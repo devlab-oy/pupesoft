@@ -8,6 +8,7 @@
 	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") $no_head = "yes";
 
 	require("../inc/parametrit.inc");
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
 		exit;
@@ -80,7 +81,6 @@
 
 	if (isset($tee) and $tee == 'maventa_siirto') {
 		// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
-				
 		$api_keys = array();
 		$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
 		$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
@@ -92,23 +92,29 @@
 
 		// Otetaan k‰yttˆˆn. // muutettava sitten viralliseen osoitteeseen kun on valmis.
 		$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
-	
-		// luetaan filu
-		$filebinary 		= fread(fopen($raakapolku, "r"), filesize($raakapolku));
-		$maventafinvoice   	= basename($raakapolku);
-			
-		$files_out['file'] = base64_encode($filebinary);
-		$files_out['filename'] = $maventafinvoice;
-		$files_out['attachment_type'] = 'FINVOICE';
-		$return_value = $client->invoice_put_file($api_keys, $files_out);
 
-		$objecti = $return_value[0];
-		
-		if (substr($objecti->status,0,2) == "OK") {
-			echo "L‰hetys onnistui<br>";
+		// Luetaan filu ja tehd‰‰n invoice_put_file() per lasku
+		$maventa_fh = fopen("$pupe_root_polku/dataout/".basename($filenimi), 'r');
+
+		$laskun_rivit = "";
+
+		while ($rivi = fgets($maventa_fh)) {
+			if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
+				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);				
+				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
+				
+				$laskun_rivit = "";
+			}
+
+			$laskun_rivit .= $rivi;
 		}
-		else {
-			echo "L‰hetys ep‰onnistui $maventafinvoice <br>";
+
+		// Myˆs vika lasku
+		if ($laskun_rivit != "") {
+			preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+			$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+			echo "Maventa-lasku $invoice_number: $status<br>\n";
 		}
 	}
 
@@ -220,7 +226,7 @@
 			echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
 		}
 
-		while ($lasrow = mysql_fetch_array($res)) {
+		while ($lasrow = mysql_fetch_assoc($res)) {
 			// Haetaan maksuehdon tiedot
 			$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
 						FROM maksuehto
@@ -624,7 +630,7 @@
 						$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 					}
 
-					if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+					if ($tilrow["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 						$rivigrouppaus = TRUE;
 					}
 
@@ -955,36 +961,30 @@
 				if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
 					$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
 				}
-				
+
 				if ($api_keys["user_api_key"] == "" or $api_keys["vendor_api_key"] == "") {
 					echo "<p class='error'>".t("Ei voida l‰hett‰‰ materiaalia Maventalle, koska Maventa-avaimet puuttuu")."</p>";
 					$virhe = 1;
 				}
-				
-				// luetaan filu
-				$filebinary 		= fread(fopen($nimifinvoice, "r"), filesize($nimifinvoice));
-				$maventafinvoice   	= basename($nimifinvoice);
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna Maventa-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".$maventafinvoice."'>";
-				echo "<input type='hidden' name='filenimi' value='".$maventafinvoice."'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br><br>";
-				
+
 				if ($virhe == 0) {
 					echo "<table>";
 					echo "<tr><th>".t("L‰het‰ aineisto uudestaan MAVENTA:lle").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='tee' value='maventa_siirto'>";
-					echo "<input type='hidden' name='filenimi' value='".$maventafinvoice."'>";
-					echo "<input type='hidden' name='raakapolku' value='".$nimifinvoice."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 					echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
 					echo "</table>";
 				}
-
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
 				//siirretaan laskutiedosto operaattorille

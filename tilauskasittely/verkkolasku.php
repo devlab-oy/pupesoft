@@ -2300,37 +2300,37 @@
 
 					// Otetaan käyttöön. // muutettava sitten viralliseen osoitteeseen kun on valmis.
 					$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
-					
-					// luetaan filu
-					$filebinary 		= fread(fopen($nimifinvoice, "r"), filesize($nimifinvoice));
 
-					/* Sallittuja 'attachment_type' muotoja ovat:
-					*  'ATTACHMENT', 'INVOICE_IMAGE', 'FINVOICE', 'TEAPPS', 'OIO'
-					*/
+					// Luetaan filu ja tehdään invoice_put_file() per lasku
+					$maventa_fh = fopen($nimifinvoice, 'r');
 
-					// http://www.maventa.com/en/community/maventa-api/api-versions/bravo/#op.id0x1a7110f0
-					$files_out['file'] = base64_encode($filebinary);
-					$files_out['filename'] = basename($nimifinvoice);
-					$files_out['attachment_type'] = 'FINVOICE';
-					$return_value = $client->invoice_put_file($api_keys, $files_out);
+					$laskun_rivit = "";
 
-					$objecti = $return_value[0];
+					while ($rivi = fgets($maventa_fh)) {
+						if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
+							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
 
-					if (substr($objecti->status,0,2) == "OK") {
-						$tulos_ulos .= "Lähetys onnistui";
-					}
-					else {
-						foreach ($verkkolaskuputkeen_finvoice as $lasnoputk => $nimiputk) {
-							$maventa_talteen .= "$lasnoputk - $nimiputk\n";
+							if ($silent == "" or $silent == "VIENTI") {
+								$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
+							}
+
+							$laskun_rivit = "";
 						}
-						$tulos_ulos .= "Lähetys epäonnistui, Laskut: $maventa_talteen<br>";
+
+						$laskun_rivit .= $rivi;
 					}
 
-					if ($silent == "" or $silent == "VIENTI") {
-						$tulos_ulos .= $tulos_ulos_ftp;
+					// Myös vika lasku
+					if ($laskun_rivit != "") {
+						preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+						$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+
+						if ($silent == "" or $silent == "VIENTI") {
+							$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
+						}
 					}
 				}
-				
 				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
@@ -2598,7 +2598,7 @@
 			echo "$tulos_ulos";
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
-			if (file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
+			if (isset($nimifinvoice) and file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

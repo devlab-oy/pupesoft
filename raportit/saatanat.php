@@ -543,7 +543,7 @@
 
 				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteensä").":</td>";
 
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."*** </td>";
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."</td>";
 				$sumlask++;
 
 				for ($sa = 1; $sa < count($saatavat_array); $sa++) {

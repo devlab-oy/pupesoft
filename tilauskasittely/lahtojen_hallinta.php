@@ -181,7 +181,7 @@
 							ORDER BY kirjoitin";
 				$kires = pupe_query($query);
 
-				echo "<tr><td>",t("Valitse tulostin"),":</td>";
+				echo "<tr><th>",t("Valitse tulostin"),":</th>";
 				echo "<td><select name='komento[reittietiketti]'>";
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
@@ -191,7 +191,7 @@
 					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
-				echo "</select>&nbsp;<input type='submit' value='",t("Vaihda"),"' />";
+				echo "</select>&nbsp;<input type='submit' value='",t("Siirrä"),"' />";
 				echo "</td></tr></table></form>";
 
 				require ("inc/footer.inc");
@@ -1687,7 +1687,9 @@
 								SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 								FROM tilausrivi
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
+								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+								#JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
 								JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.sscc = '{$lahto_row['sscc']}' AND kerayserat.nro = '{$lahto_row['erat']}')
 								LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -1703,7 +1705,9 @@
 								SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 								FROM tilausrivi
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
+								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+								#JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
 								LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'

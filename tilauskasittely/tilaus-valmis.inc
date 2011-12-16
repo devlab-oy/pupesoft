@@ -919,10 +919,10 @@ else {
 				}
 			}
 
-			// $kerayserat_select = $yhtiorow['kerayserat'] != '' ? "vh.keraysvyohyke, " : "";
-			$kerayserat_select = $yhtiorow['kerayserat'] != '' ? "tuote.keraysvyohyke, " : "";
-			// $kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
-			$kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)" : "";
+			$kerayserat_select = $yhtiorow['kerayserat'] != '' ? "vh.keraysvyohyke, " : "";
+			// $kerayserat_select = $yhtiorow['kerayserat'] != '' ? "tuote.keraysvyohyke, " : "";
+			$kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
+			// $kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)" : "";
 
 			if ($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.kerayspvm, sorttauskentta";
@@ -932,8 +932,8 @@ else {
 			}
 
 			if ($yhtiorow['kerayserat'] != '') {
-				$sorttaus = "tuote.keraysvyohyke, {$sorttaus}";
-				// $sorttaus = "vh.keraysvyohyke, {$sorttaus}";
+				// $sorttaus = "tuote.keraysvyohyke, {$sorttaus}";
+				$sorttaus = "vh.keraysvyohyke, {$sorttaus}";
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat (varattu+kpl koska magenton tilaukset on laskutettu jo tässä vaiheessa...)

@@ -509,7 +509,7 @@
 							var _arrChild = new Array();
 
 							var _getId = new Array('departure', 'manual');
-							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual');
+							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual', 'transfer');
 							var _sortByDate = new Array('date');
 
 							for (i = 0; i < arr.length; i++) {
@@ -815,7 +815,7 @@
 								//return true;
 								// empty_all = true;
 							}
-						})
+						});
 
 						if (empty_all) {
 							$('tr.toggleable_row_tr').show();
@@ -1109,7 +1109,7 @@
 					avainsana.selitetark_3 AS 'prioriteetti',
 					toimitustapa.selite AS 'toimitustapa',
 					toimitustapa.rahdinkuljettaja,
-					lasku.toimitustavan_lahto_siirto,
+					GROUP_CONCAT(IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) SEPARATOR '') AS 'toimitustavan_lahto_siirto',
 					GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
 					COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 					SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
@@ -1190,6 +1190,7 @@
 		echo "</select>";
 		echo "</th>";
 
+		echo "<th class='sort_parent_row_by' id='parent_row_transfer'>S <img class='parent_row_direction_transfer' /></th>";
 		echo "<th></th>";
 		echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 
@@ -1303,6 +1304,13 @@
 			}
 			else {
 				echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
+			}
+
+			if ($row['toimitustavan_lahto_siirto'] != '') {
+				echo "<td class='center toggleable_parent_row_transfer' id='X__{$row['lahdon_tunnus']}__{$y}'>X</td>";
+			}
+			else {
+				echo "<td class='center toggleable_parent_row_transfer' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
 			}
 
 			echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";

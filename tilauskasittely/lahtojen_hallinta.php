@@ -155,13 +155,15 @@
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
 							AND lahdot.tunnus = '{$valittu_lahto}'";
-				echo "<pre>",str_replace("\t","",$query),"</pre>";
 				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
 				echo "<font class='head'>Nykyinen lähtö: ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br />";
 
-				echo "<form method='post' action='?siirra_lahtoon=X&valittu_lahto={$valittu_lahto}&select_varasto={$select_varasto}'>";
+				echo "<form method='post' action=''>";
+				echo "<input type='hidden' name='siirra_lahtoon' value='X' />";
+				echo "<input type='hidden' name='valittu_lahto' value='{$valittu_lahto}' />";
+				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
 				echo "<table><tr><th>",t("Siirrä lähtöön"),"</th><td>";
 
@@ -1211,6 +1213,10 @@
 						var val = $('#valittu_lahto').val();
 						$('#'+val).trigger('click');
 					}
+
+					$('#select_varasto').live('change', function() {
+						$('#varastoformi').submit();
+					});
 				});
 
 				//-->
@@ -1227,11 +1233,11 @@
 	if (!isset($valittu_lahto)) $valittu_lahto = "";
 	if (!isset($select_varasto)) $select_varasto = 0;
 
-	echo "<form method='post' action=''>";
+	echo "<form method='post' id='varastoformi' action=''>";
 	echo "<table>";
 
 	echo "<tr><th>",t("Valitse varasto"),"</th><td class='back' style='vertical-align:middle;'>&nbsp;";
-	echo "<select name='select_varasto' onchange='submit()'>";
+	echo "<select name='select_varasto' id='select_varasto'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	$query = "	SELECT tunnus, nimitys

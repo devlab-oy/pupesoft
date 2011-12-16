@@ -259,27 +259,17 @@
 								AND lasku.toimitustavan_lahto = '{$lahto}'";
 					$result = pupe_query($query);
 					
-					if (mysql_num_rows($result) == 0) {
+					while ($row = mysql_fetch_assoc($result)) {
+						$lahto_x = seuraava_lahtoaika($row['liitostunnus'], $row['prioriteettinro'], $row['varasto'], $lahto);
 
-						$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
-						$upd_res = pupe_query($query);
-
-					}
-					else {
-
-						while ($row = mysql_fetch_assoc($result)) {
-							$lahto_x = seuraava_lahtoaika($row['liitostunnus'], $row['prioriteettinro'], $row['varasto'], $lahto);
-
-							if ($lahto_x !== false) {
-								$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahto_x}', toimitustavan_lahto_siirto = '{$lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
-								$upd_res = pupe_query($query);
-							}
+						if ($lahto_x !== false) {
+							$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahto_x}', toimitustavan_lahto_siirto = '{$lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+							$upd_res = pupe_query($query);
 						}
-
-						$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
-						$upd_res = pupe_query($query);
-
 					}
+
+					$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+					$upd_res = pupe_query($query);
 				}
 			}
 			else {

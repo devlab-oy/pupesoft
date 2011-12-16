@@ -14493,8 +14493,10 @@ if (!function_exists("tee_keraysera2")) {
 									$backup_array = array();
 									$backup_array[$key] = $fixed_main_array[$key];
 									unset($fixed_main_array[$key]);
-									$fixed_main_array = $backup_array + $fixed_main_array;
-									break 2;
+									// $fixed_main_array = $backup_array + $fixed_main_array;
+									$fixed_main_array = $backup_array;
+									// break 2;
+									break 3;
 								}
 							}
 						}

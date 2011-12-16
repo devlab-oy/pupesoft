@@ -491,6 +491,19 @@
 						return ret;
 					}
 
+					// 2. tason checkboxin eventti
+					$('input.checkall_child').live('click', function(){
+
+						console.log('foo');
+
+						if ($(this).is(':checked')) {
+							$('input:checkbox:visible').filter('input:checkbox:visible:not(input.checkall_parent, input.checkall_child)').attr('checked', true).parent().parent().addClass('tumma');
+						}
+						else {
+							$('input:checkbox:visible').filter('input:checkbox:visible:not(input.checkall_parent, input.checkall_child)').attr('checked', false).parent().parent().removeClass('tumma');
+						}
+					});
+
 					var column_sort = function(event) {
 
 						if (event.target != this) {
@@ -1040,17 +1053,6 @@
 					$('select.filter_parent_row_by option').each(function() {
 						if ($(this).is(':selected') && $(this).val() != '') {
 							$(this).trigger('change');
-						}
-					});
-
-					// 1. tason checkboxin eventti
-					$('input.checkall_child').click(function(){
-
-						if ($(this).is(':checked')) {
-							$('input:checkbox:visible').filter('input:checkbox:visible:not(input.checkall_parent, input.checkall_child)').attr('checked', true).parent().parent().addClass('tumma');
-						}
-						else {
-							$('input:checkbox:visible').filter('input:checkbox:visible:not(input.checkall_parent, input.checkall_child)').attr('checked', false).parent().parent().removeClass('tumma');
 						}
 					});
 

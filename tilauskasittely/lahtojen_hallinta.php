@@ -69,6 +69,141 @@
 		}
 	}
 
+	if (isset($siirra_lahtoon)) {
+
+		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
+
+			if (isset($uusi_lahto) and is_numeric(trim($uusi_lahto)) and trim($uusi_lahto) > 0) {
+
+				$checkbox_child = unserialize(urldecode($checkbox_child));
+
+				$uusi_lahto = (int) $uusi_lahto;
+
+				// haetaan vanhan lähdön toimitustapa
+				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
+							FROM lahdot 
+							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							AND lahdot.tunnus = '{$valittu_lahto}'";
+				$old_res = pupe_query($query);
+				$old_row = mysql_fetch_assoc($old_res);
+
+				// haetaan uuden lähdön toimitustapa
+				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
+							FROM lahdot
+							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							AND lahdot.tunnus = '{$uusi_lahto}'";
+				$new_res = pupe_query($query);
+				$new_row = mysql_fetch_assoc($new_res);
+
+				$erat = array('tilaukset' => array(), 'pakkaukset' => array());
+
+				foreach ($checkbox_child as $tilausnumero) {
+
+					$tilausnumero = (int) $tilausnumero;
+
+					$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$tilausnumero}'";
+					$tila_chk_res = pupe_query($query);
+					$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
+
+					// jos keräys on aloitettu tai kerätty
+					if ($tila_chk_row['tila'] == 'K' or $tila_chk_row['tila'] == 'T') {
+
+						mysql_data_seek($tila_chk_res, 0);
+
+						$erat['tilaukset'][$tilausnumero] = $tilausnumero;
+
+						while ($tila_chk_row = mysql_fetch_assoc($tila_chk_res)) {
+							$erat['pakkaukset'][$tila_chk_row['pakkaus']][$tila_chk_row['pakkausnro']][$tila_chk_row['tilausrivi']] = $tila_chk_row['kpl'];
+						}
+
+					}
+
+					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
+
+						$query = "UPDATE rahtikirjat SET toimitustapa = '{$new_row['selite']}' WHERE yhtio = '{$kukarow['yhtio']}' AND rahtikirjanro = '{$tilausnumero}'";
+						$upd_res = pupe_query($query);
+
+					}
+
+					$query = "UPDATE lasku SET toimitustavan_lahto = '{$uusi_lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+					$res = pupe_query($query);
+				}
+
+				if (count($erat['tilaukset']) > 0) {
+					require('inc/tulosta_reittietiketti.inc');
+				}
+
+			}
+			else {
+
+				if (isset($uusi_lahto) and !is_numeric(trim($uusi_lahto))) {
+					echo "<font class='error'>",t("Virheellinen lähtö"),"!</font><br />";
+
+					$checkbox_child = unserialize(urldecode($checkbox_child));
+				}
+
+				$select_varasto = (int) $select_varasto;
+
+				echo "<form method='post' action='?siirra_lahtoon=X&valittu_lahto={$valittu_lahto}&select_varasto={$select_varasto}'>";
+				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
+				echo "<table><tr><th>",t("Siirrä lähtöön"),"</th><td>";
+
+				$query = "SELECT asiakasluokka FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$valittu_lahto}'";
+				$asluok_res = pupe_query($query);
+				$asluok_row = mysql_fetch_assoc($asluok_res);
+
+				$query = "	SELECT lahdot.tunnus, toimitustapa.selite, lahdot.asiakasluokka, lahdot.pvm, lahdot.lahdon_kellonaika
+							FROM lahdot 
+							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							AND lahdot.aktiivi IN ('', 'P') 
+							AND lahdot.tunnus != '{$valittu_lahto}'
+							AND lahdot.varasto = '{$select_varasto}'
+							AND lahdot.asiakasluokka = '{$asluok_row['asiakasluokka']}'
+							ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika";
+				$lahdot_res = pupe_query($query);
+
+				echo "<select name='uusi_lahto'>";
+				echo "<option value=''>",t("Valitse"),"</option>";
+
+				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+					echo "<option value='{$lahdot_row['tunnus']}'>{$lahdot_row['pvm']} {$lahdot_row['lahdon_kellonaika']} - {$lahdot_row['asiakasluokka']} - {$lahdot_row['selite']}</option>";
+				}
+
+				echo "</select></td></tr>";
+
+				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+							FROM kirjoittimet
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							GROUP BY komento
+							ORDER BY kirjoitin";
+				$kires = pupe_query($query);
+
+				echo "<tr><td>",t("Valitse tulostin"),":</td>";
+				echo "<td><select name='komento[reittietiketti]'>";
+
+				while ($kirow = mysql_fetch_assoc($kires)) {
+
+					$sel = (isset($komento['reittietiketti']) and $komento['reittietiketti'] == $kirow['komento']) ? " selected" : "";
+
+					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+				}
+
+				echo "</select>&nbsp;<input type='submit' value='",t("Vaihda"),"' />";
+				echo "</td></tr></table></form>";
+
+				require ("inc/footer.inc");
+				exit;
+			}
+		}
+		else {
+			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
+		}
+
+	}
+
 	if (isset($muokkaa_lahto)) {
 
 		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
@@ -234,6 +369,9 @@
 						// $toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
 						// 
 						// $toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
+
+						$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN (".implode(",", $sel_ltun).")";
+						$ures  = pupe_query($query);
 
 						$tee = "tulosta";
 
@@ -1157,6 +1295,7 @@
 		echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
 		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />&nbsp;";
 		echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />";
+		echo "<input type='submit' name='siirra_lahtoon' value='",t("Siirrä lähtöön"),"' />";
 		echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 		echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 		echo "</td>";

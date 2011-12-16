@@ -79,6 +79,10 @@
 
 				$uusi_lahto = (int) $uusi_lahto;
 
+				if (strpos($valittu_lahto, "__") !== false) {
+					list($valittu_lahto, $buu) = explode("__", $valittu_lahto);
+				}
+
 				// haetaan vanhan lähdön toimitustapa
 				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
 							FROM lahdot 
@@ -117,17 +121,15 @@
 						while ($tila_chk_row = mysql_fetch_assoc($tila_chk_res)) {
 							$erat['pakkaukset'][$tila_chk_row['pakkaus']][$tila_chk_row['pakkausnro']][$tila_chk_row['tilausrivi']] = $tila_chk_row['kpl'];
 						}
-
 					}
 
 					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
 
 						$query = "UPDATE rahtikirjat SET toimitustapa = '{$new_row['selite']}' WHERE yhtio = '{$kukarow['yhtio']}' AND rahtikirjanro = '{$tilausnumero}'";
 						$upd_res = pupe_query($query);
-
 					}
 
-					$query = "UPDATE lasku SET toimitustavan_lahto = '{$uusi_lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+					$query = "UPDATE lasku SET toimitustavan_lahto = '{$uusi_lahto}', toimitustapa = '{$new_row['selite']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
 					$res = pupe_query($query);
 				}
 
@@ -135,6 +137,8 @@
 					require('inc/tulosta_reittietiketti.inc');
 				}
 
+				$valittu_lahto = "";
+				unset($siirra_lahtoon);
 			}
 			else {
 
@@ -145,6 +149,17 @@
 				}
 
 				$select_varasto = (int) $select_varasto;
+
+				$query = "	SELECT lahdot.tunnus, toimitustapa.selite, lahdot.asiakasluokka, lahdot.pvm, lahdot.lahdon_kellonaika
+							FROM lahdot
+							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							AND lahdot.tunnus = '{$valittu_lahto}'";
+				echo "<pre>",str_replace("\t","",$query),"</pre>";
+				$chk_res = pupe_query($query);
+				$chk_row = mysql_fetch_assoc($chk_res);
+
+				echo "<font class='head'>Nykyinen lähtö: ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br />";
 
 				echo "<form method='post' action='?siirra_lahtoon=X&valittu_lahto={$valittu_lahto}&select_varasto={$select_varasto}'>";
 				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
@@ -169,7 +184,7 @@
 				echo "<option value=''>",t("Valitse"),"</option>";
 
 				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
-					echo "<option value='{$lahdot_row['tunnus']}'>{$lahdot_row['pvm']} {$lahdot_row['lahdon_kellonaika']} - {$lahdot_row['asiakasluokka']} - {$lahdot_row['selite']}</option>";
+					echo "<option value='{$lahdot_row['tunnus']}'>",tv1dateconv($lahdot_row['pvm'])," {$lahdot_row['lahdon_kellonaika']} - {$lahdot_row['asiakasluokka']} - {$lahdot_row['selite']}</option>";
 				}
 
 				echo "</select></td></tr>";
@@ -658,7 +673,7 @@
 							var _arrChild = new Array();
 
 							var _getId = new Array('departure', 'manual');
-							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual', 'transfer');
+							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual', 'transfer', 'carrier');
 							var _sortByDate = new Array('date');
 
 							for (i = 0; i < arr.length; i++) {
@@ -1290,18 +1305,18 @@
 		echo "<table>";
 
 		echo "<tr>";
-		echo "<td colspan='15' class='back'>";
+		echo "<td colspan='16' class='back'>";
 		echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
 		echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
 		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />&nbsp;";
-		echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />";
+		echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />&nbsp;";
 		echo "<input type='submit' name='siirra_lahtoon' value='",t("Siirrä lähtöön"),"' />";
 		echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 		echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 		echo "</td>";
 		echo "</tr>";
 
-		echo "<tr><td colspan='15' class='back'>&nbsp;</td></tr>";
+		echo "<tr><td colspan='16' class='back'>&nbsp;</td></tr>";
 
 		echo "<tr class='header_parent' id='header_parent'>";
 
@@ -1513,7 +1528,7 @@
 			if (!isset($child_row_select_prio)) $child_row_select_prio = "";
 
 			echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
-			echo "<td colspan='15' class='back'>";
+			echo "<td colspan='16' class='back'>";
 			echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 			echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";

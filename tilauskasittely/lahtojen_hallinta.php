@@ -17,6 +17,8 @@
 		else {
 			echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
 		}
+
+		unset($man_aloitus);
 	}
 
 	if (isset($vaihda_prio)) {
@@ -67,6 +69,8 @@
 		else {
 			echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
 		}
+
+		unset($vaihda_prio);
 	}
 
 	if (isset($siirra_lahtoon)) {
@@ -136,9 +140,6 @@
 				if (count($erat['tilaukset']) > 0) {
 					require('inc/tulosta_reittietiketti.inc');
 				}
-
-				$valittu_lahto = "";
-				unset($siirra_lahtoon);
 			}
 			else {
 
@@ -219,6 +220,8 @@
 			echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
 		}
 
+		$valittu_lahto = "";
+		unset($siirra_lahtoon);
 	}
 
 	if (isset($muokkaa_lahto)) {
@@ -296,7 +299,6 @@
 				else {
 					echo "<font class='error'>",t("Virhe l‰hdˆn tallentamisessa"),"!</font><br /><br />";
 				}
-
 			}
 			else {
 
@@ -344,6 +346,8 @@
 		else {
 			echo "<font class='error'>",t("Et valinnut yht‰‰n l‰htˆ‰"),"!</font><br /><br />";
 		}
+
+		unset($muokkaa_lahto);
 	}
 
 	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
@@ -425,8 +429,6 @@
 					$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
 					$upd_res = pupe_query($query);
 				}
-
-				unset($tulosta_rahtikirjat);
 			}
 			else {
 				echo "<form method='post' action='?tulosta_rahtikirjat=X&select_varasto={$select_varasto}'>";
@@ -508,6 +510,8 @@
 		else {
 			echo "<font class='error'>",t("Et valinnut yht‰‰n l‰htˆ‰"),"!</font><br /><br />";
 		}
+
+		unset($tulosta_rahtikirjat);
 	}
 
 	enable_jquery();
@@ -992,8 +996,62 @@
 						}
 					});
 
+					$('#uni_client_search').keyup(function(event) {
+
+						// ei ajeta listaa jos painetaan nuolin‰pp‰imi‰
+						if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+							event.preventDefault();
+							return false;
+						}
+
+						if ($(this).val() == undefined) {
+							return false;
+						}
+
+						$('tr.toggleable_row_tr').hide();
+						$('tr.toggleable_tr').hide();
+						$('tr.toggleable_parent').hide();
+
+						var empty_all = true;
+
+						var selectedx = new Array();
+						var selectedxChild = new Array();
+
+						if ($(this).val() != '') {
+							var i = 0;
+
+							$('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function() {
+
+								var id = $(this).parent().parent().parent().parent().parent().parent().attr('id');
+
+								if (id != undefined) {
+									selectedxChild[i] = $('#'+id);
+									selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
+									i++;
+								}
+							});
+
+							if (selectedx != '') {
+								empty_all = false;
+							}
+						}
+
+						if (empty_all) {
+							$('tr.toggleable_row_tr').show();
+							$('tr.toggleable_tr').show();
+							$('tr.toggleable_parent').show();
+						}
+						else {
+							for (i = 0; i < selectedx.length; i++) {
+								$(selectedx[i]).show();
+								$(selectedxChild[i].show());
+							}
+						}
+						
+					});
+
 					// 1. tason l‰hdˆn napin eventti
-					$('td.toggleable').live('click', function(){
+					$('td.toggleable').live('click', function() {
 
 						var id = this.id.split(\"__\", 2);
 
@@ -1020,6 +1078,7 @@
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').show();
 
 							$('select.filter_parent_row_by').attr('disabled', false).trigger('change');
+							$('#uni_client_search').attr('disabled', false).trigger('keyup');
 
 							$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
 
@@ -1027,6 +1086,7 @@
 						}
 						else {
 
+							$('#uni_client_search').attr('disabled', true);
 							$('select.filter_parent_row_by').attr('disabled', true);
 
 							$('#header_parent th.sort_parent_row_by:visible').off();
@@ -1050,7 +1110,7 @@
 					});
 
 					// 2. tason tilausnumeronapin eventti
-					$('td.toggleable_row_order').live('click', function(){
+					$('td.toggleable_row_order').live('click', function() {
 
 						var parent = $(this).parent().parent().parent().parent();
 						var parent_id = $(parent).attr('id');
@@ -1110,7 +1170,7 @@
 					});
 
 					// 2. tason sscc-napin eventti
-					$('td.toggleable_row_sscc').live('click', function(){
+					$('td.toggleable_row_sscc').live('click', function() {
 
 						if ($(this).html() != '') {
 
@@ -1308,11 +1368,13 @@
 
 		echo "<br /><br />";
 
+		$colspan_parent = 16;
+
 		echo "<form method='post' action=''>";
 		echo "<table>";
 
 		echo "<tr>";
-		echo "<td colspan='16' class='back'>";
+		echo "<td colspan='{$colspan_parent}' class='back'>";
 		echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
 		echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
 		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa l‰htˆ"),"' />&nbsp;";
@@ -1323,7 +1385,11 @@
 		echo "</td>";
 		echo "</tr>";
 
-		echo "<tr><td colspan='16' class='back'>&nbsp;</td></tr>";
+		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
+
+		echo "<tr><th>Etsi asiakas</th><td><input type='text' id='uni_client_search' value='' /></td></tr>";
+
+		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
 
 		echo "<tr class='header_parent' id='header_parent'>";
 
@@ -1535,7 +1601,7 @@
 			if (!isset($child_row_select_prio)) $child_row_select_prio = "";
 
 			echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
-			echo "<td colspan='16' class='back'>";
+			echo "<td colspan='{$colspan_parent}' class='back'>";
 			echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 			echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
@@ -1799,6 +1865,8 @@
 
 				echo "</tr>";
 
+				$colspan_child = 17;
+
 				$query = "	SELECT tilausrivi.tuoteno,
 							kerayserat.sscc,
 							tuote.nimitys,
@@ -1818,7 +1886,7 @@
 				$rivi_res = pupe_query($query);
 
 				echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='17' class='back' style='display:none;'>";
+				echo "<td colspan='{$colspan_child}' class='back' style='display:none;'>";
 				echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";
@@ -1879,7 +1947,7 @@
 				$rivi_res = pupe_query($query);
 
 				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='17' class='back' style='display:none;'>";
+				echo "<td colspan='{$colspan_child}' class='back' style='display:none;'>";
 				echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";

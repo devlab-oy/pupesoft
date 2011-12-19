@@ -996,7 +996,7 @@
 						}
 					});
 
-					$('#uni_client_search').keyup(function(event) {
+					$('#uni_client_search, #uni_order_search').keyup(function(event) {
 
 						// ei ajeta listaa jos painetaan nuolinäppäimiä
 						if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
@@ -1007,6 +1007,8 @@
 						if ($(this).val() == undefined) {
 							return false;
 						}
+
+						var title = $(this).attr('class');
 
 						$('tr.toggleable_row_tr').hide();
 						$('tr.toggleable_tr').hide();
@@ -1020,7 +1022,7 @@
 						if ($(this).val() != '') {
 							var i = 0;
 
-							$('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function() {
+							$('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function() {
 
 								var id = $(this).parent().parent().parent().parent().parent().parent().attr('id');
 
@@ -1079,6 +1081,7 @@
 
 							$('select.filter_parent_row_by').attr('disabled', false).trigger('change');
 							$('#uni_client_search').attr('disabled', false).trigger('keyup');
+							$('#uni_order_search').attr('disabled', false).trigger('keyup');
 
 							$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
 
@@ -1087,6 +1090,7 @@
 						else {
 
 							$('#uni_client_search').attr('disabled', true);
+							$('#uni_order_search').attr('disabled', true);
 							$('select.filter_parent_row_by').attr('disabled', true);
 
 							$('#header_parent th.sort_parent_row_by:visible').off();
@@ -1387,7 +1391,8 @@
 
 		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
 
-		echo "<tr><th>Etsi asiakas</th><td><input type='text' id='uni_client_search' value='' /></td></tr>";
+		echo "<tr><th>",t("Etsi asiakas"),"</th><td><input type='text' class='client' id='uni_client_search' value='' /></td></tr>";
+		echo "<tr><th>",t("Etsi tilausnumero"),"</th><td><input type='text' class='order' id='uni_order_search' value='' /></td></tr>";
 
 		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
 

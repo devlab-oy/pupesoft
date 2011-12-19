@@ -1033,52 +1033,47 @@
 
 							$('#uni_client_search, #uni_locality_search').each(function(indx, dom) {
 
-								if ($(dom).val() == '') {
-									return false;
-								}
+								if ($(dom).val() != '') {
 
-								var title = $(dom).attr('class');
-
-								if (selectedx.length > 0 && $(dom).val() != '') {
-
-									for (var i = 0; i < selectedx.length; i++) {
-
-										if (selectedxChild[i].children().children().children().children().children('.toggleable_row_tr').children('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').length > 0) {
-											_tmp[_tmp.length] = selectedx[i];
-											_tmpChild[_tmpChild.length] = selectedxChild[i];
-										}
-									}
-
-									selectedx = _tmp;
-									selectedxChild = _tmpChild;
-								}
-								else if (selectedx.length == 0 && $(dom).val() != '') {
-
-									var i = 0;
-
-									$('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function(indexChild, domChild) {
-
-										var id = $(domChild).parent().parent().parent().parent().parent().parent().attr('id');
-
-										if (id != undefined) {
-											selectedxChild[i] = $('#'+id);
-											selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
-											i++;
-										}
-									});
+									var title = $(dom).attr('class');
 
 									if (selectedx.length > 0) {
-										empty_all = false;
-									}
 
-								}
-								else if (selectedx.length > 0 && $(this).val() == '') {
-									empty_all = false;
-								}
-								else {
-									//$('tr.toggleable_row_tr').show();
-									//return true;
-									// empty_all = true;
+										for (var i = 0; i < selectedx.length; i++) {
+
+											if (selectedxChild[i].children().children().children().children().children('.toggleable_row_tr').children('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').length > 0) {
+												_tmp[_tmp.length] = selectedx[i];
+												_tmpChild[_tmpChild.length] = selectedxChild[i];
+											}
+										}
+
+										if (_tmp.length > 0) {
+											empty_all = false;
+										}
+
+										selectedx = _tmp;
+										selectedxChild = _tmpChild;
+									}
+									else {
+
+										var i = 0;
+
+										$('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function(indexChild, domChild) {
+
+											var id = $(domChild).parent().parent().parent().parent().parent().parent().attr('id');
+
+											if (id != undefined) {
+												selectedxChild[i] = $('#'+id);
+												selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
+												i++;
+											}
+										});
+
+										if (selectedx.length > 0) {
+											empty_all = false;
+										}
+
+									}
 								}
 
 							});

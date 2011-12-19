@@ -238,6 +238,7 @@
 		$query = "	UPDATE lasku set
 					maksaja 		= '$kukarow[kuka]',
 					maksuaika 		= now(),
+					mapvm	 		= now(),
 					maksu_kurssi 	= '$trow[kurssi]',
 					maksu_tili 		= '$tili',
 					tila 			= 'P',
@@ -557,6 +558,7 @@
 				$query = "	UPDATE lasku set
 							maksaja 		= '$kukarow[kuka]',
 							maksuaika 		= now(),
+							mapvm	 		= now(),
 							maksu_kurssi 	= '$kurssi',
 							maksu_tili 		= '$tili',
 							tila 			= 'Y',

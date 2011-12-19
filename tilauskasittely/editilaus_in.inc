@@ -1029,9 +1029,9 @@ while ($tietue = fgets($fd)) {
 					$tilaustyyppilisa = $editilaus_tilaustyyppi;
 
 					if ($editilaus_tilaustyyppi == 3) {
-						$editilaus_tila = 'C';
-						$editilaus_alatila = 'A';
-						$tilaustyyppilisa = 'R';
+						$editilaus_tila 	= 'C';
+						$editilaus_alatila 	= 'A';
+						$tilaustyyppilisa 	= 'R';
 					}
 				}
 
@@ -1716,7 +1716,7 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
-				if ($editilaus_tila != "Z") {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
@@ -1822,8 +1822,11 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "$tilaus_valmis_message\n";
 					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 				}
-				else {
+				elseif ($editilaus_tila == "Z") {
 					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
+				}
+				elseif ($editilaus_tilaustyyppi == 3) {
+					$edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 				}
 			}
 			else {

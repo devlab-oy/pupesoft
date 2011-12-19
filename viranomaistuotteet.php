@@ -209,7 +209,7 @@ if ($tee == "synkronoi") {
 
 	$ok = FALSE;
 
-	if ($file = fopen("http://www.devlab.fi/softa/referenssiviranomaistuotteet.sql","r")) {
+	if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql","r")) {
 		$ok = TRUE;
 	}
 	elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql","r")) {

@@ -7,16 +7,40 @@
 
 	echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
-	//Käyttöliittymä
-	if (!isset($vv)) $vv = date("Y");
+	// Käyttöliittymä
+	if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+	if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+	if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+	if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+	$tee = isset($tee) ? trim($tee) : "";
+
+	if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {
+		// MySQL muodossa
+		$pvmalku = date("Y-m-d", mktime(0, 0, 0, $alkukk, 1, $alkuvv));
+		$pvmloppu = date("Y-m-d", mktime(0, 0, 0, $loppukk+1, 0, $loppuvv));
+	}
+	else {
+		echo "<font class='error'>".t("Päivämäärävirhe")."!</font>";
+		$tee = "";
+	}
 
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>".t("Syötä vuosi (vvvv)")."</th>";
-	echo "<td><input type='text' name='vv' value='$vv' size='5'></td>";
+	echo "<th>".t("Anna alkukausi (kk-vuosi)")."</th>";
+	echo "	<td>
+			<input type='text' name='alkukk' value='$alkukk' size='2'>-
+			<input type='text' name='alkuvv' value='$alkuvv' size='5'>
+			</td>";
+	echo "</tr>";
+
+	echo "<th>".t("Anna loppukausi (kk-vuosi)")."</th>";
+	echo "	<td>
+			<input type='text' name='loppukk' value='$loppukk' size='2'>-
+			<input type='text' name='loppuvv' value='$loppuvv' size='5'>
+			</td>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
@@ -24,107 +48,121 @@
 
 	if ($tee != '') {
 
-		$vvl = $vv + 1;
-
-		//myynnit vuoden alusta
-		$query = "	SELECT lasku.myyja, kuka.nimi, month(tapvm) kk, round(sum(arvo),0) summa, round(sum(kate),0) kate
+		// myynnit
+		$query = "	SELECT lasku.myyja,
+					kuka.nimi,
+					date_format(lasku.tapvm,'%Y/%m') kausi,
+					round(sum(lasku.arvo),0) summa,
+					round(sum(lasku.kate),0) kate
 					FROM lasku use index (yhtio_tila_tapvm)
-					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'L' and lasku.alatila = 'X' and tapvm >= '$vv-01-01' and tapvm < '$vvl-01-01'
-					GROUP BY myyja, nimi, kk
-					HAVING summa <> 0 or kate <> 0
+					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+					and lasku.tila = 'L'
+					and lasku.alatila = 'X'
+					and lasku.tapvm >= '$pvmalku'
+					and lasku.tapvm <= '$pvmloppu'
+					GROUP BY myyja, nimi, kausi
+					HAVING summa <> 0 OR kate <> 0
 					ORDER BY myyja";
-		$result3 = mysql_query($query) or pupe_error($query);
-
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Tammi")."</th>";
-		echo "<th>".t("Helmi")."</th>";
-		echo "<th>".t("Maalis")."</th>";
-		echo "<th>".t("Huhti")."</th>";
-		echo "<th>".t("Touko")."</th>";
-		echo "<th>".t("Kesa")."</th>";
-		echo "<th>".t("Heina")."</th>";
-		echo "<th>".t("Elo")."</th>";
-		echo "<th>".t("Syys")."</th>";
-		echo "<th>".t("Loka")."</th>";
-		echo "<th>".t("Marras")."</th>";
-		echo "<th>".t("Joulu")."</th>";
-		echo "<th>".t("Yhteensä")."</th></tr>";
+		$result = pupe_query($query);
 
 		$summa = array();
 		$kate = array();
-		$lask = 0;
+		$myyja_nimi = array();
 
-		while ($row = mysql_fetch_array ($result3)) {
-
-			if ($lask == 0 or $edlaatija != $row["myyja"]) {
-				$lask++;
-				$nimi[$lask] = $row["nimi"]."(".$row["myyja"].")";
-			}
-
-			$kk = $row["kk"];
-			$kate[$lask][$kk]  = $row["kate"];
-			$summa[$lask][$kk] = $row["summa"];
-
-			$edlaatija = $row["myyja"];
+		while ($row = mysql_fetch_array ($result)) {
+			$myyja_nimi[$row["myyja"]] = $row["nimi"];
+			$summa[$row["myyja"]][$row["kausi"]] = $row["summa"];
+			$kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
 		}
 
-		$lask--;
+		$sarakkeet	= 0;
+		$raja 		= '0000-00';
+		$rajataulu 	= array();
 
-		$koksumyht = $kokkatyht = '';
+		// Piirretään headerit
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Myyjä")."</th>";
 
-		for ($i=1; $i<=$lask+1; $i++) {
+		while ($raja < substr($pvmloppu, 0, 7)) {
 
-			$sumyht = $katyht = '';
+			$vuosi = substr($pvmalku, 0, 4);
+			$kk = substr($pvmalku, 5, 2);
+			$kk += $sarakkeet;
 
-			echo "<tr class='aktiivi'><td>$nimi[$i]</td>";
-			for ($j=1; $j<13; $j++) {
-
-				echo "<td align='right'>";
-
-				if ($summa[$i][$j] != 0.00 or $kate[$i][$j] != 0.00) {
-					echo str_replace(".",",",$summa[$i][$j]);
-					echo "<br>";
-					echo str_replace(".",",",$kate[$i][$j]);
-
-					$sumyht += $summa[$i][$j];
-					$katyht += $kate[$i][$j];
-					$koksumyht += $summa[$i][$j];
-					$kokkatyht += $kate[$i][$j];
-				}
-				echo "</td>";
+			if ($kk > 12) {
+				$vuosi++;
+				$kk -= 12;
 			}
-			echo "<td align='right'>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."</td>";
+
+			if ($kk < 10) $kk = '0'.$kk;
+
+			$rajataulu[$sarakkeet] = "$vuosi/$kk";
+			$sarakkeet++;
+			$raja = $vuosi."-".$kk;
+
+			echo "<th>$vuosi/$kk</th>";
+		}
+
+		echo "<th>".t("Yhteensä")."</th>";
+		echo "</tr>";
+
+		// Piirretään itse data
+		$yhteensa_summa_kausi = array();
+		$yhteensa_kate_kausi = array();
+
+		foreach ($summa as $myyja => $kausi_array) {
+
+			echo "<tr class='aktiivi'>";
+			echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
+
+			$yhteensa_summa = 0;
+			$yhteensa_kate = 0;
+
+			foreach ($rajataulu as $kausi) {
+
+				if (!isset($yhteensa_summa_kausi[$kausi])) $yhteensa_summa_kausi[$kausi] = 0;
+				if (!isset($yhteensa_kate_kausi[$kausi])) $yhteensa_kate_kausi[$kausi] = 0;
+
+				$summa = isset($kausi_array[$kausi]) ? $kausi_array[$kausi] : "";
+				$kate_summa = isset($kate[$myyja][$kausi]) ? $kate[$myyja][$kausi] : "";
+
+				$yhteensa_summa += $summa;
+				$yhteensa_kate += $kate_summa;
+
+				$yhteensa_summa_kausi[$kausi] += $summa;
+				$yhteensa_kate_kausi[$kausi] += $kate_summa;
+
+				echo "<td style='text-align:right;'>$summa<br>$kate_summa</td>";
+			}
+
+			echo "<td style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate</td>";
 			echo "</tr>";
 		}
 
-		echo "<tr><th>".t("Yhteensä")."</th>";
+		// Piirretään yhteensärivi
+		echo "<tr>";
+		echo "<th>".t("Yhteensä")."</th>";
 
-		// yhteensärivit
-		for ($j=1; $j<13; $j++) {
+		$yhteensa_summa = 0;
+		$yhteensa_kate = 0;
 
-			$sumyht = $katyht = $kateproyht = '';
-			for ($i=1; $i<=$lask+1; $i++) {
-				if ($summa[$i][$j] != 0.00 or $kate[$i][$j] != 0.00) {
-					$sumyht += $summa[$i][$j];
-					$katyht += $kate[$i][$j];
-				}
-			}
+		foreach ($rajataulu as $kausi) {
+			$yhteensa_summa += $yhteensa_summa_kausi[$kausi];
+			$yhteensa_kate += $yhteensa_kate_kausi[$kausi];
+			$kate_prosentti = round($yhteensa_kate_kausi[$kausi] / $yhteensa_summa_kausi[$kausi] * 100);
+			echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>$yhteensa_kate_kausi[$kausi]<br>$kate_prosentti%</th>";
 
-			if ($sumyht != 0) {
-				$kateproyht = round($katyht / $sumyht * 100). "%";
-			}
-
-			echo "<th style='text-align:right'>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."<br>".str_replace(".",",",$kateproyht)."</th>";
 		}
 
-		echo "<th style='text-align:right'>$koksumyht<br>$kokkatyht<br>".str_replace(".",",", round($kokkatyht / $koksumyht * 100))."%</th>";
+		$kate_prosentti = round($yhteensa_kate / $yhteensa_summa * 100);
+		echo "<th style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate<br>$kate_prosentti%</th>";
 		echo "</tr>";
+		echo "</table>";
+
 	}
 
-	echo "</table>";
-
 	require ("inc/footer.inc");
+
 ?>

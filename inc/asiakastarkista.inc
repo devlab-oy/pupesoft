@@ -4,7 +4,7 @@ if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji, $errori;
 
-		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa;
+		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa, $laskutus_talteen_i, $laskutus_talteen;
 
 		if (mysql_field_name($result, $i) == "valkoodi") {
 			if (trim($t[$i]) == '') {
@@ -300,6 +300,19 @@ if(!function_exists("asiakastarkista")) {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 				$virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
 				$errori = 1;
+			}
+		}
+
+		if (mysql_field_name($result, $i) == "laskutus_nimi" and trim($t[$i]) != '') {
+				$laskutus_talteen  = trim($t[$i]);
+				$laskutus_talteen_i = $i;
+		}
+
+		if (mysql_field_name($result, $i) == "laskutus_osoite" or mysql_field_name($result, $i) == "laskutus_postino" or mysql_field_name($result, $i) == "laskutus_postitp") {
+
+			if ($laskutus_talteen != "" and trim($t[$i]) == "") {
+				$virhe[$i] = t("Pakollinen kenttä kun laskutus nimi on annettu")."!";
+				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
 			}
 		}
 	}

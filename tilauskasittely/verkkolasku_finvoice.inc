@@ -50,20 +50,24 @@ if (!function_exists('finvoice_otsik')) {
 
 		//	Aloitellaan aineiston luontia
 		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
+			$receiverpartyid = "";
+			$receiverintermediator = "";
 
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$receiverpartyid = $lasrow["verkkotunnus"];
 				$receiverintermediator = "003710948874";
 			}
-			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
-
-				if ($receiverintermediator == "") {
-					$receiverintermediator = "003723327487";
+			else {
+				if (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
+					list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+				}
+				else {
+					$receiverpartyid = $lasrow["verkkotunnus"];
 				}
 			}
-			else {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
+				$receiverintermediator = "003723327487";
 			}
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
@@ -131,7 +135,7 @@ if (!function_exists('finvoice_otsik')) {
 			$y_postitp	 	= $lasrow["yhtio_postitp"];
 			$y_maa 			= $lasrow["yhtio_maa"];
 			$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
-			$y_vatnumero	= str_replace("0037", "", $lasrow["yhtio_ovttunnus"]);
+			$y_vatnumero	= $lasrow["yhtio_ovttunnus"];
 			$y_iban 		= $yhtiorow['pankkiiban1'];
 			$y_swift 		= $yhtiorow['pankkiswift1'];
 
@@ -309,7 +313,9 @@ if (!function_exists('finvoice_otsik')) {
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
 				xml_add("InvoiceRecipientPartyIdentifier", 						"", 							$tootfinvoice, 35);
 				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), $tootfinvoice, 35, 1);
-				xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35);
+				if ($yhtiorow["verkkolasku_lah"] != "maventa") {
+					xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35); // Maventa ei salli tyhj‰n‰, optionaalinen
+				}
 				fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
 				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
 				xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);

@@ -154,6 +154,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset  = array("TYYPPI", "ATUNNUS", "TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TYYPPI", "ATUNNUS", "TUOTENO");
+				$saakopoistaa = TRUE;
 				break;
 			case "yhteensopivuus_tuote_lisatiedot" :
 				$pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "ARVO", "KIELI");

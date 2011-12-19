@@ -39,7 +39,7 @@ if (!function_exists('pupevoice_otsik')) {
 		$y_postitp	 	= $lasrow["yhtio_postitp"];
 		$y_maa 			= $lasrow["yhtio_maa"];
 		$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
-		$y_vatnumero	= str_replace("0037", "", $lasrow["yhtio_ovttunnus"]);
+		$y_vatnumero	= $lasrow["yhtio_ovttunnus"]; # Huom tätä ei tule muuttaa, Itella tunnustaa lähettäjän tästä kentästä.
 		$y_iban 		= $yhtiorow['pankkiiban1'];
 		$y_swift 		= $yhtiorow['pankkiswift1'];
 
@@ -209,7 +209,12 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("ArticleEANIdentifier",				$tilrow['eankoodi'], 						$tootxml);
 		xml_add("ArticleName",						$tilrow['nimitys'], 						$tootxml);
 
-		$toim_query = "SELECT toim_tuoteno FROM tuotteen_toimittajat WHERE yhtio = '$tilrow[yhtio]' AND tuoteno = '$tilrow[tuoteno]'";
+		$toim_query = "	SELECT toim_tuoteno, if (jarjestys = 0, 9999, jarjestys) sorttaus
+						FROM tuotteen_toimittajat 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tuoteno = '$tilrow[tuoteno]'
+						ORDER BY sorttaus
+						LIMIT 1";
 		$toim_tuoteno_res = pupe_query($toim_query);
 		$toim_tuoteno_row = mysql_fetch_assoc($toim_tuoteno_res);
 

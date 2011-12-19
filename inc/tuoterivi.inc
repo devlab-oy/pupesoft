@@ -121,7 +121,8 @@
 		or mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
-		or mysql_field_name($result, $i) == "mallitarkenne") {
+		or mysql_field_name($result, $i) == "mallitarkenne"
+		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
@@ -697,7 +698,8 @@
 		$jatko = 0;
 
 	}
-	
+
+
 	if (mysql_field_name($result, $i) == "ostoehdotus") {
 
 		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';

@@ -42,7 +42,7 @@ if(!function_exists("avainsanatarkista")) {
 			$virhe[$i] = t("Selite on liian pitkä, maksimipituus on kolme merkkiä")."!";
 		}
 
-		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI"))) {
+		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
 			$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
 		}
 

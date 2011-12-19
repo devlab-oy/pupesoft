@@ -996,10 +996,10 @@
 						}
 					});
 
-					$('#uni_client_search, #uni_order_search').keyup(function(event) {
+					$('#uni_client_search, #uni_order_search, #uni_locality_search').keyup(function(event) {
 
 						// ei ajeta listaa jos painetaan nuolinäppäimiä
-						if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+						if (event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
 							event.preventDefault();
 							return false;
 						}
@@ -1010,6 +1010,13 @@
 
 						var title = $(this).attr('class');
 
+						if (title == 'client' || title == 'locality') {
+							$('#uni_order_search').val('');
+						}
+						else {
+							$('#uni_client_search, #uni_locality_search').val('');
+						}
+
 						$('tr.toggleable_row_tr').hide();
 						$('tr.toggleable_tr').hide();
 						$('tr.toggleable_parent').hide();
@@ -1019,23 +1026,84 @@
 						var selectedx = new Array();
 						var selectedxChild = new Array();
 
-						if ($(this).val() != '') {
-							var i = 0;
+						if (title == 'client' || title == 'locality') {
 
-							$('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function() {
+							var _tmp = new Array();
+							var _tmpChild = new Array();
 
-								var id = $(this).parent().parent().parent().parent().parent().parent().attr('id');
+							$('#uni_client_search, #uni_locality_search').each(function(indx, dom) {
 
-								if (id != undefined) {
-									selectedxChild[i] = $('#'+id);
-									selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
-									i++;
+								if ($(dom).val() == '') {
+									return false;
 								}
-							});
 
-							if (selectedx != '') {
-								empty_all = false;
+								var title = $(dom).attr('class');
+
+								if (selectedx.length > 0 && $(dom).val() != '') {
+
+									for (var i = 0; i < selectedx.length; i++) {
+
+										if (selectedxChild[i].children().children().children().children().children('.toggleable_row_tr').children('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').length > 0) {
+											_tmp[_tmp.length] = selectedx[i];
+											_tmpChild[_tmpChild.length] = selectedxChild[i];
+										}
+									}
+
+									selectedx = _tmp;
+									selectedxChild = _tmpChild;
+								}
+								else if (selectedx.length == 0 && $(dom).val() != '') {
+
+									var i = 0;
+
+									$('.toggleable_row_'+title+':containsi(\"'+$(dom).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function(indexChild, domChild) {
+
+										var id = $(domChild).parent().parent().parent().parent().parent().parent().attr('id');
+
+										if (id != undefined) {
+											selectedxChild[i] = $('#'+id);
+											selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
+											i++;
+										}
+									});
+
+									if (selectedx.length > 0) {
+										empty_all = false;
+									}
+
+								}
+								else if (selectedx.length > 0 && $(this).val() == '') {
+									empty_all = false;
+								}
+								else {
+									//$('tr.toggleable_row_tr').show();
+									//return true;
+									// empty_all = true;
+								}
+
+							});
+						}
+						else {
+
+							if ($(this).val() != '') {
+								var i = 0;
+
+								$('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').each(function() {
+
+									var id = $(this).parent().parent().parent().parent().parent().parent().attr('id');
+
+									if (id != undefined) {
+										selectedxChild[i] = $('#'+id);
+										selectedx[i] = $('#'+id.replace('toggleable_tr', 'toggleable_parent'));
+										i++;
+									}
+								});
+
+								if (selectedx.length > 0) {
+									empty_all = false;
+								}
 							}
+							
 						}
 
 						if (empty_all) {
@@ -1080,8 +1148,15 @@
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').show();
 
 							$('select.filter_parent_row_by').attr('disabled', false).trigger('change');
-							$('#uni_client_search').attr('disabled', false).trigger('keyup');
-							$('#uni_order_search').attr('disabled', false).trigger('keyup');
+
+							$('#uni_client_search').attr('disabled', false);
+							$('#uni_client_search[value!=\"\"]').trigger('keyup');
+
+							$('#uni_locality_search').attr('disabled', false);
+							$('#uni_locality_search[value!=\"\"]').trigger('keyup');
+
+							$('#uni_order_search').attr('disabled', false);
+							$('#uni_order_search[value!=\"\"]').trigger('keyup');
 
 							$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
 
@@ -1091,6 +1166,8 @@
 
 							$('#uni_client_search').attr('disabled', true);
 							$('#uni_order_search').attr('disabled', true);
+							$('#uni_locality_search').attr('disabled', true);
+
 							$('select.filter_parent_row_by').attr('disabled', true);
 
 							$('#header_parent th.sort_parent_row_by:visible').off();
@@ -1374,6 +1451,14 @@
 
 		$colspan_parent = 16;
 
+		echo "<table>";
+		echo "<tr><th>",t("Etsi asiakas"),"</th><td><input type='text' class='client' id='uni_client_search' value='' />&nbsp;</td>";
+		echo "<th>",t("Paikkakunta"),"</th><td><input type='text' class='locality' id='uni_locality_search' value='' /></td></tr>";
+		echo "<tr><th>",t("Etsi tilausnumero"),"</th><td colspan='3'><input type='text' class='order' id='uni_order_search' value='' /></td></tr>";
+		echo "</table>";
+
+		echo "<br /><br />";
+
 		echo "<form method='post' action=''>";
 		echo "<table>";
 
@@ -1388,11 +1473,6 @@
 		echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 		echo "</td>";
 		echo "</tr>";
-
-		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
-
-		echo "<tr><th>",t("Etsi asiakas"),"</th><td><input type='text' class='client' id='uni_client_search' value='' /></td></tr>";
-		echo "<tr><th>",t("Etsi tilausnumero"),"</th><td><input type='text' class='order' id='uni_order_search' value='' /></td></tr>";
 
 		echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
 

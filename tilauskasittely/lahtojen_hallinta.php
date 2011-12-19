@@ -85,9 +85,9 @@
 
 				// haetaan vanhan lähdön toimitustapa
 				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
-							FROM lahdot 
+							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 							AND lahdot.tunnus = '{$valittu_lahto}'";
 				$old_res = pupe_query($query);
 				$old_row = mysql_fetch_assoc($old_res);
@@ -96,7 +96,7 @@
 				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 							AND lahdot.tunnus = '{$uusi_lahto}'";
 				$new_res = pupe_query($query);
 				$new_row = mysql_fetch_assoc($new_res);
@@ -153,7 +153,7 @@
 				$query = "	SELECT lahdot.tunnus, toimitustapa.selite, lahdot.asiakasluokka, lahdot.pvm, lahdot.lahdon_kellonaika
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 							AND lahdot.tunnus = '{$valittu_lahto}'";
 				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
@@ -172,10 +172,10 @@
 				$asluok_row = mysql_fetch_assoc($asluok_res);
 
 				$query = "	SELECT lahdot.tunnus, toimitustapa.selite, lahdot.asiakasluokka, lahdot.pvm, lahdot.lahdon_kellonaika
-							FROM lahdot 
+							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}' 
-							AND lahdot.aktiivi IN ('', 'P') 
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.aktiivi IN ('', 'P')
 							AND lahdot.tunnus != '{$valittu_lahto}'
 							AND lahdot.varasto = '{$select_varasto}'
 							AND lahdot.asiakasluokka = '{$asluok_row['asiakasluokka']}'
@@ -231,7 +231,7 @@
 			and isset($lahto_muokkaus_aloitusaika) and trim($lahto_muokkaus_aloitusaika) != ''
 			and isset($lahto_muokkaus_tilausaika) and trim($lahto_muokkaus_tilausaika) != '') {
 
-				$array_chk = array($lahto_muokkaus_kellonaika, $lahto_muokkaus_aloitusaika, $lahto_muokkaus_tilausaika); 
+				$array_chk = array($lahto_muokkaus_kellonaika, $lahto_muokkaus_aloitusaika, $lahto_muokkaus_tilausaika);
 
 				foreach ($array_chk as $klo) {
 					$klo_arr = explode(":", $klo);
@@ -269,9 +269,9 @@
 
 						if ($lahto_muokkaus_aktiivi == "E") {
 
-							$query = "	SELECT tunnus 
-										FROM lasku 
-										WHERE yhtio = '{$kukarow['yhtio']}' 
+							$query = "	SELECT tunnus
+										FROM lasku
+										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND toimitustavan_lahto = '{$lahto}'
 										AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
 							$chk_res = pupe_query($query);
@@ -377,14 +377,14 @@
 
 					if (count($sel_ltun) > 0) {
 
-						// $query = "	SELECT toimitustapa.selite 
+						// $query = "	SELECT toimitustapa.selite
 						// 			FROM lahdot
 						// 			JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 						// 			WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 						// 			AND lahdot.tunnus = '{$lahto}'";
 						// $toimitustapa_result = pupe_query($query);
 						// $toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
-						// 
+						//
 						// $toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
 
 						$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN (".implode(",", $sel_ltun).")";
@@ -400,7 +400,7 @@
 						echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
 					}
 				}
-				
+
 				foreach ($checkbox_parent as $lahto) {
 
 					$lahto = (int) $lahto;
@@ -412,7 +412,7 @@
 								AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','C')))
 								AND lasku.toimitustavan_lahto = '{$lahto}'";
 					$result = pupe_query($query);
-					
+
 					while ($row = mysql_fetch_assoc($result)) {
 						$lahto_x = seuraava_lahtoaika($row['liitostunnus'], $row['prioriteettinro'], $row['varasto'], $lahto);
 
@@ -425,6 +425,8 @@
 					$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
 					$upd_res = pupe_query($query);
 				}
+
+				unset($tulosta_rahtikirjat);
 			}
 			else {
 				echo "<form method='post' action='?tulosta_rahtikirjat=X&select_varasto={$select_varasto}'>";
@@ -694,17 +696,17 @@
 								}
 
 								_arr.push({
-									'id': id, 
-									'row': row, 
-									'counter': counter, 
+									'id': id,
+									'row': row,
+									'counter': counter,
 									'link': id_temp[0]
 								});
 
 								_arrChild.push({
-									'id': id, 
-									'row': $('#toggleable_tr_'+id_temp[0]+'__'+counter), 
+									'id': id,
+									'row': $('#toggleable_tr_'+id_temp[0]+'__'+counter),
 									'counter': counter
-								});	
+								});
 							}
 
 							$('tr.toggleable_parent:visible').remove();
@@ -719,7 +721,7 @@
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
-								else if (_sortByDate[title]) {
+								else if (_sortByDate.indexOf(title) >= 0) {
 									_arr.sort(compareDate);
 									_arrChild.sort(compareDate);
 								}
@@ -746,7 +748,7 @@
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
-								else if (_sortByDate[title]) {
+								else if (_sortByDate.indexOf(title) >= 0) {
 									_arr.sort(compareDate).reverse();
 									_arrChild.sort(compareDate).reverse();
 								}
@@ -803,20 +805,20 @@
 								}
 
 								_arr.push({
-									'id': id, 
-									'row': row, 
+									'id': id,
+									'row': row,
 									'counter': counter
 								});
 
 								_arrChildOrder.push({
-									'id': id, 
-									'row': $('#toggleable_row_child_order_'+id+'__'+counter), 
+									'id': id,
+									'row': $('#toggleable_row_child_order_'+id+'__'+counter),
 									'counter': counter
 								});
 
 								_arrChildSscc.push({
-									'id': id, 
-									'row': $('#toggleable_row_child_sscc_'+id+'__'+counter), 
+									'id': id,
+									'row': $('#toggleable_row_child_sscc_'+id+'__'+counter),
 									'counter': counter
 								});
 							}
@@ -1516,7 +1518,7 @@
 						kerayserat.nro AS 'erat',
 						kerayserat.sscc,
 						kerayserat.pakkausnro,
-						IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) AS toimitustavan_lahto_siirto, 
+						IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) AS toimitustavan_lahto_siirto,
 						GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 						COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 						SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
@@ -1935,7 +1937,7 @@
 		}
 
 		echo "</table>";
-		echo "</form>";		
+		echo "</form>";
 	}
 
 	require ("inc/footer.inc");

@@ -11186,12 +11186,12 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\") {
 								var saatavaty = new Array();
-								var sarakemaara = parametrit[tableid][0]-2;
+								var sarakemaara = parametrit[tableid][0]-1;
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
 
-									for (var j=2; j<=sarakemaara; j++) {
+									for (var j=1; j<=sarakemaara; j++) {
 										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
 										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
 									}
@@ -11204,7 +11204,7 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								);
 
-								for (var j=2; j<=sarakemaara; j++) {
+								for (var j=1; j<=sarakemaara; j++) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}

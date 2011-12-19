@@ -1047,9 +1047,7 @@
 											}
 										}
 
-										if (_tmp.length > 0) {
-											empty_all = false;
-										}
+										empty_all = false;
 
 										selectedx = _tmp;
 										selectedxChild = _tmpChild;
@@ -1069,10 +1067,7 @@
 											}
 										});
 
-										if (selectedx.length > 0) {
-											empty_all = false;
-										}
-
+										empty_all = false;
 									}
 								}
 
@@ -1094,9 +1089,7 @@
 									}
 								});
 
-								if (selectedx.length > 0) {
-									empty_all = false;
-								}
+								empty_all = false;
 							}
 							
 						}

@@ -33,7 +33,7 @@
 	else {
 		$oletus_verokanta = 23;
 	}
-	
+
 	// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
 	if (!isset($alv_laskelman_sallittu_erotus)) {
 		$alv_laskelman_sallittu_erotus = 1;
@@ -64,13 +64,13 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$maksettava_alv_tili'";
 			$tilires = pupe_query($query);
-			
+
 			$query = "	SELECT *
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$erotus_tili'";
 			$erotilires = pupe_query($query);
-			
+
 			if (mysql_num_rows($tilires) == 1 and mysql_num_rows($erotilires) == 1) {
 
 				$alvtili_yht = (float) $alvtili_yht;
@@ -116,7 +116,7 @@
 				require("inc/teetiliointi.inc");
 
 				if ($alvpyor_yht != 0) {
-					
+
 					$summa 				= $alvpyor_yht;
 					$tili 				= $erotus_tili;
 					$kustp 				= '';
@@ -1006,7 +1006,7 @@
 			}
 
 			if (tarkista_oikeus("muutosite.php")) {
-				
+
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
 							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
@@ -1041,18 +1041,18 @@
 						echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200);
 						echo "<input type='hidden' name='tee' value='' />";
 					}
-					
+
 					echo "<tr><th>",t("Anna erotuksen tili"),"</th><td>";
-					
+
 					if (isset($erotus_tili) and trim($erotus_tili) != '') {
 						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $erotus_tili,'EISUBMIT');
 						echo "<input type='hidden' name='aputee' value='kuittaa_erotus' />";
 					}
 					else {
 						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $yhtiorow["pyoristys"],'EISUBMIT');
-						echo "<input type='hidden' name='tee' value='' />";
+						echo "<input type='hidden' name='aputee' value='' />";
 					}
-					
+
 					echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
 					echo "</table></form><br />";
 				}

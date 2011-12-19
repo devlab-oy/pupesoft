@@ -33,6 +33,11 @@
 	else {
 		$oletus_verokanta = 23;
 	}
+	
+	// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
+	if (!isset($alv_laskelman_sallittu_erotus)) {
+		$alv_laskelman_sallittu_erotus = 1;
+	}
 
 	enable_ajax();
 
@@ -826,11 +831,7 @@
 	}
 
 	function alvlaskelma($kk, $vv) {
-		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili,$alv_laskelman_sallittu_erotus;
-		// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
-		if (!isset($alv_laskelman_sallittu_erotus)) {
-			$alv_laskelman_sallittu_erotus = 1;
-		}
+		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili, $alv_laskelman_sallittu_erotus;
 
 		echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
@@ -1042,6 +1043,7 @@
 					}
 					
 					echo "<tr><th>",t("Anna erotuksen tili"),"</th><td>";
+					
 					if (isset($erotus_tili) and trim($erotus_tili) != '') {
 						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $erotus_tili,'EISUBMIT');
 						echo "<input type='hidden' name='aputee' value='kuittaa_erotus' />";
@@ -1050,6 +1052,7 @@
 						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $yhtiorow["pyoristys"],'EISUBMIT');
 						echo "<input type='hidden' name='tee' value='' />";
 					}
+					
 					echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
 					echo "</table></form><br />";
 				}

@@ -1388,7 +1388,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//muutetaan rivi‰, silloin ei saa p‰ivitt‰‰ pakollisia kentti‰
-						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
+						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 							///* T‰ss‰ on kaikki oikeellisuuscheckit *///
 							if ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
 								if ($rivi[$r] != 0 and $rivi[$r] != '') {

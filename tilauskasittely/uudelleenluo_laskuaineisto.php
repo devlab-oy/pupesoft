@@ -79,6 +79,48 @@
 		}
 	}
 
+	if (isset($tee) and $tee == 'maventa_siirto') {
+		// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+		$api_keys = array();
+		$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
+		$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+		// Vaihtoehtoinen company_uuid
+		if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+			$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+		}
+
+		// Testaus
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+		// Tuotanto
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+
+		// Luetaan filu ja tehd‰‰n invoice_put_file() per lasku
+		$maventa_fh = fopen("$pupe_root_polku/dataout/".basename($filenimi), 'r');
+
+		$laskun_rivit = "";
+
+		while ($rivi = fgets($maventa_fh)) {
+			if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
+				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
+
+				$laskun_rivit = "";
+			}
+
+			$laskun_rivit .= $rivi;
+		}
+
+		// Myˆs vika lasku
+		if ($laskun_rivit != "") {
+			preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+			$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+			echo "Maventa-lasku $invoice_number: $status<br>\n";
+		}
+	}
+
 	if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumerot != '') {
 
 		$tulostettavat_apix  = array();
@@ -187,7 +229,7 @@
 			echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
 		}
 
-		while ($lasrow = mysql_fetch_array($res)) {
+		while ($lasrow = mysql_fetch_assoc($res)) {
 			// Haetaan maksuehdon tiedot
 			$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
 						FROM maksuehto
@@ -203,7 +245,7 @@
 				}
 			}
 			else {
-				$masrow = mysql_fetch_array($result);
+				$masrow = mysql_fetch_assoc($result);
 			}
 
 			//Haetaan factoringsopimuksen tiedot
@@ -214,7 +256,7 @@
 							and factoringyhtio 	= '$masrow[factoring]'
 							and valkoodi 		= '$lasrow[valkoodi]'";
 				$fres = mysql_query($query) or pupe_error($query);
-				$frow = mysql_fetch_array($fres);
+				$frow = mysql_fetch_assoc($fres);
 			}
 			else {
 				unset($frow);
@@ -274,7 +316,7 @@
 			$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 			if (mysql_num_rows($asiakas_apu_res) == 1) {
-				$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+				$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 			}
 			else {
 				$asiakas_apu_row = array();
@@ -310,7 +352,7 @@
 							FROM kuka
 							WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 				$myyresult = mysql_query($mquery) or pupe_error($mquery);
-				$myyrow = mysql_fetch_array($myyresult);
+				$myyrow = mysql_fetch_assoc($myyresult);
 
 				//HUOM: T‰ss‰ kaikki sallitut verkkopuolen chn:‰t
 				if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
@@ -322,7 +364,7 @@
 					$lasrow['chn'] = "010";
 				}
 
-				 if ($lasrow['arvo'] >= 0) {
+				if ($lasrow['arvo'] >= 0) {
 					//Veloituslasku
 					$tyyppi='380';
 				}
@@ -397,7 +439,7 @@
 							and uusiotunnus = '$lasrow[tunnus]'
 							and toimitettuaika != '0000-00-00 00:00:00'";
 				$toimaikares = mysql_query($query) or pupe_error($query);
-				$toimaikarow = mysql_fetch_array($toimaikares);
+				$toimaikarow = mysql_fetch_assoc($toimaikares);
 
 				if ($toimaikarow["mint"] == "0000-00-00") {
 					$toimaikarow["mint"] = date("Y-m-d");
@@ -413,7 +455,7 @@
 				elseif ($lasrow["chn"] == "112") {
 					finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
 				}
-				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 					finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
 				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
@@ -432,7 +474,7 @@
 								ORDER BY alv";
 				$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
-				while ($alvrow1 = mysql_fetch_array($alvresult)) {
+				while ($alvrow1 = mysql_fetch_assoc($alvresult)) {
 
 					if ($alvrow1["alv"] >= 500) {
 						$aquery = "	SELECT '0' alv,
@@ -453,7 +495,7 @@
 									GROUP BY alv";
 					}
 					$aresult = mysql_query($aquery) or pupe_error($aquery);
-					$alvrow = mysql_fetch_array($aresult);
+					$alvrow = mysql_fetch_assoc($aresult);
 
 					// Kirjotetaan failiin arvierittelyt
 					if ($lasrow["chn"] == "111") {
@@ -462,7 +504,7 @@
 					elseif ($lasrow["chn"] == "112") {
 						finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
 					}
-					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 						finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 					}
 					else {
@@ -477,7 +519,7 @@
 				elseif ($lasrow["chn"] == "112") {
 					finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
 				}
-				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 					finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 				}
 
@@ -485,14 +527,7 @@
 				// haetaan asiakkaan tietojen takaa sorttaustiedot
 				$order_sorttaus = '';
 
-				$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta, laskutyyppi
-										FROM asiakas
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tunnus = '$lasrow[liitostunnus]'";
-				$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
 				if (mysql_num_rows($asiakas_apu_res) == 1) {
-					$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
 					$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
 					$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
 				}
@@ -516,7 +551,7 @@
 
 				// Haetaan laskun kaikki rivit
 				$query = "  SELECT
-							if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
+							if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
 							tilausrivi.ale1,
 							tilausrivi.ale2,
 							tilausrivi.ale3,
@@ -552,6 +587,7 @@
 							sum(tilausrivi.tilkpl) tilkpl,
 							sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
 							group_concat(tilausrivi.tunnus) rivitunnukset,
+							group_concat(distinct tilausrivi.perheid) perheideet,
 							count(*) rivigroup_maara,
 							sum(tilausrivi.rivihinta) rivihinta,
 							sum(tilausrivi.kpl) kpl,
@@ -573,7 +609,42 @@
 				$rivimaara   = mysql_num_rows($tilres);
 				$rivigrouppaus 	= FALSE;
 
-				while ($tilrow = mysql_fetch_array($tilres)) {
+				while ($tilrow = mysql_fetch_assoc($tilres)) {
+
+					// N‰ytet‰‰n vain perheen is‰ ja summataan lasten hinnat is‰riville
+					if ($laskutyyppi == 2) {
+						if ($tilrow["perheid"] > 0) {
+							// kyseess‰ on is‰
+							if ($tilrow["perheid"] == $tilrow["tunnus"]) {
+								// lasketaan is‰tuotteen riville lapsien hinnat yhteen
+								$query = "	SELECT
+											sum(tilausrivi.rivihinta) rivihinta,
+											round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta
+											FROM tilausrivi
+											WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+											and tilausrivi.uusiotunnus 	= '$tilrow[uusiotunnus]'
+											and tilausrivi.perheid 		in ($tilrow[perheideet])
+											and tilausrivi.perheid 		> 0";
+								$riresult = pupe_query($query);
+								$perherow = mysql_fetch_assoc($riresult);
+
+								$tilrow["hinta"] 		= $perherow["hinta"];
+								$tilrow["rivihinta"] 	= $perherow["rivihinta"];
+
+								// Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									$tilrow["ale{$alepostfix}"] = "";
+								}
+
+								$tilrow["erikoisale"] = "";
+							}
+							else {
+								// lapsia ei lis‰t‰
+								continue;
+							}
+						}
+					}
+
 
 					if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
 						//K‰‰nnet‰‰n nimitys
@@ -591,13 +662,14 @@
 						$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 					}
 
-					if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+					if ($tilrow["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 						$rivigrouppaus = TRUE;
 					}
 
 					// Otetaan yhteens‰kommentti pois jos summataan rivej‰
 					if ($rivigrouppaus) {
 						$tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+						$tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 						$tilrow["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 						$tilrow["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 					}
@@ -649,7 +721,7 @@
 					if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
 						$tilrow["kommentti"] .= " ";
 					}
-					while ($sarjarow = mysql_fetch_array($sarjares)) {
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 						$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 					}
 
@@ -730,7 +802,7 @@
 					elseif ($lasrow["chn"] == "112") {
 						finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 					}
-					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 						finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 					}
 					else {
@@ -749,7 +821,7 @@
 				elseif ($lasrow["chn"] == "112") {
 					finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
 				}
-				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 					finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 					if ($yhtiorow["verkkolasku_lah"] == "apix") {
@@ -909,6 +981,42 @@
 				}
 				else {
 					echo "APIX tmpdirrin teko feilas!<br>";
+				}
+			}
+			elseif ($yhtiorow["verkkolasku_lah"] == "maventa" and file_exists(realpath($nimifinvoice))) {
+				// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
+				$virhe = 0;
+				$api_keys = array();
+				$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
+				$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+				// Vaihtoehtoinen company_uuid
+				if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+					$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+				}
+
+				if ($api_keys["user_api_key"] == "" or $api_keys["vendor_api_key"] == "") {
+					echo "<p class='error'>".t("Ei voida l‰hett‰‰ materiaalia Maventalle, koska Maventa-avaimet puuttuu")."</p>";
+					$virhe = 1;
+				}
+
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna Maventa-aineisto").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br><br>";
+
+				if ($virhe == 0) {
+					echo "<table>";
+					echo "<tr><th>".t("L‰het‰ aineisto uudestaan MAVENTA:lle").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='maventa_siirto'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+					echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+					echo "</table>";
 				}
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {

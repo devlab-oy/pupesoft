@@ -51,6 +51,9 @@
 		elseif ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
 		}
+		elseif($trow[$i] == 'maventa') {
+			$sel5 = "selected";
+		}
 		else {
 			$sel1 = "selected";
 		}
@@ -59,6 +62,7 @@
 		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
 		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
 		$ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
+		$ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

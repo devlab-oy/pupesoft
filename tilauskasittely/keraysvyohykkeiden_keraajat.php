@@ -83,7 +83,62 @@
 				//-->
 			</script>";	
 
-	echo "<font class='head'>",t("Keräysvyöhykkeiden kerääjät"),"</font><hr>";
+	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>",t("Varasto"),"</th>";
+	echo "<th>",t("Keräysvyöhyke"),"</th>";
+	echo "<th>",t("Kuljetusliike"),"</th>";
+	echo "<th>",t("Prioriteetti"),"</th>";
+	echo "<th>",t("Tila"),"</th>";
+	echo "<th>",t("Volyymisuure"),"</th>";
+	echo "</tr>";
+
+	echo "<tr>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked/> Unikko<br />";
+	echo "<input type='checkbox' /> Veikkola";
+	echo "</td>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked /> Pientavara<br />";
+	echo "<input type='checkbox' checked /> Kardex<br />";
+	echo "<input type='checkbox' checked /> Kone<br />";
+	echo "<input type='checkbox' checked /> Painavat";
+	echo "</td>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked /> Posten logistik<br />";
+	echo "<input type='checkbox' /> Kaukokiito<br />";
+	echo "<input type='checkbox' /> Schenker<br />";
+	echo "<input type='checkbox' /> Transpori<br />";
+	echo "</td>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked /> 5<br />";
+	echo "<input type='checkbox' checked /> 7<br />";
+	echo "<input type='checkbox' checked /> 9";
+	echo "</td>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked /> Aloittamatta<br />";
+	echo "<input type='checkbox' /> Keräyksessä<br />";
+	echo "<input type='checkbox' /> Kerätty";
+	echo "</td>";
+
+	echo "<td>";
+	echo "<input type='checkbox' checked /> Rivit<br />";
+	echo "<input type='checkbox' /> Kg<br />";
+	echo "<input type='checkbox' /> Litrat<br />";
+	echo "</td>";
+
+	echo "</tr>";
+
+	echo "</table>";
+
+	echo "<br /><br />";
 
 	$query = "	SELECT keraysvyohyke.nimitys AS 'ker_nimitys',
 				GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
@@ -113,7 +168,8 @@
 	echo "<th>",t("Keräyserän aloitusaika"),"</th>";
 	echo "</tr>";
 
-	$i = 0;
+	$i = 1;
+	$max_i = mysql_num_rows($result);
 
 	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>";
@@ -161,7 +217,9 @@
 
 		if (mysql_num_rows($era_res)> 0) {
 
-			$x = 0;
+			$x = 1;
+
+			$max_x = mysql_num_rows($era_res);
 
 			while ($era_row = mysql_fetch_assoc($era_res)) {
 				echo "<tr class='era_{$i}' style='display:none;'>";
@@ -190,7 +248,8 @@
 							ORDER BY 1,2,3";
 				$asiakas_res = pupe_query($query);
 
-				$y = 0;
+				$y = 1;
+				$max_y = mysql_num_rows($asiakas_res);
 
 				while ($asiakas_row = mysql_fetch_assoc($asiakas_res)) {
 					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
@@ -246,17 +305,21 @@
 							echo "</tr>";
 						}						
 
-						echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
-						echo "<td colspan='5' class='back'>&nbsp;</td>";
-						echo "</tr>";
+						if ($y != $max_y) {
+							echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
+							echo "<td colspan='5' class='back'>&nbsp;</td>";
+							echo "</tr>";
+						}
 					}
 
 					$y++;
 				}
 
-				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
-				echo "<td colspan='5' class='back'>&nbsp;</td>";
-				echo "</tr>";
+				if ($i == $max_i) {
+					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+					echo "<td colspan='5' class='back'>&nbsp;</td>";
+					echo "</tr>";
+				}
 
 				$x++;
 			}

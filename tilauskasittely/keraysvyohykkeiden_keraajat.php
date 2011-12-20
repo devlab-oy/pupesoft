@@ -62,6 +62,15 @@
 						$('tr.era_'+$(this).attr('id')).toggle();
 					});
 
+					$('td.erat').click(function() {
+						var id = this.id.split(\"_\");
+						$('tr.asiakas_'+id[1]+'_'+id[2]).toggle();
+					});
+
+					$('td.asiakas').click(function() {
+						var id = this.id.split(\"_\");
+						$('tr.rivit_'+id[1]+'_'+id[2]+'_'+id[3]).toggle();
+					});
 				});
 
 				//-->
@@ -81,6 +90,7 @@
 				JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				GROUP BY keraysvyohyke.nimitys
@@ -128,8 +138,7 @@
 		echo "</tr>";
 
 		$query = "	SELECT kuka.nimi AS 'keraaja', 
-					SUBSTRING(kerayserat.luontiaika, 12, 5) AS 'aloitusaika',
-					kerayserat.otunnus,
+					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
 					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
 					COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
 					COUNT(DISTINCT kerayserat.otunnus) AS 'tilaukset'
@@ -139,21 +148,95 @@
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.otunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3
-					ORDER BY 1,2";
+					GROUP BY 1
+					ORDER BY 1";
 		$era_res = pupe_query($query);
 
 		if (mysql_num_rows($era_res)> 0) {
 
+			$x = 0;
+
 			while ($era_row = mysql_fetch_assoc($era_res)) {
 				echo "<tr class='era_{$i}' style='display:none;'>";
-				echo "<td>{$era_row['keraaja']}</td>";
+				echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}</td>";
 				echo "<td>{$era_row['rivit']}</td>";
 				echo "<td>{$era_row['tilaukset']}</td>";
 				echo "<td>{$era_row['kg']}</td>";
 				echo "<td>{$era_row['aloitusaika']}</td>";
 				echo "</tr>";
+
+				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+				echo "<th colspan='2'>",t("Toimitusasiakas"),"</th>";
+				echo "<th>",t("Lähtö"),"</th>";
+				echo "<th>",t("Toimitustapa"),"</th>";
+				echo "<th></th>";
+				echo "</tr>";
+
+				$query = "	SELECT CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
+							lasku.toimitustavan_lahto,
+							lasku.toimitustapa,
+							lasku.tunnus
+							FROM lasku
+							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+							AND lasku.tunnus IN ({$row['tilaukset']})
+							ORDER BY 1,2,3";
+				$asiakas_res = pupe_query($query);
+
+				$y = 0;
+
+				while ($asiakas_row = mysql_fetch_assoc($asiakas_res)) {
+					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+					echo "<td colspan='2' class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}</td>";
+					echo "<td>{$asiakas_row['toimitustavan_lahto']}</td>";
+					echo "<td>{$asiakas_row['toimitustapa']}</td>";
+					echo "<td></td>";
+					echo "</tr>";
+
+					$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka'
+								FROM kerayserat
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+								AND kerayserat.otunnus = '{$asiakas_row['tunnus']}'";
+					$rivi_res = pupe_query($query);
+
+					if (mysql_num_rows($rivi_res) > 0) {
+						echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
+						echo "<th>",t("Tuotenro"),"</th>";
+						echo "<th>",t("Tuotekuvaus"),"</th>";
+						echo "<th>",t("Keräyspaikka"),"</th>";
+						echo "<th>",t("Tilattu / Kerätty"),"</th>";
+						echo "<th></th>";
+						echo "</tr>";
+
+						while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+							echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
+							echo "<td>{$rivi_row['tuoteno']}</td>";
+							echo "<td>{$rivi_row['nimitys']}</td>";
+							echo "<td>{$rivi_row['kerayspaikka']}</td>";
+							echo "<td></td>";
+							echo "<td></td>";
+							echo "</tr>";
+						}						
+
+						echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
+						echo "<td colspan='5' class='back'>&nbsp;</td>";
+						echo "</tr>";
+					}
+
+					$y++;
+				}
+
+				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+				echo "<td colspan='5' class='back'>&nbsp;</td>";
+				echo "</tr>";
+
+				$x++;
 			}
+
+			echo "<tr class='era_{$i}' style='display:none;'>";
+			echo "<td colspan='5' class='back'>&nbsp;</td>";
+			echo "</tr>";
 		}
 
 		$i++;

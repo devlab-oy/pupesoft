@@ -230,6 +230,7 @@
 		echo "</tr>";
 
 		$query = "	SELECT kuka.nimi AS 'keraaja', 
+					GROUP_CONCAT(kerayserat.otunnus) AS 'otunnukset',
 					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
 					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
 					COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
@@ -263,21 +264,24 @@
 
 				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
 				echo "<th>",t("Tila"),"</th>";
+				echo "<th>",t("Prio"),"</th>";
 				echo "<th colspan='2'>",t("Toimitusasiakas"),"</th>";
 				echo "<th>",t("Lähtö"),"</th>";
 				echo "<th>",t("Toimitustapa"),"</th>";
 				echo "<th></th>";
-				echo "<th></th>";
 				echo "</tr>";
 
-				$query = "	SELECT CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
+				$query = "	SELECT lasku.prioriteettinro,
+							CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
 							lasku.toimitustavan_lahto,
 							lasku.toimitustapa,
 							lasku.tunnus,
 							lasku.tila, lasku.alatila
 							FROM lasku
 							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-							AND lasku.tunnus IN ({$row['tilaukset']})
+							AND lasku.tunnus IN ({$era_row['otunnukset']})
+							AND lasku.tila = 'L'
+							AND lasku.alatila IN ('A', 'B', 'C')
 							ORDER BY 1,2,3";
 				$asiakas_res = pupe_query($query);
 
@@ -289,10 +293,7 @@
 
 					echo "<td>";
 
-					if ($asiakas_row['tila'] == 'N' and $asiakas_row['alatila'] == 'A') {
-						echo t("Aloittamatta");
-					}
-					else if ($asiakas_row['tila'] == 'L' and $asiakas_row['alatila'] == 'A') {
+					if ($asiakas_row['tila'] == 'L' and $asiakas_row['alatila'] == 'A') {
 						echo t("Aloitettu");
 					}
 					else {
@@ -301,10 +302,10 @@
 
 					echo "</td>";
 
+					echo "<td>{$asiakas_row['prioriteettinro']}</td>";
 					echo "<td colspan='2' class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}</td>";
 					echo "<td>{$asiakas_row['toimitustavan_lahto']}</td>";
 					echo "<td>{$asiakas_row['toimitustapa']}</td>";
-					echo "<td></td>";
 					echo "<td></td>";
 					echo "</tr>";
 

@@ -100,8 +100,8 @@
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>",t("Keräysvyöhyke"),"</th>";
-	echo "<th>",t("Rivit"),"</th>";
 	echo "<th>",t("Tilaukset"),"</th>";
+	echo "<th>",t("Rivit"),"</th>";
 	echo "<th>",t("Kilot"),"</th>";
 	echo "<th>",t("Keräyserän aloitusaika"),"</th>";
 	echo "</tr>";
@@ -111,7 +111,6 @@
 	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>";
 		echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}</th>";
-		echo "<td>{$row['keratyt']} / {$row['suunnittelussa']}</td>";
 		echo "<td>";
 
 		$query = "	SELECT SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
@@ -132,6 +131,7 @@
 		echo "{$chk} / {$row['tilatut']}";
 		echo "</td>";
 
+		echo "<td>{$row['keratyt']} / {$row['suunnittelussa']}</td>";
 		echo "<td>{$row['kg_ker']} / {$row['kg_suun']}</td>";
 
 		echo "<td></td>";
@@ -159,23 +159,24 @@
 			while ($era_row = mysql_fetch_assoc($era_res)) {
 				echo "<tr class='era_{$i}' style='display:none;'>";
 				echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}</td>";
-				echo "<td>{$era_row['rivit']}</td>";
 				echo "<td>{$era_row['tilaukset']}</td>";
+				echo "<td>{$era_row['rivit']}</td>";
 				echo "<td>{$era_row['kg']}</td>";
 				echo "<td>{$era_row['aloitusaika']}</td>";
 				echo "</tr>";
 
 				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+				echo "<th>",t("Tila"),"</th>";
 				echo "<th colspan='2'>",t("Toimitusasiakas"),"</th>";
 				echo "<th>",t("Lähtö"),"</th>";
 				echo "<th>",t("Toimitustapa"),"</th>";
-				echo "<th></th>";
 				echo "</tr>";
 
 				$query = "	SELECT CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
 							lasku.toimitustavan_lahto,
 							lasku.toimitustapa,
-							lasku.tunnus
+							lasku.tunnus,
+							lasku.tila, lasku.alatila
 							FROM lasku
 							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 							AND lasku.tunnus IN ({$row['tilaukset']})
@@ -186,10 +187,24 @@
 
 				while ($asiakas_row = mysql_fetch_assoc($asiakas_res)) {
 					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
+
+					echo "<td>";
+
+					if ($asiakas_row['tila'] == 'N' and $asiakas_row['alatila'] == 'A') {
+						echo t("Aloittamatta");
+					}
+					else if ($asiakas_row['tila'] == 'L' and $asiakas_row['alatila'] == 'A') {
+						echo t("Aloitettu");
+					}
+					else {
+						echo t("Kerätty");
+					}
+
+					echo "</td>";
+
 					echo "<td colspan='2' class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}</td>";
 					echo "<td>{$asiakas_row['toimitustavan_lahto']}</td>";
 					echo "<td>{$asiakas_row['toimitustapa']}</td>";
-					echo "<td></td>";
 					echo "</tr>";
 
 					$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka'

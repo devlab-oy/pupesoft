@@ -53,8 +53,71 @@
 
 	enable_jquery();
 
+	echo "	<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
 	echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
+
+				google.load('visualization', '1', {packages:['corechart']});
+
+				google.setOnLoadCallback(drawChart);
+
+				function drawChart() {
+					var data = new google.visualization.DataTable();
+
+					data.addColumn('string', 'Klo');
+					data.addColumn('number', 'Kerätty');
+					data.addColumn('number', 'Keräyksessä');
+					data.addColumn('number', 'Aloittamatta');
+					data.addColumn('number', 'Siirretty');
+
+					data.addRows([
+						['08.00', 36, 0, 0, 0],
+						['09.00', 119, 0, 0, 0],
+						['10.00', 122, 0, 0, 0],
+						['11.00', 53, 0, 0, 0],
+						['12.00', 295, 0, 0, 0],
+						['13.00', 31, 0, 0, 0],
+						['14.00', 160, 0, 0, 0],
+						['15.00', 7, 0, 0, 0],
+						['16.00', 617, 190, 0, 30],
+						['17.00', 289, 95, 6, 0],
+						['18.00', 455, 118, 109, 0],
+						['19.00', 398, 194, 299, 0]
+					]);
+
+					var options = {
+						width: 800, height: 320,
+						title: 'Keräysvyöhykkeen kuormitus',
+						hAxis: {title: 'Klo', titleTextStyle: {color: 'black'}},
+						vAxis: {title: 'Rivit', titleTextStyle: {color: 'black'}},
+						isStacked: true,
+						animation: {
+							duration: 10000,
+							easing: 'linear'
+						},
+						series: {
+							0:{
+								color: 'green', 
+								visibleInLegend: true
+							}, 
+							1:{
+								color: 'blue', 
+								visibleInLegend: true
+							}, 
+							2:{
+								color: 'red', 
+								visibleInLegend: true
+							}, 
+							3:{
+								color: '#FE0', 
+								visibleInLegend: true
+							}
+						}
+					};
+
+					var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+					chart.draw(data, options);
+				}
 
 				$(document).ready(function() {
 
@@ -129,14 +192,17 @@
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked /> Rivit<br />";
-	echo "<input type='checkbox' /> Kg<br />";
-	echo "<input type='checkbox' /> Litrat<br />";
+	echo "<input type='radio' name='radio[]' checked /> Rivit<br />";
+	echo "<input type='radio' name='radio[]' /> Kg<br />";
+	echo "<input type='radio' name='radio[]' /> Litrat<br />";
 	echo "</td>";
 
 	echo "</tr>";
-
 	echo "</table>";
+
+	echo "<br /><br />";
+
+	echo "<div id='chart_div'></div>";
 
 	echo "<br /><br />";
 

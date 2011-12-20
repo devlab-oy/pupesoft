@@ -70,7 +70,6 @@
 						var id = this.id.split(\"_\");
 
 						if ($('tr[class^=\"rivit_'+id[1]+'_'+id[2]+'\"]').is(':visible') === false) {
-							console.log();
 							$('tr.asiakas_'+id[1]+'_'+id[2]).toggle();
 						}
 					});

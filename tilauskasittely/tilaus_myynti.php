@@ -1229,6 +1229,102 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	// Myyntitilaus valmis
 	else {
+		
+		$query_alennuksia = generoi_alekentta('M');
+		
+		// asiakastiedot
+		$query = "	SELECT luottoraja
+					FROM asiakas
+					WHERE asiakas.yhtio = '$kukarow[yhtio]'
+					AND asiakas.tunnus = '$laskurow[liitostunnus]'";
+		$asiakas_res = pupe_query($query);
+		$asiakas_row = mysql_fetch_assoc($asiakas_res);
+				
+		// asiakkaan luottoraja
+		$asiakas_luottoraja = $asiakas_row["luottoraja"];
+		
+		if ($asiakas_luottoraja == 0 ) {
+			$oikeasti_valmis = "KYLLA";
+		}
+		else {
+		
+			// t‰m‰n tilauksen arvo
+			$query = "	SELECT sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_alennuksia}, '$yhtiorow[hintapyoristys]')) laskun_summa
+						FROM tilausrivi
+						WHERE tilausrivi.otunnus  = '{$kukarow["kesken"]}'
+						AND tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND tilausrivi.var in ('','H')
+						AND tilausrivi.tyyppi in ('L','G')";
+			$tilaus_res = pupe_query($query);
+			$tilaus_row = mysql_fetch_assoc($tilaus_res);
+		
+			// haetaan kaikkien avoimien tilausten arvo
+			$sumquery = "	SELECT 
+							round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo,
+							round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_summa,
+							count(distinct lasku.tunnus) kpl, 
+							lasku.nimi
+							FROM lasku
+							JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V')) 
+							  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))
+							  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))
+							) 
+							AND lasku.liitostunnus = '$laskurow[liitostunnus]'";
+			$sumresult = pupe_query($sumquery);
+			$avoimetrow = mysql_fetch_assoc($sumresult);
+			
+			// Nykyinen tilanne ja luottoraja
+			$laskun_summa 		= $tilaus_row["laskun_summa"];
+			$asiakkaan_avoimet  = $avoimetrow["avoimet_arvo"]; 
+
+			$sytunnus 	 	 = $laskurow['ytunnus'];
+			$sliitostunnus	 = $laskurow['liitostunnus'];
+			$eiliittymaa 	 = "ON";
+			$luottorajavirhe = "";
+			$jvvirhe 		 = "";
+			$ylivito 		 = "";
+			$trattavirhe 	 = "";
+			$laji 			 = "MA";
+			$velkatilanne	 = "";
+
+			if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+				$grouppaus = "ytunnus";
+			}
+			else {
+				$grouppaus = "";
+			}
+
+			ob_start();
+			if ($toim != "EXTRANET") {
+				require ("raportit/saatanat.php");
+			}
+			else {
+				require ("saatanat.php");
+			}
+			$retval = ob_get_contents();
+			ob_end_clean();
+			
+			// varaa_ostaa_tavaraa on saldo joka on k‰ytett‰viss‰ asiakkaan tilaukselle/tilauksille.
+			$varaa_ostaa_tavaraa = $asiakas_luottoraja - $velkatilanne - $asiakkaan_avoimet;
+
+			if ($varaa_ostaa_tavaraa >= $laskun_summa) {
+				$oikeasti_valmis = "KYLLA";
+			}
+			else {
+				echo "<p class='error'>".t("Laskun ja avoimien laskujen yhteissumma ylitt‰‰ k‰ytett‰viss‰ olevan luoton m‰‰r‰n")."</p>";
+				if ($toim == "EXTRANET") {
+					echo "<p class='error'>".t("Ota tarvittaessa yhteytt‰ Asiakaspalveluun")."</p>";
+				}
+				
+				$tee = "";
+				$oikeasti_valmis = "KESKEN";
+				$tilausok = 100; // ei haluta laittaa valmiiksi nappia
+				unset($lopetus);
+			}
+		}
+			
 		//Jos k‰ytt‰j‰ on extranettaaja ja h‰n ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
 		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES" and $kukarow["taso"] != 3) {
 			$kukarow["taso"] = 2;
@@ -1258,7 +1354,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 
 		// Extranetk‰ytt‰j‰ jonka tilaukset on hyv‰ksytett‰v‰ meid‰n myyjill‰
-		if ($kukarow["extranet"] != "" and $kukarow["taso"] == 2) {
+		if ($kukarow["extranet"] != "" and $kukarow["taso"] == 2 and $oikeasti_valmis == "KYLLA") {
 			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'
@@ -1273,7 +1369,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$result = pupe_query($query);
 
 		}
-		else {
+		elseif ($oikeasti_valmis == "KYLLA") {
 
 			//Luodaan valituista riveist‰ suoraan normaali ostotilaus
 			if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
@@ -1323,7 +1419,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 
 	// ollaan k‰sitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
-	if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim != "TARJOUS") {
+	if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim != "TARJOUS" and $oikeasti_valmis == "KYLLA") {
 
 		$aika=date("d.m.y @ G:i:s", time());
 		echo "<font class='message'>".t("Osatoimitus")." $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
@@ -1350,7 +1446,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 	}
 	else {
-		if ($kukarow["extranet"] == "") {
+		if ($kukarow["extranet"] == "" and $oikeasti_valmis == "KYLLA") {
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
@@ -1386,22 +1482,23 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				$kentta = "kateisraha";
 			}
 		}
-
-		$tee				= '';
-		$tilausnumero		= '';
-		$laskurow			= '';
-		$kukarow['kesken']	= '';
-
-		if ($kukarow["extranet"] != "") {
-			if ($toim == 'EXTRANET_REKLAMAATIO') {
-				echo "<font class='head'>$otsikko</font><hr><br><br>";
-				echo "<font class='message'>".t("Reklamaatio valmis. Palaamme asiaan")."!</font><br><br>";
+		if ($oikeasti_valmis == "KYLLA") {
+			$tee				= '';
+			$tilausnumero		= '';
+			$laskurow			= '';
+			$kukarow['kesken']	= '';
+		
+			if ($kukarow["extranet"] != "") {
+				if ($toim == 'EXTRANET_REKLAMAATIO') {
+					echo "<font class='head'>$otsikko</font><hr><br><br>";
+					echo "<font class='message'>".t("Reklamaatio valmis. Palaamme asiaan")."!</font><br><br>";
+				}
+				else {
+					echo "<font class='head'>$otsikko</font><hr><br><br>";
+					echo "<font class='message'>".t("Tilaus valmis. Kiitos tilauksestasi")."!</font><br><br>";
+				}
+				$tee = "SKIPPAAKAIKKI";
 			}
-			else {
-				echo "<font class='head'>$otsikko</font><hr><br><br>";
-				echo "<font class='message'>".t("Tilaus valmis. Kiitos tilauksestasi")."!</font><br><br>";
-			}
-			$tee = "SKIPPAAKAIKKI";
 		}
 	}
 
@@ -2454,7 +2551,7 @@ if ($tee == '') {
 	}
 
 	//Oletetaan, ett‰ tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheit‰ ilmenee
-	$tilausok = 0;
+	if (!isset($tilausok)) $tilausok = 0;
 	$sarjapuuttuu = 0;
 
 	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";

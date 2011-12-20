@@ -59,12 +59,20 @@
 				$(document).ready(function() {
 
 					$('th.keraysvyohyke').click(function() {
-						$('tr.era_'+$(this).attr('id')).toggle();
+						var id = $(this).attr('id');
+
+						if ($('tr[class^=\"asiakas_'+id+'\"]').is(':visible') === false && $('tr[class^=\"rivit_'+id+'\"]').is(':visible') === false) {
+							$('tr.era_'+id).toggle();
+						}
 					});
 
 					$('td.erat').click(function() {
 						var id = this.id.split(\"_\");
-						$('tr.asiakas_'+id[1]+'_'+id[2]).toggle();
+
+						if ($('tr[class^=\"rivit_'+id[1]+'_'+id[2]+'\"]').is(':visible') === false) {
+							console.log();
+							$('tr.asiakas_'+id[1]+'_'+id[2]).toggle();
+						}
 					});
 
 					$('td.asiakas').click(function() {
@@ -207,12 +215,17 @@
 					echo "<td>{$asiakas_row['toimitustapa']}</td>";
 					echo "</tr>";
 
-					$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka'
+					$query = "	SELECT tilausrivi.tuoteno, 
+								tuote.nimitys, 
+								CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
+								ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0)), 0) AS 'keratty',
+								ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-								AND kerayserat.otunnus = '{$asiakas_row['tunnus']}'";
+								AND kerayserat.otunnus = '{$asiakas_row['tunnus']}'
+								GROUP BY 1,2,3";
 					$rivi_res = pupe_query($query);
 
 					if (mysql_num_rows($rivi_res) > 0) {
@@ -220,7 +233,7 @@
 						echo "<th>",t("Tuotenro"),"</th>";
 						echo "<th>",t("Tuotekuvaus"),"</th>";
 						echo "<th>",t("Keräyspaikka"),"</th>";
-						echo "<th>",t("Tilattu / Kerätty"),"</th>";
+						echo "<th>",t("Kerätty / Tilattu"),"</th>";
 						echo "<th></th>";
 						echo "</tr>";
 
@@ -229,7 +242,7 @@
 							echo "<td>{$rivi_row['tuoteno']}</td>";
 							echo "<td>{$rivi_row['nimitys']}</td>";
 							echo "<td>{$rivi_row['kerayspaikka']}</td>";
-							echo "<td></td>";
+							echo "<td>{$rivi_row['keratty']} / {$rivi_row['tilattu']}</td>";
 							echo "<td></td>";
 							echo "</tr>";
 						}						

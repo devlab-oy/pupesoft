@@ -3481,7 +3481,7 @@ if ($tee == '') {
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
-				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#".$tilausrivi["hyllyalue"]."#".$tilausrivi["hyllynro"]."#".$tilausrivi["hyllyvali"]."#".$tilausrivi["hyllytaso"];
+				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#!¡!#".$tilausrivi["hyllyalue"]."#!¡!#".$tilausrivi["hyllynro"]."#!¡!#".$tilausrivi["hyllyvali"]."#!¡!#".$tilausrivi["hyllytaso"];
 			}
 
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "¡¡¡") {
@@ -3569,9 +3569,9 @@ if ($tee == '') {
 
 			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
 
-			// Tehdaslisävarusteperhe-keississä muistetaan myös valittu paikka
-			if ($tapa != "VAIHDA" and $perheid2 > 0 and $hyllyalue != '') {
-				$paikka = $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+			// Muistetaan myös valittu paikka
+			if ($tapa != "VAIHDA" and $hyllyalue != '') {
+				$paikka = $hyllyalue."#!¡!#".$hyllynro."#!¡!#".$hyllyvali."#!¡!#".$hyllytaso;
 			}
 
 			if ($tapa == "MUOKKAA") {
@@ -3586,20 +3586,10 @@ if ($tee == '') {
 			}
 			elseif ($tapa == "JT") {
 				$var 		= "J";
-
-				if ($hyllyalue != '') {
-					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
-				}
-
 				$tila		= "";
 			}
 			elseif ($tapa == "PUUTE") {
 				$var 		= "P";
-
-				if ($hyllyalue != '') {
-					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
-				}
-
 				$tila		= "";
 			}
 			elseif ($tapa == "POISJTSTA") {
@@ -3620,18 +3610,18 @@ if ($tee == '') {
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";
 				$tila		= "";
-				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "@@@") $paikka = "";
+				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "¡¡¡" and substr($paikka,0,3) != "@@@") $paikka = "";
 			}
 			elseif ($tapa == "MYYVASTAAVA") {
 				// tuoteno, määrä, muut nollataan
-				$tuoteno	= $vastaavatuoteno;
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$rivitunnus	= 0;
-				$paikka		= '';
-				$alv		= '';
-				$perheid	= 0;
+				$tuoteno			= $vastaavatuoteno;
+				$var				= '';
+				$hinta				= '';
+				$netto				= '';
+				$rivitunnus			= 0;
+				$paikka				= '';
+				$alv				= '';
+				$perheid			= 0;
 				$perheid2			= 0;
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
@@ -3664,17 +3654,17 @@ if ($tee == '') {
 					${'ale'.$alepostfix} = '';
 				}
 
-				$tuoteno	= '';
-				$kpl		= '';
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$rivitunnus	= 0;
-				$kommentti	= '';
-				$kerayspvm	= '';
-				$toimaika	= '';
-				$paikka		= '';
-				$alv		= '';
+				$tuoteno			= '';
+				$kpl				= '';
+				$var				= '';
+				$hinta				= '';
+				$netto				= '';
+				$rivitunnus			= 0;
+				$kommentti			= '';
+				$kerayspvm			= '';
+				$toimaika			= '';
+				$paikka				= '';
+				$alv				= '';
 				$perheid			= 0;
 				$perheid2			= 0;
 				$tilausrivilinkki	= '';
@@ -4129,7 +4119,7 @@ if ($tee == '') {
 
 		if ($tapa == "VAIHDA" and $perheid2 > 0 and $kayttajan_paikka != "" and substr($kayttajan_paikka,0,3) != "¡¡¡" and substr($kayttajan_paikka,0,3) != "!!!") {
 			//Päivitetään tehdaslisävarusteille kanssa sama varastopaikka kuin isätuotteelle
-			$p2paikka = explode("#", $kayttajan_paikka);
+			$p2paikka = explode("#!¡!#", $kayttajan_paikka);
 
 			$query = "	UPDATE tilausrivi set
 						hyllyalue = '$p2paikka[0]',

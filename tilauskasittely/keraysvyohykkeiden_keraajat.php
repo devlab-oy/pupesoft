@@ -241,6 +241,7 @@
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.otunnus IN ({$row['tilaukset']})
+					AND kerayserat.tila IN ('K', 'T', 'R')
 					GROUP BY 1
 					ORDER BY 1";
 		$era_res = pupe_query($query);
@@ -347,7 +348,7 @@
 
 						if ($y != $max_y) {
 							echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
-							echo "<td colspan='5' class='back'>&nbsp;</td>";
+							echo "<td colspan='7' class='back'>&nbsp;</td>";
 							echo "</tr>";
 						}
 					}
@@ -357,7 +358,7 @@
 
 				if ($i == $max_i) {
 					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
-					echo "<td colspan='5' class='back'>&nbsp;</td>";
+					echo "<td colspan='6' class='back'>&nbsp;</td>";
 					echo "</tr>";
 				}
 
@@ -365,7 +366,7 @@
 			}
 
 			echo "<tr class='era_{$i}' style='display:none;'>";
-			echo "<td colspan='5' class='back'>&nbsp;</td>";
+			echo "<td colspan='7' class='back'>&nbsp;</td>";
 			echo "</tr>";
 		}
 

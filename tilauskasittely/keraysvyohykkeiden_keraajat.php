@@ -246,17 +246,17 @@
 
 	$chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'kerayksessa' => '', 'keratty' => '');
 
-	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> Aloittamatta<br />";
-	echo "<input type='checkbox' name='tilat[kerayksessa]'{$chk['kerayksessa']} /> Keräyksessä<br />";
-	echo "<input type='checkbox' name='tilat[keratty]'{$chk['keratty']} /> Kerätty";
+	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ",t("Aloittamatta"),"<br />";
+	echo "<input type='checkbox' name='tilat[kerayksessa]'{$chk['kerayksessa']} /> ",t("Keräyksessä"),"<br />";
+	echo "<input type='checkbox' name='tilat[keratty]'{$chk['keratty']} /> ",t("Kerätty");
 	echo "</td>";
 
 	$chk = array_fill_keys(array($volyymisuure), " checked") + array('rivit' => '', 'kg' => '', 'litrat' => '');
 
 	echo "<td>";
-	echo "<input type='radio' name='volyymisuure' value='rivit'{$chk['rivit']} /> Rivit<br />";
-	echo "<input type='radio' name='volyymisuure' value='kg'{$chk['kg']} /> Kg<br />";
-	echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> Litrat<br />";
+	echo "<input type='radio' name='volyymisuure' value='rivit'{$chk['rivit']} /> ",t("Rivit"),"<br />";
+	echo "<input type='radio' name='volyymisuure' value='kg'{$chk['kg']} /> ",t("Kg"),"<br />";
+	echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> ",t("Litrat");
 	echo "</td>";
 
 	echo "</tr>";
@@ -305,6 +305,7 @@
 				$select_keratty = ", IF(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'), {$selectlisa}, 0) AS 'keratty'";
 			}
 
+			// poistetaan defaultit
 			array_shift($varasto);
 			array_shift($keraysvyohyke);
 			array_shift($toimitustapa);

@@ -1569,7 +1569,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VALMIS_VA
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus 	= '$tilausnumero'
 					AND tila 	= 'C'
-					AND alatila = 'A'";
+					AND alatila in ('A','B','C','')";
 		$result = pupe_query($query);
 
 		$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";

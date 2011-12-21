@@ -667,6 +667,7 @@
 											yhtio      = '$kukarow[yhtio]',
 											tapvm      = now(),
 											tila       = 'X',
+											alatila    = 'I',
 											laatija    = '$kukarow[kuka]',
 											viite      = '$tapahtumaid',
 											luontiaika = now()";

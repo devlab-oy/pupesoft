@@ -340,7 +340,6 @@
 //					$Amt = $RgltryDtls->addChild('Amt', '');
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
-				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 
 			if ($laskurow["viite"] > 0) {
 				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
@@ -356,6 +355,9 @@
 							$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');											// Code (SCOR = Structured Communication Reference)
 						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
 //					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
+			}
+			else {
+				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 			}
 
 			// jos tämä muuttuja on setattu, on tämä ko. lasku/tapahtuma netotettu näistä tunnuksista!
@@ -376,7 +378,6 @@
 
 					if ($nettorow["summa"] < 0) {
 						$code = "CREN";				// hyvityslasku
-						$nettorow["summa"] *= -1;	// käännetään etumerkki
 					}
 					else {
 						$code = "CINV";				// veloituslasku
@@ -390,7 +391,14 @@
 //							$RfrdDocNb = $RfrdDocInf->addChild('RfrdDocNb', '');
 //						$RfrdDocRltdDt = $Strd->addChild('RfrdDocRltdDt', '');
 						$RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');						   					// ReferredDocumentAmount
-							$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   					// RemittedAmount
+
+							if ($nettorow["summa"] < 0) {
+								$RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));			// CreditNoteAmount
+							}
+							else {
+								$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+							}
+
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
 
 					if ($nettorow["viite"] > 0) {
@@ -399,8 +407,7 @@
 								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');						   					// Code (SCOR = Structured Communication Reference)
 							$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $nettorow['viite']));	// CreditorReference
 					}
-
-					if ($nettorow["viesti"] != "") {
+					elseif ($nettorow["viesti"] != "") {
 						$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', sprintf("%-1.140s", $nettorow['viesti']));	// AdditionalRemittanceInformation
 					}
 				}

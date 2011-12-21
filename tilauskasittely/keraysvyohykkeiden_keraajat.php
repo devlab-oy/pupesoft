@@ -104,6 +104,14 @@
 
 	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
 
+	if (!isset($varasto)) $varasto = array();
+	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
+	if (!isset($toimitustapa)) $toimitustapa = array();
+	if (!isset($prioriteetit)) $prioriteetit = array();
+	if (!isset($tilat)) $tilat = array('aloittamatta' => '', 'kerayksessa' => '', 'keratty' => '');
+	if (!isset($volyymisuure)) $volyymisuure = "rivit";
+
+	echo "<form method='post' action=''>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>",t("Varasto"),"</th>";
@@ -117,44 +125,110 @@
 	echo "<tr>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked/> Unikko<br />";
-	echo "<input type='checkbox' /> Veikkola";
+
+	$query = "	SELECT DISTINCT varastopaikat.nimitys AS 'var_nimitys', varastopaikat.tunnus AS 'var_tunnus'
+				FROM lasku
+				JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+				ORDER BY 1";
+	$res = pupe_query($query);
+
+	while ($varastorow = mysql_fetch_assoc($res)) {
+
+		$chk = in_array($varastorow['var_tunnus'], $varasto) ? " checked" : "";
+
+		echo "<input type='checkbox' name='varasto[]' value='{$varastorow['var_tunnus']}'{$chk} />&nbsp;{$varastorow['var_nimitys']}<br />";
+	}
+
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked /> Pientavara<br />";
-	echo "<input type='checkbox' checked /> Kardex<br />";
-	echo "<input type='checkbox' checked /> Kone<br />";
-	echo "<input type='checkbox' checked /> Painavat";
+
+	$query = "	SELECT DISTINCT keraysvyohyke.nimitys AS 'ker_nimitys', keraysvyohyke.tunnus AS 'ker_tunnus'
+				FROM lasku
+				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.varasto = lasku.varasto)
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+				ORDER BY 1";
+	$res = pupe_query($query);
+
+	// mysql_data_seek($res, 0);
+
+	while ($keraysvyohykerow = mysql_fetch_assoc($res)) {
+
+		$chk = in_array($keraysvyohykerow['ker_tunnus'], $keraysvyohyke) ? " checked" : "";
+
+		echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohykerow['ker_tunnus']}'{$chk} />&nbsp;{$keraysvyohykerow['ker_nimitys']}<br />";
+	}
+
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked /> Posten logistik<br />";
-	echo "<input type='checkbox' /> Kaukokiito<br />";
-	echo "<input type='checkbox' /> Schenker<br />";
-	echo "<input type='checkbox' /> Transpori<br />";
+
+	$query = "	SELECT DISTINCT lasku.toimitustapa, toimitustapa.tunnus AS 'tt_tunnus'
+				FROM lasku
+				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K')
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+				ORDER BY 1";
+	$res = pupe_query($query);
+
+	// mysql_data_seek($res, 0);
+
+	while ($toimitustaparow = mysql_fetch_assoc($res)) {
+
+		$chk = in_array($toimitustaparow['tt_tunnus'], $toimitustapa) ? " checked" : "";
+
+		echo "<input type='checkbox' name='toimitustapa[]' value='{$toimitustaparow['tt_tunnus']}'{$chk} />&nbsp;{$toimitustaparow['toimitustapa']}<br />";
+	}
+
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked /> 5<br />";
-	echo "<input type='checkbox' checked /> 7<br />";
-	echo "<input type='checkbox' checked /> 9";
+
+	$query = "	SELECT DISTINCT lasku.prioriteettinro
+				FROM lasku
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+	$res = pupe_query($query);
+
+	while ($priorow = mysql_fetch_assoc($res)) {
+
+		$chk = in_array($priorow['prioriteettinro'], $prioriteetit) ? " checked" : "";
+
+		echo "<input type='checkbox' name='prioriteetit[]' value='{$priorow['prioriteettinro']}'{$chk} />&nbsp;{$priorow['prioriteettinro']}<br />";
+	}
+
 	echo "</td>";
 
 	echo "<td>";
-	echo "<input type='checkbox' checked /> Aloittamatta<br />";
-	echo "<input type='checkbox' /> Keräyksessä<br />";
-	echo "<input type='checkbox' /> Kerätty";
+
+	$chk = array();
+
+	array_walk($tilat, function($checked, $name) use (&$chk) {
+		$chk[$name] = $checked != '' ? " checked" : "";
+	});
+
+	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> Aloittamatta<br />";
+	echo "<input type='checkbox' name='tilat[kerayksessa]'{$chk['kerayksessa']} /> Keräyksessä<br />";
+	echo "<input type='checkbox' name='tilat[keratty]'{$chk['keratty']} /> Kerätty";
 	echo "</td>";
 
+	$chk = array_fill_keys(array($volyymisuure), " checked") + array('rivit' => '', 'kg' => '', 'litrat' => '');
+
 	echo "<td>";
-	echo "<input type='radio' name='radio[]' checked /> Rivit<br />";
-	echo "<input type='radio' name='radio[]' /> Kg<br />";
-	echo "<input type='radio' name='radio[]' /> Litrat<br />";
+	echo "<input type='radio' name='volyymisuure' value='rivit'{$chk['rivit']} /> Rivit<br />";
+	echo "<input type='radio' name='volyymisuure' value='kg'{$chk['kg']} /> Kg<br />";
+	echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> Litrat<br />";
 	echo "</td>";
 
 	echo "</tr>";
+
+	echo "<tr><td class='back' colspan='6'><input type='submit' value='Näytä' /></td></tr>";
+
 	echo "</table>";
+	echo "</form>";
 
 	echo "<br /><br />";
 

@@ -159,8 +159,6 @@
 				ORDER BY 1";
 	$res = pupe_query($query);
 
-	// mysql_data_seek($res, 0);
-
 	while ($keraysvyohykerow = mysql_fetch_assoc($res)) {
 
 		$chk = in_array($keraysvyohykerow['ker_tunnus'], $keraysvyohyke) ? " checked" : "";
@@ -179,8 +177,6 @@
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				ORDER BY 1";
 	$res = pupe_query($query);
-
-	// mysql_data_seek($res, 0);
 
 	while ($toimitustaparow = mysql_fetch_assoc($res)) {
 

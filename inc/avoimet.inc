@@ -598,7 +598,7 @@
 			$karhuja = (int) $karhuja;
 
             // Halutaanko vain luottovakuutetut asiakkaat
-            $luottovakuutuslisa = ($luottovakuutettu == "K") ? "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.laji != 'P' and asiakas.luottovakuutettu = 'K')" : "";
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = 'K') " : "";
 
 			if ($karhuja > 0) {
 

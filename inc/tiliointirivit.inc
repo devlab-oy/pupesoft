@@ -203,6 +203,10 @@
 		echo "</td>";
 
 		echo "<td valign='top'>";
+		
+		// Ei rikota rivinvaihtoja
+		$selite = str_ireplace("<br>", "(br)", $selite);
+		
 		echo "<input type='text' name='selite' value = '$selite'>";
 
 		if ($trow['tila'] == 'X' and trim($liitos) != '' and $liitostunnus > 0) {

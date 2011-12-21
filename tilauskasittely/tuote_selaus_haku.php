@@ -252,13 +252,7 @@
 					$jtkielto 		 = $laskurow['jtkielto'];
 					$varataan_saldoa = "";
 					$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
-
-					if ($tilpaikka[$yht_i] != '') {
-						$paikka	= $tilpaikka[$yht_i];
-					}
-					else {
-						$paikka	= "";
-					}
+					$paikka			 = "";
 
 					// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
 					if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {

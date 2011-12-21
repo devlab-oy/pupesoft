@@ -501,6 +501,20 @@ if (!function_exists("table_exists")) {
 	}
 }
 
+if (!function_exists("maventa_invoice_put_file")) {
+	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring) {
+		$files_out['file'] = base64_encode($xmlstring);
+		$files_out['filename'] = "$invoice_number.xml";
+		$files_out['attachment_type'] = 'FINVOICE';
+
+		$return_value = $client->invoice_put_file($api_keys, $files_out);
+
+		$objecti = $return_value[0];
+
+		return $objecti->status;
+	}
+}
+
 if (!function_exists("vapauta_sarjanumerot")) {
 	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
@@ -1075,12 +1089,12 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa -= $kerarow["keratty"];
 						$hyllyssa -= $kerarow["keratty"];
 
-						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistukset eiv‰t muuta myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
@@ -1105,7 +1119,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
 										and tilausrivi.tyyppi in ('W','M')
@@ -11113,12 +11127,12 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\")†{
 								var saatavaty = new Array();
-								var sarakemaara = parametrit[tableid][0]-2;
+								var sarakemaara = parametrit[tableid][0]-1;
 
 								// Summataan vain ruudulla n‰kyv‰t luvut
 								for (var i=iStart; i<iEnd; i++) {
 
-									for (var j=2; j<=sarakemaara; j++) {
+									for (var j=1; j<=sarakemaara; j++) {
 										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
 										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
 									}
@@ -11131,11 +11145,11 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								);
 
-								for (var j=2; j<=sarakemaara; j++) {
+								for (var j=1; j<=sarakemaara; j++) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}
-							
+
 							if (tableid == \"raportti_valmistuksista\")†{
 								var saatavaty = new Array();
 								var sarakemaara = parametrit[tableid][0]-4;
@@ -11872,14 +11886,20 @@ if (!function_exists("xml_add")) {
 		$ulos = "<$joukko>";
 
 		if (strlen($tieto) > 0 or $minpituus != '') {
-			$tieto = xmlentities($tieto);
 
 			if ($maxpituus != "" and is_numeric($maxpituus) and strlen($tieto) > $maxpituus) {
 				$tieto = substr($tieto, 0, $maxpituus);
 			}
 
+			$tieto = xmlentities($tieto);
+
 			if ($minpituus != "" and is_numeric($minpituus) and strlen($tieto) < $minpituus) {
-				$tieto = str_pad($tieto, $minpituus);
+				if ($yhtiorow["verkkolasku_lah"] == "maventa" and ($joukko == "InvoiceRecipientTownName" or $joukko == "InvoiceRecipientPostCodeIdentifier")) {
+					$tieto = str_pad($tieto, $minpituus,'.');
+				}
+				else {
+					$tieto = str_pad($tieto, $minpituus);
+				}
 			}
 
 			$ulos .= $tieto;
@@ -14527,5 +14547,64 @@ if (!function_exists('gauge')) {
 					});
 
 				</script>";
+	}
+}
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('raaka_aineiden_riitto')) {
+
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+
+		global $kukarow;
+
+		// K‰ytett‰v‰t muuttujat
+		$join_lisa = "";
+		$varasto = (int) $varasto;
+		$tuoteno = mysql_real_escape_string($tuoteno);
+
+		// Katotaan halutaanko saldo vaan jostain tietyst‰ varastosta (varastopaikat.tunnus), silloin unohdetaan edell‰ annettu tyyppi kokonaan
+		if ($varasto != 0) {
+			$join_lisa = "	JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and varastopaikat.tunnus in ($varasto)";
+		}
+
+		// Loopataan lapsituotteet l‰pi
+		$query = "	SELECT tuoteperhe.tuoteno,
+					tuoteperhe.kerroin
+					FROM tuoteperhe
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.ei_saldoa = '')
+					$join_lisa
+					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteperhe.isatuoteno = '$tuoteno'
+					AND tuoteperhe.tyyppi = 'R'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return 0;
+		}
+
+		$voidaan_valmistaa = 9999999999999;
+
+		// Katotaan moneeko valmisteeseen lapsien saldo riitt‰‰
+		while ($row = mysql_fetch_assoc($result)) {
+			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
+
+			$riitto = $myytavissa / $row["kerroin"];
+
+			// Otetaan telteen pienin riitto
+			if ($riitto < $voidaan_valmistaa) {
+			 	$voidaan_valmistaa = $riitto;
+			}
+		}
+
+		// N‰ytet‰‰n alle nollat nollana ja pyˆristet‰‰n desimaalit alas
+		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
+
+		return $voidaan_valmistaa;
 	}
 }

@@ -15,7 +15,11 @@
 		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
 	}
 
-	$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+	// Testaus
+	#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+	// Tuotanto
+	$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 	// Haetaan api_keyt yhtion_parametrit taulusta
 	// Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.

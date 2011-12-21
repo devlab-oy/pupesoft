@@ -441,13 +441,15 @@
 	}
 
 	// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
-	$query = "	SELECT *
-				FROM rahtikirjat
-				WHERE yhtio 	= '$kukarow[yhtio]'
-				AND otsikkonro 	= '$kukarow[kesken]'
-				AND tulostettu != '0000-00-00 00:00:00'
-				LIMIT 1";
-	$rakre_chkres = pupe_query($query);
+	if ($kukarow["kesken"] != 0) {
+		$query = "	SELECT *
+					FROM rahtikirjat
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					AND otsikkonro 	= '$kukarow[kesken]'
+					AND tulostettu != '0000-00-00 00:00:00'
+					LIMIT 1";
+		$rakre_chkres = pupe_query($query);
+	}
 
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
@@ -1128,7 +1130,7 @@
 
 			$state_chk = '';
 
-			if (mysql_num_rows($rakre_chkres) > 0) {
+			if (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0) {
 				$state_chk = 'disabled';
 			}
 
@@ -1152,20 +1154,24 @@
 			$sel[$apu_rahdinmaksaja] = "selected";
 
 			echo "<td>".t("Rahtisopimus").":</td>
-				<td><select id='merahti' name='maksaja' {$state_chk}>
+					<td><select id='merahti' name='maksaja' {$state_chk}>
 					<option value='O'>".t("Oletus")."</option>
 					<option value='K' $sel[K]>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>
 					<option value=''  $sel[V]>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>
-					</select>
-				</td>
-				</tr>";
+					</select>";
+
+			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='maksaja' value='$apu_rahdinmaksaja'>";
+			}
+
+			echo "</td></tr>";
 
 			if ($yhtiorow["viitteen_kasinsyotto"] != "") {
 				echo "<tr><td>".t("Viitenumero").":</td><td>";
 				echo "<input type='text' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
 				echo "</td><td></td><td></td></tr>";
 			}
-
 
 			$query = "	SELECT tunnus, selite, merahti
 						FROM toimitustapa
@@ -1209,7 +1215,14 @@
 
 				echo "</option>";
 			}
-			echo "</select></td>";
+			echo "</select>";
+
+			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
+			}
+
+			echo "</td>";
 
 			//yhtiˆn oletusalvi!
 			$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
@@ -1930,7 +1943,15 @@
 			echo "</select></td>";
 
 			echo "<td>",t("Rahtivapaa"),":</td>";
-			echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk  {$state_chk}></td>";
+			echo "<td>";
+			echo "<input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk {$state_chk}>";
+
+			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='rahtivapaa' value='$srow[rahtivapaa]'>";
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			if ($yhtiorow['laskutuskielto'] != 0) {

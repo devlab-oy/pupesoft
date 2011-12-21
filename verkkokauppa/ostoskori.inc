@@ -28,7 +28,7 @@ if (!function_exists("check_ostoskori")) {
 
 		$query = "LOCK TABLE lasku WRITE, avainsana READ";
 		$koriresult = mysql_query($query) or pupe_error($query);
-		
+
 		// kaikki ok, etsit‰‰n kori
 		$query = "	SELECT *
 					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)

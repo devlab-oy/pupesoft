@@ -42,7 +42,7 @@
 						width: 800, height: 320,
 						title: 'Keräilyn kuormitus lähdön ajan mukaan',
 						hAxis: {title: 'Klo', titleTextStyle: {color: 'black'}},
-						vAxis: {title: 'Rivit', titleTextStyle: {color: 'black'}},
+						vAxis: {title: $('#chart_div_volume').html(), titleTextStyle: {color: 'black'}},
 						isStacked: true,
 						backgroundColor: '#DDD',
 						tooltip: {
@@ -319,6 +319,7 @@
 			}
 
 			echo "<div id='chart_div_values' style='display:none;'>",json_encode($data),"</div>";
+			echo "<div id='chart_div_volume' style='display:none;'>",ucwords($volyymisuure),"</div>";
 		}
 		else {
 			echo "<font class='error'>",t("Tarkista valinnat"),"!</font>";

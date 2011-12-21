@@ -108,6 +108,7 @@
 	echo "<td>";
 
 	echo "<select class='tyojono_sort'>";
+	echo "<option value=''>".t('Ei valintaa')."</option>";
 	echo "<option value='-'>".t('Ei työjonossa')."</option>";
 
 	// Haetaan tyojono avainsanat
@@ -117,6 +118,7 @@
 	}
 	echo "</select>";
 	echo "<select class='tyostatus_sort'>";
+	echo "<option value=''>".t('Ei valintaa')."</option>";
 	echo "<option value='-'>".t('Ei statusta')."</option>";
 
 	// Haetaan tyostatus avainsanat
@@ -416,7 +418,7 @@
 
 				// Haetaan tyojonot
 				echo "<select name='tyojono_muutos' onchange='submit();'>";
-				echo "<option value=''>Ei jonoa</option>";
+				echo "<option value=''>Ei työjonossa</option>";
 				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";

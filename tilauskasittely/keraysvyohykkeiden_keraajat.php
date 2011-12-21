@@ -19,8 +19,6 @@
 					data.addColumn('number', 'Aloittamatta');
 					data.addColumn('number', 'Siirretty');
 
-					var div_values = $('#chart_div_values').html();
-
 					// data.addRows([
 					// 	['08.00', 36, 0, 0, 0],
 					// 	['09.00', 119, 0, 0, 0],
@@ -36,13 +34,20 @@
 					// 	['19.00', 398, 194, 299, 0]
 					// ]);
 
-					data.addRows(jQuery.parseJSON(div_values));
+					data.addRows(jQuery.parseJSON($('#chart_div_values').html()));
 
 					var options = {
-						width: 800, height: 320,
-						title: 'Keräilyn kuormitus lähdön ajan mukaan',
-						hAxis: {title: 'Klo', titleTextStyle: {color: 'black'}},
-						vAxis: {title: $('#chart_div_volume').html(), titleTextStyle: {color: 'black'}},
+						width: 800, 
+						height: 320,
+						title: '",t("Keräilyn kuormitus lähdön ajan mukaan"),"',
+						hAxis: {
+							title: '",t("Klo"),"', 
+							titleTextStyle: {color: 'black'}
+						},
+						vAxis: {
+							title: $('#chart_div_volume').html(), 
+							titleTextStyle: {color: 'black'}
+						},
 						isStacked: true,
 						backgroundColor: '#DDD',
 						tooltip: {
@@ -110,11 +115,7 @@
 
 	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
 
-	if (!isset($varasto)) $varasto = array();
-	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
-	if (!isset($toimitustapa)) $toimitustapa = array();
-	if (!isset($prioriteetit)) $prioriteetit = array();
-	if (!isset($tilat)) $tilat = array();
+	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'kerayksessa' => ' checked', 'keratty' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 
 	echo "<form method='post' action=''>";
@@ -140,12 +141,21 @@
 				ORDER BY 1";
 	$res = pupe_query($query);
 
+	echo "<input type='hidden' name='varasto[]' value='default' />";
+
 	while ($varastorow = mysql_fetch_assoc($res)) {
 
-		$chk = in_array($varastorow['var_tunnus'], $varasto) ? " checked" : "";
+		if (!isset($varasto)) {
+			$chk = " checked";
+		}
+		else {
+			$chk = in_array($varastorow['var_tunnus'], $varasto) ? " checked" : "";
+		}
 
 		echo "<input type='checkbox' name='varasto[]' value='{$varastorow['var_tunnus']}'{$chk} />&nbsp;{$varastorow['var_nimitys']}<br />";
 	}
+
+	if (!isset($varasto)) $varasto = array();
 
 	echo "</td>";
 
@@ -159,12 +169,21 @@
 				ORDER BY 1";
 	$res = pupe_query($query);
 
+	echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+
 	while ($keraysvyohykerow = mysql_fetch_assoc($res)) {
 
-		$chk = in_array($keraysvyohykerow['ker_tunnus'], $keraysvyohyke) ? " checked" : "";
+		if (!isset($keraysvyohyke)) {
+			$chk = " checked";
+		}
+		else {
+			$chk = in_array($keraysvyohykerow['ker_tunnus'], $keraysvyohyke) ? " checked" : "";
+		}
 
 		echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohykerow['ker_tunnus']}'{$chk} />&nbsp;{$keraysvyohykerow['ker_nimitys']}<br />";
 	}
+
+	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 
 	echo "</td>";
 
@@ -178,12 +197,21 @@
 				ORDER BY 1";
 	$res = pupe_query($query);
 
+	echo "<input type='hidden' name='toimitustapa[]' value='default' />";
+
 	while ($toimitustaparow = mysql_fetch_assoc($res)) {
 
-		$chk = in_array($toimitustaparow['tt_tunnus'], $toimitustapa) ? " checked" : "";
+		if (!isset($toimitustapa)) {
+			$chk = " checked";
+		}
+		else {
+			$chk = in_array($toimitustaparow['tt_tunnus'], $toimitustapa) ? " checked" : "";
+		}
 
 		echo "<input type='checkbox' name='toimitustapa[]' value='{$toimitustaparow['tt_tunnus']}'{$chk} />&nbsp;{$toimitustaparow['toimitustapa']}<br />";
 	}
+
+	if (!isset($toimitustapa)) $toimitustapa = array();
 
 	echo "</td>";
 
@@ -196,12 +224,21 @@
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
 	$res = pupe_query($query);
 
+	echo "<input type='hidden' name='prioriteetit[]' value='default' />";
+
 	while ($priorow = mysql_fetch_assoc($res)) {
 
-		$chk = in_array($priorow['prioriteettinro'], $prioriteetit) ? " checked" : "";
+		if (!isset($prioriteetit)) {
+			$chk = " checked";
+		}
+		else {
+			$chk = in_array($priorow['prioriteettinro'], $prioriteetit) ? " checked" : "";
+		}
 
 		echo "<input type='checkbox' name='prioriteetit[]' value='{$priorow['prioriteettinro']}'{$chk} />&nbsp;{$priorow['prioriteettinro']}<br />";
 	}
+
+	if (!isset($prioriteetit)) $prioriteetit = array();
 
 	echo "</td>";
 
@@ -231,7 +268,7 @@
 
 	if (isset($submit_form)) {
 
-		if ($volyymisuure != '' and count($tilat) > 0 and (count($varasto) > 0 or count($keraysvyohyke) > 0 or count($toimitustapa) > 0 or count($prioriteetit) > 0 )) {
+		if ($volyymisuure != '' and count($tilat) > 0 and (count($varasto) > 1 or count($keraysvyohyke) > 1 or count($toimitustapa) > 0 or count($prioriteetit) > 0 )) {
 
 			$selectlisa = $volyymisuure == 'kg' ? " ROUND(tilausrivi.varattu * tuote.tuotemassa, 0)" : ($volyymisuure == 'litrat' ? " ROUND(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)" : " 1");
 
@@ -267,6 +304,11 @@
 
 				$select_keratty = ", IF(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'), {$selectlisa}, 0) AS 'keratty'";
 			}
+
+			array_shift($varasto);
+			array_shift($keraysvyohyke);
+			array_shift($toimitustapa);
+			array_shift($prioriteetit);
 
 			$varastolisa = count($varasto) > 0 ? " AND lasku.varasto IN (".implode(",", $varasto).") " : "";
 			$keraysvyohykelisa = count($keraysvyohyke) > 0 ? " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke AND keraysvyohyke.varasto = lasku.varasto) " : "";

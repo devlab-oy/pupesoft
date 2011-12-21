@@ -24,6 +24,9 @@
 					tuote.epakurantti50pvm,
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
+					tuote.kustp,
+					tuote.kohde,
+					tuote.projekti,
 					round(if (tuote.epakurantti100pvm = '0000-00-00',
 							if (tuote.epakurantti75pvm = '0000-00-00',
 								if (tuote.epakurantti50pvm = '0000-00-00',
@@ -40,7 +43,7 @@
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					AND tuote.tuoteno = '$tuoteno'
-					GROUP by 1,2,3,4,5,6,7,8";
+					GROUP by 1,2,3,4,5,6,7,8,9,10,11";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -131,8 +134,7 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.uusiotunnus
 						AND lasku.tila = 'K'
-						AND lasku.alatila = ''
-						AND lasku.kohdistettu != 'X')
+						AND lasku.alatila != 'X')
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoterow[tuoteno]'
 					and varattu = 0
@@ -202,7 +204,7 @@
 			$lisa25 = " epakurantti25pvm = now(), ";
 		}
 
-		 ///* P‰ivitet‰‰n tuote kurantiksi *///
+		///* P‰ivitet‰‰n tuote kurantiksi *///
 		if ($tee == 'pois' or $tee == "peru") {
 			$query = "	UPDATE tuote SET
 						epakurantti25pvm = '0000-00-00',
@@ -284,8 +286,8 @@
 					tuoteno 	= '$tuoterow[tuoteno]',
 					laji    	= 'Ep‰kurantti',
 					kpl     	= '$tuotteen_saldo',
-					hinta   	= round('$keskihankintahinta_muutos', 6),
-					kplhinta	= round('$keskihankintahinta_muutos', 6),
+					hinta   	= round($keskihankintahinta_muutos, 6),
+					kplhinta	= round($keskihankintahinta_muutos, 6),
 					selite  	= '$epakurantti_selite',
 					laatija    	= '$kukarow[kuka]',
 					laadittu 	= now()";
@@ -317,8 +319,13 @@
 				$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 			}
 
+			// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+			$kustp_ins 		= $tuoterow["kustp"];
+			$kohde_ins 		= $tuoterow["kohde"];
+			$projekti_ins 	= $tuoterow["projekti"];
+
 			// Tiliˆid‰‰n ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
 
 			// Toissijaisesti kokeillaan viel‰ varasto-tilin oletuskustannuspaikkaa
 			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);

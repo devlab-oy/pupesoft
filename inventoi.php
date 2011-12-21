@@ -703,7 +703,7 @@
 											summa    = '$summa',
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi: $selite',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
@@ -719,7 +719,7 @@
 											summa    = $summa * -1,
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi: $selite',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);

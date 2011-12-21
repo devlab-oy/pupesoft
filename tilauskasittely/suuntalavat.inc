@@ -115,9 +115,16 @@
 						AND tunnus = '{$suuntalavan_tunnus}'";
 			$tila_res = mysql_query($query) or pupe_error($query);
 		}
+		
+		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
+			$tee = 'EIHALUTANAYTTAAMITAAN';
+			$suuntalavan_tunnus = '';
+		}
+		else {
+			$tee = '';
+			$suuntalavan_tunnus = '';	
+		}
 
-		$tee = '';
-		$suuntalavan_tunnus = '';
 	}
 
 	if ($tee == 'purettu') {
@@ -327,7 +334,7 @@
 		}
 		
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
-			$tee = "eihalutamitäänkäyttöliittymääpliis";
+			$tee = "eihalutamitankayttoliittymaapliis";
 		}
 		
 	}

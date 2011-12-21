@@ -5,7 +5,7 @@
 		function asn_kohdistus() {
 
 			global $yhtiorow, $kukarow;
-
+						
 			// M‰‰ritell‰‰n k‰ytett‰v‰t muuttujat
 			unset($edellinen_toimittaja);
 			unset($edellinen_asn_numero);
@@ -81,7 +81,8 @@
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
-								varattu = '$row[kappalemaara]'
+								varattu = '$row[kappalemaara]', 
+								tilkpl	= '$row[kappalemaara]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$tilausrivirow[tunnus]'";
 					$upres = pupe_query($query);
@@ -95,25 +96,25 @@
 
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
-								yhtio = '$tilausrivirow[yhtio]',
-								tyyppi = '$tilausrivirow[tyyppi]',
-								toimaika = '$tilausrivirow[toimaika]',
-								kerayspvm = '$tilausrivirow[kerayspvm]',
-								otunnus = '$tilausrivirow[otunnus]',
-								tuoteno = '$tilausrivirow[tuoteno]',
-								try = '$tilausrivirow[try]',
-								osasto = '$tilausrivirow[osasto]',
-								nimitys = '$tilausrivirow[nimitys]',
-								yksikko = '$tilausrivirow[yksikko]',
-								tilkpl = '$tilausrivirow[tilkpl]',
-								varattu = '$kappaleerotus',
-								hinta = '$tilausrivirow[hinta]',
-								laatija = '$tilausrivirow[laatija]',
-								laadittu = '$tilausrivirow[laadittu]',
-								hyllyalue = '$tilausrivirow[hyllyalue]',
-								hyllynro = '$tilausrivirow[hyllynro]',
-								hyllytaso = '$tilausrivirow[hyllytaso]',
-								hyllyvali = '$tilausrivirow[hyllyvali]',
+								yhtio			= '$tilausrivirow[yhtio]',
+								tyyppi			= '$tilausrivirow[tyyppi]',
+								toimaika		= '$tilausrivirow[toimaika]',
+								kerayspvm		= '$tilausrivirow[kerayspvm]',
+								otunnus			= '$tilausrivirow[otunnus]',
+								tuoteno			= '$tilausrivirow[tuoteno]',
+								try				= '$tilausrivirow[try]',
+								osasto			= '$tilausrivirow[osasto]',
+								nimitys			= '$tilausrivirow[nimitys]',
+								yksikko			= '$tilausrivirow[yksikko]',
+								tilkpl			= '$kappaleerotus',
+								varattu			= '$kappaleerotus',
+								hinta			= '$tilausrivirow[hinta]',
+								laatija			= '$tilausrivirow[laatija]',
+								laadittu		= '$tilausrivirow[laadittu]',
+								hyllyalue		= '$tilausrivirow[hyllyalue]',
+								hyllynro		= '$tilausrivirow[hyllynro]',
+								hyllytaso		= '$tilausrivirow[hyllytaso]',
+								hyllyvali		= '$tilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
 					$inskres = pupe_query($query);
 				}
@@ -282,6 +283,14 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
+				
+				
+				// Laitetaan suuntalava siirtovalmiiksi.				
+				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;
+				$tee = "siirtovalmis";
+				$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+				require ("tilauskasittely/suuntalavat.inc");
+		
 			}
 
 		}

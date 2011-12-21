@@ -111,8 +111,14 @@
 
 	// postiennakko
 	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
-		$postiennakkomaara  = "$yhteensa $yhtiorow[valkoodi]";
-		$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
+		if ($yhtiorow["pankkiiban1"] != '') {
+			$postiennakkotilino = "$yhtiorow[pankkiiban1]";
+		}
+		else {		
+			$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		}
+		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
 		$postiennakkoviite  = "$viite";
 	}
 	else {

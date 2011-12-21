@@ -10,8 +10,6 @@
 
 				google.load('visualization', '1', {packages:['corechart']});
 
-				google.setOnLoadCallback(drawChart);
-
 				function drawChart() {
 					var data = new google.visualization.DataTable();
 
@@ -21,20 +19,24 @@
 					data.addColumn('number', 'Aloittamatta');
 					data.addColumn('number', 'Siirretty');
 
-					data.addRows([
-						['08.00', 36, 0, 0, 0],
-						['09.00', 119, 0, 0, 0],
-						['10.00', 122, 0, 0, 0],
-						['11.00', 53, 0, 0, 0],
-						['12.00', 295, 0, 0, 0],
-						['13.00', 31, 0, 0, 0],
-						['14.00', 160, 0, 0, 0],
-						['15.00', 7, 0, 0, 0],
-						['16.00', 617, 190, 0, 30],
-						['17.00', 289, 95, 6, 0],
-						['18.00', 455, 118, 109, 0],
-						['19.00', 398, 194, 299, 0]
-					]);
+					var div_values = $('#chart_div_values').html();
+
+					// data.addRows([
+					// 	['08.00', 36, 0, 0, 0],
+					// 	['09.00', 119, 0, 0, 0],
+					// 	['10.00', 122, 0, 0, 0],
+					// 	['11.00', 53, 0, 0, 0],
+					// 	['12.00', 295, 0, 0, 0],
+					// 	['13.00', 31, 0, 0, 0],
+					// 	['14.00', 160, 0, 0, 0],
+					// 	['15.00', 7, 0, 0, 0],
+					// 	['16.00', 617, 190, 0, 30],
+					// 	['17.00', 289, 95, 6, 0],
+					// 	['18.00', 455, 118, 109, 0],
+					// 	['19.00', 398, 194, 299, 0]
+					// ]);
+
+					data.addRows(jQuery.parseJSON(div_values));
 
 					var options = {
 						width: 800, height: 320,
@@ -72,6 +74,10 @@
 
 				$(document).ready(function() {
 
+					if ($('#chart_div_values').html() != undefined) {
+						google.setOnLoadCallback(drawChart);
+					} 
+
 					$('th.keraysvyohyke').click(function() {
 						var id = $(this).attr('id');
 
@@ -108,7 +114,7 @@
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 	if (!isset($toimitustapa)) $toimitustapa = array();
 	if (!isset($prioriteetit)) $prioriteetit = array();
-	if (!isset($tilat)) $tilat = array('aloittamatta' => '', 'kerayksessa' => '', 'keratty' => '');
+	if (!isset($tilat)) $tilat = array();
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 
 	echo "<form method='post' action=''>";
@@ -204,11 +210,7 @@
 
 	echo "<td>";
 
-	$chk = array();
-
-	array_walk($tilat, function($checked, $name) use (&$chk) {
-		$chk[$name] = $checked != '' ? " checked" : "";
-	});
+	$chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'kerayksessa' => '', 'keratty' => '');
 
 	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> Aloittamatta<br />";
 	echo "<input type='checkbox' name='tilat[kerayksessa]'{$chk['kerayksessa']} /> Keräyksessä<br />";
@@ -225,10 +227,103 @@
 
 	echo "</tr>";
 
-	echo "<tr><td class='back' colspan='6'><input type='submit' value='Näytä' /></td></tr>";
+	echo "<tr><td class='back' colspan='6'><input type='submit' name='submit_form' value='",t("Näytä"),"' /></td></tr>";
 
 	echo "</table>";
 	echo "</form>";
+
+	if (isset($submit_form)) {
+
+		if ($volyymisuure != '' and count($tilat) > 0 and (count($varasto) > 0 or count($keraysvyohyke) > 0 or count($toimitustapa) > 0 or count($prioriteetit) > 0 )) {
+
+			$selectlisa = $volyymisuure == 'kg' ? " ROUND(tilausrivi.varattu * tuote.tuotemassa, 0)" : ($volyymisuure == 'litrat' ? " ROUND(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)" : " 1");
+
+			$select_aloittamatta = ", 0 AS 'aloittamatta'";
+			$select_kerayksessa = ", 0 AS 'kerayksessa'";
+			$select_keratty = ", 0 AS 'keratty'";
+
+			$tilalisa = "";
+
+			if (isset($tilat['aloittamatta'])) {
+				$tilalisa = "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+				$select_aloittamatta = ", IF(lasku.tila = 'N' AND lasku.alatila = 'A', {$selectlisa}, 0) AS 'aloittamatta'";
+			}
+
+			if (isset($tilat['kerayksessa'])) {
+
+				if ($tilalisa != "") {
+					$tilalisa .= " OR ";
+				}
+
+				$tilalisa .= "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+
+				$select_kerayksessa = ", IF(lasku.tila = 'L' AND lasku.alatila = 'A', {$selectlisa}, 0) AS 'kerayksessa'";
+			}
+
+			if (isset($tilat['keratty'])) {
+
+				if ($tilalisa != "") {
+					$tilalisa .= " OR ";
+				}
+
+				$tilalisa .= "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+
+				$select_keratty = ", IF(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'), {$selectlisa}, 0) AS 'keratty'";
+			}
+
+			$varastolisa = count($varasto) > 0 ? " AND lasku.varasto IN (".implode(",", $varasto).") " : "";
+			$keraysvyohykelisa = count($keraysvyohyke) > 0 ? " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke AND keraysvyohyke.varasto = lasku.varasto) " : "";
+			$vhlisa = $keraysvyohykelisa != "" ? " AND vh.keraysvyohyke IN (".implode(",", $keraysvyohyke).") " : "";
+			$toimitustapalisa = count($toimitustapa) > 0 ? " JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K' AND toimitustapa.tunnus IN (".implode(",", $toimitustapa).")) " : "";
+			$prioriteettilisa = count($prioriteetit) > 0 ? " AND lasku.prioriteettinro IN (".implode(",", $prioriteetit).") " : "";
+
+			$query = "	SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo'
+						{$select_aloittamatta}
+						{$select_kerayksessa}
+						{$select_keratty}
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso {$vhlisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+						{$keraysvyohykelisa}
+						{$toimitustapalisa}
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						{$varastolisa}
+						{$prioriteettilisa}
+						AND ({$tilalisa})
+						ORDER BY 1";
+			$res = pupe_query($query);
+
+			$data = array();
+
+			$arr = array();
+
+			while ($row = mysql_fetch_assoc($res)) {
+
+				if (!isset($arr[$row['klo']]['aloittamatta'])) $arr[$row['klo']]['aloittamatta'] = 0;
+				if (!isset($arr[$row['klo']]['keratty'])) $arr[$row['klo']]['keratty'] = 0;
+				if (!isset($arr[$row['klo']]['kerayksessa'])) $arr[$row['klo']]['kerayksessa'] = 0;
+
+				$arr[$row['klo']]['aloittamatta'] += $row['aloittamatta'];
+				$arr[$row['klo']]['keratty'] += $row['keratty'];
+				$arr[$row['klo']]['kerayksessa'] += $row['kerayksessa'];
+			}
+
+			if (count($arr) > 0) {
+
+				foreach ($arr as $klo => $summat) {
+					$data[] = array($klo, $summat['keratty'], $summat['kerayksessa'], $summat['aloittamatta'], 0);
+				}
+
+			}
+
+			echo "<div id='chart_div_values' style='display:none;'>",json_encode($data),"</div>";
+		}
+		else {
+			echo "<font class='error'>",t("Tarkista valinnat"),"!</font>";
+		}
+	}
 
 	echo "<br /><br />";
 

@@ -192,6 +192,7 @@
 	$query = "	SELECT DISTINCT lasku.prioriteettinro
 				FROM lasku
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.prioriteettinro != 0
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
 	$res = pupe_query($query);
 
@@ -285,6 +286,7 @@
 						{$keraysvyohykelisa}
 						{$toimitustapalisa}
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.prioriteettinro != 0
 						{$varastolisa}
 						{$prioriteettilisa}
 						AND ({$tilalisa})

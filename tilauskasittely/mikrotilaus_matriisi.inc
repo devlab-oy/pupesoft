@@ -193,7 +193,6 @@
 								$rivitunnus			= "";
 								$korvaavakielto		= "";
 								$varataan_saldoa	= "";
-								$var				= "";
 								$perhekielto		= "";
 								$jtkielto 		 	= $laskurow['jtkielto'];
 

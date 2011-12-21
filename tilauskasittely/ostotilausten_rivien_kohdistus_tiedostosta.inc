@@ -210,7 +210,7 @@ if ($faarao == 'TUTKHM') {
 								}
 
 								$netto				= $rivirow["netto"];
-								$var 				= $hyvaksy."#".$rivirow['varattu'];
+								$var 				= $hyvaksy."#!¡!#".$rivirow['varattu'];
 								$kukarow["kesken"]	= $rivirow["otunnus"];
 								$laskurow["tila"] 	= "O";
 								$alv				= $rivirow["alv"];

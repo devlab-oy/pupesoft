@@ -158,7 +158,7 @@
 
 				<table>
 				<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#-eroteltu)")."</td></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#!°!#-eroteltu)")."</td></tr>
 				</table>
 
 				<br>

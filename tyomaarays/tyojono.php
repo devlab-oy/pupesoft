@@ -32,6 +32,8 @@
 		$tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
 		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
 
+		if ($tyostatus_muutos == "EISTATUSTA") $tyostatus_muutos = "";
+
 		$query = "	UPDATE tyomaarays SET
 					tyostatus = '$tyostatus_muutos'
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -43,6 +45,8 @@
 	if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
 		$tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
 		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
+
+		if ($tyojono_muutos == "EIJONOA") $tyojono_muutos = "";
 
 		$query = "	UPDATE tyomaarays SET
 					tyojono = '$tyojono_muutos'
@@ -92,7 +96,7 @@
 	// Haetaan prioriteetti avainsanat
 	echo "<td><input type='hidden'	size='10' class='search_field' name='search_prioriteetti_haku'>";
 	echo "<select class='prioriteetti_sort'>";
-	echo "<option value=''>".t('Ei valintaa')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
 
 	$prioriteetti_result = t_avainsana("TYOM_PRIORIT");
 	while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
@@ -108,8 +112,8 @@
 	echo "<td>";
 
 	echo "<select class='tyojono_sort'>";
-	echo "<option value=''>".t('Ei valintaa')."</option>";
-	echo "<option value='-'>".t('Ei työjonossa')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
+	echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
 
 	// Haetaan tyojono avainsanat
 	$tyojono_result = t_avainsana("TYOM_TYOJONO");
@@ -118,8 +122,8 @@
 	}
 	echo "</select>";
 	echo "<select class='tyostatus_sort'>";
-	echo "<option value=''>".t('Ei valintaa')."</option>";
-	echo "<option value='-'>".t('Ei statusta')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
+	echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
 
 	// Haetaan tyostatus avainsanat
 	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
@@ -418,7 +422,8 @@
 
 				// Haetaan tyojonot
 				echo "<select name='tyojono_muutos' onchange='submit();'>";
-				echo "<option value=''>Ei työjonossa</option>";
+				echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
+
 				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
@@ -427,7 +432,8 @@
 
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
-				echo "<option value=''>Ei statusta</option>";
+				echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
+
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
@@ -454,6 +460,14 @@
 		}
 
 		echo "<td valign='top'>$muoklinkki</td>";
+
+		if ($vrow["tyojono"] == "") {
+			$vrow["tyojono"] = "EIJONOA";
+		}
+		if ($vrow["tyostatus"] == "") {
+			$vrow["tyostatus"] = "EISTATUSTA";
+		}
+
 		echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
 		echo "</tr>";
 	}

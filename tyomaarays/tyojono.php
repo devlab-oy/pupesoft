@@ -120,7 +120,7 @@
 	while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 		echo "<option value='$tyojono_row[selitetark]'>$tyojono_row[selitetark]</option>";
 	}
-	echo "</select>";
+	echo "</select><br>";
 	echo "<select class='tyostatus_sort'>";
 	echo "<option value=''>".t('Ei rajausta')."</option>";
 	echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
@@ -428,7 +428,7 @@
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
 				}
-				echo "</select>";
+				echo "</select><br>";
 
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";

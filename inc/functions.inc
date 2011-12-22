@@ -11127,12 +11127,12 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\") {
 								var saatavaty = new Array();
-								var sarakemaara = parametrit[tableid][0]-2;
+								var sarakemaara = parametrit[tableid][0]-1;
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
 
-									for (var j=2; j<=sarakemaara; j++) {
+									for (var j=1; j<=sarakemaara; j++) {
 										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
 										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
 									}
@@ -11145,7 +11145,7 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								);
 
-								for (var j=2; j<=sarakemaara; j++) {
+								for (var j=1; j<=sarakemaara; j++) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}
@@ -11763,19 +11763,9 @@ if (!function_exists("pupe_DataTables")) {
 					var hakuarvo;
 
 					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+					haku_arvo = tyojono.val() +' '+ tyostatus.val();
 
-					if (tyojono.val() == '-') {
-						haku_arvo = tyostatus.text();
-					}
-					if (tyostatus.val() == '-') {
-						haku_arvo = tyojono.text();
-					}
-					if(tyojono.val() == '-' && tyostatus.val() == '-') {
-						haku_arvo = '';
-					}
-
-					datatablesit[0].fnFilter(haku_arvo, 8);
+					datatablesit[0].fnFilter(haku_arvo, 8, true, false);
 				} );
 			} );
 		</script>";

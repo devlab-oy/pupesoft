@@ -1746,14 +1746,7 @@
 							// haetaan asiakkaan tietojen takaa sorttaustiedot
 							$order_sorttaus = '';
 
-							$asiakas_apu_query = "  SELECT laskun_jarjestys, laskun_jarjestys_suunta, laskutyyppi
-													FROM asiakas
-													WHERE yhtio = '$kukarow[yhtio]'
-													and tunnus = '$lasrow[liitostunnus]'";
-							$asiakas_apu_res = pupe_query($asiakas_apu_query);
-
 							if (mysql_num_rows($asiakas_apu_res) == 1) {
-								$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 								$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
 								$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
 							}
@@ -1777,7 +1770,7 @@
 
 							// Haetaan laskun kaikki rivit
 							$query = "  SELECT
-										if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
+										if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
 										tilausrivi.ale1,
 										tilausrivi.ale2,
 										tilausrivi.ale3,
@@ -1813,6 +1806,7 @@
 										sum(tilausrivi.tilkpl) tilkpl,
 										sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
 										group_concat(tilausrivi.tunnus) rivitunnukset,
+										group_concat(distinct tilausrivi.perheid) perheideet,
 										count(*) rivigroup_maara,
 										sum(tilausrivi.rivihinta) rivihinta,
 										sum(tilausrivi.kpl) kpl,
@@ -1836,6 +1830,40 @@
 
 							while ($tilrow = mysql_fetch_assoc($tilres)) {
 
+								// Näytetään vain perheen isä ja summataan lasten hinnat isäriville
+								if ($laskutyyppi == 2) {
+									if ($tilrow["perheid"] > 0) {
+										// kyseessä on isä
+										if ($tilrow["perheid"] == $tilrow["tunnus"]) {
+											// lasketaan isätuotteen riville lapsien hinnat yhteen
+											$query = "	SELECT
+														sum(tilausrivi.rivihinta) rivihinta,
+														round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta
+														FROM tilausrivi
+														WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+														and tilausrivi.uusiotunnus 	= '$tilrow[uusiotunnus]'
+														and tilausrivi.perheid 		in ($tilrow[perheideet])
+														and tilausrivi.perheid 		> 0";
+											$riresult = pupe_query($query);
+											$perherow = mysql_fetch_assoc($riresult);
+
+											$tilrow["hinta"] 		= $perherow["hinta"];
+											$tilrow["rivihinta"] 	= $perherow["rivihinta"];
+
+											// Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
+											for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+												$tilrow["ale{$alepostfix}"] = "";
+											}
+
+											$tilrow["erikoisale"] = "";
+										}
+										else {
+											// lapsia ei lisätä
+											$lisataa = 1;
+										}
+									}
+								}
+
 								if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
 									//Käännetään nimitys
 									$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
@@ -1852,13 +1880,14 @@
 									$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 								}
 
-								if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+								if ($tilrow["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 									$rivigrouppaus = TRUE;
 								}
 
 								// Otetaan yhteensäkommentti pois jos summataan rivejä
 								if ($rivigrouppaus) {
 									$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+									$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 									$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 									$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 								}

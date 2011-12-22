@@ -245,7 +245,7 @@
 				}
 			}
 			else {
-				$masrow = mysql_fetch_array($result);
+				$masrow = mysql_fetch_assoc($result);
 			}
 
 			//Haetaan factoringsopimuksen tiedot
@@ -256,7 +256,7 @@
 							and factoringyhtio 	= '$masrow[factoring]'
 							and valkoodi 		= '$lasrow[valkoodi]'";
 				$fres = mysql_query($query) or pupe_error($query);
-				$frow = mysql_fetch_array($fres);
+				$frow = mysql_fetch_assoc($fres);
 			}
 			else {
 				unset($frow);
@@ -316,7 +316,7 @@
 			$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 			if (mysql_num_rows($asiakas_apu_res) == 1) {
-				$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+				$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 			}
 			else {
 				$asiakas_apu_row = array();
@@ -352,7 +352,7 @@
 							FROM kuka
 							WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 				$myyresult = mysql_query($mquery) or pupe_error($mquery);
-				$myyrow = mysql_fetch_array($myyresult);
+				$myyrow = mysql_fetch_assoc($myyresult);
 
 				//HUOM: Tässä kaikki sallitut verkkopuolen chn:ät
 				if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
@@ -439,7 +439,7 @@
 							and uusiotunnus = '$lasrow[tunnus]'
 							and toimitettuaika != '0000-00-00 00:00:00'";
 				$toimaikares = mysql_query($query) or pupe_error($query);
-				$toimaikarow = mysql_fetch_array($toimaikares);
+				$toimaikarow = mysql_fetch_assoc($toimaikares);
 
 				if ($toimaikarow["mint"] == "0000-00-00") {
 					$toimaikarow["mint"] = date("Y-m-d");
@@ -474,7 +474,7 @@
 								ORDER BY alv";
 				$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
-				while ($alvrow1 = mysql_fetch_array($alvresult)) {
+				while ($alvrow1 = mysql_fetch_assoc($alvresult)) {
 
 					if ($alvrow1["alv"] >= 500) {
 						$aquery = "	SELECT '0' alv,
@@ -495,7 +495,7 @@
 									GROUP BY alv";
 					}
 					$aresult = mysql_query($aquery) or pupe_error($aquery);
-					$alvrow = mysql_fetch_array($aresult);
+					$alvrow = mysql_fetch_assoc($aresult);
 
 					// Kirjotetaan failiin arvierittelyt
 					if ($lasrow["chn"] == "111") {
@@ -527,14 +527,7 @@
 				// haetaan asiakkaan tietojen takaa sorttaustiedot
 				$order_sorttaus = '';
 
-				$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta, laskutyyppi
-										FROM asiakas
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tunnus = '$lasrow[liitostunnus]'";
-				$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
 				if (mysql_num_rows($asiakas_apu_res) == 1) {
-					$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
 					$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
 					$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
 				}
@@ -558,7 +551,7 @@
 
 				// Haetaan laskun kaikki rivit
 				$query = "  SELECT
-							if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
+							if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
 							tilausrivi.ale1,
 							tilausrivi.ale2,
 							tilausrivi.ale3,
@@ -594,6 +587,7 @@
 							sum(tilausrivi.tilkpl) tilkpl,
 							sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
 							group_concat(tilausrivi.tunnus) rivitunnukset,
+							group_concat(distinct tilausrivi.perheid) perheideet,
 							count(*) rivigroup_maara,
 							sum(tilausrivi.rivihinta) rivihinta,
 							sum(tilausrivi.kpl) kpl,
@@ -615,7 +609,42 @@
 				$rivimaara   = mysql_num_rows($tilres);
 				$rivigrouppaus 	= FALSE;
 
-				while ($tilrow = mysql_fetch_array($tilres)) {
+				while ($tilrow = mysql_fetch_assoc($tilres)) {
+
+					// Näytetään vain perheen isä ja summataan lasten hinnat isäriville
+					if ($laskutyyppi == 2) {
+						if ($tilrow["perheid"] > 0) {
+							// kyseessä on isä
+							if ($tilrow["perheid"] == $tilrow["tunnus"]) {
+								// lasketaan isätuotteen riville lapsien hinnat yhteen
+								$query = "	SELECT
+											sum(tilausrivi.rivihinta) rivihinta,
+											round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta
+											FROM tilausrivi
+											WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+											and tilausrivi.uusiotunnus 	= '$tilrow[uusiotunnus]'
+											and tilausrivi.perheid 		in ($tilrow[perheideet])
+											and tilausrivi.perheid 		> 0";
+								$riresult = pupe_query($query);
+								$perherow = mysql_fetch_assoc($riresult);
+
+								$tilrow["hinta"] 		= $perherow["hinta"];
+								$tilrow["rivihinta"] 	= $perherow["rivihinta"];
+
+								// Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									$tilrow["ale{$alepostfix}"] = "";
+								}
+
+								$tilrow["erikoisale"] = "";
+							}
+							else {
+								// lapsia ei lisätä
+								continue;
+							}
+						}
+					}
+
 
 					if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
 						//Käännetään nimitys
@@ -640,6 +669,7 @@
 					// Otetaan yhteensäkommentti pois jos summataan rivejä
 					if ($rivigrouppaus) {
 						$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+						$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 						$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 						$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 					}
@@ -691,7 +721,7 @@
 					if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
 						$tilrow["kommentti"] .= " ";
 					}
-					while ($sarjarow = mysql_fetch_array($sarjares)) {
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 						$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 					}
 

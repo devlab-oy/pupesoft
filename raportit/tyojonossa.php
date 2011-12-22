@@ -84,11 +84,11 @@
 		if ($vaihdajono != $rivit["tyojono1"]) {
 
 			if ($peruste == "tyojono") {
-				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?tyojono_haku={$rivit["tyojono1"]}&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K'>{$rivit["tyojono1"]}</a></td>";
+				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?indexvas=1&tyojono_haku={$rivit["tyojono1"]}&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K'>{$rivit["tyojono1"]}</a></td>";
 			}
 			else {
 				$linkkihaku = urlencode($rivit["tyojono1"]);
-				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?linkkihaku=$linkkihaku&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K''>{$rivit["tyojono1"]}</a></td>";
+				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?indexvas=1&linkkihaku=$linkkihaku&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K''>{$rivit["tyojono1"]}</a></td>";
 			}
 		}
 		else {

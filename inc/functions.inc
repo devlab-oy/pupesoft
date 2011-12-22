@@ -6145,129 +6145,50 @@ if (!function_exists("js_popup")) {
 
 	echo "<script type='text/javascript' language='javascript'>";
 
-	?>
-
-	jQuery.fn.tooltip = function(allowHtml, className){
-		jQuery.fn.tooltip.created.id = 'toolTip';
-		$('body').append(jQuery.fn.tooltip.created);
-
-		var toolTip = $(jQuery.fn.tooltip.created);
-
-	    toolTip.css({'position':'absolute','display':'none'});
-
-	    //functions
-		function getMouseX(e) {
-			var x = null;
-
-			if (e.pageX) 	{
-				x = e.pageX;
+		if (file_exists("inc/jquery.tools.min.js")) {
+			require_once("inc/jquery.tools.min.js");
 			}
-			else if (e.clientX) {
-				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-			}
-			return x;
-		}
-
-		function getMouseY(e) {
-			var y = null;
-
-			if (e.pageY) 	{
-				y = e.pageY;
-			}
-			else if (e.clientY) {
-				y = e.clientY + document.body.scrollTop
-					+ document.documentElement.scrollTop;
+		else {
+			require_once("jquery.tools.min.js");
 			}
 
-			return y;
-		}
+		echo "</script>";
 
-	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
-	    }
+		echo "<script type='text/javascript' language='javascript'>
+			$(document).ready(function() {
+				$('.tooltip').live('mouseover', function() {
 
-	    function toolTipHide() {
-			toolTip.clearQueue();
-			toolTip.hide();
-	    }
+					var pop_id = $(this).attr('id');
 
-	    //events for each element
-	    this.each(function() {
+					console.log(pop_id);
 
-	        $(this).mousemove(function(e){
-				var x = getMouseX(e) + 20;
-				var y = getMouseY(e) + 20;
+					$(this).tooltip({
+						// avattava divi
+						tip: '#div_'+pop_id,
 
-				// get content id from element and fetch text from the div
-				var content_id = $(this).attr('id');
-				var content = $('#div_'+content_id).html();
+						// custom positioning
+						position: 'center right',
 
-				var div_height = $('#div_'+content_id).height();
-				var div_width = $('#div_'+content_id).width();
+						// move tooltip a little bit to the right
+						offset: [0, 15],
 
-				var window_width = $(window).width();
-				var window_height = $(window).height();
+						// there is no delay when the mouse is moved away from the trigger
+						delay: 0,
 
-				var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-				var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+						// Popup divin classi
+						tipClass: 'popup',
 
-				//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-				if (div_height != null && div_width != null && x != null && y != null) {
-					//	Riittääkö leveys
-					if (((x - scrollX) + div_width + 30) > window_width) {
-						//	Siirretään tämä ihan oikeaan laitaan..
-						x = window_width - div_width - 30 + scrollX;
+						// Käytettävä efekti
+						effect: 'fade',
+
+						events: {
+			                def: \"mouseover,mouseleave\",
+							tooltip: \"mouseover,mouseleave\"
 					}
-
-					if ((y - scrollY) + div_height > window_height) {
-						y -= (div_height);
-					}
-
-					//	Oikea laita on kuitenkin aina tärkein!
-					if (x < 10) {
-						x = 10;
-					}
-					if (y < 10) {
-						y = 10;
-					}
-				}
-
-				toolTipShow(e, x, y);
-
-	            //update the content
-	            if (allowHtml) {
-	                toolTip.html(content);
-				}
-	            else {
-	                toolTip.text(content);
-				}
-
-	            //remove all classes for the tipBox before add a new one and to avoid the 'append class'
-	            toolTip.removeClass();
-
-	            //set class if specified
-	            if (className) {
-					toolTip.addClass(className);
-				}
 			});
-
-	        $(this).mouseout(function(){
-	            toolTipHide();
 	        });
 	    });
-	};
-
-	$(function(){
-		//create the element (avoiding create multiple divisions for the tooltip)
-		jQuery.fn.tooltip.created = document.createElement('div');
-
-		$('.tooltip').tooltip('yes', 'popup');
-	});
-
-	<?php
-
-	echo "</script>";
-
+			</script>";
 	}
 }
 
@@ -10863,7 +10784,7 @@ if (!function_exists("laskutuspaiva")) {
 
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
-		global $yhtiorow;
+		global $yhtiorow, $PHP_SELF;
 
 		echo "<script type='text/javascript' language='javascript'>";
 		require_once("inc/jquery.min.js");
@@ -10885,9 +10806,11 @@ if (!function_exists("pupe_DataTables")) {
 			$info 			= isset($param[4]) ? $param[4] : "false";
 			$sorting 		= isset($param[5]) ? $param[5] : "true";
 			$aoColumns 		= "";
+			$serverside		= isset($param[6]) ? $param[6] : "EI";
+
 			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
-			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $serverside);
 		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
@@ -10921,7 +10844,41 @@ if (!function_exists("pupe_DataTables")) {
 						aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false}\";
 					}
 
-					datatablesit[t] = $(this).dataTable( {
+					if (parametrit[tableid][6] == 'YKS') {
+						var ss_params = {	\"bProcessing\": true,
+			        						\"bServerSide\": true,
+			        						\"sAjaxSource\": \"{$PHP_SELF}\",
+											\"fnServerParams\": function ( aoData ) {
+												aoData.push( { \"name\": \"tee\", \"value\": \"AJAX\" } );
+												aoData.push( { \"name\": \"no_head\", \"value\": \"yes\" } );
+												aoData.push( { \"name\": \"ohje\", \"value\": \"off\" } );
+											},
+											\"fnServerData\": function ( sSource, aoData, fnCallback ) {
+																$.ajax( {
+																	\"dataType\": \"json\",
+																	\"type\": \"GET\",
+																	\"url\": sSource,
+																	\"data\": aoData,
+																	\"success\": function (json) {
+
+																					$('#jupster').html('JAAHAS!');
+
+																					fnCallback(json);
+																				}
+																} );
+											}
+										};
+					}
+					else if (parametrit[tableid][6] == 'KAKS') {
+						var ss_params = {	\"bProcessing\": true,
+			        						\"sAjaxSource\": \"arrays.txt\"
+										};
+					}
+					else {
+						var ss_params = {};
+					}
+
+					var dt_params = {
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],
@@ -10931,6 +10888,7 @@ if (!function_exists("pupe_DataTables")) {
 						\"bStateSave\" : true,
 						\"iDisplayLength\" : 25,
 						\"oLanguage\": {
+							\"sProcessing\" : \"".t("Ladataan")."\",
 							\"sSearch\" : \"".t("Etsi taulukosta").":\",
 							\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
 							\"sLengthMenu\": \"",t("Näytä")," _MENU_ ",t("riviä"),"\",
@@ -11175,8 +11133,12 @@ if (!function_exists("pupe_DataTables")) {
 								}
 							}
 						}
+					};
+
+					$.extend(ss_params,dt_params);
+
+					datatablesit[t] = $(this).dataTable(ss_params);
 					} );
-				} );
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if (datatablesit[0].attr(\"id\") == 'keikka') {

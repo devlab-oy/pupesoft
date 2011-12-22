@@ -925,6 +925,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			}
 
 			$laskujen_tiedot = "";
+			$laskujen_class = "";
 
 			if ($llrow["volasku"] != $llrow["volasku_ok"] or $llrow["kulasku"] != $llrow["kulasku_ok"]) {
 				$query = "	SELECT ostores_lasku.*, kuka.nimi kukanimi
@@ -942,11 +943,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 					echo t("Lasku")." $volasrow[nimi] ($volasrow[summa] $volasrow[valkoodi]) ".t("hyväksyttävänä käyttäjällä")." $volasrow[kukanimi]<br>";
 				}
 				echo "</div>";
+
+				$laskujen_class = " class='tooltip'";
 			}
 
 			if ($llrow["volasku"] > 0) {
 				if ($llrow["volasku"] != $llrow["volasku_ok"]) {
-					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font> <img class='tooltip' id='lasku_$row[laskunro]' src='$palvelin2/pics/lullacons/alert.png'>";
+					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font> <img src='$palvelin2/pics/lullacons/alert.png'>";
 				}
 				else {
 					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='ok'>*</font>";
@@ -957,14 +960,14 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			if ($llrow["kulasku"] > 0) {
 				if ($llrow["kulasku"] != $llrow["kulasku_ok"]) {
-					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='error'>*</font> <img class='tooltip' id='lasku_$row[laskunro]' src='$palvelin2/pics/lullacons/alert.png'>";
+					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='error'>*</font> <img src='$palvelin2/pics/lullacons/alert.png'>";
 				}
 				else {
 					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='ok'>*</font>";
 				}
 			}
 
-			echo "<td valign='top'>$laskujen_tiedot</td>";
+			echo "<td valign='top' id='lasku_$row[laskunro]' $laskujen_class>$laskujen_tiedot</td>";
 
 			// jos tätä keikkaa ollaan just viemässä varastoon ei tehdä dropdownia
 			if ($keikkakesken == $row["tunnus"]) {

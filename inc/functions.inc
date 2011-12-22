@@ -2946,6 +2946,32 @@ if (!function_exists("settaa_ale")) {
 	}
 }
 
+if (!function_exists("etayhtio_hinta")) {
+	function etayhtio_hinta ($rivi_tuoteno, $kpl_maara, $laskurow) {
+		// Tarvitaa: rivin tuoteno, laskurow, kpl-m‰‰r‰, eta_yhtio
+		
+		global $yhtiorow, $kukarow;
+		
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+					AND tuoteno = '{$rivi_tuoteno}'";
+		$tres_eta = pupe_query($query);
+		$trow_eta = mysql_fetch_assoc($tres_eta);
+
+		list($lis_hinta_eta, $lis_netto_eta, $lis_eta_ale_kaikki, $alehinta_alv_eta, $alehinta_val_eta) = alehinta($laskurow, $trow_eta, $kpl_maara, '', '', '', '', $GLOBALS['eta_yhtio']);
+
+		$hintapyoristys_echo = $lis_hinta_eta;
+
+		foreach ($lis_eta_ale_kaikki as $val) {
+			$hintapyoristys_echo *= (1 - ($val / 100));
+		}
+		
+		$etayhtion_rivinarvo = 	($hintapyoristys_echo * $kpl_maara);
+		return 	$etayhtion_rivinarvo;
+	}
+}
+
 if (!function_exists("alehinta")) {
 	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
 		global $yhtiorow, $kukarow;

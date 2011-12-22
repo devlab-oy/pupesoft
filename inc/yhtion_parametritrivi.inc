@@ -51,6 +51,9 @@
 		elseif ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
 		}
+		elseif($trow[$i] == 'maventa') {
+			$sel5 = "selected";
+		}
 		else {
 			$sel1 = "selected";
 		}
@@ -59,6 +62,7 @@
 		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
 		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
 		$ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
+		$ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1507,27 +1511,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "epakur_kehahin_paivitys") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($trow[$i] != 'X') {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value='' $sel1>".t("Epäkuranttiuspoisto EI MUUTA kehahintaa.")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Epäkuranttiuspoisto MUUTTAA kehahintaa.")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2894,6 +2877,18 @@
 		$ulos .= "<option value = 'K' $sel>".t("Tarkistetaan tuotteen EAN13-koodin oikeellisuus")."</option>";
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'teeostotilaus_valmistuksen_tulosjonosta') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Valmistusten tulostusjonosta ei luoda ostotilauksia");
+		$ulos .= "<option value = 'K' $sel>".t("Valmistusten tulostusjonosta voi luoda ostotilauksia");
+		$ulos .= "</select></td>";
+		
 		$jatko = 0;
 	}
 

@@ -149,7 +149,7 @@ if (!-f $tmpfile) {
 
 	system("rm -f $tmpfile");
 
-	# siivotaan yli 180 p‰iv‰‰ vanhat aineistot
-	system("find $dirri2 -mtime +180 -delete");
+	# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
+	system("find $dirri2 -mtime +90 -delete");
 
 } # end temp if

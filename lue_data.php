@@ -270,6 +270,11 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
+	// Otetaan tuotteiden oletusalv hanskaan
+	if (in_array("tuote", $taulut)) {
+		$oletus_alvprossa = alv_oletus();
+	}
+
 	// rivim‰‰r‰ exceliss‰
 	$excelrivimaara = count($excelrivit);
 
@@ -1116,12 +1121,18 @@ if ($kasitellaan_tiedosto) {
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
 								$tee = "25paalle";
 							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
+							}
 							elseif ($tee == "") {
 								$tee = "pois";
 							}
 
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
 								$tee = "puolipaalle";
+							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
 							}
 							elseif ($tee == "") {
 								$tee = "pois";
@@ -1130,12 +1141,18 @@ if ($kasitellaan_tiedosto) {
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
 								$tee = "75paalle";
 							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
+							}
 							elseif ($tee == "") {
 								$tee = "pois";
 							}
 
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {
 								$tee = "paalle";
+							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
 							}
 							elseif ($tee == "") {
 								$tee = "pois";
@@ -1383,7 +1400,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//muutetaan rivi‰, silloin ei saa p‰ivitt‰‰ pakollisia kentti‰
-						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
+						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 							///* T‰ss‰ on kaikki oikeellisuuscheckit *///
 							if ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
 								if ($rivi[$r] != 0 and $rivi[$r] != '') {
@@ -1457,7 +1474,7 @@ if ($kasitellaan_tiedosto) {
 					}
 				}
 
-				//tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
+				// tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
 				if ($hylkaa == 0 and ($chasiakas != 0 or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != 0) and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
@@ -1514,6 +1531,11 @@ if ($kasitellaan_tiedosto) {
 
 				if (substr($taulu, 0, 11) == 'puun_alkio_' and $rivi[$postoiminto] != 'POISTA') {
 					$query .= " , laji = '{$table_tarkenne}' ";
+				}
+
+				// lis‰t‰‰n tuote, mutta ei olla speksattu alvia ollenkaan...
+				if ($rivi[$postoiminto] == 'LISAA' and $table_mysql == 'tuote' and stripos($query, ", alv = ") === FALSE) {
+					$query .= ", alv = '$oletus_alvprossa' ";
 				}
 
 				if ($rivi[$postoiminto] == 'MUUTA') {
@@ -1599,7 +1621,6 @@ if ($kasitellaan_tiedosto) {
 							$tassafailissa = TRUE;
 						}
 						else {
-
 							$t[$i] = isset($tarkrow[mysql_field_name($result, $i)]) ? $tarkrow[mysql_field_name($result, $i)] : "";
 
 							// T‰m‰ rivi ei oo exceliss‰
@@ -1650,6 +1671,7 @@ if ($kasitellaan_tiedosto) {
 								default:
 									$virheApu = "";
 							}
+
 							echo t("Virhe rivill‰").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>";
 							$errori = 1;
 						}
@@ -1699,7 +1721,7 @@ if ($kasitellaan_tiedosto) {
 						synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
 
 						// tehd‰‰n ep‰kunrattijutut
-						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
+						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
 							require("epakurantti.inc");
 						}
 

@@ -84,6 +84,7 @@ if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
+if (!isset($lisax)) $lisax = '';
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -1568,7 +1569,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VALMIS_VA
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus 	= '$tilausnumero'
 					AND tila 	= 'C'
-					AND alatila = 'A'";
+					AND alatila in ('A','B','C','')";
 		$result = pupe_query($query);
 
 		$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
@@ -1975,6 +1976,17 @@ if ($tee == '') {
 		}
 
 		$laskurow = mysql_fetch_assoc($result);
+
+		// P‰ivitet‰‰n rahtikirjatiedot jos ne on syˆtetty
+		if ($laskurow["alatila"] == "B" or $laskurow["alatila"] == "D" or $laskurow["alatila"] == "J" or $laskurow["alatila"] == "E") {
+			$query4 = "	UPDATE rahtikirjat
+						SET toimitustapa = '$laskurow[toimitustapa]',
+						merahti = '$laskurow[kohdistettu]'
+						where yhtio = '$kukarow[yhtio]'
+						and otsikkonro = '$kukarow[kesken]'
+						and tulostettu = '0000-00-00 00:00:00'";
+			$result = pupe_query($query4);
+		}
 
 		if ($yhtiorow["tilauksen_kohteet"] == "K") {
 			$query 	= "	SELECT *
@@ -2546,7 +2558,22 @@ if ($tee == '') {
 				exit;
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
+			// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+			$query = "	SELECT *
+						FROM rahtikirjat
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND otsikkonro 	= '$kukarow[kesken]'
+						AND tulostettu != '0000-00-00 00:00:00'
+						LIMIT 1";
+			$rakre_chkres = pupe_query($query);
+
+			$state_chk = "";
+
+			if (mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
+			}
+
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk}>";
 
 			// Otetaan toimitustavan tiedot ja k‰ytet‰‰n niit‰ l‰pi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
@@ -2576,6 +2603,11 @@ if ($tee == '') {
 				echo "</option>";
 			}
 			echo "</select>";
+
+			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='toimitustapa' value='$laskurow[toimitustapa]'>";
+			}
 
 			if ($laskurow["rahtivapaa"] != "") {
 				echo " (".t("Rahtivapaa").") ";
@@ -3450,7 +3482,7 @@ if ($tee == '') {
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
-				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#".$tilausrivi["hyllyalue"]."#".$tilausrivi["hyllynro"]."#".$tilausrivi["hyllyvali"]."#".$tilausrivi["hyllytaso"];
+				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#!°!#".$tilausrivi["hyllyalue"]."#!°!#".$tilausrivi["hyllynro"]."#!°!#".$tilausrivi["hyllyvali"]."#!°!#".$tilausrivi["hyllytaso"];
 			}
 
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "°°°") {
@@ -3538,9 +3570,9 @@ if ($tee == '') {
 
 			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
 
-			// Tehdaslis‰varusteperhe-keississ‰ muistetaan myˆs valittu paikka
-			if ($tapa != "VAIHDA" and $perheid2 > 0 and $hyllyalue != '') {
-				$paikka = $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+			// Muistetaan myˆs valittu paikka
+			if ($tapa != "VAIHDA" and $hyllyalue != '') {
+				$paikka = $hyllyalue."#!°!#".$hyllynro."#!°!#".$hyllyvali."#!°!#".$hyllytaso;
 			}
 
 			if ($tapa == "MUOKKAA") {
@@ -3555,20 +3587,10 @@ if ($tee == '') {
 			}
 			elseif ($tapa == "JT") {
 				$var 		= "J";
-
-				if ($hyllyalue != '') {
-					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
-				}
-
 				$tila		= "";
 			}
 			elseif ($tapa == "PUUTE") {
 				$var 		= "P";
-
-				if ($hyllyalue != '') {
-					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
-				}
-
 				$tila		= "";
 			}
 			elseif ($tapa == "POISJTSTA") {
@@ -3589,18 +3611,18 @@ if ($tee == '') {
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";
 				$tila		= "";
-				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "∞∞∞" and substr($paikka,0,3) != "@@@") $paikka = "";
+				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "@@@") $paikka = "";
 			}
 			elseif ($tapa == "MYYVASTAAVA") {
 				// tuoteno, m‰‰r‰, muut nollataan
-				$tuoteno	= $vastaavatuoteno;
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$rivitunnus	= 0;
-				$paikka		= '';
-				$alv		= '';
-				$perheid	= 0;
+				$tuoteno			= $vastaavatuoteno;
+				$var				= '';
+				$hinta				= '';
+				$netto				= '';
+				$rivitunnus			= 0;
+				$paikka				= '';
+				$alv				= '';
+				$perheid			= 0;
 				$perheid2			= 0;
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
@@ -3633,17 +3655,17 @@ if ($tee == '') {
 					${'ale'.$alepostfix} = '';
 				}
 
-				$tuoteno	= '';
-				$kpl		= '';
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$rivitunnus	= 0;
-				$kommentti	= '';
-				$kerayspvm	= '';
-				$toimaika	= '';
-				$paikka		= '';
-				$alv		= '';
+				$tuoteno			= '';
+				$kpl				= '';
+				$var				= '';
+				$hinta				= '';
+				$netto				= '';
+				$rivitunnus			= 0;
+				$kommentti			= '';
+				$kerayspvm			= '';
+				$toimaika			= '';
+				$paikka				= '';
+				$alv				= '';
 				$perheid			= 0;
 				$perheid2			= 0;
 				$tilausrivilinkki	= '';
@@ -4098,7 +4120,7 @@ if ($tee == '') {
 
 		if ($tapa == "VAIHDA" and $perheid2 > 0 and $kayttajan_paikka != "" and substr($kayttajan_paikka,0,3) != "°°°" and substr($kayttajan_paikka,0,3) != "!!!") {
 			//P‰ivitet‰‰n tehdaslis‰varusteille kanssa sama varastopaikka kuin is‰tuotteelle
-			$p2paikka = explode("#", $kayttajan_paikka);
+			$p2paikka = explode("#!°!#", $kayttajan_paikka);
 
 			$query = "	UPDATE tilausrivi set
 						hyllyalue = '$p2paikka[0]',
@@ -4457,6 +4479,24 @@ if ($tee == '') {
 		}
 		elseif ($toim == "YLLAPITO") {
 
+			$dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+
+			if (mysql_num_rows($dynamic_result) > 0) {
+				$kommentti_select = "concat(tilausrivi.kommentti";
+				$laskentalisa_riveille = " or (";
+				// ketjutetaan kommentti, ja avainsanat samaan. Laitetaan html-koodia ett‰ avainsana on mustalla, muuten ne olisi samallav‰rill‰ kuin kommentti.
+				while($drow = mysql_fetch_assoc($dynamic_result)) {
+					$kommentti_select .= ",if(tilausrivin_lisatiedot.{$drow["selite"]} !='',concat('<br><font color=\"black\">{$drow["selitetark"]}:</font> ',tilausrivin_lisatiedot.{$drow["selite"]}),'')";
+					$laskentalisa_riveille .= "tilausrivin_lisatiedot.{$drow["selite"]} !='' or ";
+				}
+				$kommentti_select .= ") kommentti,";
+				$laskentalisa_riveille = substr($laskentalisa_riveille,0,-3).") ";
+			}
+			else {
+				$kommentti_select = "tilausrivi.kommentti,";
+				$laskentalisa_riveille = "";
+			}
+
 			$tilrivity	= "'L','0'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
@@ -4517,6 +4557,7 @@ if ($tee == '') {
 					tuote.status,
 					tuote.ei_saldoa,
 					tuote.vakkoodi,
+					$kommentti_select
 					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
@@ -5085,12 +5126,13 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if(kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
+					$query = "	SELECT sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
-								WHERE yhtio = '$kukarow[yhtio]'
+								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
 								$pklisa
-								and tyyppi != 'D'";
+								and tilausrivi.tyyppi != 'D'";
 					$pkres = pupe_query($query);
 					$pkrow = mysql_fetch_row($pkres);
 
@@ -6247,7 +6289,7 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
-			}
+						}
 
 			if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				// Laskeskellaan tilauksen loppusummaa (mit‰tˆidyt ja raaka-aineet eiv‰t kuulu jengiin)

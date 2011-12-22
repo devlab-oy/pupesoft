@@ -28,39 +28,38 @@
 
 	if ($peruste == "suorittaja") {
 		$query = "	SELECT
-					tyomaarays.suorittaja,
-					tyomaarays.tyostatus,
-					ifnull(a3.nimi, 'tuntematon') tyojono1,
-					ifnull(a2.selitetark, 'tuntematon') tyostatus1,
+					ifnull(a3.nimi, 'N/A') tyojono1,
+					ifnull(a2.selitetark, 'N/A') tyostatus1,
 					count(*) maara
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus=lasku.tunnus and tyomaarays.tyojono != '')
 					LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono )
 					LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
+					LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
 					LEFT JOIN kuka a3 ON (a3.yhtio = tyomaarays.yhtio and a3.kuka = tyomaarays.suorittaja)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					GROUP BY 1,2,3,4
-					ORDER BY suorittaja, tyostatus ASC";
+					GROUP BY 1,2
+					ORDER BY a3.nimi, ifnull(a2.jarjestys, 9999), a2.selitetark";
 	}
 	else {
 		$query = "	SELECT
-					tyomaarays.tyojono,
-					tyomaarays.tyostatus,
 					a1.selitetark tyojono1,
-					ifnull(a2.selitetark, 'tuntematon') tyostatus1,
+					ifnull(a2.selitetark, 'N/A') tyostatus1,
 					count(*) maara
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus and tyomaarays.tyojono != '')
 					LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono)
 					LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
+					LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					GROUP BY 1,2,3,4
-					ORDER BY tyojono, tyostatus ASC";
+					GROUP BY 1,2
+					ORDER BY ifnull(a1.jarjestys, 9999), a1.selitetark, ifnull(a2.jarjestys, 9999), a2.selitetark";
 	}
+
 	$ekares = pupe_query($query);
 
 	$vaihdajono = "";
@@ -75,7 +74,7 @@
 	while ($rivit = mysql_fetch_assoc($ekares)) {
 
 		if ($vaihdajono != $rivit["tyojono1"] and $vaihdajono != "") {
-			echo "<tr><th colspan='2'>".t("Yhteensä").":</th><th>$jonosumma</th></tr>";
+			echo "<tr><td class='tumma' colspan='2'>".t("Yhteensä").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
 			echo "<tr><td class='back' colspan='3'><br></td></tr>";
 			$jonosumma = 0;
 		}
@@ -85,11 +84,11 @@
 		if ($vaihdajono != $rivit["tyojono1"]) {
 
 			if ($peruste == "tyojono") {
-				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?tyojono_haku={$rivit["tyojono1"]}&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K'>{$rivit["tyojono1"]}</a></td>";
+				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?indexvas=1&tyojono_haku={$rivit["tyojono1"]}&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K'>{$rivit["tyojono1"]}</a></td>";
 			}
 			else {
 				$linkkihaku = urlencode($rivit["tyojono1"]);
-				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?linkkihaku=$linkkihaku&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K''>{$rivit["tyojono1"]}</a></td>";
+				echo "<td><a href='{$palvelin2}tyomaarays/tyojono.php?indexvas=1&linkkihaku=$linkkihaku&lopetus={$palvelin2}raportit/tyojonossa.php////peruste=$peruste//tee=K''>{$rivit["tyojono1"]}</a></td>";
 			}
 		}
 		else {
@@ -97,7 +96,7 @@
 		}
 
 		echo "<td>{$rivit["tyostatus1"]} </td>";
-		echo "<td>{$rivit["maara"]} </td>";
+		echo "<td align='right'>{$rivit["maara"]} </td>";
 
 		echo "</tr>";
 
@@ -105,7 +104,7 @@
 		$vaihdajono = $rivit["tyojono1"];
 	}
 
-	echo "<tr><th colspan='2'>".t("Yhteensä").":</th><th>$jonosumma</th></tr>";
+	echo "<tr><td class='tumma' colspan='2'>".t("Yhteensä").":</td><td class='tumma' align='right'>$jonosumma</td></tr>";
 	echo "</table>";
 
 	require ("inc/footer.inc");

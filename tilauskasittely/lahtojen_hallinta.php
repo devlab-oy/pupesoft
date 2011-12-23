@@ -19,6 +19,10 @@
 		}
 
 		unset($man_aloitus);
+		unset($vaihda_prio);
+		unset($siirra_lahtoon);
+		unset($muokkaa_lahto);
+		unset($tulosta_rahtikirjat);
 	}
 
 	if (isset($vaihda_prio)) {
@@ -51,7 +55,8 @@
 					$valittu_lahto = trim($valittu_lahto);
 				}
 
-				echo "<form method='post' action='?vaihda_prio=X'>";
+				echo "<form method='post' action=''>";
+				echo "<input type='hidden' name='vaihda_prio' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
 				echo "<table>";
@@ -71,6 +76,9 @@
 		}
 
 		unset($vaihda_prio);
+		unset($siirra_lahtoon);
+		unset($muokkaa_lahto);
+		unset($tulosta_rahtikirjat);
 	}
 
 	if (isset($siirra_lahtoon)) {
@@ -222,6 +230,8 @@
 
 		$valittu_lahto = "";
 		unset($siirra_lahtoon);
+		unset($muokkaa_lahto);
+		unset($tulosta_rahtikirjat);
 	}
 
 	if (isset($muokkaa_lahto)) {
@@ -312,23 +322,26 @@
 
 				$query = "	SELECT SUBSTRING(lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 							SUBSTRING(viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
-							SUBSTRING(kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika'
+							SUBSTRING(kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
+							aktiivi
 							FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
 				$lahto_res = pupe_query($query);
 				$lahto_row = mysql_fetch_assoc($lahto_res);
 
-				echo "<form method='post' action='?muokkaa_lahto=X'>";
+				echo "<form method='post' action=''>";
+				echo "<input type='hidden' name='muokkaa_lahto' value='X' />";
+				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
 				echo "<table>";
 				echo "<tr><th>",t("Lähtö"),"</th><td>",implode(", ", $checkbox_parent),"</td></tr>";
 				echo "<tr><th>",t("Aktiivi"),"</th><td>";
 				echo "<select name='lahto_muokkaus_aktiivi'>";
 
-				$sel = $lahto_row['aktiivi'] != "" ? " selected" : "";
+				$sel = array_fill_keys(array($lahto_row['aktiivi']), " selected") + array('' => '', 'P' => '', 'E' => '');
 
 				echo "<option value=''>",t("Aktiivi"),"</option>";
-				echo "<option value='P'>",t("Pysäytetty"),"</option>";
-				echo "<option value='E'{$sel}>",t("Ei aktiivi"),"</option>";
+				echo "<option value='P'{$sel['P']}>",t("Pysäytetty"),"</option>";
+				echo "<option value='E'{$sel['E']}>",t("Ei aktiivi"),"</option>";
 
 				echo "</select>";
 				echo "</td></tr>";
@@ -348,6 +361,7 @@
 		}
 
 		unset($muokkaa_lahto);
+		unset($tulosta_rahtikirjat);
 	}
 
 	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
@@ -431,7 +445,9 @@
 				}
 			}
 			else {
-				echo "<form method='post' action='?tulosta_rahtikirjat=X&select_varasto={$select_varasto}'>";
+				echo "<form method='post' action=''>";
+				echo "<input type='hidden' name='tulosta_rahtikirjat' value='X' />";
+				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
 				echo "<table>";
 				echo "<tr><td>",t("Tulosta kaikki rahtikirjat"),":</td>";
@@ -680,7 +696,7 @@
 							var _arrChild = new Array();
 
 							var _getId = new Array('departure', 'manual');
-							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual', 'transfer', 'carrier');
+							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual', 'transfer', 'carrier', 'stopped');
 							var _sortByDate = new Array('date');
 
 							for (i = 0; i < arr.length; i++) {
@@ -1378,7 +1394,11 @@
 
 	while ($varastorow = mysql_fetch_assoc($varastores)) {
 
-		$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : "";
+		$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : ($kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "");
+
+		if ($select_varasto == 0 and $sel != "" and $kukarow['oletus_varasto'] == $varastorow['tunnus']) {
+			$select_varasto = $kukarow['oletus_varasto'];
+		}
 
 		echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
 	}
@@ -1398,6 +1418,7 @@
 					avainsana.selitetark_3 AS 'prioriteetti',
 					toimitustapa.selite AS 'toimitustapa',
 					toimitustapa.rahdinkuljettaja,
+					lahdot.aktiivi,
 					GROUP_CONCAT(IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) SEPARATOR '') AS 'toimitustavan_lahto_siirto',
 					GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
 					COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
@@ -1422,7 +1443,7 @@
 					AND varastopaikat.tunnus = '{$select_varasto}')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-					GROUP BY 1,2,3,4,5,6,7,8
+					GROUP BY 1,2,3,4,5,6,7,8,9
 					ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 		$result = pupe_query($query);
 
@@ -1437,7 +1458,7 @@
 
 		echo "<br /><br />";
 
-		$colspan_parent = 16;
+		$colspan_parent = 17;
 
 		echo "<table>";
 		echo "<tr><th>",t("Etsi asiakas"),"</th><td><input type='text' class='client' id='uni_client_search' value='' />&nbsp;</td>";
@@ -1491,6 +1512,7 @@
 		echo "</th>";
 
 		echo "<th class='sort_parent_row_by' id='parent_row_transfer'>S <img class='parent_row_direction_transfer' /></th>";
+		echo "<th class='sort_parent_row_by' id='parent_row_stopped'>P <img class='parent_row_direction_stopped' /></th>";
 		echo "<th></th>";
 		echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 
@@ -1611,6 +1633,13 @@
 			}
 			else {
 				echo "<td class='center toggleable_parent_row_transfer' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
+			}
+
+			if ($row['aktiivi'] == 'P') {
+				echo "<td class='center toggleable_parent_row_stopped' id='X__{$row['lahdon_tunnus']}{$row['aktiivi']}__{$y}'>X</td>";
+			}
+			else {
+				echo "<td class='center toggleable_parent_row_stopped' id='!__{$row['lahdon_tunnus']}X__{$y}'>&nbsp;</td>";
 			}
 
 			echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";

@@ -158,6 +158,32 @@
 
 	}
 
+	// Katsotaan onko käyttäjällä tiedostoja käsittelyssä
+	$tiedostoja_jonossa = 0;
+	$omia_tiedostoja_jonossa = 0;
+
+	if ($handle = opendir($pupe_root_polku."/datain")) {
+	    while (false !== ($file = readdir($handle))) {
+			// Tämä file on valmis lue-data file
+			if (substr($file, 0, 9) == "lue-data#" and substr($file, -4) == ".CSV") {
+				$tiedostoja_jonossa++;
+
+				// Tämä on tämän käyttäjän file
+				if (substr($file, 0, 10+strlen($kukarow["kuka"])) == "lue-data#{$kukarow["kuka"]}#") {
+					$omia_tiedostoja_jonossa++;
+				}
+			}
+	    }
+	    closedir($handle);
+	}
+
+	if ($tiedostoja_jonossa > 0) {
+		echo "<br>";
+		echo "<font class='message'>Sinulla on $omia_tiedostoja_jonossa tiedostoa käsittelyssä.</font><br>";
+		echo "<font class='message'>Yhteensä käsittelyssä on $tiedostoja_jonossa tiedostoa.</font><br>";
+		echo "<br>";
+	}
+
 	$indx = array(
 		'asiakas',
 		'asiakasalennus',

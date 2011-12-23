@@ -1,5 +1,10 @@
 <?php
 
+	// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+	ini_set('zlib.output_compression', 0);
+	ini_set('implicit_flush', 1);
+	ob_implicit_flush(1);
+
 	require ("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
@@ -8,11 +13,6 @@
 	$tee = isset($tee) ? trim($tee) : "";
 	$table = isset($table) ? trim($table) : "";
 	$laheta = isset($laheta) ? trim($laheta) : "";
-
-	// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-	ini_set('zlib.output_compression', 0);
-	ini_set('implicit_flush', 1);
-	ob_implicit_flush(1);
 
 	// K‰sitell‰‰n file
 	if ($tee == "file" and $laheta != "") {

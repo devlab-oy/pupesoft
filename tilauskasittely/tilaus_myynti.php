@@ -2483,7 +2483,7 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto
+		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto, laji
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
@@ -2840,7 +2840,7 @@ if ($tee == '') {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
 				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
-
+			
 			// Katsotaan onko liitetiedostoja
 			$liitequery = "	SELECT tunnus, selite
 							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
@@ -3018,6 +3018,13 @@ if ($tee == '') {
 
 					echo "</select></td></tr>";
 				}
+			}
+			
+			if ($faktarow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
+				echo "<tr>$jarjlisa<td class='back'></td>";
+				echo "<td colspan='3' class='back'>";
+				echo "<p class='error'>".t("HUOM!! Tämä on korjaamo-asiakas, älä myy tälle asiakkaalle")."</p>";
+				echo "</td></tr>";
 			}
 		}
 		else {

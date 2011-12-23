@@ -7,21 +7,27 @@
 	// Muuttujat
 	$tee = isset($tee) ? trim($tee) : "";
 	$table = isset($table) ? trim($table) : "";
+	$laheta = isset($laheta) ? trim($laheta) : "";
+
+	// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+	ini_set('zlib.output_compression', 0);
+	ini_set('implicit_flush', 1);
+	ob_implicit_flush(1);
 
 	// K‰sitell‰‰n file
-	if ($tee == "file") {
+	if ($tee == "file" and $laheta != "") {
 
 		$kasitellaan_tiedosto = TRUE;
 		$kasitellaan_tiedosto_tyyppi = "";
 
 		if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-			echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...</font><br><br>";
+			echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...</font><br><br>\n";
 
 			$kasiteltava_tiedosto_path = $_FILES['userfile']['tmp_name'];
 
 			if ($_FILES['userfile']['size'] == 0) {
-				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font><br>";
+				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
@@ -32,17 +38,17 @@
 			$return = tarkasta_liite("userfile", array("XLSX","XLS","CSV"));
 
 			if ($return !== TRUE) {
-				echo "<font class='error'>".t("V‰‰r‰ tiedostomuoto")." $kasitellaan_tiedosto_tyyppi !</font><br>";
+				echo "<font class='error'>".t("V‰‰r‰ tiedostomuoto")." $kasitellaan_tiedosto_tyyppi !</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
 			if (!is_executable("/usr/bin/ssconvert") and ($kasitellaan_tiedosto_tyyppi == "XLSX" or $kasitellaan_tiedosto_tyyppi == "XLS")) {
-				echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>";
+				echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
 			if (!is_executable("/usr/bin/split")) {
-				echo "<font class='error'>".t("Split komento ei ole asennettu")."!</font><br>";
+				echo "<font class='error'>".t("Split komento ei ole asennettu")."!</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
@@ -62,8 +68,10 @@
 				$return = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv));
 
 				if ($return === FALSE) {
-					echo "<font class='error'>".t("Tiedoston konversio ep‰onnistui")."!</font><br>";
+					echo "<font class='error'>".t("Tiedoston konversio ep‰onnistui")."!</font><br>\n";
 					$kasitellaan_tiedosto = FALSE;
+				}
+				else {
 					$kasitellaan_tiedosto_tyyppi = "CSV";
 				}
 
@@ -74,18 +82,19 @@
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
 			}
 
-			// Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon
-			$kasiteltava_filenimi = $kukarow["kuka"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
+			// Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon. Konversion j‰lkeen filename on muotoa: lue-data#username#taulu#randombit#jarjestys.CSV
+			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
 			$kasiteltava_filepath = $pupe_root_polku."/datain/";
 			$kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
 
-			if (!move_uploaded_file($kasiteltava_tiedosto_path, $kasiteltava_kokonimi)) {
-				echo "<font class='error'>".t("Tiedoston kopiointi ep‰onnistui")."!</font><br>";
+			// Siirret‰‰n tiedosto datain -hakemistoon
+			if (!rename($kasiteltava_tiedosto_path, $kasiteltava_kokonimi)) {
+				echo "<font class='error'>".t("Tiedoston kopiointi ep‰onnistui")."! $kasiteltava_tiedosto_path &raquo; $kasiteltava_kokonimi</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 		}
 		else {
-			echo "<font class='error'>".t("Et valinnut tiedostoa")."!</font><br>";
+			echo "<font class='error'>".t("Et valinnut tiedostoa")."!</font><br>\n";
 			$kasitellaan_tiedosto = FALSE;
 		}
 
@@ -103,7 +112,7 @@
 
 			// Splitataan tiedosto 10000 rivin osiin datain -hakemistoon
 			chdir($kasiteltava_filepath);
-			$return = shell_exec("/usr/bin/split -l 10000 $kasiteltava_kokonimi $kasiteltava_filenimi#");
+			system("/usr/bin/split -l 10000 ".escapeshellarg($kasiteltava_kokonimi)." ".escapeshellarg($kasiteltava_filenimi."#"));
 
 			// Poistetaan alkuper‰inen
 			unlink($kasiteltava_kokonimi);
@@ -141,10 +150,10 @@
 			// Poistetaan headerifile
 			unlink($header_file);
 
-			echo "<font class='message'>".t("Tiedosto laitettu k‰sittelyjonoon")."!</font><br><br>";
+			echo "<font class='message'>".t("Tiedosto laitettu k‰sittelyjonoon")."!</font><br><br>\n";
 		}
 		else {
-			echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>";
+			echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>\n";
 		}
 
 	}
@@ -332,7 +341,7 @@
 
 	echo "	<tr><td>".t("Valitse tiedosto").":</td>
 			<td><input name='userfile' type='file'></td>
-			<td class='back'><input type='submit' value='".t("L‰het‰")."'></td>
+			<td class='back'><input type='submit' name='laheta' value='".t("L‰het‰")."'></td>
 		</tr>
 
 		</table>

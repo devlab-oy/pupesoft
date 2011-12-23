@@ -30,10 +30,10 @@ if (!function_exists("tsekit")) {
 					tilausrivi.tyyppi = 'O'";
 		$tilres = pupe_query($query);
 
-		$kplyhteensa = 0;  // apumuuttuja
-		$kplvarasto  = 0;  // apumuuttuja
-		$eipaikkoja  = 0;  // apumuuttuja
-		$eituotteet  = ""; // apumuuttuja
+		$kplyhteensa = 0;  	// apumuuttuja
+		$kplvarasto  = 0;  	// apumuuttuja
+		$eipaikkoja  = 0;  	// apumuuttuja
+		$eituotteet  = ""; 	// apumuuttuja
 		$varastossaarvo = 0; // apumuuttuja
 		$uusiot = array();
 
@@ -229,7 +229,11 @@ if ($toiminto == "yhdista") {
 if ($toiminto == "poista") {
 	$eisaapoistaa = 0;
 
-	$query  = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
+	$query  = "	SELECT tunnus
+				from tilausrivi
+				where yhtio = '$kukarow[yhtio]'
+				and uusiotunnus = '$tunnus'
+				and tyyppi = 'O'";
 	$delres = pupe_query($query);
 
 	if (mysql_num_rows($delres) != 0) {
@@ -238,7 +242,10 @@ if ($toiminto == "poista") {
 
 	$query = "	SELECT tunnus
 				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$laskunro'";
+				where yhtio  = '$kukarow[yhtio]'
+				and tila	 = 'K'
+				and vanhatunnus <> 0
+				and laskunro = '$laskunro'";
 	$delres2 = pupe_query($query);
 
 	if (mysql_num_rows($delres2) != 0) {
@@ -249,18 +256,22 @@ if ($toiminto == "poista") {
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöitiin ohjelmassa keikka.php")."<br>";
 
+		// Mitätöidään keikka
 		$query  = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
+		$result = pupe_query($query);
+
+		// Mitätöidään keikalle suoraan "lisätyt" rivit eli otunnus=keikan tunnus ja uusiotunnus=0
+		$query  = "UPDATE tilausrivi SET tyyppi = 'D' where yhtio='$kukarow[yhtio]' and tila='O' and otunnus='$otunnus' and uusiotunnus=0";
 		$result = pupe_query($query);
 
 		// formissa on tullut myös $ytunnus, joten näin päästään takaisin selaukseen
 		$toiminto = "";
 	}
 	else {
-		echo "<font class='error'>Keikkaan on jo liitetty laskuja tai kohdistettu rivejä, sitä ei voi poistaa!!!<br>";
+		echo "<font class='error'>".t("VIRHE: Keikkaan on jo liitetty laskuja tai kohdistettu rivejä, sitä ei voi poistaa")."!<br>";
 		// formissa on tullut myös $ytunnus, joten näin päästään takaisin selaukseen
 		$toiminto = "";
 	}
-
 }
 
 // tulostetaan tarvittavia papruja $otunnuksen mukaan

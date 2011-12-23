@@ -14598,3 +14598,52 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		return $voidaan_valmistaa;
 	}
 }
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('zendesk_curl')) {
+	function zendesk_curl ($url) {
+		global $zendesk_auth;
+	
+		$ch  = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+		curl_setopt($ch, CURLOPT_GET, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, "Content-Type: application/xml");
+		curl_setopt($ch, CURLOPT_USERPWD, $zendesk_auth);
+
+		$result = curl_exec($ch);
+
+		if ($result === FALSE) {
+			echo "<font class='error'>VIRHE:</font><br>";
+		   	echo curl_errno($ch)." - ".curl_error($ch)."</font><br>";
+			exit;
+		}
+
+		$info 	= curl_getinfo($ch);
+		$header = substr($result,0,$info['header_size']);
+		$body 	= substr($result, $info['header_size']);
+
+		curl_close($ch);
+		
+		$statukset = array();
+		$statukset[0] = "New";
+		$statukset[1] = "Open";
+		$statukset[2] = "Pending";
+		$statukset[3] = "Solved";
+		
+		$priot = array();
+		$priot[0] = "-";
+		$priot[1] = "Low";
+		$priot[2] = "Normal";
+		$priot[3] = "High";
+		$priot[4] = "Urgent";
+		
+		return array($body, $statukset, $priot);
+	}
+}
+

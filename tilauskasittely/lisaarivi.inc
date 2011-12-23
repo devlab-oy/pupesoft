@@ -172,7 +172,7 @@
 
 	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 	if ($olpaikalta != '') {
-		$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
+		$olquery = "SELECT concat_ws('#!°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
 					FROM tuotepaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tuoteno = '$trow[tuoteno]'
@@ -340,7 +340,7 @@
 	if (substr($paikka,0,3) == "°°°") {
 		$var 		 		= "T";
 		$toimittajan_tunnus	= substr($paikka, 3);
-		$paikka		 		= "#";
+		$paikka		 		= "#!°!#";
 	}
 	elseif ($var == "T" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "!!!") {
 		$var 				= "";
@@ -374,7 +374,7 @@
 			$superpaikka = substr($paikka, 0, strpos($paikka, "&&&"));
 			$loppupaikka = substr($paikka, strpos($paikka, "&&&")+3);
 
-			$lop = "LOP#".$toimittamatta;
+			$lop = "LOP#!°!#".$toimittamatta;
 			$toimittamatta = $loppupaikka;
 		}
 		else {
@@ -383,7 +383,7 @@
 
 		$var 		 = "S";
 		$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-		$rivinumero = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
+		$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 	}
 	elseif ($var == "S" and substr($paikka,0,3) != "@@@") {
 		$var 		= "";
@@ -633,7 +633,7 @@
 				}
 
 				// K‰yd‰‰n l‰pi tuotepaikat
-				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and ($paikka != "EIERAAVIELA#EIEI")) {
+				if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and ($paikka != "EIERAAVIELA#!°!#EIEI")) {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -696,7 +696,7 @@
 					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
 
 					// Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta, silloin annetaan AINA riitt‰v‰ saldo
-					if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
+					if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!°!#".$zrow["hyllynro"]."#!°!#".$zrow["hyllyvali"]."#!°!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
 						$myytavissa = $toimittamatta;
 					}
 
@@ -1034,7 +1034,7 @@
 
 			// Myyd‰‰n tietylt‰ paikalta
 			if ($paikka != '') {
-				$paikat = explode('#',$paikka);
+				$paikat = explode('#!°!#',$paikka);
 
 				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
 
@@ -1661,7 +1661,7 @@
 					$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
 					$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
 
-					$lop = "LOP#".$toimittamatta;
+					$lop = "LOP#!°!#".$toimittamatta;
 					$toimittamatta = $loppupaikka;
 				}
 				else {
@@ -1669,7 +1669,7 @@
 				}
 
 				$var 		 = "S";
-				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
+				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
 				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 			}
 		}
@@ -1683,11 +1683,11 @@
 				// Pienennt‰‰n suoratoimitusostorivin m‰‰r‰‰, eli joudumme splittaamaan myyntirivin samassa suhteessa
 				$suoratoimitus_splittaus = TRUE;
 				// Pakotetaan loput omalle riville
-				$var = "LOJ#$suoratoimitus_rivikpl";
+				$var = "LOJ#!°!#$suoratoimitus_rivikpl";
 			}
 		}
 
-		if (substr($var,0,4) == "LOJ#" or substr($var,0,4) == "LOP#" or substr($lop,0,4) == "LOP#") {
+		if (substr($var,0,8) == "LOJ#!°!#" or substr($var,0,8) == "LOP#!°!#" or substr($lop,0,8) == "LOP#!°!#") {
 
 			if ($lisaarivi_debug == 1) echo "Laitetaan loput rivit jtksi tai puutteeksi (".substr($var,0,4).") (".substr($lop,0,4).")<br>";
 
@@ -1699,17 +1699,17 @@
 			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 
-			if (substr($var,0,4) == "LOJ#") {
+			if (substr($var,0,8) == "LOJ#!°!#") {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($var,4) - $toimittamatta;
+				$puu_kpl[] 		= substr($var,8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
 				$puu_var[]		= "";
 			}
-			elseif (substr($lop,0,4) == "LOP#") {
+			elseif (substr($lop,0,8) == "LOP#!°!#") {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($lop,4) - $toimittamatta;
+				$puu_kpl[] 		= substr($lop,8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
@@ -1790,7 +1790,7 @@
 						$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
 						$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
 
-						$lop = "LOP#".$toimittamatta;
+						$lop = "LOP#!°!#".$toimittamatta;
 						$toimittamatta = $loppupaikka;
 					}
 					else {
@@ -1798,7 +1798,7 @@
 					}
 
 					$var 		 = "S";
-					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
+					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
 					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 				}
 			}
@@ -2006,7 +2006,7 @@
 
 			if ($paikka != '') {
 				//K‰ytt‰j‰n syˆtt‰m‰ paikka
-				$paikat = explode('#',$paikka);
+				$paikat = explode('#!°!#',$paikka);
 
 				$p_hyllyalue	= $paikat[0];
 				$p_hyllynro		= $paikat[1];

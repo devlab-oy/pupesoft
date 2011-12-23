@@ -11822,19 +11822,9 @@ if (!function_exists("pupe_DataTables")) {
 					var hakuarvo;
 
 					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+					haku_arvo = tyojono.val() +' '+ tyostatus.val();
 
-					if (tyojono.val() == '-') {
-						haku_arvo = tyostatus.text();
-					}
-					if (tyostatus.val() == '-') {
-						haku_arvo = tyojono.text();
-					}
-					if(tyojono.val() == '-' && tyostatus.val() == '-') {
-						haku_arvo = '';
-					}
-
-					datatablesit[0].fnFilter(haku_arvo, 8);
+					datatablesit[0].fnFilter(haku_arvo, 8, true, false);
 				} );
 			} );
 		</script>";

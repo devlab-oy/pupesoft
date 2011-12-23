@@ -40,11 +40,9 @@
 	}
 
 	if ($trow['ei_saldoa'] != '' and $riviok == 0) {
-		$varaosavirhe .= t("VIRHE: Tuote ei ole varastoitava, sitä ei voi tilata")."!<br>";
+		$varaosavirhe .= t("HUOM: Tuote ei ole varastoitava, sitä ei voida saavuttaa varastoon")."!<br>";
 		$riviok++;
-		$tilausok++;
 	}
-
 
 	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
 		$varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";

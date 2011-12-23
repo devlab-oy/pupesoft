@@ -1511,27 +1511,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "epakur_kehahin_paivitys") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($trow[$i] != 'X') {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value='' $sel1>".t("Ep‰kuranttiuspoisto EI MUUTA kehahintaa.")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Ep‰kuranttiuspoisto MUUTTAA kehahintaa.")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2900,17 +2879,28 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'teeostotilaus_valmistuksen_tulosjonosta') {
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
-	
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
-		
+
 		$ulos .= "<option value = ''>".t("Valmistusten tulostusjonosta ei luoda ostotilauksia");
 		$ulos .= "<option value = 'K' $sel>".t("Valmistusten tulostusjonosta voi luoda ostotilauksia");
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'maksukehotus_kentat') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

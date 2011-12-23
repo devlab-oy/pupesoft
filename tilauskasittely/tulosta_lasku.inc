@@ -1223,22 +1223,24 @@ if (!function_exists('rivi_perhe')) {
 				// lasketaan isätuotteen riville lapsien hinnat yhteen
 				$query = "	SELECT
 							sum(tilausrivi.rivihinta) rivihinta,
-							round(sum(tilausrivi.rivihinta) / ($row[kpl]), '$yhtiorow[hintapyoristys]') hinta
+							round(sum(tilausrivi.rivihinta) / $row[kpl], '$yhtiorow[hintapyoristys]') hinta
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
 							and tilausrivi.uusiotunnus 	= '$row[uusiotunnus]'
-							and tilausrivi.perheid 		= '$row[perheid]'";
+							and tilausrivi.perheid 		in ($row[perheideet])
+							and tilausrivi.perheid 		> 0";
 				$riresult = pupe_query($query);
 				$perherow = mysql_fetch_assoc($riresult);
 
 				$row["hinta"] 		= $perherow["hinta"];
 				$row["rivihinta"] 	= $perherow["rivihinta"];
 
-				if ($yhtiorow['myynnin_alekentat'] > 1) {
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$row["ale{$alepostfix}"] = "";
-					}
+				// Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$row["ale{$alepostfix}"] = "";
 				}
+
+				$row["erikoisale"] = "";
 			}
 			else {
 				// lapsia ei lisätä
@@ -1247,7 +1249,7 @@ if (!function_exists('rivi_perhe')) {
 		}
 
 		if ($lisataa == 0) {
-			list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $summa, $arvo, $kurssi);
+			list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 
 		return array($thispage, $kala, $summa, $arvo);
@@ -1951,7 +1953,7 @@ if (!function_exists("tulosta_lasku")) {
 
 		// haetaan tilauksen kaikki rivit
 		$query = "  SELECT
-					if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
+					if (tilausrivi.nimitys='Kuljetusvakuutus', tilausrivin_lisatiedot.vanha_otunnus, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus)) rivigroup,
 					tilausrivi.ale1,
 					tilausrivi.ale2,
 					tilausrivi.ale3,
@@ -1987,6 +1989,7 @@ if (!function_exists("tulosta_lasku")) {
 					sum(tilausrivi.tilkpl) tilkpl,
 					sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
 					group_concat(tilausrivi.tunnus) rivitunnukset,
+					group_concat(distinct tilausrivi.perheid) perheideet,
 					count(*) rivigroup_maara,
 					$lisa
 					$sorttauskentta
@@ -2038,6 +2041,7 @@ if (!function_exists("tulosta_lasku")) {
 			// Otetaan yhteensäkommentti pois jos summataan rivejä
 			if ($rivigrouppaus) {
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakasrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 				$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 			}

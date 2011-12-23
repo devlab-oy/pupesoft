@@ -1121,12 +1121,18 @@ if ($kasitellaan_tiedosto) {
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI25PVM') {
 								$tee = "25paalle";
 							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
+							}
 							elseif ($tee == "") {
 								$tee = "pois";
 							}
 
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI50PVM') {
 								$tee = "puolipaalle";
+							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
 							}
 							elseif ($tee == "") {
 								$tee = "pois";
@@ -1135,12 +1141,18 @@ if ($kasitellaan_tiedosto) {
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI75PVM') {
 								$tee = "75paalle";
 							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
+							}
 							elseif ($tee == "") {
 								$tee = "pois";
 							}
 
 							if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {
 								$tee = "paalle";
+							}
+							elseif (trim($rivi[$r]) == "peru") {
+								$tee = "peru";
 							}
 							elseif ($tee == "") {
 								$tee = "pois";
@@ -1388,7 +1400,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//muutetaan rivi‰, silloin ei saa p‰ivitt‰‰ pakollisia kentti‰
-						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
+						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 							///* T‰ss‰ on kaikki oikeellisuuscheckit *///
 							if ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
 								if ($rivi[$r] != 0 and $rivi[$r] != '') {
@@ -1709,7 +1721,7 @@ if ($kasitellaan_tiedosto) {
 						synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
 
 						// tehd‰‰n ep‰kunrattijutut
-						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
+						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
 							require("epakurantti.inc");
 						}
 

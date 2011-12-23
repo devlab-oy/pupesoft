@@ -111,6 +111,10 @@
 		// Poistetut
 		$rajauslisa = " and asiakas.laji = 'P' ";
 	}
+	elseif ($laji == "K") {
+		// Korjaamo
+		$rajauslisa = " and asiakas.laji = 'K' ";
+	}
 	else {
 		if ($nayta_poistetut == "") {
 			$rajauslisa = " and asiakas.laji not in ('P','R') ";

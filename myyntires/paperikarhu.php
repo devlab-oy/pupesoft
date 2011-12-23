@@ -179,8 +179,8 @@
 			$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
 			$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
 			$pdf->draw_text(455, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
-			
-			if ($yhtiorow["maksukehoitus_kentat"] == "") {
+
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
 				$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
 				$pdf->draw_text(525, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
 			}
@@ -231,13 +231,13 @@
 			if ($karhukertanro == "") {
 				$karhukertanro = $row["karhuttu"] + 1;
 			}
-			
-			if ($yhtiorow["maksukehoitus_kentat"] == "") {
+
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
 				$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]), $firstpage, $norm);
 				$oikpos = $pdf->strlen($karhukertanro, $norm);
 				$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
 			}
-			
+
 			$kala = $kala - 13;
 
 			$lask++;

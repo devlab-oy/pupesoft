@@ -95,7 +95,7 @@
 						var id = this.id.split(\"_\");
 
 						if ($('tr[class^=\"rivit_'+id[1]+'_'+id[2]+'\"]').is(':visible') === false) {
-							$(this).toggleClass('tumma');
+							$(this).toggleClass('back');
 							$('tr.asiakas_'+id[1]+'_'+id[2]).toggle();
 						}
 					});
@@ -104,7 +104,7 @@
 						var id = this.id.split(\"_\");
 
 						if ($('tr.rivit_'+id[1]+'_'+id[2]+'_'+id[3]).length > 0) {
-							$(this).toggleClass('tumma');
+							$(this).toggleClass('back');
 							$('tr.rivit_'+id[1]+'_'+id[2]+'_'+id[3]).toggle();
 						}
 					});
@@ -115,7 +115,7 @@
 
 	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
 
-	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'kerayksessa' => ' checked', 'keratty' => ' checked');
+	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked', 'keratty' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 
 	echo "<form method='post' action=''>";
@@ -244,10 +244,10 @@
 
 	echo "<td>";
 
-	$chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'kerayksessa' => '', 'keratty' => '');
+	$chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
 
 	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ",t("Aloittamatta"),"<br />";
-	echo "<input type='checkbox' name='tilat[kerayksessa]'{$chk['kerayksessa']} /> ",t("Keräyksessä"),"<br />";
+	echo "<input type='checkbox' name='tilat[aloitettu]'{$chk['aloitettu']} /> ",t("Aloitettu"),"<br />";
 	echo "<input type='checkbox' name='tilat[keratty]'{$chk['keratty']} /> ",t("Kerätty");
 	echo "</td>";
 
@@ -273,7 +273,7 @@
 			$selectlisa = $volyymisuure == 'kg' ? " ROUND(tilausrivi.varattu * tuote.tuotemassa, 0)" : ($volyymisuure == 'litrat' ? " ROUND(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)" : " 1");
 
 			$select_aloittamatta = ", 0 AS 'aloittamatta'";
-			$select_kerayksessa = ", 0 AS 'kerayksessa'";
+			$select_aloitettu = ", 0 AS 'aloitettu'";
 			$select_keratty = ", 0 AS 'keratty'";
 
 			$tilalisa = "";
@@ -283,7 +283,7 @@
 				$select_aloittamatta = ", IF(lasku.tila = 'N' AND lasku.alatila = 'A', {$selectlisa}, 0) AS 'aloittamatta'";
 			}
 
-			if (isset($tilat['kerayksessa'])) {
+			if (isset($tilat['aloitettu'])) {
 
 				if ($tilalisa != "") {
 					$tilalisa .= " OR ";
@@ -291,7 +291,7 @@
 
 				$tilalisa .= "(lasku.tila = 'L' AND lasku.alatila = 'A')";
 
-				$select_kerayksessa = ", IF(lasku.tila = 'L' AND lasku.alatila = 'A', {$selectlisa}, 0) AS 'kerayksessa'";
+				$select_aloitettu = ", IF(lasku.tila = 'L' AND lasku.alatila = 'A', {$selectlisa}, 0) AS 'aloitettu'";
 			}
 
 			if (isset($tilat['keratty'])) {
@@ -319,7 +319,7 @@
 
 			$query = "	SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo'
 						{$select_aloittamatta}
-						{$select_kerayksessa}
+						{$select_aloitettu}
 						{$select_keratty}
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
@@ -344,17 +344,17 @@
 
 				if (!isset($arr[$row['klo']]['aloittamatta'])) $arr[$row['klo']]['aloittamatta'] = 0;
 				if (!isset($arr[$row['klo']]['keratty'])) $arr[$row['klo']]['keratty'] = 0;
-				if (!isset($arr[$row['klo']]['kerayksessa'])) $arr[$row['klo']]['kerayksessa'] = 0;
+				if (!isset($arr[$row['klo']]['aloitettu'])) $arr[$row['klo']]['aloitettu'] = 0;
 
 				$arr[$row['klo']]['aloittamatta'] += $row['aloittamatta'];
 				$arr[$row['klo']]['keratty'] += $row['keratty'];
-				$arr[$row['klo']]['kerayksessa'] += $row['kerayksessa'];
+				$arr[$row['klo']]['aloitettu'] += $row['aloitettu'];
 			}
 
 			if (count($arr) > 0) {
 
 				foreach ($arr as $klo => $summat) {
-					$data[] = array($klo, $summat['keratty'], $summat['kerayksessa'], $summat['aloittamatta'], 0);
+					$data[] = array($klo, $summat['keratty'], $summat['aloitettu'], $summat['aloittamatta'], 0);
 				}
 
 			}
@@ -411,7 +411,7 @@
 
 	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>";
-		echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}</th>";
+		echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='",t("Näytä kerääjät"),"' alt='",t("Näytä kerääjät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
 		echo "<td>";
 
 		$query = "	SELECT SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
@@ -441,6 +441,7 @@
 		echo "</tr>";
 
 		$query = "	SELECT kuka.nimi AS 'keraaja', 
+					GROUP_CONCAT(kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(kerayserat.otunnus) AS 'otunnukset',
 					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
 					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
@@ -465,7 +466,7 @@
 
 			while ($era_row = mysql_fetch_assoc($era_res)) {
 				echo "<tr class='era_{$i}' style='display:none;'>";
-				echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}</td>";
+				echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}&nbsp;<img title='",t("Näytä keräyserät"),"' alt='",t("Näytä keräyserät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 				echo "<td>{$era_row['tilaukset']}</td>";
 				echo "<td>{$era_row['rivit']}</td>";
 				echo "<td>{$era_row['kg']}</td>";
@@ -477,24 +478,27 @@
 				echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
 				echo "<th>",t("Tila"),"</th>";
 				echo "<th>",t("Prio"),"</th>";
-				echo "<th colspan='2'>",t("Toimitusasiakas"),"</th>";
+				echo "<th>",t("Keräyserä"),"</th>";
+				echo "<th>",t("Toimitusasiakas"),"</th>";
 				echo "<th>",t("Lähtö"),"</th>";
 				echo "<th>",t("Toimitustapa"),"</th>";
 				echo "<th></th>";
 				echo "</tr>";
 
-				$query = "	SELECT lasku.prioriteettinro,
-							CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
-							lasku.toimitustavan_lahto,
-							lasku.toimitustapa,
-							lasku.tunnus,
-							lasku.tila, lasku.alatila
-							FROM lasku
-							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-							AND lasku.tunnus IN ({$era_row['otunnukset']})
-							AND lasku.tila = 'L'
-							AND lasku.alatila IN ('A', 'B', 'C')
-							ORDER BY 1,2,3";
+				$query = "	SELECT kerayserat.nro,
+							GROUP_CONCAT(DISTINCT lasku.toimitustavan_lahto ORDER BY lasku.toimitustavan_lahto SEPARATOR '<br />') AS 'toimitustavan_lahto',
+							GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tila',
+							GROUP_CONCAT(DISTINCT CONCAT(lasku.nimi, ' ', lasku.nimitark) ORDER BY nimi, nimitark SEPARATOR '<br />') AS 'nimi',
+							GROUP_CONCAT(DISTINCT lasku.toimitustapa ORDER BY toimitustapa SEPARATOR '<br />') AS 'toimitustapa',
+							GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY prioriteettinro SEPARATOR ', ') AS 'prioriteettinro',
+							GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tunnus'
+							FROM kerayserat
+							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.nro IN ({$era_row['erat']})
+							GROUP BY 1
+							ORDER BY 1";
+
 				$asiakas_res = pupe_query($query);
 
 				$y = 1;
@@ -505,7 +509,7 @@
 
 					echo "<td>";
 
-					if ($asiakas_row['tila'] == 'L' and $asiakas_row['alatila'] == 'A') {
+					if (strpos($asiakas_row['tila'], 'K') !== false) {
 						echo t("Aloitettu");
 					}
 					else {
@@ -515,7 +519,8 @@
 					echo "</td>";
 
 					echo "<td>{$asiakas_row['prioriteettinro']}</td>";
-					echo "<td colspan='2' class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}</td>";
+					echo "<td>{$asiakas_row['nro']}</td>";
+					echo "<td class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}&nbsp;<img title='",t("Näytä rivit"),"' alt='",t("Näytä rivit"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 					echo "<td>{$asiakas_row['toimitustavan_lahto']}</td>";
 					echo "<td>{$asiakas_row['toimitustapa']}</td>";
 					echo "<td></td>";
@@ -528,10 +533,12 @@
 								ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-								AND kerayserat.otunnus = '{$asiakas_row['tunnus']}'
-								GROUP BY 1,2,3";
+								AND kerayserat.otunnus IN ({$asiakas_row['tunnus']})
+								GROUP BY 1,2,3
+								ORDER BY vh.indeksi";
 					$rivi_res = pupe_query($query);
 
 					if (mysql_num_rows($rivi_res) > 0) {
@@ -567,7 +574,7 @@
 					$y++;
 				}
 
-				if ($i == $max_i) {
+				if ($x != $max_x) {
 					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
 					echo "<td colspan='6' class='back'>&nbsp;</td>";
 					echo "</tr>";

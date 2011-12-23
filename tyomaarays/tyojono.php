@@ -32,6 +32,8 @@
 		$tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
 		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
 
+		if ($tyostatus_muutos == "EISTATUSTA") $tyostatus_muutos = "";
+
 		$query = "	UPDATE tyomaarays SET
 					tyostatus = '$tyostatus_muutos'
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -43,6 +45,8 @@
 	if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
 		$tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
 		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
+
+		if ($tyojono_muutos == "EIJONOA") $tyojono_muutos = "";
 
 		$query = "	UPDATE tyomaarays SET
 					tyojono = '$tyojono_muutos'
@@ -92,7 +96,7 @@
 	// Haetaan prioriteetti avainsanat
 	echo "<td><input type='hidden'	size='10' class='search_field' name='search_prioriteetti_haku'>";
 	echo "<select class='prioriteetti_sort'>";
-	echo "<option value=''>".t('Ei valintaa')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
 
 	$prioriteetti_result = t_avainsana("TYOM_PRIORIT");
 	while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
@@ -100,24 +104,26 @@
 	}
 	echo "</select></td>";
 
-	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
-	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
-	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
-	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_suorittaja_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_toimitetaan_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyja_haku'></td>";
 
 	echo "<td>";
 
 	echo "<select class='tyojono_sort'>";
-	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
+	echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
 
 	// Haetaan tyojono avainsanat
 	$tyojono_result = t_avainsana("TYOM_TYOJONO");
 	while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 		echo "<option value='$tyojono_row[selitetark]'>$tyojono_row[selitetark]</option>";
 	}
-	echo "</select>";
+	echo "</select><br>";
 	echo "<select class='tyostatus_sort'>";
-	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	echo "<option value=''>".t('Ei rajausta')."</option>";
+	echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
 
 	// Haetaan tyostatus avainsanat
 	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
@@ -212,30 +218,29 @@
 				yhtio.nimi yhtio,
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
-				a2.jarjestys prioriteetti,
 				a5.selitetark tyom_prioriteetti,
 				lasku.luontiaika,
 				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
 				FROM lasku
-				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
+				JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
 				JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
-				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-				LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono
-				LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
-				LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
-				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
-				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
-				LEFT JOIN avainsana a5 ON a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti
+				LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
+				LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
+				LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono)
+				LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+				LEFT JOIN kuka a3 ON (a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja)
+				LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
+				LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
+				LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
 				WHERE $konsernit
 				and lasku.tila in ('A','L','N','S','C')
 				and lasku.alatila != 'X'
 				$lisa
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
 				$omattyot
 				$lisa2
-				ORDER BY a5.selite, prioriteetti, luontiaika ASC";
+				ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();
@@ -417,16 +422,18 @@
 
 				// Haetaan tyojonot
 				echo "<select name='tyojono_muutos' onchange='submit();'>";
-				echo "<option value=''>Ei jonoa</option>";
+				echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
+
 				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
 				}
-				echo "</select>";
+				echo "</select><br>";
 
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
-				echo "<option value=''>Ei statusta</option>";
+				echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
+
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
@@ -453,6 +460,14 @@
 		}
 
 		echo "<td valign='top'>$muoklinkki</td>";
+
+		if ($vrow["tyojono"] == "") {
+			$vrow["tyojono"] = "EIJONOA";
+		}
+		if ($vrow["tyostatus"] == "") {
+			$vrow["tyostatus"] = "EISTATUSTA";
+		}
+
 		echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
 		echo "</tr>";
 	}

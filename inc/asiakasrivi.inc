@@ -150,12 +150,16 @@
 		elseif (strtoupper($trow[$i]) == 'P') {
 			$sel2 = "SELECTED";
 		}
+		elseif (strtoupper($trow[$i]) == 'K') {
+			$sel4 = "SELECTED";
+		}
 		else {
 			$sel = "SELECTED";
 		}
 
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' $sel>".t("Yritys")."</option>";
+		$ulos .= "<option value = 'K' $sel4>".t("Korjaamo")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";
 		$ulos .= "<option value = 'R' $sel3>".t("Prospekti")."</option>";
 		$ulos .= "<option value = 'P' $sel2>".t("Poistettu / Ei käytössä")."</option>";

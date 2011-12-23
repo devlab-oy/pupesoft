@@ -1081,15 +1081,15 @@
 								if ($sarjarow["era"] == $alkurow["era"] and $alkurow["hyllyalue"] == $prow["hyllyalue"] and $alkurow["hyllynro"] == $prow["hyllynro"] and $alkurow["hyllyvali"] == $prow["hyllyvali"] and $alkurow["hyllytaso"] == $prow["hyllytaso"]) {
 									$sel = "SELECTED";
 
-									$selpaikka = "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]";
+									$selpaikka = "$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]#!¡!#$alkurow[era]";
 								}
-								elseif (isset($_POST["era_new_paikka"][$prow["tunnus"]]) and $_POST["era_new_paikka"][$prow["tunnus"]] == "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]") {
+								elseif (isset($_POST["era_new_paikka"][$prow["tunnus"]]) and $_POST["era_new_paikka"][$prow["tunnus"]] == "$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]#!¡!#$alkurow[era]") {
 									$sel = "SELECTED";
 
-									$selpaikka = "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]";
+									$selpaikka = "$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]#!¡!#$alkurow[era]";
 								}
 
-								$sarjavalinta .= "<option value='$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]' $sel>";
+								$sarjavalinta .= "<option value='$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]#!¡!#$alkurow[era]' $sel>";
 
 								if (strtoupper($alkurow['varastomaa']) != strtoupper($yhtiorow['maa'])) {
 									$sarjavalinta .= strtoupper($alkurow['varastomaa'])." ";

@@ -83,6 +83,7 @@ if ($tee == "UUSI") {
 						ytunnus 		= '$trow[ytunnus]',
 						toim_ovttunnus 	= '$trow[kuka]',
 						tilinumero 		= '$trow[tilinumero]',
+						ultilno			= '$trow[ultilno]',
 						nimi 			= '$trow[kayttajanimi]',
 						nimitark 		= '".t("Matkalasku")."',
 						osoite 			= '$trow[osoite]',

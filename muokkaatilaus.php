@@ -299,15 +299,9 @@
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTOSUPER") {
-				$query = "	SELECT lasku.*
-							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila = 'A' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')
-							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
-							and tilausrivi.tyyppi 			= 'O'
-							and tilausrivi.laskutettuaika 	= '0000-00-00'
-							and tilausrivi.uusiotunnus 		= 0
-							GROUP by lasku.tunnus
-							ORDER by lasku.tunnus";
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila in ('A','')";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "HAAMU") {
@@ -1166,31 +1160,28 @@
 						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'OSTOSUPER') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
 							(SELECT count(*)
 							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
-							WHERE aputilausrivi.yhtio = tilausrivi.yhtio
-							AND aputilausrivi.otunnus = tilausrivi.otunnus
+							WHERE aputilausrivi.yhtio = lasku.yhtio
+							AND aputilausrivi.otunnus = lasku.tunnus
 							AND aputilausrivi.uusiotunnus > 0
 							AND aputilausrivi.kpl <> 0
 							AND aputilausrivi.tyyppi = 'O') varastokpl
-						FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-						JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != ''
+						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
-						and tilausrivi.tyyppi 			= 'O'
-						and tilausrivi.laskutettuaika 	= '0000-00-00'
-						and tilausrivi.uusiotunnus 		= 0
-						and lasku.tilaustyyppi			= ''
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'O'
+						and lasku.alatila in ('A','')
+						and lasku.tilaustyyppi	= ''
 						$haku
-						GROUP by lasku.tunnus
-						ORDER by lasku.luontiaika desc
+						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'HAAMU') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,

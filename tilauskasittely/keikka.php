@@ -261,7 +261,11 @@ if ($toiminto == "poista") {
 		$result = pupe_query($query);
 
 		// Mitätöidään keikalle suoraan "lisätyt" rivit eli otunnus=keikan tunnus ja uusiotunnus=0
-		$query  = "UPDATE tilausrivi SET tyyppi = 'D' where yhtio='$kukarow[yhtio]' and tila='O' and otunnus='$otunnus' and uusiotunnus=0";
+		$query  = "UPDATE tilausrivi SET tyyppi = 'D' where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$otunnus' and uusiotunnus=0";
+		$result = pupe_query($query);
+
+		// Siirretään tälle kiekalle lisätyt sille keikalle jolle ne on kohdistettu
+		$query  = "UPDATE tilausrivi SET otunnus=uusiotunnus where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$otunnus' and uusiotunnus>0";
 		$result = pupe_query($query);
 
 		// formissa on tullut myös $ytunnus, joten näin päästään takaisin selaukseen

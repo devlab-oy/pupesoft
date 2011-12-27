@@ -424,7 +424,7 @@
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
 			echo "<input type='submit' value='".t("Tallenna")."'>";
 			echo "</form></td>";
-			echo "<td><form method='post'>";
+			echo "<td><form method='post' onsubmit=\"return confirm('".t("Oletko varma, että haluat poistaa lokitiedoston?")."')\">";
 			echo "<input type='hidden' name='tee' value='poista_file'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
 			echo "<input type='submit' value='".t("Poista")."'>";

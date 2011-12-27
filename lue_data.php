@@ -2,6 +2,15 @@
 
 $lue_data_output_file = "";
 
+// Laitetaan max time 5H
+ini_set("max_execution_time", 18000);
+
+// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+//apache_setenv('no-gzip', 1);
+ini_set('zlib.output_compression', 0);
+ini_set('implicit_flush', 1);
+ob_implicit_flush(1);
+
 if (php_sapi_name() == 'cli') {
 	require('inc/connect.inc');
 	require('inc/functions.inc');
@@ -26,6 +35,7 @@ if (php_sapi_name() == 'cli') {
 	}
 
 	$kukarow['kuka'] = "cli";
+	$kukarow['nimi'] = "cli";
 
 	// Mik‰ tiedosto k‰sitell‰‰n
 	if (trim($argv[3]) != '') {
@@ -41,11 +51,11 @@ if (php_sapi_name() == 'cli') {
 	}
 
 	// Logfile, johon kirjoitetaan kaikki output
-	if (trim($argv[4]) != '') {
+	if (isset($argv[4]) and trim($argv[4]) != '') {
 		$lue_data_output_file = trim($argv[4]);
 		$fileparts = pathinfo($lue_data_output_file);
 
-		if (!is_file($fileparts["dirname"]) or !is_writable($fileparts["dirname"])) {
+		if (!is_writable($fileparts["dirname"])) {
 			die ("Virheellinen hakemisto: ".$fileparts["dirname"]);
 		}
 
@@ -60,20 +70,11 @@ else {
 	$cli = false;
 }
 
-// Laitetaan max time 5H
-ini_set("max_execution_time", 18000);
-
-// Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
-//apache_setenv('no-gzip', 1);
-ini_set('zlib.output_compression', 0);
-ini_set('implicit_flush', 1);
-ob_implicit_flush(1);
-
 // Funktio, jolla tehd‰‰n luedatan output
 function lue_data_echo($string) {
-	
+
 	global $cli, $lue_data_output_file;
-	
+
 	if ($cli === FALSE) {
 		echo $string;
 	}
@@ -163,23 +164,35 @@ if ($kasitellaan_tiedosto) {
 			exit;
 		}
 
-		/** Ladataan file **/
-		$file = fopen($kasiteltava_tiedoto_path_csv, "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+		$kasiteltava_tiedoto_path = $kasiteltava_tiedoto_path_csv;
+		$ext = "CSV";
+	}
+
+	if ($ext == "CSV") {
+		/** Ladataan CSV file **/
+		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
 		/** Laitetaan rivit arrayseen **/
 		$excelrivit = array();
 
 		while ($rivi = fgets($file)) {
 			/** Luetaan CSV rivi tiedostosta **/
-			$rivi = str_getcsv(utf8_decode($rivi));
+
+			// Katsotaan onko UTF-8 muodossa
+			if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
+				$rivi = str_getcsv(utf8_decode($rivi));
+			}
+			else {
+				$rivi = str_getcsv($rivi);
+			}
+
 			$excelrivit[] = $rivi;
 		}
 
 		fclose($file);
-
 	}
-	elseif ($ext == "CSV" or $ext == "TXT") {
-		/** Ladataan file **/
+	elseif ($ext == "TXT") {
+		/** Ladataan Tab eroteltu teksti file **/
 		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
 		/** Laitetaan rivit arrayseen **/
@@ -617,7 +630,10 @@ if ($kasitellaan_tiedosto) {
 
 		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
 
-			if ($cli) progress_bar($eriviindex, $max_rivit);
+			// Komentorivill‰ piirret‰‰n progressbar, ellei ole output loggaus p‰‰ll‰
+			if ($cli and $lue_data_output_file == "") {
+				progress_bar($eriviindex, $max_rivit);
+			}
 
 			$hylkaa    = 0;
 			$tila      = "";
@@ -643,8 +659,8 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 
-			if ($rivilaskuri % 500 == 0) {
-				lue_data_echo("<font class='message'>K‰sitell‰‰n rivi‰: $rivilaskuri</font><br>");
+			if ($cli === FALSE and $rivilaskuri % 500) {
+				echo "<font class='message'>K‰sitell‰‰n rivi‰: $rivilaskuri</font><br>";
 			}
 
 			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
@@ -1823,6 +1839,12 @@ if ($kasitellaan_tiedosto) {
 		}
 
 		lue_data_echo(t("P‰ivitettiin")." $lask ".t("rivi‰")."!<br><br>");
+
+		// Kirjoitetaan LOG fileen lopputagi, jotta tiedet‰‰n ett‰ ajo on valmis
+		if ($lue_data_output_file != "") {
+			lue_data_echo("## LUE-DATA-EOF ##");
+		}
+
 	}
 }
 

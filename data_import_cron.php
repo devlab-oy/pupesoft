@@ -8,6 +8,9 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
+	// Laitetaan unlimited max time
+	ini_set("max_execution_time", 0);
+
 	$data_import_lock_file = "/tmp/data_import.lock";
 
 	// Jos meillä ei ole lukkofileä, voidaan loopata

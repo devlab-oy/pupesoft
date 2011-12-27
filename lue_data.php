@@ -2,9 +2,6 @@
 
 $lue_data_output_file = "";
 
-// Laitetaan max time 5H
-ini_set("max_execution_time", 18000);
-
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 //apache_setenv('no-gzip', 1);
 ini_set('zlib.output_compression', 0);
@@ -66,6 +63,8 @@ if (php_sapi_name() == 'cli') {
 
 }
 else {
+	// Laitetaan max time 5H
+	ini_set("max_execution_time", 18000);
 	require ("inc/parametrit.inc");
 	$cli = false;
 }

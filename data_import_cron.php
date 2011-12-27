@@ -31,19 +31,21 @@
 				if (substr($file, 0, 9) == "lue-data#" and substr($file, -4) == ".CSV") {
 
 					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV
+					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV
 					$filen_tiedot = explode("#", $file);
 
 					// Ei käsitellä jos filename ei ole oikeaa muotoa
-					if (count($filen_tiedot) == 6) {
+					if (count($filen_tiedot) == 7) {
 
 						$kuka = $filen_tiedot[1];
 						$yhtio = $filen_tiedot[2];
 						$taulu = $filen_tiedot[3];
 						$random = $filen_tiedot[4];
-						$jarjestys = $filen_tiedot[5];
+						$orig_file = $filen_tiedot[5];
+						$jarjestys = $filen_tiedot[6];
 
 						// Logfile on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.LOG
-						$logfile = "lue-data#{$kuka}#{$yhtio}#{$taulu}#{$random}#{$jarjestys}.LOG";
+						$logfile = "lue-data#{$kuka}#{$yhtio}#{$taulu}#{$random}#{$orig_file}#{$jarjestys}.LOG";
 
 						// Ajetaan lue_data tälle tiedostolle
 						passthru("/usr/bin/php ".escapeshellarg($pupe_root_polku."/lue_data.php")." ".escapeshellarg($yhtio)." ".escapeshellarg($taulu)." ".escapeshellarg($pupe_root_polku."/datain/".$file)." ".escapeshellarg($pupe_root_polku."/datain/".$logfile));

@@ -17,7 +17,7 @@
 	if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
 
 		// Tarkistetaan eka, että tämä on tämän käyttäjän file
-		// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV.LOG
+		// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV.LOG
 		$filen_tiedot = explode("#", $datain_filenimi);
 		$kuka = $filen_tiedot[1];
 		$yhtio = $filen_tiedot[2];
@@ -53,6 +53,7 @@
 
 			echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...</font><br><br>\n";
 
+			$alkuperainen_filenimi = $_FILES['userfile']['name'];
 			$kasiteltava_tiedosto_path = $_FILES['userfile']['tmp_name'];
 
 			if ($_FILES['userfile']['size'] == 0) {
@@ -78,6 +79,11 @@
 
 			if (!is_executable("/usr/bin/split")) {
 				echo "<font class='error'>".t("Split komento ei ole asennettu")."!</font><br>\n";
+				$kasitellaan_tiedosto = FALSE;
+			}
+
+			if (strpos($alkuperainen_filenimi, "#") !== FALSE or strpos($alkuperainen_filenimi, "/") !== FALSE or strpos($alkuperainen_filenimi, ":") !== FALSE) {
+				echo "<font class='error'>".t("Tiedostonimessä kiellettyjä merkkejä").": '#' '/' ':' </font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
@@ -111,8 +117,8 @@
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
 			}
 
-			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV
-			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
+			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV
+			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'])."#".$alkuperainen_filenimi;
 			$kasiteltava_filepath = $pupe_root_polku."/datain/";
 			$kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
 
@@ -377,12 +383,14 @@
 				// Tämä logi on jo käsitelty
 				if (strpos($log, "## LUE-DATA-EOF ##") !== FALSE) {
 
-					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV.LOG
+					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV.LOG
 					$filen_tiedot = explode("#", $file);
 					$kuka = $filen_tiedot[1];
 					$taulu = $filen_tiedot[3];
+					$orig_file = $filen_tiedot[5];
 
 					$kasitelty[$kasitelty_i]["filename"] = $file;
+					$kasitelty[$kasitelty_i]["orig_file"] = $orig_file;
 					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$taulu];
 					$kasitelty[$kasitelty_i]["aika"] = date("d-m-Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
 					$kasitelty[$kasitelty_i]["kaunisnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
@@ -399,13 +407,15 @@
 
 		echo "<table>";
 		echo "<tr>";
+		echo "<th>".t("Tiedosto")."</th>";
 		echo "<th>".t("Taulu")."</th>";
 		echo "<th>".t("Käsitelty")."</th>";
 		echo "<th colspan='2'>".t("Lokitiedosto")."</th>";
 		echo "</tr>";
 
 		foreach ($kasitelty as $file) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
+			echo "<td>{$file["orig_file"]}</td>";
 			echo "<td>{$file["taulu"]}</td>";
 			echo "<td>{$file["aika"]}</td>";
 			echo "<td><form method='post'>";

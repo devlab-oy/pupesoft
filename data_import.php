@@ -184,141 +184,100 @@
 		echo "<br>";
 	}
 
-	$indx = array(
-		'asiakas',
-		'asiakasalennus',
-		'asiakashinta',
-		'asiakaskommentti',
-		'asiakkaan_avainsanat',
-		'abc_parametrit',
-		'autodata',
-		'autodata_tuote',
-		'avainsana',
-		'budjetti',
-		'etaisyydet',
-		'hinnasto',
-		'kalenteri',
-		'kustannuspaikka',
-		'liitetiedostot',
-		'maksuehto',
-		'pakkaus',
-		'perusalennus',
-		'rahtimaksut',
-		'rahtisopimukset',
-		'rekisteritiedot',
-		'sanakirja',
-		'sarjanumeron_lisatiedot',
-		'taso',
-		'tili',
-		'todo',
-		'toimi',
-		'toimitustapa',
-		'tullinimike',
-		'tuote',
-		'tuotepaikat',
-		'tuoteperhe',
-		'tuotteen_alv',
-		'tuotteen_avainsanat',
-		'tuotteen_orginaalit',
-		'tuotteen_toimittajat',
-		'vak',
-		'yhteensopivuus_auto',
-		'yhteensopivuus_auto_2',
-		'yhteensopivuus_mp',
-		'yhteensopivuus_rekisteri',
-		'yhteensopivuus_tuote',
-		'yhteensopivuus_tuote_lisatiedot',
-		'yhteyshenkilo',
-		'varaston_hyllypaikat',
-		'toimitustavan_lahdot',
-		'kuka',
-		'extranet_kayttajan_lisatiedot',
-		'auto_vari',
-		'auto_vari_tuote',
-		'auto_vari_korvaavat'
+	// Taulut, jota voidaan käsitellä
+	$taulut = array(
+		'abc_parametrit'                  => 'ABC-parametrit',
+		'asiakas'                         => 'Asiakas',
+		'asiakasalennus'                  => 'Asiakasalennukset',
+		'asiakashinta'                    => 'Asiakashinnat',
+		'asiakaskommentti'                => 'Asiakaskommentit',
+		'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
+		'avainsana'                       => 'Avainsanat',
+		'budjetti'                        => 'Budjetti',
+		'etaisyydet'                      => 'Etäisyydet varastosta',
+		'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',
+		'hinnasto'                        => 'Hinnasto',
+		'kalenteri'                       => 'Kalenteritietoja',
+		'kuka'                            => 'Kustannuspaikat',
+		'kustannuspaikka'                 => 'Käyttäjätietoja',
+		'liitetiedostot'                  => 'Liitetiedostot',
+		'maksuehto'                       => 'Maksuehto',
+		'pakkaus'                         => 'Pakkaustiedot',
+		'perusalennus'                    => 'Perusalennukset',
+		'rahtimaksut'                     => 'Rahtimaksut',
+		'rahtisopimukset'                 => 'Rahtisopimukset',
+		'rekisteritiedot'                 => 'Rekisteritiedot',
+		'sanakirja'                       => 'Sanakirja',
+		'sarjanumeron_lisatiedot'         => 'Sarjanumeron lisätiedot',
+		'taso'                            => 'Tilikartan rakenne',
+		'tili'                            => 'Tilikartta',
+		'todo'                            => 'Todo-lista',
+		'toimi'                           => 'Toimittaja',
+		'toimitustapa'                    => 'Toimitustavat',
+		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
+		'tullinimike'                     => 'Tullinimikeet',
+		'tuote'                           => 'Tuote',
+		'tuotepaikat'                     => 'Tuotepaikat',
+		'tuoteperhe'                      => 'Tuoteperheet',
+		'tuotteen_alv'                    => 'Tuotteen avainsanat',
+		'tuotteen_avainsanat'             => 'Tuotteen toimittajat',
+		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
+		'tuotteen_toimittajat'            => 'Tuotteiden ulkomaan ALV',
+		'vak'                             => 'VAK-tietoja',
+		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
+		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
 	);
 
+	// Lisätään dynaamiset tiedot
 	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+	$dynaamiset_avainsanat = "";
 
 	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		$indx[] = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+		$taulut["puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])] = "Dynaaminen_".strtolower($dynaamiset_avainsanat_row['selite']);
+		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+		}
 	}
 
-	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($indx, '');
+	// Yhtiökohtaisia
+	if ($kukarow['yhtio'] == 'mast') {
+		$taulut['auto_vari']              = 'Autoväri-datat';
+		$taulut['auto_vari_tuote']        = 'Autoväri-värikirja';
+		$taulut['auto_vari_korvaavat']    = 'Autoväri-korvaavat';
+	}
+
+	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
+		$taulut['autodata']                        = 'Autodata tuotetiedot';
+		$taulut['autodata_tuote']                  = 'Autodatatiedot';
+		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';
+		$taulut['yhteensopivuus_auto_2']           = 'Yhteensopivuus automallit 2';
+		$taulut['yhteensopivuus_mp']               = 'Yhteensopivuus mp-mallit';
+		$taulut['yhteensopivuus_rekisteri']        = 'Yhteensopivuus rekisterinumerot';
+		$taulut['yhteensopivuus_tuote']            = 'Yhteensopivuus tuotteet';
+		$taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lisätiedot';
+	}
+
+	// Taulut aakkosjärjestykseen
+	asort($taulut);
+	
+	// Selectoidaan aktiivi
+	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($taulut, '');
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";
-	echo "		<td>".t("Valitse tietokannan taulu").":</td>
-				<td><select name='table' onchange='submit();'>
-					<option value='asiakas' {$sel['asiakas']}>".t("Asiakas")."</option>
-					<option value='asiakasalennus' {$sel['asiakasalennus']}>".t("Asiakasalennukset")."</option>
-					<option value='asiakashinta' {$sel['asiakashinta']}>".t("Asiakashinnat")."</option>
-					<option value='asiakaskommentti' {$sel['asiakaskommentti']}>".t("Asiakaskommentit")."</option>
-					<option value='asiakkaan_avainsanat' {$sel['asiakkaan_avainsanat']}>".t("Asiakkaan avainsanat")."</option>
-					<option value='abc_parametrit' {$sel['abc_parametrit']}>".t("ABC-parametrit")."</option>
-					<option value='autodata' {$sel['autodata']}>".t("Autodatatiedot")."</option>
-					<option value='autodata_tuote' {$sel['autodata_tuote']}>".t("Autodata tuotetiedot")."</option>
-					<option value='avainsana' {$sel['avainsana']}>".t("Avainsanat")."</option>
-					<option value='budjetti' {$sel['budjetti']}>".t("Budjetti")."</option>
-					<option value='etaisyydet' {$sel['etaisyydet']}>".t("Etäisyydet varastosta")."</option>
-					<option value='hinnasto' {$sel['hinnasto']}>".t("Hinnasto")."</option>
-					<option value='kalenteri' {$sel['kalenteri']}>".t("Kalenteritietoja")."</option>
-					<option value='kustannuspaikka' {$sel['kustannuspaikka']}>".t("Kustannuspaikat")."</option>
-					<option value='liitetiedostot' {$sel['liitetiedostot']}>".t("Liitetiedostot")."</option>
-					<option value='maksuehto' {$sel['maksuehto']}>".t("Maksuehto")."</option>
-					<option value='pakkaus' {$sel['pakkaus']}>".t("Pakkaustiedot")."</option>
-					<option value='perusalennus' {$sel['perusalennus']}>".t("Perusalennukset")."</option>
-					<option value='rahtimaksut' {$sel['rahtimaksut']}>".t("Rahtimaksut")."</option>
-					<option value='rahtisopimukset' {$sel['rahtisopimukset']}>".t("Rahtisopimukset")."</option>
-					<option value='rekisteritiedot' {$sel['rekisteritiedot']}>".t("Rekisteritiedot")."</option>
-					<option value='sanakirja' {$sel['sanakirja']}>".t("Sanakirja")."</option>
-					<option value='sarjanumeron_lisatiedot' {$sel['sarjanumeron_lisatiedot']}>".t("Sarjanumeron lisätiedot")."</option>
-					<option value='taso' {$sel['taso']}>".t("Tilikartan rakenne")."</option>
-					<option value='tili' {$sel['tili']}>".t("Tilikartta")."</option>
-					<option value='todo' {$sel['todo']}>".t("Todo-lista")."</option>
-					<option value='toimi' {$sel['toimi']}>".t("Toimittaja")."</option>
-					<option value='toimitustapa' {$sel['toimitustapa']}>".t("Toimitustapoja")."</option>
-					<option value='tullinimike' {$sel['tullinimike']}>".t("Tullinimikeet")."</option>
-					<option value='tuote' {$sel['tuote']}>".t("Tuote")."</option>
-					<option value='tuotepaikat' {$sel['tuotepaikat']}>".t("Tuotepaikat")."</option>
-					<option value='tuoteperhe' {$sel['tuoteperhe']}>".t("Tuoteperheet")."</option>
-					<option value='tuotteen_alv' {$sel['tuotteen_alv']}>".t("Tuotteiden ulkomaan ALV")."</option>
-					<option value='tuotteen_avainsanat' {$sel['tuotteen_avainsanat']}>".t("Tuotteen avainsanat")."</option>
-					<option value='tuotteen_orginaalit' {$sel['tuotteen_orginaalit']}>".t("Tuotteiden originaalit")."</option>
-					<option value='tuotteen_toimittajat' {$sel['tuotteen_toimittajat']}>".t("Tuotteen toimittajat")."</option>
-					<option value='vak' {$sel['vak']}>".t("VAK-tietoja")."</option>
-					<option value='yhteensopivuus_auto' {$sel['yhteensopivuus_auto']}>".t("Yhteensopivuus automallit")."</option>
-					<option value='yhteensopivuus_auto_2' {$sel['yhteensopivuus_auto_2']}>".t("Yhteensopivuus automallit 2")."</option>
-					<option value='yhteensopivuus_mp' {$sel['yhteensopivuus_mp']}>".t("Yhteensopivuus mp-mallit")."</option>
-					<option value='yhteensopivuus_rekisteri' {$sel['yhteensopivuus_rekisteri']}>".t("Yhteensopivuus rekisterinumerot")."</option>
-					<option value='yhteensopivuus_tuote' {$sel['yhteensopivuus_tuote']}>".t("Yhteensopivuus tuotteet")."</option>
-					<option value='yhteensopivuus_tuote_lisatiedot' {$sel['yhteensopivuus_tuote_lisatiedot']}>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
-					<option value='yhteyshenkilo' {$sel['yhteyshenkilo']}>".t("Yhteyshenkilöt")."</option>
-					<option value='kuka' {$sel['kuka']}>".t("Käyttäjätietoja")."</option>
-					<option value='extranet_kayttajan_lisatiedot' {$sel['extranet_kayttajan_lisatiedot']}>".t("Extranet-käyttäjän lisätietoja")."</option>
-					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
-					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
+	echo "<td>".t("Valitse tietokannan taulu").":</td>";
+	echo "<td>";
+	echo "<select name='table' onchange='submit();'>";
 
-	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-	$dynaamiset_avainsanat = '';
-
-	if ($kukarow['yhtio'] == 'mast') {
-		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
-		echo "<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Autoväri-korvaavat")."</option>";
+	foreach ($taulut as $taulu => $nimitys) {
+		echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
 	}
 
-	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-		}
-
-		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-	}
-
-	echo "	</select></td></tr>";
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
 
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
 		echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
@@ -372,4 +331,3 @@
 
 		</table>
 		</form>";
-

@@ -190,11 +190,12 @@
 			unlink($header_file);
 
 			if ($montako_osaa > 1) {
-				echo "<font class='message'>".t("Tiedostosi")." $alkuperainen_filenimi ".t("jaettiin")." $montako_osaa. ".t("osaan").".</font><br><br>\n";
+				echo "<font class='message'>".t("Tiedostosi")." $alkuperainen_filenimi ".t("jaettiin")." $montako_osaa ".t("osaan").".</font>\n";
 				echo "<font class='message'>".t("Jokainen osa sis‰lt‰‰ 10000 rivi‰").".</font><br><br>\n";
 			}
 
-			echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon").". ".t("Voit nyt poistua t‰st‰ ohjelmasta. Tiedostosi sis‰‰nluetaan automaattisesti heti kuin mahdollista. Palaa t‰h‰n ohjelmaan n‰hd‰ksesi ajon tuloksen.")."</font><br><br>\n";
+			echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon.")." ".t("Voit nyt poistua t‰st‰ ohjelmasta.")."</font><br>"
+			echo "<font class='message'>".t("Tiedosto sis‰‰nluetaan automaattisesti.")." ".t("Palaa t‰h‰n ohjelmaan n‰hd‰ksesi ajon tuloksen.")."</font><br><br>\n";
 		}
 		else {
 			echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>\n";

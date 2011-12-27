@@ -9318,11 +9318,12 @@ if (!function_exists("progress_bar")) {
 
 		$timeparts = explode(" ", microtime());
 		$microtime_stop = $timeparts[1].substr($timeparts[0], 1);
+		$current_item = ($current_item == 0) ? 1 : $current_item;
 
 		$microtime_current = round($microtime_stop - $microtime_start, 0);
 		$microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
+		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)          \r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
 	}
 }
 

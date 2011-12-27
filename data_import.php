@@ -5,7 +5,36 @@
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
 
+	// Ladataan tiedosto
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	require ("inc/parametrit.inc");
+
+	// Ladataan tai poistetaan tiedosto
+	if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
+
+		// Tarkistetaan eka, ett‰ t‰m‰ on t‰m‰n k‰ytt‰j‰n file
+		// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV.LOG
+		$filen_tiedot = explode("#", $datain_filenimi);
+		$kuka = $filen_tiedot[1];
+		$yhtio = $filen_tiedot[2];
+
+		$datain_filenimi = basename($datain_filenimi);
+
+		if ($kuka != $kukarow["kuka"] or $yhtio != $kukarow["yhtio"]) {
+			echo "<font class='error'>".t("Virheellinen tiedostonimi")."!</font><br>";
+		}
+		elseif ($tee == "lataa_tiedosto") {
+			readfile($pupe_root_polku."/datain/".$datain_filenimi);
+			exit;
+		}
+		elseif ($tee == "poista_file") {
+			unlink($pupe_root_polku."/datain/".$datain_filenimi);
+		}
+	}
 
 	echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
 
@@ -165,11 +194,12 @@
 	if ($handle = opendir($pupe_root_polku."/datain")) {
 	    while (false !== ($file = readdir($handle))) {
 			// T‰m‰ file on valmis lue-data file
+
 			if (substr($file, 0, 9) == "lue-data#" and substr($file, -4) == ".CSV") {
 				$tiedostoja_jonossa++;
 
 				// T‰m‰ on t‰m‰n k‰ytt‰j‰n file
-				if (substr($file, 0, 10+strlen($kukarow["kuka"])) == "lue-data#{$kukarow["kuka"]}#") {
+				if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#") {
 					$omia_tiedostoja_jonossa++;
 				}
 			}
@@ -179,8 +209,8 @@
 
 	if ($tiedostoja_jonossa > 0) {
 		echo "<br>";
-		echo "<font class='message'>Sinulla on $omia_tiedostoja_jonossa tiedostoa k‰sittelyss‰.</font><br>";
-		echo "<font class='message'>Yhteens‰ k‰sittelyss‰ on $tiedostoja_jonossa tiedostoa.</font><br>";
+		echo "<font class='message'>".t("Sinulla")." ".t("on")." $omia_tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k‰sittely‰").".</font><br>";
+		echo "<font class='message'>".t("Palvelimella")." ".t("on")." ".t("yhteens‰")." $tiedostoja_jonossa ".t("tiedostoa")." ".t("odottamassa k‰sittely‰").".</font><br>";
 		echo "<br>";
 	}
 
@@ -259,7 +289,7 @@
 
 	// Taulut aakkosj‰rjestykseen
 	asort($taulut);
-	
+
 	// Selectoidaan aktiivi
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($taulut, '');
 
@@ -330,4 +360,69 @@
 		</tr>
 
 		</table>
-		</form>";
+		</form>
+		<br>";
+
+	// N‰ytet‰‰n k‰ytt‰j‰n kaikki LOG filet
+	$kasitelty = array();
+	$kasitelty_i = 0;
+
+	if ($handle = opendir($pupe_root_polku."/datain")) {
+	    while (false !== ($file = readdir($handle))) {
+			// T‰m‰ file on valmis lue-data file
+			if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
+
+				$log = file_get_contents($pupe_root_polku."/datain/".$file);
+
+				// T‰m‰ logi on jo k‰sitelty
+				if (strpos($log, "## LUE-DATA-EOF ##") !== FALSE) {
+
+					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV.LOG
+					$filen_tiedot = explode("#", $file);
+					$kuka = $filen_tiedot[1];
+					$taulu = $filen_tiedot[3];
+
+					$kasitelty[$kasitelty_i]["filename"] = $file;
+					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$taulu];
+					$kasitelty[$kasitelty_i]["aika"] = date("d-m-Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
+					$kasitelty[$kasitelty_i]["kaunisnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
+					$kasitelty_i++;
+				}
+			}
+	    }
+	    closedir($handle);
+	}
+
+	if (count($kasitelty) > 0) {
+
+		echo "<font class='head'>".t("Sinun k‰sitellyt ajot").":</font><hr>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Taulu")."</th>";
+		echo "<th>".t("K‰sitelty")."</th>";
+		echo "<th colspan='2'>".t("Lokitiedosto")."</th>";
+		echo "</tr>";
+
+		foreach ($kasitelty as $file) {
+			echo "<tr>";
+			echo "<td>{$file["taulu"]}</td>";
+			echo "<td>{$file["aika"]}</td>";
+			echo "<td><form method='post'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='{$file["kaunisnimi"]}'>";
+			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
+			echo "<input type='submit' value='".t("Tallenna")."'>";
+			echo "</form></td>";
+			echo "<td><form method='post'>";
+			echo "<input type='hidden' name='tee' value='poista_file'>";
+			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
+			echo "<input type='submit' value='".t("Poista")."'>";
+			echo "</form></td>";
+			echo "</tr>";
+		}
+
+		echo "</table>";
+	}
+
+	require("inc/footer.inc");

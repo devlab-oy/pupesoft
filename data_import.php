@@ -152,6 +152,8 @@
 			// Poistetaan alkuper‰inen
 			unlink($kasiteltava_kokonimi);
 
+			$montako_osaa = 0;
+
 			// Loopataan l‰pi kaikki splitatut tiedostot
 			if ($handle = opendir($kasiteltava_filepath)) {
 			    while (false !== ($file = readdir($handle))) {
@@ -177,6 +179,8 @@
 							// Renametaan temppifile alkuper‰iseksi plus CSV p‰‰te
 							rename($temp_file, $file.".CSV");
 						}
+
+						$montako_osaa++;
 					}
 			    }
 			    closedir($handle);
@@ -185,7 +189,12 @@
 			// Poistetaan headerifile
 			unlink($header_file);
 
-			echo "<font class='message'>".t("Tiedosto laitettu k‰sittelyjonoon")."!</font><br><br>\n";
+			if ($montako_osaa > 1) {
+				echo "<font class='message'>".t("Tiedostosi")." $alkuperainen_filenimi ".t("jaettiin")." $montako_osaa. ".t("osaan").".</font><br><br>\n";
+				echo "<font class='message'>".t("Jokainen osa sis‰lt‰‰ 10000 rivi‰").".</font><br><br>\n";
+			}
+
+			echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon").". ".t("Voit nyt poistua t‰st‰ ohjelmasta. Tiedostosi sis‰‰nluetaan automaattisesti heti kuin mahdollista. Palaa t‰h‰n ohjelmaan n‰hd‰ksesi ajon tuloksen.")."</font><br><br>\n";
 		}
 		else {
 			echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>\n";

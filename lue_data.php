@@ -1851,7 +1851,7 @@ if ($kasitellaan_tiedosto) {
 				lue_data_echo("\nVirheelliset $taulu rivit:\n");
 
 				// Excelin headeri
-				$output = "\"rivi\",";
+				$output = "\"virheellinen_rivi\",";
 				foreach ($excelrivit[0] as $otsikko) {
 					$output .= "\"$otsikko\",";
 				}

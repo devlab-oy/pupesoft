@@ -392,7 +392,7 @@
 					$kasitelty[$kasitelty_i]["filename"] = $file;
 					$kasitelty[$kasitelty_i]["orig_file"] = $orig_file;
 					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$taulu];
-					$kasitelty[$kasitelty_i]["aika"] = date("d-m-Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
+					$kasitelty[$kasitelty_i]["aika"] = date("d.m.Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
 					$kasitelty[$kasitelty_i]["kaunisnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
 					$kasitelty_i++;
 				}

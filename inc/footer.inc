@@ -1,5 +1,10 @@
 <?php
 
+	if (php_sapi_name() == "cli") {
+		mysql_close($link);
+		exit;
+	}
+
 	if (isset($formi) and isset($kentta)) {
 		echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 	}
@@ -8,7 +13,6 @@
 	$endtime   = $timeparts[1].substr($timeparts[0],1);
 	$aika      = round($endtime-$starttime,4);
 	$useslave  = 0;
-	$onko_cli  = (php_sapi_name() == "cli") ? TRUE : FALSE;
 
 	if ((!isset($verkkokauppa) or $verkkokauppa == "") and require("connect.inc")) {
 		$suoque = "	INSERT INTO suorituskykyloki
@@ -26,12 +30,6 @@
 
 	$lopeta_body = TRUE;
 	$piirra_sanakirja = TRUE;
-
-	// Piilotetaan koko body
-	if ($onko_cli === TRUE) {
-		$lopeta_body = FALSE;
-		$piirra_sanakirja = FALSE;
-	}
 
 	// Piilotetaan koko body
 	if (isset($nayta_pdf) and $nayta_pdf == "1") {

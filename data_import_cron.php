@@ -49,7 +49,7 @@
 						passthru("/usr/bin/php ".escapeshellarg($pupe_root_polku."/lue_data.php")." ".escapeshellarg($yhtio)." ".escapeshellarg($taulu)." ".escapeshellarg($pupe_root_polku."/datain/".$file)." ".escapeshellarg($pupe_root_polku."/datain/".$logfile));
 
 						// Siirret‰‰n file k‰sitellyksi
-						rename($file, $file.".DONE");
+						rename($pupe_root_polku."/datain/".$file, $pupe_root_polku."/datain/".$file.".DONE");
 					}
 				}
 		    }

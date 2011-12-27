@@ -1,6 +1,7 @@
 <?php
 
 $lue_data_output_file = "";
+$lue_data_virheelliset_rivit = array();
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 //apache_setenv('no-gzip', 1);
@@ -401,9 +402,6 @@ if ($kasitellaan_tiedosto) {
 				}
 			}
 		}
-
-		// Tuhotaan as we go, ku näitä ei enää tarvita...
-		unset($excelrivit[$excei]);
 	}
 
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
@@ -1835,6 +1833,10 @@ if ($kasitellaan_tiedosto) {
 				}
 			}
 
+			// Meillä oli joku virhe
+			if ($tila == 'ohita' or $hylkaa > 0) {
+				$lue_data_virheelliset_rivit[$rivilaskuri-1] = $excelrivit[$rivilaskuri-1];
+			}
 		}
 
 		lue_data_echo(t("Päivitettiin")." $lask ".t("riviä")."!<br><br>");
@@ -1842,6 +1844,28 @@ if ($kasitellaan_tiedosto) {
 		// Kirjoitetaan LOG fileen lopputagi, jotta tiedetään että ajo on valmis
 		if ($lue_data_output_file != "") {
 			lue_data_echo("## LUE-DATA-EOF ##");
+
+			// Kirjoitetaan vielä loppuun virheelliset rivit
+			if (count($lue_data_virheelliset_rivit) > 0) {
+
+				lue_data_echo("\nVirheelliset $taulu rivit:\n");
+
+				// Excelin headeri
+				$output = "\"rivi\",";
+				foreach ($excelrivit[0] as $otsikko) {
+					$output .= "\"$otsikko\",";
+				}
+				lue_data_echo(substr($output, 0, -1));
+
+				// Virheelliset rivit
+				foreach ($lue_data_virheelliset_rivit as $rivinro => $lue_data_virheellinen_rivi) {
+					$output = ($rivinro+1).",";
+					foreach ($lue_data_virheellinen_rivi as $lue_data_virheellinen_sarake) {
+						$output .= "\"$lue_data_virheellinen_sarake\",";
+					}
+					lue_data_echo(substr($output, 0, -1));
+				}
+			}
 		}
 
 	}

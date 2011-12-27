@@ -2840,7 +2840,7 @@ if ($tee == '') {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
 				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
-			
+
 			// Katsotaan onko liitetiedostoja
 			$liitequery = "	SELECT tunnus, selite
 							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
@@ -3019,7 +3019,7 @@ if ($tee == '') {
 					echo "</select></td></tr>";
 				}
 			}
-			
+
 			if ($faktarow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
 				echo "<tr>$jarjlisa<td class='back'></td>";
 				echo "<td colspan='3' class='back'>";
@@ -5121,16 +5121,16 @@ if ($tee == '') {
 				if ($tilauksen_jarjestys != 'M' and $tuoteperhe_kayty != $row['perheid'] and (($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '5' or ($tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '0' and $erikoistuote_tuoteperhe[$row['perheid']] == $row['sorttauskentta']))) or $row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U"))))) {
 
 					if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
-						$pklisa = " and tunnus = '$row[tunnus]'";
+						$pklisa = " and tilausrivi.tunnus = '$row[tunnus]'";
 					}
 					elseif (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
-						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]' or tunnus = '$row[tunnus]')";
+						$pklisa = " and (tilausrivi.perheid = '$row[tunnus]' or tilausrivi.perheid2 = '$row[tunnus]' or tilausrivi.tunnus = '$row[tunnus]')";
 					}
 					elseif ($row["perheid"] == 0) {
-						$pklisa = " and perheid2 = '$row[perheid2]'";
+						$pklisa = " and tilausrivi.perheid2 = '$row[perheid2]'";
 					}
 					else {
-						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
+						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
 					}
 
 					$query = "	SELECT sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)

@@ -151,7 +151,7 @@
 
 			if ($tee == "liita") {
 				if (count($liita) > 0) {
-					foreach($liita as $l => $v) {
+					foreach ($liita as $l => $v) {
 						//	Otetaan originaali laskurow talteen..
 						$olaskurow 		= $laskurow;
 						$otunnus 		= $l;
@@ -187,7 +187,7 @@
 	if ((int) $tunnus != 0) {
 		$tunnus = mysql_real_escape_string($tunnus);
 
-		$query = "	SELECT hyvak1, h1time
+		$query = "	SELECT tilaustyyppi, hyvak1, h1time, hyvak2, h2time
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$tunnus'";
@@ -196,9 +196,20 @@
 		if (mysql_num_rows($check_res) == 1) {
 			$check_row = mysql_fetch_assoc($check_res);
 
-			// jos ensimmäinen hyväksyjä on tää käyttäjä ja ei olla vielä hyväksytty
-			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
+			if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak2'] == $kukarow['kuka'] and $check_row["h2time"] == "0000-00-00 00:00:00") {
+				// Matkalaskuilla eka hyväksyjä on aina matkustaja itse joka ei saa korjata kirjanpitoa, vaan toka hyväksyjä vastaa tiliöinneistä
 				$onko_eka_hyvaksyja = TRUE;
+				$eka_hyvaksyja = $check_row['hyvak2'];
+			}
+			elseif ($check_row['tilaustyyppi'] != "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
+				// jos ensimmäinen hyväksyjä on tää käyttäjä ja ei olla vielä hyväksytty
+				$onko_eka_hyvaksyja = TRUE;
+				$eka_hyvaksyja = $check_row['hyvak1'];
+			}
+
+			// Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä
+			if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
+				if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) $kukarow['taso'] = 1;
 			}
 		}
 	}
@@ -220,7 +231,7 @@
 
 		$trow = mysql_fetch_assoc($result);
 
-		if ($trow['hyvak1'] == $kukarow['kuka']) {
+		if ($onko_eka_hyvaksyja) {
 			$hyvak_apu_tee  = $tee;
 			$hyvak_apu_tila = $tila;
 
@@ -529,7 +540,7 @@
 
 		$laskurow = mysql_fetch_assoc($result);
 
-		if ($laskurow['hyvak1'] != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
+		if ($eka_hyvaksyja != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
 			echo pupe_eror('lasku on väärässä tilassa');
 
 			require ("inc/footer.inc");
@@ -573,20 +584,23 @@
 
 		$laskurow = mysql_fetch_assoc($result);
 
-		//	Jos tehdään matkalaskun ensimmäinen hyväksyntä..
+		//	Kun tehdään matkalaskun ensimmäinen hyväksyntä..
 		if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
 
-			$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
 
+			if ($toimirow["oletus_erapvm"] > 0) $erpaivia = $toimirow["oletus_erapvm"];
+			else $erpaivia = 1;
+
 			//	Päivitetään tapvm ja viesti laskulle
 			$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
-			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL $toimirow[oletus_erapvm] DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
+			$query = " UPDATE lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL $erpaivia DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 			$updres = pupe_query($query);
 
 			//	Päivitetään tiliöintien tapvm as well
-			$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
+			$query = " UPDATE tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
 			$updres = pupe_query($query);
 
 		}
@@ -679,9 +693,9 @@
         $query = "	UPDATE lasku SET
 					$kentta = now(),
 					hyvaksyja_nyt = '$hyvaksyja_nyt',
-					tila = '$tila',
+					tila 	= '$tila',
 			 		alatila = '',
-					mapvm='$mapvm'
+					mapvm	= '$mapvm'
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);
 
@@ -908,7 +922,7 @@
 		echo "<tr>";
 		echo "<td>$laskurow[kuka]</td>";
 
-		if (($kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $laskurow['hyvak1'] == $kukarow['kuka']) {
+		if (($kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $onko_eka_hyvaksyja) {
 
 			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus";
 
@@ -1093,7 +1107,7 @@
 		}
 
 		// Jos laskua hyvaksyy ensimmäinen henkilö ja laskulla on annettu mahdollisuus hyvksyntälistan muutokseen näytetään se!";
-		if ($laskurow['hyvak1'] == $laskurow['hyvaksyja_nyt'] and $laskurow['h1time'] == '0000-00-00 00:00:00' and $laskurow['hyvaksynnanmuutos'] != '') {
+		if ($onko_eka_hyvaksyja and $laskurow['hyvaksynnanmuutos'] != '') {
 
 			echo "<td class='back' valign='top'><table>";
 
@@ -1117,7 +1131,7 @@
 			          	FROM kuka
 			          	WHERE yhtio = '$kukarow[yhtio]'
 						and hyvaksyja = 'o'
-						and kuka = '$laskurow[hyvak1]'
+						and kuka = '$eka_hyvaksyja'
 			          	ORDER BY nimi";
 			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_assoc($vresult);
@@ -1262,8 +1276,8 @@
 						HAVING vanhatunnus = 0";
 			$apure = pupe_query($query);
 
-			if (mysql_num_rows($apure)>0) {
-				while($apurow = mysql_fetch_assoc($apure)) {
+			if (mysql_num_rows($apure) > 0) {
+				while ($apurow = mysql_fetch_assoc($apure)) {
 
 					if ($apurow["comments"] != "") $apurow["comments"] = "<i>($apurow[comments])</i>";
 
@@ -1499,11 +1513,13 @@
 		if ($nayta != '') $nayta = '';
 		else $nayta = "and alatila != 'H'";
 
+		// and alatila != 'M', keskeneräisiä matkalaskuja ei näytetä
 		$query = "	SELECT *, round(summa * vienti_kurssi, 2) kotisumma
 				 	FROM lasku
 				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]'
 					and yhtio = '$kukarow[yhtio]'
 					and tila != 'D'
+					and alatila != 'M'
 					$nayta
 				  	ORDER BY if (kapvm!='0000-00-00',kapvm,erpcm)";
 		$result = pupe_query($query);
@@ -1555,7 +1571,7 @@
 			echo "<tr class='aktiivi'>";
 
 			 // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
-			if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $trow['hyvak1'] == $kukarow['kuka']) {
+			if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $onko_eka_hyvaksyja) {
 				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {

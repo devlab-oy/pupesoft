@@ -4,6 +4,22 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr>";
 
+if ($tee == "VALMIS") {
+	$query = "	UPDATE lasku SET
+				alatila = ''
+				WHERE yhtio 	 = '$kukarow[yhtio]'
+				and tunnus 		 = '$tilausnumero'
+				and tila		 = 'H'
+				and tilaustyyppi = 'M'
+				and alatila 	 = 'M'";
+	$updres = pupe_query($query);
+
+	$tee 		  = "";
+	$tunnus 	  = 0;
+	$tilausnumero = 0;
+}
+
+
 if ($tee == "UUSI") {
 
 	//	tarkastetaan että käyttäjälle voidaan perustaa matkalaskuja
@@ -70,6 +86,19 @@ if ($tee == "UUSI") {
 
 		if ($asiakasid > 0 or isset($EI_ASIAKASTA_X)) {
 
+			if ($trow["oletus_erapvm"] > 0) $erpaivia = $trow["oletus_erapvm"];
+			else $erpaivia = 1;
+
+			// haetaan seuraava vapaa matkalaskunumero
+			$query  = "	SELECT max(laskunro) laskunro
+						FROM lasku
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tila IN ('H','Y','M','P','Q')
+						and tilaustyyppi = 'M'";
+			$result = pupe_query($query);
+			$row    = mysql_fetch_assoc($result);
+			$maxmatkalasku = $row["laskunro"]+1;
+
 			// Perustetaan lasku
 			$query = "	INSERT into lasku set
 						yhtio 			= '$kukarow[yhtio]',
@@ -100,6 +129,7 @@ if ($tee == "UUSI") {
 						vienti 			= 'A',
 						ebid 			= '',
 						tila 			= 'H',
+						alatila 		= 'M',
 						swift 			= '$trow[swift]',
 						pankki1 		= '$trow[pankki1]',
 						pankki2 		= '$trow[pankki2]',
@@ -109,11 +139,12 @@ if ($tee == "UUSI") {
 						laatija 		= '$kukarow[kuka]',
 						luontiaika 		= now(),
 						tapvm			= current_date,
-						erpcm			= date_add(current_date, INTERVAL 14 day),
+						erpcm			= date_add(current_date, INTERVAL $erpaivia day),
 						liitostunnus 	= '$trow[tunnus]',
 						hyvaksynnanmuutos = '$trow[oletus_hyvaksynnanmuutos]',
-						suoraveloitus 	  = '',
-						tilaustyyppi	  = 'M'";
+						suoraveloitus 	= '',
+						tilaustyyppi	= 'M',
+						laskunro		= '$maxmatkalasku'";
 			$result = pupe_query($query);
 			$tilausnumero = mysql_insert_id();
 
@@ -528,7 +559,7 @@ if ($tee != "") {
 								summa 		= '$summa',
 								vero 		= '$vero',
 								selite 		= '".mysql_real_escape_string($selite)."',
-								lukko 		= '1',
+								lukko 		= '',
 								tosite 		= '$tositenro',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
@@ -2013,6 +2044,9 @@ if ($tee == "MUOKKAA") {
 	if ($lopetus == "") {
 		echo "	<form name='palaa' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='tee' value='VALMIS'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='submit' value='".t("Matkalasku valmis")."'>
 				</form>";
 	}
@@ -2141,23 +2175,25 @@ if ($tee == "") {
 				FROM lasku
 				LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and kuka.kuka=lasku.hyvak1
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and tila = 'H'
+				and lasku.tila = 'H'
+				and lasku.mapvm = '0000-00-00'
 				and (
-					(hyvak2 = '$kukarow[kuka]' and h2time = '0000-00-00 00:00:00' and hyvaksyja_nyt = '$kukarow[kuka]') or
-					(hyvak3 = '$kukarow[kuka]' and h3time = '0000-00-00 00:00:00' and hyvaksyja_nyt = '$kukarow[kuka]') or
-					(hyvak4 = '$kukarow[kuka]' and h4time = '0000-00-00 00:00:00' and hyvaksyja_nyt = '$kukarow[kuka]') or
-					(hyvak5 = '$kukarow[kuka]' and h5time = '0000-00-00 00:00:00' and hyvaksyja_nyt = '$kukarow[kuka]')
+					(lasku.hyvak2 = '$kukarow[kuka]' and lasku.h2time = '0000-00-00 00:00:00' and lasku.hyvaksyja_nyt = '$kukarow[kuka]') or
+					(lasku.hyvak3 = '$kukarow[kuka]' and lasku.h3time = '0000-00-00 00:00:00' and lasku.hyvaksyja_nyt = '$kukarow[kuka]') or
+					(lasku.hyvak4 = '$kukarow[kuka]' and lasku.h4time = '0000-00-00 00:00:00' and lasku.hyvaksyja_nyt = '$kukarow[kuka]') or
+					(lasku.hyvak5 = '$kukarow[kuka]' and lasku.h5time = '0000-00-00 00:00:00' and lasku.hyvaksyja_nyt = '$kukarow[kuka]')
 				)
-				and tilaustyyppi = 'M'";
+				and lasku.tilaustyyppi = 'M'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result)) {
 
 		echo "<br><br><font class='message'>".t("Hyväksynnässä olevat matkalaskut")."</font><hr>";
-		echo "<table><tr><th>".t("Käyttäjä")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
+		echo "<table><tr><th>".t("Laskunro")."</th><th>".t("Käyttäjä")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
 
 		while ($row = mysql_fetch_assoc($result)) {
 			echo "<tr>";
+			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[kayttajanimi]</td>";
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
@@ -2185,19 +2221,21 @@ if ($tee == "") {
 	$query = "	SELECT *
 				FROM lasku
 				WHERE yhtio 		= '$kukarow[yhtio]'
+				and tila 			= 'H'
+				and mapvm 			= '0000-00-00'
 				and toim_ovttunnus	= '$kukarow[kuka]'
 				and h1time 			= '0000-00-00 00:00:00'
-				and tila 			= 'H'
 				and tilaustyyppi 	= 'M'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 
 		echo "<br><br><font class='message'>".t("Avoimet matkalaskusi")."</font><hr>";
-		echo "<table><tr><th>".t("Henkilö")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
+		echo "<table><tr><th>".t("Laskunro")."</th><th>".t("Henkilö")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
 
 		while ($row = mysql_fetch_assoc($result)) {
 			echo "<tr>";
+			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[nimi]</td>";
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
@@ -2224,9 +2262,10 @@ if ($tee == "") {
 	$query = "	SELECT *
 				FROM lasku
 				WHERE yhtio 		= '$kukarow[yhtio]'
+				and tila 		   IN ('H','Y','M','P','Q')
+				and mapvm 			= '0000-00-00'
 				and toim_ovttunnus 	= '$kukarow[kuka]'
 				and h1time 		   != '0000-00-00 00:00:00'
-				and tila 		   IN ('H','Y','M','P','Q')
 				and tilaustyyppi 	= 'M'
 				ORDER BY luontiaika DESC";
 	$result = pupe_query($query);
@@ -2234,7 +2273,7 @@ if ($tee == "") {
 	if (mysql_num_rows($result)) {
 
 		echo "<br><br><font class='message'>".t("Vanhat matkalaskusi")."</font><hr>";
-		echo "<table><tr><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><th>".t("Tila")."</th><tr>";
+		echo "<table><tr><th>".t("Laskunro")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><th>".t("Tila")."</th><tr>";
 
 		while ($row = mysql_fetch_assoc($result)) {
 			$laskutyyppi = $row["tila"];
@@ -2249,6 +2288,7 @@ if ($tee == "") {
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 			echo "<tr>";
+			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";

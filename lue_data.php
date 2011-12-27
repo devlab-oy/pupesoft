@@ -143,31 +143,6 @@ if ($kasitellaan_tiedosto) {
 	/** K‰sitelt‰v‰n filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
-	/** Meill‰ on ssconvert ohjelma (gnumeric) ja joku Excel formaatti. K‰‰nnet‰‰n CSV muotoon, koska vie paljon v‰hemm‰n resursseja. **/
-	if (is_executable("/usr/bin/ssconvert") and ($ext == "XLS" or $ext == "XLSX")) {
-
-		$kasiteltava_tiedoto_path_csv = $kasiteltava_tiedoto_path.".csv";
-
-		/** M‰‰ritell‰‰n importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentorivilt‰: ssconvert --list-importers **/
-		if ($ext == "XLSX") {
-			$import_type = "--import-type=Gnumeric_Excel:xlsx";
-		}
-		else {
-			$import_type = "--import-type=Gnumeric_Excel:excel";
-		}
-
-		$return = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedoto_path)." ".escapeshellarg($kasiteltava_tiedoto_path_csv));
-
-		if ($return === FALSE) {
-			lue_data_echo("<font class='error'>".t("Tiedoston konversio ep‰onnistui")."!</font><br>");
-			require ("inc/footer.inc");
-			exit;
-		}
-
-		$kasiteltava_tiedoto_path = $kasiteltava_tiedoto_path_csv;
-		$ext = "CSV";
-	}
-
 	if ($ext == "CSV") {
 		/** Ladataan CSV file **/
 		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");

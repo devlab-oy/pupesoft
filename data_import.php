@@ -82,8 +82,8 @@
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
 			}
 
-			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#taulu#randombit#jarjestys.CSV
-			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
+			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.CSV
+			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
 			$kasiteltava_filepath = $pupe_root_polku."/datain/";
 			$kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
 

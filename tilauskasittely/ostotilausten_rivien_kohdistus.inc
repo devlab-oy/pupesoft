@@ -1078,7 +1078,7 @@ if ($tila == '') {
 		$alku = 0;
 	}
 
-	$unionwhere1 = " and lasku.tila = 'O' and alatila = 'A' ";
+	$unionwhere1 = " and lasku.tila = 'O' and alatila in ('A','X') ";
 	$unionwhere2 = " and lasku.tila = 'K' ";
 	$tilriindex  = "yhtio_otunnus";
 

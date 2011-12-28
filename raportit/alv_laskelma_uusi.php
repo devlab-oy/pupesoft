@@ -986,10 +986,13 @@
 
 			echo "</table><br>";
 
+			//HUOM: AND tiliointi.selite not like 'Avaavat saldot%'. Pitäisi mieluummin ratkaista niin, että "Avaavat saldot"-tositteen alatila ois esim "A"
+
 			$query = "	SELECT sum(tiliointi.summa) vero
 						FROM tiliointi
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						AND tiliointi.korjattu = ''
+						AND tiliointi.selite not like 'Avaavat saldot%'
 						AND tiliointi.tilino = '$yhtiorow[alv]'
 						AND tiliointi.tapvm >= '$startmonth'
 						AND tiliointi.tapvm <= '$endmonth'";

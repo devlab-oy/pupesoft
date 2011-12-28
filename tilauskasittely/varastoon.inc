@@ -196,7 +196,7 @@ if ($laskurow["vienti_kurssi"] == 0) {
 	}
 }
 
-if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and $yhtiorow["jalkilaskenta_kuluperuste"] == "") {
+if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and ($yhtiorow["jalkilaskenta_kuluperuste"] == "" or ($yhtiorow["jalkilaskenta_kuluperuste"] == "PX" and $laskurow["saldo_maksettu"] !=0))) {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 	$rahtitapa  = t("Virallinen");

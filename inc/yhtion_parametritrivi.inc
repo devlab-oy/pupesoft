@@ -2803,7 +2803,8 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -601,6 +601,9 @@ if ($silent == "") {
 		elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
 			$vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
 		}
+		elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'PX') {
+			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
+		}
 		else {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}

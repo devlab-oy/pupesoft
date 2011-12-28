@@ -33,6 +33,7 @@
 		$userfile	= trim($argv[2]);
 		$filenimi	= $userfile;
 		$ok 		= 1;
+		$palvelin2  = "";
 	}
 	else {
 		require ("inc/parametrit.inc");
@@ -176,6 +177,9 @@
 					}
 					else {
 						$yritirow = mysql_fetch_assoc($yritiresult);
+						
+						// Setataan kukarow-yhtiö
+						$kukarow["yhtio"] = $yritirow["yhtio"];
 					}
 
 					$query = "	SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu

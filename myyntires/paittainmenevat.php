@@ -102,7 +102,22 @@
 							}
 							else {
 								$tapvm = $suoritus1row['kirjpvm'];
-							}							
+							}
+
+							//vertaillaan tilikauteen
+							list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+							list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+
+							$myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
+							$myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+
+							$tsekpvm = str_replace("-", "", $tapvm);
+
+							if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+								echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
+
+								$tapvm  = date("Y-m-d");
+							}
 
 							// Alkuperäisen rahatiliöinnin kustannuspaikka
 							$query  = "	SELECT kustp, kohde, projekti
@@ -248,7 +263,7 @@
 			echo "<th class='back'></th>";
 			echo "<th>".t("Nimi")."</th>";
 			echo "<th>".t("Pvm")."</th>";
-			echo "<th>".t("Summa")."</th>";						
+			echo "<th>".t("Summa")."</th>";
 			echo "</tr>";
 
 			while ($trow = mysql_fetch_assoc($result)) {

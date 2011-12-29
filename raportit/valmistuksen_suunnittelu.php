@@ -23,7 +23,6 @@
 		$("a.toggle_rivit").click(function(event) {
 			event.preventDefault();
 			$("tr.togglettava_rivi_"+$(this).attr("id")).toggle();
-			$("div.togglettava_rivi_"+$(this).attr("id")).toggle();
 		});
 	});
 	</script>';
@@ -204,7 +203,7 @@
 		$myyntiennuste = ($myyntiennuste < 0) ? 0 : $myyntiennuste;
 
 		// Lasketaan riittop‰iv‰t
-		$paivakulutus = round($vuosikulutus / 360);
+		$paivakulutus = round($vuosikulutus / 240);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
 
 		// Lasketaan m‰‰r‰ennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
@@ -813,8 +812,8 @@
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]}<br><br>";
 				echo t("Myyntiennuste")." = ".t("Budjetoitu myynti")." - ".t("Reaalisaldo")."<br>";
 				echo "{$tuoterivi["myyntiennuste"]} = {$tuoterivi["budjetoitu_myynti"]} - {$tuoterivi["reaalisaldo"]}<br><br>";
-				echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 360)<br>";
-				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 360)<br><br>";
+				echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
+				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
 				echo t("Riitto p‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
 				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
 				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Myyntiennuste")."<br>";

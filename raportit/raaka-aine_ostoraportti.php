@@ -20,6 +20,10 @@
 	            }
 	        }
 	    });
+		$("a.toggle_rivit").click(function(event) {
+			event.preventDefault();
+			$("tr.togglettava_rivi_"+$(this).attr("id")).toggle();
+		});
 	});
 	</script>';
 
@@ -70,7 +74,7 @@
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
 
 		// Haetaan lapsituotteen varastosaldo
-		$query = "	SELECT ifnull(sum(saldo),0) saldo
+		$query = "	SELECT ifnull(sum(saldo), 0) saldo
 					FROM tuotepaikat
 					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotepaikat.tuoteno = '$tuoteno'";
@@ -79,7 +83,7 @@
 		$lapsi_saldo = $row['saldo'];
 
 		// Haetaan lapsituotteen vuosikulutus (rullaava 12 kk)
-		$query = "	SELECT sum(tilausrivi.kpl) vuosikulutus
+		$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'V'
@@ -90,7 +94,7 @@
 		$lapsi_vuosikulutus = $row['vuosikulutus'];
 
 		// Haetaan lapsituotteen tilauksessa oleva m‰‰r‰
-		$query = "	SELECT sum(tilausrivi.varattu) tilattu
+		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'O'
@@ -101,7 +105,7 @@
 		$lapsi_tilattu = $row['tilattu'];
 
 		// Haetaan lapsituotteen varattu m‰‰r‰
-		$query = "	SELECT sum(tilausrivi.varattu) varattu
+		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) varattu
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'L'
@@ -151,7 +155,7 @@
 		$isatuote_result = pupe_query($query);
 
 		// While loopissa k‰ytett‰v‰t muuttujat
-		$lapsi_kulutusennuste = 0;
+		$lapsi_kulutus = 0;
 
 		while ($isatuote_row = mysql_fetch_assoc($isatuote_result)) {
 
@@ -190,7 +194,7 @@
 			$isa_saldo = $row['saldo'];
 
 			// Haetaan is‰tuotteen tilauksessa oleva m‰‰r‰
-			$query = "	SELECT sum(tilausrivi.varattu) tilattu
+			$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'O'
@@ -201,7 +205,7 @@
 			$isa_tilattu = $row['tilattu'];
 
 			// Haetaan is‰tuotteen varattu m‰‰r‰
-			$query = "	SELECT sum(tilausrivi.varattu) varattu
+			$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) varattu
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'L'
@@ -220,27 +224,36 @@
 
 			// Lapsen kulutusennuste
 			$lapsi_kerroin = $isatuote_row["kerroin"];
-			$lapsi_kulutusennuste += ($isa_myyntiennuste * $lapsi_kerroin);
+			$lapsi_kulutus += ($isa_myyntiennuste * $lapsi_kerroin);
 		}
 
 		// Lasketaan lapsituotteen ostosuositus
 		$lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu;
-		$lapsi_toimitusaika = $toimittajarow['toimitusaika'];
-		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 360);
+
+		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240);
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
-		$lapsi_kulutusennuste = $lapsi_kulutusennuste - $lapsi_reaalisaldo;
-		$lapsi_maaraennuste = ($lapsi_paivakulutus * $lapsi_toimitusaika) + $lapsi_kulutusennuste;
+
+		$lapsi_kulutusennuste = $lapsi_kulutus - $lapsi_reaalisaldo;
+		$lapsi_maaraennuste = ($lapsi_paivakulutus * $toimittajarow['toimitusaika']) + $lapsi_kulutusennuste;
 		$lapsi_ostosuositus = ceil($lapsi_maaraennuste - $lapsi_reaalisaldo);
 		$lapsi_ostettavamaara = ceil($lapsi_ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array
 		$tuoterivi = array();
-		$tuoterivi['kulutusennuste'] 		= $lapsi_kulutusennuste;
-		$tuoterivi['maaraennuste']			= $lapsi_maaraennuste;
-		$tuoterivi['riittopv'] 				= $lapsi_riittopv;
 		$tuoterivi['reaalisaldo'] 			= $lapsi_reaalisaldo;
+		$tuoterivi['varastosaldo']			= $lapsi_saldo;
+		$tuoterivi['tilattu']				= $lapsi_tilattu;
+		$tuoterivi['varattu']				= $lapsi_varattu;
+		$tuoterivi['paivakulutus']			= $lapsi_paivakulutus;
+		$tuoterivi['vuosikulutus']			= $lapsi_vuosikulutus;
+		$tuoterivi['riittopv'] 				= $lapsi_riittopv;
+		$tuoterivi['kulutusennuste'] 		= $lapsi_kulutusennuste;
+		$tuoterivi['kulutus'] 				= $lapsi_kulutus;
+		$tuoterivi['maaraennuste']			= $lapsi_maaraennuste;
+		$tuoterivi['toimitusaika']			= $toimittajarow['toimitusaika'];
 		$tuoterivi['ostosuositus'] 			= $lapsi_ostosuositus;
 		$tuoterivi['ostoeramaara']			= $lapsi_ostettavamaara;
+		$tuoterivi['pakkauskoko']			= $toimittajarow['pakkauskoko'];
 		$tuoterivi['toimittajan_tunnus'] 	= $toimittajarow['tunnus'];
 		$tuoterivi['toimittajan_ytunnus'] 	= $toimittajarow['toimittaja'];
 		$tuoterivi['toimittajan_nimi'] 		= $toimittajarow['nimi'];
@@ -382,6 +395,7 @@
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
 		$abc_join          = ""; // abc-rajauksia
+		$toggle_counter    = 0;
 
 		if ($osasto != '') {
 			$tuote_where .= " and tuote.osasto = '$osasto'";
@@ -417,10 +431,10 @@
 			// katotaan JT:ss‰ olevat tuotteet ABC-analyysi‰ varten, koska ne pit‰‰ includata aina!
 			$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio 
-							AND tuote.tuoteno = tilausrivi.tuoteno 
-							AND tuote.ei_saldoa = '' 
-							AND tuote.status != 'P' 
+						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+							AND tuote.tuoteno = tilausrivi.tuoteno
+							AND tuote.ei_saldoa = ''
+							AND tuote.status != 'P'
 							$tuote_where)
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi IN  ('L','G')
@@ -492,6 +506,7 @@
 					$toimittaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$toimittaja_header .= "<th>".t("Reaalisaldo")."</th>";
 					$toimittaja_header .= "<th>".t("Ostosuositus")."</th>";
+					$toimittaja_header .= "<th></th>";
 					$toimittaja_header .= "<th>".t("Ostoer‰m‰‰r‰")."</th>";
 					$toimittaja_header .= "</tr>";
 					$toimittaja_header_piirretty = false;
@@ -523,6 +538,12 @@
 				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["ostosuositus"]}</td>";
 
+				// Tehd‰‰n Toggle-nappi, jolla voidaan n‰ytt‰‰ matikkainfo alla
+				$toggle_counter++;
+				echo "<td>";
+				echo "<a href='#' style='text-decoration:none;' class='toggle_rivit' id='$toggle_counter'><img src='{$palvelin}pics/lullacons/info.png'></a>";
+				echo "</td>";
+
 				// Tuotteella ei ole toimittajaa
 				if (empty($EDtoimittaja)) {
 					echo "<td style='text-align: right;'>{$tuoterivi["ostoeramaara"]}</td>";
@@ -536,6 +557,46 @@
 					$formin_pointteri++;
 				}
 				echo "</tr>";
+
+				// Tehd‰‰n yks hidden rivi t‰h‰n alle, jossa on kaikki luvut ja kaavat, jota on tehty valmistustarpeen laskemiseksi
+				echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
+				echo "<td colspan='3'>";
+
+				echo "<table>";
+				echo "<tr><td>".t("Reaalisaldo")."			</td><td>{$tuoterivi['reaalisaldo']}		</td></tr>";
+				echo "<tr><td>".t("Varastosaldo")."			</td><td>{$tuoterivi['varastosaldo']}		</td></tr>";
+				echo "<tr><td>".t("Tilattu")."				</td><td>{$tuoterivi['tilattu']}			</td></tr>";
+				echo "<tr><td>".t("Varattu")."				</td><td>{$tuoterivi['varattu']}			</td></tr>";
+				echo "<tr><td>".t("P‰iv‰kulutus")."			</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
+				echo "<tr><td>".t("Vuosikulutus")."			</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
+				echo "<tr><td>".t("Riitto p‰iv‰t")."		</td><td>{$tuoterivi['riittopv']}			</td></tr>";
+				echo "<tr><td>".t("Kulutusennuste")."		</td><td>{$tuoterivi['kulutusennuste']}		</td></tr>";
+				echo "<tr><td>".t("Budjetoitu kulutus")."	</td><td>{$tuoterivi['kulutus']}			</td></tr>";
+				echo "<tr><td>".t("M‰‰r‰ennuste")."			</td><td>{$tuoterivi['maaraennuste']}		</td></tr>";
+				echo "<tr><td>".t("Toimitusaika")."			</td><td>{$tuoterivi['toimitusaika']}		</td></tr>";
+				echo "<tr><td>".t("Ostosuositus")."			</td><td>{$tuoterivi['ostosuositus']}		</td></tr>";
+				echo "<tr><td>".t("Ostoer‰m‰‰r‰")."			</td><td>{$tuoterivi['ostoeramaara']}		</td></tr>";
+				echo "<tr><td>".t("Pakkauskoko")."			</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
+				echo "</table>";
+
+				echo "</td><td colspan='7'>";
+
+				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")."<br>";
+				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]}  - {$tuoterivi["varattu"]}<br><br>";
+				echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
+				echo "{$tuoterivi['paivakulutus']} = round({$tuoterivi['vuosikulutus']} / 240)<br><br>";
+				echo t("Riitto P‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
+				echo "{$tuoterivi['riittopv']} = floor({$tuoterivi['reaalisaldo']} / {$tuoterivi['paivakulutus']})<br><br>";
+				echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." - ".t("Reaalisaldo")."<br>";
+				echo "{$tuoterivi['kulutusennuste']} = {$tuoterivi['kulutus']} - {$tuoterivi['reaalisaldo']}<br><br>";
+				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Kulutusennuste")."<br>";
+				echo "{$tuoterivi['maaraennuste']} = ({$tuoterivi['paivakulutus']} * {$tuoterivi['toimitusaika']}) + {$tuoterivi['kulutusennuste']}<br><br>";
+				echo t("Ostosuositus")." = ceil(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";
+				echo "{$tuoterivi['ostosuositus']} = ceil({$tuoterivi['maaraennuste']} - {$tuoterivi['reaalisaldo']})<br><br>";
+				echo t("Ostettava m‰‰r‰")." = ceil(".t("Ostosuositus")." / ".t("Pakkauskoko").") * ".t("Pakkauskoko")."<br>";
+				echo "{$tuoterivi['ostoeramaara']} = ceil({$tuoterivi['ostosuositus']} / {$tuoterivi['pakkauskoko']}) * {$tuoterivi['pakkauskoko']}<br><br>";
+
+				echo "</td></tr>";
 			}
 
 			echo "</table>";

@@ -253,6 +253,36 @@
 			</select>
 			</td></tr>";
 
+	echo "<tr><th valign='top'>".t("Maarajaus")."</th>";
+
+	if (!isset($maarajaus)) $maarajaus = '';
+
+	$query = "	SELECT distinct koodi, nimi
+			FROM maat
+			WHERE nimi != ''
+			ORDER BY koodi";
+	$vresult = pupe_query($query);
+
+	echo "<td colspan='3'><select name='maarajaus'><option value = '' >Ei valintaa</option>";
+
+	while ($vrow=mysql_fetch_array($vresult)) {
+		$sel='';
+		if (strtoupper($maarajaus) == strtoupper($vrow[0])) {
+			$sel = "selected";
+		}
+		echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+	}
+	echo "</select></td></tr>";
+
+	$sel='';
+	if (!isset($palvelut)) $palvelut = '';
+	if ($palvelut != "") {
+		$sel = "CHECKED";
+	}	
+	
+	// Tämä vielä tekemättä
+	//echo "<tr><th valign='top'>".t("Palveluiden erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
+
 	echo "</table><br>";
 
 	$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
@@ -408,6 +438,9 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
+		if ($maarajaus != '') $lisa .= " and lasku.toim_maa = '$maarajaus' ";
+		
+
 		$asiakasjoini  = "";
 		$konsernijoini = "";
 		$konsernilisa  = "";
@@ -450,6 +483,7 @@
 					$lisa
 					$konsernilisa
 					ORDER BY $jarj";
+
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -589,7 +623,7 @@
 				}
 
 				echo "<td valign='top' align='right'>";
-				if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
+				if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel//maarajaus=$maarajaus".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
 
 				echo "<font class='$class'>".sprintf("%.2f", $trow["summa"])."</font>";
 				if (isset($workbook)) $worksheet->write($excelrivi, 6, $trow["summa"]);

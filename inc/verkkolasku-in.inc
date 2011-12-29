@@ -314,20 +314,6 @@
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
 			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
 
-			if (!isset($trow) and stripos($laskuttajan_nimi, "rum Oy Ab / ARW") !== FALSE) {
-				// 0 eleganttia
-				$query = "	SELECT *
-							FROM toimi
-							WHERE yhtio = '$yhtio'
-							and nimi = '÷rum Oy Ab / ARW'
-							and tyyppi != 'P'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_assoc($result);
-				}
-			}
-
 			if ($laskuttajan_ovt != "") {
 				// 1 etsit‰‰n toimittaja ovttunnuksella
 				$query  = "	SELECT *
@@ -875,7 +861,7 @@
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
-				
+
 				// Normaali viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 					$return .= "Viite '$viite' on v‰‰rin!\n";
@@ -1039,7 +1025,7 @@
 
 				// Onko laskuriveill‰ useita alv-verokantoja?
 				$ealvi = array_unique($ealvi);
-								
+
 				// Katsotaan alv laskuerittelyst‰
 				if (count($ealvi) == 1 and $ealvi[0] == "") {
 					$ealvi = array($lisavat[0]);

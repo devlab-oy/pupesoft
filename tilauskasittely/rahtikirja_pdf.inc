@@ -111,8 +111,14 @@
 
 	// postiennakko
 	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
-		$postiennakkomaara  = "$yhteensa $yhtiorow[valkoodi]";
-		$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
+		if ($yhtiorow["pankkiiban1"] != '') {
+			$postiennakkotilino = "$yhtiorow[pankkiiban1]";
+		}
+		else {		
+			$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		}
+		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
 		$postiennakkoviite  = "$viite";
 	}
 	else {
@@ -249,7 +255,9 @@
 		if ((int) $postirow["yhtio_toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$postirow[yhtio_toimipaikka]' and lasku_logo != ''";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$postirow[yhtio_toimipaikka]'
+						and lasku_logo != ''";
 			$result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {

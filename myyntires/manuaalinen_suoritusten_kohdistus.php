@@ -6,51 +6,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FA
 
 require_once("inc/tilinumero.inc");
 
-function kopioitiliointipaittain($tunnus, $type = '') {
-
-	global $kukarow;
-
-	// jos type yks etsitään aputunnuksella
-	if ($type == 1) {
-		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and aputunnus = '$tunnus'";
-	}
-	else {
-		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-	}
-	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) != 1) {
-		echo "Tiliöintirivi kateissa systeemivirhe!";
-		pupe_error($query);
-	}
-
-	$tiliointirow = mysql_fetch_assoc($result);
-
-	$query = "INSERT INTO tiliointi SET ";
-
-	for ($i = 0; $i < mysql_num_fields($result); $i++) {
-
-		if (mysql_field_name($result, $i) == 'laatija') {
-			$query .= "laatija = '$kukarow[kuka]', ";
-		}
-		elseif (mysql_field_name($result, $i) == 'laadittu') {
-			$query .= "laadittu = now(), ";
-		}
-		elseif (mysql_field_name($result, $i) == 'tapvm') {
-			$query .= "tapvm = now(), ";
-		}
-		elseif (mysql_field_name($result, $i) == 'summa') {
-			$query .= "summa = summa * -1, ";
-		}
-		elseif (mysql_field_name($result, $i) != 'tunnus') {
-			$query .= mysql_field_name($result,$i) . " = '".$tiliointirow[mysql_field_name($result,$i)]."', ";
-		}
-	}
-
-	$query = substr($query,0,-2);
-	$result = pupe_query($query);
-}
-
 if ($tila == "muokkaasuoritusta") {
 
 	if ($saamis == $kassa or $saamis == "" or $kassa == "") {
@@ -388,7 +343,8 @@ if ($tila == 'tee_kohdistus') {
 
 		$errorrow = mysql_fetch_assoc ($result);
 
-		$query = "	SELECT * FROM tiliointi
+		$query = "	SELECT * 
+					FROM tiliointi
 					WHERE yhtio = '$errorrow[yhtio]' and
 					aputunnus = '$errorrow[tunnus]' and
 					korjattu = ''";

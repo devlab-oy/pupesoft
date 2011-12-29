@@ -452,6 +452,9 @@
 				}
 				else {
 					$yhtiorow = mysql_fetch_assoc($result);
+					
+					// Setataan kukarow-yhtiö
+					$kukarow["yhtio"] = $yritirow["yhtio"];
 
 					if ($silent == "") {
 						echo "<font class='message'>".t("Tiliote yritykselle")." $yhtiorow[nimi].<br>";

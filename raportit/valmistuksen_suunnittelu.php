@@ -1,4 +1,4 @@
-	<?php
+<?php
 
 	require("../inc/parametrit.inc");
 
@@ -203,7 +203,7 @@
 		$myyntiennuste = ($myyntiennuste < 0) ? 0 : $myyntiennuste;
 
 		// Lasketaan riittop‰iv‰t
-		$paivakulutus = round($vuosikulutus / 360);
+		$paivakulutus = round($vuosikulutus / 240);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
 
 		// Lasketaan m‰‰r‰ennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
@@ -217,10 +217,20 @@
 
 		// Palautettava array
 		$tuoterivi = array();
-		$tuoterivi['pakkauskoko']		= $toimittajarow['pakkauskoko'];
-		$tuoterivi['valmistuksessa'] 	= $valmistuksessa;
+		$tuoterivi['reaalisaldo']		= $reaalisaldo;
+		$tuoterivi['varastosaldo']		= $varastosaldo;
+		$tuoterivi['tilattu']			= $tilattu;
+		$tuoterivi['valmistuksessa']	= $valmistuksessa;
+		$tuoterivi['varattu']			= $varattu;
+		$tuoterivi['myyntiennuste']		= $myyntiennuste;
+		$tuoterivi['budjetoitu_myynti'] = $budjetoitu_myynti;
+		$tuoterivi['vuosikulutus']		= $vuosikulutus;
+		$tuoterivi['paivakulutus']		= $paivakulutus;
 		$tuoterivi['riittopv'] 			= $riittopv;
+		$tuoterivi['maaraennuste']		= $maaraennuste;
+		$tuoterivi['toimitusaika']		= $toimittajarow['toimitusaika'];
 		$tuoterivi['valmistussuositus'] = $valmistussuositus;
+		$tuoterivi['pakkauskoko']		= $toimittajarow['pakkauskoko'];
 		$tuoterivi['valmistusmaara'] 	= $valmistusmaara;
 		$tuoterivi['abcluokka']			= $abcluokka;
 
@@ -391,6 +401,7 @@
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
 		$abc_join          = ""; // abc-rajauksia
+		$toggle_counter    = 0;
 
 		if ($osasto != '') {
 			$tuote_where .= " and tuote.osasto = '$osasto'";
@@ -488,8 +499,6 @@
 
 			echo "<table>";
 
-			$toggle_counter = 0;
-
 			while ($row = mysql_fetch_assoc($res)) {
 
 				// Valmistuslinja vaihtuu
@@ -509,7 +518,7 @@
 					$toggle_counter++;
 
 					echo "<tr>";
-					echo "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja &raquo; </font> <a href='' class='toggle_rivit' id='$toggle_counter'>".t("N‰yt‰ tuotteet")."</a></td>";
+					echo "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja &raquo; </font> <a href='#' class='toggle_rivit' id='$toggle_counter'>".t("N‰yt‰ tuotteet")."</a></td>";
 					echo "</tr>";
 
 					echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
@@ -702,6 +711,7 @@
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$valmistaja_header .= "<th>".t("Raaka-aine riitto")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuslinja")."</th>";
+					$valmistaja_header .= "<th></th>";
 					$valmistaja_header .= "<th>".t("Valmistustarve")."</th>";
 					$valmistaja_header .= "</tr>";
 					$valmistaja_header_piirretty = false;
@@ -752,6 +762,12 @@
 
 				echo "</td>";
 
+				// Tehd‰‰n Toggle-nappi, jolla voidaan n‰ytt‰‰ matikkainfo alla
+				$toggle_counter++;
+				echo "<td>";
+				echo "<a href='#' style='text-decoration:none;' class='toggle_rivit' id='$toggle_counter'><img src='{$palvelin}pics/lullacons/info.png'></a>";
+				echo "</td>";
+
 				echo "<td style='text-align: right;'>";
 				echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita' tabindex='".($formin_pointteri+1)."'>";
 				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][tuoteno]' value='{$tuoterivi["tuoteno"]}'>";
@@ -767,6 +783,47 @@
 
 				echo "</td>";
 				echo "</tr>";
+
+				// Tehd‰‰n yks hidden rivi t‰h‰n alle, jossa on kaikki luvut ja kaavat, jota on tehty valmistustarpeen laskemiseksi
+				echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
+				echo "<td colspan='3'>";
+
+				echo "<table>";
+				echo "<tr><td>".t("Reaalisaldo")."		</td><td>{$tuoterivi['reaalisaldo']}		</td></tr>";
+				echo "<tr><td>".t("Varastosaldo")."		</td><td>{$tuoterivi['varastosaldo']}		</td></tr>";
+				echo "<tr><td>".t("Tilattu")."			</td><td>{$tuoterivi['tilattu']}			</td></tr>";
+				echo "<tr><td>".t("Valmistuksessa")."	</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
+				echo "<tr><td>".t("Varattu")."			</td><td>{$tuoterivi['varattu']}			</td></tr>";
+				echo "<tr><td>".t("Myyntiennuste")."	</td><td>{$tuoterivi['myyntiennuste']}		</td></tr>";
+				echo "<tr><td>".t("Budjetoitu myynti")."</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
+				echo "<tr><td>".t("Vuosikulutus")."		</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
+				echo "<tr><td>".t("P‰iv‰kulutus")."		</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
+				echo "<tr><td>".t("Riitto p‰iv‰t")."	</td><td>{$tuoterivi['riittopv']}			</td></tr>";
+				echo "<tr><td>".t("M‰‰r‰ennuste")."		</td><td>{$tuoterivi['maaraennuste']}		</td></tr>";
+				echo "<tr><td>".t("Toimitusaika")."		</td><td>{$tuoterivi['toimitusaika']}		</td></tr>";
+				echo "<tr><td>".t("Valmistussuositus")."</td><td>{$tuoterivi['valmistussuositus']}	</td></tr>";
+				echo "<tr><td>".t("Pakkauskoko")."		</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
+				echo "<tr><td>".t("Valmistustarve")."	</td><td>{$tuoterivi['valmistusmaara']}		</td></tr>";
+				echo "</table>";
+
+				echo "</td><td colspan='7'>";
+
+				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")."<br>";
+				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]}<br><br>";
+				echo t("Myyntiennuste")." = ".t("Budjetoitu myynti")." - ".t("Reaalisaldo")."<br>";
+				echo "{$tuoterivi["myyntiennuste"]} = {$tuoterivi["budjetoitu_myynti"]} - {$tuoterivi["reaalisaldo"]}<br><br>";
+				echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
+				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
+				echo t("Riitto p‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
+				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
+				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Myyntiennuste")."<br>";
+				echo "{$tuoterivi["maaraennuste"]} = ({$tuoterivi["paivakulutus"]} * {$tuoterivi["toimitusaika"]}) + {$tuoterivi["myyntiennuste"]}<br><br>";
+				echo t("Valmistussuositus")." = ceil(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";
+				echo "{$tuoterivi["valmistussuositus"]} = ceil({$tuoterivi["maaraennuste"]} - {$tuoterivi["reaalisaldo"]})<br><br>";
+				echo t("Valmistustarve")." = ceil(".t("Valmistussuositus")." / ".t("Pakkauskoko").") * Pakkauskoko<br>";
+				echo "{$tuoterivi["valmistusmaara"]} = ceil({$tuoterivi["valmistussuositus"]} / {$tuoterivi["pakkauskoko"]}) * {$tuoterivi["pakkauskoko"]}";
+
+				echo "</td></tr>";
 
 				$formin_pointteri++;
 			}

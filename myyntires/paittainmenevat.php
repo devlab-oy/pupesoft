@@ -49,7 +49,7 @@
 
 	if ($tee == 'T') {
 
-		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
+		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ, tili READ";
 		$result = pupe_query($query);
 
 		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
@@ -77,7 +77,7 @@
 					$suoritus1row = mysql_fetch_assoc($result);
 					$suoritus2row = mysql_fetch_assoc($result);
 
-					$query  = "	SELECT ltunnus, summa, tilino, kustp, kohde, projekti
+					$query  = "	SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
 								FROM tiliointi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$suoritusrow[altunnus]'";
@@ -87,7 +87,7 @@
 
 						$tiliointi1row = mysql_fetch_assoc ($result);
 
-						$query  = "	SELECT ltunnus, summa, tilino, kustp, kohde, projekti
+						$query  = "	SELECT tunnus, ltunnus, summa, tilino, kustp, kohde, projekti
 									FROM tiliointi
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus  = '$suoritusrow[bltunnus]'";
@@ -103,6 +103,17 @@
 							else {
 								$tapvm = $suoritus1row['kirjpvm'];
 							}
+							
+							// Alkuperäisen rahatiliöinnin kustannuspaikka
+							$query  = "	SELECT kustp, kohde, projekti
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'										
+										and aputunnus  = '$tiliointi1row[tunnus]'";
+							$result = pupe_query($query);
+							$raha1row = mysql_fetch_assoc($result);
+							
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha1row["kustp"], $raha1row["kohde"], $raha1row["projekti"]);
 
 							// Nyt kaikki on hyvin ja voimme tehdä päivitykset
 							// Kirjataan päittäinmeno selvittelytilin kautta
@@ -117,11 +128,14 @@
 										lukko		= 1,
 										laatija		= '$kukarow[kuka]',
 										laadittu	= now(),
-										kustp		= $tiliointi1row[kustp],
-										kohde		= $tiliointi1row[kohde],
-										projekti	= $tiliointi1row[projekti]";
+										kustp    	= '{$kustp_ins}',
+										kohde	 	= '{$kohde_ins}',
+										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
+														
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi1row["kustp"], $tiliointi1row["kohde"], $tiliointi1row["projekti"]);
 
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',
@@ -133,11 +147,22 @@
 										lukko		= 1,
 										laatija		= '$kukarow[kuka]',
 										laadittu	= now(),
-										kustp		= $tiliointi1row[kustp],
-										kohde		= $tiliointi1row[kohde],
-										projekti	= $tiliointi1row[projekti]";
+										kustp    	= '{$kustp_ins}',
+										kohde	 	= '{$kohde_ins}',
+										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
+							
+							// Alkuperäisen rahatiliöinnin kustannuspaikka
+							$query  = "	SELECT kustp, kohde, projekti
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'										
+										and aputunnus  = '$tiliointi2row[tunnus]'";
+							$result = pupe_query($query);
+							$raha2row = mysql_fetch_assoc($result);
+														
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha2row["kustp"], $raha2row["kohde"], $raha2row["projekti"]);
 
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',
@@ -149,11 +174,14 @@
 										lukko		= 1,
 										laatija		= '$kukarow[kuka]',
 										laadittu	= now(),
-										kustp		= $tiliointi2row[kustp],
-										kohde		= $tiliointi2row[kohde],
-										projekti	= $tiliointi2row[projekti]";
+										kustp    	= '{$kustp_ins}',
+										kohde	 	= '{$kohde_ins}',
+										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
+
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi2row["kustp"], $tiliointi2row["kohde"], $tiliointi2row["projekti"]);
 
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',
@@ -165,9 +193,9 @@
 										lukko		= 1,
 										laatija		= '$kukarow[kuka]',
 										laadittu	= now(),
-										kustp		= $tiliointi2row[kustp],
-										kohde		= $tiliointi2row[kohde],
-										projekti	= $tiliointi2row[projekti]";
+										kustp    	= '{$kustp_ins}',
+										kohde	 	= '{$kohde_ins}',
+										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
 

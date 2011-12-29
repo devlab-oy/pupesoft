@@ -71,7 +71,7 @@ else {
 		$projekti 	= $xrow["projekti"];
 
 		// otetaan suurimman myynnin tiedot
-		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $xrow["summa"] > $maksimisumma) {
+		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($lasku['summa'] > 0 and $xrow["summa"] > $maksimisumma) or ($lasku['summa'] < 0 and $xrow["summa"] < $maksimisumma))) {
 			$maksimisumma = $xrow["summa"];
 
 			$maksimisumma_kustp 	= $kustp;

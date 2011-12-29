@@ -452,7 +452,7 @@
 				}
 				else {
 					$yhtiorow = mysql_fetch_assoc($result);
-					
+
 					// Setataan kukarow-yhtiö
 					$kukarow["yhtio"] = $yritirow["yhtio"];
 
@@ -576,7 +576,7 @@
 			if ($koodi == '704') {
 				$koodi = '720';
 			}
-			
+
 			// VVKKPP
 			$kirjpvm = substr($tietue, 30, 6);
 			$pvm 	 = substr($tietue, 36, 6);

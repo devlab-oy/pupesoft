@@ -323,7 +323,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "rahtikirjanumero":
-				$pakolliset = array("RAHDINKULJETTAJA", "RAHTIKIRJANRO");
+				$pakolliset = array("RAHTIKIRJANRO");
 				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;

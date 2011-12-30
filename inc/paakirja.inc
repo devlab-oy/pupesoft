@@ -438,7 +438,7 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
-		if ($maarajaus != '') $lisa .= " and if(lasku.tila in ('H','Y','M','P','Q') and lasku.maa!='', lasku.maa, if(lasku.tila not in ('H','Y','M','P','Q') and lasku.toim_maa != '', lasku.toim_maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
+		if ($maarajaus != '') $lisa .= " and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
 
 		$asiakasjoini  = "";
 		$konsernijoini = "";

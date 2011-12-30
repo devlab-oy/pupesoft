@@ -163,7 +163,7 @@
 
 		if ($ryhma == 'fi307') {
 			// Kohdekuukauden vähennettävä vero
-			$maalisa = " and lasku.toim_maa in ('FI', '') ";
+			$maalisa = " and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) in ('FI', '') ";
 		}
 
 		if ($ryhma == 'fi309') {
@@ -173,7 +173,7 @@
 			$maarow = mysql_fetch_assoc($result);
 
 			// Kaikki ei-EU-maat plus FI ja tyhjä
-			$maalisa = " and lasku.toim_maa in ('','FI', $maarow[maat]) ";
+			$maalisa = " and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) in ('','FI', $maarow[maat]) ";
 
 			$_309lisa 	 = " or alv_taso like '%fi300%' ";
 			$vainveroton = " and tiliointi.vero = 0 ";
@@ -255,7 +255,7 @@
 
 			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk " . t("taso") . " $ryhma</font><hr>";
 
-			$query = "	SELECT if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
+			$query = "	SELECT if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
 						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 						tiliointi.vero,
 						tiliointi.tilino,
@@ -702,7 +702,7 @@
 			$cleantaso 		 = $taso;
 
 			if ($taso == 'fi307') {
-				$maalisa = "JOIN lasku ON lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.toim_maa in ('FI', '')";
+				$maalisa = "JOIN lasku ON lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) in ('FI', '')";
 			}
 
 			if ($taso == 'fi309') {
@@ -711,7 +711,7 @@
 				$maarow = mysql_fetch_assoc($result);
 
 				// Kaikki ei-EU-maat plus FI ja tyhjä
-				$maalisa = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.toim_maa in ('','FI', $maarow[maat])";
+				$maalisa = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) in ('','FI', $maarow[maat])";
 
 				$_309lisa 	 = " or alv_taso like '%fi300%' ";
 				$vainveroton = " and tiliointi.vero = 0 ";

@@ -1,8 +1,8 @@
 <?php
 
-	$kentat = "tunnus, rahdinkuljettaja, rahtikirjanro";
-	$hakukentat = "tunnus, rahdinkuljettaja, rahtikirjanro";
+	$kentat = "tunnus, rahtikirjanro, luontiaika, kaytettyaika";
+	$hakukentat = "tunnus, rahtikirjanro";
 
-	$jarjestys = 'rahdinkuljettaja, rahtikirjanro';
+	$jarjestys = 'rahtikirjanro';
 
 ?>

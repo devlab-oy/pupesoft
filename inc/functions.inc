@@ -7259,11 +7259,11 @@ if (!function_exists('tarkasta_liite')) {
 				else {
 					if (count($sallitut_tiedostot)>1) {
 						//	Kaunistellaan..
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
 
 					}
 					else {
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
 					}
 				}
 			}

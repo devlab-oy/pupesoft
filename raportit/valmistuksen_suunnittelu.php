@@ -106,7 +106,7 @@
 		$vuosikulutus = $row['vuosikulutus'];
 
 		// Haetaan tuotteen valmistuksessa, ostettu, varattu sek‰ ennakkotilattu m‰‰r‰
-		$query = "	SELECT 
+		$query = "	SELECT
 					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
@@ -117,7 +117,7 @@
 					AND tilausrivi.tuoteno = '$tuoteno'
 					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);		
+		$row = mysql_fetch_assoc($result);
 		$tilattu = $row['tilattu'];
 		$varattu = $row['varattu'];
 		$ennakko = $row['ennakko'];
@@ -399,6 +399,10 @@
 
 		if ($tuotemerkki != '') {
 			$tuote_where .= " and tuote.tuotemerkki = '$tuotemerkki'";
+		}
+
+		if ($status != '') {
+			$tuote_where .= " and tuote.status = '$status'";
 		}
 
 		if ($toimittajaid != '') {
@@ -855,7 +859,7 @@
 		echo "<td><select name='kohde_varasto'>";
 
 		while ($row = mysql_fetch_assoc($result)) {
-			$sel = $row['tunnus'] == $kohde_varasto ? "selected" : "";
+			$sel = (isset($kohde_varasto) and $row['tunnus'] == $kohde_varasto) ? "selected" : "";
 			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
 		}
 		echo "</select></td></tr>";
@@ -868,7 +872,7 @@
 		echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
 
 		while ($row = mysql_fetch_assoc($result)) {
-			$sel = $row['tunnus'] == $lahde_varasto ? "selected" : "";
+			$sel = (isset($lahde_varasto) and $row['tunnus'] == $lahde_varasto) ? "selected" : "";
 			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
 		}
 		echo "</select></td></tr>";
@@ -883,10 +887,7 @@
 		$sresult = t_avainsana("OSASTO", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($osasto == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($osasto) and $osasto == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -903,10 +904,7 @@
 		$sresult = t_avainsana("TRY", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuoryh == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuoryh) and $tuoryh == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -930,11 +928,25 @@
 		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuotemerkki == $srow["tuotemerkki"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuotemerkki) and $tuotemerkki == $srow["tuotemerkki"]) ? "selected" : "";
 			echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+		}
+		echo "</select>";
+
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Tuotteen status")."</th>";
+		echo "<td>";
+		echo "<select name='status'>";
+		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
+
+		$result = t_avainsana("S");
+
+		while ($srow = mysql_fetch_array($result)) {
+			$sel = (isset($status) and $status == $srow["selite"]) ? "selected" : "";
+			echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
 

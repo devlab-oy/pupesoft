@@ -67,10 +67,10 @@
 		}
 
 		// Testaus
-		$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
 		// Tuotanto
-		#$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 		// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
 		$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("$pupe_root_polku/dataout/".basename($filenimi)));

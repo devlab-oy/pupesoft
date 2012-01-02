@@ -76,24 +76,24 @@
 	echo "</form>";
 	echo "<br>";
 
-	if (include('Spreadsheet/Excel/Writer.php')) {
-		//keksit‰‰n failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet = $workbook->addWorksheet('Raportti Valmistuksista');
-
-		$format_bold = $workbook->addFormat();
-		$format_bold->setBold();
-
-		$excelsarake = 0;
-		$excelrivi = 0;
-	}
-
 	if ($tee == "ajaraportti" and isset($submit_nappi)) {
+
+		if (include('Spreadsheet/Excel/Writer.php')) {
+			//keksit‰‰n failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet = $workbook->addWorksheet('Raportti Valmistuksista');
+
+			$format_bold = $workbook->addFormat();
+			$format_bold->setBold();
+
+			$excelsarake = 0;
+			$excelrivi = 0;
+		}
 
 		pupe_DataTables(array(array($pupe_DataTables[0], 9, 9)));
 
@@ -103,24 +103,24 @@
 					tilausrivi.toimaika,
 					tilausrivi.toimitettuaika,
 					lasku.tila,
-					lasku.alatila, 
-					tuote.try, 
+					lasku.alatila,
+					tuote.try,
 					tuote.osasto,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
-					ifnull(sum(tilausrivi.tilkpl), 0) tarvitaan,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM tuote
-					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio 
+					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio
 						AND tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi in ('W','M')
 						AND tilausrivi.toimaika between '{$pvmalku}' and '{$pvmloppu}'
 						AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
 					JOIN lasku on (lasku.yhtio = tuote.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					{$lisa_parametri}
-					{$lisa_dynaaminen["tuote"]}					
+					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
 					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8)
+					GROUP BY 1,2,3,4,5,6,7,8
+					HAVING valmistettu != 0 OR valmistetaan != 0)
 
 					UNION
 
@@ -130,24 +130,24 @@
 					tilausrivi.toimaika,
 					tilausrivi.toimitettuaika,
 					lasku.tila,
-					lasku.alatila, 
-					tuote.try, 
+					lasku.alatila,
+					tuote.try,
 					tuote.osasto,
 					ifnull(sum(tilausrivi.kpl), 0) valmistettu,
-					ifnull(sum(tilausrivi.tilkpl), 0) tarvitaan,
 					ifnull(sum(tilausrivi.varattu), 0) valmistetaan
 					FROM tuote
-					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio 
-						AND tilausrivi.tuoteno = tuote.tuoteno 
+					JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio
+						AND tilausrivi.tuoteno = tuote.tuoteno
 						AND tilausrivi.tyyppi in ('W','M')
 						AND tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' and '{$pvmloppu} 23:59:59')
 					JOIN lasku on (lasku.yhtio = tuote.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					{$lisa_parametri}
-					{$lisa_dynaaminen["tuote"]}					
+					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
 					{$lisa}
-					GROUP BY 1,2,3,4,5,6,7,8)
+					GROUP BY 1,2,3,4,5,6,7,8
+					HAVING valmistettu != 0 OR valmistetaan != 0)
 
 					ORDER BY valmistuslinja, tuoteno, alatila";
 
@@ -222,7 +222,7 @@
 
 				if($linja == "") $linja = t("Ei m‰‰ritelty");
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td>{$rivit["tuoteno"]}</td>";
 				echo "<td>{$osasto}</td>";
 				echo "<td>{$try}</td>";
@@ -259,7 +259,7 @@
 				// tehd‰‰n yhteenveto arrayt
 				if (!isset($yhteenveto_valmistettu[$rivit["valmistuslinja"]])) $yhteenveto_valmistettu[$rivit["valmistuslinja"]] = 0;
 				if (!isset($yhteenveto_valmistetaan[$rivit["valmistuslinja"]])) $yhteenveto_valmistetaan[$rivit["valmistuslinja"]] = 0;
-				
+
 				$yhteenveto_valmistettu[$rivit["valmistuslinja"]] += $rivit["valmistettu"];
 				$yhteenveto_valmistetaan[$rivit["valmistuslinja"]] += $rivit["valmistetaan"];
 			}

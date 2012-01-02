@@ -123,9 +123,6 @@
 		$ennakko = $row['ennakko'];
 		$valmistuksessa = $row['valmistuksessa'];
 
-		// Jos ollaan rajattu toimittaja käyttöliittymässä, haetaan sen tiedot eikä oletustoimittajaa
-		$toimittaja_rajaus = ($valittu_toimittaja > 0) ? "and toimi.tunnus = '$valittu_toimittaja'" : "";
-
 		// Haetaan tuotteen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
@@ -133,10 +130,9 @@
 					toimi.nimi,
 					toimi.tunnus
 					FROM tuotteen_toimittajat
-					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus $toimittaja_rajaus)
+					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
 					WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotteen_toimittajat.tuoteno = '$tuoteno'
-					$toimittaja_rajaus
 					ORDER BY if(jarjestys = 0, 9999, jarjestys)
 					LIMIT 1";
 		$result = pupe_query($query);
@@ -408,11 +404,11 @@
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
 			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
-			$toimittaja_select = "tuotteen_toimittajat.toimittaja";
+			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja";
 		}
 		else {
 			// Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryllä
-			$toimittaja_select = "(SELECT toimittaja FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
+			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
 		}
 
 		if ($abcrajaus != "") {
@@ -556,7 +552,8 @@
 		$query = "	SELECT
 					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
 					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
-					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja
+					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja,
+					$toimittaja_select
 					FROM tuote
 					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
 						AND tuoteperhe.isatuoteno = tuote.tuoteno
@@ -572,7 +569,7 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.status != 'P'
 					$tuote_where
-					GROUP BY tuoteno, nimitys, valmistuslinja";
+					GROUP BY tuoteno, nimitys, valmistuslinja, toimittaja";
 		$res = pupe_query($query);
 
 		echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/><hr>";
@@ -587,7 +584,7 @@
 			$kasiteltavat_key = 0;
 
 			// Haetaan tuotteen tiedot
-			$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($row["tuoteno"], $toimittajaid, $abcrajaustapa);
+			$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($row["tuoteno"], $row["toimittaja"], $abcrajaustapa);
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $row["tuoteno"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $row["nimitys"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $row["valmistuslinja"];
@@ -595,6 +592,7 @@
 
 			// Otetaan isätuotteen pakkauskoko talteen, sillä sen perusteella tulee laskea "samankaltaisten" valmistusmäärä
 			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuotteen_pakkauskoko"] = $isatuotteen_pakkauskoko;
 
 			// Katsotaan onko kyseessä "samankaltainen" isätuote ja haetaan lapsituotteiden infot
 			$query = "	SELECT tuote.tuoteno,
@@ -616,11 +614,12 @@
 
 			while ($samankaltainen_row = mysql_fetch_assoc($samankaltainen_result)) {
 				$kasiteltavat_key++;
-				$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($samankaltainen_row["tuoteno"], $toimittajaid, $abcrajaustapa);
+				$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($samankaltainen_row["tuoteno"], $row["toimittaja"], $abcrajaustapa);
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $samankaltainen_row["tuoteno"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $samankaltainen_row["nimitys"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuotteen_pakkauskoko"] = $isatuotteen_pakkauskoko;
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
 			}
 
@@ -639,7 +638,7 @@
 			if ($valmistettava_yhteensa != 0) {
 				// Jos meillä oli joku poikkeava pakkauskoko tuotteelle, lasketaan valmistusmäärä uudestaan
 				if ($isatuotteen_pakkauskoko != 1) {
-
+					
 					// Pyöristetään koko samankaltaisten nippu ylöspäin seuraavaan pakkauskokoon
 					$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
 
@@ -797,6 +796,7 @@
 				echo "<tr><td>".t("Toimitusaika")."		</td><td>{$tuoterivi['toimitusaika']}		</td></tr>";
 				echo "<tr><td>".t("Valmistussuositus")."</td><td>{$tuoterivi['valmistussuositus']}	</td></tr>";
 				echo "<tr><td>".t("Pakkauskoko")."		</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
+				echo "<tr><td>".t("Isän Pakkauskoko")."	</td><td>{$tuoterivi['isatuotteen_pakkauskoko']}</td></tr>";
 				echo "<tr><td>".t("Valmistustarve")."	</td><td>{$tuoterivi['valmistusmaara']}		</td></tr>";
 				echo "</table>";
 
@@ -815,7 +815,7 @@
 				echo t("Valmistussuositus")." = ceil(".t("Määräennuste")." - ".t("Reaalisaldo").")<br>";
 				echo "{$tuoterivi["valmistussuositus"]} = ceil({$tuoterivi["maaraennuste"]} - {$tuoterivi["reaalisaldo"]})<br><br>";
 				echo t("Valmistustarve")." = ceil(".t("Valmistussuositus")." / ".t("Pakkauskoko").") * Pakkauskoko<br>";
-				echo "{$tuoterivi["valmistusmaara"]} = ceil({$tuoterivi["valmistussuositus"]} / {$tuoterivi["pakkauskoko"]}) * {$tuoterivi["pakkauskoko"]}";
+				echo "{$tuoterivi["valmistusmaara"]} = ceil({$tuoterivi["valmistussuositus"]} / {$tuoterivi["isatuotteen_pakkauskoko"]}) * {$tuoterivi["isatuotteen_pakkauskoko"]}";
 
 				echo "</td></tr>";
 

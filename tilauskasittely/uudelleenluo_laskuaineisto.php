@@ -31,50 +31,26 @@
 
 	if (isset($tee) and $tee == "apix_siirto") {
 
-		#$url			= "https://test-api.apix.fi/invoices";
-		$url			= "https://api.apix.fi/invoices";
-		$transferkey	= $yhtiorow['verkkosala_lah'];
-		$transferid		= $yhtiorow['verkkotunnus_lah'];
-		$software		= "Pupesoft";
-		$version		= "1.0";
-		$timestamp		= gmdate("YmdHis");
+		// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+		$apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents("/tmp/".$filenimi));
+		$apix_laskumaara = count($apix_laskuarray);
+		$apix_laskut_20l = array();
 
-		// Siirret‰‰n aineisto APIXiin
-		$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+		if ($apix_laskumaara > 0) {
+			require_once("tilauskasittely/tulosta_lasku.inc");
 
-		$dt = substr(hash('sha256', $digest_src), 0, 64);
+			for ($a = 1; $a < $apix_laskumaara; $a++) {
+				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-		$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+				// Laitetaan 20 laskua arrayseen ja l‰hetet‰‰n ne...
+				$apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
-		$apixfilesize = filesize("$pupe_root_polku/dataout/".basename($filenimi));
-		$apix_fh = fopen("$pupe_root_polku/dataout/".basename($filenimi), 'r');
+				if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
+					echo apix_invoice_put_file($apix_laskut_20l, $kieli);
 
-		$ch = curl_init($real_url);
-		curl_setopt($ch, CURLOPT_PUT, true);
-		curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-		curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-		echo "L‰hetet‰‰n aineisto APIX:lle...<br>";
-		$response = curl_exec($ch);
-
-		curl_close($ch);
-		fclose($apix_fh);
-
-		$xml = simplexml_load_string($response);
-
-		if ($xml->Status == "OK") {
-			echo "L‰hetys onnistui!";
-		}
-		else {
-			echo "L‰hetys ep‰onnistui:<br>";
-
-			echo "Tila: ".$xml->Status."<br>";
-			echo "Tilakoodi: ".$xml->StatusCode."<br>";
-
-			foreach ($xml->FreeText as $teksti) {
-				echo "Tilaviesti: ".$teksti."<br>";
+					// Nollataan t‰m‰
+					$apix_laskut_20l = array();
+				}
 			}
 		}
 	}
@@ -91,33 +67,23 @@
 		}
 
 		// Testaus
-		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+		$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
 		// Tuotanto
-		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+		#$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-		// Luetaan filu ja tehd‰‰n invoice_put_file() per lasku
-		$maventa_fh = fopen("$pupe_root_polku/dataout/".basename($filenimi), 'r');
+		// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+		$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("$pupe_root_polku/dataout/".basename($filenimi)));
+		$maventa_laskumaara = count($maventa_laskuarray);
 
-		$laskun_rivit = "";
+		if ($maventa_laskumaara > 0) {
+			for ($a = 1; $a < $maventa_laskumaara; $a++) {
+				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-		while ($rivi = fgets($maventa_fh)) {
-			if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
-				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
-				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
+
 				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
-
-				$laskun_rivit = "";
 			}
-
-			$laskun_rivit .= $rivi;
-		}
-
-		// Myˆs vika lasku
-		if ($laskun_rivit != "") {
-			preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
-			$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
-			echo "Maventa-lasku $invoice_number: $status<br>\n";
 		}
 	}
 
@@ -825,7 +791,7 @@
 					finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 					if ($yhtiorow["verkkolasku_lah"] == "apix") {
-						$tulostettavat_apix[] = $lasrow["tunnus"];
+						$tulostettavat_apix[] = $lasrow["laskunro"];
 					}
 				}
 				else {
@@ -928,7 +894,7 @@
 			elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
 
 				$timestamp		= gmdate("YmdHis");
-				$apixfinvoice 	= basename($nimifinvoice);
+				$apixfinvoice	= basename($nimifinvoice);
 				$apixzipfile	= "Apix_".$yhtiorow['yhtio']."_invoices_$timestamp.zip";
 
 				// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
@@ -938,18 +904,18 @@
 
 				if (mkdir($apix_tmpdirnimi)) {
 
-					// Siirret‰‰n finvoiceaineisto dirikkaan
-					if (!rename("/tmp/".$apixfinvoice, $apix_tmpdirnimi."/".$apixfinvoice)) {
+					// Kopsataan finvoiceaineisto dirikkaan
+					if (!copy("/tmp/".$apixfinvoice, $apix_tmpdirnimi."/".$apixfinvoice)) {
 						echo "APIX finvoicemove $apixfinvoice feilas!";
 					}
 
 					// Luodaan laskupdf:‰t
 					foreach ($tulostettavat_apix as $apixlasku) {
-						list($apixnumero, $apixtmpfile) = tulosta_lasku($apixlasku, $kieli, "VERKKOLASKU_APIX", "", "", "");
+						$apixtmpfile = tulosta_lasku("LASKU:".$apixlasku, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
 
 						// Siirret‰‰n faili apixtemppiin
-						if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixnumero.pdf")) {
-							echo "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
+						if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlasku.pdf")) {
+							echo "APIX tmpmove Apix_invoice_$apixlasku.pdf feilas!";
 						}
 					}
 
@@ -975,7 +941,7 @@
 					echo "<tr><th>".t("L‰het‰ aineisto uudestaan APIX:lle").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='tee' value='apix_siirto'>";
-					echo "<input type='hidden' name='filenimi' value='".basename($apixzipfile)."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 					echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
 					echo "</table>";
 				}

@@ -1413,7 +1413,7 @@
 				elseif (@include_once("tulosta_lasku.inc"));
 				else exit;
 
-				tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"]);
+				tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
 
 				if ($tee != 'NAYTATILAUS') {
 					echo t("Lasku tulostuu")."...<br>";

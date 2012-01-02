@@ -750,9 +750,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "B") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Katetta ei n‰ytet‰ tilauksentekovaiheessa")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Kate n‰ytet‰‰n tilauksentekovaiheessa")."</option>";
+		$ulos .= "<option value='B' $sel3>".t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

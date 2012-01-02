@@ -7259,11 +7259,11 @@ if (!function_exists('tarkasta_liite')) {
 				else {
 					if (count($sallitut_tiedostot)>1) {
 						//	Kaunistellaan..
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
 
 					}
 					else {
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
 					}
 				}
 			}
@@ -14599,11 +14599,80 @@ if (!function_exists('raaka_aineiden_riitto')) {
 	}
 }
 
+if (!function_exists("mod11_tarkiste")) {
+	function mod11_tarkiste ($numero) {
+
+		$tulos = "";
+		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
+
+		# K‰‰nnet‰‰n stringi takaperin
+		$numero_rev = strrev($numero);
+
+		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
+			# Lasketaan tulo ja kumuloidaan
+			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
+		}
+
+		# lasketaan tarkiste ja konkatenoidaan peruslukuun
+		$jaannos = $summa % 11;
+
+		switch ($jaannos) {
+			case 0:
+				$tulos = $numero . 0;
+				break;
+			case 1:
+				$tulos = $numero . 0;
+				break;
+			default:
+				$tulos = $numero . (11 - $jaannos);
+				break;
+		}
+
+		return $tulos;
+	}
+}
+
+if (!function_exists("mod10_tarkiste")) {
+	function mod10_tarkiste ($numero) {
+
+		$kerroin = 7;
+		$tulo    = 0;
+
+		for ($i=1; $i<=strlen($numero); $i++) {
+			
+			$merkki = substr($numero, -1 * $i, 1);
+			$tulo += $kerroin * $merkki;
+			
+			switch ($kerroin) {
+				case 7:
+					$kerroin = 3;
+					break;
+				case 3:
+					$kerroin = 1;
+					break;
+				case 1:
+					$kerroin = 7;
+					break;
+			}
+		}
+
+		$tulo = substr($tulo, -1) + 0;
+
+		if ($tulo != 0) {
+			$tulo = 10 - $tulo;
+		}
+
+		$numero .= $tulo;
+		
+		return $numero;
+	}
+}
+
 // Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
 if (!function_exists('zendesk_curl')) {
 	function zendesk_curl ($url) {
 		global $zendesk_auth;
-	
+
 		$ch  = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -14629,20 +14698,20 @@ if (!function_exists('zendesk_curl')) {
 		$body 	= substr($result, $info['header_size']);
 
 		curl_close($ch);
-		
+
 		$statukset = array();
 		$statukset[0] = "New";
 		$statukset[1] = "Open";
 		$statukset[2] = "Pending";
 		$statukset[3] = "Solved";
-		
+
 		$priot = array();
 		$priot[0] = "-";
 		$priot[1] = "Low";
 		$priot[2] = "Normal";
 		$priot[3] = "High";
 		$priot[4] = "Urgent";
-		
+
 		return array($body, $statukset, $priot);
 	}
 }

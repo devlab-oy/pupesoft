@@ -105,44 +105,29 @@
 		$row = mysql_fetch_assoc($result);
 		$vuosikulutus = $row['vuosikulutus'];
 
-		// Haetaan tuotteen tilauksessa oleva määrä
-		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
+		// Haetaan tuotteen valmistuksessa, ostettu, varattu sekä ennakkotilattu määrä
+		$query = "	SELECT
+					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
+					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
+					ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
+					ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.tyyppi in ('O', 'L', 'E', 'V','W')
 					AND tilausrivi.tuoteno = '$tuoteno'
 					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 		$tilattu = $row['tilattu'];
-
-		// Haetaan tuotteen varattu määrä (myynti)
-		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) varattu
-					FROM tilausrivi
-					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.tuoteno = '$tuoteno'
-					AND tilausrivi.varattu != 0";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
 		$varattu = $row['varattu'];
-
-		// Haetaan valmistettavana oleva määrä
-		$query = " 	SELECT ifnull(sum(tilausrivi.varattu), 0) valmistuksessa
-					FROM tilausrivi
-					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi in ('V','W')
-					AND tilausrivi.tuoteno = '$tuoteno'
-					AND tilausrivi.varattu != 0";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		$ennakko = $row['ennakko'];
 		$valmistuksessa = $row['valmistuksessa'];
 
 		// Jos ollaan rajattu toimittaja käyttöliittymässä, haetaan sen tiedot eikä oletustoimittajaa
 		$toimittaja_rajaus = ($valittu_toimittaja > 0) ? "and toimi.tunnus = '$valittu_toimittaja'" : "";
 
 		// Haetaan tuotteen toimittajatiedot
-		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, 0) toimitusaika,
+		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
 					tuotteen_toimittajat.toimittaja,
 					toimi.nimi,
@@ -196,7 +181,7 @@
 		}
 
 		// Lasketaan reaalisaldo
-		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu;
+		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu - $ennakko;
 
 		// Lasketaan myyntiennuste
 		$myyntiennuste = $budjetoitu_myynti - $reaalisaldo;
@@ -222,6 +207,7 @@
 		$tuoterivi['tilattu']			= $tilattu;
 		$tuoterivi['valmistuksessa']	= $valmistuksessa;
 		$tuoterivi['varattu']			= $varattu;
+		$tuoterivi['ennakko']			= $ennakko;
 		$tuoterivi['myyntiennuste']		= $myyntiennuste;
 		$tuoterivi['budjetoitu_myynti'] = $budjetoitu_myynti;
 		$tuoterivi['vuosikulutus']		= $vuosikulutus;
@@ -415,6 +401,10 @@
 			$tuote_where .= " and tuote.tuotemerkki = '$tuotemerkki'";
 		}
 
+		if ($status != '') {
+			$tuote_where .= " and tuote.status = '$status'";
+		}
+
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
 			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
@@ -601,6 +591,7 @@
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $row["tuoteno"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $row["nimitys"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $row["valmistuslinja"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 
 			// Otetaan isätuotteen pakkauskoko talteen, sillä sen perusteella tulee laskea "samankaltaisten" valmistusmäärä
 			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
@@ -629,6 +620,7 @@
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $samankaltainen_row["tuoteno"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $samankaltainen_row["nimitys"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
 			}
 
@@ -670,15 +662,16 @@
 		if (count($valmistettavat_tuotteet) > 0) {
 
 			// Sortataan 2 dimensoinen array. Pitää ensiksi tehdä sortattavista keystä omat arrayt
-			$apusort_jarj0 = $apusort_jarj1 = array();
+			$apusort_jarj0 = $apusort_jarj1 = $apusort_jarj2 = array();
 
 			foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
 			    $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
-				$apusort_jarj1[$apusort_key] = $apusort_row['riittopv'];
+				$apusort_jarj1[$apusort_key] = $apusort_row['isatuote'];
+				$apusort_jarj2[$apusort_key] = $apusort_row['tuoteno'];
 			}
 
 			// Sortataan by valmistuslinja, riittopv
-			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $valmistettavat_tuotteet);
+			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $apusort_jarj2, SORT_ASC, $valmistettavat_tuotteet);
 
 			// Kootaan raportti
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
@@ -794,6 +787,7 @@
 				echo "<tr><td>".t("Tilattu")."			</td><td>{$tuoterivi['tilattu']}			</td></tr>";
 				echo "<tr><td>".t("Valmistuksessa")."	</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Varattu")."			</td><td>{$tuoterivi['varattu']}			</td></tr>";
+				echo "<tr><td>".t("Ennakkotilaukset")."	</td><td>{$tuoterivi['ennakko']}			</td></tr>";
 				echo "<tr><td>".t("Myyntiennuste")."	</td><td>{$tuoterivi['myyntiennuste']}		</td></tr>";
 				echo "<tr><td>".t("Budjetoitu myynti")."</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
 				echo "<tr><td>".t("Vuosikulutus")."		</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
@@ -808,8 +802,8 @@
 
 				echo "</td><td colspan='7'>";
 
-				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")."<br>";
-				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]}<br><br>";
+				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")." - ".t("Ennakkotilaukset")."<br>";
+				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]}<br><br>";
 				echo t("Myyntiennuste")." = ".t("Budjetoitu myynti")." - ".t("Reaalisaldo")."<br>";
 				echo "{$tuoterivi["myyntiennuste"]} = {$tuoterivi["budjetoitu_myynti"]} - {$tuoterivi["reaalisaldo"]}<br><br>";
 				echo t("Päiväkulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
@@ -865,7 +859,7 @@
 		echo "<td><select name='kohde_varasto'>";
 
 		while ($row = mysql_fetch_assoc($result)) {
-			$sel = $row['tunnus'] == $kohde_varasto ? "selected" : "";
+			$sel = (isset($kohde_varasto) and $row['tunnus'] == $kohde_varasto) ? "selected" : "";
 			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
 		}
 		echo "</select></td></tr>";
@@ -878,7 +872,7 @@
 		echo "<option value=''>".t("Käytä kaikista")."</option>";
 
 		while ($row = mysql_fetch_assoc($result)) {
-			$sel = $row['tunnus'] == $lahde_varasto ? "selected" : "";
+			$sel = (isset($lahde_varasto) and $row['tunnus'] == $lahde_varasto) ? "selected" : "";
 			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
 		}
 		echo "</select></td></tr>";
@@ -893,10 +887,7 @@
 		$sresult = t_avainsana("OSASTO", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($osasto == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($osasto) and $osasto == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -913,10 +904,7 @@
 		$sresult = t_avainsana("TRY", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuoryh == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuoryh) and $tuoryh == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -940,11 +928,25 @@
 		echo "<option value=''>".t("Näytä kaikki")."</option>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuotemerkki == $srow["tuotemerkki"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuotemerkki) and $tuotemerkki == $srow["tuotemerkki"]) ? "selected" : "";
 			echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+		}
+		echo "</select>";
+
+		echo "</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Tuotteen status")."</th>";
+		echo "<td>";
+		echo "<select name='status'>";
+		echo "<option value=''>".t("Näytä kaikki")."</option>";
+
+		$result = t_avainsana("S");
+
+		while ($srow = mysql_fetch_array($result)) {
+			$sel = (isset($status) and $status == $srow["selite"]) ? "selected" : "";
+			echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
 

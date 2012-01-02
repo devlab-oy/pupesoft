@@ -1851,7 +1851,8 @@ if (!$cli) {
 					<option value='kuka' {$sel['kuka']}>".t("Käyttäjätietoja")."</option>
 					<option value='extranet_kayttajan_lisatiedot' {$sel['extranet_kayttajan_lisatiedot']}>".t("Extranet-käyttäjän lisätietoja")."</option>
 					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
-					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
+					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>
+					<option value='rahtikirjanumero' {$sel['rahtikirjanumero']}>".t("LOGY-rahtikirjanumerot")."</option>";
 
 	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
 	$dynaamiset_avainsanat = '';

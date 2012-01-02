@@ -322,10 +322,10 @@
 				$kasiind = str_replace("-", "", $headers[$excej]);
 
 				if ($tuoteryhmittain != "") {					
-					$budj_taulunrivit[$liitun][$kasiind][$try] = trim($data->sheets[0]['cells'][$excei][$excej]);
+					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 				else {
-					$budj_taulunrivit[$liitun][$kasiind][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+					$budj_taulunrivit[$liitun][$kasiind][] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 
 				$insert_rivimaara++;
@@ -929,8 +929,8 @@
 
 		// Kokonaisbudjetti-tarkastukset
 		if ($summabudjetti == "on") {
-			if ($budj_kohtelu == "indeksi") {
-				echo "<font class='error'>".t("VIRHE: Kokonaisbudjettia ei voida syöttää indeksiluvulla!")."</font><br>";
+			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
+				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syöttää indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
 			}			
 			if ($budjetointi_taso == "kuukausittain") {

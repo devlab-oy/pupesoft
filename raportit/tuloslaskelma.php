@@ -735,11 +735,6 @@
 			$vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
 			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 
-			// Kuinka monta saraketta luodaan jokaisesta kaudesta
-			$jakaja = 1;
-			if ($vertailued != "") $jakaja++;
-			if ($vertailubu != "") $jakaja++;
-
 			// Yhteensäotsikkomukaan
 			if ($ei_yhteensa == "") {
 				$alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";

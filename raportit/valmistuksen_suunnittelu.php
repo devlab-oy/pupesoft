@@ -105,44 +105,29 @@
 		$row = mysql_fetch_assoc($result);
 		$vuosikulutus = $row['vuosikulutus'];
 
-		// Haetaan tuotteen tilauksessa oleva määrä
-		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
+		// Haetaan tuotteen valmistuksessa, ostettu, varattu sekä ennakkotilattu määrä
+		$query = "	SELECT 
+					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
+					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
+					ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
+					ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.tyyppi in ('O', 'L', 'E', 'V','W')
 					AND tilausrivi.tuoteno = '$tuoteno'
 					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		$row = mysql_fetch_assoc($result);		
 		$tilattu = $row['tilattu'];
-
-		// Haetaan tuotteen varattu määrä (myynti)
-		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) varattu
-					FROM tilausrivi
-					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.tuoteno = '$tuoteno'
-					AND tilausrivi.varattu != 0";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
 		$varattu = $row['varattu'];
-
-		// Haetaan valmistettavana oleva määrä
-		$query = " 	SELECT ifnull(sum(tilausrivi.varattu), 0) valmistuksessa
-					FROM tilausrivi
-					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi in ('V','W')
-					AND tilausrivi.tuoteno = '$tuoteno'
-					AND tilausrivi.varattu != 0";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		$ennakko = $row['ennakko'];
 		$valmistuksessa = $row['valmistuksessa'];
 
 		// Jos ollaan rajattu toimittaja käyttöliittymässä, haetaan sen tiedot eikä oletustoimittajaa
 		$toimittaja_rajaus = ($valittu_toimittaja > 0) ? "and toimi.tunnus = '$valittu_toimittaja'" : "";
 
 		// Haetaan tuotteen toimittajatiedot
-		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, 0) toimitusaika,
+		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
 					tuotteen_toimittajat.toimittaja,
 					toimi.nimi,
@@ -196,7 +181,7 @@
 		}
 
 		// Lasketaan reaalisaldo
-		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu;
+		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu - $ennakko;
 
 		// Lasketaan myyntiennuste
 		$myyntiennuste = $budjetoitu_myynti - $reaalisaldo;
@@ -222,6 +207,7 @@
 		$tuoterivi['tilattu']			= $tilattu;
 		$tuoterivi['valmistuksessa']	= $valmistuksessa;
 		$tuoterivi['varattu']			= $varattu;
+		$tuoterivi['ennakko']			= $ennakko;
 		$tuoterivi['myyntiennuste']		= $myyntiennuste;
 		$tuoterivi['budjetoitu_myynti'] = $budjetoitu_myynti;
 		$tuoterivi['vuosikulutus']		= $vuosikulutus;
@@ -794,6 +780,7 @@
 				echo "<tr><td>".t("Tilattu")."			</td><td>{$tuoterivi['tilattu']}			</td></tr>";
 				echo "<tr><td>".t("Valmistuksessa")."	</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Varattu")."			</td><td>{$tuoterivi['varattu']}			</td></tr>";
+				echo "<tr><td>".t("Ennakkotilaukset")."	</td><td>{$tuoterivi['ennakko']}			</td></tr>";
 				echo "<tr><td>".t("Myyntiennuste")."	</td><td>{$tuoterivi['myyntiennuste']}		</td></tr>";
 				echo "<tr><td>".t("Budjetoitu myynti")."</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
 				echo "<tr><td>".t("Vuosikulutus")."		</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
@@ -808,8 +795,8 @@
 
 				echo "</td><td colspan='7'>";
 
-				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")."<br>";
-				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]}<br><br>";
+				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")." - ".t("Ennakkotilaukset")."<br>";
+				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]}<br><br>";
 				echo t("Myyntiennuste")." = ".t("Budjetoitu myynti")." - ".t("Reaalisaldo")."<br>";
 				echo "{$tuoterivi["myyntiennuste"]} = {$tuoterivi["budjetoitu_myynti"]} - {$tuoterivi["reaalisaldo"]}<br><br>";
 				echo t("Päiväkulutus")." = round(".t("Vuosikulutus")." / 240)<br>";

@@ -102,16 +102,16 @@
 						$montako = $suora_kpl;
 					}
 
-					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]'>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#!¡!#$krow[hyllyalue]#!¡!#$krow[hyllynro]#!¡!#$krow[hyllyvali]#!¡!#$krow[hyllytaso]'>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
 					$paikatlask = $paikatlask + 1;
 					$suoratoim_totaali += $myytavissa;
 				}
 				else {
 					// tallennetaan riville toimittajan tunnus
-					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#!¡!#$krow[hyllyalue]#!¡!#$krow[hyllynro]#!¡!#$krow[hyllyvali]#!¡!#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
 					$paikatlask = $paikatlask + 2;
 
-					$suoratoim_array[] = "@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa";
+					$suoratoim_array[] = "@@@$superrow[liitostunnus]#!¡!#$krow[hyllyalue]#!¡!#$krow[hyllynro]#!¡!#$krow[hyllyvali]#!¡!#$krow[hyllytaso]$lisa";
 				}
 			}
 		}

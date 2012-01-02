@@ -340,7 +340,6 @@
 //					$Amt = $RgltryDtls->addChild('Amt', '');
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
-				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 
 			if ($laskurow["viite"] > 0) {
 				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
@@ -357,6 +356,9 @@
 						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
 //					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
 			}
+			else {
+				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
+			}
 
 			// jos tämä muuttuja on setattu, on tämä ko. lasku/tapahtuma netotettu näistä tunnuksista!
 			if ($netotetut_rivit != "") {
@@ -369,9 +371,13 @@
 
 				while ($nettorow = mysql_fetch_array($result)) {
 
+					// Jos laskunumero on syötetty, lisätään se viestiin mukaan
+		            if ($nettorow['laskunro'] != 0 and $nettorow['laskunro'] != $nettorow['viesti']) {
+		                $nettorow['viesti'] = (trim($nettorow['viesti']) == "") ? $nettorow['laskunro'] : $nettorow['viesti']." ".$nettorow['laskunro'];
+		            }
+
 					if ($nettorow["summa"] < 0) {
 						$code = "CREN";				// hyvityslasku
-						$nettorow["summa"] *= -1;	// käännetään etumerkki
 					}
 					else {
 						$code = "CINV";				// veloituslasku
@@ -385,7 +391,14 @@
 //							$RfrdDocNb = $RfrdDocInf->addChild('RfrdDocNb', '');
 //						$RfrdDocRltdDt = $Strd->addChild('RfrdDocRltdDt', '');
 						$RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');						   					// ReferredDocumentAmount
-							$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   					// RemittedAmount
+
+							if ($nettorow["summa"] < 0) {
+								$RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));			// CreditNoteAmount
+							}
+							else {
+								$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+							}
+
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
 
 					if ($nettorow["viite"] > 0) {
@@ -394,8 +407,7 @@
 								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');						   					// Code (SCOR = Structured Communication Reference)
 							$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $nettorow['viite']));	// CreditorReference
 					}
-
-					if ($nettorow["viesti"] != "") {
+					elseif ($nettorow["viesti"] != "") {
 						$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', sprintf("%-1.140s", $nettorow['viesti']));	// AdditionalRemittanceInformation
 					}
 				}
@@ -654,7 +666,7 @@
 		while ($laskurow = mysql_fetch_array($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
-            if ($laskurow['laskunro'] != 0) {
+            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
                 $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
             }
 
@@ -683,8 +695,12 @@
 		// Lisätään vielä oikea tapahtumien määrä sanoman headeriin
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
-		// Kirjoitetaaan XML ja tehdään UTF8 encode
-		fwrite($toot, str_replace(chr(10),"",utf8_encode($xml->asXML())));
+		// Kirjoitetaaan XML, tehdään tästä jäsennelty aineisto. Tämä toimii paremmin mm OPn kanssa
+		$dom = new DOMDocument('1.0');
+		$dom->preserveWhiteSpace = true;
+		$dom->formatOutput = true;
+		$dom->loadXML(str_replace(array("\n", "\r"), "", utf8_encode($xml->asXML())));
+		fwrite($toot, ($dom->saveXML()));
 		fclose($toot);
 
 		// Tehdään vielä tässä vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

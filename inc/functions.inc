@@ -515,6 +515,103 @@ if (!function_exists("maventa_invoice_put_file")) {
 	}
 }
 
+if (!function_exists("apix_invoice_put_file")) {
+	function apix_invoice_put_file($lahetettavat_apix, $kieli, $valittu_tulostin, $valittu_kopio_tulostin) {
+		global $kukarow, $yhtiorow, $pupe_root_polku;
+
+		// siirret‰‰n laskutiedosto operaattorille
+		#$url         	= "https://test-api.apix.fi/invoices";
+		$url            = "https://api.apix.fi/invoices";
+		$transferkey    = $yhtiorow['apix_avain'];
+		$transferid     = $yhtiorow['apix_tunnus'];
+		$software       = "Pupesoft";
+		$version        = "1.0";
+		$timestamp      = gmdate("YmdHis");
+		$apixzipfile    = "Apix_".$yhtiorow['yhtio']."_invoices_".$timestamp."_".md5(uniqid(rand(),true)).".zip";
+		$apix_ulos 		= "";
+
+		// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+
+		if (mkdir($apix_tmpdirnimi)) {
+
+			// Kirjoitetaan finvoiceaineisto dirikkaan
+			if (!file_put_contents($apix_tmpdirnimi."/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml", implode("\n", $lahetettavat_apix))) {
+				$apix_ulos .= "APIX finvoicewrite feilasi!";
+			}
+
+			// Luodaan laskupdf:‰t
+			$apix_lasnot = array_keys($lahetettavat_apix);
+
+			foreach ($apix_lasnot as $apixlaskunro) {
+				$apixtmpfile = tulosta_lasku("LASKU:".$apixlaskunro, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+
+				// Siirret‰‰n faili apixtemppiin
+				if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlaskunro.pdf")) {
+					$apix_ulos .= "APIX tmpmove Apix_invoice_$apixlaskunro.pdf feilas!";
+				}
+			}
+
+			// Tehd‰‰n apixzippi
+			exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+
+			// Aineisto dataouttiin
+			exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+
+			// Poistetaan apix-tmpdir
+			exec("rm -rf $apix_tmpdirnimi");
+
+			// Siirret‰‰n aineisto APIXiin
+			$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+
+			$dt = substr(hash('sha256', $digest_src), 0, 64);
+
+			$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+			$apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
+			$apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+
+			$ch = curl_init($real_url);
+			curl_setopt($ch, CURLOPT_PUT, true);
+			curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+			curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+			$apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
+			$response = curl_exec($ch);
+
+			curl_close($ch);
+			fclose($apix_fh);
+
+			$xml = simplexml_load_string($response);
+
+			if ($xml->Status == "OK") {
+				$apix_ulos .= "L‰hetys onnistui!";
+			}
+			else {
+				$apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+
+				$apix_ulos .= "Tila: ".$xml->Status."<br>";
+				$apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+				foreach ($xml->FreeText as $teksti) {
+					$apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+				}
+
+				$apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
+			}
+		}
+		else {
+			$apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+		}
+
+		return $apix_ulos;
+	}
+}
+
 if (!function_exists("vapauta_sarjanumerot")) {
 	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
@@ -14639,10 +14736,10 @@ if (!function_exists("mod10_tarkiste")) {
 		$tulo    = 0;
 
 		for ($i=1; $i<=strlen($numero); $i++) {
-			
+
 			$merkki = substr($numero, -1 * $i, 1);
 			$tulo += $kerroin * $merkki;
-			
+
 			switch ($kerroin) {
 				case 7:
 					$kerroin = 3;
@@ -14663,7 +14760,7 @@ if (!function_exists("mod10_tarkiste")) {
 		}
 
 		$numero .= $tulo;
-		
+
 		return $numero;
 	}
 }

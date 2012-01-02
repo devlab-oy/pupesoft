@@ -381,7 +381,7 @@
 	}
 
 	// Tehd‰‰n raportti
-	if (isset($tee) and $tee == "RAPORTOI") {
+	if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
 		$tuote_where       = ""; // tuote-rajauksia
 		$toimittaja_join   = ""; // toimittaja-rajauksia
@@ -389,16 +389,16 @@
 		$abc_join          = ""; // abc-rajauksia
 		$toggle_counter    = 0;
 
-		if ($osasto != '') {
-			$tuote_where .= " and tuote.osasto = '$osasto'";
+		if (isset($mul_osasto) and count($mul_osasto) > 0) {
+			$tuote_where .= " and tuote.osasto in (".implode(",", $mul_osasto).")";
 		}
 
-		if ($tuoryh != '') {
-			$tuote_where .= " and tuote.try = '$tuoryh'";
+		if (isset($mul_try) and count($mul_try) > 0) {
+			$tuote_where .= " and tuote.try in (".implode(",", $mul_try).")";
 		}
 
-		if ($tuotemerkki != '') {
-			$tuote_where .= " and tuote.tuotemerkki = '$tuotemerkki'";
+		if (isset($mul_tme) and count($mul_tme) > 0) {
+			$tuote_where .= " and tuote.tuotemerkki in ('".implode("','", $mul_tme)."')";
 		}
 
 		if ($status != '') {
@@ -844,8 +844,6 @@
 	if (!isset($tee) or $tee == "") {
 
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='RAPORTOI'>";
-
 		echo "<table>";
 
 		$query = "	SELECT *
@@ -878,60 +876,12 @@
 		echo "</select></td></tr>";
 
 		echo "<tr>";
-		echo "<th>".t("Osasto")."</th>";
-		echo "<td>";
-		echo "<select name='osasto'>";
-		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
-
-		// tehd‰‰n avainsana query
-		$sresult = t_avainsana("OSASTO", "", "");
-
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = (isset($osasto) and $osasto == $srow["selite"]) ? "selected" : "";
-			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
-		}
-		echo "</select>";
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t("Tuoteryhm‰")."</th>";
-		echo "<td>";
-		echo "<select name='tuoryh'>";
-		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
-
-		// tehd‰‰n avainsana query
-		$sresult = t_avainsana("TRY", "", "");
-
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = (isset($tuoryh) and $tuoryh == $srow["selite"]) ? "selected" : "";
-			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
-		}
-		echo "</select>";
-
-		echo "</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>".t("Tuotemerkki")."</th>";
+		echo "<th>".t("Tuoterajaus")."</th>";
 		echo "<td>";
 
-		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-		$query = "	SELECT distinct tuotemerkki
-					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tuotemerkki != ''
-					ORDER BY tuotemerkki";
-		$sresult = pupe_query($query);
-
-		echo "<select name='tuotemerkki'>";
-		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
-
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = (isset($tuotemerkki) and $tuotemerkki == $srow["tuotemerkki"]) ? "selected" : "";
-			echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
-		}
-		echo "</select>";
+		$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
+		$monivalintalaatikot_normaali = array();
+		require ("tilauskasittely/monivalintalaatikot.inc");
 
 		echo "</td>";
 		echo "</tr>";

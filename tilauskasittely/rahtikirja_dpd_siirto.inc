@@ -11,26 +11,30 @@ if ($kollityht > 0) {
 
 	if (($dpd_delisprint_host != "" and $dpd_delisprint_user != "" and $dpd_delisprint_pass != "" and $dpd_delisprint_path != "") or $dpd_delisprint_path != "") {
 
-		// tarvitaan tilauksen tunnus muutujassa $tunnus
-		// printterin komento muuttujassa $oslapp
-		// $kukarow[yhtio] jostain saadaan yhtio
-		// $yhtiorow array josta saada l‰hett‰j‰n tiedot
+		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-		// nyt on kaikki tiedot rahtikirjaa varten haettu..
-		//
-		// arrayt:
-		// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-		// $rakir_row:sta lˆytyy asiakkaan tiedot ja $rivi:st‰ ytunnus
-		//
-		// muuttujat:
-		// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-		// mehto sis‰lt‰‰ maksuehdon tiedot
-		// jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
-		//
-		// tulostetaan rahtikirja
+			$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
+						FROM rahtikirjanumero
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytettyaika = '0000-00-00 00:00:00'";
+			$logyres = pupe_query($logyq);
+			$logyrow = mysql_fetch_assoc($logyres);
 
-		//N‰in se oli muuallakin onkai se sitten oikein?
-		$rahtikirjanro = $lotsikot[0];
+			$rahtikirjanro = $logyrow["rahtikirjanro"];
+			
+			$logyq = "	UPDATE rahtikirjanumero
+						SET kayttaja = '$kukarow[kuka]',
+						kaytettyaika = now()
+						WHERE yhtio = '$kukarow[yhtio]'
+						and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+			$logyres = pupe_query($logyq);
+		}
+		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+			$rahtikirjanro = $lotsikot[0];
+		}
+		else {
+			$rahtikirjanro = $rivi["rahtikirjanro"];
+		}
 
 		if ($phpnimi == "rahtikirja_custom.php") {
 			$laskurow = $osoitelappurow;
@@ -139,19 +143,16 @@ if ($kollityht > 0) {
 				$yhres = mysql_query($query) or pupe_error($query);
 			}
 		}
-		if(mysql_num_rows($yhres) > 0) {
+		
+		if (mysql_num_rows($yhres) > 0) {
 			$yhrow = mysql_fetch_array($yhres);
 			for($i=0;$i<mysql_num_fields($yhres);$i++) {
 				$r = mysql_field_name($yhres, $i);
 				$v = $yhrow[$i];
 
 				//	Korvaavuksia ja n‰pp‰ily‰
-
 				$parcelOrder["yhteyshenkilo_".$r] = $v;
 			}
-		}
-		else {
-			//	Falceback
 		}
 
 		$query ="	SELECT sum(kollit) kollit,
@@ -160,19 +161,14 @@ if ($kollityht > 0) {
 					sum(lavametri) lavametri,
 					min(pakkauskuvaustark) pakkauskuvaustark
 					from rahtikirjat use index (otsikko_index)
-					where yhtio = '$kukarow[yhtio]'
-					and otsikkonro = '$rahtikirjanro'
-					and rahtikirjanro = '$rahtikirjanro'
-					and pakkaus = '$pakkaus[0]'";
+					where yhtio 		= '$kukarow[yhtio]'
+					and otsikkonro 		= '$rahtikirjanro'
+					and rahtikirjanro 	= '$rahtikirjanro'
+					and pakkaus 		= '$pakkaus[0]'";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$rakires = mysql_query($query) or pupe_error($query);
 		$rakirow = mysql_fetch_array($rakires);
 
-		/*
-		if (count($kiloja) != $kollit[0]) {
-			die("Kollit ja painot ei t‰sm‰‰! ".count($kiloja)."/".$kollit[0]."Kiloja = ".$rakirow[kilot]);
-		}
-		*/
 		for($i=0;$i<mysql_num_fields($rakires);$i++) {
 			$r = mysql_field_name($rakires, $i);
 			$v = $rakirow[$i];

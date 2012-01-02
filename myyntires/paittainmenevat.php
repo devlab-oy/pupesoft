@@ -103,15 +103,30 @@
 							else {
 								$tapvm = $suoritus1row['kirjpvm'];
 							}
-							
+
+							//vertaillaan tilikauteen
+							list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+							list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+
+							$myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
+							$myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+
+							$tsekpvm = str_replace("-", "", $tapvm);
+
+							if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+								echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
+
+								$tapvm  = date("Y-m-d");
+							}
+
 							// Alkuperäisen rahatiliöinnin kustannuspaikka
 							$query  = "	SELECT kustp, kohde, projekti
 										FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]'										
+										WHERE yhtio = '$kukarow[yhtio]'
 										and aputunnus  = '$tiliointi1row[tunnus]'";
 							$result = pupe_query($query);
 							$raha1row = mysql_fetch_assoc($result);
-							
+
 							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
 							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha1row["kustp"], $raha1row["kohde"], $raha1row["projekti"]);
 
@@ -133,7 +148,7 @@
 										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
-														
+
 							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
 							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointi1row["tilino"], $tiliointi1row["kustp"], $tiliointi1row["kohde"], $tiliointi1row["projekti"]);
 
@@ -152,15 +167,15 @@
 										projekti 	= '{$projekti_ins}'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
-							
+
 							// Alkuperäisen rahatiliöinnin kustannuspaikka
 							$query  = "	SELECT kustp, kohde, projekti
 										FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]'										
+										WHERE yhtio = '$kukarow[yhtio]'
 										and aputunnus  = '$tiliointi2row[tunnus]'";
 							$result = pupe_query($query);
 							$raha2row = mysql_fetch_assoc($result);
-														
+
 							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
 							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"], $raha2row["kustp"], $raha2row["kohde"], $raha2row["projekti"]);
 
@@ -231,7 +246,7 @@
 	if ($tee == '') {
 
 		//Etsitään päittäin menevät suoritukset
-		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa, b.nimi_maksaja, b.kirjpvm, b.summa
+		$query = "	SELECT a.nimi_maksaja nimi1, a.kirjpvm pvm1, a.summa summa1, b.nimi_maksaja nimi2, b.kirjpvm pvm2, b.summa summa2
 					FROM suoritus a
 					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa $tilitselisa)
 					WHERE a.yhtio = '$kukarow[yhtio]' and
@@ -242,18 +257,24 @@
 		if (mysql_num_rows($result) > 0) {
 
 			echo "<table><tr>";
-
-			for ($i = 0; $i < mysql_num_fields($result); $i++) {
-				echo "<th>".t(mysql_field_name($result,$i))."</th>";
-			}
-
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Pvm")."</th>";
+			echo "<th>".t("Summa")."</th>";
+			echo "<th class='back'></th>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Pvm")."</th>";
+			echo "<th>".t("Summa")."</th>";
 			echo "</tr>";
 
 			while ($trow = mysql_fetch_assoc($result)) {
 				echo "<tr>";
-				for ($i = 0; $i < mysql_num_fields($result); $i++) {
-					echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
-				}
+				echo "<td>".$trow["nimi1"]."</td>";
+				echo "<td>".$trow["pvm1"]."</td>";
+				echo "<td>".$trow["summa1"]."</td>";
+				echo "<td> <-> </td>";
+				echo "<td>".$trow["nimi2"]."</td>";
+				echo "<td>".$trow["pvm2"]."</td>";
+				echo "<td>".$trow["summa2"]."</td>";
 				echo "</tr>";
 			}
 			echo "</table><br>";

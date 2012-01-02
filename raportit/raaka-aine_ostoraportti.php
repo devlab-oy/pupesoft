@@ -143,7 +143,7 @@
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
 					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio 
-						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.tuoteno = tuoteperhe.isatuoteno
 						AND tuote.status NOT IN ('P', 'T'))
 					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
 					AND tuoteperhe.tuoteno = '{$tuoteno}'

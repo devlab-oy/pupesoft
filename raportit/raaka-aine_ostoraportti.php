@@ -94,7 +94,7 @@
 		$lapsi_vuosikulutus = $row['vuosikulutus'];
 
 		// Haetaan lapsituotteen ostettu, varattu sek‰ ennakkotilattu m‰‰r‰
-		$query = "	SELECT 
+		$query = "	SELECT
 					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko
@@ -109,9 +109,6 @@
 		$lapsi_tilattu = $row['tilattu'];
 		$lapsi_ennakko = $row['ennakko'];
 
-		// Jos ollaan rajattu toimittaja k‰yttˆliittym‰ss‰, haetaan sen tiedot eik‰ oletustoimittajaa
-		$toimittaja_rajaus = ($valittu_toimittaja > 0) ? "and toimi.tunnus = '$valittu_toimittaja'" : "";
-
 		// Haetaan lapsituotteen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimitusaika,
 					if(tuotteen_toimittajat.pakkauskoko > 0, tuotteen_toimittajat.pakkauskoko, 1) pakkauskoko,
@@ -119,7 +116,7 @@
 					toimi.nimi,
 					toimi.tunnus
 					FROM tuotteen_toimittajat
-					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus $toimittaja_rajaus)
+					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus and toimi.tunnus = '$valittu_toimittaja')
 					WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotteen_toimittajat.tuoteno = '$tuoteno'
 					ORDER BY if(jarjestys = 0, 9999, jarjestys)
@@ -188,7 +185,7 @@
 			$isa_saldo = $row['saldo'];
 
 			// Haetaan is‰tuotteen ostettu, varattu sek‰ ennakkotilattu m‰‰r‰
-			$query = "	SELECT 
+			$query = "	SELECT
 						ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 						ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
 						ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko
@@ -198,6 +195,7 @@
 						AND tilausrivi.tuoteno = '{$isatuote_row["isatuoteno"]}'
 						AND tilausrivi.varattu != 0";
 			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 			$isa_tilattu = $row['tilattu'];
 			$isa_varattu = $row['varattu'];
 			$isa_ennakko = $row['ennakko'];
@@ -400,11 +398,11 @@
 		if ($toimittajaid != '') {
 			// Jos ollaan rajattu toimittaja, niin otetaan vain sen toimittajan tuotteet ja laitetaan mukaan selectiin
 			$toimittaja_join = "JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid')";
-			$toimittaja_select = "tuotteen_toimittajat.toimittaja";
+			$toimittaja_select = "tuotteen_toimittajat.liitostunnus toimittaja";
 		}
 		else {
 			// Jos toimittajaa ei olla rajattu, haetaan tuotteen oletustoimittaja subqueryll‰
-			$toimittaja_select = "(SELECT toimittaja FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
+			$toimittaja_select = "(SELECT liitostunnus FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno ORDER BY if(jarjestys = 0, 9999, jarjestys), toimittaja LIMIT 1) toimittaja";
 		}
 
 		if ($abcrajaus != "") {
@@ -479,7 +477,7 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				// Haetaan tuotteen tiedot
-				$tuoterivi = teerivi($row["tuoteno"], $toimittajaid);
+				$tuoterivi = teerivi($row["tuoteno"], $row["toimittaja"]);
 
 				// Toimittaja vaihtuu
 				if ($tuoterivi['toimittajan_tunnus'] != $EDtoimittaja or $EDtoimittaja === false) {
@@ -626,10 +624,7 @@
 		$sresult = t_avainsana("OSASTO", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($osasto == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($osasto) and $osasto == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -646,10 +641,7 @@
 		$sresult = t_avainsana("TRY", "", "");
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuoryh == $srow["selite"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuoryh) and $tuoryh == $srow["selite"]) ? "selected" : "";
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
@@ -673,10 +665,7 @@
 		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($tuotemerkki == $srow["tuotemerkki"]) {
-				$sel = "selected";
-			}
+			$sel = (isset($tuotemerkki) and $tuotemerkki == $srow["tuotemerkki"]) ? "selected" : "";
 			echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
 		}
 		echo "</select>";

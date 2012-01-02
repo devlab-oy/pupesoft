@@ -1838,13 +1838,26 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 }
 
 if (!function_exists("tulosta_lasku")) {
-	function tulosta_lasku ($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $tulostettavat_email = "", $saatekirje = "") {
+	function tulosta_lasku ($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $saatekirje = "") {
 		GLOBAL $kukarow, $yhtiorow;
 
-		$query = "	SELECT *
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$lasku'";
+		if (substr($lasku,0,6) == "LASKU:") {
+			$lasku = substr($lasku, 6);
+
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tila 		= 'U'
+						and alatila 	= 'X'
+						and laskunro	= '$lasku'";
+		}
+		else {
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus 	= '$lasku'";
+		}
+
 		$laresult = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laresult);
 
@@ -2126,9 +2139,9 @@ if (!function_exists("tulosta_lasku")) {
 		}
 		elseif ($tee == 'VERKKOLASKU_APIX') {
 			// Palautetaan laskunumero ja $pdf_laskufilenimi jotta apixkoodi saa sen zipattua jne.
-			return array($laskurow["laskunro"], $pdf_laskufilenimi);
+			return $pdf_laskufilenimi;
 		}
-		elseif ($tee == 'VERKKOLASKU' and ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["tunnus"], $tulostettavat_email))) {
+		elseif ($tee == 'VERKKOLASKU' and ($yhtiorow['lasku_tulostin'] == -99 or $valittu_tulostin == -99)) {
 			// Lasku lähtee asiakkaalle sähköpostilla. Generoidaan laskun saatekirje, joka haetaan avainsanoista
 			include_once("inc/generoi_laskun_saate.inc");
 

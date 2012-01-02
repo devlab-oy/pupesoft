@@ -587,6 +587,7 @@
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $row["tuoteno"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $row["nimitys"];
 			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $row["valmistuslinja"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 
 			// Otetaan isätuotteen pakkauskoko talteen, sillä sen perusteella tulee laskea "samankaltaisten" valmistusmäärä
 			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
@@ -615,6 +616,7 @@
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $samankaltainen_row["tuoteno"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $samankaltainen_row["nimitys"];
 				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["isatuote"] = $row["tuoteno"];
 				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
 			}
 
@@ -656,15 +658,16 @@
 		if (count($valmistettavat_tuotteet) > 0) {
 
 			// Sortataan 2 dimensoinen array. Pitää ensiksi tehdä sortattavista keystä omat arrayt
-			$apusort_jarj0 = $apusort_jarj1 = array();
+			$apusort_jarj0 = $apusort_jarj1 = $apusort_jarj2 = array();
 
 			foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
 			    $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
-				$apusort_jarj1[$apusort_key] = $apusort_row['riittopv'];
+				$apusort_jarj1[$apusort_key] = $apusort_row['isatuote'];
+				$apusort_jarj2[$apusort_key] = $apusort_row['tuoteno'];
 			}
 
 			// Sortataan by valmistuslinja, riittopv
-			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $valmistettavat_tuotteet);
+			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $apusort_jarj2, SORT_ASC, $valmistettavat_tuotteet);
 
 			// Kootaan raportti
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";

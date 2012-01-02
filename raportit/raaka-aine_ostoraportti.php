@@ -142,9 +142,12 @@
 		// Loopataan läpi lapsituotteen isätuotteet ja lasketaan osto ehdotukset
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
-					WHERE yhtio = '{$kukarow["yhtio"]}'
-					AND tuoteno = '{$tuoteno}'
-					AND tyyppi = 'R'";
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio 
+						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.status NOT IN ('P', 'T'))
+					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteperhe.tuoteno = '{$tuoteno}'
+					AND tuoteperhe.tyyppi = 'R'";
 		$isatuote_result = pupe_query($query);
 
 		// While loopissa käytettävät muuttujat

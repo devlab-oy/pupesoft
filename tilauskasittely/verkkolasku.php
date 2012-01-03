@@ -117,7 +117,6 @@
 
 		//Nollataan muuttujat
 		$tulostettavat       = array();
-		$tulostettavat_apix  = array();
 		$tulostettavat_email = array();
 		$tulos_ulos          = "";
 
@@ -2049,8 +2048,6 @@
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 								if ($yhtiorow["verkkolasku_lah"] == "apix") {
-									$tulostettavat_apix[] = $lasrow["tunnus"];
-
 									//N‰m‰ menee verkkolaskuputkeen
 									$verkkolaskuputkeen_apix[$lasrow["laskunro"]] = $lasrow["nimi"];
 								}
@@ -2162,10 +2159,6 @@
 			// jos laskutettiin jotain
 			if ($lask > 0) {
 
-				if (count($tulostettavat_apix) > 0 or count($tulostettavat) > 0) {
-					require_once("tilauskasittely/tulosta_lasku.inc");
-				}
-
 				if ($silent == "" or $silent == "VIENTI") {
 					$tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
 				}
@@ -2221,99 +2214,28 @@
 					}
 				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
-					// siirret‰‰n laskutiedosto operaattorille
-					#$url           = "https://test-api.apix.fi/invoices";
-					$url            = "https://api.apix.fi/invoices";
-					$transferkey    = $yhtiorow['apix_avain'];
-					$transferid     = $yhtiorow['apix_tunnus'];
-					$software       = "Pupesoft";
-					$version        = "1.0";
-					$timestamp      = gmdate("YmdHis");
-					$apixfinvoice   = basename($nimifinvoice);
-					$apixzipfile    = "Apix_".$yhtiorow['yhtio']."_invoices_$timestamp.zip";
 
-					// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+					// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+					$apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents($nimifinvoice));
+					$apix_laskumaara = count($apix_laskuarray);
+					$apix_laskut_20l = array();
 
-					if (mkdir($apix_tmpdirnimi)) {
+					if ($apix_laskumaara > 0) {
+						require_once("tilauskasittely/tulosta_lasku.inc");
 
-						// Siirret‰‰n finvoiceaineisto dirikkaan
-						if (!rename("/tmp/".$apixfinvoice, $apix_tmpdirnimi."/".$apixfinvoice)) {
-							$tulos_ulos .= "APIX finvoicemove $apixfinvoice feilas!";
-						}
+						for ($a = 1; $a < $apix_laskumaara; $a++) {
+							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-						$kaikki_apix_laskunumerot_talteen = "";
+							// Laitetaan 20 laskua arrayseen ja l‰hetet‰‰n ne...
+							$apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
-						// Luodaan laskupdf:‰t
-						foreach ($tulostettavat_apix as $apixlasku) {
-							list($apixnumero, $apixtmpfile) = tulosta_lasku($apixlasku, $kieli, "VERKKOLASKU_APIX", "", $valittu_tulostin, $valittu_kopio_tulostin);
+							if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
+								$tulos_ulos .= apix_invoice_put_file($apix_laskut_20l, $kieli);
 
-							// Siirret‰‰n faili apixtemppiin
-							if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixnumero.pdf")) {
-								$tulos_ulos .= "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
+								// Nollataan t‰m‰
+								$apix_laskut_20l = array();
 							}
-
-							$kaikki_apix_laskunumerot_talteen .= "$apixlasku ";
 						}
-
-						// Tehd‰‰n apixzippi
-						exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
-
-						// Aineisto dataouttiin
-						exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
-
-						// Poistetaan apix-tmpdir
-						exec("rm -rf $apix_tmpdirnimi");
-
-						// Siirret‰‰n aineisto APIXiin
-						$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
-
-						$dt = substr(hash('sha256', $digest_src), 0, 64);
-
-						$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
-
-						$apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
-						$apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
-
-						$ch = curl_init($real_url);
-						curl_setopt($ch, CURLOPT_PUT, true);
-						curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-						curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
-						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-						curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-						$tulos_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
-						$response = curl_exec($ch);
-
-						curl_close($ch);
-						fclose($apix_fh);
-
-						$xml = simplexml_load_string($response);
-
-						if ($xml->Status == "OK") {
-							$tulos_ulos .= "L‰hetys onnistui!";
-						}
-						else {
-							$tulos_ulos .= "L‰hetys ep‰onnistui:<br>";
-
-							$tulos_ulos .= "Tila: ".$xml->Status."<br>";
-							$tulos_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
-
-							foreach ($xml->FreeText as $teksti) {
-								$tulos_ulos .= "Tilaviesti: ".$teksti."<br>";
-							}
-
-							$tulos_ulos .= "Laskut: $kaikki_apix_laskunumerot_talteen<br>";
-						}
-					}
-					else {
-						$tulos_ulos .= "APIX tmpdirrin teko feilas!<br>";
-					}
-
-					if ($silent == "" or $silent == "VIENTI") {
-						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "maventa" and file_exists(realpath($nimifinvoice))) {
@@ -2333,32 +2255,16 @@
 					// Tuotanto
 					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-					// Luetaan filu ja tehd‰‰n invoice_put_file() per lasku
-					$maventa_fh = fopen($nimifinvoice, 'r');
+					// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+					$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
+					$maventa_laskumaara = count($maventa_laskuarray);
 
-					$laskun_rivit = "";
+					if ($maventa_laskumaara > 0) {
+						for ($a = 1; $a < $maventa_laskumaara; $a++) {
+							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-					while ($rivi = fgets($maventa_fh)) {
-						if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
-							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
-							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
 
-							if ($silent == "" or $silent == "VIENTI") {
-								$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
-							}
-
-							$laskun_rivit = "";
-						}
-
-						$laskun_rivit .= $rivi;
-					}
-
-					// Myˆs vika lasku
-					if ($laskun_rivit != "") {
-						preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
-						$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
-
-						if ($silent == "" or $silent == "VIENTI") {
 							$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
 						}
 					}
@@ -2521,8 +2427,10 @@
 					}
 				}
 
-				// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille
-				if (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
+				// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille/s‰hkˆpostiin
+				if (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "")) {
+
+					require_once("tilauskasittely/tulosta_lasku.inc");
 
 					if ((!isset($valittu_tulostin) or $valittu_tulostin == "") and ($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99)) {
 						$valittu_tulostin = $yhtiorow['lasku_tulostin'];
@@ -2532,12 +2440,10 @@
 
 					foreach ($tulostettavat as $lasku) {
 
-						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
-
 						$vientierittelymail    = "";
 						$vientierittelykomento = "";
 
-						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", $valittu_tulostin, $valittu_kopio_tulostin, $tulostettavat_email, $saatekirje);
+						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", $valittu_tulostin, $valittu_kopio_tulostin, $saatekirje);
 
 						$query = "  SELECT *
 									FROM lasku
@@ -2545,6 +2451,78 @@
 									and tunnus = '$lasku'";
 						$laresult = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($laresult);
+
+						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $laskurow[laskunro]<br>\n";
+
+						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+							$uusiotunnus = $laskurow["tunnus"];
+
+							require('tulosta_vientierittely.inc');
+
+							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+							list($usec, $sec) = explode(' ', microtime());
+							mt_srand((float) $sec + ((float) $usec * 100000));
+							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
+
+							//kirjoitetaan pdf faili levylle..
+							$fh = fopen($pdffilenimi, "w");
+							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+							fclose($fh);
+
+							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
+								// l‰hetet‰‰n meili
+								if ($vientierittelymail != "") {
+									$komento = $vientierittelymail;
+								}
+								else {
+									$komento = "";
+								}
+
+								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+
+								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+									$kutsu .= ", ".trim($laskurow["nimi"]);
+								}
+
+								$liite              = $pdffilenimi;
+								$sahkoposti_cc      = "";
+								$content_subject    = "";
+								$content_body       = "";
+								include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+							}
+
+							//poistetaan tmp file samantien kuleksimasta...
+							system("rm -f $pdffilenimi");
+
+							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+
+							unset($Xpdf);
+						}
+					}
+				}
+
+				// l‰hetet‰‰n sa‰hkˆpostilaskut
+				if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
+
+					require_once("tilauskasittely/tulosta_lasku.inc");
+
+					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
+
+					foreach ($tulostettavat_email as $lasku) {
+
+						$vientierittelymail    = "";
+						$vientierittelykomento = "";
+
+						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", -99, "", $saatekirje);
+
+						$query = "  SELECT *
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$lasku'";
+						$laresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laresult);
+
+						if ($silent == "") $tulos_ulos .= t("L‰hetet‰‰n lasku").": $laskurow[laskunro]<br>\n";
 
 						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
@@ -2590,7 +2568,7 @@
 							//poistetaan tmp file samantien kuleksimasta...
 							system("rm -f $pdffilenimi");
 
-							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+							if ($silent == "") $tulos_ulos .= t("Vientierittely l‰hetet‰‰n")."...<br>\n";
 
 							unset($Xpdf);
 						}

@@ -255,6 +255,7 @@
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
+		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
 		'rekisteritiedot'                 => 'Rekisteritiedot',

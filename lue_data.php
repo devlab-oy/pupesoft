@@ -39,11 +39,11 @@ if (php_sapi_name() == 'cli') {
 	// Mikä tiedosto käsitellään
 	if (trim($argv[3]) != '') {
 		$path_parts = pathinfo(trim($argv[3]));
-		$_FILES['userfile']['name'] 	= $path_parts['basename'];
-		$_FILES['userfile']['type'] 	= (strtoupper($path_parts['extension']) == 'TXT' or strtoupper($path_parts['extension']) == 'CSV') ? 'text/plain' : (strtoupper($path_parts['extension']) == 'XLS') ? 'application/vnd.ms-excel' : '';
+		$_FILES['userfile']['name'] = $path_parts['basename'];
+		$_FILES['userfile']['type'] = (strtoupper($path_parts['extension']) == 'TXT' or strtoupper($path_parts['extension']) == 'CSV') ? 'text/plain' : (strtoupper($path_parts['extension']) == 'XLS') ? 'application/vnd.ms-excel' : '';
 		$_FILES['userfile']['tmp_name'] = $argv[3];
-		$_FILES['userfile']['error'] 	= 0; // UPLOAD_ERR_OK
-		$_FILES['userfile']['size'] 	= filesize($argv[3]);
+		$_FILES['userfile']['error'] = 0; // UPLOAD_ERR_OK
+		$_FILES['userfile']['size'] = filesize($argv[3]);
 	}
 	else {
 		die ("Et antanut tiedoston nimeä ja polkua.\n");
@@ -1848,9 +1848,9 @@ if ($kasitellaan_tiedosto) {
 
 					$excelrivi = 0;
 					$excelsarake = 0;
-					
+
 					$worksheet->write($excelrivi, $excelsarake++, ucfirst(t("Alkuperäinen rivinumero")), $format_bold);
-					
+
 					foreach ($excelrivit[0] as $otsikko) {
 						$worksheet->write($excelrivi, $excelsarake++, ucfirst($otsikko), $format_bold);
 					}
@@ -1898,6 +1898,7 @@ if (!$cli) {
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
+		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
 		'rekisteritiedot'                 => 'Rekisteritiedot',
@@ -1975,16 +1976,16 @@ if (!$cli) {
 
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
 		echo "<tr><th>".t("Ytunnus-tarkkuus").":</th>
-				<td><select name='ytunnustarkkuus'>
-				<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
-				<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
-				</select></td>
-		</tr>";
+					<td><select name='ytunnustarkkuus'>
+					<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
+					<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
+					</select></td>
+			</tr>";
 	}
 
 	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
 		echo "	<tr><th>",t("Valitse liitos"),":</th>
-				<td><select name='dynaamisen_taulun_liitos'>";
+					<td><select name='dynaamisen_taulun_liitos'>";
 
 		if ($table == 'puun_alkio_asiakas') {
 			echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
@@ -2002,11 +2003,11 @@ if (!$cli) {
 
 	if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
 		echo "<tr><th>".t("Segmentin valinta").":</th>
-				<td><select name='segmenttivalinta'>
-				<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
-				<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
-				</select></td>
-		</tr>";
+					<td><select name='segmenttivalinta'>
+					<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
+					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
+					</select></td>
+			</tr>";
 	}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {
@@ -2019,11 +2020,11 @@ if (!$cli) {
 	}
 
 	echo "	<tr><th>".t("Valitse tiedosto").":</th>
-			<td><input name='userfile' type='file'></td>
+				<td><input name='userfile' type='file'></td>
 			<td class='back'><input type='submit' name='laheta' value='".t("Lähetä")."'></td>
-		</tr>
+			</tr>
 
-		</table>
+			</table>
 		</form>
 		<br>";
 }

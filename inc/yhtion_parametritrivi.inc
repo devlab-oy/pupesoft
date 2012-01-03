@@ -2803,7 +2803,8 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2861,8 +2862,8 @@
 
 		$sel = $trow[$i] == 'N' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Näytetään raaka-aineet valmistusmyynnissä");
-		$ulos .= "<option value = 'N' $sel>".t("Ei näytetä raaka-aineita valmistusmyynnissä");
+		$ulos .= "<option value = ''>".t("Näytetään raaka-aineet valmistusmyynnissä (asiakkaallevalmistus)");
+		$ulos .= "<option value = 'N' $sel>".t("Ei näytetä raaka-aineita valmistusmyynnissä (asiakkaallevalmistus)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

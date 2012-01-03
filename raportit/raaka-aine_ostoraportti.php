@@ -222,7 +222,7 @@
 		// Lasketaan lapsituotteen ostosuositus
 		$lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu - $lapsi_ennakko - $lapsi_valmistuksessa;
 
-		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240);
+		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 240, 6);
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);
 
 		$lapsi_kulutusennuste = $lapsi_kulutus - $lapsi_reaalisaldo;
@@ -577,7 +577,7 @@
 
 				echo "</td><td colspan='7'>";
 
-				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")." - ".t("Ennakkotilaukset")."<br>";
+				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." - ".t("Varattu")." - ".t("Ennakkotilaukset")." - ".t("Valmistuksessa")."<br>";
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]} - {$tuoterivi["valmistuksessa"]}<br><br>";
 				echo t("Päiväkulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
 				echo "{$tuoterivi['paivakulutus']} = round({$tuoterivi['vuosikulutus']} / 240)<br><br>";

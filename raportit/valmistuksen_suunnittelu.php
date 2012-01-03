@@ -184,7 +184,7 @@
 		$myyntiennuste = ($myyntiennuste < 0) ? 0 : $myyntiennuste;
 
 		// Lasketaan riittopäivät
-		$paivakulutus = round($vuosikulutus / 240);
+		$paivakulutus = round($vuosikulutus / 240, 6);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
 
 		// Lasketaan määräennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)

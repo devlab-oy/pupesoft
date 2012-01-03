@@ -582,10 +582,10 @@
 				echo "{$tuoterivi['riittopv']} = floor({$tuoterivi['reaalisaldo']} / {$tuoterivi['paivakulutus']})<br><br>";
 				echo t("Kulutusennuste")." = ".t("Budjetoitu kulutus")." + (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").")<br>";
 				echo "{$tuoterivi['kulutusennuste']} = {$tuoterivi['kulutus']} + ({$tuoterivi['paivakulutus']} * {$tuoterivi['toimitusaika']})<br><br>";
-				echo t("Ostosuositus")." = ceil(".t("Kulutusennuste")." - ".t("Reaalisaldo").")<br>";
-				echo "{$tuoterivi['ostosuositus']} = ceil({$tuoterivi['kulutusennuste']} - {$tuoterivi['reaalisaldo']})<br><br>";
-				echo t("Ostettava m‰‰r‰")." = ceil(".t("Ostosuositus")." / ".t("Pakkauskoko").") * ".t("Pakkauskoko")."<br>";
-				echo "{$tuoterivi['ostoeramaara']} = ceil({$tuoterivi['ostosuositus']} / {$tuoterivi['pakkauskoko']}) * {$tuoterivi['pakkauskoko']}<br><br>";
+				echo t("Ostosuositus")." = round(".t("Kulutusennuste")." - ".t("Reaalisaldo").")<br>";
+				echo "{$tuoterivi['ostosuositus']} = round({$tuoterivi['kulutusennuste']} - {$tuoterivi['reaalisaldo']})<br><br>";
+				echo t("Ostettava m‰‰r‰")." = round(".t("Ostosuositus")." / ".t("Pakkauskoko").") * ".t("Pakkauskoko")."<br>";
+				echo "{$tuoterivi['ostoeramaara']} = round({$tuoterivi['ostosuositus']} / {$tuoterivi['pakkauskoko']}) * {$tuoterivi['pakkauskoko']}<br><br>";
 
 				echo "</td></tr>";
 			}

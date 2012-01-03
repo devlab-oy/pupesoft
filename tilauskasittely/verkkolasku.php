@@ -318,10 +318,21 @@
 			// alustetaan muuttujia
 			$laskutus_esto_saldot = array();
 
-			// parametri, jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
-			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+			// parametri 'H', jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
+			// parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
+			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['saldovirhe_esto_laskutus'] == 'N') {
 
-				$query = "  SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
+				if ($yhtiorow["saldovirhe_esto_laskutus"] == 'N') {
+					$query_ale_lisa = generoi_alekentta('M');
+					$selecti = " tilausrivi.tuoteno, tuote.kehahin,	round((tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}),'{$yhtiorow["hintapyoristys"]}') laskettukplhinta, group_concat(distinct lasku.tunnus) tunnukset ";
+					$grouppi = " GROUP BY 1, 2, 3 ";			
+				}
+				else {
+					$selecti = " tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset ";
+					$grouppi = " GROUP BY 1 ";
+				}
+
+				$query = "  SELECT {$selecti}
 							FROM lasku
 							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J'))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
@@ -330,66 +341,44 @@
 							and lasku.alatila = 'D'
 							and lasku.viite   = ''
 							and lasku.chn    != '999'
-							$lasklisa
-							GROUP BY 1";
+							{$lasklisa}
+							{$grouppi}";
 				$lasku_chk_res = pupe_query($query);
 
 				while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+					
+					if ($yhtiorow['saldovirhe_esto_laskutus'] == 'N') {
+						// lasketaan kate
+						$laskettukate = $lasku_chk_row["laskettukplhinta"] - $lasku_chk_row["kehahin"];
 
-					$query = "  SELECT sum(saldo) saldo
-								FROM tuotepaikat
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$lasku_chk_row[tuoteno]'";
-					$saldo_chk_res = pupe_query($query);
-					$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
+						if ($lasku_chk_row["kehahin"] <= 0 or $laskettukate < 0) {
 
-					if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
-						$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
-						$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+							if ($lasku_chk_row["kehahin"] <= 0) {
+								$virhekohta = t("keskihankintahinta on nolla");
+							}
+							elseif ($laskettukate < 0) {
+								$virhekohta = t("kate on negatiivinen");
+							}
+							else {
+								$virhekohta = t("keskihankintahinta on nolla ja kate on negatiivinen");
+							}
+
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ". $virhekohta .".<br>\n";
+						}
 					}
-				}
-			}
+					else {
+						$query = "  SELECT sum(saldo) saldo
+									FROM tuotepaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$lasku_chk_row[tuoteno]'";
+						$saldo_chk_res = pupe_query($query);
+						$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
 
-			// parametri, Estet‰‰n laskutus mik‰li keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
-			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'N') {
-
-				$query_ale_lisa = generoi_alekentta('M');
-
-				$query = "  SELECT tilausrivi.tuoteno,
-							tuote.kehahin,
-							group_concat(distinct lasku.tunnus) tunnukset,
-							round((tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}),'{$yhtiorow["hintapyoristys"]}') laskettukplhinta
-							FROM lasku
-							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J'))
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-							WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-							and lasku.tila    = 'L'
-							and lasku.alatila = 'D'
-							and lasku.viite   = ''
-							and lasku.chn    != '999'
-							$lasklisa
-							GROUP BY 1, 2";
-				$lasku_chk_res = pupe_query($query);
-
-				while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
-
-					// lasketaan kate
-					$laskettukate = $lasku_chk_row["laskettukplhinta"] - $lasku_chk_row["kehahin"];
-
-					if ($lasku_chk_row["kehahin"] <= 0 or $laskettukate < 0) {
-
-						if ($lasku_chk_row["kehahin"] <= 0) {
-							$virhekohta = t("keskihankintahinta on nolla");
+						if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
 						}
-						elseif ($laskettukate < 0) {
-							$virhekohta = t("kate on negatiivinen");
-						}
-						else {
-							$virhekohta = t("keskihankintahinta on nolla ja kate on negatiivinen");
-						}
-
-						$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
-						$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ". $virhekohta .".<br>\n";
 					}
 				}
 			}

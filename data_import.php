@@ -17,7 +17,7 @@
 	if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
 
 		// Tarkistetaan eka, ett‰ t‰m‰ on t‰m‰n k‰ytt‰j‰n file
-		// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV.LOG
+		// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT.LOG
 		$filen_tiedot = explode("#", $datain_filenimi);
 		$kuka = $filen_tiedot[1];
 		$yhtio = $filen_tiedot[2];
@@ -33,6 +33,7 @@
 		}
 		elseif ($tee == "poista_file") {
 			unlink($pupe_root_polku."/datain/".$datain_filenimi);
+			unlink($pupe_root_polku."/datain/".substr($datain_filenimi,0,-3)."ERR");
 		}
 	}
 
@@ -64,8 +65,8 @@
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$kasitellaan_tiedosto_tyyppi = strtoupper($path_parts['extension']);
 
-			// Vain Excel tai validi CSV!
-			$return = tarkasta_liite("userfile", array("XLSX","XLS","CSV"));
+			// Vain Excel!
+			$return = tarkasta_liite("userfile", array("XLSX","XLS","DATAIMPORT"));
 
 			if ($return !== TRUE) {
 				echo "<font class='error'>".t("V‰‰r‰ tiedostomuoto")." $kasitellaan_tiedosto_tyyppi !</font><br>\n";
@@ -90,7 +91,7 @@
 			// Tehd‰‰n Excel -> CSV konversio
 			if ($kasitellaan_tiedosto === TRUE and ($kasitellaan_tiedosto_tyyppi == "XLS" or $kasitellaan_tiedosto_tyyppi == "XLSX")) {
 
-				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".csv";
+				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
 
 				/** M‰‰ritell‰‰n importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentorivilt‰: ssconvert --list-importers **/
 				if ($kasitellaan_tiedosto_tyyppi == "XLSX") {
@@ -107,7 +108,7 @@
 					$kasitellaan_tiedosto = FALSE;
 				}
 				else {
-					$kasitellaan_tiedosto_tyyppi = "CSV";
+					$kasitellaan_tiedosto_tyyppi = "DATAIMPORT";
 				}
 
 				// Poistetaan orig uploadfile
@@ -117,7 +118,7 @@
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
 			}
 
-			// Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon. Konversion j‰lkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV
+			// Generoidaan uusi k‰ytt‰j‰kohtainen filenimi datain -hakemistoon. Konversion j‰lkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
 			$kasiteltava_filenimi = "lue-data#".$kukarow["kuka"]."#".$kukarow["yhtio"]."#".$table."#".md5(uniqid(microtime(), TRUE) . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'])."#".$alkuperainen_filenimi;
 			$kasiteltava_filepath = $pupe_root_polku."/datain/";
 			$kasiteltava_kokonimi = $kasiteltava_filepath.$kasiteltava_filenimi;
@@ -134,7 +135,7 @@
 		}
 
 		// File saatu palvelimelle OK
-		if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "CSV") {
+		if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "DATAIMPORT") {
 
 			// Otetaan tiedostosta ensimm‰inen rivi talteen, siin‰ on headerit
 			$file = fopen($kasiteltava_kokonimi, "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
@@ -163,8 +164,8 @@
 
 						// Jos kyseess‰ on eka file (loppuu "aa"), ei laiteta headeri‰
 						if (substr($file, -2) == "aa") {
-							// Renametaan alkuper‰iseksi plus CSV p‰‰te
-							rename($file, $file.".CSV");
+							// Renametaan alkuper‰iseksi plus DATAIMPORT p‰‰te
+							rename($file, $file.".DATAIMPORT");
 						}
 						else {
 							// Keksit‰‰n temp file
@@ -176,8 +177,8 @@
 							// Poistetaan alkuper‰inen file
 							unlink($file);
 
-							// Renametaan temppifile alkuper‰iseksi plus CSV p‰‰te
-							rename($temp_file, $file.".CSV");
+							// Renametaan temppifile alkuper‰iseksi plus DATAIMPORT p‰‰te
+							rename($temp_file, $file.".DATAIMPORT");
 						}
 
 						$montako_osaa++;
@@ -194,8 +195,12 @@
 				echo "<font class='message'>".t("Jokainen osa sis‰lt‰‰ 10000 rivi‰").".</font><br><br>\n";
 			}
 
-			echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon.")." ".t("Voit nyt poistua t‰st‰ ohjelmasta.")."</font><br>"
+			echo "<font class='message'>".t("Tiedosto siirretty k‰sittelyjonoon.")." ".t("Voit nyt poistua t‰st‰ ohjelmasta.")."</font><br>";
 			echo "<font class='message'>".t("Tiedosto sis‰‰nluetaan automaattisesti.")." ".t("Palaa t‰h‰n ohjelmaan n‰hd‰ksesi ajon tuloksen.")."</font><br><br>\n";
+
+			// Laukaistaan itse sis‰‰najo
+			exec("/usr/bin/php {$pupe_root_polku}/data_import_ajo.php > /dev/null 2>/dev/null &");
+
 		}
 		else {
 			echo "<font class='error'>".t("Dataa ei k‰sitelty")."!</font><br><br>\n";
@@ -211,7 +216,7 @@
 	    while (false !== ($file = readdir($handle))) {
 			// T‰m‰ file on valmis lue-data file
 
-			if (substr($file, 0, 9) == "lue-data#" and substr($file, -4) == ".CSV") {
+			if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
 				$tiedostoja_jonossa++;
 
 				// T‰m‰ on t‰m‰n k‰ytt‰j‰n file
@@ -313,7 +318,7 @@
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";
-	echo "<td>".t("Valitse tietokannan taulu").":</td>";
+	echo "<th>".t("Valitse tietokannan taulu").":</th>";
 	echo "<td>";
 	echo "<select name='table' onchange='submit();'>";
 
@@ -326,7 +331,7 @@
 	echo "</tr>";
 
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
-		echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
+		echo "<tr><th>".t("Ytunnus-tarkkuus").":</th>
 				<td><select name='ytunnustarkkuus'>
 				<option value=''>".t("P‰ivitet‰‰n vain, jos Ytunnuksella lˆytyy yksi rivi")."</option>
 				<option value='2'>".t("P‰ivitet‰‰n kaikki syˆtetyll‰ Ytunnuksella lˆytyv‰t asiakkaat")."</option>
@@ -335,7 +340,7 @@
 	}
 
 	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
-		echo "	<tr><td>",t("Valitse liitos"),":</td>
+		echo "	<tr><th>",t("Valitse liitos"),":</th>
 				<td><select name='dynaamisen_taulun_liitos'>";
 
 		if ($table == 'puun_alkio_asiakas') {
@@ -353,7 +358,7 @@
 	}
 
 	if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
-		echo "<tr><td>".t("Segmentin valinta").":</td>
+		echo "<tr><th>".t("Segmentin valinta").":</th>
 				<td><select name='segmenttivalinta'>
 				<option value='1'>".t("Valitaan k‰ytett‰v‰ksi asiakas-segmentin koodia")."</option>
 				<option value='2'>".t("Valitaan k‰ytett‰v‰ksi asiakas-segmentin tunnusta ")."</option>
@@ -362,7 +367,7 @@
 	}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {
-		echo "<tr><td>".t("Liitostunnus").":</td>
+		echo "<tr><th>".t("Liitostunnus").":</th>
 				<td><select name='liitostunnusvalinta'>
 				<option value='1'>".t("Liitostunnus-sarakkeessa liitostunnus")."</option>
 				<option value='2'>".t("Liitostunnus-sarakkeessa k‰ytt‰j‰nimi")."</option>
@@ -370,7 +375,7 @@
 		</tr>";
 	}
 
-	echo "	<tr><td>".t("Valitse tiedosto").":</td>
+	echo "	<tr><th>".t("Valitse tiedosto").":</th>
 			<td><input name='userfile' type='file'></td>
 			<td class='back'><input type='submit' name='laheta' value='".t("L‰het‰")."'></td>
 		</tr>
@@ -378,6 +383,8 @@
 		</table>
 		</form>
 		<br>";
+
+	exec("/usr/bin/php {$pupe_root_polku}/data_import_ajo.php > /dev/null 2>/dev/null &");
 
 	// N‰ytet‰‰n k‰ytt‰j‰n kaikki LOG filet
 	$kasitelty = array();
@@ -393,17 +400,19 @@
 				// T‰m‰ logi on jo k‰sitelty
 				if (strpos($log, "## LUE-DATA-EOF ##") !== FALSE) {
 
-					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.CSV.LOG
+					// Filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT.LOG
 					$filen_tiedot = explode("#", $file);
 					$kuka = $filen_tiedot[1];
 					$taulu = $filen_tiedot[3];
 					$orig_file = $filen_tiedot[5];
 
 					$kasitelty[$kasitelty_i]["filename"] = $file;
+					$kasitelty[$kasitelty_i]["errfilename"] = substr($file,0,-3)."ERR";
 					$kasitelty[$kasitelty_i]["orig_file"] = $orig_file;
 					$kasitelty[$kasitelty_i]["taulu"] = $taulut[$taulu];
 					$kasitelty[$kasitelty_i]["aika"] = date("d.m.Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
-					$kasitelty[$kasitelty_i]["kaunisnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
+					$kasitelty[$kasitelty_i]["lognimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".txt";
+					$kasitelty[$kasitelty_i]["errnimi"] = "$kuka-$taulu-".date("Ymd-His", filemtime($pupe_root_polku."/datain/".$file)).".xls";
 					$kasitelty_i++;
 				}
 			}
@@ -420,7 +429,9 @@
 		echo "<th>".t("Tiedosto")."</th>";
 		echo "<th>".t("Taulu")."</th>";
 		echo "<th>".t("K‰sitelty")."</th>";
-		echo "<th colspan='2'>".t("Lokitiedosto")."</th>";
+		echo "<th>".t("Lokitiedosto")."</th>";
+		echo "<th>".t("Virheelliset rivit")."</th>";
+		echo "<th>".t("Poista lokitiedosto")."</th>";
 		echo "</tr>";
 
 		foreach ($kasitelty as $file) {
@@ -430,8 +441,14 @@
 			echo "<td>{$file["aika"]}</td>";
 			echo "<td><form method='post'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='{$file["kaunisnimi"]}'>";
+			echo "<input type='hidden' name='kaunisnimi' value='{$file["lognimi"]}'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
+			echo "<input type='submit' value='".t("Tallenna")."'>";
+			echo "</form></td>";
+			echo "<td><form method='post'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='{$file["errnimi"]}'>";
+			echo "<input type='hidden' name='datain_filenimi' value='{$file["errfilename"]}'>";
 			echo "<input type='submit' value='".t("Tallenna")."'>";
 			echo "</form></td>";
 			echo "<td><form method='post' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat poistaa lokitiedoston?")."')\">";

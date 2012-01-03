@@ -19,7 +19,11 @@ cd ${POLKU};php hae_valuutat_cron.php
 
 # Siivotaan dataout dirikasta vanhat failit pois
 touch ${POLKU}/dataout
-find ${POLKU}/dataout -mtime +${BACKUPSAVEDAYS} -not -path '*/.svn*' -delete
+find ${POLKU}/dataout -mtime +${BACKUPSAVEDAYS} -not -path '*/.gitignore' -delete
+
+# Siivotaan datain dirikasta vanhat failit pois
+touch ${POLKU}/datain
+find ${POLKU}/datain -mtime +${BACKUPSAVEDAYS} -not -path '*/Finvoice*' -not -path '*/*.xsd' -delete
 
 # Jos Nagios on käytössä, niin tsekataan apachen fatalit errorit
 if [ -f "/home/nagios/nagios-pupesoft.sh" ]; then

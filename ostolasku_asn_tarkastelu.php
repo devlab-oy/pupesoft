@@ -387,7 +387,6 @@
 
 		$tee = '';
 	}
-	
 
 	if ($tee == 'uusirivi') {
 		
@@ -699,8 +698,8 @@
 								hyllyalue	= '$ostotilausrivirow[hyllyalue]',
 								hyllynro	= '$ostotilausrivirow[hyllynro]',
 								hyllytaso	= '$ostotilausrivirow[hyllytaso]',
-								hyllyvali	= '$ostotilausrivirow[hyllyvali]'";
-								//tilaajanrivinro = '$asn_row_haku[tilausrivinpositio]'";
+								hyllyvali	= '$ostotilausrivirow[hyllyvali]',
+								tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
 					$inskres = pupe_query($query);
 				}
 				
@@ -727,7 +726,7 @@
 
 		if ($valitse == 'asn') {
 			if (isset($asn_rivi) and strpos($asn_rivi, '##') !== false) {
-				list($asn_rivi, , $tilaajanrivinro) = explode('##', $asn_rivi);
+				list($asn_rivi, $tuoteno, $tilaajanrivinro) = explode('##', $asn_rivi);
 
 				$asn_rivi = (int) $asn_rivi;
 
@@ -738,7 +737,6 @@
 
 			// pakotetaan tuoteno asn_sanomasta. Välilyönnit tekee kiusaa
 			if (!isset($tuoteno)) $tuoteno =  $asn_row['toim_tuoteno'];
-
 			if (!isset($toimittaja) and isset($asn_row)) $toimittaja = $asn_row['toimittajanumero'];
 			if (!isset($tilausnro) and isset($asn_row)) $tilausnro = $asn_row['tilausnumero'];
 			if (!isset($kpl) and isset($asn_row)) $kpl = $asn_row['kappalemaara'];
@@ -974,18 +972,17 @@
 
 					$row['nimitys'] = $trow['nimitys'];
 
-					$query = "SELECT nimitys, uusiotunnus, tilaajanrivinro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$row['tilausnumero']}' AND tuoteno = '{$row['tuoteno']}' AND tyyppi = 'O'";
+					$query = "SELECT nimitys, uusiotunnus, tilaajanrivinro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$row['tilausnumero']}' AND tuoteno = '{$row['tuoteno']}' AND tilaajanrivinro = '{$row['tilausrivinpositio']}' AND tyyppi = 'O'";
 					$tilres = pupe_query($query);
 
 					if (mysql_num_rows($tilres) > 0) {
 						$tilrow = mysql_fetch_assoc($tilres);
 						$row['nimitys'] = $tilrow['nimitys'];
 						$row['uusiotunnus'] = $tilrow['uusiotunnus'];
-						$row['tilaajanrivinro'] = $tilrow['tilaajanrivinro'];
+						$row['tilausrivinpositio'] = $tilrow['tilaajanrivinro'];
 					}
 					else {
 						$row['uusiotunnus'] = 0;
-						$row['tilaajanrivinro'] = '';
 					}
 				}
 				else {
@@ -1005,7 +1002,7 @@
 				echo "<td><font class='error'>",t("Virhe"),"</font></td>";
 
 				echo "<td>";
-				if ($row['uusiotunnus'] == 0) echo "<input type='button' class='etsibutton' id={$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilaajanrivinro']}' value='",t("Etsi"),"' />";
+				if ($row['uusiotunnus'] == 0) echo "<input type='button' class='etsibutton' id={$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='",t("Etsi"),"' />";
 				echo "</td>";
 
 				echo "</tr>";

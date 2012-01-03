@@ -110,10 +110,10 @@
 					ifnull(sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)), 0) tilattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'L', tilausrivi.varattu, 0)), 0) varattu,
 					ifnull(sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)), 0) ennakko,
-					ifnull(sum(if(tilausrivi.tyyppi in ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
+					ifnull(sum(if(tilausrivi.tyyppi IN ('V','W'), tilausrivi.varattu, 0)), 0) valmistuksessa
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi in ('O', 'L', 'E', 'V','W')
+					AND tilausrivi.tyyppi IN ('O', 'L', 'E', 'V', 'W')
 					AND tilausrivi.tuoteno = '$tuoteno'
 					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
@@ -429,7 +429,7 @@
 							AND tuote.status != 'P'
 							$tuote_where)
 						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-						AND tilausrivi.tyyppi IN  ('L','G')
+						AND tilausrivi.tyyppi IN ('L','G')
 						AND tilausrivi.var = 'J'
 						AND tilausrivi.jt $lisavarattu > 0";
 			$vtresult = pupe_query($query);
@@ -638,7 +638,7 @@
 			if ($valmistettava_yhteensa != 0) {
 				// Jos meillä oli joku poikkeava pakkauskoko tuotteelle, lasketaan valmistusmäärä uudestaan
 				if ($isatuotteen_pakkauskoko != 1) {
-					
+
 					// Pyöristetään koko samankaltaisten nippu ylöspäin seuraavaan pakkauskokoon
 					$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
 

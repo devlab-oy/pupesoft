@@ -2877,8 +2877,8 @@
 
 		$sel = $trow[$i] == 'N' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰");
-		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰");
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰ (asiakkaallevalmistus)");
+		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰ (asiakkaallevalmistus)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -7695,13 +7695,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 			}
 
 			// Näytetään poistuvat tuotteet mutta ei poistettuja
-			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
+			if ($yhtiorow['livetuotehaku_poistetut'] == 'X' or $yhtiorow['livetuotehaku_poistetut'] == 'Y') {
 				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
 			}
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
 			}
-			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
+			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$naytetaanko_poistetut
@@ -7711,7 +7711,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
+
 				while ($row = mysql_fetch_assoc($result)) {
+
+					if ($yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00) ) {
+						$tyyli = "font-weight:bold;color:red;";
+						$tyyli2 = "font-weight:normal;color:red;";
+					}
+					else {
+						$tyyli = "font-weight:bold'";
+						$tyyli2 = "font-weight:normal'";
+					}
+					
 					echo "	<div id='tuote_valinta_$row[tunnus]'
 								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
@@ -7732,7 +7743,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 								}
 								echo "\"
 								style='padding:2px;'>
-								<font style='font-weight:bold'>$row[tuoteno]</font> &raquo; $row[nimitys]
+								<font style='$tyyli'>$row[tuoteno]</font> &raquo; <font style='$tyyli2'>$row[nimitys]</font>
 							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
 					$limit++;
 

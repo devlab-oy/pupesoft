@@ -11,15 +11,26 @@ if(!function_exists("tuotetarkista")) {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 			else {
-				if ($tunnus == "") {
-					$query  = "	SELECT yhtio
-								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '".trim($t[$i])."'";
-					$chkressiresult = pupe_query($query);
+				$temp_ekakirjain = (substr(trim($t[$i]),0,1));
+				if (($temp_ekakirjain == '*') or ($temp_ekakirjain == '@') or ($temp_ekakirjain == '?')) {
+					$virhe[$i] = t("Tuotenumero ei voi alkaa merkeill‰ *, @ tai ?");
+				}
+				else { 
+					if (substr(trim($t[$i]),-1) == '*') {
+						$virhe[$i] = t("Tuotenumero ei voi loppua merkkiin *");
+					}
+					else {
+						if ($tunnus == "") {
+							$query  = "	SELECT yhtio
+										FROM tuote
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tuoteno = '".trim($t[$i])."'";
+							$chkressiresult = pupe_query($query);
 
-					if (mysql_num_rows($chkressiresult) > 0) {
-						$virhe[$i] = t("Tuotenumero on jo perustettu j‰rjestelm‰‰n");
+							if (mysql_num_rows($chkressiresult) > 0) {
+								$virhe[$i] = t("Tuotenumero on jo perustettu j‰rjestelm‰‰n");
+							}
+						}
 					}
 				}
 			}
@@ -282,6 +293,11 @@ if(!function_exists("tuotetarkista")) {
 				if (mysql_num_rows($chkressiresult) > 0) {
 					$virhe[$i] = t("EAN-koodi on jo perustettu j‰rjestelm‰‰n");
 				}
+				
+				if ($yhtiorow["tarkista_eankoodi"] == "K" and tarkista_ean13(trim($t[$i])) === FALSE) {
+					$virhe[$i] = t("EAN-koodi on virheellinen");
+				}
+
 			}
 		}
 

@@ -694,6 +694,7 @@
 					$valmistaja_header .= "<th>".t("Nimitys")."</th>";
 					$valmistaja_header .= "<th>".t("Sisar")."-<br>".t("tuotteet")."</th>";
 					$valmistaja_header .= "<th>".t("ABC")."-<br>".t("luokka")."</th>";
+					$valmistaja_header .= "<th>".t("Reaali")."-<br>".t("saldo")."</th>";					
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
 					$valmistaja_header .= "<th>".t("Raaka")."-<br>".t("aine")." ".t("riitto")."</th>";
@@ -719,6 +720,7 @@
 				echo "<td>{$tuoterivi["nimitys"]}</td>";
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 

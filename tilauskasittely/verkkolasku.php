@@ -317,10 +317,18 @@
 			// alustetaan muuttujia
 			$laskutus_esto_saldot = array();
 
-			// parametri, jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
-			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+			// saldovirhe_esto_laskutus-parametri 'H', jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
+			// kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
+			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
 
-				$query = "  SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
+				$query_ale_lisa = generoi_alekentta('M');
+
+				$query = "  SELECT
+							tilausrivi.tuoteno,
+							if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0.01) kehahin,
+							sum(tilausrivi.varattu) varattu,
+							round(min(tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) min_kplhinta,
+							group_concat(distinct lasku.tunnus) tunnukset
 							FROM lasku
 							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J'))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
@@ -329,22 +337,38 @@
 							and lasku.alatila = 'D'
 							and lasku.viite   = ''
 							and lasku.chn    != '999'
-							$lasklisa
-							GROUP BY 1";
+							{$lasklisa}
+							GROUP BY 1, 2";
 				$lasku_chk_res = pupe_query($query);
 
 				while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+					// Mik‰li laskutuksessa tuotteen varastosaldo v‰henee negatiiviseksi, hyl‰t‰‰n KAIKKI tilaukset, joilla on kyseist‰ tuotetta
+					if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+						$query = "  SELECT sum(saldo) saldo
+									FROM tuotepaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$lasku_chk_row[tuoteno]'";
+						$saldo_chk_res = pupe_query($query);
+						$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
 
-					$query = "  SELECT sum(saldo) saldo
-								FROM tuotepaikat
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$lasku_chk_row[tuoteno]'";
-					$saldo_chk_res = pupe_query($query);
-					$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
+						if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+						}
+					}
 
-					if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
-						$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
-						$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+					// Estet‰‰n laskutus mik‰li keskihankintahinta on nolla tai rivin kate on negatiivinen
+					if ($yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
+
+						if ($lasku_chk_row["kehahin"] <= 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen keskihankintahinta on nolla")."<br>\n";
+						}
+
+						if (($lasku_chk_row["min_kplhinta"] - $lasku_chk_row["kehahin"]) < 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen kate on negatiivinen")."<br>\n";
+						}
 					}
 				}
 			}

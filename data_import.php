@@ -249,8 +249,8 @@
 		'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',
 		'hinnasto'                        => 'Hinnasto',
 		'kalenteri'                       => 'Kalenteritietoja',
-		'kuka'                            => 'Kustannuspaikat',
-		'kustannuspaikka'                 => 'Käyttäjätietoja',
+		'kuka'                            => 'Käyttäjätietoja',
+		'kustannuspaikka'                 => 'Kustannuspaikat',
 		'liitetiedostot'                  => 'Liitetiedostot',
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
@@ -271,10 +271,10 @@
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',
 		'tuoteperhe'                      => 'Tuoteperheet',
-		'tuotteen_alv'                    => 'Tuotteen avainsanat',
-		'tuotteen_avainsanat'             => 'Tuotteen toimittajat',
+		'tuotteen_alv'                    => 'Tuotteiden ulkomaan ALV',
+		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
-		'tuotteen_toimittajat'            => 'Tuotteiden ulkomaan ALV',
+		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
@@ -299,8 +299,8 @@
 	}
 
 	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
-		$taulut['autodata']                        = 'Autodata tuotetiedot';
-		$taulut['autodata_tuote']                  = 'Autodatatiedot';
+		$taulut['autodata']                        = 'Autodatatiedot';
+		$taulut['autodata_tuote']                  = 'Autodata tuotetiedot';
 		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';
 		$taulut['yhteensopivuus_auto_2']           = 'Yhteensopivuus automallit 2';
 		$taulut['yhteensopivuus_mp']               = 'Yhteensopivuus mp-mallit';

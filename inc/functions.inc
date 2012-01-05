@@ -1186,12 +1186,12 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa -= $kerarow["keratty"];
 						$hyllyssa -= $kerarow["keratty"];
 
-						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistukset eiv‰t muuta myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistuksten valmisteet eiv‰t lis‰‰ myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
@@ -1214,9 +1214,9 @@ if (!function_exists("saldo_myytavissa")) {
 						}
 						else {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
 										and tilausrivi.tyyppi in ('W','M')

@@ -33,6 +33,7 @@
 		$userfile	= trim($argv[2]);
 		$filenimi	= $userfile;
 		$ok 		= 1;
+		$palvelin2  = "";
 	}
 	else {
 		require ("inc/parametrit.inc");
@@ -170,12 +171,15 @@
 					$yritiresult = pupe_query($query);
 
 					if (mysql_num_rows($yritiresult) != 1) {
-						echo "<font class='error'> Tiliä '$tilino' ei löytynyt!</font><br>";
+						echo "<font class='error'>Tiliä '$tilino' ei löytynyt!</font><br>";
 						$xtyyppi = 0;
 						$virhe++;
 					}
 					else {
 						$yritirow = mysql_fetch_assoc($yritiresult);
+
+						// Setataan kukarow-yhtiö
+						$kukarow["yhtio"] = $yritirow["yhtio"];
 					}
 
 					$query = "	SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu
@@ -310,7 +314,7 @@
 						if (mysql_num_rows($vchkres) > 0) {
 							$vchkrow = mysql_fetch_assoc($vchkres);
 
-							echo "<font class='error'>VIRHE: Tiliotetapahtuma arkitointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
+							echo "<font class='error'>VIRHE: Tiliotetapahtuma arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
 
 							$xtyyppi=0;
 							$virhe++;
@@ -364,7 +368,7 @@
 						if (mysql_num_rows($vchkres) > 0) {
 							$vchkrow = mysql_fetch_assoc($vchkres);
 
-							echo "<font class='error'>VIRHE: Viitesuoritus arkitointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
+							echo "<font class='error'>VIRHE: Viitesuoritus arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
 
 							$xtyyppi=0;
 							$virhe++;
@@ -468,7 +472,19 @@
 
 			if ($xtyyppi == 3) {
 				require("inc/viitemaksut_kohdistus.inc");
-				require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+
+
+				# Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+				$query    = "SELECT yhtio from yhtio";
+				$yhtiores = pupe_query($query);
+
+				while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
+
+					// Setataan kukarow-yhtiö
+					$kukarow["yhtio"] = $yhtiorow["yhtio"];
+
+					require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+				}
 				echo "<br><br>";
 			}
 		}

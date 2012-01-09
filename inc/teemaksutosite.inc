@@ -71,14 +71,17 @@
 
 				$totkasumma += $summa + $alv;
 
+				// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["kassaale"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 				// Kassa-ale
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$yritirow[yhtio]',
 							ltunnus 	= '$trow[tunnus]',
 							tilino 		= '$yhtiorow[kassaale]',
-							kustp 		= '$tiliointirow[kustp]',
-							kohde 		= '$tiliointirow[kohde]',
-							projekti 	= '$tiliointirow[projekti]',
+							kustp    	= '{$kustp_ins}',
+							kohde	 	= '{$kohde_ins}',
+							projekti 	= '{$projekti_ins}',
 							tapvm 		= '$tpv-$tpk-$tpp',
 							summa 		= $summa * -1,
 							vero 		= '$tiliointirow[vero]',
@@ -146,14 +149,18 @@
 					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
 
 					if (round($summa, 2) != 0) {
+
+						// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["valuuttaero"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 						// Valuuttaero
 						$query = "	INSERT into tiliointi set
 									yhtio 		= '$yritirow[yhtio]',
 									ltunnus 	= '$trow[tunnus]',
 									tilino 		= '$yhtiorow[valuuttaero]',
-									kustp 		= '$tiliointirow[kustp]',
-									kohde 		= '$tiliointirow[kohde]',
-									projekti 	= '$tiliointirow[projekti]',
+									kustp    	= '{$kustp_ins}',
+									kohde	 	= '{$kohde_ins}',
+									projekti 	= '{$projekti_ins}',
 									tapvm 		= '$tpv-$tpk-$tpp',
 									summa 		= $summa,
 									vero 		= 0,
@@ -197,14 +204,18 @@
 					laadittu 	= now()";
 		$result = pupe_query($query);
 
+
+		// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelkarow["tilino"], $ostovelkarow["kustp"], $ostovelkarow["kohde"], $ostovelkarow["projekti"]);
+
 		// Ostovelat, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
 					tilino		= '$ostovelkarow[tilino]',
-					kustp		= '$ostovelkarow[kustp]',
-					kohde		= '$ostovelkarow[kohde]',
-					projekti	= '$ostovelkarow[projekti]',
+					kustp    	= '{$kustp_ins}',
+					kohde	 	= '{$kohde_ins}',
+					projekti 	= '{$projekti_ins}',
 					tapvm 		= '$tpv-$tpk-$tpp',
 					summa 		= '$trow[vietysumma]',
 					vero 		= 0,

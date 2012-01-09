@@ -2407,6 +2407,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "kehahinvirhe_esto_laskutus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei estet‰ laskutusta")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Estet‰‰n laskutus mik‰li keskihankintahinta on nolla tai rivin kate on negatiivinen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "kirjanpidon_tarkenteet") {
 
@@ -2803,7 +2818,8 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n kululaskujen summaa, mik‰li kululaskut on syˆtetty, muuten kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2861,8 +2877,8 @@
 
 		$sel = $trow[$i] == 'N' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰");
-		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰");
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰ (asiakkaallevalmistus)");
+		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰ (asiakkaallevalmistus)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

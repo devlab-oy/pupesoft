@@ -51,7 +51,7 @@
 			
 			echo t("Tulostetaan sisäinen lasku").": $sislaskrow[laskunro]<br>";
 			
-			tulosta_lasku($sislaskrow["tunnus"], "", "", "", $valittu_tulostin, "");
+			tulosta_lasku($sislaskrow["tunnus"], "", "", "", $valittu_tulostin, "", "");
 		}
 
 		$tee = '';

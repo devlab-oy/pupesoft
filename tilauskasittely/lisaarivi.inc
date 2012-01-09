@@ -584,7 +584,7 @@
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
-		if ($paikka == "" and $perheid == 0 and $perhekielto == "") {
+		if ($perheid == 0 and $perhekielto == "") {
 			foreach ($kaikkituotteet as $isatuoteno) {
 				$riikoko = 1;
 				$isa_array[] = $isatuoteno;
@@ -1727,7 +1727,7 @@
 			$puu_var[]		= $var;
 		}
 
-		if ($laskurow['tila'] != 'O' and $paikka == "" and $perheid == 0 and $perhekielto == "") {
+		if ($laskurow['tila'] != 'O' and $perheid == 0 and $perhekielto == "") {
 
 			$riikoko 		= 1;
 			$isat_array 	= array();

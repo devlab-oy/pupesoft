@@ -377,10 +377,10 @@
 		            }
 
 					if ($nettorow["summa"] < 0) {
-						$code = "CREN";				// hyvityslasku
+						$code = "CREN";	// hyvityslasku
 					}
 					else {
-						$code = "CINV";				// veloituslasku
+						$code = "CINV";	// veloituslasku
 					}
 
 					$Strd = $RmtInf->addChild('Strd', '');										   					// Structured (Max 9 occurrences)
@@ -396,7 +396,12 @@
 								$RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));			// CreditNoteAmount
 							}
 							else {
-								$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+								if ($nettorow['alatila'] != 'K') {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+								}
+								else {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', round($nettorow["summa"] - $nettorow['kasumma'],2));	   				// RemittedAmount
+								}
 							}
 
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency

@@ -1,6 +1,6 @@
 <?php
 
-	if ($_POST["toim"] == "yhtion_parametrit") {
+	if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
@@ -412,7 +412,7 @@
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
 
-					$query = "	SELECT tunnus
+					$query = "	SELECT tunnus, tila, alatila
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and (
@@ -437,6 +437,17 @@
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
 
+						$paivita_myos_lisa = "";
+
+						// Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
+						if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
+							$paivita_myos_lisa .= ", toimitustapa = '$otsikrow[toimitustapa]' ";
+						}
+
+						if ($paivita_myos_maksuehto != "") {
+							$paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
+						}
+
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -457,6 +468,7 @@
 									toim_postitp 		= '$otsikrow[toim_postitp]',
 									toim_maa    		= '$otsikrow[toim_maa]',
 									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
+									$paivita_myos_lisa
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = pupe_query($query);
@@ -1044,7 +1056,7 @@
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-			if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+			if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -1536,7 +1548,10 @@
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
-			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+			echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+			echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
+			echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
+
 		}
 		if ($toim == "toimi" and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille laskuille")."'>";
@@ -1763,7 +1778,7 @@
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+				if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
 				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>

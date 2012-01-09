@@ -1524,7 +1524,9 @@
 
 					echo "<tr class='aktiivi'>";
 
+					$zendesk_viesti = FALSE;
 					$ii = 0;
+
 					for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
 						$fieldname = mysql_field_name($result,$i);
@@ -1568,7 +1570,6 @@
 							$row_comments = mysql_fetch_assoc($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
-
 								echo "<td class='$class' align='right' valign='top'>";
 								echo "<div id='div_kommentti".$row[$fieldname]."' class='popup' style='width: 500px;'>";
 								echo $row_comments["comments"];
@@ -1593,12 +1594,32 @@
 
 								if ($row_comments["viesti"] != "") {
 									echo "<br><a target='_blank' href='https://devlab.zendesk.com/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
+									$zendesk_viesti = TRUE;
 								}
+							}
+							echo "</td>";
+						}
+						elseif ($fieldname == "asiakas" and $kukarow["yhtio"] == "savt" and $zendesk_auth != "" and $zendesk_viesti) {
+
+							echo "<td class='$class' valign='top'>".$row[$fieldname];
+
+							list($ticket, $statukset, $priot) = zendesk_curl("https://devlab.zendesk.com/tickets/{$row_comments["viesti"]}.xml");
+
+							if ($xml = simplexml_load_string($ticket)) {
+
+								list($requester, $null, $null) = zendesk_curl("https://devlab.zendesk.com/users/".$xml->{"requester-id"}.".xml");
+								list($assignee, $null, $null) = zendesk_curl("https://devlab.zendesk.com/users/".$xml->{"assignee-id"}.".xml");
+
+								$requester = simplexml_load_string($requester);
+								$assignee = simplexml_load_string($assignee);
+
+								echo "<br><br><table><tr><th>Requester</th><td>".utf8_decode($requester->{"name"})."</td></tr>";
+								echo "<tr><th>Subject</th><td>".utf8_decode($xml->{"subject"})."</td></tr>";
+								echo "<tr><th>Status</th><td>".$statukset[(int) $xml->{"status-id"}]."</td></tr>";
+								echo "<tr><th>Assignee</th><td>".utf8_decode($assignee->{"name"})."</td></tr></table>";
 							}
 
 							echo "</td>";
-
-
 						}
 						elseif ($fieldname == "seuranta") {
 

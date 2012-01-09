@@ -515,6 +515,103 @@ if (!function_exists("maventa_invoice_put_file")) {
 	}
 }
 
+if (!function_exists("apix_invoice_put_file")) {
+	function apix_invoice_put_file($lahetettavat_apix, $kieli, $valittu_tulostin, $valittu_kopio_tulostin) {
+		global $kukarow, $yhtiorow, $pupe_root_polku;
+
+		// siirret‰‰n laskutiedosto operaattorille
+		#$url         	= "https://test-api.apix.fi/invoices";
+		$url            = "https://api.apix.fi/invoices";
+		$transferkey    = $yhtiorow['apix_avain'];
+		$transferid     = $yhtiorow['apix_tunnus'];
+		$software       = "Pupesoft";
+		$version        = "1.0";
+		$timestamp      = gmdate("YmdHis");
+		$apixzipfile    = "Apix_".$yhtiorow['yhtio']."_invoices_".$timestamp."_".md5(uniqid(rand(),true)).".zip";
+		$apix_ulos 		= "";
+
+		// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+
+		if (mkdir($apix_tmpdirnimi)) {
+
+			// Kirjoitetaan finvoiceaineisto dirikkaan
+			if (!file_put_contents($apix_tmpdirnimi."/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml", implode("\n", $lahetettavat_apix))) {
+				$apix_ulos .= "APIX finvoicewrite feilasi!";
+			}
+
+			// Luodaan laskupdf:‰t
+			$apix_lasnot = array_keys($lahetettavat_apix);
+
+			foreach ($apix_lasnot as $apixlaskunro) {
+				$apixtmpfile = tulosta_lasku("LASKU:".$apixlaskunro, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+
+				// Siirret‰‰n faili apixtemppiin
+				if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlaskunro.pdf")) {
+					$apix_ulos .= "APIX tmpmove Apix_invoice_$apixlaskunro.pdf feilas!";
+				}
+			}
+
+			// Tehd‰‰n apixzippi
+			exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+
+			// Aineisto dataouttiin
+			exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+
+			// Poistetaan apix-tmpdir
+			exec("rm -rf $apix_tmpdirnimi");
+
+			// Siirret‰‰n aineisto APIXiin
+			$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+
+			$dt = substr(hash('sha256', $digest_src), 0, 64);
+
+			$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+			$apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
+			$apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+
+			$ch = curl_init($real_url);
+			curl_setopt($ch, CURLOPT_PUT, true);
+			curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+			curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+			$apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
+			$response = curl_exec($ch);
+
+			curl_close($ch);
+			fclose($apix_fh);
+
+			$xml = simplexml_load_string($response);
+
+			if ($xml->Status == "OK") {
+				$apix_ulos .= "L‰hetys onnistui!";
+			}
+			else {
+				$apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+
+				$apix_ulos .= "Tila: ".$xml->Status."<br>";
+				$apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+				foreach ($xml->FreeText as $teksti) {
+					$apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+				}
+
+				$apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
+			}
+		}
+		else {
+			$apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+		}
+
+		return $apix_ulos;
+	}
+}
+
 if (!function_exists("vapauta_sarjanumerot")) {
 	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
@@ -1089,12 +1186,12 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa -= $kerarow["keratty"];
 						$hyllyssa -= $kerarow["keratty"];
 
-						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistukset eiv‰t muuta myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistuksten valmisteet eiv‰t lis‰‰ myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
@@ -1117,9 +1214,9 @@ if (!function_exists("saldo_myytavissa")) {
 						}
 						else {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
 										and tilausrivi.tyyppi in ('W','M')
@@ -7259,11 +7356,11 @@ if (!function_exists('tarkasta_liite')) {
 				else {
 					if (count($sallitut_tiedostot)>1) {
 						//	Kaunistellaan..
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
 
 					}
 					else {
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
 					}
 				}
 			}
@@ -9318,11 +9415,12 @@ if (!function_exists("progress_bar")) {
 
 		$timeparts = explode(" ", microtime());
 		$microtime_stop = $timeparts[1].substr($timeparts[0], 1);
+		$current_item = ($current_item == 0) ? 1 : $current_item;
 
 		$microtime_current = round($microtime_stop - $microtime_start, 0);
 		$microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
+		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)          \r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
 	}
 }
 
@@ -16884,3 +16982,121 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		return $voidaan_valmistaa;
 	}
 }
+
+if (!function_exists("mod11_tarkiste")) {
+	function mod11_tarkiste ($numero) {
+
+		$tulos = "";
+		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
+
+		# K‰‰nnet‰‰n stringi takaperin
+		$numero_rev = strrev($numero);
+
+		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
+			# Lasketaan tulo ja kumuloidaan
+			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
+		}
+
+		# lasketaan tarkiste ja konkatenoidaan peruslukuun
+		$jaannos = $summa % 11;
+
+		switch ($jaannos) {
+			case 0:
+				$tulos = $numero . 0;
+				break;
+			case 1:
+				$tulos = $numero . 0;
+				break;
+			default:
+				$tulos = $numero . (11 - $jaannos);
+				break;
+		}
+
+		return $tulos;
+	}
+}
+
+if (!function_exists("mod10_tarkiste")) {
+	function mod10_tarkiste ($numero) {
+
+		$kerroin = 7;
+		$tulo    = 0;
+
+		for ($i=1; $i<=strlen($numero); $i++) {
+
+			$merkki = substr($numero, -1 * $i, 1);
+			$tulo += $kerroin * $merkki;
+
+			switch ($kerroin) {
+				case 7:
+					$kerroin = 3;
+					break;
+				case 3:
+					$kerroin = 1;
+					break;
+				case 1:
+					$kerroin = 7;
+					break;
+			}
+		}
+
+		$tulo = substr($tulo, -1) + 0;
+
+		if ($tulo != 0) {
+			$tulo = 10 - $tulo;
+		}
+
+		$numero .= $tulo;
+
+		return $numero;
+	}
+}
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('zendesk_curl')) {
+	function zendesk_curl ($url) {
+		global $zendesk_auth;
+
+		$ch  = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+		curl_setopt($ch, CURLOPT_GET, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, "Content-Type: application/xml");
+		curl_setopt($ch, CURLOPT_USERPWD, $zendesk_auth);
+
+		$result = curl_exec($ch);
+
+		if ($result === FALSE) {
+			echo "<font class='error'>VIRHE:</font><br>";
+		   	echo curl_errno($ch)." - ".curl_error($ch)."</font><br>";
+			exit;
+		}
+
+		$info 	= curl_getinfo($ch);
+		$header = substr($result,0,$info['header_size']);
+		$body 	= substr($result, $info['header_size']);
+
+		curl_close($ch);
+
+		$statukset = array();
+		$statukset[0] = "New";
+		$statukset[1] = "Open";
+		$statukset[2] = "Pending";
+		$statukset[3] = "Solved";
+
+		$priot = array();
+		$priot[0] = "-";
+		$priot[1] = "Low";
+		$priot[2] = "Normal";
+		$priot[3] = "High";
+		$priot[4] = "Urgent";
+
+		return array($body, $statukset, $priot);
+	}
+}
+

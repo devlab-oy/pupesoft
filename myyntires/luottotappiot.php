@@ -46,13 +46,16 @@ if ($tila == 'K' and is_array($luottotappio)) {
 				// Hoidetaan alv
 				$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
 
+				// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["luottotappiot"], $lasku["kustp"], $lasku["kohde"], $lasku["projekti"]);
+
 				$query = "	INSERT INTO tiliointi SET
 							yhtio		= '$kukarow[yhtio]',
 							ltunnus		= '$lasku[ltunnus]',
 							tilino		= '$yhtiorow[luottotappiot]',
-							kustp		= '$lasku[kustp]',
-							kohde		= '$lasku[kohde]',
-							projekti	= '$lasku[projekti]',
+							kustp    	= '{$kustp_ins}',
+							kohde	 	= '{$kohde_ins}',
+							projekti 	= '{$projekti_ins}',
 							tapvm 		= '$tpv-$tpk-$tpp',
 							summa		= $lasku[summa] * -1,
 							vero		= '$lasku[vero]',
@@ -95,13 +98,17 @@ if ($tila == 'K' and is_array($luottotappio)) {
 				}
 			}
 			else {
+
+				// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($lasku["tilino"], $lasku["kustp"], $lasku["kohde"], $lasku["projekti"]);
+
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 		= '$kukarow[yhtio]',
 							ltunnus		= '$lasku[ltunnus]',
 							tilino		= '$lasku[tilino]',
-							kustp		= '$lasku[kustp]',
-							kohde		= '$lasku[kohde]',
-							projekti	= '$lasku[projekti]',
+							kustp    	= '{$kustp_ins}',
+							kohde	 	= '{$kohde_ins}',
+							projekti 	= '{$projekti_ins}',
 							tapvm		= '$tpv-$tpk-$tpp',
 							summa		= $lasku[summa] * -1,
 							vero		= 0,

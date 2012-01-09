@@ -10,7 +10,7 @@
 	$alkukk = isset($alkukk) ? trim($alkukk) : "";
 	$alkuvv = isset($alkuvv) ? trim($alkuvv) : "";
 	$budj_kohtelu = isset($budj_kohtelu) ? trim($budj_kohtelu) : "";
-	$budj_taso = isset($budj_taso) ? trim($budj_taso) : "";
+	$budjetointi_taso = isset($budjetointi_taso) ? trim($budjetointi_taso) : "";
 	$loppukk = isset($loppukk) ? trim($loppukk) : "";
 	$loppuvv = isset($loppuvv) ? trim($loppuvv) : "";
 	$muutparametrit = isset($muutparametrit) ? trim($muutparametrit) : "";
@@ -56,7 +56,7 @@
 	}
 
 	// funkkarin $org_sar passataan alkuperäiset sarakkeet, jota taas käytetään "ohituksessa"
-	function piirra_budj_rivi ($row, $tryrow = "", $ohitus = "", $org_sar = "") {
+	function piirra_budj_rivi($row, $tryrow = "", $ohitus = "", $org_sar = "") {
 		global $kukarow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak, $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu;
 
 		$excelsarake = 0;
@@ -111,7 +111,7 @@
 			$ik = $rajataulu[$k];
 
 			if (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind])) {
-				$nro = (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]);
+				$nro = trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]) == "" ? "" : (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]);
 			}
 			else {
 				$query = "	SELECT *
@@ -133,7 +133,7 @@
 					if ($budj_kohtelu == "maara" and $toim == "TUOTE") {
 						$nro = $brow['maara'];
 					}
-					if ($budj_kohtelu == "isoi" and $toim == "TUOTE") {
+					if ($budj_kohtelu == "indeksi" and $toim == "TUOTE") {
 						$nro = $brow['indeksi'];
 					}
 				}
@@ -152,22 +152,22 @@
 
 				if ($grouppaus != "") {
 					if ($haen == "try" and $passaan == "yksi"){
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["try"]}][{$ik}][]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
 					}
 					elseif ($haen == "osasto" and $passaan == "yksi") {
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
 					}
 					elseif ($haen == "try" and $passaan == "kaksi") {
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
 					}
 				}
-				else {
+			else {
 					echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
 				}
 
@@ -245,8 +245,12 @@
 	}
 
 	// Ollaan uploadttu Excel
-	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-
+	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain") {
+		echo "<font class='error'>".t("Tiedostoja voidaan ajaa sisään vain kuukausittain aikavälillä")."!</font><br><br>";
+		$tee = "";
+	}
+	elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso == "kuukausittain") {
+		
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = strtoupper($path_parts['extension']);
 
@@ -317,11 +321,11 @@
 			for ($excej = $lukualku; $excej < count($headers); $excej++) {
 				$kasiind = str_replace("-", "", $headers[$excej]);
 
-				if ($tuoteryhmittain != "") {
-					$budj_taulunrivit[$liitun][$kasiind][$try] = trim($data->sheets[0]['cells'][$excei][$excej]);
+				if ($tuoteryhmittain != "") {					
+					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 				else {
-					$budj_taulunrivit[$liitun][$kasiind][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+					$budj_taulunrivit[$liitun][$kasiind][] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 
 				$insert_rivimaara++;
@@ -336,7 +340,7 @@
 			echo "<font class='error'>".t("HUOM: Maksimirivimäärä ylittyi, rivejä ei näytetä ruudulla. Rivit tallennetaan suoraan tietokantaan")."!<br><br></font>";
 		}
 		else {
-			echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eivät vielä tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Näytä/Tallenna"),"' ".t("tallentaaksesi luvut")."!<br></font>".t("Tiedosto ok")."!<br><br></font>";
+			echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eivät vielä tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Tallenna budjettiluvut"),"' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
 		}
 
 		$liitostunnukset = substr($liitostunnukset, 0, -1);
@@ -356,17 +360,15 @@
 		if (isset($poikkeus_haku) and $poikkeus_haku != "try" and $poikkeus_haku != "osasto" and $poikkeus_haku != "kummatkin") {
 			echo "<font class='error'>".t("Virhe: Budjetinluonnissa on tapahtunut vakava käsittelyvirhe, keskeytetään prosessi")."!<br><br></font>";
 			$tee = "";
-		}
+	}
 
 	}
 
 	// Lisätään/Päivitetään budjetti
 	if ($tee == "TALLENNA_BUDJETTI") {
-		// Seuraavassa käsitellään tilikautta josta erotuksesta saadaan jakaja.
-		// muuttujaa '$jakaja' käytetään sekä "update" että "insert" puolella.
-		// $jakaja on kuukausien lukumäärä
 
-		if ((($budj_kohtelu == "euro" or $budj_kohtelu == "maara") and $budj_taso == "summataso") or $summabudjetti == "on") {
+		// Jos halutaan, että syötetty arvo jaetaan tasan valitulle ryhmälle, niin lasketaan rajattujen kuukausien lukumäärä
+		if (($budj_kohtelu == "euro" or $budj_kohtelu == "maara") and $budjetointi_taso == "summa_jaetaan") {
 
 			$alkaakk = substr($kausi_alku, 0, 4).substr($kausi_alku, 5, 2);
 			$loppuukk = substr($kausi_loppu, 0, 4).substr($kausi_loppu, 5, 2);
@@ -375,7 +377,7 @@
 			$result = pupe_query($sql);
 			$rivi = mysql_fetch_assoc($result);
 
-			$jakaja = $rivi["jakaja"];
+			$kuukausien_maara = $rivi["jakaja"];
 		}
 
 		// muuttuja "poikkeus" tulee aina kun ollaan valittu 'Anna Kokonaisbudjetti Osastolle Tai Tuoteryhmälle'
@@ -388,24 +390,24 @@
 		if (isset($poikkeus) and $poikkeus == "totta") {
 
 			unset($luvut); // poistetaan ja alustetaan sekä rakennetaan uudestaan.
-
+			
 			// Normaali tapaus missä on TRY tai OSASTO
 			if ($poikkeus_haku == "try" or $poikkeus_haku == "osasto") {
 				foreach ($muunto_luvut as $litunnus => $rivit) {
 
-					$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys, tuote.try, tuote.osasto
-								FROM tuote
+			$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys, tuote.try, tuote.osasto
+						FROM tuote
 								WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-								AND tuote.status != 'P'
+						AND tuote.status != 'P'
 								and tuote.{$poikkeus_haku} = '$litunnus' ";
-					$result = pupe_query($query);
+			$result = pupe_query($query);
 
-					while ($tuoterivi = mysql_fetch_assoc($result)) {
-						foreach ($rivit as $kausi => $arvo) {
-							$luvut[$tuoterivi["tuoteno"]][$kausi][0] = $arvo[0];
-						}
-					}
+			while ($tuoterivi = mysql_fetch_assoc($result)) {
+				foreach ($rivit as $kausi => $arvo) {
+					$luvut[$tuoterivi["tuoteno"]][$kausi][0] = $arvo[0];
 				}
+			}
+		}
 			}
 
 			// "kummatkin" tarkoittaa että tulee sekä TRY ja OSASTO
@@ -449,7 +451,7 @@
 					$solu = str_replace(",", ".", trim($solu));
 					if ($try == 0) $try = "";
 
-					if ($solu == '!' or is_numeric($solu) or $summabudjetti == "on") {
+					if ($solu == '!' or is_numeric($solu)) {
 
 						$update_vai_insert = "";
 
@@ -461,25 +463,16 @@
 							// Katsotaan löytyykö näillä tiedoilla jo budjetti
 							$query = "	SELECT summa
 										FROM $budj_taulu
-										WHERE yhtio 			= '$kukarow[yhtio]'
-										AND $budj_sarak		 	= '$liitostunnus'
-										AND kausi 				= '$kausi'
-										AND dyna_puu_tunnus 	= ''
-										AND osasto 				= ''
-										AND try 				= '$try'";
+										WHERE yhtio 	= '{$kukarow["yhtio"]}'
+										AND $budj_sarak	= '$liitostunnus'
+										AND kausi 		= '$kausi'
+										AND try 		= '$try'";
 							$result = pupe_query($query);
 
 							if (mysql_num_rows($result) > 0) {
 								$budjrow = mysql_fetch_assoc($result);
-
-								if ($budjrow['summa'] != $solu) {
-									// Löytyy budjetti, mutta se on eri -> päivitetään
-									$update_vai_insert = "UPDATE";
-								}
-								else {
-									// Löytyy budjetti, mutta se on sama -> ei tehdä mitään
-									continue;
-								}
+								// Löytyy budjetti -> päivitetään
+								$update_vai_insert = "UPDATE";
 							}
 							else {
 								// Ei löydy budjettia -> lisätään
@@ -487,129 +480,118 @@
 							}
 						}
 
-						// $solu on summa
-						// $tall_index on kantaan tallennettava indek-luku, oletus on 1
-						// $tall_maara on kantaan tallennettava kappalemäärä tuotteita
+						// $solu on käyttäjän syöttämä luku
+						// $tall_summa on kantaan tallennettava summa
+						// $tall_index on kantaan tallennettava indeksi-luku
+						// $tall_maara on kantaan tallennettava kappalemäärä
+
 						$solu = (float) $solu;
-						$tall_index = 1.00;
+						$tall_summa = 0;
+						$tall_index = 0;
 						$tall_maara = 0;
 
-						// Jokainen kombinaatio pitää laittaa erikseen, tai tulee virhe-ilmoitus.
-						// Tämä on tärkeä tehdä näin, niin voidaan ylläpitää tulevaisuudessa erilaisia kombinaatioita paremmin.
+						// Toimittaja ja asiakasbudjetti tehdään aina euroissa
+						if ($toim == "TOIMITTAJA" or $toim == "ASIAKAS") {
+							$tall_summa = $solu;
+						}
+						// Tuotebudjetissa on muitakin vaihtoehtoja
+						elseif ($toim == "TUOTE") {
 
-						if ($budj_kohtelu == "euro" and $budj_taso == "summataso" and $summabudjetti == "on") {
-							$jaettava = $solu;
-							$flipmuuttuja = $jaettava/($jakaja*$tuotteiden_lukumaara);
-							$solu = round($flipmuuttuja,2);
-						}
-						elseif ($budj_kohtelu == "euro" and $budj_taso == "") {
-							//
-						}
-						elseif ($budj_kohtelu == "maara" and $budj_taso == "samatasokk" and $summabudjetti == "on") {
-							//
-						}
-						elseif ($budj_kohtelu == "maara" and $budj_taso == "summataso" and $summabudjetti == "on") {
-							$jaettava = $solu;
-							$flipmuuttuja = $jaettava/($jakaja*$tuotteiden_lukumaara);
-							$tall_maara = round($flipmuuttuja,0);
-							$solu = 0;
-						}
-						elseif ($budj_kohtelu == "maara" and $budj_taso == "") {
-							// flipataan solu määräksi ja solu tyhjäksi.
-							$tall_maara = $solu;
-							$solu = 0.00;
-						}
-						elseif ($budj_kohtelu == "maara" and $budj_taso == "samatasokk") {
-							// flipataan solu määräksi ja solu tyhjäksi.
-							$tall_maara = $solu;
-							$solu = 0.00;
-						}
-						elseif ($budj_kohtelu == "euro" and $budj_taso == "samatasokk") {
-							// $solu on solu, muut tyhjää
-							$tall_maara = "";
-							$tall_index = "";
-						}
-						elseif ($budj_kohtelu == "euro"  and $budj_taso == "summataso") {
-							$jaettava = $solu;
-							$flipmuuttuja = $jaettava/$jakaja;
-							$solu = round($flipmuuttuja,2);
-						}
-						elseif ($budj_kohtelu == "isoi" and $solu > 0.00) {
+							// Budjettiluvun voi syöttää eri tasoilla. Budjetointitasoja on: kuukausittain, joka_kk_sama ja summa_jaetaan
+							// Kuukausittain tarkoittaa, että jokaisen kauden arvo on syötetty erikseen
+							// Joka_kk_sama tarkoittaa, että jokaiselle kaudelle on annettu sama arvo
+							// Summa_jaetaan tarkoittaa, että syötetty arvo jaetaan rajattujen kuukausien ja tuotteiden määrän kesken
 
-							$edvuosi = substr($kausi, 0, 4)-1;
-							$haettavankkpvm = $edvuosi.'-'.substr($kausi, 4, 2).'-01';
-							
-							list($myyntihistoriassa, $maarahistoriassa) = tuotteenmyynti($liitostunnus, $haettavankkpvm);
+							if ($budjetointi_taso == "summa_jaetaan") {
+								// Jaetaan syötty luku kuukausien ja tuotteiden määrän mukaan
+								$solu = $solu / ($kuukausien_maara * $tuotteiden_lukumaara);
+							}
+							elseif ($budjetointi_taso != "kuukausittain" and $budjetointi_taso != "joka_kk_sama") {
+								// Virheellinen budjetointitaso, ei tehdä mitään
+								$update_vai_insert = "";
+							}
 
-							if ($myyntihistoriassa == 0.00) {
-								$tall_index = 0;
-								$tall_maara = 0;
+							// Kohtelu tarkoittaa, minkätyyppistä lukua syötetään. Kohteluita on: euro, maara ja indeksi
+							if ($budj_kohtelu == "euro") {
+								// Syötetty arvo summa kenttään
+								$tall_summa = round($solu, 2);
+							}
+							elseif ($budj_kohtelu == "maara") {
+								// Syötetty arvo määrä kenttään
+								$tall_maara = round($solu, 2);
+							}
+							elseif ($budj_kohtelu == "indeksi") {
+								// Syötetty arvo indeksi kenttään, lisäksi tulee hakea edellisen vuoden vastaavan kauden myynti/kulutus ja kertoa se indeksillä
+
+								// Kausi on muotoa VVVVKK, tehdään siitä edellisen vuoden vastaavan kauden eka päivä muotoon VVVV-KK-PP
+								$ed_kausi = (substr($kausi, 0, 4) -1).'-'.substr($kausi, 4, 2).'-01';
+
+								list($myyntihistoriassa, $maarahistoriassa) = tuotteenmyynti($liitostunnus, $ed_kausi);
+
+								$tall_index = round($solu, 2);
+								$tall_maara = round($maarahistoriassa * $tall_index, 2);
+								$tall_summa = round($myyntihistoriassa * $tall_index, 2);
+
+								if ($tall_summa == 0 or $tall_maara == 0) {
+									echo "<font class='error'>$liitostunnus: ".t("Indeksi")." $tall_index";
+									if ($tall_summa == 0) echo " ".t("summa");
+									if ($tall_summa == 0 and $tall_maara == 0) echo " ".t("ja");
+									if ($tall_maara == 0) echo " ".t("määrä");
+									echo " ".t("jäi nollaksi")."!</font><br>";
+								}
 							}
 							else {
-								$tall_index = $solu;
+								// Virheellinen kohtelu, ei tehdä mitään
+								$update_vai_insert = "";
 							}
-							$tall_maara = $maarahistoriassa * $solu;
-							$solu = $myyntihistoriassa * $solu;
 						}
-						elseif ($solu == 0) {
-							// poistohaara
-						}
-						elseif ($toim == "TOIMITTAJA" or $toim == "ASIAKAS") {
-							// perushaara toimittaja ja asiakasbudjetille, ei tehdä mitään. 
-						}
+						// Virheellinen TOIM, ei tehdä mitään
 						else {
-							echo "<font class='error'>".t("Virhe 2: Törmättiin virheeseen ja emme tallentaneet tietoa %s-tauluun",$kukarow["kieli"],$budj_taulu)." '$budj_kohtelu' / '$budj_taso' / '$summabudjetti' / $solu </font><br>";
-							break 3;
+							$update_vai_insert = "";
 						}
 
-						// Poistetaan tietue jos on huutomerkki tai jos summa on nolla!
-						if ($update_vai_insert == "DELETE" or $solu == 0) {
+						// Poistetaan tietue jos on syötetty huutomerkki
+						if ($update_vai_insert == "DELETE") {
 							$query = "	DELETE FROM $budj_taulu
-										WHERE yhtio 			= '$kukarow[yhtio]'
-										AND $budj_sarak		 	= '$liitostunnus'
-										AND kausi 				= '$kausi'
-										AND dyna_puu_tunnus 	= ''
-										AND osasto 				= ''
-										AND try 				= '$try'";
+										WHERE yhtio 	= '{$kukarow["yhtio"]}'
+										AND $budj_sarak	= '$liitostunnus'
+										AND kausi 		= '$kausi'
+										AND try 		= '$try'";
 							$result = pupe_query($query);
 							$pois += mysql_affected_rows();
 						}
 						elseif ($update_vai_insert == "UPDATE") {
 							$query	= "	UPDATE $budj_taulu SET
-										summa = $solu,
-										maara = '$tall_maara',
-										indeksi = '$tall_index',
-										muuttaja = '$kukarow[kuka]',
-										muutospvm = now()
-										WHERE yhtio 			= '$kukarow[yhtio]'
-										AND $budj_sarak		 	= '$liitostunnus'
-										AND kausi 				= '$kausi'
-										AND dyna_puu_tunnus 	= ''
-										AND osasto 				= ''
-										AND try 				= '$try'";
+										summa		= '$tall_summa',
+										maara		= '$tall_maara',
+										indeksi		= '$tall_index',
+										muuttaja	= '{$kukarow["kuka"]}',
+										muutospvm	= now()
+										WHERE yhtio 	= '{$kukarow["yhtio"]}'
+										AND $budj_sarak	= '$liitostunnus'
+										AND kausi 		= '$kausi'
+										AND try 		= '$try'";
 							$result = pupe_query($query);
 							$paiv += mysql_affected_rows();
 						}
 						elseif ($update_vai_insert == "INSERT") {
 							$query = "	INSERT INTO $budj_taulu SET
-										summa 				= $solu,
+										summa 				= '$tall_summa',
 										maara				= '$tall_maara',
-										yhtio 				= '$kukarow[yhtio]',
+										yhtio 				= '{$kukarow["yhtio"]}',
 										kausi 				= '$kausi',
 										$budj_sarak		 	= '$liitostunnus',
-										osasto 				= '',
 										try 				= '$try',
-										dyna_puu_tunnus 	= '',
 										indeksi				= '$tall_index',
-										laatija 			= '$kukarow[kuka]',
+										laatija 			= '{$kukarow["kuka"]}',
 										luontiaika 			= now(),
 										muutospvm 			= now(),
-										muuttaja 			= '$kukarow[kuka]'";
+										muuttaja 			= '{$kukarow["kuka"]}'";
 							$result = pupe_query($query);
 							$lisaa += mysql_affected_rows();
 						}
 						else {
-							echo "<font class='error'>".t("Ohitettiin $budj_sarak $liitostunnus", $kukarow["kieli"])."</font><br>";
+							echo "<font class='error'>".t("Virheelliset parametrit")." '$budj_sarak' '$liitostunnus' / '$budj_kohtelu' / '$budjetointi_taso' / '$summabudjetti' / $solu </font><br>";
 						}
 					}
 				}
@@ -700,7 +682,7 @@
 			}
 		}
 
-		echo "<form method='post' enctype='multipart/form-data'>";
+		echo "<form method='post' enctype='multipart/form-data' autocomplete='off'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<table>";
@@ -742,7 +724,7 @@
 			echo "<th>".t("Anna budjetin käsittelytyyppi")."</th>";
 			echo "<td>";
 
-			if ($budj_kohtelu == "isoi") {
+			if ($budj_kohtelu == "indeksi") {
 				$bkcheck = "SELECTED";
 				$bkcheckb = "";
 			}
@@ -757,21 +739,21 @@
 
 			echo "<select name='budj_kohtelu' onchange='submit()';>";
 			echo "<option value = 'euro'>".t("Budjetti syötetään euroilla")."</option>";
-			echo "<option value = 'isoi' $bkcheck>".t("Budjetti syötetään indekseillä")."</option>";
+			echo "<option value = 'indeksi' $bkcheck>".t("Budjetti syötetään indekseillä")."</option>";
 			echo "<option value = 'maara' $bkcheckb>".t("Budjetti syötetään määrillä")."</option>";
 			echo "</td>";
 			echo "</tr>";
 
-			// Kuukausittain vai samatasokk
+			// Millä tasolla budjetti tehdään
 			echo "<tr>";
 			echo "<th>".t("Budjettiluku")."</th>";
 			echo "<td>";
 
-			if ($budj_taso == "samatasokk") {
+			if ($budjetointi_taso == "joka_kk_sama") {
 				$btcheck1 = "SELECTED";
 				$btcheck2 = "";
 			}
-			elseif ($budj_taso == "summataso") {
+			elseif ($budjetointi_taso == "summa_jaetaan") {
 				$btcheck1 = "";
 				$btcheck2 = "SELECTED";
 			}
@@ -780,13 +762,13 @@
 				$btcheck2 = "";
 			}
 
-			echo "<select name='budj_taso' onchange='submit()';>";
-			echo "<option value = ''>".t("Kuukausittain aikavälillä")."</option>";
-			echo "<option value = 'samatasokk' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
-			echo "<option value = 'summataso' $btcheck2>".t("Summa jaetaan kuukausille tasan")."</option>";
+			echo "<select name='budjetointi_taso' onchange='submit()';>";
+			echo "<option value = 'kuukausittain'>".t("Kuukausittain aikavälillä")."</option>";
+			echo "<option value = 'joka_kk_sama' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
+			echo "<option value = 'summa_jaetaan' $btcheck2>".t("Budjettiluku jaetaan kuukausille tasan")."</option>";
 			echo "</td>";
 			echo "</tr>";
-			
+
 			// Tuoteosasto tai ryhmätason budjetti.
 			echo "<tr>";
 			echo "<th>".t("Anna kokonaisbudjetti osastolle tai tuoteryhmälle")."</th>";
@@ -794,7 +776,7 @@
 			$scheck = ($summabudjetti != "") ? "CHECKED": "";
 			echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
 			echo "</tr>";
-			
+
 			echo "<tr><th>",t("Valitse tuote"),"</th>";
 			echo "<td><input type='text' name='tuoteno' value='$tuoteno' /></td></tr>";
 
@@ -873,6 +855,11 @@
 			echo "<tr><th>",t("Tuoteryhmittäin"),"</th><td><input type='checkbox' name='tuoteryhmittain' $chk></td></tr>";
 		}
 
+		echo "<tr>";
+		echo "<th>".t("Lue budjettiluvut tiedostosta")."</th>";
+		echo "<td><input type='file' name='userfile'></td>";
+		echo "</tr>";
+
 		echo "</table><br>";
 
 		echo t("Budjettiluvun voi poistaa huutomerkillä (!)"),"<br />";
@@ -940,23 +927,20 @@
 			$tee = "";
 		}
 
-		if ($budj_taso == "" and $summabudjetti == "on") {
-			if ($budj_kohtelu == "maara") {
-				echo "<font class='error'>".t("VIRHE: Ei voida valita Määrää kokonaisbudjetille joka jaetaan per kk. Valitse Budjettiluvusta Sama luku joka kuukaudelle")."</font><br>";
+		// Kokonaisbudjetti-tarkastukset
+		if ($summabudjetti == "on") {
+			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
+				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syöttää indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
+				$tee = "";
+			}			
+			if ($budjetointi_taso == "kuukausittain") {
+				echo "<font class='error'>".t("VIRHE: Kokonaisbudjettia ei voida syöttää kuukausittain aikavälillä!")."</font><br>";
+				$tee = "";
 			}
-			else {
-				echo "<font class='error'>".t("VIRHE: Ei voida valita kokonaisbudjettia sekä jakoa kuukausittain!! Valitse Budjettiluvusta toinen vaihtoehto")."</font><br>";
-			}
-			$tee = "";
 		}
 
-		if ($budj_kohtelu == "isoi" and $budj_taso == "summataso" and $summabudjetti == "on") {
-			echo "<font class='error'>".t("VIRHE: Ei voida valita indeksiä kokonaisbudjetille joka jaetaan per kk. Valitse Budjettiluvusta Sama luku joka kuukaudelle")."</font><br>";
-			$tee = "";
-		}
-
-		if ($budj_kohtelu == "isoi" and $budj_taso == "summataso") {
-			echo "<font class='error'>".t("VIRHE: Ei voida valita indeksiä sekä jakoa kuukausittain!! Valitse Budjettiluvusta toinen vaihtoehto")."</font><br>";
+		if ($budj_kohtelu == "indeksi" and $budjetointi_taso == "summa_jaetaan") {
+			echo "<font class='error'>".t("VIRHE: Et voi jakaa indeksilukua kuukausittain!")."</font><br>";
 			$tee = "";
 		}
 
@@ -1085,10 +1069,10 @@
 						{$grouppaus}";
 		}
 		elseif ($toim == "TOIMITTAJA") {
-			$query = "	SELECT DISTINCT toimi.tunnus toimittajan_tunnus, 
-						toimi.ytunnus, 
-						toimi.ytunnus asiakasnro, 
-						toimi.nimi, 
+			$query = "	SELECT DISTINCT toimi.tunnus toimittajan_tunnus,
+						toimi.ytunnus,
+						toimi.ytunnus asiakasnro,
+						toimi.nimi,
 						toimi.nimitark,
 						'' toim_nimi, # Nämä vaan sen takia, ettei tule noticeja tablen piirtämissessä (toimittaja query pitää olla sama kun asiakasquory alla)
 						'' toim_nimitark
@@ -1097,10 +1081,10 @@
 						$lisa";
 		}
 		elseif ($toim == "ASIAKAS") {
-			$query = "	SELECT DISTINCT asiakas.tunnus asiakkaan_tunnus, 
-						asiakas.ytunnus, 
-						asiakas.asiakasnro, 
-						asiakas.nimi, 
+			$query = "	SELECT DISTINCT asiakas.tunnus asiakkaan_tunnus,
+						asiakas.ytunnus,
+						asiakas.asiakasnro,
+						asiakas.nimi,
 						asiakas.nimitark,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
@@ -1129,8 +1113,27 @@
 		}
 
 		echo "<form method='post' enctype='multipart/form-data' autocomplete='off'>";
+
+		// Laitetaan monivalintalaatikoiden valinnat myös mukaan
+		if (count($mul_try) > 0) {
+			foreach ($mul_try as $try) {
+				echo "<input type='hidden' name='mul_try[]' value = '$try'>";
+			}
+		}
+		if (count($mul_osasto) > 0) {
+			foreach ($mul_osasto as $os) {
+				echo "<input type='hidden' name='mul_osasto[]' value = '$os'>";
+			}
+		}
+		#TODO: ei osaa säilyttää dynaamisia tuotekategorioita.
+		echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
+		echo "<input type='hidden' name='alkukk' value = '$alkukk'>";
+		echo "<input type='hidden' name='alkuvv' value = '$alkuvv'>";
+		echo "<input type='hidden' name='loppukk' value = '$loppukk'>";
+		echo "<input type='hidden' name='loppuvv' value = '$loppuvv'>";
+		echo "<input type='hidden' name='tuoteno' value = '$tuoteno'>";
 		echo "<input type='hidden' name='budj_kohtelu' value='$budj_kohtelu'>";
-		echo "<input type='hidden' name='budj_taso' value='$budj_taso'>";
+		echo "<input type='hidden' name='budjetointi_taso' value='$budjetointi_taso'>";
 		echo "<input type='hidden' name='kausi_alku' value='{$tilikaudetrow["tilikausi_alku"]}'>";
 		echo "<input type='hidden' name='kausi_loppu' value='{$tilikaudetrow["tilikausi_loppu"]}'>";
 		echo "<input type='hidden' name='onko_ilman_budjettia' value='$onko_ilman_budjettia'>";
@@ -1196,13 +1199,13 @@
 			$raja = $vuosi."-".$kk;
 			$aikavalinkaudet[] = $vuosi."".$kk;
 
-			if (($budj_taso == "samatasokk" or $budj_taso == "summataso") and $sarakkeet == 1) {
+			if (($budjetointi_taso == "joka_kk_sama" or $budjetointi_taso == "summa_jaetaan") and $sarakkeet == 1) {
 				// näytetään vain 1 sarake jossa on valitun/syötetyn aikakauden
 				$vuosi2	= substr($tilikaudetrow['tilikausi_loppu'], 0, 4);
 				$kk2	= substr($tilikaudetrow['tilikausi_loppu'], 5, 2);
 				echo "<th>".$raja." / ".$vuosi2 ."-".$kk2."</th>";
 			}
-			elseif ($budj_taso == "samatasokk" or $budj_taso == "summataso") {
+			elseif ($budjetointi_taso == "joka_kk_sama" or $budjetointi_taso == "summa_jaetaan") {
 				// en piirrä turhaan otsikkoja
 			}
 			else {
@@ -1235,7 +1238,7 @@
 				mysql_data_seek($result, 0);
 			}
 		}
-		elseif ($budj_taso == "samatasokk" or $budj_taso == "summataso") {
+		elseif ($budjetointi_taso == "joka_kk_sama" or $budjetointi_taso == "summa_jaetaan") {
 			while ($row = mysql_fetch_assoc($result)) {
 				piirra_budj_rivi($row, '', 'OHITA', $ohituksen_alkuperaiset_sarakkeet);
 			}

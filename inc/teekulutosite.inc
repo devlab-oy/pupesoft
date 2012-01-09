@@ -39,7 +39,7 @@
 	$vasumma = $maara * -1;
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_kulutili"], $yritirow["oletus_kustp"], $yritirow["oletus_kohde"], $yritirow["oletus_projekti"]);
-	
+
 	// Pankin kuluja
 	$query = "	INSERT into tiliointi set
                 yhtio 		= '$yritirow[yhtio]',

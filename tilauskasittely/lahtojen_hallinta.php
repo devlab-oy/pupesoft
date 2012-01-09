@@ -146,6 +146,8 @@
 				}
 
 				if (count($erat['tilaukset']) > 0) {
+					$ei_tallenneta = true;
+
 					require('inc/tulosta_reittietiketti.inc');
 				}
 			}
@@ -1426,11 +1428,11 @@
 					COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
 					SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
 					COUNT(DISTINCT lasku.liitostunnus) AS 'asiakkaita',
-					GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
-					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
-					ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
-					ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
-					ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
+					GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset'
+					#ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
+					#ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
+					#ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
+					#ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 					FROM lasku
 					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 					JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
@@ -1668,8 +1670,20 @@
 			echo "<td class='center toggleable_parent_row_time3' id='{$row['kerailyn_aloitusaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kerailyn_aloitusaika']}</td>";
 			echo "<td class='center toggleable_parent_row_orders' id='{$row['tilatut']}__{$row['lahdon_tunnus']}__{$y}'>{$row['tilatut']} / {$row['valmiina']}</td>";
 			echo "<td class='center toggleable_parent_row_rows' id='{$row['suunnittelussa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
-			echo "<td class='center toggleable_parent_row_weight' id='{$row['kg_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kg_suun']} / {$row['kg_ker']}</td>";
-			echo "<td class='center toggleable_parent_row_liters' id='{$row['litrat_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$row['litrat_suun']} / {$row['litrat_ker']}</td>";
+
+			$query = "	SELECT ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
+						ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
+						ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
+						ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus IN ({$row['tilaukset']})";
+			$kg_res = pupe_query($query);
+			$kg_row = mysql_fetch_assoc($kg_res);
+
+			echo "<td class='center toggleable_parent_row_weight' id='{$kg_row['kg_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$kg_row['kg_suun']} / {$kg_row['kg_ker']}</td>";
+			echo "<td class='center toggleable_parent_row_liters' id='{$kg_row['litrat_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$kg_row['litrat_suun']} / {$kg_row['litrat_ker']}</td>";
 
 			echo "</tr>";
 
@@ -1926,7 +1940,7 @@
 
 					$query = "	SELECT pakkaus.pakkauskuvaus,
 								pakkaus.oma_paino,
-								(kerayserat.kpl * tuote.tuotemassa) AS 'kg'
+								ROUND((kerayserat.kpl * tuote.tuotemassa), 0) AS 'kg'
 								FROM kerayserat
 								JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')

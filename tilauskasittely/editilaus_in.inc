@@ -1262,7 +1262,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// Poistetaan spacet
-				if (in_array($yhtiorow["yhtio"], array("artr","allr","mast"))) {
+				if (in_array($yhtiorow["yhtio"], array("allr","mast"))) {
 					$tieto = str_replace(" ", "", $tieto);
 				}
 
@@ -1298,7 +1298,7 @@ while ($tietue = fgets($fd)) {
 						if (mysql_num_rows($result) == 0) {
 							// Poistetaan kolmannesta merkistä space...
 							$tieto = substr($tieto, 0, 2).substr($tieto, 3);
-							
+
 							// 3. Poistetaan kolmannesta merkistä space ja tsekataan löytyykö poistettu
 							$query = "	SELECT *
 										FROM tuote
@@ -1306,7 +1306,7 @@ while ($tietue = fgets($fd)) {
 										and tuoteno = '{$tieto}'
 										{$kieltolisa}";
 							$result = mysql_query($query) or die($query);
-							
+
 							if (mysql_num_rows($result) == 0) {
 								// Laitetaan kolmanneksi merkiksi space...
 								$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
@@ -1318,11 +1318,11 @@ while ($tietue = fgets($fd)) {
 											and tuoteno = '{$tieto}'
 											{$kieltolisa}";
 								$result = mysql_query($query) or die($query);
-								
+
 								if (mysql_num_rows($result) == 0) {
 									// Jos ei millään löydy niin laitetaan ilman spaceja eteenpäin...
 									$tieto = substr($tieto, 0, 2).substr($tieto, 3);
-								}								
+								}
 							}
 						}
 					}

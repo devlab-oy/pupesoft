@@ -6,51 +6,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FA
 
 require_once("inc/tilinumero.inc");
 
-function kopioitiliointipaittain($tunnus, $type = '') {
-
-	global $kukarow;
-
-	// jos type yks etsitään aputunnuksella
-	if ($type == 1) {
-		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and aputunnus = '$tunnus'";
-	}
-	else {
-		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-	}
-	$result = pupe_query($query);
-
-	if (mysql_num_rows($result) != 1) {
-		echo "Tiliöintirivi kateissa systeemivirhe!";
-		pupe_error($query);
-	}
-
-	$tiliointirow = mysql_fetch_assoc($result);
-
-	$query = "INSERT INTO tiliointi SET ";
-
-	for ($i = 0; $i < mysql_num_fields($result); $i++) {
-
-		if (mysql_field_name($result, $i) == 'laatija') {
-			$query .= "laatija = '$kukarow[kuka]', ";
-		}
-		elseif (mysql_field_name($result, $i) == 'laadittu') {
-			$query .= "laadittu = now(), ";
-		}
-		elseif (mysql_field_name($result, $i) == 'tapvm') {
-			$query .= "tapvm = now(), ";
-		}
-		elseif (mysql_field_name($result, $i) == 'summa') {
-			$query .= "summa = summa * -1, ";
-		}
-		elseif (mysql_field_name($result, $i) != 'tunnus') {
-			$query .= mysql_field_name($result,$i) . " = '".$tiliointirow[mysql_field_name($result,$i)]."', ";
-		}
-	}
-
-	$query = substr($query,0,-2);
-	$result = pupe_query($query);
-}
-
 if ($tila == "muokkaasuoritusta") {
 
 	if ($saamis == $kassa or $saamis == "" or $kassa == "") {
@@ -388,7 +343,8 @@ if ($tila == 'tee_kohdistus') {
 
 		$errorrow = mysql_fetch_assoc ($result);
 
-		$query = "	SELECT * FROM tiliointi
+		$query = "	SELECT * 
+					FROM tiliointi
 					WHERE yhtio = '$errorrow[yhtio]' and
 					aputunnus = '$errorrow[tunnus]' and
 					korjattu = ''";
@@ -436,9 +392,9 @@ if ($tila == 'tee_kohdistus') {
 				}
 				elseif (round($suoritus["summa"] - ($tskrow["summa"] - $tskrow["alennus"]), 2) < 0) {
 					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
-					echo "suoritussumma: {$suoritus["summa"]} laskusumma: {$tskrow["summa"]} laskusummavaluutassa: {$tskrow["summa_valuutassa"]}<br>";
-					echo "suoritusvalkoodi: {$suoritus["valkoodi"]} yhtiovalkoodi: {$yhtiorow['valkoodi']}<br>";
-					
+					#echo "suoritussumma: {$suoritus["summa"]} laskusumma: {$tskrow["summa"]} laskusummavaluutassa: {$tskrow["summa_valuutassa"]}<br>";
+					#echo "suoritusvalkoodi: {$suoritus["valkoodi"]} yhtiovalkoodi: {$yhtiorow['valkoodi']}<br>";
+
 					$tila 	= 'kohdistaminen';
 					$query 	= "UNLOCK TABLES";
 					$result = pupe_query($query);
@@ -544,6 +500,7 @@ if ($tila == 'tee_kohdistus') {
 		$asresult = pupe_query($query);
 		$mskustprow = mysql_fetch_assoc($asresult);
 
+		// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myyntisaamiset_tilino"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
 
 		// Myyntisaamiset
@@ -603,10 +560,9 @@ if ($tila == 'tee_kohdistus') {
 							and korjattu	 = ''";
 				$tilres = pupe_query($query);
 
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
+
 				if (mysql_num_rows($tilres) == 0) {
-
-					list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
-
 					// Valuuttaero
 					$query = "	INSERT INTO tiliointi SET
 								yhtio		= '$kukarow[yhtio]',
@@ -952,6 +908,9 @@ if ($tila == 'tee_kohdistus') {
 							$totkasumma += $summa + $alv;
 							$totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["kassa_ale_tilino"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 							// Kassa-ale
 							$query = "	INSERT INTO tiliointi SET
 										yhtio				= '$kukarow[yhtio]',
@@ -960,9 +919,9 @@ if ($tila == 'tee_kohdistus') {
 										tapvm				= '$suoritus[maksupvm]',
 										ltunnus				= '$lasku[tunnus]',
 										tilino				= '$suoritus[kassa_ale_tilino]',
-										kustp				= '$tiliointirow[kustp]',
-										kohde				= '$tiliointirow[kohde]',
-										projekti			= '$tiliointirow[projekti]',
+										kustp    			= '{$kustp_ins}',
+										kohde	 			= '{$kohde_ins}',
+										projekti 			= '{$projekti_ins}',
 										summa				= $summa,
 										summa_valuutassa 	= $summa_valuutassa,
 										valkoodi			= '$tiliointirow[valkoodi]',
@@ -1055,6 +1014,7 @@ if ($tila == 'tee_kohdistus') {
 				$asresult = pupe_query($query);
 				$mskustprow = mysql_fetch_assoc($asresult);
 
+				// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myyntisaamiset_tilino"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
 
 				// Myyntisaamiset
@@ -1114,10 +1074,9 @@ if ($tila == 'tee_kohdistus') {
 									and korjattu 	= ''";
 						$tilres = pupe_query($query);
 
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
+
 						if (mysql_num_rows($tilres) == 0) {
-
-							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($suoritus["myynninvaluuttaero_tilino"]);
-
 							// Valuuttaero
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$kukarow[yhtio]',

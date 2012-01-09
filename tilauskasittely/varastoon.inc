@@ -196,7 +196,7 @@ if ($laskurow["vienti_kurssi"] == 0) {
 	}
 }
 
-if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and $yhtiorow["jalkilaskenta_kuluperuste"] == "") {
+if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and ($yhtiorow["jalkilaskenta_kuluperuste"] == "" or ($yhtiorow["jalkilaskenta_kuluperuste"] == "PX" and $laskurow["saldo_maksettu"] !=0))) {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 	$rahtitapa  = t("Virallinen");
@@ -967,14 +967,17 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 			if (mysql_num_rows($result1) > 0) { // Tiliointi löytyi
 				while ($tiliointirow = mysql_fetch_assoc($result1)) {
 
+					// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+					list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["matkalla_olevat"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 					// Kumotaan, matkallaolevat
 					$query = "	INSERT into tiliointi set
 								yhtio		= '$kukarow[yhtio]',
 								ltunnus		= '$kulurow[tunnus]',
 								tilino		= '$yhtiorow[matkalla_olevat]',
-								kustp    	= '{$tiliointirow["kustp"]}',
-								kohde	 	= '{$tiliointirow["kohde"]}',
-								projekti 	= '{$tiliointirow["projekti"]}',
+								kustp    	= '{$kustp_ins}',
+								kohde	 	= '{$kohde_ins}',
+								projekti 	= '{$projekti_ins}',
 								tapvm		= now(),
 								summa		= $tiliointirow[summa] * -1,
 								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
@@ -989,14 +992,17 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 						$varastotili = $yhtiorow["raaka_ainevarasto"];
 					}
 
+					// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+					list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 					// Kirjataan varastonarvo
 					$query = "	INSERT into tiliointi set
 								yhtio		= '$kukarow[yhtio]',
 								ltunnus		= '$kulurow[tunnus]',
 								tilino		= '$varastotili',
-								kustp    	= '{$tiliointirow["kustp"]}',
-								kohde	 	= '{$tiliointirow["kohde"]}',
-								projekti 	= '{$tiliointirow["projekti"]}',
+								kustp    	= '{$kustp_ins}',
+								kohde	 	= '{$kohde_ins}',
+								projekti 	= '{$projekti_ins}',
 								tapvm		= now(),
 								summa		= '$tiliointirow[summa]',
 								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',

@@ -428,7 +428,7 @@
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
 							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
-				$result  = pupe_query($query);
+				$result = pupe_query($query);
 
 				//	Poistetaan kaikki lavaeloitukset
 				$query = "	SELECT group_concat(distinct(concat('\'', pakkaus.pakkausveloitus_tuotenumero, '\''))) veloitukset
@@ -2739,7 +2739,7 @@
 
 		echo "</table>";
 
-		if ($tee == 'change') {
+		if ((isset($tee) and $tee == 'change') or (isset($muutos) and $muutos == 'yes')) {
 			echo "<input type='hidden' name='muutos' value='yes'>";
 		}
 

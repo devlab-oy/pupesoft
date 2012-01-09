@@ -16,19 +16,15 @@
 		die ("Yhtiö on pakollinen tieto!\n");
 	}
 
-	if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '') {
+	if ($argv[2] == '') {
+		die ("Sähköpostiosoite on pakollinen tieto!\n");
+	}
+
+	if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
 
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-
-		$query    = "SELECT * from yhtio where yhtio = '$kukarow[yhtio]'";
-		$yhtiores = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($yhtiores)==1) {
-			$yhtiorow = mysql_fetch_array($yhtiores);
-		}
-		else {
-			die ("Yhtiö $kukarow[yhtio] ei löydy!");
-		}
+		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+		$email = escapeshellarg(trim($argv[2]));
 
 		$query = "	SELECT group_concat(distinct tunnus order by tunnus) varastot
 					FROM varastopaikat
@@ -37,7 +33,7 @@
 		$varastorow = mysql_fetch_array($varastores);
 
 		if ($varastorow["varastot"] != "") {
-			exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] laskut@arwidson.fi");
+			exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] $email");
 		}
 		else {
 			die ("Yhtään varastoa ei löytynyt!\n");

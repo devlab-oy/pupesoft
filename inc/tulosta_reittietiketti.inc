@@ -105,21 +105,23 @@
 						$laskurow = mysql_fetch_assoc($res);
 
 						// tila = 'K' tarkoittaa "Keräyksessä"
-						$query = "	INSERT INTO kerayserat SET
-									yhtio = '{$kukarow['yhtio']}',
-									nro = {$kerayseran_numero},
-									tila = 'K',
-									sscc = {$sscc},
-									otunnus = '{$laskurow['tunnus']}',
-									tilausrivi = '{$tilriv}',
-									pakkaus = '{$pakkaus_nro}',
-									pakkausnro = '{$juokseva_nro}',
-									kpl = '{$kpl}',
-									laatija = '{$kukarow['kuka']}',
-									luontiaika = now(),
-									muuttaja = '{$kukarow['kuka']}',
-									muutospvm = now()";
-						$insert_res = pupe_query($query);
+						if (!isset($ei_tallenneta) or !$ei_tallenneta) {
+							$query = "	INSERT INTO kerayserat SET
+										yhtio = '{$kukarow['yhtio']}',
+										nro = {$kerayseran_numero},
+										tila = 'K',
+										sscc = {$sscc},
+										otunnus = '{$laskurow['tunnus']}',
+										tilausrivi = '{$tilriv}',
+										pakkaus = '{$pakkaus_nro}',
+										pakkausnro = '{$juokseva_nro}',
+										kpl = '{$kpl}',
+										laatija = '{$kukarow['kuka']}',
+										luontiaika = now(),
+										muuttaja = '{$kukarow['kuka']}',
+										muutospvm = now()";
+							$insert_res = pupe_query($query);
+						}
 					} #end foreach $pakkaus
 
 					if (!isset($ei_tulosteta) or !$ei_tulosteta) {

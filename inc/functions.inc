@@ -14595,9 +14595,9 @@ if (!function_exists("tee_keraysera2")) {
 					if ($ot == 'tilauksen_koko' or $ot == 'tilauksen_paino') {
 						foreach ($pakkaukset as $paktun => $pak) {
 							if ($pak['yksin_eraan'] == 'K') {
-								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'])) {
+								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus'] and $val <= $pak['tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'] and $val <= $pak['tilavuus'])) {
 									echo "Siirretään $key ensimmäiseksi!<br>";
-									echo "($ot == 'tilauksen_koko' and $val >= $pak[minimi_tilavuus]) or ($ot == 'tilauksen_paino' and $val >= $pak[minimi_paino])<br><br>";
+									echo "($ot == 'tilauksen_koko' and $val >= $pak[minimi_tilavuus] and $val <= $pak[tilavuus]) or ($ot == 'tilauksen_paino' and $val >= $pak[minimi_paino] and $val <= $pak[tilavuus])<br><br>";
 
 									$backup_array = array();
 									$backup_array[$key] = $fixed_main_array[$key];

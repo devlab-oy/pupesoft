@@ -645,7 +645,7 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 
-			if ($cli === FALSE and $rivilaskuri % 500) {
+			if ($cli === FALSE and ($rivilaskuri % 500) == 0) {
 				echo "<font class='message'>K‰sitell‰‰n rivi‰: $rivilaskuri</font><br>";
 			}
 

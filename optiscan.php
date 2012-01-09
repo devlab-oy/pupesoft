@@ -392,6 +392,8 @@
 				);
 
 				if ($komento != 'email') {
+					$ei_tallenneta = true;
+
 					tulosta_reittietiketti($params);
 				}
 			}

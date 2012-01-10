@@ -169,7 +169,7 @@
 				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
-				echo "<font class='head'>Nykyinen lähtö: ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br />";
+				echo "<font class='head'>",t("Nykyinen lähtö"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br />";
 
 				echo "<form method='post' action=''>";
 				echo "<input type='hidden' name='siirra_lahtoon' value='X' />";
@@ -1981,17 +1981,18 @@
 
 				echo "</tr>";
 
-				$colspan_child = 17;
+				$colspan_child = 18;
 
 				$query = "	SELECT tilausrivi.tuoteno,
 							kerayserat.sscc,
 							tuote.nimitys,
-							tilausrivi.tilkpl AS 'suunniteltu',
+							IFNULL(kerayserat.kpl, tilausrivi.tilkpl) AS 'suunniteltu',
 							tilausrivi.yksikko,
 							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
 							kerayserat.laatija AS 'keraaja',
 							tilausrivi.kerattyaika,
-							IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
+							#IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
+							IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0) AS 'keratyt'
 							FROM tilausrivi
 							LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -2048,12 +2049,12 @@
 				$query = "	SELECT tilausrivi.tuoteno,
 							kerayserat.otunnus,
 							tuote.nimitys,
-							tilausrivi.tilkpl AS 'suunniteltu',
+							IFNULL(kerayserat.kpl, tilausrivi.tilkpl) AS 'suunniteltu',
 							tilausrivi.yksikko,
 							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
 							kerayserat.laatija AS keraaja,
 							tilausrivi.kerattyaika,
-							IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
+							IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0) AS 'keratyt'
 							FROM kerayserat
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)

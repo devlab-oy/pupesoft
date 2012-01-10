@@ -36,4 +36,3 @@
 
 	$xml->asXML("../dataout/dnsprices.xml");
 
-//	$dnshinnasto[] =   array('tuoteno' => $row["tuoteno"], 'selite' => $row["selite"], 'alkupvm' => $row["alkupvm"], 'loppupvm' => $row["loppupvm"], 'hinta' => $row["hinta"],);

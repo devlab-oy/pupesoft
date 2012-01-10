@@ -1,6 +1,31 @@
 <?php
 	
-	require ('../inc/parametrit.inc');
+	if (php_sapi_name() == 'cli') {
+		require('../inc/connect.inc');
+		require('../inc/functions.inc');
+		$cli = true;
+	
+		if (trim($argv[1]) != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		}
+		else {
+			die ("Et antanut yhtiötä.\n");
+		}
+		
+		if (trim($argv[2]) != '') {
+			$kutsutaan = trim($argv[2]);
+			// esim. anvia
+		}
+		else {
+			die ("Et antanut verkkokaupan tyyppiä.\n");
+		}	
+	}
+	else {
+		require ("../inc/parametrit.inc");
+		$kutsutaan = "anvia";
+		$cli = false;
+	}
 	
 	// Haetaan pupesta tuotteen tiedot
 	$query = "	SELECT tuote.*,
@@ -17,11 +42,14 @@
 				if(t1.jarjestys = 0 or t1.jarjestys is null, 999999, t1.jarjestys) t1j1,
 				if(t2.jarjestys = 0 or t2.jarjestys is null, 999999, t2.jarjestys) t2j2,
 				if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) t3j3,
-				if(tuote.tuotemassa <= 0, 0.01, tuote.tuotemassa) tuotemassa
+				if(tuote.tuotemassa <= 0, 0.01, tuote.tuotemassa) tuotemassa, 
+				t1.selite pvariaatio, 
+				t2.selite pvari, 
+				t3.selite ppituus
 				FROM tuote
 				LEFT JOIN tuotteen_avainsanat t1 on tuote.yhtio = t1.yhtio and tuote.tuoteno = t1.tuoteno and t1.laji = 'parametri_variaatio' and t1.kieli = 'fi'
 				LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = 'fi'
-				LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = 'fi'
+				LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_pituus' and t3.kieli = 'fi'
 				LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se'
 				LEFT JOIN tuotteen_avainsanat as ta_kuvaus_se on tuote.yhtio = ta_kuvaus_se.yhtio and tuote.tuoteno = ta_kuvaus_se.tuoteno and ta_kuvaus_se.laji = 'kuvaus' and ta_kuvaus_se.kieli = 'se'
 				LEFT JOIN tuotteen_avainsanat as ta_lyhyt_se on tuote.yhtio = ta_lyhyt_se.yhtio and tuote.tuoteno = ta_lyhyt_se.tuoteno and ta_lyhyt_se.laji = 'lyhytkuvaus' and ta_lyhyt_se.kieli = 'se'
@@ -51,14 +79,14 @@
 				AND tuote.status != 'P'
 				AND tuote.tuotetyyppi not in ('A','B')
 				AND tuote.tuoteno != ''
+			#	AND t1.selite !=''
 	 			ORDER BY t1j1, t2j2, t3j3, tuote.tuoteno
 				";
 
 	$res = pupe_query($query);
-query_dump($query);
 
-
-	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = array();
+	// alustetaan arrayt
+	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
 	// loopataan tuotteet
 	while ($row = mysql_fetch_array($res)) {
@@ -67,11 +95,11 @@ query_dump($query);
 		
 		$dnstuote[] = array('tuoteno' => $row["tuoteno"], 'nimi' => $row["nimitys"], 
 											'yksikko' => $row["yksikko"], 'myyntihinta' => $row["myyntihinta"],
-											'ean' => $row["ean"], 'myytavissa' => $myytavissa,
+											'ean' => $row["eankoodi"], 'myytavissa' => $myytavissa,
 											'osasto' => $row["osasto"], 'try' => $row["try"],
 											'nimi_swe' => $row["nimi_swe"],'nimi_eng' => $row["nimi_eng"],);
 										
-		$dnstock[] = array('tuoteno' => $row["tuoteno"], 'ean' => $row["ean"], 'myytavissa' => $myytavissa,);
+		$dnstock[] = array('tuoteno' => $row["tuoteno"], 'ean' => $row["eankoodi"], 'myytavissa' => $myytavissa,);
 
 		$dnsryhma[$row["osasto"]][$row["try"]] = array('osasto' => $row["osasto"], 'try' => $row["try"],
 											'osasto_fi' => $row["osasto_fi_nimi"], 'try_fi' => $row["try_fi_nimi"],
@@ -79,7 +107,6 @@ query_dump($query);
 											'osasto_en' => $row["osasto_en_nimi"], 'try_en' => $row["try_en_nimi"],
 											);
 		
-		// $dnslajitelma[] = array();
 	}
 	
 	// Haetaan kaikki asiakkaat 
@@ -112,23 +139,64 @@ query_dump($query);
 		$dnshinnasto[] =   array('tuoteno' => $row["tuoteno"], 'selite' => $row["selite"], 'alkupvm' => $row["alkupvm"], 'loppupvm' => $row["loppupvm"], 'hinta' => $row["hinta"],);
 	}
 	
-/*
-	echo "TUOTTEET:<pre>",var_dump($dnstuote),"</pre>";
-	echo "VARASTO:<pre>",var_dump($dnstock),"</pre>";
-	echo "RYHMÄ:<pre>",var_dump($dnsryhma),"</pre>";
-*/	
-	// mikä vkauppa
-	// --> mitä kutsutaan
+	// haetaan tuotteen variaatiot
+	$query = "	SELECT distinct selite 
+				FROM tuotteen_avainsanat 
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = 'parametri_variaatio'";
+	$resselite = pupe_query($query);
 	
-	echo "Kutsun nyt tuotetta<br>";
-	require ("tuotexml.inc");
-	echo "Kutsun nyt varastoa<br>";
-	require ("varastoxml.inc");
-	echo "Kutsun nyt ryhmää<br>";
-	require ("ryhmaxml.inc");
-	echo "Kutsun nyt asiakasta<br>";
-	require ("asiakasxml.inc");
-	echo "Kutsun nyt hinnastoa<br>";
-	require ("hinnastoxml.inc");
-	require ("inc/footer.inc");
+	// loopataan variaatio-nimitykset
+	while ($rowselite = mysql_fetch_assoc($resselite)) {
+		
+		$aliselect = "SELECT tuotteen_avainsanat.tuoteno, tuote.nimitys ,ta_nimitys_se.selite nimi_swe, ta_nimitys_en.selite nimi_eng, tuote.myyntihinta,tuote.eankoodi
+						FROM tuotteen_avainsanat 
+						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno)
+						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
+						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
+						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}' 
+						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'";
+		$alires = pupe_query($aliselect);
+				
+		while ($alirow = mysql_fetch_assoc($alires)) {
+
+			$alinselect = " SELECT tuotteen_avainsanat.laji, tuotteen_avainsanat.selite 
+							FROM tuotteen_avainsanat 
+							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}' 
+							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+							AND tuotteen_avainsanat.laji like 'parametri_%'
+							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'";
+			$alinres = pupe_query($alinselect);
+			$properties = array();
+			
+			while ($syvinrow = mysql_fetch_assoc($alinres)) {
+				$properties[] = array(substr($syvinrow["laji"], 10) => $syvinrow["selite"]);
+			}
+						
+			$dnslajitelma[$rowselite["selite"]][] = array(	'tuoteno' 	=> $alirow["tuoteno"], 
+															'nimitys'	=> $alirow["nimitys"],
+															'nimi_swe'	=> $alirow["nimi_swe"],
+															'nimi_eng'	=> $alirow["nimi_eng"],
+															'variaatio' => $rowselite["selite"],
+															'myyntihinta'	=> $alirow["myyntihinta"],
+															'ean'		=> $alirow["eankoodi"],
+															'parametrit'	=> $properties);
+
+		}
+		
+	}
+
+	if (isset($kutsutaan) and $kutsutaan == "anvia") {
+		
+		require ("tuotexml.inc");
+		require ("varastoxml.inc");
+		require ("ryhmaxml.inc");
+		require ("asiakasxml.inc");
+		require ("hinnastoxml.inc");
+		require ("lajitelmaxml.inc");
+	}
+	
+	if (php_sapi_name() != 'cli') {
+		require ("inc/footer.inc");
+	}
 ?>

@@ -13,30 +13,29 @@
 	$customer->addChild('timestamp', date("Y-m-d H:i"));
 	
 	$information = $xml->addChild('information');
+	$topgroup = $information->addChild('topgroup');
+	$topgroup->addAttribute('id','');
+	$topgroup->addChild('topgroupname','root');
 
-	foreach ($dnsryhma as $osasto) {
+	foreach ($dnsryhma as $key => $osasto) {
 
-		$topgroup = $information->addChild('topgroup');
-			$topgroup->addAttribute('id','');
-			$topgroup->addChild('topgroupname','root');
-				$group = $topgroup->addChild('group');
-				foreach ($osasto as $huijaus) {
-					// en tee mitään, otan vain tässä sisemmältä tuoten osastojen nimitykset.
-				}
-				$group->addAttribute('id',$huijaus["osasto"]);
-					$group->addChild('groupname',utf8_encode(xmlentities($huijaus["osasto_fi"])));
-					$group->addChild('groupnameswe',utf8_encode(xmlentities($huijaus["osasto_se"])));
-					$group->addChild('groupnameeng',utf8_encode(xmlentities($huijaus["osasto_en"])));
+		// Osasto on joka rivillä sama, otetaan ekalta riviltä tiedot
+		$group = $topgroup->addChild('group');
+		$group->addAttribute('extSystemID',$key);
+			$group->addChild('groupname',utf8_encode(xmlentities($dnsryhma[$key]["osasto_fi"])));
+			$group->addChild('groupnameswe',utf8_encode(xmlentities($dnsryhma[$key]["osasto_se"])));
+			$group->addChild('groupnameeng',utf8_encode(xmlentities($dnsryhma[$key]["osasto_en"])));
 
-					// Osasto pysyy samana, mutta try vaihtuu
-					foreach ($osasto as $try) {
-						$subgroup = $group->addChild('subgroup');
-						$subgroup->addAttribute('id',$try["try"]);
-							$subgroup->addChild('subgroupcode',$try["try"]);
-							$subgroup->addChild('subgroupname',		utf8_encode(xmlentities($try["try_fi"])));
-							$subgroup->addChild('subgroupnameswe',	utf8_encode(xmlentities($try["try_se"])));
-							$subgroup->addChild('subgroupnameeng',	utf8_encode(xmlentities($try["try_en"])));
-					}
+		// Loopataan osaston tuoteryhmät
+		foreach ($osasto as $try) {
+			$subgroup = $group->addChild('subgroup');
+			$subgroup->addAttribute('extSystemID',$try["try"]);
+				$subgroup->addChild('subgroupcode',$try["try"]);
+				$subgroup->addChild('subgroupname',		utf8_encode(xmlentities($try["try_fi"])));
+				$subgroup->addChild('subgroupnameswe',	utf8_encode(xmlentities($try["try_se"])));
+				$subgroup->addChild('subgroupnameeng',	utf8_encode(xmlentities($try["try_en"])));
+		}
 	}
 
 	$xml->asXML("../dataout/dnsgroups.xml");
+

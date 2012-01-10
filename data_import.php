@@ -83,8 +83,8 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (strpos($alkuperainen_filenimi, "#") !== FALSE or strpos($alkuperainen_filenimi, "/") !== FALSE or strpos($alkuperainen_filenimi, ":") !== FALSE) {
-				echo "<font class='error'>".t("Tiedostonimessä kiellettyjä merkkejä").": '#' '/' ':' </font><br>\n";
+			if (preg_match('/[^A-Za-z0-9. -]/', $alkuperainen_filenimi)) {
+				echo "<font class='error'>".t("Tiedostonimessä kiellettyjä merkkejä").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 

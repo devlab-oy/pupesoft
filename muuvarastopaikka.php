@@ -701,6 +701,11 @@
 
 				if ($yhtiorow['kerayserat'] == 'K') {
 
+					$ahyllyalue = strtoupper($ahyllyalue);
+					$ahyllynro = strtoupper($ahyllynro);
+					$ahyllyvali = strtoupper($ahyllyvali);
+					$ahyllytaso = strtoupper($ahyllytaso);
+
 					if (!isset($select_varasto) or trim($select_varasto) == "") {
 						$kaikki_ok = false;
 					}
@@ -1108,7 +1113,7 @@
 
 			while ($varastorow = mysql_fetch_assoc($varastores)) {
 
-				$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : "";
+				$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : ($kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "");
 
 				echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
 			}

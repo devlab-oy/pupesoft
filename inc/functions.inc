@@ -13571,31 +13571,50 @@ if (!function_exists("valitse_pakkaus")) {
 			$pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
 			$pisin_tuote = array_shift($pisin_tuote_array);
 
-			// pakkaukset ovat pienimm‰st‰ isoimpaan
-			foreach ($pakkaukset as $indx => $pakkaus_array) {
+			// tarkistetaan ensin mahtuuko koko nippu yhteen pakettiin
+			if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
 
-				if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $pisin_tuote['paino']) {
-					if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
-						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+				// pakkaukset ovat pienimm‰st‰ isoimpaan
+				foreach ($pakkaukset as $indx => $pakkaus_array) {
+
+					if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $pisin_tuote['paino']) {
+						if ($pakkaus_array['paino'] >= $koko_nippu_paino and $pakkaus_array['tilavuus'] >= $koko_nippu_tilavuus) {
+							if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+								$kaytettava_pakkaus = $indx;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			if ($kaytettava_pakkaus == "") {
+				// pakkaukset ovat pienimm‰st‰ isoimpaan
+				foreach ($pakkaukset as $indx => $pakkaus_array) {
+
+					if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $pisin_tuote['paino']) {
+						if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
+							if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+								$kaytettava_pakkaus = $indx;
+								break;
+							}
+						}
+						elseif ($koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0) {
+							if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
+								$kaytettava_pakkaus = $indx;
+								break;
+							}
+						}
+						elseif ($koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0) {
+							if ($koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+								$kaytettava_pakkaus = $indx;
+								break;
+							}
+						}
+						else {
 							$kaytettava_pakkaus = $indx;
 							break;
 						}
-					}
-					elseif ($koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0) {
-						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-							$kaytettava_pakkaus = $indx;
-							break;
-						}
-					}
-					elseif ($koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0) {
-						if ($koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
-							$kaytettava_pakkaus = $indx;
-							break;
-						}
-					}
-					else {
-						$kaytettava_pakkaus = $indx;
-						break;
 					}
 				}
 			}
@@ -13729,7 +13748,7 @@ if (!function_exists("splittaa_tilaus")) {
 					$isa_tuoteno_chk_res = pupe_query($query);
 					$isa_tuoteno_chk_row = mysql_fetch_assoc($isa_tuoteno_chk_res);
 
-					$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tilausrivirow['tuoteno']}' AND isatuoteno = '{$isa_tuoteno_chk_row['tuoteno']}'";
+					$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tilausrivirow['tuoteno']}' AND isatuoteno = '{$isa_tuoteno_chk_row['tuoteno']}' AND tyyppi = 'P'";
 					$ohita_kerays_chk_res = pupe_query($query);
 					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -13986,7 +14005,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 
-							$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$lapsi_chk_row['tuoteno']}' AND isatuoteno = '{$tilausrivirow['tuoteno']}'";
+							$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$lapsi_chk_row['tuoteno']}' AND isatuoteno = '{$tilausrivirow['tuoteno']}' AND tyyppi = 'P'";
 							$ohita_kerays_chk_res = pupe_query($query);
 							$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -14750,7 +14769,8 @@ if (!function_exists("tee_keraysera2")) {
 								FROM tuoteperhe 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND isatuoteno = '{$isatuote_chk_row['tuoteno']}' 
-								AND tuoteno = '{$tuoterow['tuoteno']}'";
+								AND tuoteno = '{$tuoterow['tuoteno']}'
+								AND tyyppi = 'P'";
 					$ohita_kerays_chk_res = pupe_query($query);
 					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -14991,7 +15011,8 @@ if (!function_exists("tee_keraysera2")) {
 								FROM tuoteperhe 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND isatuoteno = '{$isatuote_chk_row['tuoteno']}' 
-								AND tuoteno = '{$tuoterow['tuoteno']}'";
+								AND tuoteno = '{$tuoterow['tuoteno']}'
+								AND tyyppi = 'P'";
 					$ohita_kerays_chk_res = pupe_query($query);
 					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -15285,6 +15306,17 @@ if (!function_exists("tee_keraysera2")) {
 							echo "<br><br>";
 
 							echo "Er‰n tilavuus nyt: $eran_koko cm3 loopissa tuotteita $looppi_koko kpl<br>";
+
+							if ($pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
+								echo "<br>Pakkaus oli yksin er‰‰n alusta! Ker‰yser‰ valmis!<br><br>";
+								$era_valmis = true;
+
+								$i--;
+
+								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+
+								break 3;								
+							}
 
 							echo "Etsit‰‰n uusi pakkaus...<br>";
 

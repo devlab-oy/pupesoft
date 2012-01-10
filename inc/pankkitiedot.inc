@@ -84,7 +84,7 @@ if(!function_exists("pankkitiedot")) {
 					case (8) : //Swedbank
 						$pankki["rahalaitos"]		= '  ';
 						$pankki["pankkilaitos"] 	= "Swedbank";
-						$pankki["swift"]		= "SWEDFIHH";
+						$pankki["swift"]			= "SWEDFIHH";
 						break;
 					case (9) : //S-Pankki
 						$pankki["rahalaitos"]		= '  ';
@@ -117,6 +117,11 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["pankkilaitos"] 	= "Ålandsbanken";
 				$pankki["swift"]			= "AABAFI22";
 				break;
+			case (7) : //Itella Pankki
+				$pankki["rahalaitos"]		= '  ';
+				$pankki["pankkilaitos"] 	= "Itella Pankki";
+				$pankki["swift"]			= "ITELFIHH";
+				break;
 			case (8) : //Sampo Pankki
 				$pankki["rahalaitos"]		= '8 ';
 				$pankki["pankkilaitos"] 	= "Sampo";
@@ -124,7 +129,7 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
 				$pankki["swift"]			= "DABAFIHH";
 				break;
-			default :		
+			default :
 				if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililtä
 					$pankki["rahalaitos"]		= '  ';
 					$pankki["pankkilaitos"] 	= "Kassa_Selivittely";

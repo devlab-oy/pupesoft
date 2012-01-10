@@ -30,8 +30,6 @@
 
 	$lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
-	require_once ("inc/tilinumero.inc");
-
 	if ($keikalla == "on") {
 		//	T‰‰ll‰ haetaan laskurow aika monta kertaa, joskus voisi tehd‰ recodea?
 		$query = "	SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";

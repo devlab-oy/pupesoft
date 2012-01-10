@@ -5757,7 +5757,6 @@ if (!function_exists("tulosta_ytunnus")) {
 				$uytunnus = strtoupper($maa).$uytunnus;
 			}
 			elseif ($vienti != "") {
-				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 				$uytunnus = strtoupper($maa).$uytunnus;
 			}
 			else {

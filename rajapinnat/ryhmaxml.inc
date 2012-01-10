@@ -37,5 +37,5 @@
 		}
 	}
 
-	$xml->asXML("../dataout/dnsgroups.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnsgroups.xml");
 

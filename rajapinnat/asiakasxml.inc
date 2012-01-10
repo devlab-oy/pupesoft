@@ -25,4 +25,4 @@
 			$customer->addChild('email',utf8_encode(xmlentities($asiakas["email"])));
 	}
 
-	$xml->asXML("../dataout/dnscustomer.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnscustomer.xml");

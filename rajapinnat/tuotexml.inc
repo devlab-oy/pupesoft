@@ -36,5 +36,5 @@
 				$unit->unitprice->addAttribute('id','');
 	}
 
-	$xml->asXML("../dataout/dnsproduct.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnsproduct.xml");
 

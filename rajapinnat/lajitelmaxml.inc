@@ -48,4 +48,4 @@
 		$laskuri++;
 	}
 
-	$xml->asXML("../dataout/dnsassortment.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnsassortment.xml");

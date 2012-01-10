@@ -34,5 +34,5 @@
 			$item->addChild('price',$hinnasto["hinta"]);
 	}
 
-	$xml->asXML("../dataout/dnsprices.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnsprices.xml");
 

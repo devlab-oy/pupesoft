@@ -22,4 +22,4 @@
 			$product->addChild('instock',$tuote["myytavissa"]);
 	}
 
-	$xml->asXML("../dataout/dnstock.xml");
+	$xml->asXML("{$pupe_root_polku}/dataout/dnstock.xml");

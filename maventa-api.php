@@ -15,6 +15,10 @@
 		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
 	}
 
+	if (substr($verkkolaskut_in, -1) != "/") {
+		$verkkolaskut_in = $verkkolaskut_in."/";
+	}
+
 	// Testaus
 	#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 

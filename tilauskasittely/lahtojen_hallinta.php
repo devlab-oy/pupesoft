@@ -1412,6 +1412,44 @@
 
 	if ($select_varasto > 0) {
 
+		$ohita_kerays_lapset = array();
+
+		$query = "	SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
+					FROM lasku
+					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+					AND varastopaikat.tunnus = '{$select_varasto}')
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+		$result = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($result)) {
+
+			$query = "SELECT tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['perheid']}'";
+			$isatuote_chk_res = pupe_query($query);
+			$isatuote_chk_row = mysql_fetch_assoc($isatuote_chk_res);
+
+			$query = "	SELECT ohita_kerays 
+						FROM tuoteperhe 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND isatuoteno = '{$isatuote_chk_row['tuoteno']}' 
+						AND tuoteno = '{$row['tuoteno']}'
+						AND tyyppi = 'P'";
+			$ohita_kerays_chk_res = pupe_query($query);
+			$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
+
+			if ($ohita_kerays_chk_row['ohita_kerays'] != '') {
+				array_push($ohita_kerays_lapset, $row['tunnus']);
+			}
+
+		}
+
+		$ei_lapsia_lisa = count($ohita_kerays_lapset) > 0 ? "AND tilausrivi.tunnus NOT IN (".implode(",", $ohita_kerays_lapset).")" : "";
+
 		$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
 					lahdot.pvm AS 'lahdon_pvm',
 					SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
@@ -1437,7 +1475,7 @@
 					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 					JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' {$ei_lapsia_lisa})
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 					and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))

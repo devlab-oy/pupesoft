@@ -489,7 +489,7 @@
 										$keraysera_maara[$keraysera_chk_row['tunnus']] = 0;
 									}
 
-									$query_upd = "UPDATE kerayserat SET kpl = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
+									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
 									$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
 								}
 							}
@@ -1481,6 +1481,8 @@
 								and lasku.alatila in ('C','D')";
 					$lasresult = mysql_query($query) or pupe_error($query);
 
+					$tilausnumeroita_backup = $tilausnumeroita;
+
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
 						if ($valittu_tulostin != "") {
@@ -1777,7 +1779,7 @@
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K') {
-						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilausnumeroita})";
+						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilausnumeroita_backup})";
 						$alatila_upd_res = mysql_query($query) or pupe_error($query);
 					}
 

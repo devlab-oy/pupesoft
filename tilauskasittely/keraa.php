@@ -41,6 +41,18 @@
 	if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
 		echo "	<script type='text/javascript' language='JavaScript'>
 					$(document).ready(function() {
+
+						$('input[name^=\"keraysera_maara\"]').each(function() {
+							var rivitunnukset = $(this).attr('id').split(\"_\", 2);
+							var yhteensa = 0;
+
+							$('input[id^=\"'+rivitunnukset[0]+'\"]').each(function(){
+								yhteensa += Number($(this).val().replace(',', '.'));
+							});
+
+							$('#maara_'+rivitunnukset[0]).val(yhteensa);
+						});
+
 						$('input[name^=\"keraysera_maara\"]').keyup(function(){
 							var rivitunnukset = $(this).attr('id').split(\"_\", 2);
 							var yhteensa = 0;
@@ -479,6 +491,10 @@
 						// K‰ytt‰j‰ on syˆtt‰nyt jonkun luvun, p‰ivitet‰‰n vaikka virhetsekit menisiv‰t pepulleen
 						if (trim($maara[$apui]) != '') {
 
+							// Siivotaan hieman k‰ytt‰j‰n syˆtt‰m‰‰ kappalem‰‰r‰‰
+							$maara[$apui] = str_replace (",", ".", $maara[$apui]);
+							$maara[$apui] = (float) $maara[$apui];
+
 							// jos ker‰yser‰t on k‰ytˆss‰, p‰ivitet‰‰n muuttuneet kappalem‰‰r‰t ker‰yser‰‰n
 							if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
 								$query_ker = "SELECT tunnus FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivi = '{$apui}'";
@@ -492,11 +508,88 @@
 									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
 									$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
 								}
-							}
 
-							// Siivotaan hieman k‰ytt‰j‰n syˆtt‰m‰‰ kappalem‰‰r‰‰
-							$maara[$apui] = str_replace (",", ".", $maara[$apui]);
-							$maara[$apui] = (float) $maara[$apui];
+								// p‰ivitet‰‰n tuoteperhen lapset ker‰tyiksi jos niill‰ on ohita_ker‰ys t‰pp‰ p‰‰ll‰
+								$query_chk = "	SELECT perheid, tuoteno, varattu
+												FROM tilausrivi
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$apui}'";
+								$perheid_chk_res = pupe_query($query_chk);
+								$perheid_chk_row = mysql_fetch_assoc($perheid_chk_res);
+
+								if ($perheid_chk_row['perheid'] != 0) {
+
+									// haetaan lapset, ei oteta is‰‰ huomioon
+									$query_lapset = "	SELECT tunnus, tuoteno, varattu
+														FROM tilausrivi 
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND perheid = '{$perheid_chk_row['perheid']}'
+														AND tunnus != '{$apui}'";
+									$lapset_chk_res = pupe_query($query_lapset);
+
+									while ($lapset_chk_row = mysql_fetch_assoc($lapset_chk_res)) {
+
+										$query_ohita = "	SELECT ohita_kerays, kerroin
+															FROM tuoteperhe 
+															WHERE yhtio = '{$kukarow['yhtio']}'
+															AND tyyppi = 'P'
+															AND isatuoteno = '{$perheid_chk_row['tuoteno']}'
+															AND tuoteno = '{$lapset_chk_row['tuoteno']}'";
+										$ohita_chk_res = pupe_query($query_ohita);
+										$ohita_chk_row = mysql_fetch_assoc($ohita_chk_res);
+
+										if ($ohita_chk_row['ohita_kerays'] != '') {
+
+											$kerroin = $maara[$apui];
+
+											// ei ker‰tty yht‰ monta rivi‰ mit‰ oli tilattu
+											if ($perheid_chk_row['varattu'] != $maara[$apui] and $maara[$apui] != 0) {
+												$kerroin = $lapset_chk_row['varattu'] / $perheid_chk_row['varattu'];
+												$jaljelle_jaava_maara = $lapset_chk_row['varattu'] - ($maara[$apui] * $kerroin);
+
+												$query_clone = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lapset_chk_row['tunnus']}'";
+												$clone_res = pupe_query($query_clone);
+												$clone_row = mysql_fetch_assoc($clone_res);
+
+												$fields = "yhtio";
+												$values = "'{$kukarow['yhtio']}'";
+
+												// Ei monisteta tunnusta
+												for ($iii = 1; $iii < mysql_num_fields($clone_res) - 1; $iii++) {
+
+													$fieldname = mysql_field_name($clone_res, $iii);
+													$fields .= ", ".$fieldname;
+
+													switch ($fieldname) {
+														case 'varattu':
+															$values .= ", {$jaljelle_jaava_maara}";
+															break;
+														case 'var':
+															$values .= ", 'P'";
+															break;
+														default:
+															$values .= ", '{$clone_row[$fieldname]}'";
+													}
+												}
+
+												$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+												$uusires = pupe_query($kysely);
+											}
+
+											$tyyppilisa = $kerroin == 0 ? ", tyyppi = 'D'" : "";
+
+											$query_upd = "	UPDATE tilausrivi SET
+															keratty = '{$kukarow['kuka']}',
+															kerattyaika = now(),
+															varattu = '".($maara[$apui] * $kerroin)."'
+															{$tyyppilisa}
+															WHERE yhtio = '{$kukarow['yhtio']}'
+															AND tunnus = '{$lapset_chk_row['tunnus']}'";
+											$upd_res = pupe_query($query_upd);
+										}
+									}
+								}
+							}
 
 							// Ker‰t‰‰n tietoa poikkeama-maileja varten
 							$poikkeamat[$tilrivirow["otunnus"]][$i]["tuoteno"] 	= $tilrivirow["tuoteno"];
@@ -745,8 +838,8 @@
 								else {
 									//P‰ivitet‰‰n vain m‰‰r‰ jos se on isompi kuin alkuper‰inen varattum‰‰r‰
 									$query .= ", varattu = '".$maara[$apui]."'";
-									}
 								}
+							}
 
 							if ($poikkeama_kasittely[$apui] != "" and $rotunnus != 0) {
 								// K‰ytt‰j‰n valitsemia poikkeamak‰sittelys‰‰ntˆj‰

@@ -1,5 +1,7 @@
 <?php
 
+	$tiedoston_sijainti = "{$pupe_root_polku}/dataout/dnsprices_".date("Y_m_d_Hi").".xml";
+
 	$xmlstr  = '<?xml version="1.0" encoding="iso-8859-1"?>';
 	$xmlstr .= '<pricelist>';
 	$xmlstr .= '</pricelist>';
@@ -34,5 +36,17 @@
 			$item->addChild('price',$hinnasto["hinta"]);
 	}
 
-	$xml->asXML("{$pupe_root_polku}/dataout/dnsprices.xml");
+	// $xml->asXML("{$pupe_root_polku}/dataout/dnsprices.xml");
+	$xml->asXML($tiedoston_sijainti);
+	
+	$ftpfile = realpath($tiedoston_sijainti);
+	$todnimi = basename($tiedoston_sijainti);
+	require ("{$pupe_root_polku}/inc/ftp-send.inc");
+	
+	if ($palautus == 0) {
+		unlink($tiedoston_sijainti);
+	}
+	else {
+		rename($tiedoston_sijainti,"{$pupe_root_polku}/dataout/ERROR_".$todnimi);
+	}
 

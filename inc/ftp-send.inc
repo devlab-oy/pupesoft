@@ -11,6 +11,7 @@ $dummy			= array();
 $syy			= "";
 $palautus		= 0;
 $tulos_ulos_ftp	= "";
+$rename			= "";
 
 $filenimi = basename($ftpfile);
 

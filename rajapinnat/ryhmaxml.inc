@@ -1,5 +1,7 @@
 <?php
 
+	$tiedoston_sijainti = "{$pupe_root_polku}/dataout/dnsgroups_".date("Y_m_d_Hi").".xml";
+
 	$xmlstr  = '<?xml version="1.0" encoding="iso-8859-1"?>';
 	$xmlstr .= '<groups>';
 	$xmlstr .= '</groups>';
@@ -22,12 +24,20 @@
 		// Osasto on joka rivillä sama, otetaan ekalta riviltä tiedot
 		$group = $topgroup->addChild('group');
 		$group->addAttribute('extSystemID',$key);
-			$group->addChild('groupname',utf8_encode(xmlentities($dnsryhma[$key]["osasto_fi"])));
-			$group->addChild('groupnameswe',utf8_encode(xmlentities($dnsryhma[$key]["osasto_se"])));
-			$group->addChild('groupnameeng',utf8_encode(xmlentities($dnsryhma[$key]["osasto_en"])));
+		// setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehdään yhden kerran groupname-xml kirjoitus	
+		$vain_ekalla = 1;
 
 		// Loopataan osaston tuoteryhmät
 		foreach ($osasto as $try) {
+			
+			if ($vain_ekalla == 1) {
+				$group->addChild('groupname',utf8_encode(xmlentities($try["osasto_fi"])));
+				$group->addChild('groupnameswe',utf8_encode(xmlentities($try["osasto_se"])));
+				$group->addChild('groupnameeng',utf8_encode(xmlentities($try["osasto_en"])));
+			}
+			
+			$vain_ekalla = 2;
+			
 			$subgroup = $group->addChild('subgroup');
 			$subgroup->addAttribute('extSystemID',$try["try"]);
 				$subgroup->addChild('subgroupcode',$try["try"]);
@@ -37,5 +47,15 @@
 		}
 	}
 
-	$xml->asXML("{$pupe_root_polku}/dataout/dnsgroups.xml");
-
+	$xml->asXML($tiedoston_sijainti);
+	
+	$ftpfile = realpath($tiedoston_sijainti);
+	$todnimi = basename($tiedoston_sijainti);
+	require ("{$pupe_root_polku}/inc/ftp-send.inc");
+	
+	if ($palautus == 0) {
+		unlink($tiedoston_sijainti);
+	}
+	else {
+		rename($tiedoston_sijainti,"{$pupe_root_polku}/dataout/ERROR_".$todnimi);
+	}

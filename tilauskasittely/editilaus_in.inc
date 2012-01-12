@@ -1262,7 +1262,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// Poistetaan spacet
-				if (in_array($yhtiorow["yhtio"], array("allr","mast"))) {
+				if (in_array($yhtiorow["yhtio"], array("artr","allr","mast"))) {
 					$tieto = str_replace(" ", "", $tieto);
 				}
 
@@ -1287,15 +1287,15 @@ while ($tietue = fgets($fd)) {
 						$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
 
 						// 2. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö aktiivinen
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									and tuoteno = '{$tieto}'
-									and status != 'P'
-									{$kieltolisa}";
-						$result = mysql_query($query) or die($query);
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								and tuoteno = '{$tieto}'
+								and status != 'P'
+								{$kieltolisa}";
+					$result = mysql_query($query) or die($query);
 
-						if (mysql_num_rows($result) == 0) {
+					if (mysql_num_rows($result) == 0) {
 							// Poistetaan kolmannesta merkistä space...
 							$tieto = substr($tieto, 0, 2).substr($tieto, 3);
 
@@ -1309,7 +1309,7 @@ while ($tietue = fgets($fd)) {
 
 							if (mysql_num_rows($result) == 0) {
 								// Laitetaan kolmanneksi merkiksi space...
-								$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
 
 								// 4. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö poistettu
 								$query = "	SELECT *
@@ -1322,8 +1322,8 @@ while ($tietue = fgets($fd)) {
 								if (mysql_num_rows($result) == 0) {
 									// Jos ei millään löydy niin laitetaan ilman spaceja eteenpäin...
 									$tieto = substr($tieto, 0, 2).substr($tieto, 3);
-								}
-							}
+					}
+				}
 						}
 					}
 				}
@@ -1742,6 +1742,10 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
+				// Tilaus merkataan valmiiksi
+				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or die($query);
+
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
@@ -1750,100 +1754,6 @@ while ($tietue = fgets($fd)) {
 				// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 				$kukarow["kesken"] = $laskurow["tunnus"];
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
-
-				// alennuskenttiä
-				$query_alennuksia = generoi_alekentta('M');
-
-				// asiakastiedot
-				$query = "	SELECT luottoraja
-							FROM asiakas
-							WHERE asiakas.yhtio = '$kukarow[yhtio]'
-							AND asiakas.tunnus = '$laskurow[liitostunnus]'";
-				$asiakas_res = pupe_query($query);
-				$asiakas_row = mysql_fetch_assoc($asiakas_res);
-
-				// asiakkaan luottoraja
-				$asiakas_luottoraja = $asiakas_row["luottoraja"];
-
-				if ($asiakas_luottoraja == 0 ) {
-					$oikeasti_valmis = "KYLLA";
-				}
-				else {
-
-					// tämän tilauksen arvo
-					$query = "	SELECT sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_alennuksia}, '$yhtiorow[hintapyoristys]')) laskun_summa
-								FROM tilausrivi
-								WHERE tilausrivi.otunnus  = '{$kukarow["kesken"]}'
-								AND tilausrivi.yhtio = '$kukarow[yhtio]'
-								AND tilausrivi.var in ('','H')
-								AND tilausrivi.tyyppi in ('L','G')";
-					$tilaus_res = pupe_query($query);
-					$tilaus_row = mysql_fetch_assoc($tilaus_res);
-
-					// haetaan kaikkien avoimien tilausten arvo
-					$sumquery = "	SELECT
-									round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo,
-									round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_summa
-									FROM lasku
-									JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-									WHERE lasku.yhtio = '$kukarow[yhtio]'
-									AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V')) 
-									  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))
-									  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))
-									) 
-									AND lasku.liitostunnus = '$laskurow[liitostunnus]'";
-					$sumresult = pupe_query($sumquery);
-					$avoimetrow = mysql_fetch_assoc($sumresult);
-
-					// Nykyinen tilanne ja luottoraja
-					$laskun_summa 		= $tilaus_row["laskun_summa"];
-					$asiakkaan_avoimet  = $avoimetrow["avoimet_arvo"]; 
-
-					$sytunnus 	 	 = $laskurow['ytunnus'];
-					$sliitostunnus	 = $laskurow['liitostunnus'];
-					$eiliittymaa 	 = "ON";
-					$luottorajavirhe = "";
-					$jvvirhe 		 = "";
-					$ylivito 		 = "";
-					$trattavirhe 	 = "";
-					$laji 			 = "MA";
-					$velkatilanne	 = "";
-
-					if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-						$grouppaus = "ytunnus";
-					}
-					else {
-						$grouppaus = "";
-					}
-
-					ob_start();
-					require ("raportit/saatanat.php");
-
-					$retval = ob_get_contents();
-					ob_end_clean();
-
-					$varaa_ostaa_tavaraa = $asiakas_luottoraja - $velkatilanne - $asiakkaan_avoimet;
-
-					if ($varaa_ostaa_tavaraa >= $laskun_summa) {
-						$oikeasti_valmis = "KYLLA";
-					}
-					else {
-						$edi_ulos .= "\n".t("Laskun ja avoimien laskujen yhteissumma ylittää käytettävissä olevan luoton määrän")."\n";
-						$edi_ulos .= "\n".t("Tilaus on siirretty hyväksyttäväksi")."\n";
-						$oikeasti_valmis = "KESKEN";
-					}
-				}
-
-				// Jos "kesken" niin laitetaan (N,F) Hyväksytettäväksi, muuten laitetaan valmiiksi.
-				if ($oikeasti_valmis == "KESKEN") {
-					$query = "UPDATE lasku SET alatila='F' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-					$result = mysql_query($query) or die($query);
-				}
-				else {
-					
-					// Tilaus merkataan valmiiksi
-					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-					$result = mysql_query($query) or die($query);
 
 					// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
 					if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
@@ -1959,7 +1869,6 @@ while ($tietue = fgets($fd)) {
 						$edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 					}
 				}
-			}
 			else {
 				$edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivejä ei lisätty")."!\n\n";
 			}

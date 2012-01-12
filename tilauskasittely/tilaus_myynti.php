@@ -6838,7 +6838,6 @@ if ($tee == '') {
 										AND varasto = '{$vrst}'
 										AND ((pvm = '".date("Y-m-d")."' AND viimeinen_tilausaika > '".date("H:i:s")."') OR pvm > '".date("Y-m-d")."')
 										ORDER BY pvm, lahdon_kellonaika";
-							// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$lahdot_res = pupe_query($query);
 
 							echo "<td colspan='2' nowrap class='back'><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";

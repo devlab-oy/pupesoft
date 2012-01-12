@@ -92,7 +92,7 @@
 	}
 
 	if (!function_exists("tuoteperhe_reku2")) {
-		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug) {
+		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array) {
 			global $yhtiorow, $kukarow;
 
 			$perhearray = array();
@@ -120,6 +120,7 @@
 
 					$kaikki_array[]		= $perherow["tuoteno"]; // lisätään tuoteno arrayseen
 					$kerroin_array[]	= $tuoteno."#!¡!#".$perherow["kerroin"];
+					$ohita_kerays_array[] = $perherow['ohita_kerays'];
 
 					$mikaisa = $perherow["tuoteno"];
 					$tmp_kaikki_array = $kaikki_array;
@@ -147,7 +148,7 @@
 					$perhearray[] = $perherow;
 				}
 			}
-			return array($perhearray, $isat_array, $kaikki_array, $kerroin_array);
+			return array($perhearray, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array);
 		}
 	}
 
@@ -268,6 +269,7 @@
 	$myy_era 		= array();
 	$myy_tyyppi		= array();
 	$myy_lapsi_ein 	= array();
+	$myy_ohita_kerays = array();
 	$lisatyt_rivit1 = array();
 	$lisatyt_rivit2 = array();
 	$korkieltokommi = array();
@@ -1132,9 +1134,10 @@
 							$kaikki_array 	= array($tuoteno);
 							$kerroin_array 	= array($tuoteno."#!¡!#1");
 							$perhearray 	= array();
+							$ohita_kerays_array = array();
 
 							for ($isa = 0; $isa < $riikoko; $isa++) {
-								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
+								list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
 								$perhearray	= array_merge($perhearray, $perherow);
 
 								if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
@@ -1154,6 +1157,7 @@
 										$myy_hintakerr[$j] = $perherow["hintakerroin"];
 										$myy_alekerroi[$j] = $perherow["alekerroin"];
 										$myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
+										$myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
 										// jos ei olla vielä toimitettu kaikkea, niin lisätään tilausrivi
 										if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $varataan_saldoa == "EI")) {
@@ -1434,7 +1438,8 @@
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
-												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
+												ohita_kerays = '{$myy_ohita_kerays[$indeksi]}'
 												{$omalle_tilaukselle_lisa}
 												$sopimuslisays
 												$tlisatied_lisa
@@ -1457,6 +1462,7 @@
 												ei_nayteta 			= '$myy_lapsi_ein[$indeksi]',
 												tilausrivitunnus	= '$lisatty_tun',
 												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
+												ohita_kerays		= '{$myy_ohita_kerays[$indeksi]}',
 												vanha_otunnus		= '$kukarow[kesken]',
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
@@ -1734,9 +1740,10 @@
 			$kaikki_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
 			$kerroin_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
 			$perhearray 	= array();
+			$ohita_kerays_array = array();
 
 			for ($isa=0; $isa < $riikoko; $isa++) {
-				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
+				list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
 				$perhearray	= array_merge($perhearray, $perherow);
 
 				// Ollaanko rekursiivisia vai ei

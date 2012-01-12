@@ -502,14 +502,24 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$kres1 = pupe_query($query);
 
+
 			while ($krow1 = mysql_fetch_array($kres1)) {
+
+				if ($yhtiorow["korvaavat_alaspain"] == "K") {
+					$korvaavat_alaspainlisa = " and (korvaavat.jarjestys >= '{$krow1["jarjestys"]}' or korvaavat.jarjestys = 0) ";
+				}
+				else {
+					$korvaavat_alaspainlisa = "";
+				}
+
 				// K‰yd‰‰n l‰pi kaikki korvaavat...
 				$query = "	SELECT tuote.*
 							FROM korvaavat
 							JOIN tuote ON korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
 							WHERE korvaavat.id	='$krow1[id]'
 							and korvaavat.yhtio	='$kukarow[yhtio]'
-							order by korvaavat.jarjestys, korvaavat.tuoteno";
+							{$korvaavat_alaspainlisa}
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
 
 				while ($krow2 = mysql_fetch_array($kres2)) {

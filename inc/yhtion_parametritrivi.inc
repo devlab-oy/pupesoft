@@ -2919,4 +2919,16 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'korvaavat_alaspain') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Korvaavuusketjua menn‰‰n ymp‰ri ")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Korvaavuusketjua voi menn‰ vain alasp‰in")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

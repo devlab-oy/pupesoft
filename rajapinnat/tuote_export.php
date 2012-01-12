@@ -11,6 +11,7 @@
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+		$kukarow["extranet"] = "";
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 	}
 	else {
@@ -23,10 +24,19 @@
 	else {
 		die ("Et antanut verkkokaupan tyyppiä.\n");
 	}
+	
+	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
 	// alustetaan arrayt
 	$dnstuote = $dnsryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma = array();
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa = "AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+	}
+	else {
+		$muutoslisa = "";
+	}
+	
 	// Haetaan pupesta tuotteen tiedot
 	$query = "	SELECT tuote.*,
 				ta_nimitys_se.selite nimi_swe,
@@ -39,7 +49,7 @@
 				AND tuote.tuotetyyppi NOT in ('A','B')
 				AND tuote.tuoteno != ''
 				AND tuote.nakyvyys != ''
-				AND (tuote.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR) OR ta_nimitys_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))
+				$muutoslisa
 	 			ORDER BY tuote.tuoteno";
 	$res = pupe_query($query);
 
@@ -58,13 +68,22 @@
 							);
 	}
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa1 = "AND tapahtuma.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
+		$muutoslisa2 = "AND tilausrivi.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR)";
+	}
+	else {
+		$muutoslisa1 = "";
+		$muutoslisa2 = "";
+	}
+
 	// Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
 	$query =  "(SELECT tapahtuma.tuoteno,
 				tuote.eankoodi
 				FROM tapahtuma
 				JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno)
 				WHERE tapahtuma.yhtio='{$kukarow["yhtio"]}'
-				AND tapahtuma.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR))
+				$muutoslisa1)
 
 				UNION
 
@@ -73,7 +92,7 @@
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 				WHERE tilausrivi.yhtio='{$kukarow["yhtio"]}'
-				AND tilausrivi.laadittu > DATE_SUB(now(), INTERVAL 1 HOUR))
+				$muutoslisa2)
 
 				ORDER BY 1";
 	$result = pupe_query($query);
@@ -86,6 +105,17 @@
 							);
 	}
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa = "AND (try_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+			OR try_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+			OR try_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+			OR osasto_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+			OR osasto_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
+			OR osasto_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))";
+	}
+	else {
+		$muutoslisa = "";
+	}
 
 	// Haetaan kaikki TRY ja OSASTO:t, niiden muutokset.
 	$query = "	SELECT DISTINCT	tuote.osasto,
@@ -108,12 +138,7 @@
 				AND tuote.tuotetyyppi NOT in ('A','B')
 				AND tuote.tuoteno != ''
 				AND tuote.nakyvyys != ''
-				AND (try_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-					OR try_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-					OR try_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-					OR osasto_fi.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-					OR osasto_se.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)
-					OR osasto_en.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR))
+				$muutoslisa
 				ORDER BY 1, 2";
 	$result = pupe_query($query);
 
@@ -130,12 +155,19 @@
 														);
 	}
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa = "AND asiakas.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+	}
+	else {
+		$muutoslisa = "";
+	}
+
 	// Haetaan kaikki asiakkaat
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 				AND asiakas.laji != 'P'
-				AND asiakas.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+				$muutoslisa";
 	$res = pupe_query($query);
 
 	// pyöräytetään asiakkaat läpi
@@ -148,6 +180,13 @@
 								);
 	}
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa = "AND hinnasto.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+	}
+	else {
+		$muutoslisa = "";
+	}
+
 	// Haetaan kaikki hinnastot
 	$query = "	SELECT hinnasto.*
 				FROM hinnasto
@@ -156,7 +195,7 @@
 				AND hinnasto.laji !='O'
 				AND hinnasto.maa in ('FI','')
 				AND hinnasto.valkoodi in ('EUR','')
-				AND hinnasto.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+				$muutoslisa";
 	$res = pupe_query($query);
 
 	// Tehdään hinnastot läpi
@@ -176,23 +215,39 @@
 				AND laji = 'parametri_variaatio' ";
 	$resselite = pupe_query($query);
 
+	if ($ajetaanko_kaikki == "NO") {
+		$muutoslisa = "AND tuotteen_avainsanat.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+	}
+	else {
+		$muutoslisa = "";
+	}
+
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
 
-		$aliselect = "	SELECT tuotteen_avainsanat.tuoteno, tuote.nimitys ,ta_nimitys_se.selite nimi_swe, ta_nimitys_en.selite nimi_eng, tuote.myyntihinta,tuote.eankoodi
+		$aliselect = "	SELECT tuotteen_avainsanat.tuoteno, 
+						tuote.nimitys,
+						ta_nimitys_se.selite nimi_swe, 
+						ta_nimitys_en.selite nimi_eng, 
+						tuote.myyntihinta,
+						tuote.eankoodi
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno)
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'
-						AND tuotteen_avainsanat.muutospvm > DATE_SUB(now(), INTERVAL 1 HOUR)";
+						$muutoslisa";
 		$alires = pupe_query($aliselect);
 
 		while ($alirow = mysql_fetch_assoc($alires)) {
 
-			$alinselect = " SELECT tuotteen_avainsanat.laji, tuotteen_avainsanat.selite
+			$alinselect = " SELECT tuotteen_avainsanat.selite,
+							avainsana.selitetark
 							FROM tuotteen_avainsanat
+							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio 
+								AND avainsana.laji = 'PARAMETRI' 
+								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
@@ -201,7 +256,7 @@
 			$properties = array();
 
 			while ($syvinrow = mysql_fetch_assoc($alinres)) {
-				$properties[] = array(substr($syvinrow["laji"], 10) => $syvinrow["selite"]);
+				$properties[] = array($syvinrow["selitetark"] => $syvinrow["selite"]);
 			}
 
 			$dnslajitelma[$rowselite["selite"]][] = array(	'tuoteno' 		=> $alirow["tuoteno"],
@@ -223,6 +278,12 @@
 			$ftpuser = $anvia_ftpuser;
 			$ftppass = $anvia_ftppass;
 			$ftppath = $anvia_ftppath;
+		}
+		else {
+			$ftphost = "";
+			$ftpuser = "";
+			$ftppass = "";
+			$ftppath = ""; 		
 		}
 
 		$tulos_ulos = "";

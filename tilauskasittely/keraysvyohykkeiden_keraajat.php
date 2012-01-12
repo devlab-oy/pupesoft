@@ -117,6 +117,16 @@
 
 	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked', 'keratty' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
+	if (!isset($ajankohta)) $ajankohta = "present";
+	if (!isset($present_date_pp)) $present_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+	if (!isset($present_date_kk)) $present_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+	if (!isset($present_date_vv)) $present_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+	if (!isset($future_date_pp)) $future_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_kk)) $future_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_vv)) $future_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($past_date_pp)) $past_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_kk)) $past_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_vv)) $past_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 	echo "<form method='post' action=''>";
 	echo "<table>";
@@ -127,6 +137,7 @@
 	echo "<th>",t("Prioriteetti"),"</th>";
 	echo "<th>",t("Tila"),"</th>";
 	echo "<th>",t("Volyymisuure"),"</th>";
+	echo "<th>",t("Ajankohta"),"</th>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -259,6 +270,23 @@
 	echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> ",t("Litrat");
 	echo "</td>";
 
+	$chk = array_fill_keys(array($ajankohta), " checked") + array('past' => '', 'present' => '', 'future' => '');
+
+	echo "<td>";
+	echo "<input type='radio' name='ajankohta' value='past'{$chk['past']} /> ",t("Historia"),"<br />";
+	echo "<input type='text' name='past_date_pp' size='3' value='{$past_date_pp}' />&nbsp;";
+	echo "<input type='text' name='past_date_kk' size='3' value='{$past_date_kk}' />&nbsp;";
+	echo "<input type='text' name='past_date_vv' size='5' value='{$past_date_vv}' /><br /><br />";
+	echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ",t("Tämä päivä"),"&nbsp;";
+	echo "<input type='hidden' name='past_date_pp' value='{$present_date_pp}' />&nbsp;";
+	echo "<input type='hidden' name='past_date_kk' value='{$present_date_kk}' />&nbsp;";
+	echo "<input type='hidden' name='past_date_vv' value='{$present_date_vv}' /><br /><br />";
+	echo "<input type='radio' name='ajankohta' value='future'{$chk['future']} /> ",t("Tulevat"),"<br />";
+	echo "<input type='text' name='future_date_pp' size='3' value='{$future_date_pp}' />&nbsp;";
+	echo "<input type='text' name='future_date_kk' size='3' value='{$future_date_kk}' />&nbsp;";
+	echo "<input type='text' name='future_date_vv' size='5' value='{$future_date_vv}' /><br />";
+	echo "</td>";
+
 	echo "</tr>";
 
 	echo "<tr><td class='back' colspan='6'><input type='submit' name='submit_form' value='",t("Näytä"),"' /></td></tr>";
@@ -317,6 +345,25 @@
 			$toimitustapalisa = count($toimitustapa) > 0 ? " JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K' AND toimitustapa.tunnus IN (".implode(",", $toimitustapa).")) " : "";
 			$prioriteettilisa = count($prioriteetit) > 0 ? " AND lasku.prioriteettinro IN (".implode(",", $prioriteetit).") " : "";
 
+			if ($ajankohta == 'past') {
+				$past_date_pp = (int) $past_date_pp;
+				$past_date_kk = (int) $past_date_kk;
+				$past_date_vv = (int) $past_date_vv;
+
+				$luontiaikalisa = " AND lasku.luontiaika >= '{$past_date_vv}-{$past_date_kk}-{$past_date_pp} 00:00:00' AND lasku.luontiaika <= '{$past_date_vv}-{$past_date_kk}-{$past_date_pp} 23:59:59' ";
+			}
+			elseif ($ajankohta == 'future') {
+				$future_date_pp = (int) $future_date_pp;
+				$future_date_kk = (int) $future_date_kk;
+				$future_date_vv = (int) $future_date_vv;
+
+				$luontiaikalisa = " AND lasku.luontiaika >= '{$future_date_vv}-{$future_date_kk}-{$future_date_pp} 00:00:00' AND lasku.luontiaika <= '{$future_date_vv}-{$future_date_kk}-{$future_date_pp} 23:59:59' ";
+			}
+			else {
+				$luontiaikalisa = " AND lasku.luontiaika >= '".date("Y-m-d")." 00:00:00' AND lasku.luontiaika <= '".date("Y-m-d")." 23:59:59' ";
+			}
+
+
 			$query = "	SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo'
 						{$select_aloittamatta}
 						{$select_aloitettu}
@@ -330,6 +377,7 @@
 						{$toimitustapalisa}
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.prioriteettinro != 0
+						{$luontiaikalisa}
 						{$varastolisa}
 						{$prioriteettilisa}
 						AND ({$tilalisa})

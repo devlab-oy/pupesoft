@@ -693,7 +693,7 @@
 					// Saldolliset tuotteet
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
-					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
+					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
 
 					// Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta, silloin annetaan AINA riitt‰v‰ saldo
 					if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!°!#".$zrow["hyllynro"]."#!°!#".$zrow["hyllyvali"]."#!°!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
@@ -734,7 +734,7 @@
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
 					$zzrow[$zzrowlask]['erikoistoimitus_alarajasumma']  = $zrow['erikoistoimitus_alarajasumma'];
 
-					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
+					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $myytavissa kappaletta<br>";
 
 					// tilatulla tuotteella oli saldoa.. laitetaan lippu p‰‰lle, ett‰ huomataan osatoimituskeisi oikein..
 					if ($tuoteno == $alkupera_trow["tuoteno"]) {
@@ -908,7 +908,7 @@
 
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
+							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 
 							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 							$myy_tuoteno[$i]   = strtoupper($tuoteno);
@@ -1036,7 +1036,7 @@
 			if ($paikka != '') {
 				$paikat = explode('#!°!#',$paikka);
 
-				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
+				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if ($yhtiorow["puute_jt_oletus"] == "O" or

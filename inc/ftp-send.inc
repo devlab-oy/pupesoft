@@ -11,7 +11,6 @@ $dummy			= array();
 $syy			= "";
 $palautus		= 0;
 $tulos_ulos_ftp	= "";
-$rename			= "";
 
 $filenimi = basename($ftpfile);
 
@@ -64,16 +63,16 @@ else {
 	}
 
 	// mikä feilas?
-	if ($conn_id === FALSE) {
+	if (isset($conn_id) and $conn_id === FALSE) {
 		$palautus = 1;
 	}
-	if ($login_result === FALSE) {
+	if (isset($login_result) and $login_result === FALSE) {
 		$palautus = 2;
 	}
-	if ($upload === FALSE) {
+	if (isset($upload) and $upload === FALSE) {
 		$palautus = 3;
 	}
-	if ($rename === FALSE) {
+	if (isset($rename) and $rename === FALSE) {
 		$palautus = 4;
 	}
 

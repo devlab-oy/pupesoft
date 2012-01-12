@@ -27,7 +27,6 @@
 			$customer->addChild('email',utf8_encode(xmlentities($asiakas["email"])));
 	}
 
-	// $xml->asXML("{$pupe_root_polku}/dataout/dnscustomer.xml");
 	$xml->asXML($tiedoston_sijainti);
 
 	$ftpfile = realpath($tiedoston_sijainti);

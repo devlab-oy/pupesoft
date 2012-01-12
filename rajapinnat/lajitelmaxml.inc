@@ -50,7 +50,6 @@
 		$laskuri++;
 	}
 
-	// $xml->asXML("{$pupe_root_polku}/dataout/dnsassortment.xml");
 	$xml->asXML($tiedoston_sijainti);
 	
 	$ftpfile = realpath($tiedoston_sijainti);

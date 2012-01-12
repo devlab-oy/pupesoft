@@ -36,7 +36,6 @@
 			$item->addChild('price',$hinnasto["hinta"]);
 	}
 
-	// $xml->asXML("{$pupe_root_polku}/dataout/dnsprices.xml");
 	$xml->asXML($tiedoston_sijainti);
 	
 	$ftpfile = realpath($tiedoston_sijainti);

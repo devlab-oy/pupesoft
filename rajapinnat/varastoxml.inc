@@ -24,7 +24,6 @@
 			$product->addChild('instock',$tuote["myytavissa"]);
 	}
 
-	//$xml->asXML("{$pupe_root_polku}/dataout/dnstock.xml");
 	$xml->asXML($tiedoston_sijainti);
 	
 	$ftpfile = realpath($tiedoston_sijainti);

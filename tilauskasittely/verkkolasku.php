@@ -265,7 +265,70 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
+			$query = "	LOCK TABLES
+						asiakas READ,
+						asiakasalennus READ,
+						asiakasalennus as asale1 READ,
+						asiakasalennus as asale2 READ,
+						asiakashinta READ,
+						asiakashinta as ashin1 READ,
+						asiakashinta as ashin2 READ,
+						asiakaskommentti READ,
+						asiakkaan_positio READ,
+						avainsana as a READ,
+						avainsana as avainsana_kieli READ,
+						avainsana as b READ,
+						avainsana READ,
+						dynaaminen_puu AS node READ,
+						dynaaminen_puu AS parent READ,
+						etaisyydet READ,
+						factoring READ,
+						hinnasto READ,
+						kalenteri WRITE,
+						kassalipas READ,
+						kirjoittimet READ,
+						kuka WRITE,
+						lasku AS lx_otsikko WRITE,
+						lasku AS ux_otsikko WRITE,
+						lasku WRITE,
+						laskun_lisatiedot WRITE,
+						maat READ,
+						maksuehto READ,
+						pakkaus READ,
+						pankkiyhteystiedot READ,
+						panttitili WRITE,
+						perusalennus READ,
+						puun_alkio READ,
+						rahtikirjat READ,
+						rahtimaksut READ,
+						sanakirja WRITE,
+						sarjanumeroseuranta WRITE,
+						tapahtuma WRITE,
+						tilausrivi as t READ,
+						tilausrivi as t2 WRITE,
+						tilausrivi as t3 READ,
+						tilausrivi WRITE,
+						tilausrivin_lisatiedot as tl2 WRITE,
+						tilausrivin_lisatiedot as tlt2 WRITE,
+						tilausrivin_lisatiedot as tlt3 WRITE,
+						tilausrivin_lisatiedot t_lisa READ,
+						tilausrivin_lisatiedot WRITE,
+						tili READ,
+						tiliointi WRITE,
+						toimitustapa READ,
+						tullinimike READ,
+						tuote READ,
+						tuotepaikat WRITE,
+						tuotteen_alv READ,
+						tuotteen_avainsanat READ,
+						tuotteen_toimittajat READ,
+						tyomaarays READ,
+						varastopaikat READ,
+						yhteyshenkilo as kk READ,
+						yhteyshenkilo as kt READ,
+						yhtio READ,
+						yhtion_parametrit READ,
+						yhtion_toimipaikat READ";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1155,7 +1218,7 @@
 								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
 								list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-								// lis‰t‰‰n puuterivi
+								// lis‰t‰‰n laskutuslis‰
 								$query = "  INSERT into tilausrivi set
 											hyllyalue       = '',
 											hyllynro        = '',

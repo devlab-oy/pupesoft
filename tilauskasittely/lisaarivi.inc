@@ -1025,7 +1025,7 @@
 		$kkres = pupe_query($query);
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
-		if ($yhtiorow["puute_jt_oletus"] == "O" or (mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
+		if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or (mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta) {
 
 			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
@@ -1110,7 +1110,7 @@
 
 						if ($lisaarivi_debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
 
-						if ($yhtiorow["puute_jt_oletus"] == "O" or $myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") {
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or $myy_kpl[$i] >= $toimittamatta) {
 							$myy_kpl[$i] = $toimittamatta; // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
 						}
 
@@ -1156,9 +1156,9 @@
 										$myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
 
 										// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
-										if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $varataan_saldoa == "EI")) {
+										if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
 
-											if (($myy_kpl[$j] - $myy_kpl_myyty[$j] >= $lapsitoimittamatta) or $varataan_saldoa == "EI") {
+											if (($myy_kpl[$j] - $myy_kpl_myyty[$j] >= $lapsitoimittamatta) or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
 												// jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
 												// ja splitataan loput omaan paikaan arrayhin jotta voidaan sit myyd‰ ne seuraavalla kiekalla jos on tarvis
 												$myy_tuoteno[]	 = $myy_tuoteno[$j];

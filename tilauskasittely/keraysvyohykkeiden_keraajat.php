@@ -277,10 +277,7 @@
 	echo "<input type='text' name='past_date_pp' size='3' value='{$past_date_pp}' />&nbsp;";
 	echo "<input type='text' name='past_date_kk' size='3' value='{$past_date_kk}' />&nbsp;";
 	echo "<input type='text' name='past_date_vv' size='5' value='{$past_date_vv}' /><br /><br />";
-	echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ",t("Tämä päivä"),"&nbsp;";
-	echo "<input type='hidden' name='past_date_pp' value='{$present_date_pp}' />&nbsp;";
-	echo "<input type='hidden' name='past_date_kk' value='{$present_date_kk}' />&nbsp;";
-	echo "<input type='hidden' name='past_date_vv' value='{$present_date_vv}' /><br /><br />";
+	echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ",t("Tämä päivä"),"<br /><br />";
 	echo "<input type='radio' name='ajankohta' value='future'{$chk['future']} /> ",t("Tulevat"),"<br />";
 	echo "<input type='text' name='future_date_pp' size='3' value='{$future_date_pp}' />&nbsp;";
 	echo "<input type='text' name='future_date_kk' size='3' value='{$future_date_kk}' />&nbsp;";

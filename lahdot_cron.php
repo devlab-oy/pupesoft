@@ -28,9 +28,10 @@
 	// $pvmnimet[6] = t("Lauantai");
 	// $pvmnimet[0] = t("Sunnuntai");
 
-	$paivia_eteenpain = 14;
+	$paivia_eteenpain = trim($argv[2] == 'create') ? 14 : 1;
+	$init_i = trim($argv[2] == 'create') ? 0 : 1;
 
-	for ($i = 0; $i <= $paivia_eteenpain; $i++) {
+	for ($i = $init_i; $i <= $paivia_eteenpain; $i++) {
 
 		$time = mktime(0, 0, 0, date("m"), date("d") + $i, date("Y"));
 

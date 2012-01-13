@@ -1062,7 +1062,7 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
-				$prioriteettinro = $hyvaksynnanmuutos = ""
+				$prioriteettinro = $hyvaksynnanmuutos = "";
 
 				if ($yhtiorow['kerayserat'] == 'K') {
 					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";

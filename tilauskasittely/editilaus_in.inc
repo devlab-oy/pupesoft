@@ -1873,11 +1873,8 @@ while ($tietue = fgets($fd)) {
 
 									if ($lahto_x == $lahto) {
 										$eka_kerta = false;
+										$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
 									}
-								}
-
-								if ($sel != "") {
-									$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
 								}
 							}
 						}

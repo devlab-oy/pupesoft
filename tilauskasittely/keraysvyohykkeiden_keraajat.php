@@ -360,7 +360,7 @@
 				$past_date_kk_loppu = (int) $past_date_kk_loppu;
 				$past_date_vv_loppu = (int) $past_date_vv_loppu;
 
-				$luontiaikalisa = " AND lasku.luontiaika >= '{$past_date_vv_alku}-{$past_date_kk_alku}-{$past_date_pp_alku} 00:00:00' AND lasku.luontiaika <= '{$past_date_vv_loppu}-{$past_date_kk_loppu}-{$past_date_pp_loppu} 23:59:59' ";
+				$luontiaikalisa = " AND lahdot.pvm >= '{$past_date_vv_alku}-{$past_date_kk_alku}-{$past_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$past_date_vv_loppu}-{$past_date_kk_loppu}-{$past_date_pp_loppu} 23:59:59' ";
 			}
 			elseif ($ajankohta == 'future') {
 				$future_date_pp_alku = (int) $future_date_pp_alku;
@@ -371,10 +371,10 @@
 				$future_date_kk_loppu = (int) $future_date_kk_loppu;
 				$future_date_vv_loppu = (int) $future_date_vv_loppu;
 
-				$luontiaikalisa = " AND lasku.luontiaika >= '{$future_date_vv_alku}-{$future_date_kk_alku}-{$future_date_pp_alku} 00:00:00' AND lasku.luontiaika <= '{$future_date_vv_loppu}-{$future_date_kk_loppu}-{$future_date_pp_loppu} 23:59:59' ";
+				$luontiaikalisa = " AND lahdot.pvm >= '{$future_date_vv_alku}-{$future_date_kk_alku}-{$future_date_pp_alku} 00:00:00' AND lahdot.pvm <= '{$future_date_vv_loppu}-{$future_date_kk_loppu}-{$future_date_pp_loppu} 23:59:59' ";
 			}
 			else {
-				$luontiaikalisa = " AND lasku.luontiaika >= '".date("Y-m-d")." 00:00:00' AND lasku.luontiaika <= '".date("Y-m-d")." 23:59:59' ";
+				$luontiaikalisa = " AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59' ";
 			}
 
 
@@ -386,12 +386,11 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso {$vhlisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P') {$luontiaikalisa})
 						{$keraysvyohykelisa}
 						{$toimitustapalisa}
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.prioriteettinro != 0
-						{$luontiaikalisa}
 						{$varastolisa}
 						{$prioriteettilisa}
 						AND ({$tilalisa})

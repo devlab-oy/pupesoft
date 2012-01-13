@@ -1867,7 +1867,7 @@ while ($tietue = fgets($fd)) {
 
 								$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
-								if ($eka_kerta and $laskurow['toimitustavan_lahto'] == "0") {
+								if ($eka_kerta) {
 
 									$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
 

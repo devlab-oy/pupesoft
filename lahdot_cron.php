@@ -10,9 +10,9 @@
 		exit;
 	}
 
-	require ("/var/www/html/demo/orumstat/inc/salasanat.php");
-	require ("/var/www/html/demo/orumstat/inc/connect.inc");
-	require ("/var/www/html/demo/orumstat/inc/functions.inc");
+	require ("inc/salasanat.php");
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
 	$kukarow['yhtio'] = (string) $argv[1];
 	$kukarow['kuka'] = 'cron';

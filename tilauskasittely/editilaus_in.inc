@@ -932,25 +932,44 @@ while ($tietue = fgets($fd)) {
 				}
 
 				if (trim($editilaus_toimitustapa) != '') {
-					$query = "	SELECT *
-								FROM asiakkaan_avainsanat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tarkenne = '{$editilaus_toimitustapa}'
-								AND laji = 'editilaus_toimitustapa'
-								AND tarkenne != ''
-								AND avainsana != ''
-								AND liitostunnus = '{$arow['tunnus']}'
-								ORDER BY muutospvm DESC
-								LIMIT 1";
-					$toimitustapa_chk_res = pupe_query($query);
 
-					if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-						$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+					if ($yhtiorow['kerayserat'] == 'K') {
+						$query = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND herminator = '{$editilaus_toimitustapa}'";
+						$toimitustapa_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+						}
+						else {
+							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
+							$editilaus_toimitustapa = '';
+						}
 					}
 					else {
-						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
-						$editilaus_toimitustapa = '';
+						$query = "	SELECT *
+									FROM asiakkaan_avainsanat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tarkenne = '{$editilaus_toimitustapa}'
+									AND laji = 'editilaus_toimitustapa'
+									AND tarkenne != ''
+									AND avainsana != ''
+									AND liitostunnus = '{$arow['tunnus']}'
+									ORDER BY muutospvm DESC
+									LIMIT 1";
+						$toimitustapa_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+						}
+						else {
+							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
+							$editilaus_toimitustapa = '';
+						}
 					}
 				}
 
@@ -1043,6 +1062,20 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
+				$prioriteettinro = $hyvaksynnanmuutos = ""
+
+				if ($yhtiorow['kerayserat'] == 'K') {
+					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+					$asluok_res = pupe_query($query);
+					$asluok_row = mysql_fetch_assoc($asluok_res);
+
+					$hyvaksynnanmuutos = $asluok_row['luokka'];
+
+					$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$asluok_row['luokka']}'", "", "", "selitetark_3");
+				}
+
+				$ohjausmerkki = $yhtiorow['kerayserat'] == 'K' ? $lopviesti : "";
+
 				// Lisätään otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1058,7 +1091,7 @@ while ($tietue = fgets($fd)) {
 							erpcm								= '',
 							hinta								= '$editilaus_loppuhinta',
 							huolitsija 							= '',
-							hyvaksynnanmuutos 					= '',
+							hyvaksynnanmuutos 					= '{$hyvaksynnanmuutos}',
 							jakelu 								= '',
 							jaksotettu							= '',
 							jtkielto							= '$arow[jtkielto]',
@@ -1082,6 +1115,7 @@ while ($tietue = fgets($fd)) {
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
+							ohjausmerkki						= '{$ohjausmerkki}',
 							olmapvm								= '',
 							osatoimitus							= '',
 							osoite 			   					= '$arow[osoite]',
@@ -1089,6 +1123,7 @@ while ($tietue = fgets($fd)) {
 							piiri								= '$arow[piiri]',
 							postino 		   					= '$arow[postino]',
 							postitp 		   					= '$arow[postitp]',
+							prioriteettinro						= '{$prioriteettinro}',
 							rahtivapaa							= '$editilaus_rahtivapaa',
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
@@ -1777,6 +1812,80 @@ while ($tietue = fgets($fd)) {
 					$silent = "SILENT";
 
 					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+
+					$toimitustavan_lahto = array();
+
+					if ($yhtiorow['kerayserat'] == 'K') {
+
+						$query = "	SELECT tunnus
+									FROM toimitustapa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND selite = '{$editilaus_toimitustapa}'";
+						$chk_res = pupe_query($query);
+						$chk_row = mysql_fetch_assoc($chk_res);
+
+						$toimitustavan_tunnus = $chk_row['tunnus'];
+
+						//haetaan kaikkien tilausrivien varastopaikat
+						$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
+									FROM tilausrivi
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									and tilausrivi.otunnus = '{$laskurow['tunnus']}'
+									AND tilausrivi.tyyppi != 'D'
+									and tilausrivi.hyllyalue != ''
+									and tilausrivi.varattu > 0
+									and tilausrivi.var NOT IN ('J','P')";
+						$chk_res = pupe_query($query);
+
+						$chk_arr = array();
+
+						while ($chk_row = mysql_fetch_assoc($chk_res)) {
+							// Mihin varastoon
+							$varasto = kuuluukovarastoon($chk_row["hyllyalue"], $chk_row["hyllynro"]);
+
+							$chk_arr[$varasto] = $varasto;
+						}
+
+						$pvmlisa = trim(str_replace(" ", "", $laskurow['ohjausmerkki']) == 'VARASTOTÄYDENNYS' ? date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))) : date("Y-m-d");
+
+						$i_counter = 0;
+
+						foreach ($chk_arr as $vrst) {
+
+							$query = "	SELECT * 
+										FROM lahdot 
+										WHERE yhtio = '{$kukarow['yhtio']}' 
+										AND liitostunnus = '{$toimitustavan_tunnus}' 
+										AND asiakasluokka = '{$laskurow['prioriteettinro']}'
+										AND aktiivi IN ('', 'P')
+										AND varasto = '{$vrst}'
+										AND ((pvm = '{$pvmlisa}' AND viimeinen_tilausaika > '".date("H:i:s")."') OR pvm > '{$pvmlisa}')
+										ORDER BY pvm, lahdon_kellonaika";
+							$lahdot_res = pupe_query($query);
+
+							$eka_kerta = true;
+
+							while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+
+								$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
+
+								if ($eka_kerta and $laskurow['toimitustavan_lahto'] == "0") {
+
+									$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
+
+									if ($lahto_x == $lahto) {
+										$eka_kerta = false;
+									}
+								}
+
+								if ($sel != "") {
+									$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
+								}
+							}
+
+							$i_counter++;
+						}
+					}
 
 					require ("tilaus-valmis.inc");
 

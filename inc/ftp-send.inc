@@ -7,12 +7,13 @@ else exit;
 // tarvitaan $ftphost $ftpuser $ftppass $ftppath $ftpfile
 // palautetaan $palautus ja $syy
 
-$dummy			= array();
-$syy			= "";
-$palautus		= 0;
-$tulos_ulos_ftp	= "";
-
-$filenimi = basename($ftpfile);
+$dummy				= array();
+$syy				= "";
+$palautus			= 0;
+$tulos_ulos_ftp		= "";
+$renameftpfile		= isset($renameftpfile) ? trim($renameftpfile) : "";
+$palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
+$filenimi			= basename($ftpfile);
 
 if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile=='') {
 	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";

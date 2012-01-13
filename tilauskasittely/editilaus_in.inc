@@ -1846,7 +1846,7 @@ while ($tietue = fgets($fd)) {
 							$chk_arr[$varasto] = $varasto;
 						}
 
-						$pvmlisa = trim(str_replace(" ", "", $laskurow['ohjausmerkki']) == 'VARASTOTÄYDENNYS' ? date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))) : date("Y-m-d");
+						$pvmlisa = trim(str_replace(" ", "", $laskurow['ohjausmerkki'])) == 'VARASTOTÄYDENNYS' ? date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))) : date("Y-m-d");
 
 						foreach ($chk_arr as $vrst) {
 

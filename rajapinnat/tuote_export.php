@@ -45,6 +45,7 @@
 				tuote.eankoodi,
 				tuote.osasto,
 				tuote.try,
+				tuote.alv,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng
 				FROM tuote
@@ -68,6 +69,7 @@
 							'ean'			=> $row["eankoodi"],
 							'osasto'		=> $row["osasto"],
 							'try'			=> $row["try"],
+							'alv'			=> $row["alv"],
 							'nimi_swe'		=> $row["nimi_swe"],
 							'nimi_eng'		=> $row["nimi_eng"],
 							);

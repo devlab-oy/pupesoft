@@ -24,7 +24,7 @@
 	else {
 		die ("Et antanut verkkokaupan tyyppiä.\n");
 	}
-	
+
 	$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
 	// alustetaan arrayt
@@ -36,9 +36,15 @@
 	else {
 		$muutoslisa = "";
 	}
-	
+
 	// Haetaan pupesta tuotteen tiedot
-	$query = "	SELECT tuote.*,
+	$query = "	SELECT tuote.tuoteno,
+				tuote.nimitys,
+				tuote.yksikko,
+				tuote.myyntihinta,
+				tuote.eankoodi,
+				tuote.osasto,
+				tuote.try,
 				ta_nimitys_se.selite nimi_swe,
 				ta_nimitys_en.selite nimi_eng
 				FROM tuote
@@ -60,7 +66,6 @@
 							'yksikko'		=> $row["yksikko"],
 							'myyntihinta'	=> $row["myyntihinta"],
 							'ean'			=> $row["eankoodi"],
-							'myytavissa'	=> $myytavissa,
 							'osasto'		=> $row["osasto"],
 							'try'			=> $row["try"],
 							'nimi_swe'		=> $row["nimi_swe"],
@@ -81,8 +86,13 @@
 	$query =  "(SELECT tapahtuma.tuoteno,
 				tuote.eankoodi
 				FROM tapahtuma
-				JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno)
-				WHERE tapahtuma.yhtio='{$kukarow["yhtio"]}'
+				JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
+					AND tuote.tuoteno = tapahtuma.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
+				WHERE tapahtuma.yhtio = '{$kukarow["yhtio"]}'
 				$muutoslisa1)
 
 				UNION
@@ -90,8 +100,13 @@
 				(SELECT tilausrivi.tuoteno,
 				tuote.eankoodi
 				FROM tilausrivi
-				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-				WHERE tilausrivi.yhtio='{$kukarow["yhtio"]}'
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+					AND tuote.tuoteno = tilausrivi.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
+				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 				$muutoslisa2)
 
 				ORDER BY 1";
@@ -163,7 +178,11 @@
 	}
 
 	// Haetaan kaikki asiakkaat
-	$query = "	SELECT *
+	$query = "	SELECT asiakas.nimi,
+				asiakas.osoite,
+				asiakas.postino,
+				asiakas.postitp,
+				asiakas.email
 				FROM asiakas
 				WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 				AND asiakas.laji != 'P'
@@ -188,13 +207,17 @@
 	}
 
 	// Haetaan kaikki hinnastot
-	$query = "	SELECT hinnasto.*
+	$query = "	SELECT hinnasto.tuoteno,
+				hinnasto.selite,
+				hinnasto.alkupvm,
+				hinnasto.loppupvm,
+				hinnasto.hinta
 				FROM hinnasto
 				WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
-				AND (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0)
-				AND hinnasto.laji !='O'
-				AND hinnasto.maa in ('FI','')
-				AND hinnasto.valkoodi in ('EUR','')
+				AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
+				AND hinnasto.laji != 'O'
+				AND hinnasto.maa IN ('FI', '')
+				AND hinnasto.valkoodi in ('EUR', '')
 				$muutoslisa";
 	$res = pupe_query($query);
 
@@ -212,7 +235,7 @@
 	$query = "	SELECT distinct selite
 				FROM tuotteen_avainsanat
 				WHERE yhtio = '{$kukarow["yhtio"]}'
-				AND laji = 'parametri_variaatio' ";
+				AND laji = 'parametri_variaatio'";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -225,14 +248,19 @@
 	// loopataan variaatio-nimitykset
 	while ($rowselite = mysql_fetch_assoc($resselite)) {
 
-		$aliselect = "	SELECT tuotteen_avainsanat.tuoteno, 
+		$aliselect = "	SELECT tuotteen_avainsanat.tuoteno,
 						tuote.nimitys,
-						ta_nimitys_se.selite nimi_swe, 
-						ta_nimitys_en.selite nimi_eng, 
+						ta_nimitys_se.selite nimi_swe,
+						ta_nimitys_en.selite nimi_eng,
 						tuote.myyntihinta,
 						tuote.eankoodi
 						FROM tuotteen_avainsanat
-						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno)
+						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
+							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+							AND tuote.status != 'P'
+							AND tuote.tuotetyyppi NOT in ('A','B')
+							AND tuote.tuoteno != ''
+							AND tuote.nakyvyys != '')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
@@ -245,8 +273,8 @@
 			$alinselect = " SELECT tuotteen_avainsanat.selite,
 							avainsana.selitetark
 							FROM tuotteen_avainsanat
-							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio 
-								AND avainsana.laji = 'PARAMETRI' 
+							JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+								AND avainsana.laji = 'PARAMETRI'
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
@@ -283,16 +311,33 @@
 			$ftphost = "";
 			$ftpuser = "";
 			$ftppass = "";
-			$ftppath = ""; 		
+			$ftppath = "";
 		}
 
 		$tulos_ulos = "";
 
-		require ("{$pupe_root_polku}/rajapinnat/tuotexml.inc");
-		require ("{$pupe_root_polku}/rajapinnat/varastoxml.inc");
-		require ("{$pupe_root_polku}/rajapinnat/ryhmaxml.inc");
-		require ("{$pupe_root_polku}/rajapinnat/asiakasxml.inc");
-		require ("{$pupe_root_polku}/rajapinnat/hinnastoxml.inc");
-		require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
+		if (count($dnstuote) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/tuotexml.inc");
+		}
+
+		if (count($dnstock) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/varastoxml.inc");
+		}
+
+		if (count($dnsryhma) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/ryhmaxml.inc");
+		}
+
+		if (count($dnsasiakas) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/asiakasxml.inc");
+		}
+
+		if (count($dnshinnasto) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/hinnastoxml.inc");
+		}
+
+		if (count($dnslajitelma) > 0) {
+			require ("{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc");
+		}
 
 	}

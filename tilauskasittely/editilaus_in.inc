@@ -1848,8 +1848,6 @@ while ($tietue = fgets($fd)) {
 
 						$pvmlisa = trim(str_replace(" ", "", $laskurow['ohjausmerkki']) == 'VARASTOTÄYDENNYS' ? date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))) : date("Y-m-d");
 
-						$i_counter = 0;
-
 						foreach ($chk_arr as $vrst) {
 
 							$query = "	SELECT * 
@@ -1882,8 +1880,6 @@ while ($tietue = fgets($fd)) {
 									$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
 								}
 							}
-
-							$i_counter++;
 						}
 					}
 

@@ -2541,7 +2541,7 @@
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $laskurow[laskunro]<br>\n";
 
-						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+						if ((($laskurow["vienti"] == "E") or ($laskurow["vienti"] == "K")) and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
 
 							require('tulosta_vientierittely.inc');

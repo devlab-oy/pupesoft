@@ -16,6 +16,8 @@ $filenimi = basename($ftpfile);
 
 if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile=='') {
 	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
+	$palautus = 9;
+	$syy = t("Lähetykseen tarvittavia tietoja puuttuu");
 }
 else {
 

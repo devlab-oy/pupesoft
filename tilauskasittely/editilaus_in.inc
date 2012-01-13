@@ -1065,7 +1065,7 @@ while ($tietue = fgets($fd)) {
 				$prioriteettinro = $hyvaksynnanmuutos = "";
 
 				if ($yhtiorow['kerayserat'] == 'K') {
-					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$arow['tunnus']}'";
 					$asluok_res = pupe_query($query);
 					$asluok_row = mysql_fetch_assoc($asluok_res);
 
@@ -1793,26 +1793,6 @@ while ($tietue = fgets($fd)) {
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
 				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
 
-					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
-						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
-						$edi_ulos .= "\n";
-						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
-						$edi_ulos .= "\n";
-					}
-
-					// katsotaan ollaanko tehty JT-supereita..
-					$silent = "SILENT";
-					require("jt_super.inc");
-
-					$edi_ulos .= "\n";
-					$edi_ulos .= jt_super($laskurow["tunnus"]);
-					$edi_ulos .= "\n";
-					$edi_ulos .= "\n";
-
-					$silent = "SILENT";
-
-					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
-
 					$toimitustavan_lahto = array();
 
 					if ($yhtiorow['kerayserat'] == 'K') {
@@ -1861,24 +1841,39 @@ while ($tietue = fgets($fd)) {
 										ORDER BY pvm, lahdon_kellonaika";
 							$lahdot_res = pupe_query($query);
 
-							$eka_kerta = true;
-
 							while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
 
-								$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
+								$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
 
-								if ($eka_kerta) {
-
-									$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
-
-									if ($lahto_x == $lahto) {
-										$eka_kerta = false;
-										$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
-									}
-								}
+								$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
+								break;
 							}
 						}
+
+						if (count($toimitustavan_lahto) > 0) {
+							$toimitustavan_lahto = urlencode(serialize($toimitustavan_lahto));
+						}
 					}
+
+					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
+						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
+						$edi_ulos .= "\n";
+						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
+						$edi_ulos .= "\n";
+					}
+
+					// katsotaan ollaanko tehty JT-supereita..
+					$silent = "SILENT";
+					require("jt_super.inc");
+
+					$edi_ulos .= "\n";
+					$edi_ulos .= jt_super($laskurow["tunnus"]);
+					$edi_ulos .= "\n";
+					$edi_ulos .= "\n";
+
+					$silent = "SILENT";
+
+					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
 
 					require ("tilaus-valmis.inc");
 

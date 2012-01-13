@@ -83,7 +83,7 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (preg_match('/[^A-Za-z0-9. -]/', $alkuperainen_filenimi)) {
+			if (preg_match('/[^A-Za-z0-9. -\_]/', $alkuperainen_filenimi)) {
 				echo "<font class='error'>".t("Tiedostonimessä kiellettyjä merkkejä").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
@@ -101,9 +101,9 @@
 					$import_type = "--import-type=Gnumeric_Excel:excel";
 				}
 
-				$return = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv));
+				$return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
 
-				if ($return === FALSE) {
+				if ($return != 0 or strpos($return_string, "CRITICAL") !== FALSE) {
 					echo "<font class='error'>".t("Tiedoston konversio epäonnistui")."!</font><br>\n";
 					$kasitellaan_tiedosto = FALSE;
 				}

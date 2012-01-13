@@ -1716,7 +1716,8 @@
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.otunnus IN ({$row['tilaukset']})";
+						AND tilausrivi.otunnus IN ({$row['tilaukset']})
+						{$ei_lapsia_lisa}";
 			$kg_res = pupe_query($query);
 			$kg_row = mysql_fetch_assoc($kg_res);
 
@@ -1937,6 +1938,7 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 								AND tilausrivi.tyyppi != 'D'
+								{$ei_lapsia_lisa}
 								GROUP BY 1,2
 								HAVING ohitakerays IS NULL";
 				}
@@ -1954,6 +1956,7 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 								AND tilausrivi.tyyppi != 'D'
+								{$ei_lapsia_lisa}
 								GROUP BY 1,2
 								HAVING ohitakerays IS NULL";
 				}
@@ -1981,7 +1984,7 @@
 								ROUND((kerayserat.kpl * tuote.tuotemassa), 0) AS 'kg'
 								FROM kerayserat
 								JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' {$ei_lapsia_lisa})
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.sscc = '{$lahto_row['sscc']}'
@@ -2010,7 +2013,8 @@
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-								AND tilausrivi.tyyppi != 'D'";
+								AND tilausrivi.tyyppi != 'D'
+								{$ei_lapsia_lisa}";
 					$paino_res = pupe_query($query);
 					$paino_row = mysql_fetch_assoc($paino_res);
 
@@ -2037,6 +2041,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
+							{$ei_lapsia_lisa}
 							ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 				$rivi_res = pupe_query($query);
 
@@ -2094,7 +2099,7 @@
 							tilausrivi.kerattyaika,
 							IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0) AS 'keratyt'
 							FROM kerayserat
-							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
+							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' {$ei_lapsia_lisa})
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.sscc = '{$lahto_row['sscc']}'

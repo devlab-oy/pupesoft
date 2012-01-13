@@ -118,15 +118,18 @@
 	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked', 'keratty' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 	if (!isset($ajankohta)) $ajankohta = "present";
-	if (!isset($present_date_pp)) $present_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-	if (!isset($present_date_kk)) $present_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-	if (!isset($present_date_vv)) $present_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-	if (!isset($future_date_pp)) $future_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-	if (!isset($future_date_kk)) $future_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-	if (!isset($future_date_vv)) $future_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-	if (!isset($past_date_pp)) $past_date_pp = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($past_date_kk)) $past_date_kk = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	if (!isset($past_date_vv)) $past_date_vv = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($future_date_pp_alku)) $future_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_kk_alku)) $future_date_kk_alku = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_vv_alku)) $future_date_vv_alku = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_pp_loppu)) $future_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_kk_loppu)) $future_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($future_date_vv_loppu)) $future_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+	if (!isset($past_date_pp_alku)) $past_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_kk_alku)) $past_date_kk_alku = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_vv_alku)) $past_date_vv_alku = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 	echo "<form method='post' action=''>";
 	echo "<table>";
@@ -274,14 +277,20 @@
 
 	echo "<td>";
 	echo "<input type='radio' name='ajankohta' value='past'{$chk['past']} /> ",t("Historia"),"<br />";
-	echo "<input type='text' name='past_date_pp' size='3' value='{$past_date_pp}' />&nbsp;";
-	echo "<input type='text' name='past_date_kk' size='3' value='{$past_date_kk}' />&nbsp;";
-	echo "<input type='text' name='past_date_vv' size='5' value='{$past_date_vv}' /><br /><br />";
+	echo "<input type='text' name='past_date_pp_alku' size='3' value='{$past_date_pp_alku}' />&nbsp;";
+	echo "<input type='text' name='past_date_kk_alku' size='3' value='{$past_date_kk_alku}' />&nbsp;";
+	echo "<input type='text' name='past_date_vv_alku' size='5' value='{$past_date_vv_alku}' /> - ";
+	echo "<input type='text' name='past_date_pp_loppu' size='3' value='{$past_date_pp_loppu}' />&nbsp;";
+	echo "<input type='text' name='past_date_kk_loppu' size='3' value='{$past_date_kk_loppu}' />&nbsp;";
+	echo "<input type='text' name='past_date_vv_loppu' size='5' value='{$past_date_vv_loppu}' /><br /><br />";
 	echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ",t("Tämä päivä"),"<br /><br />";
 	echo "<input type='radio' name='ajankohta' value='future'{$chk['future']} /> ",t("Tulevat"),"<br />";
-	echo "<input type='text' name='future_date_pp' size='3' value='{$future_date_pp}' />&nbsp;";
-	echo "<input type='text' name='future_date_kk' size='3' value='{$future_date_kk}' />&nbsp;";
-	echo "<input type='text' name='future_date_vv' size='5' value='{$future_date_vv}' /><br />";
+	echo "<input type='text' name='future_date_pp_alku' size='3' value='{$future_date_pp_alku}' />&nbsp;";
+	echo "<input type='text' name='future_date_kk_alku' size='3' value='{$future_date_kk_alku}' />&nbsp;";
+	echo "<input type='text' name='future_date_vv_alku' size='5' value='{$future_date_vv_alku}' /> - ";
+	echo "<input type='text' name='future_date_pp_loppu' size='3' value='{$future_date_pp_loppu}' />&nbsp;";
+	echo "<input type='text' name='future_date_kk_loppu' size='3' value='{$future_date_kk_loppu}' />&nbsp;";
+	echo "<input type='text' name='future_date_vv_loppu' size='5' value='{$future_date_vv_loppu}' /><br />";
 	echo "</td>";
 
 	echo "</tr>";
@@ -343,18 +352,26 @@
 			$prioriteettilisa = count($prioriteetit) > 0 ? " AND lasku.prioriteettinro IN (".implode(",", $prioriteetit).") " : "";
 
 			if ($ajankohta == 'past') {
-				$past_date_pp = (int) $past_date_pp;
-				$past_date_kk = (int) $past_date_kk;
-				$past_date_vv = (int) $past_date_vv;
+				$past_date_pp_alku = (int) $past_date_pp_alku;
+				$past_date_kk_alku = (int) $past_date_kk_alku;
+				$past_date_vv_alku = (int) $past_date_vv_alku;
 
-				$luontiaikalisa = " AND lasku.luontiaika >= '{$past_date_vv}-{$past_date_kk}-{$past_date_pp} 00:00:00' AND lasku.luontiaika <= '{$past_date_vv}-{$past_date_kk}-{$past_date_pp} 23:59:59' ";
+				$past_date_pp_loppu = (int) $past_date_pp_loppu;
+				$past_date_kk_loppu = (int) $past_date_kk_loppu;
+				$past_date_vv_loppu = (int) $past_date_vv_loppu;
+
+				$luontiaikalisa = " AND lasku.luontiaika >= '{$past_date_vv_alku}-{$past_date_kk_alku}-{$past_date_pp_alku} 00:00:00' AND lasku.luontiaika <= '{$past_date_vv_loppu}-{$past_date_kk_loppu}-{$past_date_pp_loppu} 23:59:59' ";
 			}
 			elseif ($ajankohta == 'future') {
-				$future_date_pp = (int) $future_date_pp;
-				$future_date_kk = (int) $future_date_kk;
-				$future_date_vv = (int) $future_date_vv;
+				$future_date_pp_alku = (int) $future_date_pp_alku;
+				$future_date_kk_alku = (int) $future_date_kk_alku;
+				$future_date_vv_alku = (int) $future_date_vv_alku;
 
-				$luontiaikalisa = " AND lasku.luontiaika >= '{$future_date_vv}-{$future_date_kk}-{$future_date_pp} 00:00:00' AND lasku.luontiaika <= '{$future_date_vv}-{$future_date_kk}-{$future_date_pp} 23:59:59' ";
+				$future_date_pp_loppu = (int) $future_date_pp_loppu;
+				$future_date_kk_loppu = (int) $future_date_kk_loppu;
+				$future_date_vv_loppu = (int) $future_date_vv_loppu;
+
+				$luontiaikalisa = " AND lasku.luontiaika >= '{$future_date_vv_alku}-{$future_date_kk_alku}-{$future_date_pp_alku} 00:00:00' AND lasku.luontiaika <= '{$future_date_vv_loppu}-{$future_date_kk_loppu}-{$future_date_pp_loppu} 23:59:59' ";
 			}
 			else {
 				$luontiaikalisa = " AND lasku.luontiaika >= '".date("Y-m-d")." 00:00:00' AND lasku.luontiaika <= '".date("Y-m-d")." 23:59:59' ";

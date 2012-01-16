@@ -343,7 +343,7 @@
 		$view = 'yes';
 	}
 
-	if ($tee != '') {
+	if ($tee != '' and trim($kukarow['keraysvyohyke']) != '') {
 
 		if ((int) $keraajanro > 0) {
 			$query = "	SELECT *
@@ -799,6 +799,9 @@
 				}
 			}
 		}
+	}
+	else {
+		echo "<font class='error'>",t("Keräysvyöhyke täytyy valita käyttäjän takanta"),"</font><br />";
 	}
 
 	require ("inc/footer.inc");

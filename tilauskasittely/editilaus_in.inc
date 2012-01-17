@@ -1236,7 +1236,7 @@ while ($tietue = fgets($fd)) {
 				$Xresult = pupe_query($query);
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
-				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
+				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
 
 					$asnokonflikti = "";
 

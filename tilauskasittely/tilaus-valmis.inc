@@ -972,7 +972,7 @@ else {
 			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
 
-			if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto)) {
+			if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
 				$toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
 			}
 

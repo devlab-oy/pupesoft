@@ -77,6 +77,10 @@
 					chart.draw(data, options);
 				}
 
+				$('.checkall').live('click', function() {
+					$(this).is(':checked') ? $('input.'+$(this).attr('id')).attr('checked', true) : $('input.'+$(this).attr('id')).attr('checked', false);
+				});
+
 				$(document).ready(function() {
 
 					if ($('#chart_div_values').html() != undefined) {
@@ -134,11 +138,11 @@
 	echo "<form method='post' action=''>";
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>",t("Varasto"),"</th>";
-	echo "<th>",t("Keräysvyöhyke"),"</th>";
-	echo "<th>",t("Kuljetusliike"),"</th>";
-	echo "<th>",t("Prioriteetti"),"</th>";
-	echo "<th>",t("Tila"),"</th>";
+	echo "<th><input type='checkbox' class='checkall' id='varasto' checked /> ",t("Varasto"),"</th>";
+	echo "<th><input type='checkbox' class='checkall' id='keraysvyohyke' checked /> ",t("Keräysvyöhyke"),"</th>";
+	echo "<th><input type='checkbox' class='checkall' id='toimitustapa' checked /> ",t("Kuljetusliike"),"</th>";
+	echo "<th><input type='checkbox' class='checkall' id='prioriteetit' checked /> ",t("Prioriteetti"),"</th>";
+	echo "<th><input type='checkbox' class='checkall' id='tilat' checked /> ",t("Tila"),"</th>";
 	echo "<th>",t("Volyymisuure"),"</th>";
 	echo "<th>",t("Ajankohta"),"</th>";
 	echo "</tr>";
@@ -166,7 +170,7 @@
 			$chk = in_array($varastorow['var_tunnus'], $varasto) ? " checked" : "";
 		}
 
-		echo "<input type='checkbox' name='varasto[]' value='{$varastorow['var_tunnus']}'{$chk} />&nbsp;{$varastorow['var_nimitys']}<br />";
+		echo "<input type='checkbox' class='varasto' name='varasto[]' value='{$varastorow['var_tunnus']}'{$chk} />&nbsp;{$varastorow['var_nimitys']}<br />";
 	}
 
 	if (!isset($varasto)) $varasto = array();
@@ -194,7 +198,7 @@
 			$chk = in_array($keraysvyohykerow['ker_tunnus'], $keraysvyohyke) ? " checked" : "";
 		}
 
-		echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohykerow['ker_tunnus']}'{$chk} />&nbsp;{$keraysvyohykerow['ker_nimitys']}<br />";
+		echo "<input type='checkbox' class='keraysvyohyke' name='keraysvyohyke[]' value='{$keraysvyohykerow['ker_tunnus']}'{$chk} />&nbsp;{$keraysvyohykerow['ker_nimitys']}<br />";
 	}
 
 	if (!isset($keraysvyohyke)) $keraysvyohyke = array();
@@ -222,7 +226,7 @@
 			$chk = in_array($toimitustaparow['tt_tunnus'], $toimitustapa) ? " checked" : "";
 		}
 
-		echo "<input type='checkbox' name='toimitustapa[]' value='{$toimitustaparow['tt_tunnus']}'{$chk} />&nbsp;{$toimitustaparow['toimitustapa']}<br />";
+		echo "<input type='checkbox' class='toimitustapa' name='toimitustapa[]' value='{$toimitustaparow['tt_tunnus']}'{$chk} />&nbsp;{$toimitustaparow['toimitustapa']}<br />";
 	}
 
 	if (!isset($toimitustapa)) $toimitustapa = array();
@@ -249,7 +253,7 @@
 			$chk = in_array($priorow['prioriteettinro'], $prioriteetit) ? " checked" : "";
 		}
 
-		echo "<input type='checkbox' name='prioriteetit[]' value='{$priorow['prioriteettinro']}'{$chk} />&nbsp;{$priorow['prioriteettinro']}<br />";
+		echo "<input type='checkbox' class='prioriteetit' name='prioriteetit[]' value='{$priorow['prioriteettinro']}'{$chk} />&nbsp;{$priorow['prioriteettinro']}<br />";
 	}
 
 	if (!isset($prioriteetit)) $prioriteetit = array();
@@ -260,9 +264,9 @@
 
 	$chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
 
-	echo "<input type='checkbox' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ",t("Aloittamatta"),"<br />";
-	echo "<input type='checkbox' name='tilat[aloitettu]'{$chk['aloitettu']} /> ",t("Aloitettu"),"<br />";
-	echo "<input type='checkbox' name='tilat[keratty]'{$chk['keratty']} /> ",t("Kerätty");
+	echo "<input type='checkbox' class='tilat' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ",t("Aloittamatta"),"<br />";
+	echo "<input type='checkbox' class='tilat' name='tilat[aloitettu]'{$chk['aloitettu']} /> ",t("Aloitettu"),"<br />";
+	echo "<input type='checkbox' class='tilat' name='tilat[keratty]'{$chk['keratty']} /> ",t("Kerätty");
 	echo "</td>";
 
 	$chk = array_fill_keys(array($volyymisuure), " checked") + array('rivit' => '', 'kg' => '', 'litrat' => '');

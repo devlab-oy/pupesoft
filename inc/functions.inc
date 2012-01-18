@@ -11157,11 +11157,17 @@ if (!function_exists("LisaaLapsi")) {
 				ORDER BY lft desc";
 		$re = pupe_query($qu);
 
-		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
 		$re = pupe_query($qu);
+		
+		// palautetaan juuri luodun rivin tiedot
+		$qu = "SELECT tunnus, nimi, koodi, lft, rgt FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '$laji' AND koodi = '$koodi' AND nimi = '$nimi'";
+		$re = pupe_query($qu);
+		$row = mysql_fetch_assoc($re);
+		return $row;
 	}
 }
 

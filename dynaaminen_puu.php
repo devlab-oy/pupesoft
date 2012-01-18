@@ -2,272 +2,231 @@
 
 	require('inc/parametrit.inc');
 
-	if ($toim == "ASIAKAS") {
-		echo "<font class='head'>".t("Asiakaspuu")."</font><hr><br>";
-	}
-	else {
-		echo "<font class='head'>".t("Tuotepuu")."</font><hr><br>";
-	}
-
-	$oikeus = '';
-
+	enable_jquery();
+	
+	$otsikko = strtolower($toim) == "tuote" ? "Tuotepuu" : "Asiakaspuu";
+	echo "<font class='head'>{$otsikko}</font><hr /><br />";
+	
+	
 	if (tarkista_oikeus('dynaaminen_puu.php', $toim, 1)) {
-		$oikeus = 'joo';
+		$saamuokata = true;
+	} else {
+		$saamuokata = false;
+	}
+	
+	
+	if(tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
+		$saamuokataliitoksia = true;
+	} else {
+		$saamuokataliitoksia = false;
 	}
 
-	// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
-	if (isset($tee) AND $tee == 'valitse' AND isset($toim) AND isset($liitos)) {
-
-		if ($mista == 'autodata_tuote') {
-			$tunnus = $ttunnus;
-		}
-		else {
-
-			foreach ($id as $node) {
-				TuotteenAlkiot($toim, $liitos, $node, $kieli);
-			}
-
-			if ($mista == "tuote") {
-				$q = "	SELECT tunnus
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tuoteno = '$liitos'";
-				$r = mysql_query($q) or pupe_error($q);
-				$rivi = mysql_fetch_assoc($r);
-
-				$tunnus = $rivi['tunnus'];
-			}
-			else {
-				$tunnus = $liitos;
+	// luodaan uusi root node
+	if (isset($tee) && isset($toim)) {
+	
+		if($tee == 'valitsesegmentti') {
+			// haetaan valitut segmentit ja enabloidaan valintaominaisuudet yms
+			$qu = "SELECT puun_tunnus
+					FROM puun_alkio 
+					WHERE yhtio = '{$yhtiorow['yhtio']}' AND laji = '{$toim}' AND liitos = '{$liitos}'";
+			$re = pupe_query($qu);
+			// haetaan tiedot arrayhin myohempaa kayttoa varten
+			while($row = mysql_fetch_assoc($re)) {
+				$valitutnodet[] = $row['puun_tunnus'];
 			}
 		}
-
-		$toim = $mista;
-
-		require('yllapito.php');
-		exit;
-	}
-
-	// T‰m‰ luo p‰‰kategorian
-	if (isset($KatNimi) AND trim($KatNimi) != '' AND $tee == 'paakat' AND isset($toim) AND trim($toim)) {
-		LisaaPaaKat($toim, $KatNimi);
-		$tee = '';
-	}
-
-	// poistaa ja upgradettaa alemmat lapset isommaksi.
-	if (isset($tee) and $tee == 'poista' and isset($lft) AND trim($lft) != ''){
-		PoistaLapset($toim, $lft);
-		$tee = '';
-	}
-
-	// lis‰t‰‰n kategorialle lapsi
-	if (isset($tee) and $tee == 'lisaa' AND isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
-
-		if (trim($uusi_nimi) == "") {
-			echo "<font class='error'>", t('Et voi antaa tyhj‰‰ arvoa uudeksi tason nimeksi')," !!</font>";
+		elseif($tee == 'paakat' && isset($uusi_nimi) && $uusi_nimi != "") {
+			// luodaan uusi paakategoria
+			LisaaPaaKat($toim, $uusi_nimi);
+			$tee = '';
 		}
-		else {
-			LisaaLapsi($toim, $lft, $syvyys, $uusi_koodi, $uusi_nimi);
-		}
-
-		$tee = '';
 	}
 
-	//  T‰m‰ luo lomakkeen alikategorian lis‰‰miseen
-	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'lisaa') {
-		echo "<form method='POST' autocomplete='off'>";
-		echo "<table><tr><th>",t('Ylemm‰n Kategorian nimi'),":</th><td>$nimi</td></tr>";
-		echo "<tr><th>",t('Alakategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' /></td></tr>";
-		echo "<tr><th>",t('Alakategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' /></td></tr>";
-		echo "</table><br>";
-		echo "<input type='hidden' name='tee'    value='lisaa' />";
-		echo "<input type='hidden' name='lft'    value='$lft' />";
-		echo "<input type='hidden' name='syvyys' value='$syvyys' />";
-		echo "<input type='submit' value='",t('Tallenna Alakategoria'),"' />";
-		echo "</form><br><br>";
+	/* html list */
+	$qu = "	SELECT
+				node.lft AS lft,
+				node.rgt AS rgt,
+				node.nimi AS node_nimi,
+				node.koodi AS node_koodi,
+				node.tunnus AS node_tunnus,
+				node.syvyys as node_syvyys,
+				(COUNT(node.tunnus) - 1) AS syvyys
+				FROM dynaaminen_puu AS node
+				JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+				WHERE node.yhtio = '{$kukarow["yhtio"]}'
+				AND node.laji = '{$toim}'
+				GROUP BY node.lft
+				ORDER BY node.lft";
+					
+	$re = pupe_query($qu);
+	
+	// handlataan tilanne kun ei ole viela puun root nodea
+	if(mysql_num_rows($re) == 0) {
+		echo "<form method='POST'>
+				<fieldset>
+					<legend>".t("Luo uusi puu")."</legend>
+					<label>".t("Nimi").": </label><input type='text' name='uusi_nimi' />
+					<input type='hidden' name='toim' value='".$toim."' />
+					<input type='hidden' name='tee' value='paakat' />
+					<input type='submit' value='".t("Tallenna")."' />
+				</fieldset>
+			</form>";
 	}
-
-	// Lisˆt‰‰n uusi taso ja tarkistetaan ettei nimi ole tyhj‰.
-	if (isset($tee) and $tee == 'taso' AND isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
-
-		if (trim($uusi_nimi) == "") {
-			echo "<font class='error'>", t('Et voi antaa tyhj‰‰ arvoa uudeksi tason nimeksi')," !!</font>";
-		}
-		else {
-			LisaaTaso($toim, $lft, $uusi_koodi, $uusi_nimi);
-		}
-
-		$tee = '';
-	}
-
-	// t‰m‰ tulostaa Tason-lis‰ys lomakkeen
-	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'taso') {
-		echo "<form method='POST' autocomplete='off'>";
-		echo "<table>";
-		echo "<tr><th>",t('Kategorian nimi'),":</th><td>$nimi</td></tr>";
-		echo "<tr><th>",t('Uuden kategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' /></td></tr>";
-		echo "<tr><th>",t('Uuden kategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' /></td></tr>";
-		echo "</table><br>";
-		echo "<input type='hidden' name='tee' value='taso' />";
-		echo "<input type='hidden' name='lft' value='".$lft."' />";
-		echo "<input type='submit' value='",t('Tallenna taso'),"' />";
-		echo "</form><br><br>";
-	}
-
-	// muutetaan kategorian nime‰ uusiksi
-	if (isset($tee) and $tee == 'muokkaa' and isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
-
-		if (trim($uusi_nimi) == "") {
-			echo "<font class='error'>", t('Et voi laittaa tyhj‰‰ arvoa uudeksi arvoksi')," !</font>";
-		}
-		else {
-			paivitakat($toim, $uusi_koodi, $uusi_nimi, $kategoriaid);
-		}
-		$tee = '';
-	}
-
-	// t‰m‰ tulostaa nimenmuutos -lomakkeen
-	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'muokkaa') {
-		echo "<form method='POST' autocomplete='off'>";
-		echo "<table><tr><th>",t('Kategorian nimi'),":</th><td>$nimi</td></tr>";
-		echo "<tr><th>",t('Kategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' value='$nimi'/></td></tr>";
-		echo "<tr><th>",t('Kategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' value='$koodi'/></td></tr>";
-		echo "</table><br>";
-		echo "<input type='hidden' name='tee' value='muokkaa' />";
-		echo "<input type='hidden' name='laji' value='$toim' />";
-		echo "<input type='hidden' name='kategoriaid' value='$kategoriaid' />";
-		echo "<input type='submit' value='",t('Tallenna kategoria'),"' />";
-		echo "</form><br><br>";
-	}
-
-	// Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
-	if (isset($tee) and ($tee == 'ylos' or $tee == 'alas') AND isset($lft) and isset($rgt)) {
-
-		$src['lft'] = $lft;
-		$src['rgt'] = $rgt;
-
-		// $tee:ss‰ on suunta mihin siirret‰‰n
-		$kohde = SiirraTaso($toim, $src, $tee);
-	}
-
-	if (isset($toim)) {
-
-		$query = "	SELECT
-					node.lft AS lft,
-					node.rgt AS rgt,
-					node.nimi AS node_nimi,
-					node.koodi AS node_koodi,
-					node.tunnus AS node_tunnus,
-					node.syvyys AS node_syvyys,
-					(COUNT(node.tunnus) - 1) AS syvyys
-					FROM dynaaminen_puu AS node
-					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
-					WHERE node.yhtio = '{$kukarow["yhtio"]}'
-					AND node.laji = '{$toim}'
-					GROUP BY 1,2,3,4,5,6
-					ORDER BY node.lft";
-		$result = mysql_query($query) or pupe_error($query);
-
-		// Mik‰li sivulle tullaan ensimm‰isen kerran ja p‰‰kategoriaa ei ole niin t‰m‰ luo kyseisen kategorian.
-		if (mysql_num_rows($result) == 0) {
-			echo "<form method='POST'>";
-			echo "<table><tr><th>",t('Perusta'),"</th><th>$toim</th>";
-			echo "<input type='hidden' size='30' name='KatNimi' value='$toim'/></tr>";
-			echo "<tr><td></td><td><input type='submit' value='",t('Perusta kategoria'),"' /></td></tr>";
-			echo "<input type='hidden' name='tee' value='paakat' />";
-			echo "<input type='hidden' name='toim' value='$toim' />";
-			echo "</table></form>";
-
-		}
-		else {
-
-			if ($tee == 'valitsesegmentti') {
-				echo "<form method='POST'>";
+	// muutoin jatketaan normaalisti
+	else {
+		echo "<div style='border: 1px solid black; width: 500px; background: #ffffff'>";
+		echo "<ul id='eka'>";
+		
+		//mysql_fetch_assoc($re);
+		$prevdepth = 0;
+		
+		while ($row = mysql_fetch_assoc($re)) {
+		
+			// tarkistetaan onko dynaamisen puun syvyys oikein
+			if ($row["node_syvyys"] != $row["syvyys"]) {
+				$qu = "	UPDATE dynaaminen_puu
+						SET syvyys = {$row["syvyys"]}
+						WHERE yhtio	= '{$kukarow["yhtio"]}'
+						AND laji	= '{$toim}'
+						AND tunnus 	= {$row["node_tunnus"]}";
+				$re = pupe_query($qu);
 			}
-
-			echo "<table>";
-
-			while ($row = mysql_fetch_assoc($result)) {
-
-				// Pit‰‰kˆ syvyys p‰ivitt‰‰?
-				if ($row["node_syvyys"] != $row["syvyys"]) {
-					$qu = "	UPDATE dynaaminen_puu
-							SET syvyys = {$row["syvyys"]}
-							WHERE yhtio	= '{$kukarow["yhtio"]}'
-							AND laji	= '{$toim}'
-							AND tunnus 	= {$row["node_tunnus"]}";
-					$re = pupe_query($qu);
-				}
-
-				echo "\n<tr>";
-
-				for ($i = 0; $i < $row['syvyys']; $i++) {
-					echo "\n<td width='0' class='back'>&nbsp;</td>"; // tulostaa taulun syvyytt‰
-				}
-
-				if ($row['node_koodi'] == 0) $row['node_koodi'] = '';
-
-				$lastenmaara = lapset($toim, $row['lft']);
-
-				if ($row['lft'] == 1) {
-					$rowspan = $lastenmaara+1;
-				}
-				else {
-					$rowspan = $lastenmaara;
-				}
-
-				echo "\n<td rowspan='$rowspan'>",$row['node_koodi']," ",$row['node_nimi']," (",$row['node_tunnus'],")<hr>";
-				// echo "\n<td rowspan='$rowspan'>",$row['node_koodi']," ",$row['node_nimi']," (",$row['node_tunnus'],") [", $row[lft],"-",$row[rgt],"]<hr>"; // testausta varten
-
-				if ($tee == "valitsesegmentti") {
-					$check = '';
-					if (in_array($row['node_tunnus'], explode(",", $puun_tunnus))) {
-						$check = 'checked';
+			
+			// vahan kikkailua jotta saadaan list elementit suljettua standardin mukaisesti
+			$diff = $row['syvyys'] - $prevdepth;
+			$diffi = $diff;
+			
+			while($diff > 0) {
+				echo "\n<ul>";
+				$diff--;
+			}
+			while($diff < 0) {
+				echo "</li>\n</ul>\n</li>";
+				$diff++;
+			}
+			if($diffi == 0) echo "</li>";
+			
+			echo "\n<li class='nodes' id='{$row['node_tunnus']}'>{$row['node_nimi']} ({$row['node_koodi']})";
+			
+			$prevdepth = $row['syvyys'];
+		}
+		
+		echo "</ul></div>
+				<div id='infobox' style='padding: 20px; border: 1px solid black; background: #ffffff; position: fixed; left: 520px; top: 68px;'></div>";
+		
+		?>
+		<script language="javascript">
+					
+		var dynpuuparams = new Object();
+		
+		<?php
+		echo	'dynpuuparams["toim"] = "'.$toim.'";
+				 dynpuuparams["tee"] = "'.$tee.'";
+				 dynpuuparams["kieli"] = "'.$kieli.'";';
+				 
+		if(isset($liitos) && $liitos != "") {
+			echo 'dynpuuparams["liitos"] = "'.$liitos.'";';
+		}
+		?>
+		var loadimg = "<img src='pics/loading_orange.gif' id='loading' />";
+		var activenode;
+		
+		jQuery.ajaxSetup({
+			url: "dynaaminen_puu_ajax.php",
+			type: "POST",
+			cache: false
+		});
+		
+		function enableNodes() {
+			jQuery(".nodes").click(function() {
+				$("#"+activenode).removeClass("ok");
+				activenode = this.id;
+				$(this).addClass("ok");
+				jQuery("#infobox").html(loadimg);
+				
+				dynpuuparams["nodeid"] = this.id;
+				
+				jQuery.ajax({
+					data: dynpuuparams,
+					success: function(retval) {
+						jQuery("#infobox").html(retval);
 					}
-
-					echo "\n<input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
-				}
-
-				elseif ($oikeus != '') {
-					// lis‰‰
-					echo "\n<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-					// poista
-					if ($row['lft'] > 1) echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=poista'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";
-					// muokkaa
-					echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&koodi={$row['node_koodi']}&lft={$row['lft']}&tee=muokkaa&kategoriaid={$row['node_tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
-					// lis‰‰ taso v‰liin
-					if ($lastenmaara > 1) { echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=taso'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>"; }
-					// Siirto -painikkeet
-					if ($row['lft'] > 1) {
-						// ylos
-						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&rgt={$row['rgt']}&tee=ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr‰ ylˆsp‰in'),"'/></a>";
-						// alas
-						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&rgt={$row['rgt']}&tee=alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr‰ alasp‰in'),"'/></a>";
-					}
-
-
-				}
-
-				echo "</td></tr>";
-
-				if ($row['lft'] == 1) echo "\n<tr><td class='back'>&nbsp;</td></tr>";
-			}
-
-			echo "</table><br /><br />";
-
-			if ($tee == 'valitsesegmentti') {
-				echo "<input type='hidden' name='toim' 		value='$toim' />";
-				echo "<input type='hidden' name='tee' 		value='valitse' />";
-				echo "<input type='hidden' name='kieli' 	value='$kieli' />";
-				echo "<input type='hidden' name='liitos'	value='$liitos' />";
-				echo "<input type='hidden' name='ttunnus'	value='$ttunnus' />";
-				echo "<input type='hidden' name='mista' 	value='$mista' />";
-				echo "<input type='submit' name='valitse'	value='",t('Tallenna valinnat'),"'>";
-				echo "</form>";
-			}
+				});
+				return(false);
+			});
 		}
+		
+		enableNodes();
+		
+		function editNode(params) {
+			var editbox = jQuery("#editbuttons");
+			jQuery(editbox).hide().after(loadimg);
+			
+			jQuery.ajax({
+				data: params,
+				success: function(retval) {
+					jQuery("#infobox").html(retval);
+					
+					if(params["tee"] == "ylos") {
+						var current = jQuery("#"+params["nodeid"]);
+						current.prev().before(current);
+					}
+					else if(params["tee"] == "alas") {
+						var current = jQuery("#"+params["nodeid"]);
+						current.next().after(current);
+					}
+					else if(params["tee"] == "lisaa") {
+						var nodeulli = jQuery("#"+params["nodeid"]+" > ul > li:first");
+						var newli = "<li class='nodes' id='"+jQuery("#newid").val()+"'>"+params["uusi_nimi"]+" ("+jQuery("#newcode").val()+")</li>";
+						if(nodeulli.size()) {
+							nodeulli.before(newli);
+						}
+						else {
+							jQuery("#"+params["nodeid"]).append("<ul>"+newli+"</ul>");
+						}
+						enableNodes();
+					}
+					else if(params["tee"] == "muokkaa") {
+						var updli = jQuery("#"+params["nodeid"]);
+						var childul = jQuery("#"+params["nodeid"]+" > ul");
+						updli.html(params["uusi_nimi"]+" ("+params["uusi_koodi"]+")");
+						if(childul.size() > 0) {
+							updli.append("<ul>"+childul.html()+"</ul>");
+						}
+					}
+					else if(params["tee"] == "poista") {
+						var remli = jQuery("#"+params["nodeid"]);
+						var parentul = remli.parent();
+						remli.remove();
+						if(!(parentul.children("li")[0])) {
+							parentul.remove();
+						}
+					}
+					else if(params["tee"] == "addtotree") {
+						jQuery("#"+params["nodeid"]).removeClass("ok");
+						jQuery("#"+params["nodeid"]).addClass("error");
+					}
+					else if(params["tee"] == "removefromtree") {
+						jQuery("#"+params["nodeid"]).removeClass("error");
+					}
+				}
+			});
+		}
+		<?php
+		// tarvittavat javascriptit kun muokataan liitoksia
+		if($tee == 'valitsesegmentti') {
+			$nodet = implode("','", $valitutnodet);
+			echo "var valitutnodet = ['".$nodet."'];";
+		?>
+			jQuery.each(valitutnodet, function() {
+				jQuery("#"+this).addClass("error");
+			});
+		
+		<?php
+		}
+		?>
+		</script>
+		<?php
 	}
-
-	echo "<br />";
-
+	
 	require('inc/footer.inc');

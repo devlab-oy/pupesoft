@@ -1262,7 +1262,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// Poistetaan spacet
-				if (in_array($yhtiorow["yhtio"], array("artr","allr","mast"))) {
+				if (in_array($yhtiorow["yhtio"], array("allr","mast"))) {
 					$tieto = str_replace(" ", "", $tieto);
 				}
 
@@ -1287,15 +1287,15 @@ while ($tietue = fgets($fd)) {
 						$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
 
 						// 2. Laitetaan kolmanneksi merkiksi space ja tsekataan lˆytyykˆ aktiivinen
-					$query = "	SELECT *
-								FROM tuote
-								WHERE yhtio = '{$kukarow["yhtio"]}'
-								and tuoteno = '{$tieto}'
-								and status != 'P'
-								{$kieltolisa}";
-					$result = mysql_query($query) or die($query);
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									and tuoteno = '{$tieto}'
+									and status != 'P'
+									{$kieltolisa}";
+						$result = mysql_query($query) or die($query);
 
-					if (mysql_num_rows($result) == 0) {
+						if (mysql_num_rows($result) == 0) {
 							// Poistetaan kolmannesta merkist‰ space...
 							$tieto = substr($tieto, 0, 2).substr($tieto, 3);
 
@@ -1309,7 +1309,7 @@ while ($tietue = fgets($fd)) {
 
 							if (mysql_num_rows($result) == 0) {
 								// Laitetaan kolmanneksi merkiksi space...
-						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
+								$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
 
 								// 4. Laitetaan kolmanneksi merkiksi space ja tsekataan lˆytyykˆ poistettu
 								$query = "	SELECT *
@@ -1322,8 +1322,8 @@ while ($tietue = fgets($fd)) {
 								if (mysql_num_rows($result) == 0) {
 									// Jos ei mill‰‰n lˆydy niin laitetaan ilman spaceja eteenp‰in...
 									$tieto = substr($tieto, 0, 2).substr($tieto, 3);
-					}
-				}
+								}
+							}
 						}
 					}
 				}
@@ -1755,120 +1755,120 @@ while ($tietue = fgets($fd)) {
 				$kukarow["kesken"] = $laskurow["tunnus"];
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
-					// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
-					if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
+				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
 
-						if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
-							//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
-							$edi_ulos .= "\n";
-							jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
-							$edi_ulos .= "\n";
-						}
+					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
+						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
+						$edi_ulos .= "\n";
+						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
+						$edi_ulos .= "\n";
+					}
 
-						// katsotaan ollaanko tehty JT-supereita..
+					// katsotaan ollaanko tehty JT-supereita..
+					$silent = "SILENT";
+					require("jt_super.inc");
+
+					$edi_ulos .= "\n";
+					$edi_ulos .= jt_super($laskurow["tunnus"]);
+					$edi_ulos .= "\n";
+					$edi_ulos .= "\n";
+
+					$silent = "SILENT";
+
+					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+
+					require ("tilaus-valmis.inc");
+
+					// jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
+					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+						// Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
+						$varasto_query = "	SELECT tunnus
+											from varastopaikat
+											where yhtio = '$kukarow[yhtio]'
+											and tyyppi = ''
+											order by alkuhyllyalue
+											limit 1";
+						$varasto_res = pupe_query($varasto_query);
+						$varasto_row = mysql_fetch_array($varasto_res);
+
+						$query = "	SELECT hyllyalue, hyllynro
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND hyllyalue != ''
+									AND hyllynro != ''
+									AND otunnus = '$editilaus_lasku_tunnus'";
+						$edi_varastopaikka_res = pupe_query($query);
+						$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
+
+						$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+
+						$vielisa = "";
+						if ($til_vienti == "") $vielisa = "chn = '999', ";
+
+						// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
+						$query = "	UPDATE lasku SET
+									mapvm 			= now(),
+									tila 			= 'N',
+									alatila 		= 'A',
+									$vielisa
+									varasto 		= '$varasto_row[tunnus]',
+									sisviesti2 		= 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+									tulostusalue 	= '$tulostusalue'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$editilaus_lasku_tunnus'";
+						$magento_maksettu_res = pupe_query($query);
+
+						// haetaan tilauksen tiedot
+						$query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
+						$result   = mysql_query($query) or die($query);
+						$laskurow = mysql_fetch_array($result);
+
+						// pit‰‰ nollata toimitettuaika riveille
+						$query = "	UPDATE tilausrivi SET
+									toimitettu = '',
+									toimitettuaika = ''
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$editilaus_lasku_tunnus'";
+						$result = mysql_query($query) or die($query);
+
+						// pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
+						$query = "	UPDATE tilausrivi SET
+									keratty = '',
+									kerattyaika = ''
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$editilaus_lasku_tunnus'
+									AND keratty != 'saldoton'";
+						$result = mysql_query($query) or die($query);
+
+						// ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
+						$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+
+						// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
 						$silent = "SILENT";
-						require("jt_super.inc");
-
-						$edi_ulos .= "\n";
-						$edi_ulos .= jt_super($laskurow["tunnus"]);
-						$edi_ulos .= "\n";
-						$edi_ulos .= "\n";
-
-						$silent = "SILENT";
-
-						$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
-
 						require ("tilaus-valmis.inc");
-
-						// jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-						if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
-							// Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
-							$varasto_query = "	SELECT tunnus
-												from varastopaikat
-												where yhtio = '$kukarow[yhtio]'
-												and tyyppi = ''
-												order by alkuhyllyalue
-												limit 1";
-							$varasto_res = pupe_query($varasto_query);
-							$varasto_row = mysql_fetch_array($varasto_res);
-
-							$query = "	SELECT hyllyalue, hyllynro
-										FROM tilausrivi
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND hyllyalue != ''
-										AND hyllynro != ''
-										AND otunnus = '$editilaus_lasku_tunnus'";
-							$edi_varastopaikka_res = pupe_query($query);
-							$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
-
-							$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
-
-							$vielisa = "";
-							if ($til_vienti == "") $vielisa = "chn = '999', ";
-
-							// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
-							$query = "	UPDATE lasku SET
-										mapvm 			= now(),
-										tila 			= 'N',
-										alatila 		= 'A',
-										$vielisa
-										varasto 		= '$varasto_row[tunnus]',
-										sisviesti2 		= 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
-										tulostusalue 	= '$tulostusalue'
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus  = '$editilaus_lasku_tunnus'";
-							$magento_maksettu_res = pupe_query($query);
-
-							// haetaan tilauksen tiedot
-							$query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
-							$result   = mysql_query($query) or die($query);
-							$laskurow = mysql_fetch_array($result);
-
-							// pit‰‰ nollata toimitettuaika riveille
-							$query = "	UPDATE tilausrivi SET
-										toimitettu = '',
-										toimitettuaika = ''
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND otunnus = '$editilaus_lasku_tunnus'";
-							$result = mysql_query($query) or die($query);
-
-							// pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
-							$query = "	UPDATE tilausrivi SET
-										keratty = '',
-										kerattyaika = ''
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND otunnus = '$editilaus_lasku_tunnus'
-										AND keratty != 'saldoton'";
-							$result = mysql_query($query) or die($query);
-
-							// ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
-							$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
-
-							// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
-							$silent = "SILENT";
-							require ("tilaus-valmis.inc");
-						}
-
-						// Halutaanko tilaus hyv‰ksynn‰n kautta!
-						if ($tilaus_hyvaksyntaan != "") {
-							$query = "	UPDATE lasku SET
-										alatila = 'F'
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus = '$editilaus_lasku_tunnus'";
-							$magento_maksettu_res = pupe_query($query);
-						}
-
-						$edi_ulos .= "$tilaus_valmis_ulos\n";
-						$edi_ulos .= "$tilaus_valmis_message\n";
-						$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 					}
-					elseif ($editilaus_tila == "Z") {
-						$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
+
+					// Halutaanko tilaus hyv‰ksynn‰n kautta!
+					if ($tilaus_hyvaksyntaan != "") {
+						$query = "	UPDATE lasku SET
+									alatila = 'F'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$editilaus_lasku_tunnus'";
+						$magento_maksettu_res = pupe_query($query);
 					}
-					elseif ($editilaus_tilaustyyppi == 3) {
-						$edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
-					}
+
+					$edi_ulos .= "$tilaus_valmis_ulos\n";
+					$edi_ulos .= "$tilaus_valmis_message\n";
+					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 				}
+				elseif ($editilaus_tila == "Z") {
+					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
+				}
+				elseif ($editilaus_tilaustyyppi == 3) {
+					$edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
+				}
+			}
 			else {
 				$edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivej‰ ei lis‰tty")."!\n\n";
 			}

@@ -244,7 +244,7 @@
 
 			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
 		}
-			
+
 		$query = "	SELECT
 					{$selecti},
 					{$summalisa}
@@ -406,9 +406,7 @@
 				else {
 					$surow = array();
 				}
-				// palautetaan velkatilanne. avoimet - suoritus
-				$velkatilanne = ($row["avoimia"]-$surow["summa"]);
-								
+
 				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $row["avoimia"] > $asrow["luottoraja"] and $asrow["luottoraja"] != '')) {
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";

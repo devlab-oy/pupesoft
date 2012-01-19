@@ -1229,7 +1229,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	// Myyntitilaus valmis
 	else {
-		
 		//Jos k‰ytt‰j‰ on extranettaaja ja h‰n ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
 		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES" and $kukarow["taso"] != 3) {
 			$kukarow["taso"] = 2;
@@ -1274,52 +1273,53 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$result = pupe_query($query);
 
 		}
+		else {
 
-		//Luodaan valituista riveist‰ suoraan normaali ostotilaus
-		if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
-			require("tilauksesta_ostotilaus.inc");
+			//Luodaan valituista riveist‰ suoraan normaali ostotilaus
+			if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+				require("tilauksesta_ostotilaus.inc");
 
-			//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
-			if ($tee_osto != "") {
-				$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
+				//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
+				if ($tee_osto != "") {
+					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
 
-				// P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
-				$query  = "	UPDATE lasku set
-							osatoimitus = 'o'
-							where yhtio = '$kukarow[yhtio]'
-							and tunnus = '$kukarow[kesken]'";
-				$result = pupe_query($query);
+					// P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
+					$query  = "	UPDATE lasku set
+								osatoimitus = 'o'
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus = '$kukarow[kesken]'";
+					$result = pupe_query($query);
+				}
+				else {
+					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
+					$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
+				}
+
+				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 			}
-			else {
-				$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
-				$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
+
+			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
+				//	Voimme myˆs tehd‰ tilaukselta suoraan valmistuksia!
+				require("tilauksesta_valmistustilaus.inc");
+				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
+
+				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
-			if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
+			// katsotaan ollaanko tehty JT-supereita..
+			require("jt_super.inc");
+			$jt_super = jt_super($kukarow["kesken"]);
+
+			if ($kukarow["extranet"] != "") {
+				echo "$jt_super<br><br>";
+
+				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
+				$silent = "SILENT";
+			}
+
+			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
+			require("tilaus-valmis.inc");
 		}
-
-		if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
-			//	Voimme myˆs tehd‰ tilaukselta suoraan valmistuksia!
-			require("tilauksesta_valmistustilaus.inc");
-			$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
-
-			if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
-		}
-
-		// katsotaan ollaanko tehty JT-supereita..
-		require("jt_super.inc");
-		$jt_super = jt_super($kukarow["kesken"]);
-
-		if ($kukarow["extranet"] != "") {
-			echo "$jt_super<br><br>";
-
-			//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
-			$silent = "SILENT";
-		}
-
-		// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
-		require("tilaus-valmis.inc");
-		
 	}
 
 	// ollaan k‰sitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
@@ -1391,7 +1391,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		$tilausnumero		= '';
 		$laskurow			= '';
 		$kukarow['kesken']	= '';
-	
+
 		if ($kukarow["extranet"] != "") {
 			if ($toim == 'EXTRANET_REKLAMAATIO') {
 				echo "<font class='head'>$otsikko</font><hr><br><br>";
@@ -1403,7 +1403,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			}
 			$tee = "SKIPPAAKAIKKI";
 		}
-		
 	}
 
 	if ($kukarow["extranet"] == "" and $lopetus != '') {
@@ -2455,7 +2454,7 @@ if ($tee == '') {
 	}
 
 	//Oletetaan, ett‰ tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheit‰ ilmenee
-	if (!isset($tilausok)) $tilausok = 0;
+	$tilausok = 0;
 	$sarjapuuttuu = 0;
 
 	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";

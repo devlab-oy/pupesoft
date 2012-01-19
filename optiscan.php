@@ -38,7 +38,7 @@
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
 
-	chdir('/var/www/html/demo/orumstatic/');
+	chdir('/var/www/html/demo/orumstat/');
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');

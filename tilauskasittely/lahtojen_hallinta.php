@@ -563,6 +563,54 @@
 
 				$(document).ready(function() {
 
+					$('div.vihrea').css({
+						'background-color': '#3E3', 
+						'width': '15px', 
+						'height': '15px', 
+						'margin-left': 'auto',
+						'margin-right': 'auto',
+						'margin-top': '2px',
+						'-webkit-border-radius': '50%',
+						'-webkit-box-shadow': '1px 1px 4px #000',
+						'-moz-border-radius': '50%'
+					});
+
+					$('div.keltainen').css({
+						'background-color': '#F7FF24', 
+						'width': '15px', 
+						'height': '15px', 
+						'margin-left': 'auto',
+						'margin-right': 'auto',
+						'margin-top': '2px',
+						'-webkit-border-radius': '50%',
+						'-webkit-box-shadow': '1px 1px 4px #000',
+						'-moz-border-radius': '50%'
+					});
+
+					$('div.punainen').css({
+						'background-color': '#E66', 
+						'width': '15px', 
+						'height': '15px', 
+						'margin-left': 'auto',
+						'margin-right': 'auto',
+						'margin-top': '2px',
+						'-webkit-border-radius': '50%',
+						'-webkit-box-shadow': '1px 1px 4px #000',
+						'-moz-border-radius': '50%'
+					});
+
+					$('div.sininen').css({
+						'background-color': '#66E', 
+						'width': '15px', 
+						'height': '15px', 
+						'margin-left': 'auto',
+						'margin-right': 'auto',
+						'margin-top': '2px',
+						'-webkit-border-radius': '50%',
+						'-webkit-box-shadow': '1px 1px 4px #000',
+						'-moz-border-radius': '50%'
+					});
+
 					// disabloidaan enterin painallus
 					$(window).keydown(function(event) {
 						if (event.keyCode == 13) {
@@ -597,11 +645,6 @@
 					// laitetaan pikkasen paddingia vasemmalle ja oikealle puolelle data ja center sarakkeisiin.
 					$('td.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('td.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
-
-					$('td.vihrea.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
-					$('td.keltainen.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
-					$('td.punainen.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
-					$('td.sininen.toggleable_parent_row_manual').css({'background-image': 'url(\"{$palvelin2}pics/blue_h.png\")'});
 
 					// oletuksena ollaan sortattu 2. tason rivit nousevaan järjestykseen tilausnumeron mukaan
 					$('img.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
@@ -1733,17 +1776,17 @@
 				$todays_date_klo = strtotime(date('H:i:s'));
 
 				if ($todays_date == $exp_date and $todays_date_klo > $ker_date_klo) {
-					echo "<td class='vihrea toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'></td>";
+					echo "<td class='toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'><div class='vihrea'>&nbsp;</div></td>";
 				}
 				elseif (($todays_date > $exp_date) or ($todays_date == $exp_date and $todays_date_klo > $exp_date_klo)) {
-					echo "<td class='punainen toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'></td>";
+					echo "<td class='toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'><div class='punainen'>&nbsp;</div></td>";
 				}
 				else {
-					echo "<td class='keltainen toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'></td>";
+					echo "<td class='toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'><div class='keltainen'>&nbsp;</div></td>";
 				}
 
 				if (strpos($row['vakisin_kerays'], "X") !== false) {
-					echo "<td class='center sininen toggleable_parent_row_manual' id='X__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
+					echo "<td class='center toggleable_parent_row_manual' id='X__{$row['lahdon_tunnus']}__{$y}'><div class='sininen'>&nbsp;</div></td>";
 				}
 				else {
 					echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";

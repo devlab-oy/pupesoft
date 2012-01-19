@@ -1522,6 +1522,14 @@
 		echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
 		echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
 		echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+
+		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
+			$query = "SELECT toimitustavan_lahto FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilaukset})";
+			$chk_res = pupe_query($query);
+			$chk_row = mysql_fetch_assoc($chk_res);
+			$valittu_lahto = $chk_row['toimitustavan_lahto'];
+		}
+
 		echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 		echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 		echo "</td>";

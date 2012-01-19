@@ -563,52 +563,36 @@
 
 				$(document).ready(function() {
 
-					$('div.vihrea').css({
-						'background-color': '#3E3', 
+					$('div.vihrea, div.keltainen, div.punainen, div.sininen').css({
 						'width': '15px', 
 						'height': '15px', 
 						'margin-left': 'auto',
 						'margin-right': 'auto',
 						'margin-top': '2px',
+
+						'border-radius': '50%',
 						'-webkit-border-radius': '50%',
-						'-webkit-box-shadow': '1px 1px 4px #000',
-						'-moz-border-radius': '50%'
+						'-moz-border-radius': '50%',
+
+						'-webkit-box-shadow': 'inset 0 1px 1px rgba(0, 0, 0, 0.4), 0 1px rgba(200, 200, 200, 0.8)',
+						'box-shadow': 'inset 0 1px 1px rgba(0, 0, 0, 0.4), 0 1px rgba(200, 200, 200, 0.8)',
+						'-moz-box-shadow': 'inset 0 1px 1px rgba(0, 0, 0, 0.4), 0 1px rgba(200, 200, 200, 0.8)'
+					});
+
+					$('div.vihrea').css({
+						'background-color': '#5D2'
 					});
 
 					$('div.keltainen').css({
-						'background-color': '#F7FF24', 
-						'width': '15px', 
-						'height': '15px', 
-						'margin-left': 'auto',
-						'margin-right': 'auto',
-						'margin-top': '2px',
-						'-webkit-border-radius': '50%',
-						'-webkit-box-shadow': '1px 1px 4px #000',
-						'-moz-border-radius': '50%'
+						'background-color': '#FCF300'
 					});
 
 					$('div.punainen').css({
-						'background-color': '#E66', 
-						'width': '15px', 
-						'height': '15px', 
-						'margin-left': 'auto',
-						'margin-right': 'auto',
-						'margin-top': '2px',
-						'-webkit-border-radius': '50%',
-						'-webkit-box-shadow': '1px 1px 4px #000',
-						'-moz-border-radius': '50%'
+						'background-color': '#E66'
 					});
 
 					$('div.sininen').css({
-						'background-color': '#66E', 
-						'width': '15px', 
-						'height': '15px', 
-						'margin-left': 'auto',
-						'margin-right': 'auto',
-						'margin-top': '2px',
-						'-webkit-border-radius': '50%',
-						'-webkit-box-shadow': '1px 1px 4px #000',
-						'-moz-border-radius': '50%'
+						'background-color': '#66F'
 					});
 
 					// disabloidaan enterin painallus

@@ -37,18 +37,18 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 	$tilaus_row = mysql_fetch_assoc($tilaus_res);
 
 	// haetaan kaikkien avoimien tilausten arvo
-	$sumquery = "	SELECT 
+	$sumquery = "	SELECT
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_summa,
-					count(distinct lasku.tunnus) kpl, 
+					count(distinct lasku.tunnus) kpl,
 					lasku.nimi
 					FROM lasku
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V')) 
+					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))
 					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))
 					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))
-					) 
+					)
 					AND lasku.liitostunnus = '$laskurow[liitostunnus]'";
 	$sumresult = pupe_query($sumquery);
 	$avoimetrow = mysql_fetch_assoc($sumresult);
@@ -56,7 +56,7 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 	// Nykyinen tilanne ja luottoraja
 	$laskun_summa 		= $tilaus_row["laskun_summa"];
 	$asiakkaan_avoimet  = $avoimetrow["avoimet_arvo"];
-	$asiakas_luottoraja = $tilausvalmis_asiakas_row["luottoraja"]; 
+	$asiakas_luottoraja = $tilausvalmis_asiakas_row["luottoraja"];
 
 	$sytunnus 	 	 = $laskurow['ytunnus'];
 	$sliitostunnus	 = $laskurow['liitostunnus'];
@@ -196,6 +196,7 @@ elseif ($laskurow["tila"] == 'T') {
 	$result = pupe_query($query);
 }
 else {
+	// Tässä on normaalit tilaukset
 
 	// katotaan ollaanko valittu joku poikkeava kassalipas
 	if ($kertakassa != '') {

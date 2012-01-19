@@ -11951,61 +11951,31 @@ if (!function_exists("seuraava_lahtoaika")) {
 		// K‰ytet‰‰n PHP:n syntaksia date("w"), ei mysql !!!
 		// P‰iv‰m‰‰r‰ array, nimellinen ilmentym‰ toiselle puolelle on kiva.
 
-		$viikonpaiva = date("w", time());
 		$asiakasluokka = (int) $asiakasluokka;
 		$varasto = (int) $varasto;
 		$exclude = (int) $exclude;
 
 		$excludelisa = $exclude != 0 ? " and tunnus != '{$exclude}'" : "";
 
-		$pvmnimet = array();
-		$pvmnimet[1] = t("Maanantai");
-		$pvmnimet[2] = t("Tiistai");
-		$pvmnimet[3] = t("Keskiviikko");
-		$pvmnimet[4] = t("Torstai");
-		$pvmnimet[5] = t("Perjantai");
-		$pvmnimet[6] = t("Lauantai");
-		$pvmnimet[0] = t("Sunnuntai");
+		// $pvmnimet = array();
+		// $pvmnimet[1] = t("Maanantai");
+		// $pvmnimet[2] = t("Tiistai");
+		// $pvmnimet[3] = t("Keskiviikko");
+		// $pvmnimet[4] = t("Torstai");
+		// $pvmnimet[5] = t("Perjantai");
+		// $pvmnimet[6] = t("Lauantai");
+		// $pvmnimet[0] = t("Sunnuntai");
 
-		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm, tunnus
+		$query = 	"	SELECT concat(pvm, ' ', lahdon_kellonaika) as lahto, tunnus
 						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
-						and viimeinen_tilausaika > curtime()
-						and lahdon_viikonpvm = '{$viikonpaiva}'
+						and ((viimeinen_tilausaika > curtime() and pvm = curdate()) or pvm > curdate())
 						and asiakasluokka = '{$asiakasluokka}'
 						and varasto = '{$varasto}'
 						AND aktiivi IN ('', 'P')
 						{$excludelisa}
-						and pvm >= curdate())
-
-						UNION
-
-						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm, tunnus
-						FROM lahdot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND liitostunnus = '{$ttunnus}'
-						and lahdon_viikonpvm > '{$viikonpaiva}'
-						and asiakasluokka = '{$asiakasluokka}'
-						and varasto = '{$varasto}'
-						AND aktiivi IN ('', 'P')
-						{$excludelisa}
-						and pvm >= adddate(curdate(), (lahdon_viikonpvm-2)))
-
-						UNION
-
-						(SELECT '3' prio, concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm, tunnus
-						FROM lahdot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND liitostunnus = '{$ttunnus}'
-						AND lahdon_viikonpvm <= '{$viikonpaiva}'
-						and asiakasluokka = '{$asiakasluokka}'
-						and varasto = '{$varasto}'
-						AND aktiivi IN ('', 'P')
-						{$excludelisa}
-						and pvm >= adddate(curdate(),  (7-2+lahdon_viikonpvm)))
-
-						ORDER BY pvm, prio, lahdon_viikonpvm, lahdon_kellonaika";
+						ORDER BY lahto";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -12015,18 +11985,18 @@ if (!function_exists("seuraava_lahtoaika")) {
 				return $rivi["tunnus"];
 			}
 			else {
-			return $rivi["lahto"];
-		}
+				return $rivi["lahto"];
+			}
 		}
 		else {
 			if ($exclude != 0) {
 				return false;
 			}
 			else {
-			return "0000-00-00 00:00:00";
+				return "0000-00-00 00:00:00";
+			}
 		}
 	}
-}
 }
 
 // K‰sitell‰‰n XML-entiteetit

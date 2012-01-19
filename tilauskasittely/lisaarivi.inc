@@ -349,25 +349,30 @@
 					AND tuote.tuoteno = '{$trow["tuoteno"]}'";
 		$ttresult = pupe_query($query);
 		$ttrow = mysql_fetch_assoc($ttresult);
-query_dump($query);
 
 		if ($kpl <= $ttrow['osto_era']) {
 			$kpl = $ttrow['osto_era'];
 		}
 		else {
 			// tehdään avainsanavertailu.
-			// WK93910X pakkaukset OE 5 , P2 10 , P3 200 
+
 			if ($ttrow['p2'] !='' and $kpl <= $ttrow['p2']) {
 				$ostoera = $ttrow['p2'];
 				$pakkaus = 1;
 			}
-			else {
+			elseif ($ttrow['p3'] !='') { // oletetaan että pakkaus3 on suurin pakkauskoko
 				$ostoera = $ttrow['p3'];
 				$pakkaus = 2;
 			}
-			
-			echo "alku: $kpl, $ostoera, $pakkaus<br>";
-			
+			elseif ($ttrow['p2'] !='') { 
+				$ostoera = $ttrow['p2'];
+				$pakkaus = 3;
+			}
+			else {
+				$ostoera = $ttrow['osto_era'];
+				$pakkaus = 4;
+			}
+										
 			(int) $kokonaisluku = number_format($kpl / $ostoera,0,'','');
 			(float) $jakojaannos = fmod($kpl,$ostoera);
 
@@ -376,7 +381,6 @@ query_dump($query);
 				$test = ($kokonaisluku + 1) * $ostoera;
 			}
 			$kpl = (float) $test;
-			echo "loppu: $kpl, $test, $kokonaisluku, $jakojaannos<br>";
 		}
 		$ostoerahuomatus = TRUE;
 	}

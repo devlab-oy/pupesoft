@@ -2646,6 +2646,25 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "ostoera_pyoristys" ) {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ' ' $sela>".t("Ostoriveillä ei käytetä pyöristystä seuraavaan täyteen ostoerään")."</option>
+					<option value = 'K' $selb>".t("Ostoriveillä käytetään pyöristystä seuraavaan täyteen ostoerään")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "reklamaation_kasittely") {
 

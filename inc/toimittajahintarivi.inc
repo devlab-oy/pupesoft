@@ -98,7 +98,6 @@
 		$chkn[$trow[$i]] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Yhtiön oletus")."</option>";
 		$ulos .= "<option value='N' $chkn[N]>".t("N-Nettohinta")."</option>";
 		$ulos .= "<option value='E' $chkn[E]>".t("E-Nettohinta")."</option>";
 		$ulos .= "<option value='B' $chkn[B]>".t("Bruttohinta")."</option>";

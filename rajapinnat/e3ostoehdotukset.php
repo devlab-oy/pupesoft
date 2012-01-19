@@ -62,7 +62,7 @@
 				echo "<br>";
 			}
 			else {
-				$hinta = tuotteen_ostohinta ($laskurow, $tuote_row, $kpl);
+				list($hinta, , , , ) = tuotteen_ostohinta ($laskurow, $tuote_row, $kpl);
 				$insert_query = "	INSERT INTO tilausrivi SET
 									yhtio 		= '$kukarow[yhtio]',
 									tyyppi 		= 'O',

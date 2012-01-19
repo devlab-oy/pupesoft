@@ -10,7 +10,7 @@
 				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
-	$rarresult = mysql_query($query) or pupe_error($query);
+	$rarresult = pupe_query($query);
 	$trow = mysql_fetch_array($rarresult);
 
 	if (mysql_num_rows($rarresult) == 0) {
@@ -44,6 +44,11 @@
 		$riviok++;
 	}
 
+	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
+		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";	
+	}
+
+	
 	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
 		$varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
 		$riviok++;
@@ -67,7 +72,7 @@
 							where yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$prow[tunnus]'
 							and otunnus = '$kukarow[kesken]'";
-				$ishinr = mysql_query($oshinq) or pupe_error($oshinq);
+				$ishinr = pupe_query($oshinq);
 			}
 			else {
 				$paok = 'ok';
@@ -82,12 +87,12 @@
 
 		if ($paivitaostohinta == 'ON' and $JOPA != '' and $prow["tuoteno"] == $paiv_tuoteno and ($prow["tunnus"] == $paiv_rivitunnus or $toiminto == 'kohdista')) {
 			$paok ='';
-			$oshinq = "	update tuotteen_toimittajat
-						set ostohinta		= '$paiv_hinta'
-						where yhtio			= '$kukarow[yhtio]'
-						and tuoteno			= '$prow[tuoteno]'
-						and liitostunnus	= '$laskurow[liitostunnus]'";
-			$ishinr = mysql_query($oshinq) or pupe_error($oshinq);
+			$oshinq = "	UPDATE tuotteen_toimittajat
+						SET ostohinta		= '$paiv_hinta'
+						WHERE yhtio			= '$kukarow[yhtio]'
+						AND tuoteno			= '$prow[tuoteno]'
+						AND liitostunnus	= '$laskurow[liitostunnus]'";
+			$ishinr = pupe_query($oshinq);
 
 			$paok = 'ok';
 
@@ -104,7 +109,7 @@
 		}
 
 		$varquery = "SELECT var FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus	= '$prow[tunnus]'";
-		$varresult = mysql_query($varquery) or pupe_error($varquery);
+		$varresult = pupe_query($varquery);
 		$varrow  = mysql_fetch_array($varresult);
 
 		if (($toiminto != 'kohdista' and ($varrow['var'] != 'O' or $prow['var'] != 'O') and ($prow["tunnus"] != $paiv_rivitunnus or $paiv_rivitunnus == '')) or (($toiminto == 'kohdista' and $paok == ''))) {
@@ -158,7 +163,7 @@
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tunnus	= '$paiv_rivitunnus'
 										and otunnus = '$kukarow[kesken]'";
-				$paivita_res = mysql_query($paivita_toimaika) or pupe_error($paivita_toimaika);
+				$paivita_res = pupe_query($paivita_toimaika);
 
 
 			}
@@ -216,22 +221,22 @@
 					and toimi.edi_salasana != ''
 					and toimi.edi_polku    != ''
 					and toimi.oletus_vienti in ('C','F','I')";
-		$kres  = mysql_query($query) or pupe_error($query);
+		$kres  = pupe_query($query);
 
 		if (mysql_num_rows($kres) > 0) {
 			$superrow = mysql_fetch_array($kres);
 
-			$query = "	select yhtio.yhtio, yhtio.tunnus,sum(saldo) saldo
-						from tuotepaikat
-						join yhtio on yhtio.yhtio=tuotepaikat.yhtio
-						join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						and varastopaikat.tyyppi = ''
-						where tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
-						and tuoteno = '$trow[tuoteno]'
-						group by 1,2";
-			$kres2  = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT yhtio.yhtio, yhtio.tunnus,sum(saldo) saldo
+						FROM tuotepaikat
+						JOIN yhtio on yhtio.yhtio=tuotepaikat.yhtio
+						JOIN varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
+						AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						AND varastopaikat.tyyppi = ''
+						WHERE tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
+						AND tuoteno = '$trow[tuoteno]'
+						GROUP BY 1,2";
+			$kres2  = pupe_query($query);
 
 			$krow  = mysql_fetch_array($kres2);
 
@@ -241,14 +246,14 @@
 						ifnull(sum(if(tilausrivi.keratty ='', tilausrivi.varattu, 0)),0) ennpois
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 						JOIN varastopaikat on tilausrivi.yhtio = varastopaikat.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-						and varastopaikat.tyyppi = ''
+						AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+						AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+						AND varastopaikat.tyyppi = ''
 						WHERE tilausrivi.yhtio = '$krow[yhtio]'
-						and tilausrivi.tyyppi in ('L','G','V')
-						and tilausrivi.tuoteno = '$trow[tuoteno]'
-						and tilausrivi.varattu <> 0";
-			$krtre = mysql_query($query) or pupe_error($query);
+						AND tilausrivi.tyyppi in ('L','G','V')
+						AND tilausrivi.tuoteno = '$trow[tuoteno]'
+						AND tilausrivi.varattu <> 0";
+			$krtre = pupe_query($query);
 			$krtur = mysql_fetch_array($krtre);
 
 			// katotaan tuotteen saldo

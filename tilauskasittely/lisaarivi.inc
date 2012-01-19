@@ -248,6 +248,7 @@
 	$var					 = strtoupper($var); 	// varri isoks
 	$netto					 = strtoupper($netto); 	// netto isoks
 	$myyntierahuomatus 		 = FALSE;
+	$ostoerahuomatus 		 = FALSE;
 	$myy_erikoistoim_ok		 = TRUE;
 	$org_kpl				 = "";
 	$suoratoimitus_splittaus = FALSE;
@@ -272,6 +273,7 @@
 	$lisatyt_rivit2 = array();
 	$korkieltokommi = array();
 	$myyntierahuom	= array();
+	$ostoerahuom	= array();
 
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
@@ -330,6 +332,53 @@
 			$kpl = (float) $test;
 		}
 		$myyntierahuomatus = TRUE;
+	}
+	
+	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
+		$org_kpl = $kpl;
+		$pakkaus = 0;
+		
+		// haetaan tuotteen toimittajan takaata pakkauskoko tai jotain 
+		// Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa 
+		$query = "	SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite p2, ta2.selite p3 
+					FROM tuote
+					JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
+					LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
+					LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+					WHERE tuote.yhtio='{$kukarow["yhtio"]}'
+					AND tuote.tuoteno = '{$trow["tuoteno"]}'";
+		$ttresult = pupe_query($query);
+		$ttrow = mysql_fetch_assoc($ttresult);
+query_dump($query);
+
+		if ($kpl <= $ttrow['osto_era']) {
+			$kpl = $ttrow['osto_era'];
+		}
+		else {
+			// tehdään avainsanavertailu.
+			// WK93910X pakkaukset OE 5 , P2 10 , P3 200 
+			if ($ttrow['p2'] !='' and $kpl <= $ttrow['p2']) {
+				$ostoera = $ttrow['p2'];
+				$pakkaus = 1;
+			}
+			else {
+				$ostoera = $ttrow['p3'];
+				$pakkaus = 2;
+			}
+			
+			echo "alku: $kpl, $ostoera, $pakkaus<br>";
+			
+			(int) $kokonaisluku = number_format($kpl / $ostoera,0,'','');
+			(float) $jakojaannos = fmod($kpl,$ostoera);
+
+			$test = $kokonaisluku * $ostoera;
+			if ($kpl > $test) {
+				$test = ($kokonaisluku + 1) * $ostoera;
+			}
+			$kpl = (float) $test;
+			echo "loppu: $kpl, $test, $kokonaisluku, $jakojaannos<br>";
+		}
+		$ostoerahuomatus = TRUE;
 	}
 
 	$toimittamatta = $kpl; //Näin paljon ollaan toimittamassa
@@ -1477,6 +1526,10 @@
 								if ($myyntierahuomatus) {
 									$myyntierahuom[] = $lisatty_tun;
 								}
+								
+								if ($ostoerahuomatus) {
+									$ostoerahuom[] = $lisatty_tun;
+								}
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI") {
 									// lapsille oikea perheid
@@ -1845,7 +1898,8 @@
 
 			// Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
-				$lis_hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
+			//	$lis_hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = uusi_tuotteen_ostohinta($laskurow, $trow, $kpl, '', '', '');
 			}
 			elseif ($laskurow['tila'] == 'O') {
 				$lis_hinta = $hinta;
@@ -1856,19 +1910,18 @@
 				$lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 			}
 
-			if ($laskurow['tila'] == 'O' and $ale1 == "") {
+			if ($laskurow['tila'] == 'O' and $ale1 == "" and count($lis_ale_kaikki) == 0) {
 				$query = "	SELECT alennus
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$trow[tuoteno]'
 							and liitostunnus = '$laskurow[liitostunnus]'
-							LIMIT 1";
+							LIMIT 1";							
 				$rarres = pupe_query($query);
 				$rarrow	 = mysql_fetch_array($rarres);
-
 				$lis_ale_kaikki['ale1'] = $rarrow["alennus"];
 			}
-			elseif ($laskurow['tila'] == 'O') {
+			elseif ($laskurow['tila'] == 'O' and count($lis_ale_kaikki) == 0) {
 				$lis_ale_kaikki['ale1'] = $ale1;
 			}
 
@@ -2376,7 +2429,10 @@
 			if ($myyntierahuomatus) {
 				$myyntierahuom[] = $lisatty_tun;
 			}
-
+			if ($ostoerahuomatus) {
+				$ostoerahuom[] = $lisatty_tun;
+			}
+			
 			if ($i == 0) {
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;

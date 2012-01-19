@@ -407,9 +407,6 @@
 					$surow = array();
 				}
 
-				// palautetaan velkatilanne. avoimet - suoritus
-				$velkatilanne = ($row["avoimia"]-$surow["summa"]);
-
 				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $row["avoimia"] > $asrow["luottoraja"] and $asrow["luottoraja"] != '')) {
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";

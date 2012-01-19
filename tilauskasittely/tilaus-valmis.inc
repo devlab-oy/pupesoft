@@ -26,38 +26,20 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	$query_alennuksia = generoi_alekentta('M');
 
-	// tämän tilauksen arvo
-	$query = "	SELECT sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_alennuksia}, '$yhtiorow[hintapyoristys]')) laskun_summa
-				FROM tilausrivi
-				WHERE tilausrivi.otunnus  = '{$kukarow["kesken"]}'
-				AND tilausrivi.yhtio = '$kukarow[yhtio]'
-				AND tilausrivi.var in ('','H')
-				AND tilausrivi.tyyppi in ('L','G')";
-	$tilaus_res = pupe_query($query);
-	$tilaus_row = mysql_fetch_assoc($tilaus_res);
-
 	// haetaan kaikkien avoimien tilausten arvo
-	$sumquery = "	SELECT
-					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo,
-					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_summa,
-					count(distinct lasku.tunnus) kpl,
-					lasku.nimi
+	$sumquery = "	SELECT round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo
 					FROM lasku
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))
-					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))
+					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
 					)
 					AND lasku.liitostunnus = '$laskurow[liitostunnus]'";
 	$sumresult = pupe_query($sumquery);
 	$avoimetrow = mysql_fetch_assoc($sumresult);
 
-	// Nykyinen tilanne ja luottoraja
-	$laskun_summa 		= $tilaus_row["laskun_summa"];
-	$asiakkaan_avoimet  = $avoimetrow["avoimet_arvo"];
-	$asiakas_luottoraja = $tilausvalmis_asiakas_row["luottoraja"];
-
+	// Parametrejä saatanat.php:lle
 	$sytunnus 	 	 = $laskurow['ytunnus'];
 	$sliitostunnus	 = $laskurow['liitostunnus'];
 	$eiliittymaa 	 = "ON";
@@ -66,14 +48,7 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 	$ylivito 		 = "";
 	$trattavirhe 	 = "";
 	$laji 			 = "MA";
-	$velkatilanne	 = "";
-
-	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-		$grouppaus = "ytunnus";
-	}
-	else {
-		$grouppaus = "";
-	}
+	$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
 	ob_start();
 
@@ -87,7 +62,8 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 	$retval = ob_get_contents();
 	ob_end_clean();
 
-	$luottotilanne_nyt = $asiakas_luottoraja - $velkatilanne - $asiakkaan_avoimet;
+	// Lasketaan luottotilanne nyt, $avoimia_yhteensa ja $kaato_yhteensa tulee saatanat.php:stä
+	$luottotilanne_nyt = $tilausvalmis_asiakas_row["luottoraja"] - $avoimia_yhteensa - $kaato_yhteensa - $avoimetrow["avoimet_arvo"];
 }
 
 if ($luottotilanne_nyt < 0) {
@@ -104,7 +80,10 @@ if ($luottotilanne_nyt < 0) {
 				AND tunnus = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);
 
-	echo "<font class='message'>",t("Asiakkaan luottoraja on ylitetty"),". ",t("Tilausta ei merkitä valmiiksi"),".</font><br/>";
+	echo "<font class='error'>",t("Asiakkaan luottoraja on ylitetty"),". ",t("Tilausta ei merkitä valmiiksi"),".</font><br/><br/>";
+
+	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
 }
 elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
 	$query = "	UPDATE lasku SET
@@ -113,8 +92,10 @@ elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
 				AND tunnus = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);
 
-	echo "<font class='message'>",t("Asiakas on myyntikiellossa"),". ",t("Tilausta ei merkitä valmiiksi"),".</font><br/>";
+	echo "<font class='error'>",t("Asiakas on myyntikiellossa"),". ",t("Tilausta ei merkitä valmiiksi"),".</font><br/>";
 
+	// Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
 }
 elseif ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset

@@ -391,8 +391,8 @@
 	$kasitelty = array();
 	$kasitelty_i = 0;
 
-	if ($handle = opendir($pupe_root_polku."/datain")) {
-	    while (false !== ($file = readdir($handle))) {
+	if ($files = scandir($pupe_root_polku."/datain")) {
+	    foreach ($files as $file) {
 			// Tämä file on valmis lue-data file
 			if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
 
@@ -418,7 +418,6 @@
 				}
 			}
 	    }
-	    closedir($handle);
 	}
 
 	if (count($kasitelty) > 0) {

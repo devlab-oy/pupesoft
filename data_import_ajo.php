@@ -29,8 +29,8 @@
 			$faileja_kasitelty = FALSE;
 
 			// Loopataan DATAIN -hakemisto l‰pi
-			if ($handle = opendir($pupe_root_polku."/datain")) {
-			    while (false !== ($file = readdir($handle))) {
+			if ($files = scandir($pupe_root_polku."/datain") {
+			    foreach ($files as $file) {
 
 					// Etsit‰‰n "lue-data#" -alkuisia filej‰, jotka loppuu ".DATAIMPORT"
 					if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
@@ -65,8 +65,6 @@
 						}
 					}
 			    }
-
-			    closedir($handle);
 			}
 
 			// Katsotaan oisko tullut lis‰‰ k‰sitelt‰vi‰

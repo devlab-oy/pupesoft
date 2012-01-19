@@ -1531,7 +1531,6 @@ else {
 			}
 		}
 	} // end jos yksikin rivi ker‰tty else haara
-
 }
 
 //tyhjennet‰‰n ett‰ se ei kummittele uudella tilauksella

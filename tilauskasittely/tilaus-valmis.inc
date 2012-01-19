@@ -26,6 +26,20 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	$query_alennuksia = generoi_alekentta('M');
 
+	// Jos saatavat on ytunnus tasolla, pit‰‰ hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
+	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset 
+							FROM asiakas 
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND ytunnus = '{$laskurow["ytunnus"]}'";
+		$saatavat_result = pupe_query($saatavat_query);
+		$saatavat_row = mysql_fetch_assoc($saatavat_result);		
+		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
+	}
+	else {
+		$saatavat_liitostunnukset = $laskurow["liitostunnus"];
+	}
+
 	// haetaan kaikkien avoimien tilausten arvo
 	$sumquery = "	SELECT round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo
 					FROM lasku
@@ -35,7 +49,7 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
 					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
 					)
-					AND lasku.liitostunnus = '$laskurow[liitostunnus]'";
+					AND lasku.liitostunnus in ($saatavat_liitostunnukset)";
 	$sumresult = pupe_query($sumquery);
 	$avoimetrow = mysql_fetch_assoc($sumresult);
 

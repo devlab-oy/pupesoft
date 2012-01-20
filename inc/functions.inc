@@ -14086,7 +14086,7 @@ if (!function_exists("tee_keraysera2")) {
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
 		if (trim($keraysvyohyketiedot['sallitut_alustat']) == '') {
-			echo "<font class='error'>",t("Keräysvyöhykkeen")," ({$keraysvyohyketiedot['nimitys']}) ",t("ei ole määritelty sallittuja alustoja"),"!</font><br>";
+			echo "<font class='error'>",t("Keräysvyöhykkeeseen")," ({$keraysvyohyketiedot['nimitys']}) ",t("ei ole määritelty sallittuja alustoja"),"!</font><br>";
 			return false;
 		}
 

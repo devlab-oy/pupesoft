@@ -2771,6 +2771,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "oston_alekentat") {
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		// Jos lis‰‰t uuden alennuskent‰n, lis‰‰ se myˆs myynnin_alekentat_muokkaus parametriin
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value = '1'{$sel[1]}>".t("Ostossa k‰ytet‰‰n yht‰ alennuskentt‰‰")."</option>";
+		$ulos .= "<option value = '2'{$sel[2]}>".t("Ostossa k‰ytet‰‰n kahta alennuskentt‰‰")."</option>";
+		$ulos .= "<option value = '3'{$sel[3]}>".t("Ostossa k‰ytet‰‰n kolmea alennuskentt‰‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "intrastat_kaytossa") {
 
 		$apu = $trow[$i];

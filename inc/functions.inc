@@ -5742,7 +5742,7 @@ if (!function_exists("generoi_alekentta_php")) {
 			$maara = $yhtiorow['myynnin_alekentat'];
 		}
 		elseif ($tyyppi == 'O')  {
-			$maara = 1;
+			$maara = $yhtiorow['oston_alekentat'];
 		}
 		else {
 			$maara = 1;
@@ -5804,7 +5804,7 @@ if (!function_exists("generoi_alekentta_select")) {
 			$maara = $yhtiorow['myynnin_alekentat'];
 		}
 		elseif ($tyyppi == 'O')  {
-			$maara = 1;
+			$maara = $yhtiorow['oston_alekentat'];
 		}
 		else {
 			$maara = 1;
@@ -5851,7 +5851,7 @@ if (!function_exists("generoi_alekentta")) {
 			$maara = $yhtiorow['myynnin_alekentat'];
 		}
 		elseif ($tyyppi == 'O')  {
-			$maara = 1;
+			$maara = $yhtiorow['oston_alekentat'];
 		}
 		else {
 			$maara = 1;

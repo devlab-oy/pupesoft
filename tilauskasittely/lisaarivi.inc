@@ -336,11 +336,10 @@
 	
 	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
 		$org_kpl = $kpl;
-		$pakkaus = 0;
 		
 		// haetaan tuotteen toimittajan takaata pakkauskoko tai jotain 
 		// Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa 
-		$query = "	SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite p2, ta2.selite p3 
+		$query = "	SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite pakkaus2, ta2.selite pakkaus3 
 					FROM tuote
 					JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
 					LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
@@ -354,33 +353,29 @@
 			$kpl = $ttrow['osto_era'];
 		}
 		else {
-			// tehdään avainsanavertailu.
 
-			if ($ttrow['p2'] !='' and $kpl <= $ttrow['p2']) {
-				$ostoera = $ttrow['p2'];
-				$pakkaus = 1;
-			}
-			elseif ($ttrow['p3'] !='') { // oletetaan että pakkaus3 on suurin pakkauskoko
-				$ostoera = $ttrow['p3'];
-				$pakkaus = 2;
-			}
-			elseif ($ttrow['p2'] !='') { 
-				$ostoera = $ttrow['p2'];
-				$pakkaus = 3;
-			}
-			else {
-				$ostoera = $ttrow['osto_era'];
-				$pakkaus = 4;
-			}
-										
-			(int) $kokonaisluku = number_format($kpl / $ostoera,0,'','');
-			(float) $jakojaannos = fmod($kpl,$ostoera);
+			$jaannos = 0;
+			$pakkauskoko = 0;
 
-			$test = $kokonaisluku * $ostoera;
-			if ($kpl > $test) {
-				$test = ($kokonaisluku + 1) * $ostoera;
+			$ttrow["pakkaus3"] !="" ? $pakkausarray[] = $ttrow["pakkaus3"] : "";
+			$ttrow["pakkaus2"] !="" ? $pakkausarray[] = $ttrow["pakkaus2"] : "";
+			$pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta löydy.
+			
+			foreach ($pakkausarray as $pak) {
+				(float) $jaannos = fmod($kpl,$pak);
+
+				if ($jaannos == 0 or $kpl > $pak) {
+					$pakkauskoko = $pak;
+					break;
+				} 
+				if ($kpl > $pak) $pakkauskoko = $pak;
 			}
-			$kpl = (float) $test;
+
+			if ($jaannos != 0) {
+				// pyöristetään pakkauskokokoon 
+				$kpl = ceil($kpl / $pakkauskoko) * $pakkauskoko;
+			}
+
 		}
 		$ostoerahuomatus = TRUE;
 	}
@@ -1902,11 +1897,14 @@
 
 			// Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
-			//	$lis_hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
 				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = uusi_tuotteen_ostohinta($laskurow, $trow, $kpl, '', '', '');
 			}
 			elseif ($laskurow['tila'] == 'O') {
 				$lis_hinta = $hinta;
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+					$lis_ale_kaikki['ale'.$alepostfix] = ${'alkupera_ale'.$alepostfix};
+				}
+
 			}
 
 			// jos käytössä on hintakertoimet, niin muutetaan yksikkö kuntoon
@@ -2305,6 +2303,8 @@
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 			}
+
+
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 

@@ -299,7 +299,7 @@
 			}
 
 			if (function_exists($funktio)) {
-				@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
+				@$funktio($t, $i, $result, $tunnus, $virhe, $trow);
 			}
 
 			if (isset($virhe[$i]) and $virhe[$i] != "") {

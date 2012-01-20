@@ -226,7 +226,7 @@
 
 			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto'], false);
 
-			if (count($erat['tilaukset']) != 0) {
+			if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 				$otunnukset = implode(",", $erat['tilaukset']);
 
 				$ei_tulosteta = true;

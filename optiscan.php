@@ -35,10 +35,11 @@
 	}
 
 	// error_reporting(E_ALL);
-	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	error_reporting(E_ALL);
 	ini_set("display_errors", 0);
+	ini_set("log_errors", 1);
 
-	chdir('/var/www/html/demo/orumstat/');
+	chdir(dirname(__FILE__));
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');

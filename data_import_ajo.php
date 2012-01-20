@@ -29,7 +29,7 @@
 			$faileja_kasitelty = FALSE;
 
 			// Loopataan DATAIN -hakemisto l‰pi
-			if ($files = scandir($pupe_root_polku."/datain") {
+			if ($files = scandir($pupe_root_polku."/datain")) {
 			    foreach ($files as $file) {
 
 					// Etsit‰‰n "lue-data#" -alkuisia filej‰, jotka loppuu ".DATAIMPORT"

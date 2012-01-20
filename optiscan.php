@@ -224,7 +224,7 @@
 			$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräysvyöhykettä haettaessa\r\n\r\n");
 			$row = mysql_fetch_assoc($result);
 
-			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto']);
+			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto'], false);
 
 			if (count($erat['tilaukset']) != 0) {
 				$otunnukset = implode(",", $erat['tilaukset']);

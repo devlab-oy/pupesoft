@@ -14402,7 +14402,7 @@ if (!function_exists("tee_keraysera2")) {
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) == 0) {
-			return array('tilaukset' => array(), 'query' => $query);
+			return array('tilaukset' => array());
 		}
 
 		/**

@@ -194,17 +194,22 @@
 				$rivi_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe\r\n\r\n");
 
 				while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
-					$pakkauskirjain = chr((64+$rivi_row['pakkausnro']));
+					$pakkauskirjain = strtolower(chr((64+$rivi_row['pakkausnro'])));
 					$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
 					$hyllypaikka = $rivi_row['hyllyalue'];
-					$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
-					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
-					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
+					$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka." ".$rivi_row['hyllynro'] : $hyllypaikka;
+					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
+					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
+
+					$hyllypaikka = strtolower($hyllypaikka);
+					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+
+					$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
 					$response .= "N,";
 					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-					$response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
+					$response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
 
 					$n++;
 				}
@@ -282,17 +287,22 @@
 
 					while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
 
-						$pakkauskirjain = chr((64+$rivi_row['pakkausnro']));
+						$pakkauskirjain = strtolower(chr((64+$rivi_row['pakkausnro'])));
 						$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
 						$hyllypaikka = $rivi_row['hyllyalue'];
-						$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
-						$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
-						$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
+						$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka." ".$rivi_row['hyllynro'] : $hyllypaikka;
+						$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
+						$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
+
+						$hyllypaikka = strtolower($hyllypaikka);
+						$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+
+						$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
 						$response .= "N,";
 						$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-						$response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
+						$response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
 
 						$n++;
 					}

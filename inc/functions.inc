@@ -13555,7 +13555,7 @@ if (!function_exists("valitse_pakkaus")) {
 
 				$jako = $eran_koko / $_pakkaus_array['tilavuus'];
 
-				echo "$_indx: $jako = $eran_koko / $_pakkaus_array[tilavuus]<br>";
+				if ($debug) echo "$_indx: $jako = $eran_koko / $_pakkaus_array[tilavuus]<br>";
 
 				// jos jako on pienempi kuin yksi, halutaan arvo mikä on lähinnä ykköstä = optimaalinen täyttömäärä!!!!
 				if ($jako < 1) {
@@ -15652,7 +15652,7 @@ if (!function_exists("tee_keraysera2")) {
 						$ed_pak = $increment;
 					}
 				}
-				echo "</tr>";
+				if ($debug) echo "</tr>";
 			}
 
 			if ($debug and $ed_pak != '') {

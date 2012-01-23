@@ -1897,6 +1897,7 @@
 
 			// Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
+				// Muuta uusi_tuotteen_ostohinta sitten toiseksi kun se toi funkkari on hyväksytty.
 				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = uusi_tuotteen_ostohinta($laskurow, $trow, $kpl, '', '', '');
 			}
 			elseif ($laskurow['tila'] == 'O') {

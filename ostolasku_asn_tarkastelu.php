@@ -54,7 +54,7 @@
 						$('#tee').val('vahvistakolli');
 						$('#kolliformi').attr('action', '?').submit();
 					});
-					
+
 					$('.poistakohdistus').click(function(){
 						$('#tee').val('poistakohdistus');
 						$('#kolliformi').attr('action', '?').submit();
@@ -371,7 +371,7 @@
 
 		$tee = '';
 	}
-	
+
 	if ($tee == 'poistakohdistus') {
 
 		$kolli = mysql_real_escape_string($kolli);
@@ -380,8 +380,8 @@
 		$query = "SELECT * from asn_sanomat where yhtio = '{$kukarow["yhtio"]}' {$wherelisa}";
 		$kollires = pupe_query($query);
 		$rivi = mysql_fetch_assoc($kollires);
-		
-		// poistetaan STATUS-t‰pp‰		
+
+		// poistetaan STATUS-t‰pp‰
 		$query = "UPDATE asn_sanomat SET status ='', tilausrivi='' WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
 
@@ -389,7 +389,7 @@
 	}
 
 	if ($tee == 'uusirivi') {
-		
+
 		$var = 'O';
 
 		if (trim($tilausnro) == '' or $tilausnro == 0) {
@@ -409,13 +409,13 @@
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
-			
-			$laskurow = mysql_fetch_assoc($res); 
-			
+
+			$laskurow = mysql_fetch_assoc($res);
+
 			$query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tuoteno}'";
 			$result = pupe_query($query);
 			$trow = mysql_fetch_assoc($result);
-			
+
 			$hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
 
 			//pidet‰‰n kaikki muuttujat tallessa
@@ -649,35 +649,35 @@
 		else {
 			// typecastataan formista tulleet tunnukset stringeist‰ inteiksi
 			$tunnukset = array_map('intval', $tunnukset);
-			// otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in... 
+			// otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
 			// T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
 			$kpl_maara_ostolla = $ostotilauksella_kpl[$tunnukset[0]];
 
 			if ($valitse == 'asn') {
-				
+
 				// haetaan ASN-sanomalta kpl m‰‰r‰
 				$hakuquery = "SELECT * from asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$hakures = pupe_query($hakuquery);
 				$asn_row_haku = mysql_fetch_assoc($hakures);
-				
+
 				$asn_kpl_tilaukselta = $asn_row_haku["kappalemaara"];
 				$erotus = $kpl_maara_ostolla - $asn_kpl_tilaukselta;
-				
+
 				if ($erotus != 0) {
 					// tehd‰‰n splitti
 					// haetaan ostotilauksen rivitiedot kyseiselle riville.
 					$query = "SELECT * from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus ='{$asn_row_haku["tilausnumero"]}' and tunnus='{$asn_row_haku["tilausrivinpositio"]}'";
 					$ostores = pupe_query($query);
 					$ostotilausrivirow = mysql_fetch_assoc($ostores);
-					
+
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
-								varattu = '{$asn_kpl_tilaukselta}', 
+								varattu = '{$asn_kpl_tilaukselta}',
 								tilkpl	= '{$asn_kpl_tilaukselta}'
 								WHERE yhtio = '{$kukarow["yhtio"]}'
 								AND tunnus = '{$ostotilausrivirow["tunnus"]}'";
 					$upres = pupe_query($query);
-					
+
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
 								yhtio 		= '$ostotilausrivirow[yhtio]',
@@ -702,8 +702,8 @@
 								tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
 					$inskres = pupe_query($query);
 				}
-				
-				
+
+
 				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$updres = pupe_query($query);
 
@@ -726,17 +726,31 @@
 
 		if ($valitse == 'asn') {
 			if (isset($asn_rivi) and strpos($asn_rivi, '##') !== false) {
-				list($asn_rivi, $tuoteno, $tilaajanrivinro) = explode('##', $asn_rivi);
+				list($asn_rivi, , $tilaajanrivinro) = explode('##', $asn_rivi); // ei otetan linkist‰ tuoteno:a koska jos siin‰ on v‰li niin hajoilee
 
 				$asn_rivi = (int) $asn_rivi;
 
 				$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$result = pupe_query($query);
 				$asn_row = mysql_fetch_assoc($result);
+
+				$query = "SELECT tt.tuoteno, tt.toim_tuoteno FROM tuotteen_toimittajat as tt
+							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.herminator='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}')
+							WHERE tt.yhtio='{$kukarow['yhtio']}'";
+				$result = pupe_query($query);
+				$apurivi = mysql_fetch_assoc($result);
+
+				if ($apurivi["tuoteno"] !="") {
+					$tuoteno =  $apurivi['tuoteno'];
+				}
+				else {
+					$tuoteno =  $asn_row['toim_tuoteno'];
+				}
+
 			}
 
 			// pakotetaan tuoteno asn_sanomasta. V‰lilyˆnnit tekee kiusaa
-			if (!isset($tuoteno)) $tuoteno =  $asn_row['toim_tuoteno'];
+			// if (!isset($tuoteno)) $tuoteno =  $asn_row['toim_tuoteno'];
 			if (!isset($toimittaja) and isset($asn_row)) $toimittaja = $asn_row['toimittajanumero'];
 			if (!isset($tilausnro) and isset($asn_row)) $tilausnro = $asn_row['tilausnumero'];
 			if (!isset($kpl) and isset($asn_row)) $kpl = $asn_row['kappalemaara'];
@@ -903,7 +917,7 @@
 			echo "<th>",t("Kpl"),"</th>";
 			echo "<th>",t("Alennukset"),"</th>";
 			echo "<th>",t("Status"),"</th>";
-			echo "<th>&nbsp;</th>";
+			echo "<th class='back'>&nbsp;</th>";
 			echo "</tr>";
 
 			$ok = 0;
@@ -927,13 +941,9 @@
 				echo "<td>{$row['nimitys']}</td>";
 				echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
 				echo "<td align='right'>{$row['kappalemaara']}</td>";
-				echo "<td></td>";
 				echo "<td>{$row['alennus']}</td>";
-
 				echo "<td><font class='ok'>",t("Ok"),"</font></td>";
-
-				echo "<td></td>";
-
+				echo "<td class='back'></td>";
 				echo "</tr>";
 			}
 
@@ -1001,7 +1011,7 @@
 
 				echo "<td><font class='error'>",t("Virhe"),"</font></td>";
 
-				echo "<td>";
+				echo "<td class='back'>";
 				if ($row['uusiotunnus'] == 0) echo "<input type='button' class='etsibutton' id={$row['asn_tunnus']}##{$row['tuoteno']}##{$row['tilausrivinpositio']}' value='",t("Etsi"),"' />";
 				echo "</td>";
 
@@ -1118,7 +1128,7 @@
 				}
 				echo "</td>";
 
-				echo "<td>";
+				echo "<td class='back'>";
 				if ($row['tilausrivi'] == '') echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}' value='",t("Etsi"),"' />";
 				echo "</td>";
 				echo "</tr>";
@@ -1156,17 +1166,17 @@
 		else {
 
 			if ($valitse == 'asn') {
-				$query = "	SELECT 	toimi.ytunnus, 
-									toimi.nimi, 
-									toimi.nimitark, 
-									toimi.osoite, 
-									toimi.osoitetark, 
-									toimi.postino, 
-									toimi.postitp, 
-									toimi.maa, 
+				$query = "	SELECT 	toimi.ytunnus,
+									toimi.nimi,
+									toimi.nimitark,
+									toimi.osoite,
+									toimi.osoitetark,
+									toimi.postino,
+									toimi.postitp,
+									toimi.maa,
 									toimi.swift,
-									asn_sanomat.asn_numero, 
-									asn_sanomat.paketintunniste, 
+									asn_sanomat.asn_numero,
+									asn_sanomat.paketintunniste,
 									asn_sanomat.toimittajanumero,
 									asn_sanomat.status,
 									count(asn_sanomat.tunnus) AS rivit,
@@ -1200,12 +1210,12 @@
 				$naytetaanko_toimittajabutton = true;
 
 				while ($row = mysql_fetch_assoc($result)) {
-					
+
 					// n‰ytet‰‰n vain vialliset rivit
 					if ($row["rivit"] == $row["ok"] and $row["status"] == "X") {
 						continue;
 					}
-					
+
 					if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 						if ($naytetaanko_toimittajabutton) {

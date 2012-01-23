@@ -14685,9 +14685,9 @@ if (!function_exists("tee_keraysera2")) {
 
 		$erat = array('tilaukset' => array(), 'pakkaukset' => array());
 
-		enable_ajax();
-
 		if ($debug) {
+			enable_ajax();
+
 			// siirretään lopputulos-taulu debugia varten ylös
 			echo "	<script type='text/javascript'>
 

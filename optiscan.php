@@ -304,7 +304,7 @@
 		}
 
 		if ($response == '') {
-			$response = "N,,,,,,,,,,,,,1,Ei yht‰‰n ker‰yser‰‰ {$erat['tilaukset']}\r\n\r\n";
+			$response = "N,,,,,,,,,,,,,1,Ei yht‰‰n ker‰yser‰‰ {$erat['tilaukset']} {$erat['query']}\r\n\r\n";
 		}
 	}
 	elseif ($sanoma == "PrintContainers") {

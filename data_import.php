@@ -69,7 +69,7 @@
 			$return = tarkasta_liite("userfile", array("XLSX","XLS","DATAIMPORT"));
 
 			if ($return !== TRUE) {
-				echo "<font class='error'>".t("V‰‰r‰ tiedostomuoto")." $kasitellaan_tiedosto_tyyppi !</font><br>\n";
+				echo "<font class='error'>$return</font>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 

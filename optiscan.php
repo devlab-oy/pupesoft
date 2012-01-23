@@ -301,7 +301,7 @@
 		}
 
 		if ($response == '') {
-			$response = "N,,,,,,,,,,,,,1,Ei yht‰‰n ker‰yser‰‰ ".count($erat['tilaukset'])." {$erat['msg']}\r\n\r\n";
+			$response = "N,,,,,,,,,,,,,1,Ei yht‰‰n ker‰yser‰‰ ".var_dump($erat)."\r\n\r\n";
 		}
 		else {
 			$response .= "\r\n";

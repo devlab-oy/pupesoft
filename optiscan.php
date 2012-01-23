@@ -34,6 +34,8 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
+	chdir(dirname(__FILE__));
+
 	require('inc/connect.inc');
 	require('inc/functions.inc');
 
@@ -41,8 +43,6 @@
 	// error_reporting(E_ALL & ~E_NOTICE);
 	ini_set("display_errors", 0);
 	ini_set("log_errors", 1);
-
-	chdir(dirname(__FILE__));
 
 	$handle = fopen("php://stdin", "r");
 	$lines = array();

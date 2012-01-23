@@ -210,7 +210,6 @@
 				}
 			// }
 
-			$response .= "\r\n";
 		}
 		else {
 
@@ -298,13 +297,14 @@
 						$n++;
 					}
 				// }
-
-				$response .= "\r\n";
 			}
 		}
 
 		if ($response == '') {
 			$response = "N,,,,,,,,,,,,,1,Ei yht‰‰n ker‰yser‰‰\r\n\r\n";
+		}
+		else {
+			$response .= "\r\n";
 		}
 	}
 	elseif ($sanoma == "PrintContainers") {

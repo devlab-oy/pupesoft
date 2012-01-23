@@ -15548,70 +15548,76 @@ if (!function_exists("tee_keraysera2")) {
 						foreach ($marr as $tilriv => $kpl) {
 			*/
 
-			if ($debug) {
-				$summataan_laatikot = array();
+			$summataan_laatikot = array();
 
-				$ed_pak = '';
+			$ed_pak = '';
 
-				foreach ($kaytettavat_pakkaukset as $paknro => $arr) {
+			foreach ($kaytettavat_pakkaukset as $paknro => $arr) {
 
-					if (!isset($summataan_laatikot[$paknro])) {
-						$summataan_laatikot[$paknro]['massa'] = $summataan_laatikot[$paknro]['tilavuus'] = 0;
-					}
+				if (!isset($summataan_laatikot[$paknro])) {
+					$summataan_laatikot[$paknro]['massa'] = $summataan_laatikot[$paknro]['tilavuus'] = 0;
+				}
 
-					foreach ($arr as $asiakas => $arr2) {
+				foreach ($arr as $asiakas => $arr2) {
 
-						$chky = count($arr2);
-						$yyy = 1;
+					$chky = count($arr2);
+					$yyy = 1;
 
-						foreach ($arr2 as $increment => $arr3) {
+					foreach ($arr2 as $increment => $arr3) {
 
+						if ($debug) {
 							if ($ed_pak != '' and $ed_pak != $increment) {
 								echo "<tr><th colspan='7'>Yhteensä</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
 							}
 
 							echo "<tr>";
 							echo "<td>",$pakkaukset[$paknro]['nimi'],"</td>";
+						}
 
-							$query = "SELECT nimi FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asiakas}'";
-							$nimi_chk_res = pupe_query($query);
-							$nimi_chk_row = mysql_fetch_assoc($nimi_chk_res);
+						$query = "SELECT nimi FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asiakas}'";
+						$nimi_chk_res = pupe_query($query);
+						$nimi_chk_row = mysql_fetch_assoc($nimi_chk_res);
 
+						if ($debug) {
 							echo "<td>$nimi_chk_row[nimi] ($asiakas)</td>";
 
 							echo "<td>".chr(64+$increment)."</td>";
+						}
 
-							$chk = count($arr3);
-							$xxx = 1;
+						$chk = count($arr3);
+						$xxx = 1;
 
-							foreach ($arr3 as $tilriv => $kpl) {
-								$query = "	SELECT tilausrivi.tuoteno, tuote.tuotemassa, tuote.tuoteleveys, tuote.tuotekorkeus, tuote.tuotesyvyys, tilausrivi.otunnus
-											FROM tilausrivi 
-											JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
-											AND tilausrivi.tunnus = '{$tilriv}'";
-								$tuotenimi_res = pupe_query($query);
-								$tuotenimi_row = mysql_fetch_assoc($tuotenimi_res);
+						foreach ($arr3 as $tilriv => $kpl) {
+							$query = "	SELECT tilausrivi.tuoteno, tuote.tuotemassa, tuote.tuoteleveys, tuote.tuotekorkeus, tuote.tuotesyvyys, tilausrivi.otunnus
+										FROM tilausrivi 
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+										AND tilausrivi.tunnus = '{$tilriv}'";
+							$tuotenimi_res = pupe_query($query);
+							$tuotenimi_row = mysql_fetch_assoc($tuotenimi_res);
 
-								$query = "SELECT ohjausmerkki FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tuotenimi_row['otunnus']}'";
-								$lask_res = pupe_query($query);
-								$lask_row = mysql_fetch_assoc($lask_res);
+							$query = "SELECT ohjausmerkki FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tuotenimi_row['otunnus']}'";
+							$lask_res = pupe_query($query);
+							$lask_row = mysql_fetch_assoc($lask_res);
 
-								$rivi_massa = round(($kpl * $tuotenimi_row['tuotemassa']), 1);
-								$rivi_tilavuus = round(($kpl * ($tuotenimi_row['tuoteleveys'] * $tuotenimi_row['tuotekorkeus'] * $tuotenimi_row['tuotesyvyys']) * 1000), 1);
+							$rivi_massa = round(($kpl * $tuotenimi_row['tuotemassa']), 1);
+							$rivi_tilavuus = round(($kpl * ($tuotenimi_row['tuoteleveys'] * $tuotenimi_row['tuotekorkeus'] * $tuotenimi_row['tuotesyvyys']) * 1000), 1);
 
-								$erat['tilaukset'][$tuotenimi_row['otunnus']] = $tuotenimi_row['otunnus'];
+							$erat['tilaukset'][$tuotenimi_row['otunnus']] = $tuotenimi_row['otunnus'];
 
+							if ($debug) {
 								echo "<td>$tuotenimi_row[otunnus]</td>";
 								echo "<td>$tilriv</td>";
 								echo "<td>$lask_row[ohjausmerkki]</td>";
 								echo "<td>$tuotenimi_row[tuoteno]</td>";
 								echo "<td>$rivi_massa</td>";
 								echo "<td>$rivi_tilavuus</td>";
+							}
 
-								$summataan_laatikot[$increment]['massa'] += $rivi_massa;
-								$summataan_laatikot[$increment]['tilavuus'] += $rivi_tilavuus;
+							$summataan_laatikot[$increment]['massa'] += $rivi_massa;
+							$summataan_laatikot[$increment]['tilavuus'] += $rivi_tilavuus;
 
+							if ($debug) {
 								echo "<td>$kpl</td>";
 
 								if ($chk != $xxx) {
@@ -15628,44 +15634,45 @@ if (!function_exists("tee_keraysera2")) {
 									$xxx++;
 								}
 							}
-
-							if ($chky != $yyy and $ed_pak != '' and $ed_pak == $increment) {
-								echo "</tr>";
-
-								// if ($ed_pak != '' and $ed_pak != $increment) {
-								// 	echo "<tr><th colspan='4'>Paino yhteensä {$summataan_laatikot[$increment]['massa']}</th><th colspan='4'>Tilavuus yhteensä {$summataan_laatikot[$increment]['tilavuus']}</th></tr>";
-								// }
-
-								echo "<tr>";
-								echo "<td>",$pakkaukset[$paknro]['nimi'],"</td>";
-								echo "<td>$nimi_chk_row[nimi] ($asiakas)</td>";
-								$yyy++;
-							}
-
-							$ed_pak = $increment;
 						}
-					}
-					echo "</tr>";
-				}
 
-				if ($ed_pak != '') {
-					echo "<tr><th colspan='7'>Yhteensä</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
-					echo "<tr><th colspan='7'>Keräyserä yhteensä</th>";
+						if ($debug and $chky != $yyy and $ed_pak != '' and $ed_pak == $increment) {
+							echo "</tr>";
 
-					$koko_massa = $koko_tilavuus = 0;
+							// if ($ed_pak != '' and $ed_pak != $increment) {
+							// 	echo "<tr><th colspan='4'>Paino yhteensä {$summataan_laatikot[$increment]['massa']}</th><th colspan='4'>Tilavuus yhteensä {$summataan_laatikot[$increment]['tilavuus']}</th></tr>";
+							// }
 
-					foreach ($summataan_laatikot as $pak => $arr) {
-						foreach ($arr as $key => $val) {
-							${'koko_'.$key} += $val;
+							echo "<tr>";
+							echo "<td>",$pakkaukset[$paknro]['nimi'],"</td>";
+							echo "<td>$nimi_chk_row[nimi] ($asiakas)</td>";
+							$yyy++;
 						}
+
+						$ed_pak = $increment;
 					}
-
-					echo "<th>$koko_massa</th><th>$koko_tilavuus</th>";
-
-					echo "<th></th></tr>";
 				}
-				echo "</table>";
+				echo "</tr>";
 			}
+
+			if ($debug and $ed_pak != '') {
+				echo "<tr><th colspan='7'>Yhteensä</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
+				echo "<tr><th colspan='7'>Keräyserä yhteensä</th>";
+
+				$koko_massa = $koko_tilavuus = 0;
+
+				foreach ($summataan_laatikot as $pak => $arr) {
+					foreach ($arr as $key => $val) {
+						${'koko_'.$key} += $val;
+					}
+				}
+
+				echo "<th>$koko_massa</th><th>$koko_tilavuus</th>";
+
+				echo "<th></th></tr>";
+			}
+
+			if ($debug) echo "</table>";
 		}
 
 		// if ($kukarow['eposti'] != '') {

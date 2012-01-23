@@ -233,7 +233,7 @@
 
 				require('inc/tulosta_reittietiketti.inc');
 
-				$kerayslistatunnus = trim(array_shift($erat['tilaukset'][0]));
+				$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
 
 				// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
 				$query = "	UPDATE lasku SET

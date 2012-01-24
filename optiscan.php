@@ -202,7 +202,8 @@
 					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
 					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-					$hyllypaikka = strtolower($hyllypaikka);
+					$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
+
 					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
 
 					$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
@@ -296,7 +297,8 @@
 						$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
 						$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-						$hyllypaikka = strtolower($hyllypaikka);
+						$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
+
 						$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
 
 						$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");

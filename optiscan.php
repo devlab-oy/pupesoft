@@ -216,8 +216,24 @@
 
 				$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-				$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
-				$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
+				// W7 12 80 => W71280 => w71280 => w 7 128 0
+				$rivi_row['tuoteno'] = strtolower(str_replace(" ", "", $rivi_row['tuoteno']));
+
+				$_tmp = str_split($rivi_row['tuoteno']);
+				$_cnt = count($_tmp);
+				$_arr = array();
+
+				for ($i = 0; $i < $_cnt; $i++) {
+					array_push($_arr, $_tmp[$i]);
+
+					if (!is_int($_tmp[$i])) {
+						array_push($_arr, " ");
+					}
+				}
+
+				$rivi_row['tuoteno'] = implode(" ", $_arr);
+
+				$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
 
 				$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
@@ -314,8 +330,24 @@
 
 					$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-					$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
-					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
+					// W7 12 80 => W71280 => w71280 => w 7 128 0
+					$rivi_row['tuoteno'] = strtolower(str_replace(" ", "", $rivi_row['tuoteno']));
+
+					$_tmp = str_split($rivi_row['tuoteno']);
+					$_cnt = count($_tmp);
+					$_arr = array();
+
+					for ($i = 0; $i < $_cnt; $i++) {
+						array_push($_arr, $_tmp[$i]);
+
+						if (!is_int($_tmp[$i])) {
+							array_push($_arr, " ");
+						}
+					}
+
+					$rivi_row['tuoteno'] = implode(" ", $_arr);
+
+					$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
 
 					$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 

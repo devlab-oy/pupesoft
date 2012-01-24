@@ -153,13 +153,6 @@
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// Katsotaan onko k‰ytt‰j‰ll‰ jo ker‰yser‰ ker‰yksess‰
-		// $query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
-		// 			FROM kerayserat
-		// 			WHERE yhtio = '{$kukarow['yhtio']}'
-		// 			AND laatija = '{$kukarow['kuka']}'
-		// 			AND tila = 'K'
-		// 			ORDER BY sscc, otunnus, pakkausnro";
-
 		$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -169,7 +162,6 @@
 
 		$row = mysql_fetch_assoc($result);
 
-		// if (mysql_num_rows($result) > 0) {
 		if (trim($row['tilausrivit']) != '') {
 
 			$kpl_arr = explode(",", $row['tilausrivit']);
@@ -210,7 +202,6 @@
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tunnus IN ({$row['tilausrivit']})
-						#ORDER BY kerayserat.sscc, vh.indeksi, kerayserat.otunnus, kerayserat.pakkausnro
 						ORDER BY {$orderby}";
 			$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
 
@@ -225,7 +216,6 @@
 
 				$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-				// $rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
 				$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
 				$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
 
@@ -271,13 +261,6 @@
 							AND tunnus in ({$otunnukset})";
 				$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen p‰ivityksen yhteydess‰\r\n\r\n");
 
-				// $query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
-				// 			FROM kerayserat
-				// 			WHERE yhtio = '{$kukarow['yhtio']}'
-				// 			AND laatija = '{$kukarow['kuka']}'
-				// 			AND tila = 'K'
-				// 			ORDER BY sscc, otunnus, pakkausnro";
-
 				$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 							FROM kerayserat
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -316,7 +299,6 @@
 							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tunnus IN ({$row['tilausrivit']})
-							#ORDER BY kerayserat.sscc, vh.indeksi, kerayserat.otunnus, kerayserat.pakkausnro
 							ORDER BY {$orderby}";
 				$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
 
@@ -332,7 +314,6 @@
 
 					$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-					// $rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
 					$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
 					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
 
@@ -519,11 +500,11 @@
 			$query = "UPDATE tilausrivi SET varattu = '{$qty}', tilkpl = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['tunnus']}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
 
-			$query = "UPDATE kerayserat SET kpl = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 		}
 
-		$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+		$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 
 		$response = "0x100";

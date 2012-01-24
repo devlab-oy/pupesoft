@@ -507,6 +507,9 @@
 		$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 
+		$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
+
 		$response = "0x100";
 
 	}

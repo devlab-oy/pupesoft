@@ -204,7 +204,9 @@
 
 					$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+					// $rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+					$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
+					$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
 
 					$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
@@ -299,7 +301,9 @@
 
 						$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
 
-						$rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+						// $rivi_row['tuoteno'] = implode(" ", str_split(strtolower(trim($rivi_row['tuoteno']))));
+						$rivi_row['tuoteno'] = str_replace(" ", "", $rivi_row['tuoteno']);
+						$rivi_row['tuoteno'] = implode(" ", str_split(strtolower($rivi_row['tuoteno']), 3));
 
 						$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 

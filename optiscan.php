@@ -193,7 +193,8 @@
 						IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
 						tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 						kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
-						(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa
+						(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa,
+						kerayserat.nro
 						{$orderby_select}
 						FROM tilausrivi
 						JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
@@ -244,7 +245,7 @@
 				$response .= "N,";
 				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 				// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-				$response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
+				$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
 
 				$n++;
 			}
@@ -310,7 +311,8 @@
 							IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
 							tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 							kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
-							(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa
+							(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa,
+							kerayserat.nro
 							{$orderby_select}
 							FROM tilausrivi
 							JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
@@ -362,7 +364,7 @@
 					$response .= "N,";
 					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 					// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-					$response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
+					$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
 
 					$n++;
 				}
@@ -382,7 +384,7 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = mysql_real_escape_string(trim($sisalto[3]));
+		$nro = mysql_real_escape_string(trim($sisalto[3]));
 		$printer_id = (int) trim($sisalto[4]);
 
 		$query = "	SELECT komento
@@ -397,7 +399,7 @@
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND sscc = '{$sscc}'";
+					AND nro = '{$nro}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
 		if (mysql_num_rows($result) == 0) {
@@ -410,7 +412,7 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				if ($sscc > 0 and $sscc != $row['sscc']) break;
+				if ($nro > 0 and $nro != $row['nro']) break;
 
 				$query = "	SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
 							FROM tilausrivi
@@ -425,7 +427,7 @@
 				$rivit += 1;
 				$otunnus = $row['otunnus'];
 
-				$sscc = $row['sscc'];
+				$nro = $row['nro'];
 			}
 
 			$query = "SELECT toimitustapa, nimi, nimitark, osoite, postino, postitp, viesti, sisviesti2 FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otunnus}'";
@@ -435,7 +437,7 @@
 			$query = "	SELECT *
 						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND sscc = '{$sscc}'
+						AND nro = '{$nro}'
 						GROUP BY pakkausnro
 						ORDER BY pakkausnro";
 			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
@@ -447,7 +449,7 @@
 				$params = array(
 					'tilriv' => $row['tilausrivi'],
 					'pakkaus_kirjain' => $pakkaus_kirjain,
-					'sscc' => $sscc,
+					'sscc' => $row['sscc'],
 					'toimitustapa' => $laskurow['toimitustapa'],
 					'rivit' => $rivit,
 					'paino' => $paino,
@@ -478,7 +480,7 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = (int) trim($sisalto[3]);
+		$nro = (int) trim($sisalto[3]);
 		$row_id = (int) trim($sisalto[4]);
 		$qty = (int) trim($sisalto[5]);
 		$package = mysql_real_escape_string(trim($sisalto[6]));
@@ -487,7 +489,7 @@
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND sscc = '{$sscc}'
+					AND nro = '{$nro}'
 					AND tunnus = '{$row_id}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
@@ -540,11 +542,11 @@
 			$query = "UPDATE tilausrivi SET varattu = '{$qty}', tilkpl = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['tunnus']}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
 
-			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 		}
 
-		$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+		$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 
 		$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
@@ -563,19 +565,12 @@
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = (int) trim($sisalto[3]);
-
-		$query = "	SELECT nro
-					FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND sscc = '{$sscc}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
-		$row = mysql_fetch_assoc($result);
+		$nro = (int) trim($sisalto[3]);
 
 		$query = "	SELECT COUNT(otunnus) AS kpl, GROUP_CONCAT(otunnus) AS otunnukset
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$row['nro']}'
+					AND nro = '{$nro}'
 					ORDER BY sscc";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
@@ -774,9 +769,9 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = (int) trim($sisalto[3]);
+		$nro = (int) trim($sisalto[3]);
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tila = 'K'";
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K'";
 		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
 		if (mysql_num_rows($chkres) > 0) {
@@ -798,11 +793,11 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = (int) trim($sisalto[3]);
+		$nro = (int) trim($sisalto[3]);
 		$row_id = (int) trim($sisalto[4]);
 		$printer_id = (int) trim($sisalto[5]);
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 		$chkrow = mysql_fetch_array($chkres);
 
@@ -826,10 +821,8 @@
 		$res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukitusta poistettaessa\r\n\r\n");
 		*/
 
-		$uusi_sscc = $sscc;
-
 		###### TEHDƒƒN UUSI PAKKAUSKIRJAIN
-		$query = "SELECT (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$chkrow['nro']}'";
+		$query = "SELECT (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}'";
 		$uusi_paknro_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 		$uusi_paknro_row = mysql_fetch_assoc($uusi_paknro_res);
 
@@ -841,7 +834,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'
 					AND pakkausnro = '{$chkrow['pakkausnro']}'
-					AND nro = '{$chkrow['nro']}'";
+					AND nro = '{$nro}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivej‰ p‰ivitett‰ess‰\r\n\r\n");
 
 		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
@@ -849,7 +842,7 @@
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND sscc = '{$uusi_sscc}'";
+					AND nro = '{$nro}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
 		$rivit = $paino = $tilavuus = 0;
@@ -887,7 +880,7 @@
 		$params = array(
 			'tilriv' => $chkrow['tilausrivi'],
 			'pakkaus_kirjain' => $pakkaus_kirjain,
-			'sscc' => $uusi_sscc,
+			'sscc' => $chkrow['sscc'],
 			'toimitustapa' => $laskurow['toimitustapa'],
 			'rivit' => $rivit,
 			'paino' => $paino,
@@ -914,13 +907,13 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$sscc = (int) trim($sisalto[3]);
+		$nro = (int) trim($sisalto[3]);
 		$row_id = (int) trim($sisalto[4]);
 		$container_id = trim($sisalto[5]);
 		$all = trim($sisalto[6]);
 
 		// haetaan ker‰tt‰v‰ ker‰ysrivi
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n numeroa haettaessa\r\n\r\n");
 		$orig_row = mysql_fetch_assoc($result);
 
@@ -948,11 +941,11 @@
 
 				if ($all != '') {
 					if ($all == 1) {
-						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tila = 'K' AND pakkausnro = '{$orig_row['pakkausnro']}'";
+						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K' AND pakkausnro = '{$orig_row['pakkausnro']}' AND sscc = '{$orig_row['sscc']}'";
 						$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 					}
 					else {
-						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND sscc = '{$sscc}' AND tunnus = '{$row_id}'";
+						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 						$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 					}
 				}

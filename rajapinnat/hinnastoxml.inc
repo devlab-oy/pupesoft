@@ -22,6 +22,8 @@
 		$pricelist = $pricelists->addChild('pricelist');
 			$pricelist->addChild('pricelistcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
 			$pricelist->addChild('name', $hinnasto["selite"]);
+			$pricelist->addChild('nameswe', $hinnasto["selite"]);
+			$pricelist->addChild('namewng', $hinnasto["selite"]);
 			$pricelist->addChild('startdate',$hinnasto["alkupvm"]." 00:00");
 			$pricelist->addChild('enddate',$hinnasto["loppupvm"]." 23:59");
 	}

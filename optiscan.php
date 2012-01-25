@@ -224,14 +224,18 @@
 				$_arr = array();
 
 				for ($i = 0; $i < $_cnt; $i++) {
-					array_push($_arr, $_tmp[$i]);
-
-					if (!is_int($_tmp[$i])) {
-						array_push($_arr, " ");
+					if ($i < $_cnt-1 and !is_numeric($_tmp[$i])) {
+						array_push($_arr, $_tmp[$i], " ");
+					}
+					elseif ($i < $_cnt-1 and is_numeric($_tmp[$i]) and isset($_tmp[$i+1]) and !is_numeric($_tmp[$i+1])) {
+						array_push($_arr, $_tmp[$i], " ");
+					}
+					else {
+						array_push($_arr, $_tmp[$i]);
 					}
 				}
 
-				$rivi_row['tuoteno'] = implode(" ", $_arr);
+				$rivi_row['tuoteno'] = implode("", $_arr);
 
 				$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
 
@@ -338,14 +342,18 @@
 					$_arr = array();
 
 					for ($i = 0; $i < $_cnt; $i++) {
-						array_push($_arr, $_tmp[$i]);
-
-						if (!is_int($_tmp[$i])) {
-							array_push($_arr, " ");
+						if ($i < $_cnt-1 and !is_numeric($_tmp[$i])) {
+							array_push($_arr, $_tmp[$i], " ");
+						}
+						elseif ($i < $_cnt-1 and is_numeric($_tmp[$i]) and isset($_tmp[$i+1]) and !is_numeric($_tmp[$i+1])) {
+							array_push($_arr, $_tmp[$i], " ");
+						}
+						else {
+							array_push($_arr, $_tmp[$i]);
 						}
 					}
 
-					$rivi_row['tuoteno'] = implode(" ", $_arr);
+					$rivi_row['tuoteno'] = implode("", $_arr);
 
 					$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
 

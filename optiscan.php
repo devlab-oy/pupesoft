@@ -194,7 +194,7 @@
 						tilausrivi.tuoteno, ROUND(kerayserat.kpl, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 						kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
 						(tuote.tuotemassa * ROUND(kerayserat.kpl, 0)) AS kokonaismassa,
-						kerayserat.nro
+						kerayserat.nro, tuote.kerayskommentti
 						{$orderby_select}
 						FROM tilausrivi
 						JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
@@ -207,6 +207,9 @@
 			$rivi_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe\r\n\r\n");
 
 			while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
+
+				$rivi_row['kerayskommentti'] = str_replace(array("'", ","), "", $rivi_row['kerayskommentti']);
+
 				$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
 				$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
@@ -245,7 +248,7 @@
 				$response .= "N,";
 				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 				// $response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-				$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
+				$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 				$n++;
 			}
@@ -312,7 +315,7 @@
 							tilausrivi.tuoteno, ROUND(kerayserat.kpl, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 							kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
 							(tuote.tuotemassa * ROUND(kerayserat.kpl, 0)) AS kokonaismassa,
-							kerayserat.nro
+							kerayserat.nro, tuote.kerayskommentti
 							{$orderby_select}
 							FROM tilausrivi
 							JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
@@ -325,6 +328,8 @@
 				$rivi_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe\r\n\r\n");
 
 				while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
+
+					$rivi_row['kerayskommentti'] = str_replace(array("'", ","), "", $rivi_row['kerayskommentti']);
 
 					$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
 					$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
@@ -364,7 +369,7 @@
 					$response .= "N,";
 					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 					// $response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-					$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},,0\r\n";
+					$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 					$n++;
 				}

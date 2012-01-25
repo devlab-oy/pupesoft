@@ -52,7 +52,10 @@
 		$liitos = '';
 		$liitostunnus = 0;
 	}
-
+	
+	// Ei rikota rivinvaihtoja
+	$selite = str_ireplace("(br)", "<br>", $selite);
+	
 	if ($paivitetaanko) {
 
 		$query = "	SELECT *

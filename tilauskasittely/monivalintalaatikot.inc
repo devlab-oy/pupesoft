@@ -84,6 +84,12 @@
 	$lisa_parametri			 = "";
 	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "");
 
+	$lisa = isset($lisa) ? trim($lisa) : "";
+	$ulisa = isset($ulisa) ? trim($ulisa) : "";
+	$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
+	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
+	$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
+
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
 	if (!isset($mul_try)) 			$mul_try = array();
@@ -126,7 +132,7 @@
 
 			$query = "	SELECT DISTINCT (COUNT(node.tunnus) - 1) AS syvyys
 						FROM dynaaminen_puu AS node
-						JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+						JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 						WHERE node.yhtio = '{$kukarow['yhtio']}'
 						AND node.laji = '{$param}'
 						AND node.lft > 1
@@ -277,7 +283,7 @@
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		$monivalintalaatikko = strip_tags($monivalintalaatikko);
 
-		if (substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
+		if (isset($dynpuu_count_result) and mysql_num_rows($dynpuu_count_result) > 0 and substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
 			$param = substr($monivalintalaatikko, 11);
 
 			mysql_data_seek($dynpuu_count_result, 0);
@@ -301,7 +307,7 @@
 						$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus order by node.tunnus) tunnukset
 									FROM dynaaminen_puu AS node
 									JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
-									JOIN dynaaminen_puu AS parent USE INDEX (PRIMARY) ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.tunnus IN ($dynaamiset))
+									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
 									WHERE node.yhtio = '{$kukarow['yhtio']}'
 									AND node.laji = '{$param}'
 									AND node.lft > 1
@@ -1155,6 +1161,7 @@
 
 			$joinlisa = "";
 			$nodelisa = "";
+			$nodeinde = "";
 
 			# haetaan vain ne puun tunnukset, joille on tehty linkkauksia
 			if ($tree != "kuka") {
@@ -1173,6 +1180,7 @@
 
 				if (strlen($kaikki_puun_tunnukset_row["tunnukset"]) > 0) {
 					$nodelisa = " AND node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) ";
+					$nodeinde = " use index (PRIMARY) ";
 				}
 				else {
 					continue;
@@ -1181,17 +1189,11 @@
 
 			// Haetaan koko hierarkia
 			$query = "	SELECT DISTINCT parent.tunnus node_tunnus, parent.nimi node_nimi,
-						(	SELECT (COUNT(subnode.tunnus) - 1)
-							FROM dynaaminen_puu AS subnode
-							JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
-							WHERE subnode.laji = parent.laji
-							AND subnode.yhtio = parent.yhtio
-							AND subnode.tunnus = parent.tunnus
-						) syvyys,
+						parent.syvyys,
 						parent.lft,
 						parent.rgt
-						FROM dynaaminen_puu AS node
-						JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
+						FROM dynaaminen_puu AS node $nodeinde
+						JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
 						WHERE node.yhtio = '{$kukarow['yhtio']}'
 						AND node.laji = '{$tree}'
 						AND node.lft > 1

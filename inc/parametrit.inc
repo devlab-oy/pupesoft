@@ -199,6 +199,7 @@ unset($liitetaanko_editilaus_laskulle_hakemisto);
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
 unset($synkronoi_kiellot);
+unset($alv_laskelman_sallittu_erotus);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -417,7 +418,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<table width='100%' height='70%'>";
 				echo "<tr>";
 				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-				echo "<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
+				echo "<img src='http://api.devlab.fi/pupesoft.gif'><br><br>";
 				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
 				echo "</td>";
 				echo "</tr>";
@@ -462,6 +463,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if (isset($filenimi) and $filenimi != '') {
 				header("Content-Length: ".filesize("$pupe_root_polku/dataout/".basename($filenimi)));
 			}
+			elseif (isset($datain_filenimi) and $datain_filenimi != '') {
+				header("Content-Length: ".filesize("$pupe_root_polku/datain/".basename($datain_filenimi)));
+			}			
 			elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
 				header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
 			}

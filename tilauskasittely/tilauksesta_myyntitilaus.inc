@@ -435,7 +435,7 @@
 				}
 
 				if ($kopioi_paikat != "") {
-					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
+					$paikka	= $coprivirow['hyllyalue']."#!¡!#".$coprivirow['hyllynro']."#!¡!#".$coprivirow['hyllyvali']."#!¡!#".$coprivirow['hyllytaso'];
 				}
 				else {
 					$paikka	= "";
@@ -449,7 +449,7 @@
 
 				if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
 					// Otetaan paikka isältä aina kun on tehdaslisävaruste!
-					$query = "	SELECT concat_ws('#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+					$query = "	SELECT concat_ws('#!¡!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '".$isaok[$coprivirow['perheid2']]."'";

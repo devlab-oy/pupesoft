@@ -33,7 +33,7 @@
 
 		$preq = "	SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
 					FROM dynaaminen_puu AS node
-					JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt AND parent.laji = node.laji AND parent.yhtio = node.yhtio)
+					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 					WHERE node.yhtio = '$kukarow[yhtio]'
 					AND node.lft > 0
 					AND node.laji = 'asiakas'

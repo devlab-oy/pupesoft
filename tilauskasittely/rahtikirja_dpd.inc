@@ -1,28 +1,31 @@
 <?php
 
-//jos on laitettu kollikentt‰‰n 0 niin ei yritet‰ luoda pdf:f‰‰
 if ($kollityht > 0) {
 
-	// tarvitaan tilauksen tunnus muutujassa $tunnus
-	// printterin komento muuttujassa $oslapp
-	// $kukarow[yhtio] jostain saadaan yhtio
-	// $yhtiorow array josta saada l‰hett‰j‰n tiedot
+	if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-	// nyt on kaikki tiedot rahtikirjaa varten haettu..
-	//
-	// arrayt:
-	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-	// $rakir_row:sta lˆytyy asiakkaan tiedot ja $rivi:st‰ ytunnus
-	//
-	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-	// mehto sis‰lt‰‰ maksuehdon tiedot
-	// jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
-	//
-	// tulostetaan rahtikirja
+		$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
+					FROM rahtikirjanumero
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytettyaika = '0000-00-00 00:00:00'";
+		$logyres = pupe_query($logyq);
+		$logyrow = mysql_fetch_assoc($logyres);
 
-	//	N‰in se oli muuallakin onkai se sitten oikein?
-	$rahtikirjanro = $lotsikot[0];
+		$rahtikirjanro = $logyrow["rahtikirjanro"];
+
+		$logyq = "	UPDATE rahtikirjanumero
+					SET kayttaja = '$kukarow[kuka]',
+					kaytettyaika = now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+		$logyres = pupe_query($logyq);
+	}
+	elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+		$rahtikirjanro = $lotsikot[0];
+	}
+	else {
+		$rahtikirjanro = $rivi["rahtikirjanro"];
+	}
 
 	if ($phpnimi == "rahtikirja_custom.php") {
 		$laskurow = $osoitelappurow;
@@ -377,7 +380,7 @@ if ($kollityht > 0) {
 		if ($kuljetusohjeet != "") {
 			$komm .= $kuljetusohjeet;
 		}
-		
+
 		$pdf->draw_paragraph(mm_pt(55), mm_pt(20), mm_pt(35), mm_pt(140), $komm, $firstpage, $kirj);
 
 		// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa

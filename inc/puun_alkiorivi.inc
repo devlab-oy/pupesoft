@@ -77,19 +77,11 @@ if (mysql_field_name($result, $i) == "kieli") {
 	$ulos = "<td><select name='$nimi'>";
 	$sel  = "";
 
-	//	näytetäään vain kielet joita on
-	if ($perhe > 0) {
-		$query = "SELECT group_concat(distinct kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and kieli != ''";
-		$res = mysql_query($query) or pupe_error($query);
-		$kilerow = mysql_fetch_array($res);
-		$kielet = $kilerow["kielet"];
-	}
-
 	$query  = "SHOW columns from sanakirja";
 	$fields =  mysql_query($query);
 
 	while ($apurow = mysql_fetch_array($fields)) {
-		if (strlen($apurow[0]) == 2 and (strpos($kielet, $apurow[0]) === false or $apurow[0] == $trow[$i])) {
+		if (strlen($apurow[0]) == 2) {
 			$sel = "";
 			if ($trow[$i] == $apurow[0]) {
 				$sel = "SELECTED";

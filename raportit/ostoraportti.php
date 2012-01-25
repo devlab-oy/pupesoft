@@ -647,28 +647,29 @@
 				$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 			}
 
-			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
-			$query = "describe yhteensopivuus_rekisteri";
-			$res_rekyht = mysql_query($query);
-
-			$joinlisa = '';
+			$joinlisa 	= '';
 			$tyyppilisa = '';
-			$tyyppi = '';
+			$tyyppi 	= '';
 
-			if (mysql_error() == "") {
+			if (table_exists("yhteensopivuus_rekisteri")) {
 
-				$query = "	SELECT DISTINCT tyyppi
-							FROM yhteensopivuus_mp
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$res_rekyht = pupe_query($query);
+				if (table_exists("yhteensopivuus_mp")) {
+					$query = "	SELECT DISTINCT tyyppi
+								FROM yhteensopivuus_mp
+								WHERE yhtio = '{$kukarow['yhtio']}'";
+					$res_rekyht = pupe_query($query);
 
-				if (mysql_num_rows($res_rekyht) > 0) {
-					$tyyppi = 'mp';
-					while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
-						$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+					if (mysql_num_rows($res_rekyht) > 0) {
+						$tyyppi = 'mp';
+
+						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
+							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+						}
 					}
 				}
-				else {
+
+
+				if ($tyyppi == "" and table_exists("yhteensopivuus_tuote")) {
 					$query = "	SELECT DISTINCT tyyppi
 								FROM yhteensopivuus_tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'";
@@ -676,6 +677,7 @@
 
 					if (mysql_num_rows($res_rekyht) > 0) {
 						$tyyppi = 'auto';
+
 						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
 							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
 						}
@@ -702,21 +704,6 @@
 						$joinlisa .= ") ";
 					}
 				}
-			}
-
-			//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
-			// leveys x korkeus x syvyys
-			// leveys x korkeus x pituus
-			$query = "	SHOW columns
-						FROM tuote
-						LIKE 'tuotepituus'";
-			$spres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($spres) == 1) {
-				$splisa = "tuote.tuotepituus tuotesyvyys";
-			}
-			else {
-				$splisa = "tuote.tuotesyvyys";
 			}
 
 			//Ajetaan raportti tuotteittain
@@ -751,7 +738,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -768,6 +755,7 @@
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -802,7 +790,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -822,6 +810,7 @@
 							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							$abcwhere
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
@@ -2262,7 +2251,7 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			if (table_exists(yhteensopivuus_rekisteri)) {
+			if (table_exists("yhteensopivuus_rekisteri")) {
 				echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
 				echo "<tr><td class='back'><br></td></tr>";
 			}

@@ -253,6 +253,36 @@
 			</select>
 			</td></tr>";
 
+	echo "<tr><th valign='top'>".t("Maarajaus")."</th>";
+
+	if (!isset($maarajaus)) $maarajaus = '';
+
+	$query = "	SELECT distinct koodi, nimi
+			FROM maat
+			WHERE nimi != ''
+			ORDER BY koodi";
+	$vresult = pupe_query($query);
+
+	echo "<td colspan='3'><select name='maarajaus'><option value = '' >".t("Ei valintaa")."</option>";
+
+	while ($vrow=mysql_fetch_array($vresult)) {
+		$sel='';
+		if (strtoupper($maarajaus) == strtoupper($vrow[0])) {
+			$sel = "selected";
+		}
+		echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+	}
+	echo "</select></td></tr>";
+
+	$sel='';
+	if (!isset($palvelut)) $palvelut = '';
+	if ($palvelut != "") {
+		$sel = "CHECKED";
+	}
+
+	// Tämä vielä tekemättä
+	//echo "<tr><th valign='top'>".t("Palveluiden erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
+
 	echo "</table><br>";
 
 	$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
@@ -408,6 +438,8 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
+		if ($maarajaus != '') $lisa .= " and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
+
 		$asiakasjoini  = "";
 		$konsernijoini = "";
 		$konsernilisa  = "";
@@ -435,7 +467,7 @@
 
 		$query = "	SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) tili, tiliointi.tapvm, kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
 					tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
-					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi
+					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso
 					FROM tiliointi
 					LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 					LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -450,6 +482,7 @@
 					$lisa
 					$konsernilisa
 					ORDER BY $jarj";
+
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -589,7 +622,7 @@
 				}
 
 				echo "<td valign='top' align='right'>";
-				if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
+				if ($mutositelink) echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel//maarajaus=$maarajaus".str_replace("&","//",$ulisa)."///$trow[rivitunnus]'>";
 
 				echo "<font class='$class'>".sprintf("%.2f", $trow["summa"])."</font>";
 				if (isset($workbook)) $worksheet->write($excelrivi, 6, $trow["summa"]);
@@ -630,6 +663,23 @@
 
 				if ($trow['valkoodi'] != '' and $trow['summa_valuutassa'] != '') {
 					$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];
+				}
+
+				if ($trow["alv_taso"] == "fi305") {
+					// Onko tosite liitetty keikkaan
+					$query = "SELECT nimi, laskunro, mapvm from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[ltunnus]'";
+					$keikres = pupe_query($query);
+
+					if (mysql_num_rows($keikres) > 0) {
+						$keikrow = mysql_fetch_assoc($keikres);
+
+
+						$query = "SELECT nimi, laskunro, mapvm from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro = '$keikrow[laskunro]'and vanhatunnus='0'";
+						$keikres = pupe_query($query);
+						$keikrow2 = mysql_fetch_assoc($keikres);
+
+						echo "<td class='spec'>".t("Keikka").": $keikrow[laskunro], ".t("Pvm").": ".tv1dateconv($keikrow2["mapvm"])."</td>";
+					}
 				}
 
 				echo "</tr>";

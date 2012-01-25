@@ -51,6 +51,9 @@
 		elseif ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
 		}
+		elseif($trow[$i] == 'maventa') {
+			$sel5 = "selected";
+		}
 		else {
 			$sel1 = "selected";
 		}
@@ -59,6 +62,7 @@
 		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
 		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
 		$ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
+		$ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1507,27 +1511,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "epakur_kehahin_paivitys") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($trow[$i] != 'X') {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value='' $sel1>".t("Ep‰kuranttiuspoisto EI MUUTA kehahintaa.")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Ep‰kuranttiuspoisto MUUTTAA kehahintaa.")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2424,6 +2407,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "kehahinvirhe_esto_laskutus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei estet‰ laskutusta")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Estet‰‰n laskutus mik‰li keskihankintahinta on nolla tai rivin kate on negatiivinen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "kirjanpidon_tarkenteet") {
 
@@ -2820,7 +2818,8 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n kululaskujen summaa, mik‰li kululaskut on syˆtetty, muuten kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2872,17 +2871,52 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
-	
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
 		$sel = $trow[$i] == 'N' ? ' selected' : '';
-		
-		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰");
-		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰");
+
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰ (asiakkaallevalmistus)");
+		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰ (asiakkaallevalmistus)");
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'tarkista_eankoodi') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei tehd‰ tuotteen EAN13-koodin oikeellisuustarkistusta")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Tarkistetaan tuotteen EAN13-koodin oikeellisuus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'teeostotilaus_valmistuksen_tulosjonosta') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Valmistusten tulostusjonosta ei luoda ostotilauksia");
+		$ulos .= "<option value = 'K' $sel>".t("Valmistusten tulostusjonosta voi luoda ostotilauksia");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'maksukehotus_kentat') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

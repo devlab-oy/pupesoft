@@ -545,7 +545,7 @@ if ($tuoteno != '') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tuoteno'
 							and laadittu < '$pvm'
-							and hinta <> 0
+							and laji not in ('poistettupaikka', 'uusipaikka')
 							ORDER BY laadittu desc
 							LIMIT 1";
 				$result = pupe_query($query);

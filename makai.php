@@ -310,7 +310,14 @@
 						$laskusis1  	= $laskurow["tunnus"];
 						$laskusis2  	= $laskurow["sisviesti2"];
 				  	 	$laskutyyppi	= 5;
-                        $laskuviesti    = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
+						$laskuviesti	= $laskurow['viesti'];
+
+						if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+			                $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
+			            }
+
+						//Sampo/Danske haluaa viestiin ainakin yhden merkin
+						if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
 						if (strlen($laskurow["viite"]) > 0) {
 							$laskuviesti = sprintf ('%020s', $laskurow["viite"]); //Etunollatäyttö
@@ -498,7 +505,9 @@
 									left(concat_ws(' ', osoite, osoitetark),45) osoite,
 									left(concat_ws(' ', postino, postitp),45) postitp,
 									sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
-									group_concat(viite) viite, group_concat(viesti) viesti,
+									group_concat(distinct viite) viite,
+									group_concat(distinct viesti) viesti,
+									group_concat(distinct laskunro) laskunro,
 									ultilno, group_concat(lasku.tunnus) tunnus,
 									yriti.tilino ytilino, yriti.nimi tilinimi,
 									maa, pankki1, pankki2, pankki3, pankki4,
@@ -583,7 +592,6 @@
 								$laskusumma 		= $laskurow["summa"];
 								$laskuvaluutta 		= $laskurow["valkoodi"];
 								$laskutilino 		= $laskurow["ultilno"];
-								$laskuaihe 			= $laskurow["viesti"] . " " . $laskurow["tunnus"];
 								$laskumaakoodi 		= $laskurow["maa"];
 								$laskupankki1  		= $laskurow["pankki1"];
 								$laskupankki2  		= $laskurow["pankki2"];
@@ -592,6 +600,11 @@
 								$laskuswift 		= $laskurow["swift"];
 								$laskuyritivaluutta	= $laskurow["yritivalkoodi"];
 								$ohjeitapankille 	= $laskurow["sisviesti1"];
+								$laskuaihe			= $laskurow['viesti'];
+
+								if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+					                $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
+					            }
 
 								if ($kotimaa == "FI") {
 									require("inc/lum2rivi.inc");
@@ -636,7 +649,7 @@
 							lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
 							left(concat_ws(' ', osoite, osoitetark),45) osoite,
 							left(concat_ws(' ', postino, postitp),45) postitp,
-							summa, lasku.valkoodi, viite, viesti,
+							summa, lasku.valkoodi, viite, viesti, laskunro,
 							ultilno, lasku.tunnus, sisviesti2, sisviesti1,
 							yriti.tilino ytilino, yriti.nimi tilinimi,
 							maa, pankki1, pankki2, pankki3, pankki4,
@@ -693,17 +706,21 @@
 							$laskusumma = $laskurow["summa"];
 						}
 
-						$laskuvaluutta 	= $laskurow["valkoodi"];
-						$laskutilino 	= $laskurow["ultilno"];
-						$laskuaihe 		= $laskurow["viesti"] . " " . $laskurow["tunnus"];
-						$laskumaakoodi 	= $laskurow["maa"];
-						$laskupankki1  	= $laskurow["pankki1"];
-						$laskupankki2  	= $laskurow["pankki2"];
-						$laskupankki3  	= $laskurow["pankki3"];
-						$laskupankki4  	= $laskurow["pankki4"];
-						$laskuswift 	= $laskurow["swift"];
-						$laskuyritivaluutta  = $laskurow["yritivalkoodi"];
-						$ohjeitapankille = $laskurow["sisviesti1"];
+						$laskuvaluutta 		= $laskurow["valkoodi"];
+						$laskutilino 		= $laskurow["ultilno"];
+						$laskumaakoodi 		= $laskurow["maa"];
+						$laskupankki1  		= $laskurow["pankki1"];
+						$laskupankki2  		= $laskurow["pankki2"];
+						$laskupankki3  		= $laskurow["pankki3"];
+						$laskupankki4  		= $laskurow["pankki4"];
+						$laskuswift 		= $laskurow["swift"];
+						$laskuyritivaluutta	= $laskurow["yritivalkoodi"];
+						$ohjeitapankille 	= $laskurow["sisviesti1"];
+						$laskuaihe			= $laskurow['viesti'];
+
+						if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+			                $laskuaihe = (trim($laskuaihe) == "") ? $laskurow['laskunro'] : $laskuaihe." ".$laskurow['laskunro'];
+			            }
 
 						//haetaan tämän tilin tiedot
 						if ($kotimaa == "FI") {

@@ -170,6 +170,23 @@
 
 			echo "</select></td></tr>";
 
+			if ($toim == "VALMISTAVARASTOON") {
+				echo "<tr><th>".t("Valmistuslinja").":</th>";
+				echo "<td colspan='3'>";
+
+				$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
+
+				echo "<select name='valmistuslinja'>";
+				echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
+
+				while ($valmistuslinja_row = mysql_fetch_array($valmistuslinja_result)) {
+					$sel = ($valmistuslinja_row["selite"] == $srow["kohde"]) ? "selected" : "";
+					echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
+				}
+				echo "</select>";
+				echo "</td></tr>";
+			}
+
 			echo "<tr><th>".t("Nimi").":</th><td colspan='3'><input type='text' size='35' name='toim_nimi' value='$srow[toim_nimi]'></td>";
 			echo "<tr><th>".t("Nimitark").":</th><td colspan='3'><input type='text' size='35' name='toim_nimitark' value='$srow[toim_nimitark]'></td>";
 			echo "<tr><th>".t("Osoite").":</th><td colspan='3'><input type='text' size='35' name='toim_osoite' value='$srow[toim_osoite]'></td>";
@@ -460,6 +477,7 @@
 					varasto 			= '$varasto',
 					hyvaksynnanmuutos 	= '$luokka',
 					tunnusnippu			= '$tunnusnippu',
+					kohde				= '$valmistuslinja',
 					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {

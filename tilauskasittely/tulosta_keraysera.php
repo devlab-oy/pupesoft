@@ -801,7 +801,9 @@
 		}
 	}
 	else {
-		echo "<font class='error'>",t("Keräysvyöhyke täytyy valita käyttäjän takanta"),"</font><br />";
+		if (trim($kukarow['keraysvyohyke']) == '') {
+			echo "<font class='error'>",t("Keräysvyöhyke täytyy valita käyttäjän takanta"),"</font><br />";
+		}
 	}
 
 	require ("inc/footer.inc");

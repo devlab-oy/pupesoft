@@ -40,6 +40,7 @@
 			LisaaPaaKat($toim, $uusi_nimi);
 			$tee = '';
 		}
+		paivitapuunsyvyys($toim);
 	}
 
 	/* html list */
@@ -57,7 +58,7 @@
 				AND node.laji = '{$toim}'
 				GROUP BY node.lft
 				ORDER BY node.lft";
-					
+	
 	$re = pupe_query($qu);
 	
 	// handlataan tilanne kun ei ole viela puun root nodea
@@ -77,12 +78,12 @@
 		echo "<div style='border: 1px solid black; width: 500px; background: #ffffff'>";
 		echo "<ul id='eka'>";
 		
-		//mysql_fetch_assoc($re);
 		$prevdepth = 0;
 		
 		while ($row = mysql_fetch_assoc($re)) {
 		
 			// tarkistetaan onko dynaamisen puun syvyys oikein
+			/*
 			if ($row["node_syvyys"] != $row["syvyys"]) {
 				$qu = "	UPDATE dynaaminen_puu
 						SET syvyys = {$row["syvyys"]}
@@ -91,6 +92,7 @@
 						AND tunnus 	= {$row["node_tunnus"]}";
 				$re = pupe_query($qu);
 			}
+			*/
 			
 			// vahan kikkailua jotta saadaan list elementit suljettua standardin mukaisesti
 			$diff = $row['syvyys'] - $prevdepth;
@@ -106,7 +108,7 @@
 			}
 			if($diffi == 0) echo "</li>";
 			
-			echo "\n<li class='nodes' id='{$row['node_tunnus']}'>{$row['node_nimi']} ({$row['node_koodi']})";
+			echo "\n<li class='nodes' id='{$row['node_tunnus']}'>{$row['node_nimi']} ({$row['node_tunnus']} / {$row['node_koodi']})";
 			
 			$prevdepth = $row['syvyys'];
 		}
@@ -177,7 +179,7 @@
 					}
 					else if(params["tee"] == "lisaa") {
 						var nodeulli = jQuery("#"+params["nodeid"]+" > ul > li:first");
-						var newli = "<li class='nodes' id='"+jQuery("#newid").val()+"'>"+params["uusi_nimi"]+" ("+jQuery("#newcode").val()+")</li>";
+						var newli = "<li class='nodes' id='"+jQuery("#newid").val()+"'>"+params["uusi_nimi"]+" ("+jQuery("#newid").val()+" / "+jQuery("#newcode").val()+")</li>";
 						if(nodeulli.size()) {
 							nodeulli.before(newli);
 						}
@@ -189,7 +191,7 @@
 					else if(params["tee"] == "muokkaa") {
 						var updli = jQuery("#"+params["nodeid"]);
 						var childul = jQuery("#"+params["nodeid"]+" > ul");
-						updli.html(params["uusi_nimi"]+" ("+params["uusi_koodi"]+")");
+						updli.html(params["uusi_nimi"]+" ("+params["nodeid"]+" / "+params["uusi_koodi"]+")");
 						if(childul.size() > 0) {
 							updli.append("<ul>"+childul.html()+"</ul>");
 						}

@@ -11290,19 +11290,20 @@ if (!function_exists("paivitakat")) {
 if (!function_exists("muutaOksienRL")) {
 	function muutaOksienRL($laji, $kohdevas, $muutos) {
 		global $kukarow;
-
+		
 		$qu = "	UPDATE dynaaminen_puu
 				SET lft = lft+{$muutos}
 				WHERE yhtio = '{$kukarow["yhtio"]}'
-				AND laji = '{$laji}' and lft >= '{$kohdevas}'";
+				AND laji = '{$laji}' and lft >= {$kohdevas}";
 		$re = pupe_query($qu);
-
+		
 		$qu = "	UPDATE dynaaminen_puu
 				SET rgt = rgt+{$muutos}
 				WHERE yhtio = '{$kukarow["yhtio"]}'
 				AND laji = '{$laji}'
-				and rgt >= '{$kohdevas}'";
+				and rgt >= {$kohdevas}";
 		$re = pupe_query($qu);
+		
 	}
 }
 
@@ -11318,7 +11319,7 @@ if (!function_exists("muutaOksavalinRL")) {
 				AND lft >= {$src['lft']}
 				AND lft <= {$src['rgt']}";
 		$re = pupe_query($qu);
-
+		
 		$qu = "	UPDATE dynaaminen_puu
 				SET rgt = rgt+{$muutos}
 				WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -11388,6 +11389,40 @@ if (!function_exists("SiirraTaso")) {
 
 		return $kohde;
 
+	}
+}
+
+// Tarkistaa onko dynaamisen puun syvyys oikein ja paivittaa tarvittaessa
+if (!function_exists("paivitapuunsyvyys")) {
+	function paivitapuunsyvyys($laji) {
+		global $kukarow;
+		
+		$qu = "SELECT
+				node.lft AS lft,
+				node.rgt AS rgt,
+				node.tunnus AS node_tunnus,
+				node.syvyys as node_syvyys,
+				(COUNT(node.tunnus) - 1) AS syvyys
+				FROM dynaaminen_puu AS node
+				JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+				WHERE node.yhtio = '{$kukarow["yhtio"]}'
+				AND node.laji = '{$laji}'
+				GROUP BY node.lft
+				ORDER BY node.lft";	
+		$re = pupe_query($qu);
+		
+		while($row = mysql_fetch_assoc($re)) {
+			
+			if ($row["node_syvyys"] != $row["syvyys"]) {
+					$updqu = "UPDATE dynaaminen_puu
+							SET syvyys = {$row["syvyys"]}
+							WHERE yhtio	= '{$kukarow["yhtio"]}'
+							AND laji	= '{$laji}'
+							AND tunnus 	= {$row["node_tunnus"]}";
+					$updateres = pupe_query($updqu);
+			}
+		}
+		return;
 	}
 }
 

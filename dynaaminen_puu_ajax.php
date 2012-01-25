@@ -40,7 +40,7 @@
 		$noderow = getnoderow($toim, $nodeid);
 		
 		// muokkaustoiminnot
-		if(isset($tee)) {
+		if(isset($tee) && $tee != '') {
 			if($saamuokata) {
 					// Siirretään haaraa järjestyksessä ylös tai alas
 				if ($tee == 'ylos' or $tee == 'alas') {
@@ -53,6 +53,7 @@
 				elseif($tee == 'lisaa' && isset($uusi_nimi) && trim($uusi_nimi) != "" && isset($uusi_koodi) && trim($uusi_koodi) != "") {
 					// lisataan lapsitaso
 					$uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi);
+					paivitapuunsyvyys($toim);
 					
 					echo "<input type='hidden' id='newid' value='{$uusirivi['tunnus']}' />
 						  <input type='hidden' id='newcode' value='{$uusirivi['koodi']}' />";
@@ -60,12 +61,25 @@
 				elseif($tee == 'poista') {
 					// poistaa ja upgradettaa alemmat lapset isommaksi.
 					PoistaLapset($toim, $noderow['lft']);
+					paivitapuunsyvyys($toim);
 				}
 				elseif($tee == 'muokkaa' && isset($uusi_nimi) && trim($uusi_nimi) != "" && isset($uusi_koodi) && trim($uusi_koodi) != "") {
 					paivitakat($toim, $uusi_koodi, $uusi_nimi, $nodeid);
 				}
+				elseif($tee == 'siirrataso' && isset($kohdetaso) && $kohdetaso != "") {
+					// haetaan kohdenode
+					$targetnoderow = getnoderow($toim, $kohdetaso);
+					
+					if($targetnoderow != FALSE) {					
+						$src['lft'] = $noderow['lft'];
+						$src['rgt'] = $noderow['rgt'];
+						siirraOksa($toim,$src,$targetnoderow['rgt']);
+						paivitapuunsyvyys($toim);
+					}
+				}
 				// haetaan uudelleen paivittyneet
 				$noderow = getnoderow($toim, $nodeid);
+				
 			}
 			elseif($saamuokataliitosta) {
 				if($tee == 'addtotree') {
@@ -77,7 +91,6 @@
 					$re = pupe_query($qu);
 				}
 			}
-			
 			$tee = '';
 		}
 		
@@ -122,6 +135,7 @@
 			echo "	<a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
 					<a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirrä ylöspäin'),"'/> ".t('Siirrä tasoa ylöspäin')."</a><br />
 					<a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirrä alaspäin'),"'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />
+					<a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirrä alatasoksi'),"'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />
 					<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lisää'),"'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
 			
 			// poistonappi aktiivinen vain jos ei ole liitoksia
@@ -149,6 +163,22 @@
 		}
 		echo "</div>";
 		
+		// tason siirtolaatikko
+		echo "<div id='movebox' style='display: none'>
+				<form id='moveform'>
+				<fieldset>
+					<legend style='font-weight: bold'>".t("Siirrä valitun tason alatasoksi")."</legend>
+					<ul style='list-style:none; padding: 5px'>
+						<li style='padding: 3px'>
+							<label style='display: inline-block; width: 125px'>Kohdetason tunnus <font style='color: red'>*</font></label>
+							<input size='5' id='kohdetaso' autocomplete='off' />
+						</li>
+					</ul>
+					<input type='submit' id='movesubmitbtn' value='".t("Siirrä")."' />
+					</form>
+				</div>
+				";
+		
 		// tason muokkauslaatikko
 		echo "<div id='nodebox' style='display: none'>
 			<form id='tasoform'>
@@ -166,7 +196,7 @@
 				</ul>
 				<input type='hidden' id='tee' />
 				<p style='display: none; color: red' id='nodeboxerr'>Nimi tai koodi ei saa olla tyhjä.</p>
-				<input type='submit' id='submitbtn' value='Tallenna' />
+				<input type='submit' id='editsubmitbtn' value='Tallenna' />
 			</fieldset>
 			</form>
 		</div>";
@@ -192,7 +222,9 @@
 			});
 			
 			var nodebox			= jQuery("#nodebox");
+			var movebox			= jQuery("#movebox");
 			var addboxbutton	= jQuery("#showaddbox");
+			var moveboxbutton	= jQuery("#showmovebox");
 			var editboxbutton	= jQuery("#showeditbox");
 			var nodeboxtitle	= jQuery("#nodeboxtitle");
 			var nodeboxname		= jQuery("#uusi_nimi");
@@ -206,6 +238,12 @@
 				nodeboxname.val("").focus();
 				nodebox.show();
 				nodeboxcode.val("");
+				return false;
+			});
+			
+			moveboxbutton.click(function () {
+				moveboxbutton.replaceWith(movebox);
+				movebox.show();
 				return false;
 			});
 			
@@ -228,6 +266,15 @@
 					jQuery("#nodeboxerr").show();
 					return false;
 				}
+				
+				editNode(params);
+				
+				return false;
+			});
+			
+			jQuery("#moveform").submit(function() {
+				params["kohdetaso"]	= jQuery("#kohdetaso").val();
+				params["tee"]		= "siirrataso";
 				
 				editNode(params);
 				return false;

@@ -424,6 +424,10 @@
 				$paino_res = pupe_query($query);
 				$paino_row = mysql_fetch_assoc($paino_res);
 
+				if (!isset($paino[$row['sscc']])) $paino[$row['sscc']] = 0;
+				if (!isset($tilavuus[$row['sscc']])) $tilavuus[$row['sscc']] = 0;
+				if (!isset($rivit[$row['sscc']])) $rivit[$row['sscc']] = 0;
+
 				$paino[$row['sscc']] += $paino_row['paino'];
 				$tilavuus[$row['sscc']] += $paino_row['tilavuus'];
 				$rivit[$row['sscc']] += 1;

@@ -191,9 +191,9 @@
 			$query = "	SELECT keraysvyohyke.nimitys AS ker_nimitys,
 						tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
 						IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
-						tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
+						tilausrivi.tuoteno, ROUND(kerayserat.kpl, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 						kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
-						(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa,
+						(tuote.tuotemassa * ROUND(kerayserat.kpl, 0)) AS kokonaismassa,
 						kerayserat.nro
 						{$orderby_select}
 						FROM tilausrivi
@@ -309,9 +309,9 @@
 				$query = "	SELECT keraysvyohyke.nimitys AS ker_nimitys,
 							tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
 							IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
-							tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
+							tilausrivi.tuoteno, ROUND(kerayserat.kpl, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
 							kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
-							(tuote.tuotemassa * ROUND(tilausrivi.varattu, 0)) AS kokonaismassa,
+							(tuote.tuotemassa * ROUND(kerayserat.kpl, 0)) AS kokonaismassa,
 							kerayserat.nro
 							{$orderby_select}
 							FROM tilausrivi

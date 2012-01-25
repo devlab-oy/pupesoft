@@ -206,7 +206,7 @@
 			$rivi_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe\r\n\r\n");
 
 			while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
-				$pakkauskirjain = strtolower(chr((64+$rivi_row['pakkausnro'])));
+				$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
 				$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
 				$hyllypaikka = $rivi_row['hyllyalue'];
@@ -214,10 +214,10 @@
 				$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
 				$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-				$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
+				$hyllypaikka = implode(" ", str_split(strtoupper(trim($hyllypaikka))));
 
 				// W7 12 80 => W71280 => w71280 => w 7 128 0
-				$rivi_row['tuoteno'] = strtolower(str_replace(" ", "", $rivi_row['tuoteno']));
+				$rivi_row['tuoteno'] = strtoupper(str_replace(" ", "", $rivi_row['tuoteno']));
 
 				$_tmp = str_split($rivi_row['tuoteno']);
 				$_cnt = count($_tmp);
@@ -324,7 +324,7 @@
 
 				while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
 
-					$pakkauskirjain = strtolower(chr((64+$rivi_row['pakkausnro'])));
+					$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
 					$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
 					$hyllypaikka = $rivi_row['hyllyalue'];
@@ -332,10 +332,10 @@
 					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
 					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-					$hyllypaikka = implode(" ", str_split(strtolower(trim($hyllypaikka))));
+					$hyllypaikka = implode(" ", str_split(strtoupper(trim($hyllypaikka))));
 
 					// W7 12 80 => W71280 => w71280 => w 7 128 0
-					$rivi_row['tuoteno'] = strtolower(str_replace(" ", "", $rivi_row['tuoteno']));
+					$rivi_row['tuoteno'] = strtoupper(str_replace(" ", "", $rivi_row['tuoteno']));
 
 					$_tmp = str_split($rivi_row['tuoteno']);
 					$_cnt = count($_tmp);

@@ -407,12 +407,14 @@
 		}
 
 		if (trim($response) == '') {
-			$rivit = $paino = $tilavuus = 0;
+			# $rivit = $paino = $tilavuus = 0;
 			$otunnus = 0;
+
+			$rivit = $paino = $tilavuus = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				if ($nro > 0 and $nro != $row['nro']) break;
+				// if ($nro > 0 and $nro != $row['nro']) break;
 
 				$query = "	SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
 							FROM tilausrivi
@@ -422,12 +424,12 @@
 				$paino_res = pupe_query($query);
 				$paino_row = mysql_fetch_assoc($paino_res);
 
-				$paino += $paino_row['paino'];
-				$tilavuus += $paino_row['tilavuus'];
-				$rivit += 1;
+				$paino[$row['sscc']] += $paino_row['paino'];
+				$tilavuus[$row['sscc']] += $paino_row['tilavuus'];
+				$rivit[$row['sscc']] += 1;
 				$otunnus = $row['otunnus'];
 
-				$nro = $row['nro'];
+				// $nro = $row['nro'];
 			}
 
 			$query = "SELECT toimitustapa, nimi, nimitark, osoite, postino, postitp, viesti, sisviesti2 FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otunnus}'";
@@ -451,9 +453,9 @@
 					'pakkaus_kirjain' => $pakkaus_kirjain,
 					'sscc' => $row['sscc'],
 					'toimitustapa' => $laskurow['toimitustapa'],
-					'rivit' => $rivit,
-					'paino' => $paino,
-					'tilavuus' => $tilavuus,
+					'rivit' => $rivit[$row['sscc']],
+					'paino' => $paino[$row['sscc']],
+					'tilavuus' => $tilavuus[$row['sscc']],
 					'lask_nimi' => $laskurow['nimi'],
 					'lask_nimitark' => $laskurow['nimitark'],
 					'lask_osoite' => $laskurow['osoite'],
@@ -771,7 +773,22 @@
 
 		$nro = (int) trim($sisalto[3]);
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K'";
+		// $query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K'";
+		// $chkres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
+
+		// if (mysql_num_rows($chkres) > 0) {
+		// 	$response = "1,Kaikki rivit ei ole kerätty\r\n\r\n";
+		// }
+		// else {
+			$response = "0,\r\n\r\n";
+		// }
+	}
+	elseif ($sanoma == "SignOff") {
+
+		$kukarow['yhtio'] = 'artr';
+		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
+
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND laatija = '{$kukarow['kuka']}' AND tila = 'K'";
 		$chkres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
 
 		if (mysql_num_rows($chkres) > 0) {
@@ -780,9 +797,6 @@
 		else {
 			$response = "0,\r\n\r\n";
 		}
-	}
-	elseif ($sanoma == "SignOff") {
-		$response = "0,\r\n\r\n";
 	}
 	elseif ($sanoma == "Replenishment") {
 

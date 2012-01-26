@@ -1725,7 +1725,7 @@
 
 				$pvm = tv1dateconv($pvm);
 
-				$sel = $parent_row_select_date == $pvm ? " selected" : "";
+				$sel = $parent_row_select_date == $pvm ? " selected" : (date("d.m.Y") == $pvm ? " selected" : "");
 
 				echo "<option value='{$pvm}'{$sel}>{$pvm}</option>";
 			}

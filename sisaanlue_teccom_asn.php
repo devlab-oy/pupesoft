@@ -2,38 +2,34 @@
 
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
-		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
-	}
-
-	error_reporting(E_ALL);
-	ini_set("display_errors", 1);
-
-	require ("inc/connect.inc");
-	require ("inc/functions.inc");
-
-	if ($argv[1] == '') {
-		echo "Yhtiötä ei ole annettu, ei voida toimia\n";
-		die;
+		require ("inc/parametrit.inc");
 	}
 	else {
-		$kukarow["yhtio"] = $argv[1];
+		error_reporting(E_ALL);
+		ini_set("display_errors", 1);
+
+		require ("inc/connect.inc");
+		require ("inc/functions.inc");
+
+		if ($argv[1] == '') {
+			echo "Yhtiötä ei ole annettu, ei voida toimia\n";
+			die;
+		}
+		else {
+			$kukarow["yhtio"] = $argv[1];
+		}
 	}
 
-	// $kansio 		= "/Users/sami/temp/asn_testi";			// muuta näiden polut oikeiksi
-	// $kansio_valmis 	= "/Users/sami/temp/asn_testi/valmis";	// muuta näiden polut oikeiksi
-	// $kansio_error 	= "/Users/sami/temp/asn_testi/error";		// muuta näiden polut oikeiksi
-	
-	//pupe-juures php sisaanlue_teccom_asn.php artr
-	$kansio 		= "/Users/tony/Desktop/teccom_testi/teccom-aineistot";			// muuta näiden polut oikeiksi
-	$kansio_valmis 	= "/Users/tony/Desktop/teccom_testi/teccom-aineistot/valmis";	// muuta näiden polut oikeiksi
-	$kansio_error 	= "/Users/tony/Desktop/teccom_testi/teccom-aineistot/error";		// muuta näiden polut oikeiksi
-	
-	//pupe-juures php sisaanlue_teccom_asn.php artr 
-	// $kansio 		= "/home/tony/teccom_testi/teccom-aineistot";			// muuta näiden polut oikeiksi
-	// $kansio_valmis 	= "/home/tony/teccom_testi/teccom-aineistot/valmis";	// muuta näiden polut oikeiksi
-	// $kansio_error 	= "/home/tony/teccom_testi/teccom-aineistot/error";		// muuta näiden polut oikeiksi
-	
-	
+	// määritellään polut
+	if (!isset($teccomkansio)) {
+		$teccomkansio = "/home/teccom";
+	}
+	if (!isset($teccomkansio_valmis)){
+		$teccomkansio_valmis = "/home/teccom/valmis";
+	}
+	if (!isset($teccomkansio_error)) {
+		$teccomkansio_error = "/home/teccom/error";
+	}
 
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
@@ -57,13 +53,13 @@
 	$tuotteet					= "";
 	$vastaanottaja				= "";
 
-	if ($handle = opendir($kansio)) {
+	if ($handle = opendir($teccomkansio)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
 
-			if (is_file($kansio."/".$file)) {
+			if (is_file($teccomkansio."/".$file)) {
 
-				$tiedosto = $kansio."/".$file;
+				$tiedosto = $teccomkansio."/".$file;
 
 				$xml = @simplexml_load_file($tiedosto);
 				$tiedosto_sisalto = file_get_contents($tiedosto);
@@ -267,7 +263,7 @@
 
 						if (mysql_num_rows($checkinsertresult) > 0) {
 							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero löytyy tietokannasta jo sanomat, ei lisätä uudestaan sanomia\n";
-							rename($kansio."/".$file, $kansio_error."/".$file);
+							rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
 						}
 						else {
 
@@ -328,7 +324,7 @@
 											luontiaika			= now()";
 							$Xresult = pupe_query($tecquery);
 
-							rename($kansio."/".$file, $kansio_valmis."/".$file);
+							rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
 						}
 
 						unset($eka_insert); // unsetataan tämä arvo aina kierroksen lopussa koska halutaan seuraavan kierrokselta ensimmäisen insertin Id talteen
@@ -340,12 +336,12 @@
 					}
 					else {
 						echo t("Virhe! Tavarantoimittajan numero puuttuu sekä ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
-						rename($kansio."/".$file, $kansio_error."/".$file);
+						rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
 					}
 				}
 				else {
 					echo t("Tiedosto ei ole XML-sanoma").": $tiedosto\n\n";
-					rename($kansio."/".$file, $kansio_error."/".$file);
+					rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
 				}
 			}
 		}
@@ -355,7 +351,7 @@
 
 	}
 	else {
-		echo "Hakemistoa $kansio ei löydy\n";
+		echo "Hakemistoa $teccomkansio ei löydy\n";
 	}
 
 ?>

@@ -186,6 +186,10 @@ unset($verkkolaskut_orig);
 unset($verkkolaskut_error);
 unset($verkkolaskut_reject);
 
+unset($teccomkansio);
+unset($teccomkansio_valmis);
+unset($teccomkansio_error);
+
 unset($DAY_ARRAY);
 unset($AIKA_ARRAY);
 unset($MONTH_ARRAY);

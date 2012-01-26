@@ -1062,7 +1062,7 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
-				$prioriteettinro = $prioriteettinro_muutettu = $hyvaksynnanmuutos = "";
+				$prioriteettinro = $hyvaksynnanmuutos = "";
 
 				if ($yhtiorow['kerayserat'] == 'K') {
 					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$arow['tunnus']}'";
@@ -1072,7 +1072,6 @@ while ($tietue = fgets($fd)) {
 					$hyvaksynnanmuutos = $asluok_row['luokka'];
 
 					$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$asluok_row['luokka']}'", "", "", "selitetark_3");
-					$prioriteettinro_muutettu = $prioriteettinro;
 				}
 
 				$ohjausmerkki = $yhtiorow['kerayserat'] == 'K' ? $lopviesti : "";
@@ -1125,7 +1124,6 @@ while ($tietue = fgets($fd)) {
 							postino 		   					= '$arow[postino]',
 							postitp 		   					= '$arow[postitp]',
 							prioriteettinro						= '{$prioriteettinro}',
-							prioriteettinro_muutettu			= '{$prioriteettinro_muutettu}',
 							rahtivapaa							= '$editilaus_rahtivapaa',
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',

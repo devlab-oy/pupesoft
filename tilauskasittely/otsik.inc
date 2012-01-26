@@ -1701,8 +1701,6 @@
 
 			echo "<tr><td>".t("Keräysprioriteetti").":</td><td>";
 
-			echo "<input type='hidden' name='prioriteettinro_muutettu' value='{$srow['prioriteettinro_muutettu']}' />";
-
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 
 			echo "<select name='luokka'><option value=''>".t("Tyhjä")."</option>";
@@ -2962,7 +2960,6 @@
 		$ohjausmerkki = trim($ohjausmerkki);
 
 		$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
-		$prioriteettinro_muutettu = trim($prioriteettinro_muutettu) == "" ? $prioriteettinro : (int) $prioriteettinro_muutettu;
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
@@ -2979,7 +2976,6 @@
 					huolitsija 							= '$huolitsija',
 					hyvaksynnanmuutos 					= '$luokka',
 					prioriteettinro						= '$prioriteettinro',
-					prioriteettinro_muutettu			= '{$prioriteettinro_muutettu}',
 					jakelu 								= '$jakelu',
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',

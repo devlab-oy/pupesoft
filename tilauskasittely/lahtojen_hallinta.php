@@ -1877,6 +1877,23 @@
 			echo "<form>";
 			echo "<table>";
 
+			$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
+						lahdot.pvm AS 'lahdon_pvm',
+						SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
+						SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
+						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
+						avainsana.selitetark_3 AS 'prioriteetti',
+						toimitustapa.selite AS 'toimitustapa',
+						toimitustapa.rahdinkuljettaja
+						FROM lasku
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
+						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tunnus IN ({$tilaukset})";
+			$result = pupe_query($query);
+			$info_row = mysql_fetch_assoc($result);
+
 			$query = "	SELECT lasku.tunnus AS 'tilauksen_tunnus',
 						lasku.vanhatunnus AS 'tilauksen_vanhatunnus',
 						IF(lasku.tilaustyyppi = '', 'N', lasku.tilaustyyppi) AS 'tilauksen_tilaustyyppi',
@@ -1911,6 +1928,32 @@
 			echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}'>";
 
 			echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
+
+			echo "<tr><td class='back'>&nbsp;</td></tr>";
+
+			echo "<tr>";
+			echo "<th>",t("Lähtö"),"</th>";
+			echo "<th>",t("Prio"),"</th>";
+			echo "<th>",t("Rahdinkuljettaja"),"</th>";
+			echo "<th>",t("Toimitustapa"),"</th>";
+			echo "<th>",t("Pvm"),"</th>";
+			echo "<th>",t("Viim Til Klo"),"</th>";
+			echo "<th>",t("Lähtöaika"),"</th>";
+			echo "<th>",t("Ker. Alku Klo"),"</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td class='data'>{$info_row['lahdon_tunnus']}</td>";
+			echo "<td class='data'>{$info_row['prioriteetti']}</td>";
+			echo "<td class='data'>{$info_row['rahdinkuljettaja']}</td>";
+			echo "<td class='data'>{$info_row['toimitustapa']}</td>";
+			echo "<td class='data'>",tv1dateconv($info_row['lahdon_pvm']),"</td>";
+			echo "<td class='data'>{$info_row['viimeinen_tilausaika']}</td>";
+			echo "<td class='data'>{$info_row['lahdon_kellonaika']}</td>";
+			echo "<td class='data'>{$info_row['kerailyn_aloitusaika']}</td>";
+			echo "</tr>";
+
+			echo "<tr><td class='back'>&nbsp;</td></tr>";
 
 			$priorities = array();
 

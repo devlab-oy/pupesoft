@@ -14408,7 +14408,8 @@ if (!function_exists("tee_keraysera2")) {
 					toimitustapa AS toimitustapa1 read, 
 					toimitustapa AS toimitustapa2 read, 
 					lahdot AS lahdot1 read,
-					tuoteperhe read";
+					tuoteperhe read,
+					kerayserat read";
 		$result = pupe_query($query);
 
 		$query = "	(SELECT lasku1.liitostunnus,

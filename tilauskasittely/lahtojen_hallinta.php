@@ -935,7 +935,8 @@
 					};
 
 					// 1. ja 2. tason sarakkeiden sorttaus
-					$('th.sort_parent_row_by').click(column_sort);
+					$('th.sort_parent_row_by').live('click', column_sort);
+					$('th.sort_row_by').on('click', column_sort);
 
 					// 2. tason alasvetovalikolla filteröinti
 					$('select.filter_row_by_select').live('change', function(event) {

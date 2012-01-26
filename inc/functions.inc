@@ -14432,7 +14432,7 @@ if (!function_exists("tee_keraysera2")) {
 									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
 									AND lahdot1.aktiivi = ''
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
-									AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
+									AND (lahdot1.asiakasluokka = lasku1.prioriteettinro_muutettu or lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
  									)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'

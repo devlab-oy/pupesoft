@@ -39,7 +39,7 @@
 
 					$tilausnumero = (int) $tilausnumero;
 
-					$query = "UPDATE lasku SET prioriteettinro = '{$uusi_prio}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+					$query = "UPDATE lasku SET prioriteettinro_muutettu = '{$uusi_prio}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
 					$res = pupe_query($query);
 				}
 			}
@@ -1902,6 +1902,7 @@
 						lasku.toim_postitp AS 'asiakas_toim_postitp',
 						asiakas.luokka AS 'asiakas_luokka',
 						lasku.prioriteettinro AS 'prioriteetti',
+						lasku.prioriteettinro_muutettu,
 						lasku.ohjausmerkki,
 						lasku.vakisin_kerays,
 						kerayserat.nro AS 'erat',
@@ -2096,7 +2097,7 @@
 					echo "<td class='data toggleable_row_transfer' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'>&nbsp;</td>";
 				}
 
-				echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
+				echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteettinro_muutettu']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteettinro_muutettu']}</td>";
 				echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><button type='button'>{$lahto_row['tilauksen_tunnus']}</button></td>";
 				echo "<td class='toggleable_row_orderold' id='{$lahto_row['tilauksen_vanhatunnus']}__{$x}'>{$lahto_row['tilauksen_vanhatunnus']}</td>";
 

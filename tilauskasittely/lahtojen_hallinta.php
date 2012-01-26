@@ -1956,6 +1956,10 @@
 
 			echo "<tr><td class='back'>&nbsp;</td></tr>";
 
+			echo "</table>";
+
+			echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
+
 			$priorities = array();
 
 			while ($lahto_row = mysql_fetch_assoc($lahto_res)) {

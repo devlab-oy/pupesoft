@@ -899,7 +899,7 @@ if (!function_exists("saldo_myytavissa")) {
 		}
 
 		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-		$result = mysql_query($query) or die($query.mysql_error());
+		$result = pupe_query($query);
 		$tuote  = mysql_fetch_assoc($result);
 
 		if (mysql_num_rows($result) == 0) {
@@ -1054,7 +1054,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$valinta2
 							$valinta3";
 			}
-			$result = mysql_query($query) or die($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				/*
@@ -1133,7 +1133,7 @@ if (!function_exists("saldo_myytavissa")) {
 									$kerayslisa";
 					}
 
-					$ennresult = mysql_query($query) or die($query);
+					$ennresult = pupe_query($query);
 					$ennrow = mysql_fetch_assoc($ennresult);
 
 					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
@@ -1180,7 +1180,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.kerayspvm > '$pvm'";
 						}
 
-						$keraresult = mysql_query($query) or die($query);
+						$keraresult = pupe_query($query);
 						$kerarow = mysql_fetch_assoc($keraresult);
 
 						$myytavissa -= $kerarow["keratty"];
@@ -1229,7 +1229,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.hyllytaso = '$row[hyllytaso]'
 										and tilausrivi.kerayspvm <= '$pvm'";
 						}
-						$valmresult = mysql_query($query) or die($query);
+						$valmresult = pupe_query($query);
 						$valmrow = mysql_fetch_assoc($valmresult);
 
 						$myytavissa += $valmrow["varattu"];
@@ -1269,7 +1269,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.tuoteno 	= '$tuoteno'
 									and tilausrivi.varattu 	> 0
 									and tilausrivi.toimaika <= '$pvm'";
-						$osttarkres = mysql_query($query) or die($query);
+						$osttarkres = pupe_query($query);
 						$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 						if ($osttarkrow['varattu'] != 0 and $hyllyalue != '') {
@@ -1287,7 +1287,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.hyllyvali = '$hyllyvali'
 										and tilausrivi.hyllytaso = '$hyllytaso'
 										and tilausrivi.toimaika <= '$pvm'";
-							$osttarkres = mysql_query($query) or die($query);
+							$osttarkres = pupe_query($query);
 							$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 							if ($osttarkrow['varattu'] == 0) {
@@ -1302,7 +1302,7 @@ if (!function_exists("saldo_myytavissa")) {
 											and tilausrivi.tuoteno 	= '$tuoteno'
 											and tilausrivi.varattu 	> 0
 											and tilausrivi.toimaika <= '$pvm'";
-								$osttarkres = mysql_query($tarkquery) or die($tarkquery);
+								$osttarkres = pupe_query($tarkquery);
 								$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 								if ($osttarkrow['varattu'] == 0) {
@@ -1322,14 +1322,14 @@ if (!function_exists("saldo_myytavissa")) {
 												and tilausrivi.tuoteno 	= '$tuoteno'
 												and tilausrivi.varattu 	> 0
 												and tilausrivi.toimaika <= '$pvm'";
-									$osttarkres = mysql_query($query) or die($query);
+									$osttarkres = pupe_query($query);
 									$osttarkrow = mysql_fetch_assoc($osttarkres);
 								}
 							}
 						}
 					}
 
-					$ostresult = mysql_query($query) or die($query);
+					$ostresult = pupe_query($query);
 					$ostrow = mysql_fetch_assoc($ostresult);
 
 					$myytavissa += $ostrow["varattu"];
@@ -1340,7 +1340,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
 							FROM tuotepaikat
 							WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
-				$ennresult = mysql_query($query) or die($query);
+				$ennresult = pupe_query($query);
 				$ennrow = mysql_fetch_assoc($ennresult);
 
 				if (is_numeric($varasto) and $varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
@@ -1360,7 +1360,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tuotepaikat.tuoteno = '$tuoteno'
 										GROUP BY varastopaikat.tyyppi
 										HAVING varastopaikat.tyyppi is null";
-							$ennsaldoresult = mysql_query($query) or die($query);
+							$ennsaldoresult = pupe_query($query);
 
 							$ennsaldorow = mysql_fetch_assoc($ennsaldoresult);
 							$orposaldomyytavissa = $ennsaldorow["saldo"];
@@ -1375,7 +1375,7 @@ if (!function_exists("saldo_myytavissa")) {
 									tilausrivi.varattu > 0 and
 									concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])
 									$kerayslisa ";
-						$ennresult = mysql_query($query) or die($query);
+						$ennresult = pupe_query($query);
 						$ennrow = mysql_fetch_assoc($ennresult);
 
 						$orposaldomyytavissa -= $ennrow["varattu"];
@@ -1391,7 +1391,7 @@ if (!function_exists("saldo_myytavissa")) {
 									tilausrivi.varattu > 0
 									$varaako_jt_saldoa
 									$kerayslisa ";
-						$ennresult = mysql_query($query) or die($query);
+						$ennresult = pupe_query($query);
 						$ennrow = mysql_fetch_assoc($ennresult);
 
 						$orposaldomyytavissa -= $ennrow["varattu"];
@@ -7931,7 +7931,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 
 			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
 						FROM asiakas
-						WHERE asiakas.yhtio = '$kukarow[yhtio]'
+						WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.laji!='P'
 						$haku_query";
 			$result = pupe_query($query);
 

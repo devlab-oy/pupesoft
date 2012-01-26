@@ -1737,7 +1737,7 @@ if ($kasitellaan_tiedosto) {
 						unset($virhe);
 
 						if (function_exists($funktio)) {
-							$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
+							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 						}
 
 						if ($tassafailissa) {

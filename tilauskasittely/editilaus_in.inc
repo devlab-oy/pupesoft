@@ -942,7 +942,7 @@ while ($tietue = fgets($fd)) {
 
 						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
 							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+							$editilaus_toimitustapa = $toimitustapa_chk_row['selite'];
 						}
 						else {
 							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";

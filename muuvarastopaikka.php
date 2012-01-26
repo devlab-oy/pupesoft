@@ -511,7 +511,17 @@
 			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
 
-			$kehahin_query = "	SELECT *
+			$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
+								round(if (tuote.epakurantti100pvm = '0000-00-00',
+										if (tuote.epakurantti75pvm = '0000-00-00',
+											if (tuote.epakurantti50pvm = '0000-00-00',
+												if (tuote.epakurantti25pvm = '0000-00-00',
+													tuote.kehahin,
+												tuote.kehahin * 0.75),
+											tuote.kehahin * 0.5),
+										tuote.kehahin * 0.25),
+									0),
+								6) kehahin
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuotteet[$iii]'";

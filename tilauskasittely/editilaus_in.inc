@@ -1826,7 +1826,20 @@ while ($tietue = fgets($fd)) {
 							$chk_arr[$varasto] = $varasto;
 						}
 
-						$pvmlisa = trim(str_replace(" ", "", $laskurow['ohjausmerkki'])) == 'VARASTOTÄYDENNYS' ? date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))) : date("Y-m-d");
+						$pvmlisa = date("Y-m-d");
+
+						if (trim($laskurow['ohjausmerkki']) != "") {
+							$_ohjausmerkki = $laskurow['ohjausmerkki'];
+					 		$_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
+					 		$_ohjausmerkki = strtolower($_ohjausmerkki);
+ 							$_ohjausmerkki = str_replace(array("ä", "Ä"), "a", $_ohjausmerkki);
+ 							$_ohjausmerkki = str_replace(array("ö", "Ö"), "o", $_ohjausmerkki);
+
+ 							// FRSTTT = varastotayd joka on minimissään se mikä hyväksytään varastotäydennys tekstinä
+					 		if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
+					 			$pvmlisa = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+					 		}
+						}
 
 						foreach ($chk_arr as $vrst) {
 

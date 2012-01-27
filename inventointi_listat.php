@@ -141,7 +141,7 @@
 	</tr>";
 
 
-	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu lähiaikoina:")."</th>
+	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu kahden viikon sisällä:")."</th>
 	<td><input type='checkbox' name='naytainvtuot'></td>
 	</tr>";
 

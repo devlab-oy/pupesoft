@@ -14491,7 +14491,7 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
-					{$wherelisa1}
+					{$wherelisa}
 					{$groupby1}
 					{$orderby1})
 
@@ -14878,7 +14878,7 @@ if (!function_exists("tee_keraysera2")) {
 		// while ($row = mysql_fetch_assoc($res)) {
 		foreach ($fixed_main_array as $key => $tilaukset) {
 
-			if ($kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
+			if (isset($kaytettava_pakkaus) and $kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
 				if ($debug) echo "<br>Pakkaus oli yksin erään alusta! Keräyserä valmis!<br><br>";
 				$era_valmis = true;
 				break;

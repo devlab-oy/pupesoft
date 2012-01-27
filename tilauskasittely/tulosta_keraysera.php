@@ -500,6 +500,8 @@
 				echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 				echo "<input type='hidden' name='who' value='{$who}' />";
 				echo "<input type='hidden' name='tee' value='selaa' />";
+				echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
+				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo t('Etsi'),":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
 				echo "<input type='submit' value='",t("Hae"),"' />";
 				echo "</form>";
@@ -591,6 +593,8 @@
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='who' value='{$who}' />";
 						echo "<input type='hidden' name='tee' value='muokkaa' />";
+						echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
+						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 						echo "<input type='submit' value='",t("Muokkaa"),"' />";
 						echo "</form>";
 					}
@@ -600,6 +604,7 @@
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='who' value='{$who}' />";
+						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 						echo "<select name='tee' id='tee'>";
 						echo "<option value='muuta'>",t("Tallenna"),"</option>";
 						echo "<option value='uusi_pakkaus'>",t("Uusi pakkaus"),"</option>";

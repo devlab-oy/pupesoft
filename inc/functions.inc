@@ -14212,6 +14212,11 @@ if (!function_exists("tee_keraysera2")) {
 		$yhdistelysaanto_k = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') !== false ? true : false;
 		$yhdistelysaanto_p = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') !== false ? true : false;
 
+		/**
+		 * [x] saa olla useita asiakkaita
+		 * [] saa olla useita lähtöjä
+		 * [] saa olla useita prioriteettejä
+		 */
 		if ($yhdistelysaanto_s and !$yhdistelysaanto_k and !$yhdistelysaanto_p) {
 			#2
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14232,6 +14237,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [x] saa olla useita asiakkaita
+		 * [x] saa olla useita lähtöjä
+		 * [] saa olla useita prioriteettejä
+		 */
 		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
 			#3
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14252,6 +14262,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [x] saa olla useita asiakkaita
+		 * [x] saa olla useita lähtöjä
+		 * [x] saa olla useita prioriteettejä
+		 */
 		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
 			#4
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14272,6 +14287,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [x] saa olla useita asiakkaita
+		 * [] saa olla useita lähtöjä
+		 * [x] saa olla useita prioriteettejä
+		 */
 		elseif ($yhdistelysaanto_s and !$yhdistelysaanto_k and $yhdistelysaanto_p) {
 			#5
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14292,6 +14312,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.h1time ASC, lasku2.liitostunnus, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [] saa olla useita asiakkaita
+		 * [x] saa olla useita lähtöjä
+		 * [x] saa olla useita prioriteettejä
+		 */
 		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
 			#6
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14312,6 +14337,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [] saa olla useita asiakkaita
+		 * [x] saa olla useita lähtöjä
+		 * [] saa olla useita prioriteettejä
+		 */
 		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
 			#7
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14332,6 +14362,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
 			}
 		}
+		/**
+		 * [] saa olla useita asiakkaita
+		 * [] saa olla useita lähtöjä
+		 * [x] saa olla useita prioriteettejä
+		 */
 		elseif (!$yhdistelysaanto_s and !$yhdistelysaanto_k and $yhdistelysaanto_p) {
 			#8
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14352,6 +14387,11 @@ if (!function_exists("tee_keraysera2")) {
 				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.liitostunnus, lasku2.ohjausmerkki, lasku2.h1time ASC";
 			}
 		}
+		/**
+		 * [] saa olla useita asiakkaita
+		 * [] saa olla useita lähtöjä
+		 * [] saa olla useita prioriteettejä
+		 */
 		else {
 			#1
 			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
@@ -14373,6 +14413,16 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
+		$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.h1time";
+		$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.h1time";
+
+		$groupby1 = $groupby2 = "GROUP BY 1,2,3,4,5";
+
+		if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false) {
+			$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.liitostunnus, lasku1.h1time";
+			$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.liitostunnus, lasku2.h1time";
+		}
+
 		if ($debug) echo "$groupby<br>$orderby<br><br>";
 
 		/**
@@ -14387,38 +14437,38 @@ if (!function_exists("tee_keraysera2")) {
 		*/
 
 		// lukitaan tableja
-		$query = "	LOCK TABLES lasku write, 
-					lasku AS lasku1 read, 
-					lasku AS lasku2 read, 
-					laskun_lisatiedot write, 
-					asiakas AS asiakas1 read, 
-					asiakas AS asiakas2 read, 
-					tilausrivi write, 
-					tilausrivi AS tilausrivi1 read, 
-					tilausrivi AS tilausrivi2 read, 
-					tilausrivin_lisatiedot write, 
-					varaston_hyllypaikat AS vh read,
-					varaston_hyllypaikat AS vh1 read, 
-					varaston_hyllypaikat AS vh2 read, 
-					tuote read,
-					tuote AS tuote1 read, 
-					tuote AS tuote2 read,
-					keraysvyohyke AS keraysvyohyke1 read, 
-					keraysvyohyke AS keraysvyohyke2 read,
-					toimitustapa AS toimitustapa1 read, 
-					toimitustapa AS toimitustapa2 read, 
-					lahdot AS lahdot1 read,
-					tuoteperhe read,
-					kerayserat read";
+		$query = "	LOCK TABLES lasku WRITE, 
+					lasku AS lasku1 READ, 
+					lasku AS lasku2 READ, 
+					laskun_lisatiedot WRITE, 
+					asiakas AS asiakas1 READ, 
+					asiakas AS asiakas2 READ, 
+					tilausrivi WRITE, 
+					tilausrivi AS tilausrivi1 READ, 
+					tilausrivi AS tilausrivi2 READ, 
+					tilausrivin_lisatiedot WRITE, 
+					varaston_hyllypaikat AS vh READ,
+					varaston_hyllypaikat AS vh1 READ, 
+					varaston_hyllypaikat AS vh2 READ, 
+					tuote READ,
+					tuote AS tuote1 READ, 
+					tuote AS tuote2 READ,
+					keraysvyohyke AS keraysvyohyke1 READ, 
+					keraysvyohyke AS keraysvyohyke2 READ,
+					toimitustapa AS toimitustapa1 READ, 
+					toimitustapa AS toimitustapa2 READ, 
+					lahdot AS lahdot1 READ,
+					lahdot AS lahdot2 READ,
+					tuoteperhe READ,
+					kerayserat READ";
 		$result = pupe_query($query);
 
 		$query = "	(SELECT lasku1.liitostunnus,
 					lasku1.nimi as asiakas_nimi,
 					lahdot1.tunnus as lahto,
-					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					lasku1.prioriteettinro as prioriteetti,
-					LOWER(TRIM(lasku1.ohjausmerkki)) AS ohjausmerkki,
-					{$select1} as tunnus
+					lasku1.ohjausmerkki, 
+					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 					FROM lasku AS lasku1
 					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
 					JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D')
@@ -14449,11 +14499,10 @@ if (!function_exists("tee_keraysera2")) {
 
 					(SELECT lasku2.liitostunnus,
 					lasku2.nimi as asiakas_nimi,
-					999999999 as lahto,
-					1 as erotus,
+					999999999999 as lahto,
 					lasku2.prioriteettinro as prioriteetti,
-					LOWER(TRIM(lasku2.ohjausmerkki)) AS ohjausmerkki,
-					{$select2} as tunnus
+					lasku2.ohjausmerkki, 
+					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 					FROM lasku AS lasku2
 					JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
 					JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D')
@@ -14461,6 +14510,7 @@ if (!function_exists("tee_keraysera2")) {
 					JOIN tuote AS tuote2 ON (tuote2.yhtio = tilausrivi2.yhtio AND tuote2.tuoteno = tilausrivi2.tuoteno)
 					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
 					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
+					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
 					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 					AND lasku2.tila = 'N'
 					AND lasku2.alatila = 'A'
@@ -14827,6 +14877,12 @@ if (!function_exists("tee_keraysera2")) {
 
 		// while ($row = mysql_fetch_assoc($res)) {
 		foreach ($fixed_main_array as $key => $tilaukset) {
+
+			if ($kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
+				if ($debug) echo "<br>Pakkaus oli yksin erään alusta! Keräyserä valmis!<br><br>";
+				$era_valmis = true;
+				break;
+			}
 
 			$eka_kierros = true;
 

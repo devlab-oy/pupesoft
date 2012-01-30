@@ -11,10 +11,14 @@ ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
 
 if (php_sapi_name() == 'cli') {
-	require('inc/connect.inc');
-	require('inc/functions.inc');
+
+	$pupe_root_polku = dirname(__FILE__);
+	require ("{$pupe_root_polku}/inc/connect.inc");
+	require ("{$pupe_root_polku}/inc/functions.inc");
+
 	$cli = true;
 
+	ini_set("include_path", ".".PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 	ini_set("mysql.connect_timeout", 600);
 	ini_set("memory_limit", "1G");
 
@@ -352,7 +356,9 @@ if ($kasitellaan_tiedosto) {
 	foreach ($taulunotsikot as $taulu => $otsikot) {
 		if (count($otsikot) != count(array_unique($otsikot))) {
 			lue_data_echo("<font class='error'>$taulu-".t("taulun sarakkeissa ongelmia, ei voida jatkaa")."!</font><br>");
-
+			if ($lue_data_output_file != "") {
+				lue_data_echo("## LUE-DATA-EOF ##");
+			}
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -369,11 +375,11 @@ if ($kasitellaan_tiedosto) {
 	// sarakemäärä excelissä
 	$excelsarakemaara = count($headers);
 
-	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
+	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta, tässä kohtaa putsataan jokaisen solun sisältö pupesoft_cleanstring -funktiolla
 	for ($excei = 1; $excei < $excelrivimaara; $excei++) {
 		for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
 
-			$taulunrivit[$taulut[$excej]][$excei-1][] = trim($excelrivit[$excei][$excej]);
+			$taulunrivit[$taulut[$excej]][$excei-1][] = pupesoft_cleanstring($excelrivit[$excei][$excej]);
 
 			// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 			foreach ($taulunotsikot as $taulu => $joinit) {
@@ -387,7 +393,7 @@ if ($kasitellaan_tiedosto) {
 				}
 
 				if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-					$taulunrivit[$taulu][$excei-1][] = trim($excelrivit[$excei][$excej]);
+					$taulunrivit[$taulu][$excei-1][] = pupesoft_cleanstring($excelrivit[$excei][$excej]);
 				}
 			}
 		}
@@ -602,6 +608,9 @@ if ($kasitellaan_tiedosto) {
 			}
 
 			lue_data_echo("<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>");
+			if ($lue_data_output_file != "") {
+				lue_data_echo("## LUE-DATA-EOF ##");
+			}
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -645,7 +654,7 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 
-			if ($cli === FALSE and $rivilaskuri % 500) {
+			if ($cli === FALSE and ($rivilaskuri % 500) == 0) {
 				echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
 			}
 
@@ -1728,7 +1737,7 @@ if ($kasitellaan_tiedosto) {
 						unset($virhe);
 
 						if (function_exists($funktio)) {
-							$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
+							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 						}
 
 						if ($tassafailissa) {

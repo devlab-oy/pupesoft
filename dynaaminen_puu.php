@@ -158,12 +158,13 @@
 					node.nimi AS node_nimi,
 					node.koodi AS node_koodi,
 					node.tunnus AS node_tunnus,
+					node.syvyys AS node_syvyys,
 					(COUNT(node.tunnus) - 1) AS syvyys
 					FROM dynaaminen_puu AS node
-					JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 					WHERE node.yhtio = '{$kukarow["yhtio"]}'
 					AND node.laji = '{$toim}'
-					GROUP BY node.lft
+					GROUP BY 1,2,3,4,5,6
 					ORDER BY node.lft";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -187,6 +188,17 @@
 			echo "<table>";
 
 			while ($row = mysql_fetch_assoc($result)) {
+
+				// Pitääkö syvyys päivittää?
+				if ($row["node_syvyys"] != $row["syvyys"]) {
+					$qu = "	UPDATE dynaaminen_puu
+							SET syvyys = {$row["syvyys"]}
+							WHERE yhtio	= '{$kukarow["yhtio"]}'
+							AND laji	= '{$toim}'
+							AND tunnus 	= {$row["node_tunnus"]}";
+					$re = pupe_query($qu);
+				}
+
 				echo "\n<tr>";
 
 				for ($i = 0; $i < $row['syvyys']; $i++) {

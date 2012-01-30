@@ -7931,7 +7931,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 
 			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
 						FROM asiakas
-						WHERE asiakas.yhtio = '$kukarow[yhtio]'
+						WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.laji!='P'
 						$haku_query";
 			$result = pupe_query($query);
 

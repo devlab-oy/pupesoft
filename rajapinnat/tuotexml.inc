@@ -19,7 +19,7 @@
 	foreach ($dnstuote as $tuote) {
 
 		$product = $information->addChild('product');
-			$product->addAttribute('id','');
+			$product->addAttribute('extSystemID','');
 			$product->addChild('code', utf8_encode(xmlentities($tuote["tuoteno"])));
 			$product->addChild('ean', $tuote["ean"]);
 			$product->addChild('vat', $tuote["alv"]);
@@ -31,12 +31,12 @@
 
 			$units = $product->addChild('units');
 				$unit = $units->addChild('unit');
-				$unit->addAttribute('id','');
+				$unit->addAttribute('extSystemID','');
 					$salesunit = $unit->addChild('salesunit');
-					$salesunit->addAttribute('id','');
+					$salesunit->addAttribute('extSystemID','');
 						$salesunitname = $salesunit->addChild('salesunitname',utf8_encode(xmlentities($tuote["yksikko"])));
 				$unit->addChild('unitprice',$tuote["myyntihinta"]);
-				$unit->unitprice->addAttribute('id','');
+				$unit->unitprice->addAttribute('extSystemID','');
 	}
 
 	$xml->asXML($tiedoston_sijainti);

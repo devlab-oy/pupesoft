@@ -2541,77 +2541,7 @@
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $laskurow[laskunro]<br>\n";
 
-						if ((($laskurow["vienti"] == "E") or ($laskurow["vienti"] == "K")) and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
-							$uusiotunnus = $laskurow["tunnus"];
-
-							require('tulosta_vientierittely.inc');
-
-							//keksitään uudelle failille joku varmasti uniikki nimi:
-							list($usec, $sec) = explode(' ', microtime());
-							mt_srand((float) $sec + ((float) $usec * 100000));
-							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
-
-							//kirjoitetaan pdf faili levylle..
-							$fh = fopen($pdffilenimi, "w");
-							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-							fclose($fh);
-
-							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
-								// lähetetään meili
-								if ($vientierittelymail != "") {
-									$komento = $vientierittelymail;
-								}
-								else {
-									$komento = "";
-								}
-
-								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
-
-								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= ", ".trim($laskurow["nimi"]);
-								}
-
-								$liite              = $pdffilenimi;
-								$sahkoposti_cc      = "";
-								$content_subject    = "";
-								$content_body       = "";
-								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-							}
-
-							//poistetaan tmp file samantien kuleksimasta...
-							system("rm -f $pdffilenimi");
-
-							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
-
-							unset($Xpdf);
-						}
-					}
-				}
-
-				// lähetetään saähköpostilaskut
-				if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
-
-					require_once("tilauskasittely/tulosta_lasku.inc");
-
-					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan sähköpostilaskuja").":<br>\n";
-
-					foreach ($tulostettavat_email as $lasku) {
-
-						$vientierittelymail    = "";
-						$vientierittelykomento = "";
-
-						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", -99, "", $saatekirje);
-
-						$query = "  SELECT *
-									FROM lasku
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$lasku'";
-						$laresult = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($laresult);
-
-						if ($silent == "") $tulos_ulos .= t("Lähetetään lasku").": $laskurow[laskunro]<br>\n";
-
-						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+						if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
 
 							require('tulosta_vientierittely.inc');
@@ -2650,6 +2580,76 @@
 							elseif ($vientierittelykomento != '' and $vientierittelykomento != 'edi') {
 								// itse print komento...
 								$line = exec("$vientierittelykomento $pdffilenimi");
+							}
+
+							//poistetaan tmp file samantien kuleksimasta...
+							system("rm -f $pdffilenimi");
+
+							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+
+							unset($Xpdf);
+						}
+					}
+				}
+
+				// lähetetään saähköpostilaskut
+				if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
+
+					require_once("tilauskasittely/tulosta_lasku.inc");
+
+					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan sähköpostilaskuja").":<br>\n";
+
+					foreach ($tulostettavat_email as $lasku) {
+
+						$vientierittelymail    = "";
+						$vientierittelykomento = "";
+
+						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", -99, "", $saatekirje);
+
+						$query = "  SELECT *
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$lasku'";
+						$laresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laresult);
+
+						if ($silent == "") $tulos_ulos .= t("Lähetetään lasku").": $laskurow[laskunro]<br>\n";
+
+						if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+							$uusiotunnus = $laskurow["tunnus"];
+
+							require('tulosta_vientierittely.inc');
+
+							//keksitään uudelle failille joku varmasti uniikki nimi:
+							list($usec, $sec) = explode(' ', microtime());
+							mt_srand((float) $sec + ((float) $usec * 100000));
+							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
+
+							//kirjoitetaan pdf faili levylle..
+							$fh = fopen($pdffilenimi, "w");
+							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+							fclose($fh);
+
+							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
+								// lähetetään meili
+								if ($vientierittelymail != "") {
+									$komento = $vientierittelymail;
+								}
+								else {
+									$komento = "";
+								}
+
+								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+
+								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+									$kutsu .= ", ".trim($laskurow["nimi"]);
+								}
+
+								$liite              = $pdffilenimi;
+								$sahkoposti_cc      = "";
+								$content_subject    = "";
+								$content_body       = "";
+								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
 
 							//poistetaan tmp file samantien kuleksimasta...

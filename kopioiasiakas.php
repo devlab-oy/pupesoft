@@ -21,7 +21,7 @@
 		require "inc/asiakastarkista.inc";
 
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-			asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow);
+			asiakastarkista ($t, $i, $result, $tunnus, $virhe, $trow);
 			if($virhe[$i] != "") {
 				$errori = 1;
 			}

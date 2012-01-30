@@ -700,12 +700,16 @@
 		// Lis‰t‰‰n viel‰ oikea tapahtumien m‰‰r‰ sanoman headeriin
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
+/* T‰m‰ blocki piti poistaa, koska rikkoo Samlinkin. Aineistossa ei saa olla mit‰‰n j‰sentely‰.
 		// Kirjoitetaaan XML, tehd‰‰n t‰st‰ j‰sennelty aineisto. T‰m‰ toimii paremmin mm OPn kanssa
 		$dom = new DOMDocument('1.0');
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput = true;
 		$dom->loadXML(str_replace(array("\n", "\r"), "", utf8_encode($xml->asXML())));
 		fwrite($toot, ($dom->saveXML()));
+*/
+		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
+		fwrite($toot, str_replace(chr(10), "", utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

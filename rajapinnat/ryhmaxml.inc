@@ -15,14 +15,11 @@
 	$customer->addChild('timestamp', date("Y-m-d H:i"));
 	
 	$information = $xml->addChild('information');
-	$topgroup = $information->addChild('topgroup');
-	$topgroup->addAttribute('id','');
-	$topgroup->addChild('topgroupname','root');
 
 	foreach ($dnsryhma as $key => $osasto) {
 
 		// Osasto on joka rivill‰ sama, otetaan ekalta rivilt‰ tiedot
-		$group = $topgroup->addChild('group');
+		$group = $information->addChild('group');
 		$group->addAttribute('extSystemID',$key);
 		// setataan muuttuja joka seuraavassa luupissa Osaston vaihtuessa tehd‰‰n yhden kerran groupname-xml kirjoitus	
 		$vain_ekalla = 1;

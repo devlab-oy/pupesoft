@@ -34,6 +34,7 @@
 	$verkkolaskuvirheet_kasittele	= $verkkolaskut_in;
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
+	
 
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 	js_openFormInNewWindow();
@@ -65,7 +66,13 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Toiminto")."</th>";
+		echo "<th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th>";
+		echo "<th>".t("Toimittaja")."</th>";
+		echo "<th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th>";
+		echo "<th>".t("Pvm")."</th>";
+		echo "</tr>";
+		echo "<tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -81,18 +88,26 @@
 
 					// Otetaan tarvittavat muuttujat tännekin
 					$xml = simplexml_load_string($xmlstr);
-
+					
+					// Katsotaan mitä aineistoa käpistellään
 					if (strpos($file, "finvoice-") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
-
 						$kumpivoice = "FINVOICE";
+					}
+					elseif (strpos($file, "_invoice") !== false){
+						require("inc/verkkolasku-in-teccom.inc");
+						$kumpivoice = "TECCOM";
+					}
+					elseif (strpos($file, "ORAO") !== false){
+						require("inc/verkkolasku-in-unikko.inc");
+						$kumpivoice = "ORAO";
 					}
 					else {
 						require("inc/verkkolasku-in-pupevoice.inc");
-
 						$kumpivoice = "PUPEVOICE";
 					}
-
+					
+					
 					if ($kumpivoice == "PUPEVOICE") {
 						$laskuttajan_osoite 	= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC059.3042.1')));
 						$laskuttajan_postitp 	= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3164')));
@@ -100,6 +115,16 @@
 						$laskuttajan_maa 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3207')));
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
+					}
+					elseif ($kumpivoice == "TECCOM") {
+						$laskuttajan_osoite 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Street1);
+						$laskuttajan_postitp 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
+						$laskuttajan_postino 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
+						$laskuttajan_maa 		= utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
+ 						$laskuttajan_tilino		= $lasku_toimittaja["ultilno"];
+						$laskuttajan_ovt		= $lasku_toimittaja["ovt_tunnus"];
+						$laskuttajan_vat		= $lasku_toimittaja["ytunnus"];
+						
 					}
 					else {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
@@ -123,9 +148,9 @@
 									FROM toimi
 									WHERE yhtio = '$yhtiorow[yhtio]'
 									and nimi like '%$siivottu%'";
-						$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
+						$lahellaresult = pupe_query($query);	
 					}
-
+					
 					if ($lasku_toimittaja["tunnus"] == 0) {
 						if (mysql_num_rows($lahellaresult) > 0) {
 

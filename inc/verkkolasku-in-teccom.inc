@@ -6,7 +6,7 @@
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
 	$laskun_tyyppi 			= "TECCOM-INVOICE";
-	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId;
+	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId; // Tämä on lähettäjän laskunnumero
 	$laskun_ebid 			= "TECCOM-INVOICE";
 	$laskun_tilausviite		= "";
 
@@ -235,27 +235,27 @@
 				 * - tilausrivinpositio
 				 */ 
 
-				$saapumispvm_chk = trim($laskun_paiva) != '' ? substr($laskun_paiva, 0, 4).'-'.substr($laskun_paiva, 4, 2).'-'.substr($laskun_paiva, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
-				$vastaanottaja_chk = isset($xml->InvoiceHeader->BuyerParty->Address->Name1) ? $xml->InvoiceHeader->BuyerParty->PartyNumber.' , '.$xml->InvoiceHeader->BuyerParty->Address->Name1 : '';
+				// $saapumispvm_chk = trim($laskun_paiva) != '' ? substr($laskun_paiva, 0, 4).'-'.substr($laskun_paiva, 4, 2).'-'.substr($laskun_paiva, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
+				// $vastaanottaja_chk = isset($xml->InvoiceHeader->BuyerParty->Address->Name1) ? $xml->InvoiceHeader->BuyerParty->PartyNumber.' , '.$xml->InvoiceHeader->BuyerParty->Address->Name1 : '';
 
-				$query = "	INSERT INTO asn_sanomat SET
-							yhtio = '{$kukarow['yhtio']}',
-							laji = 'tec',
-							toimittajanumero = '{$laskuttajan_toimittajanumero}',
-							saapumispvm = '{$saapumispvm_chk}',
-							vastaanottaja = '{$vastaanottaja_chk}',
-							tilausnumero = '{$laskun_numero}',
-							tilausrivi = '',
-							paketintunniste = '',
-							paketinnumero = '',
-							lahetyslistannro = '',
-							toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}',
-							kappalemaara = '{$rtuoteno[$i]["kpl"]}',
-							hinta = '{$rtuoteno[$i]["hinta"]}',
-							tilausrivinpositio = '{$rtuoteno[$i]["tilaajanrivinro"]}',
-							laatija = 'crond',
-							luontiaika = now()";
-				$asn_ins_res = pupe_query($query);
+				// $query = "	INSERT INTO asn_sanomat SET
+				// 			yhtio = '{$kukarow['yhtio']}',
+				// 			laji = 'tec',
+				// 			toimittajanumero = '{$laskuttajan_toimittajanumero}',
+				// 			saapumispvm = '{$saapumispvm_chk}',
+				// 			vastaanottaja = '{$vastaanottaja_chk}',
+				// 			tilausnumero = '{$laskun_numero}',
+				// 			tilausrivi = '',
+				// 			paketintunniste = '',
+				// 			paketinnumero = '',
+				// 			lahetyslistannro = '',
+				// 			toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}',
+				// 			kappalemaara = '{$rtuoteno[$i]["kpl"]}',
+				// 			hinta = '{$rtuoteno[$i]["hinta"]}',
+				// 			tilausrivinpositio = '{$rtuoteno[$i]["tilaajanrivinro"]}',
+				// 			laatija = 'crond',
+				// 			luontiaika = now()";
+				// $asn_ins_res = pupe_query($query);
 			}
 			else {
 				//	Poistetaan tämä tietue

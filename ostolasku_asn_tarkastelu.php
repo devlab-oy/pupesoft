@@ -341,6 +341,7 @@
 
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
+query_dump($query);
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
 			$toimittaja = $kollirow['toimittajanumero'];
@@ -649,6 +650,7 @@
 		else {
 			// typecastataan formista tulleet tunnukset stringeist‰ inteiksi
 			$tunnukset = array_map('intval', $tunnukset);
+			$poista_tilausrivi = array_map('intval', $poista_tilausrivi);
 			// otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
 			// T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
 			$kpl_maara_ostolla = $ostotilauksella_kpl[$tunnukset[0]];
@@ -657,6 +659,7 @@
 
 				// haetaan ASN-sanomalta kpl m‰‰r‰
 				$hakuquery = "SELECT * from asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+				
 				$hakures = pupe_query($hakuquery);
 				$asn_row_haku = mysql_fetch_assoc($hakures);
 
@@ -704,9 +707,16 @@
 				}
 
 
-				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."', muuttaja ='{$kukarow["kuka"]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$updres = pupe_query($query);
 
+				
+				// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
+				if ($poista_tilausrivi["0"] != 0) {
+					$updatequery2 = "UPDATE tilausrivi set tilaajanrivinro ='{$poista_tilausrivi[0]}' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$asn_row_haku["tilausnumero"]}' and tunnus = '".implode(",", $tunnukset)."'";
+					pupe_query($updatequery2);
+				}
+				
 				$query = "SELECT paketintunniste FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$res = pupe_query($query);
 				$row = mysql_fetch_assoc($res);
@@ -714,7 +724,7 @@
 				$kolli = $row['paketintunniste'];
 			}
 			else {
-				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
+				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."', muuttaja ='{$kukarow["kuka"]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
 				$updres = pupe_query($query);
 			}
 
@@ -734,8 +744,8 @@
 				$result = pupe_query($query);
 				$asn_row = mysql_fetch_assoc($result);
 
-				$query = "SELECT tt.tuoteno, tt.toim_tuoteno FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.herminator='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}')
+				$query = "	SELECT tt.tuoteno, tt.toim_tuoteno FROM tuotteen_toimittajat as tt
+							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}')
 							WHERE tt.yhtio='{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
 				$apurivi = mysql_fetch_assoc($result);
@@ -812,11 +822,13 @@
 			echo "<th>",t("Keikka"),"</th>";
 			echo "<th>",t("Keikan tila"),"</th>";
 			echo "<th>",t("Kohdistus"),"</th>";
+			echo "<th>",t("Poista"),"</th>";
 			echo "</tr>";
 
 			$toimittaja = (int) $toimittaja;
 
 			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}'";
+			
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
 
@@ -855,6 +867,8 @@
 					$keikkares = pupe_query($query);
 					$keikkarow = mysql_fetch_assoc($keikkares);
 					$row['uusiotunnus'] = $keikkarow['laskunro'];
+					query_dump($query);
+					
 				}
 
 				echo "<td align='right'>$row[uusiotunnus]</td>";
@@ -874,7 +888,7 @@
 					echo "<input type='hidden' name='ostotilauksella_kpl[{$row['tunnus']}]' value='{$row['varattu']}' />";
 					echo "</td>";
 				}
-
+				echo "<td><input type='checkbox' name='poista_tilausrivi[]' class='tunnukset' value='{$row['tunnus']}' /></td>";
 				echo "</tr>";
 			}
 
@@ -1064,6 +1078,7 @@
 						asn_sanomat.kappalemaara,
 						asn_sanomat.tilausrivi,
 						asn_sanomat.hinta,
+						asn_sanomat.keikkarivinhinta,
 						asn_sanomat.tunnus
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
@@ -1073,6 +1088,7 @@
 						#AND asn_sanomat.tilausrivi != ''
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
+query_dump($query);
 
 			$ok = $virhe = 0;
 			$hintapoikkeavuus = false;
@@ -1081,6 +1097,7 @@
 
 				$query = "SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$kukarow['yhtio']}' AND toim_tuoteno = '{$row['toim_tuoteno']}' AND liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
+query_dump($query);
 
 				if (mysql_num_rows($res) > 0) {
 					$ttrow = mysql_fetch_assoc($res);
@@ -1093,6 +1110,7 @@
 								AND tuoteno = '{$ttrow['tuoteno']}'";
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
+query_dump($query);
 
 					$row['nimitys'] = $trow['nimitys'];
 				}
@@ -1110,16 +1128,28 @@
 
 				echo "<td>";
 				if ($row['tilausrivi'] != '') {
-					echo "<font class='ok'>Ok</font>";
+					echo "<font class='ok'>Ok</font>"; 
 					$ok++;
 
-					$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+					$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivinpositio']}'";
 					$hinta_chk_res = pupe_query($query);
 					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
-					if ($row['hinta'] != $hinta_chk_row['hinta']) {
+					if ($row['keikkarivinhinta'] != $hinta_chk_row['hinta']) {
 						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
 						$hintapoikkeavuus = true;
+					}
+				}
+				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
+					$query = "SELECT tilkpl, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivinpositio']}'";					
+					$kpl_chk_res = pupe_query($query);
+					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
+					
+					if ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
+						echo "<font color='orange'>Kpl ongelma <br> sanomassa {$kpl_row["tilkpl"]} <br>tilauksella {$row["kappalemaara"]}</font>";
+					}
+					if ($kpl_row["otunnus"] != 0 and ($row['tilausnumero'] != $kpl_row["otunnus"])) {
+						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei t‰sm‰‰<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font>";
 					}
 				}
 				else {
@@ -1260,10 +1290,20 @@
 			}
 			else {
 
-				$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
-							asn_sanomat.tilausnumero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero,
-							count(asn_sanomat.tunnus) AS rivit,
-							sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
+				$query = "	SELECT 	toimi.ytunnus, 
+									toimi.nimi, 
+									toimi.nimitark, 
+									toimi.osoite, 
+									toimi.osoitetark, 
+									toimi.postino, 
+									toimi.postitp, 
+									toimi.maa, 
+									toimi.swift,
+									asn_sanomat.tilausnumero, 
+									asn_sanomat.paketintunniste, 
+									asn_sanomat.toimittajanumero,
+									count(asn_sanomat.tunnus) AS rivit,
+									sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat
 							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
@@ -1271,6 +1311,7 @@
 							GROUP BY asn_sanomat.tilausnumero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 							ORDER BY toimi.nimi, toimi.ytunnus";
 				$result = pupe_query($query);
+query_dump($query);
 
 				echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
 				echo "<input type='hidden' id='tee' name='tee' value='nayta' />";

@@ -45,7 +45,7 @@
 			}
 
 			// N‰m‰ muuttujat kuuluisi olla setattuna:
-			/*
+/*			
 			echo "\n\nLASKUNTIEDOT:\n";
 			echo "01: ".$yhtio."\n";
 			echo "02: ".$verkkotunnus_vas."\n";
@@ -464,7 +464,45 @@
 				else {
 					$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEp‰onnistumisen syy: ";
 				}
-
+				
+				// T‰h‰n myˆs toi logiikka, K (tarkista), S/L (ei v‰li‰)
+				// TecCom-lasku
+				if ($trow["asn_sanomat"] == "K" or $trow["asn_sanomat"] == "L") {
+					// TecCom-lasku
+					$tarkq = "	SELECT count(*) lasku 
+								FROM asn_sanomat 
+								WHERE yhtio = '{$yhtio}'
+								AND laji = 'tec'
+								AND asn_numero = '{$laskun_numero}'
+								AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+					$tarkresult = pupe_query($tarkq);
+					$tarkrivi = mysql_fetch_assoc($tarkresult);
+					
+					if ($trow["asn_sanomat"] == "K") {
+						// asn-sanoma
+						$tarkistusquery = "	SELECT count(*) sanomat
+											FROM asn_sanomat 
+											WHERE yhtio = '{$kukarow["yhtio"]}' 
+											AND laji = 'asn' 
+											AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
+											AND tilausnumero in ({$laskun_tilausviite})";
+						$tarkistusres = pupe_query($tarkistusquery);
+						$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
+					}
+					
+					
+					if ($trow["asn_sanomat"] == "K" and $tarkrivi["lasku"] > 0 and $tarkistusrivi["sanomat"] == 0) {
+						$return .= "Kannassa on jo lasku mutta ei sanomaa tilauksille ({$laskun_tilausviite})####ASN\n";
+						mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-sanoma ja lasku", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
+					if ($trow["asn_sanomat"] == "L" and $tarkrivi["lasku"] > 0) {
+						$return .= "Kannassa on jo lasku mutta ei mene eteenp‰in ({$laskun_tilausviite})####ASN\n";
+						mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-laskun eteenp‰in menemisen ongelma", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
+				}
+				
 				// katotaan pit‰‰ks vaihtaa oletus_vienti‰
 				if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {
 
@@ -927,7 +965,7 @@
 				if ($krp != 0) {
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
-
+			
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -1033,7 +1071,7 @@
 
 	 			// Tehd‰n pelk‰t oletustiliˆinnit
 	 			// Pit‰‰ hardkoodata UNIKKO ohittamaan t‰m‰n.
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1139,11 +1177,13 @@
 					$vtontot 						= 0;
 					$vtontot_valuutassa 			= 0;
 					$maksimisumma 		 			= 0;
+					$sanomantarkistin				= 0;
 
 					$kustp		= $oletuskust;
 					$kohde		= $oletuskohde;
 					$projekti	= $oletusprojekti;
-
+					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
+										
 					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
@@ -1301,7 +1341,30 @@
 								$result = pupe_query($query);
 							}
 						}
-
+						
+						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999) {
+							// Koodaajan kommentti. tilausnumeroon on mennyt kokoajan ihan v‰‰r‰ kentt‰. {$laskun_numero} Pit‰is menn‰ asn-kentt‰‰n
+							
+							$insertquery = "INSERT INTO asn_sanomat SET
+											yhtio = '{$yhtio}',
+											laji = 'tec',
+											asn_numero = '{$laskun_numero}',
+											toimittajanumero = '{$laskuttajan_toimittajanumero}',
+											saapumispvm = '{$saapumispvm_chk}',
+											vastaanottaja = '{$ostaja_asiakkaantiedot["nimi"]}',
+											tilausnumero = '{$rtuoteno[$i]["ostotilausnro"]}',
+											tilausrivi = '',
+											paketintunniste = '',
+											paketinnumero = '',
+											lahetyslistannro = '',
+											toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}',
+											kappalemaara = '{$rtuoteno[$i]["kpl"]}',
+											hinta = '{$rtuoteno[$i]["hinta"]}',
+											tilausrivinpositio = '{$rtuoteno[$i]["tilaajanrivinro"]}',
+											laatija = 'crond',
+											luontiaika = now()";
+							$asn_ins_res = pupe_query($insertquery);
+						}
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
 
@@ -1347,9 +1410,47 @@
 										AND tunnus  = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
-
-						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						
+						
+						// elikk‰s. Rakennetaan logiikka t‰h‰n.
+						// Mik‰li toimittajalla on kentt‰ "asn_sanomat" arvoja, ja ne on
+						// K = tulee asn-sanoma ja lasku
+						// S = tulee vain sanoma
+						// L = tulee vain lasku
+						
+						if ($laskun_tyyppi == "TECCOM-INVOICE" and $trow["asn_sanomat"] == "K") {
+								
+								// katsotaan lˆytyykˆ asn-sanomia ?
+								
+								$tarkistusquery = "	SELECT count(*) maara
+													FROM asn_sanomat 
+													WHERE yhtio = '{$kukarow["yhtio"]}' 
+													AND laji = 'asn' 
+													AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
+													AND tilausnumero in ({$laskun_tilausviite})";
+								$tarkistusres = pupe_query($tarkistusquery);
+								$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
+								
+								if ($tarkistusrivi["maara"] > 0) {
+									verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+								}
+								else {
+									$return .= "Ei lˆydetty ASN-sanomaa kannasta n‰ille tilauksille ({$laskun_tilausviite})####ASN\n";
+									mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+									return ($return);
+								}
+							
+								// K = Toimittaja l‰hett‰‰ ASN-sanoman ja TecCom-laskun
+								// S = Toimittaja l‰hett‰‰ vain ASN-sanoman
+								// L = Toimittaja l‰hett‰‰ vain TecCom-laskun
+							
+							
+						}
+						else {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
+						
+						
 					}
 				}
 

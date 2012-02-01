@@ -6,8 +6,10 @@
 
 	// Haetaan ostoreskontralaskun tiedot
 	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	
 	$osres = pupe_query($query);
 	$osrow = mysql_fetch_array($osres);
+	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
 	if ($osrow["ebid"] != "TECCOM-INVOICE") {
 		$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
@@ -139,22 +141,24 @@
 		}
 		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0) {
 			// Onko ostolaskua ja onko kohdistamatta
+			
 			$query = "	SELECT tilausrivi.*
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus)
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
-										AND toimi.tunnus = '$trow[tunnus]')
+										AND toimi.tunnus = '{$trow["tunnus"]}')
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno = '".$rtuoteno[$i]["tuoteno"]."')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+														AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}')
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.otunnus = '".$rtuoteno[$i]["ostotilausnro"]."'
-						AND (tilausrivi.tunnus = '".$rtuoteno[$i]["tilaajanrivinro"]."' OR tilausrivi.tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."')";
+						AND tilausrivi.otunnus = '{$rtuoteno[$i]["ostotilausnro"]}'
+						AND (tilausrivi.tunnus = '{$rtuoteno[$i]["tilaajanrivinro"]}' OR tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]["tilaajanrivinro"]}')";
 			$checkres = pupe_query($query);
 			$tilausrivirow = mysql_fetch_array($checkres);
+query_dump($query);
 
 			if (mysql_num_rows($checkres) == 1 and $tilausrivirow['uusiotunnus'] == 0) {
 				// löytyi, ei ole keikalla
@@ -322,7 +326,7 @@
 									tilausrivi = '{$pointteri['tunnus']}',
 									keikkarivinhinta = '{$tilausrivirow['hinta']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tilausnumero = '{$laskun_numero}'
+									AND tilausnumero = '{$laskun_numero}' ## väärä tilausnumero, nyt menee toimittajan laskun numero eikä pupen ostonumero !! KORJAA !!!
 									AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
 					pupe_query($update_asn);
 
@@ -332,6 +336,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$pointteri[tunnus]'";
 					pupe_query($update);
+
 				}
 				elseif ($pointteri["kpl"] < $tilausrivirow["varattu"]) {
 					// Splitataan tilausrivi, tallennetaan vanha rivitunnus tilausrivi.tilaajanrivinro kenttään
@@ -366,6 +371,7 @@
 								hyllytaso = '$tilausrivirow[hyllytaso]',
 								hyllyvali = '$tilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$tilausrivirow[tunnus]'";
+								
 					$inskres = pupe_query($query);
 				}
 				else {
@@ -381,7 +387,7 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
@@ -389,7 +395,7 @@
 								tilausrivi = '{$pointteri['tunnus']}',
 								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tilausnumero = '{$laskun_numero}'
+								AND tilausnumero = '{$hinta_chk_row["otunnus"]}'
 								AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
 				pupe_query($update_asn);
 
@@ -417,6 +423,7 @@
 								AND tilausrivinpositio = '{$osto_loop['tilaajanrivinro']}'";
 					$chk_res = pupe_query($query);
 					$chk_row = mysql_fetch_assoc($chk_res);
+query_dump($query);
 
 					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
 				}
@@ -427,6 +434,8 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tilausnumero = '{$laskun_numero}'";
 					$chk_res = pupe_query($query);
+query_dump($query);
+					
 				}
 			}
 			elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
@@ -450,7 +459,7 @@
 								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tilausnumero = '{$laskun_numero}'";
-					$chk_res = pupe_query($query);
+					$chk_res = pupe_query($query);					
 				}
 			}
 		}

@@ -62,6 +62,15 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
+		$ulos = "<td>".$alasveto[$i]."</td>";
+		$jatko = 0;
+	}
+	elseif (mysql_field_name($result, $i) == "ytunnus") {
+		// Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
+		$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "toimittaja" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";

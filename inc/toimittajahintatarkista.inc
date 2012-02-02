@@ -2,9 +2,9 @@
 
 if(!function_exists("toimittajahintatarkista")) {
 	function toimittajahintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $alasveto, $toim;
+		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-		static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind,  $chlaji;
+		static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
 
 		if (mysql_field_name($result, $i) == "hinta") {
 			if (trim($t[$i]) == '') {
@@ -22,21 +22,20 @@ if(!function_exists("toimittajahintatarkista")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi != 'P'
 							and ytunnus = '$t[$i]'";
-				$sresult = pupe_query($query);
+				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) == 0) {
-					$virhe[$i] = t("Ytunnuksella ei löydy asiakasta!");
+					$virhe[$i] = t("Ytunnuksella ei löydy toimittajaa!");
 				}
 			}
 		}
-
 
 		if (mysql_field_name($result, $i) == "toimittaja") {
 			$chastunn = trim($t[$i]);
 
 			// Ei tsekata turhaan kun rivi dellataan luedatasta
-			if (($chastunn != '') and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
-				
+			if ($chastunn != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
+
 				unset($result);
 
 				if (is_numeric($chastunn) and $chastunn > 0) {
@@ -45,8 +44,7 @@ if(!function_exists("toimittajahintatarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tyyppi != 'P'
 								and tunnus = '$chastunn'";
-					$result = pupe_query($query);
-					
+					$result = mysql_query($query) or pupe_error($query);
 				}
 
 				if (!isset($result) or (isset($result) and mysql_num_rows($result) != 1)) {
@@ -56,19 +54,19 @@ if(!function_exists("toimittajahintatarkista")) {
 					$ulos2 			= "";
 
 					if ($ytunnus != "" and $ytunnus != "0") {
-						require("kevyt_toimittajahaku.inc");
+						require("inc/kevyt_toimittajahaku.inc");
 					}
 
 					if ($ulos2 != "" and $ytunnus == "") {
-						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse Toimittaja")."</option>".$ulos2."</select>";
-						$virhe[$i]    = t("Valitse Toimittaja!");
+						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse toimittaja")."</option>".$ulos2."</select>";
+						$virhe[$i]    = t("Valitse toimittaja!");
 					}
 					elseif ($ytunnus != "") {
 						$t[$i]  = $toimittajaid;
-						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Toimittaja löytyi!");
+						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("toimittaja löytyi!");
 					}
 					else {
-						$virhe[$i] = t("Toimittaja puuttuu tai sitä ei löydy!");
+						$virhe[$i] = t("toimittaja puuttuu tai sitä ei löydy!");
 					}
 				}
 			}
@@ -83,16 +81,17 @@ if(!function_exists("toimittajahintatarkista")) {
 				$query = "	SELECT tuoteno
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
-				$sresult = pupe_query($query);
+				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) != 1) {
+
 					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
 					else $tuoteno = $t[$i];
 
 					$kutsuja 		= "yllapito.php";
 					$ulos			= "";
 
-					require ("tuotehaku.inc");
+					require ("inc/tuotehaku.inc");
 
 					if ($ulos != "") {
 						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
@@ -111,12 +110,28 @@ if(!function_exists("toimittajahintatarkista")) {
 				$query = "	SELECT tunnus
 							FROM perusalennus
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
-				$sresult = pupe_query($query);
+				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) != 1) {
 					$virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
 				}
 			}
+		}
+
+		if (mysql_field_name($result, $i) == 'tunnus') {
+
+			$rajlask = 0;
+
+			if ($chytunnus != '') $rajlask++;
+			if ($chastunn > 0) $rajlask++;
+
+			if ($rajlask > 1 or $rajlask == 0) {
+				$virhe[$chtuoteno_ind] = $virhe[$i] = t("Valitse toimittaja tai ytunnus!");
+			}
+		}
+
+		if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
+			$virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
 		}
 
 		if (mysql_field_name($result, $i) == "minkpl") {
@@ -166,37 +181,31 @@ if(!function_exists("toimittajahintatarkista")) {
 				}
 			}
 		}
-		
-		if (mysql_field_name($result, $i) == "laji") {
-			$chlaji = trim($t[$i]);
-		}
-		
 
-		// Ei tsekata turhaan kun rivi dellataan luedatasta
-		if (($chytunnus != ''  or $chastunn != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
+		if (($chytunnus != '' or $chastunn != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
 			$and = '';
 
 			if ($chytunnus != '') 		$and .= " and ytunnus = '$chytunnus'";
 			if ($chastunn > 0) 			$and .= " and toimittaja = '$chastunn'";
+
 			if ($chryhma != '') 		$and .= " and ryhma = '$chryhma'";
 			if ($chtuoteno != '') 		$and .= " and tuoteno = '$chtuoteno'";
 
 			$aquery = "	SELECT ytunnus
 						FROM toimittajahinta
-						WHERE yhtio		= '$kukarow[yhtio]'
+						WHERE yhtio='$kukarow[yhtio]'
 						$and
-						and alkupvm 	= '$chalkupvm'
-						and loppupvm 	= '$chloppupvm'
-						and minkpl 		= $chminkpl
-						and maxkpl		= '$chmaxkpl'
-						and laji 		= '$chlaji'
-						and tunnus	   != '$trow[$i]'";
-			$dsresult = pupe_query($aquery);
+						and alkupvm = '$chalkupvm'
+						and loppupvm = '$chloppupvm'
+						and minkpl = $chminkpl
+						and maxkpl = $chmaxkpl
+						and tunnus != '$trow[$i]'";
+			$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-				$virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: Näillä tiedoilla on jo toimittajaalennus järjestelmässä!");
+				$virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: Näillä tiedoilla on jo toimittajahinta järjestelmässä!");
 			}
 		}
 	}

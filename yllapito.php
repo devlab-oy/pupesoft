@@ -1661,7 +1661,6 @@
 			}
 		}
 
-
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
 			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
@@ -1682,15 +1681,15 @@
 			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat")) {
 				echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-			
+
 			if (tarkista_oikeus("yllapito.php", "toimittajaalennus")) {
-				echo "<iframe id='toimittajaalennus_iframe' name='toimittajaalennus_iframe' src='yllapito.php?toim=toimittajaalennus&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='toimittajaalennus_iframe' name='toimittajaalennus_iframe' src='yllapito.php?toim=toimittajaalennus&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-			
+
 			if (tarkista_oikeus("yllapito.php", "toimittajahinta")) {
-				echo "<iframe id='toimittajahinta_iframe' name='toimittajahinta_iframe' src='yllapito.php?toim=toimittajahinta&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='toimittajahinta_iframe' name='toimittajahinta_iframe' src='yllapito.php?toim=toimittajahinta&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-			
+
 			if (tarkista_oikeus("yllapito.php", "tuotteen_avainsanat")) {
 				echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
@@ -1827,11 +1826,11 @@
 	if ($from == "yllapito" and $toim == "tuotteen_avainsanat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe' $jcsmaxheigth);</script>";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "toimittajaalennus") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajaalennus_iframe' $jcsmaxheigth);</script>";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "toimittajahinta") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajahinta_iframe' $jcsmaxheigth);</script>";
 	}

@@ -100,9 +100,15 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
-
+	
 	if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
+		// Jos tämä on liitetty ytunnuksella:
+		if ($trow[$i] != "" and $trow[$i] != "0") {
+			$ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
+		}
+		
 		$tyyppi = 4;
+		$jatko = 0;
 	}
 	elseif (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
@@ -115,7 +121,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
-		$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+		// Jos tämä on liitetty tunnuksella:
+		if ($trow[$i] > 0) {
+			$ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
+		}
+		
 		$tyyppi = 4;
 		$jatko = 0;
 	}

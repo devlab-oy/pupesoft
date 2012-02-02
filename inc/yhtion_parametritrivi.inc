@@ -2407,7 +2407,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kehahinvirhe_esto_laskutus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2640,13 +2640,13 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ' ' $sela>".t("Myyntiriveillä ei käytetä pyöristystä seuraavaan täyteen myyntierään")."</option>
-					<option value = 'K' $selb>".t("Myyntiriveillä käytetään pyöristystä seuraavaan täyteen myyntierään")."</option>
+					<option value = ' ' $sela>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
+					<option value = 'K' $selb>".t("Myyntirivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
 				</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ostoera_pyoristys" ) {
 
 		$sela = $selb = "";
@@ -2659,8 +2659,8 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ' ' $sela>".t("Ostoriveillä ei käytetä pyöristystä seuraavaan täyteen ostoerään")."</option>
-					<option value = 'K' $selb>".t("Ostoriveillä käytetään pyöristystä seuraavaan täyteen ostoerään")."</option>
+					<option value = ' ' $sela>".t("Ostorivin määrää ei pyöristetä seuraavaan täyteen ostoerään")."</option>
+					<option value = 'K' $selb>".t("Ostorivin määrä pyöristetään seuraavaan täyteen ostoerään")."</option>
 				</select></td>";
 
 		$jatko = 0;

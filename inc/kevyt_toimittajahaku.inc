@@ -61,7 +61,7 @@ if ($monta > 1 and $monta <= $limit) {
 	}
 	while ($toimittaja = mysql_fetch_array($result)) {
 
-		if ($kutsuja !="yllapito.php") {
+		if ($kutsuja != "yllapito.php") {
 
 			if ($toimittaja['ytunnus'] != '') $numero = trim($toimittaja['ytunnus']);
 			else die("VIRHE: Toimittajalla ei ole ytunnusta! Korjaa asia!");

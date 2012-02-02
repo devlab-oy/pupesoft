@@ -14416,7 +14416,7 @@ if (!function_exists("tee_keraysera2")) {
 		$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.h1time";
 		$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.h1time";
 
-		$groupby1 = $groupby2 = "GROUP BY 1,2,3,4,5";
+		$groupby1 = $groupby2 = "GROUP BY 1,2,3,4,5,6";
 
 		if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false) {
 			$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.liitostunnus, lasku1.h1time";
@@ -14464,6 +14464,7 @@ if (!function_exists("tee_keraysera2")) {
 		$result = pupe_query($query);
 
 		$query = "	(SELECT lasku1.liitostunnus,
+					lahdot1.lahdon_kellonaika,
 					lasku1.nimi as asiakas_nimi,
 					lahdot1.tunnus as lahto,
 					lasku1.prioriteettinro as prioriteetti,
@@ -14498,6 +14499,7 @@ if (!function_exists("tee_keraysera2")) {
 					UNION
 
 					(SELECT lasku2.liitostunnus,
+					999999999999 as lahdon_kellonaika,
 					lasku2.nimi as asiakas_nimi,
 					999999999999 as lahto,
 					lasku2.prioriteettinro as prioriteetti,
@@ -14527,6 +14529,50 @@ if (!function_exists("tee_keraysera2")) {
  			$result = pupe_query($query);
 
 			return array('tilaukset' => array(), 'msg' => $query);
+		}
+
+		$row = mysql_fetch_assoc($res);
+
+		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
+			$aikarajaus = $row['lahdon_kellonaika'];
+
+			$query = "	SELECT lasku1.liitostunnus,
+						lahdot1.lahdon_kellonaika,
+						lasku1.nimi as asiakas_nimi,
+						lahdot1.tunnus as lahto,
+						lasku1.prioriteettinro as prioriteetti,
+						lasku1.ohjausmerkki, 
+						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
+						FROM lasku AS lasku1
+						JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
+						JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D')
+						JOIN varaston_hyllypaikat AS vh1 ON (vh1.yhtio = tilausrivi1.yhtio AND vh1.hyllyalue = tilausrivi1.hyllyalue AND vh1.hyllynro = tilausrivi1.hyllynro AND vh1.hyllyvali = tilausrivi1.hyllyvali AND vh1.hyllytaso = tilausrivi1.hyllytaso AND vh1.keraysvyohyke = '{$keraysvyohyke}')
+						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
+						JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
+						JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
+					 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
+										AND lahdot1.liitostunnus = toimitustapa1.tunnus
+										AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+										#AND lahdot1.lahdon_kellonaika >= CURTIME()
+										AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
+										AND lahdot1.aktiivi = ''
+										AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+										#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
+										AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+											)
+						WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
+						AND lasku1.tila = 'N'
+						AND lasku1.alatila = 'A'
+						AND lasku1.vakisin_kerays = ''
+						AND lasku1.varasto = '{$varasto}'
+						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + 120) 
+						{$groupby1}
+						{$orderby1}";
+			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
+			$res = pupe_query($query);
+		}
+		else {
+			mysql_data_seek($res, 0);
 		}
 
 		/**

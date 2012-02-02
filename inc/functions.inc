@@ -14624,6 +14624,7 @@ if (!function_exists("tee_keraysera2")) {
 						#LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$row['tunnus']})
+						AND tilausrivi.varattu > 0
 						#AND (tuoteperhe.ohita_kerays IS NULL OR tuoteperhe.ohita_kerays = '')
 						ORDER BY vh.indeksi";
 			$indeksi_res = pupe_query($query);
@@ -14974,6 +14975,7 @@ if (!function_exists("tee_keraysera2")) {
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tilaukset})
 						AND tilausrivi.tyyppi != 'D'
+						AND tilausrivi.varattu > 0
 						ORDER BY tuote.yksin_kerailyalustalle ASC, pisin_sorttaus DESC, vh.indeksi ASC";
 			$tuoteres = pupe_query($query);
 

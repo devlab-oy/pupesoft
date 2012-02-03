@@ -145,7 +145,6 @@
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
 
-
 		$laskuri = 0;
 
 		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä, eikä suoraan keikkaan lisättyjä ostorivejä lasku.alatila!='K')
@@ -169,6 +168,25 @@
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri mitätöidyn tilauksen rivit. (Rivit jostain syystä ei dellattuja)\n";
 
 
+		// Arkistoidaan tulostetut ostotilaukset joilla ei ole yhtään tulossa olevaa kamaa
+		$query = "	SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus
+					FROM lasku
+					LEFT JOIN tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.varattu != 0
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tila = 'O'
+					AND lasku.alatila = 'A'
+					AND tilausrivi.tunnus is null";
+		$result = mysql_query($query) or die($query);
+
+		while ($row = mysql_fetch_array($result)) {
+			$query = "UPDATE lasku set alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
+			$deler = mysql_query($query) or die($query);
+			$laskuri ++;
+		}
+
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Arkistoitiin $laskuri ostotilausta.\n";
+		
+		
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 		$lask = 0;
 		$lask2 = 0;

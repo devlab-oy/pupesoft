@@ -816,7 +816,7 @@
 
 			$rivienmaara = mysql_num_rows($presult);
 
-			echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+			echo "<table><tr>";
 			echo "<th>#</th>";
 			echo "<th align='left'>".t("Nimitys")."</th>";
 			echo "<th align='left'>".t("Paikka")."</th>";

@@ -169,6 +169,19 @@
 						$tuoteno = $tuote_row["tuoteno"];
 					}
 
+					$query = "  SELECT tunnus
+								FROM tapahtuma
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND laji IN ('tulo', 'valmistus')
+								AND tuoteno = '{$tuoteno}'
+								LIMIT 1";
+					$tapahtuma_res = pupe_query($query);
+
+					if (mysql_num_rows($tapahtuma_res) == 0) {
+						echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla ei ole yht‰‰n tuloa")."! ($tuoteno)</font><br>";
+						$virhe = 1;
+					}
+
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
 						echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n sarja- tai er‰numeroa").": $tuoteno!</font><br>";
 						$virhe = 1;
@@ -667,6 +680,7 @@
 											yhtio      = '$kukarow[yhtio]',
 											tapvm      = now(),
 											tila       = 'X',
+											alatila    = 'I',
 											laatija    = '$kukarow[kuka]',
 											viite      = '$tapahtumaid',
 											luontiaika = now()";
@@ -702,7 +716,7 @@
 											summa    = '$summa',
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi: $selite',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
@@ -718,7 +732,7 @@
 											summa    = $summa * -1,
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi: $selite',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);

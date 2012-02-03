@@ -1,7 +1,6 @@
 <?php
 
 	require ("../inc/parametrit.inc");
-    require_once ("inc/tilinumero.inc");
 
 	$lisa = "";
 

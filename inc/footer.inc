@@ -1,5 +1,10 @@
 <?php
 
+	if (php_sapi_name() == "cli") {
+		mysql_close($link);
+		exit;
+	}
+
 	if (isset($formi) and isset($kentta)) {
 		echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 	}
@@ -89,11 +94,11 @@
 			echo "</form>";
 		}
 
-		echo "<br><br>";
+			echo "<br><br>";
 
-		if ($kukarow["extranet"] != "") {
-			echo $yhtiorow["web_seuranta"];
-		}
+			if ($kukarow["extranet"] != "") {
+				echo $yhtiorow["web_seuranta"];
+			}
 
 		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 

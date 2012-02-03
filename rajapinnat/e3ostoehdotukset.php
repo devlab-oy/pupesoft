@@ -62,7 +62,9 @@
 				echo "<br>";
 			}
 			else {
-				list($hinta, , , , ) = tuotteen_ostohinta ($laskurow, $tuote_row, $kpl);
+
+				list($hinta,,,) = alehinta_osto($laskurow, $tuote_row, $kpl);
+
 				$insert_query = "	INSERT INTO tilausrivi SET
 									yhtio 		= '$kukarow[yhtio]',
 									tyyppi 		= 'O',
@@ -104,9 +106,9 @@
 			$lines = file($kansio.$file);
 
 			foreach ($lines as $line) {
-				
+
 				//$toimittajaytunnus 		= pupesoft_cleanstring(substr($line, 0, 7));
-				$toimittajaytunnus		= '06806400'; 										// <<== POISTA TOI TOSTA ETTEI MENE SITTEN SISÄREISILLE 
+				$toimittajaytunnus		= '06806400'; 										// <<== POISTA TOI TOSTA ETTEI MENE SITTEN SISÄREISILLE
 				$varasto 				= pupesoft_cleanstring(substr($line, 12, 3));
 				$e3ostotilausnumero 	= pupesoft_cleanstring(substr($line, 15, 7));
 				$toimituspaiva 			= pupesoft_cleanstring(substr($line, 31, 8));

@@ -14416,7 +14416,8 @@ if (!function_exists("tee_keraysera2")) {
 		$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.h1time";
 		$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.h1time";
 
-		$groupby1 = $groupby2 = "GROUP BY 1,2,3,4,5,6";
+		$groupby1 = "GROUP BY 1,2,3,4,5";
+		$groupby2 = "GROUP BY 1,2,3,4,5";
 
 		if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false) {
 			$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.liitostunnus, lasku1.h1time";
@@ -14463,12 +14464,15 @@ if (!function_exists("tee_keraysera2")) {
 					kerayserat READ";
 		$result = pupe_query($query);
 
-		$query = "	(SELECT lasku1.liitostunnus,
-					lahdot1.lahdon_kellonaika,
+		$query = "	(SELECT lahdot1.asiakasluokka,
+					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+					lasku1.prioriteettinro as prioriteetti,
+					lasku1.h1time,
+					lasku1.liitostunnus,
 					lasku1.nimi as asiakas_nimi,
 					lahdot1.tunnus as lahto,
-					lasku1.prioriteettinro as prioriteetti,
 					lasku1.ohjausmerkki, 
+					lahdot1.lahdon_kellonaika,
 					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 					FROM lasku AS lasku1
 					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
@@ -14493,17 +14497,17 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
 					{$wherelisa}
-					{$groupby1}
-					{$orderby1})
-
+					GROUP BY 1,2,3,4,5,6,7,8)
 					UNION
-
-					(SELECT lasku2.liitostunnus,
-					999999999999 as lahdon_kellonaika,
+					(SELECT 999999999999 as asiakasluokka,
+					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
+					lasku2.prioriteettinro as prioriteetti,
+					lasku2.h1time,
+					lasku2.liitostunnus,
 					lasku2.nimi as asiakas_nimi,
 					999999999999 as lahto,
-					lasku2.prioriteettinro as prioriteetti,
 					lasku2.ohjausmerkki, 
+					999999999999 as lahdon_kellonaika,
 					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 					FROM lasku AS lasku2
 					JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
@@ -14518,8 +14522,8 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					{$groupby2}
-					{$orderby2})";
+					GROUP BY 1,2,3,4,5,6,7,8)
+					ORDER BY 1,2,3,4";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 
@@ -14536,12 +14540,15 @@ if (!function_exists("tee_keraysera2")) {
 		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 			$aikarajaus = $row['lahdon_kellonaika'];
 
-			$query = "	SELECT lasku1.liitostunnus,
-						lahdot1.lahdon_kellonaika,
+			$query = "	SELECT lahdot1.asiakasluokka,
+						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+						lasku1.prioriteettinro as prioriteetti,
+						lasku1.h1time,
+						lasku1.liitostunnus,
 						lasku1.nimi as asiakas_nimi,
 						lahdot1.tunnus as lahto,
-						lasku1.prioriteettinro as prioriteetti,
 						lasku1.ohjausmerkki, 
+						lahdot1.lahdon_kellonaika,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 						FROM lasku AS lasku1
 						JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
@@ -14559,15 +14566,15 @@ if (!function_exists("tee_keraysera2")) {
 										AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 										#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
 										AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
-											)
+	 									)
 						WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 						AND lasku1.tila = 'N'
 						AND lasku1.alatila = 'A'
 						AND lasku1.vakisin_kerays = ''
 						AND lasku1.varasto = '{$varasto}'
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + 120) 
-						{$groupby1}
-						{$orderby1}";
+						GROUP BY 1,2,3,4,5,6,7,8
+						ORDER BY 1,2,3,4";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$res = pupe_query($query);
 		}

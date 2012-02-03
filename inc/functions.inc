@@ -14469,7 +14469,7 @@ if (!function_exists("tee_keraysera2")) {
 					lasku1.prioriteettinro as prioriteetti,
 					lasku1.h1time,
 					lasku1.liitostunnus,
-					lasku1.nimi as asiakas_nimi,
+					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 					lahdot1.tunnus as lahto,
 					lasku1.ohjausmerkki, 
 					lahdot1.lahdon_kellonaika,
@@ -14504,7 +14504,7 @@ if (!function_exists("tee_keraysera2")) {
 					lasku2.prioriteettinro as prioriteetti,
 					lasku2.h1time,
 					lasku2.liitostunnus,
-					lasku2.nimi as asiakas_nimi,
+					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
 					999999999999 as lahto,
 					lasku2.ohjausmerkki, 
 					999999999999 as lahdon_kellonaika,
@@ -14545,7 +14545,7 @@ if (!function_exists("tee_keraysera2")) {
 						lasku1.prioriteettinro as prioriteetti,
 						lasku1.h1time,
 						lasku1.liitostunnus,
-						lasku1.nimi as asiakas_nimi,
+						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 						lahdot1.tunnus as lahto,
 						lasku1.ohjausmerkki, 
 						lahdot1.lahdon_kellonaika,
@@ -14605,12 +14605,12 @@ if (!function_exists("tee_keraysera2")) {
 				break;
 			}
 
-			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['liitostunnus'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
+			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['asiakas_nimi'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
 				if ($debug) echo "EI SAA OLLA USEITA LƒHT÷Jƒ! BREAK<br>";
 				break;
 			}
 
-			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and trim($ed_asiakas) != '' and $ed_asiakas != $row['liitostunnus']) {
+			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and trim($ed_asiakas) != '' and $ed_asiakas != $row['asiakas_nimi']) {
 				if ($debug) echo "EI SAA OLLA USEITA ASIAKKAITA! BREAK<br>";
 				break;
 			}
@@ -14676,7 +14676,7 @@ if (!function_exists("tee_keraysera2")) {
 			$kerailyniput_tiedot[$i]['tilauksen_paino'] = $til_paino;
 
 			$ed_prioriteetti = $row['prioriteetti'];
-			$ed_asiakas = $row['liitostunnus'];
+			$ed_asiakas = $row['asiakas_nimi'];
 			$ed_lahto = $row['lahto'];
 
 			$i++;
@@ -15177,7 +15177,7 @@ if (!function_exists("tee_keraysera2")) {
 
 			// $ed_prioriteetti = $row['prioriteetti'];
 
-			if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['liitostunnus'] and trim($ed_lahto) != '' and $ed_lahto != $kerailyniput_tiedot[$key]['lahto']) {
+			if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['nimi'] and trim($ed_lahto) != '' and $ed_lahto != $kerailyniput_tiedot[$key]['lahto']) {
 				if ($debug) {
 					echo "<br><br>Er‰n tilavuus NYT: $eran_koko cm3<br>";
 					echo "Er‰n pinta-ala NYT: $eran_koko_pintaala cm2<br><br>";
@@ -15217,7 +15217,7 @@ if (!function_exists("tee_keraysera2")) {
 			
 			// $ed_lahto = $row['lahto'];
 
-			if (trim($ed_asiakas) != '' and $ed_asiakas != $kerailyniput_tiedot[$key]['liitostunnus']) {
+			if (trim($ed_asiakas) != '' and $ed_asiakas != $kerailyniput_tiedot[$key]['nimi']) {
 				if ($debug) {
 					echo "<br><br>Er‰n tilavuus NYT: $eran_koko cm3<br>";
 					echo "Er‰n pinta-ala NYT: $eran_koko_pintaala cm2<br><br>";
@@ -15286,7 +15286,7 @@ if (!function_exists("tee_keraysera2")) {
 				}
 
 				// MERKKI-KENTTƒ
-				if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['liitostunnus'] and trim($ed_ohjausmerkki) != '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷' and $ed_ohjausmerkki != $ohjausmerkki[$tuoterow['otunnus']]) {
+				if (trim($ed_asiakas) != '' and $ed_asiakas == $kerailyniput_tiedot[$key]['nimi'] and trim($ed_ohjausmerkki) != '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷' and $ed_ohjausmerkki != $ohjausmerkki[$tuoterow['otunnus']]) {
 					if ($debug) {
 						echo "<br><br>Er‰n tilavuus NYT: $eran_koko cm3<br>";
 						echo "Er‰n pinta-ala NYT: $eran_koko_pintaala cm2<br><br>";
@@ -15639,7 +15639,7 @@ if (!function_exists("tee_keraysera2")) {
 				}
 
 				$ii++;
-				$ed_asiakas = $kerailyniput_tiedot[$key]['liitostunnus'];
+				$ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
 				$ed_otunnus = $tuoterow['otunnus'];
 				$ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
 				// $rivit++;

@@ -522,7 +522,6 @@
 
 		if (!$php_cli) {
 			echo t("Tuotteita/tuotepaikkoja"),": ",mysql_num_rows($result),"<br>";
-			force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
 		}
 
 		if ($summaustaso == 'TRY') {
@@ -646,8 +645,6 @@
 		$elements = mysql_num_rows($result); // total number of elements to process
 
 		if (!$php_cli) {
-			echo "Löytyi $elements tietuetta.<br><br>";
-
 			echo "<a name='focus_tahan'>".t("Lasketaan varastonarvo")."...<br></a>";
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 

@@ -14464,10 +14464,10 @@ if (!function_exists("tee_keraysera2")) {
 					kerayserat READ";
 		$result = pupe_query($query);
 
-		$query = "	(SELECT lahdot1.asiakasluokka,
+		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					lasku1.prioriteettinro as prioriteetti,
 					lasku1.h1time,
+					lahdot1.asiakasluokka,
 					lasku1.liitostunnus,
 					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 					lahdot1.tunnus as lahto,
@@ -14499,10 +14499,10 @@ if (!function_exists("tee_keraysera2")) {
 					{$wherelisa}
 					GROUP BY 1,2,3,4,5,6,7,8)
 					UNION
-					(SELECT 999999999999 as asiakasluokka,
+					(SELECT lasku2.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
-					lasku2.prioriteettinro as prioriteetti,
 					lasku2.h1time,
+					999999999999 as asiakasluokka,
 					lasku2.liitostunnus,
 					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
 					999999999999 as lahto,
@@ -14523,7 +14523,7 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
 					GROUP BY 1,2,3,4,5,6,7,8)
-					ORDER BY 1,2,3,4";
+					ORDER BY 1,2,3";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 
@@ -14540,10 +14540,10 @@ if (!function_exists("tee_keraysera2")) {
 		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 			$aikarajaus = $row['lahdon_kellonaika'];
 
-			$query = "	SELECT lahdot1.asiakasluokka,
+			$query = "	SELECT lasku1.prioriteettinro as prioriteetti,
 						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-						lasku1.prioriteettinro as prioriteetti,
 						lasku1.h1time,
+						lahdot1.asiakasluokka,
 						lasku1.liitostunnus,
 						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 						lahdot1.tunnus as lahto,
@@ -14574,7 +14574,7 @@ if (!function_exists("tee_keraysera2")) {
 						AND lasku1.varasto = '{$varasto}'
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + 120) 
 						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER BY 1,2,3,4";
+						ORDER BY 1,2,3";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$res = pupe_query($query);
 		}

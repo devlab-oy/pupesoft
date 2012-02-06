@@ -483,8 +483,7 @@
 					$jarjestys_join
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
-					$where_lisa
-					LIMIT 2000)
+					$where_lisa)
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa1
@@ -517,8 +516,7 @@
 											$varastontunnukset)
 					$jarjestys_join
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					$where_lisa
-					LIMIT 2000)					
+					$where_lisa)
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
 
@@ -537,7 +535,7 @@
 
 			$try_array = array();
 			$try_array[0] = t("Ei tuoteryhm‰‰");
-			
+
 			while ($row = mysql_fetch_assoc($try_result)) {
 				$try_array[$row["selite"]] = $row["selitetark"];
 			}

@@ -691,10 +691,7 @@
 				}
 
 				if ($row["sarjanumeroseuranta"] == "G") {
-					/*
-						Haetaan vapaat erät varastosta ja lasketaan niiden saldot
-					*/
-
+					# Haetaan vapaat erät varastosta ja lasketaan niiden saldot
 					$query	= "		SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
 									FROM sarjanumeroseuranta
 									JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
@@ -708,6 +705,7 @@
 									$summaus_lisa
 									HAVING era_kpl > 0";
 					$vararvores = pupe_query($query);
+
 					while ($vararvorow = mysql_fetch_assoc($vararvores)) {
 						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"])*$vararvorow["era_kpl"];
 						$bruttovaraston_arvo = $varaston_arvo;
@@ -1139,12 +1137,24 @@
 				if ($summaustaso == 'TRY') {
 					$tryosind = "$row[osasto] - ".$osasto_array[$row["osasto"]]."###$row[try] - ".$try_array[$row["try"]];
 
-					$varastot2[$tryosind]["netto"] += $muutoshinta;
-					$varastot2[$tryosind]["brutto"] += $bmuutoshinta;
+					if (!isset($varastot2[$tryosind])) {
+						$varastot2[$tryosind]["netto"]  = $muutoshinta;
+						$varastot2[$tryosind]["brutto"] = $bmuutoshinta;
+					}
+					else {
+						$varastot2[$tryosind]["netto"]  += $muutoshinta;
+						$varastot2[$tryosind]["brutto"] += $bmuutoshinta;
+					}
 				}
 				else {
-					$varastot2[$row["varastonnimi"]]["netto"] += $muutoshinta;
-					$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
+					if (!isset($varastot2[$row["varastonnimi"]])) {
+						$varastot2[$row["varastonnimi"]]["netto"]  = $muutoshinta;
+						$varastot2[$row["varastonnimi"]]["brutto"] = $bmuutoshinta;
+					}
+					else {
+						$varastot2[$row["varastonnimi"]]["netto"]  += $muutoshinta;
+						$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
+					}
 				}
 			}
 		}
@@ -1212,6 +1222,7 @@
 
 	if (isset($workbook)) {
 		$workbook->close();
+
 		if (!$php_cli) {
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

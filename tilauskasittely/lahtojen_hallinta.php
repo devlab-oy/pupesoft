@@ -1604,6 +1604,7 @@
 						AND varastopaikat.tunnus = '{$select_varasto}')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+						AND lasku.luontiaika >= '2012-02-03 16:40:00'
 						GROUP BY 1,2,3,4,5,6,7,8,9
 						ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 			$result = pupe_query($query);

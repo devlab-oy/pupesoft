@@ -14574,7 +14574,7 @@ if (!function_exists("tee_keraysera2")) {
 						AND lasku1.vakisin_kerays = ''
 						AND lasku1.varasto = '{$varasto}'
 						AND lasku1.luontiaika >= '2012-02-03 16:40:00'
-						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + 120) 
+						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) 
 						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER BY 1,2,3";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";

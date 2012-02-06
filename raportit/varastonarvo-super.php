@@ -455,10 +455,6 @@
 					$varastolisa1
 					tapahtuma.yhtio,
 					tapahtuma.tuoteno,
-					tapahtuma.hyllyalue,
-					tapahtuma.hyllynro,
-					tapahtuma.hyllyvali,
-					tapahtuma.hyllytaso,
 					tuote.try,
 					tuote.osasto,
 					tuote.tuotemerkki,
@@ -489,10 +485,6 @@
 					$varastolisa1
 					tuotepaikat.yhtio,
 					tuotepaikat.tuoteno,
-					tuotepaikat.hyllyalue,
-					tuotepaikat.hyllynro,
-					tuotepaikat.hyllyvali,
-					tuotepaikat.hyllytaso,
 					tuote.try,
 					tuote.osasto,
 					tuote.tuotemerkki,

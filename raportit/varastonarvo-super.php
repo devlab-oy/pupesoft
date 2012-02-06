@@ -12,6 +12,9 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	// T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
+	$useslave = 1;
+
 	if (!$php_cli) {
 		require("../inc/parametrit.inc");
 	}
@@ -512,8 +515,10 @@
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
 
+		$elements = mysql_num_rows($result);
+
 		if (!$php_cli) {
-			echo t("Tuotteita/tuotepaikkoja"),": ",mysql_num_rows($result),"<br>";
+			echo t("Tuotteita/tuotepaikkoja"),": $elements<br>";
 		}
 
 		if ($summaustaso == 'TRY') {
@@ -634,8 +639,6 @@
 			$excelsarake = 0;
 		}
 
-		$elements = mysql_num_rows($result); // total number of elements to process
-
 		if (!$php_cli) {
 			echo "<a name='focus_tahan'>".t("Lasketaan varastonarvo")."...<br></a>";
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
@@ -643,8 +646,8 @@
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');
 
-				#$bar = new ProgressBar();
-				#$bar->initialize($elements); // print the empty bar
+				$bar = new ProgressBar();
+				$bar->initialize($elements); // print the empty bar
 			}
 		}
 
@@ -656,13 +659,7 @@
 			$lask++;
 
 			if (!$php_cli) {
-				#$bar->increase();
-
-				if (($lask % 1000) == 0) {
-					echo "<font class='message'>K‰sitell‰‰n rivi‰: $lask</font><br>";
-					ob_flush();
-					flush();
-				}
+				$bar->increase();
 			}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY') {

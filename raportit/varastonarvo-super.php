@@ -664,9 +664,16 @@
 			$kpl = 0;
 			$varaston_arvo = 0;
 			$bruttovaraston_arvo = 0;
+			$lask++;
 
 			if (!$php_cli) {
 				#$bar->increase();
+
+				if (($lask % 1000) == 0) {
+					echo "<font class='message'>K‰sitell‰‰n rivi‰: $lask</font><br>";
+					ob_flush();
+					flush();
+				}
 			}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY') {
@@ -899,7 +906,6 @@
 				// summataan varastonarvoa
 				$varvo += $muutoshinta;
 				$bvarvo += $bmuutoshinta;
-				$lask++;
 				$kehalisa = "";
 
 				// sarjanumerollisilla tuotteilla ei ole keskihankintahintaa

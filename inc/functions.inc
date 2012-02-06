@@ -11940,14 +11940,15 @@ if (!function_exists("pupe_DataTables")) {
 						});
 
 						$('input[name^=\"rivi_ale\"]').each(function(){
-
-							var tun 				= $(this).attr('id').substring(9);
+							
+							var monesko				= $(this).attr('name').substring(8,9);
+							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
-							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen_'+tun).val());
+							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 							var ale 				= parseFloat(this.value);
-
+							
 							if (rivi_ale_alkup != ale) {
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
@@ -11957,7 +11958,8 @@ if (!function_exists("pupe_DataTables")) {
 										ale: ale,
 										no_head: 'yes',
 										ohje: 'off',
-										suoratoimitukset: suoratoimitukset },
+										suoratoimitukset: suoratoimitukset, 
+										monesko_kentta: monesko},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);

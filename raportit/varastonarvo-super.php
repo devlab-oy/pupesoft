@@ -318,7 +318,7 @@
 							  	tapahtuma.hyllyvali,
 							  	tapahtuma.hyllytaso";
 
-			$paikka_lisa_2 = ", tuotepaikat.hyllyalue,
+			$paikka_lisa2 = ", tuotepaikat.hyllyalue,
 							  	tuotepaikat.hyllynro,
 							  	tuotepaikat.hyllyvali,
 							  	tuotepaikat.hyllytaso";

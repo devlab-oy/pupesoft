@@ -268,7 +268,9 @@ if (!function_exists("avoin_kori")) {
 
 				$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),$yhtiorow[hintapyoristys]) summa
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$kukarow[kesken]'
+							and tyyppi != 'D'";
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 
@@ -496,6 +498,117 @@ if (!function_exists("table_exists")) {
 		else {
 			return false;
 		}
+	}
+}
+
+if (!function_exists("maventa_invoice_put_file")) {
+	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring) {
+		$files_out['file'] = base64_encode($xmlstring);
+		$files_out['filename'] = "$invoice_number.xml";
+		$files_out['attachment_type'] = 'FINVOICE';
+
+		$return_value = $client->invoice_put_file($api_keys, $files_out);
+
+		$objecti = $return_value[0];
+
+		return $objecti->status;
+	}
+}
+
+if (!function_exists("apix_invoice_put_file")) {
+	function apix_invoice_put_file($lahetettavat_apix, $kieli, $valittu_tulostin, $valittu_kopio_tulostin) {
+		global $kukarow, $yhtiorow, $pupe_root_polku;
+
+		// siirret‰‰n laskutiedosto operaattorille
+		#$url         	= "https://test-api.apix.fi/invoices";
+		$url            = "https://api.apix.fi/invoices";
+		$transferkey    = $yhtiorow['apix_avain'];
+		$transferid     = $yhtiorow['apix_tunnus'];
+		$software       = "Pupesoft";
+		$version        = "1.0";
+		$timestamp      = gmdate("YmdHis");
+		$apixzipfile    = "Apix_".$yhtiorow['yhtio']."_invoices_".$timestamp."_".md5(uniqid(rand(),true)).".zip";
+		$apix_ulos 		= "";
+
+		// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+
+		if (mkdir($apix_tmpdirnimi)) {
+
+			// Kirjoitetaan finvoiceaineisto dirikkaan
+			if (!file_put_contents($apix_tmpdirnimi."/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml", implode("\n", $lahetettavat_apix))) {
+				$apix_ulos .= "APIX finvoicewrite feilasi!";
+			}
+
+			// Luodaan laskupdf:‰t
+			$apix_lasnot = array_keys($lahetettavat_apix);
+
+			foreach ($apix_lasnot as $apixlaskunro) {
+				$apixtmpfile = tulosta_lasku("LASKU:".$apixlaskunro, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+
+				// Siirret‰‰n faili apixtemppiin
+				if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlaskunro.pdf")) {
+					$apix_ulos .= "APIX tmpmove Apix_invoice_$apixlaskunro.pdf feilas!";
+				}
+			}
+
+			// Tehd‰‰n apixzippi
+			exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+
+			// Aineisto dataouttiin
+			exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+
+			// Poistetaan apix-tmpdir
+			exec("rm -rf $apix_tmpdirnimi");
+
+			// Siirret‰‰n aineisto APIXiin
+			$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+
+			$dt = substr(hash('sha256', $digest_src), 0, 64);
+
+			$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+			$apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
+			$apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+
+			$ch = curl_init($real_url);
+			curl_setopt($ch, CURLOPT_PUT, true);
+			curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+			curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+			$apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
+			$response = curl_exec($ch);
+
+			curl_close($ch);
+			fclose($apix_fh);
+
+			$xml = simplexml_load_string($response);
+
+			if ($xml->Status == "OK") {
+				$apix_ulos .= "L‰hetys onnistui!";
+			}
+			else {
+				$apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+
+				$apix_ulos .= "Tila: ".$xml->Status."<br>";
+				$apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+				foreach ($xml->FreeText as $teksti) {
+					$apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+				}
+
+				$apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
+			}
+		}
+		else {
+			$apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+		}
+
+		return $apix_ulos;
 	}
 }
 
@@ -786,7 +899,7 @@ if (!function_exists("saldo_myytavissa")) {
 		}
 
 		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-		$result = mysql_query($query) or die($query.mysql_error());
+		$result = pupe_query($query);
 		$tuote  = mysql_fetch_assoc($result);
 
 		if (mysql_num_rows($result) == 0) {
@@ -941,7 +1054,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$valinta2
 							$valinta3";
 			}
-			$result = mysql_query($query) or die($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				/*
@@ -1020,7 +1133,7 @@ if (!function_exists("saldo_myytavissa")) {
 									$kerayslisa";
 					}
 
-					$ennresult = mysql_query($query) or die($query);
+					$ennresult = pupe_query($query);
 					$ennrow = mysql_fetch_assoc($ennresult);
 
 					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
@@ -1067,16 +1180,16 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.kerayspvm > '$pvm'";
 						}
 
-						$keraresult = mysql_query($query) or die($query);
+						$keraresult = pupe_query($query);
 						$kerarow = mysql_fetch_assoc($keraresult);
 
 						$myytavissa -= $kerarow["keratty"];
 						$hyllyssa -= $kerarow["keratty"];
 
-						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistuksten valmisteet eiv‰t lis‰‰ myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
@@ -1101,7 +1214,7 @@ if (!function_exists("saldo_myytavissa")) {
 						}
 						else {
 							$query = "	SELECT
-										ifnull(sum(tilausrivi.varattu),0) varattu
+										ifnull(sum(if(lasku.tilaustyyppi='V' and tilausrivi.tyyppi = 'W', 0, tilausrivi.varattu)),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1116,7 +1229,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.hyllytaso = '$row[hyllytaso]'
 										and tilausrivi.kerayspvm <= '$pvm'";
 						}
-						$valmresult = mysql_query($query) or die($query);
+						$valmresult = pupe_query($query);
 						$valmrow = mysql_fetch_assoc($valmresult);
 
 						$myytavissa += $valmrow["varattu"];
@@ -1156,7 +1269,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.tuoteno 	= '$tuoteno'
 									and tilausrivi.varattu 	> 0
 									and tilausrivi.toimaika <= '$pvm'";
-						$osttarkres = mysql_query($query) or die($query);
+						$osttarkres = pupe_query($query);
 						$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 						if ($osttarkrow['varattu'] != 0 and $hyllyalue != '') {
@@ -1174,7 +1287,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.hyllyvali = '$hyllyvali'
 										and tilausrivi.hyllytaso = '$hyllytaso'
 										and tilausrivi.toimaika <= '$pvm'";
-							$osttarkres = mysql_query($query) or die($query);
+							$osttarkres = pupe_query($query);
 							$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 							if ($osttarkrow['varattu'] == 0) {
@@ -1189,7 +1302,7 @@ if (!function_exists("saldo_myytavissa")) {
 											and tilausrivi.tuoteno 	= '$tuoteno'
 											and tilausrivi.varattu 	> 0
 											and tilausrivi.toimaika <= '$pvm'";
-								$osttarkres = mysql_query($tarkquery) or die($tarkquery);
+								$osttarkres = pupe_query($tarkquery);
 								$osttarkrow = mysql_fetch_assoc($osttarkres);
 
 								if ($osttarkrow['varattu'] == 0) {
@@ -1209,14 +1322,14 @@ if (!function_exists("saldo_myytavissa")) {
 												and tilausrivi.tuoteno 	= '$tuoteno'
 												and tilausrivi.varattu 	> 0
 												and tilausrivi.toimaika <= '$pvm'";
-									$osttarkres = mysql_query($query) or die($query);
+									$osttarkres = pupe_query($query);
 									$osttarkrow = mysql_fetch_assoc($osttarkres);
 								}
 							}
 						}
 					}
 
-					$ostresult = mysql_query($query) or die($query);
+					$ostresult = pupe_query($query);
 					$ostrow = mysql_fetch_assoc($ostresult);
 
 					$myytavissa += $ostrow["varattu"];
@@ -1227,7 +1340,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
 							FROM tuotepaikat
 							WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
-				$ennresult = mysql_query($query) or die($query);
+				$ennresult = pupe_query($query);
 				$ennrow = mysql_fetch_assoc($ennresult);
 
 				if (is_numeric($varasto) and $varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
@@ -1247,7 +1360,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tuotepaikat.tuoteno = '$tuoteno'
 										GROUP BY varastopaikat.tyyppi
 										HAVING varastopaikat.tyyppi is null";
-							$ennsaldoresult = mysql_query($query) or die($query);
+							$ennsaldoresult = pupe_query($query);
 
 							$ennsaldorow = mysql_fetch_assoc($ennsaldoresult);
 							$orposaldomyytavissa = $ennsaldorow["saldo"];
@@ -1262,7 +1375,7 @@ if (!function_exists("saldo_myytavissa")) {
 									tilausrivi.varattu > 0 and
 									concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])
 									$kerayslisa ";
-						$ennresult = mysql_query($query) or die($query);
+						$ennresult = pupe_query($query);
 						$ennrow = mysql_fetch_assoc($ennresult);
 
 						$orposaldomyytavissa -= $ennrow["varattu"];
@@ -1278,7 +1391,7 @@ if (!function_exists("saldo_myytavissa")) {
 									tilausrivi.varattu > 0
 									$varaako_jt_saldoa
 									$kerayslisa ";
-						$ennresult = mysql_query($query) or die($query);
+						$ennresult = pupe_query($query);
 						$ennrow = mysql_fetch_assoc($ennresult);
 
 						$orposaldomyytavissa -= $ennrow["varattu"];
@@ -1392,6 +1505,54 @@ if (!function_exists("laskuval")) {
 
 		$sum = $summa/$kurssi;
 		return $sum;
+	}
+}
+
+if (!function_exists("tilinumero_print")) {
+	function tilinumero_print($tilino_data) {
+
+		global $yhtiorow;
+
+		if (strtoupper($yhtiorow["maa"]) != "FI") {
+			return $tilino_data;
+		}
+
+		if (trim($tilino_data) == '') {
+			return "";
+		}
+		else {
+			if (substr($tilino_data, 0, 1) >= 0 and substr($tilino_data, 0, 1) <= '9') {
+				$alkuosa = substr($tilino_data, 0, 6);
+
+				# WHAT ???
+				#if ($tilino_print[0] == "4" or $tilino_print[0] == "5") {
+				#	$loppuosa = substr($tilino_data, 6, 1);
+				#	$loppuindex = 7;
+				#}
+				#else {
+					$loppuosa = "";
+					$loppuindex = 6;
+		  		#}
+
+				while ($tilino_data[$loppuindex] == "0") {
+					$loppuindex++;
+				}
+
+		  		$loppuosa .= substr($tilino_data, $loppuindex);
+
+		  		return "$alkuosa-$loppuosa";
+		  	}
+		  	else {
+				return $tilino_data;
+		  	}
+		}
+
+	}
+}
+
+if (!function_exists("pankkipvm")) {
+	function pankkipvm($pvm) {
+		return substr($pvm, 4, 2).".".substr($pvm, 2, 2).".20".substr($pvm, 0, 2);
 	}
 }
 
@@ -1531,16 +1692,16 @@ if (!function_exists("generoi_sorttauskentta")) {
 		// varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun
 		if ($jarjestys == "0") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
-									if (tilausrivi.perheid > 0, ifnull((select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))),
-								   		if (tilausrivi.perheid2 > 0, ifnull((select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))),
+									if (tilausrivi.perheid > 0, ifnull((select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus AND t2.tyyppi != 'D'), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))),
+								   		if (tilausrivi.perheid2 > 0, ifnull((select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus AND t3.tyyppi != 'D'), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
 		// varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
 		elseif ($jarjestys == "1") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno),
-									if (tilausrivi.perheid > 0, ifnull((select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
-								   		if (tilausrivi.perheid2 > 0, ifnull((select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
+									if (tilausrivi.perheid > 0, ifnull((select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus AND t2.tyyppi != 'D'), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
+								   		if (tilausrivi.perheid2 > 0, ifnull((select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus AND t3.tyyppi != 'D'), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
@@ -1558,16 +1719,16 @@ if (!function_exists("generoi_sorttauskentta")) {
 		// tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun
 		elseif ($jarjestys == "4") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno),
-									if (tilausrivi.perheid > 0, ifnull((select concat(t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)),
-										if (tilausrivi.perheid2 > 0, ifnull((select concat(t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)),
+									if (tilausrivi.perheid > 0, ifnull((select concat(t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus AND t2.tyyppi != 'D'), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)),
+										if (tilausrivi.perheid2 > 0, ifnull((select concat(t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus AND t3.tyyppi != 'D'), if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno), tilausrivi.tuoteno)),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
 		// tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
 		elseif ($jarjestys == "5") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tuoteno,
-									if (tilausrivi.perheid > 0, ifnull((select concat(t2.tuoteno, tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus), tilausrivi.tuoteno),
-										if (tilausrivi.perheid2 > 0, ifnull((select concat(t3.tuoteno, tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus), tilausrivi.tuoteno),
+									if (tilausrivi.perheid > 0, ifnull((select concat(t2.tuoteno, tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus AND t2.tyyppi != 'D'), tilausrivi.tuoteno),
+										if (tilausrivi.perheid2 > 0, ifnull((select concat(t3.tuoteno, tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus AND t3.tyyppi != 'D'), tilausrivi.tuoteno),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
@@ -1598,8 +1759,8 @@ if (!function_exists("generoi_sorttauskentta")) {
 		// toimittajan tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
 		elseif ($jarjestys == "10") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno),
-									if (tilausrivi.perheid > 0, ifnull((select concat(if (tt2.toim_tuoteno!='', concat(tt2.toim_tuoteno,tilausrivi.perheid), concat(t2.tuoteno,tilausrivi.perheid)), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) from tilausrivi as t2 JOIN tuotteen_toimittajat tt2 ON t2.yhtio = tt2.yhtio and t2.tuoteno = tt2.tuoteno and tt2.liitostunnus = '$toimittaja' where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)),
-										if (tilausrivi.perheid2 > 0, ifnull((select concat(if (tt3.toim_tuoteno!='', concat(tt3.toim_tuoteno,tilausrivi.perheid2), concat(t3.tuoteno,tilausrivi.perheid2)), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) from tilausrivi as t3 JOIN tuotteen_toimittajat tt3 ON t3.yhtio = tt3.yhtio and t3.tuoteno = tt3.tuoteno and tt3.liitostunnus = '$toimittaja' where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)),
+									if (tilausrivi.perheid > 0, ifnull((select concat(if (tt2.toim_tuoteno!='', concat(tt2.toim_tuoteno,tilausrivi.perheid), concat(t2.tuoteno,tilausrivi.perheid)), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) from tilausrivi as t2 JOIN tuotteen_toimittajat tt2 ON t2.yhtio = tt2.yhtio and t2.tuoteno = tt2.tuoteno and tt2.liitostunnus = '$toimittaja' where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid and t2.otunnus=tilausrivi.otunnus AND t2.tyyppi != 'D'), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)),
+										if (tilausrivi.perheid2 > 0, ifnull((select concat(if (tt3.toim_tuoteno!='', concat(tt3.toim_tuoteno,tilausrivi.perheid2), concat(t3.tuoteno,tilausrivi.perheid2)), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) from tilausrivi as t3 JOIN tuotteen_toimittajat tt3 ON t3.yhtio = tt3.yhtio and t3.tuoteno = tt3.tuoteno and tt3.liitostunnus = '$toimittaja' where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2 and t3.otunnus=tilausrivi.otunnus AND t3.tyyppi != 'D'), if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)),
 											if (tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)))) as sorttauskentta";
 		}
 		elseif ($jarjestys == "M") {
@@ -3043,7 +3204,7 @@ if (!function_exists("alehinta")) {
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 	   				FROM puun_alkio
 					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 0)
+	   				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
 	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
 					AND puun_alkio.laji    = 'asiakas'
 					AND puun_alkio.liitos  = '$laskurow[liitostunnus]'";
@@ -3084,7 +3245,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3095,7 +3256,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -3158,7 +3319,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3169,7 +3330,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -3231,7 +3392,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3242,7 +3403,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -3305,7 +3466,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -3316,7 +3477,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							UNION
 							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
-							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -4152,7 +4313,7 @@ if (!function_exists("alehinta")) {
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -4162,11 +4323,9 @@ if (!function_exists("alehinta")) {
 							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-'))
-
 							UNION
-
 							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -4438,7 +4597,7 @@ if (!function_exists("alehinta")) {
 			// 14. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ aleprosentti == 999.99 (asiakkaan myym‰l‰hinta)
 			if ($hinta == 0) {
 				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -4449,7 +4608,7 @@ if (!function_exists("alehinta")) {
 							and alennus = 999.99)
 							UNION
 							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -4673,7 +4832,7 @@ if (!function_exists("alehinta")) {
 
 			// 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
 			$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-						FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
+						FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and asiakas = '$laskurow[liitostunnus]'
 						and asiakas > 0
@@ -4685,7 +4844,7 @@ if (!function_exists("alehinta")) {
 						and alennus <= 100)
 						UNION
 						(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-						FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
+						FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$laskurow[ytunnus]'
 						and ytunnus != ''
@@ -4703,7 +4862,7 @@ if (!function_exists("alehinta")) {
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhm‰ aleprosentti (asiakkaan tuotealeryhm‰n alennus)
 			if (jatka_ale($ale)) {
 				$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
+							FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
@@ -4715,7 +4874,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100)
 							UNION
 							(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
@@ -5596,7 +5755,6 @@ if (!function_exists("tulosta_ytunnus")) {
 				$uytunnus = strtoupper($maa).$uytunnus;
 			}
 			elseif ($vienti != "") {
-				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 				$uytunnus = strtoupper($maa).$uytunnus;
 			}
 			else {
@@ -7243,11 +7401,11 @@ if (!function_exists('tarkasta_liite')) {
 				else {
 					if (count($sallitut_tiedostot)>1) {
 						//	Kaunistellaan..
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
 
 					}
 					else {
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
 					}
 				}
 			}
@@ -7580,14 +7738,14 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-			
+
 			// N‰ytet‰‰n poistuvat tuotteet mutta ei poistettuja
 			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
 				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
-			} 
+			}
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
-			}	
+			}
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -7773,7 +7931,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 
 			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
 						FROM asiakas
-						WHERE asiakas.yhtio = '$kukarow[yhtio]'
+						WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.laji!='P'
 						$haku_query";
 			$result = pupe_query($query);
 
@@ -7973,16 +8131,13 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 					AND asiakas = '$asiakastunnus'
 					AND asiakas != ''
 					AND yhtio = '$kukarow[yhtio]')
-
 					UNION
-
 					(SELECT *, '2' prio
 					FROM rahtisopimukset as rahtisopimukset2
 					WHERE toimitustapa = '$toimitustapa'
 					AND ytunnus = '$ytunnus'
 					AND ytunnus != ''
 					AND yhtio = '$kukarow[yhtio]')
-
 					ORDER BY prio
 					LIMIT 1";
 		$rares = pupe_query($query);
@@ -8604,6 +8759,7 @@ if (!function_exists("t_avainsana")) {
 		global $kukarow, $yhtiorow, $link;
 
 		$laji = mysql_real_escape_string($laji);
+		$orderlisa = "";
 
 		if ($kieli == "") {
 			$kieli = $kukarow["kieli"];
@@ -9335,11 +9491,12 @@ if (!function_exists("progress_bar")) {
 
 		$timeparts = explode(" ", microtime());
 		$microtime_stop = $timeparts[1].substr($timeparts[0], 1);
+		$current_item = ($current_item == 0) ? 1 : $current_item;
 
 		$microtime_current = round($microtime_stop - $microtime_start, 0);
 		$microtime_total = round($microtime_current / $current_item * $total_items, 0);
 
-		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
+		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)          \r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
 	}
 }
 
@@ -9424,6 +9581,34 @@ if (!function_exists("viivakoodi")) {
 		}
 
 		return $barcode;
+	}
+}
+
+if (!function_exists("tarkista_ean13")) {
+	function tarkista_ean13($eankoodi){
+		// Ensiksi eankoodi muutetaan Stringiksi
+		$eankoodi =(string)$eankoodi;
+
+		$tarkistusmerkki = $eankoodi[12];
+
+		// 1. Add the values of the digits in the even-numbered positions: 2, 4, 6, etc.
+		$even_sum = $eankoodi{1} + $eankoodi{3} + $eankoodi{5} + $eankoodi{7} + $eankoodi{9} + $eankoodi{11};
+		// 2. Multiply this result by 3.
+		$even_sum_three = $even_sum * 3;
+		// 3. Add the values of the digits in the odd-numbered positions: 1, 3, 5, etc.
+		$odd_sum = $eankoodi{0} + $eankoodi{2} + $eankoodi{4} + $eankoodi{6} + $eankoodi{8} + $eankoodi{10};
+		// 4. Sum the results of steps 2 and 3.
+		$total_sum = $even_sum_three + $odd_sum;
+		// 5. The check character is the smallest number which, when added to the result in step 4,  produces a multiple of 10.
+		$next_ten = (ceil($total_sum/10))*10;
+		$check_digit = $next_ten - $total_sum;
+
+		if ($check_digit == $tarkistusmerkki) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
 	}
 }
 
@@ -10662,16 +10847,16 @@ if (!function_exists("lapset")) {
 
 		$qu = "	SELECT node.tunnus, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
 				FROM dynaaminen_puu AS node
-				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 				JOIN (	SELECT node.tunnus AS tunnus, (COUNT(parent.tunnus) - 1) AS depth
 						FROM dynaaminen_puu AS node
-						JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+						JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 						WHERE node.yhtio = '{$kukarow["yhtio"]}'
 						AND node.laji 	 = '$laji'
 						AND node.lft 	 = '$left'
 						GROUP BY node.tunnus
 						ORDER BY node.lft) AS sub_tree
-				JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND sub_parent.tunnus = sub_tree.tunnus AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt)
+				JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND sub_parent.tunnus = sub_tree.tunnus AND sub_parent.lft <= node.lft AND sub_parent.rgt >= node.lft)
 				WHERE node.yhtio = '{$kukarow["yhtio"]}'
 				AND node.laji 	= '$laji'
 				GROUP BY node.tunnus
@@ -11017,16 +11202,16 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla n‰kyv‰t luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][8];
+									valuutta = aaData[aiDisplay[i]][9];
 									valuutat[valuutta] = valuutta;
 
-									if (aaData[aiDisplay[i]][6] == '') {
+									if (aaData[aiDisplay[i]][7] == '') {
 										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 									else {
 										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 								}
 
@@ -11116,12 +11301,12 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\")†{
 								var saatavaty = new Array();
-								var sarakemaara = parametrit[tableid][0]-2;
+								var sarakemaara = parametrit[tableid][0]-1;
 
 								// Summataan vain ruudulla n‰kyv‰t luvut
 								for (var i=iStart; i<iEnd; i++) {
 
-									for (var j=2; j<=sarakemaara; j++) {
+									for (var j=1; j<=sarakemaara; j++) {
 										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
 										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
 									}
@@ -11134,8 +11319,33 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								);
 
-								for (var j=2; j<=sarakemaara; j++) {
+								for (var j=1; j<=sarakemaara; j++) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
+								}
+							}
+
+							if (tableid == \"raportti_valmistuksista\")†{
+								var saatavaty = new Array();
+								var sarakemaara = parametrit[tableid][0]-4;
+
+								// Summataan vain ruudulla n‰kyv‰t luvut
+								for (var i=iStart; i<iEnd; i++) {
+
+									for (var j=4; j<=sarakemaara; j++) {
+										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
+										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
+									}
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								for (var j=4; j<=sarakemaara; j++) {
+									$('#yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}
 						}
@@ -11727,19 +11937,9 @@ if (!function_exists("pupe_DataTables")) {
 					var hakuarvo;
 
 					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdell‰ ehdolla
-					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+					haku_arvo = tyojono.val() +' '+ tyostatus.val();
 
-					if (tyojono.val() == '-') {
-						haku_arvo = tyostatus.text();
-					}
-					if (tyostatus.val() == '-') {
-						haku_arvo = tyojono.text();
-					}
-					if(tyojono.val() == '-' && tyostatus.val() == '-') {
-						haku_arvo = '';
-					}
-
-					datatablesit[0].fnFilter(haku_arvo, 8);
+					datatablesit[0].fnFilter(haku_arvo, 8, true, false);
 				} );
 			} );
 		</script>";
@@ -11803,25 +12003,20 @@ if (!function_exists("seuraava_lahtoaika")) {
 						and viimeinen_tilausaika > curtime()
 						and lahdon_viikonpvm = '$viikonpaiva'
 						AND aktiivi != 'E')
-
 						UNION
-
 						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-$viikonpaiva)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
 						FROM toimitustavan_lahdot
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND liitostunnus = '$ttunnus'
 						and lahdon_viikonpvm > '$viikonpaiva'
 						AND aktiivi != 'E')
-
 						UNION
-
 						(SELECT '3' prio, concat(adddate(curdate(),  (7-$viikonpaiva+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
 						FROM toimitustavan_lahdot
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND liitostunnus = '$ttunnus'
 						AND lahdon_viikonpvm <= '$viikonpaiva'
 						AND aktiivi != 'E')
-
 						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika
 						LIMIT 1";
 		$result = pupe_query($query);
@@ -11850,14 +12045,20 @@ if (!function_exists("xml_add")) {
 		$ulos = "<$joukko>";
 
 		if (strlen($tieto) > 0 or $minpituus != '') {
-			$tieto = xmlentities($tieto);
 
 			if ($maxpituus != "" and is_numeric($maxpituus) and strlen($tieto) > $maxpituus) {
 				$tieto = substr($tieto, 0, $maxpituus);
 			}
 
+			$tieto = xmlentities($tieto);
+
 			if ($minpituus != "" and is_numeric($minpituus) and strlen($tieto) < $minpituus) {
-				$tieto = str_pad($tieto, $minpituus);
+				if ($yhtiorow["verkkolasku_lah"] == "maventa" and ($joukko == "InvoiceRecipientTownName" or $joukko == "InvoiceRecipientPostCodeIdentifier")) {
+					$tieto = str_pad($tieto, $minpituus,'.');
+				}
+				else {
+					$tieto = str_pad($tieto, $minpituus);
+				}
 			}
 
 			$ulos .= $tieto;
@@ -11928,7 +12129,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
 						FROM tiliointi
 						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus and lasku.vienti = 'E')
-						JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+						JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
@@ -11954,7 +12155,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,
@@ -11963,7 +12164,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}
@@ -13137,6 +13338,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					FROM lasku
 					JOIN tilausrivi USE index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
 									AND tilausrivi.otunnus = lasku.tunnus
+									AND tilausrivi.tyyppi != 'D'
 									AND tilausrivi.tuoteno = '$tuoteno'
 									AND tilausrivi.varattu+tilausrivi.kpl > 0)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -13145,9 +13347,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					AND lasku.alatila IN ('D','X')
 					GROUP BY ika, hinta
 					HAVING kpl != 0)
-
 					UNION
-
 					(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
 					tilausrivi.hinta * {$query_ale_lisa} hinta,
 					sum(tilausrivi.kpl  +tilausrivi.varattu) kpl
@@ -13370,7 +13570,7 @@ if (!function_exists("tee_keraysera")) {
 					SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu+tilausrivi.kpl), 4)) tilauksen_koko
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke IN ({$keraysvyohyke}))
 					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus IN ({$keraysvyohyke}))
@@ -13504,6 +13704,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$row['tunnus']}'
+						AND tilausrivi.tyyppi != 'D'
 						ORDER BY tuote.yksin_kerailyalustalle ASC, y_koko DESC";
 			$tuoteres = pupe_query($query);
 
@@ -13972,7 +14173,10 @@ if (!function_exists("tee_keraysera")) {
 						$erat['pakkaukset'][$pakkauksen_nro][$juokseva_nro][$tilriv] = $kpl;
 
 						if ($ulkoinen_jarjestelma == 'K') {
-							$query = "SELECT otunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+							$query = "	SELECT otunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$tilriv}'";
 							$tilriv_tiedot_res = pupe_query($query);
 							$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
 
@@ -14502,3 +14706,180 @@ if (!function_exists('gauge')) {
 				</script>";
 	}
 }
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('raaka_aineiden_riitto')) {
+
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+
+		global $kukarow;
+
+		// K‰ytett‰v‰t muuttujat
+		$join_lisa = "";
+		$varasto = (int) $varasto;
+		$tuoteno = mysql_real_escape_string($tuoteno);
+
+		// Katotaan halutaanko saldo vaan jostain tietyst‰ varastosta (varastopaikat.tunnus), silloin unohdetaan edell‰ annettu tyyppi kokonaan
+		if ($varasto != 0) {
+			$join_lisa = "	JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and varastopaikat.tunnus in ($varasto)";
+		}
+
+		// Loopataan lapsituotteet l‰pi
+		$query = "	SELECT tuoteperhe.tuoteno,
+					tuoteperhe.kerroin
+					FROM tuoteperhe
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.ei_saldoa = '')
+					$join_lisa
+					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteperhe.isatuoteno = '$tuoteno'
+					AND tuoteperhe.tyyppi = 'R'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return 0;
+		}
+
+		$voidaan_valmistaa = 9999999999999;
+
+		// Katotaan moneeko valmisteeseen lapsien saldo riitt‰‰
+		while ($row = mysql_fetch_assoc($result)) {
+			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
+
+			$riitto = $myytavissa / $row["kerroin"];
+
+			// Otetaan telteen pienin riitto
+			if ($riitto < $voidaan_valmistaa) {
+			 	$voidaan_valmistaa = $riitto;
+			}
+		}
+
+		// N‰ytet‰‰n alle nollat nollana ja pyˆristet‰‰n desimaalit alas
+		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
+
+		return $voidaan_valmistaa;
+	}
+}
+
+if (!function_exists("mod11_tarkiste")) {
+	function mod11_tarkiste ($numero) {
+
+		$tulos = "";
+		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
+
+		# K‰‰nnet‰‰n stringi takaperin
+		$numero_rev = strrev($numero);
+
+		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
+			# Lasketaan tulo ja kumuloidaan
+			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
+		}
+
+		# lasketaan tarkiste ja konkatenoidaan peruslukuun
+		$jaannos = $summa % 11;
+
+		switch ($jaannos) {
+			case 0:
+				$tulos = $numero . 0;
+				break;
+			case 1:
+				$tulos = $numero . 0;
+				break;
+			default:
+				$tulos = $numero . (11 - $jaannos);
+				break;
+		}
+
+		return $tulos;
+	}
+}
+
+if (!function_exists("mod10_tarkiste")) {
+	function mod10_tarkiste ($numero) {
+
+		$kerroin = 7;
+		$tulo    = 0;
+
+		for ($i=1; $i<=strlen($numero); $i++) {
+
+			$merkki = substr($numero, -1 * $i, 1);
+			$tulo += $kerroin * $merkki;
+
+			switch ($kerroin) {
+				case 7:
+					$kerroin = 3;
+					break;
+				case 3:
+					$kerroin = 1;
+					break;
+				case 1:
+					$kerroin = 7;
+					break;
+			}
+		}
+
+		$tulo = substr($tulo, -1) + 0;
+
+		if ($tulo != 0) {
+			$tulo = 10 - $tulo;
+		}
+
+		$numero .= $tulo;
+
+		return $numero;
+	}
+}
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('zendesk_curl')) {
+	function zendesk_curl ($url) {
+		global $zendesk_auth;
+
+		$ch  = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+		curl_setopt($ch, CURLOPT_GET, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, "Content-Type: application/xml");
+		curl_setopt($ch, CURLOPT_USERPWD, $zendesk_auth);
+
+		$result = curl_exec($ch);
+
+		if ($result === FALSE) {
+			echo "<font class='error'>VIRHE:</font><br>";
+		   	echo curl_errno($ch)." - ".curl_error($ch)."</font><br>";
+			exit;
+		}
+
+		$info 	= curl_getinfo($ch);
+		$header = substr($result,0,$info['header_size']);
+		$body 	= substr($result, $info['header_size']);
+
+		curl_close($ch);
+
+		$statukset = array();
+		$statukset[0] = "New";
+		$statukset[1] = "Open";
+		$statukset[2] = "Pending";
+		$statukset[3] = "Solved";
+
+		$priot = array();
+		$priot[0] = "-";
+		$priot[1] = "Low";
+		$priot[2] = "Normal";
+		$priot[3] = "High";
+		$priot[4] = "Urgent";
+
+		return array($body, $statukset, $priot);
+	}
+}
+

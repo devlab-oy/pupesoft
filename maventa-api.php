@@ -6,16 +6,24 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
-	$pupesoft_polku = "/var/www/html/pupesoft/";
+	$pupesoft_polku = dirname(__FILE__);
 
 	// otetaan tietokanta connect
-	require ($pupesoft_polku."inc/connect.inc");
+	require ($pupesoft_polku."/inc/connect.inc");
 
 	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in)) {
 		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
 	}
 
-	$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+	if (substr($verkkolaskut_in, -1) != "/") {
+		$verkkolaskut_in = $verkkolaskut_in."/";
+	}
+
+	// Testaus
+	#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+	// Tuotanto
+	$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 	// Haetaan api_keyt yhtion_parametrit taulusta
 	// Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
@@ -44,7 +52,7 @@
 
 		// Täytetään api_keys, näillä kirjaudutaan Maventaan
 		$api_keys = array();
-		$api_keys["user_api_key"] 	= $maventa_keys['maventa_api_avain'];
+		$api_keys["user_api_key"]   = $maventa_keys['maventa_api_avain'];
 		$api_keys["vendor_api_key"] = $maventa_keys['maventa_ohjelmisto_api_avain'];
 
 		// Vaihtoehtoinen company_uuid
@@ -72,13 +80,8 @@
 			foreach ($invoice->attachments as $liite) {
 				//Finvoice - XML
 				if ($liite->attachment_type == "FINVOICE") {
-
-					// Tiedoston nimeen joku hash ettei tule samoja nimiä.
-					$tiedosto = $verkkolaskut_in."maventa_".md5(uniqid(mt_rand(), true))."_".$liite->filename;
-					$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu tallentaa\n");
-					fwrite($fd, base64_decode($liite->file));
-					fclose($fd);
-
+					// Tiedoston nimeen id mukaan, ettei tule samoja nimiä. Älä muuta nimeä, koska siitä etsitään ID myöhemmässä vaiheessa (verkkolasku-in.inc)
+					file_put_contents($verkkolaskut_in."maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
 					echo "Haettiin yritykselle: $maventa_keys[nimi] lasku toimittajalta: {$lasku->company_name}, {$lasku->invoice_nr}\n";
 				}
 			}

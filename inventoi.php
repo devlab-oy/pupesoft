@@ -81,7 +81,7 @@
 					// luetaan rivi tiedostosta..
 					$tuo		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][0]));
 					$hyl		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][1]));
-					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2])));
+					$maa		= str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2]));
 					$lisaselite	= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][3]));
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
@@ -99,7 +99,7 @@
 					$rivi		= explode("\t", trim($rivi));
 					$tuo		= mysql_real_escape_string(trim($rivi[0]));
 					$hyl		= mysql_real_escape_string(trim($rivi[1]));
-					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($rivi[2])));
+					$maa		= str_replace(",", ".", trim($rivi[2]));
 					$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
@@ -148,11 +148,11 @@
 				$hyllynro	= $tuotetiedot[2];
 				$hyllyvali  = $tuotetiedot[3];
 				$hyllytaso	= $tuotetiedot[4];
-				$kpl		= $maara[$i];
+				$kpl		= str_replace(",", ".", $maara[$i]);
 				$poikkeama  = 0;
 				$skp		= 0;
 
-				if ($kpl != '') {
+				if ($kpl != '' and is_numeric($kpl)) {
 
 					$query = "	SELECT *
 								FROM tuote
@@ -167,6 +167,19 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
+					}
+
+					$query = "  SELECT tunnus
+								FROM tapahtuma
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND laji IN ('tulo', 'valmistus')
+								AND tuoteno = '{$tuoteno}'
+								LIMIT 1";
+					$tapahtuma_res = pupe_query($query);
+
+					if (mysql_num_rows($tapahtuma_res) == 0) {
+						echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla ei ole yhtään tuloa")."! ($tuoteno)</font><br>";
+						$virhe = 1;
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
@@ -604,6 +617,16 @@
 								}
 							}
 
+							if ($erotus > 0) {
+								$selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
+							}
+							elseif ($erotus < 0) {
+								$selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("vähennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
+							}
+							else {
+								$selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("täsmäsi.")." <br>$lisaselite<br>$inven_laji";
+							}
+
 							///* Tehdään tapahtuma *///
 							$query = "	INSERT into tapahtuma set
 										yhtio   	= '$kukarow[yhtio]',
@@ -616,20 +639,9 @@
 										hyllynro 	= '$hyllynro',
 										hyllyvali 	= '$hyllyvali',
 										hyllytaso 	= '$hyllytaso',
-										selite  	= ";
-
-							if ($erotus > 0) {
-								$query .= " '".t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji',";
-							}
-							elseif ($erotus < 0) {
-								$query .= " '".t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("vähennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji',";
-							}
-							else {
-								$query .= " '".t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("täsmäsi.")." <br>$lisaselite<br>$inven_laji',";
-							}
-
-							$query .= "	laatija  = '$kukarow[kuka]',
-										laadittu = now()";
+										selite  	= '$selite',
+										laatija  	= '$kukarow[kuka]',
+										laadittu 	= now()";
 							$result = pupe_query($query);
 
 							// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -654,12 +666,12 @@
 										inventointilista_aika	= '0000-00-00 00:00:00',
 										muuttaja			 	= '$kukarow[kuka]',
 										muutospvm			 	= now()
-										WHERE yhtio		= '$kukarow[yhtio]'
-										and tuoteno		= '$tuoteno'
-										and hyllyalue	= '$hyllyalue'
-										and hyllynro	= '$hyllynro'
-										and hyllyvali	= '$hyllyvali'
-										and hyllytaso	= '$hyllytaso'";
+										WHERE yhtio				= '$kukarow[yhtio]'
+										and tuoteno				= '$tuoteno'
+										and hyllyalue			= '$hyllyalue'
+										and hyllynro			= '$hyllynro'
+										and hyllyvali			= '$hyllyvali'
+										and hyllytaso			= '$hyllytaso'";
 							$result = pupe_query($query);
 
 							if ($summa <> 0 and mysql_affected_rows() > 0) {
@@ -668,12 +680,12 @@
 											yhtio      = '$kukarow[yhtio]',
 											tapvm      = now(),
 											tila       = 'X',
+											alatila    = 'I',
 											laatija    = '$kukarow[kuka]',
 											viite      = '$tapahtumaid',
 											luontiaika = now()";
 								$result = pupe_query($query);
 								$laskuid = mysql_insert_id($link);
-
 
 								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
@@ -682,8 +694,13 @@
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 								}
 
-								// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
+								// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+								$kustp_ins 		= $tuote_row["kustp"];
+								$kohde_ins 		= $tuote_row["kohde"];
+								$projekti_ins 	= $tuote_row["projekti"];
+
+								// Kokeillaan varastonmuutos tilin oletuskustannuspaikalle
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
 
 								// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
@@ -699,7 +716,7 @@
 											summa    = '$summa',
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi $row[tuoteno] $erotus kpl',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
@@ -715,7 +732,7 @@
 											summa    = $summa * -1,
 											vero     = 0,
 											lukko    = '',
-											selite   = 'Inventointi $row[tuoteno] $erotus kpl',
+											selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);

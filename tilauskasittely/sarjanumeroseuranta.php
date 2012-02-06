@@ -162,6 +162,8 @@
 			$sarrow = mysql_fetch_assoc($sarres);
 
 			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
+				$era_kpl = (float) str_replace(",", ".", $era_kpl);
+
 				$query = "	UPDATE sarjanumeroseuranta
 							SET lisatieto 	= '$lisatieto',
 							sarjanumero 	= '$sarjanumero',
@@ -390,7 +392,8 @@
 	if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
 
 		$sarjanumero = trim($sarjanumero);
-		$insok = "OK";
+		$era_kpl 	 = (float) str_replace(",", ".", $era_kpl);
+		$insok 		 = "OK";
 
 		if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
 			$query = "	SELECT *
@@ -401,7 +404,7 @@
 						and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
 		}
 		else {
-			if ((float) $era_kpl <= 0) {
+			if ($era_kpl <= 0) {
 				$insok = "EI";
 				echo "<font class='error'>".t("Erälle on syötettävä kappalemäärä")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
 			}
@@ -1013,7 +1016,7 @@
 					$lisa
 					$lisa2
 					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus
-					LIMIT 100";
+					LIMIT 250";
 		$sarjaresiso = pupe_query($query);
 	}
 

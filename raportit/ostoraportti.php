@@ -1062,24 +1062,30 @@
 				$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 			}
 
-			$joinlisa = '';
+
+			$joinlisa 	= '';
 			$tyyppilisa = '';
-			$tyyppi = '';
+			$tyyppi 	= '';
 
 			if (table_exists("yhteensopivuus_rekisteri")) {
 
-				$query = "	SELECT DISTINCT tyyppi
-							FROM yhteensopivuus_mp
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$res_rekyht = pupe_query($query);
+				if (table_exists("yhteensopivuus_mp")) {
+					$query = "	SELECT DISTINCT tyyppi
+								FROM yhteensopivuus_mp
+								WHERE yhtio = '{$kukarow['yhtio']}'";
+					$res_rekyht = pupe_query($query);
 
-				if (mysql_num_rows($res_rekyht) > 0) {
-					$tyyppi = 'mp';
-					while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
-						$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+					if (mysql_num_rows($res_rekyht) > 0) {
+						$tyyppi = 'mp';
+
+						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
+							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+						}
 					}
 				}
-				else {
+
+
+				if ($tyyppi == "" and table_exists("yhteensopivuus_tuote")) {
 					$query = "	SELECT DISTINCT tyyppi
 								FROM yhteensopivuus_tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'";
@@ -1087,6 +1093,7 @@
 
 					if (mysql_num_rows($res_rekyht) > 0) {
 						$tyyppi = 'auto';
+
 						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
 							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
 						}
@@ -1112,21 +1119,23 @@
 
 						$joinlisa .= ") ";
 					}
+
 					if ($vm3 != '' or $vm4 != '') {
 						$joinlisa2 = " 	JOIN yhteensopivuus_$tyyppi ON (yhteensopivuus_$tyyppi.yhtio = yhteensopivuus_rekisteri.yhtio
 										AND yhteensopivuus_$tyyppi.tunnus = yhteensopivuus_rekisteri.autoid ";
 						if ($vm3 != '') {
 							$vm3 = (int) $vm3;
 							$joinlisa2 .= $tyyppi == 'auto' ? " AND yhteensopivuus_$tyyppi.alkuvuosi >= '$vm3' " : " AND yhteensopivuus_$tyyppi.vm >= '$vm3' ";
-				}
+						}
 
 						if ($vm4 != '') {
 							$vm4 = (int) $vm4;
 							$joinlisa2 .= $tyyppi == 'auto' ? " AND yhteensopivuus_$tyyppi.loppuvuosi <= '$vm4' " : " AND yhteensopivuus_$tyyppi.vm <= '$vm4' ";
-			}
+						}
 
 						$joinlisa2 .= ") ";
 					}
+
 					if ($vm5 != '' or $vm6 != '') {
 						$joinlisa3 = " 	JOIN yhteensopivuus_$tyyppi ON (yhteensopivuus_$tyyppi.yhtio = yhteensopivuus_rekisteri.yhtio
 										AND yhteensopivuus_$tyyppi.tunnus = yhteensopivuus_rekisteri.autoid ";
@@ -1142,22 +1151,7 @@
 
 						$joinlisa3 .= ") ";
 					}
-				}// tyyppi
-			}
-
-			//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
-			// leveys x korkeus x syvyys
-			// leveys x korkeus x pituus
-			$query = "	SHOW columns
-						FROM tuote
-						LIKE 'tuotepituus'";
-			$spres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($spres) == 1) {
-				$splisa = "tuote.tuotepituus tuotesyvyys";
-			}
-			else {
-				$splisa = "tuote.tuotesyvyys";
+				}
 			}
 
 			echo "<font class='message'>".t("Ajetaan raportti").":<br></font>";
@@ -1194,11 +1188,10 @@
 				else {
 					echo ".<br>";
 				}
-				
+
 				echo "</font>";
 			}
 
-			echo "                                                                                                                                                                                                                                                                                                                                                                                                <br>\n\r";
 			flush();
 
 			//Ajetaan raportti tuotteittain
@@ -1233,7 +1226,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -1250,6 +1243,7 @@
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -1284,7 +1278,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -1304,6 +1298,7 @@
 							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							$abcwhere
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
@@ -2240,11 +2235,10 @@
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
 		}
-				else {
+		else {
 			ob_end_flush();
-				}
+		}
 
 		require("inc/footer.inc");
-				}
-
+	}
 ?>

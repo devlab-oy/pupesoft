@@ -62,6 +62,9 @@
 
 	while ($row = mysql_fetch_assoc($suorires)) {
 
+		// Setataan kukarow-yhtiö
+		$kukarow["yhtio"] = $row["suoriyhtio"];
+
 		if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
 			$alennus = round(($row["laskutettu_valuutassa"] - $row["suoritettu"]) * $row["suorituskurssi"], 2);
 			$alennus_valuutassa = round($row["laskutettu_valuutassa"] - $row["suoritettu"], 2);
@@ -109,7 +112,10 @@
 			$asresult = pupe_query($query);
 			$mskustprow = mysql_fetch_assoc($asresult);
 
-			# Myyntisaamiset, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
+			// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["myyntisaamiset"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
+
+			# Myyntisaamiset
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$row[suoriyhtio]',
 						laatija				= 'automaatti',
@@ -117,9 +123,9 @@
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '$row[laskutunnus]',
 						tilino				= '$row[myyntisaamiset]',
-						kustp				= '$mskustprow[kustp]',
-						kohde				= '$mskustprow[kohde]',
-						projekti			= '$mskustprow[projekti]',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						summa				= -$row[laskutettu],
 						summa_valuutassa	= -$row[laskutettu_valuutassa],
 						valkoodi			= '$row[laskuvaluutta]',
@@ -219,15 +225,18 @@
 						$totkasumma += $summa + $alv;
 						$totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
+						// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["alennustili"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 						# Lisätään myynnin kassa-alennuskirjaus ilman veroa
 						$query = "	INSERT INTO tiliointi
 									SET yhtio			= '$row[suoriyhtio]',
 									laatija 			= 'automaatti',
 									laadittu 			= now(),
 									tilino 				= '$row[alennustili]',
-									kustp				= '$tiliointirow[kustp]',
-									kohde				= '$tiliointirow[kohde]',
-									projekti			= '$tiliointirow[projekti]',
+									kustp    			= '{$kustp_ins}',
+									kohde	 			= '{$kohde_ins}',
+									projekti 			= '{$projekti_ins}',
 									tapvm 				= '$row[kirjpvm]',
 									ltunnus 			= '$row[laskutunnus]',
 									summa 				= '$summa',
@@ -323,6 +332,9 @@
 							// Kuinka paljon on tämän viennin osuus
 							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $row["laskutettu"] * $vesumma, 2);
 
+							// Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
+							list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["valuuttaerotili"], $tiliointirow["kustp"], $tiliointirow["kohde"], $tiliointirow["projekti"]);
+
 							$query = "	INSERT INTO tiliointi SET
 										yhtio		= '$row[suoriyhtio]',
 										laatija		= 'automaatti',
@@ -330,9 +342,9 @@
 										tapvm		= '$row[kirjpvm]',
 										ltunnus		= '$row[laskutunnus]',
 										tilino		= '$row[valuuttaerotili]',
-										kustp		= '$tiliointirow[kustp]',
-										kohde		= '$tiliointirow[kohde]',
-										projekti	= '$tiliointirow[projekti]',
+										kustp    	= '{$kustp_ins}',
+										kohde	 	= '{$kohde_ins}',
+										projekti 	= '{$projekti_ins}',
 										summa		= $summa,
 										selite		= 'Automaattikohdistettu asiakkaan suoritus'";
 							$result = pupe_query($query);
@@ -401,6 +413,9 @@
 	$laskut = array();
 
 	while ($row = mysql_fetch_assoc($suorires)) {
+
+		// Setataan kukarow-yhtiö
+		$kukarow["yhtio"] = $row["yhtio"];
 
 		if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
 			$summa = round($row["summa"] * $row["suorituskurssi"],2);

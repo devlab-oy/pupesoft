@@ -4,7 +4,6 @@
 	$pupe_DataTables = "maksalaskuja";
 
 	require ("inc/parametrit.inc");
-	require ("inc/tilinumero.inc");
 
 	js_popup();
 
@@ -238,6 +237,7 @@
 		$query = "	UPDATE lasku set
 					maksaja 		= '$kukarow[kuka]',
 					maksuaika 		= now(),
+					mapvm	 		= now(),
 					maksu_kurssi 	= '$trow[kurssi]',
 					maksu_tili 		= '$tili',
 					tila 			= 'P',
@@ -557,6 +557,7 @@
 				$query = "	UPDATE lasku set
 							maksaja 		= '$kukarow[kuka]',
 							maksuaika 		= now(),
+							mapvm	 		= now(),
 							maksu_kurssi 	= '$kurssi',
 							maksu_tili 		= '$tili',
 							tila 			= 'Y',

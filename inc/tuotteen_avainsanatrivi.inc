@@ -26,7 +26,7 @@
 		$ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
 		$ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
 		$ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
-		
+
 		$sresult = t_avainsana("TUOTEULK");
 
 		while ($srow = mysql_fetch_array($sresult)) {
@@ -35,13 +35,13 @@
 
 		$vresult = t_avainsana("PARAMETRI");
 
-		while ($vrow = mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
 		}
 
 		$lresult = t_avainsana("LISATIETO");
 
-		while ($lrow = mysql_fetch_array($lresult)) {
+		while ($lrow = mysql_fetch_assoc($lresult)) {
 			$ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lisätieto").": $lrow[selitetark]</option>";
 		}
 
@@ -152,19 +152,11 @@
 		$ulos = "<td><select name='$nimi'>";
 		$sel  = "";
 
-		//	näytetäään vain kielet joita on
-		if ($perhe > 0) {
-			$query = "SELECT group_concat(distinct kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and kieli != ''";
-			$res = pupe_query($query);
-			$kilerow = mysql_fetch_array($res);
-			$kielet = $kilerow["kielet"];
-		}
-
 		$query  = "SHOW columns from sanakirja";
 		$fields =  mysql_query($query);
 
 		while ($apurow = mysql_fetch_array($fields)) {
-			if (strlen($apurow[0]) == 2 and (strpos($kielet, $apurow[0]) === false or $apurow[0] == $trow[$i])) {
+			if (strlen($apurow[0]) == 2) {
 				$sel = "";
 				if ($trow[$i] == $apurow[0]) {
 					$sel = "SELECTED";
@@ -198,4 +190,19 @@
 		}
 	}
 
-?>
+	if (mysql_field_name($result, $i) == 'nakyvyys') {
+		if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
+	 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
+
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value=''>".t("Kyllä")."</option>";
+			$ulos .= "<option value='K'>".t("Kyllä")." (".t("ei otsikkoa").")</option>";
+			$ulos .= "<option value='o'{$sel['o']}>".t("Ei")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
+	}

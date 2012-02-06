@@ -314,20 +314,6 @@
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
 			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
 
-			if (!isset($trow) and stripos($laskuttajan_nimi, "rum Oy Ab / ARW") !== FALSE) {
-				// 0 eleganttia
-				$query = "	SELECT *
-							FROM toimi
-							WHERE yhtio = '$yhtio'
-							and nimi = '÷rum Oy Ab / ARW'
-							and tyyppi != 'P'";
-				$result = pupe_query($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_assoc($result);
-				}
-			}
-
 			if ($laskuttajan_ovt != "") {
 				// 1 etsit‰‰n toimittaja ovttunnuksella
 				$query  = "	SELECT *
@@ -875,7 +861,7 @@
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
-				
+
 				// Normaali viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 					$return .= "Viite '$viite' on v‰‰rin!\n";
@@ -1039,7 +1025,7 @@
 
 				// Onko laskuriveill‰ useita alv-verokantoja?
 				$ealvi = array_unique($ealvi);
-								
+
 				// Katsotaan alv laskuerittelyst‰
 				if (count($ealvi) == 1 and $ealvi[0] == "") {
 					$ealvi = array($lisavat[0]);
@@ -1556,6 +1542,63 @@
 										laatija				= '$kukarow[kuka]',
 										luontiaika			= now()";
 							$Xresult = pupe_query($query);
+						}
+					}
+
+					// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritet‰‰n hakea laskun kuva mukaan
+					if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+
+						// Otetaan laskun ID tiedostonimest‰, lˆydyy "maventa_" ja "_maventa" stringien v‰list‰
+						$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+
+						// Loppupositio lˆytyi, joten tiedosto on oikein nimetty
+						if ($id_loppupositio !== FALSE) {
+
+							// Maventa avaimet
+							$api_keys = array();
+							$api_keys["user_api_key"] = $yhtiorow['maventa_api_avain'];
+							$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+							// Vaihtoehtoinen company_uuid
+							if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+								$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+							}
+
+							// Laskun ID
+							$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
+
+							// Haetaan kuva
+							$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+							$invoice = $client->inbound_invoice_show($api_keys, $maventa_lasku_id, true, "finvoice");
+
+							foreach ($invoice->attachments as $liite) {
+								if ($liite->attachment_type == "INVOICE_IMAGE") {
+
+									$data = mysql_real_escape_string(base64_decode($liite->file));
+									$filesize = strlen($data);
+
+									// lis‰t‰‰n kuva
+									$query = "	INSERT INTO liitetiedostot SET
+												yhtio    			= '$kukarow[yhtio]',
+												liitos   			= 'lasku',
+												liitostunnus 		= '$tunnus',
+												data     			= '$data',
+												selite   			= '$selite',
+												kieli				= '$yhtiorow[kieli]',
+												filename 			= '$liite->filename',
+												filesize 			= '$filesize',
+												filetype 			= 'application/pdf',
+												image_width			= '',
+												image_height		= '',
+												image_bits			= '',
+												image_channels		= '',
+												kayttotarkoitus		= 'VERKKOLASKU',
+												jarjestys			= '1',
+												laatija				= '$kukarow[kuka]',
+												luontiaika			= now()";
+									$Xresult = pupe_query($query);
+								}
+							}
 						}
 					}
 

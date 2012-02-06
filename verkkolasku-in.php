@@ -128,6 +128,9 @@
 		}
 
 		unlink("/tmp/##verkkolasku-in.lock");
+
+		# siivotaan yli 90 päivää vanhat aineistot
+		system("find $verkkolaskut_in -mtime +90 -delete");
 	}
 
 ?>

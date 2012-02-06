@@ -1,18 +1,5 @@
 <?php
 
-	// nyt on kaikki tiedot rahtikirjaa varten haettu..
-	//
-	// arrayt:
-	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-	// $rakir_row:sta lˆytyy asiakkaan tiedot
-	//
-	// muuttujat:
-	// otunnukset, rahdinmaksaja, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-	// mehto sis‰lt‰‰ maksuehdon tiedot
-	// jv tapauksissa on myˆs yhteensa, summa, jvhinta, lasno ja viite muuttujat
-	//
-	// tulostetaan rahtikirja
-
 	//	Jos t‰m‰ on osa "kokonaistoimitusta", merkataan alkuper‰inen tilausnumero alkuun
 	if ($rakir_row["tunnusnippu"]>0) {
 		foreach ($lotsikot as &$o) {
@@ -84,18 +71,31 @@
 			$rakir_row['toim_nimi']    = $rakir_row['nimi'];
 		}
 	}
+	
+	if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-	//	Olisiko mit‰‰n lis‰tietoja?
-	/*
-	$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.puh
-				FROM laskun_lisatiedot
-				JOIN yhteyshenkilo ON yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_tekninen
-				WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]' and laskun_lisatiedot.otunnus IN ($otunnukset)";
-	$lisatiedres = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($lisatiedres)==0) {
-		$lisatiedres = false;
+		$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
+					FROM rahtikirjanumero
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytettyaika = '0000-00-00 00:00:00'";
+		$logyres = pupe_query($logyq);
+		$logyrow = mysql_fetch_assoc($logyres);
+
+		$rahtikirjanro = $logyrow["rahtikirjanro"];
+		
+		$logyq = "	UPDATE rahtikirjanumero
+					SET kayttaja = '$kukarow[kuka]',
+					kaytettyaika = now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+		$logyres = pupe_query($logyq);
 	}
-	*/
+	elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+		$rahtikirjanro = $lotsikot[0];
+	}
+	else {
+		$rahtikirjanro = $rivi["rahtikirjanro"];
+	}
 
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
 	if ($rakir_row['muumaksaja'] != '') {
@@ -111,8 +111,14 @@
 
 	// postiennakko
 	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
-		$postiennakkomaara  = "$yhteensa $yhtiorow[valkoodi]";
-		$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
+		if ($yhtiorow["pankkiiban1"] != '') {
+			$postiennakkotilino = "$yhtiorow[pankkiiban1]";
+		}
+		else {
+			$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		}
+		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
 		$postiennakkoviite  = "$viite";
 	}
 	else {
@@ -140,7 +146,6 @@
 	$pdf->set_default('margin-right', 	0);
 	$rectparam["width"] = 0.3;
 
-
 	//fontit
 	$norm["height"] = 6;
 	$norm["font"] = "Times-Roman";
@@ -155,7 +160,6 @@
 	$huge["height"] = 22;
 	$huge["font"] = "Helvetica-Bold";
 
-
 	// Tulostetaan oikea sivum‰‰r‰
 	if ($yhtiorow["rahtikirjan_kopiomaara"] == 4) {
 		$tulostakolli = 4;
@@ -164,27 +168,17 @@
 		$tulostakolli = 3;
 	}
 
-	// testi‰ varten
-	//$tulostakolli = 1;
-
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		// tehd‰‰n pdf:n uusi sivu
 		$firstpage = $pdf->new_page("a4");
-
-
-		$lahete	= sprintf("%09d", $lotsikot[0]); //Laitetaan laheteen numero rahtikirjan alkuun
-		//$aika	= sprintf("%05d", date("mds"));	//Loppuun laitetaan p‰iv‰ys
 
 		if ($toitarow['sopimusnro'] != '') {
 			$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitk‰
 		}
 
 		//tehd‰‰n viivakoodi joka 9 merkki‰ pitk‰.
-		$viiva 	= $lahete;
-
-		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro = $lotsikot[0];
+		$viiva 	= $rahtikirjanro;
 
 		//Duusataan viivakoodia
 		$output   = "png";
@@ -249,7 +243,9 @@
 		if ((int) $postirow["yhtio_toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$postirow[yhtio_toimipaikka]' and lasku_logo != ''";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$postirow[yhtio_toimipaikka]'
+						and lasku_logo != ''";
 			$result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {

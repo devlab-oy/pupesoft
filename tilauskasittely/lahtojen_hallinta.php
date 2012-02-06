@@ -1223,6 +1223,8 @@
 					// 	}
 					// });
 
+					$('tr[id^=\"toggleable_row_child_\"]:visible').hide();
+
 					// 2. tason tilausnumeronapin eventti
 					$('td.toggleable_row_order').live('click', function() {
 

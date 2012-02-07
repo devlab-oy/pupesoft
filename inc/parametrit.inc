@@ -213,6 +213,7 @@ else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
+mysql_set_charset("latin1");
 
 // Pupeasennuksen root polku
 $pupe_root_polku = dirname(dirname(__FILE__));

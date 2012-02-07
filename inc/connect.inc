@@ -36,5 +36,4 @@ else {
 }
 
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-
-?>
+mysql_set_charset("latin1");

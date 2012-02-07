@@ -13502,6 +13502,10 @@ if (!function_exists("valitse_pakkaus")) {
 			$pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
 			$pisin_tuote = array_shift($pisin_tuote_array);
 
+			if ($pisin_tuote['koko'] == '') {
+				return "";
+			}
+
 			// pakkaukset ovat pienimm‰st‰ isoimpaan
 			foreach ($pakkaukset as $indx => $pakkaus_array) {
 
@@ -13547,6 +13551,7 @@ if (!function_exists("valitse_pakkaus")) {
 			}
 
 			if ($debug) echo "pisin mitta: $pisin_tuote[koko]<br>";
+			if ($debug) echo "<pre>",var_dump($pisin_tuote),"</pre>";
 			if ($debug) echo "kaytettava_pakkaus: $kaytettava_pakkaus valitse_pakkaus er‰n koko: $eran_koko<br>kaytetty_paino: $kaytetty_paino<br>";
 
 			// jos er‰n koko on tosi iso, niin katsotaan pakkauksista mik‰ on pakkauksia tarvittava minimim‰‰r‰

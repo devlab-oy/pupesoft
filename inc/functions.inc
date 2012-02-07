@@ -14068,8 +14068,10 @@ if (!function_exists('arrcmp')) {
 }
 
 if (!function_exists("tee_keraysera2")) {
-	function tee_keraysera2($keraysvyohyke, $varasto, $debug = true) {
-		global $kukarow, $yhtiorow;
+	function tee_keraysera2($keraysvyohyke, $varasto, $debug_x = true) {
+		global $kukarow, $yhtiorow, $debug;
+
+		$debug = $debug_x;
 
 		$varasto = (int) $varasto;
 

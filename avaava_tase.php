@@ -89,7 +89,8 @@
 		$toimittajaid	= 0;
 		$asiakasid		= 0;
 
-		$gokfrom = 'avaavatase';
+		$gokfrom 	= 'avaavatase';
+		$avaavatase = 'joo';
 
 		// Onko tulos jo kirjattu
 		$query = "	SELECT tunnus
@@ -145,6 +146,7 @@
 		}
 
 		// Kirjataan avaava tase
+		unset($tunnus);
 		$summa				= '';
 		$summa_valuutassa	= '';
 		$tili				= '';
@@ -201,7 +203,7 @@
 	echo "<input type='hidden' name='tee' value='go'>";
 	echo "<table>";
 
-	echo "<tr><th>",t("Valitse tilikausi"),"</th>";
+	echo "<tr><th>",t("Valitse suljettava tilikausi"),"</th>";
 
 	$query = "	SELECT tilikausi_alku, tilikausi_loppu, tunnus
 				FROM tilikaudet

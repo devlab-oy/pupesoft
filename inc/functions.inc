@@ -15411,7 +15411,7 @@ if (!function_exists("tee_keraysera2")) {
 							if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 								if ($debug) echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $x kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";
 
-								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
+								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $x);
 
 								$era_valmis = true;
 								break 3;

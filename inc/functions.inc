@@ -13736,7 +13736,7 @@ if (!function_exists("calculate_average")) {
 }
 
 if (!function_exists("splittaa_tilaus")) {
-	function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '') {
+	function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '', $debug = false) {
 		global $kukarow, $debug;
 
 		if ($debug) echo "<br>otunnukset: $otunnukset<br>";
@@ -15414,10 +15414,10 @@ if (!function_exists("tee_keraysera2")) {
 								$x--;
 
 								if ($x == 0) {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
+									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
 								}
 								else {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $x);
+									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $x, $debug);
 								}
 
 								$era_valmis = true;

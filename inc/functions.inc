@@ -15413,6 +15413,7 @@ if (!function_exists("tee_keraysera2")) {
 
 								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
 
+								$era_valmis = true;
 								break 3;
 							}
 

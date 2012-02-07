@@ -464,6 +464,8 @@
 
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
 
+				$debug = true;
+
 				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
 
 				if (count($erat['tilaukset']) != 0) {

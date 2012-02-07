@@ -1098,7 +1098,7 @@
 					$laskutuslisa_tyyppi_ehto = "";
 
 					//ei k‰teislaskuihin
-					if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
+					if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'U') {
 						$query = "  SELECT tunnus
 									FROM maksuehto
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -1115,7 +1115,7 @@
 							$laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
 						}
 					}
-					elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
+					elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'N' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
 						//ei noudolle
 						$query = "  SELECT selite
 									FROM toimitustapa
@@ -1211,11 +1211,29 @@
 								}
 								else {
 									// Raham‰‰r‰inen laskutulis‰
+									// tapauksissa A,B,C
 									$hinta = $yhtiorow["laskutuslisa"];
 								}
 
 								$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
-								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+								$alemuuttuja = "";
+
+								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T') {
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', '');
+									$netto = '';
+									
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+										if (isset($lis_ale["ale".$alepostfix])) {
+											$alemuuttuja .= "ale$alepostfix = '{$lis_ale["ale".$alepostfix]}',";
+										}
+									}
+								}
+								else {
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+									$netto = 'N';
+									$alemuuttuja = "ale1 = '0',";
+								}
+
 								list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
 								// lis‰t‰‰n laskutuslis‰
@@ -1235,10 +1253,10 @@
 											kpl2            = '0',
 											tilkpl          = '1',
 											jt              = '0',
-											ale1            = '0',
-											alv             = '$alv',
-											netto           = 'N',
+											{$alemuuttuja}
+											netto           = '{$netto}',
 											hinta           = '$lkhinta',
+											alv             = '$alv',
 											kerayspvm       = now(),
 											otunnus         = '$laskurow[tunnus]',
 											tyyppi          = 'L',

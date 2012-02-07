@@ -112,6 +112,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("LAJI", "SELITE", "SELITETARK", "SELITETARK_2", "KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$joinattavat = array("PERHE" => "avainsana");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuoteperhe" :
 				$pakolliset  = array("ISATUOTENO", "TUOTENO", "TYYPPI");
@@ -320,6 +321,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "toimitustavan_lahdot":
 				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
 				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "AKTIIVI", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "rahtikirjanumero":
+				$pakolliset = array("RAHTIKIRJANRO");
+				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			default :

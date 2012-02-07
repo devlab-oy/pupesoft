@@ -1526,7 +1526,7 @@ if (!function_exists('loppu')) {
 			$onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
 
 			if ($onko_tili1_iban != "") {
-				$code = PalautaPankkiviivakoodi($$onko_tili1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+				$code = PalautaPankkiviivakoodi($onko_tili1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
 			}
 			elseif ($onko_iban1_iban != "") {
 				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
@@ -1838,13 +1838,26 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 }
 
 if (!function_exists("tulosta_lasku")) {
-	function tulosta_lasku ($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $tulostettavat_email = "", $saatekirje = "") {
+	function tulosta_lasku ($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $saatekirje = "") {
 		GLOBAL $kukarow, $yhtiorow;
 
-		$query = "	SELECT *
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$lasku'";
+		if (substr($lasku,0,6) == "LASKU:") {
+			$lasku = substr($lasku, 6);
+
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tila 		= 'U'
+						and alatila 	= 'X'
+						and laskunro	= '$lasku'";
+		}
+		else {
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus 	= '$lasku'";
+		}
+
 		$laresult = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laresult);
 
@@ -1895,10 +1908,10 @@ if (!function_exists("tulosta_lasku")) {
 		$pdf_lasku->set_default('margin-right',  0);
 
 		if ($laskurow["tila"] == 'U') {
-			$where  = " and tilausrivi.uusiotunnus='$lasku' and tilausrivi.tyyppi = 'L' ";
+			$where  = " and tilausrivi.uusiotunnus='$laskurow[tunnus]' and tilausrivi.tyyppi = 'L' ";
 		}
 		else {
-			$where  = " and tilausrivi.otunnus='$lasku' and tilausrivi.tyyppi in ('L','W','E') and (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) != 0 ";
+			$where  = " and tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) != 0 ";
 		}
 
 		// Laskutyyppi
@@ -2126,9 +2139,9 @@ if (!function_exists("tulosta_lasku")) {
 		}
 		elseif ($tee == 'VERKKOLASKU_APIX') {
 			// Palautetaan laskunumero ja $pdf_laskufilenimi jotta apixkoodi saa sen zipattua jne.
-			return array($laskurow["laskunro"], $pdf_laskufilenimi);
+			return $pdf_laskufilenimi;
 		}
-		elseif ($tee == 'VERKKOLASKU' and ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["tunnus"], $tulostettavat_email))) {
+		elseif ($tee == 'VERKKOLASKU' and ($yhtiorow['lasku_tulostin'] == -99 or $valittu_tulostin == -99)) {
 			// Lasku lähtee asiakkaalle sähköpostilla. Generoidaan laskun saatekirje, joka haetaan avainsanoista
 			include_once("inc/generoi_laskun_saate.inc");
 

@@ -4,7 +4,6 @@
 	$pupe_DataTables = "maksalaskuja";
 
 	require ("inc/parametrit.inc");
-	require ("inc/tilinumero.inc");
 
 	js_popup();
 

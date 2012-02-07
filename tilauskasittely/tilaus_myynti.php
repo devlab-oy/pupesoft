@@ -2484,7 +2484,7 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto
+		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto, laji
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
@@ -3019,6 +3019,13 @@ if ($tee == '') {
 
 					echo "</select></td></tr>";
 				}
+			}
+
+			if ($faktarow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
+				echo "<tr>$jarjlisa<td class='back'></td>";
+				echo "<td colspan='3' class='back'>";
+				echo "<p class='error'>".t("HUOM!! Tämä on korjaamo-asiakas, älä myy tälle asiakkaalle")."</p>";
+				echo "</td></tr>";
 			}
 		}
 		else {
@@ -3583,6 +3590,10 @@ if ($tee == '') {
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$perheid = $tilausrivi["perheid"];
 				}
+				
+				if ($tilausrivi["tunnus"] == $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
+					$paikka = "";
+				}
 
 				$tila		= "MUUTA";
 			}
@@ -3967,7 +3978,6 @@ if ($tee == '') {
 			else {
 				$hyvityssaannon_palautuskielto = "";
 			}
-
 
 			$query	= "	SELECT *
 						from tuote
@@ -4458,7 +4468,7 @@ if ($tee == '') {
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-			if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
+			if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
 				$tilrivity	= "'L','W','M'";
 			}
 			else {
@@ -5067,7 +5077,7 @@ if ($tee == '') {
 						$class = "";
 					}
 
-					if ($vanhaid != $row["perheid"] and $vanhaid != 'KALA' and $yhtiorow["raaka_aineet_valmistusmyynti"] != "N") {
+					if ($vanhaid != $row["perheid"] and $vanhaid != 'KALA' and ($yhtiorow["raaka_aineet_valmistusmyynti"] != "N" or $toim != "VALMISTAASIAKKAALLE")) {
 						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 					}
 				}
@@ -5114,17 +5124,17 @@ if ($tee == '') {
 				// Tuoteperheiden lapsille ei näytetä rivinumeroa
 				if ($tilauksen_jarjestys != 'M' and $tuoteperhe_kayty != $row['perheid'] and (($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '5' or ($tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '0' and $erikoistuote_tuoteperhe[$row['perheid']] == $row['sorttauskentta']))) or $row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U"))))) {
 
-					if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
-						$pklisa = " and tunnus = '$row[tunnus]'";
+					if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
+						$pklisa = " and tilausrivi.tunnus = '$row[tunnus]'";
 					}
 					elseif (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
-						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]' or tunnus = '$row[tunnus]')";
+						$pklisa = " and (tilausrivi.perheid = '$row[tunnus]' or tilausrivi.perheid2 = '$row[tunnus]' or tilausrivi.tunnus = '$row[tunnus]')";
 					}
 					elseif ($row["perheid"] == 0) {
-						$pklisa = " and perheid2 = '$row[perheid2]'";
+						$pklisa = " and tilausrivi.perheid2 = '$row[perheid2]'";
 					}
 					else {
-						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
+						$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
 					}
 
 					$query = "	SELECT sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
@@ -6030,7 +6040,7 @@ if ($tee == '') {
 								<input type='Submit' value='".t("Lisää valmiste")."'>
 								</form>";
 					}
-					elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and $yhtiorow["raaka_aineet_valmistusmyynti"] != "N") or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '') {
+					elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '') {
 						if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
 							$lisax = "<input type='hidden' name='teeperhe'  value = 'OK'>";
 						}

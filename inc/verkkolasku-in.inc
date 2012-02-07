@@ -1545,6 +1545,63 @@
 						}
 					}
 
+					// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritetään hakea laskun kuva mukaan
+					if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+
+						// Otetaan laskun ID tiedostonimestä, löydyy "maventa_" ja "_maventa" stringien välistä
+						$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+
+						// Loppupositio löytyi, joten tiedosto on oikein nimetty
+						if ($id_loppupositio !== FALSE) {
+
+							// Maventa avaimet
+							$api_keys = array();
+							$api_keys["user_api_key"] = $yhtiorow['maventa_api_avain'];
+							$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+							// Vaihtoehtoinen company_uuid
+							if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+								$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+							}
+
+							// Laskun ID
+							$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
+
+							// Haetaan kuva
+							$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+							$invoice = $client->inbound_invoice_show($api_keys, $maventa_lasku_id, true, "finvoice");
+
+							foreach ($invoice->attachments as $liite) {
+								if ($liite->attachment_type == "INVOICE_IMAGE") {
+
+									$data = mysql_real_escape_string(base64_decode($liite->file));
+									$filesize = strlen($data);
+
+									// lisätään kuva
+									$query = "	INSERT INTO liitetiedostot SET
+												yhtio    			= '$kukarow[yhtio]',
+												liitos   			= 'lasku',
+												liitostunnus 		= '$tunnus',
+												data     			= '$data',
+												selite   			= '$selite',
+												kieli				= '$yhtiorow[kieli]',
+												filename 			= '$liite->filename',
+												filesize 			= '$filesize',
+												filetype 			= 'application/pdf',
+												image_width			= '',
+												image_height		= '',
+												image_bits			= '',
+												image_channels		= '',
+												kayttotarkoitus		= 'VERKKOLASKU',
+												jarjestys			= '1',
+												laatija				= '$kukarow[kuka]',
+												luontiaika			= now()";
+									$Xresult = pupe_query($query);
+								}
+							}
+						}
+					}
+
 					if (trim($liitetaanko_editilaus_laskulle_hakemisto) != '' and trim($laskun_asiakkaan_tilausnumero) != '') {
 
 						// fopen dirikka $liitetaanko_editilaus_laskulle_hakemisto eli purchaseorderit

@@ -1,10 +1,5 @@
 <?php
 
-/* Pupesoft -> UPS datasiirto
- * rahtikirja_ups_siirto.inc
- *************************************************************/
-
-//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
 	// katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
@@ -24,28 +19,31 @@ if ($kollityht > 0) {
 	$ups_path_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_path[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_path['oletus'] : $ups_path[strtolower($tulostusalue_check_row['pakkaamo'])];
 
 	if ($ups_host_x != "" and $ups_user_x != "" and $ups_pass_x != "" and $ups_path_x != "") {
+		
+		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-		// tarvitaan tilauksien tunnukset muuttujassa $otunnukset
-		// tarvitaan tilauksen tunnus muuttujassa $tunnus
-		// printterin komento muuttujassa $oslapp
-		// $kukarow[yhtio] jostain saadaan yhtio
-		// $yhtiorow array josta saada lähettäjän tiedot
+			$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
+						FROM rahtikirjanumero
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytettyaika = '0000-00-00 00:00:00'";
+			$logyres = pupe_query($logyq);
+			$logyrow = mysql_fetch_assoc($logyres);
 
-		// nyt on kaikki tiedot rahtikirjaa varten haettu..
-		//
-		// arrayt:
-		// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-		// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-		//
-		// muuttujat:
-		// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-		// mehto sisältää maksuehdon tiedot
-		// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-		//
-		// tulostetaan rahtikirja
-
-		//Näin se oli muuallakin onkai se sitten oikein?
-		$rahtikirjanro = $lotsikot[0];
+			$rahtikirjanro = $logyrow["rahtikirjanro"];
+			
+			$logyq = "	UPDATE rahtikirjanumero
+						SET kayttaja = '$kukarow[kuka]',
+						kaytettyaika = now()
+						WHERE yhtio = '$kukarow[yhtio]'
+						and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+			$logyres = pupe_query($logyq);
+		}
+		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+			$rahtikirjanro = $lotsikot[0];
+		}
+		else {
+			$rahtikirjanro = $rivi["rahtikirjanro"];
+		}
 
 		if ($phpnimi == "rahtikirja_custom.php") {
 			$ups_laskurow = $osoitelappurow;

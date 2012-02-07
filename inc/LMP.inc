@@ -30,6 +30,9 @@
 			else {
 				$yritirow = mysql_fetch_assoc($result);
 
+				// Setataan kukarow-yhtiö
+				$kukarow["yhtio"] = $yritirow["yhtio"];
+
 				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
 
 				if (strlen($yritirow["oletus_rahatili"]) == 0) { // Tarkistetaan tilit
@@ -88,7 +91,7 @@
 			$tiliotedatatu = $tiliotedatarow['tiliointitunnus'];
 
 			echo "<tr>";
-			
+
 			// VVKKPP
 			$taso = substr($tietue, 187, 1);
 			$pvm = substr($tietue, 42, 6);

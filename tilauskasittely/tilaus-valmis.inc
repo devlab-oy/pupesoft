@@ -28,12 +28,12 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	// Jos saatavat on ytunnus tasolla, pitää hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset 
-							FROM asiakas 
+		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
+							FROM asiakas
 							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND ytunnus = '{$laskurow["ytunnus"]}'";
 		$saatavat_result = pupe_query($saatavat_query);
-		$saatavat_row = mysql_fetch_assoc($saatavat_result);		
+		$saatavat_row = mysql_fetch_assoc($saatavat_result);
 		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
 	}
 	else {
@@ -412,23 +412,22 @@ else {
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
 							AND tilausrivi.tyyppi != 'D'";
 		$rivihintaresult = pupe_query($tilausriviquery);
+
+		$rahtivapaa_alarajasumma_rivit = 0;
+
 		while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
-			
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
-				$etayhtio_rivihinta = 0;
-				$etayhtio_rivihinta = etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
-				
-				$etayhtio_yhteissumma += $etayhtio_rivihinta;
+				$rahtivapaa_alarajasumma_rivit += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
 			}
-		
-			$rivien_yhteissumma_eieta += $totaalirivi["rivihinta"];
+			else {
+				$rahtivapaa_alarajasumma_rivit += $totaalirivi["rivihinta"];
+			}
 		}
 
-
 		// kaikkiyhteensä ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
-		if (($rivien_yhteissumma_eieta > $rahtivapaa_alarajasumma or $etayhtio_yhteissumma > $rahtivapaa_alarajasumma )and $rahtivapaa_alarajasumma != 0) {
+		if ($rahtivapaa_alarajasumma_rivit > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
-			
+
 			// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
 			$query = "	UPDATE lasku
 						SET rahtivapaa  = 'o',
@@ -1462,16 +1461,16 @@ else {
 			}
 
 			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS' or $tullaanko_tilausten_sisaanluvusta == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
-				
-				if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] !='') {
+
+				if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
 					$herminator = $totarowx['herminator2'];
 				}
 				else {
 					$herminator = $totarowx['herminator'];
 				}
-						
+
 				foreach ($tilausnumerot as $til_nro) {
-					
+
 					// Jos tilauksista yksikin menee "Unikko"-järjestelmään, päivitetään kaikki tilaukset rahtivapaiksi
 					// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
 					$query = "	UPDATE lasku
@@ -1519,7 +1518,7 @@ else {
 							'toimitustapa' => $herminator,
 							'toim' => $toim,
 						);
-												
+
 						if (file_exists("editilaus_out_futur.inc")) {
 							require("editilaus_out_futur.inc");
 						}

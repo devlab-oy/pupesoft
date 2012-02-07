@@ -6612,7 +6612,7 @@ if ($tee == '') {
 					else {
 						echo "<tr>$jarjlisa
 								<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-								<th colspan='5' align='right'>".t("Veroton yhteensä")."</th>
+								<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
 						if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -6927,7 +6927,7 @@ if ($tee == '') {
 
 					echo "<tr>$jarjlisa
 							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteensä")."</th>
+							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$etayhtio_totaalisumma);
 					echo "</td>";
 

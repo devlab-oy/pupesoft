@@ -112,6 +112,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("LAJI", "SELITE", "SELITETARK", "SELITETARK_2", "KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$joinattavat = array("PERHE" => "avainsana");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuoteperhe" :
 				$pakolliset  = array("ISATUOTENO", "TUOTENO", "TYYPPI");

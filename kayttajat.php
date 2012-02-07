@@ -1142,9 +1142,9 @@
 
 					echo "<tr><th align='left'>",t("Näytön koko"),":</th>
 							<td><select name='resoluutio'>
-							<option value='I' {$sel2}>",t("Iso"),"</option>
-							<option value='N' {$sel1}>",t("Normaali"),"</option>
 							<option value='P' {$sel3}>",t("Pieni"),"</option>
+							<option value='N' {$sel1}>",t("Normaali"),"</option>
+							<option value='I' {$sel2}>",t("Iso"),"</option>
 							</select></td></tr>";
 
 					if ($krow['naytetaan_katteet_tilauksella'] == "") {

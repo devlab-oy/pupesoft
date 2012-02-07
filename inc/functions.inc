@@ -14844,6 +14844,9 @@ if (!function_exists("tee_keraysera2")) {
 									unset($fixed_main_array[$key]);
 									// $fixed_main_array = $backup_array + $fixed_main_array;
 									$fixed_main_array = $backup_array;
+
+									// huijataan pinta-alaa jos valitaan "Yksin er‰‰n"-alusta
+									$keraysvyohyketiedot['max_keraysera_pintaala'] = 100000000;
 									// break 2;
 									break 3;
 								}

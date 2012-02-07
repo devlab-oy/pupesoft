@@ -6559,8 +6559,7 @@ if ($tee == '') {
 					echo "<tr>$jarjlisa
 							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 							<th colspan='5' align='right'>".t("Veroton yhteens‰").":</th>
-							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri);
-					echo "</td>";
+							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
 					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) and $kotiarvo_eieri-$ostot_eieri != 0) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."%</td>";
@@ -6614,8 +6613,7 @@ if ($tee == '') {
 						echo "<tr>$jarjlisa
 								<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 								<th colspan='5' align='right'>".t("Veroton yhteens‰")."</th>
-								<td class='spec' align='right'>".sprintf("%.2f",$arvo);
-						echo "</td>";
+								<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
 						if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/($kotiarvo-$ostot))."%</td>";
@@ -6627,7 +6625,7 @@ if ($tee == '') {
 						echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 					}
 				}
-				
+
 				// Etsit‰‰n asiakas
 				$query = "	SELECT laskunsummapyoristys
 							FROM asiakas
@@ -6922,17 +6920,17 @@ if ($tee == '') {
 						echo "<td class='spec'>$yhtiorow[valkoodi]</td></tr>";
 					}
 				}
-				
+
 				if (isset($etayhtio_totaalisumma) and $etayhtio_totaalisumma !=0) {
-					
+
 					echo "<tr><td class='back'><br></td></tr>";
-							
+
 					echo "<tr>$jarjlisa
 							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteens‰")."</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$etayhtio_totaalisumma);
 					echo "</td>";
-					
+
 					if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}

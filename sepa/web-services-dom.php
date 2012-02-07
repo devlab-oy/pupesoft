@@ -12,6 +12,8 @@
 	// Converted: openssl pkcs12 -in WSNDEA1234.p12 -out nordea.pem -nodes
 	// Password: WSNDEA1234
 	define('CERT', 'nordea.pem');
+	define('PRIVATE_KEY', 'nordea.key');
+	define('CERT_FILE', 'nordea.crt');
 
 	// From: http://www.fkl.fi/teemasivut/sepa/tekninen_dokumentaatio/Dokumentit/WebServices_Messages_20081022_105.pdf
 	/*
@@ -28,7 +30,7 @@
 	*/
 
 	// 1. Tarvitaan maksuaineiston nimi muuttujassa $payload_file
-	$payload_file = "/Users/joni/Desktop/SEPA-demo-07.02.12.14.07.49.xml";
+	$payload_file = "/Users/joni/Desktop/ssl/SEPA-demo-07.02.12.14.07.49.xml";
 
 	// 2. Tehdään base64_encode
 	$payload = base64_encode(file_get_contents($payload_file));
@@ -36,10 +38,12 @@
 	// 3. Tehdään Application Request ja lisätään infot
 	$xml = new DomDocument('1.0');
 	$xml->encoding = 'UTF-8';
+	$xml->preserveWhiteSpace = true;
+	$xml->formatOutput = true;
 	$applicationrequest = $xml->createElement("ApplicationRequest");
 	$applicationrequest = $xml->appendChild($applicationrequest);
 	$applicationrequest->setAttribute("xmlns", "http://bxd.fi/xmldata/");
-	$applicationrequest->appendChild($xml->createElement("CustomerId", 	"Joni"));
+	$applicationrequest->appendChild($xml->createElement("CustomerId", 	"11111111"));
 	$applicationrequest->appendChild($xml->createElement("Command",		"UploadFile"));
 	$applicationrequest->appendChild($xml->createElement("Timestamp", 	date("c")));
 	$applicationrequest->appendChild($xml->createElement("Environment", "TEST"));
@@ -53,33 +57,60 @@
 
 	// Haetaan private key
 	$applicationrequest_key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
-	$applicationrequest_key->loadKey(CERT, TRUE);
+	$applicationrequest_key->loadKey(PRIVATE_KEY, TRUE);
 
 	// Ja laitetaan signeeraus XML dokumenttiin
 	$applicationrequest_signature->sign($applicationrequest_key);
-	$applicationrequest_signature->add509Cert(CERT, TRUE, TRUE);
+	$applicationrequest_signature->add509Cert(CERT_FILE, TRUE, TRUE);
 	$applicationrequest_signature->appendSignature($xml->documentElement);
 
 	# 6. Koko Application Request base64_encodataan
 	$application_request = base64_encode($xml->saveXML());
 
 	# 7. Tehdään SOAP
-	$soap_data = array(	"RequestHeader" => array(
-						"SenderId" => '111111111',
-						"RequestId" => date('U'),
-						"Timestamp" => date('c'),
-						"Language" => 'FI',
-						"UserAgent" => 'Pupesoft 1.00',
-						"ReceiverId" => '11111111A1'),
-						"ApplicationRequest" => $application_request);  // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
+	$soap = new DomDocument('1.0');
+	$soap->encoding = 'UTF-8';
+	$soap->preserveWhiteSpace = true;
+	$soap->formatOutput = true;
+
+	$envelope = $soap->createElement("soapenv:Envelope");
+	$envelope = $soap->appendChild($envelope);
+	$envelope->setAttribute("xmlns:cor", "http://bxd.fi/CorporateFileService");
+	$envelope->setAttribute("xmlns:mod", "http://model.bxd.fi");
+	$envelope->setAttribute("xmlns:soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
+#	$envelope->setAttribute("xmlns:sign", "http://danskebank.dk/AGENA/SEPA/SigningService");
+#	$envelope->setAttribute("xmlns:dpstate", "http://danskebank.dk/AGENA/SEPA/dpstate");
+#	$envelope->appendChild($soap->createElement("soapenv:Header"));
+	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
+	$uploadfilein = $body->appendChild($soap->createElement("mod:uploadFilein"));
+	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
+	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));
+	$requestheader->appendChild($soap->createElement("mod:RequestId",			date("U")));
+	$requestheader->appendChild($soap->createElement("mod:Timestamp",			date("C")));
+	$requestheader->appendChild($soap->createElement("mod:Language",			"FI"));
+	$requestheader->appendChild($soap->createElement("mod:UserAgent",			"Pupesoft 1.0"));
+	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
+	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
 
 	# 9. Signataan SOAP
-	// MITEN?
+	$soap_request = new WSSESoap($soap);
+	$soap_request->addTimestamp();
+
+	$soap_request_key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
+	$soap_request_key->loadKey(PRIVATE_KEY, TRUE);
+
+	$soap_request->signSoapDoc($soap_request_key);
+	$token = $soap_request->addBinaryToken(file_get_contents(CERT_FILE));
+	$soap_request->attachTokentoSig($token);
+
+	$soap_request_xml = $soap_request->saveXML();
+
+	$soap_xml = new DomDocument('1.0');
+	$soap_xml->Load($soap_request_xml);
 
 	# 10. Lähetetään SOAP request (Nordea)
 	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
 	$client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
 	var_dump($client->__getFunctions());
 
-	//var_dump($soap_data);
-	//$client->uploadFile($soap_data);
+//	$client->uploadFile($soap_xml->saveXML());

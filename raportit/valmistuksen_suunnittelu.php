@@ -179,22 +179,18 @@
 		// Lasketaan reaalisaldo
 		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu - $ennakko;
 
-		// Lasketaan myyntiennuste
-		$myyntiennuste = $budjetoitu_myynti - $reaalisaldo;
-		$myyntiennuste = ($myyntiennuste < 0) ? 0 : $myyntiennuste;
-
 		// Lasketaan riittop‰iv‰t
 		$paivakulutus = round($vuosikulutus / 240, 6);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
 
 		// Lasketaan m‰‰r‰ennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
-		$maaraennuste = ($paivakulutus * $toimittajarow['toimitusaika']) + $myyntiennuste;
+		$maaraennuste = ($paivakulutus * $toimittajarow['toimitusaika']) + $budjetoitu_myynti;
 
 		// Lasketaan paljon kannattaisi valmistaa
-		$valmistussuositus = ceil($maaraennuste - $reaalisaldo);
+		$valmistussuositus = round($maaraennuste - $reaalisaldo);
 
 		// Pyˆristet‰‰n suositus ylˆsp‰in seuraavaan pakkauskokoon
-		$valmistusmaara = ceil($valmistussuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
+		$valmistusmaara = round($valmistussuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array
 		$tuoterivi = array();
@@ -204,7 +200,6 @@
 		$tuoterivi['valmistuksessa']	= $valmistuksessa;
 		$tuoterivi['varattu']			= $varattu;
 		$tuoterivi['ennakko']			= $ennakko;
-		$tuoterivi['myyntiennuste']		= $myyntiennuste;
 		$tuoterivi['budjetoitu_myynti'] = $budjetoitu_myynti;
 		$tuoterivi['vuosikulutus']		= $vuosikulutus;
 		$tuoterivi['paivakulutus']		= $paivakulutus;
@@ -697,14 +692,17 @@
 					$valmistaja_header .= "<tr>";
 					$valmistaja_header .= "<th>".t("Tuotenumero")."</th>";
 					$valmistaja_header .= "<th>".t("Nimitys")."</th>";
-					$valmistaja_header .= "<th>".t("Sisartuotteet")."</th>";
-					$valmistaja_header .= "<th>".t("ABC-luokka")."</th>";
+					$valmistaja_header .= "<th>".t("Sisar")."-<br>".t("tuotteet")."</th>";
+					$valmistaja_header .= "<th>".t("ABC")."-<br>".t("luokka")."</th>";
+					$valmistaja_header .= "<th>".t("Reaali")."-<br>".t("saldo")."</th>";					
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
-					$valmistaja_header .= "<th>".t("Raaka-aine riitto")."</th>";
-					$valmistaja_header .= "<th>".t("Valmistuslinja")."</th>";
+					$valmistaja_header .= "<th>".t("Raaka")."-<br>".t("aine")." ".t("riitto")."</th>";
+					$valmistaja_header .= "<th>".t("Vuosi")."-<br>".t("kulutus")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistus")."-<br>".t("suositus")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistus")."-".t("linja")."</th>";
 					$valmistaja_header .= "<th></th>";
-					$valmistaja_header .= "<th>".t("Valmistustarve")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistus")."-<br>".t("m‰‰r‰")."</th>";
 					$valmistaja_header .= "</tr>";
 					$valmistaja_header_piirretty = false;
 				}
@@ -722,12 +720,16 @@
 				echo "<td>{$tuoterivi["nimitys"]}</td>";
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 
 				// Tarkistetaanko moneenko valmisteeseen meill‰ on raaka-aineita
 				$raaka_aineiden_riitto = raaka_aineiden_riitto($tuoterivi["tuoteno"], (int) $lahde_varasto);
 				echo "<td style='text-align: right;'>$raaka_aineiden_riitto</td>";
+
+				echo "<td style='text-align: right;'>{$tuoterivi["vuosikulutus"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["valmistussuositus"]}</td>";
 
 				echo "<td>";
 
@@ -778,7 +780,7 @@
 
 				// Tehd‰‰n yks hidden rivi t‰h‰n alle, jossa on kaikki luvut ja kaavat, jota on tehty valmistustarpeen laskemiseksi
 				echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
-				echo "<td colspan='3'>";
+				echo "<td colspan='4'>";
 
 				echo "<table>";
 				echo "<tr><td>".t("Reaalisaldo")."		</td><td>{$tuoterivi['reaalisaldo']}		</td></tr>";
@@ -787,7 +789,6 @@
 				echo "<tr><td>".t("Valmistuksessa")."	</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Varattu")."			</td><td>{$tuoterivi['varattu']}			</td></tr>";
 				echo "<tr><td>".t("Ennakkotilaukset")."	</td><td>{$tuoterivi['ennakko']}			</td></tr>";
-				echo "<tr><td>".t("Myyntiennuste")."	</td><td>{$tuoterivi['myyntiennuste']}		</td></tr>";
 				echo "<tr><td>".t("Budjetoitu myynti")."</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
 				echo "<tr><td>".t("Vuosikulutus")."		</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
 				echo "<tr><td>".t("P‰iv‰kulutus")."		</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
@@ -797,25 +798,23 @@
 				echo "<tr><td>".t("Valmistussuositus")."</td><td>{$tuoterivi['valmistussuositus']}	</td></tr>";
 				echo "<tr><td>".t("Pakkauskoko")."		</td><td>{$tuoterivi['pakkauskoko']}		</td></tr>";
 				echo "<tr><td>".t("Is‰n Pakkauskoko")."	</td><td>{$tuoterivi['isatuotteen_pakkauskoko']}</td></tr>";
-				echo "<tr><td>".t("Valmistustarve")."	</td><td>{$tuoterivi['valmistusmaara']}		</td></tr>";
+				echo "<tr><td>".t("Valmistusm‰‰r‰")."	</td><td>{$tuoterivi['valmistusmaara']}		</td></tr>";
 				echo "</table>";
 
-				echo "</td><td colspan='7'>";
+				echo "</td><td colspan='8'>";
 
 				echo t("Reaalisaldo")." = ".t("Varastosaldo")." + ".t("Tilattu")." + ".t("Valmistuksessa")." - ".t("Varattu")." - ".t("Ennakkotilaukset")."<br>";
 				echo "{$tuoterivi["reaalisaldo"]} = {$tuoterivi["varastosaldo"]} + {$tuoterivi["tilattu"]} + {$tuoterivi["valmistuksessa"]} - {$tuoterivi["varattu"]} - {$tuoterivi["ennakko"]}<br><br>";
-				echo t("Myyntiennuste")." = ".t("Budjetoitu myynti")." - ".t("Reaalisaldo")."<br>";
-				echo "{$tuoterivi["myyntiennuste"]} = {$tuoterivi["budjetoitu_myynti"]} - {$tuoterivi["reaalisaldo"]}<br><br>";
 				echo t("P‰iv‰kulutus")." = round(".t("Vuosikulutus")." / 240)<br>";
 				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
 				echo t("Riitto p‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
 				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
-				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Myyntiennuste")."<br>";
-				echo "{$tuoterivi["maaraennuste"]} = ({$tuoterivi["paivakulutus"]} * {$tuoterivi["toimitusaika"]}) + {$tuoterivi["myyntiennuste"]}<br><br>";
-				echo t("Valmistussuositus")." = ceil(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";
-				echo "{$tuoterivi["valmistussuositus"]} = ceil({$tuoterivi["maaraennuste"]} - {$tuoterivi["reaalisaldo"]})<br><br>";
-				echo t("Valmistustarve")." = ceil(".t("Valmistussuositus")." / ".t("Pakkauskoko").") * Pakkauskoko<br>";
-				echo "{$tuoterivi["valmistusmaara"]} = ceil({$tuoterivi["valmistussuositus"]} / {$tuoterivi["isatuotteen_pakkauskoko"]}) * {$tuoterivi["isatuotteen_pakkauskoko"]}";
+				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Budjetoitu myynti")."<br>";
+				echo "{$tuoterivi["maaraennuste"]} = ({$tuoterivi["paivakulutus"]} * {$tuoterivi["toimitusaika"]}) + {$tuoterivi["budjetoitu_myynti"]}<br><br>";
+				echo t("Valmistussuositus")." = round(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";
+				echo "{$tuoterivi["valmistussuositus"]} = round({$tuoterivi["maaraennuste"]} - {$tuoterivi["reaalisaldo"]})<br><br>";
+				echo t("Valmistusm‰‰r‰")." = round(".t("Valmistussuositus")." / ".t("Pakkauskoko").") * Pakkauskoko<br>";
+				echo "{$tuoterivi["valmistusmaara"]} = round({$tuoterivi["valmistussuositus"]} / {$tuoterivi["isatuotteen_pakkauskoko"]}) * {$tuoterivi["isatuotteen_pakkauskoko"]}";
 
 				echo "</td></tr>";
 

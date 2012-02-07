@@ -30,15 +30,15 @@
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>";
 	echo "<td>	<input type='text' size='6' maxlength='5' name='ahyllyalue'>
-				<input type='text' size='6' maxlength='5' name='ahyllynro'>
-				<input type='text' size='6' maxlength='5' name='ahyllyvali'>
+	<input type='text' size='6' maxlength='5' name='ahyllynro'>
+	<input type='text' size='6' maxlength='5' name='ahyllyvali'>
 				<input type='text' size='6' maxlength='5' name='ahyllytaso'>";
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>";
 	echo "<td>	<input type='text' size='6' maxlength='5' name='lhyllyalue'>
-				<input type='text' size='6' maxlength='5' name='lhyllynro'>
-				<input type='text' size='6' maxlength='5' name='lhyllyvali'>
+	<input type='text' size='6' maxlength='5' name='lhyllynro'>
+	<input type='text' size='6' maxlength='5' name='lhyllyvali'>
 				<input type='text' size='6' maxlength='5' name='lhyllytaso'>";
 	echo "</td></tr>";
 
@@ -62,7 +62,7 @@
 
 	echo "<td><select name='tuotemerkki'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
-	while ($srow = mysql_fetch_array ($sresult)){
+	while($srow = mysql_fetch_array ($sresult)){
 		echo "<option value='$srow[0]'>$srow[0]</option>";
 	}
 	echo "</td></tr>";
@@ -73,10 +73,10 @@
     echo "<td class='back' colspan='2'>".t("tai inventoi raportin avulla")."...</th></tr>";
 	echo "<tr><th>".t("Valitse raportti")."</th>";
 	echo "<td><select name='raportti'>
-				<option value=''>".t("Valitse")."</option>
-				<option value='vaarat'>".t("Väärät saldot")."</option>
-				<option value='loppuneet'>".t("Loppuneet tuotteet")."</option>
-				<option value='negatiiviset'>".t("Kaikki miinus-saldolliset")."</option>
+		<option value=''>".t("Valitse")."</option>
+		<option value='vaarat'>".t("Väärät saldot")."</option>
+		<option value='loppuneet'>".t("Loppuneet tuotteet")."</option>
+		<option value='negatiiviset'>".t("Kaikki miinus-saldolliset")."</option>
 				</select>";
 	echo "</td></tr>";
 
@@ -97,13 +97,13 @@
 
 	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>";
 	echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
-			<input type='text' name='kka' value='$kka' size='3'>
+		<input type='text' name='kka' value='$kka' size='3'>
 			<input type='text' name='vva' value='$vva' size='5'></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>";
 	echo "<td>	<input type='text' name='ppl' value='$ppl' size='3'>
-				<input type='text' name='kkl' value='$kkl' size='3'>
-				<input type='text' name='vvl' value='$vvl' size='5'>";
+		<input type='text' name='kkl' value='$kkl' size='3'>
+		<input type='text' name='vvl' value='$vvl' size='5'>";
 
 	echo "<tr><td class='back'><br></td></tr>";
 	echo "<tr><td class='back' colspan='2'>".t("Valitse ehdoista")."...</th></tr>";
@@ -150,6 +150,10 @@
 
 	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu lähiaikoina:")."</th>";
 	echo "<td><input type='checkbox' name='naytainvtuot'></td></tr>";
+
+	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu kahden viikon sisällä:")."</th>
+	<td><input type='checkbox' name='naytainvtuot'></td>
+	</tr>";
 
 	echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu päivämääränä tai sen jälkeen:")."</th>
 		<td><input type='text' name='ippa' value='$ippa' size='3'>
@@ -453,9 +457,9 @@
 				array_unique($tuotenoarray);
 				$tuotelisa = " and tuote.tuoteno in ('".implode("','", $tuotenoarray)."') ";
 			}
-			else {
-				$tuotelisa = "";
-			}
+				else {
+					$tuotelisa = "";
+				}
 
 			$where = "";
 
@@ -494,7 +498,7 @@
 				if ($from == '') {
 					$yhtiotaulu = "tuotepaikat";
 					$from 		= " FROM tuotepaikat ";
-					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $tuotelisa  ";
+					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $tuotelisa ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 
 						$where		= "	and concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso),5, '0')) >=
@@ -520,7 +524,7 @@
 					$yhtiotaulu = "tuotteen_toimittajat";
 					$from 		= " FROM tuotteen_toimittajat ";
 					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
-									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' $tuotelisa  ";
+									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' $tuotelisa ";
 
 					$where		= " and tuotteen_toimittajat.toimittaja = '$toimittaja'";
 				}

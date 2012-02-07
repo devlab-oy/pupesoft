@@ -30,8 +30,6 @@
 
 	$lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
-	require_once ("inc/tilinumero.inc");
-
 	if ($keikalla == "on") {
 		//	Täällä haetaan laskurow aika monta kertaa, joskus voisi tehdä recodea?
 		$query = "	SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
@@ -1161,7 +1159,7 @@
 						if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
 							$query = "	SELECT parent.tunnus tunnus
 										FROM dynaaminen_puu AS node
-										JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+										JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 										JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
 										WHERE node.tunnus IN ($hierarkia)
 										AND node.laji = 'kuka'
@@ -1221,7 +1219,7 @@
 					if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
 						$query = "	SELECT parent.tunnus tunnus
 									FROM dynaaminen_puu AS node
-									JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 									JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
 									WHERE node.tunnus IN ($hierarkia)
 									AND node.laji = 'kuka'

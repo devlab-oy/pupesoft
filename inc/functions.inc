@@ -14503,7 +14503,6 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku1.tila = 'N'
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
-					AND lasku1.luontiaika >= '2012-02-03 16:40:00'
 					AND lasku1.varasto = '{$varasto}'
 					{$wherelisa}
 					GROUP BY 1,2,3,4,5,6,7,8)
@@ -14581,7 +14580,6 @@ if (!function_exists("tee_keraysera2")) {
 						AND lasku1.alatila = 'A'
 						AND lasku1.vakisin_kerays = ''
 						AND lasku1.varasto = '{$varasto}'
-						AND lasku1.luontiaika >= '2012-02-03 16:40:00'
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) 
 						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER BY 1,2,3";
@@ -14677,7 +14675,7 @@ if (!function_exists("tee_keraysera2")) {
 			$mediaani = calculate_median($indeksit);
 
 			// otetaan mediaani, loopattavat tilaukset ja niiden tiedot talteen
-			$kerailyniput[$i] = $mediaani;
+			$kerailyniput[$row['prioriteetti']][$i] = $mediaani;
 			$kerailyniput_key[$i] = $row['tunnus'];
 			$kerailyniput_tiedot[$i]['liitostunnus'] = $row['liitostunnus'];
 			$kerailyniput_tiedot[$i]['lahto'] = $row['lahto'];
@@ -14693,7 +14691,9 @@ if (!function_exists("tee_keraysera2")) {
 		}
 
 		// j‰rjestet‰‰n mediaanit nousevaan j‰rjestykseen
-		asort($kerailyniput);
+		foreach ($kerailyniput as $pri => &$nippu) {
+			asort($nippu);
+		}
 
 		// annetaan mediaanien lukum‰‰r‰n minimi ja maksimiarvot (ja niille askelv‰lit) joita k‰ytet‰‰n lineaarisen suoran kulmakertoimen ja vakion laskentaan
 		$min_max = array(
@@ -14703,121 +14703,123 @@ if (!function_exists("tee_keraysera2")) {
 					1 => array(70 => 10)
 					);
 
-		// mediaanien lukum‰‰r‰
-		$mediaanilkm = count($kerailyniput);
+		foreach($kerailyniput as $pri => &$nippu) {
+			// mediaanien lukum‰‰r‰
+			$mediaanilkm = count($nippu);
 
-		// $mediaanilkm = 1;
+			// $mediaanilkm = 1;
 
-		// jos mediaanien lukum‰‰r‰ on v‰hint‰‰n yht‰ suuri kuin annettu minimi
-		if ($mediaanilkm >= key($min_max[0])) {
+			// jos mediaanien lukum‰‰r‰ on v‰hint‰‰n yht‰ suuri kuin annettu minimi
+			if ($mediaanilkm >= key($min_max[0])) {
 
-			// jos mediaanien lukum‰‰r‰ ylitt‰‰ sallitun maksimin, k‰ytet‰‰n maksimin askelv‰li‰
-			if ($mediaanilkm > key($min_max[1])) {
-				$askelvali = current($min_max[1]);
-			}
-			else {
-				// lineaarisen suoran kulmakerroin ja vakio
-				// kulmakertoimella ja vakiolla pystyt‰‰n laskemaan askelv‰li
-				$kulmakerroin = round((current($min_max[1]) - current($min_max[0])) / (key($min_max[1]) - key($min_max[0])), 5);  
-				$vakio = round(current($min_max[0]) - ($kulmakerroin * key($min_max[0])) , 5);
-				$askelvali = round($mediaanilkm * $kulmakerroin + $vakio , 0);
-			}
-
-			if ($debug) {
-				echo "<table>";
-				echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelv‰li</th></tr>";
-				echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
-				echo "</table>";
-
-				echo "<br>";
-
-				echo "<table>";
-				echo "<tr><th>Index</th><th>Ker‰ilynippu</th><th>Mediaani</th></tr>";
-				foreach ($kerailyniput as $indx => $mediaani) {
-					echo "<tr><td>$indx</td><td>{$kerailyniput_key[$indx]}</td><td>$mediaani</td></tr>";
+				// jos mediaanien lukum‰‰r‰ ylitt‰‰ sallitun maksimin, k‰ytet‰‰n maksimin askelv‰li‰
+				if ($mediaanilkm > key($min_max[1])) {
+					$askelvali = current($min_max[1]);
 				}
-				echo "</table>";
-
-				echo "<br>";
-			}
-
-			$keskihajonta = array();
-
-			if ($debug) {
-				echo "<table>";
-				echo "<tr><th>Aputaulukko</th><th>Tulos</th><th>Sortattu</th></tr>";
-				echo "<tr><td>";
-
-				echo "<table>";
-				echo "<tr><th>I</th><th>Keskihajonta</th><th>Key</th></tr>";
-			}
-
-			// muodostetaan keskihajonta-taulukko
-			for ($i = 0; $i < $mediaanilkm; $i++) {
-				$tmp_arr = array_slice($kerailyniput, $i, $askelvali, TRUE); 
-
-				$cnt_tmp_arr = count($tmp_arr);
-
-				if ($cnt_tmp_arr < $askelvali) continue;
-
-				$std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
-
-				$get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
-				$indx_from = array_pop($get_indx_from);
-				$key = key($indx_from);
-
-				$keskihajonta[$key] = $std_deviation;
-
-				if ($debug) echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
-			}
-
-			if ($debug) {
-				echo "</table>";
-				echo "</td>";
-
-				echo "<td>";
-				echo "<table>";
-				echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
-				foreach ($keskihajonta as $key => $kh) {
-					echo "<tr><td>$key</td><td>$kh</td></tr>";
+				else {
+					// lineaarisen suoran kulmakerroin ja vakio
+					// kulmakertoimella ja vakiolla pystyt‰‰n laskemaan askelv‰li
+					$kulmakerroin = round((current($min_max[1]) - current($min_max[0])) / (key($min_max[1]) - key($min_max[0])), 5);  
+					$vakio = round(current($min_max[0]) - ($kulmakerroin * key($min_max[0])) , 5);
+					$askelvali = round($mediaanilkm * $kulmakerroin + $vakio , 0);
 				}
-				echo "</table>";
-				echo "</td>";
-			}
 
-			// j‰rjestet‰‰n keskihajonta-taulukko nousevaan j‰rjestykseen
-			// mit‰ pienempi keskihajontaluku on, sit‰ parempi!
-			asort($keskihajonta);
+				if ($debug) {
+					echo "<table>";
+					echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelv‰li</th></tr>";
+					echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
+					echo "</table>";
 
-			if ($debug) {
-				echo "<td>";
-				echo "<table>";
-				echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
-				foreach ($keskihajonta as $key => $kh) {
-					echo "<tr><td>$key</td><td>$kh</td></tr>";
+					echo "<br>";
+
+					echo "<table>";
+					echo "<tr><th>Index</th><th>Ker‰ilynippu</th><th>Mediaani</th></tr>";
+					foreach ($nippu as $indx => $mediaani) {
+						echo "<tr><td>$indx</td><td>{$kerailyniput_key[$indx]}</td><td>$mediaani</td></tr>";
+					}
+					echo "</table>";
+
+					echo "<br>";
 				}
-				echo "</table>";
-				echo "</td></tr>";
-				echo "</table>";
-			}
 
-			reset($keskihajonta);
+				$keskihajonta = array();
 
-			// otetaan ensimm‰isen alkion mediaani talteen
-			$main_value = $kerailyniput[key($keskihajonta)];
+				if ($debug) {
+					echo "<table>";
+					echo "<tr><th>Aputaulukko</th><th>Tulos</th><th>Sortattu</th></tr>";
+					echo "<tr><td>";
 
-			uasort($kerailyniput, 'arrcmp');
-
-			if ($debug) {
-				echo "<br>";
-
-				echo "<table>";
-				echo "<tr><th>Indeksi</th><th>Mediaani</th></tr>";
-				foreach ($kerailyniput as $indx => $med) {
-					echo "<tr><td>$indx</td><td>$med</td></tr>";
+					echo "<table>";
+					echo "<tr><th>I</th><th>Keskihajonta</th><th>Key</th></tr>";
 				}
-				echo "</table>";
-				// echo "<pre>",var_dump($kerailyniput),"</pre>";
+
+				// muodostetaan keskihajonta-taulukko
+				for ($i = 0; $i < $mediaanilkm; $i++) {
+					$tmp_arr = array_slice($nippu, $i, $askelvali, TRUE); 
+
+					$cnt_tmp_arr = count($tmp_arr);
+
+					if ($cnt_tmp_arr < $askelvali) continue;
+
+					$std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
+
+					$get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
+					$indx_from = array_pop($get_indx_from);
+					$key = key($indx_from);
+
+					$keskihajonta[$key] = $std_deviation;
+
+					if ($debug) echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
+				}
+
+				if ($debug) {
+					echo "</table>";
+					echo "</td>";
+
+					echo "<td>";
+					echo "<table>";
+					echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+					foreach ($keskihajonta as $key => $kh) {
+						echo "<tr><td>$key</td><td>$kh</td></tr>";
+					}
+					echo "</table>";
+					echo "</td>";
+				}
+
+				// j‰rjestet‰‰n keskihajonta-taulukko nousevaan j‰rjestykseen
+				// mit‰ pienempi keskihajontaluku on, sit‰ parempi!
+				asort($keskihajonta);
+
+				if ($debug) {
+					echo "<td>";
+					echo "<table>";
+					echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+					foreach ($keskihajonta as $key => $kh) {
+						echo "<tr><td>$key</td><td>$kh</td></tr>";
+					}
+					echo "</table>";
+					echo "</td></tr>";
+					echo "</table>";
+				}
+
+				reset($keskihajonta);
+
+				// otetaan ensimm‰isen alkion mediaani talteen
+				$main_value = $nippu[key($keskihajonta)];
+
+				uasort($nippu, 'arrcmp');
+
+				if ($debug) {
+					echo "<br>";
+
+					echo "<table>";
+					echo "<tr><th>Indeksi</th><th>Mediaani</th></tr>";
+					foreach ($nippu as $indx => $med) {
+						echo "<tr><td>$indx</td><td>$med</td></tr>";
+					}
+					echo "</table>";
+					// echo "<pre>",var_dump($kerailyniput),"</pre>";
+				}
 			}
 		}
 
@@ -14826,8 +14828,10 @@ if (!function_exists("tee_keraysera2")) {
 		reset($kerailyniput);
 
 		// muodostetaan loopattava p‰‰taulukko
-		foreach ($kerailyniput as $indx => $med) {
-			$fixed_main_array[$indx] = $kerailyniput_key[$indx];
+		foreach ($kerailyniput as $pri => $nippux) {
+			foreach ($nippux as $indx => $med) {
+				$fixed_main_array[$indx] = $kerailyniput_key[$indx];
+			}
 		}
 
 		if ($debug) echo "<pre>",var_dump($fixed_main_array),"</pre>";
@@ -14923,6 +14927,8 @@ if (!function_exists("tee_keraysera2")) {
 			echo "<font class='message'>MAX rivit: $keraysvyohyketiedot[max_keraysera_rivit]</font>";
 			echo "<br><br>";
 		}
+
+		$fail = "";
 
 		$ed_lahto = '';
 		$ed_prioriteetti = '';
@@ -15266,6 +15272,11 @@ if (!function_exists("tee_keraysera2")) {
 			$ed_tuote = '';
 
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+
+				if ($eran_koko == 0 and ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+					if ($debug) echo "Tuotteen $tuoterow[tuoteno] lis‰ys yksin‰‰n ylitt‰isi max ker‰yser‰ pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus])<br><br>";
+					$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+				}
 
 				if ($tuoterow['perheid'] > 0 and $tuoterow['perheid'] != $tuoterow['tunnus']) {
 
@@ -15704,7 +15715,35 @@ if (!function_exists("tee_keraysera2")) {
 		// 	$eran_koko_pintaala += ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys']);
 		// }
 
-		if (!$era_valmis and $eran_koko > 0)  $era_valmis = true;
+		// nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.
+		// l‰hetet‰‰n t‰st‰ infomaili
+		if (count($fixed_main_array) > 0 and !$era_valmis and $eran_koko == 0 and $fail != "") {
+			$bound   = uniqid(time()."_");
+
+			$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow['postittaja_email']}>\n";
+			$header .= "MIME-Version: 1.0\n";
+			$header .= "Content-Type: multipart/mixed; boundary=\"{$bound}\"\n";
+
+			$content  = "--{$bound}\n";
+			$content .= "Content-Type: text/plain;charset=iso-8859-1\n";
+			$content .= "Content-Transfer-Encoding: quoted-printable\n";
+
+			$content .= t("Virhe ker‰yser‰‰ tehdess‰").".\n";
+			$content .= t("Tarkista tuotteen mitat")."!\n\n";
+
+			foreach(explode("|||", $fail) as $failures) {
+				list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);
+
+				$content .= t("Tuoteno")." {$fail_tuoteno}\n";
+				$content .= t("Tilaus")." {$fail_otunnus}\n\n";
+			}
+
+			$content .= "--{$bound}--\n";
+
+			$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Ker‰yser‰ss‰ virhe")." - {$yhtiorow['nimi']}", "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow['postittaja_email']}");
+		}
+
+		if (!$era_valmis and $eran_koko > 0) $era_valmis = true;
 
 		if ($debug) {
 			echo "Lis‰tyt tilausrivit array:<br>";

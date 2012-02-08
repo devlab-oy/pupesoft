@@ -807,6 +807,10 @@
 							tuote.ei_saldoa,
 							tuote.yksikko,
 							tuote.tunnus,
+							tuote.epakurantti25pvm, 
+							tuote.epakurantti50pvm, 
+							tuote.epakurantti75pvm, 
+							tuote.epakurantti100pvm,
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 							tuote.sarjanumeroseuranta
 							FROM {$tvk_taulu}
@@ -845,6 +849,10 @@
 								tuote.ei_saldoa,
 								tuote.yksikko,
 								tuote.tunnus,
+								tuote.epakurantti25pvm, 
+								tuote.epakurantti50pvm, 
+								tuote.epakurantti75pvm, 
+								tuote.epakurantti100pvm,
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
 								tuoteperhe.tyyppi

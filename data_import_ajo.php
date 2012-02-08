@@ -3,13 +3,11 @@
 	/* DATA IMPORT CRON LOOP */
 	/* Ajetaan cronista ja t‰m‰ sis‰‰nlukee luedata-tiedostot datain hakemistosta */
 
-	error_log("Moi");
-
 	// Kutsutaanko CLI:st‰
 	if (php_sapi_name() != 'cli') {
 		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 	}
-	
+
 	// Laitetaan unlimited max time
 	ini_set("max_execution_time", 0);
 
@@ -23,16 +21,16 @@
 
 		$pupe_root_polku = dirname(__FILE__);
 		require ("{$pupe_root_polku}/inc/connect.inc");
-		require ("{$pupe_root_polku}/inc/functions.inc");		
+		require ("{$pupe_root_polku}/inc/functions.inc");
 
 		function data_import () {
 			GLOBAL $pupe_root_polku;
-			
+
 			$faileja_kasitelty = FALSE;
 
 			// Loopataan DATAIN -hakemisto l‰pi
-			if ($handle = opendir($pupe_root_polku."/datain")) {
-			    while (false !== ($file = readdir($handle))) {
+			if ($files = scandir($pupe_root_polku."/datain")) {
+			    foreach ($files as $file) {
 
 					// Etsit‰‰n "lue-data#" -alkuisia filej‰, jotka loppuu ".DATAIMPORT"
 					if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
@@ -53,13 +51,13 @@
 
 							// Logfile on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.LOG
 							$logfile = "lue-data#{$kuka}#{$yhtio}#{$taulu}#{$random}#{$orig_file}#{$jarjestys}.LOG";
-							
+
 							// Errorfile on muotoa: lue-data#username#yhtio#taulu#randombit#jarjestys.ERR
 							$errfile = "lue-data#{$kuka}#{$yhtio}#{$taulu}#{$random}#{$orig_file}#{$jarjestys}.ERR";
 
 							// Ajetaan lue_data t‰lle tiedostolle
 							passthru("/usr/bin/php $pupe_root_polku/lue_data.php ".escapeshellarg($yhtio)." ".escapeshellarg($taulu)." ".escapeshellarg($pupe_root_polku."/datain/".$file)." ".escapeshellarg($pupe_root_polku."/datain/".$logfile)." ".escapeshellarg($pupe_root_polku."/datain/".$errfile));
-							
+
 							// Siirret‰‰n file k‰sitellyksi
 							rename($pupe_root_polku."/datain/".$file, $pupe_root_polku."/datain/".$file.".DONE");
 
@@ -67,8 +65,6 @@
 						}
 					}
 			    }
-
-			    closedir($handle);
 			}
 
 			// Katsotaan oisko tullut lis‰‰ k‰sitelt‰vi‰

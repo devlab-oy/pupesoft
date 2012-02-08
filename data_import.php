@@ -69,7 +69,7 @@
 			$return = tarkasta_liite("userfile", array("XLSX","XLS","DATAIMPORT"));
 
 			if ($return !== TRUE) {
-				echo "<font class='error'>".t("V‰‰r‰ tiedostomuoto")." $kasitellaan_tiedosto_tyyppi !</font><br>\n";
+				echo "<font class='error'>$return</font>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
@@ -83,8 +83,8 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (strpos($alkuperainen_filenimi, "#") !== FALSE or strpos($alkuperainen_filenimi, "/") !== FALSE or strpos($alkuperainen_filenimi, ":") !== FALSE) {
-				echo "<font class='error'>".t("Tiedostonimess‰ kiellettyj‰ merkkej‰").": '#' '/' ':' </font><br>\n";
+			if (preg_match('/[^A-Za-z0-9. -\_]/', $alkuperainen_filenimi)) {
+				echo "<font class='error'>".t("Tiedostonimess‰ kiellettyj‰ merkkej‰").". ".t("Sallitut merkit").": A-Z 0-9</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
 
@@ -101,9 +101,9 @@
 					$import_type = "--import-type=Gnumeric_Excel:excel";
 				}
 
-				$return = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv));
+				$return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
 
-				if ($return === FALSE) {
+				if ($return != 0 or strpos($return_string, "CRITICAL") !== FALSE) {
 					echo "<font class='error'>".t("Tiedoston konversio ep‰onnistui")."!</font><br>\n";
 					$kasitellaan_tiedosto = FALSE;
 				}
@@ -249,8 +249,8 @@
 		'extranet_kayttajan_lisatiedot'   => 'Extranet-k‰ytt‰j‰n lis‰tietoja',
 		'hinnasto'                        => 'Hinnasto',
 		'kalenteri'                       => 'Kalenteritietoja',
-		'kuka'                            => 'Kustannuspaikat',
-		'kustannuspaikka'                 => 'K‰ytt‰j‰tietoja',
+		'kuka'                            => 'K‰ytt‰j‰tietoja',
+		'kustannuspaikka'                 => 'Kustannuspaikat',
 		'liitetiedostot'                  => 'Liitetiedostot',
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
@@ -271,10 +271,10 @@
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',
 		'tuoteperhe'                      => 'Tuoteperheet',
-		'tuotteen_alv'                    => 'Tuotteen avainsanat',
-		'tuotteen_avainsanat'             => 'Tuotteen toimittajat',
+		'tuotteen_alv'                    => 'Tuotteiden ulkomaan ALV',
+		'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
 		'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
-		'tuotteen_toimittajat'            => 'Tuotteiden ulkomaan ALV',
+		'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilˆt',
@@ -299,8 +299,8 @@
 	}
 
 	if ($kukarow['yhtio'] == 'artr' or $kukarow['yhtio'] == 'allr') {
-		$taulut['autodata']                        = 'Autodata tuotetiedot';
-		$taulut['autodata_tuote']                  = 'Autodatatiedot';
+		$taulut['autodata']                        = 'Autodatatiedot';
+		$taulut['autodata_tuote']                  = 'Autodata tuotetiedot';
 		$taulut['yhteensopivuus_auto']             = 'Yhteensopivuus automallit';
 		$taulut['yhteensopivuus_auto_2']           = 'Yhteensopivuus automallit 2';
 		$taulut['yhteensopivuus_mp']               = 'Yhteensopivuus mp-mallit';
@@ -391,8 +391,8 @@
 	$kasitelty = array();
 	$kasitelty_i = 0;
 
-	if ($handle = opendir($pupe_root_polku."/datain")) {
-	    while (false !== ($file = readdir($handle))) {
+	if ($files = scandir($pupe_root_polku."/datain")) {
+	    foreach ($files as $file) {
 			// T‰m‰ file on valmis lue-data file
 			if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
 
@@ -418,7 +418,6 @@
 				}
 			}
 	    }
-	    closedir($handle);
 	}
 
 	if (count($kasitelty) > 0) {

@@ -29,7 +29,9 @@
 
 		$query = "	SELECT tunnus, ytunnus, nimi, postitp
 					FROM toimi
-					WHERE yhtio = '$kukarow[yhtio]' $lisat
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tyyppi != 'P'
+					$lisat
 					ORDER BY nimi";
 		$result = pupe_query($query);
 
@@ -105,6 +107,7 @@
 		$query = "	SELECT tunnus
 					FROM toimi
 					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi != 'P'
 					$lisat
 					ORDER BY selaus";
 		$result = pupe_query($query);
@@ -301,7 +304,8 @@
 		$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
 					FROM toimi
 					WHERE tunnus = '$tunnus'
-					and yhtio = '$kukarow[yhtio]'";
+					and yhtio = '$kukarow[yhtio]'
+					and tyyppi != 'P'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {

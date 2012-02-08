@@ -62,7 +62,7 @@
 			$tili = $xrow['tilino'];
 
 			// Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
-			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $tositeliit == 0) {
+			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $tositeliit == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
 				$ok = 1;
 			}
@@ -78,7 +78,7 @@
 			7 = pakollisia kenttiä tiliöinnissä on projekti
 			*/
 
-			if ($xrow['tiliointi_tarkistus'] != 0) {
+			if ($xrow['tiliointi_tarkistus'] != 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 
 				if ($xrow['tiliointi_tarkistus'] == 1) {
 					if ($kustp_tark == 0 or $kustp_tark == '' ){
@@ -130,19 +130,19 @@
 				}
 			}
 
-			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0) {
+			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Pakollinen kustannuspaikka puuttui")."!";
 				$ok = 1;
 				$kustp = $xrow['kustp'];
 			}
 
-			if ($xrow['kohde'] != 0 and isset($kohde) and $kohde == 0) {
+			if ($xrow['kohde'] != 0 and isset($kohde) and $kohde == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Pakollinen kohde puuttui")."!";
 				$ok = 1;
 				$kohde = $xrow['kohde'];
 			}
 
-			if ($xrow['projekti'] != 0 and isset($projekti) and $projekti == 0) {
+			if ($xrow['projekti'] != 0 and isset($projekti) and $projekti == 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
 				$virhe .= t("Pakollinen projekti puuttui")."!";
 				$ok = 1;
 				$projekti = $xrow['projekti'];

@@ -1526,7 +1526,7 @@ if (!function_exists('loppu')) {
 			$onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
 
 			if ($onko_tili1_iban != "") {
-				$code = PalautaPankkiviivakoodi($$onko_tili1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+				$code = PalautaPankkiviivakoodi($onko_tili1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
 			}
 			elseif ($onko_iban1_iban != "") {
 				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
@@ -1908,10 +1908,10 @@ if (!function_exists("tulosta_lasku")) {
 		$pdf_lasku->set_default('margin-right',  0);
 
 		if ($laskurow["tila"] == 'U') {
-			$where  = " and tilausrivi.uusiotunnus='$lasku' and tilausrivi.tyyppi = 'L' ";
+			$where  = " and tilausrivi.uusiotunnus='$laskurow[tunnus]' and tilausrivi.tyyppi = 'L' ";
 		}
 		else {
-			$where  = " and tilausrivi.otunnus='$lasku' and tilausrivi.tyyppi in ('L','W','E') and (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) != 0 ";
+			$where  = " and tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) != 0 ";
 		}
 
 		// Laskutyyppi

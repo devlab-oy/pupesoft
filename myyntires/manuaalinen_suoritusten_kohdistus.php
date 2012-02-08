@@ -4,8 +4,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FA
 	require ("../inc/parametrit.inc");
 }
 
-require_once("inc/tilinumero.inc");
-
 if ($tila == "muokkaasuoritusta") {
 
 	if ($saamis == $kassa or $saamis == "" or $kassa == "") {
@@ -343,7 +341,7 @@ if ($tila == 'tee_kohdistus') {
 
 		$errorrow = mysql_fetch_assoc ($result);
 
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM tiliointi
 					WHERE yhtio = '$errorrow[yhtio]' and
 					aputunnus = '$errorrow[tunnus]' and

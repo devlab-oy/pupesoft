@@ -1092,7 +1092,7 @@
 				}
 
 				// katsotaan halutaanko laskuille lisätä lisäkulu prosentti
-				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and $yhtiorow["laskutuslisa"] > 0 and $yhtiorow["laskutuslisa_tyyppi"] != "") {
+				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and ($yhtiorow["laskutuslisa"] > 0 or $yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') and $yhtiorow["laskutuslisa_tyyppi"] != "") {
 
 					$yhdista = array();
 					$laskutuslisa_tyyppi_ehto = "";
@@ -1218,7 +1218,7 @@
 								$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 								$alemuuttuja = "";
 
-								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T') {
+								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
 									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', '');
 									$netto = '';
 									

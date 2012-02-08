@@ -25,7 +25,7 @@
 	*/
 
 	// 1. Tarvitaan maksuaineiston nimi muuttujassa $payload_file
-	$payload_file = "/Users/joni/Desktop/SEPA-demo-07.02.12.14.07.49.xml";
+	$payload_file = "/Users/joni/Desktop/ssl/SEPA-demo-07.02.12.14.07.49.xml";
 	
 	// 2. Tehdään base64_encode
 	$payload = base64_encode(file_get_contents($payload_file));
@@ -40,7 +40,9 @@
 	$application_request_xml->addChild("Command",		"UploadFile");
 	$application_request_xml->addChild("Timestamp",		date("c"));
 	$application_request_xml->addChild("Environment",	"TEST");
+	$application_request_xml->addChild("TargetId",		"11111111A1");
 	$application_request_xml->addChild("SoftwareId",	"Pupesoft 1.0");
+	$application_request_xml->addChild("FileType",		"NDCORPAYS");	
 	$application_request_xml->addChild("Content",		$payload); // <--- 4. Laitetaan payload content-elementtiin
 
 	// Signature osa
@@ -64,7 +66,7 @@
 			$x509data = $keyinfo->addChild("X509Data");
 				$x509data->addChild("X509SubjectName");
 				$x509data->addChild("X509IssuerSerial");
-				$x509data->addChild("X509Certificate");
+				$x509data->addChild("X509Certificate");			
 			$keyinfo->addChild("KeyValue");
 
 	file_put_contents("simple.xml", $application_request_xml->asXML());
@@ -74,6 +76,23 @@
 	$application_request_file_signed = tempnam("/tmp", "appreq");
 	file_put_contents($application_request_file, $application_request_xml->asXML());
 	system("xmlsec1 --sign --output $application_request_file_signed --pkcs12 $server_sertificate_p12 --pwd $server_sertificate_pass --trusted-pem $bank_certificate_pem $application_request_file");
+
+	$xml = new DomDocument();
+	$xml->Load($application_request_file_signed);
+
+	// Tehdään validaatio Application Requestille
+	libxml_use_internal_errors(true);
+	if (!$xml->schemaValidate("{$pupe_root_polku}/sepa/ApplicationRequest_20080918.xsd")) {
+		echo "Virheellinen Application Request!\n\n";
+		
+		var_dump($xml->saveXML());
+		
+		$all_errors = libxml_get_errors();
+		foreach ($all_errors as $error) {
+			echo "$error->message\n";
+		}
+		exit;
+	}
 
 	# 6. Koko Application Request base64_encodataan
 	$application_request = base64_encode(file_get_contents($application_request_file_signed));
@@ -96,12 +115,17 @@
  	// MITEN?
 	
 	# 10. Lähetetään SOAP request (Nordea)
-	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
-	$client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
-	var_dump($client->__getFunctions());
-	//var_dump($soap_data);
+	try {
+		$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
+		$client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
+		//var_dump($client->__getFunctions());
 
-	//$client->uploadFile($soap_data);
+		$soap_result = $client->uploadFile($soap_data);
+		var_dump($soap_result);
+	}
+	catch (SoapFault $ex) {
+		var_dump($ex->faultcode, $ex->faultstring);
+	}
 		
 	// CREATE SERVER ROOT CERT
 	// openssl genrsa -des3 -out ca.key 4096

@@ -33,7 +33,7 @@
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheitä, teidään keikka ja suuntalava sekä kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 					if ($virheet == 0) {
-						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste);
+						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 					}
 					else {
 						$virheet = 0;
@@ -138,7 +138,7 @@
 			}
 
 			if ($virheet == 0 and count($paketin_rivit) > 0) {
-				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste);
+				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 			}
 			elseif ($virheet != 0) {
 				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero\n\n";
@@ -150,7 +150,7 @@
 
 	if (!function_exists("asn_kohdista_suuntalava")) {
 
-		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste) {
+		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,$SSCC='') {
 
 			global $yhtiorow, $kukarow;
 
@@ -235,8 +235,18 @@
 					$keikkarow = mysql_fetch_array($checkres);
 					$keikan_tunnus = $keikkarow["tunnus"];
 				}
+				$query = "	SELECT th.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
+							FROM tuotepaikat as tp
+							JOIN varaston_hyllypaikat as th on (th.yhtio = tp.yhtio and th.hyllyalue=tp.hyllyalue and th.hyllynro=tp.hyllynro and th.hyllyvali=tp.hyllyvali and th.hyllytaso=tp.hyllyvali)
+							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tp.yhtio and keraysvyohyke.tunnus = th.keraysvyohyke)
+							WHERE tp.yhtio = '$kukarow[yhtio]' 
+							AND tp.tuoteno IN ('".implode("','", $paketin_tuotteet)."') 
+							AND tp.oletus = 'x'
+							GROUP BY 1
+							ORDER BY 3 DESC
+							LIMIT 1";
 
-				$query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
+$VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
 							FROM tuote
 							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'

@@ -39,7 +39,7 @@
 	$laatikkoind				= "";
 	$laatikonnumerot			= "";
 	$pakkauslista 				= "";
-	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441");
+	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441","123080");
 	$positio					= "";
 	$rivilla					= "";
 	$suba						= "";
@@ -86,12 +86,15 @@
 					elseif ($tavarantoimittajanumero == "112") {
 						$tavarantoimittajanumero = "123442";
 					}
+					elseif (strtoupper($tavarantoimittajanumero) == "LES-7") {
+						$tavarantoimittajanumero = "123080";
+					}				
 
 					$asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;
 					$asn_numero = utf8_decode($asn_numero);
 
 					$toimituspvm = tv3dateconv($xml->DesAdvHeader->DeliveryDate->Date);
-					$vastaanottaja = (string) $xml->DesAdvHeader->DeliveryParty->PartyNumber." , ".$xml->DesAdvHeader->DeliveryParty->Address->Name1;
+					$vastaanottaja = (string) $xml->DesAdvHeader->DeliveryParty->PartyNumber." , ".trim($xml->DesAdvHeader->DeliveryParty->Address->Name1);
 					$vastaanottaja = utf8_decode($vastaanottaja);
 
 					// Haetaan pakkauslistan referenssinumero, mikäli löytyy
@@ -221,20 +224,28 @@
 							foreach ($laatikosta->PkgId as $ident) {
 								$laatikkoind = (string) $ident->PkgIdentNumber;
 								$laatikkoind = utf8_decode($laatikkoind);
+								// SSCC-koodi on periaatteessa sama mutta lyhentämättömänä tulevaisuutta varten keikalle
+								$sscc = $laatikkoind;
 
 								if ($tavarantoimittajanumero == "123085") {
 									$laatikkoind = "0".$laatikkoind;
+									$sscc = $laatikkoind;
 								}
-								elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049") and strlen($laatikkoind) >10) {
+								elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) >10) {
+									$sscc = $laatikkoind;
 									$laatikkoind = substr($laatikkoind,10);
+									
 								}
 								elseif ($tavarantoimittajanumero == "123342") {
+									$sscc = $laatikkoind;
 									$laatikkoind = substr($laatikkoind,8);
 								}
 								else {
 									$laatikkoind = $laatikkoind;
+									$sscc = $laatikkoind;
 								}
 								$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
+								$lisays[$p][$c]['SSCC'] = $sscc;
 							}
 						}
 						elseif ($tavarantoimittajanumero == "123312" and trim($laatikosta->PkgNumber) == 1) {
@@ -273,19 +284,24 @@
 								if (isset($lisays[$i][1]["PkgIdentNumber"])) {
 									$laatikkoid = $lisays[$i][1]["PkgIdentNumber"];
 									$laatikkoid = utf8_decode($laatikkoid);
+									$SSCC		= $lisays[$i][1]["SSCC"];
+									$SSCC 		= utf8_decode($SSCC);
 								}
 								else {
 									$laatikkoid = "";
+									$SSCC		= "";
 								}
 
 								foreach ($lisays[$i] as $value) {
-
+									
 									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
+										
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
 															laji				= 'asn',
 		 													toimittajanumero	= '$tavarantoimittajanumero',
 		 													asn_numero			= '$asn_numero',
+															sscc_koodi			= '$SSCC',
 		 													saapumispvm 		= '$toimituspvm',
 		 													vastaanottaja 		= '$vastaanottaja',
 		 													tilausnumero 		= '$value[BuyerOrderNumber]',

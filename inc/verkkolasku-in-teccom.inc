@@ -36,6 +36,9 @@
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
 		$laskuttajan_toimittajanumero = "123067";
 	}
+	elseif (strtoupper($laskuttajan_toimittajanumero) == "LES-7") {
+		$laskuttajan_toimittajanumero = "123080";
+	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "NISSENS") {
 		$laskuttajan_toimittajanumero = "123403";
 	}
@@ -216,6 +219,16 @@
 				}
 				else {
 					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ;
+				}
+
+				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
+					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->"Value";
+					
+					if (strtoupper($attribute) == "ALLOW") {
+						
+					}
+					// $rtuoteno[$i]["kate"]
 				}
 
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%

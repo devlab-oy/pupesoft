@@ -2033,6 +2033,9 @@
 		$ulos .= "<option value = 'L' $sel[L]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
 		$ulos .= "<option value = 'N' $sel[N]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi noutolaskuihin")."</option>";
+		$ulos .= "<option value = 'T' $sel[T]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
+		$ulos .= "<option value = 'U' $sel[U]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi k‰teislaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
+		$ulos .= "<option value = 'V' $sel[V]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi noutolaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2407,7 +2410,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kehahinvirhe_esto_laskutus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

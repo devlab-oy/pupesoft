@@ -11,7 +11,7 @@
 	// From: http://www.nordea.fi/sitemod/upload/root/fi_org/liite/WSNDEA1234.p12
 	// Converted: openssl pkcs12 -in WSNDEA1234.p12 -out nordea.pem -nodes
 	// Password: WSNDEA1234
-	define('CERT', 'nordea.pem');
+	define('SERVICE_CERT', 'server.crt');
 	define('PRIVATE_KEY', 'nordea.key');
 	define('CERT_FILE', 'nordea.crt');
 
@@ -47,9 +47,11 @@
 	$applicationrequest->appendChild($xml->createElement("Command",		"UploadFile"));
 	$applicationrequest->appendChild($xml->createElement("Timestamp", 	date("c")));
 	$applicationrequest->appendChild($xml->createElement("Environment", "TEST"));
+	$applicationrequest->appendChild($xml->createElement("TargetId", 	"11111111A1"));
 	$applicationrequest->appendChild($xml->createElement("SoftwareId", 	"Pupesoft 1.0"));
+	$applicationrequest->appendChild($xml->createElement("FileType", 	"NDCORPAYS"));
 	$applicationrequest->appendChild($xml->createElement("Content", 	$payload)); // <--- 4. Laitetaan payload content-elementtiin
-
+		
 	// 5. Signataan Application Request
 	$applicationrequest_signature = new XMLSecurityDSig();
 	$applicationrequest_signature->setCanonicalMethod(XMLSecurityDSig::C14N_COMMENTS);
@@ -63,6 +65,23 @@
 	$applicationrequest_signature->sign($applicationrequest_key);
 	$applicationrequest_signature->add509Cert(CERT_FILE, TRUE, TRUE);
 	$applicationrequest_signature->appendSignature($xml->documentElement);
+
+	#file_put_contents("verify.xml", $xml->saveXML());
+	#$xml->Load("verify.xml");
+
+	// Tehdään validaatio Application Requestille
+	libxml_use_internal_errors(true);
+	if (!$xml->schemaValidate("{$pupe_root_polku}/sepa/ApplicationRequest_20080918.xsd")) {
+		echo "Virheellinen Application Request!\n\n";
+		
+		var_dump($xml->saveXML());
+		
+		$all_errors = libxml_get_errors();
+		foreach ($all_errors as $error) {
+			echo "$error->message\n";
+		}
+		#exit;
+	}
 
 	# 6. Koko Application Request base64_encodataan
 	$application_request = base64_encode($xml->saveXML());
@@ -103,6 +122,8 @@
 	$token = $soap_request->addBinaryToken(file_get_contents(CERT_FILE));
 	$soap_request->attachTokentoSig($token);
 
+	#file_put_contents("verify_soap.xml", $soap_request->saveXML());
+	
 	# 10. Lähetetään SOAP request (Nordea)
 	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
 
@@ -111,6 +132,7 @@
 	// var_dump($client->__getTypes());
 
 	$request	= $soap_request->saveXML();
+	#$request	= file_get_contents("verify_soap.xml");
 	$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
 	$action		= "uploadFile";
 	$version	= "1";

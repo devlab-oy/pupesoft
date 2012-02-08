@@ -105,12 +105,30 @@
 
 	$soap_request_xml = $soap_request->saveXML();
 
-	$soap_xml = new DomDocument('1.0');
-	$soap_xml->Load($soap_request_xml);
-
 	# 10. Lähetetään SOAP request (Nordea)
-	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
-	$client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
-	var_dump($client->__getFunctions());
+	$soap_do = curl_init();
+	curl_setopt($soap_do, CURLOPT_URL,				"https://filetransfer.nordea.com/services/CorporateFileService");
+	curl_setopt($soap_do, CURLOPT_CONNECTTIMEOUT,	60);
+	curl_setopt($soap_do, CURLOPT_TIMEOUT,			60);
+	curl_setopt($soap_do, CURLOPT_RETURNTRANSFER,	true );
+	curl_setopt($soap_do, CURLOPT_POST,				true );
+	curl_setopt($soap_do, CURLOPT_POSTFIELDS,		$soap_request_xml);
+	curl_setopt($soap_do, CURLOPT_HTTPHEADER,		array(	"Content-Type: text/xml; charset=utf-8",
+															"Content-Length: ".strlen($soap_request_xml),
+															"Cache-Control: no-cache",
+													        "Pragma: no-cache",
+													        "SOAPAction: \"uploadFile\"",
+														));
+	$soap_result = curl_exec($soap_do);
 
-//	$client->uploadFile($soap_xml->saveXML());
+    if ($soap_result === false) {
+        echo "Error:\n", curl_error($soap_do), "\n";
+    }
+
+	echo "Result:\n", $soap_result, "\n";
+    curl_close($soap_do);
+
+	// Check Available functions:
+	// $client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
+	// $client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
+	// var_dump($client->__getFunctions());

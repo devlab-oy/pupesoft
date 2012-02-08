@@ -103,32 +103,18 @@
 	$token = $soap_request->addBinaryToken(file_get_contents(CERT_FILE));
 	$soap_request->attachTokentoSig($token);
 
-	$soap_request_xml = $soap_request->saveXML();
-
 	# 10. Lähetetään SOAP request (Nordea)
-	$soap_do = curl_init();
-	curl_setopt($soap_do, CURLOPT_URL,				"https://filetransfer.nordea.com/services/CorporateFileService");
-	curl_setopt($soap_do, CURLOPT_CONNECTTIMEOUT,	60);
-	curl_setopt($soap_do, CURLOPT_TIMEOUT,			60);
-	curl_setopt($soap_do, CURLOPT_RETURNTRANSFER,	true );
-	curl_setopt($soap_do, CURLOPT_POST,				true );
-	curl_setopt($soap_do, CURLOPT_POSTFIELDS,		$soap_request_xml);
-	curl_setopt($soap_do, CURLOPT_HTTPHEADER,		array(	"Content-Type: text/xml; charset=utf-8",
-															"Content-Length: ".strlen($soap_request_xml),
-															"Cache-Control: no-cache",
-													        "Pragma: no-cache",
-													        "SOAPAction: \"uploadFile\"",
-														));
-	$soap_result = curl_exec($soap_do);
-
-    if ($soap_result === false) {
-        echo "Error:\n", curl_error($soap_do), "\n";
-    }
-
-	echo "Result:\n", $soap_result, "\n";
-    curl_close($soap_do);
+	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
 
 	// Check Available functions:
-	// $client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
-	// $client->__setLocation = "https://filetransfer.nordea.com/services/CorporateFileService";
 	// var_dump($client->__getFunctions());
+	// var_dump($client->__getTypes());
+
+	$request	= $soap_request->saveXML();
+	$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
+	$action		= "uploadFile";
+	$version	= "1";
+
+	$soap_result = $client->__doRequest($request, $location, $action, $version);
+
+	var_dump($soap_result);

@@ -11,7 +11,6 @@
 	// From: http://www.nordea.fi/sitemod/upload/root/fi_org/liite/WSNDEA1234.p12
 	// Converted: openssl pkcs12 -in WSNDEA1234.p12 -out nordea.pem -nodes
 	// Password: WSNDEA1234
-	define('SERVICE_CERT', 'server.crt');
 	define('PRIVATE_KEY', 'nordea.key');
 	define('CERT_FILE', 'nordea.crt');
 
@@ -51,7 +50,7 @@
 	$applicationrequest->appendChild($xml->createElement("SoftwareId", 	"Pupesoft 1.0"));
 	$applicationrequest->appendChild($xml->createElement("FileType", 	"NDCORPAYS"));
 	$applicationrequest->appendChild($xml->createElement("Content", 	$payload)); // <--- 4. Laitetaan payload content-elementtiin
-		
+	
 	// 5. Signataan Application Request
 	$applicationrequest_signature = new XMLSecurityDSig();
 	$applicationrequest_signature->setCanonicalMethod(XMLSecurityDSig::C14N_COMMENTS);
@@ -69,22 +68,26 @@
 	#file_put_contents("verify.xml", $xml->saveXML());
 	#$xml->Load("verify.xml");
 
+	$axml = new DomDocument('1.0');
+	$axml->encoding = 'UTF-8';
+	$axml->loadXML($xml->saveXML());
+
 	// Tehdään validaatio Application Requestille
 	libxml_use_internal_errors(true);
-	if (!$xml->schemaValidate("{$pupe_root_polku}/sepa/ApplicationRequest_20080918.xsd")) {
+	if (!$axml->schemaValidate("{$pupe_root_polku}/sepa/ApplicationRequest_20080918.xsd")) {
 		echo "Virheellinen Application Request!\n\n";
 		
-		var_dump($xml->saveXML());
+		var_dump($axml->saveXML());
 		
 		$all_errors = libxml_get_errors();
 		foreach ($all_errors as $error) {
 			echo "$error->message\n";
 		}
-		#exit;
+		exit;
 	}
 
 	# 6. Koko Application Request base64_encodataan
-	$application_request = base64_encode($xml->saveXML());
+	$application_request = base64_encode($axml->saveXML());
 
 	# 7. Tehdään SOAP
 	$soap = new DomDocument('1.0');
@@ -101,18 +104,24 @@
 #	$envelope->setAttribute("xmlns:dpstate", "http://danskebank.dk/AGENA/SEPA/dpstate");
 #	$envelope->appendChild($soap->createElement("soapenv:Header"));
 	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
-	$uploadfilein = $body->appendChild($soap->createElement("mod:uploadFilein"));
+	$uploadfilein = $body->appendChild($soap->createElement("cor:uploadFilein"));
 	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
 	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));
 	$requestheader->appendChild($soap->createElement("mod:RequestId",			date("U")));
-	$requestheader->appendChild($soap->createElement("mod:Timestamp",			date("C")));
+	$requestheader->appendChild($soap->createElement("mod:Timestamp",			date("c")));
 	$requestheader->appendChild($soap->createElement("mod:Language",			"FI"));
 	$requestheader->appendChild($soap->createElement("mod:UserAgent",			"Pupesoft 1.0"));
 	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
 	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
 
+	#file_put_contents("verify_soap.xml", $soap->saveXML());
+	
+	$axml = new DomDocument('1.0');
+	$axml->encoding = 'UTF-8';
+	$axml->loadXML($soap->saveXML());
+	
 	# 9. Signataan SOAP
-	$soap_request = new WSSESoap($soap);
+	$soap_request = new WSSESoap($axml);
 	$soap_request->addTimestamp();
 
 	$soap_request_key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
@@ -123,20 +132,23 @@
 	$soap_request->attachTokentoSig($token);
 
 	#file_put_contents("verify_soap.xml", $soap_request->saveXML());
-	
+
 	# 10. Lähetetään SOAP request (Nordea)
-	$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
+	try {
+		$client = new SoapClient ("file://{$pupe_root_polku}/sepa/BankCorporateFileService_20080616.wsdl");
+		// Check Available functions:
+		// var_dump($client->__getFunctions());
+		// var_dump($client->__getTypes());
 
-	// Check Available functions:
-	// var_dump($client->__getFunctions());
-	// var_dump($client->__getTypes());
+		$request	= $soap_request->saveXML();
+		#$request	= file_get_contents("verify_soap.xml");
+		$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
+		$action		= "uploadFile";
+		$version	= "1";
 
-	$request	= $soap_request->saveXML();
-	#$request	= file_get_contents("verify_soap.xml");
-	$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
-	$action		= "uploadFile";
-	$version	= "1";
-
-	$soap_result = $client->__doRequest($request, $location, $action, $version);
-
-	var_dump($soap_result);
+		$soap_result = $client->__doRequest($request, $location, $action, $version);
+		var_dump($soap_result);
+	}
+	catch (SoapFault $ex) {
+		var_dump($ex->faultcode, $ex->faultstring);
+	}

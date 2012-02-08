@@ -1220,8 +1220,8 @@
 
 								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
 									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', '');
-									$netto = '';
-									
+									$netto = $lis_netto;
+
 									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 										if (isset($lis_ale["ale".$alepostfix])) {
 											$alemuuttuja .= "ale$alepostfix = '{$lis_ale["ale".$alepostfix]}',";

@@ -26,6 +26,20 @@
 		8. Insert Signed and Base64-coded Application Request into SOAP message Body part.
 		9. Digitally sign (detached type XML Digital Signature) the whole SOAP message with the Private Key of Sender Certificate and put the signature into SOAP-header This step is usually performed by the SOAP software based on a security configuration.
 		10. Send the SOAP request and wait for a response.
+
+		The hash algorithm used in XML Digital Signatures is SHA1.
+		The cryptographic algorithm used in XML Digital Signatures is RSA.
+
+		Key lengths are determined by the certificates used for signing and are thus bank specific.
+		Nordea key length: 1024
+
+		Canonicalization standard used for Nordea WS is http://www.w3.org/2001/10/xml-exc-c14n#
+		The hash algorithm used in XML Digital Signatures is SHA1 http://www.w3.org/2000/09/xmldsig#sha1
+		The cryptographic algorithm used in XML Digital Signatures is RSA http://www.w3.org/2000/09/xmldsig#rsa-sha1
+
+		Standard used for WS communication at Nordea for SOAP envelope is:
+		SignatureMethod Algorithm = http://www.w3.org/2000/09/xmldsig#rsa-sha1
+		DigestMethod Algorithm = http://www.w3.org/2000/09/xmldsig#sha1
 	*/
 
 	// 1. Tarvitaan maksuaineiston nimi muuttujassa $payload_file
@@ -50,35 +64,63 @@
 	$applicationrequest->appendChild($xml->createElement("SoftwareId", 	"Pupesoft 1.0"));
 	$applicationrequest->appendChild($xml->createElement("FileType", 	"NDCORPAYS"));
 	$applicationrequest->appendChild($xml->createElement("Content", 	$payload)); // <--- 4. Laitetaan payload content-elementtiin
-	
+
 	// 5. Signataan Application Request
-	$applicationrequest_signature = new XMLSecurityDSig();
-	$applicationrequest_signature->setCanonicalMethod(XMLSecurityDSig::C14N_COMMENTS);
-	$applicationrequest_signature->addReference($xml, XMLSecurityDSig::SHA1, array('http://www.w3.org/2000/09/xmldsig#enveloped-signature'));
 
-	// Haetaan private key
-	$applicationrequest_key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
-	$applicationrequest_key->loadKey(PRIVATE_KEY, TRUE);
+	// Canonicalizoidaan xml (exclusive true, comments false)
+	$xml_data = $xml->C14N(TRUE, FALSE);
 
-	// Ja laitetaan signeeraus XML dokumenttiin
-	$applicationrequest_signature->sign($applicationrequest_key);
-	$applicationrequest_signature->add509Cert(CERT_FILE, TRUE, TRUE);
-	$applicationrequest_signature->appendSignature($xml->documentElement);
+	// Haetaan private key ja sertifikaatti
+	$key = openssl_pkey_get_private(file_get_contents(PRIVATE_KEY));
+	$cert = file_get_contents(CERT_FILE);
+	$cert = str_replace(array("-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----", "\n"), "", $cert);
 
-	#file_put_contents("verify.xml", $xml->saveXML());
-	#$xml->Load("verify.xml");
+	// Signataan tiedosto
+	openssl_sign($xml_data, $signature, $key, OPENSSL_ALGO_SHA1);
+	$signature_value = base64_encode($signature);
 
+	// Lasketaan raw hash/digest tiedostosta
+	$digest = base64_encode(sha1($xml_data, TRUE));
+
+	// Lisätään SOAP Signature osio ja laitetaan signature, cert ja digest tiedostoon
+	$simple_xml = simplexml_load_string($xml_data);
+
+	$signature = $simple_xml->addChild("Signature");
+	$signature->addAttribute("xmlns", "http://www.w3.org/2000/09/xmldsig#");
+		$signedinfo = $signature->addChild("SignedInfo");
+		$canonicalizationmethod = $signedinfo->addChild("CanonicalizationMethod");
+		$canonicalizationmethod->addAttribute("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#");
+		$signaturemethod = $signedinfo->addChild("SignatureMethod");
+		$signaturemethod->addAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
+		$reference = $signedinfo->addChild("Reference");
+			$transforms = $reference->addChild("Transforms");
+				$transform = $transforms->addChild("Transform");
+				$transform->addAttribute("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#");
+			$digestmethod = $reference->addChild("DigestMethod");
+			$digestmethod->addAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#sha1");
+			$reference->addChild("DigestValue", $digest);
+		$signature->addChild("SignatureValue", $signature_value);
+		$keyinfo = $signature->addChild("KeyInfo");
+			$x509data = $keyinfo->addChild("X509Data");
+				$x509data->addChild("X509Certificate", $cert);
+
+	#file_put_contents("application_request.xml", $simple_xml->asXML());
+
+	# 6. Koko Application Request base64_encodataan
+	$application_request = base64_encode($simple_xml->asXML());
+
+	// Tehdään validaatio Application Requestille
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
-	$axml->loadXML($xml->saveXML());
+	$axml->loadXML($simple_xml->asXML());
 
 	// Tehdään validaatio Application Requestille
 	libxml_use_internal_errors(true);
 	if (!$axml->schemaValidate("{$pupe_root_polku}/sepa/ApplicationRequest_20080918.xsd")) {
 		echo "Virheellinen Application Request!\n\n";
-		
+
 		var_dump($axml->saveXML());
-		
+
 		$all_errors = libxml_get_errors();
 		foreach ($all_errors as $error) {
 			echo "$error->message\n";
@@ -114,24 +156,24 @@
 	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
 	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
 
-	#file_put_contents("verify_soap.xml", $soap->saveXML());
-	
+	# 9. Signataan SOAP
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
 	$axml->loadXML($soap->saveXML());
-	
-	# 9. Signataan SOAP
+
+	// Tehdään Security header
 	$soap_request = new WSSESoap($axml);
 	$soap_request->addTimestamp();
 
-	$soap_request_key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
+	// Ladataan private key
+	$soap_request_key = new XMLSecurityKey("http://www.w3.org/2000/09/xmldsig#rsa-sha1", array('type' => 'private'));
 	$soap_request_key->loadKey(PRIVATE_KEY, TRUE);
 
 	$soap_request->signSoapDoc($soap_request_key);
 	$token = $soap_request->addBinaryToken(file_get_contents(CERT_FILE));
 	$soap_request->attachTokentoSig($token);
 
-	#file_put_contents("verify_soap.xml", $soap_request->saveXML());
+#	file_put_contents("verify_soap.xml", $soap_request->saveXML());
 
 	# 10. Lähetetään SOAP request (Nordea)
 	try {
@@ -147,8 +189,15 @@
 		$version	= "1";
 
 		$soap_result = $client->__doRequest($request, $location, $action, $version);
-		var_dump($soap_result);
 	}
 	catch (SoapFault $ex) {
 		var_dump($ex->faultcode, $ex->faultstring);
+		exit;
 	}
+
+	$soap_response = new DomDocument('1.0');
+	$soap_response->encoding = 'UTF-8';
+	$soap_response->loadXML($soap_result);
+	$soap_response->preserveWhiteSpace = true;
+	$soap_response->formatOutput = true;
+	echo $soap_response->saveXML();

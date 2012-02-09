@@ -105,7 +105,7 @@
 				$x509data->addChild("X509Certificate", $cert);
 
 	#file_put_contents("application_request.xml", $simple_xml->asXML());
-
+	
 	# 6. Koko Application Request base64_encodataan
 	$application_request = base64_encode($simple_xml->asXML());
 
@@ -146,6 +146,7 @@
 #	$envelope->setAttribute("xmlns:dpstate", "http://danskebank.dk/AGENA/SEPA/dpstate");
 #	$envelope->appendChild($soap->createElement("soapenv:Header"));
 	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
+	$body->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 	$uploadfilein = $body->appendChild($soap->createElement("cor:uploadFilein"));
 	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
 	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));
@@ -156,11 +157,67 @@
 	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
 	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
 
+ 	$axml_xml = $soap->saveXML();
+
 	# 9. Signataan SOAP
+
+	// Canonicalizoidaan xml (exclusive true, comments false)
+	$xml_data = $soap->C14N(TRUE, FALSE);
+
+	// Signataan tiedosto
+	openssl_sign($xml_data, $signature, $key, OPENSSL_ALGO_SHA1);
+	$signature_value = base64_encode($signature);
+
+	// Lasketaan raw hash/digest tiedostosta
+	$digest = base64_encode(sha1($xml_data, TRUE));
+
+	// Tehdään GUID ja lisätään se body elementtiin sekä headerin reference uriin
+	$guid = md5(uniqid(rand(), true));
+	$body->setAttribute("wsu:Id", $guid);
+	
+	// Tehdään SOAP Header elementti
+	$header = $envelope->appendChild($soap->createElement("soapenv:Header"));
+		$security = $header->appendChild($soap->createElement("wsse:Security"));
+		$security->setAttribute("xmlns:wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+		$security->setAttribute("soapenv:mustUnderstand", "1");
+		$token = $security->appendChild($soap->createElement("wsse:BinarySecurityToken", $cert));
+		$token->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+		$token->setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
+#		$token->setAttribute("wsu:Id");
+		$token->setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
+		$signature = $security->appendChild($soap->createElement("ds:Signature"));
+		$signature->setAttribute("xmlns:ds", "http://www.w3.org/2000/09/xmldsig#");
+			$signedinfo = $signature->appendChild($soap->createElement("ds:SignedInfo"));
+				$canonicalizationmethod = $signedinfo->appendChild($soap->createElement("ds:CanonicalizationMethod"));
+				$canonicalizationmethod->setAttribute("Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
+				$signaturemethod = $signedinfo->appendChild($soap->createElement("ds:SignatureMethod"));
+				$signaturemethod->setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
+				$reference = $signedinfo->appendChild($soap->createElement("ds:Reference"));
+				$reference->setAttribute("URI", "#".$guid);
+					$transforms = $reference->appendChild($soap->createElement("ds:Transforms"));
+						$transform = $transforms->appendChild($soap->createElement("ds:Transform"));
+						$transform->setAttribute("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#");
+					$digestmethod = $reference->appendChild($soap->createElement("ds:DigestMethod"));
+					$digestmethod->setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#sha1");
+					$reference->appendChild($soap->createElement("ds:DigestValue", $digest));
+			$signature->appendChild($soap->createElement("ds:SignatureValue", $signature_value));
+			$keyinfo = $signature->appendChild($soap->createElement("ds:KeyInfo"));
+				$sectoken = $keyinfo->appendChild($soap->createElement("wsse:SecurityTokenReference"));
+					$reference = $sectoken->appendChild($soap->createElement("wsse:Reference"));
+#					$reference->setAttribute("URI");
+		$timestamp = $security->appendChild($soap->createElement("wsu:Timestamp"));
+			$timestamp->appendChild($soap->createElement("wsu:Created", gmdate("Y-m-d\TH:i:s", time()).'Z'));
+			$timestamp->appendChild($soap->createElement("wsu:Expires", gmdate("Y-m-d\TH:i:s", time() + 3600).'Z'));
+			$timestamp->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+#			$timestamp->setAttribute("wsu:Id", $guid);
+
+	file_put_contents("verify_soap1.xml", $soap->saveXML());
+	$soap_xml = $soap->saveXML();
+
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
-	$axml->loadXML($soap->saveXML());
-
+	$axml->loadXML($axml_xml);
+	
 	// Tehdään Security header
 	$soap_request = new WSSESoap($axml);
 	$soap_request->addTimestamp();
@@ -173,7 +230,7 @@
 	$token = $soap_request->addBinaryToken(file_get_contents(CERT_FILE));
 	$soap_request->attachTokentoSig($token);
 
-#	file_put_contents("verify_soap.xml", $soap_request->saveXML());
+	file_put_contents("verify_soap2.xml", $soap_request->saveXML());
 
 	# 10. Lähetetään SOAP request (Nordea)
 	try {
@@ -183,7 +240,8 @@
 		// var_dump($client->__getTypes());
 
 		$request	= $soap_request->saveXML();
-		#$request	= file_get_contents("verify_soap.xml");
+#		$request	= $soap_xml;
+		$request	= file_get_contents("verify_soap.xml");
 		$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
 		$action		= "uploadFile";
 		$version	= "1";

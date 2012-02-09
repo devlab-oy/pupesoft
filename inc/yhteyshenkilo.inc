@@ -14,5 +14,12 @@
 		$hakukentat = "tunnus, nimi, titteli, puh/gsm/fax, email, www, liitostunnus";
 	}
 
+	if ($laji == "T") {
+		$rajauslisa = " and yhteyshenkilo.tyyppi='T' ";
+	}
+	else {
+		$rajauslisa = " and yhteyshenkilo.tyyppi='A' ";
+	}
+
 	$jarjestys = 'nimi';
 ?>

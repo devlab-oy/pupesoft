@@ -2643,8 +2643,27 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ' ' $sela>".t("Myyntiriveillä ei käytetä pyöristystä seuraavaan täyteen myyntierään")."</option>
-					<option value = 'K' $selb>".t("Myyntiriveillä käytetään pyöristystä seuraavaan täyteen myyntierään")."</option>
+					<option value = ' ' $sela>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
+					<option value = 'K' $selb>".t("Myyntirivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "ostoera_pyoristys" ) {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ' ' $sela>".t("Ostorivin määrää ei pyöristetä seuraavaan täyteen ostoerään")."</option>
+					<option value = 'K' $selb>".t("Ostorivin määrä pyöristetään seuraavaan täyteen ostoerään")."</option>
 				</select></td>";
 
 		$jatko = 0;
@@ -2752,6 +2771,22 @@
 		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='3'{$sel[3]}>".t("Ale3 muokkaus")."<br />";
 
 		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "oston_alekentat") {
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		// Jos lisäät uuden alennuskentän, lisää se myös myynnin_alekentat_muokkaus parametriin
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value = '1'{$sel[1]}>".t("Ostossa käytetään yhtä alennuskenttää")."</option>";
+		$ulos .= "<option value = '2'{$sel[2]}>".t("Ostossa käytetään kahta alennuskenttää")."</option>";
+		$ulos .= "<option value = '3'{$sel[3]}>".t("Ostossa käytetään kolmea alennuskenttää")."</option>";
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 

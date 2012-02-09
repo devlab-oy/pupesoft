@@ -13800,6 +13800,8 @@ if (!function_exists("splittaa_tilaus")) {
 			echo "<pre>",var_dump($uudelle_tilaukselle),"</pre>";
 		}
 
+		$uudet_tunnukset_return = array();
+
 		foreach ($uudelle_tilaukselle as $otunn => $rivit) {
 
 			// Haetaan splitattava tilaus
@@ -13831,6 +13833,8 @@ if (!function_exists("splittaa_tilaus")) {
 			$uusitunnus = mysql_insert_id();
 
 			if ($debug) echo "UUSI TILAUKSEN TUNNUS ON $uusitunnus<br><br>";
+
+			array_push($uudet_tunnukset_return, $uusitunnus);
 
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
@@ -14052,6 +14056,8 @@ if (!function_exists("splittaa_tilaus")) {
 				}
 			}							
 		}
+
+		return $uudet_tunnukset_return;
 	}
 }
 
@@ -15614,7 +15620,25 @@ if (!function_exists("tee_keraysera2")) {
 
 								$i--;
 
-								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+								// katsotaan onko tämä tilausrivi tilauksen ensimmäinen rivi, jos ei ole niin splitataan
+								$chk_arr = $lisatyt_tilausrivit;
+								unset($chk_arr[$tuoterow['otunnus']][$tuoterow['tunnus']]);
+
+								if (count($chk_arr[$tuoterow['otunnus']]) > 0) {
+									if ($i == 0) {
+										$uudet_tunnukset_array = splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
+									}
+									else {
+										$uudet_tunnukset_array = splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+									}
+								}
+								else {
+									$uudet_tunnukset_array = array($tuoterow['otunnus']);
+								}
+
+								foreach($uudet_tunnukset_array as $loop_tun) {
+									$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$loop_tun}" : "{$tuoterow['tuoteno']}###{$loop_tun}";
+								}
 
 								$era_valmis = true;
 								break 3;								
@@ -15755,11 +15779,11 @@ if (!function_exists("tee_keraysera2")) {
 			// $boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Keräyserässä virhe")." - {$yhtiorow['nimi']}", "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow['postittaja_email']}");
 
 			if ($debug) {
-				echo "Virhe keräyserää tehdessä. Tarkista tuotteen mitat!<br>";
+				echo "Virhe keräyserää tehdessä. Tarkista tuotteen mitat, paino, yksin keräilyalustalle ehto ja laita tilaukselle lähtö!<br>";
 			}
 
 			$message = t("Virhe keräyserää tehdessä").". ";
-			$message .= t("Tarkista tuotteen mitat")."! ";
+			$message .= t("Tarkista tuotteen mitat, paino, yksin keräilyalustalle ehto ja laita tilaukselle lähtö")."! ";
 
 			foreach(explode("|||", $fail) as $failures) {
 				list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);

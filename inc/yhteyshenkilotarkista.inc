@@ -11,7 +11,7 @@ if(!function_exists("yhteyshenkilotarkista")) {
 			$errori = 1;
 		}
 
-		if (mysql_field_name($result, $i) == "tyyppi" and $t[$i] != "A" and $t[$i] != "T") {
+		if (mysql_field_name($result, $i) == "tyyppi") {
 			$tyyppi_tarkista = $t[$i];
 
 			if ($t[$i] != "A" and $t[$i] != "T") {

@@ -15772,14 +15772,16 @@ if (!function_exists("tee_keraysera2")) {
 				$upd_res = pupe_query($query);
 			}
 
-			$query = "	INSERT INTO messenger SET 
-						yhtio = '{$kukarow['yhtio']}', 
-						kuka = '{$kukarow['kuka']}', 
-						vastaanottaja = '{$yhtiorow['alert_varasto_kayttajat']}', 
-						viesti = '{$message}', 
-						status = 'X', 
-						luontiaika = now()";
-			$messenger_result = pupe_query($query);
+			foreach(explode(",", $yhtiorow['alert_varasto_kayttajat']) as $admini) {
+				$query = "	INSERT INTO messenger SET 
+							yhtio = '{$kukarow['yhtio']}', 
+							kuka = '{$kukarow['kuka']}', 
+							vastaanottaja = '{$admini}', 
+							viesti = '{$message}', 
+							status = 'X', 
+							luontiaika = now()";
+				$messenger_result = pupe_query($query);
+			}
 		}
 
 		if (!$era_valmis and $eran_koko > 0) $era_valmis = true;

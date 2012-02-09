@@ -2989,7 +2989,7 @@ if ($tee == '') {
 			if ($toim == 'TARJOUS') {
 				$kalequery = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2, kalenteri.*
 								FROM kalenteri
-								LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+								LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
 								LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=kalenteri.yhtio and kuka1.kuka=kalenteri.kuka)
 								LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=kalenteri.yhtio and kuka2.kuka=kalenteri.myyntipaallikko)
 								where kalenteri.liitostunnus = '$laskurow[liitostunnus]'
@@ -3589,7 +3589,7 @@ if ($tee == '') {
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$perheid = $tilausrivi["perheid"];
 				}
-				
+
 				if ($tilausrivi["tunnus"] == $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$paikka = "";
 				}

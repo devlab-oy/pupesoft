@@ -1,23 +1,23 @@
 <?php
-	
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
 	}
-	
+
 	echo "<font class='head'>".t("Muistutukset")."</font><hr>";
 
 	if($tee == 'B') {
 		if ($muuta != "") {
 			$query = "	SELECT yhteyshenkilo.tunnus yhenkilo, kalenteri.*
 						FROM kalenteri
-						LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus
-						WHERE kalenteri.tunnus	= '$kaletunnus' 
+						LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
+						WHERE kalenteri.tunnus	= '$kaletunnus'
 						and kalenteri.yhtio		= '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$prow = mysql_fetch_array ($result);
 
 			$viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
-		        
+
 			$kysely = "	INSERT INTO kalenteri
 						SET asiakas  	= '$prow[asiakas]',
 						liitostunnus 	= '$prow[liitostunnus]',
@@ -31,40 +31,40 @@
 						pvmalku  		= now(),
 						perheid 		= '$kaletunnus'";
 			$result = mysql_query($kysely) or pupe_error($kysely);
-			
+
 			$query = "	UPDATE kalenteri
 						SET kuittaus 	= ''
-						WHERE tunnus	= '$kaletunnus' 
+						WHERE tunnus	= '$kaletunnus'
 						and yhtio		= '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-	
+
 			$tee = "";
 		}
 		else {
-			$tee = "A";	
+			$tee = "A";
 		}
 	}
-	
-	if($tee == 'A') {		
-		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*		
-					FROM kalenteri					
-					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio					
+
+	if($tee == 'A') {
+		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*
+					FROM kalenteri
+					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
 					WHERE kalenteri.tunnus	= '$kaletunnus'
 					and kalenteri.yhtio		= '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<table>";		
-		
-		echo "<tr>";		
+		echo "<table>";
+
+		echo "<tr>";
 		echo "<th>".t("P‰iv‰m‰‰r‰")."</th>";
 		echo "<th>".t("Viesti")."</th>";
-		echo "<th>".t("Tapa")."</th>";		
+		echo "<th>".t("Tapa")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
 		echo "<th>".t("Yhteyshenkilˆ")."</th>";
-		echo "</tr>";		
-		
-		$prow = mysql_fetch_array ($result);		
-				
+		echo "</tr>";
+
+		$prow = mysql_fetch_array ($result);
+
 		if ($prow["liitostunnus"] > 0) {
 			$query = "	SELECT nimi
 						FROM asiakas
@@ -72,21 +72,21 @@
 						and tunnus	= '$prow[liitostunnus]'";
 			$asresult = mysql_query($query) or pupe_error($query);
 			$asrow = mysql_fetch_array($asresult);
-			
-			$aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";					
+
+			$aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";
 		}
 		else {
 			$aslisa = "";
 		}
-		
-		echo "<tr>";	
+
+		echo "<tr>";
 		echo "<td>".tv1dateconv($prow["pvmalku"])."</td>";
 		echo "<td>$prow[kentta01]</td>";
 		echo "<td>$prow[tapa]</td>";
 		echo "<td>$prow[asiakas] $aslisa</td>";
-		echo "<td>$prow[yhteyshenkilo]</td>";				
-		echo "</tr>";	
-		
+		echo "<td>$prow[yhteyshenkilo]</td>";
+		echo "</tr>";
+
 		echo "</table><br><br>";
 		echo "<table>
 				<form action='".$palvelin2."crm/kuittaamattomat.php?tee=B&kuka=$kuka&kaletunnus=$kaletunnus' method='POST'>
@@ -97,14 +97,14 @@
 				<tr><td class='back'><input type='submit' value='".t("Kuittaa")."'></td></tr>
 				</table></form>";
 	}
-	
+
 	if($tee == "LISAAMUISTUTUS") {
 		if ($viesti != "") {
-			
+
 			if ($kuittaus == '') {
 				$kuittaus = 'K';
 			}
-			
+
 			if (checkdate($mkka, $mppa, $mvva)) {
 				$pvmalku  = "'$mvva-$mkka-$mppa $mhh:$mmm:00'";
 			}
@@ -122,9 +122,9 @@
 						pvmalku  = $pvmalku";
 			$result = mysql_query($kysely) or pupe_error($kysely);
 			$muist = mysql_insert_id();
-		
+
 			echo t("Lis‰tty muistutus p‰iv‰lle:")."  <b>$pvmalku</b><br><br>";
-			
+
 			$query = "	SELECT *
 						FROM kuka
 						WHERE yhtio	= '$kukarow[yhtio]'
@@ -135,14 +135,14 @@
 			// K‰yt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
 			if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
 				$ok = 1;
-				
+
 				$teksti = substr("Muistutus $yhtiorow[nimi]. $tapa. ".$viesti, 0, 160);
 				$teksti = urlencode($teksti);
 
 				$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$row[puhno]&viesti=$teksti&not_before_date=$mvva-$mkka-$mppa&not_before=$mhh:$mmm:00&yhtio=$kukarow[yhtio]&kalenteritunnus=$muist");
 
 				if (trim($retval) == "0") $ok = 0;
-				
+
 				if ($ok == 1) {
 					echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
 				}
@@ -151,18 +151,18 @@
 					echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
 				}
 			}
-			
+
 			$kuka		= '';
 			$tapa		= '';
 			$viesti		= '';
 			$kuittaus	= '';
-			$tee 		= '';	
+			$tee 		= '';
 		}
 		else {
-			$tee 		= 'MUISTUTUS';	
-		}	
+			$tee 		= 'MUISTUTUS';
+		}
 	}
-		
+
 	if($tee == "MUISTUTUS") {
 		echo "<table>";
 		echo "	<form action='".$palvelin2."crm/kuittaamattomat.php' method='POST'>
@@ -170,10 +170,10 @@
 				<input type='hidden' name='from' value='$from'>";
 
 		echo "<table width='620'>";
-		
+
 		echo "<tr><th colspan='3'>".t("Lis‰‰ muistutus")."</th>";
 		echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
-		
+
 		echo "	<tr>
 			<th>".t("Yhteydenottaja: ")."</th>
 			<td colspan='2'><select name='kuka'>
@@ -184,7 +184,7 @@
 					WHERE kuka.yhtio	= '$kukarow[yhtio]'
 					and oikeu.yhtio		= kuka.yhtio
 					and oikeu.kuka		= kuka.kuka
-					and oikeu.nimi		= 'crm/kalenteri.php' 
+					and oikeu.nimi		= 'crm/kalenteri.php'
 					and kuka.kuka 		<> '$kukarow[kuka]'
 					ORDER BY kuka.nimi";
 		$result = mysql_query($query) or pupe_error($query);
@@ -200,18 +200,18 @@
 			echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 		}
 		echo "</select></td></tr>";
-	
+
 		if (!isset($mkka))
 			$mkka = date("m");
 		if (!isset($mvva))
 			$mvva = date("Y");
 		if (!isset($mppa))
-			$mppa = date("d");	
+			$mppa = date("d");
 		if (!isset($mhh))
 			$mhh = "08";
 		if (!isset($mmm))
 			$mmm = "00";
-			
+
 		echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
 				<td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
 				<input type='text' name='mkka' value='$mkka' size='3'>-
@@ -219,19 +219,19 @@
 				&nbsp;&nbsp;
 				<input type='text' name='mhh' value='$mhh' size='3'>:
 				<input type='text' name='mmm' value='$mmm' size='3'></td></tr>";
-	
+
 		if ($kuittaus == "E") {
 			$sel = "CHECKED";
 		}
 		else {
 			$sel = "";
 		}
-	
+
 		echo"	<tr>
 				<th>".t("Ei kuittausta:")." </th><td colspan='2'><input type='checkbox' name='kuittaus' value='E' $sel>
 				</td>
 				</tr>";
-				
+
 		echo "<tr><th>".t("Tapa:")."</th>";
 
 		$vresult = t_avainsana("KALETAPA");
@@ -256,88 +256,88 @@
 				</td></tr>";
 		echo "</table>";
 	}
-		
+
 	if ($tee == "") {
-		
+
 		if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
 			echo "<a href='".$palvelin2."crm/kuittaamattomat.php?tee=MUISTUTUS&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>".t("Lis‰‰ muistutus")."</a><br><br>";
 		}
-	
+
 		echo "<table>";
-		
+
 		if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
 			echo "<tr>";
 			echo "<td>N‰yt‰ henkilˆn </td>";
-		
+
 			echo "	<form action='".$palvelin2."crm/kuittaamattomat.php' method='POST'>
-				
+
 					<td><select name='kuka' onchange='submit()'>
 					<option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
-		
+
 			$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
 						FROM kuka, oikeu
 						WHERE kuka.yhtio	= '$kukarow[yhtio]'
 						and oikeu.yhtio		= kuka.yhtio
 						and oikeu.kuka		= kuka.kuka
-						and oikeu.nimi		= 'crm/kalenteri.php' 
+						and oikeu.nimi		= 'crm/kalenteri.php'
 						and kuka.tunnus <> '$kukarow[tunnus]'
-						ORDER BY kuka.nimi";	
+						ORDER BY kuka.nimi";
 			$result = mysql_query($query) or pupe_error($query);
-		
-			while ($row = mysql_fetch_array($result)) {		
-				$sel = '';		
-			
-				if($row["kuka"] == $kuka) {			
+
+			while ($row = mysql_fetch_array($result)) {
+				$sel = '';
+
+				if($row["kuka"] == $kuka) {
 					$sel = 'SELECTED';
-				}		
-			
+				}
+
 				echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 			}
-		
+
 			echo "</select></td><td> ".t("kuitattavat muistutukset").".</td></form>";
-		
-			echo "</tr></table><br>"; 
+
+			echo "</tr></table><br>";
 		}
-	
+
 		if ($kuka == '') {
 			$kuka = $kukarow["kuka"];
 		}
-	
+
 		//* listataan muistutukset *///
-		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2, 
+		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2,
 					lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.muutospvm laskumpvm,
-					kalenteri.*,					
+					kalenteri.*,
 					date_format(pvmalku, '%Y%m%d%H%i%s') voimassa
 					FROM kalenteri
-					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
 					LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=kalenteri.yhtio and kuka1.kuka=kalenteri.kuka)
 					LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=kalenteri.yhtio and kuka2.kuka=kalenteri.myyntipaallikko)
 					LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
 					LEFT JOIN kuka as kuka3 ON (kuka3.yhtio = lasku.yhtio and kuka3.tunnus = lasku.myyja)
 					where (kalenteri.kuka = '$kuka' or kalenteri.myyntipaallikko = '$kuka')
 					and kalenteri.tyyppi in ('Muistutus','Lead')
-					and kuittaus		 = 'K' 
-					and kalenteri.yhtio  = '$kukarow[yhtio]' 
+					and kuittaus		 = 'K'
+					and kalenteri.yhtio  = '$kukarow[yhtio]'
 					and left(kalenteri.tyyppi,7) != 'DELETED'
 					ORDER BY kalenteri.pvmalku desc";
 		$result = mysql_query($query) or pupe_error($query);
-	
+
 		if (mysql_num_rows($result) > 0) {
-			echo "<table>";		
-			
+			echo "<table>";
+
 			echo "<tr>";
 			echo "<th valign='top'>".t("Asiaa hoitaa")."</th>";
 			echo "<th valign='top'>".t("P‰iv‰m‰‰r‰")."<br>".t("Muistutus")."</th>";
 			echo "<th valign='top'>".t("Viesti")."</th>";
-			echo "<th valign='top'>".t("Tyyppi")."<br>".t("Tapa")."</th>";		
+			echo "<th valign='top'>".t("Tyyppi")."<br>".t("Tapa")."</th>";
 			echo "<th valign='top'>".t("Asiakas")."</th>";
 			echo "<th valign='top'>".t("Yhteyshenkilˆ")."</th>";
-			echo "</tr>";		
-			
-			while ($prow = mysql_fetch_array ($result)) {			
-				
+			echo "</tr>";
+
+			while ($prow = mysql_fetch_array ($result)) {
+
 				unset($asrow);
-				
+
 				if ($prow["liitostunnus"] > 0) {
 					$query = "	SELECT nimi
 								FROM asiakas
@@ -345,56 +345,56 @@
 								and tunnus	= '$prow[liitostunnus]'";
 					$asresult = mysql_query($query) or pupe_error($query);
 					$asrow = mysql_fetch_array($asresult);
-					
-					$aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";				
+
+					$aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";
 				}
 				else {
 					$aslisa = "";
 				}
-				
-				echo "<tr>";	
+
+				echo "<tr>";
 				echo "<td valign='top'>$prow[nimi1]</td>";
 				echo "<td valign='top'>".tv1dateconv($prow["luontiaika"], "P")."<br>";
-				
-				
+
+
 				if (date("YmdHis") > $prow["voimassa"]) {
 					echo "<font style='color:#FF0000;'>".tv1dateconv($prow["pvmalku"], "P")."</font>";
 				}
 				else {
-					echo "<font style='color:#00FF00;'>".tv1dateconv($prow["pvmalku"], "P")."</font>";	
+					echo "<font style='color:#00FF00;'>".tv1dateconv($prow["pvmalku"], "P")."</font>";
 				}
 				echo "</td>";
-				
+
 				echo "<td valign='top'>$prow[kentta01]";
-				
+
 				if ($prow["laskutunnus"] > 0) {
 					$laskutyyppi = $prow["laskutila"];
 					$alatila	 = $prow["laskualatila"];
 
 					//tehd‰‰n selv‰kielinen tila/alatila
 					require "inc/laskutyyppi.inc";
-										
+
 					echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>$prow[laskutunnus]</a> / ".tv1dateconv($prow["laskumpvm"])." ($prow[laskumyyja])";
 				}
-				
+
 				if ($prow["laskutunnus"] == 0 and $prow["tyyppi"] == "Lead") {
 					echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&asiakasid=$prow[liitostunnus]'>".t("Tee tarjous")."</a>";
 				}
-				
-				
+
+
 				echo "</td>";
 				echo "<td valign='top'>$prow[tyyppi]<br>$prow[tapa]</td>";
 				echo "<td valign='top'>$prow[asiakas] $aslisa</td>";
-				echo "<td valign='top'>$prow[yhteyshenkilo]</td>";								
-				
+				echo "<td valign='top'>$prow[yhteyshenkilo]</td>";
+
 				if ($prow["kuka"] == $kukarow["kuka"]) {
 					echo "<td class='back' valign='top'><form action='".$palvelin2."crm/kuittaamattomat.php?&tee=A&kaletunnus=$prow[tunnus]' method='post'>
-							<input type='submit' value='".t("Kuittaa")."'></form></td>";			
+							<input type='submit' value='".t("Kuittaa")."'></form></td>";
 				}
-				
-				echo "</tr>";		
-			}		
-			
+
+				echo "</tr>";
+			}
+
 			echo "</table>";
 		}
 		else {

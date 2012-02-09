@@ -1441,7 +1441,9 @@
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
-							WHERE liitostunnus = '$srow[liitostunnus]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
 							ORDER BY nimi";
 				$yhresult = pupe_query($query);
 
@@ -2418,7 +2420,8 @@
 							where yhtio = '$kukarow[yhtio]'
 							and liitostunnus = '$srow[liitostunnus]'
 							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''";
+							and tilausyhteyshenkilo != ''
+							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
 			echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";

@@ -20,9 +20,10 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
 	$query = "	SELECT *
 				FROM yhteyshenkilo
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE yhtio 	 = '$kukarow[yhtio]'
 				AND liitostunnus = '$laskurow[liitostunnus]'
-				AND nimi = '$laskurow[tilausyhteyshenkilo]'";
+				AND nimi 		 = '$laskurow[tilausyhteyshenkilo]'
+				and tyyppi		 = 'A'";
 	$yhteyshenkiloresult = pupe_query($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 

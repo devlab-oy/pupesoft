@@ -15604,6 +15604,11 @@ if (!function_exists("tee_keraysera2")) {
 									echo "Nyt sisäinen looppi on $xxx > ($tuoterow[y_maara] * 2)<br>";
 									echo "POIS TÄÄLTÄ! KERÄYSERÄ VALMIS!<br>";
 								}
+
+								$i--;
+
+								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+
 								$era_valmis = true;
 								break 3;								
 							}

@@ -19,7 +19,7 @@ if ($kollityht > 0) {
 	$ups_path_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_path[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_path['oletus'] : $ups_path[strtolower($tulostusalue_check_row['pakkaamo'])];
 
 	if ($ups_host_x != "" and $ups_user_x != "" and $ups_pass_x != "" and $ups_path_x != "") {
-		
+
 		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
 			$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
@@ -30,7 +30,7 @@ if ($kollityht > 0) {
 			$logyrow = mysql_fetch_assoc($logyres);
 
 			$rahtikirjanro = $logyrow["rahtikirjanro"];
-			
+
 			$logyq = "	UPDATE rahtikirjanumero
 						SET kayttaja = '$kukarow[kuka]',
 						kaytettyaika = now()
@@ -121,9 +121,10 @@ if ($kollityht > 0) {
 
 		$query = "	SELECT *
 					FROM yhteyshenkilo
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio 	 = '$kukarow[yhtio]'
 					AND liitostunnus = '$laskurow[liitostunnus]'
-					AND nimi = '$laskurow[tilausyhteyshenkilo]'";
+					AND nimi 		 = '$laskurow[tilausyhteyshenkilo]'
+					and tyyppi		 = 'A'";
 		$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
 		$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
@@ -141,8 +142,9 @@ if ($kollityht > 0) {
 		elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'
+						and tyyppi	= 'A'";
 			$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
 			$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 			if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
@@ -153,8 +155,9 @@ if ($kollityht > 0) {
 		elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ups_laskurow['yhteyshenkilo_tekninen']}'";
+						WHERE yhtio	= '{$kukarow['yhtio']}'
+						AND tunnus	= '{$ups_laskurow['yhteyshenkilo_tekninen']}'
+						and tyyppi	= 'A'";
 			$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
 			$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 			if ($yhteyshenkilo_tekninen_row['nimi'] == '') {

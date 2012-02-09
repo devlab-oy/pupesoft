@@ -135,7 +135,7 @@
 								tilkpl			= '$kappaleerotus',
 								varattu			= '$kappaleerotus',
 								hinta			= '$tilausrivirow[hinta]',
-								laatija			= '$tilausrivirow[laatija]',
+								laatija			= 'split',
 								laadittu		= '$tilausrivirow[laadittu]',
 								hyllyalue		= '$tilausrivirow[hyllyalue]',
 								hyllynro		= '$tilausrivirow[hyllynro]',
@@ -147,7 +147,8 @@
 				else {
 					// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 					$query = "	UPDATE asn_sanomat SET
-								tilausrivi = '{$tilausrivirow['tunnus']}'
+								tilausrivi = '{$tilausrivirow['tunnus']}', 
+								tuoteno = '{$tilausrivirow['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);

@@ -716,7 +716,7 @@
 					pupe_query($updatequery2);
 				}
 				
-				$query = "SELECT paketintunniste FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+				$query = "SELECT paketintunniste, asn_numero FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$res = pupe_query($query);
 				$row = mysql_fetch_assoc($res);
 
@@ -743,9 +743,27 @@
 				$result = pupe_query($query);
 				$asn_row = mysql_fetch_assoc($result);
 
-				$query = "	SELECT tt.tuoteno, tt.toim_tuoteno 
+				if ($asn_row["toimittajanumero"] == "123067") {
+					$orgtuote = $asn_row["toim_tuoteno"];
+					$lyhennetty_tuoteno = substr($asn_row["toim_tuoteno"], 0, -3);
+					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+					
+					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
+									}
+				elseif ($asn_row["toimittajanumero"] == "123067") {
+					$suba = substr($asn_row["toim_tuoteno"],0,3);
+					$subb = substr($asn_row["toim_tuoteno"],4);
+					$tuote = $suba."-".$subb;
+					$poikkeus_tuoteno = " = '$tuote' ";
+				}
+				else {
+					$poikkeus_tuoteno = " = '$asn_row[toim_tuoteno]' ";
+				}
+
+
+				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno 
 							FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}' and toimi.tyyppi !='P')
+							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno {$poikkeus_tuoteno} and toimi.tyyppi !='P')
 							JOIN tuote on (tuote.yhtio = toimi.yhtio and tuote.tuoteno = tt.tuoteno and tuote.status !='P')
 							WHERE tt.yhtio='{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
@@ -911,7 +929,7 @@
 						if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
 						FROM asn_sanomat
 						JOIN tilausrivi ON (tilausrivi.yhtio = asn_sanomat.yhtio AND tilausrivi.tunnus IN (asn_sanomat.tilausrivi))
-						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
+						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi!='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
 						AND asn_sanomat.tilausrivi != ''
@@ -976,7 +994,7 @@
 						asn_sanomat.tilausnumero,
 						toimi.tunnus AS toimi_tunnus, asn_sanomat.tunnus AS asn_tunnus
 						FROM asn_sanomat
-						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
+						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
 						AND asn_sanomat.tilausrivi = ''
@@ -1246,7 +1264,7 @@
 									count(asn_sanomat.tunnus) AS rivit,
 									sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat
-							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
+							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 							AND asn_sanomat.laji = 'asn'
 							GROUP BY asn_sanomat.paketinnumero, asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift

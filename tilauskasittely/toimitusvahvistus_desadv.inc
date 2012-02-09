@@ -160,9 +160,10 @@
 			// CTA - contact information
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio 	 = '$kukarow[yhtio]'
 						AND liitostunnus = '$desadv_laskurow[liitostunnus]'
-						AND nimi = '$desadv_laskurow[tilausyhteyshenkilo]'";
+						AND nimi 		 = '$desadv_laskurow[tilausyhteyshenkilo]'
+						and tyyppi	 	 = 'A'";
 			$yhteyshenkiloresult = pupe_query($query);
 			$yhteyshenkiloasiakas = mysql_fetch_assoc($yhteyshenkiloresult);
 
@@ -177,7 +178,8 @@
 				$query = "	SELECT *
 							FROM yhteyshenkilo
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'";
+							AND tunnus 	= '$desadv_laskurow[yhteyshenkilo_kaupallinen]'
+							and tyyppi	= 'A'";
 				$yhteyshenkilo_kaupallinen_res = pupe_query($query);
 				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 
@@ -187,8 +189,9 @@
 			elseif ($desadv_laskurow['yhteyshenkilo_tekninen'] != '') {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$desadv_laskurow[yhteyshenkilo_tekninen]'";
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tunnus	= '$desadv_laskurow[yhteyshenkilo_tekninen]'
+							and tyyppi	= 'A'";
 				$yhteyshenkilo_tekninen_res = pupe_query($query);
 				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 

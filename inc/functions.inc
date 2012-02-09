@@ -15453,7 +15453,7 @@ if (!function_exists("tee_keraysera2")) {
 							}
 
 							// tiedetään että ollaan pakkauksen sisällä ja tuote menee yksin keräysalustalle. uusi pakettinro.
-							if ($kaytettava_pakkaus != "") {
+							if ($kaytettava_pakkaus != "" and $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] > 0) {
 								$juokseva_nro++;
 								$kaytettava_pakkaus = "";
 							}

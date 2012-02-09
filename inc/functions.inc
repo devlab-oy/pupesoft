@@ -15728,30 +15728,48 @@ if (!function_exists("tee_keraysera2")) {
 
 		// nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.
 		// lähetetään tästä infomaili
-		if (count($fixed_main_array) > 0 and !$era_valmis and $eran_koko == 0 and $fail != "") {
-			$bound   = uniqid(time()."_");
+		if (count($fixed_main_array) > 0 and !$era_valmis and $eran_koko == 0 and $fail != "" and $yhtiorow['alert_varasto_kayttajat'] != '') {
+			// $bound   = uniqid(time()."_");
 
-			$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow['postittaja_email']}>\n";
-			$header .= "MIME-Version: 1.0\n";
-			$header .= "Content-Type: multipart/mixed; boundary=\"{$bound}\"\n";
+			// $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow['postittaja_email']}>\n";
+			// $header .= "MIME-Version: 1.0\n";
+			// $header .= "Content-Type: multipart/mixed; boundary=\"{$bound}\"\n";
 
-			$content  = "--{$bound}\n";
-			$content .= "Content-Type: text/plain;charset=iso-8859-1\n";
-			$content .= "Content-Transfer-Encoding: quoted-printable\n";
+			// $content  = "--{$bound}\n";
+			// $content .= "Content-Type: text/plain;charset=iso-8859-1\n";
+			// $content .= "Content-Transfer-Encoding: quoted-printable\n";
 
-			$content .= t("Virhe keräyserää tehdessä").".\n";
-			$content .= t("Tarkista tuotteen mitat")."!\n\n";
+			// $content .= t("Virhe keräyserää tehdessä").".\n";
+			// $content .= t("Tarkista tuotteen mitat")."!\n\n";
+
+			// foreach(explode("|||", $fail) as $failures) {
+			// 	list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);
+
+			// 	$content .= t("Tuoteno")." {$fail_tuoteno}\n";
+			// 	$content .= t("Tilaus")." {$fail_otunnus}\n\n";
+			// }
+
+			// $content .= "--{$bound}--\n";
+
+			// $boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Keräyserässä virhe")." - {$yhtiorow['nimi']}", "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow['postittaja_email']}");
+
+			$message = t("Virhe keräyserää tehdessä").". ";
+			$message .= t("Tarkista tuotteen mitat")."! ";
 
 			foreach(explode("|||", $fail) as $failures) {
 				list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);
 
-				$content .= t("Tuoteno")." {$fail_tuoteno}\n";
-				$content .= t("Tilaus")." {$fail_otunnus}\n\n";
+				$message .= t("Tuoteno")." {$fail_tuoteno} (".t("Tilaus")." {$fail_otunnus}) ";
 			}
 
-			$content .= "--{$bound}--\n";
-
-			$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Keräyserässä virhe")." - {$yhtiorow['nimi']}", "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow['postittaja_email']}");
+			$query = "	INSERT INTO messenger SET 
+						yhtio = '{$kukarow['yhtio']}', 
+						kuka = '{$kukarow['kuka']}', 
+						vastaanottaja = '{$yhtiorow['alert_varasto_kayttajat']}', 
+						viesti = '{$message}', 
+						status = 'X', 
+						luontiaika = now()";
+			$messenger_result = pupe_query($query);
 		}
 
 		if (!$era_valmis and $eran_koko > 0) $era_valmis = true;

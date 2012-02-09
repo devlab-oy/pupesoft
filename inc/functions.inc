@@ -15752,7 +15752,7 @@ if (!function_exists("tee_keraysera2")) {
 
 		// nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.
 		// lähetetään tästä infomaili
-		if (count($fixed_main_array) > 0 and !$era_valmis and $eran_koko == 0 and $fail != "" and $yhtiorow['alert_varasto_kayttajat'] != '') {
+		if (count($fixed_main_array) > 0 and !$era_valmis and $fail != "" and $yhtiorow['alert_varasto_kayttajat'] != '') {
 			// $bound   = uniqid(time()."_");
 
 			// $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow['postittaja_email']}>\n";

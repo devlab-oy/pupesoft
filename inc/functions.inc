@@ -15760,6 +15760,9 @@ if (!function_exists("tee_keraysera2")) {
 				list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);
 
 				$message .= t("Tuoteno")." {$fail_tuoteno} (".t("Tilaus")." {$fail_otunnus}) ";
+
+				$query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
+				$upd_res = pupe_query($query);
 			}
 
 			$query = "	INSERT INTO messenger SET 

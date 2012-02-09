@@ -868,8 +868,6 @@
 					$keikkares = pupe_query($query);
 					$keikkarow = mysql_fetch_assoc($keikkares);
 					$row['uusiotunnus'] = $keikkarow['laskunro'];
-					
-					
 				}
 
 				echo "<td align='right'>$row[uusiotunnus]</td>";
@@ -985,19 +983,39 @@
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
 
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				$virhe++;
 
 				echo "<tr>";
 
+				if ($row["toimittajanumero"] == "123067") {
+					$orgtuote = $row["toim_tuoteno"];
+					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);
+					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+					
+					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
+									}
+				elseif ($row["toimittajanumero"] == "123067") {
+					$suba = substr($row["toim_tuoteno"],0,3);
+					$subb = substr($row["toim_tuoteno"],4);
+					$tuote = $suba."-".$subb;
+					$poikkeus_tuoteno = " = '$tuote' ";
+				}
+				else {
+					$poikkeus_tuoteno = " = '$row[toim_tuoteno]' ";
+				}
+
+
 				$query = "	SELECT tt.tuoteno 
 							FROM tuotteen_toimittajat as tt
 							JOIN tuote on (tuote.yhtio=tt.yhtio and tt.tuoteno = tuote.tuoteno and tuote.status !='P') 
 							WHERE tt.yhtio = '{$kukarow['yhtio']}' 
-							AND tt.toim_tuoteno = '{$row['toim_tuoteno']}' 
+							AND tt.toim_tuoteno {$poikkeus_tuoteno} 
 							AND tt.liitostunnus = '{$row['toimi_tunnus']}'";
 				$res = pupe_query($query);
+
 
 				if (mysql_num_rows($res) > 0) {
 					$ttrow = mysql_fetch_assoc($res);
@@ -1011,10 +1029,12 @@
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
 
+
 					$row['nimitys'] = $trow['nimitys'];
 
 					$query = "SELECT nimitys, uusiotunnus, tilaajanrivinro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$row['tilausnumero']}' AND tuoteno = '{$row['tuoteno']}' AND tilaajanrivinro = '{$row['tilausrivinpositio']}' AND tyyppi = 'O'";
 					$tilres = pupe_query($query);
+
 
 					if (mysql_num_rows($tilres) > 0) {
 						$tilrow = mysql_fetch_assoc($tilres);

@@ -46,6 +46,27 @@
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
 				// Siirtymävaiheen jälkeen poista lasku.comments tilausnumero ehto !!!!
+				
+				// poikkeuskäsittelyä muutamalle toimittajalle. 
+				// Kun haetaan ja kohdistetaan niin tällä toimittajalla pitää ensin "täydellä", sitten lopusta 3-merkkiä pois, sen jälkeen vielä lisätään "090"
+				
+				if ($row["toimittajanumero"] == "123067") {
+					$orgtuote = $row["toim_tuoteno"];
+					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);
+					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+					
+					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
+									}
+				elseif ($row["toimittajanumero"] == "123067") {
+					$suba = substr($row["toim_tuoteno"],0,3);
+					$subb = substr($row["toim_tuoteno"],4);
+					$tuote = $suba."-".$subb;
+					$poikkeus_tuoteno = " = '$tuote' ";
+				}
+				else {
+					$poikkeus_tuoteno = " = '$row[toim_tuoteno]' ";
+				}
+				
 				$query = "	SELECT tilausrivi.*
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
@@ -57,7 +78,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus 
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno = '$row[toim_tuoteno]')
+															AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi = 'O'
@@ -66,6 +87,7 @@
 							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'";
 				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
+
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VÄHEMMÄN kuin tilausrivillä, vanhan tilausrivin tunnus jää jäljellä
 				if (mysql_num_rows($checkres) == 0 or $row["kappalemaara"] > $tilausrivirow["varattu"]) {
@@ -292,11 +314,13 @@ $VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialu
 							AND tilausrivi.tunnus IN (".implode(",", $paketin_rivit).")";
 				$updateres = pupe_query($query);
 
+
 				$query = "	UPDATE asn_sanomat SET
 							status = 'X'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
+
 				
 				
 				// Laitetaan suuntalava siirtovalmiiksi.				

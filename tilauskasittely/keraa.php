@@ -1427,11 +1427,10 @@
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						$query = "	SELECT pakkaus.pakkaus,
-									pakkaus.pakkauskuvaus,
-									tuote.tuotemassa,
-									(pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys) as kuutiot,
-									kerayserat.kpl,
-									kerayserat.pakkausnro
+									SUM(tuote.tuotemassa) tuotemassa,
+									SUM((pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys)) as kuutiot,
+									SUM(kerayserat.kpl) AS kpl,
+									COUNT(kerayserat.tunnus) AS maara
 									FROM kerayserat
 									JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -1439,6 +1438,7 @@
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND kerayserat.otunnus = '{$laskurow['tunnus']}'
 									AND kerayserat.tila = 'K'
+									GROUP BY 1
 									ORDER BY pakkausnro ASC";
 						$keraysera_res = mysql_query($query) or pupe_error($query);
 
@@ -1448,13 +1448,12 @@
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] = 0;
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
-							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['pakkausnro'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['pakkausnro'] = 0;
+							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
 
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] 			+= $keraysera_row['kpl'];
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['pakkauskuvaus'] = $keraysera_row['pakkauskuvaus'];
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 		+= ($keraysera_row['tuotemassa'] * $keraysera_row['kpl']);
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] 		+= $keraysera_row['kuutiot'];
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['pakkausnro']	= $keraysera_row['pakkausnro'];
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] 			= $keraysera_row['kpl'];
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 		= ($keraysera_row['tuotemassa'] * $keraysera_row['kpl']);
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] 		= $keraysera_row['kuutiot'];
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara']			= $keraysera_row['maara'];
 						}
 
 						// esisyötetään rahtikirjan tiedot
@@ -1462,10 +1461,10 @@
 
 							foreach ($rahtikirjan_pakkaukset as $pak => $arr) {
 								$query_ker  = "	INSERT INTO rahtikirjat SET
-												kollit = '{$arr['pakkausnro']}',
+												kollit = '{$arr['maara']}',
 												kilot = '{$arr['paino']}',
 												kuutiot = '{$arr['kuutiot']}',
-												pakkauskuvaus = '{$arr['pakkauskuvaus']}',
+												pakkauskuvaus = '',
 												pakkaus = '{$pak}',
 												rahtikirjanro = '{$laskurow['tunnus']}',
 												otsikkonro = '{$laskurow['tunnus']}',

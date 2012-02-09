@@ -15276,6 +15276,7 @@ if (!function_exists("tee_keraysera2")) {
 				if ($eran_koko == 0 and ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 					if ($debug) echo "Tuotteen $tuoterow[tuoteno] lis‰ys yksin‰‰n ylitt‰isi max ker‰yser‰ pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus])<br><br>";
 					$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+					break 2;
 				}
 
 				if ($tuoterow['perheid'] > 0 and $tuoterow['perheid'] != $tuoterow['tunnus']) {
@@ -15753,6 +15754,10 @@ if (!function_exists("tee_keraysera2")) {
 
 			// $boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Ker‰yser‰ss‰ virhe")." - {$yhtiorow['nimi']}", "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow['postittaja_email']}");
 
+			if ($debug) {
+				echo "Virhe ker‰yser‰‰ tehdess‰. Tarkista tuotteen mitat!<br>";
+			}
+
 			$message = t("Virhe ker‰yser‰‰ tehdess‰").". ";
 			$message .= t("Tarkista tuotteen mitat")."! ";
 
@@ -15760,6 +15765,8 @@ if (!function_exists("tee_keraysera2")) {
 				list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);
 
 				$message .= t("Tuoteno")." {$fail_tuoteno} (".t("Tilaus")." {$fail_otunnus}) ";
+
+				if ($debug) echo "Tuoteno $fail_tuoteno (Tilaus $fail_otunnus)<br>";
 
 				$query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
 				$upd_res = pupe_query($query);

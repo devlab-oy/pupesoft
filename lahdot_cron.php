@@ -28,6 +28,20 @@
 	// $pvmnimet[6] = t("Lauantai");
 	// $pvmnimet[0] = t("Sunnuntai");
 
+	$query = "	SELECT lahdot.tunnus, lasku.tunnus AS ltunnus
+				FROM lahdot
+				LEFT JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'N')
+				WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+				AND lahdot.aktiivi = ''
+				AND lahdot.pvm < CURDATE()
+				HAVING ltunnus IS NULL";
+	$chk_res = pupe_query($query);
+
+	while ($chk_row = mysql_fetch_assoc($chk_res)) {
+		$query = "DELETE FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$chk_row['tunnus']}'";
+		$del_res = pupe_query($query);
+	}
+
 	$paivia_eteenpain = trim($argv[2] == 'create') ? 14 : 1;
 	$init_i = trim($argv[2] == 'create') ? 0 : 1;
 

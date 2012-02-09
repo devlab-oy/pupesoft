@@ -11941,7 +11941,7 @@ if (!function_exists("pupe_DataTables")) {
 
 						$('input[name^=\"rivi_ale\"]').each(function(){
 							
-							var monesko				= $(this).attr('name').substring(8,9);
+							var monesko				= $(this).attr('name').substring(8,9);													
 							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
@@ -11963,7 +11963,7 @@ if (!function_exists("pupe_DataTables")) {
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
-										$('#rivialealkuperainen_'+tun).val(ale);
+										$('#rivialealkuperainen'+monesko+'_'+tun).val(ale);
 										$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
 
 										// P‰ivitet‰‰n 'Kohdistettu Summa'

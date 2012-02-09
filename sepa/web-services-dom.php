@@ -10,6 +10,9 @@
 
 	// From: http://www.nordea.fi/sitemod/upload/root/fi_org/liite/WSNDEA1234.p12
 	// Converted: openssl pkcs12 -in WSNDEA1234.p12 -out nordea.pem -nodes
+	// Public key: openssl rsa -in nordea.pem -pubout
+	// Private key: openssl rsa -in nordea.pem
+	
 	// Password: WSNDEA1234
 	define('PRIVATE_KEY', 'nordea.key');
 	define('CERT_FILE', 'nordea.crt');
@@ -211,9 +214,27 @@
 			$timestamp->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 #			$timestamp->setAttribute("wsu:Id", $guid);
 
-	file_put_contents("verify_soap1.xml", $soap->saveXML());
+	#file_put_contents("verify_soap1.xml", $soap->saveXML());
 	$soap_xml = $soap->saveXML();
+	
+	// Tehdään validaatio Application Requestille
+	$axml = new DomDocument('1.0');
+	$axml->encoding = 'UTF-8';
+	$axml->loadXML($soap_xml);
 
+	// Tehdään validaatio Application Requestille
+	libxml_use_internal_errors(true);
+	if (!$axml->schemaValidate("{$pupe_root_polku}/sepa/soap-envelope-schema.xsd")) {
+		echo "Virheellinen SOAP Envelope!\n\n";
+
+		$all_errors = libxml_get_errors();
+		foreach ($all_errors as $error) {
+			echo "$error->message\n";
+		}
+		exit;
+	}
+    
+/*
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
 	$axml->loadXML($axml_xml);
@@ -231,6 +252,7 @@
 	$soap_request->attachTokentoSig($token);
 
 	file_put_contents("verify_soap2.xml", $soap_request->saveXML());
+*/
 
 	# 10. Lähetetään SOAP request (Nordea)
 	try {
@@ -239,9 +261,10 @@
 		// var_dump($client->__getFunctions());
 		// var_dump($client->__getTypes());
 
-		$request	= $soap_request->saveXML();
-#		$request	= $soap_xml;
-		$request	= file_get_contents("verify_soap.xml");
+#		$request	= $soap_request->saveXML();
+		$request	= $soap_xml;
+#		$request	= file_get_contents("verify_soap.xml");
+#		$request	= file_get_contents("SOAPrequest_GetUserInfo.xml");		
 		$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
 		$action		= "uploadFile";
 		$version	= "1";

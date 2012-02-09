@@ -2033,6 +2033,9 @@
 		$ulos .= "<option value = 'L' $sel[L]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
 		$ulos .= "<option value = 'N' $sel[N]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi noutolaskuihin")."</option>";
+		$ulos .= "<option value = 'T' $sel[T]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
+		$ulos .= "<option value = 'U' $sel[U]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi k‰teislaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
+		$ulos .= "<option value = 'V' $sel[V]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi noutolaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2407,7 +2410,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kehahinvirhe_esto_laskutus") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2915,6 +2918,40 @@
 
 		$ulos .= "<option value = ''>".t("N‰ytet‰‰n viimeisin muistutusp‰iv‰ ja perint‰kerrat")."</option>";
 		$ulos .= "<option value = 'K' $sel>".t("Ei n‰ytet‰ viimeisint‰ muistutusp‰iv‰‰ eik‰ perint‰kertoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'viitemaksujen_kohdistus_sallittu_heitto') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i]*100;
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0.00' {$sel[0]}>0.00</option>";
+		$ulos .= "<option value = '0.05' {$sel[5]}>0.05</option>";
+		$ulos .= "<option value = '0.10' {$sel[10]}>0.10</option>";
+		$ulos .= "<option value = '0.15' {$sel[15]}>0.15</option>";
+		$ulos .= "<option value = '0.20' {$sel[20]}>0.20</option>";
+		$ulos .= "<option value = '0.25' {$sel[25]}>0.25</option>";
+		$ulos .= "<option value = '0.30' {$sel[30]}>0.30</option>";
+		$ulos .= "<option value = '0.35' {$sel[35]}>0.35</option>";
+		$ulos .= "<option value = '0.40' {$sel[40]}>0.40</option>";
+		$ulos .= "<option value = '0.45' {$sel[45]}>0.45</option>";
+		$ulos .= "<option value = '0.50' {$sel[50]}>0.50</option>";
+		$ulos .= "<option value = '0.55' {$sel[55]}>0.55</option>";
+		$ulos .= "<option value = '0.60' {$sel[60]}>0.60</option>";
+		$ulos .= "<option value = '0.65' {$sel[65]}>0.65</option>";
+		$ulos .= "<option value = '0.70' {$sel[70]}>0.70</option>";
+		$ulos .= "<option value = '0.75' {$sel[75]}>0.75</option>";
+		$ulos .= "<option value = '0.80' {$sel[80]}>0.80</option>";
+		$ulos .= "<option value = '0.85' {$sel[85]}>0.85</option>";
+		$ulos .= "<option value = '0.90' {$sel[90]}>0.90</option>";
+		$ulos .= "<option value = '0.95' {$sel[95]}>0.95</option>";
+		$ulos .= "<option value = '1.00' {$sel[100]}>1.00</option>";
+		
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

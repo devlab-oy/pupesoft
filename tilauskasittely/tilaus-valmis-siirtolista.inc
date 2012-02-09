@@ -121,6 +121,7 @@
 			$varasto   = 'x';
 			$edvarasto = 'x';
 			$tulostusalue = $edtulostusalue = "x";
+			unset($laskusplitres);
 
 			while ($row = mysql_fetch_array($result)) {
 				// Mihin varastoon

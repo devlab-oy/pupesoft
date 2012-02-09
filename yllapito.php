@@ -805,6 +805,7 @@
 			$query = "	SELECT nimi value, nimi text
 						FROM yhteyshenkilo
 						WHERE tunnus = '$tmp_tuote_tunnus'
+						and tyyppi	 = 'A'
 						and yhtio 	 = '$kukarow[yhtio]'";
 			$otsikres = pupe_query($query);
 			$otsikrow = mysql_fetch_assoc($otsikres);

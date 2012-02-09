@@ -28,12 +28,12 @@ if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	// Jos saatavat on ytunnus tasolla, pit‰‰ hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset 
-							FROM asiakas 
+		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
+							FROM asiakas
 							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND ytunnus = '{$laskurow["ytunnus"]}'";
 		$saatavat_result = pupe_query($saatavat_query);
-		$saatavat_row = mysql_fetch_assoc($saatavat_result);		
+		$saatavat_row = mysql_fetch_assoc($saatavat_result);
 		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
 	}
 	else {
@@ -1038,6 +1038,7 @@ else {
 			$sisviesti2_numerointi	= 1;
 			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
+			unset($laskusplitres);
 
 			while ($row = mysql_fetch_assoc($result)) {
 

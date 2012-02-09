@@ -33,7 +33,12 @@
 	$kuljetus		= $srow["kuljetus"];
 	$tnimi			= "";
 
-	$query	= "SELECT nimi from yhteyshenkilo where yhtio='$kukarow[yhtio]' and tyyppi = 'T' and tilausyhteyshenkilo != '' and liitostunnus='$toimittaja'";
+	$query	= "	SELECT nimi
+				from yhteyshenkilo
+				where yhtio				 = '$kukarow[yhtio]'
+				and tyyppi 				 = 'T'
+				and tilausyhteyshenkilo != ''
+				and liitostunnus		 = '$toimittaja'";
 	$result = pupe_query($query);
 	$yhrow 	= mysql_fetch_array($result);
 

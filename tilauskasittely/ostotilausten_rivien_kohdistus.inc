@@ -439,7 +439,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 
 	unset($tee);
 	unset($tila);
-	
+
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 		unset(${'ale'.$alepostfix});
 		unset(${'ale_array'.$alepostfix});
@@ -830,7 +830,7 @@ if ($tila == 'tee_kohdistus') {
 			$result = pupe_query($query);
 		}
 	}
-	
+
 	if (is_array($rivi_ale3)) {
 		// ale3
 		foreach ($rivi_ale3 as $tunnus => $ale) {
@@ -1004,72 +1004,72 @@ if ($tila == '') {
 									WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
 									and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
 									and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,'$yhtiorow[hintapyoristys]') alerivihinta";
-	$kentat_array[] = "tilausrivi.kate kuluhinta";
+	#$kentat_array[] = "tilausrivi.kate kuluhinta";
 	$kentat_array[] = "tilausrivi.toimaika toimaika";
 	$kentat_array[] = "tilausrivi.kommentti kommentti";
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kentat_array[] = "lasku.laskunro keikka";
 
 	$kennim_array = array();
 	$kennim_array[] = t('Tilaus');
-	$kennim_array[] = t('Tuoteno'); // 1
-	$kennim_array[] = t('Toim_tuoteno'); // 2
-	$kennim_array[] = t('Nimitys'); //3
-	$kennim_array[] = t('M‰‰r‰'); //4 
-	$kennim_array[] = t('M‰‰r‰/Ulk'); //5
-	$kennim_array[] = t('Hinta'); // 6
-	
+	$kennim_array[] = t('Tuoteno');
+	$kennim_array[] = t('Toim_tuoteno');
+	$kennim_array[] = t('Nimitys');
+	$kennim_array[] = t('M‰‰r‰');
+	$kennim_array[] = t('M‰‰r‰/Ulk');
+	$kennim_array[] = t('Hinta');
+
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$kennim_array[] = t('Ale').$alepostfix; // 7,8,9
+		$kennim_array[] = t('Ale').$alepostfix;
 	}
-	
-	$kennim_array[] = t('Alv');			// 9,10 
-	$kennim_array[] = t('Rivihinta'); // 10
-	$kennim_array[] = t('+Alv -Ale'); //11
-	$kennim_array[] = t('Extrakulu'); //12
-	$kennim_array[] = t('Toimaika'); //13
-	$kennim_array[] = t('Kommentti'); //14
+
+	$kennim_array[] = t('Alv');
+	$kennim_array[] = t('Rivihinta');
+	$kennim_array[] = t('+Alv -Ale');
+	#$kennim_array[] = t('Extrakulu');
+	$kennim_array[] = t('Toimaika');
+	$kennim_array[] = t('Kommentti');
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t('Keikka');
 
 	$kenhak_array = array();
 	$kenhak_array[] = 'otunnus';
-	$kenhak_array[] = 'tuoteno'; // 1
-	$kenhak_array[] = 'toim_tuoteno'; // 2
-	$kenhak_array[] = 'nimitys'; // 3 
-	$kenhak_array[] = 'siskpl'; // 4
-	$kenhak_array[] = 'ulkkpl'; // 5
-	$kenhak_array[] = 'hinta'; // 6
-	
+	$kenhak_array[] = 'tuoteno';
+	$kenhak_array[] = 'toim_tuoteno';
+	$kenhak_array[] = 'nimitys';
+	$kenhak_array[] = 'siskpl';
+	$kenhak_array[] = 'ulkkpl';
+	$kenhak_array[] = 'hinta';
+
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		$kenhak_array[] = t('Ale').$alepostfix; // 7,8,9
+		$kenhak_array[] = t('Ale').$alepostfix;
 	}
 
-	$kenhak_array[] = 'alv';		//9,10
-	$kenhak_array[] = 'rivihinta'; //10
-	$kenhak_array[] = 'alerivihinta'; // 11
-	$kenhak_array[] = 'kuluhinta';	//12
-	$kenhak_array[] = 'toimaika';	//13
-	$kenhak_array[] = 'toimaika';	//14
+	$kenhak_array[] = 'alv';
+	$kenhak_array[] = 'rivihinta';
+	$kenhak_array[] = 'alerivihinta';
+	#$kenhak_array[] = 'kuluhinta';
+	$kenhak_array[] = 'toimaika';
+	$kenhak_array[] = 'kommentti';
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenhak_array[] = 'laskunro';
 
 	$kenkok_array = array();
-	$kenkok_array[] = 6;	
-	$kenkok_array[] = 15;	
-	$kenkok_array[] = 15;	
-	$kenkok_array[] = 17;	
-	$kenkok_array[] = 7;	
-	$kenkok_array[] = 7;	
+	$kenkok_array[] = 6;
+	$kenkok_array[] = 15;
+	$kenkok_array[] = 15;
+	$kenkok_array[] = 17;
+	$kenkok_array[] = 7;
+	$kenkok_array[] = 7;
 	$kenkok_array[] = 7;
 
 	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 		$kenkok_array[] = 4;
-	}	
+	}
 
-	$kenkok_array[] = 4;	//9,10
-	$kenkok_array[] = 8;	//10
-	$kenkok_array[] = 8;	//11
-	$kenkok_array[] = 4;	//12
-	$kenkok_array[] = 12;	//13
-	$kenkok_array[] = 12;	//14
+	$kenkok_array[] = 4;
+	$kenkok_array[] = 8;
+	$kenkok_array[] = 8;
+	#$kenkok_array[] = 4;
+	$kenkok_array[] = 12;
+	$kenkok_array[] = 12;
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kenkok_array[] = 6;
 
 	if ($kukarow["resoluutio"] != 'I') {
@@ -1410,7 +1410,7 @@ if ($tila == '') {
 	echo "<tr></tr><tr><th>x</th>";
 
 	//hakukent‰t
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
@@ -1441,23 +1441,35 @@ if ($tila == '') {
 
 	echo "<th nowrap valign='top'><a href='$href=4".$ulisa."'>$kennim_array[4]</a><br><a href='$href=5".$ulisa."'>$kennim_array[5]</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."'>".t("Valuutta")."</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."'>$kennim_array[7]</a><br></th>";
-	
-	$pointteri = 8;
-	
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		echo "<th nowrap valign='top'><a href='$href=$pointteri".$ulisa."'>$kennim_array[$pointteri]</a></th>"; 
-		$pointteri++; // 8,9,10
+
+	$pointteri = 7;
+
+	for ($alepostfix=1; $alepostfix <= $yhtiorow["oston_alekentat"]; $alepostfix++) {
+		echo "<th nowrap valign='top'>$kennim_array[$pointteri]";
+		$pointteri++;
+
+		if ($alepostfix == $yhtiorow["oston_alekentat"]) {
+			echo "<br>$kennim_array[$pointteri]";
+			$pointteri++;
+		}
+
+		echo "</th>";
 	}
-// header
-	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a> <br></th>";
-	$pointteri = ($pointteri+3);
+
 	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
 	$pointteri++;
-	echo "<a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
-	echo "</th>";
+	echo "$kennim_array[$pointteri]</th>";
+	$pointteri++;
+
+	echo "<th nowrap valign='top'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
+	$pointteri++;
+
+	echo "<a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+	$pointteri++;
+
 	echo "<th></th>";
 	echo "</tr>";
+
 	// hakukent‰t alkaa t‰st‰
 	echo "<tr><td></td>";
 
@@ -1471,23 +1483,32 @@ if ($tila == '') {
 		echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[3]' name='haku[3]' value='$haku[3]'></td>";
 	}
 
-	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[4]' name='haku[4]' value='$haku[4]'><br><input type='text' size='$kenkok_array[5]' name='haku[5]' value='$haku[5]'></td>";
+	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[4]' name='haku[4]' value='$haku[4]'><br><input type='text' size='$kenkok_array[5]' name='haku[5]' value='$haku[5]'></td>";
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[6]' name='haku[6]' value='$haku[6]'></td>";
-	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[7]' name='haku[7]' value='$haku[7]'><br></td>";
-	
-	$pointteri = 8;
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-		echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
-		$pointteri++;
-	}
-	
-	echo "<td nowrap valign='top'>";
-	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br></td>";
-	$pointteri = ($pointteri+3);
-	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'> <br>";
-	$pointteri++;
-	//echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'> </td>";
 
+	$pointteri = 7;
+
+	for ($alepostfix=1; $alepostfix <= $yhtiorow["oston_alekentat"]; $alepostfix++) {
+		echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'>";
+		$pointteri++;
+
+		if ($alepostfix == $yhtiorow["oston_alekentat"]) {
+			echo "<br><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'>";
+			$pointteri++;
+		}
+
+		echo "</td>";
+	}
+
+	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
+	$pointteri++;
+	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+	$pointteri++;
+
+	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
+	$pointteri++;
+
+	echo "<input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
 
 	echo "<td></td>";
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
@@ -1787,9 +1808,20 @@ if ($tila == '') {
 
 		if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
 			echo "<$td $class valign='top' align='right'>".hintapyoristys($rivirow["hinta"],6)."<br>$kulurow[valkoodi]&nbsp;</$td>";
-			
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				echo "<$td $class valign='top' align='right'>". (float) $rivirow["ale$alepostfix"];
+
+				if ($alepostfix == $yhtiorow["oston_alekentat"]) {
+					if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
+						echo "<br>". (float) $rivirow["alv"];
+					}
+					else {
+						echo "<br>0";
+					}
+				}
+
+				echo "</$td>";
 			}
 
 		}
@@ -1797,22 +1829,24 @@ if ($tila == '') {
 			echo "<$td $class valign='top' align='right'>";
 			echo "<input size='7' type='text' name='rivi_hinta[$rivirow[rivitunnus]]' value='".hintapyoristys($rivirow["hinta"],6)."' style='text-align:right'>";
 			echo "<br>$kulurow[valkoodi]</$td>";
-			
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				echo "<$td $class valign='top' align='right'>";
 				echo "<input size='4' type='text' name='rivi_ale{$alepostfix}[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale$alepostfix"]."' style='text-align:right'>";
+
+				if ($alepostfix == $yhtiorow["oston_alekentat"]) {
+					if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
+						echo "<br>". (float) $rivirow["alv"]."&nbsp;";
+					}
+					else {
+						echo "<br>0&nbsp;";
+					}
+				}
+
+				echo "</$td>";
 			}
 
 		}
-
-		if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
-			echo "<$td $class valign='top' align='right'>". (float) $rivirow["alv"]."</td>";
-		}
-		else {
-			echo "<$td $class valign='top' align='right'>0</td>";
-		}
-		echo "&nbsp;</$td>";
-
 
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";

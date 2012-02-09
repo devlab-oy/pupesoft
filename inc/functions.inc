@@ -14475,11 +14475,11 @@ if (!function_exists("tee_keraysera2")) {
 		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					lasku1.h1time,
+					lasku1.ohjausmerkki, 
 					lahdot1.asiakasluokka,
 					lasku1.liitostunnus,
 					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 					lahdot1.tunnus as lahto,
-					lasku1.ohjausmerkki, 
 					lahdot1.lahdon_kellonaika,
 					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 					FROM lasku AS lasku1
@@ -14510,11 +14510,11 @@ if (!function_exists("tee_keraysera2")) {
 					(SELECT lasku2.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
 					lasku2.h1time,
+					lasku2.ohjausmerkki, 
 					999999999999 as asiakasluokka,
 					lasku2.liitostunnus,
 					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
 					999999999999 as lahto,
-					lasku2.ohjausmerkki, 
 					999999999999 as lahdon_kellonaika,
 					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 					FROM lasku AS lasku2
@@ -14531,7 +14531,7 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
 					GROUP BY 1,2,3,4,5,6,7,8)
-					ORDER BY 1,2,3";
+					ORDER BY 1,2,3,4";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 
@@ -14551,11 +14551,11 @@ if (!function_exists("tee_keraysera2")) {
 			$query = "	SELECT lasku1.prioriteettinro as prioriteetti,
 						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 						lasku1.h1time,
+						lasku1.ohjausmerkki, 
 						lahdot1.asiakasluokka,
 						lasku1.liitostunnus,
 						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
 						lahdot1.tunnus as lahto,
-						lasku1.ohjausmerkki, 
 						lahdot1.lahdon_kellonaika,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 						FROM lasku AS lasku1
@@ -14582,7 +14582,7 @@ if (!function_exists("tee_keraysera2")) {
 						AND lasku1.varasto = '{$varasto}'
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) 
 						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER BY 1,2,3";
+						ORDER BY 1,2,3,4";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$res = pupe_query($query);
 		}
@@ -15443,6 +15443,12 @@ if (!function_exists("tee_keraysera2")) {
 
 								$era_valmis = true;
 								break 3;
+							}
+
+							// tiedet‰‰n ett‰ ollaan pakkauksen sis‰ll‰ ja tuote menee yksin ker‰ysalustalle. uusi pakettinro.
+							if ($kaytettava_pakkaus != "") {
+								$juokseva_nro++;
+								$kaytettava_pakkaus = "";
 							}
 
 							$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = 1;

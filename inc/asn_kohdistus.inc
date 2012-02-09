@@ -45,20 +45,24 @@
 				}
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
+				// Siirtymävaiheen jälkeen poista lasku.comments tilausnumero ehto !!!!
 				$query = "	SELECT tilausrivi.*
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus)
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
-											AND toimi.toimittajanro = '$row[toimittajanumero]')
+											AND toimi.toimittajanro = '$row[toimittajanumero]'
+											AND toimi.tyyppi !='P')
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus 
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 															AND tuotteen_toimittajat.toim_tuoteno = '$row[toim_tuoteno]')
+							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
-							AND tilausrivi.otunnus = '$row[tilausnumero]'
+							AND (tilausrivi.otunnus = '$row[tilausnumero]' or lasku.comments = '$row[tilausnumero]')
 							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'";
 				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);

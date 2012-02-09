@@ -341,7 +341,6 @@
 
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
-query_dump($query);
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
 			$toimittaja = $kollirow['toimittajanumero'];
@@ -744,8 +743,10 @@ query_dump($query);
 				$result = pupe_query($query);
 				$asn_row = mysql_fetch_assoc($result);
 
-				$query = "	SELECT tt.tuoteno, tt.toim_tuoteno FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}')
+				$query = "	SELECT tt.tuoteno, tt.toim_tuoteno 
+							FROM tuotteen_toimittajat as tt
+							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno='{$asn_row["toim_tuoteno"]}' and toimi.tyyppi !='P')
+							JOIN tuote on (tuote.yhtio = toimi.yhtio and tuote.tuoteno = tt.tuoteno and tuote.status !='P')
 							WHERE tt.yhtio='{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
 				$apurivi = mysql_fetch_assoc($result);
@@ -827,7 +828,7 @@ query_dump($query);
 
 			$toimittaja = (int) $toimittaja;
 
-			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}'";
+			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}' and tyyppi !='P'";
 			
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
@@ -867,7 +868,7 @@ query_dump($query);
 					$keikkares = pupe_query($query);
 					$keikkarow = mysql_fetch_assoc($keikkares);
 					$row['uusiotunnus'] = $keikkarow['laskunro'];
-					query_dump($query);
+					
 					
 				}
 
@@ -902,8 +903,14 @@ query_dump($query);
 		if ($valitse == 'asn') {
 			$kolli = mysql_real_escape_string($kolli);
 
-			$query = "	SELECT asn_sanomat.toimittajanumero, asn_sanomat.toim_tuoteno, asn_sanomat.tilausrivinpositio, asn_sanomat.kappalemaara, asn_sanomat.status, asn_sanomat.tilausnumero,
-						tilausrivi.tuoteno, if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
+			$query = "	SELECT asn_sanomat.toimittajanumero, 
+						asn_sanomat.toim_tuoteno, 
+						asn_sanomat.tilausrivinpositio, 
+						asn_sanomat.kappalemaara, 
+						asn_sanomat.status, 
+						asn_sanomat.tilausnumero,
+						tilausrivi.tuoteno, 
+						if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
 						FROM asn_sanomat
 						JOIN tilausrivi ON (tilausrivi.yhtio = asn_sanomat.yhtio AND tilausrivi.tunnus IN (asn_sanomat.tilausrivi))
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
@@ -942,7 +949,7 @@ query_dump($query);
 
 				echo "<tr>";
 
-				$query = "SELECT nimitys FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$row['tuoteno']}'";
+				$query = "SELECT nimitys FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$row['tuoteno']}' and status !='P'";
 				$tuoteres = pupe_query($query);
 				$tuoterow = mysql_fetch_assoc($tuoteres);
 
@@ -963,7 +970,12 @@ query_dump($query);
 
 			$virhe = 0;
 
-			$query = "	SELECT asn_sanomat.toimittajanumero, asn_sanomat.toim_tuoteno, asn_sanomat.tilausrivinpositio, asn_sanomat.kappalemaara, asn_sanomat.status, asn_sanomat.tilausnumero,
+			$query = "	SELECT asn_sanomat.toimittajanumero, 
+						asn_sanomat.toim_tuoteno, 
+						asn_sanomat.tilausrivinpositio, 
+						asn_sanomat.kappalemaara, 
+						asn_sanomat.status, 
+						asn_sanomat.tilausnumero,
 						toimi.tunnus AS toimi_tunnus, asn_sanomat.tunnus AS asn_tunnus
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
@@ -979,7 +991,12 @@ query_dump($query);
 
 				echo "<tr>";
 
-				$query = "SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$kukarow['yhtio']}' AND toim_tuoteno = '{$row['toim_tuoteno']}' AND liitostunnus = '{$row['toimi_tunnus']}'";
+				$query = "	SELECT tt.tuoteno 
+							FROM tuotteen_toimittajat as tt
+							JOIN tuote on (tuote.yhtio=tt.yhtio and tt.tuoteno = tuote.tuoteno and tuote.status !='P') 
+							WHERE tt.yhtio = '{$kukarow['yhtio']}' 
+							AND tt.toim_tuoteno = '{$row['toim_tuoteno']}' 
+							AND tt.liitostunnus = '{$row['toimi_tunnus']}'";
 				$res = pupe_query($query);
 
 				if (mysql_num_rows($res) > 0) {
@@ -1088,7 +1105,6 @@ query_dump($query);
 						#AND asn_sanomat.tilausrivi != ''
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
-query_dump($query);
 
 			$ok = $virhe = 0;
 			$hintapoikkeavuus = false;
@@ -1097,7 +1113,6 @@ query_dump($query);
 
 				$query = "SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$kukarow['yhtio']}' AND toim_tuoteno = '{$row['toim_tuoteno']}' AND liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
-query_dump($query);
 
 				if (mysql_num_rows($res) > 0) {
 					$ttrow = mysql_fetch_assoc($res);
@@ -1110,7 +1125,6 @@ query_dump($query);
 								AND tuoteno = '{$ttrow['tuoteno']}'";
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
-query_dump($query);
 
 					$row['nimitys'] = $trow['nimitys'];
 				}
@@ -1311,7 +1325,6 @@ query_dump($query);
 							GROUP BY asn_sanomat.tilausnumero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 							ORDER BY toimi.nimi, toimi.ytunnus";
 				$result = pupe_query($query);
-query_dump($query);
 
 				echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
 				echo "<input type='hidden' id='tee' name='tee' value='nayta' />";

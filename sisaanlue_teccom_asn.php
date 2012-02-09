@@ -164,7 +164,7 @@
 						}
 
 						foreach ($paketti2->PkgItem as $yyy) {
-							$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
+							$kpl = (float) $yyy->DeliveredQuantity->Quantity;
 							$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
 							$c++;
 						}
@@ -178,15 +178,16 @@
 						if (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
 							$paketti3 = $paketti3->Package;
 						}
-
+/*
 						if ($tavarantoimittajanumero == "123312" and trim($paketti3->PkgNumber) == 1) {
 							$lisays[$p][$c]['PositionNumber'] = "";
 						}
-
+*/						
 						foreach ($paketti3->PkgItem as $zzz) {
-							$positio = (string) $zzz->PositionNumber;
+							//$positio = (string) $zzz->PositionNumber;
+							$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
 							$positio = utf8_decode($positio);
-							$lisays[$p][$c]['PositionNumber'] = $positio;
+							$lisays[$p][$c]['PositionNumber'] = (int) $positio;
 							$c++;
 						}
 						$p++;

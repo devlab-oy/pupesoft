@@ -15640,7 +15640,6 @@ if (!function_exists("tee_keraysera2")) {
 									$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$loop_tun}" : "{$tuoterow['tuoteno']}###{$loop_tun}";
 								}
 
-								$era_valmis = true;
 								break 3;								
 							}
 

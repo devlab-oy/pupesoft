@@ -129,9 +129,9 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		global $path_xauxi, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xauxi...";
-		
+		//vied‰‰n nimityksen sijaan lyhytkuvaus -Satu 8.2.12
 		$query = "	SELECT 	tuote.tuoteno AS tuoteno,
-							tuote.nimitys AS tuotenimi, 
+							tuote.lyhytkuvaus AS tuotenimi, 
 							(
 								SELECT korv.tuoteno
 								FROM korvaavat AS korv
@@ -180,6 +180,9 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 			// mones t‰m‰ on
 			$row++;
+
+			$tuote['tuotenimi'] = str_replace('\n', ' ', $tuote['tuotenimi']);
+			$tuote['tuotenimi'] = preg_replace(" {2,}", " ", $tuote['tuotenimi']);
 
 			$out  = sprintf("%-3.3s",		"E3T");
 			$out .= sprintf("%-18.18s",		$tuote['tuoteno']);

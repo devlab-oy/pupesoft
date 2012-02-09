@@ -100,7 +100,7 @@
 		//korjataan hintaa ja aleprossaa
 		$hinta	= str_replace(',','.',$hinta);
 
-		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			${'ale'.$alepostfix} = str_replace(',','.',${'ale'.$alepostfix});
 		}
 
@@ -382,8 +382,8 @@
 			$tuoteno 		= $tilausrivirow["tuoteno"];
 			$tuotenimitys	= $tilausrivirow["nimitys"];
 			$kpl 			= $tilausrivirow["tilkpl"];
-
-			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				${'ale'.$alepostfix} = $tilausrivirow["ale{$alepostfix}"];
 			}
 
@@ -405,8 +405,8 @@
 		if ($tee == 'TI' and isset($tyhjenna)) {
 
 			$tee = "Y";
-
-			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				unset(${'ale'.$alepostfix});
 				unset(${'ale_array'.$alepostfix});
 				unset(${'kayttajan_ale'.$alepostfix});
@@ -472,7 +472,7 @@
 			$kayttajan_kpl		= $kpl;
 			$kayttajan_alv		= $alv;
 
-			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
 			}
 
@@ -515,8 +515,8 @@
 				else {
 					$hinta = $kayttajan_hinta;
 				}
-
-				for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+				
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 					if (is_array(${'ale_array'.$alepostfix})) {
 						${'ale'.$alepostfix} = ${'ale_array'.$alepostfix}[$tuoteno];
 					}
@@ -564,7 +564,7 @@
 				$alv 	= '';
 				$paikka	= '';
 
-				for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 					${'ale'.$alepostfix} = '';
 				}
 			}
@@ -579,8 +579,7 @@
 			}
 
 			$tee = "Y";
-
-			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				unset(${'ale'.$alepostfix});
 				unset(${'ale_array'.$alepostfix});
 				unset(${'kayttajan_ale'.$alepostfix});
@@ -804,7 +803,10 @@
 						tuote.tuotemassa,
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
-						tuotteen_toimittajat.valuutta
+						tuotteen_toimittajat.valuutta, 
+						tilausrivi.ale1, 
+						tilausrivi.ale2,
+						tilausrivi.ale3
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -825,7 +827,7 @@
 			echo "<th align='left'>".t("M‰‰r‰")."<br>".t("M‰‰r‰/Ulk")."</th>";
 			echo "<th align='left'>".t("Hinta")."</th>";
 
-			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
 			}
 
@@ -840,9 +842,10 @@
 			$eimitatoi 		= '';
 			$lask 			= mysql_num_rows($presult);
 			$tilausok 		= 0;
+			$divnolla		= 0;
 
 			while ($prow = mysql_fetch_array ($presult)) {
-
+				$divnolla++;
 				$yhteensa += $prow["rivihinta"];
 				$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
 
@@ -996,14 +999,52 @@
 							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";
 						}
 					}
+					
+					if ($yhtiorow["ostoera_pyoristys"] == "K") {
+						// haetaan tuotteen toimittajan takaata pakkauskoko tai jotain 
+						// Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa 
+						$query = "	SELECT tuote.tunnus, tt.toim_tuoteno, tt.osto_era, ta1.selite p2,ta1.selitetark p2s, ta2.selite p3,ta2.selitetark p3s 
+									FROM tuote
+									JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
+									LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
+									LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+									WHERE tuote.yhtio='{$kukarow["yhtio"]}'
+									AND tuote.tuoteno = '{$prow["tuoteno"]}'";
+						$ttresult = pupe_query($query);
+						$ttrow = mysql_fetch_assoc($ttresult);
+						
+					}
 
 					echo "</td>";
-					echo "<td valign='top' $class>$prow[toim_tuoteno]</td>";
+
+					echo "<td valign='top' class='tooltip' id='$divnolla'>$prow[toim_tuoteno]";
+
+					if ($ttrow["p2"] !="" or $ttrow["p3"] !="") {
+						echo "<br><img src='$palvelin2/pics/lullacons/info.png'>";
+						echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
+						// t‰h‰n pakkauskoot..
+						echo "<ul><li>".t("Oletuskoko").": {$ttrow["osto_era"]}</li>";
+						if ($ttrow["p2"] !="") {
+							echo "<li>".t("pakkaus2").": {$ttrow["p2"]} {$ttrow["p2s"]}</li>";
+						}
+						if ($ttrow["p3"] !="") {
+							echo "<li>".t("pakkaus3").": {$ttrow["p3"]} {$ttrow["p3s"]}</li>";
+						}
+						echo "</ul></div>";
+					}
+					echo "</td>";
 					echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)."<br>".($prow["tilattu_ulk"]*1)."</td>";
 					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
-					for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+					$alespan = 8;
+					$backspan1 = 1;
+					$backspan2 = 5;
+					
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 						echo "<td valign='top' $class align='right'>".((float) $prow["ale{$alepostfix}"])."</td>";
+						$alespan++;
+						$backspan1++;
+						$backspan2++;
 					}
 
 					echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
@@ -1083,7 +1124,7 @@
 									echo "<td><input type='text' name='kpl_array[$xprow[tuoteno]]' size='5' maxlength='5'></td>
 											<td><input type='text' name='hinta_array[$xprow[tuoteno]]' size='5' maxlength='12'></td>";
 
-									for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 										echo "<td><input type='text' name='ale_array{$alepostfix}[$xprow[tuoteno]]' size='5' maxlength='6'></td>";
 									}
 
@@ -1153,7 +1194,7 @@
 						}
 					}
 
-					echo "<td colspan='9' $kommclass1>";
+					echo "<td colspan='$alespan' $kommclass1>";
 					if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
 					echo "</td></tr>";
 				}
@@ -1181,14 +1222,14 @@
 					<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'samewindow'); return false;\">
 					</form>
 					</td>
-					<td class='back' colspan='2'></td>
+					<td class='back' colspan='$backspan1'></td>
 					<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
 					<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
 					<td class='spec'>$laskurow[valkoodi]</td>
 					</tr>";
 
 			echo "	<tr>
-					<td class='back' colspan='6'></td>
+					<td class='back' colspan='$backspan2'></td>
 					<td colspan='3' class='spec'>".t("Tilauksen paino").":</td>
 					<td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
 					<td class='spec'>kg</td>

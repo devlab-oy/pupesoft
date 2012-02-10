@@ -128,14 +128,17 @@
 	}
 		
 	// CREATE SERVER ROOT CERT
-	// openssl genrsa -des3 -out ca.key 4096
+	// openssl genrsa -des3 -out ca.key 1024
 	// openssl req -new -x509 -days 365 -key ca.key -out ca.crt
 	// 
 	// CREATE SERVER SERTIFICATE
-	// openssl genrsa -des3 -out server.key 4096
+	// openssl genrsa -des3 -out server.key 1024
 	// openssl req -new -key server.key -out server.csr
 	// openssl x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
 	// 
+	// Generate server pem
+	// openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout server.pem -out server.pem
+	//
 	// COMBINE SERVER CERT+KEY TO P12
 	// openssl pkcs12 -export -out server.p12 -inkey server.key -in server.crt
 	// 

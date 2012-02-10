@@ -15390,6 +15390,9 @@ if (!function_exists("tee_keraysera2")) {
 					// $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $param);
 					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote_chklist, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
 
+					$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] = 0;
+					$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] = 0;
+
 					// if ($kaytettava_pakkaus == '') {
 					// 	break 2;
 					// }

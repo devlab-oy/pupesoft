@@ -260,7 +260,7 @@
 								$virhe++;
 							}
 							elseif (!$forceta)  {
-								echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br><br";
+								echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br><br>";
 
 								if (!$php_cli) {
 									list($usec, $sec) = explode(' ', microtime());

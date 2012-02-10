@@ -15617,6 +15617,7 @@ if (!function_exists("tee_keraysera2")) {
 									$i--;
 
 									if ($i == 0) {
+										unset($lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']]);
 										splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
 									}
 									else {
@@ -15662,6 +15663,7 @@ if (!function_exists("tee_keraysera2")) {
 
 								if (count($chk_arr[$tuoterow['otunnus']]) > 0) {
 									if ($i == 0) {
+										unset($lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']]);
 										$uudet_tunnukset_array = splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
 									}
 									else {

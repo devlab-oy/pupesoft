@@ -14897,7 +14897,7 @@ if (!function_exists("tee_keraysera2")) {
 			echo "	<script type='text/javascript'>
 
 						$(document).ready(function() {
-							$('#content').append($('#content_table'));
+							$('#content').append($('#content_table')).append($('#content_package'));
 						});
 
 					</script>";
@@ -14908,8 +14908,7 @@ if (!function_exists("tee_keraysera2")) {
 			echo "<br><hr>";
 			echo "<font class='head'>Tästä alkaa debug viestit!</font><br><br>";
 
-			echo "KÄYTETTÄVÄT PAKKAUKSET:";
-			echo "<table>";
+			echo "<table id='content_package'>";
 			echo "<tr>";
 			echo "<th>Nimi</th><th>Leveys</th><th>Korkeus</th><th>Syvyys</th><th>Kantavuus</th><th>Minimi<br>tilavuus</th><th>Minimi<br>Kantavuus</th><th>Netto<br>tilavuus</th><th>Yksin<br>erään</th><th>Käytetty<br>tilavuus</th><th>Käytetty<br>paino</th></tr>";
 

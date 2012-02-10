@@ -12,7 +12,7 @@
 	// Converted: openssl pkcs12 -in WSNDEA1234.p12 -out nordea.pem -nodes
 	// Public key: openssl rsa -in nordea.pem -pubout
 	// Private key: openssl rsa -in nordea.pem
-	
+
 	// Password: WSNDEA1234
 	define('PRIVATE_KEY', 'nordea.key');
 	define('CERT_FILE', 'nordea.crt');
@@ -46,7 +46,7 @@
 	*/
 
 	// 1. Tarvitaan maksuaineiston nimi muuttujassa $payload_file
-	$payload_file = "/Users/joni/Desktop/ssl/SEPA-demo-07.02.12.14.07.49.xml";
+	$payload_file = "SEPA-demo-07.02.12.14.07.49.xml";
 
 	// 2. Tehdään base64_encode
 	$payload = base64_encode(file_get_contents($payload_file));
@@ -108,7 +108,7 @@
 				$x509data->addChild("X509Certificate", $cert);
 
 	#file_put_contents("application_request.xml", $simple_xml->asXML());
-	
+
 	# 6. Koko Application Request base64_encodataan
 	$application_request = base64_encode($simple_xml->asXML());
 
@@ -140,27 +140,25 @@
 	$soap->preserveWhiteSpace = true;
 	$soap->formatOutput = true;
 
+	$body_timestamp = date("c");
+	$body_requestid = date("U");
+
 	$envelope = $soap->createElement("soapenv:Envelope");
 	$envelope = $soap->appendChild($envelope);
 	$envelope->setAttribute("xmlns:cor", "http://bxd.fi/CorporateFileService");
 	$envelope->setAttribute("xmlns:mod", "http://model.bxd.fi");
 	$envelope->setAttribute("xmlns:soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
-#	$envelope->setAttribute("xmlns:sign", "http://danskebank.dk/AGENA/SEPA/SigningService");
-#	$envelope->setAttribute("xmlns:dpstate", "http://danskebank.dk/AGENA/SEPA/dpstate");
-#	$envelope->appendChild($soap->createElement("soapenv:Header"));
 	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
 	$body->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 	$uploadfilein = $body->appendChild($soap->createElement("cor:uploadFilein"));
 	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
 	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));
-	$requestheader->appendChild($soap->createElement("mod:RequestId",			date("U")));
-	$requestheader->appendChild($soap->createElement("mod:Timestamp",			date("c")));
+	$requestheader->appendChild($soap->createElement("mod:RequestId",			$body_requestid));
+	$requestheader->appendChild($soap->createElement("mod:Timestamp",			$body_timestamp));
 	$requestheader->appendChild($soap->createElement("mod:Language",			"FI"));
 	$requestheader->appendChild($soap->createElement("mod:UserAgent",			"Pupesoft 1.0"));
 	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
 	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
-
- 	$axml_xml = $soap->saveXML();
 
 	# 9. Signataan SOAP
 
@@ -176,8 +174,19 @@
 
 	// Tehdään GUID ja lisätään se body elementtiin sekä headerin reference uriin
 	$guid = md5(uniqid(rand(), true));
-	$body->setAttribute("wsu:Id", $guid);
-	
+
+	// Aloitetaan uusi SOAP dokumentti
+	$soap = new DomDocument('1.0');
+	$soap->encoding = 'UTF-8';
+	$soap->preserveWhiteSpace = true;
+	$soap->formatOutput = true;
+
+	$envelope = $soap->createElement("soapenv:Envelope");
+	$envelope = $soap->appendChild($envelope);
+	$envelope->setAttribute("xmlns:cor", "http://bxd.fi/CorporateFileService");
+	$envelope->setAttribute("xmlns:mod", "http://model.bxd.fi");
+	$envelope->setAttribute("xmlns:soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
+
 	// Tehdään SOAP Header elementti
 	$header = $envelope->appendChild($soap->createElement("soapenv:Header"));
 		$security = $header->appendChild($soap->createElement("wsse:Security"));
@@ -214,9 +223,23 @@
 			$timestamp->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 #			$timestamp->setAttribute("wsu:Id", $guid);
 
+	// Kirjoitetaan BODY uudestaan (taidot loppu, että oisin osannut appendaa valmiin blockin, toisaalta tämä on identtinen, joten ei pitäisi tulla hash ongelmia)
+	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
+	$body->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+	$body->setAttribute("wsu:Id", $guid);
+	$uploadfilein = $body->appendChild($soap->createElement("cor:uploadFilein"));
+	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
+	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));
+	$requestheader->appendChild($soap->createElement("mod:RequestId",			$body_requestid));
+	$requestheader->appendChild($soap->createElement("mod:Timestamp",			$body_timestamp));
+	$requestheader->appendChild($soap->createElement("mod:Language",			"FI"));
+	$requestheader->appendChild($soap->createElement("mod:UserAgent",			"Pupesoft 1.0"));
+	$requestheader->appendChild($soap->createElement("mod:ReceiverId", 			"11111111A1"));
+	$uploadfilein->appendChild($soap->createElement("mod:ApplicationRequest", 	$application_request)); // <--- 8. Laitetaan Application Request ApplicationRequest-elementtiin
+
 	#file_put_contents("verify_soap1.xml", $soap->saveXML());
 	$soap_xml = $soap->saveXML();
-	
+
 	// Tehdään validaatio Application Requestille
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
@@ -233,12 +256,12 @@
 		}
 		exit;
 	}
-    
+
 /*
 	$axml = new DomDocument('1.0');
 	$axml->encoding = 'UTF-8';
 	$axml->loadXML($axml_xml);
-	
+
 	// Tehdään Security header
 	$soap_request = new WSSESoap($axml);
 	$soap_request->addTimestamp();
@@ -264,7 +287,7 @@
 #		$request	= $soap_request->saveXML();
 		$request	= $soap_xml;
 #		$request	= file_get_contents("verify_soap.xml");
-#		$request	= file_get_contents("SOAPrequest_GetUserInfo.xml");		
+#		$request	= file_get_contents("SOAPrequest_GetUserInfo.xml");
 		$location	= "https://filetransfer.nordea.com/services/CorporateFileService";
 		$action		= "uploadFile";
 		$version	= "1";

@@ -15378,6 +15378,21 @@ if (!function_exists("tee_keraysera2")) {
 					$yksin_kerailyalustalle_normi_tuote_trigger = true;
 				} 
 
+				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "") {
+					$loytyko_pakkaus = false;
+					foreach ($pakkaukset as $pakx => $arrx) {
+
+						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['leveys'] or $arrx['korkeus'] >= $tuoterow['korkeus'] or $arrx['syvyys'] >= $tuoterow['syvyys'])) {
+							$loytyko_pakkaus = true;
+						}
+					}
+
+					if (!$loytyko_pakkaus) {
+						$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
+						$yksin_kerailyalustalle_normi_tuote_trigger = true;
+					}
+				}
+
 				if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
 					or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 

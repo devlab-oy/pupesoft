@@ -15385,7 +15385,7 @@ if (!function_exists("tee_keraysera2")) {
 
 					foreach ($pakkaukset as $arrx) {
 
-						echo "{$arrx['yksin_eraan']} == "" and ({$arrx['leveys']} >= {$tuoterow['leveys']} or {$arrx['korkeus']} >= {$tuoterow['korkeus']} or {$arrx['syvyys']} >= {$tuoterow['syvyys']})<br>";
+						echo "{$arrx['yksin_eraan']} == '' and ({$arrx['leveys']} >= {$tuoterow['leveys']} or {$arrx['korkeus']} >= {$tuoterow['korkeus']} or {$arrx['syvyys']} >= {$tuoterow['syvyys']})<br>";
 
 						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['leveys'] or $arrx['korkeus'] >= $tuoterow['korkeus'] or $arrx['syvyys'] >= $tuoterow['syvyys'])) {
 							echo "LÖYTYI! tuote mahtuu johonkin pakkaukseen.<br><br>";

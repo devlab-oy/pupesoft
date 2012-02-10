@@ -14904,8 +14904,6 @@ if (!function_exists("tee_keraysera2")) {
 
 			echo "<br>";
 
-			echo "<div id='content'></div>";
-
 			echo "<br>";
 			echo "<br><hr>";
 			echo "<font class='head'>Tästä alkaa debug viestit!</font><br><br>";

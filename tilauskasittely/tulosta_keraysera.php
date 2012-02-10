@@ -463,6 +463,7 @@
 			if ($tee == 'keraysera' and trim($keraysvyohyke) != '' and $select_varasto > 0) {
 
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
+				echo "<div id='content'></div>";
 
 				$debug = true;
 

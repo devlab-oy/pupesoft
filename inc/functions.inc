@@ -15395,8 +15395,7 @@ if (!function_exists("tee_keraysera2")) {
 					// }
 
 					if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
-						or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))
-						or ($kaytettava_pakkaus == '' and $tuoterow['yksin_kerailyalustalle'] == '' and !$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus'])) {
+						or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 						if ($debug) echo "Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>";
 						$era_valmis = true;
 
@@ -15501,6 +15500,14 @@ if (!function_exists("tee_keraysera2")) {
 					// $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, array($tuoterow['otunnus'] => $tuoterow['tuoteno']));
 					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, array($tuoterow['tuoteno'] => array('koko' => $tuoterow['pisin_sorttaus'], 'paino' => $tuoterow['y_paino'], 'tilavuus' => $tuoterow['y_koko'], 'tilaus' => array($tuoterow['otunnus'] => $tuoterow['otunnus']))), array($tuoterow['otunnus'] => $tuoterow['tuoteno']), '', '', 0, 0, $eran_koko_pintaala);
 					if ($debug) echo "käytettävä pakkaus: $kaytettava_pakkaus<br>";
+
+					if ($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+						$era_valmis = true;
+
+						splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
+
+						break 2;
+					}
 				}
 
 				if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['tuotteen_koko'])

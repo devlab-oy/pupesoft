@@ -14847,7 +14847,7 @@ if (!function_exists("tee_keraysera2")) {
 		if ($debug) echo "<pre>",var_dump($fixed_main_array),"</pre>";
 
 		// koitetaan heittää tilausrypäs ensimmäiseksi joka matchaa minimi tilavuuteen tai minimi painoon
-		if ($yksin_eraan and count($fixed_main_array) > 1) {
+		if ($yksin_eraan and count($fixed_main_array) > 0) {
 			foreach ($kerailyniput_tiedot as $key => $arr) {
 				foreach ($arr as $ot => $val) {
 					if ($ot == 'tilauksen_koko' or $ot == 'tilauksen_paino') {

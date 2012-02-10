@@ -172,8 +172,10 @@
 	// Lasketaan raw hash/digest tiedostosta
 	$digest = base64_encode(sha1($xml_data, TRUE));
 
-	// Tehdään GUID ja lisätään se body elementtiin sekä headerin reference uriin
-	$guid = md5(uniqid(rand(), true));
+	// Tehdään GUID1, lisätään se Body Id:seen sekä headerin SignedInfo->Reference URI:in
+	// Tehdään GUID2, lisätään se BinarySecurityToken Id:seen sekä SecurityTokenReference->Reference URI:in
+	$guid1 = md5(uniqid(rand(), true));
+	$guid2 = md5(uniqid(rand(), true));
 
 	// Aloitetaan uusi SOAP dokumentti
 	$soap = new DomDocument('1.0');
@@ -195,7 +197,7 @@
 		$token = $security->appendChild($soap->createElement("wsse:BinarySecurityToken", $cert));
 		$token->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 		$token->setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
-#		$token->setAttribute("wsu:Id");
+		$token->setAttribute("wsu:Id", $guid2);
 		$token->setAttribute("ValueType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3");
 		$signature = $security->appendChild($soap->createElement("ds:Signature"));
 		$signature->setAttribute("xmlns:ds", "http://www.w3.org/2000/09/xmldsig#");
@@ -205,7 +207,7 @@
 				$signaturemethod = $signedinfo->appendChild($soap->createElement("ds:SignatureMethod"));
 				$signaturemethod->setAttribute("Algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
 				$reference = $signedinfo->appendChild($soap->createElement("ds:Reference"));
-				$reference->setAttribute("URI", "#".$guid);
+				$reference->setAttribute("URI", "#".$guid1);
 					$transforms = $reference->appendChild($soap->createElement("ds:Transforms"));
 						$transform = $transforms->appendChild($soap->createElement("ds:Transform"));
 						$transform->setAttribute("Algorithm", "http://www.w3.org/2001/10/xml-exc-c14n#");
@@ -216,17 +218,17 @@
 			$keyinfo = $signature->appendChild($soap->createElement("ds:KeyInfo"));
 				$sectoken = $keyinfo->appendChild($soap->createElement("wsse:SecurityTokenReference"));
 					$reference = $sectoken->appendChild($soap->createElement("wsse:Reference"));
-#					$reference->setAttribute("URI");
+					$reference->setAttribute("URI", "#".$guid2);
 		$timestamp = $security->appendChild($soap->createElement("wsu:Timestamp"));
 			$timestamp->appendChild($soap->createElement("wsu:Created", gmdate("Y-m-d\TH:i:s", time()).'Z'));
 			$timestamp->appendChild($soap->createElement("wsu:Expires", gmdate("Y-m-d\TH:i:s", time() + 3600).'Z'));
 			$timestamp->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
-#			$timestamp->setAttribute("wsu:Id", $guid);
+#			$timestamp->setAttribute("wsu:Id");
 
 	// Kirjoitetaan BODY uudestaan (taidot loppu, että oisin osannut appendaa valmiin blockin, toisaalta tämä on identtinen, joten ei pitäisi tulla hash ongelmia)
 	$body = $envelope->appendChild($soap->createElement("soapenv:Body"));
 	$body->setAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
-	$body->setAttribute("wsu:Id", $guid);
+	$body->setAttribute("wsu:Id", $guid1);
 	$uploadfilein = $body->appendChild($soap->createElement("cor:uploadFilein"));
 	$requestheader = $uploadfilein->appendChild($soap->createElement("mod:RequestHeader"));
 	$requestheader->appendChild($soap->createElement("mod:SenderId", 			"111111111"));

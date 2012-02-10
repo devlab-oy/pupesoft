@@ -15380,7 +15380,7 @@ if (!function_exists("tee_keraysera2")) {
 
 				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "") {
 					$loytyko_pakkaus = false;
-					foreach ($pakkaukset as $pakx => $arrx) {
+					foreach ($pakkaukset as $arrx) {
 
 						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['leveys'] or $arrx['korkeus'] >= $tuoterow['korkeus'] or $arrx['syvyys'] >= $tuoterow['syvyys'])) {
 							$loytyko_pakkaus = true;

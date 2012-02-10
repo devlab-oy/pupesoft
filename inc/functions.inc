@@ -15608,13 +15608,20 @@ if (!function_exists("tee_keraysera2")) {
 							if ($debug) echo "<br>Tuote ei mahdu pakkaukseen!<br>";
 
 							if ($kaytettava_pakkaus == "") {
-								$i--;
 
-								if ($i == 0) {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
-								}
-								else {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+								$chk_arr = $lisatyt_tilausrivit;
+								unset($chk_arr[$tuoterow['otunnus']][$tuoterow['tunnus']]);
+
+								if (count($chk_arr[$tuoterow['otunnus']]) > 0) {
+
+									$i--;
+
+									if ($i == 0) {
+										splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
+									}
+									else {
+										splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+									}
 								}
 
 								$era_valmis = true;

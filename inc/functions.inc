@@ -15607,6 +15607,20 @@ if (!function_exists("tee_keraysera2")) {
 
 							if ($debug) echo "<br>Tuote ei mahdu pakkaukseen!<br>";
 
+							if ($kaytettava_pakkaus == "") {
+								$i--;
+
+								if ($i == 0) {
+									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);								
+								}
+								else {
+									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+								}
+
+								$era_valmis = true;
+								break 3;
+							}
+
 							if ($debug and $pakkaukset[$kaytettava_pakkaus]['tilavuus'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko'])) {
 								echo "Pakkauksen tilavuus ylittyi! ({$pakkaukset[$kaytettava_pakkaus]['tilavuus']} < {$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus']} + {$tuoterow['y_koko']})<br>";
 							}
@@ -15651,9 +15665,11 @@ if (!function_exists("tee_keraysera2")) {
 									$uudet_tunnukset_array = array($tuoterow['otunnus']);
 								}
 
-								foreach($uudet_tunnukset_array as $loop_tun) {
-									$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$loop_tun}" : "{$tuoterow['tuoteno']}###{$loop_tun}";
-								}
+								// foreach($uudet_tunnukset_array as $loop_tun) {
+								// 	$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$loop_tun}" : "{$tuoterow['tuoteno']}###{$loop_tun}";
+								// }
+
+								$era_valmis = true;
 
 								break 3;								
 							}

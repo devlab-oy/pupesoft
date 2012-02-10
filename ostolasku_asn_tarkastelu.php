@@ -650,6 +650,7 @@
 			// typecastataan formista tulleet tunnukset stringeist‰ inteiksi
 			$tunnukset = array_map('intval', $tunnukset);
 			$poista_tilausrivi = array_map('intval', $poista_tilausrivi);
+			$ostotilauksella_tilaajanrivinro = array_map('intval',$ostotilauksella_tilaajanrivinro);
 			// otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
 			// T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
 			$kpl_maara_ostolla = $ostotilauksella_kpl[$tunnukset[0]];
@@ -664,14 +665,14 @@
 
 				$asn_kpl_tilaukselta = $asn_row_haku["kappalemaara"];
 				$erotus = $kpl_maara_ostolla - $asn_kpl_tilaukselta;
-
+				
 				if ($erotus != 0) {
 					// tehd‰‰n splitti
 					// haetaan ostotilauksen rivitiedot kyseiselle riville.
-					$query = "SELECT * from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus ='{$asn_row_haku["tilausnumero"]}' and tunnus='{$asn_row_haku["tilausrivinpositio"]}'";
+					$query = "SELECT * from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus ='{$asn_row_haku["tilausnumero"]}' and tunnus='{$tunnukset[0]}'";
 					$ostores = pupe_query($query);
 					$ostotilausrivirow = mysql_fetch_assoc($ostores);
-
+					
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
 								varattu = '{$asn_kpl_tilaukselta}',
@@ -679,7 +680,7 @@
 								WHERE yhtio = '{$kukarow["yhtio"]}'
 								AND tunnus = '{$ostotilausrivirow["tunnus"]}'";
 					$upres = pupe_query($query);
-
+					
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
 								yhtio 		= '$ostotilausrivirow[yhtio]',
@@ -702,13 +703,12 @@
 								hyllytaso	= '$ostotilausrivirow[hyllytaso]',
 								hyllyvali	= '$ostotilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
+
 					$inskres = pupe_query($query);
 				}
 
-
 				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."', muuttaja ='{$kukarow["kuka"]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 				$updres = pupe_query($query);
-
 				
 				// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
 				if ($poista_tilausrivi["0"] != 0) {
@@ -750,7 +750,7 @@
 					
 					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
 									}
-				elseif ($asn_row["toimittajanumero"] == "123067") {
+				elseif ($asn_row["toimittajanumero"] == "123453") {
 					$suba = substr($asn_row["toim_tuoteno"],0,3);
 					$subb = substr($asn_row["toim_tuoteno"],4);
 					$tuote = $suba."-".$subb;
@@ -763,7 +763,7 @@
 
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno 
 							FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno {$poikkeus_tuoteno} and toimi.tyyppi !='P')
+							JOIN toimi on (toimi.tunnus = tt.liitostunnus and toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno {$poikkeus_tuoteno} and toimi.tyyppi !='P')
 							JOIN tuote on (tuote.yhtio = toimi.yhtio and tuote.tuoteno = tt.tuoteno and tuote.status !='P')
 							WHERE tt.yhtio='{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
@@ -903,6 +903,7 @@
 					echo "<td align='center'>";
 					echo "<input type='checkbox' name='tunnukset[]' class='tunnukset' value='{$row['tunnus']}' />";
 					echo "<input type='hidden' name='ostotilauksella_kpl[{$row['tunnus']}]' value='{$row['varattu']}' />";
+					echo "<input type='hidden' name='ostotilauksella_tilaajanrivinro[{$row['tunnus']}]' value='{$row['tilaajanrivinro']}' />";
 					echo "</td>";
 				}
 				echo "<td><input type='checkbox' name='poista_tilausrivi[]' class='tunnukset' value='{$row['tunnus']}' /></td>";
@@ -925,7 +926,8 @@
 						asn_sanomat.kappalemaara, 
 						asn_sanomat.status, 
 						asn_sanomat.tilausnumero,
-						tilausrivi.tuoteno, 
+						tilausrivi.tuoteno,
+						tilausrivi.otunnus, 
 						if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
 						FROM asn_sanomat
 						JOIN tilausrivi ON (tilausrivi.yhtio = asn_sanomat.yhtio AND tilausrivi.tunnus IN (asn_sanomat.tilausrivi))
@@ -946,6 +948,7 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>",t("Toimittajanro"),"</th>";
+			echo "<th>",t("Laskun numero"),"</th>";
 			echo "<th>",t("Ostotilausnro"),"</th>";
 			echo "<th>",t("Tuotenro"),"</th>";
 			echo "<th>",t("Toimittajan"),"<br />",t("Tuotenro"),"</th>";
@@ -972,6 +975,7 @@
 				$row['nimitys'] = $tuoterow['nimitys'];
 
 				echo "<td align='right'>{$row['toimittajanumero']}</td>";
+				echo "<td align='right'>{$row['otunnus']}</td>";
 				echo "<td align='right'>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td>{$row['toim_tuoteno']}</td>";
@@ -1014,8 +1018,8 @@
 					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
 					
 					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
-									}
-				elseif ($row["toimittajanumero"] == "123067") {
+				}
+				elseif ($row["toimittajanumero"] == "123453") {
 					$suba = substr($row["toim_tuoteno"],0,3);
 					$subb = substr($row["toim_tuoteno"],4);
 					$tuote = $suba."-".$subb;
@@ -1047,16 +1051,21 @@
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
 
-
 					$row['nimitys'] = $trow['nimitys'];
 
-					$query = "SELECT nimitys, uusiotunnus, tilaajanrivinro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$row['tilausnumero']}' AND tuoteno = '{$row['tuoteno']}' AND tilaajanrivinro = '{$row['tilausrivinpositio']}' AND tyyppi = 'O'";
+					$query = "	SELECT tuoteno, uusiotunnus, tilaajanrivinro 
+								FROM tilausrivi 
+								WHERE yhtio = '{$kukarow['yhtio']}' 
+								AND otunnus = '{$row['tilausnumero']}' 
+								AND tuoteno = '{$row['tuoteno']}' 
+								AND tilaajanrivinro = '{$row['tilausrivinpositio']}' 
+								AND tyyppi = 'O'";
 					$tilres = pupe_query($query);
 
 
 					if (mysql_num_rows($tilres) > 0) {
 						$tilrow = mysql_fetch_assoc($tilres);
-						$row['nimitys'] = $tilrow['nimitys'];
+						// $row['nimitys'] = $tilrow['nimitys'];
 						$row['uusiotunnus'] = $tilrow['uusiotunnus'];
 						$row['tilausrivinpositio'] = $tilrow['tilaajanrivinro'];
 					}

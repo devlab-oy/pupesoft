@@ -39,7 +39,7 @@
 	$laatikkoind				= "";
 	$laatikonnumerot			= "";
 	$pakkauslista 				= "";
-	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441","123080");
+	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441","123080","123007");
 	$positio					= "";
 	$rivilla					= "";
 	$suba						= "";
@@ -206,7 +206,11 @@
 					// on poikkeuksia ja poikkeuksen poikkeuksia
 					$p=1; $c=1;
 					foreach ($xml->Package as $laatikosta) {
-
+					/*
+						if (($laatikosta->PkgId->PkgIdentNumber == "" or $laatikosta->PkgId->PkgIdentNumber == "0") and $tavarantoimittajanumero != "123312") {
+							$laatikosta = $laatikosta->Package;
+						}
+					*/	
 						if (isset($laatikosta->PkgId)) {
 							foreach ($laatikosta->PkgId as $ident) {
 								$laatikkoind = (string) $ident->PkgIdentNumber;
@@ -221,7 +225,7 @@
 								elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) >10) {
 									$sscc = $laatikkoind;
 									$laatikkoind = substr($laatikkoind,10);
-									
+		
 								}
 								elseif ($tavarantoimittajanumero == "123342") {
 									$sscc = $laatikkoind;
@@ -239,14 +243,19 @@
 							$lisays[$p][$c]['PkgIdentNumber'] = "TOTAL PACKS";
 						}
 						elseif ((trim($laatikosta->PkgNumber) == 1 or trim($laatikosta->PkgNumber) == 0 or trim($laatikosta->PkgNumber) == "01") and 
-						($laatikosta->PkgInfo->PacketKind == strtoupper("TOTAL PACKS") or 
-							$laatikosta->PkgInfo->PacketKind == strtoupper("TOTALPACKS") or 
-							$laatikosta->PkgInfo->PacketKindFreeText == strtoupper("TOTAL PACKS") or 
-							$laatikosta->PkgInfo->PacketKindFreeText == strtoupper("TOTALPACKS"))) {
+						(strtoupper($laatikosta->PkgInfo->PacketKind) == "TOTAL PACKS" or 
+							strtoupper($laatikosta->PkgInfo->PacketKind) == "TOTALPACKS" or 
+							strtoupper($laatikosta->PkgInfo->PacketKindFreeText) == "TOTAL PACKS" or 
+							strtoupper($laatikosta->PkgInfo->PacketKindFreeText) == "TOTALPACKS")) {
 								$lisays[$p][$c]['PkgIdentNumber'] = "TOTAL PACKS";
-							}
+						}
 						elseif ($tavarantoimittajanumero == "123441" and !isset($laatikosta->PkgId->PkgIdentNumber)) {
 							$lisays[$p][$c]['PkgIdentNumber'] = $asn_numero;
+						}
+						elseif ($tavarantoimittajanumero == "123007" and !isset($laatikosta->PkgId->PkgIdentNumber) and (isset($laatikosta->PkgInfo->PacketKind) and (strtoupper($laatikosta->PkgInfo->PacketKind) != "TOTAL PACKS" or strtoupper($laatikosta->PkgInfo->PacketKind) != "TOTALPACKS"))) {
+							$laatikkoind = (string) $laatikosta->PkgInfo->PacketKind;
+							$laatikkoind = utf8_decode($laatikkoind);	
+							$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
 						}
 						else {
 							$lisays[$p][$c]['PkgIdentNumber'] = $asn_numero;
@@ -272,7 +281,6 @@
 						}
 						else {
 							for ($i = 1; $i <= $pakettienlukumaara; $i++) {
-
 								// otetaan talteen arrayn ensimmäisen rivin viimeisestä solusta laatikon tunnisteid ja laitetaan se jokaisen rivin tietoihin
 								if (isset($lisays[$i][1]["PkgIdentNumber"])) {
 									$laatikkoid = $lisays[$i][1]["PkgIdentNumber"];

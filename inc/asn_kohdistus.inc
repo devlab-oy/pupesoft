@@ -27,8 +27,17 @@
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";
 			$result = pupe_query($query);
 
+			$poisto_tilausnumerot = array();
+
 			// Loopataan tuoterivit l‰pi
 			while ($row = mysql_fetch_assoc($result)) {
+
+				if (count($poisto_tilausnumerot) == 0) {
+					$tilausrivi_muuttuja = "";
+				}
+				else {
+					$tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $poisto_tilausnumerot)."')";
+				}
 
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheit‰, teid‰‰n keikka ja suuntalava sek‰ kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
@@ -56,8 +65,8 @@
 					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
 					
 					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
-									}
-				elseif ($row["toimittajanumero"] == "123067") {
+				}
+				elseif ($row["toimittajanumero"] == "123453") {
 					$suba = substr($row["toim_tuoteno"],0,3);
 					$subb = substr($row["toim_tuoteno"],4);
 					$tuote = $suba."-".$subb;
@@ -83,8 +92,9 @@
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
-							AND (tilausrivi.otunnus = '$row[tilausnumero]' or lasku.comments = '$row[tilausnumero]')
-							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'";
+							AND (tilausrivi.otunnus = '$row[tilausnumero]' or lasku.comments like '%{$row["tilausnumero"]}%')
+							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'
+							{$tilausrivi_muuttuja}";
 				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
 
@@ -115,11 +125,14 @@
 					
 					// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 					$query = "	UPDATE asn_sanomat SET
-								tilausrivi = '{$tilausrivirow['tunnus']}'
+								tilausrivi = '{$tilausrivirow['tunnus']}', 
+								tuoteno = '{$tilausrivirow['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);
-
+					
+					$poisto_tilausnumerot[] = $tilausrivirow['tunnus'];
+										
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
 								yhtio			= '$tilausrivirow[yhtio]',
@@ -152,6 +165,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);
+					$poisto_tilausnumerot[] = $tilausrivirow['tunnus'];
 				}
 
 				// Otetaan talteen t‰m‰n kierroksen tiedot
@@ -185,7 +199,8 @@
 			$toimhaku = "	SELECT *
 							FROM toimi
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND toimittajanro = '$edellinen_toimittaja'";
+							AND toimittajanro = '$edellinen_toimittaja'
+							AND tyyppi !='P'";
 			$checkres = pupe_query($toimhaku);
 
 			if (mysql_num_rows($checkres) != 1) {

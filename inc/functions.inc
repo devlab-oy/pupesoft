@@ -14897,7 +14897,7 @@ if (!function_exists("tee_keraysera2")) {
 			echo "	<script type='text/javascript'>
 
 						$(document).ready(function() {
-							$('#content').append($('#content_table')).append($('#content_package'));
+							$('#content').append($('#content_table')).append('<br>').append($('#content_package'));
 						});
 
 					</script>";

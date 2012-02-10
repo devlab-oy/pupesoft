@@ -15281,6 +15281,8 @@ if (!function_exists("tee_keraysera2")) {
 
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
 
+				$yksin_kerailyalustalle_normi_tuote_trigger = false;
+
 				if ($eran_koko == 0 and ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 					if ($debug) echo "Tuotteen $tuoterow[tuoteno] lis‰ys yksin‰‰n ylitt‰isi max ker‰yser‰ pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus])<br><br>";
 					$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
@@ -15373,6 +15375,7 @@ if (!function_exists("tee_keraysera2")) {
 
 				if ($kaytettava_pakkaus != "" and $tuoterow['yksin_kerailyalustalle'] == "" and ($pakkaukset[$kaytettava_pakkaus]['leveys'] < $tuoterow['pisin_sorttaus'] and $pakkaukset[$kaytettava_pakkaus]['korkeus'] < $tuoterow['pisin_sorttaus'] and $pakkaukset[$kaytettava_pakkaus]['syvyys'] < $tuoterow['pisin_sorttaus'])) {
 					$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
+					$yksin_kerailyalustalle_normi_tuote_trigger = true;
 				} 
 
 				if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
@@ -15479,11 +15482,11 @@ if (!function_exists("tee_keraysera2")) {
 							// tiedet‰‰n ett‰ ollaan pakkauksen sis‰ll‰ ja tuote menee yksin ker‰ysalustalle. uusi pakettinro.
 							// if ($kaytettava_pakkaus != "" and $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] > 0) {
 							if ($kaytettava_pakkaus != "") {
-								if ($tuoterow['yksin_kerailyalustalle'] == 'K' and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
+								if ($tuoterow['yksin_kerailyalustalle'] == 'K' or !$yksin_kerailyalustalle_normi_tuote_trigger) {
 									$juokseva_nro++;
 								}
 
-								if (!isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
+								if (!$yksin_kerailyalustalle_normi_tuote_trigger) {
 									$kaytettava_pakkaus = "";
 								}
 							}
@@ -15493,7 +15496,8 @@ if (!function_exists("tee_keraysera2")) {
 							$eran_koko += $tuoterow['y_koko'];
 							// $eran_koko_pintaala += ($tuoterow['tuoteleveys'] * $tuoterow['tuotesyvyys']);
 							$eran_koko_pintaala += ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']);
-							$juokseva_nro++;
+
+							if (!$yksin_kerailyalustalle_normi_tuote_trigger) $juokseva_nro++;
 							$lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']] = $tuoterow['tunnus'];
 						}
 

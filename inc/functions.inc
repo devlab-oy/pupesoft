@@ -14995,7 +14995,8 @@ if (!function_exists("tee_keraysera2")) {
 						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
 						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
 						tilausrivi.varattu y_maara,
-						IF(tuote.yksin_kerailyalustalle = 'K', 'K', '') yksin_kerailyalustalle,
+						tuote.yksin_kerailyalustalle,
+						IF(tuote.yksin_keraysalustalle = 'K', 3, IF(tuote.yksin_keraysalustalle = 'E', 1, 2)) yksin_keraysalustalle_sort,
 						tuote.tuotemassa y_paino,
 						tilausrivi.perheid,
 						if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS pisin_sorttaus,
@@ -15009,7 +15010,7 @@ if (!function_exists("tee_keraysera2")) {
 						AND tilausrivi.otunnus IN ({$tilaukset})
 						AND tilausrivi.tyyppi != 'D'
 						AND tilausrivi.varattu > 0
-						ORDER BY tuote.yksin_kerailyalustalle ASC, pisin_sorttaus DESC, vh.indeksi ASC";
+						ORDER BY yksin_keraysalustalle_sort ASC, pisin_sorttaus DESC, vh.indeksi ASC";
 			$tuoteres = pupe_query($query);
 
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {

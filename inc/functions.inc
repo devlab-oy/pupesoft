@@ -15423,24 +15423,39 @@ if (!function_exists("tee_keraysera2")) {
 						echo "Erän pinta-ala ennen YKSIN KERÄYSALUSTALLE: $eran_koko_pintaala cm2<br>";
 					}
 
-					if ($tuoterow['yksin_kerailyalustalle'] == 'E' and !$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]) {
+					$tehdaanko_yksin_kerailyalustalle = true;
 
-						if ($tuoterow['y_maara'] > 1) {
-							$query = "	SELECT *, 
-										IF(jarjestys = 0, 999999999, jarjestys) AS true_order
-										FROM tuotteen_toimittajat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tuoteno = '{$tuoterow['tuoteno']}'
-										ORDER BY true_order";
-							$order_chk_res = pupe_query($query);
-							$order_chk_row = mysql_fetch_assoc($order_chk_res);
+					if ($tuoterow['yksin_kerailyalustalle'] == 'E') {
 
-							if ($order_chk_row['pakkauskoko'] > 1) {
-								
+						if ($kaytettava_pakkaus != "" and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
+							$tehdaanko_yksin_kerailyalustalle = false;
+
+							if (isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
+								unset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 							}
 						}
+
+						// if (!$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]) {
+
+						// }
+
+						// if ($tuoterow['y_maara'] > 1) {
+						// 	$query = "	SELECT *, 
+						// 				IF(jarjestys = 0, 999999999, jarjestys) AS true_order
+						// 				FROM tuotteen_toimittajat
+						// 				WHERE yhtio = '{$kukarow['yhtio']}'
+						// 				AND tuoteno = '{$tuoterow['tuoteno']}'
+						// 				ORDER BY true_order";
+						// 	$order_chk_res = pupe_query($query);
+						// 	$order_chk_row = mysql_fetch_assoc($order_chk_res);
+
+						// 	if ($order_chk_row['pakkauskoko'] > 1) {
+								
+						// 	}
+						// }
 					}
-					else {
+
+					if ($tehdaanko_yksin_kerailyalustalle) {
 						for ($x = 1; $x <= $tuoterow['y_maara']; $x++) {
 
 							if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) {

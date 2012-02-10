@@ -15482,7 +15482,7 @@ if (!function_exists("tee_keraysera2")) {
 							// tiedetään että ollaan pakkauksen sisällä ja tuote menee yksin keräysalustalle. uusi pakettinro.
 							// if ($kaytettava_pakkaus != "" and $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] > 0) {
 							if ($kaytettava_pakkaus != "") {
-								if ($tuoterow['yksin_kerailyalustalle'] == 'K' or !$yksin_kerailyalustalle_normi_tuote_trigger) {
+								if ($tuoterow['yksin_kerailyalustalle'] == 'K' or $yksin_kerailyalustalle_normi_tuote_trigger) {
 									$juokseva_nro++;
 								}
 
@@ -15492,6 +15492,8 @@ if (!function_exists("tee_keraysera2")) {
 							}
 
 							$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = 1;
+
+							if ($yksin_kerailyalustalle_normi_tuote_trigger) $juokseva_nro--;
 
 							$eran_koko += $tuoterow['y_koko'];
 							// $eran_koko_pintaala += ($tuoterow['tuoteleveys'] * $tuoterow['tuotesyvyys']);

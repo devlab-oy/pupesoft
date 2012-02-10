@@ -14561,7 +14561,6 @@ if (!function_exists("tee_keraysera2")) {
 
 			$query = "	SELECT lasku1.prioriteettinro as prioriteetti,
 						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-						lasku1.h1time,
 						lasku1.ohjausmerkki, 
 						lahdot1.asiakasluokka,
 						lasku1.liitostunnus,
@@ -14593,7 +14592,7 @@ if (!function_exists("tee_keraysera2")) {
 						AND lasku1.varasto = '{$varasto}'
 						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) 
 						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER BY 1,2,3,4";
+						ORDER BY prioriteetti, erotus, ohjausmerkki, h1time";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$res = pupe_query($query);
 		}

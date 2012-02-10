@@ -13589,6 +13589,8 @@ if (!function_exists("valitse_pakkaus")) {
 			$pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
 			$pisin_tuote = array_shift($pisin_tuote_array);
 
+			if ($pisin_tuote['koko'] == "") return "";
+
 			// tarkistetaan ensin mahtuuko koko nippu yhteen pakettiin
 			if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
 
@@ -13607,6 +13609,9 @@ if (!function_exists("valitse_pakkaus")) {
 			}
 
 			if ($kaytettava_pakkaus == "") {
+				if ($debug) echo "pisin mitta: $pisin_tuote[koko]<br>";
+				if ($debug) echo "<pre>",var_dump($pisin_tuote),"</pre>";
+
 				// pakkaukset ovat pienimmästä isoimpaan
 				foreach ($pakkaukset as $indx => $pakkaus_array) {
 

@@ -14995,7 +14995,7 @@ if (!function_exists("tee_keraysera2")) {
 						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
 						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
 						tilausrivi.varattu y_maara,
-						tuote.yksin_kerailyalustalle,
+						IF(tuote.yksin_kerailyalustalle = 'K', 'K', '') yksin_kerailyalustalle,
 						tuote.tuotemassa y_paino,
 						tilausrivi.perheid,
 						if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS pisin_sorttaus,

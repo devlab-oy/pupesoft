@@ -29,8 +29,10 @@ if (!function_exists('alku')) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$thispage = $pdf_lasku->new_page("a4");
-
-		tulosta_logo_pdf($pdf_lasku, $thispage, $laskurow);
+		$sivutus = 0;
+		$todsivu = 1;
+		$page_lasku = $thispage;
+		tulosta_logo_pdf($pdf_lasku, $page_lasku, $laskurow);
 
 		//Otsikko
 		if ($laskurow["vienti"] == "") {
@@ -475,6 +477,21 @@ if (!function_exists('alku')) {
 				}
 
 				$pohja = $pohja - 10;
+				
+				if ($pohja <= 130) {
+					loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
+					
+					$pdf_lasku->draw_text(500, 815, t("Sivu", $kieli).": $todsivu /", $thispage, $norm);
+					
+					$kala = 735;
+					$pohja = $kala;
+					
+					$sivutus = 1;
+					$todsivu++;
+					list($thispage, $kala,$todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, 'eiotsikoitanyt',$todsivu);
+					
+				}
+				
 			}
 
 			$kala = $pohja-10;
@@ -488,15 +505,31 @@ if (!function_exists('alku')) {
 				$kala = 565;
 			}
 		}
-
-		list($thispage, $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala);
-
-		return array($thispage, $kala);
+		
+		if ($sivutus == 1) {
+			loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
+			
+			$pdf_lasku->draw_text(500, 815, t("Sivu", $kieli).": $todsivu /", $thispage, $norm);
+			
+			$kala = 735;
+			$pohja = $kala;
+			
+			$sivutus = 0;
+			$todsivu++;
+			
+			list($thispage, $kala,$todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '',$todsivu);
+		}
+		else {
+			list($thispage, $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala);
+		}
+		
+		
+		return array($thispage, $kala, $todsivu);
 	}
 }
 
 if (!function_exists('uusi_sivu')) {
-	function uusi_sivu ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $alvierittely = '') {
+	function uusi_sivu ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $alvierittely = '',$todsivu='') {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$thispage = $pdf_lasku->new_page("a4");
@@ -565,7 +598,7 @@ if (!function_exists('uusi_sivu')) {
 			list($thispage, $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala);
 		}
 
-		return array($thispage, $kala);
+		return array($thispage, $kala, $todsivu);
 	}
 }
 
@@ -2030,7 +2063,15 @@ if (!function_exists("tulosta_lasku")) {
 		mysql_data_seek($result, 0);
 
 		// aloitellaan laskun teko
-		list($page_lasku[$sivu], $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
+		#list($page_lasku[$sivu], $kala, $todsivu) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
+		list($page_return, $kala, $todsivu) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
+		
+		$org_tod = $todsivu;
+		$org_sivu = $sivu;
+		$sivu = $todsivu;
+		$page_lasku[$sivu] = $page_return;
+		
+		#$page_lasku[$todsivu] = $page_return;
 
 		$rivigrouppaus = FALSE;
 
@@ -2064,7 +2105,7 @@ if (!function_exists("tulosta_lasku")) {
 
 				$sivu++;
 
-				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
+				list($page_lasku[$sivu], $kala, $todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '', $todsivu);
 			}
 
 			// Mahtuuko rivi tälle sivulle
@@ -2078,7 +2119,7 @@ if (!function_exists("tulosta_lasku")) {
 
 				$sivu++;
 
-				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
+				list($page_lasku[$sivu], $kala,$todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '',$todsivu);
 			}
 
 			list($page_lasku[$sivu], $kala, $summa, $arvo) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala, $laskutyyppi, $toim, $summa, $arvo);
@@ -2098,7 +2139,7 @@ if (!function_exists("tulosta_lasku")) {
 
 			$sivu++;
 
-			list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
+			list($page_lasku[$sivu], $kala,$todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '',$todsivu);
 		}
 
 		$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, "");
@@ -2113,7 +2154,7 @@ if (!function_exists("tulosta_lasku")) {
 
 				$sivu++;
 
-				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
+				list($page_lasku[$sivu], $kala,$todsivu) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '',$todsivu);
 			}
 
 			$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, $masrow['kassa_alepros']);

@@ -15488,7 +15488,12 @@ if (!function_exists("tee_keraysera2")) {
 								for ($ix = 1; $ix <= $lkm; $ix++) {
 
 									if ($ix == $lkm and $order_chk_row['pakkauskoko'] < $tuoterow['y_maara']) {
-										$kappalemaara = ($order_chk_row['pakkauskoko'] * $ix) - $tuoterow['y_maara'];
+										if (ceil($tuoterow['y_maara'] / $order_chk_row['pakkauskoko']) > 2) {
+											$kappalemaara = ($order_chk_row['pakkauskoko'] * $ix) - $tuoterow['y_maara'];
+										}
+										else {
+											$kappalemaara = $tuoterow['y_maara'] - $order_chk_row['pakkauskoko'];
+										}
 									}
 									elseif ($ix == $lkm and $order_chk_row['pakkauskoko'] > $tuoterow['y_maara']) {
 										$kappalemaara = $tuoterow['y_maara'];

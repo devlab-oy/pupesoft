@@ -15462,7 +15462,7 @@ if (!function_exists("tee_keraysera2")) {
 							}
 						}
 
-						if ($tuoterow['y_maara'] > 1) {
+						if ($tuoterow['y_maara'] > 1 and $tehdaanko_yksin_kerailyalustalle) {
 							$query = "	SELECT osto_era, pakkauskoko, 
 										IF(jarjestys = 0, 999999999, jarjestys) AS true_order
 										FROM tuotteen_toimittajat

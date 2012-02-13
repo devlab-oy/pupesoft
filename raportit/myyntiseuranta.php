@@ -753,7 +753,10 @@
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
 					}
-					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+
+					if ($tuoterajaus != "") {
+						$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+					}
 				}
 
 				if (isset($status) and $status != '') {

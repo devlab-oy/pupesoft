@@ -4,7 +4,7 @@
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	require "inc/parametrit.inc";
 
 	if (!isset($tee))		$tee = "";
@@ -59,8 +59,6 @@
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
-
-	require_once ("inc/tilinumero.inc");
 
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
@@ -289,7 +287,7 @@
 			if ($yritirow["tilino"] == $tilino) $chk = "selected";
 			echo "<option value='$yritirow[tilino]' $chk>$yritirow[nimi] ($yritirow[tilino])";
 		}
-		
+
 		$chk = array_fill_keys(array($tyyppi), " selected") + array_fill_keys(array('1', '2', '3'), '');
 
 		echo "</select></td></tr>

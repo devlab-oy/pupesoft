@@ -277,7 +277,12 @@
 
 			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
-			$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'T' and tilausyhteyshenkilo != ''";
+			$yhteysquery = "SELECT *
+							FROM yhteyshenkilo
+							where yhtio 			 = '$kukarow[yhtio]'
+							and liitostunnus 		 = '$srow[liitostunnus]'
+							and tyyppi 				 = 'T'
+							and tilausyhteyshenkilo != ''";
 			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
 
 			if (mysql_num_rows($yhteysresult) > 0) {

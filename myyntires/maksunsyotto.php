@@ -1,7 +1,6 @@
 <?php
 
 require ("../inc/parametrit.inc");
-require_once ("inc/tilinumero.inc");
 
 if ($livesearch_tee == "ASIAKASHAKU") {
 	livesearch_asiakashaku();

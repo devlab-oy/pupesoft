@@ -70,7 +70,8 @@
 					$ebid = "gen".substr(md5(rand()),0,20);
 				}
 
-				$filenimi = "finvoice-$ebid.xml";
+				$path_parts = pathinfo($file);
+				$filenimi = "finvoice-{$path_parts["filename"]}-$ebid.xml";
 				$save = file_put_contents($laskut."/".$filenimi, $boob);
 
 				if ($save !== FALSE) {

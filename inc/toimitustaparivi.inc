@@ -79,6 +79,23 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
+
+		$sel1='';
+		$sel2='';
+
+		if ($trow[$i]=='K')
+			$sel2 = 'SELECTED';
+		else
+			$sel1 = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sel1>".t("Ei k‰ytet‰ LOGY:n rahtikirjanumeroita")."</option>";
+		$ulos .= "<option value='K' $sel2>".t("K‰ytet‰‰n LOGY:n rahtikirjanumeroita")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "merahti") {
 		$sel1='';

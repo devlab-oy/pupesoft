@@ -153,7 +153,7 @@
 
 			if (isset($workbook)) {
 				$sarake = 0;
-				$worksheet->write($excelrivi, $sarake, t("Ytunnus"), $format_bold);
+				$worksheet->write($excelrivi, $sarake++, t("Ytunnus"), $format_bold);
 				$worksheet->write($excelrivi, $sarake++, t("Nimi"), $format_bold);
 				$worksheet->write($excelrivi, $sarake++, t("Nimitark"), $format_bold);
 				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhmä"), $format_bold);
@@ -243,7 +243,7 @@
 
 				if (isset($workbook)) {
 					$sarake = 0;
-					$worksheet->writeString($excelrivi, $sarake, $lrow["ytunnus"]);
+					$worksheet->writeString($excelrivi, $sarake++, $lrow["ytunnus"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimi"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimitark"]);
 					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);

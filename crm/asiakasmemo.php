@@ -388,7 +388,9 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$asiakasid'
+							WHERE yhtio		 = '$kukarow[yhtio]'
+							and liitostunnus = '$asiakasid'
+							and tyyppi 		 = 'A'
 							ORDER BY nimi";
 				$result = pupe_query($query);
 
@@ -815,7 +817,7 @@
 						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
 						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
-						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus
+						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
 						LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
 						LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -920,7 +922,7 @@
 			}
 
 			echo "</table>";
-			
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
 				if ($naytapoistetut == "") {
 					echo "<br>";

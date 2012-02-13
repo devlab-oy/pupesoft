@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tuoteketjujen sis‰‰nluku").":</font><hr>";
+echo "<font class='head'>".t("Tuoteketjujen sis‰‰nluku")."</font><hr>";
 
 if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 	if ($uusi == 1) {
@@ -32,7 +32,7 @@ $kielletty		= 0;
 $table_apu		= '';
 $taulunrivit	= array();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = strtoupper($path_parts['extension']);
@@ -84,7 +84,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
 
 	$table_apu = $table;
-	$table = ($table == 'tuoteresepti') ? 'tuoteperhe' : $table;
+	$table = ($table != 'korvaavat' and $table != "vastaavat") ? 'tuoteperhe' : $table;
 
 	// haetaan valitun taulun sarakkeet
 	$query = "SHOW COLUMNS FROM $table";
@@ -326,7 +326,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								}
 
 								$query = $alku.$kysely.$loppu;
-								$iresult = mysql_query($query) or pupe_error($query);
+								$iresult = pupe_query($query);
 
 								if ($toiminto == 'LISAA') {
 									echo t("Lis‰ttiin ketjuun")," $id {$rivi[$j]}!<br>";
@@ -363,7 +363,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											and id = '$id'
 											and yhtio = '{$kukarow['yhtio']}'";
 								$iresult = pupe_query($kquery);
-								
+
 								$lask++;
 							}
 							else {
@@ -386,7 +386,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$isatuote = "";
 
 			// tuoteresepteiss‰ tyyppi pit‰‰ olla R, tuoteperheiss‰ P
-			$tyyppi = ($table_apu == 'tuoteresepti') ? 'R' : 'P';
+			$tyyppi = "";
+			if ($table_apu == 'tuoteperhe') $tyyppi = 'P';
+			if ($table_apu == 'tuoteresepti') $tyyppi = 'R';
+			if ($table_apu == 'vsuunnittelu') $tyyppi = 'S';
+			if ($table_apu == 'osaluettelo') $tyyppi = 'O';
+			if ($table_apu == 'tuotekooste') $tyyppi = 'V';
+			if ($table_apu == 'lisavaruste') $tyyppi = 'L';
 
 			for ($r = 0; $r < count($headers); $r++) {
 
@@ -471,15 +477,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 }
 else {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
-			<br><br>
 			<table border='0'>
 			<tr>
 				<th>",t("Valitse tietokannan taulu"),":</th>
 				<td><select name='table'>
-					<option value='korvaavat'>",t("Korvaavat"),"</option>
-					<option value='vastaavat'>",t("Vastaavat"),"</option>
+					<option value='korvaavat'>",t("Korvaavat tuotteet"),"</option>
+					<option value='vastaavat'>",t("Vastaavat tuotteet"),"</option>
 					<option value='tuoteperhe'>",t("Tuoteperheet"),"</option>
 					<option value='tuoteresepti'>",t("Tuotereseptit"),"</option>
+					<option value='osaluettelo'>",t("Tuotteen osaluettelo"),"</option>
+					<option value='tuotekooste'>",t("Tuotteen koosteluettelo"),"</option>
+					<option value='lisavaruste'>",t("Tuotteen lis‰varusteet"),"</option>
+					<option value='vsuunnittelu'>",t("Samankaltaiset valmisteet"),"</option>
 				</select></td>
 			</tr>
 

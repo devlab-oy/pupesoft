@@ -404,9 +404,9 @@
 				// !!!!!!!! YHTEYSHENKILÖ OSIO !!!!!!!!!!!!
 				$hquery = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhtio = '$kukarow[yhtio]'
+							WHERE yhtio 	 = '$kukarow[yhtio]'
 							AND liitostunnus = '$asrow[tunnus]'
-							and tyyppi != 'T'";
+							and tyyppi	 	 = 'A'";
 				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {

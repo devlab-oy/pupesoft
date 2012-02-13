@@ -340,7 +340,6 @@
 //					$Amt = $RgltryDtls->addChild('Amt', '');
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
-				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 
 			if ($laskurow["viite"] > 0) {
 				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
@@ -356,6 +355,9 @@
 							$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');											// Code (SCOR = Structured Communication Reference)
 						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
 //					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
+			}
+			else {
+				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 			}
 
 			// jos t‰m‰ muuttuja on setattu, on t‰m‰ ko. lasku/tapahtuma netotettu n‰ist‰ tunnuksista!
@@ -375,11 +377,10 @@
 		            }
 
 					if ($nettorow["summa"] < 0) {
-						$code = "CREN";				// hyvityslasku
-						$nettorow["summa"] *= -1;	// k‰‰nnet‰‰n etumerkki
+						$code = "CREN";	// hyvityslasku
 					}
 					else {
-						$code = "CINV";				// veloituslasku
+						$code = "CINV";	// veloituslasku
 					}
 
 					$Strd = $RmtInf->addChild('Strd', '');										   					// Structured (Max 9 occurrences)
@@ -390,7 +391,19 @@
 //							$RfrdDocNb = $RfrdDocInf->addChild('RfrdDocNb', '');
 //						$RfrdDocRltdDt = $Strd->addChild('RfrdDocRltdDt', '');
 						$RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');						   					// ReferredDocumentAmount
-							$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   					// RemittedAmount
+
+							if ($nettorow["summa"] < 0) {
+								$RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));			// CreditNoteAmount
+							}
+							else {
+								if ($nettorow['alatila'] != 'K') {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+								}
+								else {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', round($nettorow["summa"] - $nettorow['kasumma'],2));	   				// RemittedAmount
+								}
+							}
+
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
 
 					if ($nettorow["viite"] > 0) {
@@ -399,8 +412,7 @@
 								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');						   					// Code (SCOR = Structured Communication Reference)
 							$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $nettorow['viite']));	// CreditorReference
 					}
-
-					if ($nettorow["viesti"] != "") {
+					elseif ($nettorow["viesti"] != "") {
 						$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', sprintf("%-1.140s", $nettorow['viesti']));	// AdditionalRemittanceInformation
 					}
 				}
@@ -688,8 +700,16 @@
 		// Lis‰t‰‰n viel‰ oikea tapahtumien m‰‰r‰ sanoman headeriin
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
+/* T‰m‰ blocki piti poistaa, koska rikkoo Samlinkin. Aineistossa ei saa olla mit‰‰n j‰sentely‰.
+		// Kirjoitetaaan XML, tehd‰‰n t‰st‰ j‰sennelty aineisto. T‰m‰ toimii paremmin mm OPn kanssa
+		$dom = new DOMDocument('1.0');
+		$dom->preserveWhiteSpace = true;
+		$dom->formatOutput = true;
+		$dom->loadXML(str_replace(array("\n", "\r"), "", utf8_encode($xml->asXML())));
+		fwrite($toot, ($dom->saveXML()));
+*/
 		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
-		fwrite($toot, str_replace(chr(10),"",utf8_encode($xml->asXML())));
+		fwrite($toot, str_replace(chr(10), "", utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

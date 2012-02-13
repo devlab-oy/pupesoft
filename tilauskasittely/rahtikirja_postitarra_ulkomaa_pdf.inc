@@ -90,15 +90,14 @@
 		}
 
 		#Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
-		$viiva = mod11_tarkiste("1234$oma$juokseva");
+		$viiva = mod11_tarkiste($toitarow['tunhalnro'].$oma.$juokseva);
 
 		$viiva1   = "CE".$viiva."FI";
-
 		$viivaedi = "CE".$viiva."FI";
 		$viiva2   = "*CE".$viiva."FI*";
 
 		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro .= "$viiva2 ";
+		$rahtikirjanro .= "$viiva1 ";
 
 		// tehdään pdf:n uusi sivu
 		$firstpage = $pdf->new_page("a5");

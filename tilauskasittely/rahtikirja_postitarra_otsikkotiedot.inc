@@ -47,7 +47,7 @@
 		if ($yhtiorow["pankkiiban1"] != '') {
 			$postiennakkotilino = "$yhtiorow[pankkiiban1]";
 		}
-		else {		
+		else {
 			$postiennakkotilino = "$yhtiorow[pankkitili1]";
 		}
 		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
@@ -266,6 +266,11 @@
 	else {
 		$rahdinmaksaja		= "Maksaja muu kuin lähettäjä. ";
 		$rahdinmaksajan_nr 	= "";
+	}
+
+	// Ulkomaan lähetykissä tarvitaan myös nelinumeroinen, asiakaskohtainen tunnushallintanumero
+	if (strpos($toitarow['sopimusnro'], "@") !== FALSE) {
+		list($toitarow['sopimusnro'], $toitarow['tunhalnro']) = explode("@", $toitarow['sopimusnro']);
 	}
 
 	$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä

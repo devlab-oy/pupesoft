@@ -15000,7 +15000,8 @@ if (!function_exists("tee_keraysera2")) {
 						tuote.tuotemassa y_paino,
 						tilausrivi.perheid,
 						if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS pisin_sorttaus,
-						if (tuote.tuotekorkeus < tuote.tuoteleveys, if(tuote.tuotekorkeus < tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys < tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS lyhin_sorttaus
+						if (tuote.tuotekorkeus < tuote.tuoteleveys, if(tuote.tuotekorkeus < tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys < tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS lyhin_sorttaus,
+						tuote.myynti_era
 						FROM tilausrivi
 						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -15461,7 +15462,7 @@ if (!function_exists("tee_keraysera2")) {
 						}
 
 						if ($tuoterow['y_maara'] > 1) {
-							$query = "	SELECT osto_era, 
+							$query = "	SELECT osto_era, pakkauskoko, 
 										IF(jarjestys = 0, 999999999, jarjestys) AS true_order
 										FROM tuotteen_toimittajat
 										WHERE yhtio = '{$kukarow['yhtio']}'
@@ -15470,36 +15471,52 @@ if (!function_exists("tee_keraysera2")) {
 							$order_chk_res = pupe_query($query);
 							$order_chk_row = mysql_fetch_assoc($order_chk_res);
 
+							// pakkauskoon valitsemisperiaate
+							if ($tuoterow['myynti_era'] > 1) {
+								$kerayspakkauskoko = $tuoterow['myynti_era'];
+							}
+							elseif ($order_chk_row['osto_era'] > 1 or $order_chk_row['pakkauskoko'] > 1) {
+								if ($order_chk_row['osto_era'] > $order_chk_row['pakkauskoko']) {
+									$kerayspakkauskoko = $order_chk_row['osto_era'];
+								}
+								else {
+									$kerayspakkauskoko = $order_chk_row['pakkauskoko'];
+								}
+							}
+							else {
+								$kerayspakkauskoko = 1;
+							}
+
 							// jos osto_era on suurempi kuin 1, katsotaan montako kertaa osto_era menee tilattavaan määrään ja tehdään jokaisella kerralla yksin keräilyalustalle pakkaus (dummy 999)
-							if ($order_chk_row['osto_era'] > 1) {
+							if ($kerayspakkauskoko > 1) {
 
 								if (isset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro])) $juokseva_nro++;
 
 								$tuoterow['y_maara'] = (int) $tuoterow['y_maara'];
-								$order_chk_row['osto_era'] = (int) $order_chk_row['osto_era'];
+								$kerayspakkauskoko = (int) $kerayspakkauskoko;
 
-								if ($tuoterow['y_maara'] % $order_chk_row['osto_era'] == 0) {
-									$lkm = $tuoterow['y_maara'] / $order_chk_row['osto_era'];
+								if ($tuoterow['y_maara'] % $kerayspakkauskoko == 0) {
+									$lkm = $tuoterow['y_maara'] / $kerayspakkauskoko;
 								}
 								else {
-									$lkm = ceil($tuoterow['y_maara'] / $order_chk_row['osto_era']);
+									$lkm = ceil($tuoterow['y_maara'] / $kerayspakkauskoko);
 								}
 
 								for ($ix = 1; $ix <= $lkm; $ix++) {
 
-									if ($ix == $lkm and $order_chk_row['osto_era'] < $tuoterow['y_maara']) {
-										if (ceil($tuoterow['y_maara'] / $order_chk_row['osto_era']) > 2) {
-											$kappalemaara = ($order_chk_row['osto_era'] * $ix) - $tuoterow['y_maara'];
+									if ($ix == $lkm and $kerayspakkauskoko < $tuoterow['y_maara']) {
+										if (ceil($tuoterow['y_maara'] / $kerayspakkauskoko) > 2) {
+											$kappalemaara = ($kerayspakkauskoko * $ix) - $tuoterow['y_maara'];
 										}
 										else {
-											$kappalemaara = $tuoterow['y_maara'] - $order_chk_row['osto_era'];
+											$kappalemaara = $tuoterow['y_maara'] - $kerayspakkauskoko;
 										}
 									}
-									elseif ($ix == $lkm and $order_chk_row['osto_era'] > $tuoterow['y_maara']) {
+									elseif ($ix == $lkm and $kerayspakkauskoko > $tuoterow['y_maara']) {
 										$kappalemaara = $tuoterow['y_maara'];
 									}
 									else {
-										$kappalemaara = $order_chk_row['osto_era'];
+										$kappalemaara = $kerayspakkauskoko;
 									}
 
 									if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $kappalemaara) > $keraysvyohyketiedot['max_keraysera_pintaala']) {

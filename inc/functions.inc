@@ -15507,7 +15507,12 @@ if (!function_exists("tee_keraysera2")) {
 
 									if ($ix == $lkm and $kerayspakkauskoko < $tuoterow['y_maara']) {
 										if (ceil($tuoterow['y_maara'] / $kerayspakkauskoko) > 2) {
-											$kappalemaara = ($kerayspakkauskoko * $ix) - $tuoterow['y_maara'];
+											if (($kerayspakkauskoko * $ix) - $tuoterow['y_maara'] == 0) {
+												$kappalemaara = $kerayspakkauskoko;
+											}
+											else {
+												$kappalemaara = ($kerayspakkauskoko * $ix) - $tuoterow['y_maara'];
+											}
 										}
 										else {
 											$kappalemaara = $tuoterow['y_maara'] - $kerayspakkauskoko;

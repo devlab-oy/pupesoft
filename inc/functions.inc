@@ -15476,13 +15476,8 @@ if (!function_exists("tee_keraysera2")) {
 							if ($tuoterow['myynti_era'] > 1) {
 								$kerayspakkauskoko = $tuoterow['myynti_era'];
 							}
-							elseif ($order_chk_row['osto_era'] > 1 or $order_chk_row['pakkauskoko'] > 1) {
-								if ($order_chk_row['osto_era'] > $order_chk_row['pakkauskoko']) {
-									$kerayspakkauskoko = $order_chk_row['osto_era'];
-								}
-								else {
-									$kerayspakkauskoko = $order_chk_row['pakkauskoko'];
-								}
+							elseif ($order_chk_row['osto_era'] > 1) {
+								$kerayspakkauskoko = $order_chk_row['osto_era'];
 							}
 							else {
 								$kerayspakkauskoko = 1;

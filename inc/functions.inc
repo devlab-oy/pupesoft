@@ -14480,7 +14480,8 @@ if (!function_exists("tee_keraysera2")) {
 					lahdot AS lahdot1 READ,
 					lahdot AS lahdot2 READ,
 					tuoteperhe READ,
-					kerayserat READ";
+					kerayserat READ,
+					tuotteen_toimittajat READ";
 		$result = pupe_query($query);
 
 		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,

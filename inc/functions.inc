@@ -15478,11 +15478,24 @@ if (!function_exists("tee_keraysera2")) {
 								$tuoterow['y_maara'] = (int) $tuoterow['y_maara'];
 								$order_chk_row['pakkauskoko'] = (int) $order_chk_row['pakkauskoko'];
 
-								$lkm = $tuoterow['y_maara'] % $order_chk_row['pakkauskoko'] == 0 ? $tuoterow['y_maara'] / $order_chk_row['pakkauskoko'] : ceil($tuoterow['y_maara'] / $order_chk_row['pakkauskoko'] + 1);
+								if ($tuoterow['y_maara'] % $order_chk_row['pakkauskoko'] == 0) {
+									$lkm = $tuoterow['y_maara'] / $order_chk_row['pakkauskoko'];
+								}
+								else {
+									$lkm = ceil($tuoterow['y_maara'] / $order_chk_row['pakkauskoko']);
+								}
 
 								for ($ix = 1; $ix <= $lkm; $ix++) {
 
-									$kappalemaara = $ix == $lkm ? ($order_chk_row['pakkauskoko'] * $ix) - $tuoterow['y_maara'] : $order_chk_row['pakkauskoko'];
+									if ($ix == $lkm and $order_chk_row['pakkauskoko'] < $tuoterow['y_maara']) {
+										$kappalemaara = ($order_chk_row['pakkauskoko'] * $ix) - $tuoterow['y_maara'];
+									}
+									elseif ($ix == $lkm and $order_chk_row['pakkauskoko'] > $tuoterow['y_maara']) {
+										$kappalemaara = $tuoterow['y_maara'];
+									}
+									else {
+										$kappalemaara = $order_chk_row['pakkauskoko'];
+									}
 
 									if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $kappalemaara) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 										if ($debug) echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $kappalemaara kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";

@@ -15443,8 +15443,6 @@ if (!function_exists("tee_keraysera2")) {
 
 				if ($tuoterow['yksin_kerailyalustalle'] != '' or ($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']] and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '')) {
 
-					// if ($kaytettava_pakkaus == "") $juokseva_nro--;
-
 					if ($debug) {
 						echo "<br><br>Erän tilavuus ennen YKSIN KERÄYSALUSTALLE: $eran_koko cm3<br>";
 						echo "Erän pinta-ala ennen YKSIN KERÄYSALUSTALLE: $eran_koko_pintaala cm2<br>";
@@ -15462,10 +15460,6 @@ if (!function_exists("tee_keraysera2")) {
 							}
 						}
 
-						// if (!$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]) {
-
-						// }
-
 						if ($tuoterow['y_maara'] > 1) {
 							$query = "	SELECT pakkauskoko, 
 										IF(jarjestys = 0, 999999999, jarjestys) AS true_order
@@ -15476,13 +15470,36 @@ if (!function_exists("tee_keraysera2")) {
 							$order_chk_res = pupe_query($query);
 							$order_chk_row = mysql_fetch_assoc($order_chk_res);
 
+							// jos pakkauskoko on suurempi kuin 1, katsotaan montako kertaa pakkauskoko menee tilattavaan määrään ja tehdään jokaisella kerralla yksin keräilyalustalle pakkaus (dummy 999)
 							if ($order_chk_row['pakkauskoko'] > 1) {
 
 								if (isset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro])) $juokseva_nro++;
 
-								$lkm = (int) $tuoterow['y_maara'] % (int) $order_chk_row['pakkauskoko'] == 0 ? (int) $tuoterow['y_maara'] / (int) $order_chk_row['pakkauskoko'] : ceil((int) $tuoterow['y_maara'] / (int) $order_chk_row['pakkauskoko'] + 1);
+								$tuoterow['y_maara'] = (int) $tuoterow['y_maara'];
+								$order_chk_row['pakkauskoko'] = (int) $order_chk_row['pakkauskoko'];
+
+								$lkm = $tuoterow['y_maara'] % $order_chk_row['pakkauskoko'] == 0 ? $tuoterow['y_maara'] / $order_chk_row['pakkauskoko'] : ceil($tuoterow['y_maara'] / $order_chk_row['pakkauskoko'] + 1);
 
 								for ($ix = 1; $ix <= $lkm; $ix++) {
+
+									$kappalemaara = $ix == $lkm ? ($order_chk_row['pakkauskoko'] * $ix) - $tuoterow['y_maara'] : $order_chk_row['pakkauskoko'];
+
+									if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $kappalemaara) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+										if ($debug) echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $kappalemaara kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";
+
+										$ix--;
+
+										if ($ix == 0) {
+											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
+										}
+										else {
+											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", ($ix * $kappalemaara), $debug);
+										}
+
+										$era_valmis = true;
+										break 3;
+									}
+
 									// esimerkki
 									// lkm = 3
 									// y_maara 50
@@ -15491,7 +15508,6 @@ if (!function_exists("tee_keraysera2")) {
 									// ix == 2 -> 20
 									// ix == 3 -> 3 * 20 - 50 = 10
 
-									$kappalemaara = $ix == $lkm ? ((int) $order_chk_row['pakkauskoko'] * $ix) - (int) $tuoterow['y_maara'] : (int) $order_chk_row['pakkauskoko'];
 									$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
 									$juokseva_nro++;
 								}

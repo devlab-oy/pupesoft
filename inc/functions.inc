@@ -14868,7 +14868,7 @@ if (!function_exists("tee_keraysera2")) {
 									$fixed_main_array = $backup_array;
 
 									// huijataan pinta-alaa jos valitaan "Yksin er‰‰n"-alusta
-									$keraysvyohyketiedot['max_keraysera_pintaala'] = 100000000;
+									$keraysvyohyketiedot['max_keraysera_pintaala'] = ($pak['leveys'] * $pak['syvyys']) * 1.5;
 									// break 2;
 									break 3;
 								}

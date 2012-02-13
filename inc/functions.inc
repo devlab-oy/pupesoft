@@ -15381,20 +15381,20 @@ if (!function_exists("tee_keraysera2")) {
 				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "") {
 					$loytyko_pakkaus = false;
 
-					echo "Käytettävä pakkaus on tyhjää ja ei ole yksin keräysalustalle tuote!<br><br>";
+					if ($debug) echo "Käytettävä pakkaus on tyhjää ja ei ole yksin keräysalustalle tuote!<br><br>";
 
 					foreach ($pakkaukset as $arrx) {
 
-						echo "{$arrx['yksin_eraan']} == '' and ({$arrx['leveys']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['korkeus']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['syvyys']} >= {$tuoterow['pisin_sorttaus']})<br>";
+						if ($debug) echo "{$arrx['yksin_eraan']} == '' and ({$arrx['leveys']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['korkeus']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['syvyys']} >= {$tuoterow['pisin_sorttaus']})<br>";
 
 						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['pisin_sorttaus'] or $arrx['korkeus'] >= $tuoterow['pisin_sorttaus'] or $arrx['syvyys'] >= $tuoterow['pisin_sorttaus'])) {
-							echo "LÖYTYI! tuote mahtuu johonkin pakkaukseen.<br><br>";
+							if ($debug) echo "LÖYTYI! tuote mahtuu johonkin pakkaukseen.<br><br>";
 							$loytyko_pakkaus = true;
 						}
 					}
 
 					if (!$loytyko_pakkaus) {
-						echo "Ei löytynyt sopivaa pakkausta. Laitetaan tuote yksin keräysalustalle.<br><br>";
+						if ($debug) echo "Ei löytynyt sopivaa pakkausta. Laitetaan tuote yksin keräysalustalle.<br><br>";
 						$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
 						$yksin_kerailyalustalle_normi_tuote_trigger = true;
 					}

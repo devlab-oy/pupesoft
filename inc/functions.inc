@@ -14867,7 +14867,7 @@ if (!function_exists("tee_keraysera2")) {
 									// $fixed_main_array = $backup_array + $fixed_main_array;
 									$fixed_main_array = $backup_array;
 
-									// huijataan pinta-alaa jos valitaan "Yksin er‰‰n"-alusta
+									// huijataan pinta-alaa jos valitaan "Yksin er‰‰n"-alusta. 1,5 kertainen yksin ker‰‰n alustan verran.
 									$keraysvyohyketiedot['max_keraysera_pintaala'] = ($pak['leveys'] * $pak['syvyys']) * 1.5;
 									// break 2;
 									break 3;
@@ -15380,7 +15380,7 @@ if (!function_exists("tee_keraysera2")) {
 					$yksin_kerailyalustalle_normi_tuote_trigger = true;
 				} 
 
-				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "") {
+				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
 					$loytyko_pakkaus = false;
 
 					if ($debug) echo "K‰ytett‰v‰ pakkaus on tyhj‰‰ ja ei ole yksin ker‰ysalustalle tuote!<br><br>";
@@ -15610,7 +15610,7 @@ if (!function_exists("tee_keraysera2")) {
 
 							$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = 1;
 
-							if ($yksin_kerailyalustalle_normi_tuote_trigger) $juokseva_nro--;
+							//if ($yksin_kerailyalustalle_normi_tuote_trigger) $juokseva_nro--;
 
 							$eran_koko += $tuoterow['y_koko'];
 							// $eran_koko_pintaala += ($tuoterow['tuoteleveys'] * $tuoterow['tuotesyvyys']);

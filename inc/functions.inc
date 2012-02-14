@@ -15766,6 +15766,8 @@ if (!function_exists("tee_keraysera2")) {
 
 							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 
+							$kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $i;
+
 							$era_valmis = true;
 							break 3;
 						}

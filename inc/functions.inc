@@ -15547,8 +15547,9 @@ if (!function_exists("tee_keraysera2")) {
 									// ix == 3 -> 3 * 20 - 50 = 10
 
 									$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
-									$juokseva_nro++;
 								}
+
+								$juokseva_nro++;
 
 								$eran_koko += ($tuoterow['y_koko'] * $tuoterow['y_maara']);
 								$eran_koko_pintaala += ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']);

@@ -35,7 +35,7 @@ else {
 		$ftppath .= "/";
 	}
 
-	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
+	$cmd = "/usr/bin/ncftpput -u \"$ftpuser\" -p \"$ftppass\" $ftphost $ftppath $ftpfile";
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {

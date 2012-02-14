@@ -14882,7 +14882,7 @@ if (!function_exists("tee_keraysera2")) {
 												AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
 												ORDER BY pinta_ala DESC";
 									$pakkaus_result = pupe_query($query);
-									$pakkaus_row = mysql_fetch_assoc($pakkaus_result));
+									$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
 									$keraysvyohyketiedot['max_keraysera_pintaala'] = $pakkaus_row['pinta_ala'] * 1.5;
 									if ($debug) echo "Uusi pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br><br>";

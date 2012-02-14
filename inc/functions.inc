@@ -15571,6 +15571,18 @@ if (!function_exists("tee_keraysera2")) {
 
 								$ii++;
 
+								if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+									if ($debug) echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
+
+									unset($kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
+									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
+
+									$era_valmis = true;
+									break 2;
+								}
+
+								$rivit++;
+
 								$ed_tilausnro = $tuoterow['otunnus'];
 
 								continue;
@@ -15581,8 +15593,15 @@ if (!function_exists("tee_keraysera2")) {
 					if ($tehdaanko_yksin_kerailyalustalle) {
 						for ($x = 1; $x <= $tuoterow['y_maara']; $x++) {
 
-							if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
-								if ($debug) echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $x kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";
+							if (($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) or ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala'])) {
+								if ($debug) {
+									if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+										echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
+									}
+									else {
+										echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $x kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";
+									}
+								}
 
 								$x--;
 
@@ -15619,6 +15638,8 @@ if (!function_exists("tee_keraysera2")) {
 
 							if (!$yksin_kerailyalustalle_normi_tuote_trigger) $juokseva_nro++;
 							$lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']] = $tuoterow['tunnus'];
+
+							$rivit++;
 						}
 
 						if ($debug) {

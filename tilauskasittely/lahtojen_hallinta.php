@@ -415,6 +415,22 @@
 						$nayta_pdf = 'foo';
 
 						require ("rahtikirja-tulostus.php");
+
+						$query = "	SELECT COUNT(tunnus) as tunnus
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+									AND toimitustavan_lahto = '{$lahto}'";
+						$result = pupe_query($query);
+
+						$row = mysql_fetch_assoc($result);
+
+						if ($row['tunnus'] == count($sel_ltun)) {
+							$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+							$upd_res = pupe_query($query);
+						}
+
+						$tee = "";
 					}
 					else {
 						echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";

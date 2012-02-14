@@ -520,7 +520,7 @@
 
 		$summa = $turvasumma;
 	}
-	
+
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I' and isset($teetosite)) {
 
@@ -646,6 +646,8 @@
 		$avaavatase 		= "";
 		$gokfrom 			= "";
 		$tilikausi 			= "";
+		$asiakasid			= "";
+		$toimittajaid		= "";
 
 		if ($lopetus != '' and $tullaan == "muutosite") {
 			lopetus($lopetus, "META");

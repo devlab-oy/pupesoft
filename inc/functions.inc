@@ -10737,6 +10737,39 @@ if (!function_exists("tarkista_oikeus")) {
 	}
 }
 
+if (!function_exists("mod11_tarkiste")) {
+	function mod11_tarkiste ($numero) {
+
+		$tulos = "";
+		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
+
+		# K‰‰nnet‰‰n stringi takaperin
+		$numero_rev = strrev($numero);
+
+		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
+			# Lasketaan tulo ja kumuloidaan
+			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
+		}
+
+		# lasketaan tarkiste ja konkatenoidaan peruslukuun
+		$jaannos = $summa % 11;
+
+		switch ($jaannos) {
+			case 0:
+				$tulos = $numero . 0;
+				break;
+			case 1:
+				$tulos = $numero . 0;
+				break;
+			default:
+				$tulos = $numero . (11 - $jaannos);
+				break;
+		}
+
+		return $tulos;
+	}
+}
+
 if (!function_exists("tarkista_viite")) {
 	function tarkista_viite($viite) {
 
@@ -12524,7 +12557,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 }
 
 if (!function_exists("hintapyoristys")) {
-	function hintapyoristys($luku, $desimaalit=0) {
+	function hintapyoristys($luku, $desimaalit=0, $loppunollat_pois=FALSE) {
 		global $yhtiorow;
 
 		$luku = (float) $luku;
@@ -12536,11 +12569,10 @@ if (!function_exists("hintapyoristys")) {
 			$desit = (int) $yhtiorow['hintapyoristys'];
 		}
 
-
 		// k‰‰nnet‰‰n luku desimaaliluvuksi parametrin mukaisesti
 		$luku = sprintf("%.{$desit}f", round($luku, $desit));
 
-		if ($yhtiorow["hintapyoristys_loppunollat"] == "P" or (int) $desimaalit > 0) {
+		if ($yhtiorow["hintapyoristys_loppunollat"] == "P" or (int) $desimaalit > 0 or $loppunollat_pois) {
 			// poistetaan nollat lopusta
 			$luku = rtrim($luku, "0");
 

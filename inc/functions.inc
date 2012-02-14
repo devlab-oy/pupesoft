@@ -16114,7 +16114,7 @@ if (!function_exists("tee_keraysera2")) {
 
 						if ($debug) {
 							if ($ed_pak != '' and $ed_pak != $increment) {
-								$m2 = ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000;
+								$m2 = $ed_pakkaustunnus != 999 ? ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000 : "";
 								echo "<tr><th colspan='8'>Yhteensä</th><th>{$m2} m2</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
 							}
 
@@ -16207,7 +16207,7 @@ if (!function_exists("tee_keraysera2")) {
 			}
 
 			if ($debug and $ed_pak != '') {
-				$m2 = ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000;
+				$m2 = $ed_pakkaustunnus != 999 ? ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000 : "";
 
 				echo "<tr><th colspan='8'>Yhteensä</th><th></th>{$m2} m2<th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
 				echo "<tr><th colspan='9'>Keräyserä yhteensä</th>";

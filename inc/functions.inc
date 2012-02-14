@@ -12557,7 +12557,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 }
 
 if (!function_exists("hintapyoristys")) {
-	function hintapyoristys($luku, $desimaalit=0) {
+	function hintapyoristys($luku, $desimaalit=0, $loppunollat_pois=FALSE) {
 		global $yhtiorow;
 
 		$luku = (float) $luku;
@@ -12569,11 +12569,10 @@ if (!function_exists("hintapyoristys")) {
 			$desit = (int) $yhtiorow['hintapyoristys'];
 		}
 
-
 		// käännetään luku desimaaliluvuksi parametrin mukaisesti
 		$luku = sprintf("%.{$desit}f", round($luku, $desit));
 
-		if ($yhtiorow["hintapyoristys_loppunollat"] == "P" or (int) $desimaalit > 0) {
+		if ($yhtiorow["hintapyoristys_loppunollat"] == "P" or (int) $desimaalit > 0 or $loppunollat_pois) {
 			// poistetaan nollat lopusta
 			$luku = rtrim($luku, "0");
 

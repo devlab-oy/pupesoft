@@ -16044,7 +16044,7 @@ if (!function_exists("tee_keraysera2")) {
 				echo "<th>Merkki</th>";
 				echo "<th>Tuoteno</th>";
 				echo "<th>Nimitys</th>";
-				echo "<th>Yksin kerailyalustalle</th>";
+				echo "<th>Y.A.</th>";
 				echo "<th>Yht. Paino<br>kg</th>";
 				echo "<th>Yht. Tilavuus<br>litroina</th>";
 				echo "<th>Kpl</th>";

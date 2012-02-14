@@ -15750,6 +15750,19 @@ if (!function_exists("tee_keraysera2")) {
 					for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
 						if ($debug) echo "$i. tuote ";
 
+						if ($tuoterow['myynti_era'] > 1 and $i > $tuoterow['myynti_era']) {
+							if ($debug) {
+								echo "Tuotteen myyntierä ylitetty ($tuoterow[myynti_era])!!! Splitataan tilaus.<br>";
+							}
+
+							$i--;
+
+							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
+
+							$era_valmis = true;
+							break 3;
+						}
+
 						if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko'])
 							and $pakkaukset[$kaytettava_pakkaus]['paino'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + $tuoterow['y_paino'])) {
 

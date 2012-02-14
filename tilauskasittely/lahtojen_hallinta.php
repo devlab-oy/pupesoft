@@ -1828,18 +1828,25 @@
 
 				echo "<td class='center toggleable_parent_row_time3' id='{$row['kerailyn_aloitusaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kerailyn_aloitusaika']}</td>";
 
-				$query = "	SELECT COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
-							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
-							COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
+				$query = "	SELECT COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 							SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina'
 							FROM lasku
-							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus {$ei_lapsia_lisa})
 							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 							AND lasku.tunnus IN ({$row['tilaukset']})";
 				$rivit_res = pupe_query($query);
 				$rivit_row = mysql_fetch_assoc($rivit_res);
 
 				echo "<td class='center toggleable_parent_row_orders' id='{$rivit_row['tilatut']}__{$row['lahdon_tunnus']}__{$y}'>{$rivit_row['tilatut']} / {$rivit_row['valmiina']}</td>";
+
+				$query = "	SELECT COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
+							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
+							FROM lasku
+							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.varattu > 0 {$ei_lapsia_lisa})
+							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+							AND lasku.tunnus IN ({$row['tilaukset']})";
+				$rivit_res = pupe_query($query);
+				$rivit_row = mysql_fetch_assoc($rivit_res);
+
 				echo "<td class='center toggleable_parent_row_rows' id='{$rivit_row['suunnittelussa']}__{$row['lahdon_tunnus']}__{$y}'>{$rivit_row['suunnittelussa']} / {$rivit_row['keratyt']}</td>";
 
 				$query = "	SELECT ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',

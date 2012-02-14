@@ -16043,6 +16043,8 @@ if (!function_exists("tee_keraysera2")) {
 				echo "<th>Tilausrivi</th>";
 				echo "<th>Merkki</th>";
 				echo "<th>Tuoteno</th>";
+				echo "<th>Nimitys</th>";
+				echo "<th>Yksin kerailyalustalle</th>";
 				echo "<th>Yht. Paino<br>kg</th>";
 				echo "<th>Yht. Tilavuus<br>litroina</th>";
 				echo "<th>Kpl</th>";
@@ -16095,6 +16097,7 @@ if (!function_exists("tee_keraysera2")) {
 			$summataan_laatikot = array();
 
 			$ed_pak = '';
+			$ed_pakkaustunnus = '';
 
 			foreach ($kaytettavat_pakkaukset as $paknro => $arr) {
 
@@ -16111,7 +16114,8 @@ if (!function_exists("tee_keraysera2")) {
 
 						if ($debug) {
 							if ($ed_pak != '' and $ed_pak != $increment) {
-								echo "<tr><th colspan='7'>Yhteensä</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
+								$m2 = ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000;
+								echo "<tr><th colspan='8'>Yhteensä</th><th>{$m2} m2</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
 							}
 
 							echo "<tr>";
@@ -16132,7 +16136,7 @@ if (!function_exists("tee_keraysera2")) {
 						$xxx = 1;
 
 						foreach ($arr3 as $tilriv => $kpl) {
-							$query = "	SELECT tilausrivi.tuoteno, tuote.tuotemassa, tuote.tuoteleveys, tuote.tuotekorkeus, tuote.tuotesyvyys, tilausrivi.otunnus
+							$query = "	SELECT tilausrivi.tuoteno, tuote.tuotemassa, tuote.tuoteleveys, tuote.tuotekorkeus, tuote.tuotesyvyys, tilausrivi.otunnus, tuote.nimitys, tuote.yksin_kerailyalustalle
 										FROM tilausrivi 
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
@@ -16154,6 +16158,8 @@ if (!function_exists("tee_keraysera2")) {
 								echo "<td>$tilriv</td>";
 								echo "<td>$lask_row[ohjausmerkki]</td>";
 								echo "<td>$tuotenimi_row[tuoteno]</td>";
+								echo "<td>$tuotenimi_row[nimitys]</td>";
+								echo "<td>$tuotenimi_row[yksin_kerailyalustalle]</td>";
 								echo "<td>$rivi_massa</td>";
 								echo "<td>$rivi_tilavuus</td>";
 							}
@@ -16194,14 +16200,17 @@ if (!function_exists("tee_keraysera2")) {
 						}
 
 						$ed_pak = $increment;
+						$ed_pakkaustunnus = $paknro;
 					}
 				}
 				if ($debug) echo "</tr>";
 			}
 
 			if ($debug and $ed_pak != '') {
-				echo "<tr><th colspan='7'>Yhteensä</th><th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
-				echo "<tr><th colspan='7'>Keräyserä yhteensä</th>";
+				$m2 = ($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000;
+
+				echo "<tr><th colspan='8'>Yhteensä</th><th></th>{$m2} m2<th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
+				echo "<tr><th colspan='9'>Keräyserä yhteensä</th>";
 
 				$koko_massa = $koko_tilavuus = 0;
 

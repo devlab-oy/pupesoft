@@ -15486,7 +15486,7 @@ if (!function_exists("tee_keraysera2")) {
 							// jos osto_era on suurempi kuin 1, katsotaan montako kertaa osto_era menee tilattavaan määrään ja tehdään jokaisella kerralla yksin keräilyalustalle pakkaus (dummy 999)
 							if ($kerayspakkauskoko > 1) {
 
-								if (isset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro])) $juokseva_nro++;
+								//if (isset($kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro])) $juokseva_nro++;
 
 								$tuoterow['y_maara'] = (int) $tuoterow['y_maara'];
 								$kerayspakkauskoko = (int) $kerayspakkauskoko;
@@ -15549,8 +15549,6 @@ if (!function_exists("tee_keraysera2")) {
 									$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
 								}
 
-								$juokseva_nro++;
-
 								$eran_koko += ($tuoterow['y_koko'] * $tuoterow['y_maara']);
 								$eran_koko_pintaala += ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']);
 
@@ -15584,6 +15582,8 @@ if (!function_exists("tee_keraysera2")) {
 								$rivit++;
 
 								$ed_tilausnro = $tuoterow['otunnus'];
+
+								$juokseva_nro++;
 
 								continue;
 							}

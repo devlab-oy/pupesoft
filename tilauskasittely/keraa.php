@@ -506,6 +506,7 @@
 									}
 
 									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
+									echo "<pre>",str_replace("\t", "", $query_upd),"</pre>";
 									$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
 								}
 
@@ -585,6 +586,7 @@
 															{$tyyppilisa}
 															WHERE yhtio = '{$kukarow['yhtio']}'
 															AND tunnus = '{$lapset_chk_row['tunnus']}'";
+											echo "<pre>",str_replace("\t", "", $query_upd),"</pre>";
 											$upd_res = pupe_query($query_upd);
 										}
 									}
@@ -1216,6 +1218,8 @@
 			$tee = '';
 		}
 
+		echo "tee: $tee<br>keraysvirhe: $keraysvirhe<br>real_submit: $real_submit<br>";
+
 		// Jos keräyspoikkeamia syntyi, niin lähetetään mailit myyjälle ja asiakkaalle
 		if ($muuttuiko == 'kylsemuuttu') {
 			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
@@ -1440,6 +1444,7 @@
 									AND kerayserat.tila = 'K'
 									GROUP BY 1
 									ORDER BY pakkausnro ASC";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$keraysera_res = mysql_query($query) or pupe_error($query);
 
 						$rahtikirjan_pakkaukset = array();
@@ -1471,6 +1476,7 @@
 												tulostuspaikka = '{$laskurow['varasto']}',
 												toimitustapa = '{$laskurow['toimitustapa']}',
 												yhtio = '{$kukarow['yhtio']}'";
+								echo "<pre>",str_replace("\t", "", $query_ker),"</pre>";
 								$ker_res = mysql_query($query_ker) or pupe_error($query_ker);
 
 								// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
@@ -1501,6 +1507,7 @@
 								else {
 									// päivitetään keräyserän tila "Kerätty"-tilaan
 									$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
+									echo "<pre>",str_replace("\t", "", $query),"</pre>";
 									$tila_upd_res = mysql_query($query) or pupe_error($query);
 								}
 							}
@@ -1508,6 +1515,7 @@
 						else {
 							// päivitetään keräyserän tila "Kerätty"-tilaan
 							$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$tila_upd_res = mysql_query($query) or pupe_error($query);
 						}
 					}

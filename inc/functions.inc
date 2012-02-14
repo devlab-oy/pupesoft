@@ -15762,6 +15762,8 @@ if (!function_exists("tee_keraysera2")) {
 
 							$i = floor($i / $tuoterow['myynti_era']) * $tuoterow['myynti_era'];
 
+							echo "splitattava m‰‰r‰ on $i (floor($i / $tuoterow[myynti_era]) * $tuoterow[myynti_era]<br>";
+
 							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 
 							$era_valmis = true;

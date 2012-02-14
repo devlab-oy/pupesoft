@@ -14481,7 +14481,8 @@ if (!function_exists("tee_keraysera2")) {
 					lahdot AS lahdot2 READ,
 					tuoteperhe READ,
 					kerayserat READ,
-					tuotteen_toimittajat READ";
+					tuotteen_toimittajat READ,
+					pakkaus READ";
 		$result = pupe_query($query);
 
 		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
@@ -14867,8 +14868,24 @@ if (!function_exists("tee_keraysera2")) {
 									// $fixed_main_array = $backup_array + $fixed_main_array;
 									$fixed_main_array = $backup_array;
 
+									if ($debug) echo "Huijataan keräysvyöhykkeen pinta-ala rajoitusta!<br>Vanha pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br>";
 									// huijataan pinta-alaa jos valitaan "Yksin erään"-alusta. 1,5 kertainen yksin kerään alustan verran.
-									$keraysvyohyketiedot['max_keraysera_pintaala'] = ($pak['leveys'] * $pak['syvyys']) * 1.5;
+
+									$query = "	SELECT (if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin})) pinta_ala
+												FROM pakkaus
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND paino > 0
+												AND leveys > 0
+												AND syvyys > 0
+												AND korkeus > 0
+												AND yksin_eraan = 'K'
+												AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
+												ORDER BY pinta_ala DESC";
+									$pakkaus_result = pupe_query($query);
+									$pakkaus_row = mysql_fetch_assoc($pakkaus_result));
+
+									$keraysvyohyketiedot['max_keraysera_pintaala'] = $pakkaus_row['pinta_ala'] * 1.5;
+									if ($debug) echo "Uusi pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br><br>";
 									// break 2;
 									break 3;
 								}

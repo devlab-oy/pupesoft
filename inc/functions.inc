@@ -15752,29 +15752,16 @@ if (!function_exists("tee_keraysera2")) {
 
 					$xxx = 1;
 
-					$myyntieraan_mahtuu = 0;
-
-					if ($tuoterow['myynti_era'] > 1) {
-						if ($tuoterow['myynti_era'] % $tuoterow['y_maara']) {
-							$myyntieraan_mahtuu = $tuoterow['y_maara'];
-						}
-						else {
-							$myyntieraan_mahtuu = floor($tuoterow['y_maara'] / $tuoterow['myynti_era']) * $tuoterow['myynti_era'];
-						}
-
-					}
-
 					for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
 						if ($debug) echo "$i. tuote ";
 
-						if ($tuoterow['myynti_era'] > 1 and $myyntieraan_mahtuu > 0 and $i > $myyntieraan_mahtuu) {
+						if ($tuoterow['myynti_era'] > 1 and $pakkaukset[$kaytettava_pakkaus]['tilavuus'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko'])
+							and $pakkaukset[$kaytettava_pakkaus]['paino'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + $tuoterow['y_paino'])) {
 							if ($debug) {
-								echo "Tuotteen myyntierä ylitetty ($tuoterow[myynti_era], mahtuu $myyntieraan_mahtuu kpl)!!! Splitataan tilaus.<br>";
+								echo "Tuotteen myyntierä ylitetty ($tuoterow[myynti_era])!!! Splitataan tilaus.<br>";
 							}
 
-							$i--;
-
-							$i = $myyntieraan_mahtuu;
+							$i = floor($i / $tuoterow['myynti_era']);
 
 							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 

@@ -435,6 +435,8 @@
 			$keraaja = mysql_fetch_assoc($result);
 			$who = $keraaja['kuka'];
 
+			$lapsi_i = 0;
+
 			for ($i=0; $i < count($kerivi); $i++) {
 
 				$query1 = "	SELECT if (kerattyaika='0000-00-00 00:00:00', 'keraamaton', 'keratty') status
@@ -588,6 +590,8 @@
 															AND tunnus = '{$lapset_chk_row['tunnus']}'";
 											echo "<pre>",str_replace("\t", "", $query_upd),"</pre>";
 											$upd_res = pupe_query($query_upd);
+
+											$lapsi_i = $i+1;
 										}
 									}
 								}
@@ -1205,6 +1209,9 @@
 						}
 					}
 
+					$i = $lapsi_i > 0 ? $lapsi_i : $i;
+					$lapsi_i = 0;
+
 					//Keräämätön rivi
 					$keraamaton++;
 				}
@@ -1218,7 +1225,7 @@
 			$tee = '';
 		}
 
-		echo "tee: $tee<br>keraysvirhe: $keraysvirhe<br>real_submit: $real_submit<br>";
+		echo "tee: $tee<br>keraysvirhe: $keraysvirhe<br>real_submit: $real_submit<br>keraamaton: $keraamaton<br>";
 
 		// Jos keräyspoikkeamia syntyi, niin lähetetään mailit myyjälle ja asiakkaalle
 		if ($muuttuiko == 'kylsemuuttu') {

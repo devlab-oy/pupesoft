@@ -15760,7 +15760,7 @@ if (!function_exists("tee_keraysera2")) {
 								echo "Tuotteen myyntierä ylitetty ($tuoterow[myynti_era])!!! Splitataan tilaus.<br>";
 							}
 
-							$i = floor($i / $tuoterow['myynti_era']);
+							$i = floor($i / $tuoterow['myynti_era']) * $tuoterow['myynti_era'];
 
 							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 

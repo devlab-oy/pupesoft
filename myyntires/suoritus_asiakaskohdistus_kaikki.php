@@ -69,10 +69,12 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
 		$asiakasokmaksaja = FALSE;
 
-		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
 		$query = "	SELECT nimi, konserniyhtio, tunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
+					and laji != 'R'
+					and laji != 'P'
 					and left(nimi, 12) = '{$suoritus['nimi_maksaja']}'";
 		$asres = pupe_query($query);
 
@@ -81,10 +83,43 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 			$asiakasokmaksaja = TRUE;
 		}
 
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
 		if (!$asiakasokmaksaja) {
 			$query = "	SELECT nimi, konserniyhtio, tunnus
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
+						and left(nimi, 12) = '{$suoritus['nimi_maksaja']}'";
+			$asres = pupe_query($query);
+
+			if (mysql_num_rows($asres) == 1) {
+				$asiakas = mysql_fetch_assoc($asres);
+				$asiakasokmaksaja = TRUE;
+			}
+		}
+
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
+		if (!$asiakasokmaksaja) {
+			$query = "	SELECT nimi, konserniyhtio, tunnus
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
+						and laji != 'P'
+						and MATCH (nimi) AGAINST ('$unimi')";
+			$asres = pupe_query($query);
+
+			if (mysql_num_rows($asres) == 1) {
+				$asiakas = mysql_fetch_assoc($asres);
+				$asiakasokmaksaja = TRUE;
+			}
+		}
+
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
+		if (!$asiakasokmaksaja) {
+			$query = "	SELECT nimi, konserniyhtio, tunnus
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
 						and MATCH (nimi) AGAINST ('$unimi')";
 			$asres = pupe_query($query);
 

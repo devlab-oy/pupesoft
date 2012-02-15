@@ -53,6 +53,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<table>";
 		echo "<tr>
 				<th>".t("Ytunnus")."</th>
+				<th>".t("Toimittajanro")."</th>
 				<th>".t("Nimi")."</th>
 				<th colspan='3'>".t("Osoite")."</th>
 				<th>".t("Tilinumero")."</th>
@@ -68,6 +69,7 @@ if ($monta > 1 and $monta <= $limit) {
 
 			echo "<tr class='aktiivi'>
 					<td>".tarkistahetu($toimittaja["ytunnus"])."</td>
+					<td>$toimittaja[toimittajanro]</td>
 					<td>$toimittaja[nimi] $toimittaja[nimitark]</td>
 					<td>$toimittaja[osoite]</td>
 					<td>$toimittaja[postino]</td>
@@ -108,7 +110,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "</td></tr>";
 		}
 		else {
-			$ulos2 .= "<option value='$toimittaja[tunnus]'>$toimittaja[ytunnus] $toimittaja[nimi] $toimittaja[nimitark] </option>";
+			$ulos2 .= "<option value='$toimittaja[tunnus]'>$toimittaja[ytunnus] $toimittaja[toimittajanro] $toimittaja[nimi] $toimittaja[nimitark] </option>";
 		}
 
 	}

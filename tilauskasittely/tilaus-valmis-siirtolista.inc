@@ -23,6 +23,11 @@
 		$lisasalker = " ";
 	}
 
+	// L‰hetteet tulostetaan automaattisesti
+	if ($yhtiorow["lahetteen_tulostustapa"] == "A") {
+		$tulostetaan = "OK";
+	}
+
 	// p‰ivitet‰‰n vanhatunnus laskulle
 	$query  = "	UPDATE lasku SET
 	 			vanhatunnus = tunnus
@@ -680,7 +685,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					if ($yhtiorow["kerataanko_valmistukset"] == "E") {
+					if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
 						$query = "	UPDATE lasku
 									SET alatila='C', lahetepvm=now()
 									where yhtio='$kukarow[yhtio]'

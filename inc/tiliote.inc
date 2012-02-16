@@ -607,10 +607,11 @@
 			// Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
 			$tdq = "	SELECT tiliotedata.*
 						FROM tiliotedata
-						WHERE alku = '$tiliotedatarow[alku]'
-						and tilino = '$tiliotedatarow[tilino]'
-						and tyyppi = '$tiliotedatarow[tyyppi]'
-						and tunnus > '$tiliotedatarow[tunnus]'
+						WHERE yhtio = '$tiliotedatarow[yhtio]'
+						and alku 	= '$tiliotedatarow[alku]'
+						and tilino  = '$tiliotedatarow[tilino]'
+						and tyyppi  = '$tiliotedatarow[tyyppi]'
+						and tunnus  > '$tiliotedatarow[tunnus]'
 						ORDER BY perheid, tunnus";
 			$tdres2peek = pupe_query($tdq);
 
@@ -627,6 +628,24 @@
 					}
 
 					break;
+				}
+			}
+
+			if ($kuittikoodi == "E" and $koodi == "710" and strtoupper(trim($koodiselite)) == "PANO") {
+
+				$query = "	SELECT *
+							FROM tiliotedata
+							WHERE yhtio = '$tiliotedatarow[yhtio]'
+							and alku 	= '$tiliotedatarow[alku]'
+							and tilino 	= '$tiliotedatarow[tilino]'
+							and tyyppi 	= '$tiliotedatarow[tyyppi]'
+							and substr(tieto,13,18) = '".substr($tietue,12,18)."'
+							and tunnus != '$tiliotedatarow[tunnus]'";
+				$tdres2peek = mysql_query($query) or pupe_error($query);
+
+				# Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI löydy toista tapahtumaa, niin nollataan kuittikoodi.
+				if (mysql_num_rows($tdres2peek) == 0) {
+					$kuittikoodi = " ";
 				}
 			}
 

@@ -265,6 +265,38 @@
 			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰ysvyˆhykett‰ haettaessa\r\n\r\n");
 			$row = mysql_fetch_assoc($result);
 
+			// lukitaan tableja
+			$query = "	LOCK TABLES lasku WRITE, 
+						lasku AS lasku1 READ, 
+						lasku AS lasku2 READ, 
+						laskun_lisatiedot WRITE, 
+						asiakas AS asiakas1 READ, 
+						asiakas AS asiakas2 READ, 
+						tilausrivi WRITE, 
+						tilausrivi AS tilausrivi1 READ, 
+						tilausrivi AS tilausrivi2 READ, 
+						tilausrivin_lisatiedot WRITE, 
+						varaston_hyllypaikat AS vh READ,
+						varaston_hyllypaikat AS vh1 READ, 
+						varaston_hyllypaikat AS vh2 READ, 
+						tuote READ,
+						tuote AS tuote1 READ, 
+						tuote AS tuote2 READ,
+						keraysvyohyke AS keraysvyohyke1 READ, 
+						keraysvyohyke AS keraysvyohyke2 READ,
+						toimitustapa AS toimitustapa1 READ, 
+						toimitustapa AS toimitustapa2 READ, 
+						lahdot AS lahdot1 READ,
+						lahdot AS lahdot2 READ,
+						tuoteperhe READ,
+						kerayserat READ,
+						tuotteen_toimittajat READ,
+						pakkaus READ,
+						avainsana WRITE,
+						keraysvyohyke READ,
+						asiakas READ";
+			$result = pupe_query($query);
+
 			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto'], false);
 
 			if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
@@ -284,6 +316,10 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus in ({$otunnukset})";
 				$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen p‰ivityksen yhteydess‰\r\n\r\n");
+
+				// lukitaan tableja
+		 		$query = "UNLOCK TABLES";
+				$result = pupe_query($query);
 
 				$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 							FROM kerayserat
@@ -373,6 +409,11 @@
 
 					$n++;
 				}
+			}
+			else {
+				// lukitaan tableja
+		 		$query = "UNLOCK TABLES";
+				$result = pupe_query($query);
 			}
 		}
 
@@ -495,8 +536,10 @@
 		$row_id = (int) trim($sisalto[4]);
 		$qty = (int) trim($sisalto[5]);
 		$package = mysql_real_escape_string(trim($sisalto[6]));
+		$splitlineflag = (int) trim($sisalto[7]);
 
-		// katsotaan m‰ts‰‰v‰tkˆ kappalem‰‰r‰t. jos ei niin pit‰‰ splitata tilausrivi ja laittaa loput puutteeksi
+		$pitaako_splitata = false;
+
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
@@ -505,7 +548,76 @@
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
 
-		if ($qty < (int) $row['kpl']) {
+		// splitataan rivi, splittauksen ensimm‰inen rivi
+		if ($splitlineflag == 1) {
+
+			$query = "UPDATE kerayserat SET tila = 'T', kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+			$upd_res = pupe_query($query);
+
+		}
+		// 2 = 2 ... n splitattu rivi
+		// 3 = viimeinen splitattu rivi
+		elseif ($splitlineflag == 2 or $splitlineflag == 3) {
+
+			$fields = "yhtio";
+			$values = "'{$kukarow['yhtio']}'";
+
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+
+				$fieldname = mysql_field_name($result, $i);
+
+				if ($fieldname == 'tunnus' or $fieldname == 'yhtio') continue;
+
+				$fields .= ", ".$fieldname;
+
+				switch ($fieldname) {
+					case 'tila':
+						$values .= ", 'T'";
+						break;
+					case 'pakkausnro':
+						$values .= ", '".(ord($package) - 64)."'";
+						break;
+					case 'kpl':
+					case 'kpl_keratty':
+						$values .= ", '{$qty}'";
+						break;
+					default:
+						$values .= ", '".$row[$fieldname]."'";
+				}
+			}
+
+			$query = "INSERT INTO kerayserat ({$fields}) VALUES ({$values})";
+			$insres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivi‰ luodessa\r\n\r\n");
+
+			if ($splitlineflag == 3) {
+
+				$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+				$chk_res = pupe_query($query);
+				$chk_row = mysql_fetch_assoc($chk_res);
+
+				$query = "SELECT SUM(kpl_keratty) kappaleet FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tilausrivi = '{$row['tilausrivi']}'";
+				$sum_res = pupe_query($query);
+				$sum_row = mysql_fetch_assoc($sum_res);
+
+				if ($chk_row['varattu'] > $sum_row['kappaleet']) {
+					$pitaako_splitata = true;
+					$qty = $sum_row['kappaleet'];
+				}
+				else {
+					$query = "UPDATE tilausrivi SET varattu = '{$sum_row['kappaleet']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+					$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
+				}
+			}
+
+		}
+		// ei splitata rivi‰ eli normaali rivi, $splitlineflag == 0
+		else {
+			
+		}
+
+		// katsotaan m‰ts‰‰v‰tkˆ kappalem‰‰r‰t. jos ei niin pit‰‰ splitata tilausrivi ja laittaa loput puutteeksi
+
+		if (($splitlineflag == 0 and $qty < (int) $row['kpl']) or $pitaako_splitata) {
 			// ker‰‰j‰ otti v‰hemm‰n mit‰ oli tilausrivill‰, splitataan tilausrivi ja p‰ivitet‰‰n loput puutteeksi
 			$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
 			$tilrivires = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ haettaessa\r\n\r\n");
@@ -516,7 +628,7 @@
 			$fields = "yhtio";
 			$values = "'{$kukarow['yhtio']}'";
 
-			$puutevarattu = $row['kpl'] - $qty;
+			$puutevarattu = $pitaako_splitata ? $tilrivirow['varattu'] - $qty : $row['kpl'] - $qty;
 
 			for ($i = 0; $i < mysql_num_fields($tilrivires); $i++) {
 
@@ -557,11 +669,17 @@
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 		}
 
-		$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+		if ($splitlineflag == 0 or $splitlineflag == 3) {
 
-		$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
-		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
+			if ($splitlineflag == 0) {
+				$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+				$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+			}
+
+			$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
+			
+		}
 
 		$response = "0x100";
 

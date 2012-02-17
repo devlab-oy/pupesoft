@@ -465,6 +465,38 @@
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
 				echo "<div id='content'></div>";
 
+				// lukitaan tableja
+				$query = "	LOCK TABLES lasku WRITE, 
+							lasku AS lasku1 READ, 
+							lasku AS lasku2 READ, 
+							laskun_lisatiedot WRITE, 
+							asiakas AS asiakas1 READ, 
+							asiakas AS asiakas2 READ, 
+							tilausrivi WRITE, 
+							tilausrivi AS tilausrivi1 READ, 
+							tilausrivi AS tilausrivi2 READ, 
+							tilausrivin_lisatiedot WRITE, 
+							varaston_hyllypaikat AS vh READ,
+							varaston_hyllypaikat AS vh1 READ, 
+							varaston_hyllypaikat AS vh2 READ, 
+							tuote READ,
+							tuote AS tuote1 READ, 
+							tuote AS tuote2 READ,
+							keraysvyohyke AS keraysvyohyke1 READ, 
+							keraysvyohyke AS keraysvyohyke2 READ,
+							toimitustapa AS toimitustapa1 READ, 
+							toimitustapa AS toimitustapa2 READ, 
+							lahdot AS lahdot1 READ,
+							lahdot AS lahdot2 READ,
+							tuoteperhe READ,
+							kerayserat READ,
+							tuotteen_toimittajat READ,
+							pakkaus READ,
+							avainsana WRITE,
+							keraysvyohyke READ,
+							asiakas READ";
+				$result = pupe_query($query);
+
 				$debug = true;
 
 				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
@@ -488,6 +520,10 @@
 				}
 				else {
 					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
+
+					// lukitaan tableja
+			 		$query = "UNLOCK TABLES";
+ 					$result = pupe_query($query);
 				}
 			}
 

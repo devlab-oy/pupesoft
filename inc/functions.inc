@@ -14456,35 +14456,6 @@ if (!function_exists("tee_keraysera2")) {
 	 								)
 		*/
 
-		// lukitaan tableja
-		$query = "	LOCK TABLES lasku WRITE, 
-					lasku AS lasku1 READ, 
-					lasku AS lasku2 READ, 
-					laskun_lisatiedot WRITE, 
-					asiakas AS asiakas1 READ, 
-					asiakas AS asiakas2 READ, 
-					tilausrivi WRITE, 
-					tilausrivi AS tilausrivi1 READ, 
-					tilausrivi AS tilausrivi2 READ, 
-					tilausrivin_lisatiedot WRITE, 
-					varaston_hyllypaikat AS vh READ,
-					varaston_hyllypaikat AS vh1 READ, 
-					varaston_hyllypaikat AS vh2 READ, 
-					tuote READ,
-					tuote AS tuote1 READ, 
-					tuote AS tuote2 READ,
-					keraysvyohyke AS keraysvyohyke1 READ, 
-					keraysvyohyke AS keraysvyohyke2 READ,
-					toimitustapa AS toimitustapa1 READ, 
-					toimitustapa AS toimitustapa2 READ, 
-					lahdot AS lahdot1 READ,
-					lahdot AS lahdot2 READ,
-					tuoteperhe READ,
-					kerayserat READ,
-					tuotteen_toimittajat READ,
-					pakkaus READ";
-		$result = pupe_query($query);
-
 		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					lasku1.h1time,
@@ -14549,10 +14520,6 @@ if (!function_exists("tee_keraysera2")) {
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) == 0) {
-			// lukitaan tableja
- 			$query = "UNLOCK TABLES";
- 			$result = pupe_query($query);
-
 			return array('tilaukset' => array(), 'msg' => $query);
 		}
 
@@ -15032,7 +14999,11 @@ if (!function_exists("tee_keraysera2")) {
 						ORDER BY yksin_kerailyalustalle_sort ASC, pisin_sorttaus DESC, vh.indeksi ASC";
 			$tuoteres = pupe_query($query);
 
+			$inner_main_array = array();
+
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+
+				$inner_main_array[] = $tuoterow;
 
 				if ($tuoterow['perheid'] > 0 and $tuoterow['perheid'] != $tuoterow['tunnus']) {
 
@@ -15298,7 +15269,8 @@ if (!function_exists("tee_keraysera2")) {
 
 			$ed_tuote = '';
 
-			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+			// while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+			foreach ($inner_main_array as $inner_key => &$tuoterow) {
 
 				$yksin_kerailyalustalle_normi_tuote_trigger = false;
 
@@ -15397,7 +15369,7 @@ if (!function_exists("tee_keraysera2")) {
 					$yksin_kerailyalustalle_normi_tuote_trigger = true;
 				} 
 
-				if ($kaytettava_pakkaus == "" and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
+				if ($kaytettava_pakkaus == "" and count($pakkaukset) > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
 					$loytyko_pakkaus = false;
 
 					if ($debug) echo "Käytettävä pakkaus on tyhjää ja ei ole yksin keräysalustalle tuote!<br><br>";
@@ -15409,6 +15381,7 @@ if (!function_exists("tee_keraysera2")) {
 						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['pisin_sorttaus'] or $arrx['korkeus'] >= $tuoterow['pisin_sorttaus'] or $arrx['syvyys'] >= $tuoterow['pisin_sorttaus'])) {
 							if ($debug) echo "LÖYTYI! tuote mahtuu johonkin pakkaukseen.<br><br>";
 							$loytyko_pakkaus = true;
+							break;
 						}
 					}
 
@@ -15465,6 +15438,18 @@ if (!function_exists("tee_keraysera2")) {
 					if ($debug) {
 						echo "<br><br>Erän tilavuus ennen YKSIN KERÄYSALUSTALLE: $eran_koko cm3<br>";
 						echo "Erän pinta-ala ennen YKSIN KERÄYSALUSTALLE: $eran_koko_pintaala cm2<br>";
+					}
+
+					// Tuote ei ole yksin keräilyalustalle tuote, vaan sen mitat ovat niin suuret että se ei mahdu ilmeisesti mihinkään laatikkoon. Laitetaan sille Yksin keräilyalustalle = K ja laitetaan jonon hännille
+					if ($tuoterow['yksin_kerailyalustalle'] == '' and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '') {
+						if ($debug) {
+							echo "Tuote ei ole yksin keräilyalustalle tuote, vaan sen mitat ovat niin suuret että se ei mahdu ilmeisesti mihinkään laatikkoon. Laitetaan sille Yksin keräilyalustalle = K ja laitetaan jonon hännille.<br><br>";
+						}
+
+						$tuoterow['yksin_kerailyalustalle'] = 'K';
+						$inner_row[] = $tuoterow;
+						unset($inner_row[$inner_key]);
+						continue;
 					}
 
 					$tehdaanko_yksin_kerailyalustalle = true;
@@ -15564,6 +15549,8 @@ if (!function_exists("tee_keraysera2")) {
 									// ix == 3 -> 3 * 20 - 50 = 10
 
 									$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
+
+									if ($ix < $lkm) $juokseva_nro++;
 								}
 
 								$eran_koko += ($tuoterow['y_koko'] * $tuoterow['y_maara']);
@@ -15988,10 +15975,6 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
-		// lukitaan tableja
- 		$query = "UNLOCK TABLES";
- 		$result = pupe_query($query);
-
 		// if ($looppi_koko > 0) {
 		// 	$eran_koko += $pakkaukset[$kaytettava_pakkaus]['tilavuus'];
 		// 	$eran_koko_pintaala += ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys']);
@@ -16138,6 +16121,9 @@ if (!function_exists("tee_keraysera2")) {
 			$ed_pak = '';
 			$ed_pakkaustunnus = '';
 
+			reset($kaytettavat_pakkaukset);
+			unset($paknro, $arr);
+
 			foreach ($kaytettavat_pakkaukset as $paknro => $arr) {
 
 				if (!isset($summataan_laatikot[$paknro])) {
@@ -16187,8 +16173,8 @@ if (!function_exists("tee_keraysera2")) {
 							$lask_res = pupe_query($query);
 							$lask_row = mysql_fetch_assoc($lask_res);
 
-							$rivi_massa = round(($kpl * $tuotenimi_row['tuotemassa']), 1);
-							$rivi_tilavuus = round(($kpl * ($tuotenimi_row['tuoteleveys'] * $tuotenimi_row['tuotekorkeus'] * $tuotenimi_row['tuotesyvyys']) * 1000), 1);
+							$rivi_massa = round($kpl * $tuotenimi_row['tuotemassa'], 1);
+							$rivi_tilavuus = round($kpl * $tuotenimi_row['tuoteleveys'] * $tuotenimi_row['tuotekorkeus'] * $tuotenimi_row['tuotesyvyys'] * 1000, 1);
 
 							$erat['tilaukset'][$tuotenimi_row['otunnus']] = $tuotenimi_row['otunnus'];
 

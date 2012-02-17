@@ -13464,6 +13464,15 @@ if (!function_exists("tuotteen_lisatiedot")) {
 	}
 }
 
+if (!function_exists("check_lock_tables")) {
+	function check_lock_tables($tables) {
+
+		global $dbkanta;
+
+		return (!is_array($tables) or mysql_num_rows(pupe_query("SHOW OPEN TABLES FROM {$dbkanta} WHERE `Table` IN ('".mysql_real_escape_string(implode("','", $tables))."') AND `In_use` = 1")) > 0) ? false : true;
+	}
+}
+
 if (!function_exists("pisin_tuote")) {
 	function pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas) {
 

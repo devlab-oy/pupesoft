@@ -38,9 +38,13 @@
 
 					$kappaleet = 0;
 
-					// emuloidaan transactioita mysql LOCK komennolla
-					$query = "LOCK TABLES avainsana WRITE";
-					$res   = pupe_query($query);
+					$lukotetaan = check_lock_tables(array('avainsana'));
+
+					if ($lukotetaan) {
+						// emuloidaan transactioita mysql LOCK komennolla
+						$query = "LOCK TABLES avainsana WRITE";
+						$res   = pupe_query($query);
+					}
 
 					$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
 					$result = pupe_query($query);
@@ -77,6 +81,12 @@
 					else {
 						$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
 						$update_res = pupe_query($query);
+					}
+
+					if ($lukotetaan) {
+						// poistetaan lukko
+						$query = "UNLOCK TABLES";
+						$res   = pupe_query($query);
 					}
 
 					foreach ($pakkaus as $tilriv => $kpl) {

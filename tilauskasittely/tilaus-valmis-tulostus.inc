@@ -24,14 +24,63 @@
 	$returnvalue	= 0;
 	$komento		= "";
 
-	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana WRITE, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ";
+	$locktables = array(
+			'liitetiedostot',
+			'tilausrivi',
+			't2',
+			'tlt2',
+			'tilausrivi_osto',
+			'tilausrivi_myynti',
+			'sarjanumeroseuranta',
+			't3',
+			'lasku',
+			'sanakirja',
+			'avainsana',
+			'a',
+			'b',
+			'varaston_tulostimet',
+			'tuotepaikat',
+			'tuote',
+			'tuoteperhe',
+			'maksuehto',
+			'varastopaikat',
+			'kirjoittimet',
+			'asiakas',
+			'kuka',
+			'asiakaskommentti',
+			'tuotteen_toimittajat',
+			'tuotteen_avainsanat',
+			'pankkiyhteystiedot',
+			'toimitustapa',
+			'yhtion_toimipaikat',
+			'yhtion_parametrit',
+			'tuotteen_alv',
+			'maat',
+			'rahtisopimukset',
+			'rahtisopimukset2',
+			'pakkaamo',
+			'avainsana_kieli',
+			'vanha_lasku',
+			'vanha_varaston_tulostimet',
+			'yhtio'
+		);
 
 	if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
-		$query .= ", lasku AS lasku1 WRITE, lasku AS lasku2 WRITE, laskun_lisatiedot WRITE, asiakas AS asiakas1 READ, asiakas AS asiakas2 READ, tilausrivi AS tilausrivi1 READ, tilausrivi AS tilausrivi2 READ, tilausrivin_lisatiedot WRITE, varaston_hyllypaikat AS vh READ, varaston_hyllypaikat AS vh1 READ, varaston_hyllypaikat AS vh2 READ, tuote AS tuote1 READ, tuote AS tuote2 READ, keraysvyohyke AS keraysvyohyke1 READ, keraysvyohyke AS keraysvyohyke2 READ, toimitustapa AS toimitustapa1 READ, toimitustapa AS toimitustapa2 READ, lahdot AS lahdot1 WRITE, lahdot AS lahdot2 WRITE, kerayserat READ, pakkaus READ, keraysvyohyke READ";
+		array_push($locktables, 'lasku1', 'lasku2', 'laskun_lisatiedot', 'asiakas1', 'asiakas2', 'tilausrivi1', 'tilausrivi2', 'tilausrivin_lisatiedot', 'vh', 'vh1', 'vh2', 'tuote1', 'tuote2', 'keraysvyohyke1', 'keraysvyohyke2', 'toimitustapa1', 'toimitustapa2', 'lahdot1', 'lahdot2', 'kerayserat', 'pakkaus', 'keraysvyohyke');
 	}
 
-	$res   = mysql_query($query) or pupe_error($query);
+	$lukotetaan = check_lock_tables($locktables);
+
+	if ($lukotetaan) {
+		// emuloidaan transactioita mysql LOCK komennolla
+		$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana WRITE, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ";
+
+		if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			$query .= ", lasku AS lasku1 WRITE, lasku AS lasku2 WRITE, laskun_lisatiedot WRITE, asiakas AS asiakas1 READ, asiakas AS asiakas2 READ, tilausrivi AS tilausrivi1 READ, tilausrivi AS tilausrivi2 READ, tilausrivin_lisatiedot WRITE, varaston_hyllypaikat AS vh READ, varaston_hyllypaikat AS vh1 READ, varaston_hyllypaikat AS vh2 READ, tuote AS tuote1 READ, tuote AS tuote2 READ, keraysvyohyke AS keraysvyohyke1 READ, keraysvyohyke AS keraysvyohyke2 READ, toimitustapa AS toimitustapa1 READ, toimitustapa AS toimitustapa2 READ, lahdot AS lahdot1 WRITE, lahdot AS lahdot2 WRITE, kerayserat READ, pakkaus READ, keraysvyohyke READ";
+		}
+
+		$res   = mysql_query($query) or pupe_error($query);
+	}
 
 	if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
 		$queryc = "	SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
@@ -347,8 +396,10 @@
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
 
-	// poistetaan lukot
-	$query = "UNLOCK TABLES";
-	$res   = mysql_query($query) or pupe_error($query);
+	if ($lukotetaan) {
+		// poistetaan lukot
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+	}
 
 ?>

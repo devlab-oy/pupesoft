@@ -82,8 +82,71 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = 'A' $sel1>".t("L‰hetteet tulostetaan automaattisesti")."";
-		$ulos .= "<option value = 'K' $sel2>".t("L‰hetteet tulostetaan k‰sin")."";
+		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
+		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "myyntitilin_tulostustapa") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'A') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'K') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
+		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilien ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "valmistuksen_tulostustapa") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'A') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'K') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = 'K' $sel2>".t("Valmistuksien ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
+		$ulos .= "<option value = 'A' $sel1>".t("Valmistuksien ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "siirtolistan_tulostustapa") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'A') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'K') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = 'K' $sel2>".t("Siirtolistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
+		$ulos .= "<option value = 'A' $sel1>".t("Siirtolistat tulostetaan automaattisesti")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

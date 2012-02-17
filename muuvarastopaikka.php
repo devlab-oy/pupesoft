@@ -5,7 +5,7 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ, asiakas READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
@@ -508,8 +508,33 @@
 						and tunnus		= '$siirretaan[$iii]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
-			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+			if ($minnerow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $minnerow["hyllynro"].$minnerow["hyllyvali"].$minnerow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				$minne_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+			}
+			else {
+				$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
+			}
+
+			if ($mistarow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $mistarow["hyllynro"].$mistarow["hyllyvali"].$mistarow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				$mista_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+			}
+			else {
+				$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+			}
 
 			$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
 								round(if (tuote.epakurantti100pvm = '0000-00-00',

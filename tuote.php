@@ -914,13 +914,28 @@
 							$kokonaissaldo_tapahtumalle += $saldo;
 						}
 
-						echo "<tr>
-								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
-								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
-								<td align='right'>".sprintf("%.2f", $saldo)."</td>
-								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
-								<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
-								</tr>";
+						echo "<tr>";
+						echo "<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>";
+
+						if ($saldorow["hyllyalue"] == "!!M") {
+							$asiakkaan_tunnus = (int) $saldorow["hyllynro"].$saldorow["hyllyvali"].$saldorow["hyllytaso"];
+
+							$query = "	SELECT nimi, toim_nimi
+										FROM asiakas
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tunnus = '$asiakkaan_tunnus'";
+							$asiakasresult = pupe_query($query);
+							$asiakasrow = mysql_fetch_assoc($asiakasresult);
+							echo "<td>{$asiakasrow["nimi"]}</td>";
+						}
+						else {
+							echo "<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>";
+						}
+
+						echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
+									<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
+									<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+									</tr>";
 					}
 				}
 

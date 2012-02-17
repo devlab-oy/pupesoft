@@ -216,12 +216,11 @@
 
 		if (isset($etsi)) {
 
-			$query = "	SELECT asiakas.*
-						FROM asiakas
-						JOIN asiakkaan_avainsanat on (asiakkaan_avainsanat.yhtio = asiakas.yhtio and asiakas.tunnus = asiakkaan_avainsanat.liitostunnus)
-						WHERE asiakas.yhtio = '{$kukarow["yhtio"]}' ";
-
+			$asiakkaan_avainsana_where = "";
+			$asiakkaan_avainsana_join = "";
+			
 			if (isset($dyn) and count($dyn) > 0) {
+				
 				foreach($dyn as $muuttuja) {
 					if ($$muuttuja != '') {
 						$$muuttuja = mysql_real_escape_string($$muuttuja);
@@ -234,11 +233,16 @@
 				$av_sana = substr($av_sana,0,-1);
 
 				if ($av_laji != "" and $av_sana != "") {
-					$query2 .= " AND asiakkaan_avainsanat.laji in ({$av_laji}) and asiakkaan_avainsanat.avainsana in ({$av_sana}) ";
+					$asiakkaan_avainsana_join = "JOIN asiakkaan_avainsanat on (asiakkaan_avainsanat.yhtio = asiakas.yhtio and asiakas.tunnus = asiakkaan_avainsanat.liitostunnus)";
+					$asiakkaan_avainsana_where .= " AND asiakkaan_avainsanat.laji in ({$av_laji}) and asiakkaan_avainsanat.avainsana in ({$av_sana}) ";
 				}
 			}
 
-			$query .= $query2;
+			$query = "	SELECT asiakas.*
+						FROM asiakas
+						$asiakkaan_avainsana_join
+						WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
+						$asiakkaan_avainsana_where";
 
 			if (checkdate($kk1, $pvm1, $vuosi1)) {
 				$alkaa = $vuosi1."-".$kk1."-".$pvm1;
@@ -275,7 +279,7 @@
 				if (strlen($postino1) < 5) {
 					$postino1 = str_pad($postino1, 5, "0", STR_PAD_LEFT);
 				}
-				$query .= " AND asiakas.postino >= '$postino1' ";
+				$query .= " AND (asiakas.postino >= '$postino1' or asiakas.toim_postino >= '$postino1') ";
 			}
 
 			if ($postino2 != '') {
@@ -284,7 +288,7 @@
 				if (strlen($postino2) < 5) {
 					$postino2 = str_pad($postino2, 5, "0", STR_PAD_LEFT);
 				}
-				$query .= " AND asiakas.postino <= '$postino2' ";
+				$query .= " AND (asiakas.postino <= '$postino2' or asiakas.toim_postino <= '$postino2') ";
 			}
 
 			if ($kieli != '') {
@@ -334,6 +338,7 @@
 			echo "<th>",t("Nimi"),"</th>";
 			echo "<th>",t("Sähköpostiosoite"),"</th>";
 			echo "<th>",t("Postino")." ".t("Postitp"),"</th>";
+			echo "<th>",t("Toim.Postino")." ".t("Toim.Postitp"),"</th>";
 			echo "<th>",t("Myyntisumma"),"</th>";
 
 			echo "</tr>";
@@ -368,6 +373,10 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Postino"), $format_bold);
 				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Toim.Postitp"), $format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Toim.Postino"), $format_bold);
+				$excelsarake++;				
 				$worksheet->writeString($excelrivi, $excelsarake, t("Myynti aikavälillä"), $format_bold);
 				$excelsarake++;
 
@@ -433,6 +442,7 @@
 					echo "<td>{$row['nimi']}</td>";
 					echo "<td>{$row['email']}</td>";
 					echo "<td>{$row['postino']} {$row['postitp']}</td>";
+					echo "<td>{$row['toim_postino']} {$row['toim_postitp']}</td>";
 					echo "<td align='right'>". round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"])."</td>";
 
 					echo "</tr>";
@@ -457,6 +467,10 @@
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, $row["postitp"]);
 						$excelsarake++;
+						$worksheet->writeString($excelrivi, $excelsarake, $row["toim_postino"]);
+						$excelsarake++;
+						$worksheet->writeString($excelrivi, $excelsarake, $row["toim_postitp"]);
+						$excelsarake++;						
 						$worksheet->writeString($excelrivi, $excelsarake, round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"]));
 						$excelsarake++;
 

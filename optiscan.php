@@ -267,8 +267,8 @@
 
 			// lukitaan tableja
 			$query = "	LOCK TABLES lasku WRITE, 
-						lasku AS lasku1 READ, 
-						lasku AS lasku2 READ, 
+						lasku AS lasku1 WRITE, 
+						lasku AS lasku2 WRITE, 
 						laskun_lisatiedot WRITE, 
 						asiakas AS asiakas1 READ, 
 						asiakas AS asiakas2 READ, 
@@ -286,8 +286,8 @@
 						keraysvyohyke AS keraysvyohyke2 READ,
 						toimitustapa AS toimitustapa1 READ, 
 						toimitustapa AS toimitustapa2 READ, 
-						lahdot AS lahdot1 READ,
-						lahdot AS lahdot2 READ,
+						lahdot AS lahdot1 WRITE,
+						lahdot AS lahdot2 WRITE,
 						tuoteperhe READ,
 						kerayserat READ,
 						tuotteen_toimittajat READ,

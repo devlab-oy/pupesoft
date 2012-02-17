@@ -15374,14 +15374,14 @@ if (!function_exists("tee_keraysera2")) {
 
 					if ($debug) echo "K‰ytett‰v‰ pakkaus on tyhj‰‰ ja ei ole yksin ker‰ysalustalle tuote!<br><br>";
 
-					foreach ($pakkaukset as $arrx) {
+					foreach ($pakkaukset as $indeksinro => $arrx) {
 
 						if ($debug) echo "{$arrx['yksin_eraan']} == '' and ({$arrx['leveys']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['korkeus']} >= {$tuoterow['pisin_sorttaus']} or {$arrx['syvyys']} >= {$tuoterow['pisin_sorttaus']})<br>";
 
 						if ($arrx['yksin_eraan'] == "" and ($arrx['leveys'] >= $tuoterow['pisin_sorttaus'] or $arrx['korkeus'] >= $tuoterow['pisin_sorttaus'] or $arrx['syvyys'] >= $tuoterow['pisin_sorttaus'])) {
 							if ($debug) echo "L÷YTYI! tuote mahtuu johonkin pakkaukseen.<br><br>";
 							$loytyko_pakkaus = true;
-							break;
+							$kaytettava_pakkaus = $indeksinro;
 						}
 					}
 

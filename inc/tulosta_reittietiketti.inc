@@ -79,10 +79,6 @@
 						$update_res = pupe_query($query);
 					}
 
-					// poistetaan lukko
-					$query = "UNLOCK TABLES";
-					$res   = pupe_query($query);
-
 					foreach ($pakkaus as $tilriv => $kpl) {
 						$pakkaus_kirjaimet[$tilriv][$pakkaus_kirjain] = $kpl;
 						$rivit += 1;

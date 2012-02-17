@@ -25,7 +25,8 @@
 
 	// L‰hetteet tulostetaan automaattisesti
 	if ($yhtiorow["lahetteen_tulostustapa"] == "A") {
-		$tulostetaan = "OK";
+		### Korjataan t‰m‰ ###
+		#$tulostetaan = "OK";
 	}
 
 	// p‰ivitet‰‰n vanhatunnus laskulle

@@ -396,10 +396,8 @@
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
 
-	if ($lukotetaan) {
-		// poistetaan lukot
-		$query = "UNLOCK TABLES";
-		$res   = pupe_query($query);
-	}
+	// poistetaan lukot
+	$query = "UNLOCK TABLES";
+	$res   = pupe_query($query);
 
 ?>

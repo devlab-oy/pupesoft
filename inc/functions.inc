@@ -15450,16 +15450,16 @@ if (!function_exists("tee_keraysera2")) {
 					}
 
 					// Tuote ei ole yksin ker‰ilyalustalle tuote, vaan sen mitat ovat niin suuret ett‰ se ei mahdu ilmeisesti mihink‰‰n laatikkoon. Laitetaan sille Yksin ker‰ilyalustalle = K ja laitetaan jonon h‰nnille
-					if ($tuoterow['yksin_kerailyalustalle'] == '' and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '') {
-						if ($debug) {
-							echo "Tuote ei ole yksin ker‰ilyalustalle tuote, vaan sen mitat ovat niin suuret ett‰ se ei mahdu ilmeisesti mihink‰‰n laatikkoon. Laitetaan sille Yksin ker‰ilyalustalle = K ja laitetaan jonon h‰nnille.<br><br>";
-						}
+					// if ($tuoterow['yksin_kerailyalustalle'] == '' and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '') {
+					// 	if ($debug) {
+					// 		echo "Tuote ei ole yksin ker‰ilyalustalle tuote, vaan sen mitat ovat niin suuret ett‰ se ei mahdu ilmeisesti mihink‰‰n laatikkoon. Laitetaan sille Yksin ker‰ilyalustalle = K ja laitetaan jonon h‰nnille.<br><br>";
+					// 	}
 
-						$tuoterow['yksin_kerailyalustalle'] = 'K';
-						$inner_main_array[] = $tuoterow;
-						unset($inner_main_array[$inner_key]);
-						continue;
-					}
+					// 	$tuoterow['yksin_kerailyalustalle'] = 'K';
+					// 	$inner_main_array[] = $tuoterow;
+					// 	unset($inner_main_array[$inner_key]);
+					// 	continue;
+					// }
 
 					$tehdaanko_yksin_kerailyalustalle = true;
 

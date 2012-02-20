@@ -14465,7 +14465,7 @@ if (!function_exists("tee_keraysera2")) {
 	 								)
 		*/
 
-		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
+		$query = "	(SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					lasku1.h1time,
 					lasku1.ohjausmerkki, 
@@ -14500,7 +14500,7 @@ if (!function_exists("tee_keraysera2")) {
 					{$wherelisa}
 					GROUP BY 1,2,3,4,5,6,7,8)
 					UNION
-					(SELECT lasku2.prioriteettinro as prioriteetti,
+					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
 					lasku2.h1time,
 					lasku2.ohjausmerkki, 

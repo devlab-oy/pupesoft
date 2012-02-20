@@ -167,6 +167,7 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
+						$kehahin = $tuote_row["kehahin"];
 					}
 
 					$query = "  SELECT tunnus
@@ -177,8 +178,8 @@
 								LIMIT 1";
 					$tapahtuma_res = pupe_query($query);
 
-					if (mysql_num_rows($tapahtuma_res) == 0) {
-						echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla ei ole yht‰‰n tuloa")."! ($tuoteno)</font><br>";
+					if (mysql_num_rows($tapahtuma_res) == 0 and $kehahin != 0)  {
+						echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
 						$virhe = 1;
 					}
 

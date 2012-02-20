@@ -333,10 +333,11 @@ if ($tee == 'KARHUA')  {
 	$lires = pupe_query($query);
 	$lirow = mysql_fetch_assoc($lires);
 
-	$query = "	SELECT SUM(summa) summa
+	$query = "	SELECT sum(summa) summa
 				FROM suoritus
-				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kohdpvm	= '0000-00-00'
+				and ltunnus > 0
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = pupe_query($query);
 	$kaato = mysql_fetch_assoc($summaresult);

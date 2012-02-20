@@ -57,7 +57,7 @@
 				FROM yhtio
 				JOIN lasku use index (yhtio_tila_mapvm) ON (lasku.yhtio = yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00')
 				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)
-				JOIN suoritus use index (yhtio_viite) ON (suoritus.yhtio = lasku.yhtio and suoritus.viite = lasku.viite and suoritus.valkoodi=lasku.valkoodi and suoritus.tilino = yriti.tilino and suoritus.kohdpvm = '0000-00-00' and suoritus.ltunnus=0)
+				JOIN suoritus use index (yhtio_viite) ON (suoritus.yhtio = lasku.yhtio and suoritus.viite = lasku.viite and suoritus.valkoodi = lasku.valkoodi and suoritus.tilino = yriti.tilino and suoritus.kohdpvm = '0000-00-00' and suoritus.ltunnus = 0)
 				JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
 				LEFT JOIN factoring ON (factoring.yhtio = lasku.yhtio and factoring.valkoodi = lasku.valkoodi and factoring.factoringyhtio = maksuehto.factoring)
 				HAVING saamisetkpl > 0 and (
@@ -379,9 +379,7 @@
 
 			#Ja suoritus kirjatuksi
 			$query = "	UPDATE suoritus
-						SET kohdpvm = now(),
-						ltunnus = '$row[laskutunnus]',
-						summa = 0
+						SET kohdpvm = now(), ltunnus = '$row[laskutunnus]'
 						WHERE tunnus = '$row[suoritunnus]'";
 			$updres = pupe_query($query);
 		}
@@ -501,7 +499,9 @@
 						lukko				= '1'";
 			$insres = pupe_query($query);
 
-			$query = "UPDATE suoritus SET ltunnus='$tlast_id' WHERE tunnus='$row[tunnus]'";
+			$query = "	UPDATE suoritus
+						SET ltunnus = '$tlast_id'
+						WHERE tunnus = '$row[tunnus]'";
 			$updres = pupe_query($query);
 		}
 		else {

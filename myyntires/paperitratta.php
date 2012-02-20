@@ -1,25 +1,31 @@
 <?php
 
-	function uusi_karhukierros($yhtio) {
-		$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio' and tyyppi='T'";
-		$result = mysql_query($query) or pupe_error($query);
-		$array = mysql_fetch_array($result);
+	if (!function_exists("uusi_karhukierros")) {
+		function uusi_karhukierros($yhtio) {
+			$query = "	SELECT tunnus
+						FROM karhukierros
+						where pvm  = current_date
+						and yhtio  = '$yhtio'
+						and tyyppi = 'T'";
+			$result = pupe_query($query);
 
-		if (!mysql_num_rows($result)) {
-			$query = "INSERT INTO karhukierros (pvm,yhtio,tyyppi) values (current_date,'$yhtio','T')";
-			$result = mysql_query($query) or pupe_error($query);
-			$query = "SELECT LAST_INSERT_ID() FROM karhukierros";
-			$result = mysql_query($query) or pupe_error($query);
-			$array = mysql_fetch_array($result);
+			if (!mysql_num_rows($result)) {
+				$query = "INSERT INTO karhukierros (pvm,yhtio,tyyppi) values (current_date,'$yhtio','T')";
+				$result = pupe_query($query);
+				$uusid = mysql_insert_id();
+			}
+			else {
+				$row = mysql_fetch_assoc($result);
+				$uusid = $row["tunnus"];
+			}
+
+			return $uusid;
 		}
-
-		$out = $array[0];
-		return $out;
 	}
 
 	function liita_lasku($ktunnus,$ltunnus) {
 		$query = "INSERT INTO karhu_lasku (ktunnus,ltunnus) values ($ktunnus,$ltunnus)";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	function alku ($trattakierros_tunnus = '') {
@@ -35,8 +41,8 @@
 		$apuqu = "	SELECT *
 					from kuka
 					where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
-		$yres = mysql_query($apuqu) or pupe_error($apuqu);
-		$yrow = mysql_fetch_array($yres);
+		$yres = pupe_query($apuqu);
+		$yrow = mysql_fetch_assoc($yres);
 
 		tulosta_logo_pdf($pdf, $firstpage, "");
 
@@ -68,8 +74,8 @@
 						FROM karhukierros
 						WHERE tunnus = '$trattakierros_tunnus'
 						LIMIT 1";
-			$pvm_result = mysql_query($query) or pupe_error($query);
-			$pvm_row = mysql_fetch_array($pvm_result);
+			$pvm_result = pupe_query($query);
+			$pvm_row = mysql_fetch_assoc($pvm_result);
 
 			$paiva = substr($pvm_row["pvm"], 8, 2);
 			$kuu   = substr($pvm_row["pvm"], 5, 2);
@@ -302,15 +308,15 @@
 		$karhutunnus = mysql_real_escape_string($karhutunnus);
 		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
 
-		$query = "	SELECT count(distinct ktunnus)
+		$query = "	SELECT count(distinct ktunnus) kerta
 					FROM karhu_lasku
 					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = 'T')
 					WHERE ltunnus in ($xquery)
 					AND ktunnus <= $karhutunnus";
-		$karhukertares = mysql_query($query) or pupe_error($query);
-		$karhukertarow = mysql_fetch_array($karhukertares);
+		$karhukertares = pupe_query($query);
+		$karhukertarow = mysql_fetch_assoc($karhukertares);
 
-		$karhukertanro = $karhukertarow[0];
+		$karhukertanro = $karhukertarow['kerta'];
 		$ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 	}
 	else {
@@ -335,22 +341,22 @@
 				and l.tila = 'U'
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				ORDER BY l.erpcm";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//otetaan maksuehto- ja asiakastiedot ekalta laskulta
-	$laskutiedot = mysql_fetch_array($result);
+	$laskutiedot = mysql_fetch_assoc($result);
 
 	$query = "	SELECT *
 				FROM maksuehto
 				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[maksuehto]'";
-	$maksuehtoresult = mysql_query($query) or pupe_error($query);
-	$maksuehtotiedot = mysql_fetch_array($maksuehtoresult);
+	$maksuehtoresult = pupe_query($query);
+	$maksuehtotiedot = mysql_fetch_assoc($maksuehtoresult);
 
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[liitostunnus]'";
-	$asiakasresult = mysql_query($query) or pupe_error($query);
-	$asiakastiedot = mysql_fetch_array($asiakasresult);
+	$asiakasresult = pupe_query($query);
+	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
 	//Otetaan tässä asiakkaan kieli talteen
 	$kieli = $asiakastiedot["kieli"];
@@ -362,16 +368,23 @@
 				FROM lasku
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tunnus in ($xquery)";
-	$lires = mysql_query($query) or pupe_error($query);
-	$lirow = mysql_fetch_array($lires);
+	$lires = pupe_query($query);
+	$lirow = mysql_fetch_assoc($lires);
 
-	$query = "	SELECT SUM(summa) summa
+	// Karhuvaiheessa tämä on tyhjä
+	if ($laskutiedot["kpvm"] == "") {
+		$laskutiedot["kpvm"] = date("Y-m-d");
+	}
+
+	$query = "	SELECT sum(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
+				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and ltunnus  > 0
+				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
-	$summaresult = mysql_query($query) or pupe_error($query);
-	$kaato = mysql_fetch_array($summaresult);
+	$summaresult = pupe_query($query);
+	$kaato = mysql_fetch_assoc($summaresult);
 
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
@@ -383,7 +396,7 @@
 	$firstpage = alku($karhutunnus);
 
 	$summa=0.0;
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		if ($tee_pdf != 'tulosta_tratta') {
 			liita_lasku($karhukierros,$row['tunnus']);
 		}
@@ -412,12 +425,21 @@
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet
-					where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
-		$kires = mysql_query($query) or pupe_error($query);
+					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
+		$kires = pupe_query($query);
 
 		if (mysql_num_rows($kires) == 1) {
-			$kirow=mysql_fetch_array($kires);
-			$line = exec("$kirow[komento] $pdffilenimi");
+			$kirow = mysql_fetch_assoc($kires);
+			if($kirow["komento"] == "email") {
+				$liite = $pdffilenimi;
+				$kutsu = "Tratta ".$asiakastiedot["ytunnus"];
+				echo t("Tratta lähetetään osoitteeseen $kukarow[eposti]")."...\n<br>";
+
+				require("inc/sahkoposti.inc");
+			}
+			else {
+				$line = exec("{$kirow['komento']} $pdffilenimi");
+			}
 		}
 	}
 ?>

@@ -127,11 +127,11 @@
 
 				$query = "	SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
 							FROM suoritus
-							WHERE yhtio='$kukarow[yhtio]'
-							and ltunnus<>0
-							and asiakas_tunnus in ($tunnukset)
-							and summa != 0
+							WHERE yhtio = '$kukarow[yhtio]'
 							and kohdpvm = '0000-00-00'
+							and ltunnus > 0
+							and asiakas_tunnus in ($tunnukset)
+							and summa  != 0
 							$salisa
 							group by 1";
 				$kaatoresult = pupe_query($query);

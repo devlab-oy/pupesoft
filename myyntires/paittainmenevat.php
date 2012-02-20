@@ -32,7 +32,9 @@
 				$tapvm = $suoritusrow['kirjpvm'];
 
 				//Kirjataan suoritukset käytetyksi
-				$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritusrow[tunnus]'";
+				$query = "	UPDATE suoritus
+							SET kohdpvm = '$tapvm'
+							WHERE tunnus = '$suoritusrow[tunnus]'";
 				if ($debug == 1) echo "$query<br>";
 				else $result = pupe_query($query);
 
@@ -216,11 +218,15 @@
 							else $result = pupe_query($query);
 
 							//Kirjataan suoritukset käytetyksi
-							$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus1row[tunnus]'";
+							$query = "	UPDATE suoritus
+										SET kohdpvm = '$tapvm'
+										WHERE tunnus = '$suoritus1row[tunnus]'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
 
-							$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus2row[tunnus]'";
+							$query = "	UPDATE suoritus
+										SET kohdpvm = '$tapvm'
+										WHERE tunnus = '$suoritus2row[tunnus]'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
 

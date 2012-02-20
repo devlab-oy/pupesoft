@@ -151,6 +151,6 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 	}
 }
 
-echo "<font class='message'>Suoritukset kohdistettu</font><br><br>";
+echo "<font class='message'>".t("Suoritukset kohdistettu")."</font><br><br>";
 
 ?>

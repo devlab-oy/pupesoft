@@ -147,7 +147,9 @@
 							valkoodi	= '$tiliointi1_row[valkoodi]'";
 				$result = pupe_query($query);
 
-				$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus_row[tunnus]'";
+				$query = "	UPDATE suoritus
+							SET kohdpvm = '$tapvm'
+							WHERE tunnus = '$suoritus_row[tunnus]'";
 				$result = pupe_query($query);
 			}
 		}
@@ -162,7 +164,10 @@
 	}
 
 	if ($tila == 'komm') {
-		$query = "UPDATE suoritus set viesti = '$komm' WHERE tunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
+		$query = "	UPDATE suoritus
+					SET viesti = '$komm'
+					WHERE tunnus = '$tunnus'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$tila = 'tarkenna';
 	}

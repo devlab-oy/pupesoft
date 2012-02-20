@@ -425,12 +425,21 @@
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet
-					where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
+					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
 		$kires = pupe_query($query);
 
 		if (mysql_num_rows($kires) == 1) {
-			$kirow=mysql_fetch_assoc($kires);
-			$line = exec("$kirow[komento] $pdffilenimi");
+			$kirow = mysql_fetch_assoc($kires);
+			if($kirow["komento"] == "email") {
+				$liite = $pdffilenimi;
+				$kutsu = "Tratta ".$asiakastiedot["ytunnus"];
+				echo t("Tratta l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n<br>";
+
+				require("inc/sahkoposti.inc");
+			}
+			else {
+				$line = exec("{$kirow['komento']} $pdffilenimi");
+			}
 		}
 	}
 ?>

@@ -415,9 +415,11 @@
 							AND tunnus in ({$otunnukset})";
 				$upd_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe tilauksen päivityksen yhteydessä\r\n\r\n");
 
-				// lukitaan tableja
-		 		$query = "UNLOCK TABLES";
-				$result = pupe_query($query);
+				if ($lukotetaan) {
+					// lukitaan tableja
+			 		$query = "UNLOCK TABLES";
+					$result = pupe_query($query);
+				}
 
 				$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 							FROM kerayserat

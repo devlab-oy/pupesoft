@@ -4,8 +4,9 @@ echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font
 
 $query  = "	SELECT *
 			FROM suoritus
-			WHERE asiakas_tunnus = ''
-			and yhtio = '$kukarow[yhtio]'
+			WHERE yhtio = '$kukarow[yhtio]'
+			and kohdpvm	= '0000-00-00'
+			and asiakas_tunnus = 0
 			and summa != 0";
 $result = pupe_query($query);
 

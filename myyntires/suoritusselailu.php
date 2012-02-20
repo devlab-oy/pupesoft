@@ -40,8 +40,8 @@
 		$query = "	SELECT *
 					FROM suoritus
 					WHERE yhtio	= '$kukarow[yhtio]'
+					AND kohdpvm	= '0000-00-00'
 					AND tunnus in ($suoritustunnukset)
-					and kohdpvm	= '0000-00-00'
 					$suorilisa";
 		$suoritus_res = pupe_query($query);
 
@@ -147,7 +147,7 @@
 							valkoodi	= '$tiliointi1_row[valkoodi]'";
 				$result = pupe_query($query);
 
-				$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";
+				$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus_row[tunnus]'";
 				$result = pupe_query($query);
 			}
 		}
@@ -245,8 +245,9 @@
 
 			$query = "	SELECT *
 						FROM suoritus
-						WHERE tunnus = '$tunnus'
-						and yhtio = '$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kohdpvm	= '0000-00-00'
+						and tunnus  = '$tunnus'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -300,7 +301,9 @@
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio AND tiliointi.tunnus = suoritus.ltunnus AND tiliointi.korjattu = '')
 					LEFT JOIN tili ON (tili.yhtio = suoritus.yhtio and tili.tilino = tiliointi.tilino)
 					LEFT JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
-					WHERE suoritus.tunnus = $tunnus AND suoritus.yhtio = '$kukarow[yhtio]'";
+					WHERE suoritus.yhtio = '$kukarow[yhtio]'
+					AND suoritus.kohdpvm = '0000-00-00'
+					AND suoritus.tunnus  = $tunnus";
 		$result = pupe_query($query);
 
 		echo "	<form action = '$PHP_SELF' method='post'>
@@ -485,14 +488,13 @@
 
 		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
 
-		$query = "	SELECT distinct suoritus.tilino, nimi, yriti.valkoodi
-					FROM suoritus, yriti
+		$query = "	SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
+					FROM suoritus
+					JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 					WHERE suoritus.yhtio = '$kukarow[yhtio]'
-					AND kohdpvm = '0000-00-00'
-					and yriti.yhtio=suoritus.yhtio
-					and yriti.tilino=suoritus.tilino
+					AND suoritus.kohdpvm = '0000-00-00'
 					$lisa
-					ORDER BY nimi";
+					ORDER BY yriti.nimi";
 		$result = pupe_query($query);
 
 		echo "<table>";

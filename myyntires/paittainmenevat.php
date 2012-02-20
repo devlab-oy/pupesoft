@@ -11,19 +11,18 @@
 		$tilitselisa = " and b.tilino = a.tilino ";
 	}
 
-	//$debug = 1;
-
 	if ($tee == 'N') {
 
 		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
 		$result = pupe_query($query);
 
 		//Etsit‰‰n nolla suoritukset
-		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa, a.ltunnus, a.tunnus
-					FROM suoritus a
-					WHERE a.yhtio = '$kukarow[yhtio]' and
-					a.kohdpvm = '0000-00-00' and
-					a.summa = 0";
+		$query = "	SELECT nimi_maksaja, kirjpvm, summa, ltunnus, tunnus
+					FROM suoritus
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kohdpvm = '0000-00-00'
+					and ltunnus > 0
+					and summa   = 0";
 		$paaresult = pupe_query($query);
 
 		if (mysql_num_rows($paaresult) > 0) {
@@ -54,8 +53,9 @@
 
 		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
 					FROM suoritus a
-					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa $tilitselisa)
+					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
 					WHERE a.yhtio = '$kukarow[yhtio]'
+					and a.ltunnus > 0
 					and a.kohdpvm = '0000-00-00'
 					and a.summa < 0";
 		$paaresult = pupe_query($query);
@@ -68,8 +68,9 @@
 				$query  = "	SELECT tunnus, kirjpvm
 							FROM suoritus
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]')
-							AND kohdpvm = '0000-00-00'";
+							AND kohdpvm = '0000-00-00'
+							and ltunnus > 0
+							and tunnus in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]')";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 2) {
@@ -215,11 +216,11 @@
 							else $result = pupe_query($query);
 
 							//Kirjataan suoritukset k‰ytetyksi
-							$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus1row[tunnus]'";
+							$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus1row[tunnus]'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
 
-							$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus2row[tunnus]'";
+							$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritus2row[tunnus]'";
 							if ($debug == 1) echo "$query<br>";
 							else $result = pupe_query($query);
 
@@ -248,10 +249,11 @@
 		//Etsit‰‰n p‰itt‰in menev‰t suoritukset
 		$query = "	SELECT a.nimi_maksaja nimi1, a.kirjpvm pvm1, a.summa summa1, b.nimi_maksaja nimi2, b.kirjpvm pvm2, b.summa summa2
 					FROM suoritus a
-					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa $tilitselisa)
-					WHERE a.yhtio = '$kukarow[yhtio]' and
-					a.kohdpvm = '0000-00-00' and
-					a.summa < 0";
+					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.ltunnus > 0 and b.summa * -1 = a.summa $tilitselisa)
+					WHERE a.yhtio = '$kukarow[yhtio]'
+					and a.kohdpvm = '0000-00-00'
+					and a.ltunnus > 0
+					and a.summa < 0";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -290,11 +292,12 @@
 		}
 
 		//Etsit‰‰n nolla suoritukset
-		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa
-					FROM suoritus a
-					WHERE a.yhtio = '$kukarow[yhtio]' and
-					a.kohdpvm = '0000-00-00' and
-					a.summa = 0";
+		$query = "	SELECT nimi_maksaja, kirjpvm, summa
+					FROM suoritus
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kohdpvm = '0000-00-00'
+					and ltunnus > 0
+					and summa   = 0";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {

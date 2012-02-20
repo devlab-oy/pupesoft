@@ -14537,7 +14537,7 @@ if (!function_exists("tee_keraysera2")) {
 		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 			$aikarajaus = $row['lahdon_kellonaika'];
 
-			$query = "	SELECT lasku1.prioriteettinro as prioriteetti,
+			$query = "	SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
 						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 						lasku1.ohjausmerkki, 
 						lahdot1.asiakasluokka,
@@ -14615,7 +14615,7 @@ if (!function_exists("tee_keraysera2")) {
 			$til_koko = $til_paino = 0;
 
 			// otunnukset tulevat group concatilla esim. 123,124,125
-			$query = "	SELECT vh.indeksi,
+			$query = "	SELECT SQL_NO_CACHE vh.indeksi,
 						ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4) tilauksen_koko,
 						ROUND(tuote.tuotemassa * tilausrivi.varattu, 4) as tilauksen_paino,
 						tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.tuoteno
@@ -14981,7 +14981,7 @@ if (!function_exists("tee_keraysera2")) {
 				echo "<br>ETSITÄÄN PISIN TUOTE:<br>";
 			}
 
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus,
+			$query = "	SELECT SQL_NO_CACHE tilausrivi.tunnus, tilausrivi.otunnus,
 						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * tilausrivi.varattu, 4) as tuotteen_koko,
 						tilausrivi.tuoteno,
 						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,

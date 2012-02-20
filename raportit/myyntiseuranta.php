@@ -645,6 +645,15 @@
 							$lisa .= " and lasku.maksuteksti = '{$rajaus[$i]}' ";
 						}
 					}
+					
+					if ($mukaan == "naytamaksupvm") {
+						if ($group!="") $group .= ",lasku.mapvm";
+						else $group  .= "lasku.mapvm";
+						$select .= "lasku.mapvm maksupvm, ";
+						$order  .= "lasku.mapvm,";
+						$gluku++;
+					}
+					
 				}
 
 				if ($sarjanumerot != '') {
@@ -1249,6 +1258,11 @@
 
 							// echotaan kenttien sisältö
 							for ($i=0; $i < mysql_num_fields($result); $i++) {
+
+								// jos kyseessa on mapvm
+								if (mysql_field_name($result, $i) == "maksupvm") {
+									$row[$i] = tv1dateconv($row[$i]);
+								}
 
 								// jos kyseessa on tuote
 								if (mysql_field_name($result, $i) == "tuoteno") {
@@ -2152,6 +2166,7 @@
 			if ($ruksit[190] != '')			$ruk190chk 				= "CHECKED";
 			if ($ruksit[200] != '')			$ruk200chk 				= "CHECKED";
 			if ($ruksit[210] != '')			$ruk210chk 				= "CHECKED";
+			if ($ruksit[215] != '')			$ruk215chk 				= "CHECKED";
 			if ($ruksit[220] != '')			$ruk220chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
@@ -2352,6 +2367,12 @@
 				<td><input type='text' name='jarjestys[210]' size='2' value='{$jarjestys[210]}'></td>
 				<td><input type='checkbox' name='ruksit[210]' value='maksuehdoittain' {$ruk210chk}></td>
 				<td><input type='text' name='rajaus[210]' value='{$rajaus[210]}'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä maksupäivämäärä"),"</th>
+				<td><input type='text' name='jarjestys[215]' size='2' value='{$jarjestys[215]}'></td>
+				<td><input type='checkbox' name='ruksit[215]' value='naytamaksupvm' {$ruk215chk}></td>
+				<td></td>
 				</tr>
 				<tr>
 				<th>",t("Listaa asiakkaan tilausnumeroittain"),"</th>

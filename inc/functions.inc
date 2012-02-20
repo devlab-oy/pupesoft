@@ -15456,8 +15456,8 @@ if (!function_exists("tee_keraysera2")) {
 						}
 
 						$tuoterow['yksin_kerailyalustalle'] = 'K';
-						$inner_row[] = $tuoterow;
-						unset($inner_row[$inner_key]);
+						$inner_main_array[] = $tuoterow;
+						unset($inner_main_array[$inner_key]);
 						continue;
 					}
 

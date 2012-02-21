@@ -13469,7 +13469,7 @@ if (!function_exists("check_lock_tables")) {
 
 		global $dbkanta;
 
-		return (!is_array($tables) or mysql_num_rows(pupe_query("SHOW OPEN TABLES FROM {$dbkanta} WHERE `Table` IN ('".mysql_real_escape_string(implode("','", $tables))."') AND `In_use` = 1")) > 0) ? false : true;
+		return (!is_array($tables) or mysql_num_rows(pupe_query("SHOW OPEN TABLES FROM {$dbkanta} WHERE `Table` IN ('".mysql_real_escape_string(implode("','", $tables))."') AND `In_use` > 0")) > 0) ? false : true;
 	}
 }
 

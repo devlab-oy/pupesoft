@@ -561,7 +561,7 @@
 								lahdot AS lahdot1 WRITE,
 								lahdot AS lahdot2 WRITE,
 								tuoteperhe READ,
-								kerayserat READ,
+								kerayserat WRITE,
 								tuotteen_toimittajat READ,
 								pakkaus READ,
 								avainsana WRITE,

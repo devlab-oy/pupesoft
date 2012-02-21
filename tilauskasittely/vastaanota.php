@@ -892,6 +892,10 @@
 					tilausrivi.tunnus,
 					tilausrivi.varattu,
 					tilausrivi.toimitettu,
+					tilausrivi.hyllyalue,
+					tilausrivi.hyllynro,
+					tilausrivi.hyllyvali,
+					tilausrivi.hyllytaso,				
 					tuote.ei_saldoa,
 					concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'), lpad(upper(tilausrivi.hyllyvali), 5, '0'), lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -959,13 +963,6 @@
 				$privirow['t4'] = "";
 				$lahde = "Vastaanottavaa paikkaa ei löydy";
 			}
-			elseif ($privirow['t1'] == '' and $toim == "MYYNTITILI") { // ei löytynyt varastopaikkaa
-				$privirow['t1'] = "!!M";
-				$privirow['t2'] = "0";
-				$privirow['t3'] = "0";
-				$privirow['t4'] = "0";
-				$lahde = "Uusi paikka";
-			}
 
 			if (isset($tunnus)) {
 				foreach ($tunnus as $tun) {
@@ -985,6 +982,16 @@
 
 			if ($rivirow["ei_saldoa"] != "") {
 				echo "<td></td>";
+			}
+			elseif ($rivirow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $rivirow["hyllynro"].$rivirow["hyllyvali"].$rivirow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";				
 			}
 			else  {
 				echo "<td>$rivirow[paikka]</td>";

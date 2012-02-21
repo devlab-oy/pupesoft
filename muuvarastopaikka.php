@@ -104,7 +104,7 @@
 				else {
 
 					if ($hyllyalue[$poistetaan] == "!!M") {
-						$asiakkaan_tunnus = (int) $hyllyalue[$poistetaan].$hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
+						$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
 						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
 									FROM asiakas
 									WHERE yhtio = '{$kukarow["yhtio"]}'

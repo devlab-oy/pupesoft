@@ -183,87 +183,92 @@
 
 	if ($tilatapa == "PALAUTA") {
 
-		// Palautetaan myyntitilin rivit tuotteen oletuspaikalle
-		$query = "	SELECT *
+		// Tehd‰‰n siirrett‰vist‰ riveist‰ siirtolista
+		$query = "	SELECT tilausrivi.*
 					FROM tilausrivi
-					WHERE yhtio = '{$kukarow["yhtio"]}'
-					AND otunnus = '{$kukarow["kesken"]}'
-					AND var = 'B'
-					AND kpl != 0";
+					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+					AND tilausrivi.otunnus = '{$kukarow["kesken"]}'
+					AND tilausrivi.var = 'B'
+					AND tilausrivi.kpl != 0";
 		$palauta_result = pupe_query($query);
 
-		while ($palauta_row = mysql_fetch_assoc($palauta_result)) {
+		if (mysql_num_rows($palauta_result) > 0) {
 
-			// $tuoteno = tuotenumero jota siirret‰‰n
-			// $asaldo  = siirrett‰v‰ m‰‰r‰
-			// $mista   = tuotepaikan tunnus josta otetaan
-			// $minne   = tuotepaikan tunnus jonne siirret‰‰n
+			// Tehd‰‰n siirtolistaotsikko
+			$query = "	SELECT varasto, clearing
+						FROM lasku
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						AND lasku.tunnus = '{$kukarow["kesken"]}'";
+			$otsikko_result = pupe_query($query);
+			$otsikko_row = mysql_fetch_assoc($otsikko_result);
 
-			$tuoteno = $palauta_row["tuoteno"];
-			$asaldo = $palauta_row["kpl"];
+			// L‰hett‰v‰ varasto otetaan myyntitilin vastaanottavasta varastosta
+			$varasto = $otsikko_row["clearing"];
+			// Vastaanottava varasto otetaan myyntitilin l‰hett‰v‰st‰ varastosta
+			$clearing = $otsikko_row["varasto"];
 
-			// Haetaan l‰hde-varastopaikka
-			$query = "	SELECT tunnus, saldo
-						FROM tuotepaikat
-						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND tuoteno = '{$palauta_row["tuoteno"]}'
-						AND hyllyalue = '{$palauta_row["hyllyalue"]}'
-						AND hyllynro = '{$palauta_row["hyllynro"]}'
-						AND hyllyvali = '{$palauta_row["hyllyvali"]}'
-						AND hyllytaso = '{$palauta_row["hyllytaso"]}'";
-			$tuotepaikat_result = pupe_query($query);
+			$toim = "SIIRTOLISTA";
+			$jatka = "jatka";
+			$kukarow["kesken"] = 0;
+			$tilausnumero = 0;
 
-			if (mysql_num_rows($tuotepaikat_result) != 1) {
-				echo "<font class='error'>$tuoteno: Virheellinen l‰hett‰v‰ varastopaikka</font><br>";
-				continue;
-			}
+			require("tilauskasittely/otsik_siirtolista.inc");
 
-			$tuotepaikat_row = mysql_fetch_assoc($tuotepaikat_result);
-			$tuotepaikan_saldo = $tuotepaikat_row["saldo"] - $asaldo;
-			$mista = $tuotepaikat_row["tunnus"];
+			$kukarow["kesken"] = $id;
 
-			// Haetaan kohde-varastopaikka (oletus)
-			$query = "	SELECT tunnus
-						FROM tuotepaikat
-						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND tuoteno = '{$palauta_row["tuoteno"]}'
-						AND hyllyalue != '!!M'
-						AND oletus != ''";
-			$tuotepaikat_result = pupe_query($query);
+			$query = "	SELECT *
+						FROM lasku
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						AND lasku.tunnus = '{$kukarow["kesken"]}'";
+			$laskuresult = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskuresult);
 
-			if (mysql_num_rows($tuotepaikat_result) != 1) {
-				echo "<font class='error'>$tuoteno: Virheellinen vastaanottava varastopaikka</font><br>";
-				continue;
-			}
+			// Loopataan l‰pi myyntitilin rivit..
+			while ($palauta_row = mysql_fetch_assoc($palauta_result)) {
 
-			$tuotepaikat_row = mysql_fetch_assoc($tuotepaikat_result);
-			$minne = $tuotepaikat_row["tunnus"];
+				$query = "	SELECT *
+							FROM tuote
+							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+							AND tuote.tuoteno = '{$palauta_row["tuoteno"]}'";
+				$tuoteresult = pupe_query($query);
+				$trow = mysql_fetch_assoc($tuoteresult);
 
-			$tee = "N";
-			$kutsuja = "vastaanota.php";
+				$tuoteno = $palauta_row["tuoteno"];
+				$kpl = $palauta_row["kpl"];
+				$var = "H"; // Varmuuden vuoksi v‰kisin hyv‰ksytty rivi, ettei tule ongelmia
 
-			require("muuvarastopaikka.php");
+				// Lis‰t‰‰n rivi
+				// $laskurow			--> jossa on laskun kaikki tiedot
+				// $trow				--> jossa on tuotteen kaikki tiedot
+				// $tuoteno				--> jossa on tuotenumero
+				// $kpl					--> jossa on kappalem‰‰r‰
+				// $var					--> H,J,P varrit
+				require("tilauskasittely/lisaarivi.inc");
 
-			// Jos siirto onnistui
-			if ($tee == "OK") {
-				// P‰ivitet‰‰n siirretty rivi k‰sitellyksi
+				// P‰ivitet‰‰n uusi siirtolistan rivi samantien ker‰tyksi
+				$query = "	UPDATE tilausrivi SET
+							keratty = '{$kukarow["kuka"]}',
+							kerattyaika = now()
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus in (".implode(",", $lisatyt_rivit1).")";
+				$update_result = pupe_query($query);
+
+				// P‰ivitet‰‰n myyntitilin rivi k‰sittelyksi
 				$query = "	UPDATE tilausrivi SET
 							varattu = 0,
 							kpl = 0
 							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND tunnus = {$palauta_row["tunnus"]}";
 				$tilausrivi_result = pupe_query($query);
-
-				// Poistetaan myyntitilin varastopaikka jos se meni tyhj‰ksi
-				if ($tuotepaikan_saldo == 0) {
-					$tee = "MUUTA";
-					$poista = array($mista);
-					$halyraja2 = array();
-					$tilausmaara2 = array();					
-					$kutsuja = "vastaanota.php";
-					require("muuvarastopaikka.php");
-				}
 			}
+
+			// P‰ivitet‰‰n uusi siirtolista odottamaan vastaanottokuittausta
+			$query = "	UPDATE lasku SET
+						lahetepvm = now(),
+						alatila = 'C'
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tunnus = '{$laskurow["tunnus"]}'";
+			$update_result = pupe_query($query);
 		}
 
 		$tila 		= "";
@@ -271,7 +276,12 @@
 		$rivitunnus = "";
 		$tilatapa = "LEPAA";
 
-		echo "<font class='message'>".t("Valitut rivit siirret‰‰n omaan varastoon")."! $uusi_siirtolista</font><br><br>";
+		unset($jatka);
+		$toim = "MYYNTITILI";
+		$kukarow["kesken"] = 0;
+		$tilausnumero = 0;
+
+		echo "<font class='message'>".t("Valitut rivit siirret‰‰n omaan varastoon")."! {$kukarow["kesken"]}</font><br><br>";
 	}
 
 	if ($tilatapa == "LEPAA") {

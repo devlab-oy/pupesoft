@@ -24,7 +24,7 @@
 		$ostovelkarow = mysql_fetch_assoc($result);
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Ostovelkatilin määrittely epäonnistui")."!<br>".t("Summaa ei kirjattu")."!</font><br>";
+		echo "<font class='error'>".t("VIRHE: Ostovelkatilin määrittely epäonnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
 		$teemaksutosite = FALSE;
 	}
 
@@ -40,7 +40,7 @@
 	$yresult = pupe_query($query);
 
 	if (mysql_num_rows($yresult) == 0) {
-		echo "<font class='error'>".t("VIRHE: Kulutilin määrittely epäonnistui")."!<br>".t("Summaa ei kirjattu")."!</font><br>";
+		echo "<font class='error'>".t("VIRHE: Kulutilin määrittely epäonnistui")."!<br>\n".t("Summaa ei kirjattu")."!</font><br>\n";
 		$teemaksutosite = FALSE;
 	}
 
@@ -50,7 +50,7 @@
 		if ($trow['alatila'] == 'K' and $trow['vietykasumma'] != 0) {
 
 			// Kassa-alessa on huomioitava alv, joka voi olla useita vientejä
-			echo "<font class='message'>".t("Kirjaan kassa-alennusta yhteensä")." $trow[vietykasumma]</font><br>";
+			echo "<font class='message'>".t("Kirjaan kassa-alennusta yhteensä")." $trow[vietykasumma]</font><br>\n";
 
 			$totkasumma = 0;
 
@@ -62,7 +62,7 @@
 				$summa = round(($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma']) * $trow['vietykasumma'], 2);
 				$alv = 0;
 
-				echo "<font class='message'>".t("Kirjaan kassa-alennusta")." $summa</font><br>";
+				echo "<font class='message'>".t("Kirjaan kassa-alennusta")." $summa</font><br>\n";
 
 				if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
 					$alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
@@ -116,7 +116,7 @@
 			$heitto = round($totkasumma - $trow["vietykasumma"], 2);
 
 			if (abs($heitto) >= 0.01) {
-				echo "<font class='message'>".t("Joudun pyöristämään kassa-alennusta")."</font><br>";
+				echo "<font class='message'>".t("Joudun pyöristämään kassa-alennusta")."</font><br>\n";
 
 				$query = "	UPDATE tiliointi
 							SET summa = summa + $heitto
@@ -136,7 +136,7 @@
 			}
 
 			if (round($vesumma, 2) != 0) {
-				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
+				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>\n";
 
 				$totvesumma = 0;
 
@@ -146,7 +146,7 @@
 					// Kuinka paljon on tämän viennin osuus
 					$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma, 2);
 
-					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
+					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>\n";
 
 					if (round($summa, 2) != 0) {
 
@@ -176,7 +176,7 @@
 
 				// Hoidetaan mahdolliset pyöristykset
 				if ($totvesumma != $vesumma) {
-					echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
+					echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>\n";
 
 					$query = "	UPDATE tiliointi
 								SET summa = summa - $totvesumma + $vesumma
@@ -238,7 +238,7 @@
 		$dummyresult = pupe_query($query);
 
 		// Merkataan käsitellyiksi & lisätään linkki
-		echo "<font class='message'>*** ".t("laskuun lisätty maksutiliöinti")." ***</font><br>";
+		echo "<font class='message'>*** ".t("laskuun lisätty maksutiliöinti")." ***</font><br>\n";
 
 		//Lasku maksetuksi
 		$kurssi += 0;
@@ -254,7 +254,7 @@
 					WHERE tunnus = '$trow[tunnus]'";
 		$result = pupe_query($query);
 
-		echo "<font class='message'>*** ".t("lasku suoritettu")." ***</font><br>";
+		echo "<font class='message'>*** ".t("lasku suoritettu")." ***</font><br>\n";
 
 	}
 	else {

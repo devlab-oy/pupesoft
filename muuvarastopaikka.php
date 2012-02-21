@@ -5,7 +5,7 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ, asiakas READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
@@ -102,7 +102,24 @@
 					echo "<font class='error'>".t("Et voi poistaa paikkaa jolla on saldoa")."</font><br><br>";
 				}
 				else {
-					echo "<font class='message'>".t("Poistetaan varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]</font><br><br>";
+
+					if ($hyllyalue[$poistetaan] == "!!M") {
+						$asiakkaan_tunnus = (int) $hyllynro[$poistetaan].$hyllyvali[$poistetaan].$hyllytaso[$poistetaan];
+						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+									FROM asiakas
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									AND tunnus = '$asiakkaan_tunnus'";
+						$asiakasresult = pupe_query($query);
+						$asiakasrow = mysql_fetch_assoc($asiakasresult);
+						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
+					}
+					else {
+						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";
+					}
+
+					if ($kutsuja != "vastaanota.php") {
+						echo "<font class='message'>$poisto_texti</font><br><br>";
+					}
 
 					$query = "	INSERT into tapahtuma set
 								yhtio 		= '$kukarow[yhtio]',
@@ -115,7 +132,7 @@
 								hyllynro 	= '$hyllynro[$poistetaan]',
 								hyllyvali	= '$hyllyvali[$poistetaan]',
 								hyllytaso	= '$hyllytaso[$poistetaan]',
-								selite 		= '".t("Poistettiin tuotepaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]',
+								selite 		= '$poisto_texti',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = mysql_query($query) or pupe_error($query);
@@ -130,7 +147,7 @@
 		}
 
 		// Oletuspaikka vaihdettiin
-		if ($oletus != $oletusrow["tunnus"]) {
+		if (isset($oletus) and $oletus != $oletusrow["tunnus"]) {
 			$query = "	SELECT *
 						FROM tuotepaikat
 						WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
@@ -185,7 +202,13 @@
 		$ahyllynro	= '';
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
-		$tee = 'M';
+
+		if ($kutsuja == "vastaanota.php") {
+			$tee = "OK";
+		}
+		else {
+			$tee = 'M';
+		}
 	}
 
 	// Siirret‰‰n saldo, jos se on viel‰ olemassa
@@ -508,8 +531,33 @@
 						and tunnus		= '$siirretaan[$iii]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
-			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+			if ($minnerow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $minnerow["hyllynro"].$minnerow["hyllyvali"].$minnerow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				$minne_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+			}
+			else {
+				$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
+			}
+
+			if ($mistarow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $mistarow["hyllynro"].$mistarow["hyllyvali"].$mistarow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				$mista_texti = t("Myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+			}
+			else {
+				$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+			}
 
 			$kehahin_query = "	SELECT tuote.sarjanumeroseuranta,
 								round(if (tuote.epakurantti100pvm = '0000-00-00',
@@ -705,7 +753,7 @@
 		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
 
 		if ($saldo === FALSE) {
-			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '') {
+			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 
 				$query = "	SELECT oletus
@@ -852,6 +900,7 @@
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					and tuotepaikat.tuoteno = '$tuoteno'
+					and tuotepaikat.hyllyalue != '!!M'
 					ORDER BY sorttauskentta";
 		$paikatresult1 = mysql_query($query) or pupe_error($query);
 
@@ -890,6 +939,7 @@
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					and tuotepaikat.tuoteno = '$tuoteno'
+					and tuotepaikat.hyllyalue != '!!M'
 					ORDER BY sorttauskentta";
 		$paikatresult2 = mysql_query($query) or pupe_error($query);
 

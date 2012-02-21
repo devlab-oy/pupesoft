@@ -914,13 +914,28 @@
 							$kokonaissaldo_tapahtumalle += $saldo;
 						}
 
-						echo "<tr>
-								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
-								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
-								<td align='right'>".sprintf("%.2f", $saldo)."</td>
-								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
-								<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
-								</tr>";
+						echo "<tr>";
+						echo "<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>";
+
+						if ($saldorow["hyllyalue"] == "!!M") {
+							$asiakkaan_tunnus = (int) $saldorow["hyllynro"].$saldorow["hyllyvali"].$saldorow["hyllytaso"];
+
+							$query = "	SELECT nimi, toim_nimi
+										FROM asiakas
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										AND tunnus = '$asiakkaan_tunnus'";
+							$asiakasresult = pupe_query($query);
+							$asiakasrow = mysql_fetch_assoc($asiakasresult);
+							echo "<td>{$asiakasrow["nimi"]}</td>";
+						}
+						else {
+							echo "<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>";
+						}
+
+						echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
+									<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
+									<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+									</tr>";
 					}
 				}
 
@@ -1797,7 +1812,9 @@
 				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 							if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 							concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
+							tapahtuma.hyllyalue tapahtuma_hyllyalue,
 							concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+							tilausrivi.hyllyalue tilausrivi_hyllyalue,
 							round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,
 							tilausrivi.tunnus trivitunn,
 							tilausrivi.perheid,
@@ -1973,8 +1990,8 @@
 							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("Näytä keikka")." $prow[lasku2laskunro]</a>";
 						}
 
-						if (trim($prow["tapapaikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";
-						elseif (trim($prow["paikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[paikka]";
+						if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";
+						elseif (trim($prow["paikka"]) != "" and $prow["tilausrivi_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[paikka]";
 
 						if ($tuoterow["sarjanumeroseuranta"] != "" and ($prow["laji"] == "tulo" or $prow["laji"] == "laskutus")) {
 

@@ -469,6 +469,20 @@
 		}
 		elseif ($toim == "MYYNTITILI") {
 			echo "<font class='head'>".t("Myyntitilin otsikko")."</font><hr>";
+			// Myyntitili oikeellisuustarkistus
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND alkuhyllyalue = '!!M'
+						AND loppuhyllyalue = '!!M'
+						AND tyyppi = 'E'";
+			$myyntitili_result = pupe_query($query);
+
+			if (mysql_num_rows($myyntitili_result) != 1) {
+				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
+				require("inc/footer.inc");
+				exit;
+			}			
 		}
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";

@@ -111,7 +111,7 @@
 									AND tunnus = '$asiakkaan_tunnus'";
 						$asiakasresult = pupe_query($query);
 						$asiakasrow = mysql_fetch_assoc($asiakasresult);
-						$poisto_texti = t("Poistettiin myyntitili")." ".$asiakasrow["asiakkaan_nimi"];
+						$poisto_texti = t("Poistettiin myyntitili-varastopaikka")." ".$asiakasrow["asiakkaan_nimi"];
 					}
 					else {
 						$poisto_texti = t("Poistettiin varastopaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]";

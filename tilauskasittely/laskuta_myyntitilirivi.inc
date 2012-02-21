@@ -281,7 +281,7 @@
 		$kukarow["kesken"] = 0;
 		$tilausnumero = 0;
 
-		echo "<font class='message'>".t("Valitut rivit siirret‰‰n omaan varastoon")."! {$kukarow["kesken"]}</font><br><br>";
+		echo "<font class='message'>".t("Valitut rivit siirret‰‰n omaan varastoon")."!</font><br><br>";
 	}
 
 	if ($tilatapa == "LEPAA") {

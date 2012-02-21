@@ -471,72 +471,72 @@
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
 				echo "<div id='content'></div>";
 
-				$locktables = array(
-						'lasku', 
-						'lasku1', 
-						'lasku2', 
-						'laskun_lisatiedot', 
-						'asiakas1', 
-						'asiakas2', 
-						'tilausrivi', 
-						'tilausrivi1', 
-						'tilausrivi2', 
-						'tilausrivin_lisatiedot', 
-						'vh',
-						'vh1', 
-						'vh2', 
-						'tuote',
-						'tuote1', 
-						'tuote2',
-						'keraysvyohyke1', 
-						'keraysvyohyke2',
-						'toimitustapa1', 
-						'toimitustapa2', 
-						'lahdot1',
-						'lahdot2',
-						'tuoteperhe',
-						'kerayserat',
-						'tuotteen_toimittajat',
-						'pakkaus',
-						'avainsana',
-						'keraysvyohyke',
-						'asiakas',
-						'liitetiedostot', 
-						't2', 
-						'tlt2', 
-						'tilausrivi_osto', 
-						'tilausrivi_myynti', 
-						'sarjanumeroseuranta', 
-						't3', 
-						'sanakirja', 
-						'a', 
-						'b', 
-						'varaston_tulostimet', 
-						'tuotepaikat', 
-						'maksuehto', 
-						'varastopaikat', 
-						'kirjoittimet', 
-						'kuka', 
-						'asiakaskommentti', 
-						'tuotteen_avainsanat', 
-						'pankkiyhteystiedot', 
-						'toimitustapa', 
-						'yhtion_toimipaikat', 
-						'yhtion_parametrit', 
-						'tuotteen_alv', 
-						'maat', 
-						'rahtisopimukset', 
-						'rahtisopimukset2', 
-						'pakkaamo', 
-						'avainsana_kieli', 
-						'vanha_lasku', 
-						'vanha_varaston_tulostimet', 
-						'yhtio'
-					);
+				// $locktables = array(
+				// 		'lasku', 
+				// 		'lasku1', 
+				// 		'lasku2', 
+				// 		'laskun_lisatiedot', 
+				// 		'asiakas1', 
+				// 		'asiakas2', 
+				// 		'tilausrivi', 
+				// 		'tilausrivi1', 
+				// 		'tilausrivi2', 
+				// 		'tilausrivin_lisatiedot', 
+				// 		'vh',
+				// 		'vh1', 
+				// 		'vh2', 
+				// 		'tuote',
+				// 		'tuote1', 
+				// 		'tuote2',
+				// 		'keraysvyohyke1', 
+				// 		'keraysvyohyke2',
+				// 		'toimitustapa1', 
+				// 		'toimitustapa2', 
+				// 		'lahdot1',
+				// 		'lahdot2',
+				// 		'tuoteperhe',
+				// 		'kerayserat',
+				// 		'tuotteen_toimittajat',
+				// 		'pakkaus',
+				// 		'avainsana',
+				// 		'keraysvyohyke',
+				// 		'asiakas',
+				// 		'liitetiedostot', 
+				// 		't2', 
+				// 		'tlt2', 
+				// 		'tilausrivi_osto', 
+				// 		'tilausrivi_myynti', 
+				// 		'sarjanumeroseuranta', 
+				// 		't3', 
+				// 		'sanakirja', 
+				// 		'a', 
+				// 		'b', 
+				// 		'varaston_tulostimet', 
+				// 		'tuotepaikat', 
+				// 		'maksuehto', 
+				// 		'varastopaikat', 
+				// 		'kirjoittimet', 
+				// 		'kuka', 
+				// 		'asiakaskommentti', 
+				// 		'tuotteen_avainsanat', 
+				// 		'pankkiyhteystiedot', 
+				// 		'toimitustapa', 
+				// 		'yhtion_toimipaikat', 
+				// 		'yhtion_parametrit', 
+				// 		'tuotteen_alv', 
+				// 		'maat', 
+				// 		'rahtisopimukset', 
+				// 		'rahtisopimukset2', 
+				// 		'pakkaamo', 
+				// 		'avainsana_kieli', 
+				// 		'vanha_lasku', 
+				// 		'vanha_varaston_tulostimet', 
+				// 		'yhtio'
+				// 	);
 
-				$lukotetaan = check_lock_tables($locktables);
+				// $lukotetaan = check_lock_tables($locktables);
 
-				if ($lukotetaan) {
+				// if ($lukotetaan) {
 					// lukitaan tableja
 					$query = "	LOCK TABLES lasku WRITE, 
 								lasku AS lasku1 WRITE, 
@@ -599,7 +599,7 @@
 								varaston_tulostimet as vanha_varaston_tulostimet READ, 
 								yhtio READ";
 					$result = pupe_query($query);
-				}
+				// }
 
 				$debug = true;
 
@@ -625,11 +625,11 @@
 				else {
 					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
 
-					if ($lukotetaan) {
+					// if ($lukotetaan) {
 						// lukitaan tableja
 				 		$query = "UNLOCK TABLES";
 	 					$result = pupe_query($query);
-					}
+					// }
 				}
 			}
 

@@ -1016,7 +1016,7 @@
 					$lisa
 					$lisa2
 					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus
-					LIMIT 100";
+					LIMIT 250";
 		$sarjaresiso = pupe_query($query);
 	}
 

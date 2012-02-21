@@ -181,8 +181,12 @@
 		fclose($fh);
 
 		// tehd‰‰n failista zippi
-		exec("cd /tmp;/usr/bin/zip Tilintarkastus-$kukarow[yhtio].zip $file1 $file2 $file3");
-
+		chdir("/tmp");
+		exec("/usr/bin/zip Tilintarkastus-{$kukarow["yhtio"]}.zip ".escapeshellarg($file1)." ".escapeshellarg($file2)." ".escapeshellarg($file3));
+		unlink($file1);
+		unlink($file2);
+		unlink($file3);
+		
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
 		echo "<form method='post' action='$PHP_SELF'>";

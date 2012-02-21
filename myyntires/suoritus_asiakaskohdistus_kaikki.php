@@ -1,11 +1,12 @@
 <?php
 
-echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font><br>";
+echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font><br>\n";
 
 $query  = "	SELECT *
 			FROM suoritus
-			WHERE asiakas_tunnus = ''
-			and yhtio = '$kukarow[yhtio]'
+			WHERE yhtio = '$kukarow[yhtio]'
+			and kohdpvm	= '0000-00-00'
+			and asiakas_tunnus = 0
 			and summa != 0";
 $result = pupe_query($query);
 
@@ -39,7 +40,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 				$asiakas = mysql_fetch_assoc($asres);
 				$ok = 1;
 
-				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>";
+				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>\n";
 
 				if ($asiakas['konserniyhtio'] != '') {
 					$query   = "	UPDATE tiliointi
@@ -69,10 +70,12 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
 		$asiakasokmaksaja = FALSE;
 
-		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
 		$query = "	SELECT nimi, konserniyhtio, tunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
+					and laji != 'R'
+					and laji != 'P'
 					and left(nimi, 12) = '{$suoritus['nimi_maksaja']}'";
 		$asres = pupe_query($query);
 
@@ -81,10 +84,43 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 			$asiakasokmaksaja = TRUE;
 		}
 
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
 		if (!$asiakasokmaksaja) {
 			$query = "	SELECT nimi, konserniyhtio, tunnus
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
+						and left(nimi, 12) = '{$suoritus['nimi_maksaja']}'";
+			$asres = pupe_query($query);
+
+			if (mysql_num_rows($asres) == 1) {
+				$asiakas = mysql_fetch_assoc($asres);
+				$asiakasokmaksaja = TRUE;
+			}
+		}
+
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
+		if (!$asiakasokmaksaja) {
+			$query = "	SELECT nimi, konserniyhtio, tunnus
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
+						and laji != 'P'
+						and MATCH (nimi) AGAINST ('$unimi')";
+			$asres = pupe_query($query);
+
+			if (mysql_num_rows($asres) == 1) {
+				$asiakas = mysql_fetch_assoc($asres);
+				$asiakasokmaksaja = TRUE;
+			}
+		}
+
+		// Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
+		if (!$asiakasokmaksaja) {
+			$query = "	SELECT nimi, konserniyhtio, tunnus
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji != 'R'
 						and MATCH (nimi) AGAINST ('$unimi')";
 			$asres = pupe_query($query);
 
@@ -95,7 +131,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 		}
 
 		if ($asiakasokmaksaja) {
-			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>";
+			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>\n";
 
 			if ($asiakas['konserniyhtio'] != '') {
 				$query   = "	UPDATE tiliointi
@@ -115,6 +151,6 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 	}
 }
 
-echo "<font class='message'>Suoritukset kohdistettu</font><br><br>";
+echo "<font class='message'>".t("Suoritukset kohdistettu")."</font><br>\n<br>\n";
 
 ?>

@@ -119,11 +119,13 @@
 	$lopu = date("Y-m-d")." 23:59:59";
 
 	$query = "	SELECT
-				round(sum(round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0)), 0) AS 'tilatut_eurot',
-				round(sum(round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}')), 0) AS 'tilatut_kate',
-				round(sum(if(tilausrivi.toimitettu!='', 1, 0)), 0) AS 'toimitetut_rivit'
+				round(sum(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1))), 0) AS 'tilatut_eurot',
+				round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))), 0) AS 'tilatut_kate',
+				sum(if(tilausrivi.toimitettu!='', 1, 0)) AS 'toimitetut_rivit'
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+				JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+				JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
 				AND tilausrivi.laadittu >= '$alku'
@@ -133,7 +135,7 @@
 
 	echo "<input type='hidden' id='tilatut_eurot' value='{$row['tilatut_eurot']}' />";
 	echo "<input type='hidden' id='toimitetut_rivit' value='{$row['toimitetut_rivit']}' />";
-	echo "<input type='hidden' id='tilatut_katepros' value='".round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1)."' />";
+	echo "<input type='hidden' id='tilatut_katepros' value='".round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100)."' />";
 	echo "<input type='hidden' name='tee' value='laske' />";
 
 	if (!isset($kka)) $kka = date("n",mktime(0, 0, 0, date("n"), 1, date("Y")));

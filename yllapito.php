@@ -1,6 +1,6 @@
 <?php
 
-	if ($_POST["toim"] == "yhtion_parametrit") {
+	if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
@@ -299,7 +299,7 @@
 			}
 
 			if (function_exists($funktio)) {
-				@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
+				@$funktio($t, $i, $result, $tunnus, $virhe, $trow);
 			}
 
 			if (isset($virhe[$i]) and $virhe[$i] != "") {
@@ -412,7 +412,7 @@
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
 
-					$query = "	SELECT tunnus
+					$query = "	SELECT tunnus, tila, alatila
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and (
@@ -437,6 +437,17 @@
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
 
+						$paivita_myos_lisa = "";
+
+						// Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
+						if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
+							$paivita_myos_lisa .= ", toimitustapa = '$otsikrow[toimitustapa]' ";
+						}
+
+						if ($paivita_myos_maksuehto != "") {
+							$paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
+						}
+
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -457,6 +468,7 @@
 									toim_postitp 		= '$otsikrow[toim_postitp]',
 									toim_maa    		= '$otsikrow[toim_maa]',
 									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
+									$paivita_myos_lisa
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = pupe_query($query);
@@ -793,6 +805,7 @@
 			$query = "	SELECT nimi value, nimi text
 						FROM yhteyshenkilo
 						WHERE tunnus = '$tmp_tuote_tunnus'
+						and tyyppi	 = 'A'
 						and yhtio 	 = '$kukarow[yhtio]'";
 			$otsikres = pupe_query($query);
 			$otsikrow = mysql_fetch_assoc($otsikres);
@@ -1044,7 +1057,7 @@
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-			if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+			if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -1536,7 +1549,12 @@
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
-			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+			echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+
+			if ($toim == "asiakas") {
+				echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
+				echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
+			}
 		}
 		if ($toim == "toimi" and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille laskuille")."'>";
@@ -1644,7 +1662,6 @@
 			}
 		}
 
-
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
 			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
@@ -1665,6 +1682,15 @@
 			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat")) {
 				echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
+
+			if (tarkista_oikeus("yllapito.php", "toimittajaalennus")) {
+				echo "<iframe id='toimittajaalennus_iframe' name='toimittajaalennus_iframe' src='yllapito.php?toim=toimittajaalennus&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+
+			if (tarkista_oikeus("yllapito.php", "toimittajahinta")) {
+				echo "<iframe id='toimittajahinta_iframe' name='toimittajahinta_iframe' src='yllapito.php?toim=toimittajahinta&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+
 			if (tarkista_oikeus("yllapito.php", "tuotteen_avainsanat")) {
 				echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
@@ -1712,6 +1738,8 @@
 			$toim == "rahtisopimukset" or
 			$toim == "etaisyydet" or
 			$toim == "tuotteen_avainsanat" or
+			$toim == "toimittajaalennus" or
+			$toim == "toimittajahinta" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or
 			$toim == "asiakaskommentti" or
@@ -1763,7 +1791,7 @@
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
-				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+				if (isset($liitostunnus)) echo "&liitostunnus=$liitostunnus";
 				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
@@ -1798,6 +1826,14 @@
 
 	if ($from == "yllapito" and $toim == "tuotteen_avainsanat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "toimittajaalennus") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajaalennus_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "toimittajahinta") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimittajahinta_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {

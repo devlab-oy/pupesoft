@@ -21,7 +21,7 @@ if ($kollityht > 0) {
 			$logyrow = mysql_fetch_assoc($logyres);
 
 			$rahtikirjanro = $logyrow["rahtikirjanro"];
-			
+
 			$logyq = "	UPDATE rahtikirjanumero
 						SET kayttaja = '$kukarow[kuka]',
 						kaytettyaika = now()
@@ -84,7 +84,7 @@ if ($kollityht > 0) {
 			if($r=="asiakkaan_viite" and $v == "") {
 				$v = $laskurow["viite"];
 			}
-			
+
 			//	Poistetaan aina kaikki turhat merkit ja välilyönnit
 			$parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
 		}
@@ -127,23 +127,29 @@ if ($kollityht > 0) {
 		*/
 		$query = "	SELECT nimi, titteli, email, puh, gsm, fax
 					FROM laskun_lisatiedot
-					JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
-					WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and otunnus IN ($otunnukset) and yhteyshenkilo_tekninen>0";
+					JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
+					WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
+					and otunnus IN ($otunnukset)
+					and yhteyshenkilo_tekninen > 0";
 		$yhres = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($yhres) == 0) {
+
+		if (mysql_num_rows($yhres) == 0) {
 			$query = "	SELECT nimi, titteli, email, puh, gsm, fax
 						FROM laskun_lisatiedot
-						JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen
-						WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and otunnus IN ($otunnukset) and yhteyshenkilo_tekninen>0";
+						JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and yhteyshenkilo.tyyppi = 'A'
+						WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
+						and otunnus IN ($otunnukset)
+						and yhteyshenkilo_tekninen > 0";
 			$yhres = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($yhres) == 0) {
+
+			if (mysql_num_rows($yhres) == 0) {
 				$query = "	SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 				$yhres = mysql_query($query) or pupe_error($query);
 			}
 		}
-		
+
 		if (mysql_num_rows($yhres) > 0) {
 			$yhrow = mysql_fetch_array($yhres);
 			for($i=0;$i<mysql_num_fields($yhres);$i++) {

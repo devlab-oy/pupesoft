@@ -1223,7 +1223,10 @@
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
 					}
-					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+
+					if ($tuoterajaus != "") {
+						$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+					}
 				}
 
 				if (isset($status) and $status != '') {
@@ -1328,7 +1331,7 @@
 						$tee = '';
 					}
 				}
-				
+
 				if ($naytakaikkityypit != "") {
 					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
 				}
@@ -1775,7 +1778,7 @@
 									if (!${"dyn_".$dynlaji}) {
 										$dynpuu_q = " 	SELECT subparent.nimi
 														FROM dynaaminen_puu AS subnode
-														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
+														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subparent.lft < subnode.lft AND subparent.rgt > subnode.lft)
 														WHERE subnode.tunnus = ".$row[mysql_field_name($result, $i)]."
 														ORDER BY subparent.lft";
 										$dynpuu_r = pupe_query($dynpuu_q);

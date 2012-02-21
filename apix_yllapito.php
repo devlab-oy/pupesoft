@@ -167,8 +167,8 @@
 	echo "<br><br>";
 
 	echo "<font class='message'>Vaihe 2: Rekisteröidy APIX asiakkaaksi ja hanki verkkopostimerkkejä heidän verkkokaupasta</font><hr>";
-	echo "<form target='top' action='https://registration.apix.fi' method='get'>";
 #	echo "<form target='top' action='https://test-registration.apix.fi' method='get'>";
+	echo "<form target='top' action='https://registration.apix.fi' method='get'>";
 	echo "<input type='submit' value='Siirry APIX rekisteröintiin klikkaamalla tästä'>";
 	echo "</form>";
 

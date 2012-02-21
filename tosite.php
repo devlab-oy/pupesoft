@@ -617,32 +617,37 @@
 			require("inc/kuitti.inc");
 		}
 
-		$alv_tili = "";
-		$asiakas_y = "";
-		$comments = "";
-		$ed_iliitos = "";
-		$ed_iliitostunnus = "";
-		$ikohde = "";
-		$ikustp = "";
-		$iliitos = "";
-		$iprojekti = "";
-		$iselite = "";
-		$isumma = "";
-		$itili = "";
-		$ivero = "";
-		$maara = "";
-		$nimi = "";
-		$selite = "";
-		$summa = "";
-		$tee = "";
-		$teetosite = "";
-		$tiliointirivit = "";
-		$toimittaja_y = "";
-		$tositesum = "";
-		$tpk = "";
-		$tpp = "";
-		$tpv = "";
-		$valkoodi = "";
+		$alv_tili 			= "";
+		$asiakas_y 			= "";
+		$comments 			= "";
+		$ed_iliitos 		= "";
+		$ed_iliitostunnus 	= "";
+		$ikohde 			= "";
+		$ikustp 			= "";
+		$iliitos 			= "";
+		$iprojekti 			= "";
+		$iselite 			= "";
+		$isumma 			= "";
+		$itili 				= "";
+		$ivero 				= "";
+		$maara 				= "";
+		$nimi 				= "";
+		$selite 			= "";
+		$summa 				= "";
+		$tee 				= "";
+		$teetosite 			= "";
+		$tiliointirivit 	= "";
+		$toimittaja_y 		= "";
+		$tositesum 			= "";
+		$tpk 				= "";
+		$tpp 				= "";
+		$tpv 				= "";
+		$valkoodi 			= "";
+		$avaavatase 		= "";
+		$gokfrom 			= "";
+		$tilikausi 			= "";
+		$asiakasid			= "";
+		$toimittajaid		= "";
 
 		if ($lopetus != '' and $tullaan == "muutosite") {
 			lopetus($lopetus, "META");
@@ -790,6 +795,10 @@
 		$formi = 'tosite';
 		$kentta = 'tpp';
 
+		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($avaavatase) and $avaavatase == 'joo')) {
+			echo "<br><br><font class='error'>".t("HUOM: Avaavaa tasetta ei ole vielä kirjattu")."!<br>".t("HUOM: Tarkista tämä tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
+		}
+
 		echo "<br>\n";
 		echo "<font class='head'>".t("Tositteen otsikkotiedot").":</font>\n";
 
@@ -809,7 +818,7 @@
 
 		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($tilikausi) and is_numeric($tilikausi))) {
 			echo "<input type='hidden' name='avaavatase' value='joo' />";
-			echo "<input type='hidden' name='tilikausi' value='{$tilikausi}' />";
+			echo "<input type='hidden' name='tilikausi'  value='{$tilikausi}' />";
 		}
 
 		// Uusi tosite
@@ -840,10 +849,10 @@
 
 			foreach ($tiliointirivit as $xxx => $rivix) {
 
-				$query = "	SELECT * 
-							FROM tiliointi 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
-							AND ltunnus = '{$tunnus}' 
+				$query = "	SELECT *
+							FROM tiliointi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ltunnus = '{$tunnus}'
 							AND tunnus = '{$rivix}'";
 				$info_res = pupe_query($query);
 				$info_row = mysql_fetch_assoc($info_res);
@@ -1221,10 +1230,10 @@
 			if (isset($ivirhe[$i])) echo "<font class='error'>{$ivirhe[$i]}</font>";
 			echo "</td>\n";
 			echo "</tr>\n";
-			
+
 			// Ei rikota rivinvaihtoja
 			$iselite[$i] = str_ireplace("<br>", "(br)", $iselite[$i]);
-			
+
 			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";
 		}

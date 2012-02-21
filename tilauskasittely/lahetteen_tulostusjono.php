@@ -91,7 +91,7 @@
 		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
-		
+
 		enable_ajax();
 
 		echo "<script type='text/javascript' language='javascript'>";
@@ -109,7 +109,7 @@
 				var toimittaja 	= $(\"#toimittaja_\"+osat[1]).val();
 				var maara 		= $(\"#maara_\"+osat[1]).val();
 
-				// JOS haluat debuggia niin näytä alert-boxi, 
+				// JOS haluat debuggia niin näytä alert-boxi,
 				// mikäli se ei tule näkyviin, niin input-kentissä on jotain häikkää
 			//	alert(submitid+' '+tuoteno+' '+toimittaja+' '+maara);
 
@@ -130,7 +130,7 @@
 					}
 				);
 			});
-			
+
 			</script>";
 
 	}
@@ -287,16 +287,16 @@
 					varastopaikat.tunnus varastotunnus,
 					lasku.tunnus otunnus,
 					lasku.viesti,
-					lasku.sisviesti2,
-					GROUP_CONCAT(if (kommentti='',NULL,kommentti) separator '<br>') AS kommentit,
+					GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
+					GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
+					GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
 					count(*) riveja,
 					lasku.yhtio yhtio,
 					lasku.yhtio_nimi yhtio_nimi
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-					WHERE
-					lasku.yhtio = '$kukarow[yhtio]'
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tunnus in ($tilaukset)
 					$tilaustyyppi
 					GROUP BY lasku.tunnus
@@ -351,8 +351,7 @@
 				if ($logistiikka_yhtio != '') {
 					echo "<th>",t("Yhtiö"),"</th>";
 				}
-				echo "<th>".t("Pri")."</th>";
-				echo "<th>".t("Varastoon")."</th>";
+				echo "<th>".t("Pri")."<br>".t("Varastoon")."</th>";
 				echo "<th>".t("Tilaus")."</th>";
 				echo "<th>".t("Asiakas")."</th>";
 				echo "<th>".t("Nimi")."</th>";
@@ -385,30 +384,26 @@
 						echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
 					}
 
-					if (trim($tilrow["sisviesti2"]) != "" or trim($tilrow['kommentit'] != '')) {
-						echo "<div id='div_$tilrow[otunnus]' class='popup' style='width:500px;'>";
+					echo "<$ero valign='top' align='right'>$tilrow[t_tyyppi] $tilrow[prioriteetti] ";
 
-						if (trim($tilrow["sisviesti2"]) != "") {
-							echo t("Lisätiedot").":<br>";
-							echo $tilrow["sisviesti2"];
-							echo "<br>";
-						}
-						if (trim($tilrow['kommentit'] != '')) {
-							echo t("Rivikommentit").":<br>";
-							echo $tilrow["kommentit"];
-							echo "<br>";
-						}
-
-						echo "</div>";
-						echo "<$ero valign='top' class='tooltip' id='$tilrow[otunnus]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <img src='$palvelin2/pics/lullacons/info.png'></$ero>";
-
-
-					}
-					else {
-						echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
+					if (trim($tilrow["sisviesti2"]) != "") {
+						echo "<div id='div_{$tilrow["div_id"]}_1' class='popup' style='width:500px;'>";
+						echo t("Keräyslistan lisätiedot").":<br>".str_replace("\n", "<br>", $tilrow["sisviesti2"]);
+						echo "</div><img class='tooltip' id='{$tilrow["div_id"]}_1' src='$palvelin2/pics/lullacons/alert.png'>";
 					}
 
-					echo "<$ero valign='top'>$tilrow[varastonimi]</$ero>";
+					echo "<br>$tilrow[varastonimi] ";
+
+					if (trim($tilrow["comments"]) != "" or trim($tilrow["kommentti"]) != "") {
+						echo "<div id='div_{$tilrow["div_id"]}_2' class='popup' style='width:500px;'>";
+						echo t("Lähetteen lisätiedot").":<br>";
+						if (trim($tilrow["comments"]) != "") echo str_replace("\n", "<br>", $tilrow["comments"])."<br>";
+						if (trim($tilrow["kommentti"]) != "") echo str_replace("\n", "<br>", $tilrow["kommentti"])."<br>";
+						echo "</div><img class='tooltip' id='{$tilrow["div_id"]}_2' src='$palvelin2/pics/lullacons/info.png'>";
+					}
+
+					echo "</$ero>";
+
 					echo "<$ero valign='top'>$tilrow[tunnus]</$ero>";
 					echo "<$ero valign='top'>$tilrow[ytunnus]</$ero>";
 
@@ -834,8 +829,9 @@
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR '_') div_id,
 					count(distinct otunnus) tilauksia,
 					count(*) riveja,
-					group_concat(DISTINCT concat_ws('\n\n', if (comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if (sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
-					GROUP_CONCAT(DISTINCT if (kommentti='',NULL,kommentti) separator '\n') AS kommentit,
+					GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
+					GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
+					GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
 					lasku.mapvm
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
@@ -911,26 +907,26 @@
 					echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
 				}
 
-				if (trim($tilrow["ohjeet"]) != "" or trim($tilrow['kommentit'] != '')) {
-					echo "<div id='div_$tilrow[div_id]' class='popup' style='width:500px;'>";
-					if (trim($tilrow["ohjeet"]) != "") {
-						echo t("Lisätiedot").":<br>";
-						echo str_replace("\n", "<br>", $tilrow["ohjeet"]);
-						echo "<br>";
-					}
-					if (trim($tilrow['kommentit'] != '')) {
-						echo t("Rivikommentit").":<br>";
-						echo str_replace("\n", "<br>", $tilrow["kommentit"]);
-						echo "<br>";
-					}
-					echo "</div>";
-					echo "<$ero valign='top' class='tooltip' id='$tilrow[div_id]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <img src='$palvelin2/pics/lullacons/info.png'>";
-				}
-				else {
-					echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]";
+				echo "<$ero valign='top' align='right'>$tilrow[t_tyyppi] $tilrow[prioriteetti] ";
+
+				if (trim($tilrow["sisviesti2"]) != "") {
+					echo "<div id='div_{$tilrow["div_id"]}_1' class='popup' style='width:500px;'>";
+					echo t("Keräyslistan lisätiedot").":<br>".str_replace("\n", "<br>", $tilrow["sisviesti2"]);
+					echo "</div><img class='tooltip' id='{$tilrow["div_id"]}_1' src='$palvelin2/pics/lullacons/alert.png'>";
 				}
 
-				echo "<br>$tilrow[varastonimi]</$ero>";
+				echo "<br>$tilrow[varastonimi] ";
+
+				if (trim($tilrow["comments"]) != "" or trim($tilrow["kommentti"]) != "") {
+					echo "<div id='div_{$tilrow["div_id"]}_2' class='popup' style='width:500px;'>";
+					echo t("Lähetteen lisätiedot").":<br>";
+					if (trim($tilrow["comments"]) != "") echo str_replace("\n", "<br>", $tilrow["comments"])."<br>";
+					if (trim($tilrow["kommentti"]) != "") echo str_replace("\n", "<br>", $tilrow["kommentti"])."<br>";
+					echo "</div><img class='tooltip' id='{$tilrow["div_id"]}_2' src='$palvelin2/pics/lullacons/info.png'>";
+				}
+
+				echo "</$ero>";
+
 				echo "<$ero valign='top'>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";
 				echo "<$ero valign='top'>$tilrow[ytunnus]";
 

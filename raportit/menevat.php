@@ -273,9 +273,10 @@
 				$query = "	SELECT
 							$suorilisa
 							FROM suoritus
-							WHERE yhtio='$kukarow[yhtio]'
-							and asiakas_tunnus in ($row[liitostunnus])
-							and kohdpvm = '0000-00-00'";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ltunnus > 0
+							and kohdpvm = '0000-00-00'
+							and asiakas_tunnus in ($row[liitostunnus])";
 				$suresult = mysql_query($query) or pupe_error($query);
 				$surow = mysql_fetch_array($suresult);
 

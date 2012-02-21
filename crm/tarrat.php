@@ -67,7 +67,7 @@
 
 		if ($as_yht_tiedot == 'on') {
 			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
-			$joinilisa = " LEFT JOIN yhteyshenkilo yht on yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus ";
+			$joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
 		}
 
 		$query = "	SELECT asiakas.* $selectilisa
@@ -398,7 +398,7 @@
 					ORDER BY $jarjestys
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<form action = '$PHP_SELF' method = 'post'>
 			<input type='hidden' name='asmemo_viesti' value='$asmemo_viesti'>
 			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>

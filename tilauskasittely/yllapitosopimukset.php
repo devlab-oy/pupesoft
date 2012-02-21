@@ -203,6 +203,7 @@
 				$laskurow = mysql_fetch_assoc($result);
 
 				$kukarow["kesken"] = $ok;
+				$tilausvalmiskutsuja = "YLLAPITOSOPIMUKSET";
 
 				// tilaus valmis
 				require("tilaus-valmis.inc");
@@ -233,14 +234,14 @@
 					$tee 			= "TARKISTA";
 					$laskutakaikki 	= "KYLLA";
 					$silent		 	= "KYLLA";
-					
+
 					if ($poikkeus == "joo") {
 						$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("päivälle")." ".$poikkeuspvm.".</font><br>";
 					}
 					else {
 						$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("päivälle")." ".date("d.m.Y").".</font><br>";
 					}
-					
+
 					require("verkkolasku.php");
 				}
 				else {
@@ -467,8 +468,8 @@
 			echo "<tr>";
 			echo "</table>";
 		}
-		
-		echo "<br>";		
+
+		echo "<br>";
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Syötä Poikkeava Laskutuspäivämäärä (Pp-Kk-Vvvv)")."</th>";
@@ -502,7 +503,7 @@
 
 
 		echo "</form>";
-		
+
 		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
 					function verify(){
@@ -527,7 +528,7 @@
 							var falsekk = tanaankk-1;
 
 							var dateSyotetty = new Date(tanaanvv, falsekk, tanaanpp);
-							
+
 						}
 						else {
 							// voidaan syöttää kenttää 2 pituinen vuosiarvo esim. 11 = 2011
@@ -556,7 +557,7 @@
 						dateTiliLoppu = dateTiliLoppu.getTime();
 
 						dateSyotetty = dateSyotetty.getTime();
-						
+
 						if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 							var msg = msg+'".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")." ';
 						}

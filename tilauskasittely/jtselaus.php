@@ -283,6 +283,8 @@
 			}
 			else {
 				$mista = "jtselaus";
+				$tilausvalmiskutsuja = "JTSELAUS";
+
 				require ("tilaus-valmis.inc");
 			}
 

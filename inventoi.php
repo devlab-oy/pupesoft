@@ -167,20 +167,21 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
-						$kehahin = $tuote_row["kehahin"];
 					}
 
-					$query = "  SELECT tunnus
-								FROM tapahtuma
-								WHERE yhtio = '{$kukarow["yhtio"]}'
-								AND laji IN ('tulo', 'valmistus')
-								AND tuoteno = '{$tuoteno}'
-								LIMIT 1";
-					$tapahtuma_res = pupe_query($query);
+					if ($tuote_row["kehahin"] != 0) {
+						$query = "  SELECT tunnus
+									FROM tapahtuma
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									AND laji IN ('tulo', 'valmistus')
+									AND tuoteno = '{$tuoteno}'
+									LIMIT 1";
+						$tapahtuma_res = pupe_query($query);
 
-					if (mysql_num_rows($tapahtuma_res) == 0 and $kehahin != 0)  {
-						echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
-						$virhe = 1;
+						if (mysql_num_rows($tapahtuma_res) == 0)  {
+							echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
+							$virhe = 1;
+						}
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {

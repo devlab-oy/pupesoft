@@ -1323,6 +1323,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				$silent = "SILENT";
 			}
 
+			$tilausvalmiskutsuja = "TILAUSMYYNTI";
+
 			// tulostetaan lähetteet ja tilausvahvistukset tai sisäinen lasku..
 			require("tilaus-valmis.inc");
 		}

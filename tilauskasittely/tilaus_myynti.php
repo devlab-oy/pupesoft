@@ -83,8 +83,9 @@ if (!isset($var_array)) 			$var_array = "";
 if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
-if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
-if (!isset($lisax)) $lisax = '';
+if (!isset($omalle_tilaukselle)) 	$omalle_tilaukselle = '';
+if (!isset($lisax)) 				$lisax = '';
+if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -6263,10 +6264,10 @@ if ($tee == '') {
 					$row['kommentti'] .= "\n".t("Hinta").": ".hintapyoristys($lis_hinta_eta);
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$row['kommentti'] .= "\n".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
+						$row['kommentti'] .= ", ".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
 					}
 
-					$row['kommentti'] .= "\n".t("Alv").": ".($row['alv']*1)."%";
+					$row['kommentti'] .= ", ".t("Alv").": ".($row['alv']*1)."%";
 
 					$hintapyoristys_echo = $lis_hinta_eta;
 
@@ -6274,7 +6275,9 @@ if ($tee == '') {
 						$hintapyoristys_echo *= (1 - ($val / 100));
 					}
 
-					$row['kommentti'] .= "\n".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
+					$etayhtio_totaalisumma +=  ($hintapyoristys_echo * $kpl_ruudulle);
+
+					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
 				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
@@ -6689,8 +6692,10 @@ if ($tee == '') {
 					$kaikkiyhteensa = 0;
 				}
 
-				if (($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
-					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
+				if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma >$rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+					echo "<th colspan='5' align='right'>".t("Rahtikulu").":</th>";
+					echo "<td class='spec' align='right'>0.00</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
@@ -6927,6 +6932,26 @@ if ($tee == '') {
 
 						echo "<td class='spec'>$yhtiorow[valkoodi]</td></tr>";
 					}
+				}
+
+				if (isset($etayhtio_totaalisumma) and $etayhtio_totaalisumma !=0) {
+
+					echo "<tr><td class='back'><br></td></tr>";
+
+					echo "<tr>$jarjlisa
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteens‰").":</th>
+							<td class='spec' align='right'>".sprintf("%.2f",$etayhtio_totaalisumma);
+					echo "</td>";
+
+					if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+					}
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+					}
+
+					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
 			}

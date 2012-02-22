@@ -15225,7 +15225,7 @@ if (!function_exists("tee_keraysera2")) {
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {
 
 				if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
-					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote_chklist, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
+					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
 				}
 
 				$yksin_kerailyalustalle_normi_tuote_trigger = false;

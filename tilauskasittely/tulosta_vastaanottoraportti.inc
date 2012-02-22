@@ -1,8 +1,7 @@
 <?php
 
-	// Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
-	// sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
-
+	// Ohjelma vatii muuttujan $otunnus joka viittaa keikkaan johon rivit on kohdistettu.
+	// sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 	require_once('pdflib/phppdflib.class.php');
 
 	$norm["height"] 			= 10;
@@ -48,17 +47,25 @@
  			$pdf->draw_text(315, 758, t("Toimittaja", $kieli), $firstpage, $pieni);
  			$pdf->draw_text(315, 748, $laskurow['nimi'].' '.$laskurow['nimitark'], $firstpage, $norm);
 
-			// tuotelistauksen otsikko
 			$pdf->draw_rectangle(725, 15, 705, 580, $firstpage, $rectparam2);
  			$pdf->draw_text(20, 716, t("SSCC"), $firstpage, $pieniboldi);
  			$pdf->draw_text(20, 708, t("Keräysvyöhyke"), $firstpage, $pieniboldi);
  			$pdf->draw_text(100, 716, t("Paikka"), $firstpage, $pieniboldi);
  			$pdf->draw_text(175, 716, t("Tuoteno"), $firstpage, $pieniboldi);
  			$pdf->draw_text(175, 708, t("Nimitys"), $firstpage, $pieniboldi);
- 			$pdf->draw_text(350, 716, t("Toimittajan tuoteno"), $firstpage, $pieniboldi);
- 			$pdf->draw_text(465, 716, t("Tilattu"), $firstpage, $pieniboldi);
- 			$pdf->draw_text(520, 716, t("Saavutettu"), $firstpage, $pieniboldi);
 
+			if ($yhtiorow["vastaanottoraportti"] == "K") {
+				$pdf->draw_text(350, 716, t("Saldo"), $firstpage, $pieniboldi);
+				$pdf->draw_text(460, 716, t("Vanha hinta"), $firstpage, $pieniboldi);
+				$pdf->draw_text(460, 708, t("Uusi hinta"), $firstpage, $pieniboldi);
+	 			$pdf->draw_text(520, 716, t("Tilattu"), $firstpage, $pieniboldi);
+	 			$pdf->draw_text(520, 708, t("Saavutettu"), $firstpage, $pieniboldi);
+			}
+			else {
+	 			$pdf->draw_text(350, 716, t("Toimittajan tuoteno"), $firstpage, $pieniboldi);
+	 			$pdf->draw_text(465, 716, t("Tilattu"), $firstpage, $pieniboldi);
+	 			$pdf->draw_text(520, 716, t("Saavutettu"), $firstpage, $pieniboldi);
+			}
 			return($firstpage);
 		}
 	}
@@ -84,8 +91,19 @@
 
 				$kutsu = "Vastaanottoraportti";
 
-				require("../inc/sahkoposti.inc");
+				if (@include("../inc/sahkoposti.inc"));
+				elseif (@include("inc/sahkoposti.inc"));
+				else include("sahkoposti.inc");
 
+			}
+			elseif ($tee == 'vastaanottoraportinkopio') {
+				$liite = $pdffilenimi;
+
+				$kutsu = "Vastaanottoraportti";
+
+				if (@include("../inc/sahkoposti.inc"));
+				elseif (@include("inc/sahkoposti.inc"));
+				else include("sahkoposti.inc");
 			}
 			elseif ($tee == 'NAYTATILAUS') {
     			//Työnnetään tuo pdf vaan putkeen!
@@ -101,7 +119,11 @@
 		}
 	}
 
-	$query = "	SELECT tilausrivi.*, suuntalavat.sscc, tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu+tilausrivi.kpl siskpl, keraysvyohyke.nimitys AS keraysvyohyke_nimitys
+	$query = "	SELECT tilausrivi.*,
+				suuntalavat.sscc,
+				tuotteen_toimittajat.toim_tuoteno,
+				tilausrivi.varattu+tilausrivi.kpl siskpl,
+				keraysvyohyke.nimitys AS keraysvyohyke_nimitys
 				FROM tilausrivi
 				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
 				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
@@ -112,7 +134,8 @@
 				AND tilausrivi.tyyppi = 'O'
 				AND tilausrivi.kpl != 0
 				AND tilausrivi.suuntalava != 0";
-	$vastaanottoraportti_result = mysql_query($query) or pupe_error($query);
+
+	$vastaanottoraportti_result = pupe_query($query);
 
 	$firstpage = alku_vastaanotto();
 	$kala = 685;
@@ -131,13 +154,68 @@
 		$pdf->draw_text(100, $kala, $row['hyllyalue'].' '.$row['hyllynro'].' '.$row['hyllyvali'].' '.$row['hyllytaso'], $firstpage, $pieni);
 		$pdf->draw_text(175, $kala, $row['tuoteno'], $firstpage, $pieni);
 		$pdf->draw_text(175, $kala-10, $row['nimitys'], $firstpage, $pieni);
-		$pdf->draw_text(350, $kala, $row['toim_tuoteno'], $firstpage, $pieni);
 
-		$siskpl = $row['siskpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
-		$kpl = $row['kpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		if ($yhtiorow["vastaanottoraportti"] == "K") {
 
-		$pdf->draw_text(465, $kala, $siskpl, $firstpage, $pieni);
-		$pdf->draw_text(520, $kala, $kpl, $firstpage, $pieni);
+			list(,, $varastosaldo) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', '');
+			$pdf->draw_text(350, $kala, $varastosaldo, $firstpage, $pieni);
+
+			// haetaan tapahtumalta uusihinta ja aika
+			$query1 = "	SELECT hinta, laadittu
+						FROM tapahtuma
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						and tuoteno = '{$row["tuoteno"]}'
+						and laji = 'tulo'
+						and rivitunnus = '{$row["tunnus"]}'
+						ORDER BY laadittu desc
+						LIMIT 1";
+			$result = pupe_query($query1);
+			$uusirow = mysql_fetch_assoc($result);
+
+			// haetaan tuotteelle vanhahinta
+			$query2 = "	SELECT hinta
+						FROM tapahtuma
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						and tuoteno = '{$row["tuoteno"]}'
+						and laadittu < '{$uusirow["laadittu"]}'
+						and laji = 'tulo'
+						ORDER BY laadittu desc
+						LIMIT 1";
+			$result = pupe_query($query2);
+			$vanharow = mysql_fetch_assoc($result);
+
+			if ($laskurow["mapvm"] == 0000-00-00) {
+				$nmerkki = "~ ";
+				$kohdistus = 458;
+			}
+			else {
+				$nmerkki = "";
+				$kohdistus = 465;
+			}
+
+			if ($vanharow["hinta"] == "") {
+				$vanharow["hinta"] = "0.00";
+			}
+
+			$pdf->draw_text(465, $kala, $vanharow["hinta"], $firstpage, $pieni);
+			$pdf->draw_text($kohdistus, $kala-8, $nmerkki."".$uusirow["hinta"], $firstpage, $pieni);
+
+			$siskpl = $row['siskpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			$kpl = $row['kpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+			$pdf->draw_text(520, $kala, $siskpl, $firstpage, $pieni);
+			$pdf->draw_text(520, $kala-8, $kpl, $firstpage, $pieni);
+
+		}
+		else {
+			$pdf->draw_text(350, $kala, $row['toim_tuoteno'], $firstpage, $pieni);
+			$siskpl = $row['siskpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			$kpl = $row['kpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+			$pdf->draw_text(465, $kala, $siskpl, $firstpage, $pieni);
+			$pdf->draw_text(520, $kala, $kpl, $firstpage, $pieni);
+
+		}
 
 		$pdf->draw_rectangle($kala-15, 15, $kala-15, 580, $firstpage, $rectparam2);
 

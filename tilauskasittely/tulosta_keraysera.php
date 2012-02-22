@@ -85,13 +85,11 @@
 
 		if (isset($kerayseranro) and trim($kerayseranro) > 0) {
 
-			$lukotetaan = check_lock_tables(array('avainsana'));
+			// $lukotetaan = check_lock_tables(array('avainsana'));
 
-			if ($lukotetaan) {
-				// emuloidaan transactioita mysql LOCK komennolla
-				$query = "LOCK TABLES avainsana WRITE";
-				$res   = pupe_query($query);
-			}
+			// emuloidaan transactioita mysql LOCK komennolla
+			$query = "LOCK TABLES avainsana WRITE";
+			$res   = pupe_query($query);
 
 			$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
 			$result = pupe_query($query);
@@ -130,11 +128,9 @@
 				$update_res = pupe_query($query);
 			}
 
-			if ($lukotetaan) {
-				// poistetaan lukko
-				$query = "UNLOCK TABLES";
-				$res   = pupe_query($query);
-			}
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = pupe_query($query);
 
 			$query = "SELECT tila, (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$kerayseranro}' GROUP BY 1";
 			$uusi_paknro_res = pupe_query($query);
@@ -603,6 +599,8 @@
 
 				$debug = true;
 
+				$lukotetaan = false;
+
 				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
 
 				if (count($erat['tilaukset']) != 0) {
@@ -624,13 +622,11 @@
 				}
 				else {
 					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
-
-					// if ($lukotetaan) {
-						// lukitaan tableja
-				 		$query = "UNLOCK TABLES";
-	 					$result = pupe_query($query);
-					// }
 				}
+
+				// lukitaan tableja
+		 		$query = "UNLOCK TABLES";
+				$result = pupe_query($query);
 			}
 
 			echo "<br /><br />";

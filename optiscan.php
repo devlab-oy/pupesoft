@@ -395,6 +395,8 @@
 				$result = pupe_query($query);
 			// }
 
+			$lukotetaan = false;
+
 			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto'], false);
 
 			if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
@@ -511,11 +513,9 @@
 				}
 			}
 
-			if ($lukotetaan) {
-				// poistetaan lukko
-				$query = "UNLOCK TABLES";
-				$res   = pupe_query($query);
-			}
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = pupe_query($query);
 
 		}
 

@@ -24,54 +24,54 @@
 	$returnvalue	= 0;
 	$komento		= "";
 
-	$locktables = array(
-			'liitetiedostot',
-			'tilausrivi',
-			't2',
-			'tlt2',
-			'tilausrivi_osto',
-			'tilausrivi_myynti',
-			'sarjanumeroseuranta',
-			't3',
-			'lasku',
-			'sanakirja',
-			'avainsana',
-			'a',
-			'b',
-			'varaston_tulostimet',
-			'tuotepaikat',
-			'tuote',
-			'tuoteperhe',
-			'maksuehto',
-			'varastopaikat',
-			'kirjoittimet',
-			'asiakas',
-			'kuka',
-			'asiakaskommentti',
-			'tuotteen_toimittajat',
-			'tuotteen_avainsanat',
-			'pankkiyhteystiedot',
-			'toimitustapa',
-			'yhtion_toimipaikat',
-			'yhtion_parametrit',
-			'tuotteen_alv',
-			'maat',
-			'rahtisopimukset',
-			'rahtisopimukset2',
-			'pakkaamo',
-			'avainsana_kieli',
-			'vanha_lasku',
-			'vanha_varaston_tulostimet',
-			'yhtio'
-		);
+	// $locktables = array(
+	// 		'liitetiedostot',
+	// 		'tilausrivi',
+	// 		't2',
+	// 		'tlt2',
+	// 		'tilausrivi_osto',
+	// 		'tilausrivi_myynti',
+	// 		'sarjanumeroseuranta',
+	// 		't3',
+	// 		'lasku',
+	// 		'sanakirja',
+	// 		'avainsana',
+	// 		'a',
+	// 		'b',
+	// 		'varaston_tulostimet',
+	// 		'tuotepaikat',
+	// 		'tuote',
+	// 		'tuoteperhe',
+	// 		'maksuehto',
+	// 		'varastopaikat',
+	// 		'kirjoittimet',
+	// 		'asiakas',
+	// 		'kuka',
+	// 		'asiakaskommentti',
+	// 		'tuotteen_toimittajat',
+	// 		'tuotteen_avainsanat',
+	// 		'pankkiyhteystiedot',
+	// 		'toimitustapa',
+	// 		'yhtion_toimipaikat',
+	// 		'yhtion_parametrit',
+	// 		'tuotteen_alv',
+	// 		'maat',
+	// 		'rahtisopimukset',
+	// 		'rahtisopimukset2',
+	// 		'pakkaamo',
+	// 		'avainsana_kieli',
+	// 		'vanha_lasku',
+	// 		'vanha_varaston_tulostimet',
+	// 		'yhtio'
+	// 	);
 
-	if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
-		array_push($locktables, 'lasku1', 'lasku2', 'laskun_lisatiedot', 'asiakas1', 'asiakas2', 'tilausrivi1', 'tilausrivi2', 'tilausrivin_lisatiedot', 'vh', 'vh1', 'vh2', 'tuote1', 'tuote2', 'keraysvyohyke1', 'keraysvyohyke2', 'toimitustapa1', 'toimitustapa2', 'lahdot1', 'lahdot2', 'kerayserat', 'pakkaus', 'keraysvyohyke');
-	}
+	// if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+	// 	array_push($locktables, 'lasku1', 'lasku2', 'laskun_lisatiedot', 'asiakas1', 'asiakas2', 'tilausrivi1', 'tilausrivi2', 'tilausrivin_lisatiedot', 'vh', 'vh1', 'vh2', 'tuote1', 'tuote2', 'keraysvyohyke1', 'keraysvyohyke2', 'toimitustapa1', 'toimitustapa2', 'lahdot1', 'lahdot2', 'kerayserat', 'pakkaus', 'keraysvyohyke');
+	// }
 
-	$lukotetaan = check_lock_tables($locktables);
+	// $lukotetaan = check_lock_tables($locktables);
 
-	if ($lukotetaan) {
+	if (!isset($lukotetaan) or $lukotetaan) {
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana WRITE, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ";
 
@@ -396,8 +396,10 @@
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
 
-	// poistetaan lukot
-	$query = "UNLOCK TABLES";
-	$res   = pupe_query($query);
+	if (!isset($lukotetaan) or $lukotetaan) {
+		// poistetaan lukot
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+	}
 
 ?>

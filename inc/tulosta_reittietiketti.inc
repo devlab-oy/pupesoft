@@ -38,9 +38,9 @@
 
 					$kappaleet = 0;
 
-					$lukotetaan = check_lock_tables(array('avainsana'));
+					// $lukotetaan = check_lock_tables(array('avainsana'));
 
-					if ($lukotetaan) {
+					if (!isset($lukotetaan) or $lukotetaan) {
 						// emuloidaan transactioita mysql LOCK komennolla
 						$query = "LOCK TABLES avainsana WRITE";
 						$res   = pupe_query($query);
@@ -83,7 +83,7 @@
 						$update_res = pupe_query($query);
 					}
 
-					if ($lukotetaan) {
+					if (!isset($lukotetaan) or $lukotetaan) {
 						// poistetaan lukko
 						$query = "UNLOCK TABLES";
 						$res   = pupe_query($query);

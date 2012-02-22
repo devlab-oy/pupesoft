@@ -1775,8 +1775,7 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";
-
-					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+					$tilausvalmiskutsuja = "EDITILAUS";
 
 					require ("tilaus-valmis.inc");
 
@@ -1846,6 +1845,8 @@ while ($tietue = fgets($fd)) {
 
 						// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
 						$silent = "SILENT";
+						$tilausvalmiskutsuja = "EDITILAUS";
+
 						require ("tilaus-valmis.inc");
 					}
 

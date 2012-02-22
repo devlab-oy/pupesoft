@@ -487,11 +487,11 @@
 		$laskutiedot["kpvm"] = date("Y-m-d");
 	}
 
-	$query = "	SELECT SUM(summa) summa
+	$query = "	SELECT sum(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
 				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and ltunnus  > 0
 				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = pupe_query($query);

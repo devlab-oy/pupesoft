@@ -351,7 +351,7 @@
 			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
-			
+
 			if ($grouppaus != "kustannuspaikka") {
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
@@ -397,8 +397,9 @@
 								$suorilisa
 								FROM suoritus
 								WHERE yhtio = '$saatavat_yhtio'
-								and asiakas_tunnus in ($row[liitostunnus])
+								and ltunnus > 0
 								and kohdpvm = '0000-00-00'
+								and asiakas_tunnus in ($row[liitostunnus])
 								$salisa2";
 					$suresult = pupe_query($query);
 					$surow = mysql_fetch_assoc($suresult);
@@ -489,7 +490,7 @@
 							$worksheet->writeString($excelrivi, $excelsarake, $kustpmuuttuja);
 							$excelsarake++;
 						}
-						
+
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["alle_$saatavat_array[0]"]);
 						$excelsarake++;
 

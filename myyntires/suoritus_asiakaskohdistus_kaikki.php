@@ -1,11 +1,12 @@
 <?php
 
-echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font><br>";
+echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font><br>\n";
 
 $query  = "	SELECT *
 			FROM suoritus
-			WHERE asiakas_tunnus = ''
-			and yhtio = '$kukarow[yhtio]'
+			WHERE yhtio = '$kukarow[yhtio]'
+			and kohdpvm	= '0000-00-00'
+			and asiakas_tunnus = 0
 			and summa != 0";
 $result = pupe_query($query);
 
@@ -39,7 +40,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 				$asiakas = mysql_fetch_assoc($asres);
 				$ok = 1;
 
-				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>";
+				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>\n";
 
 				if ($asiakas['konserniyhtio'] != '') {
 					$query   = "	UPDATE tiliointi
@@ -130,7 +131,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 		}
 
 		if ($asiakasokmaksaja) {
-			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>";
+			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>\n";
 
 			if ($asiakas['konserniyhtio'] != '') {
 				$query   = "	UPDATE tiliointi
@@ -150,6 +151,6 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 	}
 }
 
-echo "<font class='message'>Suoritukset kohdistettu</font><br><br>";
+echo "<font class='message'>".t("Suoritukset kohdistettu")."</font><br>\n<br>\n";
 
 ?>

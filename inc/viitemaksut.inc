@@ -46,7 +46,7 @@
 		$yritirow = mysql_fetch_assoc($result);
 
 		if ($yritirow["yhtio"] == "") {
-			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>";
+			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>\n";
 			continue;
 		}
 		else {
@@ -62,7 +62,7 @@
 			$valresult = pupe_query($query);
 
 			if (mysql_num_rows($valresult) != 1) {
-				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>";
+				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>\n";
 				continue;
 			}
 			else {
@@ -78,7 +78,7 @@
 			$valrow = mysql_fetch_assoc ($valresult);
 
 			if ($valrow["valkoodi"] == '') {
-				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>";
+				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>\n";
 				continue;
 			}
 			else {
@@ -109,7 +109,7 @@
 		#print "done, insert/read/error: $insertcnt/$readcnt/$errcnt\n";
 	}
 	else {
-		echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>";
+		echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>\n";
 		$errcnt++;
 		next;
 	}

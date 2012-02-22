@@ -649,8 +649,14 @@ if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI") {
 	require ("laskuta_myyntitilirivi.inc");
 }
 
+// Palautetaan myyntitili takaisin omaan varastoon
+if ($kukarow["extranet"] == "" and $tee == "PALAUTAMYYNTITILI") {
+	$tilatapa = "PALAUTA";
+	require ("laskuta_myyntitilirivi.inc");
+}
+
 // Laitetaan myyntitili takaisin lep‰‰m‰‰n
-if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI" and $muokkauslukko == "") {
+if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI") {
 	$tilatapa = "LEPAA";
 	require ("laskuta_myyntitilirivi.inc");
 }
@@ -1316,6 +1322,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";
 			}
+
+			$tilausvalmiskutsuja = "TILAUSMYYNTI";
 
 			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
 			require("tilaus-valmis.inc");
@@ -3401,7 +3409,6 @@ if ($tee == '') {
 
 	if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
 		$tilatapa = "PAIVITA";
-
 		require("laskuta_myyntitilirivi.inc");
 	}
 
@@ -5467,7 +5474,6 @@ if ($tee == '') {
 
 					 if ($row["kpl"] != 0 and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {
 						$tilatapa = "VALITSE";
-
 						require('laskuta_myyntitilirivi.inc');
 					}
 					else {
@@ -5668,7 +5674,16 @@ if ($tee == '') {
 					echo "</form>";
 				}
 				elseif ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {
-					echo "<td $class align='right' valign='top' nowrap>".t("Laskutettu")."</td>";
+					echo "<td $class align='right' valign='top' nowrap>";
+
+					if ($row["var"] == "B") {
+						echo t("Palautettu");
+					}
+					else {
+						echo t("Laskutettu");
+					}
+
+					echo "</td>";
 					echo "</form>";
 				}
 				else {
@@ -6999,6 +7014,18 @@ if ($tee == '') {
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='mista' value = '$mista'>
 					<input type='submit' value='* ".t("Laskuta valitut rivit")." *'>
+					</form></td>";
+
+			echo "	<td class='back' valign='top'>
+					<form name='laskuta' action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+					<input type='hidden' name='projektilla' value='$projektilla'>
+					<input type='hidden' name='tee' value='PALAUTAMYYNTITILI'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='mista' value = '$mista'>
+					<input type='submit' value='* ".t("Palauta valitut rivit omaan varastoon")." *'>
 					</form></td>";
 
 			echo "	<td class='back' valign='top'>

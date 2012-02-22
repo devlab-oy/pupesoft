@@ -492,6 +492,11 @@ if ($kasitellaan_tiedosto) {
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 			}
 
+			if (substr($row[1], 0, 7) == "decimal" or substr($row[1], 0, 3) == "int") {
+				// Sallitaan myös miinusmerkki...
+				$tlengthpit++;
+			}
+
 			$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
 		}
 

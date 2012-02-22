@@ -45,10 +45,3 @@
 	$todnimi = basename($tiedoston_sijainti);
 
 	require ("{$pupe_root_polku}/inc/ftp-send.inc");
-
-	if ($palautus == 0) {
-		unlink($tiedoston_sijainti);
-	}
-	else {
-		rename($tiedoston_sijainti,"{$pupe_root_polku}/dataout/ERROR_".$todnimi);
-	}

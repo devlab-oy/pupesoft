@@ -18,7 +18,6 @@ if (!isset($alv)) 					$alv = "";
 if (!isset($alv_array)) 			$alv_array = "";
 if (!isset($asiakasid)) 			$asiakasid = "";
 if (!isset($asiakasOnProspekti)) 	$asiakasOnProspekti = "";
-if (!isset($eta_yhtio)) 			$eta_yhtio = "";
 if (!isset($from)) 					$from = "";
 if (!isset($hinta)) 				$hinta = "";
 if (!isset($hinta_array)) 			$hinta_array = "";
@@ -85,6 +84,7 @@ if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
 if (!isset($lisax)) $lisax = '';
+if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -2498,8 +2498,9 @@ if ($tee == '') {
 		$faktaresult = pupe_query($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
 
-		if ($GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
-			unset($GLOBALS['eta_yhtio']);
+		// KAUTTALASKUTUSKIKKARE
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
+			$GLOBALS['eta_yhtio'] = "";
 		}
 
 		echo "<tr>$jarjlisa";
@@ -5233,7 +5234,7 @@ if ($tee == '') {
 						$pknum = 0;
 						$borderlask = 0;
 
-						if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
 							echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
 						}
 						else {
@@ -6262,10 +6263,10 @@ if ($tee == '') {
 					$row['kommentti'] .= "\n".t("Hinta").": ".hintapyoristys($lis_hinta_eta);
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$row['kommentti'] .= "\n".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
+						$row['kommentti'] .= ", ".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
 					}
 
-					$row['kommentti'] .= "\n".t("Alv").": ".($row['alv']*1)."%";
+					$row['kommentti'] .= ", ".t("Alv").": ".($row['alv']*1)."%";
 
 					$hintapyoristys_echo = $lis_hinta_eta;
 
@@ -6273,7 +6274,9 @@ if ($tee == '') {
 						$hintapyoristys_echo *= (1 - ($val / 100));
 					}
 
-					$row['kommentti'] .= "\n".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
+					$etayhtio_totaalisumma +=  ($hintapyoristys_echo * $kpl_ruudulle);
+
+					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
 				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
@@ -6684,7 +6687,7 @@ if ($tee == '') {
 					$kaikkiyhteensa = 0;
 				}
 
-				if (($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+				if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
 					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
@@ -6922,6 +6925,26 @@ if ($tee == '') {
 
 						echo "<td class='spec'>$yhtiorow[valkoodi]</td></tr>";
 					}
+				}
+
+				if (isset($etayhtio_totaalisumma) and $etayhtio_totaalisumma !=0) {
+
+					echo "<tr><td class='back'><br></td></tr>";
+
+					echo "<tr>$jarjlisa
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteens‰").":</th>
+							<td class='spec' align='right'>".sprintf("%.2f",$etayhtio_totaalisumma);
+					echo "</td>";
+
+					if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+			}
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+					}
+
+					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
 			}

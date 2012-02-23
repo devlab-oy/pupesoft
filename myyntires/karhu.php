@@ -350,7 +350,7 @@ if ($tee == 'KARHUA')  {
 	echo "</table>";
 	echo "</td></tr></table><br>";
 
-	if (isset($ekirje_config) && is_array($ekirje_config)) {
+	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		$submit_text = 'Lähetä eKirje';
 	}
 	else {

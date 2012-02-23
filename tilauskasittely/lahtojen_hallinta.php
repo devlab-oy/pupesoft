@@ -2257,7 +2257,7 @@
 							kerayserat.laatija AS 'keraaja',
 							tilausrivi.kerattyaika,
 							#IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
-							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0), 0) AS 'keratyt'
+							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
 							FROM tilausrivi
 							LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -2320,7 +2320,7 @@
 							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
 							kerayserat.laatija AS keraaja,
 							tilausrivi.kerattyaika,
-							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu, 0), 0) AS 'keratyt'
+							ROUND(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', IFNULL(kerayserat.kpl_keratty, tilausrivi.varattu), 0), 0) AS 'keratyt'
 							FROM kerayserat
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' {$ei_lapsia_lisa})
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)

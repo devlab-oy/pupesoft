@@ -73,7 +73,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	$params = mysql_fetch_assoc($res);
 
 	$yhtiorow = array_merge($yhtiorow, $params);
-
+	
 	echo "E3rajapinta siirto: $yhtio\n";
 
 	//testausta varten limit
@@ -142,7 +142,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 							) korvaavatuoteno
 					FROM tuote
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-					WHERE tuote.yhtio = '$yhtio' $tuoterajaukset
+					WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
 					HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 					//ta1.selite,
 					//LEFT JOIN tuotteen_avainsanat ta1 use index (yhtio_kieli_laji_tuoteno) ON (ta1.yhtio = tuote.yhtio AND ta1.kieli='fi' AND ta1.laji = 'parametri_korvattu' AND ta1.tuoteno = tuote.tuoteno)
@@ -181,14 +181,16 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			// mones t‰m‰ on
 			$row++;
 
-			$tuote['tuotenimi'] = str_replace('\n', ' ', $tuote['tuotenimi']);
-			$tuote['tuotenimi'] = preg_replace(" {2,}", " ", $tuote['tuotenimi']);
+			$nimitys = $tuote['tuotenimi'];
+			$order   = array("\r\n", "\n", "\r", "\t");
+			$nimitys = str_replace($order, ' ', $nimitys);
+			$nimitys = preg_replace(" {2,}", " ", $nimitys);
 
 			$out  = sprintf("%-3.3s",		"E3T");
 			$out .= sprintf("%-18.18s",		$tuote['tuoteno']);
 			$out .= sprintf("%-3.3s",		"001");
 			$out .= sprintf("%-8.8s",		$tuto['toimittaja']);
-			$out .= sprintf("%-45.45s",		$tuote['tuotenimi']); 
+			$out .= sprintf("%-45.45s",		$nimitys); 
 			
 			//$tuote = implode("\t", $tuote);
 
@@ -218,7 +220,8 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		//Item Lead Time File XLT0 (toimitusaikaseuranta)
 		//Tiedot p‰iv‰n aikaan tehdyist‰ tuloutuksista, jotka tehty E3:ssa syntynytt‰ tilausta vastaan
 		//tony: tein muutokset luonti ja lahete tietojen sis‰ltˆˆn. Sek‰ myˆs laskun tila semmoiseksi ett‰ on kyse tuloutetuista ostokeikasta
-
+		//j‰tet‰‰ t‰st aineistost ostoehdotus EI:t pois -satu 17-2-12
+		
 		echo "Ulostetaan xlt0...\n";
 
 	//	$tanaan = date("Y-m-d"); // muodossa Y-m-d == 2005-10-29
@@ -240,8 +243,10 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 						) korvaavatuoteno
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
-					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset)
+					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset AND tuote.ostoehdotus = '')
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus AND lasku.tila = 'K' AND lasku.alatila != 'I')
+					#t‰‰ ei ole aukoton ratkaisu ratkaista sit‰, ett‰ vain e3:lla tehtyj‰ tilauksia vastaan tehdyt tuloutukset.. jotkut tulot ei tuu osumaan jatkossa jos t‰lleen tehd‰‰n (jos asn/ostolasku kohdistuksien vuoksi uupuu ja tehd‰‰n k‰sin rivej‰)
+					#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 					WHERE tilausrivi.yhtio	= '$yhtio' 
 					AND tilausrivi.tyyppi = 'O'
@@ -484,7 +489,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					LEFT JOIN abc_aputaulu tm ON (tm.yhtio = tuote.yhtio AND tm.tuoteno = tuote.tuoteno AND tm.tyyppi = 'TM')
 					LEFT JOIN abc_aputaulu tr ON (tr.yhtio = tuote.yhtio AND tr.tuoteno = tuote.tuoteno AND tr.tyyppi = 'TR')
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-					WHERE tuote.yhtio = '$yhtio' $tuoterajaukset
+					WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
 					HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null) 
 					ORDER BY tuote.tuoteno";
 		$resto = mysql_query($qxf04) or pupe_error($qxf04);
@@ -581,11 +586,22 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
 					LIMIT 1
 				) korvaavatuoteno,
-				ROUND(sum(tuotepaikat.saldo),0) saldo
+				tuote.ostoehdotus,
+				#ROUND(sum(tuotepaikat.saldo),0) saldo
+				(
+					SELECT ROUND(sum(tuotepaikat.saldo),0) saldo
+					FROM tuotepaikat
+					JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio 
+					AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
+					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					AND varastopaikat.tyyppi = '')
+					WHERE tuotepaikat.yhtio = tuote.yhtio
+					AND tuotepaikat.tuoteno = tuote.tuoteno
+				) saldo
 				FROM tuote
-				LEFT JOIN tuotepaikat on (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+				#LEFT JOIN tuotepaikat on (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 				LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-				WHERE tuote.yhtio = '$yhtio' $tuoterajaukset
+				WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
 				GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
 				HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rests = mysql_query($Q1) or pupe_error($Q1);
@@ -613,47 +629,66 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			$toimirow = mysql_fetch_assoc($toimires);
 			
 			if ($toimirow['toimittaja'] == '' or $toimirow['tyyppi'] == 'P') continue;
-				
-			$Q2 = " 	SELECT round(SUM(tilausrivi.kpl), 0) myyty
-			        	FROM tilausrivi
-			        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
-			        	WHERE tilausrivi.yhtio = '$yhtio'
-			        	AND tyyppi = 'L'
-			  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
-			  			AND laskutettuaika > '0000-00-00'
-			        	AND tilausrivi.toimitettuaika = '$tanaan'";
-			$q2r =  mysql_query($Q2) or pupe_error($Q2);
-			$myyntirow = mysql_fetch_assoc($q2r);
 			
-			$Q2 = " 	SELECT round(SUM(tilausrivi.varattu), 0) myyty2
-			        	FROM tilausrivi
-			        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
-			        	WHERE tilausrivi.yhtio = '$yhtio'
-			        	AND tyyppi = 'L'
-			  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
-			  			AND varattu != 0
-			        	AND tilausrivi.toimitettuaika = '$tanaan'";
-			$q2r2 =  mysql_query($Q2) or pupe_error($Q2);
-			$myyntirow2 = mysql_fetch_assoc($q2r2);
+			//Jos ostoehdotus on kyll‰, siirret‰‰n myyntilukuja. Muuten ei.
+			//Myynnit vaan "normaaleist" varastoist, tsekataa vaa varastopaikat-taulusta tyyppi '':st‰ myydyt
+			//Jos asiakkuuksilla palautetaan tavaraa (toimittajapalautus), ei oteta niit‰ palautuksia myyntilukuihin mukaan. Katotaan t‰‰ kauppatapahtuman luonteella
+			if ($tuoterow['ostoehdotus'] == '') {
+			
+				$Q2 = " 	SELECT round(SUM(tilausrivi.kpl), 0) myyty
+				        	FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+				        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio 
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) 
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND varastopaikat.tyyppi = '')
+				        	WHERE tilausrivi.yhtio = '$yhtio'
+				        	AND tilausrivi.tyyppi = 'L'
+				  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
+				  			AND laskutettuaika > '0000-00-00'
+				        	AND tilausrivi.toimitettuaika = '$tanaan'";
+				$q2r =  mysql_query($Q2) or pupe_error($Q2);
+				$myyntirow = mysql_fetch_assoc($q2r);
+				
+				$Q2 = " 	SELECT round(SUM(tilausrivi.varattu), 0) myyty2
+				        	FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+				        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio 
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) 
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND varastopaikat.tyyppi = '')
+				        	WHERE tilausrivi.yhtio = '$yhtio'
+				        	AND tilausrivi.tyyppi = 'L'
+				  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
+				  			AND varattu != 0
+				        	AND tilausrivi.toimitettuaika = '$tanaan'";
+				$q2r2 =  mysql_query($Q2) or pupe_error($Q2);
+				$myyntirow2 = mysql_fetch_assoc($q2r2);
+				
+				// tarkistetaan ettei laitetan negatiivia arvoja
+				$myyntipvm = $myyntirow['myyty'] + $myyntirow2['myyty2'];
+				if ($myyntipvm < 0) {
+					$myyntipvm = '0';
+				}
+			}
+			else {
+				$myyntipvm = '0';
+			}
 			
 			//avoimet ostokappaleet 
 			$Q3 = 	"	SELECT round(SUM(tilausrivi.varattu),0) as tilauksessa, tilausrivin_lisatiedot.tilausrivitunnus
 						FROM tilausrivi
+						#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
 						WHERE tilausrivi.yhtio = '$yhtio'
-						AND tyyppi = 'O'
+						AND tilausrivi.tyyppi = 'O'
 						AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
 						AND tilausrivi.laskutettuaika = '0000-00-00'
 						HAVING tilausrivin_lisatiedot.tilausrivitunnus is null";
 			$q3r = 	mysql_query($Q3) or pupe_error($Q3);
 			$ostorow = mysql_fetch_assoc($q3r);
-            
-			// tarkistetaan ettei laitetan negatiivia arvoja
-			$myyntipvm = $myyntirow['myyty'] + $myyntirow2['myyty2'];
-			
-			if ($myyntipvm < 0) {
-				$myyntipvm = '0';
-			}
             
 			$tilauksessa = $ostorow['tilauksessa'];
 			if ($tilauksessa < 0) {

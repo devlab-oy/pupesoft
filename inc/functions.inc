@@ -15041,8 +15041,11 @@ if (!function_exists("tee_keraysera2")) {
 
 				$pisin_tuote_per_asiakas[$tuoterow['otunnus']][] = $tuoterow['tuoteno'];
 
-				// simuloidaan keräyksen muodostumista
-				$eran_koko_chk += $tuoterow['tuotteen_koko'];
+				if ($tuoterow['yksin_kerailyalustalle'] != 'K') {
+					// simuloidaan keräyksen muodostumista
+					$eran_koko_chk += $tuoterow['tuotteen_koko'];
+				}
+
 				$eran_koko_pintaala_chk += (($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) * $tuoterow['y_maara']);
 				$eran_paino_chk += ($tuoterow['y_paino'] * $tuoterow['y_maara']);
 			}

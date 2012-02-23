@@ -213,8 +213,11 @@
 				hinnasto.selite,
 				hinnasto.alkupvm,
 				hinnasto.loppupvm,
-				hinnasto.hinta
+				hinnasto.hinta, 
+				tuote.myymalahinta, 
+				tuote.alv
 				FROM hinnasto
+				JOIN tuote on (tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno)
 				WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
 				AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
 				AND hinnasto.laji != 'O'
@@ -225,11 +228,20 @@
 
 	// Tehdään hinnastot läpi
 	while ($row = mysql_fetch_array($res)) {
+		
+		if ($yhtiorow["alv_kasittely"] != "") {
+			// hinnat ei sisällä ALV:tä
+			$row["hinta"] = $row["hinta"] * (1+($row["alv"]/100));
+			$row["myymalahinta"] = $row["myymalahinta"] * (1+($row["alv"]/100));
+		}
+		
+		
 		$dnshinnasto[] = array(	'tuoteno'	=> $row["tuoteno"],
 								'selite'	=> $row["selite"],
 								'alkupvm'	=> $row["alkupvm"],
 								'loppupvm'	=> $row["loppupvm"],
 								'hinta'		=> $row["hinta"],
+								'kuluttajahinta' => $row["myymalahinta"],
 								);
 	}
 

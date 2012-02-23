@@ -265,7 +265,70 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
+			$query = "	LOCK TABLES
+						asiakas READ,
+						asiakasalennus READ,
+						asiakasalennus as asale1 READ,
+						asiakasalennus as asale2 READ,
+						asiakashinta READ,
+						asiakashinta as ashin1 READ,
+						asiakashinta as ashin2 READ,
+						asiakaskommentti READ,
+						asiakkaan_positio READ,
+						avainsana as a READ,
+						avainsana as avainsana_kieli READ,
+						avainsana as b READ,
+						avainsana READ,
+						dynaaminen_puu AS node READ,
+						dynaaminen_puu AS parent READ,
+						etaisyydet READ,
+						factoring READ,
+						hinnasto READ,
+						kalenteri WRITE,
+						kassalipas READ,
+						kirjoittimet READ,
+						kuka WRITE,
+						lasku AS lx_otsikko WRITE,
+						lasku AS ux_otsikko WRITE,
+						lasku WRITE,
+						laskun_lisatiedot WRITE,
+						maat READ,
+						maksuehto READ,
+						pakkaus READ,
+						pankkiyhteystiedot READ,
+						panttitili WRITE,
+						perusalennus READ,
+						puun_alkio READ,
+						rahtikirjat READ,
+						rahtimaksut READ,
+						sanakirja WRITE,
+						sarjanumeroseuranta WRITE,
+						tapahtuma WRITE,
+						tilausrivi as t READ,
+						tilausrivi as t2 WRITE,
+						tilausrivi as t3 READ,
+						tilausrivi WRITE,
+						tilausrivin_lisatiedot as tl2 WRITE,
+						tilausrivin_lisatiedot as tlt2 WRITE,
+						tilausrivin_lisatiedot as tlt3 WRITE,
+						tilausrivin_lisatiedot t_lisa READ,
+						tilausrivin_lisatiedot WRITE,
+						tili READ,
+						tiliointi WRITE,
+						toimitustapa READ,
+						tullinimike READ,
+						tuote READ,
+						tuotepaikat WRITE,
+						tuotteen_alv READ,
+						tuotteen_avainsanat READ,
+						tuotteen_toimittajat READ,
+						tyomaarays READ,
+						varastopaikat READ,
+						yhteyshenkilo as kk READ,
+						yhteyshenkilo as kt READ,
+						yhtio READ,
+						yhtion_parametrit READ,
+						yhtion_toimipaikat READ";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -317,10 +380,18 @@
 			// alustetaan muuttujia
 			$laskutus_esto_saldot = array();
 
-			// parametri, jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
-			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+			// saldovirhe_esto_laskutus-parametri 'H', jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
+			// kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
+			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
 
-				$query = "  SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
+				$query_ale_lisa = generoi_alekentta('M');
+
+				$query = "  SELECT
+							tilausrivi.tuoteno,
+							if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0.01) kehahin,
+							sum(tilausrivi.varattu) varattu,
+							round(min(tilausrivi.hinta / if ('{$yhtiorow["alv_kasittely"]}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) min_kplhinta,
+							group_concat(distinct lasku.tunnus) tunnukset
 							FROM lasku
 							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J'))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
@@ -329,22 +400,38 @@
 							and lasku.alatila = 'D'
 							and lasku.viite   = ''
 							and lasku.chn    != '999'
-							$lasklisa
-							GROUP BY 1";
+							{$lasklisa}
+							GROUP BY 1, 2";
 				$lasku_chk_res = pupe_query($query);
 
 				while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+					// Mik‰li laskutuksessa tuotteen varastosaldo v‰henee negatiiviseksi, hyl‰t‰‰n KAIKKI tilaukset, joilla on kyseist‰ tuotetta
+					if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+						$query = "  SELECT sum(saldo) saldo
+									FROM tuotepaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$lasku_chk_row[tuoteno]'";
+						$saldo_chk_res = pupe_query($query);
+						$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
 
-					$query = "  SELECT sum(saldo) saldo
-								FROM tuotepaikat
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$lasku_chk_row[tuoteno]'";
-					$saldo_chk_res = pupe_query($query);
-					$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
+						if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+						}
+					}
 
-					if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
-						$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
-						$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+					// Estet‰‰n laskutus mik‰li keskihankintahinta on nolla tai rivin kate on negatiivinen
+					if ($yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
+
+						if ($lasku_chk_row["kehahin"] <= 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen keskihankintahinta on nolla")."<br>\n";
+						}
+
+						if (($lasku_chk_row["min_kplhinta"] - $lasku_chk_row["kehahin"]) < 0) {
+							$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+							$tulos_ulos .= "<br>\n".t("Hintavirhe").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen kate on negatiivinen")."<br>\n";
+						}
 					}
 				}
 			}
@@ -1005,13 +1092,13 @@
 				}
 
 				// katsotaan halutaanko laskuille lis‰t‰ lis‰kulu prosentti
-				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and $yhtiorow["laskutuslisa"] > 0 and $yhtiorow["laskutuslisa_tyyppi"] != "") {
+				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and ($yhtiorow["laskutuslisa"] > 0 or $yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') and $yhtiorow["laskutuslisa_tyyppi"] != "") {
 
 					$yhdista = array();
 					$laskutuslisa_tyyppi_ehto = "";
 
 					//ei k‰teislaskuihin
-					if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
+					if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'U') {
 						$query = "  SELECT tunnus
 									FROM maksuehto
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -1028,7 +1115,7 @@
 							$laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
 						}
 					}
-					elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
+					elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'N' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
 						//ei noudolle
 						$query = "  SELECT selite
 									FROM toimitustapa
@@ -1124,14 +1211,32 @@
 								}
 								else {
 									// Raham‰‰r‰inen laskutulis‰
+									// tapauksissa A,B,C
 									$hinta = $yhtiorow["laskutuslisa"];
 								}
 
 								$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
-								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+								$alemuuttuja = "";
+
+								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', '');
+									$netto = $lis_netto;
+
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+										if (isset($lis_ale["ale".$alepostfix])) {
+											$alemuuttuja .= "ale$alepostfix = '{$lis_ale["ale".$alepostfix]}',";
+										}
+									}
+								}
+								else {
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+									$netto = 'N';
+									$alemuuttuja = "ale1 = '0',";
+								}
+
 								list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-								// lis‰t‰‰n puuterivi
+								// lis‰t‰‰n laskutuslis‰
 								$query = "  INSERT into tilausrivi set
 											hyllyalue       = '',
 											hyllynro        = '',
@@ -1148,10 +1253,10 @@
 											kpl2            = '0',
 											tilkpl          = '1',
 											jt              = '0',
-											ale1            = '0',
-											alv             = '$alv',
-											netto           = 'N',
+											{$alemuuttuja}
+											netto           = '{$netto}',
 											hinta           = '$lkhinta',
+											alv             = '$alv',
 											kerayspvm       = now(),
 											otunnus         = '$laskurow[tunnus]',
 											tyyppi          = 'L',
@@ -2454,77 +2559,7 @@
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $laskurow[laskunro]<br>\n";
 
-						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
-							$uusiotunnus = $laskurow["tunnus"];
-
-							require('tulosta_vientierittely.inc');
-
-							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-							list($usec, $sec) = explode(' ', microtime());
-							mt_srand((float) $sec + ((float) $usec * 100000));
-							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
-
-							//kirjoitetaan pdf faili levylle..
-							$fh = fopen($pdffilenimi, "w");
-							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
-							fclose($fh);
-
-							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
-								// l‰hetet‰‰n meili
-								if ($vientierittelymail != "") {
-									$komento = $vientierittelymail;
-								}
-								else {
-									$komento = "";
-								}
-
-								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
-
-								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= ", ".trim($laskurow["nimi"]);
-								}
-
-								$liite              = $pdffilenimi;
-								$sahkoposti_cc      = "";
-								$content_subject    = "";
-								$content_body       = "";
-								include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
-							}
-
-							//poistetaan tmp file samantien kuleksimasta...
-							system("rm -f $pdffilenimi");
-
-							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
-
-							unset($Xpdf);
-						}
-					}
-				}
-
-				// l‰hetet‰‰n sa‰hkˆpostilaskut
-				if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
-
-					require_once("tilauskasittely/tulosta_lasku.inc");
-
-					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
-
-					foreach ($tulostettavat_email as $lasku) {
-
-						$vientierittelymail    = "";
-						$vientierittelykomento = "";
-
-						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", -99, "", $saatekirje);
-
-						$query = "  SELECT *
-									FROM lasku
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$lasku'";
-						$laresult = pupe_query($query);
-						$laskurow = mysql_fetch_assoc($laresult);
-
-						if ($silent == "") $tulos_ulos .= t("L‰hetet‰‰n lasku").": $laskurow[laskunro]<br>\n";
-
-						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+						if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
 
 							require('tulosta_vientierittely.inc');
@@ -2563,6 +2598,76 @@
 							elseif ($vientierittelykomento != '' and $vientierittelykomento != 'edi') {
 								// itse print komento...
 								$line = exec("$vientierittelykomento $pdffilenimi");
+							}
+
+							//poistetaan tmp file samantien kuleksimasta...
+							system("rm -f $pdffilenimi");
+
+							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+
+							unset($Xpdf);
+						}
+					}
+				}
+
+				// l‰hetet‰‰n sa‰hkˆpostilaskut
+				if ($yhtiorow['lasku_tulostin'] != -99 and count($tulostettavat_email) > 0) {
+
+					require_once("tilauskasittely/tulosta_lasku.inc");
+
+					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
+
+					foreach ($tulostettavat_email as $lasku) {
+
+						$vientierittelymail    = "";
+						$vientierittelykomento = "";
+
+						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", -99, "", $saatekirje);
+
+						$query = "  SELECT *
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$lasku'";
+						$laresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($laresult);
+
+						if ($silent == "") $tulos_ulos .= t("L‰hetet‰‰n lasku").": $laskurow[laskunro]<br>\n";
+
+						if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
+							$uusiotunnus = $laskurow["tunnus"];
+
+							require('tulosta_vientierittely.inc');
+
+							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+							list($usec, $sec) = explode(' ', microtime());
+							mt_srand((float) $sec + ((float) $usec * 100000));
+							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
+
+							//kirjoitetaan pdf faili levylle..
+							$fh = fopen($pdffilenimi, "w");
+							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+							fclose($fh);
+
+							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
+								// l‰hetet‰‰n meili
+								if ($vientierittelymail != "") {
+									$komento = $vientierittelymail;
+								}
+								else {
+									$komento = "";
+								}
+
+								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+
+								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+									$kutsu .= ", ".trim($laskurow["nimi"]);
+								}
+
+								$liite              = $pdffilenimi;
+								$sahkoposti_cc      = "";
+								$content_subject    = "";
+								$content_body       = "";
+								include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}
 
 							//poistetaan tmp file samantien kuleksimasta...

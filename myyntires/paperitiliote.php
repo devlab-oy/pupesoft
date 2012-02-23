@@ -29,10 +29,10 @@
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
-		
+
 		$pdf->draw_text(310, 771, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
 		$pdf->draw_text(310, 761, tv1dateconv($tito_pvm), 	$firstpage, $norm);
-		
+
 		$pdf->draw_text(430, 771, t("Puhelin", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(430, 761, $kukarow["puhno"], 		$firstpage, $norm);
 
@@ -52,20 +52,20 @@
 		$pdf->draw_text(30,  $kala, t("Laskunro", $kieli),			$firstpage, $pieni);
 		$pdf->draw_text(100, $kala, t("Pvm", $kieli),				$firstpage, $pieni);
 		$pdf->draw_text(180, $kala, t("Eräpvm", $kieli),			$firstpage, $pieni);
-		
+
 		$pdf->draw_text(300, $kala, t("Valuutta", $kieli),			$firstpage, $pieni);
-		
+
 		$oikpos = $pdf->strlen(t("Summa", $kieli), $pieni);
 		$pdf->draw_text(400-$oikpos, $kala, t("Summa", $kieli),		$firstpage, $pieni);
-		
+
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
 		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
-		
+
 		if ($tito_pvm != date('Y-m-d')) {
 			$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
 		}
-		
-		
+
+
 		$kala -= 15;
 
 		return($firstpage);
@@ -73,7 +73,7 @@
 
 	function rivi ($tyyppi, $firstpage, $summa, $row) {
 		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
-															
+
 		if ($lask == 39) {
 			$sivu++;
 			loppu($firstpage, array());
@@ -101,7 +101,7 @@
 				$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
 				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
 			}
-			
+
 			if ($tito_pvm != date('Y-m-d')) {
 				$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
 			}
@@ -234,23 +234,23 @@
 	else {
 		$tito_pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 	}
-	
-	$query = "	SELECT lasku.ytunnus, lasku.valkoodi, lasku.tunnus, lasku.erpcm, lasku.liitostunnus, lasku.mapvm, lasku.nimi, lasku.tapvm, lasku.laskunro, 				
-				lasku.summa-lasku.saldo_maksettu laskuavoinsaldo, 
-				lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa, 				
-				lasku.summa laskusumma, 
-				lasku.summa_valuutassa laskusumma_valuutassa					
-				FROM lasku use index (yhtio_tila_liitostunnus_tapvm) 
-				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and (lasku.mapvm > '$tito_pvm' or lasku.mapvm = '0000-00-00') 
-				and lasku.tapvm <= '$tito_pvm' 
-				and lasku.tapvm > '0000-00-00' 
-				and lasku.tila = 'U' 
-				and lasku.alatila = 'X' 
+
+	$query = "	SELECT lasku.ytunnus, lasku.valkoodi, lasku.tunnus, lasku.erpcm, lasku.liitostunnus, lasku.mapvm, lasku.nimi, lasku.tapvm, lasku.laskunro,
+				lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
+				lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
+				lasku.summa laskusumma,
+				lasku.summa_valuutassa laskusumma_valuutassa
+				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and (lasku.mapvm > '$tito_pvm' or lasku.mapvm = '0000-00-00')
+				and lasku.tapvm <= '$tito_pvm'
+				and lasku.tapvm > '0000-00-00'
+				and lasku.tila = 'U'
+				and lasku.alatila = 'X'
 				and lasku.liitostunnus in ($tunnukset)
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				ORDER BY lasku.ytunnus, lasku.laskunro";
-	$result = mysql_query($query) or pupe_error($query);	
+	$result = mysql_query($query) or pupe_error($query);
 	$laskutiedot = mysql_fetch_array($result);
 
 	//otetaan asiakastiedot ekalta laskulta
@@ -271,9 +271,9 @@
 
 	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
 				FROM suoritus
-				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
+				WHERE yhtio = '$kukarow[yhtio]'
 				and kohdpvm = '0000-00-00'
+				and ltunnus > 0
 				and asiakas_tunnus in ($tunnukset)";
 	$suoritusresult = mysql_query($query) or pupe_error($query);
 

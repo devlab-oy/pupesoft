@@ -18,6 +18,16 @@
 		exit;
 	}
 
+	// Pupe datatables koodi
+	pupe_DataTables(array(array($pupe_DataTables[0], 9, 9)));
+
+	// Piirret‰‰n taulu aluksi display:none, ettei selain piirr‰ sit‰ ruudulle. Toglataan display p‰‰lle kun dokumentti on ready ja datatables tehny rivityksen.
+	echo '<script language="javascript">
+	$(document).ready(function() {
+		$("#raportti_valmistuksista").toggle();
+	});
+	</script>';
+
 	// Tarvittavat muuttujat
 	$tee = isset($tee) ? trim($tee) : "";
 
@@ -95,11 +105,9 @@
 			$excelrivi = 0;
 		}
 
-		pupe_DataTables(array(array($pupe_DataTables[0], 9, 9)));
-
 		$query = "	(SELECT
 					tuote.tuoteno,
-					tuote.valmistuslinja,
+					lasku.kohde valmistuslinja,
 					tilausrivi.toimaika,
 					tilausrivi.toimitettuaika,
 					lasku.tila,
@@ -126,7 +134,7 @@
 
 					(SELECT
 					tuote.tuoteno,
-					tuote.valmistuslinja,
+					lasku.kohde valmistuslinja,
 					tilausrivi.toimaika,
 					tilausrivi.toimitettuaika,
 					lasku.tila,
@@ -179,7 +187,8 @@
 				$worksheet->write($excelrivi, $excelsarake, t("Toteutunut valmistusp‰iv‰"), $format_bold);
 				$excelsarake++;
 			}
-			echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+
+			echo "<table class='display dataTable' style='display:none;' id='$pupe_DataTables[0]'>";
 			echo "<thead>";
 			echo "<tr>";
 			echo "<th>".t("Tuoteno")."</th>";
@@ -300,6 +309,13 @@
 				echo "<td style='text-align:right;'>{$yhteenveto_valmistetaan[$valmistuslinja]}</td>";
 				echo "</tr>";
 			}
+
+			echo "<tr>";
+			echo "<th>".t("Yhteens‰")."</th>";
+			echo "<th style='text-align:right;'>".array_sum($yhteenveto_valmistettu)."</th>";
+			echo "<th style='text-align:right;'>".array_sum($yhteenveto_valmistetaan)."</th>";
+			echo "</tr>";
+
 			echo "</table>";
 
 			echo "<br>";

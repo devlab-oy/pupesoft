@@ -377,10 +377,10 @@
 		            }
 
 					if ($nettorow["summa"] < 0) {
-						$code = "CREN";				// hyvityslasku
+						$code = "CREN";	// hyvityslasku
 					}
 					else {
-						$code = "CINV";				// veloituslasku
+						$code = "CINV";	// veloituslasku
 					}
 
 					$Strd = $RmtInf->addChild('Strd', '');										   					// Structured (Max 9 occurrences)
@@ -396,7 +396,12 @@
 								$RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));			// CreditNoteAmount
 							}
 							else {
-								$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+								if ($nettorow['alatila'] != 'K') {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);	   				// RemittedAmount
+								}
+								else {
+									$RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', round($nettorow["summa"] - $nettorow['kasumma'],2));	   				// RemittedAmount
+								}
 							}
 
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
@@ -422,7 +427,11 @@
 	require("inc/parametrit.inc");
 
 	// Onko maksuaineistoille annettu salasanat.php:ss‰ oma polku jonne tallennetaan
-	if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
+
+	if (isset($tee) and $tee == "KIRJOITAKOPIO") {
+		$pankkitiedostot_polku = "/tmp/";
+	}
+	elseif (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
 		$pankkitiedostot_polku = trim($pankkitiedostot_polku);
 		if (substr($pankkitiedostot_polku, -1) != "/") {
 			$pankkitiedostot_polku .= "/";
@@ -433,20 +442,27 @@
 	}
 
 	if ($tee == "lataa_tiedosto") {
-		readfile($pankkitiedostot_polku.basename($pankkifilenimi));
+		if (isset($pankkifilenimi)) readfile($pankkitiedostot_polku.basename($pankkifilenimi));
+		elseif (isset($tmpfilenimi)) readfile("/tmp/".basename($tmpfilenimi));
 		exit;
 	}
 
 	echo "<font class='head'>".t("SEPA-maksuaineisto")."</font><hr>";
 
-	// Haetaan poimitut maksut
+	if (isset($tee) and $tee == "KIRJOITAKOPIO") {
+		$lisa = " and lasku.tunnus in ($poimitut_laskut) ";
+	}
+	else {
+		$lisa = " and lasku.tila = 'P' and lasku.maksaja = '$kukarow[kuka]' ";
+	}
+
+	// Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
 	$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
-					and lasku.tila		= 'P'
-					and lasku.maksaja	= '$kukarow[kuka]'
+					$lisa
 					ORDER BY maksu_tili, olmapvm, ultilno";
 	$result = mysql_query($haku_query) or pupe_error($haku_query);
 
@@ -515,10 +531,9 @@
 			echo "<input type = 'submit' value = '".t("Tee maksuaineistot")."'>";
 			echo "</form>";
 		}
-
 	}
 
-	if ($tee == "KIRJOITA") {
+	if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
 		$popvm_nyt = date("Y-m-d H:i:s");
 
@@ -556,9 +571,8 @@
 		$query = "	SELECT maksu_tili, ultilno, olmapvm, valkoodi
 					FROM lasku
 					WHERE yhtio	= '$kukarow[yhtio]'
-					AND tila	= 'P'
-					AND summa	< 0
-					AND maksaja	= '$kukarow[kuka]'
+					$lisa
+					AND summa < 0
 					GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -568,8 +582,7 @@
 			$query = "	SELECT lasku.tunnus laskutunnus, if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
 						FROM lasku
 						WHERE yhtio 	= '$kukarow[yhtio]'
-						AND tila 		= 'P'
-						AND maksaja 	= '$kukarow[kuka]'
+						$lisa
 						AND ultilno		= '$laskurow[ultilno]'
 						AND valkoodi	= '$laskurow[valkoodi]'
 						AND maksu_tili	= '$laskurow[maksu_tili]'
@@ -639,17 +652,17 @@
 						AND lasku.tunnus in ($tunnukset)
 						LIMIT 1";
 			$result = mysql_query($query) or pupe_error($query);
+			$nettorow = mysql_fetch_array($result);
 
-			while ($nettorow = mysql_fetch_array($result)) {
+			$nettorow["viite"]		= '';						// Viitenroa ei sallita netotetulla tapahtumalla
+			$nettorow["alatila"]	= '';						// Ei k‰teisalennusta netotetulla tapahtumalla
+			$nettorow["summa"]		= $netotettava_summa[$i];	// Netotettu summa
 
-				$nettorow["viite"]		= '';						// Viitenroa ei sallita netotetulla tapahtumalla
-				$nettorow["alatila"]	= '';						// Ei k‰teisalennusta netotetulla tapahtumalla
-				$nettorow["summa"]		= $netotettava_summa[$i];	// Netotettu summa
+			sepa_paymentinfo($nettorow);
+			sepa_credittransfer($nettorow, $tunnukset);
+			$tapahtuma_maara++;
 
-				sepa_paymentinfo($nettorow);
-				sepa_credittransfer($nettorow, $tunnukset);
-				$tapahtuma_maara++;
-
+			if ($tee == "KIRJOITA") {
 				// p‰ivitet‰‰n laskut "odottaa suoritusta" tilaan
 				$query = "	UPDATE lasku
 							SET tila = 'Q',
@@ -660,7 +673,20 @@
 			}
 		}
 
-		// Ajetaan haku_query (filen alusta), uudelleen niin saadaan resultista tila = 'Q' pois
+		$netotetut_laskut = implode($netotettava_laskut);
+
+		// Haetaan poimitut maksut POISLUKIEN netotetut
+		if ($netotetut_laskut != "") {
+			$lisa .= " and lasku.tunnus not in ($netotetut_laskut) ";
+		}
+
+		$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+						FROM lasku
+						JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
+						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+						WHERE lasku.yhtio	= '$kukarow[yhtio]'
+						$lisa
+						ORDER BY maksu_tili, olmapvm, ultilno";
 		$result = mysql_query($haku_query) or pupe_error($haku_query);
 
 		while ($laskurow = mysql_fetch_array($result)) {
@@ -683,24 +709,31 @@
 			sepa_credittransfer($laskurow);
 			$tapahtuma_maara++;
 
-			// p‰ivitet‰‰n lasku "odottaa suoritusta" tilaan
-			$query = "	UPDATE lasku
-						SET tila = 'Q',
-						popvm = '$popvm_nyt'
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tunnus = '$laskurow[tunnus]'";
-			$uresult = mysql_query($query) or pupe_error($query);
+			if ($tee == "KIRJOITA") {
+				// p‰ivitet‰‰n lasku "odottaa suoritusta" tilaan
+				$query = "	UPDATE lasku
+							SET tila = 'Q',
+							popvm = '$popvm_nyt'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$laskurow[tunnus]'";
+				$uresult = mysql_query($query) or pupe_error($query);
+			}
 		}
 
 		// Lis‰t‰‰n viel‰ oikea tapahtumien m‰‰r‰ sanoman headeriin
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
+		/* T‰m‰ blocki piti poistaa, koska rikkoo Samlinkin. Aineistossa ei saa olla mit‰‰n j‰sentely‰.
 		// Kirjoitetaaan XML, tehd‰‰n t‰st‰ j‰sennelty aineisto. T‰m‰ toimii paremmin mm OPn kanssa
 		$dom = new DOMDocument('1.0');
 		$dom->preserveWhiteSpace = true;
 		$dom->formatOutput = true;
 		$dom->loadXML(str_replace(array("\n", "\r"), "", utf8_encode($xml->asXML())));
 		fwrite($toot, ($dom->saveXML()));
+		*/
+
+		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
+		fwrite($toot, str_replace(chr(10), "", utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(
@@ -738,9 +771,14 @@
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
-		echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
+
+		if ($tee == "KIRJOITAKOPIO") {
+			echo "<input type='hidden' name='tmpfilenimi' value='".basename($kaunisnimi)."'>";
+		}
+		else {
+			echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
+		}
+
 		echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
-
 	}
-
 ?>

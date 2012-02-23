@@ -8,8 +8,8 @@ $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_ebid 			= "FINVOICEXML";
-$laskun_tapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
-$laskun_lapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_tapvm			= $xml->InvoiceDetails->InvoiceDate;
+$laskun_lapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";
@@ -127,7 +127,10 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = $xrinfo;
 			}
 
-			$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
+			if ($tuotetieto->RowIdentifierUrlText != "") {
+				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
+			}
+			
 			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);

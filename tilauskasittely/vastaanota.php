@@ -223,8 +223,6 @@
 
 					if (mysql_num_rows($vares) == 1) {
 
-						echo "<font class='message'>".t("Perustan")." ";
-
 						$query = "	SELECT tuoteno
 									from tuotepaikat
 									WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]'";
@@ -251,10 +249,14 @@
 										and tunnus 	= '$uusipaikka'
 										and tuoteno	= '$tilausrivirow[tuoteno]'";
 							$result = mysql_query($query) or pupe_error($query);
-
 							$paikkarow = mysql_fetch_array($result);
 
-							echo t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
+							if ($toim == "MYYNTITILI") {
+								echo "<font class='message'>".t("Tuote")." $tilausrivirow[tuoteno] ".t("siirretty myyntitiliin").".</font><br>";
+							}
+							else {
+								echo "<font class='message'>".t("Perustan")." ".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
+							}
 						}
 						else {
 							echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!</font><br>";
@@ -457,7 +459,6 @@
 
 					require("muuvarastopaikka.php");
 
-
 					if ($eancheck[$tun]!='' and $kirjoitin!='') {
 						$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
 						$komres = mysql_query($query) or pupe_error($query);
@@ -556,7 +557,7 @@
 		}
 	}
 
-	//Tulostetaan vastaanotetut listaus
+	// Tulostetaan vastaanotetut listaus
 	if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
 
 		$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
@@ -758,14 +759,20 @@
 		}
 
 		//tässä on valittu tilaus
-		$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2', date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija, clearing
+		$query = "	SELECT tunnus '$qnimi1',
+					nimi '$qnimi2',
+					date_format(luontiaika, '%Y-%m-%d')
+					laadittu,
+					laatija,
+					clearing,
+					if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, '<br>', toim_nimi)) asiakkaan_nimi,
+					liitostunnus asiakkaan_tunnus
 					FROM lasku
 					WHERE tunnus = '$id'
 					and tila = 'G'
 					and yhtio = '$kukarow[yhtio]'
 					and alatila in ('B','C','D')";
 		$result = mysql_query($query) or pupe_error($query);
-
 		$row = mysql_fetch_array($result);
 
 		echo "<table>";
@@ -853,6 +860,7 @@
 			$mrow = mysql_fetch_array($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
 		}
+
 		echo "<input type='hidden' name='tee' value='paikat'>";
 
 		if ($toim == "") {
@@ -879,10 +887,18 @@
 		$lisa .= " and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
 
 		//siirtolistan rivit
-		$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tunnus,  tilausrivi.varattu,
-					concat_ws(' ',  tilausrivi.hyllyalue,  tilausrivi.hyllynro,  tilausrivi.hyllyvali,  tilausrivi.hyllytaso) paikka,
-					tilausrivi.toimitettu, tuote.ei_saldoa,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+		$query = "	SELECT tilausrivi.nimitys,
+					tilausrivi.tuoteno,
+					tilausrivi.tunnus,
+					tilausrivi.varattu,
+					tilausrivi.toimitettu,
+					tilausrivi.hyllyalue,
+					tilausrivi.hyllynro,
+					tilausrivi.hyllyvali,
+					tilausrivi.hyllytaso,				
+					tuote.ei_saldoa,
+					concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'), lpad(upper(tilausrivi.hyllyvali), 5, '0'), lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -901,12 +917,15 @@
 		echo "<th>".t("Tuoteno")."</th>";
 		echo "<th>".t("Paikka")."</th>";
 		echo "<th>".t("Määrä")."</th>";
-		echo "<th>".t("Hyllyalue")."</th>";
-		echo "<th>".t("Hyllynro")."</th>";
-		echo "<th>".t("Hyllyväli")."</th>";
-		echo "<th>".t("Hyllytaso")."</th>";
 
-		if ($toim != "MYYNTITILI") {
+		if ($toim == "MYYNTITILI") {
+			echo "<th>".t("Asiakas")."</th>";
+		}
+		else {
+			echo "<th>".t("Hyllyalue")."</th>";
+			echo "<th>".t("Hyllynro")."</th>";
+			echo "<th>".t("Hyllyväli")."</th>";
+			echo "<th>".t("Hyllytaso")."</th>";
 			echo "<th>".t("Varastopaikka")."</th>";
 			echo "<th>".t("Paikan Lähde")."</th>";
 			echo "<th>".t("EANkoodi")."</th>";
@@ -944,13 +963,6 @@
 				$privirow['t4'] = "";
 				$lahde = "Vastaanottavaa paikkaa ei löydy";
 			}
-			elseif ($privirow['t1'] == '' and $toim == "MYYNTITILI") { // ei löytynyt varastopaikkaa
-				$privirow['t1'] = "!!M";
-				$privirow['t2'] = "0";
-				$privirow['t3'] = "0";
-				$privirow['t4'] = "0";
-				$lahde = "Uusi paikka";
-			}
 
 			if (isset($tunnus)) {
 				foreach ($tunnus as $tun) {
@@ -971,70 +983,84 @@
 			if ($rivirow["ei_saldoa"] != "") {
 				echo "<td></td>";
 			}
+			elseif ($rivirow["hyllyalue"] == "!!M") {
+				$asiakkaan_tunnus = (int) $rivirow["hyllynro"].$rivirow["hyllyvali"].$rivirow["hyllytaso"];
+				$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '$asiakkaan_tunnus'";
+				$asiakasresult = pupe_query($query);
+				$asiakasrow = mysql_fetch_assoc($asiakasresult);
+				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";				
+			}
 			else  {
 				echo "<td>$rivirow[paikka]</td>";
 			}
 
 			echo "<td>$rivirow[varattu]</td>";
 
-			if ($rivirow["ei_saldoa"] != "") {
-				echo "<td colspan='6'></td>";
-				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'>";
+			// Myyntitileillä on speciaali vastaanotto
+			if ($toim == "MYYNTITILI") {
+
+				$asiakkaan_tunnus = str_pad($row["asiakkaan_tunnus"], 15, 0, STR_PAD_LEFT);
+				$hyllypaikka = str_split($asiakkaan_tunnus, 5);
+
+				echo "<td>";
+				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='!!M' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t2[$rivirow[tunnus]]' value='$hyllypaikka[0]' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t3[$rivirow[tunnus]]' value='$hyllypaikka[1]' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t4[$rivirow[tunnus]]' value='$hyllypaikka[2]' maxlength='5' size='5'>";
+				echo "{$row["asiakkaan_nimi"]}";
+				echo "</td>";
 			}
 			else {
-				if ($toim == "") {
+
+				if ($rivirow["ei_saldoa"] != "") {
+					echo "<td colspan='6'></td>";
+					echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'>";
+				}
+				else {
 					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'></td>";
-				}
-				else {
-					echo "<td align='center'><input type='hidden' name='t1[$rivirow[tunnus]]' value='!!M'>!!M</td>";
-				}
+					echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
+					echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
-				echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='5' size='5'></td>";
-				echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
-				echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
+					//Missä tuotetta on?
+					$query  = "	SELECT *
+								FROM tuotepaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$rivirow[tuoteno]'
+								$lisa
+								ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
+					$vares = mysql_query($query) or pupe_error($query);
 
-				//Missä tuotetta on?
-				$query  = "	SELECT *
-							FROM tuotepaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$rivirow[tuoteno]'
-							$lisa
-							ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
-				$vares = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($vares) > 1) {
+						echo "<td><select name='rivivarasto[$rivirow[tunnus]]'><option value='x'>Ei muutosta";
 
-				if (mysql_num_rows($vares) > 1) {
-					echo "<td><select name='rivivarasto[$rivirow[tunnus]]'><option value='x'>Ei muutosta";
+						while ($varow = mysql_fetch_array($vares)) {
+							$sel='';
+	//						if ($varow['tunnus'] == $varasto) $sel = 'selected';
+							echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
+						}
 
-					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-//						if ($varow['tunnus'] == $varasto) $sel = 'selected';
-						echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
-					}
-
-					echo "</select></td>";
-				}
-				else {
-					echo "<input type='hidden' name='rivivarasto[$rivirow[tunnus]]' value=''>";
-
-					if (mysql_num_rows($vares) == 1) {
-						$varow = mysql_fetch_array($vares);
-
-						echo "<td>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</td>";
+						echo "</select></td>";
 					}
 					else {
-						if ($toim != "MYYNTITILI") {
+						echo "<input type='hidden' name='rivivarasto[$rivirow[tunnus]]' value=''>";
+
+						if (mysql_num_rows($vares) == 1) {
+							$varow = mysql_fetch_array($vares);
+
+							echo "<td>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</td>";
+						}
+						else {
 							echo "<td><font class='error'>Ei varastopaikkaa!</font></td>";
 						}
 					}
-				}
 
-				if ($toim != "MYYNTITILI") {
-					//Valikko, josta voi valita muun varastopaikan
+					// Valikko, josta voi valita muun varastopaikan
 					echo "<td>$lahde</td>";
 				}
-			}
-
-			if ($toim != "MYYNTITILI") {
 
 				//haetaan eankoodi tuotteelta
 				$query  = "	SELECT eankoodi
@@ -1055,19 +1081,20 @@
 					$echk = "CHECKED";
 				}
 				echo "<td align='center'><input type='checkbox' name='eancheck[$rivirow[tunnus]]' $echk></td>";
-
 			}
 
-			echo"</tr>";
+			echo "</tr>";
 
 		}
 
-		echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
-		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
-		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
-		echo "</tr>";
+		if ($toim != "MYYNTITILI") {
+			echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
+			echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
+			echo "</tr>";
+		}
 
 		echo "</table><br>";
 
@@ -1107,11 +1134,17 @@
 			echo "<input type='checkbox' name='vainlistaus'></td>";
 			echo "</table>";
 		}
-		echo "<br><br><input type='submit' name='Laheta' value='".t("Valitse")."'>";
-		echo "</form>";
+		echo "<br>";
 
+		if ($toim == "MYYNTITILI") {
+			echo "<input type='submit' name='Laheta' value='".t("Toimita myyntitili")."'>";
+		}
+		else {
+			echo "<input type='submit' name='Laheta' value='".t("Vastaanota siirtolista")."'>";
+		}
+
+		echo "</form>";
 
 	}
 
-	require ("../inc/footer.inc");
-?>
+	require ("inc/footer.inc");

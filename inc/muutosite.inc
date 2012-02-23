@@ -1,7 +1,5 @@
 <?php
 
-	require_once ("inc/tilinumero.inc");
-
 	if (!isset($tila)) $tila = "";
 	if (!isset($komm)) $komm = "";
 

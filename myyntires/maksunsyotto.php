@@ -1,7 +1,6 @@
 <?php
 
 require ("../inc/parametrit.inc");
-require_once ("inc/tilinumero.inc");
 
 if ($livesearch_tee == "ASIAKASHAKU") {
 	livesearch_asiakashaku();
@@ -19,10 +18,10 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
 	$query = "	SELECT tunnus
 				FROM suoritus
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND asiakas_tunnus = '$asiakasid'
-				AND summa = '$summa'
-				AND kirjpvm = '$vva-$kka-$ppa'";
+				WHERE yhtio 		= '$kukarow[yhtio]'
+				AND asiakas_tunnus  = '$asiakasid'
+				AND summa 			= '$summa'
+				AND kirjpvm 		= '$vva-$kka-$ppa'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) != 0) {

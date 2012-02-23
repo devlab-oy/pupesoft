@@ -712,7 +712,7 @@
 					$tpk = date("m");
 					$tpv = date("Y");
 
-					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
@@ -728,14 +728,14 @@
 					$tpp = $tillop[2];
 					$tpk = $tillop[1];
 					$tpv = $tillop[0];
-					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				if ($syotettypvm < $ostoresktilalk) {
 					$tpp = $tilalk[2];
 					$tpk = $tilalk[1];
 					$tpv = $tilalk[0];
-					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				// Oletus-alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
@@ -782,7 +782,7 @@
 						$erv = (int) substr($newer, 0, 4);
 					}
 
-					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				if (!checkdate($erk, $erp, $erv)) {
@@ -850,7 +850,7 @@
 					$duplikaattilasku_check_res = pupe_query($query);
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>".$komm;
+						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
 					}
 				}
 
@@ -1545,6 +1545,63 @@
 						}
 					}
 
+					// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritetään hakea laskun kuva mukaan
+					if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+
+						// Otetaan laskun ID tiedostonimestä, löydyy "maventa_" ja "_maventa" stringien välistä
+						$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+
+						// Loppupositio löytyi, joten tiedosto on oikein nimetty
+						if ($id_loppupositio !== FALSE) {
+
+							// Maventa avaimet
+							$api_keys = array();
+							$api_keys["user_api_key"] = $yhtiorow['maventa_api_avain'];
+							$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+							// Vaihtoehtoinen company_uuid
+							if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+								$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+							}
+
+							// Laskun ID
+							$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
+
+							// Haetaan kuva
+							$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+							$invoice = $client->inbound_invoice_show($api_keys, $maventa_lasku_id, true, "finvoice");
+
+							foreach ($invoice->attachments as $liite) {
+								if ($liite->attachment_type == "INVOICE_IMAGE") {
+
+									$data = mysql_real_escape_string(base64_decode($liite->file));
+									$filesize = strlen($data);
+
+									// lisätään kuva
+									$query = "	INSERT INTO liitetiedostot SET
+												yhtio    			= '$kukarow[yhtio]',
+												liitos   			= 'lasku',
+												liitostunnus 		= '$tunnus',
+												data     			= '$data',
+												selite   			= '$selite',
+												kieli				= '$yhtiorow[kieli]',
+												filename 			= '$liite->filename',
+												filesize 			= '$filesize',
+												filetype 			= 'application/pdf',
+												image_width			= '',
+												image_height		= '',
+												image_bits			= '',
+												image_channels		= '',
+												kayttotarkoitus		= 'VERKKOLASKU',
+												jarjestys			= '1',
+												laatija				= '$kukarow[kuka]',
+												luontiaika			= now()";
+									$Xresult = pupe_query($query);
+								}
+							}
+						}
+					}
+
 					if (trim($liitetaanko_editilaus_laskulle_hakemisto) != '' and trim($laskun_asiakkaan_tilausnumero) != '') {
 
 						// fopen dirikka $liitetaanko_editilaus_laskulle_hakemisto eli purchaseorderit
@@ -1628,7 +1685,7 @@
 
 				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";
+				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>\n";
 				return 0;
 			}
 			else {

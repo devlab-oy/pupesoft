@@ -4,8 +4,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FA
 	require ("../inc/parametrit.inc");
 }
 
-require_once("inc/tilinumero.inc");
-
 if ($tila == "muokkaasuoritusta") {
 
 	if ($saamis == $kassa or $saamis == "" or $kassa == "") {
@@ -21,14 +19,14 @@ if ($tila == "muokkaasuoritusta") {
 
 		// sitten laitetaan suoritus pointtaamaan saamistiliöintiin
 		$query = "	UPDATE suoritus
-					set ltunnus = '$saamis'
-					where yhtio = '$kukarow[yhtio]'
+					SET ltunnus = '$saamis'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kohdpvm = '0000-00-00'
 					and tunnus  = '$suoritus_tunnus'";
 		$result = pupe_query($query);
 	}
 
 	$tila = "vaihdasuorituksentili";
-
 }
 
 if ($tila == "vaihdasuorituksentili") {
@@ -48,8 +46,9 @@ if ($tila == "vaihdasuorituksentili") {
 
 	$query = "	SELECT *
 				FROM suoritus
-				WHERE tunnus = '$suoritus_tunnus'
-				and yhtio 	 = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kohdpvm = '0000-00-00'
+				and tunnus  = '$suoritus_tunnus'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -173,7 +172,12 @@ if ($tila == 'tee_kohdistus') {
 	$result = pupe_query($query);
 
 	// haetaan suorituksen tiedot
-	$query = "	SELECT suoritus.tunnus tunnus,
+	$query = "	SELECT
+				suoritus.yhtio yhtio,
+				suoritus.tunnus tunnus,
+				suoritus.kirjpvm kirjpvm,
+				suoritus.maksupvm maksupvm,
+				suoritus.viite viite,
 				suoritus.asiakas_tunnus asiakas_tunnus,
 				suoritus.tilino tilino,
 				suoritus.summa summa,
@@ -181,8 +185,10 @@ if ($tila == 'tee_kohdistus') {
 				suoritus.kurssi kurssi,
 				suoritus.asiakas_tunnus asiakastunnus,
 				suoritus.kirjpvm maksupvm,
+				suoritus.maksupvm maksupvm_clean,
 				suoritus.ltunnus ltunnus,
 				suoritus.nimi_maksaja nimi_maksaja,
+				suoritus.viesti clean_viesti,
 				suoritus.viesti,
 				yriti.oletus_rahatili kassatilino,
 				tiliointi.tilino myyntisaamiset_tilino,
@@ -194,10 +200,10 @@ if ($tila == 'tee_kohdistus') {
 				JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
 				JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = suoritus.yhtio and tiliointi2.aputunnus = tiliointi.tunnus and tiliointi2.korjattu = '')
 				JOIN yhtio ON (yhtio.yhtio = suoritus.yhtio)
-				WHERE suoritus.yhtio = '$kukarow[yhtio]' and
-				suoritus.tunnus = '$suoritus_tunnus' and
-				suoritus.ltunnus != 0 and
-				suoritus.kohdpvm = '0000-00-00'";
+				WHERE suoritus.yhtio = '$kukarow[yhtio]'
+				and suoritus.kohdpvm = '0000-00-00'
+				and suoritus.ltunnus > 0
+				and suoritus.tunnus  = '$suoritus_tunnus'";
 	$result = pupe_query($query);
 
 	// tehdään nätimpi errorihandlaus
@@ -295,10 +301,10 @@ if ($tila == 'tee_kohdistus') {
 
 		$query = "	SELECT *
 					FROM suoritus
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tunnus = '$suoritus_tunnus' and
-					ltunnus != 0 and
-					kohdpvm = '0000-00-00'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kohdpvm = '0000-00-00'
+					and ltunnus > 0
+					and tunnus  = '$suoritus_tunnus'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -343,7 +349,7 @@ if ($tila == 'tee_kohdistus') {
 
 		$errorrow = mysql_fetch_assoc ($result);
 
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM tiliointi
 					WHERE yhtio = '$errorrow[yhtio]' and
 					aputunnus = '$errorrow[tunnus]' and
@@ -638,7 +644,10 @@ if ($tila == 'tee_kohdistus') {
 		$result = pupe_query($query);
 
 		//Merkataan suoritus käytetyksi ja yliviivataan sen tiliöinnit
-		$query = "UPDATE suoritus SET kohdpvm=now(), summa=0 WHERE tunnus=$suoritus[tunnus] AND yhtio='$kukarow[yhtio]'";
+		$query = "	UPDATE suoritus
+					SET kohdpvm = now()
+					WHERE tunnus = $suoritus[tunnus]
+					AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		// Luetaan ketjussa olevat tapahtumat ja poistetaan ne (=merkataan korjatuksi)
@@ -1138,7 +1147,10 @@ if ($tila == 'tee_kohdistus') {
 				$result = pupe_query($query);
 			}
 
-			$query = "UPDATE suoritus SET kohdpvm=now(), summa=$kaatosumma WHERE tunnus=$suoritus[tunnus] AND yhtio='$kukarow[yhtio]'";
+			$query = "	UPDATE suoritus
+						SET kohdpvm = now(), summa = (summa-$kaatosumma)
+						WHERE tunnus = $suoritus[tunnus]
+						AND yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			// Luetaan ketjussa olevat tapahtumat ja poistetaan ne ( = merkataan korjatuksi)
@@ -1224,12 +1236,20 @@ if ($tila == 'tee_kohdistus') {
 							lukko				= '1'";
 				$result = pupe_query($query);
 
-				// Päivitetään osoitin
-				$query = "	UPDATE suoritus
-							SET ltunnus = '$ttunnus',
-							kohdpvm = '0000-00-00'
-							WHERE tunnus = $suoritus[tunnus]
-							AND yhtio = '$kukarow[yhtio]'";
+				// Luodaan suoritus johon ylijäänyt saldo laitetaan
+				$query = "	INSERT INTO suoritus SET
+							yhtio			= '$suoritus[yhtio]',
+							tilino			= '$suoritus[tilino]',
+							nimi_maksaja	= '$suoritus[nimi_maksaja]',
+							summa			= $erotus * -1,
+							kirjpvm			= '$suoritus[kirjpvm]',
+							maksupvm		= '$suoritus[maksupvm_clean]',
+							asiakas_tunnus	= '$suoritus[asiakas_tunnus]',
+							ltunnus			= '$ttunnus',
+							viesti			= '$suoritus[clean_viesti]',
+							viite			= '$suoritus[viite]',
+							valkoodi		= '$suoritus[valkoodi]',
+							kurssi			= '$suoritus[kurssi]'";
 				$result = pupe_query($query);
 			}
 		}
@@ -1249,6 +1269,7 @@ if ($tila == 'suorituksenvalinta') {
 				FROM suoritus
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND kohdpvm = '0000-00-00'
+				and ltunnus > 0
 				and asiakas_tunnus = '$asiakas_tunnus'";
 	$result = pupe_query($query);
 
@@ -1336,7 +1357,9 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 				LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio and asiakas.tunnus = suoritus.asiakas_tunnus)
 				LEFT JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'
-				and suoritus.tunnus = '$suoritus_tunnus'";
+				and suoritus.kohdpvm = '0000-00-00'
+				and suoritus.ltunnus > 0
+				and suoritus.tunnus  = '$suoritus_tunnus'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -1776,14 +1799,13 @@ if ($tila == '') {
 	echo "<input type='hidden' name='tila' value=''>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	$query = "	SELECT distinct suoritus.tilino,
-				nimi,
-				yriti.valkoodi
+	$query = "	SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
 				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'
-				AND kohdpvm = '0000-00-00'
-				ORDER BY nimi";
+				AND suoritus.kohdpvm = '0000-00-00'
+				and suoritus.ltunnus > 0
+				ORDER BY yriti.nimi";
 	$result = pupe_query($query);
 
 	echo "<table>";
@@ -1802,6 +1824,7 @@ if ($tila == '') {
 				FROM suoritus use index (yhtio_kohdpvm)
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND kohdpvm = '0000-00-00'
+				and ltunnus > 0
 				ORDER BY valkoodi";
 	$vresult = pupe_query($query);
 
@@ -1820,10 +1843,10 @@ if ($tila == '') {
 	$query = "	SELECT distinct asiakas.maa
 				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
-				WHERE suoritus.asiakas_tunnus<>0
-				AND suoritus.yhtio = '$kukarow[yhtio]'
+				WHERE suoritus.yhtio = '$kukarow[yhtio]'
 				AND suoritus.kohdpvm = '0000-00-00'
-				AND suoritus.ltunnus != 0
+				AND suoritus.ltunnus > 0
+				AND suoritus.asiakas_tunnus > 0
 				ORDER BY asiakas.maa";
 	$vresult = pupe_query($query);
 
@@ -1869,10 +1892,10 @@ if ($tila == '') {
 				sum(if (suoritus.viite>0, 1,0)) viitteita
 				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
-				WHERE suoritus.asiakas_tunnus<>0
-				AND suoritus.yhtio = '$kukarow[yhtio]'
+				WHERE suoritus.yhtio = '$kukarow[yhtio]'
 				AND suoritus.kohdpvm = '0000-00-00'
-				AND suoritus.ltunnus!=0
+				AND suoritus.ltunnus > 0
+				AND suoritus.asiakas_tunnus > 0
 				$lisa
 				GROUP BY suoritus.asiakas_tunnus
 				ORDER BY asiakas.nimi";

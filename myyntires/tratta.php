@@ -108,7 +108,9 @@ if ($tee == "ALOITATRATTAAMINEN") {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
 	}
 
-	$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus) tratattavat
+	$query = "	SELECT
+				group_concat(distinct lasku.tunnus) tratattavat,
+				group_concat(distinct lasku.liitostunnus) liitostunnarit
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
 						maksuehto.jv,
@@ -138,9 +140,11 @@ if ($tee == "ALOITATRATTAAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$tratattavat = array();
+		$tratattavat_asiakkaat = array();
 
-		while($karhuttavarow = mysql_fetch_array($result)) {
+		while ($karhuttavarow = mysql_fetch_array($result)) {
 			$tratattavat[] = $karhuttavarow["tratattavat"];
+			$tratattavat_asiakkaat[] = $karhuttavarow["liitostunnarit"];
 		}
 		$tee = "TRATTAA";
 	}
@@ -194,6 +198,26 @@ if ($tee == 'TRATTAA')  {
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
+
+	$as_tunnus = explode(",", $tratattavat_asiakkaat[0]);
+
+	foreach ($as_tunnus as $astun) {
+		$query  = "	SELECT kentta01
+			        FROM kalenteri
+			        WHERE yhtio = '$kukarow[yhtio]'
+			        AND tyyppi  = 'Myyntireskontraviesti'
+			        AND liitostunnus = $astun
+			        AND yhtio   = '$kukarow[yhtio]'
+					ORDER BY tunnus desc
+					LIMIT 1";
+		$amres = pupe_query($query);
+
+		if (mysql_num_rows($amres) > 0) {
+			$amrow = mysql_fetch_assoc($amres);
+
+			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01]</td></tr>";
+		}
+	}
 
 	echo "</table>";
 

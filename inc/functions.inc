@@ -15518,8 +15518,6 @@ if (!function_exists("tee_keraysera2")) {
 
 								$kaytettava_pakkaus = "";
 
-								$ii++;
-
 								if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
 									if ($debug) echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
 
@@ -15535,6 +15533,8 @@ if (!function_exists("tee_keraysera2")) {
 								$ed_tilausnro = $tuoterow['otunnus'];
 
 								if ($max_tuoterivit > $ii) $juokseva_nro++;
+
+								$ii++;
 
 								if ($eran_koko_chk > 0) {
 									$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, abs($eran_koko_chk - $eran_koko), '', 0, 0, $eran_koko_pintaala);

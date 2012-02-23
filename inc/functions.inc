@@ -14801,6 +14801,8 @@ if (!function_exists("tee_keraysera2")) {
 
 		// muodostetaan loopattava päätaulukko
 		foreach ($kerailyniput as $pri => $nippux) {
+			if ($debug) echo "prio: $pri<br>";
+			if ($debug) echo "<pre>",var_dump($nippux),"</pre>";
 			foreach ($nippux as $indx => $med) {
 				$fixed_main_array[$indx] = $kerailyniput_key[$indx];
 			}

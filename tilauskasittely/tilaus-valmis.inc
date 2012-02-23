@@ -22,7 +22,8 @@ $query  = "	SELECT *
 $tilausvalmis_asiakas_res = pupe_query($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
-if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
+// Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
+if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	$query_alennuksia = generoi_alekentta('M');
 
@@ -1048,6 +1049,7 @@ else {
 			$sisviesti2_numerointi	= 1;
 			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
+			unset($laskusplitres);
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1460,7 +1462,7 @@ else {
 				}
 			}
 
-			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS' or $tullaanko_tilausten_sisaanluvusta == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
+			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
 
 				if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
 					$herminator = $totarowx['herminator2'];

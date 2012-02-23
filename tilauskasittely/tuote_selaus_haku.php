@@ -807,6 +807,10 @@
 							tuote.ei_saldoa,
 							tuote.yksikko,
 							tuote.tunnus,
+							tuote.epakurantti25pvm,
+							tuote.epakurantti50pvm,
+							tuote.epakurantti75pvm,
+							tuote.epakurantti100pvm,
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 							tuote.sarjanumeroseuranta
 							FROM {$tvk_taulu}
@@ -845,6 +849,10 @@
 								tuote.ei_saldoa,
 								tuote.yksikko,
 								tuote.tunnus,
+								tuote.epakurantti25pvm,
+								tuote.epakurantti50pvm,
+								tuote.epakurantti75pvm,
+								tuote.epakurantti100pvm,
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
 								tuoteperhe.tyyppi
@@ -887,6 +895,10 @@
 					tuote.ei_saldoa,
 					tuote.yksikko,
 					tuote.tunnus,
+					tuote.epakurantti25pvm,
+					tuote.epakurantti50pvm,
+					tuote.epakurantti75pvm,
+					tuote.epakurantti100pvm,
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status
@@ -1264,7 +1276,6 @@
 			}
 
 			$isan_kuva = '';
-
 			foreach ($rows as &$row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
@@ -1349,6 +1360,10 @@
 				if ($hae_ja_selaa_row['selite'] != 'B' and $verkkokauppa == "" and strtoupper($row["status"]) == "P") {
 					$vari = "tumma";
 					$row["nimitys"] .= "<br> * ".t("Poistuva tuote");
+				}
+
+				if ($yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00)) {
+					$vari = 'spec';
 				}
 
 				$tuotteen_lisatiedot = tuotteen_lisatiedot($row["tuoteno"]);

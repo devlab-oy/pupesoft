@@ -469,6 +469,20 @@
 		}
 		elseif ($toim == "MYYNTITILI") {
 			echo "<font class='head'>".t("Myyntitilin otsikko")."</font><hr>";
+			// Myyntitili oikeellisuustarkistus
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND alkuhyllyalue = '!!M'
+						AND loppuhyllyalue = '!!M'
+						AND tyyppi = 'E'";
+			$myyntitili_result = pupe_query($query);
+
+			if (mysql_num_rows($myyntitili_result) != 1) {
+				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
+				require("inc/footer.inc");
+				exit;
+			}			
 		}
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
@@ -1441,7 +1455,9 @@
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
-							WHERE liitostunnus = '$srow[liitostunnus]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
 							ORDER BY nimi";
 				$yhresult = pupe_query($query);
 
@@ -2418,7 +2434,8 @@
 							where yhtio = '$kukarow[yhtio]'
 							and liitostunnus = '$srow[liitostunnus]'
 							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''";
+							and tilausyhteyshenkilo != ''
+							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
 			echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";

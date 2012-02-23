@@ -127,7 +127,10 @@ if (count($tuotetiedot) > 0) {
 				$rtuoteno[$i]["kommentti"] = $xrinfo;
 			}
 
-			$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
+			if ($tuotetieto->RowIdentifierUrlText != "") {
+				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
+			}
+			
 			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);

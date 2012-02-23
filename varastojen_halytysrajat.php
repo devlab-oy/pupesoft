@@ -551,7 +551,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "</td></tr>";
 
 	// katotaan onko abc aputaulu rakennettu
-	$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
+	$query  = "SELECT count(*) FROM abc_aputaulu WHERE yhtio='$kukarow[yhtio]' AND tyyppi IN ('TK','TR','TP')";
 	$abcres = mysql_query($query) or pupe_error($query);
 	$abcrow = mysql_fetch_array($abcres);
 

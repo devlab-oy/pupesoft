@@ -230,28 +230,7 @@
 	}
 
 	// Haetaan abc-parametrit
-	$query = "	SELECT *
-				FROM abc_parametrit
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi 	= '$abcrajaustapa'
-				ORDER by luokka";
-	$res = pupe_query($query);
-
-	$ryhmanimet   					= array();
-	$ryhmaprossat					= array();
-	$kiertonopeus_tavoite 			= array();
-	$palvelutaso_tavoite 			= array();
-	$varmuusvarasto_pv   			= array();
-	$toimittajan_toimitusaika_pv 	= array();
-
-	while ($row = mysql_fetch_array($res)) {
-		$ryhmanimet[] 					= $row["luokka"];
-		$ryhmaprossat[] 				= $row["osuusprosentti"];
-		$kiertonopeus_tavoite[] 		= $row["kiertonopeus_tavoite"];
-		$palvelutaso_tavoite[] 			= $row["palvelutaso_tavoite"];
-		$varmuusvarasto_pv[]   			= $row["varmuusvarasto_pv"];
-		$toimittajan_toimitusaika_pv[] 	= $row["toimittajan_toimitusaika_pv"];
-	}
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcrajaustapa);
 
 	// Tarvittavat p‰iv‰m‰‰r‰t
 	if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));

@@ -15277,3 +15277,46 @@ if (!function_exists('zendesk_curl')) {
 	}
 }
 
+// Haetaan ryhmänimet tietokannasta ja palautetaan 2 arrayta
+if (!function_exists('hae_ryhmanimet')) {
+	function hae_ryhmanimet ($abc_tyyppi) {
+		global $yhtiorow, $kukarow;
+
+		if ($abc_tyyppi == "") {
+			return FALSE;
+		}
+
+		// Haetaan abc-parametrit
+		$query = "	SELECT *
+					FROM abc_parametrit
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					and tyyppi 	= '{$abc_tyyppi}'
+					ORDER by luokka";
+		$res = pupe_query($query);
+
+		if (mysql_num_rows($res) == 0) {
+			echo t("ABC-parametrit puuttuu")."</br>";
+			exit;
+		}
+
+		$ryhmanimet   					= array();
+		$ryhmaprossat					= array();
+		$kiertonopeus_tavoite 			= array();
+		$palvelutaso_tavoite 			= array();
+		$varmuusvarasto_pv   			= array();
+		$toimittajan_toimitusaika_pv 	= array();
+
+		while ($row = mysql_fetch_array($res)) {
+			$ryhmanimet[] 					= $row["luokka"];
+			$ryhmaprossat[] 				= $row["osuusprosentti"];
+			$kiertonopeus_tavoite[] 		= $row["kiertonopeus_tavoite"];
+			$palvelutaso_tavoite[] 			= $row["palvelutaso_tavoite"];
+			$varmuusvarasto_pv[]   			= $row["varmuusvarasto_pv"];
+			$toimittajan_toimitusaika_pv[] 	= $row["toimittajan_toimitusaika_pv"];
+		}
+
+		return array($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv);
+	}
+}
+
+

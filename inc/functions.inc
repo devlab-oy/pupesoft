@@ -15366,7 +15366,7 @@ if (!function_exists("tee_keraysera2")) {
 					}
 
 					$param = $eran_koko_chk;
-					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote_chklist, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
+					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
 
 					$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] = 0;
 					$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] = 0;

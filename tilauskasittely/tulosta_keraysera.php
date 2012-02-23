@@ -554,7 +554,7 @@
 								keraysvyohyke AS keraysvyohyke2 READ,
 								toimitustapa AS toimitustapa1 READ, 
 								toimitustapa AS toimitustapa2 READ, 
-								lahdot AS READ,
+								lahdot READ,
 								lahdot AS lahdot1 WRITE,
 								lahdot AS lahdot2 WRITE,
 								tuoteperhe READ,

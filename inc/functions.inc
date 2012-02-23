@@ -15957,7 +15957,7 @@ if (!function_exists("tee_keraysera2")) {
 				echo "<th>Asiakas</th>";
 				echo "<th>Paknro</th>";
 				echo "<th>Toimitustapa</th>";
-				echo "<th>Lähtökellonaika</th>";
+				echo "<th>Lähtöklo</th>";
 				echo "<th>Tilaus</th>";
 				echo "<th>Tilausrivi</th>";
 				echo "<th>Merkki</th>";

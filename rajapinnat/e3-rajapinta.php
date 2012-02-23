@@ -184,7 +184,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			$nimitys = $tuote['tuotenimi'];
 			$order   = array("\r\n", "\n", "\r", "\t");
 			$nimitys = str_replace($order, ' ', $nimitys);
-			$nimitys = preg_replace(" {2,}", " ", $nimitys);
+			$nimitys = preg_replace("~\s+~", " ", $nimitys);
 
 			$out  = sprintf("%-3.3s",		"E3T");
 			$out .= sprintf("%-18.18s",		$tuote['tuoteno']);

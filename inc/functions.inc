@@ -15956,6 +15956,8 @@ if (!function_exists("tee_keraysera2")) {
 				echo "<th>Pakkaus</th>";
 				echo "<th>Asiakas</th>";
 				echo "<th>Paknro</th>";
+				echo "<th>Toimitustapa</th>";
+				echo "<th>Lähtökellonaika</th>";
 				echo "<th>Tilaus</th>";
 				echo "<th>Tilausrivi</th>";
 				echo "<th>Merkki</th>";
@@ -16057,7 +16059,7 @@ if (!function_exists("tee_keraysera2")) {
 							$tuotenimi_res = pupe_query($query);
 							$tuotenimi_row = mysql_fetch_assoc($tuotenimi_res);
 
-							$query = "SELECT ohjausmerkki FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tuotenimi_row['otunnus']}'";
+							$query = "SELECT ohjausmerkki, toimitustapa, toimitustavan_lahto FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tuotenimi_row['otunnus']}'";
 							$lask_res = pupe_query($query);
 							$lask_row = mysql_fetch_assoc($lask_res);
 
@@ -16067,6 +16069,13 @@ if (!function_exists("tee_keraysera2")) {
 							$erat['tilaukset'][$tuotenimi_row['otunnus']] = $tuotenimi_row['otunnus'];
 
 							if ($debug) {
+
+								$query = "SELECT lahdon_kellonaika FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lask_row['toimitustavan_lahto']}'";
+								$klo_res = pupe_query($query);
+								$klo_row = mysql_fetch_assoc($klo_res);
+
+								echo "<td>$lask_row[toimitustapa]</td>";
+								echo "<td>$klo_row[lahdon_kellonaika]</td>";
 								echo "<td>$tuotenimi_row[otunnus]</td>";
 								echo "<td>$tilriv</td>";
 								echo "<td>$lask_row[ohjausmerkki]</td>";

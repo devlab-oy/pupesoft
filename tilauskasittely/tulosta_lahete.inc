@@ -1133,7 +1133,7 @@ if (!function_exists('rivi_lahete')) {
 		$asrow1 = mysql_fetch_assoc($asresult);
 
 		//saadaan lähetteen summa menemään oikein, taaksepäin yhteensopivasti
-		$row["myyntihinta"]			= tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), '');
+		$row["myyntihinta"]			= tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), "EINETTOA");
 		$row["brutto_rivihinta"] 	= $row["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		$row["aleryhma"] 			= $asrow1["aleryhma"];
 
@@ -1223,7 +1223,7 @@ if (!function_exists('rivi_lahete')) {
 						$lapsi_res = mysql_query($query) or pupe_error($query);
 						$lapsi_row = mysql_fetch_assoc($lapsi_res);
 
-						$myyntihinta_temp = tuotteen_myyntihinta($laskurow, $lapsi_row, $perhekpl, '');
+						$myyntihinta_temp = tuotteen_myyntihinta($laskurow, $lapsi_row, $perhekpl, "EINETTOA");
 						$row['myyntihinta'] += $myyntihinta_temp;
 						$row['brutto_rivihinta'] += $myyntihinta_temp * $perhekpl;
 					}
@@ -2141,7 +2141,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$asrow1 = mysql_fetch_assoc($asresult);
 
 			//saadaan lähetteen summa menemään oikein, taaksepäin yhteensopivasti
-			$row["myyntihinta"] = hintapyoristys(tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), ''));
+			$row["myyntihinta"] = hintapyoristys(tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), "EINETTOA"));
 
 			$oikpos = $pdf->strlen($row["myyntihinta"]	, $norm);
 			$pdf->draw_text(500-$oikpos, $kala, $row["myyntihinta"], $thispage, $norm);

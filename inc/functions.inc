@@ -2934,9 +2934,9 @@ if (!function_exists("settaa_ale")) {
 if (!function_exists("etayhtio_hinta")) {
 	function etayhtio_hinta ($rivi_tuoteno, $kpl_maara, $laskurow) {
 		// Tarvitaa: rivin tuoteno, laskurow, kpl-m‰‰r‰, eta_yhtio
-		
+
 		global $yhtiorow, $kukarow;
-		
+
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
@@ -2951,7 +2951,7 @@ if (!function_exists("etayhtio_hinta")) {
 		foreach ($lis_eta_ale_kaikki as $val) {
 			$hintapyoristys_echo *= (1 - ($val / 100));
 		}
-		
+
 		$etayhtion_rivinarvo = 	($hintapyoristys_echo * $kpl_maara);
 		return 	$etayhtion_rivinarvo;
 	}
@@ -3015,8 +3015,8 @@ if (!function_exists("alehinta")) {
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laji != 'P'
-						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
-						AND toim_ovttunnus != ''";
+						AND ytunnus = '{$laskurow['ytunnus']}'
+						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = pupe_query($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
@@ -8150,7 +8150,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 						$tyyli = "font-weight:bold'";
 						$tyyli2 = "font-weight:normal'";
 					}
-					
+
 					echo "	<div id='tuote_valinta_$row[tunnus]'
 								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
@@ -12016,15 +12016,15 @@ if (!function_exists("pupe_DataTables")) {
 						});
 
 						$('input[name^=\"rivi_ale\"]').each(function(){
-							
-							var monesko				= $(this).attr('name').substring(8,9);													
+
+							var monesko				= $(this).attr('name').substring(8,9);
 							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 							var ale 				= parseFloat(this.value);
-							
+
 							if (rivi_ale_alkup != ale) {
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
@@ -12034,7 +12034,7 @@ if (!function_exists("pupe_DataTables")) {
 										ale: ale,
 										no_head: 'yes',
 										ohje: 'off',
-										suoratoimitukset: suoratoimitukset, 
+										suoratoimitukset: suoratoimitukset,
 										monesko_kentta: monesko},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);

@@ -207,8 +207,8 @@ if ($asiakasid > 0) {
 					FROM asiakas
 					WHERE yhtio = '{$asiakas_yhtio}'
 					AND laji != 'P'
-					AND toim_ovttunnus = '{$asiakasrow['toim_ovttunnus']}'
-					AND toim_ovttunnus != ''";
+					AND ytunnus = '{$asiakasrow['ytunnus']}'
+					AND toim_ovttunnus = '{$asiakasrow['toim_ovttunnus']}'";
 		$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
 		$asiakasrow = mysql_fetch_assoc($asiakas_tunnus_res);
 	}

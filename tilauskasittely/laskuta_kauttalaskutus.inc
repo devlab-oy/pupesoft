@@ -19,8 +19,8 @@
 				FROM asiakas
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND laji != 'P'
-				AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'
-				AND toim_ovttunnus != ''";
+				AND ytunnus in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
+				AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'";
 	$result = mysql_query($asquery) or pupe_error($asquery);
 	$asirow = mysql_fetch_assoc($result);
 

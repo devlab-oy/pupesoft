@@ -158,8 +158,8 @@
 							FROM asiakas
 							WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
 							AND laji != 'P'
+							AND ytunnus = '{$laskurow['ytunnus']}'
 							AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
-							AND toim_ovttunnus != ''
 							GROUP BY 1";
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);

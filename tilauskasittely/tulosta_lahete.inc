@@ -55,8 +55,8 @@ if (!function_exists('alku_lahete')) {
 						FROM asiakas
 						WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
 						AND laji != 'P'
-						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
-						AND toim_ovttunnus != ''";
+						AND ytunnus = '{$laskurow['ytunnus']}'
+						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
@@ -553,8 +553,8 @@ if (!function_exists('uusi_sivu_lahete')) {
 						FROM asiakas
 						WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
 						AND laji != 'P'
-						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
-						AND toim_ovttunnus != ''";
+						AND ytunnus = '{$laskurow['ytunnus']}'
+						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 

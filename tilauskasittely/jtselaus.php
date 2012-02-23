@@ -278,6 +278,9 @@
 
 				require ("tilaus-valmis-siirtolista.inc");
 
+				$aika=date("d.m.y @ G:i:s", time());
+				echo "<font class='message'>".t("Siirtolista")." $laskurow[tunnus] ".t("valmis")."! ($aika)</font><br>";
+
 				$toim = $vanhatoim;
 				$vanhatoim = "";
 			}
@@ -286,6 +289,9 @@
 				$tilausvalmiskutsuja = "JTSELAUS";
 
 				require ("tilaus-valmis.inc");
+
+				$aika=date("d.m.y @ G:i:s", time());
+				echo "<font class='message'>".t("Myyntitilaus")." $laskurow[tunnus], $laskurow[nimi] ".t("valmis")."! ($aika)</font><br>";
 			}
 
 			//	Katsotaan toimitettiinko jotain mistä meidän tulee laittaa viestiä

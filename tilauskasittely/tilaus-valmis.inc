@@ -417,6 +417,7 @@ else {
 		$rahtivapaa_alarajasumma_rivit = 0;
 
 		while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
+			// KAUTTALASKUTUSKIKKARE
 			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
 				$rahtivapaa_alarajasumma_rivit += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
 			}
@@ -1464,12 +1465,14 @@ else {
 
 			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
 
-				if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
-					$herminator = $totarowx['herminator2'];
-				}
-				else {
-					$herminator = $totarowx['herminator'];
-				}
+				#if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
+				#	$herminator = $totarowx['herminator2'];
+				#}
+				#else {
+				#	$herminator = $totarowx['herminator'];
+				#}
+
+				$herminator = $totarowx['herminator'];
 
 				foreach ($tilausnumerot as $til_nro) {
 

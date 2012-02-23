@@ -161,7 +161,7 @@
 			$row    = mysql_fetch_array($result);
 			$id		= $row['id'];
 
-			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 999, jarjestys), tuoteno";
 			$result = pupe_query($query);
 
 			echo "<br><table>";

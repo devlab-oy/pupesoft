@@ -383,7 +383,8 @@
 
 			#Ja suoritus kirjatuksi
 			$query = "	UPDATE suoritus
-						SET kohdpvm = now(), ltunnus = '$row[laskutunnus]'
+						SET kohdpvm = '$row[kirjpvm]',
+						ltunnus = '$row[laskutunnus]'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$row[suoritunnus]'";
 			$updres = pupe_query($query);

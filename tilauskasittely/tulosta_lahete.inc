@@ -49,17 +49,19 @@ if (!function_exists('alku_lahete')) {
 
 		$page[$sivu] = $thispage;
 
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+		// KAUTTALASKUTUSKIKKARE
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa, osasto
 						FROM asiakas
 						WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+						AND laji != 'P'
 						AND ytunnus = '{$laskurow['ytunnus']}'
 						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
 			if ($asiakas_tunnus_row['osasto'] != '6') {
-				unset($GLOBALS['eta_yhtio']);
+				$GLOBALS['eta_yhtio'] = "";
 				$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 			}
 			else {
@@ -158,8 +160,8 @@ if (!function_exists('alku_lahete')) {
 			//Vasen sarake
 			$pdf->draw_text(50, 729, t("Ostaja", $kieli), 	$thispage, $pieni);
 
-			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
-				$pdf->draw_text(50, 717, $asiakas_tunnus_row["nimi"], 			$thispage, $norm);
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
+				$pdf->draw_text(50, 717, $asiakas_tunnus_row["nimi"], 				$thispage, $norm);
 				$pdf->draw_text(50, 707, $asiakas_tunnus_row["nimitark"],			$thispage, $norm);
 				$pdf->draw_text(50, 697, $asiakas_tunnus_row["osoite"], 			$thispage, $norm);
 				$pdf->draw_text(50, 687, $asiakas_tunnus_row["postino"]." ".$asiakas_tunnus_row["postitp"], $thispage, $norm);
@@ -348,7 +350,7 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(310, 656, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), 		$thispage, $boldi);
 			}
 
-			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '')) {
+			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc")) {
 				if ($yhtiorow['alv_kasittely'] == '') {
 					$pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli).".", $thispage, $boldi);
 				}
@@ -545,17 +547,19 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		$thispage = $pdf->new_page("a4");
 
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+		// KAUTTALASKUTUSKIKKARE
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa, osasto
 						FROM asiakas
 						WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+						AND laji != 'P'
 						AND ytunnus = '{$laskurow['ytunnus']}'
 						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
 			if ($asiakas_tunnus_row['osasto'] != '6') {
-				unset($GLOBALS['eta_yhtio']);
+				$GLOBALS['eta_yhtio'] = "";
 				$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 			}
 			else {
@@ -902,7 +906,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 				$pdf->draw_text(523, $kala+15, t("Rivihinta", $kieli),		$thispage, $norm);
 			}
 		}
-		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+		elseif (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			//tulosta_lahete_hae_hinnat.inc
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
@@ -1369,7 +1373,7 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialehintoja.inc") {
 				$returntest = rivi_eialehintoja_lahete($returntest);
 			}
-			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+			elseif (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 				$returntest = rivi_hae_hinnat_lahete($returntest);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
@@ -1462,7 +1466,7 @@ if (!function_exists('rivi_lahete')) {
 
 				$return = rivi_eialehintoja_lahete($return);
 			}
-			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+			elseif (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 				$return = rivi_hae_hinnat_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
@@ -2394,7 +2398,7 @@ if (!function_exists('loppu_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			// etäyhtiön yhtiötiedot
 			$y_puhelin		= $GLOBALS['eta_yhtio_puhelin'];
 			$y_fax			= $GLOBALS['eta_yhtio_fax'];

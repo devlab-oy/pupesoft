@@ -813,9 +813,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "B") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Katetta ei n‰ytet‰ tilauksentekovaiheessa")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Kate n‰ytet‰‰n tilauksentekovaiheessa")."</option>";
+		$ulos .= "<option value='B' $sel3>".t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3021,7 +3025,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'viitemaksujen_kohdistus_sallittu_heitto') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3050,7 +3054,22 @@
 		$ulos .= "<option value = '0.90' {$sel[90]}>0.90</option>";
 		$ulos .= "<option value = '0.95' {$sel[95]}>0.95</option>";
 		$ulos .= "<option value = '1.00' {$sel[100]}>1.00</option>";
-		
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'luottorajan_ylitys') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myynti‰ ei estet‰ jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti esetet‰‰n jos luottoraja on ylitetty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

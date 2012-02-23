@@ -601,7 +601,7 @@
 			}
 
 			//Jos kyseess‰ on laskutettava myyntitili
-			if($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") {
+			if ($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") {
 				// P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
 				$query = "	UPDATE lasku
 							SET eilahetetta = 'o'
@@ -615,7 +615,9 @@
 							and yhtio = '$kukarow[yhtio]'";
 				$result  	= pupe_query($query);
 				$laskurow   = mysql_fetch_array($result);
-
+				
+				$tilausvalmiskutsuja = "MYYNTITILI";
+				
 				require("tilaus-valmis.inc");
 			}
 

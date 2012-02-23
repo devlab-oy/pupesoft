@@ -1151,16 +1151,25 @@
 						$sel1 = "SELECTED";
 						$sel2 = "";
 						$sel3 = "";
+						$sel4 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
 						$sel1 = "";
 						$sel2 = "SELECTED";
 						$sel3 = "";
+						$sel4 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "N") {
 						$sel1 = "";
 						$sel2 = "";
 						$sel3 = "SELECTED";
+						$sel4 = "";
+					}
+					if ($krow['naytetaan_katteet_tilauksella'] == "B") {
+						$sel1 = "";
+						$sel2 = "";
+						$sel3 = "";
+						$sel4 = "SELECTED";
 					}
 
 					echo "<tr><th align='left'>",t("Katteet n‰ytet‰‰n tilauksentekovaiheessa"),":</th>
@@ -1168,6 +1177,7 @@
 							<option value=''  {$sel1}>",t("Oletus"),"</option>
 							<option value='Y' {$sel2}>",t("Kate n‰ytet‰‰n"),"</option>
 							<option value='N' {$sel3}>",t("Katetta ei n‰ytet‰"),"</option>
+							<option value='B' {$sel4}>",t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰"),"</option>
 							</select></td></tr>";
 
 					echo "<tr><th align='left'>",t("Lomaoikeus"),":</th>

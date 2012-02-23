@@ -22,7 +22,8 @@ $query  = "	SELECT *
 $tilausvalmis_asiakas_res = pupe_query($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
-if ($tilausvalmis_asiakas_row['luottoraja'] != 0) {
+// Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
+if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
 	$query_alennuksia = generoi_alekentta('M');
 
@@ -406,16 +407,27 @@ else {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
-		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta
+		$tilausriviquery = "SELECT tilausrivi.tuoteno, (tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta, (tilausrivi.varattu+tilausrivi.jt) kplmaara
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
 							AND tilausrivi.tyyppi != 'D'";
 		$rivihintaresult = pupe_query($tilausriviquery);
-		$totaalirivi = mysql_fetch_assoc($rivihintaresult);
+
+		$rahtivapaa_alarajasumma_rivit = 0;
+
+		while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
+			// KAUTTALASKUTUSKIKKARE
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
+				$rahtivapaa_alarajasumma_rivit += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
+			}
+			else {
+				$rahtivapaa_alarajasumma_rivit += $totaalirivi["rivihinta"];
+			}
+		}
 
 		// kaikkiyhteensä ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
-		if ($totaalirivi["rivihinta"] > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
+		if ($rahtivapaa_alarajasumma_rivit > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 
 			// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -1451,7 +1463,17 @@ else {
 				}
 			}
 
-			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS' or $tullaanko_tilausten_sisaanluvusta == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
+			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
+
+				#if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
+				#	$herminator = $totarowx['herminator2'];
+				#}
+				#else {
+				#	$herminator = $totarowx['herminator'];
+				#}
+
+				$herminator = $totarowx['herminator'];
+
 				foreach ($tilausnumerot as $til_nro) {
 
 					// Jos tilauksista yksikin menee "Unikko"-järjestelmään, päivitetään kaikki tilaukset rahtivapaiksi
@@ -1498,7 +1520,7 @@ else {
 							'lisatiedot' => $laskun_lisatiedot,
 							'asiakasrow' => $asiakas_chk_row,
 							'tilaustyyppi' => $pupesoft_tilaustyyppi,
-							'toimitustapa' => $totarowx['herminator'],
+							'toimitustapa' => $herminator,
 							'toim' => $toim,
 						);
 

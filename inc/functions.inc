@@ -2931,6 +2931,32 @@ if (!function_exists("settaa_ale")) {
 	}
 }
 
+if (!function_exists("etayhtio_hinta")) {
+	function etayhtio_hinta ($rivi_tuoteno, $kpl_maara, $laskurow) {
+		// Tarvitaa: rivin tuoteno, laskurow, kpl-määrä, eta_yhtio
+
+		global $yhtiorow, $kukarow;
+
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+					AND tuoteno = '{$rivi_tuoteno}'";
+		$tres_eta = pupe_query($query);
+		$trow_eta = mysql_fetch_assoc($tres_eta);
+
+		list($lis_hinta_eta, $lis_netto_eta, $lis_eta_ale_kaikki, $alehinta_alv_eta, $alehinta_val_eta) = alehinta($laskurow, $trow_eta, $kpl_maara, '', '', '', '', $GLOBALS['eta_yhtio']);
+
+		$hintapyoristys_echo = $lis_hinta_eta;
+
+		foreach ($lis_eta_ale_kaikki as $val) {
+			$hintapyoristys_echo *= (1 - ($val / 100));
+		}
+
+		$etayhtion_rivinarvo = 	($hintapyoristys_echo * $kpl_maara);
+		return 	$etayhtion_rivinarvo;
+	}
+}
+
 if (!function_exists("alehinta")) {
 	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
 		global $yhtiorow, $kukarow;
@@ -2976,21 +3002,26 @@ if (!function_exists("alehinta")) {
 		$vanha_yhtio	= "";
 		$vanha_liitostunnus = 0;
 
+		// KAUTTALASKUTUSKIKKARE
 		if ($yhtio != '') {
-			$vanha_yhtio = $kukarow['yhtio'];
+			$vanha_yhtio 		= $kukarow['yhtio'];
+			$vanha_liitostunnus = $laskurow['liitostunnus'];
+			$vanha_ytunnus 		= $laskurow['ytunnus'];
+
 			$yhtiorow = hae_yhtion_parametrit($yhtio);
 			$kukarow['yhtio'] = $yhtio;
 
-			$query = "	SELECT tunnus
+			$query = "	SELECT ytunnus, tunnus
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji != 'P'
 						AND ytunnus = '{$laskurow['ytunnus']}'
 						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
 			$asiakas_tunnus_res = pupe_query($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
-			$vanha_liitostunnus = $laskurow['liitostunnus'];
-			$laskurow['liitostunnus'] = $asiakas_tunnus_row['tunnus'];
+			$laskurow["ytunnus"] 		= $asiakas_tunnus_row["ytunnus"];
+			$laskurow["liitostunnus"] 	= $asiakas_tunnus_row["tunnus"];
 		}
 
 		// oletetaan yhtiön valuutta jos sitä ei tiedetä
@@ -3003,12 +3034,12 @@ if (!function_exists("alehinta")) {
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+			$query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
 			$alhire = pupe_query($query);
 
 			// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
 			if (mysql_num_rows($alhire) == 1) {
-				$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
+				$query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
 				$alhire = pupe_query($query);
 
 				// ei löytynyt alvia, se on pakko löytyä
@@ -4897,8 +4928,9 @@ if (!function_exists("alehinta")) {
 
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
-			$kukarow['yhtio'] = $vanha_yhtio;
-			$laskurow['liitostunnus'] = $vanha_liitostunnus;
+			$kukarow['yhtio'] 			= $vanha_yhtio;
+			$laskurow['liitostunnus'] 	= $vanha_liitostunnus;
+			$laskurow['ytunnus'] 		= $vanha_ytunnus;
 		}
 
 		if ($trow["myyntihinta_maara"] != 0) {
@@ -8118,7 +8150,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 						$tyyli = "font-weight:bold'";
 						$tyyli2 = "font-weight:normal'";
 					}
-					
+
 					echo "	<div id='tuote_valinta_$row[tunnus]'
 								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
@@ -11984,15 +12016,15 @@ if (!function_exists("pupe_DataTables")) {
 						});
 
 						$('input[name^=\"rivi_ale\"]').each(function(){
-							
-							var monesko				= $(this).attr('name').substring(8,9);													
+
+							var monesko				= $(this).attr('name').substring(8,9);
 							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
 							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 							var ale 				= parseFloat(this.value);
-							
+
 							if (rivi_ale_alkup != ale) {
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
@@ -12002,7 +12034,7 @@ if (!function_exists("pupe_DataTables")) {
 										ale: ale,
 										no_head: 'yes',
 										ohje: 'off',
-										suoratoimitukset: suoratoimitukset, 
+										suoratoimitukset: suoratoimitukset,
 										monesko_kentta: monesko},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);

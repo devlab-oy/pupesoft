@@ -18,7 +18,6 @@ if (!isset($alv)) 					$alv = "";
 if (!isset($alv_array)) 			$alv_array = "";
 if (!isset($asiakasid)) 			$asiakasid = "";
 if (!isset($asiakasOnProspekti)) 	$asiakasOnProspekti = "";
-if (!isset($eta_yhtio)) 			$eta_yhtio = "";
 if (!isset($from)) 					$from = "";
 if (!isset($hinta)) 				$hinta = "";
 if (!isset($hinta_array)) 			$hinta_array = "";
@@ -85,6 +84,7 @@ if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
 if (!isset($lisax)) $lisax = '';
+if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -2498,8 +2498,9 @@ if ($tee == '') {
 		$faktaresult = pupe_query($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
 
-		if ($GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
-			unset($GLOBALS['eta_yhtio']);
+		// KAUTTALASKUTUSKIKKARE
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
+			$GLOBALS['eta_yhtio'] = "";
 		}
 
 		echo "<tr>$jarjlisa";
@@ -4342,25 +4343,27 @@ if ($tee == '') {
 					}
 				}
 
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 
 					$epakurpantti = "";
 
-					if ($tuote['epakurantti100pvm'] != '0000-00-00') {
-						$tuote['kehahin'] = 0;
-						$epakurpantti = "(".t("Täysepäkurantti").")";
-					}
-					elseif ($tuote['epakurantti75pvm'] != '0000-00-00') {
-						$tuote['kehahin'] = round($tuote['kehahin'] * 0.25, 6);
-						$epakurpantti = "(".t("75% Epäkurantti").")";
-					}
-					elseif ($tuote['epakurantti50pvm'] != '0000-00-00') {
-						$tuote['kehahin'] = round($tuote['kehahin'] * 0.5,  6);
-						$epakurpantti = "(".t("Puoliepäkurantti").")";
-					}
-					elseif ($tuote['epakurantti25pvm'] != '0000-00-00') {
-						$tuote['kehahin'] = round($tuote['kehahin'] * 0.75, 6);
-						$epakurpantti = "(".t("25% Epäkurantti").")";
+					if ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
+						if ($tuote['epakurantti100pvm'] != '0000-00-00') {
+							$tuote['kehahin'] = 0;
+							$epakurpantti = "(".t("Täysepäkurantti").")";
+						}
+						elseif ($tuote['epakurantti75pvm'] != '0000-00-00') {
+							$tuote['kehahin'] = round($tuote['kehahin'] * 0.25, 6);
+							$epakurpantti = "(".t("75% Epäkurantti").")";
+						}
+						elseif ($tuote['epakurantti50pvm'] != '0000-00-00') {
+							$tuote['kehahin'] = round($tuote['kehahin'] * 0.5,  6);
+							$epakurpantti = "(".t("Puoliepäkurantti").")";
+						}
+						elseif ($tuote['epakurantti25pvm'] != '0000-00-00') {
+							$tuote['kehahin'] = round($tuote['kehahin'] * 0.75, 6);
+							$epakurpantti = "(".t("25% Epäkurantti").")";
+						}
 					}
 
 					if ($kukarow["yhtio"] == "srs") {
@@ -4370,7 +4373,8 @@ if ($tee == '') {
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti</th><td align='right'>".hintapyoristys($tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
 
 					if ($tuote["myyntihinta_maara"] != 0) {
-						echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti $tuote[myyntihinta_maara] $tuote[yksikko]</th><td align='right'>".hintapyoristys($tuote['kehahin'] * $tuote["myyntihinta_maara"])." $yhtiorow[valkoodi]</td></tr>";
+						echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti $tuote[myyntihinta_maara] $tuote[yksikko]</th>";
+						echo "<td align='right'>".hintapyoristys($tuote['kehahin'] * $tuote["myyntihinta_maara"])." $yhtiorow[valkoodi]</td></tr>";
 					}
 				}
 
@@ -4561,13 +4565,19 @@ if ($tee == '') {
 
 		$rivilaskuri = $ruuturow["rivit"];
 
+		if ($kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "B")) {
+			$kehahin_select = " tuote.kehahin ";
+		}
+		else {
+			$kehahin_select = " round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) ";
+		}
+
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
 					if (tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					tuote.myyntihinta,
-					round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) kehahin,
-					tuote.kehahin kehahin_kurantti,
+					$kehahin_select kehahin,
 					tuote.sarjanumeroseuranta,
 					tuote.vaaditaan_kpl2,
 					tuote.yksikko,
@@ -4767,15 +4777,8 @@ if ($tee == '') {
 					$sarakkeet++;
 				}
 
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) or ($kukarow['extranet'] == '' and $kukarow["naytetaan_katteet_tilauksella"] == "O")) {
-
-					if ($kukarow['naytetaan_katteet_tilauksella'] == "O") {
-						$headerit .= "<th style='text-align:right;'>".t("Kehahinta")."</th>";
-					}
-					else {
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 					$headerit .= "<th style='text-align:right;'>".t("Kate")."</th>";
-					}
-
 					$sarakkeet++;
 				}
 
@@ -5231,7 +5234,7 @@ if ($tee == '') {
 						$pknum = 0;
 						$borderlask = 0;
 
-						if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
 							echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
 						}
 						else {
@@ -5863,7 +5866,7 @@ if ($tee == '') {
 						echo "<td $class align='right' valign='top'>".hintapyoristys($summa)."</td>";
 					}
 
-					if (($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) or ($kukarow['extranet'] == '' and $kukarow["naytetaan_katteet_tilauksella"] == "O") ) {
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						// Tän rivin kate
 						$kate = 0;
 
@@ -5933,12 +5936,7 @@ if ($tee == '') {
 						}
 						elseif ($kukarow['extranet'] == '') {
 							if ($kotisumma_alviton != 0) {
-								if ($kukarow['naytetaan_katteet_tilauksella'] == 'O') {
-									$kate = hintapyoristys($row['kehahin']);
-								}
-								else {
-									$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
-								}
+								$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
 							}
 							elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
 								$kate = "-100.00%";
@@ -6265,10 +6263,10 @@ if ($tee == '') {
 					$row['kommentti'] .= "\n".t("Hinta").": ".hintapyoristys($lis_hinta_eta);
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$row['kommentti'] .= "\n".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
+						$row['kommentti'] .= ", ".t("Ale")."{$alepostfix}: ".($lis_eta_ale_kaikki["ale{$alepostfix}"]*1)."%";
 					}
 
-					$row['kommentti'] .= "\n".t("Alv").": ".($row['alv']*1)."%";
+					$row['kommentti'] .= ", ".t("Alv").": ".($row['alv']*1)."%";
 
 					$hintapyoristys_echo = $lis_hinta_eta;
 
@@ -6276,7 +6274,9 @@ if ($tee == '') {
 						$hintapyoristys_echo *= (1 - ($val / 100));
 					}
 
-					$row['kommentti'] .= "\n".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
+					$etayhtio_totaalisumma +=  ($hintapyoristys_echo * $kpl_ruudulle);
+
+					$row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
 				}
 
 				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
@@ -6294,10 +6294,6 @@ if ($tee == '') {
 					else {
 						$kommclass1 = "";
 						$kommclass2 = " ";
-					}
-
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						// $cspan++; // Tälläistä muuttujaa ei ole koko filessä!
 					}
 
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
@@ -6397,8 +6393,7 @@ if ($tee == '') {
 								tuote.sarjanumeroseuranta,
 								tuote.ei_saldoa,
 								tuote.tuoteno,
-								round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) kehahin,
-								tuote.kehahin kehahin_kurantti,
+								$kehahin_select kehahin,
 								tilausrivi.tunnus,
 								tilausrivi.varattu+tilausrivi.jt varattu,
 								tilausrivin_lisatiedot.osto_vai_hyvitys,
@@ -6544,10 +6539,10 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa_eieri)."</td>";
 
-					if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_kotimaa_eieri/($kotiarvo_kotimaa_eieri-$ostot_eieri))."%</td>";
 					}
-					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
@@ -6558,10 +6553,10 @@ if ($tee == '') {
 						<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa_eieri)."</td>";
 
-					if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa_eieri != 0  and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_ulkomaa_eieri/($kotiarvo_ulkomaa_eieri-$ostot_eieri))."%</td>";
 					}
-					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
@@ -6573,10 +6568,11 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
-					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) and $kotiarvo_eieri-$ostot_eieri != 0) {
+
+					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and $kotiarvo_eieri-$ostot_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."%</td>";
 					}
-					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
@@ -6589,7 +6585,7 @@ if ($tee == '') {
 						<th colspan='5' align='right'>".t("Erikoisalennus")." $laskurow[erikoisale]%:</th>
 						<td class='spec' align='right'>".sprintf("%.2f", ($arvo_eieri-$arvo)*-1)."</td>";
 
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
@@ -6601,10 +6597,10 @@ if ($tee == '') {
 								<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 								<td class='spec' align='right' nowrap>".sprintf("%.2f",$arvo_kotimaa)."</td>";
 
-						if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa/($kotiarvo_kotimaa-$ostot))."%</td>";
 						}
-						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 						}
 
@@ -6615,7 +6611,7 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
 
-						if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_ulkomaa/($kotiarvo_ulkomaa-$ostot))."%</td>";
 						}
 
@@ -6627,10 +6623,10 @@ if ($tee == '') {
 								<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
-						if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/($kotiarvo-$ostot))."%</td>";
 						}
-						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 						}
 
@@ -6661,7 +6657,7 @@ if ($tee == '') {
 
 				echo "<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
 
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 					echo "<td class='spec' align='right'>&nbsp;</td>";
 				}
 
@@ -6691,9 +6687,9 @@ if ($tee == '') {
 					$kaikkiyhteensa = 0;
 				}
 
-				if (($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+				if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
 					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -6765,13 +6761,13 @@ if ($tee == '') {
 					}
 
 					echo ":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td>";
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td>";
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -6899,7 +6895,7 @@ if ($tee == '') {
 
 						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right' $state></td>";
 
-						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right'>&nbsp;</td>";
 						}
 
@@ -6920,15 +6916,35 @@ if ($tee == '') {
 								<th colspan='5' align='right'>".t("Liitetyt kululaskut").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$kulusumma)."</td>";
 
-						if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) and $kotiarvo_eieri-$ostot_eieri != 0) {
+						if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and $kotiarvo_eieri-$ostot_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*($kate-$kulusumma)/($kotiarvo-$ostot))."%</td>";
 						}
-						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 						}
 
 						echo "<td class='spec'>$yhtiorow[valkoodi]</td></tr>";
 					}
+				}
+
+				if (isset($etayhtio_totaalisumma) and $etayhtio_totaalisumma !=0) {
+
+					echo "<tr><td class='back'><br></td></tr>";
+
+					echo "<tr>$jarjlisa
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+							<th colspan='5' align='right'>".t("Asiakkaan")." ".t("Veroton yhteensä").":</th>
+							<td class='spec' align='right'>".sprintf("%.2f",$etayhtio_totaalisumma);
+					echo "</td>";
+
+					if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+			}
+					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+					}
+
+					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
 			}

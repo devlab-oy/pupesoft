@@ -171,7 +171,7 @@
 								myyja			= '$myyjannumero',
 								tila			= 'O',
 								viesti			= '$e3ostotilausnumero',
-								laatija			= '$kukarow[kuka]',
+								laatija			= 'E3',
 								luontiaika		= now()";
 				$otsikkoinsert = mysql_query($insquery) or pupe_error($insquery);
 				$id = mysql_insert_id();

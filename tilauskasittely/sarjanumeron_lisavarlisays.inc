@@ -16,7 +16,7 @@
 						sarjanumeroseuranta.hyllynro,
 						sarjanumeroseuranta.hyllyvali,
 						sarjanumeroseuranta.hyllytaso,
-						concat_ws('#', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) paikka
+						concat_ws('#!¡!#', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) paikka
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -41,7 +41,7 @@
 							round(tilausrivi.varattu/$ostorow[kpl],2) varattu,
 							round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl,
 							tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi,
-							concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+							concat_ws('#!¡!#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 							tilausrivi.hyllyalue,
 							tilausrivi.hyllynro,
 							tilausrivi.hyllyvali,
@@ -138,7 +138,7 @@
 									${'ale'.$alepostfix} = "";
 								}
 
-								if ($sarjarow_isa["paikka"] != "###") {
+								if ($sarjarow_isa["paikka"] != "#!¡!##!¡!##!¡!#") {
 									$paikka		 = $sarjarow_isa["paikka"];
 								}
 

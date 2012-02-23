@@ -33,7 +33,7 @@
 		$jatko = 0;
 	}
 
-/* ei käytössä
+	/* ei käytössä
 	if (mysql_field_name($result, $i) == "multi_jv") {
 
 		$sel='';
@@ -45,7 +45,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-*/
+	*/
 
 	if (mysql_field_name($result, $i) == "kuljyksikko") {
 
@@ -75,6 +75,24 @@
 		$ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
 		$ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
 		$ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
+		$ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan lähetys</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
+
+		$sel1='';
+		$sel2='';
+
+		if ($trow[$i]=='K')
+			$sel2 = 'SELECTED';
+		else
+			$sel1 = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sel1>".t("Ei käytetä LOGY:n rahtikirjanumeroita")."</option>";
+		$ulos .= "<option value='K' $sel2>".t("Käytetään LOGY:n rahtikirjanumeroita")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -42,27 +42,31 @@
 		$payment_date = "20".dateconv(substr($tietue,21,6));
 
 		$query = "SELECT * FROM yriti WHERE tilino = '$account' and kaytossa = ''";
-		$result = mysql_query($query) or pupe_error($query);
-		$yritirow = mysql_fetch_array($result);
+		$result = pupe_query($query);
+		$yritirow = mysql_fetch_assoc($result);
 
 		if ($yritirow["yhtio"] == "") {
-			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>";
+			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>\n";
 			continue;
-		} 
+		}
+		else {
+			// Setataan kukarow-yhtiö
+			$kukarow["yhtio"] = $yritirow["yhtio"];
+		}
 
 		if ($yritirow["valkoodi"] != "") {
 			$query = "	SELECT *
 						FROM valuu
 						WHERE yhtio = '$yritirow[yhtio]'
 						and nimi	= '$yritirow[valkoodi]'";
-			$valresult = mysql_query($query) or pupe_error($query);
+			$valresult = pupe_query($query);
 
 			if (mysql_num_rows($valresult) != 1) {
-				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>";
+				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>\n";
 				continue;
 			}
 			else {
-				$valrow = mysql_fetch_array ($valresult);
+				$valrow = mysql_fetch_assoc($valresult);
 
 				$valkoodi	= $valrow["nimi"];
 				$kurssi 	= $valrow["kurssi"];
@@ -70,11 +74,11 @@
 		}
 		else {
 			$query = "SELECT valkoodi FROM yhtio WHERE yhtio = '$yritirow[yhtio]'";
-			$valresult = mysql_query($query) or pupe_error($query);
-			$valrow = mysql_fetch_array ($valresult);
+			$valresult = pupe_query($query);
+			$valrow = mysql_fetch_assoc ($valresult);
 
 			if ($valrow["valkoodi"] == '') {
-				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>";
+				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>\n";
 				continue;
 			}
 			else {
@@ -85,14 +89,14 @@
 
 		#arkistointitunnus
 		$query = "INSERT INTO suoritus (yhtio,tilino,nimi_maksaja,viite,summa,valkoodi,kurssi,maksupvm,kirjpvm) VALUES ('$yritirow[yhtio]','$account','$payer_name','$reference',$sum,'$valkoodi','$kurssi','$payment_date','$entry_date')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tiliointitunnus = mysql_insert_id();
 
 		#päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi
 		$query = "	UPDATE tiliotedata
 		 			SET tiliointitunnus = '$tiliointitunnus', kasitelty = now()
 					WHERE tunnus = '$tiliotedatarow[tunnus]'";
-		$dataupdres = mysql_query($query) or pupe_error($query);
+		$dataupdres = pupe_query($query);
 
 	}
 	elseif ($type == 9) {
@@ -105,7 +109,7 @@
 		#print "done, insert/read/error: $insertcnt/$readcnt/$errcnt\n";
 	}
 	else {
-		echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>";
+		echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>\n";
 		$errcnt++;
 		next;
 	}

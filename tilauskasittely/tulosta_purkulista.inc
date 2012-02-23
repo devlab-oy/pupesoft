@@ -560,6 +560,20 @@
 			}
 		}
 
+		// katsotaan onko tuotetta jälkitoimituksessa
+		$query = "	SELECT sum(varattu+jt) kpl
+					FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'L'
+					AND tuoteno = '{$row['tuoteno']}'
+					AND laskutettuaika = '0000-00-00'
+					AND var = 'J'";
+		$jt_check_res = pupe_query($query);
+		$jt_check_row = mysql_fetch_assoc($jt_check_res);
+
+		if ($jt_check_row['kpl'] > 0) {
+			$row['kommentti'] .= "\n".t("Jälkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='{$row["yksikko"]}'", "", "", "selite");
+		}
 
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);

@@ -753,7 +753,10 @@
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
 					}
-					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+
+					if ($tuoterajaus != "") {
+						$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+					}
 				}
 
 				if (isset($status) and $status != '') {
@@ -2317,6 +2320,7 @@
 				<td><input type='text' name='jarjestys[160]' size='2' value='{$jarjestys[160]}'></td>
 				<td><input type='checkbox' name='ruksit[160]' value='myyja' {$ruk160chk}></td>
 				<td><input type='text' name='rajaus[160]' value='{$rajaus[160]}'></td>
+				<td class='back'>",t("(Toimii vain jos ajat raporttia tilauksista)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Listaa konsernittain"),"</th>

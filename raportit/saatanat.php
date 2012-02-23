@@ -61,6 +61,7 @@
 		echo "<option value = 'asiakas' $sel[asiakas]>".t("Asiakas")."</option>";
 		echo "<option value = 'ytunnus' $sel[ytunnus]>".t("Ytunnus")."</option>";
 		echo "<option value = 'nimi'    $sel[nimi]>".t("Nimi")."</option>";
+		echo "<option value = 'kustannuspaikka'    $sel[kustannuspaikka]>".t("Kustannuspaikka")."</option>";
 		echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan n‰ytt‰‰ vain jos summaustaso on Asiakas.")."</td></tr>";
 
 		$query = "	SELECT nimi, tunnus
@@ -111,16 +112,15 @@
 
 		echo "<tr>";
 
+		$luottolisa = "";
+		$checked = "";
+
 		if ($luottovakuutettu == "K") {
-			$luottolisa = "K";
+			$luottolisa = " JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = 'K') ";
 			$checked = "CHECKED";
 		}
-		else {
-			$luottolisa = "";
-			$checked = "";
-		}
 
-		echo "<th>".t("Vain luottovakuutetut")."</th>";
+		echo "<th>".t("N‰yt‰ vain luottovakuutetut asiakkaat").":</th>";
 		echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 		echo "<td valign='top' class='back'><input type='submit' value='".t("N‰yt‰")."'></td></tr>";
 		echo "</tr>";
@@ -140,12 +140,13 @@
 		elseif ($laji == 'MMK') $tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 		else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
-		$lisa 			 = '';
-		$saatavat_yhtio  = $kukarow['yhtio'];
-		$eta_asiakaslisa = '';
+		$generoitumuuttuja	= '';
+		$kustpmuuttuja		= "";
+		$saatavat_yhtio		= $kukarow['yhtio'];
+		$eta_asiakaslisa	= '';
 
 		if ($sanimi != '') {
-			$lisa .= " and lasku.nimi like '%$sanimi%' ";
+			$generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
 		}
 
 		if ($sytunnus != '') {
@@ -185,7 +186,7 @@
 				$row = mysql_fetch_assoc($result);
 			}
 
-			$lisa .= " and lasku.liitostunnus in ($row[tunnukset]) ";
+			$generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
 
 		if ($yli != 0) {
@@ -202,6 +203,10 @@
 		elseif ($grouppaus == 'nimi') {
 			$selecti = "group_concat(distinct lasku.ytunnus separator '<br>') ytunnus, lasku.nimi, group_concat(distinct lasku.liitostunnus) liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
 			$grouppauslisa = "lasku.nimi";
+		}
+		elseif ($grouppaus == 'kustannuspaikka') {
+			$selecti = "tiliointi.kustp kustannuspaikka";
+			$grouppauslisa = "tiliointi.kustp";
 		}
 		else {
 			// grouppaus = asiakas
@@ -246,23 +251,23 @@
 		}
 
 		$query = "	SELECT
-					$selecti,
-					$summalisa
+					{$selecti},
+					{$summalisa}
 					min(lasku.liitostunnus) litu,
 					min(lasku.tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
-					JOIN asiakas on (asiakas.yhtio  = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = '$luottolisa')
-					WHERE lasku.yhtio = '$saatavat_yhtio'
-					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm = '0000-00-00')
-					and lasku.tapvm	<= '$savvl-$sakkl-$sappl'
+					{$luottolisa}
+					WHERE lasku.yhtio = '{$saatavat_yhtio}'
+					and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
+					and lasku.tapvm	<= '{$savvl}-{$sakkl}-{$sappl}'
 					and lasku.tapvm > '0000-00-00'
 					and lasku.tila = 'U'
 					and lasku.alatila = 'X'
-					$lisa
-					$salisa1
-					GROUP BY $grouppauslisa
-					$having
+					{$generoitumuuttuja}
+					{$salisa1}
+					GROUP BY {$grouppauslisa}
+					{$having}
 					ORDER BY 1,2,3";
 		$result = pupe_query($query);
 
@@ -294,10 +299,16 @@
 			if (isset($workbook)) {
 				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
-				$excelsarake++;
+				if ($grouppaus != "kustannuspaikka") {
+					$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+					$excelsarake++;
+				}
+				else {
+					$worksheet->write($excelrivi, $excelsarake, t("Kustannuspaikka"), $format_bold);
+					$excelsarake++;
+				}
 
 				$worksheet->write($excelrivi, $excelsarake, t("Alle")." {$saatavat_array[0]} ".t("pv"), $format_bold);
 				$excelsarake++;
@@ -324,7 +335,12 @@
 			echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi] - $sappl.$sakkl.$savvl</font><hr>";
 
 			if ($eiliittymaa != 'ON') {
-				$sarakemaara = count($saatavat_array)+7;
+				if ($grouppaus == "kustannuspaikka") {
+					$sarakemaara = count($saatavat_array)+6;
+				}
+				else {
+					$sarakemaara = count($saatavat_array)+7;
+				}
 
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
@@ -340,8 +356,15 @@
 			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
-			echo "<th>".t("Ytunnus")."</th>";
-			echo "<th>".t("Nimi")."</th>";
+
+			if ($grouppaus != "kustannuspaikka") {
+				echo "<th>".t("Ytunnus")."</th>";
+				echo "<th>".t("Nimi")."</th>";
+			}
+			else {
+				echo "<th>".t("Kustannuspaikka")."</th>";
+			}
+
 			echo "<th align='right'>".t("Alle")." {$saatavat_array[0]} ".t("pv")."</th>";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -379,8 +402,9 @@
 								$suorilisa
 								FROM suoritus
 								WHERE yhtio = '$saatavat_yhtio'
-								and asiakas_tunnus in ($row[liitostunnus])
+								and ltunnus > 0
 								and kohdpvm = '0000-00-00'
+								and asiakas_tunnus in ($row[liitostunnus])
 								$salisa2";
 					$suresult = pupe_query($query);
 					$surow = mysql_fetch_assoc($suresult);
@@ -417,8 +441,33 @@
 					if ($row["yli_{$saatavat_array[count($saatavat_array)-1]}"] == 0) $row["yli_{$saatavat_array[count($saatavat_array)-1]}"] = "";
 
 					echo "<tr class='aktiivi'>";
-					echo "<td valign='top'><a name='$row[latunnari]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$row[ytunnus]&asiakasid=$row[litu]&alatila=$asirappari_linkki_alatila&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]'>$row[ytunnus]</a></td>";
-					echo "<td valign='top'>$row[nimi]</td>";
+
+					if ($grouppaus != "kustannuspaikka") {
+						echo "<td valign='top'>";
+						echo "<a name='$row[latunnari]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$row[ytunnus]&asiakasid=$row[litu]&alatila=$asirappari_linkki_alatila&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]'>$row[ytunnus]</a>";
+						echo "</td>";
+					}
+
+					if ($grouppaus == "kustannuspaikka") {
+						$query = "	SELECT nimi, koodi
+									FROM kustannuspaikka
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '{$row["kustannuspaikka"]}'";
+						$nimiresult = pupe_query($query);
+
+						if (mysql_num_rows($nimiresult) == 1) {
+							$nimirow = mysql_fetch_assoc($nimiresult);
+							echo "<td valign='top'>{$nimirow["nimi"]} {$nimirow["koodi"]}</td>";
+							$kustpmuuttuja = "{$nimirow["nimi"]} {$nimirow["koodi"]}";
+						}
+						else {
+							echo "<td valign='top'>".t("Ei Kustannuspaikkaa")."</td>";
+							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
+						}
+					}
+					else {
+						echo "<td valign='top'>$row[nimi]</td>";
+					}
 
 					echo "<td valign='top' align='right'>".$row["alle_$saatavat_array[0]"]."</td>";
 
@@ -436,10 +485,16 @@
 					if (isset($workbook)) {
 						$excelsarake = 0;
 
-						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
-						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
-						$excelsarake++;
+						if ($grouppaus != "kustannuspaikka") {
+							$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
+							$excelsarake++;
+							$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
+							$excelsarake++;
+						}
+						else {
+							$worksheet->writeString($excelrivi, $excelsarake, $kustpmuuttuja);
+							$excelsarake++;
+						}
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["alle_$saatavat_array[0]"]);
 						$excelsarake++;
@@ -483,10 +538,16 @@
 			echo "<tfoot>";
 
 			if ($eiliittymaa != 'ON' or $rivilask >= 1) {
-				echo "<tr>";
-				echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteens‰").":</td>";
-
+				$colspan = 2;
 				$sumlask = 2;
+
+				echo "<tr>";
+				if ($grouppaus == "kustannuspaikka") {
+					$colspan = 1;
+					$sumlask = 1;
+				}
+
+				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteens‰").":</td>";
 
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."</td>";
 				$sumlask++;
@@ -511,13 +572,13 @@
 			echo "</table>";
 
 			if ($sytunnus != '') {
-				
+
 				$liitoslisa = "";
-				
+
 				if ($sliitostunnus !="") {
 					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
 				}
-				
+
 				$query = "	SELECT jv
 							FROM asiakas
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
@@ -527,7 +588,7 @@
 							{$liitoslisa}
 							$eta_asiakaslisa
 							LIMIT 1";
-				
+
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 

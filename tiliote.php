@@ -33,11 +33,12 @@
 		$userfile	= trim($argv[2]);
 		$filenimi	= $userfile;
 		$ok 		= 1;
+		$palvelin2  = "";
 	}
 	else {
 		require ("inc/parametrit.inc");
 
-		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br><br>";
+		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br>\n<br>\n";
 
 		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
 		echo "<table>";
@@ -47,7 +48,7 @@
 					<td class='back'><input type='submit' value='".t("Käsittele tiedosto")."'></td>
 				</tr>";
 		echo "</table>";
-		echo "</form><br><br>";
+		echo "</form><br>\n<br>\n";
 
 		echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
@@ -109,8 +110,6 @@
 		}
 		else {
 			// Tämä oli tiliote tai viiteaineisto
-			require ("inc/tilinumero.inc");
-
 			$query= "LOCK TABLE tiliotedata WRITE, yriti READ, yhtio READ";
 			$tiliotedataresult = pupe_query($query);
 
@@ -170,14 +169,17 @@
 					$yritiresult = pupe_query($query);
 
 					if (mysql_num_rows($yritiresult) != 1) {
-						echo "<font class='error'> Tiliä '$tilino' ei löytynyt!</font><br>";
+						echo "<font class='error'>Tiliä '$tilino' ei löytynyt!</font><br>\n";
 						$xtyyppi = 0;
 						$virhe++;
 					}
 					else {
 						$yritirow = mysql_fetch_assoc($yritiresult);
+
+						// Setataan kukarow-yhtiö
+						$kukarow["yhtio"] = $yritirow["yhtio"];
 					}
-					
+
 					$query = "	SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu
 								FROM yhtio
 								WHERE yhtio = '{$yritirow['yhtio']}'";
@@ -234,7 +236,7 @@
 							if (trim($tiliotedatarow["kantaaineisto"]) != "") {
 								for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
 									if (trim($distinct_aineistot[$xlmpmaa_i]) != "" and strpos(trim($tiliotedatarow["kantaaineisto"]), trim($distinct_aineistot[$xlmpmaa_i])) !== FALSE) {
-										echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+										echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>\n<br>\nTili: $tilino<br>\nAjalta: $alkupvm - $loppupvm<br>\nYritys: $yritirow[yhtio]</font><br>\n<br>\n";
 
 										$xtyyppi=0;
 										$virhe++;
@@ -244,7 +246,7 @@
 
 							// Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
 							if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
-								echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+								echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n<br>\n";
 
 								$xtyyppi=0;
 								$virhe++;
@@ -252,13 +254,13 @@
 						}
 						else {
 							if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-								echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+								echo "<font class='error'>VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>\nTiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 								$xtyyppi=0;
 								$virhe++;
 							}
 							elseif (!$forceta)  {
-								echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+								echo "<font class='error'>VIRHE: Tämä aineisto on jo aiemmin käsitelty! (Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio])</font><br>\n<br>\n";
 
 								if (!$php_cli) {
 									list($usec, $sec) = explode(' ', microtime());
@@ -270,7 +272,7 @@
 									echo "<form action='$PHP_SELF' method='post' onSubmit='return verify();'>";
 									echo "<input type='hidden' name='virhe_file' value='$tmpfile'>
 											<input type='submit' value='".t("Käsittele aineisto vaikka kyseisen päivän/tilin aineisto on jo käsitelty")."'>";
-									echo "</form><br><br>";
+									echo "</form><br>\n<br>\n";
 								}
 
 								$xtyyppi=0;
@@ -287,15 +289,16 @@
 					$tsekpvm = (int) "20".substr($tietue, 30, 6);
 
 					if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu or $tsekpvm < $myrealku or $tsekpvm > $myreloppu or $tsekpvm < $tikaalku or $tsekpvm > $tikaloppu) {
-						echo "<font class='error'>VIRHE: Aineistossa on tapahtuma ($tsekpvm) suljetulle kaudelle!</font><br>";
+						echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 						$xtyyppi=0;
 						$virhe++;
 					}
 
 					$arkistotunnari = substr($tietue, 12, 18);
+					$taso = substr($tietue, 187, 1);
 
-					if ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0)) {
+					if (($taso == ' ') and ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0))) {
 						// Katsotaan löytyykö tällä tunnuksella suoritus
 						$query = "	SELECT alku
 									FROM tiliotedata
@@ -309,7 +312,7 @@
 						if (mysql_num_rows($vchkres) > 0) {
 							$vchkrow = mysql_fetch_assoc($vchkres);
 
-							echo "<font class='error'>VIRHE: Tiliotetapahtuma arkitointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
+							echo "<font class='error'>VIRHE: Tiliotetapahtuma arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 							$xtyyppi=0;
 							$virhe++;
@@ -327,7 +330,7 @@
 					if ($pvm == '000000') $tsekpvm = $turvapvm;
 
 					if ($tsekpvm < $oresalku or $tsekpvm > $oresloppu) {
-						echo "<font class='error'>VIRHE: Aineistossa on tapahtuma ($tsekpvm) suljetulle kaudelle!</font><br>";
+						echo "<font class='error'>VIRHE: Aineistossa on tapahtuma suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 						$xtyyppi=0;
 						$virhe++;
@@ -341,7 +344,7 @@
 					$tsekpvm = (int) "20".substr($tietue, 15, 6);
 
 					if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-						echo "<font class='error'>VIRHE: Aineistossa on viitesuoritus ($tsekpvm) suljetulle kaudelle!</font><br>";
+						echo "<font class='error'>VIRHE: Aineistossa on viitesuoritus suljetulle kaudelle! (Tili: $tilino / Pvm: $tsekpvm / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 						$xtyyppi=0;
 						$virhe++;
@@ -363,7 +366,7 @@
 						if (mysql_num_rows($vchkres) > 0) {
 							$vchkrow = mysql_fetch_assoc($vchkres);
 
-							echo "<font class='error'>VIRHE: Viitesuoritus arkitointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä (Tili: $tilino / Pvm: $vchkrow[alku])!</font><br>";
+							echo "<font class='error'>VIRHE: Viitesuoritus arkistointitunnuksella: '$arkistotunnari' löytyy jo järjestelmästä! (Tili: $tilino / Pvm: $vchkrow[alku] / Yhtiö: $yritirow[yhtio])</font><br>\n";
 
 							$xtyyppi=0;
 							$virhe++;
@@ -397,7 +400,7 @@
 
 			//Jos meillä tuli virheitä
 			if ($virhe > 0) {
-				echo "<br><font class='error'>".t("Aineistoa ei tallennettu järjestelmään").".</font>";
+				echo "<br>\n<font class='error'>".t("Aineistoa ei tallennettu järjestelmään").".</font>";
 
 				//Poistetaan aineistot tiliotedatasta
 				$query = "DELETE FROM tiliotedata WHERE aineisto ='$aineistorow[aineisto]'";
@@ -453,7 +456,7 @@
 				echo "<tr><td colspan = '6'>";
 				require("inc/teeselvittely.inc");
 				echo "</td></tr>";
-				echo "</table><br><br>";
+				echo "</table><br>\n<br>\n";
 			}
 
 			if ($xtyyppi == 2) {
@@ -462,13 +465,28 @@
 				$kohdm = $vastavienti_valuutassa;
 
 				require("inc/teeselvittely.inc");
-				echo "</table><br><br>";
+				echo "</table><br>\n<br>\n";
 			}
 
 			if ($xtyyppi == 3) {
-				require("inc/viitemaksut_kohdistus.inc");
-				require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
-				echo "<br><br>";
+
+				# Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+				$query    = "SELECT yhtio from yhtio";
+				$yhtiores = pupe_query($query);
+
+				while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
+
+					// Setataan yhtiorow
+					$yhtiorow = hae_yhtion_parametrit($yhtiorow['yhtio']);
+
+					// Setataan kukarow-yhtiö
+					$kukarow["yhtio"] = $yhtiorow["yhtio"];
+
+					require("inc/viitemaksut_kohdistus.inc");
+					require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+				}
+
+				echo "<br>\n<br>\n";
 			}
 		}
 	}

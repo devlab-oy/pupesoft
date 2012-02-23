@@ -7,15 +7,18 @@ else exit;
 // tarvitaan $ftphost $ftpuser $ftppass $ftppath $ftpfile
 // palautetaan $palautus ja $syy
 
-$dummy			= array();
-$syy			= "";
-$palautus		= 0;
-$tulos_ulos_ftp	= "";
-
-$filenimi = basename($ftpfile);
+$dummy				= array();
+$syy				= "";
+$palautus			= 0;
+$tulos_ulos_ftp		= "";
+$renameftpfile		= isset($renameftpfile) ? trim($renameftpfile) : "";
+$palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
+$filenimi			= basename($ftpfile);
 
 if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile=='') {
-	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>";
+	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
+	$palautus = 9;
+	$syy = t("Lähetykseen tarvittavia tietoja puuttuu");
 }
 else {
 
@@ -32,7 +35,7 @@ else {
 		$ftppath .= "/";
 	}
 
-	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
+	$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
@@ -63,16 +66,16 @@ else {
 	}
 
 	// mikä feilas?
-	if ($conn_id === FALSE) {
+	if (isset($conn_id) and $conn_id === FALSE) {
 		$palautus = 1;
 	}
-	if ($login_result === FALSE) {
+	if (isset($login_result) and $login_result === FALSE) {
 		$palautus = 2;
 	}
-	if ($upload === FALSE) {
+	if (isset($upload) and $upload === FALSE) {
 		$palautus = 3;
 	}
-	if ($rename === FALSE) {
+	if (isset($rename) and $rename === FALSE) {
 		$palautus = 4;
 	}
 

@@ -1029,9 +1029,9 @@ while ($tietue = fgets($fd)) {
 					$tilaustyyppilisa = $editilaus_tilaustyyppi;
 
 					if ($editilaus_tilaustyyppi == 3) {
-						$editilaus_tila = 'C';
-						$editilaus_alatila = 'A';
-						$tilaustyyppilisa = 'R';
+						$editilaus_tila 	= 'C';
+						$editilaus_alatila 	= 'A';
+						$tilaustyyppilisa 	= 'R';
 					}
 				}
 
@@ -1262,7 +1262,7 @@ while ($tietue = fgets($fd)) {
 				}
 
 				// Poistetaan spacet
-				if (in_array($yhtiorow["yhtio"], array("artr","allr","mast"))) {
+				if (in_array($yhtiorow["yhtio"], array("allr","mast"))) {
 					$tieto = str_replace(" ", "", $tieto);
 				}
 
@@ -1273,7 +1273,7 @@ while ($tietue = fgets($fd)) {
 
 				// Spessukase
 				if ($yhtiorow["yhtio"] == "artr") {
-
+					// 1. Etsitään aktiivisia tuotteita kaikki spacet poistettuina
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -1283,8 +1283,48 @@ while ($tietue = fgets($fd)) {
 					$result = mysql_query($query) or die($query);
 
 					if (mysql_num_rows($result) == 0) {
-						// Laitetaan kolmanneksi merkiksi space
-						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
+						// Laitetaan kolmanneksi merkiksi space...
+						$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+
+						// 2. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö aktiivinen
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									and tuoteno = '{$tieto}'
+									and status != 'P'
+									{$kieltolisa}";
+						$result = mysql_query($query) or die($query);
+
+						if (mysql_num_rows($result) == 0) {
+							// Poistetaan kolmannesta merkistä space...
+							$tieto = substr($tieto, 0, 2).substr($tieto, 3);
+
+							// 3. Poistetaan kolmannesta merkistä space ja tsekataan löytyykö poistettu
+							$query = "	SELECT *
+										FROM tuote
+										WHERE yhtio = '{$kukarow["yhtio"]}'
+										and tuoteno = '{$tieto}'
+										{$kieltolisa}";
+							$result = mysql_query($query) or die($query);
+
+							if (mysql_num_rows($result) == 0) {
+								// Laitetaan kolmanneksi merkiksi space...
+								$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+
+								// 4. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö poistettu
+								$query = "	SELECT *
+											FROM tuote
+											WHERE yhtio = '{$kukarow["yhtio"]}'
+											and tuoteno = '{$tieto}'
+											{$kieltolisa}";
+								$result = mysql_query($query) or die($query);
+
+								if (mysql_num_rows($result) == 0) {
+									// Jos ei millään löydy niin laitetaan ilman spaceja eteenpäin...
+									$tieto = substr($tieto, 0, 2).substr($tieto, 3);
+								}
+							}
+						}
 					}
 				}
 
@@ -1716,7 +1756,7 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-				if ($editilaus_tila != "Z") {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
@@ -1735,8 +1775,7 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";
-
-					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+					$tilausvalmiskutsuja = "EDITILAUS";
 
 					require ("tilaus-valmis.inc");
 
@@ -1806,6 +1845,8 @@ while ($tietue = fgets($fd)) {
 
 						// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
 						$silent = "SILENT";
+						$tilausvalmiskutsuja = "EDITILAUS";
+
 						require ("tilaus-valmis.inc");
 					}
 
@@ -1822,8 +1863,11 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "$tilaus_valmis_message\n";
 					$edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
 				}
-				else {
+				elseif ($editilaus_tila == "Z") {
 					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
+				}
+				elseif ($editilaus_tilaustyyppi == 3) {
+					$edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 				}
 			}
 			else {

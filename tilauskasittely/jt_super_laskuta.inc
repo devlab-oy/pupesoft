@@ -138,6 +138,7 @@
 			$kukarow["kesken"] = $apukala;
 
 			$laskuvirhe .= t("Laskutetaan suoratoimitus")." $apukala\n";
+			$tilausvalmiskutsuja = "JTSUPERIT";
 
 			require ("tilaus-valmis.inc");
 		}

@@ -178,9 +178,12 @@
 			$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
 			$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
 			$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
 			$pdf->draw_text(455, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(525, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
+
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
+				$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
+				$pdf->draw_text(525, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
+			}
 
 			$kala -= 15;
 
@@ -216,8 +219,6 @@
 			$oikpos = $pdf->strlen($row["ika"], $norm);
 			$pdf->draw_text(338-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
 
-			$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),				$firstpage, $norm);
-
 			if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
 				$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
 				$pdf->draw_text(500-$oikpos, $kala, $row["summa_valuutassa"]." ".$row["valkoodi"], 	$firstpage, $norm);
@@ -231,8 +232,11 @@
 				$karhukertanro = $row["karhuttu"] + 1;
 			}
 
-			$oikpos = $pdf->strlen($karhukertanro, $norm);
-			$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, 			$firstpage, $norm);
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
+				$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]), $firstpage, $norm);
+				$oikpos = $pdf->strlen($karhukertanro, $norm);
+				$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
+			}
 
 			$kala = $kala - 13;
 
@@ -483,11 +487,11 @@
 		$laskutiedot["kpvm"] = date("Y-m-d");
 	}
 
-	$query = "	SELECT SUM(summa) summa
+	$query = "	SELECT sum(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
 				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and ltunnus  > 0
 				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = pupe_query($query);

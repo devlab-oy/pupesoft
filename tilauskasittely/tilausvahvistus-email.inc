@@ -7,7 +7,7 @@ $query = "	SELECT *
 			FROM asiakas
 			WHERE yhtio = '$kukarow[yhtio]'
 			AND tunnus = '$laskurow[liitostunnus]'";
-$tilvahresult = mysql_query($query) or pupe_error($query);
+$tilvahresult = pupe_query($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
 $kieli = strtolower($tilvahasiakas['kieli']);
@@ -20,10 +20,11 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
 	$query = "	SELECT *
 				FROM yhteyshenkilo
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE yhtio 	 = '$kukarow[yhtio]'
 				AND liitostunnus = '$laskurow[liitostunnus]'
-				AND nimi = '$laskurow[tilausyhteyshenkilo]'";
-	$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
+				AND nimi 		 = '$laskurow[tilausyhteyshenkilo]'
+				and tyyppi		 = 'A'";
+	$yhteyshenkiloresult = pupe_query($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
 	if ($yhteyshenkiloasiakas['email'] != '') {
@@ -79,7 +80,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -97,7 +98,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -137,14 +138,15 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[myyja]'";
-	$kresult = mysql_query($query) or pupe_error($query);
+	$kresult = pupe_query($query);
 
 	$krow = mysql_fetch_array($kresult);
 
@@ -178,7 +180,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 						$tyyppilisa
 						and otunnus IN ($laskurow[nippu])
 						and toimaika != '0000-00-00'";
-			$toimaikares = mysql_query($query) or pupe_error($query);
+			$toimaikares = pupe_query($query);
 
 			if (mysql_num_rows($toimaikares) > 1) {
 				$useita = "JOO";

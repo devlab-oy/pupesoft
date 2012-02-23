@@ -98,7 +98,7 @@
 		$tilausok++;
 	}
 
-	if ($row["hinta"] == 0 and !in_array($row["var2"], array("OK", "PK")) and $row["tyyppi"] != "V" and strtoupper($trow["tuotetyyppi"]) != 'R' and strtoupper($trow["tuotetyyppi"]) != 'M' and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
+	if ($row["hinta"] == 0 and !in_array($row["var2"], array("OK", "PK")) and $row["tyyppi"] != "V" and strtoupper($trow["tuotetyyppi"]) != 'R' and strtoupper($trow["tuotetyyppi"]) != 'M' and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS" and $toim != "MYYNTITILI") {
 		if (($row['perheid'] == 0 and $trow['ei_saldoa'] == '') or ($row['perheid'] != 0 and $trow['ei_saldoa'] == '' and $row['perheid'] == $row['tunnus'])) {
 			$varaosavirhe .= t("HUOM: Hinta puuttuu!")."<br>";
 			$riviok++;
@@ -368,7 +368,7 @@
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
 		if (!in_array($row["var"], array('J','S','U','T','P')) and $kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G")) {
 
-			$paikat .= "<option value='EIERAAVIELA#EIEI'>".t("Valitse erä")."</option>";
+			$paikat .= "<option value='EIERAAVIELA#!¡!#EIEI'>".t("Valitse erä")."</option>";
 			$paikatlask++;
 
 			if ($trow["sarjanumeroseuranta"] == "F") {
@@ -504,10 +504,10 @@
 							}
 						}
 
-						$paikat .= "<option value='$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]";
+						$paikat .= "<option value='$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]";
 
 						if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
-							$paikat .= "#$alkurow[era]";
+							$paikat .= "#!¡!#$alkurow[era]";
 						}
 
 						$title  = "";
@@ -671,7 +671,7 @@
 
 					// tallennetaan riville toimittajan tunnus
 					$title = "$valmpaikatrow[varasto] --> ".t("valmista")." ($valmpaikatrow[hyllyalue]-$valmpaikatrow[hyllynro]-$valmpaikatrow[hyllyvali]-$valmpaikatrow[hyllytaso])";
-					$paikat .= "<option value='¡¡V$valmpaikatrow[hyllyalue]#$valmpaikatrow[hyllynro]#$valmpaikatrow[hyllyvali]#$valmpaikatrow[hyllytaso]' title='$title' $sel>$title</option>";
+					$paikat .= "<option value='¡¡V$valmpaikatrow[hyllyalue]#!¡!#$valmpaikatrow[hyllynro]#!¡!#$valmpaikatrow[hyllyvali]#!¡!#$valmpaikatrow[hyllytaso]' title='$title' $sel>$title</option>";
 					$paikatlask++;
 				}
 			}

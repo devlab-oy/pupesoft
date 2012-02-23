@@ -4,7 +4,7 @@
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<b>".t("Lasku katosi")."</b><br>";
+		echo "<b>".t("Lasku katosi")."</b><br>\n";
 		exit;
 	}
 	$laskurow = mysql_fetch_assoc($result);
@@ -52,6 +52,9 @@
 		$liitos = '';
 		$liitostunnus = 0;
 	}
+
+	// Ei rikota rivinvaihtoja
+	$selite = str_ireplace("(br)", "<br>", $selite);
 
 	if ($paivitetaanko) {
 

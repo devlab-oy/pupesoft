@@ -87,7 +87,8 @@ if (!function_exists('alku_lahete')) {
 			$query  = "	SELECT max(kerattyaika) kerattyaika
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'";
+						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'";
 			$keraresult = mysql_query($query) or pupe_error($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -218,6 +219,7 @@ if (!function_exists('alku_lahete')) {
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus IN ($laskurow[nippu])
+							AND tyyppi != 'D'
 							and toimaika != '0000-00-00'";
 				$toimaikares = mysql_query($query) or pupe_error($query);
 
@@ -580,7 +582,11 @@ if (!function_exists('uusi_sivu_lahete')) {
 		}
 		else {
 			// haetaan max(kerattyaika)
-			$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+			$query  = "	SELECT max(kerattyaika) as kerattyaika
+						from tilausrivi
+						where yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'";
 			$keraresult = mysql_query($query) or pupe_error($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -1097,6 +1103,7 @@ if (!function_exists('rivi_lahete')) {
 							and tilausrivi.perheid = '$row[perheid]'
 							and tuote.tuotetyyppi != 'R'
 							and tilausrivi.tyyppi != 'V'
+							AND tilausrivi.tyyppi != 'D'
 							ORDER BY tilausrivi.tunnus";
 				$perheresult = mysql_query($query) or pupe_error($query);
 
@@ -1196,6 +1203,7 @@ if (!function_exists('rivi_lahete')) {
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus in ($perherow[tunnukset])
+								AND tilausrivi.tyyppi != 'D'
 								and tilausrivi.perheid = '$row[perheid]'";
 					$riresult = mysql_query($query) or pupe_error($query);
 					$perherow = mysql_fetch_assoc($riresult);
@@ -2313,7 +2321,8 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 		$alakala = $kala;
 
-		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"])) {
+		// tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
+		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
 			#viivakoodi
 			$data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
 			$image = $pdf->jfif_embed($data);
@@ -2347,50 +2356,6 @@ if (!function_exists('loppu_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
-		// yhtiötiedot
-		$y_puhelin		= $yhtiorow['puhelin'];
-		$y_fax			= $yhtiorow['fax'];
-		$y_email		= $yhtiorow['email'];
-		$y_www			= $yhtiorow['www'];
-		$y_nimi 		= $laskurow["yhtio_nimi"];
-		$y_osoite 		= $laskurow["yhtio_osoite"];
-		$y_postino	 	= $laskurow["yhtio_postino"];
-		$y_postitp	 	= $laskurow["yhtio_postitp"];
-		$y_maa 			= $laskurow["yhtio_maa"];
-		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
-		$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
-		$y_iban 		= $yhtiorow['pankkiiban1'];
-		$y_swift 		= $yhtiorow['pankkiswift1'];
-
-		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
-
-			if (mysql_num_rows($alhire) == 1) {
-				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_assoc($alhire);
-				$y_puhelin		= $alhiro['puhelin'];
-				$y_fax			= $alhiro['fax'];
-				$y_email		= $alhiro['email'];
-			}
-		}
-
-		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
-			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
-
-			if (mysql_num_rows($alhire) == 1) {
-				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_assoc($alhire);
-				$y_puhelin		= $alhiro['puhelin'];
-				$y_fax			= $alhiro['fax'];
-				$y_email		= $alhiro['email'];
-			}
-		}
-
 		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			// etäyhtiön yhtiötiedot
 			$y_puhelin		= $GLOBALS['eta_yhtio_puhelin'];
@@ -2407,6 +2372,68 @@ if (!function_exists('loppu_lahete')) {
 			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
 			$y_iban 		= "";
 			$y_swift 		= "";
+		}
+		else {
+			// yhtiötiedot
+			$y_tiedot_ok	= FALSE;
+			$y_nimi 		= $laskurow["yhtio_nimi"];
+			$y_osoite 		= $laskurow["yhtio_osoite"];
+			$y_postino	 	= $laskurow["yhtio_postino"];
+			$y_postitp	 	= $laskurow["yhtio_postitp"];
+			$y_maa 			= $laskurow["yhtio_maa"];
+			$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
+			$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+			$y_iban 		= $yhtiorow['pankkiiban1'];
+			$y_swift 		= $yhtiorow['pankkiswift1'];
+
+			if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_tiedot_ok	= TRUE;
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
+
+			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+			if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_tiedot_ok	= TRUE;
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
+
+			// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+			if (!$y_tiedot_ok) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
 		}
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {

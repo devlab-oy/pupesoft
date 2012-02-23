@@ -1,7 +1,6 @@
 <?php
 
 	require ("../inc/parametrit.inc");
-    require_once ("inc/tilinumero.inc");
 
 	$lisa = "";
 
@@ -41,8 +40,8 @@
 		$query = "	SELECT *
 					FROM suoritus
 					WHERE yhtio	= '$kukarow[yhtio]'
+					AND kohdpvm	= '0000-00-00'
 					AND tunnus in ($suoritustunnukset)
-					and kohdpvm	= '0000-00-00'
 					$suorilisa";
 		$suoritus_res = pupe_query($query);
 
@@ -95,8 +94,23 @@
 				}
 				else {
 					$stili  = $tiliointi2_row["tilino"];
-					$tapvm  = date("Y-m-d");
+					$tapvm  = $tiliointi1_row["tapvm"];
 					$selite = t('Suoritus poistettu');
+				}
+
+				//vertaillaan tilikauteen
+				list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+				list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+
+				$myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
+				$myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+
+				$tsekpvm = str_replace("-", "", $tapvm);
+
+				if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+					echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
+
+					$tapvm  = date("Y-m-d");
 				}
 
 				$query = "	INSERT INTO tiliointi SET
@@ -133,7 +147,9 @@
 							valkoodi	= '$tiliointi1_row[valkoodi]'";
 				$result = pupe_query($query);
 
-				$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";
+				$query = "	UPDATE suoritus
+							SET kohdpvm = '$tapvm'
+							WHERE tunnus = '$suoritus_row[tunnus]'";
 				$result = pupe_query($query);
 			}
 		}
@@ -148,7 +164,10 @@
 	}
 
 	if ($tila == 'komm') {
-		$query = "UPDATE suoritus set viesti = '$komm' WHERE tunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
+		$query = "	UPDATE suoritus
+					SET viesti = '$komm'
+					WHERE tunnus = '$tunnus'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$tila = 'tarkenna';
 	}
@@ -231,8 +250,9 @@
 
 			$query = "	SELECT *
 						FROM suoritus
-						WHERE tunnus = '$tunnus'
-						and yhtio = '$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kohdpvm	= '0000-00-00'
+						and tunnus  = '$tunnus'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -286,8 +306,14 @@
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio AND tiliointi.tunnus = suoritus.ltunnus AND tiliointi.korjattu = '')
 					LEFT JOIN tili ON (tili.yhtio = suoritus.yhtio and tili.tilino = tiliointi.tilino)
 					LEFT JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
-					WHERE suoritus.tunnus = $tunnus AND suoritus.yhtio = '$kukarow[yhtio]'";
+					WHERE suoritus.yhtio = '$kukarow[yhtio]'
+					AND suoritus.kohdpvm = '0000-00-00'
+					AND suoritus.tunnus  = $tunnus";
 		$result = pupe_query($query);
+
+		echo "	<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<input type = 'hidden' name='tila' value='komm'>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -330,20 +356,14 @@
 			echo "</tr>";
 		}
 
-		echo "</table>";
-
 		// Mahdollisuus muuttaa viestiä
-		echo "	<form action = '$PHP_SELF' method='post'>
-				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<input type = 'hidden' name='tila' value='komm'>
-				<table>
-					<tr>
-						<th>".t("Lisää kommentti suoritukselle")."</th>
-						<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-						<td class='back'><input type = 'submit' value = '".t("Lisää")."'></td>
-					</tr>
-				</table>
-				</form><br>";
+		echo "<tr>
+			<th>".t("Lisää kommentti suoritukselle")."</th>
+			<td colspan='4'><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
+			<td class='back'><input type = 'submit' value = '".t("Lisää")."'></td>
+			</tr>";
+
+		echo "</table></form><br>";
 
 		foreach ($haku as $key => $value) {
 			$old   = array("[","{","\\","|","]","}");
@@ -357,10 +377,21 @@
 			$ulisa .= "&haku[$key]=".urlencode($siivottu);
 		}
 
+		if (!isset($poisetsi)) {
+			$asiakasrajaus = " and asiakas.laji != 'P' ";
+			$petsichk = "";
+		}
+		else {
+			$asiakasrajaus = "";
+			$petsichk = "CHECKED";
+		}
+
 		//haetaan omat asiakkaat
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
+					and laji != 'R'
+					$asiakasrajaus
 					$lisa
 					ORDER BY nimi";
 		$result = pupe_query($query);
@@ -371,78 +402,86 @@
 		echo "<tr>";
 
 		echo "<th>".t("ytunnus")."	<br><input type='text' name = 'haku[ytunnus]' value = '$haku[ytunnus]' size='15'></th>";
-		echo "<th>".t("nimi")."		<br><input type='text' name = 'haku[nimi]'    value = '$haku[nimi]' size='15'></th>";
+		echo "<th>".t("nimi")."		<br><input type='text' name = 'haku[nimi]'    value = '$haku[nimi]' size='25'></th>";
 		echo "<th>".t("postino")."	<br><input type='text' name = 'haku[postino]' value = '$haku[postino]' size='8'></th>";
 		echo "<th>".t("postitp")."	<br><input type='text' name = 'haku[postitp]' value = '$haku[postitp]' size='12'></th>";
 		echo "<th valign='top'>".t("avoimia")."<br>".t("laskuja")."</th>";
 		echo "<th valign='top'>".t("saamisettili")."</th>";
-		echo "<th valign='bottom'><input type='submit' value = '".t("Etsi")."'></th>";
+		echo "<td class='back'><input type='submit' value = '".t("Etsi")."'>";
+		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi myös poistettuja asiakkaita")."";
+		echo "</td>";
 		echo "</tr>";
 
 		echo "</form>";
 
-		while ($trow = mysql_fetch_assoc ($result)) {
+		if (mysql_num_rows($result) > 0) {
 
-			echo "<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='tila' value='kohdista'>
-					<input type='hidden' name='atunnus' value='$trow[tunnus]'>
-					<input type='hidden' name='tunnus' value='$tunnus'>";
+			while ($trow = mysql_fetch_assoc ($result)) {
 
-			echo "<tr>";
-			echo "<td valign='top'>$trow[ytunnus]</td>";
-			echo "<td valign='top'><a href='myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////tunnus=$tunnus//tila=tarkenna'>$trow[nimi] $trow[nimitark]</a><br>$trow[toim_nimi] $trow[toim_nimitark]</td>";
-			echo "<td valign='top'>$trow[postino]<br>$trow[toim_postino]</td>";
-			echo "<td valign='top'>$trow[postitp]<br>$trow[toim_postitp]</td>";
+				echo "<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='tila' value='kohdista'>
+						<input type='hidden' name='atunnus' value='$trow[tunnus]'>
+						<input type='hidden' name='tunnus' value='$tunnus'>";
 
-			// Onko asiakkaalla avoimia laskuja
-			$query = "	SELECT count(*) maara
-						FROM lasku USE INDEX (yhtio_tila_mapvm)
-						WHERE yhtio = '$kukarow[yhtio]'
-						and mapvm = '0000-00-00'
-						and tila = 'U'
-						and (ytunnus = '$trow[ytunnus]' or nimi = '$trow[nimi]' or liitostunnus = '$trow[tunnus]')";
-			$lresult = pupe_query($query);
-			$lasku = mysql_fetch_assoc ($lresult);
+				echo "<tr>";
+				echo "<td valign='top'>$trow[ytunnus]</td>";
+				echo "<td valign='top'><a href='myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////tunnus=$tunnus//tila=tarkenna'>$trow[nimi] $trow[nimitark]</a><br>$trow[toim_nimi] $trow[toim_nimitark]</td>";
+				echo "<td valign='top'>$trow[postino]<br>$trow[toim_postino]</td>";
+				echo "<td valign='top'>$trow[postitp]<br>$trow[toim_postitp]</td>";
 
-			echo "<td valign='top'>$lasku[maara]</td>";
+				// Onko asiakkaalla avoimia laskuja
+				$query = "	SELECT count(*) maara
+							FROM lasku USE INDEX (yhtio_tila_mapvm)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and mapvm = '0000-00-00'
+							and tila = 'U'
+							and (ytunnus = '$trow[ytunnus]' or nimi = '$trow[nimi]' or liitostunnus = '$trow[tunnus]')";
+				$lresult = pupe_query($query);
+				$lasku = mysql_fetch_assoc ($lresult);
 
-			$sel1 = '';
-			$sel2 = '';
-			$sel3 = '';
-			$sel4 = '';
-			$sel5 = '';
+				echo "<td valign='top'>$lasku[maara]</td>";
 
-			if ($suoritus['ttilino'] == $yhtiorow["myyntisaamiset"]) {
-				$sel1 = "selected";
+				$sel1 = '';
+				$sel2 = '';
+				$sel3 = '';
+				$sel4 = '';
+				$sel5 = '';
+
+				if ($suoritus['ttilino'] == $yhtiorow["myyntisaamiset"]) {
+					$sel1 = "selected";
+				}
+				if ($suoritus['ttilino'] == $yhtiorow['factoringsaamiset']) {
+					$sel2 = "selected";
+				}
+				if ($suoritus['ttilino'] == $yhtiorow["selvittelytili"]) {
+					$sel3 = "selected";
+				}
+				if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
+					$sel4 = "selected";
+				}
+				if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
+					$sel5 = "selected";
+				}
+
+				echo "<td valign='top'><select name='vastatili'>";
+				echo "<option value='$yhtiorow[myyntisaamiset]' $sel1>"		.t("Myyntisaamiset").		" ($yhtiorow[myyntisaamiset])</option>";
+				echo "<option value='$yhtiorow[factoringsaamiset]' $sel2>"	.t("Factoringsaamiset").	" ($yhtiorow[factoringsaamiset])</option>";
+
+				if ($suoritus["oletus_selvittelytili"] != "") {
+					echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
+				}
+				if ($trow['konserniyhtio'] != "") {
+					echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
+				}
+				echo "</select></td>";
+
+				echo "<td class='back' valign='top'><input type='submit' value='".t("kohdista")."'></td>";
+				echo "</tr>";
+				echo "</form>";
 			}
-			if ($suoritus['ttilino'] == $yhtiorow['factoringsaamiset']) {
-				$sel2 = "selected";
-			}
-			if ($suoritus['ttilino'] == $yhtiorow["selvittelytili"]) {
-				$sel3 = "selected";
-			}
-			if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
-				$sel4 = "selected";
-			}
-			if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
-				$sel5 = "selected";
-			}
-
-			echo "<td valign='top'><select name='vastatili'>";
-			echo "<option value='$yhtiorow[myyntisaamiset]' $sel1>"		.t("Myyntisaamiset").		" ($yhtiorow[myyntisaamiset])</option>";
-			echo "<option value='$yhtiorow[factoringsaamiset]' $sel2>"	.t("Factoringsaamiset").	" ($yhtiorow[factoringsaamiset])</option>";
-
-			if ($suoritus["oletus_selvittelytili"] != "") {
-				echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
-			}
-			if ($trow['konserniyhtio'] != "") {
-				echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
-			}
-			echo "</select></td>";
-
-			echo "<td valign='top'><input type='submit' value='".t("kohdista")."'></td>";
-			echo "</tr>";
-			echo "</form>";
+		}
+		else {
+			echo "<tr><td colspan='6'>".t("Haulla ei löytynyt yhtään asiakasta")."!</td></tr>";
 		}
 
 		echo "</table>";
@@ -454,14 +493,13 @@
 
 		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
 
-		$query = "	SELECT distinct suoritus.tilino, nimi, yriti.valkoodi
-					FROM suoritus, yriti
+		$query = "	SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
+					FROM suoritus
+					JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 					WHERE suoritus.yhtio = '$kukarow[yhtio]'
-					AND kohdpvm = '0000-00-00'
-					and yriti.yhtio=suoritus.yhtio
-					and yriti.tilino=suoritus.tilino
+					AND suoritus.kohdpvm = '0000-00-00'
 					$lisa
-					ORDER BY nimi";
+					ORDER BY yriti.nimi";
 		$result = pupe_query($query);
 
 		echo "<table>";

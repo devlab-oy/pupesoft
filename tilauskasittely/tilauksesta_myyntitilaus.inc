@@ -435,7 +435,7 @@
 				}
 
 				if ($kopioi_paikat != "") {
-					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
+					$paikka	= $coprivirow['hyllyalue']."#!°!#".$coprivirow['hyllynro']."#!°!#".$coprivirow['hyllyvali']."#!°!#".$coprivirow['hyllytaso'];
 				}
 				else {
 					$paikka	= "";
@@ -449,7 +449,7 @@
 
 				if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
 					// Otetaan paikka is‰lt‰ aina kun on tehdaslis‰varuste!
-					$query = "	SELECT concat_ws('#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+					$query = "	SELECT concat_ws('#!°!#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '".$isaok[$coprivirow['perheid2']]."'";
@@ -601,7 +601,7 @@
 			}
 
 			//Jos kyseess‰ on laskutettava myyntitili
-			if($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") {
+			if ($monistarow["tila"] == "G" and $monistarow["alatila"] == "V" and $monistarow["tilaustyyppi"] == "M") {
 				// P‰ivitet‰‰n kopsatun laskun eilahetett‰ kentt‰‰
 				$query = "	UPDATE lasku
 							SET eilahetetta = 'o'
@@ -615,7 +615,9 @@
 							and yhtio = '$kukarow[yhtio]'";
 				$result  	= pupe_query($query);
 				$laskurow   = mysql_fetch_array($result);
-
+				
+				$tilausvalmiskutsuja = "MYYNTITILI";
+				
 				require("tilaus-valmis.inc");
 			}
 

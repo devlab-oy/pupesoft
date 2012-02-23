@@ -44,7 +44,12 @@
 	// postiennakko
 	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
 		$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
-		$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		if ($yhtiorow["pankkiiban1"] != '') {
+			$postiennakkotilino = "$yhtiorow[pankkiiban1]";
+		}
+		else {
+			$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		}
 		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
 		$postiennakkoviite  = "$viite";
 	}
@@ -115,11 +120,15 @@
 	$kuljetus  	= "";
 	$keku 		= "16";
 
-	if (strpos($selite_chk, "9")     !== FALSE) $keku = "9";
-	if (strpos($selite_chk, "00")    !== FALSE) $keku = "00";
-	if (strpos($selite_chk, "14")    !== FALSE) $keku = "14";
-	if (strpos($selite_chk, "21")    !== FALSE) $keku = "21";
-	if (strpos($selite_chk, "00/16") !== FALSE) $keku = "00/16";
+	if (strpos($selite_chk, "9")     !== FALSE) 				$keku = "9";
+	if (strpos($selite_chk, "00")    !== FALSE) 				$keku = "00";
+	if (strpos($selite_chk, "14")    !== FALSE) 				$keku = "14";
+	if (strpos($selite_chk, "21")    !== FALSE) 				$keku = "21";
+	if (strpos($selite_chk, "00/16") !== FALSE) 				$keku = "00/16";
+	if (strpos($selite_chk, "Customer Return") !== FALSE) 		$keku = "ASIAKASPALAUTUS 14";
+	if (strpos($selite_chk, "Undelivered Shipment") !== FALSE) 	$keku = "UNDELIVERED SHIPMENT";
+	if (strpos($selite_chk, "Lisäarvokuljetus") !== FALSE) 		$keku = "LISÄARVOKULJETUS";
+	if (strpos($selite_chk, "Priority Ulkomaa") !== FALSE) 		$keku = "PRIORITY ULKOMAA";
 
 	// Jos on vaarallisia aineita, niin tulostetaan aina VAK/ADR-kortti
 	if (count($vakit) > 0) {
@@ -141,6 +150,7 @@
 	#VAK/ADR 					2W2116
 	#Lisäarvokuljetus  			2W2150
 	#Asiakaspalautus 14			2W2108
+	#Priority Ulkomaa			2W2015
 
 	switch ($keku) {
 		case "00":
@@ -178,6 +188,14 @@
 		case "ASIAKASPALAUTUS 14":
 			$tuoteviiva1="2W2108";
 			$tuoteviiva2=">62W>52108";
+			break;
+		case "UNDELIVERED SHIPMENT":
+			$tuoteviiva1="2W2108";
+			$tuoteviiva2=">62W>52108";
+			break;
+		case "PRIORITY ULKOMAA":
+			$tuoteviiva1="2W2015";
+			$tuoteviiva2=">62W>52015";
 			break;
 	}
 
@@ -221,6 +239,14 @@
 				$tuoteviiva1="2W2147";
 				$tuoteviiva2=">62W>52147";
 				break;
+			case "UNDELIVERED SHIPMENT":
+				$tuoteviiva1="2W2147";
+				$tuoteviiva2=">62W>52147";
+				break;
+			case "PRIORITY ULKOMAA":
+				$tuoteviiva1="2W2015";
+				$tuoteviiva2=">62W>52015";
+				break;
 		}
 	}
 
@@ -240,6 +266,11 @@
 	else {
 		$rahdinmaksaja		= "Maksaja muu kuin lähettäjä. ";
 		$rahdinmaksajan_nr 	= "";
+	}
+
+	// Ulkomaan lähetykissä tarvitaan myös nelinumeroinen, asiakaskohtainen tunnushallintanumero
+	if (strpos($toitarow['sopimusnro'], "@") !== FALSE) {
+		list($toitarow['sopimusnro'], $toitarow['tunhalnro']) = explode("@", $toitarow['sopimusnro']);
 	}
 
 	$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä

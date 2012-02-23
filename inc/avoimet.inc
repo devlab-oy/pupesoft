@@ -598,7 +598,7 @@
 			$karhuja = (int) $karhuja;
 
             // Halutaanko vain luottovakuutetut asiakkaat
-            $luottovakuutuslisa = ($luottovakuutettu == "K") ? "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.laji != 'P' and asiakas.luottovakuutettu = 'K')" : "";
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? " JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = 'K') " : "";
 
 			if ($karhuja > 0) {
 
@@ -844,14 +844,15 @@
 							suoritus.summa * -1 summa,
 							suoritus.valkoodi
 					  		FROM suoritus
-							JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino	in ($tili))
+							JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili))
 					  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $lisa3)
-					  		WHERE suoritus.yhtio = '$kukarow[yhtio]'
-							and kirjpvm <= '$pvm'
-							and kohdpvm  = '0000-00-00'
+					  		WHERE suoritus.yhtio  = '$kukarow[yhtio]'
+							and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$pvm')
+							and suoritus.ltunnus  > 0
+							and suoritus.kirjpvm <= '$pvm'
 							$lisa2
 							$valkoodi2
-					  		ORDER BY ytunnus";
+					  		ORDER BY asiakas.ytunnus";
 				$result = pupe_query($query);
 
 				while ($trow = mysql_fetch_assoc ($result)) {

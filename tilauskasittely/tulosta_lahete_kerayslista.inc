@@ -204,6 +204,9 @@ if (!function_exists('alku_kerayslista')) {
 			elseif ($tyyppi == "REKLAMAATIO") {
 				$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
+			elseif ($tyyppi == "MYYNTITILI") {
+				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);
+			}			
 			else {
 				$pdf->draw_text(310,815, t("Keräyslista", $kieli), 		$thispage, $iso);
 			}
@@ -532,6 +535,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		elseif ($tyyppi == "REKLAMAATIO") {
 			$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 		}
+		elseif ($tyyppi == "MYYNTITILI") {
+			$pdf->draw_text(310,815, t("Myyntitili", $kieli), 				$thispage, $iso);
+		}		
 		else {
 			$pdf->draw_text(310,815, t("Keräyslista", $kieli), 				$thispage, $iso);
 		}
@@ -813,6 +819,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus in ($perherow[tunnukset])
+									AND tilausrivi.tyyppi != 'D'
 									and tilausrivi.perheid = '$row[perheid]'
 									ORDER BY tilausrivi.tunnus";
 						$perheresult = mysql_query($query) or pupe_error($query);
@@ -949,7 +956,7 @@ if (!function_exists('rivi_kerayslista')) {
 						$pdf->draw_text(465-$oikpos, $kala, $rivipaikkahyllyssa,	$thispage, $norm);
 					}
 
-					if ($tyyppi == "SIIRTOLISTA") {
+					if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 						list(, $kohde_hyllyssa, ) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["clearing"]);
 					}
 				}
@@ -984,7 +991,7 @@ if (!function_exists('rivi_kerayslista')) {
 				list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
 				$pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 
-				if ($tyyppi == "SIIRTOLISTA") {
+				if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 					$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 	$thispage, $norm);
 				}
 
@@ -1024,7 +1031,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 				//Haetan sarjanumeron tiedot
 				if ($row["sarjanumeroseuranta"] != "") {
-					if ($tyyppi == "SIIRTOLISTA") {
+					if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 						$sarjanutunnus = "siirtorivitunnus";
 					}
 					elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
@@ -1125,10 +1132,7 @@ if (!function_exists('loppu_kerayslista')) {
 		}
 		else {
 			// yhtiötiedot
-			$y_puhelin		= $yhtiorow['puhelin'];
-			$y_fax			= $yhtiorow['fax'];
-			$y_email		= $yhtiorow['email'];
-			$y_www			= $yhtiorow['www'];
+			$y_tiedot_ok	= FALSE;
 			$y_nimi 		= $laskurow["yhtio_nimi"];
 			$y_osoite 		= $laskurow["yhtio_osoite"];
 			$y_postino	 	= $laskurow["yhtio_postino"];
@@ -1136,33 +1140,55 @@ if (!function_exists('loppu_kerayslista')) {
 			$y_maa 			= $laskurow["yhtio_maa"];
 			$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
 			$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+			$y_iban 		= $yhtiorow['pankkiiban1'];
+			$y_swift 		= $yhtiorow['pankkiswift1'];
 
 			if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
 				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
-					// haetaan toimipaikan tiedot
 					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_tiedot_ok	= TRUE;
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
 					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
 				}
 			}
 
 			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 			if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
 				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
-					// haetaan toimipaikan tiedot
 					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_tiedot_ok	= TRUE;
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
 					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
+
+			// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+			if (!$y_tiedot_ok) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
 				}
 			}
 
@@ -1251,6 +1277,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				$kutsu = t("Reklamaatio/Purkulista", $kieli);
 				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 			}
+			elseif ($tyyppi == "MYYNTITILI") {
+				$kutsu = t("Myyntitili", $kieli);
+				echo t("Myyntitili tulostuu")."...<br>";
+			}			
 			else {
 				$kutsu = t("Keräyslista", $kieli).": $laskurow[tunnus]";
 				echo t("Keräyslista tulostuu")."...<br>";
@@ -1286,6 +1316,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 					$kutsu = t("Reklamaatio/Purkulista", $kieli);
 					echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 				}
+				elseif ($tyyppi == "MYYNTITILI") {
+					$kutsu = t("Myyntitili", $kieli);
+					echo t("Myyntitili tulostuu")."...<br>";
+				}							
 				else {
 					$kutsu = t("Keräyslista", $kieli);
 					echo t("Keräyslista tulostuu")."...<br>";

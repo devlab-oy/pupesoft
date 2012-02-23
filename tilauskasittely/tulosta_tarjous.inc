@@ -1343,8 +1343,8 @@ if (!function_exists('loppu_tarjous')) {
 				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
 
 				$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa", $kieli)." ".$voimassa." ". t("saakka", $kieli).". ".t("Maksuehtomme on")." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
-				$pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen")."!", $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(30,  $kuha-80, t("Kunnioittavasti").",", $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen", $kieli)."!", $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(30,  $kuha-80, t("Kunnioittavasti", $kieli).",", $page_tarjous[$sivu], $boldi);
 
 				$query  = "	SELECT *
 				            from kuka
@@ -1359,7 +1359,7 @@ if (!function_exists('loppu_tarjous')) {
 				}
 
 				$pdf_tarjous->draw_text(30,  $kuha-93, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(217, $kuha-93, "Puh: $myyrow[puhno]", $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(217, $kuha-93, t("Puh", $kieli).": ". $myyrow['puhno'], $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(404, $kuha-93, "Email: $myyrow[eposti]", $page_tarjous[$sivu], $boldi);
 			}
 		}

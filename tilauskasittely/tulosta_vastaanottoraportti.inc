@@ -4,20 +4,20 @@
 	// sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 	require_once('pdflib/phppdflib.class.php');
 
-	$norm["height"] 			= 10;
-	$norm["font"] 				= "Helvetica";
-
-	$pieni["height"] 			= 8;
-	$pieni["font"] 				= "Helvetica";
-
-	$pieniboldi["height"] 		= 8;
-	$pieniboldi["font"]			= "Helvetica-Bold";
-
-	$boldi2["height"] 			= 14;
-	$boldi2["font"]				= "Helvetica-Bold";
-
-	$rectparam["width"] 		= 1;
-	$rectparam2["width"] 		= 0.5;
+	$norm["height"] 	  = 10;
+	$norm["font"] 		  = "Helvetica";
+                          
+	$pieni["height"] 	  = 8;
+	$pieni["font"] 		  = "Helvetica";
+                          
+	$pieniboldi["height"] = 8;
+	$pieniboldi["font"]	  = "Helvetica-Bold";
+                          
+	$boldi2["height"] 	  = 14;
+	$boldi2["font"]		  = "Helvetica-Bold";
+                          
+	$rectparam["width"]   = 1;
+	$rectparam2["width"]  = 0.5;
 
 	$pdf = new pdffile;
 	$pdf->set_default('margin-top', 	0);
@@ -86,17 +86,7 @@
 			fclose($fh);
 
 			//itse print komento tulee valitse_tulosin.inciltä...
-			if ($komento["Vastaanottoraportti"] == 'email') {
-				$liite = $pdffilenimi;
-
-				$kutsu = "Vastaanottoraportti";
-
-				if (@include("../inc/sahkoposti.inc"));
-				elseif (@include("inc/sahkoposti.inc"));
-				else include("sahkoposti.inc");
-
-			}
-			elseif ($tee == 'vastaanottoraportinkopio') {
+			if ($komento["Vastaanottoraportti"] == 'email' or $tee == 'vastaanottoraportinkopio') {
 				$liite = $pdffilenimi;
 
 				$kutsu = "Vastaanottoraportti";

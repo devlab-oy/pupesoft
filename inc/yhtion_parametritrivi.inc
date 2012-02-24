@@ -74,6 +74,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 'A') {
 			$sel1 = "selected";
@@ -81,9 +82,13 @@
 		if ($trow[$i] == 'K') {
 			$sel2 = "selected";
 		}
+		if ($trow[$i] == 'B') {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
 		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -15337,13 +15337,12 @@ if (!function_exists("tee_keraysera2")) {
 
 				if ($debug) echo "juokseva_nro $juokseva_nro > käyttäjän max_keraysera_alustat $kukarow[max_keraysera_alustat]<br>";
 
-				// if (($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) or ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat'])) {
-				if ($juokseva_nro > $kukarow['max_keraysera_alustat']) {
-					if ($debug and (($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat']))) {
+				if (((int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit']) or ((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
+					if ($debug and (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat']))) {
 						echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>";
 					}
 
-					if ($debug and $rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+					if ($debug and (int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit']) {
 						echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
 					}
 

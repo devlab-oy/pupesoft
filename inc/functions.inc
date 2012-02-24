@@ -14796,7 +14796,7 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
-		$fixed_main_array = array();
+		$fixed_main_array = $fixed_main_prio_array = array();
 
 		reset($kerailyniput);
 
@@ -14806,6 +14806,7 @@ if (!function_exists("tee_keraysera2")) {
 			if ($debug) echo "<pre>",var_dump($nippux),"</pre>";
 			foreach ($nippux as $indx => $med) {
 				$fixed_main_array[$indx] = $kerailyniput_key[$indx];
+				$fixed_main_prio_array[$kerailyniput_key[$indx]] = array('prioriteetti' => $pri, 'indeksi' => $indx);
 			}
 		}
 
@@ -14827,8 +14828,18 @@ if (!function_exists("tee_keraysera2")) {
 
 									$backup_array = array();
 									$backup_array[$key] = $fixed_main_array[$key];
-									unset($fixed_main_array[$key]);
-									$fixed_main_array = $backup_array;
+//									unset($fixed_main_array[$key]);
+
+									$fixed_main_array = array();
+
+									foreach ($fixed_main_prio_array as $nippu_z => $nipun_tiedot) {
+										if ($nipun_tiedot['prioriteetti'] < $fixed_main_prio_array[$backup_array[$key]]) {
+											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
+										}
+									}
+
+									$fixed_main_array[$key] = $backup_array[$key];
+									//$fixed_main_array = $backup_array;
 
 									if ($debug) echo "Huijataan ker‰ysvyˆhykkeen pinta-ala rajoitusta!<br>Vanha pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br>";
 									// huijataan pinta-alaa jos valitaan "Yksin er‰‰n"-alusta. 1,5 kertainen yksin ker‰‰n alustan verran.

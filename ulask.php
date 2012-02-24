@@ -134,7 +134,7 @@ if ($tee == 'poistalasku') {
 	$tee = '';
 
 	if ($boob === FALSE) {
-		echo t("Virhe: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
+		echo t("VIRHE: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
 	}
 	else {
 		unlink($skannatut_laskut_polku.$skannattu_lasku);

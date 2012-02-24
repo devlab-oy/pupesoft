@@ -201,7 +201,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 }
 
 if ($tee == 'LUO' and (trim($tilinumero) == '' or trim($annettuvuosi) == '')) {
-	echo "<font class='error'>".t("Virhe: Joko tiedosto puuttui, tilinumero puuttui tai vuosi puuttui")."!</font>";
+	echo "<font class='error'>".t("VIRHE: Joko tiedosto puuttui, tilinumero puuttui tai vuosi puuttui")."!</font>";
 	unset($tee);
 }
 
@@ -215,7 +215,7 @@ if ($tee == "synkronoi") {
 	$tilires = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tilires) == 0) {
-		echo "<font class='error'>".t("Virhe: Ulkomaanpäivärahojen tilinumero puuttuu")."!</font><br>";
+		echo "<font class='error'>".t("VIRHE: Ulkomaanpäivärahojen tilinumero puuttuu")."!</font><br>";
 		$tee = '';
 	}
 
@@ -227,7 +227,7 @@ if ($tee == "synkronoi") {
 	$tilires = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tilires) == 0) {
-		echo "<font class='error'>".t("Virhe: Kotimaanpäivärahojen tilinumero puuttuu")."!</font><br>";
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahojen tilinumero puuttuu")."!</font><br>";
 		$tee = '';
 	}
 }

@@ -48,7 +48,7 @@
 		$pvmloppu = date("Y-m-d", mktime(0, 0, 0, $kk2, $pp2, $vv2));
 	}
 	else {
-		echo "<font class='error'>".t("Virhe: P‰iv‰m‰‰riss‰ ongelmia")."!</font><br><br>";
+		echo "<font class='error'>".t("VIRHE: P‰iv‰m‰‰riss‰ ongelmia")."!</font><br><br>";
 		$tee = "";
 	}
 

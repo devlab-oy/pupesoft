@@ -88,21 +88,23 @@
 		$filenimi = "/tmp/sahantera_tulostus.txt";
 		$hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
+		// Mitat tulee olla millimetrej‰, metrein‰ kannassa. Syvyys yhdell‰ desimaalilla, muut ilman desimaalia.
+		$mitat = round($trow["tuotekorkeus"] * 1000, 0)." x ".round($trow["tuoteleveys"] * 1000, 0)." x ".round($trow["tuotesyvyys"] * 1000, 1);
+
+		// Splitataan tuotteen nimitys spacesta
 		$nimitys = split(" ", $trow["nimitys"]);
 
-		$out = chr(10).chr(10).chr(10).chr(10); 	// 5 rivilt‰ aloitetaan tulostus
-		$out .= sprintf ('%6s', ' ');				// 4 merkki‰ alusta niin saadaan oikeaan kohtaan aloittamaan tulostus.
-		$out .= sprintf ('%-9s', $nimitys[1]); 		// Halutaan nimityksest‰ toka sana. :/
-		$out .= sprintf ('%1s', ' ');
-		$out .= sprintf ('%-24s', round($trow["tuotekorkeus"],0)." x ".round($trow["tuoteleveys"],0)." x ".round($trow["tuotesyvyys"],2)); // pituus, leveys, paksuus = korkeus, leveys, syvyys
-		$out .= sprintf ('%2s', ' ');
-		$out .= sprintf ('%-8s', $hammastus);		// hammastus, avainsanoista. 2 vaihtoehtoa: (3/4) tuumakoko, (16) mm-koko, hampaita tuumalle
-		$out .= chr(10).chr(10);
-		$out .= chr(13);
-		$out .= sprintf ('%16s', ' ');				// 16 merkki‰ alusta niin saadaan "nimitys / tuoteno" oikeaan paikkaan.
-		$out .= sprintf ('%-24s', $trow["tuoteno"]);
-		$out .= chr(10).chr(13);
-		$out .= chr(12);
+		$out = chr(10).chr(10).chr(10).chr(10); 		// 5 rivinvaihtoa (Line feed)
+		$out .= sprintf ('%6s', ' ');					// 6 spacea
+		$out .= sprintf ('%-9.9s', $nimitys[1]); 		// Nimityksest‰ toka sana, max 9 merkki‰
+		$out .= sprintf ('%1s', ' ');					// 1 space
+		$out .= sprintf ('%-25.25s', $mitat); 			// Pituus x leveys x paksuus, max 25 merkki‰
+		$out .= sprintf ('%1s', ' ');					// 1 space
+		$out .= sprintf ('%-12.12s', $hammastus);		// Hammastus, max 12 merkki‰
+		$out .= chr(10).chr(10).chr(13);				// 2 rivinvaihtoa (Line feed) + 1 Carriage return (= siirret‰‰n kirjoitusp‰‰ rivin alkuun)
+		$out .= sprintf ('%16s', ' ');					// 16 spacea
+		$out .= sprintf ('%-40.40s', $trow["tuoteno"]);	// Tuotenumero, max 40 merkki‰
+		$out .= chr(13).chr(12);						// Carriage return + Form feed
 
 		$boob = file_put_contents($filenimi, $out);
 

@@ -270,7 +270,7 @@ if ($tee == 'KARHUA')  {
 			        FROM kalenteri
 			        WHERE yhtio = '$kukarow[yhtio]'
 			        AND tyyppi  = 'Myyntireskontraviesti'
-			        AND liitostunnus = $astun
+			        AND liitostunnus = '$astun'
 			        AND yhtio   = '$kukarow[yhtio]'
 					ORDER BY tunnus desc
 					LIMIT 1";

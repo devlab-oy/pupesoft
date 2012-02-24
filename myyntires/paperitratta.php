@@ -433,7 +433,7 @@
 			if($kirow["komento"] == "email") {
 				$liite = $pdffilenimi;
 				$kutsu = "Tratta ".$asiakastiedot["ytunnus"];
-				echo t("Tratta l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n<br>";
+				echo t("Tratta l‰hetet‰‰n osoitteeseen")."  $kukarow[eposti]...\n<br>";
 
 				require("inc/sahkoposti.inc");
 			}

@@ -1111,7 +1111,7 @@
 				$laskurow["ykpl3"] = $laskurow["kpl3"] + $laskurow["e_kpl3"] + $kulutrow["kpl3"];
 				$laskurow["ykpl4"] = $laskurow["kpl4"] + $laskurow["e_kpl4"] + $kulutrow["kpl4"];
 
-				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa m‰‰ritelty jo aiemmin!
+				//tilauksessa, ennakkopoistot ja jt	HUOM: varastolisa m‰‰ritelty jo aiemmin!
 				$query = "	SELECT
 							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
 							sum(if(tyyppi = 'O', varattu, 0)) tilattu,

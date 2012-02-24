@@ -14964,6 +14964,8 @@ if (!function_exists("tee_keraysera2")) {
 			$pisin_tuote = array();
 			$pisin_tuote_per_asiakas = array();
 
+			$skipattavien_lapsien_lkm = 0;
+
 			$ohjausmerkki = array();
 			$query = "SELECT tunnus, LOWER(TRIM(ohjausmerkki)) AS ohjausmerkki FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilaukset})";
 			$ohjausmerkki_res = pupe_query($query);
@@ -15008,8 +15010,6 @@ if (!function_exists("tee_keraysera2")) {
 
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
 
-				$inner_main_array[] = $tuoterow;
-
 				if ($tuoterow['perheid'] > 0 and $tuoterow['perheid'] != $tuoterow['tunnus']) {
 
 					$query = "SELECT tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tuoterow['perheid']}'";
@@ -15026,9 +15026,12 @@ if (!function_exists("tee_keraysera2")) {
 					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
 					if ($ohita_kerays_chk_row['ohita_kerays'] != '') {
+						$skipattavien_lapsien_lkm++;
 						continue;
 					}
 				}
+
+				$inner_main_array[] = $tuoterow;
 
 				if (!isset($pisin_tuote[$tuoterow['tuoteno']]['koko'])) $pisin_tuote[$tuoterow['tuoteno']]['koko'] = 0;
 
@@ -15234,7 +15237,7 @@ if (!function_exists("tee_keraysera2")) {
 			}
 
 			mysql_data_seek($tuoteres, 0);
-			$max_tuoterivit = mysql_num_rows($tuoteres);
+			$max_tuoterivit = mysql_num_rows($tuoteres) - $skipattavien_lapsien_lkm;
 			$ii = 1;
 
 			$ed_ohjausmerkki = '种种种种种种种种';

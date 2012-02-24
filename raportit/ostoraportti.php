@@ -74,19 +74,13 @@
 
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
-		// ABC luokkanimet
-		$ryhmanimet = $ryhmaprossat = array();
+		// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
+		$org_rajaus = $abcrajaus;
+		list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
-		$query = "	SELECT DISTINCT luokka, osuusprosentti
-					FROM abc_parametrit
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY osuusprosentti DESC";
-		$luokka_res = pupe_query($query);
+		if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
-		while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
-			$ryhmanimet[] = $luokka_row['luokka'];
-			$ryhmaprossat[] = $luokka_row['osuusprosentti'];
-		}
+		list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 		// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
 		if ($yhtiorow["varaako_jt_saldoa"] != "") {
@@ -1891,51 +1885,61 @@
 			echo "<table>";
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
-					// katotaan onko abc aputaulu rakennettu
-					$query  = "SELECT count(*) FROM abc_aputaulu WHERE yhtio='$kukarow[yhtio]' AND tyyppi IN ('TK','TR','TP')";
-					$abcres = mysql_query($query) or pupe_error($query);
-					$abcrow = mysql_fetch_array($abcres);
+			echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
-					// jos on niin näytetään tällänen vaihtoehto
-					if ($abcrow[0] > 0) {
-						echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+			echo "<select name='abcrajaus' onchange='submit()'>";
+			echo "<option  value=''>".t("Valitse yksi")."</option>";
 
-						$sel = array();
-						$sel[$abcrajaus] = "SELECTED";
+			$sel1 = $sel2 = $sel3 ="";
 
-						echo "<select name='abcrajaus'>
-						<option value=''>Ei rajausta</option>
-						<option $sel[0] value='0'>Luokka A-30</option>
-						<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-						<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-						<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-						<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-						<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-						<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-						<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-						<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
-						</select>";
+			for ($i=0; $i < count($ryhmaprossat); $i++) { 
+				if ($i !=0) $teksti = t("ja paremmat"); 
+				if ($org_rajaus == "{$i}##TK") {
+					$sel1 = "SELECTED";
+				}
+				else {
+					$sel1 ="";
+				}
+				echo "<option  value='$i##TK' $sel1>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+			$teksti="";
 
-						$sel = array();
-						$sel[$abcrajaustapa] = "SELECTED";
+			for ($i=0; $i < count($ryhmaprossat); $i++) { 
+				if ($i !=0) $teksti = t("ja paremmat"); 
+				if ($org_rajaus == "{$i}##TR") {
+					$sel2 = "SELECTED";
+				}
+				else {
+					$sel2 ="";
+				}
+				echo "<option  value='$i##TR' $sel2>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+			$teksti="";
 
-						echo "<select name='abcrajaustapa'>
-						<option $sel[TK] value='TK'>Myyntikate</option>
-						<option $sel[TR] value='TR'>Myyntirivit</option>
-						<option $sel[TP] value='TP'>Myyntikappaleet</option>
-						</select>";
+			for ($i=0; $i < count($ryhmaprossat); $i++) { 
+				if ($i !=0) $teksti = t("ja paremmat"); 
+				if ($org_rajaus == "{$i}##TP") {
+					$sel3 = "SELECTED";
+				}
+				else {
+					$sel3 ="";
+				}
+				echo "<option  value='$i##TP' $sel3>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+			}
 
-						$sel = array();
-						$sel[$abcrajausluokka] = "SELECTED";
+			echo "</select>";
 
-						echo "<select name='abcrajausluokka'>
-						<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>
-						<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>
-						<option {$sel['try']} value='try'>",t("Tuoteryhmän luokka"),"</option>
-						<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>
-						</select>
-						</td></tr>";
-					}
+			$sel = array();
+			$sel[$abcrajausluokka] = "SELECTED";
+
+			echo "<select name='abcrajausluokka'>";
+			echo "<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>";
+			echo "<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>";
+			echo "<option {$sel['try']} value='try'>",t("Tuoteryhmän luokka"),"</option>";
+			echo "<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>";
+			echo "</select>";
+			echo "</td></tr>";
+
 
 			echo "<tr><td colspan='2' class='back'><br></td></tr>";
 			echo "<tr><td colspan='2' class='back'>".t("Valitse jos haluat tulostaa asiakaan myynnit").":</td></tr>";

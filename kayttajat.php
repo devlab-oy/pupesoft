@@ -748,7 +748,7 @@
 
 					if ($yhtiorow['kerayserat'] == 'K') {
 
-						$max_keraysera_alustat = $krow['max_keraysera_alustat'] != '' ? : 0;
+						$max_keraysera_alustat = (int) $krow['max_keraysera_alustat'] > 0 ? : 0;
 
 						echo "<tr><th align='left'>",t("Max keräysvyöhyke alustat"),"</th><td><input type='text' name='max_keraysera_alustat' value='{$max_keraysera_alustat}' /></td></tr>";
 					}

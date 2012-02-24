@@ -15335,7 +15335,7 @@ if (!function_exists("tee_keraysera2")) {
 					$eka_kierros = false;
 				}
 
-				if ($debug) echo "juokseva_nro $juokseva_nro > käyttäjän max_keraysera_alustat $kukarow['max_keraysera_alustat']<br>";
+				if ($debug) echo "juokseva_nro $juokseva_nro > käyttäjän max_keraysera_alustat $kukarow[max_keraysera_alustat]<br>";
 
 				if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit'] or $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat'] or $juokseva_nro > $kukarow['max_keraysera_alustat']) {
 					if ($debug and ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat'] or $juokseva_nro > $kukarow['max_keraysera_alustat'])) {

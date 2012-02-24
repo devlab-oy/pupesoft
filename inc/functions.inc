@@ -14999,7 +14999,7 @@ if (!function_exists("tee_keraysera2")) {
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tilaukset})
 						AND tilausrivi.tyyppi != 'D'
-						AND tilausrivi1.var NOT IN ('P', 'J')
+						AND tilausrivi.var NOT IN ('P', 'J')
 						AND tilausrivi.varattu > 0
 						ORDER BY yksin_kerailyalustalle_sort ASC, pisin_sorttaus DESC, vh.indeksi ASC";
 			$tuoteres = pupe_query($query);

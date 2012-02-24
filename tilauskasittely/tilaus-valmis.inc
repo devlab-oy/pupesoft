@@ -1238,9 +1238,20 @@ else {
 					$query = "UPDATE tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
 					$ohno  = pupe_query($query);
 
-					if (($row['omalle_tilaukselle'] != '' or $row['ohita_kerays']) and $row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
-						$query = "UPDATE tilausrivi SET otunnus = '{$laskurow['tunnus']}' WHERE otunnus = '{$row['otunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}' AND yhtio = '{$kukarow['yhtio']}'";
-						$ohno  = pupe_query($query);
+					if ($row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
+
+						$query = "	SELECT tilausrivin_lisatiedot.ohita_kerays
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays != '')
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.perheid = '{$row['perheid']}'
+									AND tilausrivi.tunnus != '{$row['perheid']}'";
+						$ohnoes_res = pupe_query($query);
+
+						if (mysql_num_rows($ohnoes_res) > 0 or $row['omalle_tilaukselle'] != '') {
+							$query = "UPDATE tilausrivi SET otunnus = '{$laskurow['tunnus']}' WHERE otunnus = '{$row['otunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}' AND yhtio = '{$kukarow['yhtio']}'";
+							$ohno  = pupe_query($query);
+						}
 					}
 				}
 

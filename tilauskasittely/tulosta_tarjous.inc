@@ -224,12 +224,18 @@ if (!function_exists('alku_tarjous')) {
 
 			$pdf_tarjous->draw_rectangle(716, 300, 695, 580, $page_tarjous[$sivu], $rectparam);
 			$pdf_tarjous->draw_text(310, 708, t("Toimitusehto", $kieli), 		$page_tarjous[$sivu], $pieni);
-			$pdf_tarjous->draw_text(310, 698, $laskurow["toimitusehto"], 		$page_tarjous[$sivu], $norm);
+
+
+			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
+			$pdf_tarjous->draw_text(310, 698, $toimehto, $page_tarjous[$sivu], $norm);
 
 			$pdf_tarjous->draw_rectangle(695, 300, 674, 580, $page_tarjous[$sivu], $rectparam);
 
-			$pdf_tarjous->draw_text(310, 687, t("Maksuehto", $kieli), 			$page_tarjous[$sivu], $pieni);
-			$pdf_tarjous->draw_text(310, 677, $laskurow["maksuehto"], 			$page_tarjous[$sivu], $norm);
+			$pdf_tarjous->draw_text(310, 687, t("Maksuehto", $kieli),	$page_tarjous[$sivu], $pieni);
+			$pdf_tarjous->draw_text(310, 677, $laskurow["maksuehto"],	$page_tarjous[$sivu], $norm);
 
 		}
 
@@ -1203,7 +1209,7 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(200, $kala-38, t($voimassa, $kieli), $page_tarjous[$sivu], $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-51, t("Maksuehto", $kieli), $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli).t(" tai erillisen maksupostiohjelman mukaan", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli)." ".t("tai erillisen maksupostiohjelman mukaan", $kieli), $page_tarjous[$sivu], $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-64, t("Myynti- ja toimitusehdot", $kieli), $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(200, $kala-64, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $page_tarjous[$sivu], $norm);
@@ -1298,7 +1304,10 @@ if (!function_exists('loppu_tarjous')) {
 
 				$veroteksti = "";
 
-				if ($kaanteinen_verotus === TRUE) {
+				if ($laskurow["vienti"] != "") {
+					$veroteksti = ""; // Laitetaan tyhjänä
+				}
+				elseif ($kaanteinen_verotus === TRUE) {
 					$veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
 				}
 				elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
@@ -1324,7 +1333,7 @@ if (!function_exists('loppu_tarjous')) {
 					}
 				}
 
-				$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+				if ($laskurow["rahtivapaa"] == "") $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
 
 				$pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
 
@@ -1342,7 +1351,7 @@ if (!function_exists('loppu_tarjous')) {
 
 				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
 
-				$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa", $kieli)." ".$voimassa." ". t("saakka", $kieli).". ".t("Maksuehtomme on")." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
 				$pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen", $kieli)."!", $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(30,  $kuha-80, t("Kunnioittavasti", $kieli).",", $page_tarjous[$sivu], $boldi);
 
@@ -1449,6 +1458,11 @@ if (!function_exists('tulosta_tarjous')) {
 			$kielnum = mysql_num_rows($kielresult);
 			$kielrow = mysql_fetch_array($kielresult);
 			$kieli = strtolower($kielrow['kieli']);
+		}
+
+		// Vientitilauksilla AINA verottomat
+		if ($laskurow["vienti"] != "") {
+			$verolliset_verottomat_hinnat = "verottomat";
 		}
 
 		// haetaan maksuehdon tiedot
@@ -1780,6 +1794,7 @@ if (!function_exists('alvierittely')) {
 			#$yhtiorow['tarjouksen_alv_kasittely'] == 'X'	- Tuotteiden myyntihinnat ovat arvonlisäverottomia
 
 			if ($yhtiorow['alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == 'verolliset') {
+
 			}
 			elseif ($yhtiorow['alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == 'verottomat') {
 				$total_uudet += $veron_maara;

@@ -14126,6 +14126,8 @@ if (!function_exists("tee_keraysera2")) {
 
 		$kukarow['max_keraysera_alustat'] = $kukarow['max_keraysera_alustat'] != 0 ? : 9999999999;
 
+		if ($debug) echo "Kerääjän max_keraysera_alustat $kukarow[max_keraysera_alustat]<br><br>";
+
 		if (trim($keraysvyohyketiedot['sallitut_alustat']) == '') {
 			if ($debug) echo "<font class='error'>",t("Keräysvyöhykkeeseen")," ({$keraysvyohyketiedot['nimitys']}) ",t("ei ole määritelty sallittuja alustoja"),"!</font><br>";
 			return array();

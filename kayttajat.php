@@ -260,6 +260,7 @@
 			}
 
 			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
 
@@ -305,6 +306,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
 						yhtio 							= '{$yhtio}'";
@@ -457,6 +459,7 @@
 			}
 
 			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$query = "	UPDATE kuka
 						SET nimi 						= '{$firname}',
@@ -498,6 +501,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						muuttaja						= '{$kukarow['kuka']}',
 						muutospvm						= now()
 						WHERE kuka	= '{$kuka}'
@@ -740,6 +744,13 @@
 						}
 
 						echo "</select></td></tr>";
+					}
+
+					if ($yhtiorow['kerayserat'] == 'K') {
+
+						$max_keraysera_alustat = $krow['max_keraysera_alustat'] != '' ? : 0;
+
+						echo "<tr><th align='left'>",t("Max keräysvyöhyke alustat"),"</th><td><input type='text' name='max_keraysera_alustat' value='{$max_keraysera_alustat}' /></td></tr>";
 					}
 
 				}

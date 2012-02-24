@@ -14110,8 +14110,9 @@ if (!function_exists("tee_keraysera2")) {
 		$mittakerroin = 100;
 
 		$query = "	SELECT nimitys, sallitut_alustat,
-					if(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
+					IF(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
 					max_keraysera_rivit,
+					IF(max_keraysera_alustat = 0, 9999999999, max_keraysera_alustat) max_keraysera_alustat,
 					yhdistelysaanto,
 					lahtojen_valinen_enimmaisaika,
 					ulkoinen_jarjestelma
@@ -15312,8 +15313,15 @@ if (!function_exists("tee_keraysera2")) {
 					$eka_kierros = false;
 				}
 
-				if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
-					if ($debug) echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
+				if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit'] or $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+					if ($debug and $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+						echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_rivit: $keraysvyohyketiedot[max_keraysera_alustat])<br>";
+					}
+
+					if ($debug and $rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+						echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
+					}
+
 					$era_valmis = true;
 
 					splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
@@ -15501,7 +15509,20 @@ if (!function_exists("tee_keraysera2")) {
 
 									$kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
 
-									if ($ix < $lkm) $juokseva_nro++;
+									if ($ix < $lkm) {
+										$juokseva_nro++;
+
+										if ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+											if ($debug) {
+												echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_rivit: $keraysvyohyketiedot[max_keraysera_alustat])<br>";
+											}
+
+											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
+
+											$era_valmis = true;
+											break 3;
+										}
+									}
 								}
 
 								$eran_koko += ($tuoterow['y_koko'] * $tuoterow['y_maara']);
@@ -15548,10 +15569,13 @@ if (!function_exists("tee_keraysera2")) {
 					if ($tehdaanko_yksin_kerailyalustalle) {
 						for ($x = 1; $x <= $tuoterow['y_maara']; $x++) {
 
-							if (($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) or ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala'])) {
+							if (($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) or ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) or $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
 								if ($debug) {
 									if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
 										echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
+									}
+									elseif ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+										echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_rivit: $keraysvyohyketiedot[max_keraysera_alustat])<br>";
 									}
 									else {
 										echo "Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $x kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $x)<br><br>";
@@ -15737,7 +15761,11 @@ if (!function_exists("tee_keraysera2")) {
 
 							if ($debug) echo "<br>Tuote ei mahdu pakkaukseen!<br>";
 
-							if ($kaytettava_pakkaus == "") {
+							if ($kaytettava_pakkaus == "" or $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+
+								if ($debug and $juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) {
+									echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_rivit: $keraysvyohyketiedot[max_keraysera_alustat])<br>";
+								}
 
 								$chk_arr = $lisatyt_tilausrivit;
 								unset($chk_arr[$tuoterow['otunnus']][$tuoterow['tunnus']]);

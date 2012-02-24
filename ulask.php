@@ -685,7 +685,7 @@ if ($tee == 'I') {
 			require 'inc/pankkitilinoikeellisuus.php';
 
 			if ($pankkitili == '') {
-				$errormsg .= "<font class='error'>".t("Pankkitili '%s' on virheellinen", "", $trow['tilinumero'])."</font><br>";
+				$errormsg .= "<font class='error'>".t("Pankkitili %s on virheellinen", "", $trow['tilinumero'])."</font><br>";
 				$tee = 'E';
 			}
 			else {

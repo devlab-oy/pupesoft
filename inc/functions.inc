@@ -15536,7 +15536,7 @@ if (!function_exists("tee_keraysera2")) {
 									if ($ix < $lkm) {
 										$juokseva_nro++;
 
-										if (($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat'])) {
+										if (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 											if ($debug) {
 												echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>";
 											}
@@ -15593,12 +15593,12 @@ if (!function_exists("tee_keraysera2")) {
 					if ($tehdaanko_yksin_kerailyalustalle) {
 						for ($x = 1; $x <= $tuoterow['y_maara']; $x++) {
 
-							if (($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) or ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) or ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat'])) {
+							if (((int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit']) or ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $x) > $keraysvyohyketiedot['max_keraysera_pintaala']) or ((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 								if ($debug) {
-									if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+									if ((int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit']) {
 										echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>";
 									}
-									elseif (($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat'])) {
+									elseif (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 										echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>";
 									}
 									else {
@@ -15785,9 +15785,9 @@ if (!function_exists("tee_keraysera2")) {
 
 							if ($debug) echo "<br>Tuote ei mahdu pakkaukseen!<br>";
 
-							if ($kaytettava_pakkaus == "" or ($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat'])) {
+							if ($kaytettava_pakkaus == "" or ((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 
-								if ($debug and (($juokseva_nro > $keraysvyohyketiedot['max_keraysera_alustat']) or ($juokseva_nro > $kukarow['max_keraysera_alustat']))) {
+								if ($debug and (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat']))) {
 									echo "ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>";
 								}
 

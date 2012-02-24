@@ -14167,6 +14167,7 @@ if (!function_exists("tee_keraysera2")) {
 			$pakkaukset[$pakkaus_row['tunnus']]['yksin_eraan'] 			= $pakkaus_row['yksin_eraan'];
 			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
 			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
+			$pakkaukset[$pakkaus_row['tunnus']]['pahvipintaala']		= (2 * ($pakkaus_row['leveys'] * $pakkaus_row['korkeus'] + $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] + $pakkaus_row['korkeus'] * $pakkaus_row['syvyys']) + ($pakkaus_row['leveys'] * $pakkaus_row['syvyys']));
 
 			if (!$yksin_eraan and $pakkaus_row['yksin_eraan'] == 'K') {
 				$yksin_eraan = true;

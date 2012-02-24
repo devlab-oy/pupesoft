@@ -332,8 +332,12 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
 			}
 
+			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
 			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 		$thispage, $pieni);
-			$pdf->draw_text(310, 677, $laskurow["toimitusehto"], 		$thispage, $norm);
+			$pdf->draw_text(310, 677, $toimehto, 						$thispage, $norm);
 
 			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 

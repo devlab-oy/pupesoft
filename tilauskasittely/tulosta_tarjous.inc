@@ -225,7 +225,6 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_rectangle(716, 300, 695, 580, $page_tarjous[$sivu], $rectparam);
 			$pdf_tarjous->draw_text(310, 708, t("Toimitusehto", $kieli), 		$page_tarjous[$sivu], $pieni);
 
-
 			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
 			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
 			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
@@ -1621,8 +1620,6 @@ if (!function_exists('tulosta_tarjous')) {
 
 		// Lopputekstit
 		list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 1, $total_uudet, $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto, $kala, $vikanrivin_sivu);
-
-		error_log(var_dump($page_tarjous));
 
 		// Piirret‰‰n sivut
 		if ($yhtiorow['tarjoustyyppi'] == 1) {

@@ -1689,13 +1689,14 @@
 
 				$params = array(
 					'laskurow'					=> $laskurow,
-					'sellahetetyyppi' => $sellahetetyyppi,
-					'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+					'sellahetetyyppi' 			=> $sellahetetyyppi,
+					'extranet_tilausvahvistus' 	=> $extranet_tilausvahvistus,
 					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
 					'tee'						=> $tee,
 					'toim'						=> $toim,
-					'query_ale_lisa' => $query_ale_lisa,
-					'komento' => $komento
+					'query_ale_lisa' 			=> $query_ale_lisa,
+					'komento' 					=> $komento,
+					'kieli' 					=> $kieli
 					);
 
 				pupesoft_tulosta_lahete($params);

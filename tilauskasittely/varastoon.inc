@@ -792,7 +792,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk>";
 
 		if ($tilrivirow['netto'] == 'X') {
-			$varastoon_msg .= "<br /><img src='../pics/lullacons/alert.png' alt='".t("Huomio")."' title='".t("Huom! Rivi‰ ei vied‰ automaattisesti varastoon.")."' />";
+			$varastoon_msg .= "<br /><img src='../pics/lullacons/alert.png' alt='".t("Huomio")."' title='".t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon.")."' />";
 		}
 
 		$varastoon_msg .= "</td>";
@@ -1018,7 +1018,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM! Keikkaan ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM: Keikkaan ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 
@@ -1041,12 +1041,12 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	if ($yhtiorow["varastoonvientipaiva"] == "K") {
 		echo " / ".t("Muuta kaikki p‰iv‰m‰‰r‰t");
 
-		echo "<br /><img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("Huom! Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
-		echo "<br />",t("Huom! Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
+		echo "<br /><img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
+		echo "<br />",t("HUOM: Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
 	}
 	else {
-		echo "<br /><img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("Huom! Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
-		echo "<br />",t("Huom! Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
+		echo "<br /><img src='../pics/lullacons/alert.png' alt='",t("Huomio"),"' title='",t("HUOM: Rivi‰ ei vied‰ automaattisesti varastoon."),"' /> = ",t("Rivi‰ ei vied‰ automaattisesti varastoon");
+		echo "<br />",t("HUOM: Jos muutit varastoonviet‰vi‰ m‰‰ri‰, muista p‰ivitt‰‰ rivit ennen varastoonvienti‰");
 		echo "</td><td valign='top' class='tumma' nowrap>";
 	}
 

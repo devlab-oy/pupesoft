@@ -2,13 +2,20 @@
 
 	require("inc/parametrit.inc");
 
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
+
 	echo "<font class='head'>".t("Etiketin tulostus")."</font><hr>";
 
 	// Vakio lomake
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
 
-	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+	enable_ajax();
+
+	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='hae'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -19,7 +26,7 @@
 	echo "<th>".t("Kirjoitin")."</th>";
 
 	echo "<tr>";
-	echo "<td><input type='text' name='tuoteno' size='20' maxlength='60' value='$tuoteno'></td>";
+	echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 150, $tuoteno)."</td>";
 	echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
 	echo "<td><select name='kirjoitin'>";
 	echo "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -48,7 +55,7 @@
 	// Virhetarkastukset
 	if ($tee == "hae") {
 
-		$query = "	SELECT tunnus
+		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					and tuoteno = '{$tuoteno}'";
@@ -81,9 +88,11 @@
 		$filenimi = "/tmp/sahantera_tulostus.txt";
 		$hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
+		$nimitys = split(" ", $trow["nimitys"]);
+
 		$out = chr(10).chr(10).chr(10).chr(10); 	// 5 riviltä aloitetaan tulostus
 		$out .= sprintf ('%6s', ' ');				// 4 merkkiä alusta niin saadaan oikeaan kohtaan aloittamaan tulostus.
-		$out .= sprintf ('%-9s', $trow["try"]);
+		$out .= sprintf ('%-9s', $nimitys[1]); 		// Halutaan nimityksestä toka sana. :/
 		$out .= sprintf ('%1s', ' ');
 		$out .= sprintf ('%-24s', round($trow["tuotekorkeus"],0)." x ".round($trow["tuoteleveys"],0)." x ".round($trow["tuotesyvyys"],2)); // pituus, leveys, paksuus = korkeus, leveys, syvyys
 		$out .= sprintf ('%2s', ' ');

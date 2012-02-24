@@ -66,19 +66,19 @@
 			$tee = "jatka";
 		}
 		else {
-			echo "<font class='error'>".t("Virhe: Tuotetta ei löydy")."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Tuotetta ei löydy")."</font><br>";
 			$tee = "";
 		}
 
 		$tulostakappale = (int) $tulostakappale;
 
 		if ($tulostakappale <= 0) {
-			echo "<font class='error'>".t("Virhe: Syötä kappalemäärä")."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Syötä kappalemäärä")."</font><br>";
 			$tee = "";
 		}
 
 		if ($kirjoitin == "") {
-			echo "<font class='error'>".t("Virhe: Valitse kirjoitin")."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Valitse kirjoitin")."</font><br>";
 			$tee = "";
 		}
 	}
@@ -109,7 +109,7 @@
 		$boob = file_put_contents($filenimi, $out);
 
 		if ($boob === FALSE) {
-			echo "<font class='error'>".t("Virhe: Tiedoston kirjoittaminen ei onnistunut")."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Tiedoston kirjoittaminen ei onnistunut")."</font><br>";
 			$tee = "";
 		}
 		else {

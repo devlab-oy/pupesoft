@@ -4,8 +4,8 @@
 
 	echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
 
-	$kansio 					= "/Users/jamppa/Desktop/e3/";			//Pit‰‰ vaihtaa !!
-	$kansio_valmis				= "/Users/jamppa/Desktop/e3/valmis/";	//Pit‰‰ vaihtaa !!
+	$kansio 					= "/Users/tony/Desktop/e3/";			//Pit‰‰ vaihtaa !!
+	$kansio_valmis				= "/Users/tony/Desktop/e3/valmis/";	//Pit‰‰ vaihtaa !!
 	$toimittajaytunnus 			= "";
 	$e3ostotilausnumero 		= "";
 	$tuoteno					= "";
@@ -107,8 +107,8 @@
 
 			foreach ($lines as $line) {
 
-				//$toimittajaytunnus 		= pupesoft_cleanstring(substr($line, 0, 7));
-				$toimittajaytunnus		= '06806400'; 										// <<== POISTA TOI TOSTA ETTEI MENE SITTEN SISƒREISILLE
+				$toimittajaytunnus 		= pupesoft_cleanstring(substr($line, 0, 7));
+				//$toimittajaytunnus		= '06806400'; 										// <<== POISTA TOI TOSTA ETTEI MENE SITTEN SISƒREISILLE
 				$varasto 				= pupesoft_cleanstring(substr($line, 12, 3));
 				$e3ostotilausnumero 	= pupesoft_cleanstring(substr($line, 15, 7));
 				$toimituspaiva 			= pupesoft_cleanstring(substr($line, 31, 8));
@@ -117,16 +117,32 @@
 				$toivottutoimituspaiva	= pupesoft_cleanstring(substr($toivottutoimituspaiva, 0, 4)."-".substr($toivottutoimituspaiva, 4, 2)."-".substr($toivottutoimituspaiva, 6, 2));
 				$myyjannumero 			= pupesoft_cleanstring(substr($line, 557, 4));
 			}
-
+				
+			$kquery = "	SELECT tunnus
+						FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]'
+						and myyja = '$myyjannumero'
+						ORDER BY tunnus desc
+						LIMIT 1";
+			$kresult = mysql_query($kquery) or pupe_error($kquery);
+			if (mysql_num_rows($kresult) == 1) {
+				$myyja = mysql_fetch_array($kresult);
+				$myyjannumero = $myyja['tunnus'];
+			}
+			else {
+				$myyjannumero = '';
+			}
+			
 			if ($toivottutoimituspaiva != '0000-00-00') {
 				$toimituspaiva = $toivottutoimituspaiva;
 			}
-
+			
 			$query = "	SELECT *
 						FROM toimi
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND ytunnus = '$toimittajaytunnus'
-						AND ytunnus != ''
+						AND toimittajanro = '$toimittajaytunnus'
+						AND toimittajanro != ''
+						AND toimittajanro != '0'
 						AND tyyppi != 'P'
 						ORDER BY tunnus
 						LIMIT 1";

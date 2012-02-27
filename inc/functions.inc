@@ -14841,6 +14841,10 @@ if (!function_exists("tee_keraysera2")) {
 
 									foreach ($fixed_main_prio_array as $nippu_z => $nipun_tiedot) {
 										if ($nipun_tiedot['prioriteetti'] < $fixed_main_prio_array[$backup_array[$key]]) {
+											if ($debug) {
+												echo "{$nipun_tiedot['prioriteetti']} < {$fixed_main_prio_array[$backup_array[$key]]}<br>";
+												echo "nippu: {$nippu_z}<br><br>";
+											}
 											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
 										}
 									}

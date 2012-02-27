@@ -78,7 +78,7 @@
 		$tee = "ETSILASKU";
 	}
 
-	if ($toim == 'OSTO' or $toim == 'HAAMU' or $toim == 'PURKU' or $toim == 'TARIFFI') {
+	if ($toim == 'OSTO' or $toim == 'HAAMU' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'VASTAANOTTORAPORTTI') {
 		$query_ale_lisa = generoi_alekentta('O');
 	}
 	else {
@@ -96,6 +96,9 @@
 	}
 	if ($toim == "VASTAANOTETUT") {
 		$fuse = t("Vastaanotetut");
+	}
+	if ($toim == "VASTAANOTTORAPORTTI") {
+		$fuse = t("Vastaanottoraportti");
 	}
 	if ($toim == "TARIFFI") {
 		$fuse = t("Tariffilista");
@@ -234,11 +237,10 @@
 		}
 	}
 	elseif (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
-
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
 
 		if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT' or $toim == 'HAAMU') {
+			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT' or $toim == 'HAAMU'  or $toim == 'VASTAANOTTORAPORTTI') {
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
@@ -333,7 +335,7 @@
 		}
 		else {
 			if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU") {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU" or $toim == 'VASTAANOTTORAPORTTI') {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td>";
 
 					if ($kukarow["extranet"] == "") {
@@ -353,7 +355,7 @@
 				}
 			}
 			else {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU") {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU" or $toim == 'VASTAANOTTORAPORTTI') {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
 				}
 				else {
@@ -367,7 +369,7 @@
 			echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
 			echo "<tr>";
 
-			if ($toim == "PURKU" or $toim == "TARIFFI") {
+			if ($toim == "PURKU" or $toim == "TARIFFI" or $toim == "VASTAANOTTORAPORTTI	") {
 				echo "<th>".t("Keikkanumero")."</th>";
 			}
 			else {
@@ -376,7 +378,7 @@
 
 			echo "<td colspan='3'><input type='text' size='15' name='laskunro'></td>";
 
-			if ($kukarow["extranet"] == "") {
+			if ($kukarow["extranet"] == "" and $toim != "VASTAANOTTORAPORTTI") {
 				echo "<td colspan='3'><input type='text' size='15' name='laskunroloppu'></td>";
 			}
 
@@ -480,6 +482,18 @@
 		if ($toim == "VASTAANOTETUT") {
 
 			$where1 = " lasku.tila = 'G' and alatila in ('V','X') ";
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "VASTAANOTTORAPORTTI") {
+			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa Vastaanottoraportti
+			$where1 .= " lasku.tila = 'K' ";
+
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
@@ -796,9 +810,15 @@
 		}
 
 		$joinlisa = "";
+		$where5	="";
 
 		if ($toim == "DGD") {
 			$joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
+		}
+		
+		if ($toim == "VASTAANOTTORAPORTTI") {
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
+			$where5 = " AND tilausrivi.kpl !=0 ";
 		}
 
 		// Etsitään muutettavaa tilausta
@@ -822,7 +842,7 @@
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					$joinlisa
-					WHERE $where1 $where2 $where3
+					WHERE $where1 $where2 $where3 $where5
 					and lasku.$logistiikka_yhtiolisa
 					$where4
 					$jarj";
@@ -1055,6 +1075,12 @@
 				$komento["Vastaanotetut"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "VASTAANOTTORAPORTTI") {
+			$tulostimet[0] = 'Vastaanottoraportti';
+			if ($kappaleet > 0 and $komento["Vastaanottoraportti"] != 'email') {
+				$komento["Vastaanottoraportti"] .= " -# $kappaleet ";
+			}
+		}
 		if ($toim == "TARIFFI") {
 			$tulostimet[0] = 'Tariffilista';
 			if ($kappaleet > 0 and $komento["Tariffilista"] != 'email') {
@@ -1275,6 +1301,11 @@
 				$otunnus = $laskurow["tunnus"];
 				$mista = 'vastaanota';
 				require('tulosta_purkulista.inc');
+				$tee = '';
+			}
+			if ($toim == "VASTAANOTTORAPORTTI") {
+				$otunnus = $laskurow["tunnus"];
+				require('tulosta_vastaanottoraportti.inc');
 				$tee = '';
 			}
 

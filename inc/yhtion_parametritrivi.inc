@@ -3079,4 +3079,16 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'vastaanottoraportti') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Vastaanottoraportissa ei n‰ytet‰ keskihankintahintoja")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Vastaanottoraportissa n‰ytet‰‰n keskihankintahinnat")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

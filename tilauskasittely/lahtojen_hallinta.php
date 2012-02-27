@@ -389,6 +389,8 @@
 								AND toimitustavan_lahto = '{$lahto}'";
 					$result = pupe_query($query);
 
+					$toimitustapa_varasto = "";
+
 					while ($row = mysql_fetch_assoc($result)) {
 						$sel_ltun[] = $row['tunnus'];
 

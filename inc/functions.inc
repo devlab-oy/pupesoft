@@ -16211,7 +16211,19 @@ if (!function_exists("tee_keraysera2")) {
 			if ($debug and $ed_pak != '') {
 				$m2 = $ed_pakkaustunnus != 999 ? (($pakkaukset[$ed_pakkaustunnus]['leveys'] * $pakkaukset[$ed_pakkaustunnus]['syvyys']) / 10000) : "";
 
-				echo "<tr><th colspan='10'>Yhteensä</th><th></th>{$m2}<th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th></th></tr>";
+				$puukotettu = $summataan_laatikot[$ed_pak]['tilavuus'];
+
+				if ($ed_pakkaustunnus != 999) {
+					$query = "SELECT puukotuskerroin FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$ed_pakkaustunnus}'";
+					$puukko_res = pupe_query($query);
+					$puukko_row = mysql_fetch_assoc($puukko_res);
+
+					if ($puukko_row['puukotuskerroin'] != 0) {
+						$puukotettu = $summataan_laatikot[$ed_pak]['tilavuus'] * $puukko_row['puukotuskerroin'];
+					}
+				}
+
+				echo "<tr><th colspan='10'>Yhteensä</th><th></th>{$m2}<th>{$summataan_laatikot[$ed_pak]['massa']}</th><th>{$summataan_laatikot[$ed_pak]['tilavuus']}</th><th>{$puukotettu}</th></tr>";
 				echo "<tr><th colspan='11'>Keräyserä yhteensä</th>";
 
 				$koko_massa = $koko_tilavuus = 0;

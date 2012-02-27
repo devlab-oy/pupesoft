@@ -42,11 +42,11 @@ if ($tee == 'LAHETA') {
 		}
 		catch (Exception $e) {
 			$ekarhu_success = false;
-			echo "<font class='error'>Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+			echo "<font class='error'>".t("Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
 		}
 	}
 	else {
-		echo "<font class='error'>Et valinnut yhtään laskua.</font>";
+		echo "<font class='error'>".t("Et valinnut yhtään laskua").".</font>";
 		$ekarhu_success = false;
 	}
 
@@ -92,12 +92,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
 			}
 			else {
-				echo "Ei karhuttavaa";
+				echo t("Ei karhuttavaa");
 				exit;
 			}
 		}
 		else {
-			echo "Valittu factoringsopimus ei löydy";
+			echo t("Valittu factoringsopimus ei löydy");
 			exit;
 		}
 	}

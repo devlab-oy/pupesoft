@@ -43,11 +43,7 @@
 		$id		= $row['id'];
 
 		//muutetaan prio..
-		$query  = "		UPDATE $taulu SET 
-						jarjestys = '$prio',
-						muutospvm = now(),
-						muuttaja = '$kukarow[kuka]' 
-						WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+		$query  = "UPDATE $taulu SET jarjestys = '$prio' WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		//n‰ytet‰‰n silti loput.. kiltti‰.
@@ -95,25 +91,25 @@
 				$id 	= $row[0]+1;
 
 				//lis‰t‰‰n "is‰ tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$id', '$tuoteno', '$kukarow[yhtio]')";
 				$result = pupe_query($query);
 
 				// lis‰t‰‰n korvaava tuote...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$id', '$korvaava', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$id', '$korvaava', '$kukarow[yhtio]')";
 				$result = pupe_query($query);
 			}
 
 			//lapsi on lˆytynyt, is‰‰ ei
 			if (($cid != "") and ($fid == "")) {
 				//lis‰t‰‰n "is‰ tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]')";
 				$result = pupe_query($query);
 			}
 
 			//is‰ on lˆytynyt, lapsi ei
 			if (($fid != "") and ($cid == "")) {
 				//lis‰t‰‰n korvaava...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$fid', '$korvaava', '$kukarow[yhtio]')";
 				$result = pupe_query($query);
 			}
 

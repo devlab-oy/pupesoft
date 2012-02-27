@@ -319,7 +319,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 										$jarjestys = (int) $irow["jarjestys"] + 1;
 									}
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now() ";
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys' ";
 								}
 								else {
 									$kysely = " and tuoteno='$rivi[$j]'";
@@ -350,9 +350,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 								while ($irow = mysql_fetch_assoc($iresult)) {
 									$kquery = "	UPDATE $table
-												SET jarjestys = $siirtojarj,
-												muuttaja = '$kukarow[kuka]',
-												muutospvm = now()
+												SET jarjestys = $siirtojarj
 												WHERE tunnus = '$irow[tunnus]'";
 									$updres = pupe_query($kquery);
 
@@ -360,9 +358,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 								}
 
 								$kquery = "	UPDATE $table
-											SET jarjestys = $jarjestys,
-											muuttaja = '$kukarow[kuka]',
-											muutospvm = now()
+											SET jarjestys = $jarjestys
 											WHERE tuoteno = '$rivi[$j]'
 											and id = '$id'
 											and yhtio = '{$kukarow['yhtio']}'";
@@ -467,9 +463,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 									yhtio = '{$kukarow['yhtio']}',
 									isatuoteno = '$isatuote',
 									tuoteno = '{$rivi[$r]}',
-									tyyppi = '$tyyppi',
-									laatija = '$kukarow[kuka]',
-									luontiaika = now()";
+									tyyppi = '$tyyppi'";
 						$result = pupe_query($query);
 						$lask++;
 					}

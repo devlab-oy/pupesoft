@@ -369,7 +369,7 @@
 			echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
 			echo "<tr>";
 
-			if ($toim == "PURKU" or $toim == "TARIFFI" or $toim == "VASTAANOTTORAPORTTI	") {
+			if ($toim == "PURKU" or $toim == "TARIFFI" or $toim == "VASTAANOTTORAPORTTI") {
 				echo "<th>".t("Keikkanumero")."</th>";
 			}
 			else {

@@ -59,11 +59,16 @@
  			$pdf->draw_text(175, 708, t("Nimitys"), $firstpage, $pieniboldi);
 
 			if ($yhtiorow["vastaanottoraportti"] == "K") {
-				$pdf->draw_text(350, 716, t("Saldo"), $firstpage, $pieniboldi);
-				$pdf->draw_text(460, 716, t("Vanha hinta"), $firstpage, $pieniboldi);
-				$pdf->draw_text(460, 708, t("Uusi hinta"), $firstpage, $pieniboldi);
-	 			$pdf->draw_text(520, 716, t("Tilattu"), $firstpage, $pieniboldi);
-	 			$pdf->draw_text(520, 708, t("Saavutettu"), $firstpage, $pieniboldi);
+				$oikpos = $pdf->strlen(t("Saldo"), $pieniboldi);
+				$pdf->draw_text(420-$oikpos, 716, t("Saldo"), $firstpage, $pieniboldi);
+				$oikpos = $pdf->strlen(t("Vanha hinta"), $pieniboldi);
+				$pdf->draw_text(505-$oikpos, 716, t("Vanha hinta"), $firstpage, $pieniboldi);
+				$oikpos = $pdf->strlen(t("Uusi hinta"), $pieniboldi);
+				$pdf->draw_text(505-$oikpos, 708, t("Uusi hinta"), $firstpage, $pieniboldi);
+				$oikpos = $pdf->strlen(t("Tilattu"), $pieniboldi);
+	 			$pdf->draw_text(565-$oikpos, 716, t("Tilattu"), $firstpage, $pieniboldi);
+				$oikpos = $pdf->strlen(t("Saavutettu"), $pieniboldi);
+	 			$pdf->draw_text(565-$oikpos, 708, t("Saavutettu"), $firstpage, $pieniboldi);
 			}
 			else {
 	 			$pdf->draw_text(350, 716, t("Toimittajan tuoteno"), $firstpage, $pieniboldi);
@@ -159,9 +164,6 @@
 
 		if ($yhtiorow["vastaanottoraportti"] == "K") {
 
-			list(,, $varastosaldo) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', '');
-			$pdf->draw_text(350, $kala, $varastosaldo, $firstpage, $pieni);
-
 			// haetaan tapahtumalta uusihinta ja aika
 			$query1 = "	SELECT hinta, laadittu
 						FROM tapahtuma
@@ -188,25 +190,34 @@
 
 			if ($laskurow["mapvm"] == 0000-00-00) {
 				$nmerkki = "~ ";
-				$kohdistus = 458;
 			}
 			else {
 				$nmerkki = "";
-				$kohdistus = 465;
 			}
 
 			if ($vanharow["hinta"] == "") {
 				$vanharow["hinta"] = "0.00";
 			}
 
-			$pdf->draw_text(465, $kala, $vanharow["hinta"], $firstpage, $pieni);
-			$pdf->draw_text($kohdistus, $kala-8, $nmerkki."".$uusirow["hinta"], $firstpage, $pieni);
+			list(,, $varastosaldo) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', '');
+
+			$oikpos = $pdf->strlen($varastosaldo, $pieni);
+			$pdf->draw_text(420-$oikpos, $kala, $varastosaldo, $firstpage, $pieni);
+
+			$oikpos = $pdf->strlen($vanharow["hinta"], $pieni);
+			$pdf->draw_text(505-$oikpos, $kala, $vanharow["hinta"], $firstpage, $pieni);
+
+			$oikpos = $pdf->strlen($nmerkki.$uusirow["hinta"], $pieni);
+			$pdf->draw_text(505-$oikpos, $kala-8, $nmerkki.$uusirow["hinta"], $firstpage, $pieni);
 
 			$siskpl = $row['siskpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 			$kpl = $row['kpl'].' '.t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
-			$pdf->draw_text(520, $kala, $siskpl, $firstpage, $pieni);
-			$pdf->draw_text(520, $kala-8, $kpl, $firstpage, $pieni);
+			$oikpos = $pdf->strlen($siskpl, $pieni);
+			$pdf->draw_text(565-$oikpos, $kala, $siskpl, $firstpage, $pieni);
+
+			$oikpos = $pdf->strlen($kpl, $pieni);
+			$pdf->draw_text(565-$oikpos, $kala-8, $kpl, $firstpage, $pieni);
 
 		}
 		else {

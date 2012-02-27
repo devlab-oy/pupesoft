@@ -2823,10 +2823,11 @@ if ($tee == '') {
 			echo "<td><input type='text' name='myyjanro' size='8' $state> tai ";
 			echo "<select name='myyja' onchange='submit();' $state>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$laskurow[myyja]')
-						ORDER BY nimi";
+						JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%tilaus_myynti.php'
+						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
+						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($yresult)) {

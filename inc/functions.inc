@@ -14849,7 +14849,9 @@ if (!function_exists("tee_keraysera2")) {
 											// }
 											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
 
+											if ($debug) echo "nipun_tiedot indeksi: $nipun_tiedot[indeksi]<br>";
 											if ($debug) echo "<pre>",var_dump($kerailynipun_tiedot[$nipun_tiedot['indeksi']]),"</pre>";
+											if ($debug) echo "<pre>",var_dump($kerailynipun_tiedot),"</pre>";
 
 											// katsotaan ylittääkö pienemmän prioriteetin tilaus yksin erään speksit
 											foreach ($kerailynipun_tiedot[$nipun_tiedot['indeksi']] as $ot2 => $val2) {

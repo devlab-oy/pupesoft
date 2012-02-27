@@ -14850,16 +14850,15 @@ if (!function_exists("tee_keraysera2")) {
 											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
 
 											// katsotaan ylittääkö pienemmän prioriteetin tilaus yksin erään speksit
-											foreach ($kerailynipun_tiedot[$nipun_tiedot['indeksi']] as $arr_chk_mahtuuko) {
-												foreach ($arr_chk_mahtuuko as $ot2 => $val2) {
-													if ($ot2 == 'tilauksen_koko' or $ot2 == 'tilauksen_paino') {
-														if (($ot2 == 'tilauksen_koko' and ($val2 < $pak['minimi_tilavuus'] or $val2 > $pak['tilavuus'])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak['minimi_paino'] or $val2 > $pak['tilavuus']))) {
-															if ($debug) {
-																echo "indeksi $nipun_tiedot[indeksi] ei mahdu!<br>";
-																echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br><br>";
-															}
-															$huijataanko = false;
+											foreach ($kerailynipun_tiedot[$nipun_tiedot['indeksi']] as $ot2 => $val2) {
+												if ($debug) echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br><br>";
+
+												if ($ot2 == 'tilauksen_koko' or $ot2 == 'tilauksen_paino') {
+													if (($ot2 == 'tilauksen_koko' and ($val2 < $pak['minimi_tilavuus'] or $val2 > $pak['tilavuus'])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak['minimi_paino'] or $val2 > $pak['tilavuus']))) {
+														if ($debug) {
+															echo "indeksi $nipun_tiedot[indeksi] ei mahdu!<br>";
 														}
+														$huijataanko = false;
 													}
 												}
 											}

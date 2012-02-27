@@ -2280,7 +2280,7 @@
 				echo "<th>",t("Nimitys"),"</th>";
 				echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
 				echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
-				echo "<th>",t("Poikkeama m‰‰r‰"),"</th>";
+				echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
 				echo "<th>",t("Yksikkˆ"),"</th>";
 				echo "<th>",t("Hyllypaikka"),"</th>";
 				echo "<th>",t("Ker‰‰j‰"),"</th>";
@@ -2341,7 +2341,7 @@
 				echo "<th>",t("Nimitys"),"</th>";
 				echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
 				echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
-				echo "<th>",t("Poikkeama m‰‰r‰"),"</th>";
+				echo "<th>",t("Poikkeava m‰‰r‰"),"</th>";
 				echo "<th>",t("Yksikkˆ"),"</th>";
 				echo "<th>",t("Hyllypaikka"),"</th>";
 				echo "<th>",t("Ker‰‰j‰"),"</th>";

@@ -14854,12 +14854,11 @@ if (!function_exists("tee_keraysera2")) {
 												foreach ($arr_chk_mahtuuko as $ot2 => $val2) {
 													if ($ot2 == 'tilauksen_koko' or $ot2 == 'tilauksen_paino') {
 														if (($ot2 == 'tilauksen_koko' and ($val2 < $pak['minimi_tilavuus'] or $val2 > $pak['tilavuus'])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak['minimi_paino'] or $val2 > $pak['tilavuus']))) {
-																if ($debug) {
-																	echo "indeksi $nipun_tiedot[indeksi] ei mahdu!<br>";
-																	echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br><br>";
-																}
-																$huijataanko = false;
+															if ($debug) {
+																echo "indeksi $nipun_tiedot[indeksi] ei mahdu!<br>";
+																echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br><br>";
 															}
+															$huijataanko = false;
 														}
 													}
 												}

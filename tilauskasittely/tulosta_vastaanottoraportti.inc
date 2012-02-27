@@ -3,23 +3,23 @@
 	// Ohjelma vatii muuttujan $otunnus joka viittaa keikkaan johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 	require_once('pdflib/phppdflib.class.php');
-	
+
 	$select_lisa = "";
-	$join_lisat = "";
-    $where_lisa = "";
+	$join_lisat  = "";
+    $where_lisa  = "";
 
 	$norm["height"] 	  = 10;
 	$norm["font"] 		  = "Helvetica";
-                          
+
 	$pieni["height"] 	  = 8;
 	$pieni["font"] 		  = "Helvetica";
-                          
+
 	$pieniboldi["height"] = 8;
 	$pieniboldi["font"]	  = "Helvetica-Bold";
-                          
+
 	$boldi2["height"] 	  = 14;
 	$boldi2["font"]		  = "Helvetica-Bold";
-                          
+
 	$rectparam["width"]   = 1;
 	$rectparam2["width"]  = 0.5;
 
@@ -98,28 +98,31 @@
 				if (@include("../inc/sahkoposti.inc"));
 				elseif (@include("inc/sahkoposti.inc"));
 				else include("sahkoposti.inc");
+
+				echo t("Vastaanottoraportti tulostuu"),"...<br>";
 			}
 			elseif ($tee == 'NAYTATILAUS') {
     			//Työnnetään tuo pdf vaan putkeen!
     			echo file_get_contents($pdffilenimi);
     		}
 			elseif ($komento["Vastaanottoraportti"] != '' and $komento["Vastaanottoraportti"] != 'edi') {
-
 				$line = exec("$komento[Vastaanottoraportti] $pdffilenimi");
+
+				echo t("Vastaanottoraportti tulostuu"),"...<br>";
 			}
 
 			//poistetaan tmp file samantien kuleksimasta...
 			system("rm -f $pdffilenimi");
 		}
 	}
-	
+
 	if ($yhtiorow["suuntalavat"] == "S") {
-		$select_lisa	= ", suuntalavat.sscc,	keraysvyohyke.nimitys AS keraysvyohyke_nimitys";
-		$join_lisat		= "	JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
-							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)";
-		$where_lisa		= " AND tilausrivi.suuntalava != 0";
+		$select_lisa = ", suuntalavat.sscc,	keraysvyohyke.nimitys AS keraysvyohyke_nimitys";
+		$join_lisat	 = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						 JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)";
+		$where_lisa	 = " AND tilausrivi.suuntalava != 0";
 	}
-	
+
 
 	$query = "	SELECT tilausrivi.*,
 				tuotteen_toimittajat.toim_tuoteno,
@@ -134,7 +137,6 @@
 				AND tilausrivi.tyyppi = 'O'
 				AND tilausrivi.kpl != 0
 				{$where_lisa}";
-
 	$vastaanottoraportti_result = pupe_query($query);
 
 	$firstpage = alku_vastaanotto();
@@ -226,5 +228,4 @@
 
 	print_pdf_vastaanotto();
 
-	echo t("Vastaanottoraportti tulostuu"),"...<br /><br />";
-
+?>

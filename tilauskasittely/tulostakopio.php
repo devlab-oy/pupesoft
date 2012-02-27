@@ -815,6 +815,7 @@
 		if ($toim == "DGD") {
 			$joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
 		}
+		
 		if ($toim == "VASTAANOTTORAPORTTI") {
 			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
 			$where5 = " AND tilausrivi.kpl !=0 ";

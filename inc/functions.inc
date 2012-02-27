@@ -14831,7 +14831,9 @@ if (!function_exists("tee_keraysera2")) {
 
 								if ($debug) echo "debug!!! ($ot == 'tilauksen_koko' and $val >= $pak[minimi_tilavuus] and $val <= $pak[tilavuus]) or ($ot == 'tilauksen_paino' and $val >= $pak[minimi_paino] and $val <= $pak[tilavuus])<br><br>";
 
-								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus'] and $val <= $pak['tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'] and $val <= $pak['tilavuus'])) {
+								// otetaan and $val <= $pak['tilavuus'] pois!!!
+								// if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus'] and $val <= $pak['tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'] and $val <= $pak['tilavuus'])) {
+								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'])) {
 
 									if ($debug) {
 										echo "Siirret‰‰n $key ensimm‰iseksi!<br>";
@@ -14894,7 +14896,7 @@ if (!function_exists("tee_keraysera2")) {
 									$pakkaus_result = pupe_query($query);
 									$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
-									$keraysvyohyketiedot['max_keraysera_pintaala'] = $huijataanko ? ($pakkaus_row['pinta_ala'] * 1.5) : $keraysvyohyketiedot['max_keraysera_pintaala'];
+									$keraysvyohyketiedot['max_keraysera_pintaala'] = $huijataanko ? ($pakkaus_row['pinta_ala'] * 1.1) : $keraysvyohyketiedot['max_keraysera_pintaala'];
 									if ($debug) echo "Uusi pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br><br>";
 									// break 2;
 									break 3;

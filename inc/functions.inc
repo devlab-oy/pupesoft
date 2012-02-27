@@ -14124,7 +14124,7 @@ if (!function_exists("tee_keraysera2")) {
 
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
-		$kukarow['max_keraysera_alustat'] = $kukarow['max_keraysera_alustat'] != 0 ? : 9999999999;
+		$kukarow['max_keraysera_alustat'] = (int) $kukarow['max_keraysera_alustat'] != 0 ? (int) $kukarow['max_keraysera_alustat'] : 9999999999;
 
 		if ($debug) echo "Ker‰‰j‰n max_keraysera_alustat $kukarow[max_keraysera_alustat]<br><br>";
 

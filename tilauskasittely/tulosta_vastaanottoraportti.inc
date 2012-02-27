@@ -3,6 +3,10 @@
 	// Ohjelma vatii muuttujan $otunnus joka viittaa keikkaan johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
 	require_once('pdflib/phppdflib.class.php');
+	
+	$select_lisa = "";
+	$join_lisat = "";
+    $where_lisa = "";
 
 	$norm["height"] 	  = 10;
 	$norm["font"] 		  = "Helvetica";
@@ -86,7 +90,7 @@
 			fclose($fh);
 
 			//itse print komento tulee valitse_tulosin.inciltä...
-			if ($komento["Vastaanottoraportti"] == 'email' or $tee == 'vastaanottoraportinkopio') {
+			if ($komento["Vastaanottoraportti"] == 'email') {
 				$liite = $pdffilenimi;
 
 				$kutsu = "Vastaanottoraportti";
@@ -108,22 +112,28 @@
 			system("rm -f $pdffilenimi");
 		}
 	}
+	
+	if ($yhtiorow["suuntalavat"] == "S") {
+		$select_lisa	= ", suuntalavat.sscc,	keraysvyohyke.nimitys AS keraysvyohyke_nimitys";
+		$join_lisat		= "	JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)";
+		$where_lisa		= " AND tilausrivi.suuntalava != 0";
+	}
+	
 
 	$query = "	SELECT tilausrivi.*,
-				suuntalavat.sscc,
 				tuotteen_toimittajat.toim_tuoteno,
-				tilausrivi.varattu+tilausrivi.kpl siskpl,
-				keraysvyohyke.nimitys AS keraysvyohyke_nimitys
+				tilausrivi.varattu+tilausrivi.kpl siskpl
+				{$select_lisa}
 				FROM tilausrivi
-				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
-				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
+				{$join_lisat}
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.uusiotunnus = '{$otunnus}'
 				AND tilausrivi.tyyppi = 'O'
 				AND tilausrivi.kpl != 0
-				AND tilausrivi.suuntalava != 0";
+				{$where_lisa}";
 
 	$vastaanottoraportti_result = pupe_query($query);
 

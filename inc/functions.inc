@@ -14839,6 +14839,8 @@ if (!function_exists("tee_keraysera2")) {
 
 									$fixed_main_array = array();
 
+									$huijataanko = true;
+
 									foreach ($fixed_main_prio_array as $nippu_z => $nipun_tiedot) {
 										if ($nipun_tiedot['prioriteetti'] < $fixed_main_prio_array[$backup_array[$key]]['prioriteetti']) {
 											// if ($debug) {
@@ -14846,6 +14848,22 @@ if (!function_exists("tee_keraysera2")) {
 											// 	echo "nippu: {$nippu_z}<br><br>";
 											// }
 											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
+
+											// katsotaan ylittääkö pienemmän prioriteetin tilaus yksin erään speksit
+											foreach ($kerailynipun_tiedot[$nipun_tiedot['indeksi']] as $arr_chk_mahtuuko) {
+												foreach ($arr_chk_mahtuuko as $ot2 => $val2) {
+													if ($ot2 == 'tilauksen_koko' or $ot2 == 'tilauksen_paino') {
+														if (($ot2 == 'tilauksen_koko' and ($val2 < $pak['minimi_tilavuus'] or $val2 > $pak['tilavuus'])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak['minimi_paino'] or $val2 > $pak['tilavuus']))) {
+																if ($debug) {
+																	echo "indeksi $nipun_tiedot[indeksi] ei mahdu!<br>";
+																	echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br><br>";
+																}
+																$huijataanko = false;
+															}
+														}
+													}
+												}
+											}
 										}
 									}
 
@@ -14868,7 +14886,7 @@ if (!function_exists("tee_keraysera2")) {
 									$pakkaus_result = pupe_query($query);
 									$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
-									$keraysvyohyketiedot['max_keraysera_pintaala'] = $pakkaus_row['pinta_ala'] * 1.5;
+									$keraysvyohyketiedot['max_keraysera_pintaala'] = $huijataanko ? $pakkaus_row['pinta_ala'] * 1.5 : $keraysvyohyketiedot['max_keraysera_pintaala'];
 									if ($debug) echo "Uusi pinta-ala rajoitus on $keraysvyohyketiedot[max_keraysera_pintaala]<br><br>";
 									// break 2;
 									break 3;

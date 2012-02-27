@@ -21,6 +21,8 @@
 	$pdf->set_default('margin-right', 	0);
 	$rectparam["width"] = 0.3;
 
+	$apukomento = "matriisi";
+
 	if (!function_exists('alku_purku')) {
 		function alku_purku () {
 			global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
@@ -207,11 +209,27 @@
 	}
 
 	if ($mista == "vastaanota" and $vainlistaus == '') {
-		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso,
-					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
-					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso,
+		$query = "	SELECT tuote.tuoteno, 
+					tuote.sarjanumeroseuranta, 
+					tapahtuma.hyllyalue, 
+					tapahtuma.hyllynro, 
+					tapahtuma.hyllyvali, 
+					tapahtuma.hyllytaso,
+					tilausrivi.yksikko, 
+					tilausrivi.varattu+tilausrivi.kpl varattu, 
+					tilausrivi.hinta,
+					tuote.nimitys, 
+					tilausrivi.perheid2, 
+					tilausrivi.kommentti, 
+					tilausrivi.otunnus, 
+					tilausrivi.tunnus, 
+					tilausrivi.hyllyalue trhyllyalue, 
+					tilausrivi.hyllynro trhyllynro, 
+					tilausrivi.hyllyvali trhyllyvali, 
+					tilausrivi.hyllytaso trhyllytaso,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta, 
-					tuote.purkukommentti
+					tuote.purkukommentti, 
+					tilausrivi.laadittu
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
@@ -220,11 +238,23 @@
 					ORDER BY sorttauskentta, tuote.tuoteno";
 	}
 	elseif ($mista == "vastaanota" and $vainlistaus != '') {
-		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta,
-					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
-					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso,
+		$query = "	SELECT tuote.tuoteno,
+					tuote.sarjanumeroseuranta,
+					tilausrivi.yksikko, 
+					tilausrivi.varattu+tilausrivi.kpl varattu, 
+					tilausrivi.hinta,
+					tuote.nimitys, 
+					tilausrivi.perheid2, 
+					tilausrivi.kommentti, 
+					tilausrivi.otunnus, 
+					tilausrivi.tunnus, 
+					tilausrivi.hyllyalue trhyllyalue, 
+					tilausrivi.hyllynro trhyllynro, 
+					tilausrivi.hyllyvali trhyllyvali, 
+					tilausrivi.hyllytaso trhyllytaso,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta, 
-					tuote.purkukommentti
+					tuote.purkukommentti, 
+					tilausrivi.laadittu
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					WHERE tilausrivi.otunnus = '$otunnus'
@@ -232,11 +262,25 @@
 					ORDER BY sorttauskentta, tuote.tuoteno";
 	}
 	else {
-		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tuote.sarjanumeroseuranta,
-					tilausrivi.hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, 
+					tuote.tuoteno, 
+					tilausrivi.hyllyalue, 
+					tilausrivi.hyllynro, 
+					tilausrivi.hyllyvali, 
+					tuote.sarjanumeroseuranta,
+					tilausrivi.hyllytaso, 
+					tilausrivi.yksikko, 
+					tilausrivi.varattu+tilausrivi.kpl varattu, 
+					tilausrivi.hinta, 
+					if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 					round(if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara,
-					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus,
+					tuote.nimitys, 
+					tilausrivi.perheid2, 
+					tilausrivi.kommentti, 
+					tilausrivi.otunnus, 
+					tilausrivi.tunnus,
 					tuote.purkukommentti,
+					tilausrivi.laadittu,
 					$sorttauskentta
 					$selectlisa
 					FROM tilausrivi
@@ -249,7 +293,7 @@
 					ORDER BY $orderlisa sorttauskentta, tilausrivi.tunnus";
 	}
 
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$kala 		= 500;
 	$total 		= 0;
@@ -259,8 +303,57 @@
 	$ekakala	= '';
 	$edellinen_sscc = '';
 
-	$firstpage = alku_purku();
 
+	if ($apukomento == "matriisi") {
+		// Tehd‰‰n otsikko tai jotain..
+		$filenimi = "/tmp/purkulista_tulostus.txt";
+
+		$huijausrow = mysql_fetch_assoc($result);
+		$hae_alku = "SELECT * from lasku where yhtio='oga' and tunnus='{$huijausrow["otunnus"]}'";
+		$result100 = pupe_query($query);
+		$turharow = mysql_fetch_array($result100);
+
+		$out = sprintf ('%-20.20s', $yhtiorow["nimi"]);			// Tulostetaan alkuun yhtiˆn nimi
+		$out .= sprintf ('%4s', ' ');							// 4 spacea
+		$out .= sprintf ('%-26.26s', 'VARASTOONSAAPUMISILMOITUS'); 
+		$out .= sprintf ('%2s', ' ');							// 2 space
+	//	$out .= sprintf ('%-6.6s', 'VIITE:'); 					// ????
+		$out .= sprintf ('%6s', ' '); // jos ei viite-sanaa tulosteta
+		$out .= sprintf ('%8s', ' ');							// 8 space
+		$out .= sprintf ('%-6.6s', 'AJOPVM');					// ajop‰iv‰m‰‰r‰
+		$out .= sprintf ('%1s', ' ');							// 1 space 
+		$tulostettu	= date("d/m/y");
+		$out .= sprintf ('%8.8s', $tulostettu);				// nyt
+		// ensimm‰inen rivi valmis
+		$out .= chr(13);								// 1 rivinvaihtoa (Line feed) + 1 Carriage return (= siirret‰‰n kirjoitusp‰‰ rivin alkuun)
+		//toinen rivi alkaa
+		$out .= sprintf ('%-65.65s', $laskurow["ytunnus"].' '.$laskurow["nimi"]); // Mist‰ tavara tulee
+		$out .= sprintf ('%1s', ' ');							// 1 space
+		$out .= sprintf ('%7s', 'TILAUS:');						// 8 space
+		$out .= sprintf ('%1s', ' ');							// 1 space
+		$out .= sprintf ('%-11.11s', $huijausrow["otunnus"]);		// tilauksen tunnus
+		$out .= sprintf ('%1s', ' ');							// 1 space
+		
+		
+		
+		$out .= chr(13);								// Rivinvaihto + Carriage return
+		// Kolmannen rivin otsikkoja
+		$out .= sprintf ('%-47s', 'TUOTENO / NIMITYS');			// 
+		$out .= sprintf ('%-15s', 'HYLLY');						// 
+		$out .= sprintf ('%10s', 'TILATTU');					// 
+		$out .= sprintf ('%1s', ' ');							// 
+		$out .= sprintf ('%-5.5s', 'YKS');						// 
+		$out .= sprintf ('%5s', ' ');							// 5 space
+		$out .= sprintf ('%-10.10s', 'SAAPUNUT');				// 5 space
+		$out .= chr(13);								// Rivinvaihto + Carriage return		
+		// Hyp‰t‰‰n tekem‰n rivej‰. riville 548
+		
+		// $boob = file_put_contents($filenimi, $out);
+	}
+	
+	$firstpage = alku_purku();
+	
+	
 	if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavajoin) != '') {
 
 		$row = mysql_fetch_assoc($result);
@@ -322,7 +415,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$row[tuoteno]'
 					and oletus  = 'X'";
-		$olesaldoresult = mysql_query($query) or pupe_error($query);
+		$olesaldoresult = pupe_query($query);
 		$olesaldorow = mysql_fetch_array($olesaldoresult);
 
 		$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -336,7 +429,7 @@
 					and hyllynro 	= '$olesaldorow[hyllynro]'
 					and hyllyvali 	= '$olesaldorow[hyllyvali]'
 					and hyllytaso 	= '$olesaldorow[hyllytaso]'";
-		$hylresult = mysql_query($query) or pupe_error($query);
+		$hylresult = pupe_query($query);
 		$hylrow = mysql_fetch_array($hylresult);
 
 		$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
@@ -361,7 +454,7 @@
 					and hyllynro  = '$row[hyllynro]'
 					and hyllyvali = '$row[hyllyvali]'
 					and hyllytaso = '$row[hyllytaso]'";
-		$xolesaldoresult = mysql_query($query) or pupe_error($query);
+		$xolesaldoresult = pupe_query($query);
 
 		// tuotepaikoista ei lˆydy rivill‰ olevaa varastopaikkaa.. silloin ei echota mit‰‰n paikkaa
 		if (mysql_num_rows($xolesaldoresult) == 0) {
@@ -382,7 +475,6 @@
 		}
 
 		$perheid = $row["perheid2"];
-
 
 		if ($mista == "vastaanota") {
 			$pdf->draw_text(30, $kala, $row["tuoteno"], 		$firstpage, $p);
@@ -418,7 +510,7 @@
 							and hyllynro = '".$t2[$row[tunnus]]."'
 							and hyllyvali = '".$t3[$row[tunnus]]."'
 							and hyllytaso = '".$t4[$row[tunnus]]."'";
-				$olesaldoresult = mysql_query($query) or pupe_error($query);
+				$olesaldoresult = pupe_query($query);
 				$olesaldorow = mysql_fetch_array($olesaldoresult);
 
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -432,7 +524,7 @@
 							and hyllynro 	= '$olesaldorow[hyllynro]'
 							and hyllyvali 	= '$olesaldorow[hyllyvali]'
 							and hyllytaso 	= '$olesaldorow[hyllytaso]'";
-				$hylresult = mysql_query($query) or pupe_error($query);
+				$hylresult = pupe_query($query);
 				$hylrow = mysql_fetch_array($hylresult);
 
 				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
@@ -449,7 +541,7 @@
 							and hyllynro = '$row[hyllynro]'
 							and hyllyvali = '$row[hyllyvali]'
 							and hyllytaso = '$row[hyllytaso]'";
-				$olesaldoresult = mysql_query($query) or pupe_error($query);
+				$olesaldoresult = pupe_query($query);
 				$olesaldorow = mysql_fetch_array($olesaldoresult);
 
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -463,7 +555,7 @@
 							and hyllynro 	= '$olesaldorow[hyllynro]'
 							and hyllyvali 	= '$olesaldorow[hyllyvali]'
 							and hyllytaso 	= '$olesaldorow[hyllytaso]'";
-				$hylresult = mysql_query($query) or pupe_error($query);
+				$hylresult = pupe_query($query);
 				$hylrow = mysql_fetch_array($hylresult);
 
 				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
@@ -504,6 +596,26 @@
 		$lisaa = 0;
 		$kala = $kala - 25 - $lisaa;
 
+		if ($apukomento == "matriisi") {
+		
+			$out .= sprintf ('%-46.46s', $row["tuoteno"]." ".$row["nimitys"]);
+			$out .= sprintf ('%1s', ' ');							// 1 space			
+			$out .= sprintf ('%-23.23s', $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+									
+			$out .= sprintf ('%01.2f', $row["varattu"]);
+			$out .= sprintf ('%1s', " ");
+			$out .= sprintf ('%-10.10s', '');				
+			$out .= sprintf ('%13s', ' '); // nyt 100	
+			$out .= sprintf ('%-15.15s', $row["tuoteno"]);				
+
+			$out .= chr(13);
+			$out .= sprintf ('%100s',' '); // 100 space niin menn‰‰n suoraan tarraan									
+			$out .= sprintf ('%15s', $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);			
+		
+			$out .= chr(10).chr(13);								// Rivinvaihto + Carriage return		
+
+		}
+
 		if ($row["sarjanumeroseuranta"] != "") {
 
 			if ($row["varattu"] < 0) {
@@ -520,7 +632,7 @@
 	   					WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$row[tuoteno]'
 	   					and $tunken = '$row[tunnus]'";
-	   		$sarjares = mysql_query($query) or pupe_error($query);
+	   		$sarjares = pupe_query($query);
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				if ($row["sarjanumeroseuranta"] == "S") {
@@ -590,6 +702,8 @@
 		$sumarum += $row["varattu"];
 		$total   += $row["hinta"];
 	}
+
+	$boob = file_put_contents($filenimi, $out);
 
 	// viivat rivien v‰liin...
 	$x[0] = 20;

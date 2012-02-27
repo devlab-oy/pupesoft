@@ -14819,6 +14819,8 @@ if (!function_exists("tee_keraysera2")) {
 
 		if ($debug) echo "<pre>",var_dump($fixed_main_array),"</pre>";
 
+		$kerailyniput_tiedot2 = $kerailyniput_tiedot;
+
 		// koitetaan heittää tilausrypäs ensimmäiseksi joka matchaa minimi tilavuuteen tai minimi painoon
 		if ($yksin_eraan and count($fixed_main_array) > 0) {
 			foreach ($kerailyniput_tiedot as $key => $arr) {
@@ -14850,11 +14852,10 @@ if (!function_exists("tee_keraysera2")) {
 											$fixed_main_array[$nipun_tiedot['indeksi']] = $nippu_z;
 
 											if ($debug) echo "nipun_tiedot indeksi: $nipun_tiedot[indeksi]<br>";
-											if ($debug) echo "<pre>",var_dump($kerailyniput_tiedot[$nipun_tiedot['indeksi']]),"</pre>";
-											if ($debug) echo "<pre>",var_dump($kerailyniput_tiedot),"</pre>";
+											if ($debug) echo "<pre>",var_dump($kerailyniput_tiedot2[$nipun_tiedot['indeksi']]),"</pre>";
 
 											// katsotaan ylittääkö pienemmän prioriteetin tilaus yksin erään speksit
-											foreach ($kerailyniput_tiedot[$nipun_tiedot['indeksi']] as $ot2 => $val2) {
+											foreach ($kerailyniput_tiedot2[$nipun_tiedot['indeksi']] as $ot2 => $val2) {
 												if ($debug) echo "($ot2 == 'tilauksen_koko' and ($val2 < $pak[minimi_tilavuus] or $val2 > $pak[tilavuus])) or ($ot2 == 'tilauksen_paino' and ($val2 < $pak[minimi_paino] or $val2 > $pak[tilavuus]))<br>";
 
 												if ($ot2 == 'tilauksen_koko' or $ot2 == 'tilauksen_paino') {
@@ -14866,6 +14867,8 @@ if (!function_exists("tee_keraysera2")) {
 													}
 												}
 											}
+
+											reset($kerailyniput_tiedot2);
 										}
 									}
 

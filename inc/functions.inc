@@ -14828,6 +14828,9 @@ if (!function_exists("tee_keraysera2")) {
 					if ($ot == 'tilauksen_koko' or $ot == 'tilauksen_paino') {
 						foreach ($pakkaukset as $paktun => $pak) {
 							if ($pak['yksin_eraan'] == 'K') {
+
+								if ($debug) echo "debug!!! ($ot == 'tilauksen_koko' and $val >= $pak[minimi_tilavuus] and $val <= $pak[tilavuus]) or ($ot == 'tilauksen_paino' and $val >= $pak[minimi_paino] and $val <= $pak[tilavuus])<br><br>";
+
 								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus'] and $val <= $pak['tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'] and $val <= $pak['tilavuus'])) {
 
 									if ($debug) {

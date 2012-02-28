@@ -1,20 +1,6 @@
 <?php
 
-/*
-
-TƒSTƒ SKRIPTISTƒ PUUTTUU KORVAAVIIN LIITTYVƒ KƒSITTELY. NYKYINEN TUOTTEEN_AVAINSANOISTA KATOTTU KORVAAVUUS PITƒƒ OLLA TUTKITTU TODELLISISTA KORVAUKSISTA, EI AVAINSANOISTA.
-LISƒKSI XSWP EI OLE KUNNOSSA KORVAAVIEN TAKIA. NYT EI TIEDETƒ KOSKA KORVAUS ON TEHTY.
-
-
-
-XLTO: pit‰‰ rajata viel‰ laatija = 'E3' tjsp et tuloutukset jtoka tehty E3:lla tehdyill‰ ostotilauksilla rekisterˆid‰‰n!
-XF01 avoimet pit‰‰ katsoa et ne on E3:n avoimia ostotilausrivej‰!
-XF01 myynnit pit‰isi katsoa niin et ne on ns ykkˆsvaraston myyntej‰, eik‰ esim palautuksia tjsp rekkulavarastosta!!!! -jouni ojala
-^
-Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan riveilt‰, et t‰‰ tieto j‰‰ taltee.
-
-*/
-
+	//toimi.herminator pit‰nee vaihtaa toimi.toimittajanro:ksi tuotannossa viimeist‰‰n?
 
 	if (empty($argv)) {
 	    die('<p>T‰m‰n scriptin voi ajaa ainoastaan komentorivilt‰.</p>');
@@ -30,6 +16,9 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
+	
+	//testauksen vuoksi..
+	ini_set("memory_limit", "5000M");
 
 	if (include("/var/www/html/demo/orum/inc/connect.inc"));
 	elseif (include("/Users/tony/Sites/pupesoft/inc/connect.inc"));
@@ -40,11 +29,11 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	else require("/var/www/html/pupesoft/inc/functions.inc");
 
 	$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-	$today = $tanaan;
 	
 	//rajaukset
 	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = ''";
 	$toimirajaus = " AND toimi.oletus_vienti in ('C','F','I')";
+	$xf02loppulause = '';
 	
 	$path = "/Users/tony/E3konversio/E3_$yhtio/filet/terve/";
 	//$path = "/home/tony/E3konversio/artr/artr/";
@@ -61,7 +50,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	$path_wswp 		 = $path . 'xswp.txt';
 	$path_xvni    	 = $path . 'xvni.txt';
 	$path_xf04 		 = $path . 'xf04.txt';
-	$path_xf01     	 = $path . 'xf01'.$today.'.txt';
+	$path_xf01     	 = $path . 'xf01'.$tanaan.'.txt';
 	$path_xf02       = $path . 'xf02.txt';
 
 	$query = "SELECT * from yhtio where yhtio='$yhtio'";
@@ -82,11 +71,11 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	// Ajetaan kaikki operaatiot
 //	xauxi($limit);
 //	xlto($limit); 
-	xswp($limit); 
+	xswp($limit);
 //	xvni($limit); 
 //	xf04($limit);
 //	xf01($limit); 
-	xf02($limit); 
+//	xf02($limit); 
                   
 	//Siirret‰‰n failit logisticar palvelimelle
 	#siirto($path);
@@ -126,7 +115,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	}
 
 	function xauxi($limit = '') {
-		global $path_xauxi, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_xauxi, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xauxi...";
 		//vied‰‰n nimityksen sijaan lyhytkuvaus -Satu 8.2.12
@@ -144,12 +133,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
 					HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
-					//ta1.selite,
-					//LEFT JOIN tuotteen_avainsanat ta1 use index (yhtio_kieli_laji_tuoteno) ON (ta1.yhtio = tuote.yhtio AND ta1.kieli='fi' AND ta1.laji = 'parametri_korvattu' AND ta1.tuoteno = tuote.tuoteno)
-					//(ta1.selite = '$tanaan' OR ta1.selite is null)
-					//tuoteperhe.isatuoteno,
-					//LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'P')
-					//tuoteperhe.isatuoteno is null AND
 		$rested = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rested);
 
@@ -163,10 +146,8 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		$row = 0;
 
 		while ($tuote = mysql_fetch_assoc($rested)) {
-			
-			$toimittaja = 'AS ytunnus, toimi.herminator as toimittaja';
-			
-			$query = "	SELECT toimi.ytunnus $toimittaja, toimi.tyyppi
+
+			$query = "	SELECT toimi.herminator as toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtio'
@@ -191,8 +172,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			$out .= sprintf("%-3.3s",		"001");
 			$out .= sprintf("%-8.8s",		$tuto['toimittaja']);
 			$out .= sprintf("%-45.45s",		$nimitys); 
-			
-			//$tuote = implode("\t", $tuote);
 
 			if (! fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
@@ -206,8 +185,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			for ($i=0; $i < (int) $progress; $i++) {
 				$hash .= "#";
 			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -215,7 +192,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	}
 
 	function xlto($limit = '') {
-		global $path_xlto, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_xlto, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		//Item Lead Time File XLT0 (toimitusaikaseuranta)
 		//Tiedot p‰iv‰n aikaan tehdyist‰ tuloutuksista, jotka tehty E3:ssa syntynytt‰ tilausta vastaan
@@ -224,15 +201,11 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		
 		echo "Ulostetaan xlt0...\n";
 
-	//	$tanaan = date("Y-m-d"); // muodossa Y-m-d == 2005-10-29
-
 		$query = "	SELECT
 						tilausrivi.tuoteno tuoteno,
-						sum(round(tilausrivi.kpl)) kpl,
 						DATE_FORMAT(tilausrivi.laskutettuaika,'%Y%m%d') luonti,
 						DATE_FORMAT(tilausrivi.laadittu,'%Y%m%d') lahete,
 						tilausrivin_lisatiedot.tilausrivitunnus,
-						lasku.ytunnus,
 						(
 							SELECT korv.tuoteno
 							FROM korvaavat AS korv
@@ -240,7 +213,8 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 							AND korv.id = korvaavat.id
 							ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
 							LIMIT 1
-						) korvaavatuoteno
+						) korvaavatuoteno,
+					sum(round(tilausrivi.kpl)) kpl
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
 					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset AND tuote.ostoehdotus = '')
@@ -251,7 +225,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					WHERE tilausrivi.yhtio	= '$yhtio' 
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.laskutettuaika = '$tanaan'
-					GROUP BY 1
+					GROUP BY tuoteno, luonti, lahete, tilausrivitunnus, korvaavatuoteno
 					HAVING tilausrivin_lisatiedot.tilausrivitunnus is null AND (korvaavatuoteno = tilausrivi.tuoteno OR korvaavatuoteno is null)";
 		$rest = mysql_query($query) or pupe_error($query);
 
@@ -261,7 +235,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 		if ($rows == 0) {
 			echo "Yht‰‰n laskutustietoa ei lˆytynyt\n";
-			//miks ihmeess‰ die? koko skripti kuolee t‰h‰n, eik‰ muita aineistoja tehd‰ laisinkaan... ˆˆ-ˆˆ
 			//die();
 		}
 
@@ -270,10 +243,8 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		while ($xlto = mysql_fetch_assoc($rest)) {
 			
 			if ($xlto['kpl'] == 0 or $xlto['kpl'] < 0) continue;
-			
-			$toimittaja = 'AS ytunnus, toimi.herminator AS toimittaja';
-			
-			$query = "	SELECT toimi.ytunnus $toimittaja, toimi.tyyppi
+
+			$query = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtio'
@@ -285,7 +256,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			
 			//tyhj‰t pois ja jos ostorivin toimittaja ei oo p‰‰toimittaja, ni skipataan (vain p‰‰toimittajan ostoja e3)
 			if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
-			//if ($tuto['ytunnus'] != $xlto['ytunnus']) continue;	//t‰m‰ pois Sadun pyynnˆst‰, kaikki tuloutukset e3:seen.
 			
 			// mones t‰m‰ on
 			$row++;
@@ -312,22 +282,25 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	}
 
 	function xswp($limit = '') {
-		global $path_wswp, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_wswp, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
 
 		echo "Tulostetaan xswp...";
 
-/*		$query = "	SELECT korvaavat.id, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') as tunnus,
-		 			group_concat(korvaavat.tuoteno order by korvaavat.jarjestys, korvaavat.tunnus SEPARATOR '####') as tuotteet
-					FROM korvaavat
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = korvaavat.yhtio and tuotteen_toimittajat.tuoteno = korvaavat.tuoteno)
-					WHERE korvaavat.yhtio = '$yhtio'
-					GROUP BY id, toimittaja
-					$limit";
-*/
-		$query = "			SELECT korvaavat.id, tuote.tuoteno, korvaavat.jarjestys
-							FROM tuote
-							JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan' AND korvaavat.jarjestys = '1')
-							WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''";
+		$query = "				SELECT korvaavat.id, 
+								tuote.tuoteno, 
+								korvaavat.jarjestys,
+								(
+									SELECT korv.tuoteno
+									FROM korvaavat AS korv
+									WHERE korv.yhtio = tuote.yhtio
+									AND korv.id = korvaavat.id
+									ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+									LIMIT 1
+								) korvaavatuoteno
+								FROM tuote
+								JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
+								WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
+								HAVING tuote.tuoteno = korvaavatuoteno";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
 		$row = 0;
@@ -338,15 +311,15 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		}
 
 		$fp = fopen($path_wswp, 'w+');
+		
 		$xf02loppulause = '';
+		
 		while ($korvaavat = mysql_fetch_assoc($rest)) {
 
 			// mones t‰m‰ on
 			$row++;
 
-			$toimittaja = "AS ytunnus, RPAD(toimi.herminator,7,' ') as toimittaja";
-			
-			$query = "			SELECT toimi.ytunnus $toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
+			$query = "			SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
 								FROM tuotteen_toimittajat
 								JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 								WHERE tuotteen_toimittajat.yhtio = '$yhtio'
@@ -360,37 +333,17 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 			$query = "			SELECT korvaavat.tuoteno
 								FROM korvaavat
-								WHERE korvaavat.yhtio = '$yhtio' AND korvaavat.id = '$korvaavat[id]' and if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys) > '$korvaavat[jarjestys]'
+								WHERE korvaavat.yhtio = '$yhtio' AND korvaavat.id = '$korvaavat[id]' AND if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys) >= '$korvaavat[jarjestys]' AND korvaavat.tuoteno != '$korvaavat[tuoteno]'
 								ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
 								LIMIT 1";
 			$korvaavaresult = mysql_query($query) or pupe_error($query);
+			$korvaavarows = mysql_num_rows($korvaavaresult);
+			if ($korvaavarows == 0) continue;
 			$korvaava = mysql_fetch_assoc($korvaavaresult);
 
 			$lause = "E3T001$tuto[tutotunnus] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
-			$xf02loppulause .= "$tuto[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D";
+			$xf02loppulause .= "$tuto[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
 
-/*			//// explode, tunniste , alikysely ///
-			$testi = explode("####", $korvaavat['tuotteet']);
-			$alitunniste = $testi[0];
-
-			// korjattu, herminator toimii
-
-			$apuquery2 = "	SELECT DISTINCT RPAD(korvaavat.tuoteno,17,' ') as tuoteno, RPAD(toimi.ytunnus,7,' ') as tunnus
-							FROM korvaavat
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = korvaavat.yhtio and tuotteen_toimittajat.tuoteno = korvaavat.tuoteno)
-							JOIN toimi on (toimi.ytunnus = tuotteen_toimittajat.toimittaja and toimi.yhtio='$yhtio')
-							WHERE korvaavat.yhtio = '$yhtio'
-							AND korvaavat.tuoteno != '$alitunniste'
-							AND korvaavat.id = '$korvaavat[id]'";
-			$rested2 = mysql_query($apuquery2) or pupe_error($apuquery2);
-
-			$i=1;
-
-			while ($ali2 = mysql_fetch_assoc($rested2)) {
-				//echo "alkuptuote: $alitunniste # alkuptoimittaja: $korvaavat[tunnus] # korvaavatuote: $ali2[tuoteno] # korvaavatoimittaja $ali2[tunnus]\n";
-				$lause = "E3T001$korvaavat[tunnus] ".str_pad($alitunniste,17)." 001$ali2[tunnus] $ali2[tuoteno] U1    000000000000000000000000000AYNY";
-			}
-*/
 			if (!fwrite($fp, $lause . "\n")) {
 				echo "Failed writing row.\n";
 				die();
@@ -408,20 +361,18 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 		fclose($fp);
 		echo "Do Did Done.\n";
+		return $xf02loppulause;
 	}
 
 	function xvni($limit = '') {
-		global $path_xvni, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_xvni, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		echo "Ulostetaan XVNI...";
-		
-		$toimittaja = 'toimi.herminator';
-		$ytunnus = 'AS ytunnus, toimi.herminator AS tunnus';
-		
-		$qxvni = "	SELECT ytunnus $ytunnus, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
+
+		$qxvni = "	SELECT toimi.herminator AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
 					FROM toimi
 					WHERE toimi.yhtio = '$yhtio'
-					AND $toimittaja not in ('0','')
+					AND toimi.herminator not in ('0','')
 					AND tyyppi = '' $toimirajaus
 					ORDER BY 1 $limit";
 		$resto = mysql_query($qxvni) or pupe_error($qxvni);
@@ -437,7 +388,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 			$out = sprintf("%-3.3s", "E3T");					//XVCOMP
 			$out .= sprintf("%-3.3s", "001");					//XVWHSE
-			$out .= sprintf("%-8.8s", $xvni['tunnus']);			//XVVNDR
+			$out .= sprintf("%-8.8s", $xvni['toimittaja']);		//XVVNDR
 			$out .= sprintf("%-4.4s", "");						//XVSUBV
 			$out .= sprintf("%-30.30s", $xvni['nimi']);			//XVNAME
 			$out .= sprintf("%-18.18s", $xvni['lyhytnimi']);	//XVSEQ
@@ -497,7 +448,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	}
 
 	function xf04($limit = '') {
-		global $path_xf04, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_xf04, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		echo "Tulostetaan xf04...\n";
 		// jos kirjaimet on A-I niin homma toimii, jos on enemm‰n niin homma kusee.
@@ -524,7 +475,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					ORDER BY tuote.tuoteno";
 		$resto = mysql_query($qxf04) or pupe_error($qxf04);
 		$rows = mysql_num_rows($resto);
-		echo "÷ˆˆˆˆˆˆ\n";
 		$laskuri = 0;
 
 		if ($rows == 0) {
@@ -534,10 +484,8 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		$fp = fopen($path_xf04, 'w+');
 
 		while ($xf04 = mysql_fetch_assoc($resto)) {
-			
-			$toimittaja = 'AS ytunnus, toimi.herminator AS toimittaja';
 
-			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno as ttuoteno, toimi.ytunnus $toimittaja, toimi.tyyppi
+			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno as ttuoteno, toimi.herminator AS toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtio'
@@ -596,13 +544,12 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			$laskuri++;
 			echo "Kasitelty $laskuri / $rows\r";
 		}
-		echo "÷ˆˆˆˆˆˆ2\n";
 		fclose($fp);
 		echo "\nsniffer daa.\n";
 	}
 
 	function xf01($limit = '') {
-		global $path_xf01, $yhtiorow, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus;
+		global $path_xf01, $yhtiorow, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		echo "Ajetaan xf01...\n";
 
@@ -617,7 +564,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					LIMIT 1
 				) korvaavatuoteno,
 				tuote.ostoehdotus,
-				#ROUND(sum(tuotepaikat.saldo),0) saldo
 				(
 					SELECT ROUND(sum(tuotepaikat.saldo),0) saldo
 					FROM tuotepaikat
@@ -629,7 +575,6 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 					AND tuotepaikat.tuoteno = tuote.tuoteno
 				) saldo
 				FROM tuote
-				#LEFT JOIN tuotepaikat on (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 				LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 				WHERE tuote.yhtio = '$yhtio' $tuoterajaukset AND tuote.ostoehdotus = ''
 				GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
@@ -646,9 +591,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 
 		while ($tuoterow = mysql_fetch_assoc($rests)) {
 
-			$toimittaja = 'AS ytunnus, toimi.herminator AS toimittaja';
-
-			$toimittajaquery = "	SELECT toimi.ytunnus $toimittaja, toimi.tyyppi
+			$toimittajaquery = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
 									FROM tuotteen_toimittajat
 									JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 									WHERE tuotteen_toimittajat.yhtio = '$yhtio' 
@@ -755,19 +698,16 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 	}
 
 	function xf02($limit = '') {
-		global $path_xf02, $yhtiorow, $yhtio, $tanaan, $today, $tuoterajaukset, $toimirajaus, $xf02loppulause;
+		global $path_xf02, $yhtiorow, $yhtio, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
 
 		echo "Ajetaan xf02...\n";
 
-		$kyselyxfo2 = " SELECT tuote.tuoteno org_tuoteno,
-						round((abc_aputaulu.summa / abc_aputaulu.kpl),4) as KAhinta,
-						round(tuote.tuotemassa,3) tuotemassa,
+		$kyselyxfo2 = " SELECT tuote.tuoteno,
 						tuote.tuotekorkeus,
 						tuote.tuoteleveys,
 						tuote.tuotesyvyys,
-						round(((tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys)/1000000000),4) as tilavuus,
 						tuote.nimitys,
-						tuote.status status,
+						tuote.status,
 						tuote.suoratoimitus,
 						tuote.epakurantti25pvm epakura,
 						tuote.ostoehdotus,
@@ -778,16 +718,17 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 							AND korv.id = korvaavat.id
 							ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
 							LIMIT 1
-						) korvaavatuoteno
+						) korvaavatuoteno,
+						round((abc_aputaulu.summa / abc_aputaulu.kpl),4) as KAhinta,
+						round(tuote.tuotemassa,3) tuotemassa,
+						round(((tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys)/1000000000),4) as tilavuus
 						FROM tuote use index (tuoteno_index)
 						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
 						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 						WHERE tuote.yhtio='$yhtio' $tuoterajaukset
+						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
 						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";
-						//AND (ta2.selite != 'no' OR ta2.selite is null) 
-						//ta2.selite as ostoehdotus
-						//LEFT JOIN tuotteen_avainsanat ta2 use index (yhtio_kieli_laji_tuoteno) ON (ta2.yhtio = tuote.yhtio AND ta2.kieli='fi' AND ta2.laji = 'parametri_ostoehdotus' AND ta2.tuoteno = tuote.tuoteno)
 		$rests = mysql_query($kyselyxfo2) or pupe_error($kyselyxfo2);
 		$rows = mysql_num_rows($rests);
 		$laskuri = 0;
@@ -799,14 +740,12 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 		$fp = fopen($path_xf02, 'w+');
 		
 		while ($xf02 = mysql_fetch_assoc($rests)) {
-			
-			$toimittaja = 'AS ytunnus, toimi.herminator AS toimittaja';
-			
-			$query = "	SELECT toimi.ytunnus $toimittaja, round(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)),4) ostohinta, round(tuotteen_toimittajat.pakkauskoko,0) ostokpl, tuotteen_toimittajat.valuutta, toimi.tyyppi
+
+			$query = "	SELECT toimi.herminator AS toimittaja, round(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)),4) ostohinta, round(tuotteen_toimittajat.pakkauskoko,0) ostokpl, tuotteen_toimittajat.valuutta, toimi.tyyppi
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtio'
-						AND tuotteen_toimittajat.tuoteno = '$xf02[org_tuoteno]'
+						AND tuotteen_toimittajat.tuoteno = '$xf02[tuoteno]'
 						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus 
 						LIMIT 1";
 			$rest_toimittajista = mysql_query($query) or pupe_error($query);
@@ -851,7 +790,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			if ($toim_row['ostokpl'] == '0') $toim_row['ostokpl'] = '1';
 
 			$out  = sprintf("%-8.8s",	$toim_row['toimittaja']);	   				//XVNDR
-			$out .= sprintf("%-18.18s",	$xf02['org_tuoteno']);   	   				//XITEM
+			$out .= sprintf("%-18.18s",	$xf02['tuoteno']);		   	   				//XITEM
 			$out .= sprintf("%-3.3s",	"001");   					   				//XWHSE
 			$out .= sprintf("%013.13s",	str_replace('.','',$ostonetto));   			//XPCHP
 			$out .= sprintf("%013.13s",	str_replace('.','',$KA_myynti_hinta));   	//XSLSP
@@ -873,6 +812,7 @@ Varmista et asn ja ostolasku rivisplittaukset ym s‰ilytt‰‰ alk.per laatijan rive
 			$laskuri++;
 			echo "Kasitelty $laskuri / $rows\r";
 		}
+
 		if (! fwrite($fp, $xf02loppulause . "\n")) {
 			echo "Failed writing row.\n";
 			die();

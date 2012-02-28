@@ -433,13 +433,13 @@
 					<input type='hidden' name='tee' value='TOIMITA'>";
 
 			if ($toim == "ENNAKKO") {
-				echo "	<font class='error'>".t("HUOM! Sinulla on toimittamattomia ennakkorivejä")."</font><br>
+				echo "	<font class='error'>".t("HUOM: Sinulla on toimittamattomia ennakkorivejä")."</font><br>
 						<table>
 						<tr>
 						<td>".t("Toimita poimitut ennakko-rivit").": </td>";
 			}
 			else {
-				echo "	<font class='error'>".t("HUOM! Sinulla on toimittamattomia jt-rivejä")."</font><br>
+				echo "	<font class='error'>".t("HUOM: Sinulla on toimittamattomia jt-rivejä")."</font><br>
 						<table>
 						<tr>
 						<td>".t("Laske alennukset uudelleen")."</td>
@@ -2032,7 +2032,7 @@
 				$huomio = "";
 
 				if ($vrow['tyyppi'] == 'E') {
-					$huomio = "<td class='back'><font class='error'>".t("HUOM!!! Erikoisvarasto!")."</font></td>";
+					$huomio = "<td class='back'><font class='error'>".t("HUOM: Erikoisvarasto!")."</font></td>";
 				}
 
 				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td>$huomio</tr>";

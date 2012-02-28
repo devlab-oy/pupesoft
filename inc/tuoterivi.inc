@@ -71,7 +71,7 @@
 	    $sresult = pupe_query($query);
 
 		if(mysql_num_rows($sresult) != 0) {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("Huom! Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
+			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("HUOM: Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
 			$jatko=0;
 		}
 	}

@@ -317,7 +317,23 @@
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
 			$tilausnumeroita = $laskurow["tunnus"];
 			require("tilaus-valmis-tulostus.inc");
+
+			// jos halutaan MYÖS lähete samantien
+			if ($yhtiorow["lahetteen_tulostustapa"] == "B") {
+				$params = array(
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> "",
+					'extranet_tilausvahvistus'	=> "",
+					'naytetaanko_rivihinta'		=> "",
+					'tee'						=> "",
+					'toim'						=> $toim,
+					'query_ale_lisa'			=> "",
+					'komento'					=> $komento
+					);
+				pupesoft_tulosta_lahete($params);
+			}
 		}
+
 		///* Tähän mennään jos lähete vain siirretään tulostusjonoon *///
 		elseif (mysql_affected_rows() > 0) {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
@@ -346,7 +362,7 @@
 			$tunnukset		= 0;
 			$rahtikirjanro	= 0;
 			$tulostauna		= "";
-			
+
 			if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
 				$tulostauna = "KYLLA";
 				$asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";

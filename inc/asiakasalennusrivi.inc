@@ -100,13 +100,13 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
 		// Jos t‰m‰ on liitetty ytunnuksella:
 		if ($trow[$i] != "" and $trow[$i] != "0") {
 			$ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
 		}
-		
+
 		$tyyppi = 4;
 		$jatko = 0;
 	}
@@ -125,7 +125,11 @@
 		if ($trow[$i] > 0) {
 			$ulos = "<input type='hidden' name='$nimi' value='$trow[$i]'>";
 		}
-		
+		// Jos t‰‰ on uusi itemi
+		elseif ((int) $tunnus == 0) {
+			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+		}
+
 		$tyyppi = 4;
 		$jatko = 0;
 	}

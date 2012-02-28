@@ -935,7 +935,7 @@
 				$result   = pupe_query($query);
 				$kulutrow = mysql_fetch_assoc($result);
 
-				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa m‰‰ritelty jo aiemmin!
+				//tilauksessa, ennakkopoistot ja jt	HUOM: varastolisa m‰‰ritelty jo aiemmin!
 				$query = "	SELECT
 							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
 							sum(if(tyyppi = 'O', varattu, 0)) tilattu,

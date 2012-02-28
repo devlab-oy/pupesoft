@@ -320,8 +320,12 @@ if (!function_exists('alku')) {
 
 
 		// Leveämmät laatikot
+		$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+		if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+		else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
 		$pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Toimitusehto", $kieli), $page_lasku[$sivu], $pieni);
-		$pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["toimitusehto"], 270, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
+		$pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($toimehto, 270, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
 		$rivi_ind++;
 
 		$pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), 	$page_lasku[$sivu], $pieni);

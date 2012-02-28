@@ -60,7 +60,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
 				require "inc/laskutyyppi.inc";
 
 				if($row["tunnusnippu"]>0) {
-					$lisa="<td class='back'><font class='message'>".t("HUOM! tilaus on jo liitettynä projektiin")." $row[tunnusnippu]</font></td>";
+					$lisa="<td class='back'><font class='message'>".t("HUOM: tilaus on jo liitettynä projektiin")." $row[tunnusnippu]</font></td>";
 				}
 				else {
 					$lisa = "";

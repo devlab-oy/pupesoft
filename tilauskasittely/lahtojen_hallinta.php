@@ -416,8 +416,6 @@
 
 						$nayta_pdf = 'foo';
 
-						echo "sel_ltun: <pre>",var_dump($sel_ltun),"</pre>";
-
 						require ("rahtikirja-tulostus.php");
 
 						$query = "	SELECT COUNT(tunnus) as tunnus

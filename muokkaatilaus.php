@@ -1156,7 +1156,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila		= 'O'
 						and lasku.alatila	= ''
-						and lasku.tilaustyyppi	= ''
+						and lasku.tilaustyyppi	!= 'O'
 						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
@@ -1177,7 +1177,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'O'
 						and lasku.alatila in ('A','')
-						and lasku.tilaustyyppi	= ''
+						and lasku.tilaustyyppi	!= 'O'
 						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";

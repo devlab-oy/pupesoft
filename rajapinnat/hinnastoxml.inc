@@ -36,7 +36,6 @@
 			$item->addChild('pricelistcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
 			$item->addChild('productcode', utf8_encode(xmlentities($hinnasto["tuoteno"])));
 			$item->addChild('price',$hinnasto["hinta"]);
-			$item->addChild('myymalahinta',$hinnasto["myymalahinta"]);
 	}
 
 	$xml->asXML($tiedoston_sijainti);

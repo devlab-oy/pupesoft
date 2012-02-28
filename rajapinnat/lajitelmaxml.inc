@@ -31,6 +31,7 @@
 				$assortment->addChild('assortmentnameeng', utf8_encode(xmlentities($tiedot["nimi_eng"])));
 				$assortment->addChild('ean', utf8_encode(xmlentities($tiedot["ean"])));
 				$assortment->addChild('assortmentprice',$tiedot["myyntihinta"]);
+				$assortment->addChild('kuluttajahinta',$tiedot["myymalahinta"]);
 				$properties = $assortment->addChild('properties');
 				$propertytype = $properties->addChild('propertytype');
 				

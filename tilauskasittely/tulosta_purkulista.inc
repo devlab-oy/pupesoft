@@ -306,68 +306,62 @@
 	$tulostin_row = mysql_fetch_assoc($tulostin_result);
 
 	if ($tulostin_row["merkisto"] != 0) {
-		
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		
-		$filenimi = "/tmp/purkulista_".md5(uniqid(mt_rand(), true)).".txt";
 
-		$out = sprintf ('%-20.20s', $yhtiorow["nimi"]);			// Tulostetaan alkuun yhtiön nimi
-		$out .= sprintf ('%4s', ' ');							// 4 spacea
-		$out .= sprintf ('%-26.26s', 'VARASTOONSAAPUMISILMOITUS');
-		$out .= sprintf ('%16s', ' ');							// 16 space
-		$out .= sprintf ('%-6.6s', 'AJOPVM');					// ajopäivämäärä
-		$out .= sprintf ('%1s', ' ');							// 1 space
-		$tulostettu	= date("d/m/y");
-		$out .= sprintf ('%8.8s', $tulostettu);					// nyt
-		$out .= chr(13);
-		// RIVI 1 valmis
-		$out .= sprintf ("%'-95s",'-');							// tulostetaan '-' merkkiä
-		// RIVI 2 valmis
-		$out .= chr(13);
-		$out .= sprintf ('%-65.65s', $laskurow["ytunnus"].' '.$laskurow["nimi"]); // Mistä tavara tulee
-		$out .= sprintf ('%1s', ' ');							// 1 space
-		$out .= sprintf ('%7s', 'KEIKKA:');	
-		$out .= sprintf ('%-11.11s', $laskurow["laskunro"]);		// Keikan numero
-		
-		$out .= chr(13);
-		$out .= sprintf ("%'-95s",'-');						// tulostetaan '-' merkkiä
-		// RIVI 3 valmis
-		$out .= chr(13); // Rivinvaihto + Carriage return
-		$out .= sprintf ('%-47s', 'TUOTENO / NIMITYS');
-		$out .= sprintf ('%-15s', 'HYLLY');
-		$out .= sprintf ('%17s', 'TILATTU');
-		$out .= sprintf ('%1s', ' ');
-		$out .= sprintf ('%3.3s', 'YKS');
-		$out .= sprintf ('%12.12s', 'SAAPUNUT');
-		$out .= chr(13);
-		// RIVI 4 valmis
+		// RIVI 1
+		$out  = sprintf('%-20.20s',	$yhtiorow["nimi"]);
+		$out .= sprintf('%4s',		' ');
+		$out .= sprintf('%-26.26s',	'PURKULISTA');
+		$out .= sprintf('%16s', 	' ');
+		$out .= sprintf('%-6.6s', 	'AJOPVM');
+		$out .= sprintf('%1s', 		' ');
+		$out .= sprintf('%8.8s', 	date("d/m/y")); // Ajopvm
+		$out .= chr(10).chr(13);	// Line feed (Rivinvaihto) + Carriage return (Siirretään kirjoituspää rivin alkuun)
 
-		// periaatteessa tähän voisi laittaa ton rivien tekemisen, else:ssä tehtäisiin normaalisti.
+		// RIVI 2
+		$out .= sprintf("%'-95s", '-');
+		$out .= chr(10).chr(13);
+
+		// RIVI 3
+		$out .= sprintf('%-65.65s',	$laskurow["ytunnus"].' '.$laskurow["nimi"]);	// Mistä tavara tulee
+		$out .= sprintf('%1s',		' ');
+		$out .= sprintf('%7s',		'KEIKKA:');
+		$out .= sprintf('%-11.11s',	$laskurow["laskunro"]);							// Keikan numero
+		$out .= chr(10).chr(13);
+
+		// RIVI 4
+		$out .= sprintf("%'-95s",	'-');
+		$out .= chr(10).chr(13);
+
+		// RIVI 5
+		$out .= sprintf('%-47s',	'TUOTENO / NIMITYS');
+		$out .= sprintf('%-15s',	'HYLLY');
+		$out .= sprintf('%17s',		'TILATTU');
+		$out .= sprintf('%1s',		' ');
+		$out .= sprintf('%3.3s',	'YKS');
+		$out .= sprintf('%12.12s',	'SAAPUNUT');
+		$out .= chr(10).chr(13);
+
 		while ($row = mysql_fetch_array($result)) {
 
-			$out .= sprintf ('%-46.46s', $row["tuoteno"]." ".$row["nimitys"]);
-			$out .= sprintf ('%1s', ' ');
-			$out .= sprintf ('%-23.23s', $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
-			
 			$yksikko = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 			$varattu = ($yksikko != "") ? $row["varattu"]." ".$yksikko : $row["varattu"];
-			
-			$out .= sprintf ('%13.13s', $varattu); // tilattu
-			$out .= sprintf ('%16s', ' ');
-			$out .= sprintf ('%-15.15s', $row["tuoteno"]);
 
-			$out .= chr(13);
-			$out .= sprintf ('%99s',' ');
-			$out .= sprintf ('%-15.15s', $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			// RIVI 1
+			$out .= sprintf('%-46.46s',	$row["tuoteno"]." ".$row["nimitys"]);
+			$out .= sprintf('%1s',		' ');
+			$out .= sprintf('%-23.23s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$out .= sprintf('%13.13s',	$varattu); // tilattu
+			$out .= sprintf('%16s',		' ');
+			$out .= sprintf('%-15.15s',	$row["tuoteno"]);
+			$out .= chr(10).chr(13);
 
-			$out .= chr(10).chr(13);	
+			// RIVI 2
+			$out .= sprintf('%99s',		' ');
+			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
+			$out .= chr(10).chr(13);
 		}
 		
-		$boob = file_put_contents($filenimi, $out);
-		
-		$line = exec("$komento[Purkulista] $filenimi");
+		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {
 		$firstpage = alku_purku();
@@ -727,7 +721,7 @@
 			$pdf->draw_text(210,  30, t("Allekirjoitus", $kieli),	$firstpage, $pieni);
 			$pdf->draw_text(504,  30, t("Nimenselvennys", $kieli),	$firstpage, $pieni);
 		}
-		
+
 		print_pdf_purku();
 	}
 

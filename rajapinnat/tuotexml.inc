@@ -36,6 +36,7 @@
 					$salesunit->addAttribute('extSystemID','');
 						$salesunitname = $salesunit->addChild('salesunitname',utf8_encode(xmlentities($tuote["yksikko"])));
 				$unit->addChild('unitprice',$tuote["myyntihinta"]);
+				$unit->addChild('kuluttajahinta',$tuote["myymalahinta"]);
 				$unit->unitprice->addAttribute('extSystemID','');
 	}
 

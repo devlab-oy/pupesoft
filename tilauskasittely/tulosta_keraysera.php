@@ -546,6 +546,7 @@
 								tilausrivin_lisatiedot WRITE, 
 								tilausrivin_lisatiedot AS tilrivlis1 READ,
 								tilausrivin_lisatiedot AS tilrivlis2 READ,
+								messenger WRITE,
 								varaston_hyllypaikat AS vh READ,
 								varaston_hyllypaikat AS vh1 READ, 
 								varaston_hyllypaikat AS vh2 READ, 

@@ -301,7 +301,8 @@
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'
-						$muutoslisa";
+						{$muutoslisa}
+						ORDER BY tuote.tuoteno";
 		$alires = pupe_query($aliselect);
 
 		while ($alirow = mysql_fetch_assoc($alires)) {
@@ -315,7 +316,8 @@
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
-							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'";
+							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
+							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();
 

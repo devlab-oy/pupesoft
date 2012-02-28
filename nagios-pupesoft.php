@@ -83,11 +83,15 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
 				echo "CRITICAL - Slave SQL Not running $STATE_CRITICAL";
 				exit;
 			}
-			elseif ($row["Seconds_Behind_Master"] == "NULL" or $row["Seconds_Behind_Master"] > 600) {
+			elseif ($row["Seconds_Behind_Master"] == "NULL") {
+				echo "CRITICAL - Seconds_Behind_Master is NULL $STATE_CRITICAL";
+				exit;
+			}
+			elseif ($row["Seconds_Behind_Master"] > 600) {
 				echo "CRITICAL - Slave 10 minutes behind master $STATE_CRITICAL";
 				exit;
 			}
-			elseif ($row["Seconds_Behind_Master"] == "NULL" or $row["Seconds_Behind_Master"] > 300) {
+			elseif ($row["Seconds_Behind_Master"] > 300) {
 				echo "WARNING - Slave 5 minutes behind master $STATE_WARNING";
 				exit;
 			}

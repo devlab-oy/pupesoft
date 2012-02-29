@@ -677,6 +677,25 @@
 				$fields .= ", ".$fieldname;
 
 				switch ($fieldname) {
+					case 'sscc':
+						$query = "LOCK TABLES avainsana WRITE";
+						$lock_res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukituksen yhteydessä\r\n\r\n");
+
+						$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+						$selite_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa haettaessa\r\n\r\n");
+						$selite_row = mysql_fetch_assoc($selite_result);
+
+						$uusi_sscc = is_numeric($selite_row['selite']) ? (int) $selite_row['selite'] + 1 : 1;
+
+						$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+						$update_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä\r\n\r\n");
+
+						// poistetaan lukko
+						$query = "UNLOCK TABLES";
+						$unlock_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukitusta poistettaessa\r\n\r\n");
+
+						$values .= ", '{$uusi_sscc}'";
+						break;
 					case 'tila':
 						$values .= ", 'T'";
 						break;
@@ -1059,30 +1078,34 @@
 
 		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
 
-		###### TEHDÄÄN UUSI SSCC-NUMERO
-		// emuloidaan transactioita mysql LOCK komennolla
-		$query = "LOCK TABLES avainsana WRITE";
-		$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukituksen yhteydessä\r\n\r\n");
+		if ($splitlineflag == 0) {
+			###### TEHDÄÄN UUSI SSCC-NUMERO
+			// emuloidaan transactioita mysql LOCK komennolla
+			$query = "LOCK TABLES avainsana WRITE";
+			$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukituksen yhteydessä\r\n\r\n");
 
-		$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa haettaessa\r\n\r\n");
-		$row = mysql_fetch_assoc($result);
+			$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa haettaessa\r\n\r\n");
+			$row = mysql_fetch_assoc($result);
 
-		$uusi_sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$uusi_sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
 
-		$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-		$update_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä\r\n\r\n");
+			$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$update_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä\r\n\r\n");
 
-		// poistetaan lukko
-		$query = "UNLOCK TABLES";
-		$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukitusta poistettaessa\r\n\r\n");
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukitusta poistettaessa\r\n\r\n");
+		}
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 		$chkres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
 		$chkrow = mysql_fetch_array($chkres);
 
+		$sscclisa = $splitlineflag == 0 ? " sscc = '{$uusi_sscc}', " : "";
+
 		$query = "	UPDATE kerayserat SET
-					sscc = '{$uusi_sscc}',
+					{$sscclisa}
 					pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'

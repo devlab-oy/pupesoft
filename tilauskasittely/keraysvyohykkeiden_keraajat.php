@@ -446,10 +446,10 @@
 				ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
 				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
 				ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
-				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker',
+				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tilausrivi.varattu * tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker',
 				ROUND((COUNT(DISTINCT lasku.tunnus) * keraysvyohyke.tilauksen_tyoaikavakio_min_per_tilaus + COUNT(DISTINCT tilausrivi.tunnus) * keraysvyohyke.kerailyrivin_tyoaikavakio_min_per_rivi) / 60, 1) AS 'kapasiteettitarve'
 				FROM lasku
-				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.varattu > 0)
 				JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -479,23 +479,25 @@
 		echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='",t("Näytä kerääjät"),"' alt='",t("Näytä kerääjät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
 		echo "<td>";
 
-		$query = "	SELECT SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
+		$query = "	SELECT lasku.tunnus, SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 0, 1)) AS 'keratyt'
 					FROM lasku 
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.varattu > 0)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND lasku.tunnus IN ({$row['tilaukset']})";
+					AND lasku.tunnus IN ({$row['tilaukset']})
+					GROUP BY 1
+					ORDER BY lasku.tunnus";
+		//echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$chk_res = pupe_query($query);
 
 		$chk = 0;
 
 		while ($chk_row = mysql_fetch_assoc($chk_res)) {
-			if ($chk_row['keratyt'] != 0) {
+			if ($chk_row['keratyt'] == 0) {
 				$chk++;
 			}
 		}
 
-		echo "{$chk} / {$row['tilatut']}";
-		echo "</td>";
+		echo "{$chk} / {$row['tilatut']}</td>";
 
 		echo "<td>{$row['keratyt']} / {$row['suunnittelussa']}</td>";
 		echo "<td>{$row['kg_ker']} / {$row['kg_suun']}</td>";

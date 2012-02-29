@@ -241,14 +241,14 @@
 
 				$rivi_row['tuoteno'] = implode("", $_arr);
 
-				$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
+				$rivi_row['tuoteno'] = implode(" ,,, ", str_split($rivi_row['tuoteno'], 3));
 
 				$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
 				$response .= "N,";
 				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 				// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-				$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
+				$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 				$n++;
 			}
@@ -342,6 +342,9 @@
 							tilausrivi AS tilausrivi1 READ, 
 							tilausrivi AS tilausrivi2 READ, 
 							tilausrivin_lisatiedot WRITE, 
+							tilausrivin_lisatiedot AS tilrivlis1 READ,
+							tilausrivin_lisatiedot AS tilrivlis2 READ,
+							messenger WRITE,
 							varaston_hyllypaikat AS vh READ,
 							varaston_hyllypaikat AS vh1 READ, 
 							varaston_hyllypaikat AS vh2 READ, 
@@ -352,6 +355,7 @@
 							keraysvyohyke AS keraysvyohyke2 READ,
 							toimitustapa AS toimitustapa1 READ, 
 							toimitustapa AS toimitustapa2 READ, 
+							lahdot READ,
 							lahdot AS lahdot1 WRITE,
 							lahdot AS lahdot2 WRITE,
 							tuoteperhe READ,
@@ -500,14 +504,14 @@
 
 					$rivi_row['tuoteno'] = implode("", $_arr);
 
-					$rivi_row['tuoteno'] = implode(" ", str_split($rivi_row['tuoteno'], 3));
+					$rivi_row['tuoteno'] = implode(" ,,, ", str_split($rivi_row['tuoteno'], 3));
 
 					$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
 					$response .= "N,";
 					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
 					// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-					$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
+					$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 					$n++;
 				}
@@ -1031,6 +1035,14 @@
 	}
 	elseif ($sanoma == "NewContainer") {
 
+		/**
+		 * Case1 (Normaali):
+		 * Kaikki edelliset rivit jotka ker‰tty A:han s‰ilyv‰t kyseisess‰ alustassa, mutta nykyinen/tulevat rivit menev‰t B:hen.
+		 * 
+		 * Case2 (Jaa rivi):
+		 * Edelliset rivit + se m‰‰r‰ jaetusta rivist‰ ovat alustassa A. Seuraavat rivit + jaetun rivin loput menev‰t B:hen.
+		 */
+
 		$kukarow['yhtio'] = 'artr';
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -1038,12 +1050,15 @@
 		$nro = (int) trim($sisalto[3]);
 		$row_id = (int) trim($sisalto[4]);
 		$printer_id = (int) trim($sisalto[5]);
+		$splitlineflag = (int) trim($sisalto[6]);
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
-		$chkrow = mysql_fetch_array($chkres);
+		###### TEHDƒƒN UUSI PAKKAUSKIRJAIN
+		$query = "SELECT (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}'";
+		$uusi_paknro_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$uusi_paknro_row = mysql_fetch_assoc($uusi_paknro_res);
 
-		/*
+		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
+
 		###### TEHDƒƒN UUSI SSCC-NUMERO
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query = "LOCK TABLES avainsana WRITE";
@@ -1061,17 +1076,13 @@
 		// poistetaan lukko
 		$query = "UNLOCK TABLES";
 		$res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukitusta poistettaessa\r\n\r\n");
-		*/
 
-		###### TEHDƒƒN UUSI PAKKAUSKIRJAIN
-		$query = "SELECT (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}'";
-		$uusi_paknro_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
-		$uusi_paknro_row = mysql_fetch_assoc($uusi_paknro_res);
+		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$chkrow = mysql_fetch_array($chkres);
 
-		// T‰m‰n tilausrivin tuotteet pit‰‰ laittaa uudelle alustalle (sama asiakas), tulostaa t‰st‰ uusi alustatarra automaattisesti sek‰ vaihtaa kaikki ker‰‰m‰ttˆm‰t rivit kyseiselt‰ ker‰yser‰lt‰ t‰lle uudelle.
-		// Vastauksena tulee l‰hett‰‰ uuden alustan tunnus. sanomassa tulee tulostimen numero, mille laput pit‰‰ tulostaa. Vastaus OK tai error ja joku viesti joka puhutaan k‰ytt‰j‰lle.
 		$query = "	UPDATE kerayserat SET
-					#sscc = '{$uusi_sscc}',
+					sscc = '{$uusi_sscc}',
 					pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'
@@ -1079,12 +1090,11 @@
 					AND nro = '{$nro}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivej‰ p‰ivitett‰ess‰\r\n\r\n");
 
-		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
-
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$nro}'";
+					AND nro = '{$nro}'
+					AND pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
 		$rivit = $paino = $tilavuus = 0;
@@ -1122,7 +1132,7 @@
 		$params = array(
 			'tilriv' => $chkrow['tilausrivi'],
 			'pakkaus_kirjain' => $pakkaus_kirjain,
-			'sscc' => $chkrow['sscc'],
+			'sscc' => $uusi_sscc,
 			'toimitustapa' => $laskurow['toimitustapa'],
 			'rivit' => $rivit,
 			'paino' => $paino,
@@ -1144,6 +1154,17 @@
 		$response = "{$pakkaus_kirjain},0,\r\n\r\n";
 	}
 	elseif ($sanoma == "ChangeContainer") {
+
+		/**
+		 * Case1 (Normaali):
+		 * Kaikki edelliset rivit jotka ker‰tty A:han s‰ilyv‰t kyseisess‰ alustassa, mutta nykyinen/tulevat rivit menev‰t B:hen.
+		 * 
+		 * Case2 (Jaa rivi):
+		 * Ensimm‰iseen laatikkoon laitetaan 5 kpl, jonka j‰lkeen halutaan "vaihda alusta", 
+		 * niin WMS ei p‰ivit‰ A-kirjainta, vaan palauttaa Vocollectille pakkauskirjaimen, joka on sallittu (sama asiakas). 
+		 * Toisen jaetun rivin kuittauksen kohdalla p‰ivitt‰‰ uudelle ker‰ysriville pakkauskirjaimeksi aiemmin valitun pakkauskirjaimen. 
+		 * Ei tulosteta SSCC-koodia.
+		 */
 
 		$kukarow['yhtio'] = 'artr';
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));

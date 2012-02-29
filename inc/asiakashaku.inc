@@ -520,6 +520,10 @@ if ($monta > 1 and $monta <= $limit) {
 				echo "<td>$asiakas[yhtionimi]</td>";
 			}
 
+			if ($asiakas["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
+				$brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
+			}
+
 			echo "<td>$asiakas[ytunnus]</td>
 					<td>$asiakas[asiakasnro]</td>
 					<td>$asiakas[nimi] $asiakas[nimitark] $brnim</td>

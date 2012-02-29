@@ -140,7 +140,7 @@ if($tee=="") {
 				}
 
 				if($toim != "TARJOUS") {
-					$lisa ="<td class='back'>HUOM! tilaus on osa projektia '$row[tunnusnippu]'!</td>";
+					$lisa ="<td class='back'>HUOM: tilaus on osa projektia '$row[tunnusnippu]'!</td>";
 				}
 				echo "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$row[tunnus]&nippu=$row[tunnusnippu]&otunnus=$row[tunnus]'>$row[tunnus]</a>";
 			}

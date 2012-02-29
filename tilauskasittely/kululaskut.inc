@@ -195,13 +195,22 @@ if ($tee_kululaskut == "liita") {
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
+
+			// Jos keikka on jo loppulaskettu (eli t‰ss‰ vain jaetaan lasku osiin, niin ei nollata kohdistettu-kentt‰‰)
+			if ($keikanalatila == "X") {
+				$upd_kohdistettu = "X";
+			}
+			else {
+				$upd_kohdistettu = "";
+			}
+
 			$query = "	UPDATE lasku set
 						vienti			= '$oslasrow[vienti]',
 						tapvm			= '$oslasrow[tapvm]',
 						valkoodi		= '$oslasrow[valkoodi]',
 						maksu_kurssi 	= '$oslasrow[maksu_kurssi]',
 						vienti_kurssi	= '$oslasrow[vienti_kurssi]',
-						kohdistettu		= ''
+						kohdistettu		= '$upd_kohdistettu'
 						where yhtio		= '$kukarow[yhtio]'
 						and tunnus		= '$laskurow[tunnus]'";
 			$result = pupe_query($query);

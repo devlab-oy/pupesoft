@@ -245,12 +245,12 @@
 	}
 
 	// Ollaan uploadttu Excel
-	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain") {
+	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain" and $toim == "TUOTE") {
 		echo "<font class='error'>".t("Tiedostoja voidaan ajaa sis‰‰n vain kuukausittain aikav‰lill‰")."!</font><br><br>";
 		$tee = "";
 	}
-	elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso == "kuukausittain") {
-		
+	elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = strtoupper($path_parts['extension']);
 
@@ -321,7 +321,7 @@
 			for ($excej = $lukualku; $excej < count($headers); $excej++) {
 				$kasiind = str_replace("-", "", $headers[$excej]);
 
-				if ($tuoteryhmittain != "") {					
+				if ($tuoteryhmittain != "") {
 					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 				else {
@@ -358,7 +358,7 @@
 		}
 
 		if (isset($poikkeus_haku) and $poikkeus_haku != "try" and $poikkeus_haku != "osasto" and $poikkeus_haku != "kummatkin") {
-			echo "<font class='error'>".t("Virhe: Budjetinluonnissa on tapahtunut vakava k‰sittelyvirhe, keskeytet‰‰n prosessi")."!<br><br></font>";
+			echo "<font class='error'>".t("VIRHE: Budjetinluonnissa on tapahtunut vakava k‰sittelyvirhe, keskeytet‰‰n prosessi")."!<br><br></font>";
 			$tee = "";
 	}
 
@@ -390,7 +390,7 @@
 		if (isset($poikkeus) and $poikkeus == "totta") {
 
 			unset($luvut); // poistetaan ja alustetaan sek‰ rakennetaan uudestaan.
-			
+
 			// Normaali tapaus miss‰ on TRY tai OSASTO
 			if ($poikkeus_haku == "try" or $poikkeus_haku == "osasto") {
 				foreach ($muunto_luvut as $litunnus => $rivit) {
@@ -932,7 +932,7 @@
 			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
 				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syˆtt‰‰ indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
-			}			
+			}
 			if ($budjetointi_taso == "kuukausittain") {
 				echo "<font class='error'>".t("VIRHE: Kokonaisbudjettia ei voida syˆtt‰‰ kuukausittain aikav‰lill‰!")."</font><br>";
 				$tee = "";

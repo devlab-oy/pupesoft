@@ -40,7 +40,7 @@ if ($kukarow["extranet"] != "") {
 		$asiakasid = $asiakasrow["tunnus"];
 	}
 	else {
-		echo t("<font class='error'>VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."</font><br><br>";
+		echo "<font class='error'>".t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n")."!</font><br><br>";
 		exit;
 	}
 }
@@ -195,17 +195,18 @@ if ($kukarow["extranet"] == "" and $ytunnus != '') {
 if ($asiakasid > 0) {
 
 	// KAUTTALASKUTUSKIKKARE
-	if ($GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
-		unset($GLOBALS['eta_yhtio']);
+	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
+		$GLOBALS['eta_yhtio'] = "";
 	}
 
-	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
+	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
 		$asiakas_yhtio = $GLOBALS['eta_yhtio'];
 
 		// Toisen firman asiakastiedot
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '{$asiakas_yhtio}'
+					AND laji != 'P'
 					AND ytunnus = '{$asiakasrow['ytunnus']}'
 					AND toim_ovttunnus = '{$asiakasrow['toim_ovttunnus']}'";
 		$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);

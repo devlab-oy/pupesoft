@@ -68,7 +68,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "oletus_valkoodi") { //valuutta
-		$query = "SELECT nimi, tunnus
+		$query = "	SELECT nimi, tunnus
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
@@ -378,8 +378,8 @@
 		else $selo = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>Ei automaattitoimitusta</option>";
-		$ulos .= "<option value='S' $sels>Suoratoimitukset toimitetaan automaattisesti</option>";
+		$ulos .= "<option value='' $selo>".t("Ei automaattitoimitusta")."</option>";
+		$ulos .= "<option value='S' $sels>".t("Suoratoimitukset toimitetaan automaattisesti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -392,8 +392,8 @@
 		else $selo = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>Ostolaskua ei voi eritellä</option>";
-		$ulos .= "<option value='S' $sels>Ostolaskun voi eritellä</option>";
+		$ulos .= "<option value='' $selo>".t("Ostolaskua ei voi eritellä")."</option>";
+		$ulos .= "<option value='S' $sels>".t("Ostolaskun voi eritellä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

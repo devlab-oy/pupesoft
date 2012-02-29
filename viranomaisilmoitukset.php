@@ -351,7 +351,7 @@ if ($tee == "VSRALVYV") {
 					$ok = 1;
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
+					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM: Maa haettu asiakkaan tiedoista")."</font></td></tr>";
 				}
 				else {
 					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";

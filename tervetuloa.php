@@ -140,7 +140,7 @@ if (!isset($tee) or $tee == '') {
 	$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo,
 				kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa $selectlisa
 				FROM kalenteri
-				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
 				LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
 				WHERE kalenteri.kuka = '$kukarow[kuka]'
 				and kalenteri.tyyppi = 'Muistutus'
@@ -220,7 +220,7 @@ if (!isset($tee) or $tee == '') {
 		echo "<th>".t("Työnumero")."</th>";
 		echo "<th>".t("Prioriteetti")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
-		echo "<th>".t("Päivämäärä")."</th>";		
+		echo "<th>".t("Päivämäärä")."</th>";
 		echo "</tr>";
 
 	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
@@ -231,7 +231,7 @@ if (!isset($tee) or $tee == '') {
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
-			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";			
+			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
 			echo "</tr>";
 		}
 		echo "</table><br>";
@@ -252,8 +252,8 @@ if (!isset($tee) or $tee == '') {
 		$ulos = '';
 
 		// Katsotaan pienin tilikausi, josta lähetään esittämään
-		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min 
-						FROM tilikaudet 
+		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
+						FROM tilikaudet
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tilikausi_alku >= '2010-11-01'";
 		$min_result = pupe_query($min_query);

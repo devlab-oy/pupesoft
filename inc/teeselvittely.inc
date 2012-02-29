@@ -21,7 +21,7 @@
 						luontiaika 	= now()";
 			$result = pupe_query($query);
 			$laskuid = mysql_insert_id ($link);
-			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>";
+			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>\n";
 		}
 
 		// Tehdään vastakirjaus
@@ -52,7 +52,7 @@
 			$vastavienti_valuutassa = 0;
 			$laskuid 				= 0;
 
-			echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>";
+			echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>\n";
 		}
 
 		// Tehdään normaali kirjaus
@@ -157,7 +157,7 @@
 			$vastavienti += $maara;
 			$vastavienti_valuutassa += $kohdm;
 
-			echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>";
+			echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>\n";
 		}
 	}
 

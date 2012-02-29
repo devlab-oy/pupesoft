@@ -469,6 +469,20 @@
 		}
 		elseif ($toim == "MYYNTITILI") {
 			echo "<font class='head'>".t("Myyntitilin otsikko")."</font><hr>";
+			// Myyntitili oikeellisuustarkistus
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND alkuhyllyalue = '!!M'
+						AND loppuhyllyalue = '!!M'
+						AND tyyppi = 'E'";
+			$myyntitili_result = pupe_query($query);
+
+			if (mysql_num_rows($myyntitili_result) != 1) {
+				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
+				require("inc/footer.inc");
+				exit;
+			}
 		}
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
@@ -579,7 +593,7 @@
 				$result = pupe_query($query);
 
 				if (mysql_affected_rows() > 0) {
-					echo "<font class='message'>".t("HUOM! Uudet otsikkotiedot haettu asiakasrekisterist‰.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Uudet otsikkotiedot haettu asiakasrekisterist‰.")."</font><br>";
 				}
 
 				$query = "	UPDATE laskun_lisatiedot
@@ -696,7 +710,7 @@
 				}
 
 				if ($tilausnumero == 0) {
-					echo "<font class='message'>".t("HUOM! Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
 				}
 			}
 
@@ -841,7 +855,7 @@
 		}
 
 		if ($templ > 0 and $asiakasid == '') {
-			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
+			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
 		}
 
 		echo "</table>";
@@ -1160,7 +1174,7 @@
 					<option value=''  $sel[V]>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>
 					</select>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='maksaja' value='$apu_rahdinmaksaja'>";
 			}
@@ -1203,7 +1217,7 @@
 			}
 			echo "</select>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
 			}
@@ -1398,10 +1412,10 @@
 			echo "<td>".t("Myyj‰")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+			$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$srow[myyja]')
-						ORDER BY nimi";
+						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
+						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
 			while($row = mysql_fetch_assoc($yresult)) {
@@ -1427,7 +1441,9 @@
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
-							WHERE liitostunnus = '$srow[liitostunnus]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
 							ORDER BY nimi";
 				$yhresult = pupe_query($query);
 
@@ -1933,7 +1949,7 @@
 			echo "<td>";
 			echo "<input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk {$state_chk}>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='rahtivapaa' value='$srow[rahtivapaa]'>";
 			}
@@ -2405,7 +2421,8 @@
 							where yhtio = '$kukarow[yhtio]'
 							and liitostunnus = '$srow[liitostunnus]'
 							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''";
+							and tilausyhteyshenkilo != ''
+							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
 			echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
@@ -2770,7 +2787,7 @@
 			}
 			else {
 				$query3 = "UPDATE ";
-				$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
+				$postquery3 = " WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 			}
 		}
 

@@ -85,7 +85,7 @@ if(!function_exists("liitetiedostottarkista")) {
 					$checkrow = mysql_fetch_array($result);
 
 					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
-					$virhe[$i] = $virhe[$liite_datai] = t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
+					$virhe[$i] = $virhe[$liite_datai] = t("VIRHE: Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
 					$errori = 1;
 				}
 				else {

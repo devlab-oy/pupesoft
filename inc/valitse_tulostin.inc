@@ -55,6 +55,8 @@
 		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
 		<input type='hidden' name='kertakassa' value='$kertakassa'>
 		<input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
+		<input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
+		<input type='hidden' name='varastonarvo' value='$varastonarvo'>
 		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />";
 
 	if ($nappikeikalle == 'menossa') {
@@ -363,7 +365,7 @@
 	}
 	
 	if ($laskurow['kirjoitin'] == "edi") {
-		echo "<tr><td colspan='2' class='back'><font class='error'>".t("Huom! EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
+		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}
 
 	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";

@@ -48,7 +48,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	}
 
 	// Haetaan keikat, joihin lasku on liitetty
-	$query = "	SELECT ifnull(group_concat(laskunro), 0) keikat
+	$query = "	SELECT laskunro, summa
 				FROM lasku USE INDEX (tila_index)
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$jaettavalaskurow[liitostunnus]'
@@ -56,22 +56,42 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				and lasku.alatila in ('', 'S')
 				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
 	$keikkares = pupe_query($query);
-	$keikkarow = mysql_fetch_assoc($keikkares);
 
-	// katsotaan onko j‰lkilaskettu
-	$query = "	SELECT *
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND laskunro in ($keikkarow[keikat])
-				AND laskunro != 0
-				AND tila = 'K'
-				AND alatila = 'X'
-				AND kohdistettu = 'X'";
-	$check_res = pupe_query($query);
+	$keikat   = array();
+	$keikatok = TRUE;
 
-	if (mysql_num_rows($check_res) != 0) {
-		echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on liitetty keikkaan joka on j‰lkilaskettu"),"!<br/>";
-		return false;
+	while ($keikkarow = mysql_fetch_assoc($keikkares)) {
+
+		// katsotaan onko j‰lkilaskettu
+		$query = "	SELECT tunnus
+					FROM lasku
+					WHERE yhtio	 	= '$kukarow[yhtio]'
+					AND laskunro 	= '$keikkarow[laskunro]'
+					AND vanhatunnus = 0
+					AND tila 		= 'K'
+					AND alatila 	= 'X'
+					AND kohdistettu = 'X'";
+		$check_res = pupe_query($query);
+
+		// katsotaan onko alkuper‰inen lasku liitetty kokonaan keikkaan, jos on voidaan liitt‰‰ molemmat laskut uudestaan
+		if ($jaettavalaskurow['summa'] == $keikkarow['summa']) {
+			$keikat[] = $keikkarow['laskunro'];
+
+			echo "<font class='error'>".t("Liitet‰‰n molemmat laskut uudestaan keikkaan")." $keikkarow[laskunro]</font><br>";
+		}
+		else {
+			if (mysql_num_rows($check_res) > 0) {
+				echo "<font class='error'>".t("Laskua ei voida jakaa, koska se on liitetty vain osittain keikkaan %s ja keikka on j‰lkilaskettu", "", $keikkarow["laskunro"])."!</font><br>";
+				$keikatok = FALSE;
+			}
+			else {
+				echo "<font class='error'>".t("Lasku oli liitetty vain osittain keikkaan %s, joten uusia laskuja ei voitu liitt‰‰. K‰y korjaamassa keikan laskut manuaalisesti", "", $keikkarow["laskunro"]).".</font><br>";
+			}
+		}
+	}
+
+	if (!$keikatok) {
+		return FALSE;
 	}
 
 	// Tehd‰‰n uusi lasku
@@ -290,58 +310,38 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 		$laskutusres = pupe_query($query);
 	}
 
-	// Haetaan keikat, joihin lasku on liitetty
-	$query = "	SELECT *
-				FROM lasku USE INDEX (tila_index)
-				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.liitostunnus = '$jaettavalaskurow[liitostunnus]'
-				and lasku.tila = 'K'
-				and lasku.alatila in ('', 'S')
-				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
-	$keikkares = pupe_query($query);
+	if (count($keikat) > 0) {
+		// dellataan vanhat liitosotsikot
+		$query = "	UPDATE lasku SET
+		 			tila = 'D'
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.liitostunnus = '$jaettavalaskurow[liitostunnus]'
+					and lasku.tila = 'K'
+					and lasku.alatila in ('', 'S')
+					and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
+		$keikkares = pupe_query($query);
 
-	$keikat = array();
-	while ($keikkarow = mysql_fetch_assoc($keikkares)) {
-		// katsotaan onko alkuper‰inen lasku liitetty kokonaan keikkaan, jos on voidaan liitt‰‰ molemmat laskut uudestaan
-		if ($jaettavalaskurow['summa'] == $keikkarow['summa']) {
-			$keikat[] = $keikkarow['laskunro'];
-			echo "<font class='error'>Liitet‰‰n molemmat laskut uudestaan keikkaan $keikkarow[laskunro]</font><br>";
+		foreach ($keikat as $keikka) {
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND tila 		= 'K'
+						AND vanhatunnus = 0
+						AND laskunro 	= '$keikka'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			$tee_kululaskut = 'liita';
+			$otunnus 		= $laskurow['tunnus'];
+			$silent 		= 'jee';
+			$keikanalatila 	= $laskurow['alatila'];
+
+			$laskutunnus = $jaettavalaskurow['tunnus'];
+			require('tilauskasittely/kululaskut.inc');
+
+			$laskutunnus = $utunnus;
+			require('tilauskasittely/kululaskut.inc');
 		}
-		else {
-			echo "<font class='error'>Lasku oli liitetty vain osittain keikkaan $keikkarow[laskunro], joten uusia laskuja ei voitu liitt‰‰. K‰y korjaamassa keikan laskut manuaalisesti.</font><br>";
-		}
-	}
-
-	// dellataan vanhat liitosotsikot
-	$query = "	UPDATE lasku SET
-	 			tila = 'D'
-				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.liitostunnus = '$jaettavalaskurow[liitostunnus]'
-				and lasku.tila = 'K'
-				and lasku.alatila in ('', 'S')
-				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
-	$keikkares = pupe_query($query);
-
-	foreach ($keikat as $keikka) {
-		$query = "	SELECT *
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tila = 'K'
-					AND vanhatunnus = 0
-					AND laskunro = '$keikka'";
-		$laskures = pupe_query($query);
-		$laskurow = mysql_fetch_assoc($laskures);
-
-		$tee_kululaskut = 'liita';
-		$otunnus 		= $laskurow['tunnus'];
-		$silent 		= 'jee';
-		$keikanalatila 	= "";
-
-		$laskutunnus = $jaettavalaskurow['tunnus'];
-		require('tilauskasittely/kululaskut.inc');
-
-		$laskutunnus = $utunnus;
-		require('tilauskasittely/kululaskut.inc');
 	}
 
 	// T‰ss‰ kopioidaan laskun liitetiedostot uudelle laskulle
@@ -354,6 +354,6 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				AND liitos = 'lasku'";
 	$insert_res = pupe_query($query);
 
-	return true;
+	return TRUE;
 
 }

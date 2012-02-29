@@ -1652,7 +1652,7 @@ while ($tietue = fgets($fd)) {
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
 
 								// Tilausrivin systeemikommentti
-								$kommentti .= t("Huom: Tuote toimitetaan erikoisvarastosta!");
+								$kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
 							}
 							else {
 								$var = "H";
@@ -1665,7 +1665,7 @@ while ($tietue = fgets($fd)) {
 					// Jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
 					if ($sallitaanjt == '1') {
 						$var 		= "J";
-						$kommentti 	= ""; // Huom! nollataan kommentti
+						$kommentti 	= ""; // HUOM: nollataan kommentti
 					}
 
 					if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
@@ -1885,8 +1885,7 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";
-
-					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+					$tilausvalmiskutsuja = "EDITILAUS";
 
 					require ("tilaus-valmis.inc");
 
@@ -1956,6 +1955,8 @@ while ($tietue = fgets($fd)) {
 
 						// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
 						$silent = "SILENT";
+						$tilausvalmiskutsuja = "EDITILAUS";
+
 						require ("tilaus-valmis.inc");
 					}
 

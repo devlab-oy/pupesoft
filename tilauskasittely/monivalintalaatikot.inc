@@ -319,7 +319,7 @@
 							// Nollataan joinit tässä vaiheessa näin, koska syvempi puun taso rajaa enemmän kuin edelliset tasot, joten turha joinata monta kertaa
 							$lisa_dynaaminen[$param] = "";
 
-							$lisa_dynaaminen[$param] .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
+							$lisa_dynaaminen[$param] .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} use index (yhtio_laji_puun_tunnus) ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
 
 							if ($param == "tuote") {
 								$lisa_dynaaminen[$param] .= "tuote.tuoteno)\n";

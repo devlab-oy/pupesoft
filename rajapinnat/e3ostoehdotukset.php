@@ -63,7 +63,7 @@
 			}
 			else {
 
-				list($hinta,,,) = alehinta_osto($laskurow, $tuote_row, $kpl);
+				list($hinta,$netto,$ale,) = alehinta_osto($laskurow, $tuote_row, $kpl);
 
 				$insert_query = "	INSERT INTO tilausrivi SET
 									yhtio 		= '$kukarow[yhtio]',
@@ -78,6 +78,10 @@
 									yksikko		= '$tuote_row[yksikko]',
 									varattu		= '$kpl',
 									hinta		= '$hinta',
+									netto		= '$netto',
+									ale1		= '$ale[ale1]',
+									ale2		= '$ale[ale2]',
+									ale3		= '$ale[ale3]',
 									laadittu	= now(),
 									hyllyalue	= '$tuote_row[hyllyalue]',
 									hyllynro	= '$tuote_row[hyllynro]',

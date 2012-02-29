@@ -6,10 +6,10 @@
 	
 	// tarkistetaan oikeuksia ja katsotaan etta muokataanko puuta vai puuliitoksia
 	$saamuokata = $saamuokataliitosta = false;
-	if($tee == 'valitsesegmentti' || $tee == 'addtotree' || $tee == 'removefromtree' && tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
+	if ($tee == 'valitsesegmentti' || $tee == 'addtotree' || $tee == 'removefromtree' && tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
 		$saamuokataliitosta = true;
 	}
-	elseif(tarkista_oikeus('dynaaminen_puu.php', $toim, 1)) {
+	elseif (tarkista_oikeus('dynaaminen_puu.php', $toim, 1)) {
 		$saamuokata = true;
 	}
 	
@@ -35,13 +35,13 @@
 	}
 	
 	// nodeid tarvitaan aina
-	if(isset($nodeid) && isset($toim) && trim($toim) != "") {
+	if (isset($nodeid) && isset($toim) && trim($toim) != "") {
 		
 		$noderow = getnoderow($toim, $nodeid);
 		
 		// muokkaustoiminnot
-		if(isset($tee) && $tee != '') {
-			if($saamuokata) {
+		if (isset($tee) && $tee != '') {
+			if ($saamuokata) {
 					// Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
 				if ($tee == 'ylos' or $tee == 'alas') {
 					$src['lft'] = $noderow['lft'];
@@ -50,27 +50,33 @@
 					// $tee:ssa on suunta mihin siirret‰‰n
 					$kohde = SiirraTaso($toim, $src, $tee);
 				}
-				elseif($tee == 'lisaa' && isset($uusi_nimi) && trim($uusi_nimi) != "" && isset($uusi_koodi) && trim($uusi_koodi) != "") {
+				elseif ($tee == 'lisaa' && isset($uusi_nimi) && trim($uusi_nimi) != "") {
 					// lisataan lapsitaso
+
+					$uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
+
 					$uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi);
 					paivitapuunsyvyys($toim);
 					
 					echo "<input type='hidden' id='newid' value='{$uusirivi['tunnus']}' />
 						  <input type='hidden' id='newcode' value='{$uusirivi['koodi']}' />";
 				}
-				elseif($tee == 'poista') {
+				elseif ($tee == 'poista') {
 					// poistaa ja upgradettaa alemmat lapset isommaksi.
 					PoistaLapset($toim, $noderow['lft']);
 					paivitapuunsyvyys($toim);
 				}
-				elseif($tee == 'muokkaa' && isset($uusi_nimi) && trim($uusi_nimi) != "" && isset($uusi_koodi) && trim($uusi_koodi) != "") {
+				elseif ($tee == 'muokkaa' && isset($uusi_nimi) && trim($uusi_nimi) != "") {
+					$uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
 					paivitakat($toim, $uusi_koodi, $uusi_nimi, $nodeid);
+
+					echo "<input type='hidden' id='newcode' value='{$uusi_koodi}' />";
 				}
-				elseif($tee == 'siirrataso' && isset($kohdetaso) && $kohdetaso != "") {
+				elseif ($tee == 'siirrataso' && isset($kohdetaso) && $kohdetaso != "") {
 					// haetaan kohdenode
 					$targetnoderow = getnoderow($toim, $kohdetaso);
 					
-					if($targetnoderow != FALSE) {					
+					if ($targetnoderow != FALSE) {					
 						$src['lft'] = $noderow['lft'];
 						$src['rgt'] = $noderow['rgt'];
 						siirraOksa($toim,$src,$targetnoderow['rgt']);
@@ -81,11 +87,11 @@
 				$noderow = getnoderow($toim, $nodeid);
 				
 			}
-			elseif($saamuokataliitosta) {
-				if($tee == 'addtotree') {
+			elseif ($saamuokataliitosta) {
+				if ($tee == 'addtotree') {
 					TuotteenAlkiot($toim, $liitos, $nodeid, $kieli); 
 				}
-				elseif($tee == 'removefromtree') {
+				elseif ($tee == 'removefromtree') {
 					$qu = "DELETE FROM puun_alkio
 							WHERE yhtio = '{$yhtiorow["yhtio"]}' AND laji = '{$toim}' AND liitos ='{$liitos}' AND puun_tunnus = {$nodeid}";
 					$re = pupe_query($qu);
@@ -94,19 +100,20 @@
 			$tee = '';
 		}
 		
-		if ($noderow == false) {
+		if ($noderow == FALSE) {
 			echo "<p>".t("Valitse uusi taso")."...</p>";
 			exit;
 		}
 		
 		echo "<h2 style='font-size: 20px'>".$noderow['nimi']."</h2><hr />
 				<p><font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".
-				" <font class='message'>lft/rgt:</font> ".$noderow['lft']." / ".$noderow['rgt']."<br />".
 				"<font class='message'>".t("Tunnus").":</font> ".$noderow['tunnus']."<br />".
 				" <font class='message'>".t("Syvyys").":</font> ".$noderow['syvyys']."<br />".
-				" <font class='message'>".t("Toimittajan koodi").":</font> ".$noderow['toimittajan_koodi'].
+				" <font class='message'>lft / rgt:</font> ".$noderow['lft']." / ".$noderow['rgt'].
 				"</p>";
 		
+		// " <font class='message'>".t("Toimittajan koodi").":</font> ".$noderow['toimittajan_koodi'].
+
 		// tuotteet
 		$qu = "SELECT count(*) lkm
 				FROM puun_alkio
@@ -126,8 +133,10 @@
 		$child_items = $row['lkm'];
 	
 		echo "<p>";
-		if($own_items>0) echo "<font class='message'>".t("Liitoksia").":</font> ".$own_items."<br />";
-		if($child_items>0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
+		if ($own_items > 0) {
+			echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[4]={$nodeid}'>".$own_items."</a><br />";
+		}
+		if ($child_items > 0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
 		echo "</p>";
 		
 		echo "<hr /><div id='editbuttons'>";
@@ -139,21 +148,21 @@
 					<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰'),"'/>".t('Lis‰‰ uusi lapsitaso')."</a><br /><br />";
 			
 			// poistonappi aktiivinen vain jos ei ole liitoksia
-			if($own_items > 0 || $child_items > 0) {
+			if ($own_items > 0 || $child_items > 0) {
 				echo "<font style='info'>".t("Poistaminen ei ole mahdollista kun tasolla on liitoksia.")."</font>";
 			}
 			else {
 				echo "<a href='#' class='editbtn' id='poista'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/> ".t('Poista taso')."</a>";
 			}
 		}
-		elseif($saamuokataliitosta) {
+		elseif ($saamuokataliitosta) {
 			// tarkistetaan onko jo liitetty
 			$qu = "SELECT *
 					FROM puun_alkio
 					WHERE yhtio = '{$yhtiorow["yhtio"]}' AND laji = '{$toim}' AND liitos = '{$liitos}' AND puun_tunnus = {$noderow["tunnus"]}";
 			$re = pupe_query($qu);
 			
-			if(mysql_num_rows($re) > 0) {
+			if (mysql_num_rows($re) > 0) {
 				$row = mysql_fetch_assoc($re);
 				echo "<a class='editnode' id='removefromtree'>".t("Poista liitos")." ({$liitos} - {$noderow["tunnus"]})</a>";
 			}
@@ -170,7 +179,7 @@
 					<legend style='font-weight: bold'>".t("Siirr‰ valitun tason alatasoksi")."</legend>
 					<ul style='list-style:none; padding: 5px'>
 						<li style='padding: 3px'>
-							<label style='display: inline-block; width: 125px'>Kohdetason tunnus <font style='color: red'>*</font></label>
+							<label style='display: inline-block; width: 125px'>".t("Kohdetason tunnus")." <font style='color: red'>*</font></label>
 							<input size='5' id='kohdetaso' autocomplete='off' />
 						</li>
 					</ul>
@@ -186,17 +195,17 @@
 				<legend style='font-weight: bold' id='nodeboxtitle'></legend>
 				<ul style='list-style:none; padding: 5px'>
 					<li style='padding: 3px'>
-						<label style='display: inline-block; width: 50px'>Nimi <font style='color: red'>*</font></label>
+						<label style='display: inline-block; width: 50px'>".t("Nimi")." <font style='color: red'>*</font></label>
 						<input size='35' id='uusi_nimi' autocomplete='off' />
 					</li>
 					<li style='padding: 3px'>
-						<label style='display: inline-block; width: 50px'>Koodi <font style='color: red'>*</font></label>
+						<label style='display: inline-block; width: 50px'>".t("Koodi")."</label>
 						<input size='35' id='uusi_koodi' autocomplete='off' />
 					</li>	
 				</ul>
 				<input type='hidden' id='tee' />
-				<p style='display: none; color: red' id='nodeboxerr'>Nimi tai koodi ei saa olla tyhj‰.</p>
-				<input type='submit' id='editsubmitbtn' value='Tallenna' />
+				<p style='display: none; color: red' id='nodeboxerr'>".t("Nimi tai koodi ei saa olla tyhj‰").".</p>
+				<input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
 			</fieldset>
 			</form>
 		</div>";
@@ -209,7 +218,7 @@
 			  params['kieli'] = '{$kieli}';
 			 ";
 		
-		if($saamuokata) {
+		if ($saamuokata) {
 			echo "params['nodeid'] = {$nodeid};
 				var nimi = '{$noderow["nimi"]}';
 				var koodi = '{$noderow["koodi"]}';";
@@ -262,7 +271,7 @@
 				params["uusi_koodi"]	= jQuery("#uusi_koodi").val();
 				params["tee"]			= jQuery("#tee").val();
 				
-				if(params["uusi_nimi"] == "" || params["uusi_koodi"] == "") {
+				if(params["uusi_nimi"] == "") {
 					jQuery("#nodeboxerr").show();
 					return false;
 				}
@@ -281,24 +290,22 @@
 			});
 			<?php
 		}
-		elseif($saamuokataliitosta) {
-			echo "params['liitos']		= '{$liitos}';
+		elseif ($saamuokataliitosta) {
+			echo "params['liitos']	= '{$liitos}';
 				  params['nodeid']	= '{$noderow["tunnus"]}';";
 			?>
 			jQuery(".editnode").click(function() {
 				params["tee"] = this.id;
 				editNode(params);
 			});
-			<?php
-		}
-		?>
+		<?php } ?>
 		</script>
 		<?php
 		// suljetaan nodelaatikko
 		echo "</div>";
 	}
 	else {
-		echo "virhe: nodeid tai toim puuttuu";
+		echo "<p>".t("virhe: nodeid tai toim puuttuu")."</p>";
 	}
 
 ?>

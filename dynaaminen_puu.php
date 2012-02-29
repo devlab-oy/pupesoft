@@ -81,18 +81,6 @@
 		$prevdepth = 0;
 		
 		while ($row = mysql_fetch_assoc($re)) {
-		
-			// tarkistetaan onko dynaamisen puun syvyys oikein
-			/*
-			if ($row["node_syvyys"] != $row["syvyys"]) {
-				$qu = "	UPDATE dynaaminen_puu
-						SET syvyys = {$row["syvyys"]}
-						WHERE yhtio	= '{$kukarow["yhtio"]}'
-						AND laji	= '{$toim}'
-						AND tunnus 	= {$row["node_tunnus"]}";
-				$re = pupe_query($qu);
-			}
-			*/
 			
 			// vahan kikkailua jotta saadaan list elementit suljettua standardin mukaisesti
 			$diff = $row['syvyys'] - $prevdepth;
@@ -108,7 +96,7 @@
 			}
 			if($diffi == 0) echo "</li>";
 			
-			echo "\n<li class='nodes' id='{$row['node_tunnus']}'>{$row['node_nimi']} ({$row['node_tunnus']} / {$row['node_koodi']})";
+			echo "<li class='nodes' id='{$row['node_tunnus']}'>{$row['node_nimi']} ({$row['node_tunnus']} / {$row['node_koodi']})";
 			
 			$prevdepth = $row['syvyys'];
 		}
@@ -191,7 +179,7 @@
 					else if(params["tee"] == "muokkaa") {
 						var updli = jQuery("#"+params["nodeid"]);
 						var childul = jQuery("#"+params["nodeid"]+" > ul");
-						updli.html(params["uusi_nimi"]+" ("+params["nodeid"]+" / "+params["uusi_koodi"]+")");
+						updli.html(params["uusi_nimi"]+" ("+params["nodeid"]+" / "+jQuery("#newcode").val()+")");
 						if(childul.size() > 0) {
 							updli.append("<ul>"+childul.html()+"</ul>");
 						}
@@ -210,6 +198,9 @@
 					}
 					else if(params["tee"] == "removefromtree") {
 						jQuery("#"+params["nodeid"]).removeClass("error");
+					}
+					else if(params["tee"] == "siirrataso") {
+						window.location.reload();
 					}
 				}
 			});
@@ -232,3 +223,4 @@
 	}
 	
 	require('inc/footer.inc');
+	

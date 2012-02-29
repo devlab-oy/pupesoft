@@ -36,6 +36,7 @@
 					$salesunit->addAttribute('extSystemID','');
 						$salesunitname = $salesunit->addChild('salesunitname',utf8_encode(xmlentities($tuote["yksikko"])));
 				$unit->addChild('unitprice',$tuote["myyntihinta"]);
+				$unit->addChild('kuluttajahinta',$tuote["myymalahinta"]);
 				$unit->unitprice->addAttribute('extSystemID','');
 	}
 
@@ -45,10 +46,3 @@
 	$todnimi = basename($tiedoston_sijainti);
 
 	require ("{$pupe_root_polku}/inc/ftp-send.inc");
-
-	if ($palautus == 0) {
-		unlink($tiedoston_sijainti);
-	}
-	else {
-		rename($tiedoston_sijainti,"{$pupe_root_polku}/dataout/ERROR_".$todnimi);
-	}

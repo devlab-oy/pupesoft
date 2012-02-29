@@ -253,14 +253,14 @@
 
 		echo "<tr><th>".t("Valitse sesonki:")."</th>
 				<td><select name='mikrotila_sesonki'>
-				<option value='SS10'>".t("SS10")."
-				<option value='FW10'>".t("FW10")."
-				<option value='SS11'>".t("SS11")."
-				<option value='FW11'>".t("FW11")."
-				<option value='SS12' SELECTED>".t("SS12")."
-				<option value='FW12'>".t("FW12")."
-				<option value='SS13'>".t("SS13")."
-				<option value='FW13'>".t("FW13")."
+				<option value='SS10'>SS10</option>
+				<option value='FW10'>FW10</option>
+				<option value='SS11'>SS11</option>
+				<option value='FW11'>FW11</option>
+				<option value='SS12' SELECTED>SS12</option>
+				<option value='FW12'>FW12</option>
+				<option value='SS13'>SS13</option>
+				<option value='FW13'>FW13</option>
 				</select></td></tr>";
 		echo "<tr><td colspan='2' class='back'><input type='submit' value='".t("Lisää tuotteet")."'></td></tr>";
 		echo "</table></form>";

@@ -181,10 +181,12 @@
 					<input type='text' name='toimvv' value='$toimvv' size='6'>
 					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'></td>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja
+			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER BY nimi";
+						JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%tilaus_osto.php'
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						and kuka.extranet = ''
+						ORDER BY kuka.nimi";
 			$yresult = mysql_query($query) or pupe_error($query);
 
 			echo "<td>".t("Ostaja").":</td>";
@@ -277,7 +279,12 @@
 
 			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
-			$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'T' and tilausyhteyshenkilo != ''";
+			$yhteysquery = "SELECT *
+							FROM yhteyshenkilo
+							where yhtio 			 = '$kukarow[yhtio]'
+							and liitostunnus 		 = '$srow[liitostunnus]'
+							and tyyppi 				 = 'T'
+							and tilausyhteyshenkilo != ''";
 			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
 
 			if (mysql_num_rows($yhteysresult) > 0) {

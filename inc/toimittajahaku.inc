@@ -326,7 +326,8 @@
 									AND lasku.laskunro = keikka.laskunro
 									AND keikka.tila = 'K'
 									AND keikka.vanhatunnus = 0
-									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
+									AND lasku.tila 		  = 'K'
 									AND lasku.vanhatunnus = '$trow[tunnus]'";
 						$keikka_res = pupe_query($query);
 

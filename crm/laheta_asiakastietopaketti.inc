@@ -44,8 +44,9 @@
 
 		$query = "	SELECT *
 					FROM yhteyshenkilo
-					WHERE yhtio = '$kukarow[yhtio]'
-					and liitostunnus = '$row[ytunnus]'";
+					WHERE yhtio 	 = '$kukarow[yhtio]'
+					and liitostunnus = '$row[ytunnus]'
+					and tyyppi 		 = 'A'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {

@@ -152,7 +152,7 @@ if (!function_exists('tyomaarays_alku')) {
 		$pdf->draw_text(310, 729, t("Myyjä", $kieli), 		$thispage, $pieni);
 
 		//etsitään myyjän nimi
-		$query  = "	select nimi
+		$query  = "	SELECT nimi
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = pupe_query($query);
@@ -167,9 +167,13 @@ if (!function_exists('tyomaarays_alku')) {
 		$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
 
+		$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+		if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+		else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
 		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 677, $laskurow["toimitusehto"], 	$thispage, $norm);
+		$pdf->draw_text(310, 677, $toimehto, 					$thispage, $norm);
 
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 666, t("Maksuehto", $kieli), 		$thispage, $pieni);

@@ -56,6 +56,20 @@
 	$huge["height"] 			= 20;
 	$huge["font"] 				= "Helvetica-Bold";
 
+	$query_ale_lisa = generoi_alekentta('M');
+
+	// Tilausken arvo
+	$query = "  SELECT lasku.valkoodi, sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]')) rivihinta
+				FROM tilausrivi
+				JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+				where tilausrivi.otunnus in ($otunnukset)
+				and tilausrivi.yhtio = '$kukarow[yhtio]'
+				and tilausrivi.var in ('','H')
+				and tilausrivi.tyyppi in ('L','G')
+				GROUP BY 1";
+	$riresult = pupe_query($query);
+	$rirow = mysql_fetch_assoc($riresult);
+
 	// defaultteja
 	$kala = 575;
 	$lask = 1;
@@ -66,20 +80,24 @@
 	// tulostetaan niin monta lappua kun on kollejakin
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-		$kuka    = sprintf("%02d",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
-		$oma     = sprintf("%09d",$rtunnus); 			// 9, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ olaa uniikki
+		$juokseva = sprintf("%02d", $tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
-		// tehd‰‰n viivakoodit
-		$viiva1   = "JJFI$toitarow[sopimusnro]$kuka$oma";
+		if (substr($rivi["rahtikirjanro"], 0, 2) == "CE") {
+			$oma = sprintf("%02d", substr($rivi["rahtikirjanro"], -5));
+		}
+		else {
+			$oma = sprintf("%02d", substr($rtunnus, -2)); // 2, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ olaa uniikki
+		}
 
-		$viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
+		#L‰hetystunnuksen tarkistenumeron laskentakaava (modulus 11):
+		$viiva = mod11_tarkiste($toitarow['tunhalnro'].$oma.$juokseva);
 
-		$viiva2   = "JJFI $toitarow[sopimusnro] $kuka$oma";
-		$v2_alku  = substr($viiva2, 0, -6);
-		$v2_loppu = substr($viiva2, -6);
+		$viiva1   = "CE".$viiva."FI";
+		$viivaedi = "CE".$viiva."FI";
+		$viiva2   = "*CE".$viiva."FI*";
 
 		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro .= "$viiva2 ";
+		$rahtikirjanro .= "$viiva1 ";
 
 		// tehd‰‰n pdf:n uusi sivu
 		$firstpage = $pdf->new_page("a5");
@@ -90,22 +108,13 @@
 		$pdf->image_place($image, 570, 70, $firstpage, $logoparam);
 
 		if (class_exists("Image_Barcode")) {
-			//tehd‰‰n JJFI viivakoodi
-			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-
-			imagejpeg(Image_Barcode::draw($viiva1, 'code128', 'jpg', false, 3, 190), $nimi);
-
-			$fh = fopen($nimi, "r");
-			$data = fread($fh, filesize($nimi));
-			fclose($fh);
-
+			// L‰hetystunnus
+			$data = viivakoodi($viiva1, "code39", 280, 70, "");
 			$image = $pdf->jfif_embed($data);
-
 			$logoparam['scale'] = 122/282;
-			$pdf->image_place($image, 275, 30, $firstpage, $logoparam);
-			system("rm -f $nimi");
+			$pdf->image_place($image, 270, 30, $firstpage, $logoparam);
 
-			// postin koodiksi
+			// Tuotetunnus
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
 			imagejpeg(Image_Barcode::draw($tuoteviiva1, 'code128', 'jpg', false, 3, 130), $nimi);
@@ -118,6 +127,21 @@
 
 			$logoparam['scale'] = 122/282;
 			$pdf->image_place($image, 540, 255, $firstpage, $logoparam);
+			system("rm -f $nimi");
+
+			// Sopimustunnus
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+			imagejpeg(Image_Barcode::draw("9V".$toitarow["sopimusnro"], 'code128', 'jpg', false, 3, 130), $nimi);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			$logoparam['scale'] = 122/282;
+			$pdf->image_place($image, 20, 225, $firstpage, $logoparam);
 			system("rm -f $nimi");
 		}
 
@@ -199,12 +223,13 @@
 		$pdf->draw_text(255, 435,  $kollityht,									$firstpage, $iso);
 
 
-		$pdf->draw_text(260, 423,  "Sample/Enchatillon", $firstpage, $pieni);
-		$pdf->draw_text(260, 414,  "Gift/Cadeau", $firstpage, $pieni);
-		$pdf->draw_text(260, 405,  "Merchandise, value", $firstpage, $pieni);
-		$pdf->draw_text(260, 400,  "Marchandises, valeur", $firstpage, $pieni);
-		$pdf->draw_text(343, 423,  "Documents", $firstpage, $pieni);
-		$pdf->draw_text(249,  401,  "X",	$firstpage, $isobold);
+		$pdf->draw_text(260, 423,  "Sample/Enchatillon", 	$firstpage, $pieni);
+		$pdf->draw_text(260, 414,  "Gift/Cadeau", 			$firstpage, $pieni);
+		$pdf->draw_text(260, 405,  "Merchandise, value", 	$firstpage, $pieni);
+		$pdf->draw_text(260, 400,  "Marchandises, valeur", 	$firstpage, $pieni);
+		$pdf->draw_text(343, 423,  "Documents", 			$firstpage, $pieni);
+		$pdf->draw_text(249,  401,  "X",					$firstpage, $isobold);
+		$pdf->draw_text(329,  401,  $rirow["valkoodi"]." ".$rirow["rivihinta"],	$firstpage, $norm);
 
 		// asiakkaan postitoimipaikan alle
 		$pdf->draw_rectangle(398,18,398,400, 									$firstpage, $rectparam);
@@ -219,7 +244,7 @@
 		$pdf->draw_text(140,  375,  "renvoyer ‡ l'expÈditeur immÈdiatement",	$firstpage, $pieni);
 
 		$pdf->draw_rectangle(385,250,375,260, 									$firstpage, $rectparam);
-		$pdf->draw_text(263,  380,  "by air",	$firstpage, $pieni);
+		$pdf->draw_text(263,  380,  "by air",		$firstpage, $pieni);
 		$pdf->draw_text(263,  375,  "par avion",	$firstpage, $pieni);
 
 		$pdf->draw_rectangle(385,300,375,310, 									$firstpage, $rectparam);
@@ -230,11 +255,8 @@
 		// viiva viivakooditekstin yl‰ ja alapuolelle
 		$pdf->draw_rectangle(260,18,260,400, 									$firstpage, $rectparam);
 		$pdf->draw_rectangle(370,18,370,400, 									$firstpage, $rectparam);
-		$pdf->draw_text(140, 262,  $v2_alku,									$firstpage, $viivacourier);
-		$pdf->draw_text(140, 362,  $v2_alku,									$firstpage, $viivacourier);
-
-		$pdf->draw_text(247, 262,  $v2_loppu,									$firstpage, $viivacourierbold);
-		$pdf->draw_text(247, 362,  $v2_loppu,									$firstpage, $viivacourierbold);
+		$pdf->draw_text(140, 262,  $viiva2,										$firstpage, $viivacourier);
+		$pdf->draw_text(140, 362,  $viiva2,										$firstpage, $viivacourier);
 
 		// viivakoodin alapuolella
 		$pdf->draw_text(18,  250,  "Sender / ExpÈditeur", 						$firstpage, $pieni);
@@ -267,12 +289,14 @@
 		$pdf->draw_rectangle(208,18,208,400, 									$firstpage, $rectparam);
 
 		// Lis‰tiedot
-		$pdf->draw_rectangle(158,18,158,400, 									$firstpage, $rectparam);
-		$pdf->draw_text(18, 150,  "Date",	$firstpage, $pieni);
-		$pdf->draw_text(70, 150,  "Time/Heure",	$firstpage, $pieni);
-		$pdf->draw_text(130, 150,  "Recipient's signature Signature du destinataire",	$firstpage, $pieni);
+		$pdf->draw_rectangle(118,18,118,400, 									$firstpage, $rectparam);
+		$pdf->draw_text(18, 110,  "Date",	$firstpage, $pieni);
+		$pdf->draw_text(70, 110,  "Time/Heure",	$firstpage, $pieni);
+		$pdf->draw_text(130, 110,  "Recipient's signature Signature du destinataire",	$firstpage, $pieni);
 
 		$pdf->draw_text(18, 10,   t("Itella Green - Carbon neutral delivery"),					$firstpage, $iso);
+
+		$pdf->draw_text(270, 10,  "9V".$toitarow['sopimusnro'],		$firstpage, $viivacourier);
 
 		//l‰hetet‰‰n postin edisanoma
 		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {

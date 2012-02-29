@@ -115,7 +115,7 @@
 																					
 				$h-=$pdf->ln(1.5);
 
-				$pdf->write($h, 1, 0, 0, t("HUOM!! Tämä ei ole ostotilaus.", $kieli), "norm", "L", "B");
+				$pdf->write($h, 1, 0, 0, t("HUOM: Tämä ei ole ostotilaus.", $kieli), "norm", "L", "B");
 				
 				return $pdf;
 			}
@@ -367,7 +367,7 @@
 					$kutsu = "Toimituksen vahvistuspyyntö $laskurow[tunnus]";				
 				}
 
-				$tulosta_ostotilaus_ulos .= t("Toimituksen vahvistuspyyntö lähetetään osoitteeseen $kukarow[eposti]")."...<br>";
+				$tulosta_ostotilaus_ulos .= t("Toimituksen vahvistuspyyntö lähetetään osoitteeseen")." $kukarow[eposti]...<br>";
 
 				if ($kukarow["extranet"] == '') {
 					require("../inc/sahkoposti.inc");

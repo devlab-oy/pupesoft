@@ -47,14 +47,13 @@ if (isset($tapa) and $tapa == 'paalle') {
 	if (isset($viite)) {
 		// tutkaillaan suoritusta
 		$query = "	SELECT suoritus.*
-					from suoritus, yriti
-					where suoritus.yhtio='$kukarow[yhtio]'
-					and summa != 0
-					and kohdpvm = '0000-00-00'
-					and viite like '$viite%'
-					and suoritus.yhtio=yriti.yhtio
-					and suoritus.tilino=yriti.tilino
-					and yriti.factoring != ''";
+					FROM suoritus
+					JOIN yriti ON and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != ''
+					WHERE suoritus.yhtio = '$kukarow[yhtio]'
+					AND suoritus.kohdpvm = '0000-00-00'
+					and suoritus.ltunnus > 0
+					AND suoritus.summa  != 0
+					AND suoritus.viite like '$viite%'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -81,9 +80,16 @@ if (isset($tapa) and $tapa == 'paalle') {
 	}
 
 	if (isset($tilino) and is_array($valitut)) {
+
 		echo "Kohdistan!<br>";
+
 		foreach ($valitut as $valittu) {
-			$query = "select * from suoritus where yhtio='$kukarow[yhtio]' and tunnus='$valittu' and kohdpvm='0000-00-00'";
+			$query = "	SELECT *
+						from suoritus
+						where yhtio = '$kukarow[yhtio]'
+						and kohdpvm = '0000-00-00'
+						and ltunnus > 0
+						and tunnus  = '$valittu'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -92,17 +98,23 @@ if (isset($tapa) and $tapa == 'paalle') {
 			else {
 				$suoritusrow=mysql_fetch_assoc($result);
 				// p‰ivitet‰‰n suoritus
-				$query = "update suoritus set kohdpvm = now(), summa = 0 where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[tunnus]'";
+				$query = "	UPDATE suoritus
+							SET kohdpvm = now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$suoritusrow[tunnus]'";
 				$result = pupe_query($query);
-				//echo "$query<br>";
+
 				if (mysql_affected_rows() == 0) {
 					echo "<font class='error'>".t("Suorituksen p‰ivitys ep‰onnistui")."! $tunnus</font><br>";
 				}
 
 				// tehd‰‰n kirjanpitomuutokset
-				$query = "update tiliointi set tilino='$tilino', selite = '".t("Kohdistettiin korkoihin")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
+				$query = "	UPDATE tiliointi
+							set tilino = '$tilino', selite = '".t("Kohdistettiin korkoihin")."'
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$suoritusrow[ltunnus]'";
 				$result = pupe_query($query);
-				//echo "$query<br>";
+
 				if (mysql_affected_rows() == 0) {
 					echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
 				}
@@ -116,16 +128,17 @@ if (isset($tapa) and $tapa == 'pois') {
 	if (isset($viite)) {
 		$query = "	SELECT suoritus.*, tiliointi.summa
 					from suoritus, yriti, tiliointi
-					where suoritus.yhtio='$kukarow[yhtio]'
+					where suoritus.yhtio = '$kukarow[yhtio]'
+					and suoritus.kohdpvm > '0000-00-00'
+					and suoritus.ltunnus > 0
 					and suoritus.summa = 0
-					and kohdpvm != '0000-00-00'
-					and viite like '$viite%'
-					and suoritus.yhtio=yriti.yhtio
-					and suoritus.tilino=yriti.tilino
+					and suoritus.viite like '$viite%'
+					and suoritus.yhtio = yriti.yhtio
+					and suoritus.tilino = yriti.tilino
 					and yriti.factoring != ''
-					and tiliointi.yhtio=suoritus.yhtio
-					and selite = '".t("Kohdistettiin korkoihin")."'
-					and tiliointi.tunnus=suoritus.ltunnus";
+					and tiliointi.yhtio = suoritus.yhtio
+					and tiliointi.selite = '".t("Kohdistettiin korkoihin")."'
+					and tiliointi.tunnus = suoritus.ltunnus";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -153,12 +166,12 @@ if (isset($tapa) and $tapa == 'pois') {
 		foreach ($valitut as $valittu) {
 			$query = "	SELECT *
 						FROM suoritus
-						WHERE yhtio  = '$kukarow[yhtio]'
-						AND tunnus   = '$valittu'
-						AND kohdpvm != '0000-00-00'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND kohdpvm > '0000-00-00'
+						and ltunnus > 0
+						AND tunnus  = '$valittu'";
 			$result = pupe_query($query);
 
-			//echo "$query<br>";
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Suoritus on kadonnut tai se ei ole en‰‰ k‰ytetty")."!</font><br><br>";
 			}

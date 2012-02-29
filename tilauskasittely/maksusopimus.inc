@@ -332,7 +332,7 @@
 			$jaksotettavaa = $rivrow["jaksotettavaa_veroton"];
 		}
 
-		// Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM! Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
+		// Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM: Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
 		$query = "	SELECT *
 					FROM maksupositio
 					WHERE yhtio = '$kukarow[yhtio]'

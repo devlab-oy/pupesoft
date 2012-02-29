@@ -1157,7 +1157,7 @@
 
 		/**
 		 * Case1 (Normaali):
-		 * Kaikki edelliset rivit jotka ker‰tty A:han s‰ilyv‰t kyseisess‰ alustassa, mutta nykyinen/tulevat rivit menev‰t B:hen.
+		 * Jos pyydet‰‰n ker‰yksen yhteydess‰ "Vaihda alusta", niin WMS palauttaa Vocollectille pakkauskirjaimen, joka on sallittu (sama asiakas) ja siirt‰‰ sinne joko kyseisen rivin tai kaikki loput ker‰yksess‰ olevat rivit.
 		 * 
 		 * Case2 (Jaa rivi):
 		 * Ensimm‰iseen laatikkoon laitetaan 5 kpl, jonka j‰lkeen halutaan "vaihda alusta", 

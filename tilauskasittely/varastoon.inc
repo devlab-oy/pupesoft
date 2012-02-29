@@ -923,7 +923,9 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 
 	$rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t‰‰ tehd‰‰n elsess‰ affected rowssilla..
 
-	// laitetaan kohdistettu X kun lasku on viety varastoon...	laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
+	// laitetaan kohdistettu X kun lasku on viety varastoon...
+	// laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
+	// MAPVM p‰vittyy jos keikka loppulasketaan uudestaan ja se nolllataan jos/kun keikka avataan (avaa_keikka.php)
 	$query = "	UPDATE lasku set
 				kohdistettu = 'X',
 				alatila = 'X',

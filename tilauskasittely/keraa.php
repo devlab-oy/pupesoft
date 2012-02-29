@@ -1434,10 +1434,9 @@
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						$query = "	SELECT pakkaus.pakkaus,
-									SUM(tuote.tuotemassa) tuotemassa,
-									SUM((pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys)) as kuutiot,
-									SUM(kerayserat.kpl) AS kpl,
-									COUNT(kerayserat.tunnus) AS maara
+									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + pakkaus.oma_paino, 1) tuotemassa,
+									ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) * IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)), 2) as kuutiot,
+									COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
 									FROM kerayserat
 									JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -1452,13 +1451,36 @@
 						$rahtikirjan_pakkaukset = array();
 
 						while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] = 0;
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
 							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
 
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] 			= $keraysera_row['kpl'];
-							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 		= ($keraysera_row['tuotemassa'] * $keraysera_row['kpl']);
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 		= $keraysera_row['tuotemassa'];
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] 		= $keraysera_row['kuutiot'];
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara']			= $keraysera_row['maara'];
+						}
+
+						$query = "	SELECT 'MUU KOLLI' AS pakkaus,
+									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty), 1) tuotemassa,
+									ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty), 2) as kuutiot,
+									COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
+									FROM kerayserat
+									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+									AND kerayserat.tila = 'K'
+									AND kerayserat.pakkaus = '999'
+									GROUP BY 1
+									ORDER BY pakkausnro ASC";
+						$keraysera_res = mysql_query($query) or pupe_error($query);
+
+						while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
+							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
+							if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
+
+							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 		= $keraysera_row['tuotemassa'];
 							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] 		= $keraysera_row['kuutiot'];
 							$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara']			= $keraysera_row['maara'];
 						}
@@ -2108,7 +2130,8 @@
 						lasku.yhtio_nimi AS 'yhtio_nimi',
 						kerayserat.nro AS 'keraysera',
 						GROUP_CONCAT(DISTINCT lasku.toimitustapa ORDER BY lasku.toimitustapa SEPARATOR '<br />') AS 'toimitustapa',
-						GROUP_CONCAT(DISTINCT avainsana.selitetark_3 ORDER BY avainsana.selitetark_3 SEPARATOR ', ') AS 'prioriteetti',
+						#GROUP_CONCAT(DISTINCT avainsana.selitetark_3 ORDER BY avainsana.selitetark_3 SEPARATOR ', ') AS 'prioriteetti',
+						GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY lasku.prioriteettinro SEPARATOR ', ') AS prioriteetti,
 						GROUP_CONCAT(DISTINCT concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, CONCAT(\"(\", lasku.ytunnus, \")\")) SEPARATOR '<br />') AS 'asiakas',
 						GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
 						COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja'
@@ -2123,7 +2146,7 @@
 							((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 						JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
 						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = asiakas.luokka)
+						#JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = asiakas.luokka)
 						WHERE lasku.{$logistiikka_yhtiolisa}
 						AND lasku.tila = 'L'
 						AND lasku.alatila = 'A'

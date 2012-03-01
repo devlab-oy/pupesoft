@@ -2288,10 +2288,13 @@
 				echo "<th>",t("Ker‰‰j‰"),"</th>";
 				echo "</tr>";
 
+				$lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
+
 				while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+
 					echo "<tr>";
 					echo "<td class='tumma'>{$rivi_row['sscc']}</td>";
-					echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
+					echo "<td class='tumma'><a href='{$palvelin2}tuvar.php?toim=&tee=Z&tuoteno=".urlencode($rivi_row["tuoteno"])."&lopetus={$lopetus_url}'>{$rivi_row['tuoteno']}</a></td>";
 					echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
 					echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
 					echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
@@ -2349,10 +2352,13 @@
 				echo "<th>",t("Ker‰‰j‰"),"</th>";
 				echo "</tr>";
 
+				$lopetus_url = trim($lopetus) != '' ? $lopetus."/SPLIT/{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}" : "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=lahto//tilaukset={$tilaukset}";
+
 				while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+
 					echo "<tr>";
 					echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
-					echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
+					echo "<td class='tumma'><a href='{$palvelin2}tuvar.php?toim=&tee=Z&tuoteno=".urlencode($rivi_row["tuoteno"])."&lopetus={$lopetus_url}'>{$rivi_row['tuoteno']}</a></td>";
 					echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
 					echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
 					echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";

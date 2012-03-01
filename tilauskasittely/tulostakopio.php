@@ -445,7 +445,7 @@
 		}
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
-			$where1 .= " lasku.tila = 'O' ";
+			$where1 .= " lasku.tila = 'O' AND lasku.tilaustyyppi != 'O' ";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 

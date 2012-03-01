@@ -227,7 +227,25 @@
 
 				echo "</select></td></tr>";
 			}
-
+			
+			if ($toim != "HAAMU") {
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+				echo "<td><select name='tilaustyyppi'>";
+            	
+				$sel = array();
+				$sel[$srow["tilaustyyppi"]] = "selected";
+            	
+				echo "<option value='1' $sel[1]>".t("Normaalitilaus")."</option>";
+				echo "<option value='2' $sel[2]>".t("Pikalähetys")."</option>";
+				echo "<option value='3' $sel[3]>".t("Yölähetys")."</option>";
+				echo "</select></td>";
+				//visuaalista säätöä, "täytetään" turha väli
+				echo "<td>";
+				echo "</td>";
+				echo "<td>";
+				echo "</td>";
+			}
+			
 			echo "<tr><td>".t("Kuljetus").": </td><td valign='middle'>";
 
 			$toimtapares = t_avainsana("TOIMITUSTAPA_OS");
@@ -428,9 +446,6 @@
 
 		if ($toim == "HAAMU") {
 			$tilaustyyppi = "O";
-		}
-		else {
-			$tilaustyyppi = "";
 		}
 
 		$query .= "	lasku SET

@@ -121,11 +121,31 @@
 						// jos mikään ei mätsää, niin laitetaan asn-numero
 					}
 
-					$p=1; $c=1;
+					$p=1; $c=1;$d=1;
 					// haetaan tuotteet riveittäin
 					foreach ($xml->Package as $paketti) {
-
-						if (!isset($paketti->PkgItem->ProductId->ProductNumber) and $tavarantoimittajanumero != "123312") {
+						
+						if ($tavarantoimittajanumero == "123085" and $paketti->PkgNumber == 0) {
+							foreach ($paketti->Package as $paketti) {
+								foreach ($paketti->PkgItem as $xxx) {
+									$tuote = (string) $xxx->ProductId->ProductNumber;
+									$tuote = utf8_decode($tuote);
+									$lisays[$p][$c]['ProductId'] = $tuote;
+									$c++;
+								}
+								
+								foreach ($paketti->PkgId as $xxx) {
+									$ident = (string) $xxx->PkgIdentNumber;
+									$ident = utf8_decode($ident);
+									$lisays[$p][1]['PkgIdentNumber'] = '0'.$ident;
+									$lisays[$p][1]['SSCC'] = '0'.$ident;
+									
+								}
+								
+								$p++;
+							}
+						}
+						elseif (!isset($paketti->PkgItem->ProductId->ProductNumber) and $tavarantoimittajanumero != "123312" ) {
 							$paketti = $paketti->Package;
 						}
 
@@ -133,32 +153,47 @@
 							$lisays[$p][$c]['ProductId'] = "";
 						}
 
-						foreach ($paketti->PkgItem as $xxx) {
-							$tuote = (string) $xxx->ProductId->ProductNumber;
-							$tuote = utf8_decode($tuote);
-							$lisays[$p][$c]['ProductId'] = $tuote;
-							$c++;
+						if ($tavarantoimittajanumero != "123085") {
+							foreach ($paketti->PkgItem as $xxx) {
+								$tuote = (string) $xxx->ProductId->ProductNumber;
+								$tuote = utf8_decode($tuote);
+								$lisays[$p][$c]['ProductId'] = $tuote;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
 
 					}
-
+					
+					
 					$p=1; $c=1;
 					// tuotteiden kappalemäärät
 					foreach ($xml->Package as $paketti2) {
-						if (!isset($paketti2->PkgItem->DeliveredQuantity->Quantity) and $tavarantoimittajanumero != "123312") {
+						
+						if ($tavarantoimittajanumero == "123085" and $paketti2->PkgNumber == 0) {
+							foreach ($paketti2->Package as $paketti22) {
+								foreach ($paketti22->PkgItem as $yyy) {
+									$kpl = (float) $yyy->DeliveredQuantity->Quantity;
+									$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
+									$c++;
+								}
+							$p++;
+							}
+						}
+						elseif (!isset($paketti2->PkgItem->DeliveredQuantity->Quantity) and $tavarantoimittajanumero != "123312") {
 							$paketti2 = $paketti2->Package;
 						}
 
 						if ($tavarantoimittajanumero == "123312" and trim($paketti2->PkgNumber) == 1) {
 							$lisays[$p][$c]['DeliveredQuantity'] = "";
 						}
-
-						foreach ($paketti2->PkgItem as $yyy) {
-							$kpl = (float) $yyy->DeliveredQuantity->Quantity;
-							$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
-							$c++;
+						if ($tavarantoimittajanumero != "123085") {
+							foreach ($paketti2->PkgItem as $yyy) {
+								$kpl = (float) $yyy->DeliveredQuantity->Quantity;
+								$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -167,16 +202,37 @@
 					$p=1; $c=1;
 					// tuotteen rivipositio
 					foreach ($xml->Package as $paketti3) {
-						if (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
+						
+						if ($tavarantoimittajanumero == "123085" and $paketti3->PkgNumber == 0) {
+							foreach ($paketti3->Package as $paketti3) {
+								foreach ($paketti3->PkgItem as $zzz) {
+									//$positio = (string) $zzz->PositionNumber;
+									$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
+									$positio = utf8_decode($positio);
+									$lisays[$p][$c]['PositionNumber'] = (int) $positio;
+									$c++;
+								}
+								$p++;
+							}
+						}
+						elseif ($tavarantoimittajanumero == "123342") {
+							foreach ($paketti3->PkgItem as $www) {
+								$positio = (int) $www->OrderRef->BuyerOrderNumber;
+								$lisays[$p][$c]['PositionNumber'] = $positio;
+								$c++;
+							}
+						}
+						elseif (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
 							$paketti3 = $paketti3->Package;
 						}
-
-						foreach ($paketti3->PkgItem as $zzz) {
-							//$positio = (string) $zzz->PositionNumber;
-							$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
-							$positio = utf8_decode($positio);
-							$lisays[$p][$c]['PositionNumber'] = (int) $positio;
-							$c++;
+						
+						if ($tavarantoimittajanumero != "123085" and $tavarantoimittajanumero != "123342"){
+							foreach ($paketti3->PkgItem as $zzz) {
+								$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
+								$positio = utf8_decode($positio);
+								$lisays[$p][$c]['PositionNumber'] = (int) $positio;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -185,47 +241,56 @@
 					$p=1; $c=1;
 					// rivin tilaajan tilausnumero
 					foreach ($xml->Package as $tuotteelta_tilausno) {
-						if (!isset($tuotteelta_tilausno->PkgItem->OrderRef->BuyerOrderNumber) and $tavarantoimittajanumero != "123312") {
+						
+						if ($tavarantoimittajanumero == "123085" and $tuotteelta_tilausno->PkgNumber == 0) {
+							foreach ($tuotteelta_tilausno->Package as $tuotteelta_tilausno) {
+								foreach ($tuotteelta_tilausno->PkgItem as $www) {
+									$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
+									$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
+									$c++;
+								}
+							$p++;
+							}
+						}
+						elseif (!isset($tuotteelta_tilausno->PkgItem->OrderRef->BuyerOrderNumber) and $tavarantoimittajanumero != "123312") {
 							$tuotteelta_tilausno = $tuotteelta_tilausno->Package;
 						}
 
 						if ($tavarantoimittajanumero == "123312" and trim($tuotteelta_tilausno->PkgNumber) == 1) {
 							$lisays[$p][$c]['BuyerOrderNumber'] = "";
 						}
-
-						foreach ($tuotteelta_tilausno->PkgItem as $www) {
-							$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
-							$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
-							$c++;
+						
+						if ($tavarantoimittajanumero != "123085") {
+							foreach ($tuotteelta_tilausno->PkgItem as $www) {
+								$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
+								$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
 					}
 
 					// tarvitaan pakkauksen "PkgIdentNumber"
-					// on poikkeuksia ja poikkeuksen poikkeuksia
+					// on poikkeuksia ja poikkeuksen poikkeuksia ja niillekki vielä poikkeus
 					$p=1; $c=1;
 					foreach ($xml->Package as $laatikosta) {
-					/*
-						if (($laatikosta->PkgId->PkgIdentNumber == "" or $laatikosta->PkgId->PkgIdentNumber == "0") and $tavarantoimittajanumero != "123312") {
-							$laatikosta = $laatikosta->Package;
-						}
-					*/	
+
 						if (isset($laatikosta->PkgId)) {
 							foreach ($laatikosta->PkgId as $ident) {
 								$laatikkoind = (string) $ident->PkgIdentNumber;
 								$laatikkoind = utf8_decode($laatikkoind);
 								// SSCC-koodi on periaatteessa sama mutta lyhentämättömänä tulevaisuutta varten keikalle
 								$sscc = $laatikkoind;
-
-								if ($tavarantoimittajanumero == "123085") {
-									$laatikkoind = "0".$laatikkoind;
-									$sscc = $laatikkoind;
-								}
-								elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) >10) {
+								
+								if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) >10) {
 									$sscc = $laatikkoind;
 									$laatikkoind = substr($laatikkoind,10);
 		
+								}
+								elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) < 10) {
+									$sscc = $laatikkoind;
+									$laatikkoind = '0'.$laatikkoind;
 								}
 								elseif ($tavarantoimittajanumero == "123342") {
 									$sscc = $laatikkoind;
@@ -235,8 +300,10 @@
 									$laatikkoind = $laatikkoind;
 									$sscc = $laatikkoind;
 								}
-								$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
-								$lisays[$p][$c]['SSCC'] = $sscc;
+								if ($tavarantoimittajanumero !="123085") {
+									$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
+									$lisays[$p][$c]['SSCC'] = $sscc;
+								}
 							}
 						}
 						elseif ($tavarantoimittajanumero == "123312" and trim($laatikosta->PkgNumber) == 1) {
@@ -274,7 +341,6 @@
 										AND toimittajanumero = '$tavarantoimittajanumero'
 										AND asn_numero = '$asn_numero'";
 						$checkinsertresult = pupe_query($tarkinsert);
-
 						if (mysql_num_rows($checkinsertresult) > 0) {
 							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero löytyy tietokannasta jo sanomat, ei lisätä uudestaan sanomia\n";
 							rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
@@ -295,7 +361,7 @@
 
 								foreach ($lisays[$i] as $value) {
 									
-									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
+									if ($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != '' and $value["BuyerOrderNumber"] != 0)) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 										
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
@@ -314,7 +380,8 @@
 		 													tilausrivinpositio	= '$value[PositionNumber]',
 		 													laatija 			= '$kukarow[kuka]',
 		 													luontiaika 			= now()";
-		 								$result = pupe_query($sqlinsert);
+		 								$result = pupe_query($sqlinsert);	
+			
 		 								$eka_insert[] = mysql_insert_id(); // Otetaan insertin ensimmäinen tunnus talteen. tätä käytetään liitetiedostoissa liitostunnuksena.
 									}
 								}
@@ -339,8 +406,8 @@
 											jarjestys			= '1',
 											laatija				= '$kukarow[kuka]',
 											luontiaika			= now()";
-							$Xresult = pupe_query($tecquery);
-
+						//	$Xresult = pupe_query($tecquery);
+// JAMPPA
 							rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
 						}
 

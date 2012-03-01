@@ -271,7 +271,7 @@
 				while ($asiakas_row = mysql_fetch_assoc($asiakas_res)) {
 					echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
 
-					echo "<td>";
+					echo "<td class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>";
 
 					if (strpos($asiakas_row['tila'], 'K') !== false) {
 						echo t("Aloitettu");
@@ -280,11 +280,11 @@
 						echo t("Kerätty");
 					}
 
-					echo "</td>";
+					echo "&nbsp;<img title='",t("Näytä rivit"),"' alt='",t("Näytä rivit"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 
 					echo "<td>{$asiakas_row['prioriteettinro']}</td>";
 					echo "<td>{$asiakas_row['nro']}</td>";
-					echo "<td class='asiakas' id='asiakas_{$i}_{$x}_{$y}'>{$asiakas_row['nimi']}&nbsp;<img title='",t("Näytä rivit"),"' alt='",t("Näytä rivit"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+					echo "<td>{$asiakas_row['nimi']}</td>";
 					echo "<td>{$asiakas_row['toimitustavan_lahto']}</td>";
 					echo "<td>{$asiakas_row['toimitustapa']}</td>";
 					echo "<td></td>";
@@ -293,15 +293,18 @@
 					$query = "	SELECT tilausrivi.tuoteno, 
 								tuote.nimitys, 
 								CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
+								tilausrivi.otunnus,
+								CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
 								ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl_keratty, 0)), 0) AS 'keratty',
 								ROUND(SUM(tilausrivi.varattu), 0) AS 'tilattu'
 								FROM kerayserat
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.otunnus IN ({$asiakas_row['tunnus']})
-								GROUP BY 1,2,3
+								GROUP BY 1,2,3,4,5
 								ORDER BY vh.indeksi";
 					$rivi_res = pupe_query($query);
 
@@ -310,9 +313,9 @@
 						echo "<th>",t("Tuotenro"),"</th>";
 						echo "<th>",t("Tuotekuvaus"),"</th>";
 						echo "<th>",t("Keräyspaikka"),"</th>";
+						echo "<th>",t("Asiakas"),"</th>";
 						echo "<th>",t("Kerätty / Tilattu"),"</th>";
-						echo "<th></th>";
-						echo "<th></th>";
+						echo "<th>",t("Tilaus"),"</th>";
 						echo "<th></th>";
 						echo "</tr>";
 
@@ -321,9 +324,9 @@
 							echo "<td>{$rivi_row['tuoteno']}</td>";
 							echo "<td>{$rivi_row['nimitys']}</td>";
 							echo "<td>{$rivi_row['kerayspaikka']}</td>";
+							echo "<td>{$rivi_row['nimi']}</td>";
 							echo "<td>{$rivi_row['keratty']} / {$rivi_row['tilattu']}</td>";
-							echo "<td></td>";
-							echo "<td></td>";
+							echo "<td>{$rivi_row['otunnus']}</td>";
 							echo "<td></td>";
 							echo "</tr>";
 						}						

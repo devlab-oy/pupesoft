@@ -155,11 +155,13 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	}
 
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
-	if ($vikaa != 0 or $tarkea < count($pakolliset) or $postoiminto == 'X') {
-		// suljetaan avattu faili.. kilttiä!
-		fclose ($file);
-		// ja kuollaan pois
-		die("<br><br><font class='error'>".t("Virheitä löytyi! Ei voida jatkaa")."!<br></font>");
+	if ($vikaa != 0 or $tarkea < count($pakolliset)) {
+		die("<br><br><font class='error'>".t("VIRHE: Pakollisisa sarakkeita puuttuu! Ei voida jatkaa")."!<br></font>");
+	}
+	
+	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
+	if ($postoiminto == 'X') {
+		die("<br><br><font class='error'>".t("VIRHE: Toiminto-sarake puuttuu! Ei voida jatkaa")."!<br></font>");
 	}
 
 	if ($kielletty > 0) {
@@ -195,6 +197,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 		fclose($file);
 	}
 
+	/*
 	echo "<table>";
 	echo "<tr>";
 
@@ -214,6 +217,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 	echo "</table><br>";
 	#exit;
+	*/
 
 	// luetaan tiedosto loppuun...
 	foreach ($taulunrivit as $rivinumero => $rivi) {
@@ -319,10 +323,10 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 										$jarjestys = (int) $irow["jarjestys"] + 1;
 									}
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now() ";
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 								}
 								else {
-									$kysely = " and tuoteno='$rivi[$j]'";
+									$kysely = " and tuoteno='$rivi[$j]' ";
 								}
 
 								$query = $alku.$kysely.$loppu;
@@ -464,16 +468,17 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
 					if (strtoupper(trim($headers[$r])) == "TUOTENO") {
 						$query  = "	INSERT INTO tuoteperhe SET
-									yhtio = '{$kukarow['yhtio']}',
-									isatuoteno = '$isatuote',
-									tuoteno = '{$rivi[$r]}',
-									tyyppi = '$tyyppi',
-									laatija = '$kukarow[kuka]',
-									luontiaika = now()";
+									yhtio 		= '{$kukarow['yhtio']}',
+									isatuoteno 	= '$isatuote',
+									tuoteno 	= '{$rivi[$r]}',
+									tyyppi 		= '$tyyppi',
+									laatija 	= '$kukarow[kuka]',
+									luontiaika 	= now(),
+									muuttaja 	= '$kukarow[kuka]',
+									muutospvm 	= now()";
 						$result = pupe_query($query);
 						$lask++;
 					}
-
 				}
 			}
 		}

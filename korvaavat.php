@@ -1,4 +1,5 @@
 <?php
+
 	require ("inc/parametrit.inc");
 
 	if ($toim == "vastaavat") {
@@ -43,10 +44,10 @@
 		$id		= $row['id'];
 
 		//muutetaan prio..
-		$query  = "		UPDATE $taulu SET 
+		$query  = "		UPDATE $taulu SET
 						jarjestys = '$prio',
 						muutospvm = now(),
-						muuttaja = '$kukarow[kuka]' 
+						muuttaja = '$kukarow[kuka]'
 						WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
@@ -95,25 +96,29 @@
 				$id 	= $row[0]+1;
 
 				//lisätään "isä tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = "	INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 
 				// lisätään korvaava tuote...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$id', '$korvaava', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$id', '$korvaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
 			//lapsi on löytynyt, isää ei
 			if (($cid != "") and ($fid == "")) {
 				//lisätään "isä tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
 			//isä on löytynyt, lapsi ei
 			if (($fid != "") and ($cid == "")) {
 				//lisätään korvaava...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio, luontiaika, laatija) VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', now(), '$kukarow[kuka]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 

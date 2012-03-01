@@ -130,7 +130,10 @@
 								foreach ($paketti->PkgItem as $xxx) {
 									$tuote = (string) $xxx->ProductId->ProductNumber;
 									$tuote = utf8_decode($tuote);
+									$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
+									$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
 									$lisays[$p][$c]['ProductId'] = $tuote;
+									$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
 									$c++;
 								}
 								
@@ -157,7 +160,10 @@
 							foreach ($paketti->PkgItem as $xxx) {
 								$tuote = (string) $xxx->ProductId->ProductNumber;
 								$tuote = utf8_decode($tuote);
+								$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
+								$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
 								$lisays[$p][$c]['ProductId'] = $tuote;
+								$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
 								$c++;
 							}
 						}
@@ -341,6 +347,7 @@
 										AND toimittajanumero = '$tavarantoimittajanumero'
 										AND asn_numero = '$asn_numero'";
 						$checkinsertresult = pupe_query($tarkinsert);
+						
 						if (mysql_num_rows($checkinsertresult) > 0) {
 							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero löytyy tietokannasta jo sanomat, ei lisätä uudestaan sanomia\n";
 							rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
@@ -360,8 +367,8 @@
 								}
 
 								foreach ($lisays[$i] as $value) {
-									
-									if ($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != '' and $value["BuyerOrderNumber"] != 0)) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
+
+									if ($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != '')) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 										
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
@@ -376,6 +383,7 @@
 		 													paketintunniste 	= '$laatikkoid',
 		 													lahetyslistannro 	= '$pakkauslista',
 		 													toim_tuoteno		= '$value[ProductId]',
+															toim_tuoteno2		= '$value[BuyerProductNumber]',
 		 													kappalemaara		= '$value[DeliveredQuantity]',
 		 													tilausrivinpositio	= '$value[PositionNumber]',
 		 													laatija 			= '$kukarow[kuka]',
@@ -406,8 +414,7 @@
 											jarjestys			= '1',
 											laatija				= '$kukarow[kuka]',
 											luontiaika			= now()";
-						//	$Xresult = pupe_query($tecquery);
-// JAMPPA
+							$Xresult = pupe_query($tecquery);
 							rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
 						}
 

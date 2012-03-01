@@ -1079,6 +1079,7 @@
 				}
 
 				echo "<td align='right'>{$row['toimittajanumero']}</td>";
+				echo "<td align='right'>{$row['otunnus']}</td>";
 				echo "<td align='right'>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td>{$row['toim_tuoteno']}</td>";

@@ -320,8 +320,9 @@
 						echo "</tr>";
 
 						while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+							//{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z
 							echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
-							echo "<td>{$rivi_row['tuoteno']}</td>";
+							echo "<td><a href='{$palvelin2}tuvar.php?toim=&tee=Z&tuoteno=".urlencode($rivi_row["tuoteno"])."&lopetus={$palvelin2}tilauskasittely/keraysvyohykkeiden_keraajat.php'>{$rivi_row['tuoteno']}</a></td>";
 							echo "<td>{$rivi_row['nimitys']}</td>";
 							echo "<td>{$rivi_row['kerayspaikka']}</td>";
 							echo "<td>{$rivi_row['nimi']}</td>";

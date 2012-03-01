@@ -928,6 +928,7 @@
 						asn_sanomat.tilausnumero,
 						tilausrivi.tuoteno,
 						tilausrivi.otunnus, 
+						tilausrivi.tilkpl as tilattu,
 						if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
 						FROM asn_sanomat
 						JOIN tilausrivi ON (tilausrivi.yhtio = asn_sanomat.yhtio AND tilausrivi.tunnus IN (asn_sanomat.tilausrivi))
@@ -953,8 +954,8 @@
 			echo "<th>",t("Tuotenro"),"</th>";
 			echo "<th>",t("Toimittajan"),"<br />",t("Tuotenro"),"</th>";
 			echo "<th>",t("Nimitys"),"</th>";
-			echo "<th>",t("Rivinro"),"</th>";
-			echo "<th>",t("Kpl"),"</th>";
+			echo "<th>",t("Tilattu kpl"),"</th>";
+			echo "<th>",t("Asn-kpl"),"</th>";
 			echo "<th>",t("Alennukset"),"</th>";
 			echo "<th>",t("Status"),"</th>";
 			echo "<th class='back'>&nbsp;</th>";
@@ -975,14 +976,14 @@
 				$row['nimitys'] = $tuoterow['nimitys'];
 
 				echo "<td align='right'>{$row['toimittajanumero']}</td>";
+				echo "<td align='right'></td>";
 				echo "<td align='right'>{$row['otunnus']}</td>";
-				echo "<td align='right'>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td>{$row['toim_tuoteno']}</td>";
 				echo "<td>{$row['nimitys']}</td>";
-				echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
+				echo "<td align='right'>{$row['tilattu']}</td>";
 				echo "<td align='right'>{$row['kappalemaara']}</td>";
-				echo "<td>{$row['alennus']}</td>";
+				echo "<td></td>";
 				echo "<td><font class='ok'>",t("Ok"),"</font></td>";
 				echo "<td class='back'></td>";
 				echo "</tr>";
@@ -1079,12 +1080,12 @@
 				}
 
 				echo "<td align='right'>{$row['toimittajanumero']}</td>";
-				echo "<td align='right'>{$row['otunnus']}</td>";
+				echo "<td align='right'></td>";
 				echo "<td align='right'>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td>{$row['toim_tuoteno']}</td>";
 				echo "<td>{$row['nimitys']}</td>";
-				echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
+				echo "<td align='right'>{$row['tilattu']}</td>";
 				echo "<td align='right'>{$row['kappalemaara']}</td>";
 				echo "<td></td>";
 

@@ -4,9 +4,12 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Kopioi varastojen h‰lytysrajat")."</font><hr>";
 
-// ABC luokkanimet
-$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
-$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
+list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+
+if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
+
+list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+
 
 // Tarvittavat p‰iv‰m‰‰r‰t
 if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -125,7 +128,7 @@ if ($tee == "paivita") {
 					 				halytysraja = '$kohdehaly[$paikkatunnus]'
 									WHERE yhtio = '$kukarow[yhtio]' and
 									tunnus = '$paikkatunnus'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						$laskuri++;
 					}
@@ -226,7 +229,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]' and (tunnus = '$kopioitavavarasto' or tunnus = '$kohdevarasto')
 				ORDER BY nimitys";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<tr><th>".t("Varastosta varastoon")."</th><td>";
 
@@ -252,11 +255,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	// hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
 	$query  = "SELECT TO_DAYS('$vvl1-$kkl1-$ppl1')-TO_DAYS('$vva1-$kka1-$ppa1') ero";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$erorow = mysql_fetch_array($result);
 
 	// t‰ss‰ on itse query
-
 	$query = "	SELECT
 				tuote.tuoteno,
 				tuote.nimitys,
@@ -287,8 +289,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				and tuote.ei_saldoa = ''
 				group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
 				$jarjestys";
-	$res = mysql_query($query) or pupe_error($query);
-
+	$res = pupe_query($query);
 
 	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
@@ -299,18 +300,13 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<th>".t("Varasto")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("S")."</th>";
-	if ($abcpaalla == "kylla") {
-		echo "<th>".t("Abc")."</th>";
-	}
+	echo "<th>".t("Abc")."</th>";
 	echo "<th>".t("Puute")."</th>";
 	echo "<th>".t("Kok.Saldo")."<br>".t("Var.Saldo")."</th>";
 	echo "<th>".t("Kok.Myynti")."<br>".t("Var.Myynti")."</th>";
 	echo "<th>".t("H‰lytysraja")."</th>";
 
-
-
 	echo "</tr>\n";
-
 
 	$edtuoteno = "";
 	$edkohdetuoteno = "";
@@ -369,10 +365,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		echo "<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 		echo "<td>$row[status]</td>";
-
-		if ($abcpaalla == "kylla") {
-			echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
-		}
+		echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
 
 		// tutkaillaan myynti
 		$query = "	SELECT
@@ -401,7 +394,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
    					and tyyppi = 'L'
    					and tuoteno = '$row[tuoteno]'
    					and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";
-		$result   = mysql_query($query) or pupe_error($query);
+		$result   = pupe_query($query);
 		$summarow = mysql_fetch_array($result);
 
 		echo "<td align='right'>$summarow[puutekpl1]</td>";
@@ -491,7 +484,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY nimitys";
-	$vtresult = mysql_query($query) or pupe_error($query);
+	$vtresult = pupe_query($query);
 
 
 	echo "<tr><th>Kopioitava varasto</th>\n";
@@ -583,7 +576,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 				FROM tuote
 				WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
 				ORDER BY tuotemerkki";
-	$sresult = mysql_query($query) or pupe_error($query);
+	$sresult = pupe_query($query);
 
 	echo "<select name='tuotemerkki'>\n";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";
@@ -599,42 +592,36 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "</td></tr>";
 
-	// katotaan onko abc aputaulu rakennettu
-	$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
-	$abcres = mysql_query($query) or pupe_error($query);
-	$abcrow = mysql_fetch_array($abcres);
+	echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
-	// jos on niin n‰ytet‰‰n t‰ll‰nen vaihtoehto
-	if ($abcrow[0] > 0) {
-		echo "<input type='hidden' name='abcpaalla' value='kylla'>";
-		echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+	echo "<select name='abcrajaus'>";
+	echo "<option  value=''>".t("Valitse")."</option>";
 
-		$sel = array();
-		$sel[$abcrajaus] = "SELECTED";
-
-		echo "<select name='abcrajaus'>
-		<option value=''>".t("Ei rajausta")."</option>
-		<option $sel[0] value='0'>".t("Luokka")." A-30</option>
-		<option $sel[1] value='1'>".t("Luokka")." B-20 ".t("ja paremmat")."</option>
-		<option $sel[2] value='2'>".t("Luokka")." C-15 ".t("ja paremmat")."</option>
-		<option $sel[3] value='3'>".t("Luokka")." D-15 ".t("ja paremmat")."</option>
-		<option $sel[4] value='4'>".t("Luokka")." E-10 ".t("ja paremmat")."</option>
-		<option $sel[5] value='5'>".t("Luokka")." F-05 ".t("ja paremmat")."</option>
-		<option $sel[6] value='6'>".t("Luokka")." G-03 ".t("ja paremmat")."</option>
-		<option $sel[7] value='7'>".t("Luokka")." H-02 ".t("ja paremmat")."</option>
-		<option $sel[8] value='8'>".t("Luokka")." I-00 ".t("ja paremmat")."</option>
-		</select>";
-
-		$sel = array();
-		$sel[$abcrajaustapa] = "SELECTED";
-
-		echo "<select name='abcrajaustapa'>
-		<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
-		<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
-		<option $sel[TP] value='TK'>".t("Myyntikappaleet")."</option>
-		</select>
-		</td></tr>";
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TM'>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
 	}
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TK'>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+	}
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TR'>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+	}
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TP'>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+	}
+
+	echo "</select>";
 
 	echo "<tr><th>".t("Uusi tuote")." on</th>";
 	echo "<td><select name='uusienika'>";

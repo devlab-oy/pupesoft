@@ -121,7 +121,7 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 }
 
 // Vaihdetaan tietyn projektin toiseen toimitukseen
-//	HUOM! t‰m‰ k‰ytt‰‰ aktivointia joten t‰m‰ on oltava aika alussa!! (valinta on onchage submit rivisyˆtˆss‰ joten noita muita paremetreja ei oikein voi passata eteenp‰in..)
+//	HUOM: t‰m‰ k‰ytt‰‰ aktivointia joten t‰m‰ on oltava aika alussa!! (valinta on onchage submit rivisyˆtˆss‰ joten noita muita paremetreja ei oikein voi passata eteenp‰in..)
 if ((int) $valitsetoimitus > 0) {
 	$tee 			= "AKTIVOI";
 	$tilausnumero 	= $valitsetoimitus;
@@ -726,7 +726,7 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 		$updres=pupe_query($query);
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE!!! rivi‰ ei voi siirt‰‰!")."</font><br>";
+		echo "<font class='error'>".t("VIRHE: rivi‰ ei voi siirt‰‰!")."</font><br>";
 	}
 
 	$tyhjenna 	= "JOO";
@@ -2454,7 +2454,7 @@ if ($tee == '') {
 			$prosres = pupe_query($prosque);
 			if (mysql_num_rows($prosres)==1) {
 				$asiakasOnProspekti = "JOO";
-				echo "<br><font class='error'>".t("HUOM!!! Asiakas on prospektiasiakas, tarkista asiakasrekisteriss‰ asiakkaan tiedot ja p‰ivit‰ tiedot tilauksen otsikolle.")."</font>";
+				echo "<br><font class='error'>".t("HUOM: Asiakas on prospektiasiakas, tarkista asiakasrekisteriss‰ asiakkaan tiedot ja p‰ivit‰ tiedot tilauksen otsikolle.")."</font>";
 			}
 		}
 
@@ -2613,7 +2613,7 @@ if ($tee == '') {
 			}
 			echo "</select>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='toimitustapa' value='$laskurow[toimitustapa]'>";
 			}
@@ -2823,10 +2823,10 @@ if ($tee == '') {
 			echo "<td><input type='text' name='myyjanro' size='8' $state> tai ";
 			echo "<select name='myyja' onchange='submit();' $state>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$laskurow[myyja]')
-						ORDER BY nimi";
+						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$laskurow[myyja]')
+						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($yresult)) {
@@ -3032,7 +3032,7 @@ if ($tee == '') {
 			if ($faktarow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
 				echo "<tr>$jarjlisa<td class='back'></td>";
 				echo "<td colspan='3' class='back'>";
-				echo "<p class='error'>".t("HUOM!! T‰m‰ on korjaamo-asiakas, ‰l‰ myy t‰lle asiakkaalle")."</p>";
+				echo "<p class='error'>".t("HUOM: T‰m‰ on korjaamo-asiakas, ‰l‰ myy t‰lle asiakkaalle")."</p>";
 				echo "</td></tr>";
 			}
 		}
@@ -3111,25 +3111,25 @@ if ($tee == '') {
 
 		if ($luottorajavirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>",t("HUOM!!!!!! Luottoraja ylittynyt"),"!!!!!</font>";
+			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!!!!!</font>";
 			echo "<br/>";
 		}
 
 		if ($jvvirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>",t("HUOM!!!!!! T‰m‰ on j‰lkivaatimusasiakas"),"!!!!!</font>";
+			echo "<font class='error'>",t("HUOM: T‰m‰ on j‰lkivaatimusasiakas"),"!!!!!</font>";
 			echo "<br/>";
 		}
 
 		if ($ylivito > 0) {
 			echo "<br/>";
-			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!</font>";
+			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!</font>";
 			echo "<br/>";
 		}
 
 		if ($trattavirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>";
+			echo "<font class='error'>".t("HUOM: Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>";
 			echo "<br/>";
 		}
 
@@ -4275,12 +4275,12 @@ if ($tee == '') {
 				}
 				//	Jos haetaan niin ei ilmoitella turhia
 				elseif ($menutila != "haku" and $menutila != "") {
-					echo "HUOM! Koitettiin hakea myyntimenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
+					echo "HUOM: Koitettiin hakea myyntimenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
 				}
 
 			}
 			else {
-				echo "HUOM! Koitettiin hakea myyntimenuja, mutta tiedot olivat puutteelliset.<br>";
+				echo "HUOM: Koitettiin hakea myyntimenuja, mutta tiedot olivat puutteelliset.<br>";
 			}
 		}
 		else {
@@ -4762,7 +4762,7 @@ if ($tee == '') {
 
 				if ($kukarow['hinnat'] == 0) {
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$headerit .= "<th style='text-align:right;'>".t("Ale{$alepostfix}%")."</th>";
+						$headerit .= "<th style='text-align:right;'>".t("Ale{$alepostfix}")."%</th>";
 						$sarakkeet++;
 					}
 
@@ -6519,7 +6519,7 @@ if ($tee == '') {
 
 				//Jos myyj‰ on myym‰ss‰ ulkomaan varastoista liian pienell‰ summalla
 				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
-					$ulkom_huom = "<font class='error'>".t("HUOM! Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $laskurow[valkoodi]</font>";
+					$ulkom_huom = "<font class='error'>".t("HUOM: Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $laskurow[valkoodi]</font>";
 				}
 				elseif ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 					if ($tm_toimitustaparow['ulkomaanlisa'] > 0) {

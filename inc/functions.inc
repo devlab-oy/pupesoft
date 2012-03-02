@@ -1407,28 +1407,31 @@ if (!function_exists("saldo_myytavissa")) {
 }
 
 if (!function_exists("lpr")) {
-	function lpr($str,$prn,$prnkomento = "") {
+	function lpr($str, $prn, $prnkomento = "") {
+
 		global $kukarow;
 
 		if ($prnkomento != "") {
-			$kirjoitin["komento"] = $prnkomento;
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND komento = '".mysql_real_escape_string($prnkomento)."'";
 		}
 		else {
 			$query = "	SELECT *
 						FROM kirjoittimet
-						WHERE
-						yhtio = '$kukarow[yhtio]' and
-						tunnus = '$prn'
-						ORDER by kirjoitin";
-			$kirre = pupe_query($query);
-
-			if (mysql_num_rows($kirre) != 1) {
-				echo "printer not found";
-				return;
-			}
-
-			$kirjoitin = mysql_fetch_assoc($kirre);
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tunnus = '{$prn}'";
 		}
+
+		$kirre = pupe_query($query);
+
+		if (mysql_num_rows($kirre) != 1) {
+			echo "printer not found";
+			return;
+		}
+
+		$kirjoitin = mysql_fetch_assoc($kirre);
 
 		$pipe = popen($kirjoitin["komento"], 'w');
 
@@ -4924,7 +4927,7 @@ if (!function_exists("alehinta")) {
 		}
 
 		$debug = 0;
-		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale)," ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale),"% ".t("HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
@@ -5637,7 +5640,7 @@ if (!function_exists("alehinta_osto")) {
 		}
 
 		$debug = 0;
-		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale)," ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale),"% ".t("HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
 		if ($laskurow["valkoodi"] != $valuutta) {
 			$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
@@ -7764,7 +7767,7 @@ if (!function_exists('tarkasta_liite')) {
 
 		//	Ei saatu erroreita. jatketaan..
 		if ($file["size"] == 0) {
-			return "<font class='error'>".t("VIRHE! Tiedosto on tyhjä")."</font><br><br>";
+			return "<font class='error'>".t("VIRHE: Tiedosto on tyhjä")."</font><br><br>";
 		}
 		elseif ($file["error"] == 0) {
 
@@ -7784,32 +7787,32 @@ if (!function_exists('tarkasta_liite')) {
 				else {
 					if (count($sallitut_tiedostot)>1) {
 						//	Kaunistellaan..
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE: Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
 
 					}
 					else {
-						return "<font class='error'>".t("VIRHE! Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+						return "<font class='error'>".t("VIRHE: Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
 					}
 				}
 			}
 			else {
-				return "<font class='error'>".t("VIRHE! Ladattu tiedosto oli liian suuri! Suurin sallittu tiedostokoko on %s", $kieli, size_readable($file["size"]))."!</font><br><br>";
+				return "<font class='error'>".t("VIRHE: Ladattu tiedosto oli liian suuri! Suurin sallittu tiedostokoko on %s", $kieli, size_readable($file["size"]))."!</font><br><br>";
 			}
 		}
 		elseif ($file["error"] == 1 or $file["error"] == 2) {
-			return "<font class='error'>".t("VIRHE! Tiedosto on liian suuri!")."!</font><br><br>";
+			return "<font class='error'>".t("VIRHE: Tiedosto on liian suuri!")."!</font><br><br>";
 		}
 		elseif ($file["error"] == 3) {
-			return "<font class='error'>".t("VIRHE! Tiedoston lataus epäonnistui!")."!</font><br><br>";
+			return "<font class='error'>".t("VIRHE: Tiedoston lataus epäonnistui!")."!</font><br><br>";
 		}
 		elseif ($file["error"] == 4) {
 			return true;
 		}
 		elseif ($file["error"] == 7) {
-			return "<font class='error'>".t("VIRHE! Palvelinasetuksissa on virhe!")."!</font><br><br>";
+			return "<font class='error'>".t("VIRHE: Palvelinasetuksissa on virhe!")."!</font><br><br>";
 		}
 		else {
-			return "<font class='error'>".t("VIRHE! Tapahtui virhe tallennettaessa tiedostoa!")."!</font><br><br>";
+			return "<font class='error'>".t("VIRHE: Tapahtui virhe tallennettaessa tiedostoa!")."!</font><br><br>";
 		}
 	}
 }
@@ -9216,7 +9219,7 @@ if (!function_exists("t_avainsana")) {
 
 		$kielisubquery = "";
 
-		//Haetaan vieraskieliset vain jos pyydetään vieraskielistä
+		// Haetaan vieraskieliset vain jos pyydetään vieraskielistä
 		if (strtoupper($kieli) != strtoupper($yhtiorow["kieli"])) {
 			$kielisubquery = ", IFNULL((SELECT if (avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
 								FROM avainsana as avainsana_kieli
@@ -9237,8 +9240,13 @@ if (!function_exists("t_avainsana")) {
 		$result = pupe_query($query, $link);
 
 		if ($return != "") {
-			$row = mysql_fetch_assoc($result);
-			return $row[$return];
+			if (mysql_num_rows($result) > 0) {
+				$row = mysql_fetch_assoc($result);
+				return $row[$return];
+			}
+			else {
+				return "";
+			}
 		}
 
 		return $result;
@@ -15276,4 +15284,47 @@ if (!function_exists('zendesk_curl')) {
 		return array($body, $statukset, $priot);
 	}
 }
+
+// Haetaan ryhmänimet tietokannasta ja palautetaan 2 arrayta
+if (!function_exists('hae_ryhmanimet')) {
+	function hae_ryhmanimet ($abc_tyyppi) {
+		global $yhtiorow, $kukarow;
+
+		if ($abc_tyyppi == "") {
+			return FALSE;
+		}
+
+		// Haetaan abc-parametrit
+		$query = "	SELECT *
+					FROM abc_parametrit
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					and tyyppi 	= '{$abc_tyyppi}'
+					ORDER by luokka";
+		$res = pupe_query($query);
+
+		if (mysql_num_rows($res) == 0) {
+			echo t("ABC-parametrit puuttuu")."</br>";
+			exit;
+		}
+
+		$ryhmanimet   					= array();
+		$ryhmaprossat					= array();
+		$kiertonopeus_tavoite 			= array();
+		$palvelutaso_tavoite 			= array();
+		$varmuusvarasto_pv   			= array();
+		$toimittajan_toimitusaika_pv 	= array();
+
+		while ($row = mysql_fetch_array($res)) {
+			$ryhmanimet[] 					= $row["luokka"];
+			$ryhmaprossat[] 				= $row["osuusprosentti"];
+			$kiertonopeus_tavoite[] 		= $row["kiertonopeus_tavoite"];
+			$palvelutaso_tavoite[] 			= $row["palvelutaso_tavoite"];
+			$varmuusvarasto_pv[]   			= $row["varmuusvarasto_pv"];
+			$toimittajan_toimitusaika_pv[] 	= $row["toimittajan_toimitusaika_pv"];
+		}
+
+		return array($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv);
+	}
+}
+
 

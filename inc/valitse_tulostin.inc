@@ -364,7 +364,7 @@
 	}
 	
 	if ($laskurow['kirjoitin'] == "edi") {
-		echo "<tr><td colspan='2' class='back'><font class='error'>".t("Huom! EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
+		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}
 
 	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";

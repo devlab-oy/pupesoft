@@ -40,7 +40,7 @@ if ($kukarow["extranet"] != "") {
 		$asiakasid = $asiakasrow["tunnus"];
 	}
 	else {
-		echo t("<font class='error'>VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."</font><br><br>";
+		echo "<font class='error'>".t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n")."!</font><br><br>";
 		exit;
 	}
 }

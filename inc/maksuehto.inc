@@ -41,7 +41,7 @@
 				$kaytossa_disabled = '';
 			}
 			else {
-				$otsikko_lisatiedot .= "<font class='message'>".t("Huom! Maksuehtoa ei voi poistaa, koska se on käytössä").":";
+				$otsikko_lisatiedot .= "<font class='message'>".t("HUOM: Maksuehtoa ei voi poistaa, koska se on käytössä").":";
 
 				$otsikko_lisatiedot .= "<ul>";
 				if (mysql_num_rows($chkres1) > 0) {

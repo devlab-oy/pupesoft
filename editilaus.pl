@@ -21,7 +21,7 @@ if (-f $tmpfile) {
 	$smtp->mail($emailfrom);
 	$smtp->to($email);
 	$smtp->data();
-	$smtp->datasend("Subject: Editilaus HUOM!\n\n");
+	$smtp->datasend("Subject: Editilaus HUOM:\n\n");
 	$smtp->datasend("\nEditilausten sisäänluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!");
 	$smtp->dataend();
 	$smtp->quit;

@@ -13,11 +13,21 @@
 
 		//Vasen sarake
 		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
-		$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
-		$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
-		$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
-		$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
+
+		if ($asiakastiedot["laskutus_nimi"] != "") {
+			$pdf->draw_text(50, 717, $asiakastiedot["laskutus_nimi"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 707, $asiakastiedot["laskutus_nimitark"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 697, $asiakastiedot["laskutus_osoite"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 687, $asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"], $firstpage, $norm);
+			$pdf->draw_text(50, 677, $asiakastiedot["laskutus_maa"], 		$firstpage, $norm);
+		}
+		else {
+			$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+			$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
+		}
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, 				$firstpage, $rectparam);
@@ -222,8 +232,8 @@
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and ytunnus = '$ytunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-		$asiakasrow2 = mysql_fetch_array($result);
+		$result = pupe_query($query);
+		$asiakasrow2 = mysql_fetch_assoc($result);
 
 		$tunnukset 	= $asiakasrow2['tunnukset'];
 	}
@@ -250,16 +260,16 @@
 				and lasku.liitostunnus in ($tunnukset)
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				ORDER BY lasku.ytunnus, lasku.laskunro";
-	$result = mysql_query($query) or pupe_error($query);
-	$laskutiedot = mysql_fetch_array($result);
+	$result = pupe_query($query);
+	$laskutiedot = mysql_fetch_assoc($result);
 
 	//otetaan asiakastiedot ekalta laskulta
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$laskutiedot[liitostunnus]'";
-	$asiakasresult = mysql_query($query) or pupe_error($query);
-	$asiakastiedot = mysql_fetch_array($asiakasresult);
+	$asiakasresult = pupe_query($query);
+	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
 	//Otetaan tässä asiakkaan kieli talteen
 	$kieli = $asiakastiedot["kieli"];
@@ -275,13 +285,13 @@
 				and kohdpvm = '0000-00-00'
 				and ltunnus > 0
 				and asiakas_tunnus in ($tunnukset)";
-	$suoritusresult = mysql_query($query) or pupe_error($query);
+	$suoritusresult = pupe_query($query);
 
 	$firstpage = alku();
 
 	$totaali = array();
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 
 		$firstpage = rivi(1, $firstpage, $summa, $row);
 
@@ -293,7 +303,7 @@
 		}
 	}
 
-	while ($row = mysql_fetch_array($suoritusresult)) {
+	while ($row = mysql_fetch_assoc($suoritusresult)) {
 		$firstpage = rivi(2, $firstpage, $summa, $row);
 		$totaali[$row['valkoodi']] += $row['summa'];
 	}

@@ -259,7 +259,17 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
+					unset($keraysvyohyke);
+					$keraysvyohyke = '';
+				}
+				else {
+					unset($keraysvyohyke[0]);
+					$keraysvyohyke = implode(",", $keraysvyohyke);
+				}
+			}
+
 			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
@@ -458,7 +468,18 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
+					unset($keraysvyohyke);
+					$keraysvyohyke = '';
+				}
+				else {
+					unset($keraysvyohyke[0]);
+					$keraysvyohyke = implode(",", $keraysvyohyke);
+				}
+			}
+
+
 			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$query = "	UPDATE kuka
@@ -733,17 +754,16 @@
 
 						echo "<tr><th align='left'>",t("Keräysvyöhyke"),":</th><td>";
 
-						echo "<select name='keraysvyohyke'>";
-						echo "<option value=''>",t("Valitse"),"</option>";
+						echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
 
 						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 
-							$sel = $keraysvyohyke_row['tunnus'] == $krow['keraysvyohyke'] ? ' selected' : '';
+							$chk = strpos($krow['keraysvyohyke'], $keraysvyohyke_row['tunnus']) !== false ? ' checked' : '';
 
-							echo "<option value='{$keraysvyohyke_row['tunnus']}'{$sel}>{$keraysvyohyke_row['nimitys']}</option>";
+							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} />&nbsp;{$keraysvyohyke_row['nimitys']}<br />";
 						}
 
-						echo "</select></td></tr>";
+						echo "</td></tr>";
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K') {

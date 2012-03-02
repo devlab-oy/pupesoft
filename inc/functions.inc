@@ -15328,3 +15328,17 @@ if (!function_exists('hae_ryhmanimet')) {
 }
 
 
+// Tehd‰‰n asiakkaan tunnuksesta myyntitili-varastopaikka
+if (!function_exists('myyntitili_varastopaikka')) {
+	function myyntitili_varastopaikka($tunnus) {
+
+		// Left paddataan nollilla 15 merkki‰ pitk‰ksi
+		$asiakkaan_tunnus = str_pad($tunnus, 15, 0, STR_PAD_LEFT);
+
+		// Splitataan kolmeen, 5 merkki‰ pitk‰‰n, osaan
+		$hyllypaikka = str_split($asiakkaan_tunnus, 5);
+
+		// Palautetaan hyllyalue, hyllynro, hyllyvali, hyllytaso
+		return array("!!M", $hyllypaikka[0], $hyllypaikka[1], $hyllypaikka[2]);
+	}
+}

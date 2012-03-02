@@ -29,6 +29,14 @@
 
 	echo "<font class='head'>".t("Raaka-aineiden ostoraportti")."</font><hr>";
 
+	// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
+	$org_rajaus = $abcrajaus;
+	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+
+	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
+
+	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+
 	// Ehdotetaan oletuksena ehdotusta ensikuun myynnille sekä siitä plus 3 kk
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
@@ -142,7 +150,7 @@
 		// Loopataan läpi lapsituotteen isätuotteet ja lasketaan osto ehdotukset
 		$query = "	SELECT isatuoteno, kerroin
 					FROM tuoteperhe
-					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio 
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.isatuoteno
 						AND tuote.status NOT IN ('P', 'T'))
 					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
@@ -628,42 +636,52 @@
 		echo "</td>";
 		echo "</tr>";
 
-		// katotaan onko abc aputaulu rakennettu
-		$query  = "SELECT count(*) from abc_aputaulu where yhtio = '$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
-		$abcres = pupe_query($query);
-		$abcrow = mysql_fetch_array($abcres);
+		echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
-		// jos on niin näytetään tällänen vaihtoehto
-		if ($abcrow[0] > 0) {
-			echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+		echo "<select name='abcrajaus'>";
+		echo "<option  value=''>".t("Valitse")."</option>";
 
-			$sel = array_fill(0, 9, "");
-			$abcrajaus = (isset($abcrajaus)) ? (int) $abcrajaus : 0;
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
 
-			echo "<select name='abcrajaus'>
-			<option value=''>".t("Ei rajausta")."</option>
-			<option $sel[0] value='0'>".t("Luokka A-30")."</option>
-			<option $sel[1] value='1'>".t("Luokka B-20 ja paremmat")."</option>
-			<option $sel[2] value='2'>".t("Luokka C-15 ja paremmat")."</option>
-			<option $sel[3] value='3'>".t("Luokka D-15 ja paremmat")."</option>
-			<option $sel[4] value='4'>".t("Luokka E-10 ja paremmat")."</option>
-			<option $sel[5] value='5'>".t("Luokka F-05 ja paremmat")."</option>
-			<option $sel[6] value='6'>".t("Luokka G-03 ja paremmat")."</option>
-			<option $sel[7] value='7'>".t("Luokka H-02 ja paremmat")."</option>
-			<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
-			</select>";
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
 
-			$sel = array("TK" => "", "TR" => "", "TP" => "");
-			$abcrajaustapa = (isset($abcrajaustapa)) ? $abcrajaustapa : "TK";
-			$sel[$abcrajaustapa] = "SELECTED";
-
-			echo "<select name='abcrajaustapa'>
-			<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
-			<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
-			<option $sel[TP] value='TP'>".t("Myyntikappaleet")."</option>
-			</select>
-			</td></tr>";
+			echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
 		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		echo "</select>";
 
 		echo "<tr><th>".t("Toimittaja")."</th><td>";
 		if ($toimittajaid == "") {

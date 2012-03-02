@@ -748,18 +748,32 @@
 					$lyhennetty_tuoteno = substr($asn_row["toim_tuoteno"], 0, -3);
 					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
 					
-					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
-									}
+					if ($asn_row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno' $toinen_tuoteno)";
+				}
 				elseif ($asn_row["toimittajanumero"] == "123453") {
 					$suba = substr($asn_row["toim_tuoteno"],0,3);
-					$subb = substr($asn_row["toim_tuoteno"],4);
+					$subb = substr($asn_row["toim_tuoteno"],3);
 					$tuote = $suba."-".$subb;
-					$poikkeus_tuoteno = " = '$tuote' ";
+					$yhteen = $asn_row["toim_tuoteno"];
+					
+					if ($asn_row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
 				else {
-					$poikkeus_tuoteno = " = '$asn_row[toim_tuoteno]' ";
+					
+					if ($asn_row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno = " in ('{$asn_row["toim_tuoteno"]}' $toinen_tuoteno) ";
 				}
-
 
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno 
 							FROM tuotteen_toimittajat as tt
@@ -992,7 +1006,8 @@
 			$virhe = 0;
 
 			$query = "	SELECT asn_sanomat.toimittajanumero, 
-						asn_sanomat.toim_tuoteno, 
+						asn_sanomat.toim_tuoteno,
+						asn_sanomat.toim_tuoteno2, 
 						asn_sanomat.tilausrivinpositio, 
 						asn_sanomat.kappalemaara, 
 						asn_sanomat.status, 
@@ -1018,16 +1033,31 @@
 					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);
 					$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
 					
-					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno')";
+					if ($row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno =" in ('$orgtuote','$lyhennetty_tuoteno','$jatkettu_tuoteno' $toinen_tuoteno)";
 				}
 				elseif ($row["toimittajanumero"] == "123453") {
 					$suba = substr($row["toim_tuoteno"],0,3);
-					$subb = substr($row["toim_tuoteno"],4);
+					$subb = substr($row["toim_tuoteno"],3);
 					$tuote = $suba."-".$subb;
-					$poikkeus_tuoteno = " = '$tuote' ";
+					$yhteen = $row["toim_tuoteno"];
+					
+					if ($row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
 				else {
-					$poikkeus_tuoteno = " = '$row[toim_tuoteno]' ";
+					
+					if ($row["toim_tuoteno2"] != "") {
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$row[toim_tuoteno]' $toinen_tuoteno) ";
 				}
 
 

@@ -14768,7 +14768,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			'tyyppi'					=> '',
 			'useita'					=> '',
 			'ei_echoa'					=> $ei_echoa,
-			'komento'					=> $komento
+			'komento'					=> $komento,
+			'yhteensamaara'				=> 0,
 			);
 
 			if ($laskurow["tila"] == "G") {

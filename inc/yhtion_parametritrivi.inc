@@ -3074,17 +3074,17 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'naytayhteensamaarat') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Ei n‰ytet‰ yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, vahvistuksella eik‰ laskulla")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("N‰ytet‰‰n yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, vahvistuksella sek‰ laskulla")."</option>";
+		$ulos .= "<option value = ''>".t("Ei n‰ytet‰ yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, tilausvahvistuksella eik‰ laskulla")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("N‰ytet‰‰n yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, tilausvahvistuksella sek‰ laskulla")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 ?>

@@ -578,7 +578,7 @@ if (!function_exists('uusi_sivu')) {
 }
 
 if (!function_exists('rivi_lasku')) {
-	function rivi_lasku ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $totaalikpl) {
+	function rivi_lasku ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -703,19 +703,19 @@ if (!function_exists('rivi_lasku')) {
 		}
 
 		if ($laskutyyppi == 1) {
-			list($thispage, $kala, $summa, $arvo, $totaalikpl) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl);
+			list($thispage, $kala, $summa, $arvo) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 2) {
-			list($thispage, $kala, $summa, $arvo, $totaalikpl) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl);
+			list($thispage, $kala, $summa, $arvo) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 4 or $laskutyyppi == 8) {
-			list($thispage, $kala, $summa, $arvo, $totaalikpl) = rivi_plain_2($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl);
+			list($thispage, $kala, $summa, $arvo) = rivi_plain_2($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		else {
-			list($thispage, $kala, $summa, $arvo, $totaalikpl) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl);
+			list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 
-		return array($thispage, $kala, $summa, $arvo, $totaalikpl);
+		return array($thispage, $kala, $summa, $arvo);
 	}
 }
 
@@ -782,7 +782,7 @@ if (!function_exists('rivi_otsikot')) {
 }
 
 if (!function_exists('rivi_original')) {
-	function rivi_original ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl) {
+	function rivi_original ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		//Nimitys
@@ -796,8 +796,6 @@ if (!function_exists('rivi_original')) {
 		//Määrä
 		$pdf_lasku->draw_text(340, $kala, $row["kpl"], $thispage, $norm);
 		
-		$totaalikpl += $row["kpl"];
-
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -958,12 +956,12 @@ if (!function_exists('rivi_original')) {
 			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 		}
 
-		return array($thispage, $kala, $summa, $arvo, $totaalikpl);
+		return array($thispage, $kala, $summa, $arvo);
 	}
 }
 
 if (!function_exists('rivi_plain')) {
-	function rivi_plain ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl) {
+	function rivi_plain ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		//Nimitys
@@ -977,8 +975,6 @@ if (!function_exists('rivi_plain')) {
 		$oikpos = $pdf_lasku->strlen($row["kpl"], $norm);
 		$pdf_lasku->draw_text(380-$oikpos, $kala, $row["kpl"], $thispage, $norm);
 		
-		$totaalikpl += $row["kpl"];
-
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -1086,12 +1082,12 @@ if (!function_exists('rivi_plain')) {
 			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 		}
 
-		return array($thispage, $kala, $summa, $arvo, $totaalikpl);
+		return array($thispage, $kala, $summa, $arvo);
 	}
 }
 
 if (!function_exists('rivi_plain_2')) {
-	function rivi_plain_2 ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl) {
+	function rivi_plain_2 ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		//Tuoteno
@@ -1101,8 +1097,6 @@ if (!function_exists('rivi_plain_2')) {
 		$oikpos = $pdf_lasku->strlen($row["kpl"], $norm);
 		$pdf_lasku->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
 		
-		$totaalikpl += $row["kpl"];
-
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -1221,12 +1215,12 @@ if (!function_exists('rivi_plain_2')) {
 			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 		}
 
-		return array($thispage, $kala, $summa, $arvo, $totaalikpl);
+		return array($thispage, $kala, $summa, $arvo);
 	}
 }
 
 if (!function_exists('rivi_perhe')) {
-	function rivi_perhe ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl) {
+	function rivi_perhe ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$lisataa = 0;
@@ -1263,10 +1257,10 @@ if (!function_exists('rivi_perhe')) {
 		}
 
 		if ($lisataa == 0) {
-			list($thispage, $kala, $summa, $arvo, $totaalikpl) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi, $totaalikpl);
+			list($thispage, $kala, $summa, $arvo) = rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 
-		return array($thispage, $kala, $summa, $arvo, $totaalikpl);
+		return array($thispage, $kala, $summa, $arvo);
 	}
 }
 
@@ -1588,7 +1582,7 @@ if (!function_exists('loppu')) {
 }
 
 if (!function_exists('alvierittely')) {
-	function alvierittely ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $toim, $kala, $summa, $arvo, $kassa_ale = '', $totaalikpl='') {
+	function alvierittely ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $toim, $kala, $summa, $arvo, $kassa_ale = '', $yhteensamaara=0) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$kassa_ale_lisa = '';
@@ -1604,8 +1598,8 @@ if (!function_exists('alvierittely')) {
 		}
 		
 		if ($yhtiorow["naytayhteensamaarat"] == "K" and $kassa_ale == '') {
-			$pdf_lasku->draw_text(190, $kala, t("Määrä yhteensä", $kieli).":", 		$thispage, $norm);
-			$pdf_lasku->draw_text(340, $kala, sprintf('%.2f', $totaalikpl), $thispage, $norm);
+			$pdf_lasku->draw_text(190, $kala, t("Tuotteita yhteensä", $kieli).":", 	$thispage, $norm);
+			$pdf_lasku->draw_text(340, $kala, sprintf('%.2f', $yhteensamaara), 		$thispage, $norm);
 			$kala -=10;
 		}
 
@@ -2053,7 +2047,8 @@ if (!function_exists("tulosta_lasku")) {
 		// aloitellaan laskun teko
 		list($page_lasku, $sivu, $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu);
 
-		$rivigrouppaus = FALSE;
+		$rivigrouppaus = FALSE;	
+		$yhteensamaara = 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
 
@@ -2070,6 +2065,10 @@ if (!function_exists("tulosta_lasku")) {
 
 			if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 				$rivigrouppaus = TRUE;
+			}
+						
+			if (($laskutyyppi != 2) or ($laskutyyppi == 2 and $row["perheid"] > 0 and $row["perheid"] == $row["tunnus"])) {
+				$yhteensamaara += $row["kpl"];
 			}
 
 			// Otetaan yhteensäkommentti pois jos summataan rivejä
@@ -2102,7 +2101,7 @@ if (!function_exists("tulosta_lasku")) {
 				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
 			}
 
-			list($page_lasku[$sivu], $kala, $summa, $arvo, $totaalikpl) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala, $laskutyyppi, $toim, $summa, $arvo, $totaalikpl);
+			list($page_lasku[$sivu], $kala, $summa, $arvo) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala, $laskutyyppi, $toim, $summa, $arvo);
 
 			// Tutkitaan mihin printteriin tämän laskun voisi tulostaa
 			if ($valittu_tulostin == "AUTOMAAGINEN_VALINTA" and $varasto == 0 and $row["ei_saldoa"] == "") {
@@ -2112,7 +2111,7 @@ if (!function_exists("tulosta_lasku")) {
 		}
 
 		// Mahtuuko erittely samalle sivulle?
-		$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, "", '');
+		$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, "", "");
 
 		if ($devnullkala <= 110+$vientikala+$barcode_korkeus) {
 			loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $page_lasku[$sivu], $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
@@ -2122,12 +2121,12 @@ if (!function_exists("tulosta_lasku")) {
 			list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
 		}
 
-		$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, "", $totaalikpl);
+		$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, "", $yhteensamaara);
 
 		if ($masrow['kassa_alepros'] > 0) {
 
 			// Mahtuuko erittely samalle sivulle?
-			$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $totaalikpl);
+			$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $yhteensamaara);
 
 			if ($devnullkala <= 110+$vientikala+$barcode_korkeus) {
 				loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $page_lasku[$sivu], $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
@@ -2137,7 +2136,7 @@ if (!function_exists("tulosta_lasku")) {
 				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
 			}
 
-			$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $totaalikpl);
+			$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $yhteensamaara);
 		}
 
 		// Vikan sivun loppulaatikko

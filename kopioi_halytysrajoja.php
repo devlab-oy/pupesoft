@@ -259,7 +259,6 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$erorow = mysql_fetch_array($result);
 
 	// tässä on itse query
-
 	$query = "	SELECT
 				tuote.tuoteno,
 				tuote.nimitys,
@@ -292,7 +291,6 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				$jarjestys";
 	$res = pupe_query($query);
 
-
 	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
 	echo "\n<table>";
@@ -302,18 +300,13 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<th>".t("Varasto")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("S")."</th>";
-	if ($abcpaalla == "kylla") {
-		echo "<th>".t("Abc")."</th>";
-	}
+	echo "<th>".t("Abc")."</th>";
 	echo "<th>".t("Puute")."</th>";
 	echo "<th>".t("Kok.Saldo")."<br>".t("Var.Saldo")."</th>";
 	echo "<th>".t("Kok.Myynti")."<br>".t("Var.Myynti")."</th>";
 	echo "<th>".t("Hälytysraja")."</th>";
 
-
-
 	echo "</tr>\n";
-
 
 	$edtuoteno = "";
 	$edkohdetuoteno = "";
@@ -372,10 +365,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		echo "<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 		echo "<td>$row[status]</td>";
-
-		if ($abcpaalla == "kylla") {
-			echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
-		}
+		echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
 
 		// tutkaillaan myynti
 		$query = "	SELECT
@@ -602,25 +592,32 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "</td></tr>";
 
-	echo "<input type='hidden' name='abcpaalla' value='kylla'>";
-	echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+	echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
 	echo "<select name='abcrajaus'>";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	echo "<option  value=''>".t("Valitse")."</option>";
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TM'>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
+	}
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TK'>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
 	}
+
 	$teksti="";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TR'>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
 	}
+
 	$teksti="";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TP'>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
 	}
 

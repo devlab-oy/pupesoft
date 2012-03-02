@@ -100,32 +100,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 	// Haetaan abc-parametrit
-	$query = "	SELECT *
-				FROM abc_parametrit
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi 	= '$abcchar'
-				ORDER by luokka";
-	$res = pupe_query($query);
-
-	if (mysql_num_rows($res) > 0) {
-		$ryhmanimet   	= array();
-		$ryhmaprossat	= array();
-		$sisainen_taso	= "";
-
-		while ($row = mysql_fetch_array($res)) {
-			$ryhmanimet[] 	= $row["luokka"];
-			$ryhmaprossat[] = $row["osuusprosentti"];
-
-			// Otetaan eka kulutaso
-			if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
-				$sisainen_taso = $row["kulujen_taso"];
-			}
-		}
-	}
-	else {
-		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")." ($kukarow[yhtio])\n";
-		exit;
-	}
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
 	$i_luokka = count($ryhmaprossat)-1;
 
@@ -180,6 +155,9 @@ if ($tee == 'YHTEENVETO') {
 		$kaudenostriviyht += $row["rivia_osto"];
 		$kaudenmyyriviyht += $row["rivia"];
 	}
+
+	// t‰‰ on nyt hardcoodattu, eli milt‰ kirjanpidon tasolta otetaan kulut
+	$sisainen_taso = "34";
 
 	if ($kustannuksetyht == "" and $sisainen_taso != "") {
 		// etsit‰‰n kirjanpidosta mitk‰ on meid‰n kulut samalta ajanjaksolta

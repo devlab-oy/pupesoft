@@ -20,9 +20,9 @@ if ($php_cli) {
 
 	$kukarow['yhtio'] = trim($argv[1]);
 
-	$abctyyppi = "";
-	$saldottomatmukaan = "";
-	$kustannuksetyht = "";
+	$abctyyppi 			= "";
+	$saldottomatmukaan 	= "";
+	$kustannuksetyht 	= "";
 
 	if (isset($argv[2]) and trim($argv[2]) != "") {
 		$abctyyppi = trim($argv[2]);
@@ -32,7 +32,7 @@ if ($php_cli) {
 		$saldottomatmukaan = trim($argv[3]);
 	}
 
-	$query    = "SELECT * FROM yhtio whuere yhtio='$kukarow[yhtio]'";
+	$query    = "SELECT * FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
 	$yhtiores = pupe_query($query);
 
 	if (mysql_num_rows($yhtiores) == 1) {
@@ -79,32 +79,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 	// Haetaan abc-parametrit
-	$query = "	SELECT *
-				FROM abc_parametrit
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi 	= '$abcchar'
-				ORDER by luokka";
-	$res = pupe_query($query);
-
-	if (mysql_num_rows($res) > 0) {
-		$ryhmanimet   	= array();
-		$ryhmaprossat	= array();
-		$sisainen_taso	= "";
-
-		while ($row = mysql_fetch_array($res)) {
-			$ryhmanimet[] 	= $row["luokka"];
-			$ryhmaprossat[] = $row["osuusprosentti"];
-
-			// Otetaan eka kulutaso
-			if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
-				$sisainen_taso = $row["kulujen_taso"];
-			}
-		}
-	}
-	else {
-		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")." ($kukarow[yhtio])\n";
-		exit;
-	}
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
 	//siivotaan ensin aputaulu tyhj‰ksi
 	$query = "	DELETE from abc_aputaulu
@@ -161,7 +136,7 @@ if ($tee == 'YHTEENVETO') {
  	// t‰‰ on nyt hardcoodattu, eli milt‰ kirjanpidon tasolta otetaan kulut
 	$sisainen_taso = "34";
 
-	if ($kustannuksetyht == "") {
+	if ($kustannuksetyht == "" and $sisainen_taso != "") {
 		// etsit‰‰n kirjanpidosta mitk‰ on meid‰n kulut samalta ajanjaksolta
 		$query  = "	SELECT sum(summa) summa
 					FROM tiliointi use index (yhtio_tapvm_tilino)
@@ -435,11 +410,11 @@ if ($tee == 'YHTEENVETO') {
 
 	$query = "OPTIMIZE table abc_aputaulu";
 	$optir = pupe_query($query);
-	
+
 	if ($php_cli == FALSE) {
 		$tee = "";
 	}
-	
+
 }
 
 if ($tee == "") {

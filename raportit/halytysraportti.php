@@ -15,7 +15,7 @@
 
 		echo "<font class='head'>".t("Hälytysraportti")."</font><hr>";
 
-
+		$org_rajaus = $abcrajaus;
 		list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
 		if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
@@ -699,6 +699,7 @@
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
+
 			$res = pupe_query($query);
 
 			if (isset($valitut["poistetut"]) and $valitut["poistetut"] != '' and isset($valitut["poistuvat"]) and $valitut["poistuvat"] != '') {
@@ -2342,22 +2343,46 @@
 			echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
 			echo "<select name='abcrajaus'>";
+			echo "<option  value=''>".t("Valitse")."</option>";
 
-			for ($i=0; $i < count($ryhmaprossat); $i++) { 
-				if ($i !=0) $teksti = t("ja paremmat"); 
-				echo "<option  value='$i##TK'>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
 			}
-			$teksti="";
 
-			for ($i=0; $i < count($ryhmaprossat); $i++) { 
-				if ($i !=0) $teksti = t("ja paremmat"); 
-				echo "<option  value='$i##TR'>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
 			}
-			$teksti="";
 
-			for ($i=0; $i < count($ryhmaprossat); $i++) { 
-				if ($i !=0) $teksti = t("ja paremmat"); 
-				echo "<option  value='$i##TP'>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
 			}
 
 			echo "</select>";

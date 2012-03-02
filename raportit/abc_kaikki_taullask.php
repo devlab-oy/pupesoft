@@ -216,7 +216,7 @@
 			$sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
 			$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
 
-			$query = "	SELECT *,
+			$query = "	SELECT abc_aputaulu.*,
 						if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
 						abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
 						abc_aputaulu.kate - abc_aputaulu.kustannus_yht total

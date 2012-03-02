@@ -45,6 +45,7 @@
 	else {
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 	}
+	
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "<br>";

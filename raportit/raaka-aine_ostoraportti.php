@@ -639,43 +639,46 @@
 		echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
 		echo "<select name='abcrajaus'>";
-		echo "<option  value=''>".t("Valitse yksi")."</option>";
+		echo "<option  value=''>".t("Valitse")."</option>";
 
-		$sel1 = $sel2 = $sel3 ="";
-
+		$teksti = "";
 		for ($i=0; $i < count($ryhmaprossat); $i++) {
-			if ($i !=0) $teksti = t("ja paremmat");
-			if ($org_rajaus == "{$i}##TK") {
-				$sel1 = "SELECTED";
-			}
-			else {
-				$sel1 ="";
-			}
-			echo "<option  value='$i##TK' $sel1>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
 		}
-		$teksti="";
 
+		$teksti = "";
 		for ($i=0; $i < count($ryhmaprossat); $i++) {
-			if ($i !=0) $teksti = t("ja paremmat");
-			if ($org_rajaus == "{$i}##TR") {
-				$sel2 = "SELECTED";
-			}
-			else {
-				$sel2 ="";
-			}
-			echo "<option  value='$i##TR' $sel2>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
 		}
-		$teksti="";
 
+		$teksti = "";
 		for ($i=0; $i < count($ryhmaprossat); $i++) {
-			if ($i !=0) $teksti = t("ja paremmat");
-			if ($org_rajaus == "{$i}##TP") {
-				$sel3 = "SELECTED";
-			}
-			else {
-				$sel3 ="";
-			}
-			echo "<option  value='$i##TP' $sel3>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
 		}
 
 		echo "</select>";

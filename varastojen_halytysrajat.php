@@ -555,21 +555,29 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
 	echo "<select name='abcrajaus'>";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	echo "<option  value=''>".t("Valitse")."</option>";
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
+		echo "<option  value='$i##TM'>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
+	}
+
+	$teksti="";
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i != 0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TK'>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
 	}
+
 	$teksti="";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TR'>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
 	}
+
 	$teksti="";
-	
-	for ($i=0; $i < count($ryhmaprossat); $i++) { 
-		if ($i !=0) $teksti = t("ja paremmat"); 
+	for ($i=0; $i < count($ryhmaprossat); $i++) {
+		if ($i !=0) $teksti = t("ja paremmat");
 		echo "<option  value='$i##TP'>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
 	}
 

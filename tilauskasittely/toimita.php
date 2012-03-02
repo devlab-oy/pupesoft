@@ -355,6 +355,7 @@
 						'nimitysleveys'				=> '',
 						'tyyppi'					=> '',
 						'useita'					=> '',
+						'yhteensamaara'				=> 0,
 						);
 
 						if ($laskurow["tila"] == "G") {
@@ -496,16 +497,16 @@
 					and lasku.vienti = ''
 					ORDER BY lasku.toimaika";
 		$tilre = pupe_query($query);
-		
+
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsit‰‰n sopivia tilauksia
 			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
 						FROM lasku
 						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
-						WHERE lasku.tunnus = '$tilrow[otunnus]' 
-						and lasku.tila = 'L' 
-						$haku 
-						and lasku.$logistiikka_yhtiolisa 
+						WHERE lasku.tunnus = '$tilrow[otunnus]'
+						and lasku.tila = 'L'
+						$haku
+						and lasku.$logistiikka_yhtiolisa
 						and lasku.alatila in ('C','B')
 						ORDER by laadittu desc";
 			$result = pupe_query($query);

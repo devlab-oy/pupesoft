@@ -230,6 +230,7 @@
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -456,6 +457,12 @@
 				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("N‰yt‰ laskun maksup‰iv‰m‰‰r‰"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "<tr>
@@ -1118,7 +1125,7 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group .= ",lasku.maksuteksti";
+						$group  .= ",lasku.maksuteksti";
 						$select .= "lasku.maksuteksti maksuehto, ";
 						$order  .= "lasku.maksuteksti,";
 						$gluku++;
@@ -1147,6 +1154,13 @@
 				if ($tilrivikomm != "") {
 					$group .= ",tilausrivi.tunnus";
 					$select .= "tilausrivi.kommentti, ";
+					$gluku++;
+					$muutgroups++;
+				}
+
+				if ($naytamaksupvm != "") {
+					$group .= ",lasku.mapvm";					
+					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
 				}

@@ -644,16 +644,7 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.maksuteksti = '{$rajaus[$i]}' ";
 						}
-					}
-					
-					if ($mukaan == "naytamaksupvm") {
-						if ($group!="") $group .= ",lasku.mapvm";
-						else $group  .= "lasku.mapvm";
-						$select .= "lasku.mapvm maksupvm, ";
-						$order  .= "lasku.mapvm,";
-						$gluku++;
-					}
-					
+					}					
 				}
 
 				if ($sarjanumerot != '') {
@@ -671,6 +662,13 @@
 					if ($group!="") $group .= ",tilausrivi.tunnus";
 					else $group  .= "tilausrivi.tunnus";
 					$select .= "tilausrivi.kommentti, ";
+					$gluku++;
+				}
+				
+				if ($naytamaksupvm != "") {
+					if ($group!="") $group .= ",lasku.mapvm";
+					else $group  .= "lasku.mapvm";
+					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 				}
 
@@ -2166,7 +2164,6 @@
 			if ($ruksit[190] != '')			$ruk190chk 				= "CHECKED";
 			if ($ruksit[200] != '')			$ruk200chk 				= "CHECKED";
 			if ($ruksit[210] != '')			$ruk210chk 				= "CHECKED";
-			if ($ruksit[215] != '')			$ruk215chk 				= "CHECKED";
 			if ($ruksit[220] != '')			$ruk220chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
@@ -2189,6 +2186,7 @@
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2367,13 +2365,7 @@
 				<td><input type='text' name='jarjestys[210]' size='2' value='{$jarjestys[210]}'></td>
 				<td><input type='checkbox' name='ruksit[210]' value='maksuehdoittain' {$ruk210chk}></td>
 				<td><input type='text' name='rajaus[210]' value='{$rajaus[210]}'></td>
-				</tr>
-				<tr>
-				<th>",t("N‰yt‰ maksup‰iv‰m‰‰r‰"),"</th>
-				<td><input type='text' name='jarjestys[215]' size='2' value='{$jarjestys[215]}'></td>
-				<td><input type='checkbox' name='ruksit[215]' value='naytamaksupvm' {$ruk215chk}></td>
-				<td></td>
-				</tr>
+				</tr>				
 				<tr>
 				<th>",t("Listaa asiakkaan tilausnumeroittain"),"</th>
 				<td><input type='text' name='jarjestys[220]' size='2' value='{$jarjestys[220]}'></td>
@@ -2519,6 +2511,12 @@
 				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("N‰yt‰ laskun maksup‰iv‰m‰‰r‰"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "</table><br>";

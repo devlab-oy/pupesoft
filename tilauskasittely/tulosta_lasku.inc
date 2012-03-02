@@ -795,7 +795,7 @@ if (!function_exists('rivi_original')) {
 
 		//M‰‰r‰
 		$pdf_lasku->draw_text(340, $kala, $row["kpl"], $thispage, $norm);
-		
+
 		// yksikkˆhinta pit‰‰ olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -974,7 +974,7 @@ if (!function_exists('rivi_plain')) {
 
 		$oikpos = $pdf_lasku->strlen($row["kpl"], $norm);
 		$pdf_lasku->draw_text(380-$oikpos, $kala, $row["kpl"], $thispage, $norm);
-		
+
 		// yksikkˆhinta pit‰‰ olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -1096,7 +1096,7 @@ if (!function_exists('rivi_plain_2')) {
 
 		$oikpos = $pdf_lasku->strlen($row["kpl"], $norm);
 		$pdf_lasku->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
-		
+
 		// yksikkˆhinta pit‰‰ olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
@@ -1596,7 +1596,7 @@ if (!function_exists('alvierittely')) {
 			$pdf_lasku->draw_text(360, $kala, t("Kassa-alennuksella", $kieli), 		$thispage, $norm);
 			$kala -= 10;
 		}
-		
+
 		if ($yhtiorow["naytayhteensamaarat"] == "K" and $kassa_ale == '') {
 			$pdf_lasku->draw_text(190, $kala, t("Tuotteita yhteens‰", $kieli).":", 	$thispage, $norm);
 			$pdf_lasku->draw_text(340, $kala, sprintf('%.2f', $yhteensamaara), 		$thispage, $norm);
@@ -1634,7 +1634,7 @@ if (!function_exists('alvierittely')) {
 		else {
 			$where = " uusiotunnus = '$laskurow[tunnus]' ";
 		}
-		
+
 		//Haetaan kaikki alvikannat riveilt‰
 		$alvquery = "	SELECT distinct alv
 						FROM tilausrivi
@@ -1766,7 +1766,7 @@ if (!function_exists('alvierittely')) {
 				$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 								$thispage, $norm);
 			}
 		}
-		
+
 		$kala -= 10;
 
 		return $kala;
@@ -2047,7 +2047,7 @@ if (!function_exists("tulosta_lasku")) {
 		// aloitellaan laskun teko
 		list($page_lasku, $sivu, $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu);
 
-		$rivigrouppaus = FALSE;	
+		$rivigrouppaus = FALSE;
 		$yhteensamaara = 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -2066,7 +2066,7 @@ if (!function_exists("tulosta_lasku")) {
 			if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 				$rivigrouppaus = TRUE;
 			}
-						
+
 			if (($laskutyyppi != 2) or ($laskutyyppi == 2 and $row["perheid"] > 0 and $row["perheid"] == $row["tunnus"])) {
 				$yhteensamaara += $row["kpl"];
 			}
@@ -2090,7 +2090,7 @@ if (!function_exists("tulosta_lasku")) {
 			// Mahtuuko rivi t‰lle sivulle
 			$devnull = "";
 
-			list($devnull, $devnullkala, $devnullsumma, $devnullarvo, $plaa) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $devnull, $kala, $laskutyyppi, $toim, $summa, $arvo, '');
+			list($devnull, $devnullkala, $devnullsumma, $devnullarvo) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $devnull, $kala, $laskutyyppi, $toim, $summa, $arvo, '');
 
 			// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 			if ($devnullkala <= 130) {

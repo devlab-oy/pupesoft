@@ -644,7 +644,7 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.maksuteksti = '{$rajaus[$i]}' ";
 						}
-					}
+					}					
 				}
 
 				if ($sarjanumerot != '') {
@@ -662,6 +662,13 @@
 					if ($group!="") $group .= ",tilausrivi.tunnus";
 					else $group  .= "tilausrivi.tunnus";
 					$select .= "tilausrivi.kommentti, ";
+					$gluku++;
+				}
+				
+				if ($naytamaksupvm != "") {
+					if ($group!="") $group .= ",lasku.mapvm";
+					else $group  .= "lasku.mapvm";
+					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 				}
 
@@ -1249,6 +1256,11 @@
 
 							// echotaan kenttien sisältö
 							for ($i=0; $i < mysql_num_fields($result); $i++) {
+
+								// jos kyseessa on mapvm
+								if (mysql_field_name($result, $i) == "maksupvm") {
+									$row[$i] = tv1dateconv($row[$i]);
+								}
 
 								// jos kyseessa on tuote
 								if (mysql_field_name($result, $i) == "tuoteno") {
@@ -2174,6 +2186,7 @@
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2352,7 +2365,7 @@
 				<td><input type='text' name='jarjestys[210]' size='2' value='{$jarjestys[210]}'></td>
 				<td><input type='checkbox' name='ruksit[210]' value='maksuehdoittain' {$ruk210chk}></td>
 				<td><input type='text' name='rajaus[210]' value='{$rajaus[210]}'></td>
-				</tr>
+				</tr>				
 				<tr>
 				<th>",t("Listaa asiakkaan tilausnumeroittain"),"</th>
 				<td><input type='text' name='jarjestys[220]' size='2' value='{$jarjestys[220]}'></td>
@@ -2498,6 +2511,12 @@
 				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä laskun maksupäivämäärä"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "</table><br>";

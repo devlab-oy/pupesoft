@@ -338,7 +338,7 @@
 			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
 			if ($tulostauna != "") {
-				// loppuun pakollinen UNZ ja EOF. Huom! UNZ ja EOF pit‰‰ olla erillisill‰ riveill‰ !!!
+				// loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pit‰‰ olla erillisill‰ riveill‰ !!!
 				$desadv_message .= "\nUNZ+1+{$lahtunniste}'";
 				$desadv_message .= "\n'''EOF'''0'";
 			}

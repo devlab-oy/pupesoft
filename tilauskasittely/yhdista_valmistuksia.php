@@ -190,7 +190,7 @@
 								//	tiedot varmasti ok?
 								if($ekaperhe > 0 and $loput != "") {
 
-									//	Päivitetään summa ekaan tietueeseen toinen tuhotaan! HUOM! tämä ei tajua mitään varastopaikoista, jos meillä on sama tuote 2 kertaa on myös suuri ongelma!
+									//	Päivitetään summa ekaan tietueeseen toinen tuhotaan! HUOM: tämä ei tajua mitään varastopaikoista, jos meillä on sama tuote 2 kertaa on myös suuri ongelma!
 									$query = "	SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
 												FROM tilausrivi
 												WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)

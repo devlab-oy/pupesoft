@@ -358,7 +358,7 @@
 		}
 
 		if (isset($poikkeus_haku) and $poikkeus_haku != "try" and $poikkeus_haku != "osasto" and $poikkeus_haku != "kummatkin") {
-			echo "<font class='error'>".t("Virhe: Budjetinluonnissa on tapahtunut vakava käsittelyvirhe, keskeytetään prosessi")."!<br><br></font>";
+			echo "<font class='error'>".t("VIRHE: Budjetinluonnissa on tapahtunut vakava käsittelyvirhe, keskeytetään prosessi")."!<br><br></font>";
 			$tee = "";
 	}
 

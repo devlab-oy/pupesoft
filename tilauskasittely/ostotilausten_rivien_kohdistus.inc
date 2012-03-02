@@ -915,12 +915,17 @@ if ($tila == '') {
 
 	$alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
 
-	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
+	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi, jos ostolaskuilla on alvia!
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
-		$simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
+		if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
+		else $simualv = 0;
 
-		if (in_array($simualv, array(8,12,17,22))) {
+		if ($kulurow["arvo"] > 0 and $simualv == 0) {
+			$alvti = 0;
+			$alvit = 0;
+		}
+		elseif (in_array($simualv, array(8,12,17,22))) {
 			$alvti = $simualv;
 			$alvit = $simualv;
 		}

@@ -560,6 +560,9 @@
 			$vasta_arvo		= 0;
 			$vasta_kurssi	= 1;
 
+			// Nollataan tämä tässä
+			$selite_maksuavarten = "";
+
 			$tiliotedataid = $tiliotedatarow['tunnus'];
 			$tiliotedatape = $tiliotedatarow['perheid'];
 			$tiliotedataka = $tiliotedatarow['kasitelty'];
@@ -582,7 +585,7 @@
 			$pvm 	 = substr($tietue, 36, 6);
 
 			// Tiliöidään kuitenkin loppupeleissä kaikki kirjauspvm:lle.
-			$pvm	 = $kirjpvm;
+			$pvm = $kirjpvm;
 
 			if ($pvm == "000000") { // Haa, pankki ei antanutkaan arvopvmää, joten otetaan käyttöön tapahtumapvm
 				$pvm = $kirjpvm;
@@ -741,15 +744,13 @@
 
 			if ($tee == 'S') echo "<td class='$class'></td>";
 
-			$selite_maksuavarten = "";
-
 			switch ($tyyppi) {
 
 				// Vapaa viesti
 				case '00' :
 				   	$selite = "";
 				   	$luottokuntatieto = "";
-					$selite_maksuavarten = htmlspecialchars(strip_tags($arvo));
+					$selite_maksuavarten = htmlspecialchars(trim(strip_tags($arvo)));
 
 					for ($i = 0; $i < 13; $i++) {
 				   		$osa = trim(substr($arvo, $i*35, 35));
@@ -759,10 +760,6 @@
 				   		}
 						// Luottokunnan käsittelyä varten
 						if ($i == 1) $luottokuntatieto = $osa;
-
-				   		// Luottokunnan käsittelyä varten (Samposta info tulee JOSKUS tokassa segmentissä, muilla aina ekassa. siksi tämä on kommentointuna)
-						// if (substr($pankkitilino, 0, 1) == '8' and $i == 2) $luottokuntatieto = $osa;
-				   		// if (substr($pankkitilino, 0, 1) != '8' and $i == 1) $luottokuntatieto = $osa;
 				   	}
 					break;
 

@@ -74,6 +74,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == 'A') {
 			$sel1 = "selected";
@@ -81,9 +82,13 @@
 		if ($trow[$i] == 'K') {
 			$sel2 = "selected";
 		}
+		if ($trow[$i] == 'B') {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
 		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3080,11 +3085,22 @@
 
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Ei n‰ytet‰ yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, tilausvahvistuksella eik‰ laskulla")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("N‰ytet‰‰n yhteens‰ kappalem‰‰ri‰ l‰hetteell‰, tilausvahvistuksella sek‰ laskulla")."</option>";
+		$ulos .= "<option value = ''>".t("Ei n‰ytet‰ kokonaistuotem‰‰r‰‰ l‰hetteell‰, tilausvahvistuksella eik‰ laskulla")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("N‰ytet‰‰n kokonaistuotem‰‰r‰ l‰hetteell‰, tilausvahvistuksella sek‰ laskulla")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'vastaanottoraportti') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Vastaanottoraportissa ei n‰ytet‰ keskihankintahintoja")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Vastaanottoraportissa n‰ytet‰‰n keskihankintahinnat")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

@@ -161,7 +161,7 @@ if ($tee == "UUSI") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE!!! Anna asiakkaan nimi")."</font><br>";
+		echo "<font class='error'>".t("VIRHE: Anna asiakkaan nimi")."</font><br>";
 		$tee="";
 	}
 }
@@ -223,7 +223,7 @@ if ($tee != "") {
 				$tres = pupe_query($query);
 
 				if (mysql_num_rows($tres) != 1) {
-					echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." $tuoteno</font><br>";
+					echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (2) $tuoteno</font><br>";
 					return;
 				}
 				else {
@@ -267,7 +267,7 @@ if ($tee != "") {
 						$loppu = mktime($loppuhh, $loppumm, 0, $loppukk, $loppupp, $loppuvv);
 
 						//	Tarkastetaan ett‰ t‰ll‰ v‰lill‰ ei jo ole jotain arvoa
-						//	HUOM! Koitetaan tarkastaa kaikki k‰ytt‰j‰n matkalaskut..
+						//	HUOM: Koitetaan tarkastaa kaikki k‰ytt‰j‰n matkalaskut..
 						$query = "	SELECT lasku.toim_nimi,
 									lasku.summa,
 									lasku.tapvm tapvm,
@@ -290,7 +290,7 @@ if ($tee != "") {
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) > 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! P‰iv‰m‰‰r‰ on menee p‰‰llekk‰in toisen matkalaskun kanssa")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: P‰iv‰m‰‰r‰ on menee p‰‰llekk‰in toisen matkalaskun kanssa")."</font><br>";
 
 							$errori .= "<table><tr><th>".t("Asiakas")."</th><th>".t("viesti")."</th><th>".t("Summa/tapvm")."</th><th>".t("Tuote")."</th><th>".t("Ajalla")."</th><th>".t("Viesti")."</th></tr>";
 
@@ -308,7 +308,7 @@ if ($tee != "") {
 						}
 
 						if ($loppuvv.$loppukk.$loppupp > date("Ymd")) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Matkalaskua ei voi tehd‰ etuk‰teen!")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Matkalaskua ei voi tehd‰ etuk‰teen!")."</font><br>";
 						}
 
 						$paivat = $puolipaivat = $ylitunnit = $tunnit = 0;
@@ -337,7 +337,7 @@ if ($tee != "") {
 							$tres2 = pupe_query($query);
 
 							if (mysql_num_rows($tres2) != 1) {
-								$errori .= t("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (2). Puolip‰iv‰rahaa ei voitu lis‰t‰!")."</font><br>");
+								$errori .= "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu. Puolip‰iv‰rahaa ei voitu lis‰t‰")."!</font><br>";
 							}
 							else {
 								$trow2 = mysql_fetch_assoc($tres2);
@@ -353,11 +353,11 @@ if ($tee != "") {
 							}
 						}
 						elseif ($ylitunnit <= 10 and $trow["vienti"] != "FI" and $paivat == 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
 							//	T‰nne pit‰isi joskus koodata se puolikas ulkomaanp‰iv‰raha..
 						}
 						elseif ($paivat == 0 and $puolipaivat == 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Liian lyhyt aikav‰li")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Liian lyhyt aikav‰li")."</font><br>";
 						}
 
 						//	Lis‰t‰‰n myˆs saldoton isatuote jotta tied‰mme mist‰ puolip‰iv‰raha periytyy!
@@ -374,16 +374,16 @@ if ($tee != "") {
 						//echo "SAATIIN p‰ivarahoja: $paivat puolip‰iv‰rahoja: $puolipaivat<br>";
 					}
 					else {
-						$errori .= "<font class='error'>".t("VIRHE!!! P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
 					}
 				}
 				elseif ($tyyppi == "B") {
 					if ($kpl == 0) {
-						$errori .= "<font class='error'>".t("VIRHE!!! kappalem‰‰r‰ on annettava")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: kappalem‰‰r‰ on annettava")."</font><br>";
 					}
 
 					if ($kommentti == "" and $trow["kommentoitava"] != "") {
-						$errori .= "<font class='error'>".t("VIRHE!!! Kululle on annettava selite")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: Kululle on annettava selite")."</font><br>";
 					}
 
 					if ($trow["myyntihinta"]>0) {
@@ -392,7 +392,7 @@ if ($tee != "") {
 
 					$hinta = str_replace ( ",", ".", $hinta);
 					if ($hinta <= 0) {
-						$errori .= "<font class='error'>".t("VIRHE!!! Kulun hinta puuttuu")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: Kulun hinta puuttuu")."</font><br>";
 					}
 
 					$tuoteno_array[$trow["tuoteno"]] = $trow["tuoteno"];
@@ -521,7 +521,7 @@ if ($tee != "") {
 							$summa += $rivihinta;
 						}
 						else {
-							echo "<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (1)")." $lisaa_tuoteno</font><br>";
+							echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (1) $lisaa_tuoteno</font><br>";
 						}
 					}
 
@@ -541,7 +541,7 @@ if ($tee != "") {
 					if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t‰t‰ ei tarvita
 
 					if ($toim == "SUPER" and $tilino > 0 and $trow["tilino"] != $tilino) {
-						echo "<font class='message'>".t("HUOM! tiliˆid‰‰n poikkeavalle tilille '$tilino'<br>");
+						echo "<font class='message'>".t("HUOM: tiliˆid‰‰n poikkeavalle tilille '$tilino'<br>");
 						$trow["tilino"] = $tilino;
 					}
 
@@ -734,7 +734,7 @@ if ($tee != "") {
 				$ero = round($rivisumma["summa"], 2) + round($summarow["summa"], 2);
 
 				if ($ero <> 0) {
-					echo "	<font class='error'>".t("VIRHE!!! Matkalasku ja kirjanpito ei t‰sm‰‰!!!")."</font><br>
+					echo "	<font class='error'>".t("VIRHE: Matkalasku ja kirjanpito ei t‰sm‰‰!!!")."</font><br>
 							<font class='message'>".t("Heitto on")." $ero [rivit $rivirow[summa]] (kp $summarow[summa])</font><br>";
 				}
 			}
@@ -1530,7 +1530,7 @@ if ($tee == "MUOKKAA") {
 			$trow = mysql_fetch_assoc($tres);
 		}
 		else {
-			die("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (3)")."</font><br>");
+			die("<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (3)</font><br>");
 		}
 
 		echo "<br><font class='message'>".t("Lis‰‰")." $trow[nimitys]</font><hr>$errori";
@@ -1546,7 +1546,7 @@ if ($tee == "MUOKKAA") {
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
 		if ($rivitunnus > 0) {
-			echo "<font class='error'>".t("HUOM! Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
+			echo "<font class='error'>".t("HUOM: Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
 		}
 
 		echo "<table><tr>";

@@ -324,7 +324,8 @@
 					$loppu = tarkiste($sscc);
 					$sscc = $sscc.$loppu;
 
-					$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+					#$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+					$linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$sscc'>$sscc</a><br>";
 
 				}
 

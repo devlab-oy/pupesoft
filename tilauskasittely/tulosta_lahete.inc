@@ -332,8 +332,12 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
 			}
 
+			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
 			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 		$thispage, $pieni);
-			$pdf->draw_text(310, 677, $laskurow["toimitusehto"], 		$thispage, $norm);
+			$pdf->draw_text(310, 677, $toimehto, 						$thispage, $norm);
 
 			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 
@@ -1133,7 +1137,7 @@ if (!function_exists('rivi_lahete')) {
 		$asrow1 = mysql_fetch_assoc($asresult);
 
 		//saadaan lähetteen summa menemään oikein, taaksepäin yhteensopivasti
-		$row["myyntihinta"]			= tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), '');
+		$row["myyntihinta"]			= tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), "EINETTOA");
 		$row["brutto_rivihinta"] 	= $row["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		$row["aleryhma"] 			= $asrow1["aleryhma"];
 
@@ -1223,7 +1227,7 @@ if (!function_exists('rivi_lahete')) {
 						$lapsi_res = mysql_query($query) or pupe_error($query);
 						$lapsi_row = mysql_fetch_assoc($lapsi_res);
 
-						$myyntihinta_temp = tuotteen_myyntihinta($laskurow, $lapsi_row, $perhekpl, '');
+						$myyntihinta_temp = tuotteen_myyntihinta($laskurow, $lapsi_row, $perhekpl, "EINETTOA");
 						$row['myyntihinta'] += $myyntihinta_temp;
 						$row['brutto_rivihinta'] += $myyntihinta_temp * $perhekpl;
 					}
@@ -2143,7 +2147,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$asrow1 = mysql_fetch_assoc($asresult);
 
 			//saadaan lähetteen summa menemään oikein, taaksepäin yhteensopivasti
-			$row["myyntihinta"] = hintapyoristys(tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), ''));
+			$row["myyntihinta"] = hintapyoristys(tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), "EINETTOA"));
 
 			$oikpos = $pdf->strlen($row["myyntihinta"]	, $norm);
 			$pdf->draw_text(500-$oikpos, $kala, $row["myyntihinta"], $thispage, $norm);
@@ -2550,7 +2554,7 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli).t(" tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli)." ".t("tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $norm);

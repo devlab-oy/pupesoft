@@ -482,7 +482,7 @@
 				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
 				require("inc/footer.inc");
 				exit;
-			}			
+			}
 		}
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
@@ -593,7 +593,7 @@
 				$result = pupe_query($query);
 
 				if (mysql_affected_rows() > 0) {
-					echo "<font class='message'>".t("HUOM! Uudet otsikkotiedot haettu asiakasrekisterist‰.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Uudet otsikkotiedot haettu asiakasrekisterist‰.")."</font><br>";
 				}
 
 				$query = "	UPDATE laskun_lisatiedot
@@ -710,7 +710,7 @@
 				}
 
 				if ($tilausnumero == 0) {
-					echo "<font class='message'>".t("HUOM! Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
 				}
 			}
 
@@ -855,7 +855,7 @@
 		}
 
 		if ($templ > 0 and $asiakasid == '') {
-			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
+			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
 		}
 
 		echo "</table>";
@@ -1174,7 +1174,7 @@
 					<option value=''  $sel[V]>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>
 					</select>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='maksaja' value='$apu_rahdinmaksaja'>";
 			}
@@ -1231,7 +1231,7 @@
 			}
 			echo "</select>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
 			}
@@ -1426,10 +1426,10 @@
 			echo "<td>".t("Myyj‰")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+			$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$srow[myyja]')
-						ORDER BY nimi";
+						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
+						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
 			while($row = mysql_fetch_assoc($yresult)) {
@@ -1962,7 +1962,7 @@
 			echo "<td>";
 			echo "<input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk {$state_chk}>";
 
-			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
 			if ($state_chk == 'disabled') {
 				echo "<input type='hidden' name='rahtivapaa' value='$srow[rahtivapaa]'>";
 			}
@@ -2798,7 +2798,7 @@
 			}
 			else {
 				$query3 = "UPDATE ";
-				$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
+				$postquery3 = " WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 			}
 		}
 

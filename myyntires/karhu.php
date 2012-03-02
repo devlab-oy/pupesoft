@@ -42,11 +42,11 @@ if ($tee == 'LAHETA') {
 		}
 		catch (Exception $e) {
 			$ekarhu_success = false;
-			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+			echo "<font class='error'>".t("Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin").". ".t("VIRHE").": " . $e->getMessage() . "</font>";
 		}
 	}
 	else {
-		echo "<font class='error'>Et valinnut yht‰‰n laskua.</font>";
+		echo "<font class='error'>".t("Et valinnut yht‰‰n laskua").".</font>";
 		$ekarhu_success = false;
 	}
 
@@ -92,12 +92,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
 			}
 			else {
-				echo "Ei karhuttavaa";
+				echo t("Ei karhuttavaa");
 				exit;
 			}
 		}
 		else {
-			echo "Valittu factoringsopimus ei lˆydy";
+			echo t("Valittu factoringsopimus ei lˆydy");
 			exit;
 		}
 	}
@@ -143,7 +143,10 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
-	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
+	$query = "	SELECT asiakas.ytunnus,
+				group_concat(distinct lasku.tunnus) karhuttavat,
+				group_concat(distinct lasku.liitostunnus) liitostunnarit,
+				sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
 						maksuehto.jv,
@@ -173,10 +176,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$karhuttavat = array();
+		$karhuttavat_asiakkaat = array();
 		unset($pdf);
 
 		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
+			$karhuttavat_asiakkaat[] = $karhuttavarow["liitostunnarit"];
 		}
 
 		if ($karhuakaikki != "") {
@@ -257,6 +262,26 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
+
+	$as_tunnus = explode(",", $karhuttavat_asiakkaat[0]);
+
+	foreach ($as_tunnus as $astun) {
+		$query  = "	SELECT kentta01
+			        FROM kalenteri
+			        WHERE yhtio = '$kukarow[yhtio]'
+			        AND tyyppi  = 'Myyntireskontraviesti'
+			        AND liitostunnus = '$astun'
+			        AND yhtio   = '$kukarow[yhtio]'
+					ORDER BY tunnus desc
+					LIMIT 1";
+		$amres = pupe_query($query);
+
+		if (mysql_num_rows($amres) > 0) {
+			$amrow = mysql_fetch_assoc($amres);
+
+			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01]</td></tr>";
+		}
+	}
 
 	echo "<tr><th>". t('Karhuviesti') ."</th><td>";
 
@@ -350,7 +375,7 @@ if ($tee == 'KARHUA')  {
 	echo "</table>";
 	echo "</td></tr></table><br>";
 
-	if (isset($ekirje_config) && is_array($ekirje_config)) {
+	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		$submit_text = 'L‰het‰ eKirje';
 	}
 	else {

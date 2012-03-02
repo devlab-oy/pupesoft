@@ -23,9 +23,9 @@
 	$ulos .= sprintf('%12.12s', '');							// 17 Varalla
 	$ulos .= sprintf('%-20.20s', $laskusis1);					// 18 Sisäinen viite
 	$ulos .= sprintf('%-20.20s', $laskusis2);					// 19 Kustannuspaikka
-	$ulos .= sprintf('%5.5s', '');								// 20 Sampon speksissä Postinumero (Pakollinen maksuosoituksissa)		HUOM! Kentän tyyppi N maksutapahtuma-tietueelle (tietuetunnus 1), mutta kenttä on "varalla" sekä tyyppiä AN erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
-	$ulos .= sprintf('%10.10s', '');							// 21 Sampon speksissä Postitoimipaikka (Pakollinen maksuosoituksissa)	HUOM! Kenttä on "varalla" erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
-	$ulos .= sprintf('%30.30s', '');							// 22 Sampon speksissä Saajan jakeluosoite								HUOM! Kenttä on "varalla" erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
+	$ulos .= sprintf('%5.5s', '');								// 20 Sampon speksissä Postinumero (Pakollinen maksuosoituksissa)		HUOM: Kentän tyyppi N maksutapahtuma-tietueelle (tietuetunnus 1), mutta kenttä on "varalla" sekä tyyppiä AN erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
+	$ulos .= sprintf('%10.10s', '');							// 21 Sampon speksissä Postitoimipaikka (Pakollinen maksuosoituksissa)	HUOM: Kenttä on "varalla" erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
+	$ulos .= sprintf('%30.30s', '');							// 22 Sampon speksissä Saajan jakeluosoite								HUOM: Kenttä on "varalla" erittelytapahtuma-tietueessa (tietuetunnus 2) / Nordean Speksissä "varalla"
 
 	//print strlen($ulos) . "/" . $ulos;
 	//print "</pre>";

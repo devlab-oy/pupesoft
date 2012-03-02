@@ -104,7 +104,7 @@
 	# 13)	Postiennakkolähetyserän (edellyttää EDI-tietoja) jokaiseen lähetykseen kiinnitetään osoitekortti täydellisenä yksilöivää lähetystunnusta lukuun ottamatta samansisältöisenä.
 	#		Postiennakkoerän kokonaissumma ja kokonaiskappalemäärä (kpl st. kenttään)
 	# 	 	merkitään erän jokaiseen osoitekorttiin. Postiennakkolähetyserän EDI-sanomassa ilmoitetaan myös lisäpalvelutunnus 3102. Kappalemäärärajaus paketeille on 2-10 ja kuljetusyksiköille 2-99.
-	# Huom!	Samalle vastaanottajalle osoitetun lähetyserän (MPS, edellyttää EDI-tietoja) tietoja ei tulosteta osoitekorttiin,
+	# HUOM:	Samalle vastaanottajalle osoitetun lähetyserän (MPS, edellyttää EDI-tietoja) tietoja ei tulosteta osoitekorttiin,
 	#		mutta ne ilmoitetaan EDI -sanomassa. Poikkeuksena Postiennakko, katso selite 13.
 
 	$x = array();

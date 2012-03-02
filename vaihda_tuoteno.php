@@ -427,17 +427,25 @@ if ($error == 0 and $tee == "file") {
 
 						$query = "	INSERT INTO korvaavat
 									SET
-									tuoteno 			= '$vantuoteno',
-									id					= '$korvid[maxi]',
-									yhtio				= '$kukarow[yhtio]'";
+									tuoteno 	= '$vantuoteno',
+									id			= '$korvid[maxi]',
+									yhtio		= '$kukarow[yhtio]',
+									laatija 	= '$kukarow[kuka]',
+									luontiaika	= now(),
+									muuttaja 	= '$kukarow[kuka]',
+									muutospvm 	= now()";
 						$result4 = pupe_query($query);
 
 						if ($loytyikorv != '1') {
 							$query = "	INSERT INTO korvaavat
 										SET
-										tuoteno 			= '$uustuoteno',
-										id					= '$korvid[maxi]',
-										yhtio				= '$kukarow[yhtio]'";
+										tuoteno 	= '$uustuoteno',
+										id			= '$korvid[maxi]',
+										yhtio		= '$kukarow[yhtio]',
+										laatija 	= '$kukarow[kuka]',
+										luontiaika	= now(),
+										muuttaja 	= '$kukarow[kuka]',
+										muutospvm 	= now()";
 							$result4 = pupe_query($query);
 						}
 					}

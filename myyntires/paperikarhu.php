@@ -490,7 +490,7 @@
 	$query = "	SELECT sum(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
 				and ltunnus  > 0
 				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
@@ -717,7 +717,7 @@
 			if($kirow["komento"] == "email") {
 				$liite = $pdffilenimi;
 				$kutsu = "Karhukirje ".$asiakastiedot["ytunnus"];
-				echo t("Karhukirje l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n<br>";
+				echo t("Karhukirje l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...\n<br>";
 
 				require("inc/sahkoposti.inc");
 			}

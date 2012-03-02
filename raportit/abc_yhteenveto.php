@@ -45,6 +45,7 @@
 	else {
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 	}
+	
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "<br>";
@@ -295,9 +296,9 @@
 					JOIN tuote USING (yhtio, tuoteno)
 					WHERE abc_aputaulu.yhtio = '$kukarow[yhtio]'
 					AND abc_aputaulu.tyyppi = '$abcchar'
-					$abc_lisa
-					$lisa
-					$saapumispvmlisa";
+					{$abc_lisa}
+					{$lisa}
+					{$saapumispvmlisa}";
 		$sumres = pupe_query($query);
 		$sumrow = mysql_fetch_assoc($sumres);
 
@@ -309,9 +310,9 @@
 		$orderby  = " ORDER BY ";
 
 		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
-			$prequery .= " luokka,";
-			$groupby  .= " luokka,";
-			$orderby  .= " luokka,";
+			$prequery .= " abc_aputaulu.luokka,";
+			$groupby  .= " abc_aputaulu.luokka,";
+			$orderby  .= " abc_aputaulu.luokka,";
 		}
 
 		$groupby  = substr($groupby, 0, -1);
@@ -323,28 +324,23 @@
 			$orderby .= " $abcwhat desc";
 		}
 
-		if (strtolower($toim) == 'myynti') {
-			$paramtyppi = "TM";
+		// n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
+		$asiakas_join_array = array('AK','AM','AP','AR');
+		$tuote_join_array = array('TK','TM','TP','TR','TV');
+		
+		if (in_array($abcchar,$asiakas_join_array)) {
+			$analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
 		}
-		elseif (strtolower($toim) == 'kate') {
-			$paramtyppi = "TK";
-		}
-		elseif (strtolower($toim) == 'kpl') {
-			$paramtyppi = "TP";
-		}
-		elseif (strtolower($toim) == 'kulutus') {
-			$paramtyppi = "TV";
-		}
-		elseif (strtolower($toim) == 'rivit') {
-			$paramtyppi = "TR";
+		elseif (in_array($abcchar,$tuote_join_array)) {
+			$analyysin_join = " JOIN tuote USING (yhtio, tuoteno) ";
 		}
 		else {
-			$paramtyppi = "";
+			$analyysin_join = "";
 		}
 
 		//haetaan luokkien arvot
 		$query = "	SELECT
-					$prequery
+					{$prequery}
 					count(abc_aputaulu.tuoteno) tuotelkm,
 					group_concat(abc_aputaulu.tuoteno SEPARATOR '<br>') tuotenumerot,
 					max(abc_aputaulu.summa) max,
@@ -382,21 +378,21 @@
 					abc_aputaulu.myyjanro,
 					abc_aputaulu.ostajanro
 					FROM abc_aputaulu
-					JOIN tuote USING (yhtio, tuoteno)
+					{$analyysin_join}
 					WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
-					and abc_aputaulu.tyyppi = '$abcchar'
-					$abc_lisa
-					$lisa
-					$saapumispvmlisa
-					$groupby
-					$orderby";
+					and abc_aputaulu.tyyppi = '{$abcchar}'
+					{$abc_lisa}
+					{$lisa}
+					{$saapumispvmlisa}
+					{$groupby}
+					{$orderby}";
 		$res = pupe_query($query);
 
 		$i = 0;
 
 		while ($row = mysql_fetch_assoc($res)) {
 
-			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
+			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$abcchar' and luokka = '$ryhmanimet[$i]'";
 			$paramres = pupe_query($query);
 			$paramrow = mysql_fetch_assoc($paramres);
 

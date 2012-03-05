@@ -229,7 +229,6 @@
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
-			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
@@ -452,9 +451,22 @@
 
 			echo "</select></td><td></td></tr>";
 
+			$vsel[$verkkokaupat] = "SELECTED";
+
 			echo "<tr>
-				<th>",t("Näytä vain verkkokauppatilauksia"),"</th>
-				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
+				<th>",t("Ohjelmamoduli"),"</th>
+				<td>
+				<select name='verkkokaupat'>
+				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
+				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
+				<option value='EXTRANET'		{$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
+				<option value='MAGENTO'			{$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
+				<option value='VARAOSASELAIN'	{$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
+				<option value='VERKKOKAUPPA'	{$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
+				<option value='EDIFACT911'		{$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
+				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+				</select>
+				</td>
 				<td></td>
 				<td class='back'></td>
 				</tr>
@@ -1159,7 +1171,7 @@
 				}
 
 				if ($naytamaksupvm != "") {
-					$group .= ",lasku.mapvm";					
+					$group .= ",lasku.mapvm";
 					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
@@ -1248,7 +1260,7 @@
 				}
 
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
-					$lisa .= " and lasku.laatija = 'Magento' ";
+					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
 
 				$vvaa = $vva - '1';

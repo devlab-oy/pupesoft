@@ -39,12 +39,12 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$eilahe = "o";
 			}
 
-			if ($asiakasrow["spec_ytunnus"] != '') {
+			if (isset($asiakasrow["spec_ytunnus"]) and $asiakasrow["spec_ytunnus"] != '') {
 				$ytunnus 				= $asiakasrow["spec_ytunnus"];
 				$asiakasrow["ytunnus"] 	= $asiakasrow["spec_ytunnus"];
 			}
 
-			if ($asiakasrow["spec_tunnus"] != '') {
+			if (isset($asiakasrow["spec_tunnus"]) and $asiakasrow["spec_tunnus"] != '') {
 				$asiakasid 				= $asiakasrow["spec_tunnus"];
 				$asiakasrow["tunnus"] 	= $asiakasrow["spec_tunnus"];
 			}
@@ -93,15 +93,15 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				}
 				elseif (mysql_num_rows($meapu)>1) {
 					echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("löytyi usealla käyttäjällä")."!</font><br><br>";
-					$myyjanro = "";
+					$myyja = 0;
 				}
 				else {
 					echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("ei löytynyt")."!</font><br><br>";
-					$myyjanro = "";
+					$myyja = 0;
 				}
 			}
 
-			if ((int) $myyja == 0) {
+			if (!isset($myyja) or $myyja == 0) {
 				$myyja = $kukarow["tunnus"];
 			}
 
@@ -166,7 +166,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$jtkielto = $asiakasrow['jtkielto'];
 
 			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
-			if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON';
+			// if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON'; // Tälläistä kenttää ei ole
 
 		}
 		else {
@@ -244,6 +244,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		}
 		if ($toim == "EXTRANET_REKLAMAATIO") {
 			$tilaustyyppi = 'R';
+		}
+		if ($toim == "MYYNTITILI") {
+			$tilaustyyppi = "M";
 		}
 
 		$jatka	= "JATKA";

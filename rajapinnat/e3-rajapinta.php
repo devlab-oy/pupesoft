@@ -18,7 +18,7 @@
 	ini_set("display_errors", 0);
 	
 	//testauksen vuoksi..
-	ini_set("memory_limit", "5000M");
+	//ini_set("memory_limit", "5000M");
 
 	if (include("/var/www/html/demo/orum/inc/connect.inc"));
 	elseif (include("/Users/tony/Sites/pupesoft/inc/connect.inc"));
@@ -35,9 +35,9 @@
 	$toimirajaus = " AND toimi.oletus_vienti in ('C','F','I')";
 	$xf02loppulause = '';
 	
-	$path = "/Users/tony/E3konversio/E3_$yhtio/filet/terve/";
+	//$path = "/Users/tony/E3konversio/E3_$yhtio/filet/terve/";
 	//$path = "/home/tony/E3konversio/artr/artr/";
-	//$path = "/home/satu/e3/aineisto/";
+	$path = "/home/satu/e3/aineisto/";
 	
 	// Sivotaan eka vanha pois
   	system("rm -rf $path");
@@ -69,13 +69,13 @@
 	$limit = "";
 
 	// Ajetaan kaikki operaatiot
-//	xauxi($limit);
-//	xlto($limit); 
+	xauxi($limit);
+	xlto($limit); 
 	xswp($limit);
-//	xvni($limit); 
-//	xf04($limit);
-//	xf01($limit); 
-//	xf02($limit); 
+	xvni($limit); 
+	xf04($limit);
+	xf01($limit); 
+	xf02($limit); 
                   
 	//Siirret‰‰n failit logisticar palvelimelle
 	#siirto($path);

@@ -368,7 +368,7 @@
 
 								foreach ($lisays[$i] as $value) {
 
-									if ($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != '')) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
+									if (($laatikkoid == "TOTAL PACKS" and $tavarantoimittajanumero == "123220") or ($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != ''))) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 										
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',

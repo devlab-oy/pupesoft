@@ -371,7 +371,6 @@
 			$mul_tme = unserialize(urldecode($mul_tme));
 
 			$lisa = unserialize(urldecode($lisa));
-			$lisa_dynaaminen = unserialize(urldecode($lisa_dynaaminen));
 			$lisa_parametri = unserialize(urldecode($lisa_parametri));
 
 			// tallennamuisti-funkkarin takia joudutaan kaksi kertaa unserializee.
@@ -741,7 +740,6 @@
 							LEFT JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus = 'X')
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
 							LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa')
-							$lisa_dynaaminen
 							$lisa_parametri
 							$lisaa2
 							WHERE tuote.$yhtiot
@@ -798,7 +796,6 @@
 							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
-							$lisa_dynaaminen
 							$lisa_parametri
 							WHERE tuote.$yhtiot
 							$lisa
@@ -945,8 +942,8 @@
 
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				#$bar = new ProgressBar();
+				#$bar->initialize($elements); // print the empty bar
 			}
 
 			while ($row = mysql_fetch_array($res)) {
@@ -1290,6 +1287,7 @@
 					$asosresult = pupe_query($query);
 					$asosrow = mysql_fetch_array($asosresult);
 				}
+
 				if ($asiakasid != '') {
 					$query  = "	SELECT sum(if (t.laskutettuaika >= '$vva1-$kka1-$ppa1' and t.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,t.kpl,0)) kpl1,
 								sum(if (t.laskutettuaika >= '$vva2-$kka2-$ppa2' and t.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,t.kpl,0)) kpl2,
@@ -1688,8 +1686,7 @@
 					$excelsarake = 0;
 				}
 
-				$bar->increase();
-
+				#$bar->increase();
 			}
 
 			if ($korvaavien_otsikot > 0) {
@@ -1878,7 +1875,6 @@
 
 			// Otetaan monivalintalaatikoista palautuvat parametrit talteen ja laitetaan isoihin kyselyihin
 			echo "	<input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>
-					<input type='hidden' name='lisa_dynaaminen' value='".urlencode(serialize($lisa_dynaaminen["tuote"]))."'>
 					<input type='hidden' name='lisa_parametri' value='".urlencode(serialize($lisa_parametri))."'>";
 
 			echo "<br><br>";
@@ -2002,7 +1998,6 @@
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
 					<input type='hidden' name='lisa' value='$lisa'>
-					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
 					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>
@@ -2157,7 +2152,6 @@
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
 					<input type='hidden' name='lisa' value='$lisa'>
-					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
 					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>

@@ -762,7 +762,7 @@
 		$submit_button = '';
 	}
 
-	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen["tuote"] != '' or $lisa_parametri != '')) {
+	if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
 		$tuotekyslinkki = "";
 
@@ -904,7 +904,6 @@
 					tuote.status
 					FROM tuote use index (tuoteno, nimitys)
 					$lisa_parametri
-					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$kieltolisa
 					$lisa

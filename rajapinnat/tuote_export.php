@@ -318,6 +318,7 @@
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
 							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";

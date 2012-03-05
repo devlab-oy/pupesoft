@@ -109,6 +109,7 @@
 
 	$x = array();
 	if ($yhteensa != '')				$x[]='1'; // Postiennakko
+	if ($kollityht>1)					$x[]='2'; // Monipakettil‰hetys
 	if ($rakir_row['merahti'] != 'K')	$x[]='3'; // Maksaja muu kuin l‰hett‰j‰
 	if ($toitarow['lauantai'] != '')	$x[]='6'; // lauantaijakelu
 	if ($toitarow['kuljyksikko'] != '')	$x[]='7'; // kuljetusyksikkˆkuljetus
@@ -251,7 +252,7 @@
 	}
 
 	if (count($vakit) > 0) {
-		// T‰m‰ tyhjennett‰n kun tulostetaan VAK/ADR rahtikirja
+		// T‰m‰ tyhjennet‰‰n kun tulostetaan VAK/ADR rahtikirja
 		$keku = "";
 	}
 

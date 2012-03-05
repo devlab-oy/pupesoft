@@ -255,23 +255,36 @@
 									hyllytaso		= '$tilausrivirow[hyllytaso]',
 									hyllyvali		= '$tilausrivirow[hyllyvali]',
 									tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
-					$inskres = pupe_query($lisaaquery);
-					$extraa = mysql_insert_id();
+						$inskres = pupe_query($lisaaquery);
+						$extraa = mysql_insert_id();
 					
-					$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
-					$paketin_rivit			= array_unique(array_merge($paketin_rivit, $lisa_array));
-					$siistitty 				= implode(",", $lisa_array);
+						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
+						$paketin_rivit			= array_unique(array_merge($paketin_rivit, $lisa_array));
+						$siistitty 				= implode(",", $lisa_array);
 					
-					// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
-					$updatequery = "	UPDATE asn_sanomat SET
-								tilausrivi = '{$siistitty},{$extraa}',
-								tuoteno = '{$tilausrivirow['tuoteno']}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$row['tunnus']}'";
-					$upd_res = pupe_query($updatequery);
-					$kaytetyt_tilausrivit[] = $extraa;
-					$paketin_rivit[]		= $extraa;
-
+						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+						$updatequery = "	UPDATE asn_sanomat SET
+									tilausrivi = '{$siistitty},{$extraa}',
+									tuoteno = '{$tilausrivirow['tuoteno']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$row['tunnus']}'";
+						$upd_res = pupe_query($updatequery);
+						$kaytetyt_tilausrivit[] = $extraa;
+						$paketin_rivit[]		= $extraa;
+					}
+					elseif ($ylimaaraista == 0) {
+						// Jos menee tasan tilatut ja tulleet.
+						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
+						$paketin_rivit			= array_unique(array_merge($paketin_rivit, $lisa_array));
+						$siistitty 				= implode(",", $lisa_array);
+					
+						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+						$updatequery = "	UPDATE asn_sanomat SET
+									tilausrivi = '{$siistitty}',
+									tuoteno = '{$tilausrivirow['tuoteno']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$row['tunnus']}'";
+						$upd_res = pupe_query($updatequery);
 					}
 				}
 				elseif ($row["kappalemaara"] < $tilausrivirow["varattu"]) {

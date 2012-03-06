@@ -412,7 +412,7 @@
 			while ($kirow = mysql_fetch_assoc($kires)) {
 
 				$sel = "";
-				if ($kirow["tunnus"] == $kukarow["keraysvyohyke"] and $kirow['kir_tunnus'] == $kirow['printteri8']) {
+				if (strpos($kukarow["keraysvyohyke"],$kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri8']) {
 					$sel = " selected";
 				}
 
@@ -444,7 +444,7 @@
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
 					$sel = "";
-					if ($kirow["tunnus"] == $kukarow["keraysvyohyke"] and $kirow['kir_tunnus'] == $kirow['printteri0']) {
+					if (strpos($kukarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri0']) {
 						$sel = " selected";
 					}
 
@@ -608,6 +608,7 @@
 				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
 
 				if (count($erat['tilaukset']) != 0) {
+
 					$otunnukset = implode(",", $erat['tilaukset']);
 
 					require('inc/tulosta_reittietiketti.inc');
@@ -666,7 +667,7 @@
 						JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$kukarow['keraysvyohyke']}')
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke IN ({$kukarow['keraysvyohyke']}))
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 						AND kerayserat.tila = 'K'

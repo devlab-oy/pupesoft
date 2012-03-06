@@ -95,7 +95,55 @@
 					$(this).is(':checked') ? $('input.'+$(this).attr('id')).attr('checked', true) : $('input.'+$(this).attr('id')).attr('checked', false);
 				});
 
+				function translate(element, x, y)
+				{    
+				    var translation = 'translate(' + x + 'px,' + y + 'px)';
+				    var translation = 'translateY('+y+'px)';
+
+				    element.css({
+				        'transform': translation,
+				        '-ms-transform': translation,
+				        '-webkit-transform': translation,
+				        '-o-transform': translation,
+				        '-moz-transform': translation
+				    });
+				}
+
 				$(document).ready(function() {
+
+			        var stickyHeaderTop = $('#keraajat thead').offset().top;
+			        var stickyHeaderWidth = $('#keraajat').css('width');
+			        var stickyHeaderPosition = $('#keraajat').position();
+
+			        var ii = 0;
+
+			        if ($('#chart_div_values').html() != undefined) {
+			        	stickyHeaderTop += 300;
+			        }
+
+			        $('#keraajat th').each(function() {
+			        	var widthi = $(this).css('width');
+			        	$('#th_'+ii).css({width: widthi});
+			        	ii++;
+			        });
+
+					$('#keraajat td').each(function() {
+						$(this).css({position: 'static'});
+					});
+
+			        $('#divi').hide();
+
+			        $(window).scroll(function(){
+
+			                if ($(window).scrollTop() > stickyHeaderTop) {
+			                        $('#keraajat').css({width: stickyHeaderWidth});
+			                        $('#divi').show();
+			                        $('#divi').css({position: 'fixed', top: '-1px', left: stickyHeaderPosition.left});
+			                } 
+			                else {
+		                        $('#divi').css({position: 'static', top: '0px'}).hide();
+			                }
+			        });
 
 					$('.keraysvyohyke_checkbox').click(function() {
 						var keraysvyohyke = $(this).val();
@@ -185,8 +233,7 @@
 				ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
 				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
 				ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
-				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tilausrivi.varattu * tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker',
-				ROUND((COUNT(DISTINCT lasku.tunnus) * keraysvyohyke.tilauksen_tyoaikavakio_min_per_tilaus + COUNT(DISTINCT tilausrivi.tunnus) * keraysvyohyke.kerailyrivin_tyoaikavakio_min_per_rivi) / 60, 1) AS 'kapasiteettitarve'
+				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tilausrivi.varattu * tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 				FROM lasku
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.varattu > 0)
 				JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
@@ -200,6 +247,20 @@
 	$result = pupe_query($query);
 
 	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>",t("Valitse"),"</td>";
+	echo "<td style='vertical-align:middle;'>";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloittamatta' /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloitettu' /> ",t("Aloitettu"),"&nbsp;&nbsp;";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='keratty' /> ",t("Ker‰tty"),"&nbsp;&nbsp;";
+	echo "<input type='submit' value='",t("N‰yt‰"),"' />";
+	echo "</td>";
+	echo "<td class='back' colspan='5'></td>";
+	echo "</tr>";
+
+	echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
+
 	echo "<tr>";
 	echo "<th>",t("Ker‰ysvyˆhyke"),"</th>";
 	echo "<th>",t("Tilaukset"),"</th>";
@@ -242,7 +303,18 @@
 
 		echo "<td>{$row['litrat_ker']} / {$row['litrat_suun']}</td>";
 		echo "<td></td>";
-		echo "<td>{$row['kapasiteettitarve']} h</td>";
+
+		$query = "	SELECT ROUND((COUNT(DISTINCT lasku.tunnus) * keraysvyohyke.tilauksen_tyoaikavakio_min_per_tilaus + COUNT(DISTINCT tilausrivi.tunnus) * keraysvyohyke.kerailyrivin_tyoaikavakio_min_per_rivi) / 60, 1) AS 'kapasiteettitarve'
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.varattu > 0)
+					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tunnus IN ({$row['tilaukset']})";
+		$kap_res = pupe_query($query);
+		$kap_row = mysql_fetch_assoc($kap_res);
+
+		echo "<td>{$kap_row['kapasiteettitarve']} h</td>";
 		echo "</tr>";
 
 		$query = "	SELECT kuka.nimi AS 'keraaja', 
@@ -595,7 +667,7 @@
 				}
 
 				$tilalisa = "(lasku.tila = 'N' AND lasku.alatila = 'A')";
-				$select_aloittamatta = ", SUM(IF(lasku.tila = 'N' AND lasku.alatila = 'A', {$selectlisa}, 0)) AS 'aloittamatta'";
+				$select_aloittamatta = ", SUM(IF((lasku.tila = 'N' AND lasku.alatila = 'A'), {$selectlisa}, 0)) AS 'aloittamatta'";
 			}
 
 			if (isset($tilat['aloitettu'])) {
@@ -611,7 +683,7 @@
 					$groupbylisa = "GROUP BY 1";
 				}
 
-				$select_aloitettu = ", SUM(IF(lasku.tila = 'L' AND lasku.alatila = 'A', {$selectlisa}, 0)) AS 'aloitettu'";
+				$select_aloitettu = ", SUM(IF((lasku.tila = 'L' AND lasku.alatila = 'A'), {$selectlisa}, 0)) AS 'aloitettu'";
 			}
 
 			if (isset($tilat['keratty'])) {
@@ -627,7 +699,7 @@
 					$groupbylisa = "GROUP BY 1";
 				}
 
-				$select_keratty = ", IF(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'), {$selectlisa}, 0) AS 'keratty'";
+				$select_keratty = ", IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), {$selectlisa}, 0) AS 'keratty'";
 			}
 
 			// poistetaan defaultit
@@ -637,9 +709,9 @@
 			array_shift($prioriteetit);
 
 			$varastolisa = count($varasto) > 0 ? " AND lasku.varasto IN (".implode(",", $varasto).") " : "";
-			$keraysvyohykelisa = count($keraysvyohyke) > 0 ? " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.varasto = lasku.varasto AND keraysvyohyke.tunnus IN (".implode(",", $keraysvyohyke).")) " : "";
+			$keraysvyohykelisa = count($keraysvyohyke) > 0 ? " JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.varasto = lasku.varasto AND keraysvyohyke.tunnus IN (".implode(",", $keraysvyohyke).") AND keraysvyohyke.tunnus = vh.keraysvyohyke) " : "";
 			$vhlisa = $keraysvyohykelisa != "" ? " AND vh.keraysvyohyke IN (".implode(",", $keraysvyohyke).") " : "";
-			$toimitustapalisa = count($toimitustapa) > 0 ? " JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K' AND toimitustapa.tunnus IN (".implode(",", $toimitustapa).")) " : "";
+			$toimitustapalisa = count($toimitustapa) > 0 ? " JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa AND toimitustapa.extranet != 'K' AND toimitustapa.tunnus IN (".implode(",", $toimitustapa).") AND toimitustapa.selite = lasku.toimitustapa) " : "";
 			$prioriteettilisa = count($prioriteetit) > 0 ? " AND lasku.prioriteettinro IN (".implode(",", $prioriteetit).") " : "";
 
 			if ($ajankohta == 'past') {
@@ -667,7 +739,6 @@
 			else {
 				$luontiaikalisa = " AND lahdot.pvm >= '".date("Y-m-d")." 00:00:00' AND lahdot.pvm <= '".date("Y-m-d")." 23:59:59' ";
 			}
-
 
 			$query = "	SELECT SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'klo', GROUP_CONCAT(lasku.tunnus) tunnukset
 						{$select_aloittamatta}
@@ -733,16 +804,36 @@
 	$keraysvyohyke_res = pupe_query($query);
 
 	if (mysql_num_rows($keraysvyohyke_res) > 0) {
-		echo "<table>";
 
+		echo "<div id='divi'>";
+		echo "<table>";
 		echo "<tr>";
-		echo "<th>",t("Ker‰‰j‰"),"</th>";
+		echo "<th id='th_0'>",t("Ker‰‰j‰"),"</th>";
+
+		$id = 1;
+		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
+			echo "<th id='th_$id'>{$keraysvyohyke_row['nimitys']}</th>";
+			$id++;
+		}
+
+		echo "</tr>";
+		echo "</table>";
+		echo "</div>";
+
+		echo "<table id='keraajat'>";
+
+		echo "<thead>";
+		echo "<tr>";
+		echo "<th id='thead_keraaja'>",t("Ker‰‰j‰"),"</th>";
+
+		mysql_data_seek($keraysvyohyke_res, 0);
 
 		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res)) {
 			echo "<th>{$keraysvyohyke_row['nimitys']}</th>";
 		}
 
 		echo "</tr>";
+		echo "</thead>";
 
 		$query = "	SELECT * 
 					FROM kuka 

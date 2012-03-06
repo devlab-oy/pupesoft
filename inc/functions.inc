@@ -15834,6 +15834,9 @@ if (!function_exists("tee_keraysera2")) {
 					$tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
 					$yksin_kerailyalustalle_normi_tuote_trigger = true;
 					if ($debug) echo "Laitetaan tuote tuote_yksin_keraysalustalle arrayseen ja yksin_kerailyalustalle_normi_tuote_trigger p‰‰lle<br><br>";
+					if ($debug) echo "FAIL-jonoon!<br><br>";
+					$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+					break 2;
 				} 
 
 				if ($kaytettava_pakkaus == "" and count($pakkaukset) > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {

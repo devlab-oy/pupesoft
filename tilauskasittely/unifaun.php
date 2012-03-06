@@ -109,7 +109,8 @@ class Unifaun {
 		$filenimi = "{$this->palvelin2}/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		/* HUOM! TESTIPATH */
-		$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
+		// $filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
+		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
@@ -142,6 +143,9 @@ class Unifaun {
 			#	<val n="favorite"></val>						# Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
 			#	<val n="partition"></val>						# Defines the profile group where the shipment should be stored in the online system.
 			#</meta>
+
+		$search = array('Ä', 'ä', 'Ö', 'ö', 'Å', 'å');
+		$replace = array('A', 'a', 'O', 'o', 'A', 'a');
 
 			// Lähettäjän tiedot
 			$uni_sender = $xml->addChild('sender');	# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
@@ -231,7 +235,7 @@ class Unifaun {
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); # Receiver's name
 				$uni_rcv_val->addAttribute('n', "name");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(urlencode($this->rakir_row["toim_osoite"]))); # Address line 1
+				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_osoite"])); # Address line 1
 				$uni_rcv_val->addAttribute('n', "address1");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', ""); # Address line 2
@@ -240,7 +244,7 @@ class Unifaun {
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); # Zipcode
 				$uni_rcv_val->addAttribute('n', "zipcode");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(urlencode($this->rakir_row["toim_postitp"]))); # City
+				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); # City
 				$uni_rcv_val->addAttribute('n', "city");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', ""); # State

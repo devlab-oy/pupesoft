@@ -9,10 +9,6 @@
 
 	$otunnukset = implode(",", $erat['tilaukset']);
 
-	if ((!isset($ei_tulosteta) or !$ei_tulosteta) and (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "")) {
-		require("tilauskasittely/unifaun.php");
-	}
-
 	$tilausrivit = '';
 	$pakkaus_kirjaimet = array();
 
@@ -134,39 +130,41 @@
 						}
 					} #end foreach $pakkaus
 
-					if (!isset($ei_tulosteta) or !$ei_tulosteta) {
+					// if (!isset($ei_tulosteta) or !$ei_tulosteta) {
 
-						if (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "") {
+					// 	if (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "") {
 
-						}
-						else {
-							$params = array(
-								'tilriv' => $tilriv,
-								'pakkaus_kirjain' => $pakkaus_kirjain,
-								'sscc' => $sscc,
-								'toimitustapa' => $laskurow['toimitustapa'],
-								'rivit' => $rivit,
-								'paino' => $paino,
-								'tilavuus' => $tilavuus,
-								'lask_nimi' => $laskurow['nimi'],
-								'lask_nimitark' => $laskurow['nimitark'],
-								'lask_osoite' => $laskurow['osoite'],
-								'lask_postino' => $laskurow['postino'],
-								'lask_postitp' => $laskurow['postitp'],
-								'lask_viite' => $laskurow['viesti'],
-								'lask_merkki' => $laskurow['sisviesti2'],
-								'komento_reittietiketti' => $komento['reittietiketti'],
-							);
+					// 	}
+					// 	else {
+					// 		$params = array(
+					// 			'tilriv' => $tilriv,
+					// 			'pakkaus_kirjain' => $pakkaus_kirjain,
+					// 			'sscc' => $sscc,
+					// 			'toimitustapa' => $laskurow['toimitustapa'],
+					// 			'rivit' => $rivit,
+					// 			'paino' => $paino,
+					// 			'tilavuus' => $tilavuus,
+					// 			'lask_nimi' => $laskurow['nimi'],
+					// 			'lask_nimitark' => $laskurow['nimitark'],
+					// 			'lask_osoite' => $laskurow['osoite'],
+					// 			'lask_postino' => $laskurow['postino'],
+					// 			'lask_postitp' => $laskurow['postitp'],
+					// 			'lask_viite' => $laskurow['viesti'],
+					// 			'lask_merkki' => $laskurow['sisviesti2'],
+					// 			'komento_reittietiketti' => $komento['reittietiketti'],
+					// 		);
 
-							tulosta_reittietiketti($params);
-						}
-					}
+					// 		tulosta_reittietiketti($params);
+					// 	}
+					// }
 				} #end foreach $rarr
 			} #end foreach $era_arr
 		} #end if
 	} #end foreach $erat
 
 	if ($kerayseran_numero > 0 and (!isset($ei_tulosteta) or !$ei_tulosteta) and (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "")) {
+
+		require("tilauskasittely/unifaun.php");
 
 		$query = "SELECT DISTINCT otunnus FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$kerayseran_numero}'";
 		$ker_res = pupe_query($query);

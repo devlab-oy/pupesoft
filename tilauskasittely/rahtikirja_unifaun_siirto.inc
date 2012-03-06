@@ -16,9 +16,6 @@ if ($kollityht > 0) {
 		$unifaun->setRahtikirjaRow($rakir_row);
 		$unifaun->setYhteensa($yhteensa);
 		$unifaun->setViite($viite);
-		$unifaun->setKolliYht($kollityht);
-		$unifaun->setKilotYht($kilotyht);
-		$unifaun->setPakkauskuvaus($pakkauskuvaus);
 		$unifaun->setMehto($mehto);
 
 		if ($phpnimi == "rahtikirja_custom.php") {
@@ -36,6 +33,15 @@ if ($kollityht > 0) {
 		}
 
 		$unifaun->_getXML();
+
+		$kollitiedot = array(
+			'maara' => $kollityht,
+			'paino' => $kilotyht,
+			'pakkauskuvaus' => $pakkauskuvaus[0]
+		);
+
+		$unifaun->setContainerRow($kollitiedot);
+
 		$unifaun->ftpSend();
 
 	}

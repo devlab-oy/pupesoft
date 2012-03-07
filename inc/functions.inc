@@ -16718,7 +16718,7 @@ if (!function_exists("tee_keraysera2")) {
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
-			$filenimi = "/Users/sami/temp/kardex/orders/ulkoisen_jarjestelman_tiedosto-".md5(uniqid(mt_rand(), true)).".txt";
+			$filenimi = "/tmp/kardex-".md5(uniqid(mt_rand(), true)).".txt";
 			$fh = fopen($filenimi, "w+");
 		}
 

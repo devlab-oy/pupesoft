@@ -427,8 +427,26 @@
 				}
 			}
 
+			if (!isset($trow) and $laskuttajan_nimi != "") {
+
+				$laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
+
+				// 8 etsit‰‰n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-tyˆnnetaan laskun nimi-kentt‰‰n...)
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '$yhtio'
+							and ultilno = '$laskuttajan_nimi'
+							and ultilno not in ('','0')
+							and tyyppi != 'P'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
 			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
-				// 8 etsit‰‰n toimittaja teccomi-specific
+				// 9 etsit‰‰n toimittaja teccomi-specific
 				$query = "	SELECT *
 							FROM toimi
 							WHERE yhtio = '$yhtio'

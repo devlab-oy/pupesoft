@@ -54,17 +54,17 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			$rivi .= "".t("Valitettavasti ei löytynyt yhtään tuotetta.")."\t";
+			$rivi .= t("Valitettavasti ei löytynyt yhtään tuotetta.")."\t";
 		}
 
-		$rivi .= "".t("Tuotenumero")."\t";
-		$rivi .= "".t("Nimitys")."\t";
-		$rivi .= "".t("Kuvaus")."\t";
-		$rivi .= "".t("tuotemerkki")."\t";
-		$rivi .= "".t("Hinta_veroll")."\t";
-		$rivi .= "".t("alv")."\t";
-		$rivi .= "".t("Aleprosentti")."\t";
-		$rivi .= "".t("Aleryhmä")."\t\n";
+		$rivi .= t("Tuotenumero")."\t";
+		$rivi .= t("Nimitys")."\t";
+		$rivi .= t("Kuvaus")."\t";
+		$rivi .= t("tuotemerkki")."\t";
+		$rivi .= t("Hinta_veroll")."\t";
+		$rivi .= t("alv")."\t";
+		$rivi .= t("Aleprosentti")."\t";
+		$rivi .= t("Aleryhmä")."\t\n";
 
 		while ($tuoterow = mysql_fetch_array($result)) {
 
@@ -123,7 +123,7 @@
 		if ($boob===FALSE) echo " - ".t("Sähköpostin lähetys epäonnistui")."!<br>";
 		else echo " $kukarow[eposti].<br>".t("Sähköposti lähetetty").".<br>";
 		echo "<br>".t("Sinulle tulee liitteenä pakattu ZIP tiedosto josta saat purettua sarkaimilla erotellun tekstitiedoston").". <br>";
-		echo "".t("Huomaa että jos avaat tiedoston Exceliin, sinun pitää määritellä ensimmäinen sarake tekstiksi jotta Excel ei poista etunollia").". <br>";
+		echo t("Huomaa että jos avaat tiedoston Exceliin, sinun pitää määritellä ensimmäinen sarake tekstiksi jotta Excel ei poista etunollia").". <br>";
 
 		//lopetetaan tähän
 		require ("footer.inc");

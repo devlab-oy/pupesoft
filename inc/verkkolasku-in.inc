@@ -1566,8 +1566,10 @@
 								foreach ($liitefilet as $liitefile) {
 									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
 
-										$data = mysql_real_escape_string(file_get_contents($liitefile));
+										$data = file_get_contents($liitefile);
 										$filesize = strlen($data);
+
+										$data = mysql_real_escape_string($data);
 
 										$filename = str_replace("maventa_{$maventa_lasku_id}_maventa-", "", basename($liitefile));
 

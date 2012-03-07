@@ -29,6 +29,14 @@
 
 	echo "<font class='head'>".t("Valmistuksien suunnittelu")."</font><hr>";
 
+	// org_rajausta tarvitaan yhdess‰ selectiss‰ joka triggerˆi taas toisen asian.
+	$org_rajaus = $abcrajaus;
+	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+
+	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
+
+	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sek‰ siit‰ plus 3 kk
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
 	if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
@@ -67,13 +75,11 @@
 	function teerivi($tuoteno, $valittu_toimittaja, $abc_rajaustapa) {
 
 		// Kukarow ja p‰iv‰m‰‰r‰t globaaleina
-		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
+		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu, $ryhmanimet;
 
 		// Tehd‰‰n kaudet p‰iv‰m‰‰rist‰
 		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
-
-		$ryhmanimet = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 
 		// Haetaan tuotteen ABC luokka
 		$query = "	SELECT abc_aputaulu.luokka
@@ -438,14 +444,14 @@
 				$jt_tuotteet = $vrow[0];
 			}
 
-			// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-			$abc_join = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
-						AND abc_aputaulu.tuoteno = tuote.tuoteno
-						AND abc_aputaulu.tyyppi = '{$abcrajaustapa}'
-						AND (luokka <= '{$abcrajaus}' or luokka_osasto <= '{$abcrajaus}' or luokka_try <= '{$abcrajaus}' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ({$jt_tuotteet}))) ";
+			// joinataan ABC-aputaulu
+			$abc_join = " 	JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
+							AND abc_aputaulu.tuoteno = tuote.tuoteno
+							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}'
+							AND (luokka <= '{$abcrajaus}' or luokka_osasto <= '{$abcrajaus}' or luokka_try <= '{$abcrajaus}' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ({$jt_tuotteet}))) ";
 		}
 		else {
-			$abc_join = " LEFT JOIN abc_aputaulu ON (abc_aputaulu.yhtio = tuote.yhtio
+			$abc_join = "	LEFT JOIN abc_aputaulu ON (abc_aputaulu.yhtio = tuote.yhtio
 							AND abc_aputaulu.tuoteno = tuote.tuoteno
 							AND abc_aputaulu.tyyppi = '{$abcrajaustapa}')";
 		}
@@ -903,42 +909,52 @@
 		echo "</td>";
 		echo "</tr>";
 
-		// katotaan onko abc aputaulu rakennettu
-		$query  = "SELECT count(*) from abc_aputaulu where yhtio = '$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
-		$abcres = pupe_query($query);
-		$abcrow = mysql_fetch_array($abcres);
+		echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
-		// jos on niin n‰ytet‰‰n t‰ll‰nen vaihtoehto
-		if ($abcrow[0] > 0) {
-			echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+		echo "<select name='abcrajaus' onchange='submit()'>";
+		echo "<option  value=''>".t("Valitse")."</option>";
 
-			$sel = array_fill(0, 9, "");
-			$abcrajaus = (isset($abcrajaus)) ? (int) $abcrajaus : 0;
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
 
-			echo "<select name='abcrajaus'>
-			<option value=''>".t("Ei rajausta")."</option>
-			<option $sel[0] value='0'>".t("Luokka A-30")."</option>
-			<option $sel[1] value='1'>".t("Luokka B-20 ja paremmat")."</option>
-			<option $sel[2] value='2'>".t("Luokka C-15 ja paremmat")."</option>
-			<option $sel[3] value='3'>".t("Luokka D-15 ja paremmat")."</option>
-			<option $sel[4] value='4'>".t("Luokka E-10 ja paremmat")."</option>
-			<option $sel[5] value='5'>".t("Luokka F-05 ja paremmat")."</option>
-			<option $sel[6] value='6'>".t("Luokka G-03 ja paremmat")."</option>
-			<option $sel[7] value='7'>".t("Luokka H-02 ja paremmat")."</option>
-			<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
-			</select>";
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
 
-			$sel = array("TK" => "", "TR" => "", "TP" => "");
-			$abcrajaustapa = (isset($abcrajaustapa)) ? $abcrajaustapa : "TK";
-			$sel[$abcrajaustapa] = "SELECTED";
-
-			echo "<select name='abcrajaustapa'>
-			<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
-			<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
-			<option $sel[TP] value='TP'>".t("Myyntikappaleet")."</option>
-			</select>
-			</td></tr>";
+			echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
 		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		$teksti = "";
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
+			$selabc = "";
+
+			if ($i > 0) $teksti = t("ja paremmat");
+			if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
+
+			echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+		}
+
+		echo "</select>";
 
 		echo "<tr><th>".t("Toimittaja")."</th><td>";
 		if ($toimittajaid == "") {

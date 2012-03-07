@@ -66,10 +66,8 @@
 		}
 
 		$asiakasanalyysi = FALSE;
-
-		//ryhmäjako
-		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
-		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
+		
+		list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
 		// jos kaikki tarvittavat tiedot löytyy mennään queryyn
 		if ($tee == 'YHTEENVETO') {

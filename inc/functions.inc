@@ -17755,7 +17755,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			'tyyppi'					=> '',
 			'useita'					=> '',
 			'ei_echoa'					=> $ei_echoa,
-			'komento'					=> $komento
+			'komento'					=> $komento,
+			'yhteensamaara'				=> 0,
 			);
 
 			if ($laskurow["tila"] == "G") {
@@ -18264,3 +18265,60 @@ if (!function_exists('zendesk_curl')) {
 	}
 }
 
+// Haetaan ryhm‰nimet tietokannasta ja palautetaan 2 arrayta
+if (!function_exists('hae_ryhmanimet')) {
+	function hae_ryhmanimet ($abc_tyyppi) {
+		global $yhtiorow, $kukarow;
+
+		if ($abc_tyyppi == "") {
+			return FALSE;
+		}
+
+		// Haetaan abc-parametrit
+		$query = "	SELECT *
+					FROM abc_parametrit
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					and tyyppi 	= '{$abc_tyyppi}'
+					ORDER by luokka";
+		$res = pupe_query($query);
+
+		if (mysql_num_rows($res) == 0) {
+			echo t("ABC-parametrit puuttuu")."</br>";
+			exit;
+		}
+
+		$ryhmanimet   					= array();
+		$ryhmaprossat					= array();
+		$kiertonopeus_tavoite 			= array();
+		$palvelutaso_tavoite 			= array();
+		$varmuusvarasto_pv   			= array();
+		$toimittajan_toimitusaika_pv 	= array();
+
+		while ($row = mysql_fetch_array($res)) {
+			$ryhmanimet[] 					= $row["luokka"];
+			$ryhmaprossat[] 				= $row["osuusprosentti"];
+			$kiertonopeus_tavoite[] 		= $row["kiertonopeus_tavoite"];
+			$palvelutaso_tavoite[] 			= $row["palvelutaso_tavoite"];
+			$varmuusvarasto_pv[]   			= $row["varmuusvarasto_pv"];
+			$toimittajan_toimitusaika_pv[] 	= $row["toimittajan_toimitusaika_pv"];
+		}
+
+		return array($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv);
+	}
+}
+
+
+// Tehd‰‰n asiakkaan tunnuksesta myyntitili-varastopaikka
+if (!function_exists('myyntitili_varastopaikka')) {
+	function myyntitili_varastopaikka($tunnus) {
+
+		// Left paddataan nollilla 15 merkki‰ pitk‰ksi
+		$asiakkaan_tunnus = str_pad($tunnus, 15, 0, STR_PAD_LEFT);
+
+		// Splitataan kolmeen, 5 merkki‰ pitk‰‰n, osaan
+		$hyllypaikka = str_split($asiakkaan_tunnus, 5);
+
+		// Palautetaan hyllyalue, hyllynro, hyllyvali, hyllytaso
+		return array("!!M", $hyllypaikka[0], $hyllypaikka[1], $hyllypaikka[2]);
+	}
+}

@@ -1783,6 +1783,7 @@
 								'nimitysleveys'   		    => '',
 								'tyyppi'					=> '',
 								'useita'					=> '',
+								'yhteensamaara'				=> 0,
 								);
 
 								if ($laskurow["tila"] == "G") {

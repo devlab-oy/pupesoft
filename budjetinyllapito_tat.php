@@ -22,7 +22,6 @@
 	$tuoteryhmittain = isset($tuoteryhmittain) ? trim($tuoteryhmittain) : "";
 	$lisa = isset($lisa) ? trim($lisa) : "";
 	$lisa_parametri = isset($lisa_parametri) ? trim($lisa_parametri) : "";
-	$lisa_dynaaminen = isset($lisa_dynaaminen) ? $lisa_dynaaminen : array("tuote" => "", "asiakas" => "");
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
 	$asiakasid = isset($asiakasid) ? (int) $asiakasid : 0;
 	$toimittajaid = isset($toimittajaid) ? (int) $toimittajaid : 0;
@@ -1061,7 +1060,6 @@
 			$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys, tuote.try, tuote.osasto $selectlisa
 						FROM tuote
 						{$lisa_parametri}
-						{$lisa_dynaaminen["tuote"]}
 						{$joinlisa}
 						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 						AND tuote.status != 'P'
@@ -1089,7 +1087,6 @@
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
 						FROM asiakas
-						{$lisa_dynaaminen["asiakas"]}
 						WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 						$lisa";
 		}

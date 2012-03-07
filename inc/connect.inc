@@ -37,4 +37,4 @@ else {
 
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
 
-?>
+mysql_query("set group_concat_max_len=1000000");

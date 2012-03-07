@@ -665,6 +665,13 @@
 					$gluku++;
 				}
 
+				if ($naytamaksupvm != "") {
+					if ($group!="") $group .= ",lasku.mapvm";
+					else $group  .= "lasku.mapvm";
+					$select .= "lasku.mapvm maksupvm, ";
+					$gluku++;
+				}
+
 				if (is_array($mul_oasiakasosasto) and count($mul_oasiakasosasto) > 0) {
 					$sel_oasiakasosasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_oasiakasosasto))."')";
 					$lisa .= " and asiakas.osasto in {$sel_oasiakasosasto} ";
@@ -764,7 +771,7 @@
 				}
 
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
-					$lisa .= " and lasku.laatija = 'Magento' ";
+					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
 
 				$vvaa = $vva - '1';
@@ -1249,6 +1256,11 @@
 
 							// echotaan kenttien sisältö
 							for ($i=0; $i < mysql_num_fields($result); $i++) {
+
+								// jos kyseessa on mapvm
+								if (mysql_field_name($result, $i) == "maksupvm") {
+									$row[$i] = tv1dateconv($row[$i]);
+								}
 
 								// jos kyseessa on tuote
 								if (mysql_field_name($result, $i) == "tuoteno") {
@@ -2173,7 +2185,7 @@
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
-			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2493,11 +2505,30 @@
 
 			echo "</select></td></tr>";
 
+			$vsel[$verkkokaupat] = "SELECTED";
+
 			echo "<tr>
-				<th>",t("Näytä vain verkkokauppatilauksia"),"</th>
-				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
+				<th>",t("Ohjelmamoduli"),"</th>
+				<td>
+				<select name='verkkokaupat'>
+				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
+				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
+				<option value='EXTRANET'		{$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
+				<option value='MAGENTO'			{$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
+				<option value='VARAOSASELAIN'	{$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
+				<option value='VERKKOKAUPPA'	{$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
+				<option value='EDIFACT911'		{$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
+				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+				</select>
+				</td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä laskun maksupäivämäärä"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "</table><br>";

@@ -2737,6 +2737,12 @@
 			if (isset($ohjelmamoduli) and $ohjelmamoduli != "") {
 				$postquery .= ",ohjelma_moduli = '$ohjelmamoduli'";
 			}
+			elseif (substr($toim, 0, 8) == "EXTRANET") {
+				$postquery .= ",ohjelma_moduli = 'EXTRANET'";
+			}
+			else {
+				$postquery .= ",ohjelma_moduli = 'PUPESOFT'";
+			}
 
 			$query2 = "INSERT into ";
 			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";

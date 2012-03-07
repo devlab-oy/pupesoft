@@ -209,6 +209,10 @@
 
 	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
 
+	if (isset($nayta_valinnat) and count($nayta_valinnat) == 1) {
+		echo "<br /><font class='error'>",t("VIRHE: Et valinnut mitään rajausta"),"!</font><br /><br />";
+	}
+
 	if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked', 'aloitettu' => ' checked', 'keratty' => ' checked');
 	if (!isset($volyymisuure)) $volyymisuure = "rivit";
 	if (!isset($ajankohta)) $ajankohta = "present";
@@ -224,6 +228,27 @@
 	if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu', 'keratty');
+
+	$wherelisa = "";
+
+	foreach ($nayta_valinnat as $mita_naytetaan) {
+
+		switch ($mita_naytetaan) {
+			case 'aloittamatta':
+				$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+				break;
+			case 'aloitettu':
+				$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+				break;
+			case 'keratty':
+				$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+				break;
+		}
+
+	}
+
+	$wherelisa = "AND ({$wherelisa})";
 
 	$query = "	SELECT keraysvyohyke.nimitys AS 'ker_nimitys',
 				GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
@@ -241,7 +266,7 @@
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
+				{$wherelisa}
 				GROUP BY keraysvyohyke.nimitys
 				ORDER BY 1";
 	$result = pupe_query($query);
@@ -251,10 +276,16 @@
 	echo "<tr>";
 	echo "<th>",t("Valitse"),"</td>";
 	echo "<td style='vertical-align:middle;'>";
-	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloittamatta' /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
-	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloitettu' /> ",t("Aloitettu"),"&nbsp;&nbsp;";
-	echo "<input type='checkbox' name='nayta_valinnat[]' value='keratty' /> ",t("Kerätty"),"&nbsp;&nbsp;";
+
+	$chk = array_fill_keys($nayta_valinnat, " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
+
+	echo "<form method='post' action=''>";
+	echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";
+	echo "<input type='checkbox' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ",t("Kerätty"),"&nbsp;&nbsp;";
 	echo "<input type='submit' value='",t("Näytä"),"' />";
+	echo "</form>";
 	echo "</td>";
 	echo "<td class='back' colspan='5'></td>";
 	echo "</tr>";

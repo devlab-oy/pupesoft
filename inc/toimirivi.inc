@@ -460,6 +460,24 @@
 			$jatko = 0;
 		}
 	}
+	
+	if (mysql_field_name($result, $i) == "verovelvollinen") {
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "selected";
+		
+		$query = "SELECT nimi FROM maat WHERE koodi='{$yhtiorow["maa"]}' limit 1";
+		$maare = pupe_query($query);
+		$maaro = mysql_fetch_assoc($maare);
+		
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja ei ole verovelvollinen maassa").": $maaro[nimi]</option>";
+		$ulos .= "<option value='$yhtiorow[maa]' $sel>".t("Toimittaja on verovelvollinen maassa").": $maaro[nimi]</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "maksukielto") {
 

@@ -206,6 +206,7 @@ $aika_debug_array = array();
 $quer_debug_array = array();
 
 require("salasanat.php");
+
 // haetaan jotain tarpeellisia funktioita mukaan..
 if (@include_once("inc/functions.inc"));
 elseif (@include_once("functions.inc"));
@@ -236,8 +237,15 @@ $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pup
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
 //Initioidaan pari muuttujaa
-if(!isset($login))		$login = "";
-if(!isset($extranet)) 	$extranet = "";
+if (!isset($login))		$login = "";
+if (!isset($extranet)) 	$extranet = "";
+
+// Siivotaan dirikkapolut
+if (isset($verkkolaskut_in) and substr($verkkolaskut_in, -1) != "/") $verkkolaskut_in = $verkkolaskut_in."/";
+if (isset($verkkolaskut_ok) and substr($verkkolaskut_ok, -1) != "/") $verkkolaskut_ok = $verkkolaskut_ok."/";
+if (isset($verkkolaskut_orig) and substr($verkkolaskut_orig, -1) != "/") $verkkolaskut_orig = $verkkolaskut_orig."/";
+if (isset($verkkolaskut_error) and substr($verkkolaskut_error, -1) != "/") $verkkolaskut_error = $verkkolaskut_error."/";
+if (isset($verkkolaskut_reject) and substr($verkkolaskut_reject, -1) != "/") $verkkolaskut_reject = $verkkolaskut_reject."/";
 
 // jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
@@ -465,7 +473,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 			elseif (isset($datain_filenimi) and $datain_filenimi != '') {
 				header("Content-Length: ".filesize("$pupe_root_polku/datain/".basename($datain_filenimi)));
-			}			
+			}
 			elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
 				header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
 			}

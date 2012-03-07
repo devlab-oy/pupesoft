@@ -1841,6 +1841,13 @@ while ($tietue = fgets($fd)) {
 					 		}
 						}
 
+						if ($laskurow['tilaustyyppi'] == 2) {
+							$query = "UPDATE lasku SET ohjausmerkki = 'VARASTOTÄYDENNYS' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
+							$upd_tilaustyyppi_res = pupe_query($query);
+
+							$pvmlisa = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+						}
+
 						foreach ($chk_arr as $vrst) {
 
 							$query = "	SELECT * 

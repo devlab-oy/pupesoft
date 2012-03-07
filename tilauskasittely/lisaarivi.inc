@@ -248,6 +248,7 @@
 	$var					 = strtoupper($var); 	// varri isoks
 	$netto					 = strtoupper($netto); 	// netto isoks
 	$myyntierahuomatus 		 = FALSE;
+	$ostoerahuomatus 		 = FALSE;
 	$myy_erikoistoim_ok		 = TRUE;
 	$org_kpl				 = "";
 	$suoratoimitus_splittaus = FALSE;
@@ -272,6 +273,7 @@
 	$lisatyt_rivit2 = array();
 	$korkieltokommi = array();
 	$myyntierahuom	= array();
+	$ostoerahuom	= array();
 
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
@@ -330,6 +332,52 @@
 			$kpl = (float) $test;
 		}
 		$myyntierahuomatus = TRUE;
+	}
+
+	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
+		$org_kpl = $kpl;
+
+		// haetaan tuotteen toimittajan takaata pakkauskoko tai jotain
+		// Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
+		$query = "	SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv, ta1.selite pakkaus2, ta2.selite pakkaus3
+					FROM tuote
+					JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
+					LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
+					LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
+					WHERE tuote.yhtio='{$kukarow["yhtio"]}'
+					AND tuote.tuoteno = '{$trow["tuoteno"]}'";
+		$ttresult = pupe_query($query);
+		$ttrow = mysql_fetch_assoc($ttresult);
+
+		if ($kpl <= $ttrow['osto_era']) {
+			$kpl = $ttrow['osto_era'];
+		}
+		else {
+
+			$jaannos = 0;
+			$pakkauskoko = 0;
+
+			$ttrow["pakkaus3"] !="" ? $pakkausarray[] = $ttrow["pakkaus3"] : "";
+			$ttrow["pakkaus2"] !="" ? $pakkausarray[] = $ttrow["pakkaus2"] : "";
+			$pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta löydy.
+
+			foreach ($pakkausarray as $pak) {
+				(float) $jaannos = fmod($kpl,$pak);
+
+				if ($jaannos == 0 or $kpl > $pak) {
+					$pakkauskoko = $pak;
+					break;
+				}
+				if ($kpl > $pak) $pakkauskoko = $pak;
+			}
+
+			if ($jaannos != 0) {
+				// pyöristetään pakkauskokokoon
+				$kpl = ceil($kpl / $pakkauskoko) * $pakkauskoko;
+			}
+
+		}
+		$ostoerahuomatus = TRUE;
 	}
 
 	$toimittamatta = $kpl; //Näin paljon ollaan toimittamassa
@@ -1235,8 +1283,8 @@
 									}
 
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM! Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
-										$kommentti .= " ".t("HUOM! Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+									if (strpos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
+										$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 									}
 
 									// oletetaan, että meillä on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
@@ -1247,8 +1295,8 @@
 
 								if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM!")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
-										$kommentti .= " ".t("HUOM!")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
+									if (strpos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
+										$kommentti .= " ".t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
 									}
 								}
 
@@ -1476,6 +1524,10 @@
 
 								if ($myyntierahuomatus) {
 									$myyntierahuom[] = $lisatty_tun;
+								}
+
+								if ($ostoerahuomatus) {
+									$ostoerahuom[] = $lisatty_tun;
 								}
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI") {
@@ -1845,31 +1897,19 @@
 
 			// Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
-				$lis_hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($laskurow, $trow, $kpl);
 			}
 			elseif ($laskurow['tila'] == 'O') {
 				$lis_hinta = $hinta;
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+					$lis_ale_kaikki['ale'.$alepostfix] = ${'alkupera_ale'.$alepostfix};
+				}
 			}
 
 			// jos käytössä on hintakertoimet, niin muutetaan yksikkö kuntoon
 			if ($laskurow["tila"] == 'O' and $trow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
 				$lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
-			}
-
-			if ($laskurow['tila'] == 'O' and $ale1 == "") {
-				$query = "	SELECT alennus
-							FROM tuotteen_toimittajat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$trow[tuoteno]'
-							and liitostunnus = '$laskurow[liitostunnus]'
-							LIMIT 1";
-				$rarres = pupe_query($query);
-				$rarrow	 = mysql_fetch_array($rarres);
-
-				$lis_ale_kaikki['ale1'] = $rarrow["alennus"];
-			}
-			elseif ($laskurow['tila'] == 'O') {
-				$lis_ale_kaikki['ale1'] = $ale1;
 			}
 
 			if ($laskurow['tila'] != 'O') {
@@ -2249,6 +2289,8 @@
 				$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 			}
 
+
+
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
 			// lisätään puuterivi
@@ -2375,6 +2417,9 @@
 
 			if ($myyntierahuomatus) {
 				$myyntierahuom[] = $lisatty_tun;
+			}
+			if ($ostoerahuomatus) {
+				$ostoerahuom[] = $lisatty_tun;
 			}
 
 			if ($i == 0) {

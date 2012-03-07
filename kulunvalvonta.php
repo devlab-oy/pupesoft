@@ -650,7 +650,7 @@
 		$tee = "OHITAKAIKKI";
 	}
 	elseif ((mysql_num_rows($result) != 1 and $toim != "VIENTI" and $toim != "KULUNVALVONTA" and $toim != "YHTEENVETO") or (mysql_num_rows($result) != 1 and $toim == "KULUNVALVONTA" and isset($viivakoodi))) {
-		echo "<br><font class='message'>".t("Virhe! Käyttäjää ei löytynyt!")."</font>";
+		echo "<br><font class='message'>".t("VIRHE: Käyttäjää ei löytynyt!")."</font>";
 		echo "<meta http-equiv='refresh' content='2;URL=kulunvalvonta.php?toim=$toim'><br>";
 		exit;
 		$tee = "";

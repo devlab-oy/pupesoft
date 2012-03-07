@@ -784,10 +784,12 @@ if ($tee == "tilaa") {
 		else {
 			// tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
 			$silent = "JOO";
+			$tilausvalmiskutsuja = "VERKKOKAUPPA";
+
 			require("tilaus-valmis.inc");
 		}
 
-		$ulos = "<font class='head'>Kiitos tilauksesta</font><br><br><font class='message'>Tilauksesi numero on $kukarow[kesken]</font><br>";
+		$ulos = "<font class='head'>".t("Kiitos tilauksesta")."</font><br><br><font class='message'>".t("Tilauksesi numero on").": $kukarow[kesken]</font><br>";
 
 
 		// tilaus ei en‰‰ kesken...
@@ -1142,7 +1144,7 @@ if ($tee == "selaa") {
 
 	if ($kukarow["kuka"] != "www" and (int) $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
-		$tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"], $tilausnumero, "");
+		$tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"], $tilausnumero, "", "", "", "VERKKOKAUPPA");
 		$kukarow["kesken"] = $tilausnumero;
 	}
 

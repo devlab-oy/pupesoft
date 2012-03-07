@@ -177,6 +177,7 @@
 	'nimitysleveys'				=> '',
 	'tyyppi'					=> 'TILAUSVAHVISTUS',
 	'useita'					=> '',
+	'yhteensamaara'				=> 0,
 	);
 
 	// Aloitellaan lähetteen teko

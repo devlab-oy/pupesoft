@@ -5,19 +5,19 @@
 		require ("inc/parametrit.inc");
 	}
 	else {
-		error_reporting(E_ALL);
-		ini_set("display_errors", 1);
+	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
 
-		require ("inc/connect.inc");
-		require ("inc/functions.inc");
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
-		if ($argv[1] == '') {
-			echo "Yhtiötä ei ole annettu, ei voida toimia\n";
-			die;
-		}
-		else {
-			$kukarow["yhtio"] = $argv[1];
-		}
+	if ($argv[1] == '') {
+		echo "Yhtiötä ei ole annettu, ei voida toimia\n";
+		die;
+	}
+	else {
+		$kukarow["yhtio"] = $argv[1];
+	}
 	}
 
 	// määritellään polut
@@ -124,7 +124,7 @@
 					$p=1; $c=1;$d=1;
 					// haetaan tuotteet riveittäin
 					foreach ($xml->Package as $paketti) {
-						
+
 						if ($tavarantoimittajanumero == "123085" and $paketti->PkgNumber == 0) {
 							foreach ($paketti->Package as $paketti) {
 								foreach ($paketti->PkgItem as $xxx) {
@@ -157,21 +157,21 @@
 						}
 
 						if ($tavarantoimittajanumero != "123085") {
-							foreach ($paketti->PkgItem as $xxx) {
-								$tuote = (string) $xxx->ProductId->ProductNumber;
-								$tuote = utf8_decode($tuote);
+						foreach ($paketti->PkgItem as $xxx) {
+							$tuote = (string) $xxx->ProductId->ProductNumber;
+							$tuote = utf8_decode($tuote);
 								$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
 								$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
-								$lisays[$p][$c]['ProductId'] = $tuote;
+							$lisays[$p][$c]['ProductId'] = $tuote;
 								$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
-								$c++;
-							}
+							$c++;
+						}
 						}
 						$p++;
 						$c=1;
 
 					}
-					
+
 					
 					$p=1; $c=1;
 					// tuotteiden kappalemäärät
@@ -195,11 +195,11 @@
 							$lisays[$p][$c]['DeliveredQuantity'] = "";
 						}
 						if ($tavarantoimittajanumero != "123085") {
-							foreach ($paketti2->PkgItem as $yyy) {
-								$kpl = (float) $yyy->DeliveredQuantity->Quantity;
-								$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
-								$c++;
-							}
+						foreach ($paketti2->PkgItem as $yyy) {
+							$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
+							$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
+							$c++;
+						}
 						}
 						$p++;
 						$c=1;
@@ -231,14 +231,14 @@
 						elseif (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
 							$paketti3 = $paketti3->Package;
 						}
-						
+
 						if ($tavarantoimittajanumero != "123085" and $tavarantoimittajanumero != "123342"){
-							foreach ($paketti3->PkgItem as $zzz) {
+						foreach ($paketti3->PkgItem as $zzz) {
 								$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
-								$positio = utf8_decode($positio);
+							$positio = utf8_decode($positio);
 								$lisays[$p][$c]['PositionNumber'] = (int) $positio;
-								$c++;
-							}
+							$c++;
+						}
 						}
 						$p++;
 						$c=1;
@@ -265,13 +265,13 @@
 						if ($tavarantoimittajanumero == "123312" and trim($tuotteelta_tilausno->PkgNumber) == 1) {
 							$lisays[$p][$c]['BuyerOrderNumber'] = "";
 						}
-						
+
 						if ($tavarantoimittajanumero != "123085") {
-							foreach ($tuotteelta_tilausno->PkgItem as $www) {
-								$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
-								$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
-								$c++;
-							}
+						foreach ($tuotteelta_tilausno->PkgItem as $www) {
+							$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
+							$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
+							$c++;
+						}
 						}
 						$p++;
 						$c=1;
@@ -288,7 +288,7 @@
 								$laatikkoind = utf8_decode($laatikkoind);
 								// SSCC-koodi on periaatteessa sama mutta lyhentämättömänä tulevaisuutta varten keikalle
 								$sscc = $laatikkoind;
-								
+
 								if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108") and strlen($laatikkoind) >10) {
 									$sscc = $laatikkoind;
 									$laatikkoind = substr($laatikkoind,10);
@@ -307,10 +307,10 @@
 									$sscc = $laatikkoind;
 								}
 								if ($tavarantoimittajanumero !="123085") {
-									$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
+								$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
 									$lisays[$p][$c]['SSCC'] = $sscc;
-								}
 							}
+						}
 						}
 						elseif ($tavarantoimittajanumero == "123312" and trim($laatikosta->PkgNumber) == 1) {
 							$lisays[$p][$c]['PkgIdentNumber'] = "TOTAL PACKS";
@@ -347,7 +347,7 @@
 										AND toimittajanumero = '$tavarantoimittajanumero'
 										AND asn_numero = '$asn_numero'";
 						$checkinsertresult = pupe_query($tarkinsert);
-						
+
 						if (mysql_num_rows($checkinsertresult) > 0) {
 							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero löytyy tietokannasta jo sanomat, ei lisätä uudestaan sanomia\n";
 							rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
@@ -389,7 +389,7 @@
 		 													tilausrivinpositio	= '$value[PositionNumber]',
 		 													laatija 			= '$kukarow[kuka]',
 		 													luontiaika 			= now()";
-		 								$result = pupe_query($sqlinsert);	
+		 								$result = pupe_query($sqlinsert);
 			
 		 								$eka_insert[] = mysql_insert_id(); // Otetaan insertin ensimmäinen tunnus talteen. tätä käytetään liitetiedostoissa liitostunnuksena.
 									}

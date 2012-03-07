@@ -139,13 +139,28 @@
 				$abc_lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
 			}
 		}
-
+		// n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
+		$asiakas_join_array = array('AK','AM','AP','AR');
+		$tuote_join_array = array('TK','TM','TP','TR','TV');
+		
+		if (in_array($abcchar,$asiakas_join_array)) {
+			$analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
+		}
+		elseif (in_array($abcchar,$tuote_join_array)) {
+			$analyysin_join = " JOIN tuote USING (yhtio, tuoteno) ";
+		}
+		else {
+			$analyysin_join = "";
+		}
+		
+		list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
+				
 		//kauden yhteismyynnit ja katteet
 		$query = "	SELECT
 					sum(abc_aputaulu.summa) yhtmyynti,
 					sum(abc_aputaulu.kate) yhtkate
 					FROM abc_aputaulu
-					JOIN tuote USING (yhtio, tuoteno)
+					{$analyysin_join}
 					WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
 					and abc_aputaulu.tyyppi = '$abcchar'
 					and abc_aputaulu.luokka = '$luokka'
@@ -165,7 +180,7 @@
 					abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
 					abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
 					FROM abc_aputaulu
-					JOIN tuote USING (yhtio, tuoteno)
+					{$analyysin_join}
 					WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
 					and abc_aputaulu.tyyppi = '$abcchar'
 					and abc_aputaulu.luokka = '$luokka'
@@ -305,7 +320,7 @@
 				}
 
 				echo "<tr>";
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>".$ryhmanimet[$luokka]."</a></td>";
 
 				if (!$asiakasanalyysi) echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				else echo "<td valign='top'><a href='../crm/asiakasmemo.php?asiakasid=$row[asiakastunnus]'>$row[tuoteno]</a></td>";

@@ -1,31 +1,42 @@
 <?php
+
 //Kun tullaan t‰nne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 //ja tarvitaan myˆs $tuoteno
-$query = "	SELECT tuote.*, concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-			FROM tuote
-			JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuotepaikat.oletus = 'X')
-			WHERE tuote.yhtio = '$kukarow[yhtio]'
-			AND tuote.tuoteno = '$tuoteno'";
+
+if ($malli == 'Zebra_hylly') {
+	$query = "	SELECT tuote.*, concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+				FROM tuote
+				JOIN tuotepaikat on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuotepaikat.oletus = 'X')
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				AND tuote.tuoteno = '$tuoteno'";
+}
+else {
+	$query = "	SELECT tuote.*
+				FROM tuote
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				AND tuote.tuoteno = '$tuoteno'";
+}
 
 $tarrares = pupe_query($query);
-//tuote pit‰‰ lˆyty‰
 
 // haetaan yhtiˆtiedot Pupesta
-$yhtiorow = hae_yhtion_parametrit($kukarow[yhtio]);
+$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
 if (mysql_num_rows($tarrares) == 1) {
 	$tarrarow = mysql_fetch_array($tarrares);
-	//jos tullaan yksinkertaisesta n‰kym‰st‰ tulostetaan tuoteno eankoodin sijaan
-	if ($toim== 'YKS') {
+
+	// jos tullaan yksinkertaisesta n‰kym‰st‰ tulostetaan tuoteno eankoodin sijaan
+	if ($toim == 'YKS') {
 		$tarrarow['eankoodi'] = $tarrarow['tuoteno'];
 	}
-	//jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
+
+	// jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
 	if (($tarrarow['eankoodi'] != 0 or $tarrarow['eankoodi'] != "0") and $tarrarow['eankoodi'] != '') {
 		$eankoodi = trim($tarrarow['eankoodi']);
 		$nimitys = $tarrarow['nimitys'];
 		$nimitys2 = '';
 
-		//jos nimitys on pidempi kuin 25 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
+		// jos nimitys on pidempi kuin 25 merkki‰ niin se ei mahdu yhdelle riville vaan pit‰‰ jakaa kahtia
 		if (strlen($nimitys) > 25 and $malli == 'Zebra') {
 			if (strpos($nimitys, " ")) {
 				$nimipalat = explode(' ',$nimitys);
@@ -95,16 +106,16 @@ if (mysql_num_rows($tarrares) == 1) {
 
 			$sivu = escapeshellarg($sivu);
 		}
-		// t‰m‰ haara on Zebra_hyllytarra, joka liimataan hyllyyn
 		elseif ($malli == 'Zebra_hylly') {
+			// t‰m‰ haara on Zebra_hyllytarra, joka liimataan hyllyyn
 			// Toimii ja suunniteltu mallille GX20t
 			// Tarrankoko 57 mm x 51 mm
-			
+
 			// Ohjelmointimanuaali lˆytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
 			// "Programmin guide"
 
-
 			$pituus_nimitys = 40; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan nimitys.
+
 			if (strlen($nimitys) > $pituus_nimitys ) {
 				if (strpos($nimitys, " ")) {
 					$nimipalat = explode(' ',$nimitys);
@@ -129,6 +140,7 @@ if (mysql_num_rows($tarrares) == 1) {
 			}
 
 			$pituus_tuoteno = 25; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan tuoteno.
+
 			if (strlen($tuoteno) > $pituus_tuoteno ) {
 				if (strpos($tuoteno, " ")) {
 					$nimipalat = explode(' ',$tuoteno);
@@ -163,18 +175,18 @@ if (mysql_num_rows($tarrares) == 1) {
 
 			$sivu .= "^MD10";  											// TUMMUUS, , vakio on 8 mutta se ei riit‰ viivakoodille.
 			$sivu .= "^PQ$tkpl";										// Tulostettavien lukum‰‰r‰
-//			$sivu .= "^FO200,200\n^BEN,100,Y,N^FD$eankoodi\n^FS";		// viivakoodi EAN-13
+			//$sivu .= "^FO200,200\n^BEN,100,Y,N^FD$eankoodi\n^FS";		// viivakoodi EAN-13
 			$sivu .= "^BY1,3,100\n";									// kutistaa viivakoodia. Vakioasetus olisi ^BY2,2
 			$sivu .= "^FO150,200\n^BCN,100,Y,N,N\n^FD$eankoodi\n^FS";		// Code 128
-			
+
 			$sivu .= "^FO100,320\n^ASN,20,12\n^FDVarasto: ".$tarrarow['tuotepaikka']."\n^FS"; // varastopaikka, oletus
 			$sivu .= "^FO200,360\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";	// Tulostetaan Firma
 
 			$sivu .= "\n^XZ";	// pakollinen lopetus
 
 		}
-		// t‰m‰ haara on Zebra_tuote, joka liimataan tuotteeseen
 		else {
+			// t‰m‰ haara on Zebra_tuote, joka liimataan tuotteeseen
 			// Toimii ja suunniteltu mallille GX420t
 			// Tarrakoko 76 mm x 25 mm
 
@@ -202,7 +214,7 @@ if (mysql_num_rows($tarrares) == 1) {
 				$nimitys = substr($nimitys,0,$pituus);
 				$nimitys2 = substr($nimitys2,0,$pituus);
 			}
-			
+
 
 			$sivu  = "^XA\n";		// vakio alku, pakollinen
 			$sivu .= "^LH50\n";	// offset vasemmasta
@@ -222,19 +234,10 @@ if (mysql_num_rows($tarrares) == 1) {
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
 		$filenimi = "/tmp/Zebra-tarrat-".md5(uniqid(mt_rand(), true)).".txt";
-		$fh = fopen($filenimi, "w+");
-
-		fwrite($fh,$sivu);
-
-		fclose($fh);
+		$fh = file_put_contents($filenimi, $sivu);
 
 		$line = exec("$komento $filenimi");
-
-		//$line = exec(" echo \"$sivu\" | $komento");
-		//echo "<pre>$sivu</pre><br>";
-		
 		system("rm -f $filenimi");
-
 	}
 	else {
 		echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ole viivakoodia j‰rjestelm‰ss‰ joten tarrojen tulostus taitaa olla turhaa")."!!!<br></font>";

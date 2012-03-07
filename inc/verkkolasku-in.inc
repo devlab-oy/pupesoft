@@ -750,7 +750,7 @@
 					$tpk = date("m");
 					$tpv = date("Y");
 
-					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
@@ -766,14 +766,14 @@
 					$tpp = $tillop[2];
 					$tpk = $tillop[1];
 					$tpv = $tillop[0];
-					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				if ($syotettypvm < $ostoresktilalk) {
 					$tpp = $tilalk[2];
 					$tpk = $tilalk[1];
 					$tpv = $tilalk[0];
-					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				// Oletus-alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
@@ -820,7 +820,7 @@
 						$erv = (int) substr($newer, 0, 4);
 					}
 
-					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>\n" . $komm;
 				}
 
 				if (!checkdate($erk, $erp, $erv)) {
@@ -888,7 +888,7 @@
 					$duplikaattilasku_check_res = pupe_query($query);
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>".$komm;
+						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
 					}
 				}
 
@@ -1786,7 +1786,7 @@
 
 				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";
+				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>\n";
 				return 0;
 			}
 			else {

@@ -33,7 +33,7 @@ if ($php_cli) {
 	}
 
 	$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-	$yhtiores = mysql_query($query) or pupe_error($query);
+	$yhtiores = pupe_query($query);
 
 	if (mysql_num_rows($yhtiores) == 1) {
 		$yhtiorow = mysql_fetch_array($yhtiores);
@@ -100,32 +100,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 	// Haetaan abc-parametrit
-	$query = "	SELECT *
-				FROM abc_parametrit
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi 	= '$abcchar'
-				ORDER by luokka";
-	$res = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($res) > 0) {
-		$ryhmanimet   	= array();
-		$ryhmaprossat	= array();
-		$sisainen_taso	= "";
-
-		while ($row = mysql_fetch_array($res)) {
-			$ryhmanimet[] 	= $row["luokka"];
-			$ryhmaprossat[] = $row["osuusprosentti"];
-
-			// Otetaan eka kulutaso
-			if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
-				$sisainen_taso = $row["kulujen_taso"];
-			}
-		}
-	}
-	else {
-		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")." ($kukarow[yhtio])\n";
-		exit;
-	}
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcchar);
 
 	$i_luokka = count($ryhmaprossat)-1;
 
@@ -133,7 +108,7 @@ if ($tee == 'YHTEENVETO') {
 	$query = "	DELETE from abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	// katotaan halutaanko saldottomia mukaan.. default on että EI haluta
 	if ($saldottomatmukaan == "") {
@@ -160,7 +135,7 @@ if ($tee == 'YHTEENVETO') {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and ($riviwhere)
 				GROUP BY 1";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	//kokokauden kokonaismyynti
 	$kaudenmyyriviyht 	= 0;
@@ -181,6 +156,9 @@ if ($tee == 'YHTEENVETO') {
 		$kaudenmyyriviyht += $row["rivia"];
 	}
 
+	// tää on nyt hardcoodattu, eli miltä kirjanpidon tasolta otetaan kulut
+	$sisainen_taso = "34";
+
 	if ($kustannuksetyht == "" and $sisainen_taso != "") {
 		// etsitään kirjanpidosta mitkä on meidän kulut samalta ajanjaksolta
 		$query  = "	SELECT sum(summa) summa
@@ -190,7 +168,7 @@ if ($tee == 'YHTEENVETO') {
 					tiliointi.tapvm >= '$vva-$kka-$ppa' and
 					tiliointi.tapvm <= '$vvl-$kkl-$ppl' and
 					tiliointi.korjattu = ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$kprow  = mysql_fetch_array($result);
 		$kustannuksetyht = $kprow["summa"];
 	}
@@ -260,7 +238,7 @@ if ($tee == 'YHTEENVETO') {
 				and ($riviwhere)
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 	   			ORDER BY $abcwhat desc";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	$i				= 0;
 	$ryhmaprossa	= 0;
@@ -277,7 +255,7 @@ if ($tee == 'YHTEENVETO') {
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tuoteno = '$row[tuoteno]' and
 					laji = 'tulo'";
-		$insres = mysql_query($query) or pupe_error($query);
+		$insres = pupe_query($query);
 		$tulorow = mysql_fetch_array($insres);
 
 		// saldo nyt
@@ -285,7 +263,7 @@ if ($tee == 'YHTEENVETO') {
 					FROM tuotepaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND	tuoteno = '$row[tuoteno]'";
-		$saldores = mysql_query($query) or pupe_error($query);
+		$saldores = pupe_query($query);
 		$saldorow = mysql_fetch_array($saldores);
 
 		// katotaan onko kelvollinen tuote, elikkä luokitteluperuste pitää olla > 0
@@ -364,7 +342,7 @@ if ($tee == 'YHTEENVETO') {
 					saapumispvm			= '$row[saapumispvm]',
 					saldo				= '$saldorow[saldo]',
 					status				= '$row[status]'";
-		$insres = mysql_query($query) or pupe_error($query);
+		$insres = pupe_query($query);
 
 		// luokka vaihtuu
 		if ($ryhmaprossa >= $ryhmaprossat[$i]) {
@@ -401,7 +379,7 @@ if ($tee == 'YHTEENVETO') {
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				HAVING saldo > 0 and luokka is null";
-	$tuores = mysql_query($query) or pupe_error($query);
+	$tuores = pupe_query($query);
 
 	// ja käydään kaikki ne tuotteet läpi ja lisätään abc_aputauluun
 	while ($row = mysql_fetch_array($tuores)) {
@@ -412,7 +390,7 @@ if ($tee == 'YHTEENVETO') {
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tuoteno = '$row[tuoteno]' and
 					laji = 'tulo'";
-		$insres = mysql_query($query) or pupe_error($query);
+		$insres = pupe_query($query);
 		$tulorow = mysql_fetch_array($insres);
 
 		$query = "	INSERT INTO abc_aputaulu
@@ -434,7 +412,7 @@ if ($tee == 'YHTEENVETO') {
 					saapumispvm			= '$row[saapumispvm]',
 					saldo				= '$row[saldo]',
 					status				= '$row[status]'";
-		$insres = mysql_query($query) or pupe_error($query);
+		$insres = pupe_query($query);
 
 	}
 
@@ -445,7 +423,7 @@ if ($tee == 'YHTEENVETO') {
 				kustannus_yht	= kustannus + kustannus_osto
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
-	$ires = mysql_query($query) or pupe_error($query);
+	$ires = pupe_query($query);
 
 	// päivitetään ensiks kaikki osastot, tuoteryhmät ja tuotemerkit I-luokkaan ja käydään sitten päivittämässä niitä oikeisiin luokkiin
 	$query = "	UPDATE abc_aputaulu SET
@@ -454,14 +432,14 @@ if ($tee == 'YHTEENVETO') {
 				luokka_tuotemerkki = '$i_luokka'
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
-	$ires = mysql_query($query) or pupe_error($query);
+	$ires = pupe_query($query);
 
 	// haetaan kaikki osastot
 	$query = "	SELECT distinct osasto FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'
 				order by osasto";
-	$kaikres = mysql_query($query) or pupe_error($query);
+	$kaikres = pupe_query($query);
 
 	// tehdään osastokohtaiset luokat
 	while ($arow = mysql_fetch_array($kaikres)) {
@@ -477,7 +455,7 @@ if ($tee == 'YHTEENVETO') {
 					and tyyppi = '$abcchar'
 					and osasto = '$arow[osasto]'
 					and $abcwhat > 0";
-		$resi 	= mysql_query($query) or pupe_error($query);
+		$resi 	= pupe_query($query);
 		$yhtrow = mysql_fetch_array($resi);
 
 		//rakennetaan aliluokat
@@ -493,7 +471,7 @@ if ($tee == 'YHTEENVETO') {
 					and osasto = '$arow[osasto]'
 					and $abcwhat > 0
 					ORDER BY $abcwhat desc";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$i			 = 0;
 		$ryhmaprossa = 0;
@@ -512,7 +490,7 @@ if ($tee == 'YHTEENVETO') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = '$abcchar'
 						and tunnus  = '$row[tunnus]'";
-			$insres = mysql_query($query) or pupe_error($query);
+			$insres = pupe_query($query);
 
 			//luokka vaihtuu
 			if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
@@ -533,7 +511,7 @@ if ($tee == 'YHTEENVETO') {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'
 				order by try";
-	$kaikres = mysql_query($query) or pupe_error($query);
+	$kaikres = pupe_query($query);
 
 	// tehdään try kohtaiset luokat
 	while ($arow = mysql_fetch_array($kaikres)) {
@@ -549,7 +527,7 @@ if ($tee == 'YHTEENVETO') {
 					and tyyppi = '$abcchar'
 					and try = '$arow[try]'
 					and $abcwhat > 0";
-		$resi 	= mysql_query($query) or pupe_error($query);
+		$resi 	= pupe_query($query);
 		$yhtrow = mysql_fetch_array($resi);
 
 		//rakennetaan aliluokat
@@ -565,7 +543,7 @@ if ($tee == 'YHTEENVETO') {
 					and try = '$arow[try]'
 					and $abcwhat > 0
 					ORDER BY $abcwhat desc";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$i			 = 0;
 		$ryhmaprossa = 0;
@@ -584,7 +562,7 @@ if ($tee == 'YHTEENVETO') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = '$abcchar'
 						and tunnus  = '$row[tunnus]'";
-			$insres = mysql_query($query) or pupe_error($query);
+			$insres = pupe_query($query);
 
 			//luokka vaihtuu
 			if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
@@ -605,7 +583,7 @@ if ($tee == 'YHTEENVETO') {
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tyyppi = '$abcchar'
 				ORDER BY tuotemerkki";
-	$kaikres = mysql_query($query) or pupe_error($query);
+	$kaikres = pupe_query($query);
 
 	// tehdään try kohtaiset luokat
 	while ($arow = mysql_fetch_array($kaikres)) {
@@ -621,7 +599,7 @@ if ($tee == 'YHTEENVETO') {
 					and tyyppi = '$abcchar'
 					and tuotemerkki = '$arow[tuotemerkki]'
 					and $abcwhat > 0";
-		$resi 	= mysql_query($query) or pupe_error($query);
+		$resi 	= pupe_query($query);
 		$yhtrow = mysql_fetch_array($resi);
 
 		//rakennetaan aliluokat
@@ -637,7 +615,7 @@ if ($tee == 'YHTEENVETO') {
 					and tuotemerkki = '$arow[tuotemerkki]'
 					and $abcwhat > 0
 					ORDER BY $abcwhat desc";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$i			 = 0;
 		$ryhmaprossa = 0;
@@ -656,7 +634,7 @@ if ($tee == 'YHTEENVETO') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = '$abcchar'
 						and tunnus  = '$row[tunnus]'";
-			$insres = mysql_query($query) or pupe_error($query);
+			$insres = pupe_query($query);
 
 			//luokka vaihtuu
 			if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
@@ -672,8 +650,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 	$query = "OPTIMIZE table abc_aputaulu";
-	$optir = mysql_query($query) or pupe_error($query);
-
+	$optir = pupe_query($query);
 
 	if (!$php_cli) {
 		echo t("ABC-aputaulu rakennettu")."!<br><br>";
@@ -693,12 +670,13 @@ if (!$php_cli) {
 			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 			<td><input type='text' name='kka' value='$kka' size='3'></td>
 			<td><input type='text' name='vva' value='$vva' size='5'></td>
-			</tr><tr><th>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
+			</tr>";
+	echo "<tr><th>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
-	echo "<tr><th>ABC-luokkien laskentatapa</th>";
+	echo "<tr><th>".t("ABC-luokkien laskentatapa")."</th>";
 	echo "<td colspan='3'><select name='abctyyppi'>";
 	echo "<option value='kate'>".t("Katteen mukaan")."</option>";
 	echo "<option value='myynti'>".t("Myynnin mukaan")."</option>";
@@ -708,10 +686,10 @@ if (!$php_cli) {
 	echo "</select></td></tr>";
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";
-	echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella")."</th>
-			<td colspan='3'><input type='text' name='kustannuksetyht' value='$kustannuksetyht' size='15'></td></tr>";
-	echo "<tr><th colspan='1'>".t("Huomioi laskennassa myös saldottomat tuotteet")."</th>
-			<td colspan='3'><input type='checkbox' name='saldottomatmukaan' value='kylla'></td></tr>";
+	echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella")."</th>";
+	echo "<td colspan='3'><input type='text' name='kustannuksetyht' value='$kustannuksetyht' size='15'></td></tr>";
+	echo "<tr><th colspan='1'>".t("Huomioi laskennassa myös saldottomat tuotteet")."</th>";
+	echo "<td colspan='3'><input type='checkbox' name='saldottomatmukaan' value='kylla'></td></tr>";
 
 	echo "</table>";
 	echo "<br><input type='submit' value='".t("Rakenna")."'>";

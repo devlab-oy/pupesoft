@@ -14,11 +14,13 @@
 	$asiytunnus3 = (int) $asiytunnus2;
 	$asiytunnus4 = str_replace("-", "", $GLOBALS["toim_asiakkaantiedot"]["ytunnus"]);
 
+	// KAUTTALASKUTUSKIKKARE
 	$asquery = "SELECT tunnus
 				FROM asiakas
-				where yhtio = '$kukarow[yhtio]'
-				and ytunnus in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
-				and toim_ovttunnus = '".$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]."'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND laji != 'P'
+				AND ytunnus in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
+				AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'";
 	$result = mysql_query($asquery) or pupe_error($asquery);
 	$asirow = mysql_fetch_assoc($result);
 

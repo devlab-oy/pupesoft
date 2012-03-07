@@ -293,6 +293,8 @@
 			else {
 				$toslink = FALSE;
 			}
+			
+			$poimitut_laskut = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
@@ -316,6 +318,8 @@
 				echo "</tr>";
 
 				$laskuja++;
+				
+				$poimitut_laskut[] = $row['tunnus'];
 				$poimittu_summa += $row['poimittusumma_eur'];
 				$summa += $row['summa_eur'];
 			}
@@ -328,7 +332,14 @@
 			echo "</tr>";
 
 			echo "</table>";
-
+			
+			if (tarkista_oikeus("sepa.php")) {		
+				echo "<br><br><form name = 'valinta' method='post' action = 'sepa.php'>";
+				echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITAKOPIO'>";
+				echo "<input type = 'hidden' name = 'poimitut_laskut' value = '".implode(",", $poimitut_laskut)."'>";
+				echo "<input type = 'submit' value = '".t("Tee maksuaineistokopio")."'>";
+				echo "</form>";
+			}
 		}
 		else {
 			echo "<br /><font class='error'>",t("Yhtään laskua ei löytynyt"),".</font><br />";

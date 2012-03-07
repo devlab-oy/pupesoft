@@ -1615,6 +1615,7 @@
 								'nimitysleveys'   		    => '',
 								'tyyppi'					=> '',
 								'useita'					=> '',
+								'yhteensamaara'				=> 0,
 								);
 
 								if ($laskurow["tila"] == "G") {
@@ -2191,7 +2192,7 @@
 
 			if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 
-			// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+			// Summataan rivit yhteen (HUOM: unohdetaan kaikki perheet!)
 			if ($yhtiorow["valmistus_kerayslistan_jarjestys"] == "S") {
 				$select_lisa = "sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) rivitunnukset,";
 				$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
@@ -2203,7 +2204,7 @@
 
 			if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 
-			// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+			// Summataan rivit yhteen (HUOM: unohdetaan kaikki perheet!)
 			if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
 				$select_lisa = "sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) rivitunnukset,";
 				$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";

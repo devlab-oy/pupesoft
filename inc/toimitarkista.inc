@@ -57,7 +57,7 @@ if(!function_exists("toimitarkista")) {
 						require 'pankkitilinoikeellisuus.php';
 
 						if ($pankkitili == '') {
-							$virhe[$i] = t("Pankkitili '%s' on virheellinen", "", $t[$i]);
+							$virhe[$i] = t("Pankkitili %s on virheellinen", "", $t[$i]);
 						}
 						else {
 							$t[$i]=$pankkitili;

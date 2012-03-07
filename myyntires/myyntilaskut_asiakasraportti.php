@@ -127,11 +127,11 @@
 
 				$query = "	SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
 							FROM suoritus
-							WHERE yhtio='$kukarow[yhtio]'
-							and ltunnus<>0
-							and asiakas_tunnus in ($tunnukset)
-							and summa != 0
+							WHERE yhtio = '$kukarow[yhtio]'
 							and kohdpvm = '0000-00-00'
+							and ltunnus > 0
+							and asiakas_tunnus in ($tunnukset)
+							and summa  != 0
 							$salisa
 							group by 1";
 				$kaatoresult = pupe_query($query);
@@ -270,11 +270,34 @@
 				echo "<tr>
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</th>
 					<td colspan='2'></td></tr>";
-
+					
 				echo "<tr>
 					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
-
+					
+					
+				$as_tunnus = explode(",", $tunnukset);
+				
+				foreach ($as_tunnus as $astun) {
+					$query  = "	SELECT kentta01
+						        FROM kalenteri
+						        WHERE yhtio = '$kukarow[yhtio]'
+						        AND tyyppi  = 'Myyntireskontraviesti' 
+						        AND liitostunnus = '$astun'
+						        AND yhtio   = '$kukarow[yhtio]'
+								ORDER BY tunnus desc 
+								LIMIT 1";
+					$amres = pupe_query($query);
+				
+					if (mysql_num_rows($amres) > 0) {
+						$amrow = mysql_fetch_assoc($amres);
+                
+						echo "<tr>
+							<th>".t("Reskontraviesti")."</th><td colspan='2'>$amrow[kentta01]</td>
+							</tr>";
+					}
+				}
+				
 				echo "<tr><td colspan='3' class='back'><br></td></tr>";
 
 				if (!isset($vv)) $vv = date("Y");

@@ -215,7 +215,7 @@
 			$q_loppu = "$vvl-$kkl-$ppl";
 		}
 		else {
-			echo "VIRHE!";
+			echo "VIRHE:";
 			require ("inc/footer.inc");
 			exit;
 		}

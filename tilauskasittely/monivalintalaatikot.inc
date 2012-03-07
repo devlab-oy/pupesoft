@@ -82,7 +82,7 @@
 	$lisa_haku_kohde		 = "";
 	$lisa_haku_projekti		 = "";
 	$lisa_parametri			 = "";
-	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "");
+	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "", "kuka" => "");
 
 	$lisa = isset($lisa) ? trim($lisa) : "";
 	$ulisa = isset($ulisa) ? trim($ulisa) : "";
@@ -280,6 +280,7 @@
 		}
 	}
 
+	// Dynaamisen puun rajaukset1
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		$monivalintalaatikko = strip_tags($monivalintalaatikko);
 
@@ -304,7 +305,16 @@
 					$dynaamiset = substr($dynaamiset, 0, -1);
 
 					if (trim($dynaamiset) != '') {
-						$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus order by node.tunnus) tunnukset
+
+						if ($param == "tuote" or $param == "kuka") {
+							$liitoksetlisa = ", GROUP_CONCAT(DISTINCT concat('\'',puun_alkio.liitos,'\'')) liitokset ";
+						}
+						elseif ($param == "asiakas") {
+							$liitoksetlisa = ", GROUP_CONCAT(DISTINCT puun_alkio.liitos) liitokset ";
+						}
+
+						$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
+									$liitoksetlisa
 									FROM dynaaminen_puu AS node
 									JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
 									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
@@ -318,8 +328,9 @@
 						if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
 							// Nollataan joinit tässä vaiheessa näin, koska syvempi puun taso rajaa enemmän kuin edelliset tasot, joten turha joinata monta kertaa
 							$lisa_dynaaminen[$param] = "";
+							$lisa_dynaaminen_liitokset[$param] = "";
 
-							$lisa_dynaaminen[$param] .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
+							$lisa_dynaaminen[$param] .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} use index (yhtio_laji_puun_tunnus) ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
 
 							if ($param == "tuote") {
 								$lisa_dynaaminen[$param] .= "tuote.tuoteno)\n";
@@ -333,8 +344,26 @@
 
 							$lisa_dynaaminen[$param] .= "JOIN dynaaminen_puu dynaaminen_{$param}_{$count_row['syvyys']} ON (dynaaminen_{$param}_{$count_row['syvyys']}.yhtio = {$param}_alkio{$count_row['syvyys']}.yhtio AND dynaaminen_{$param}_{$count_row['syvyys']}.tunnus = {$param}_alkio{$count_row['syvyys']}.puun_tunnus AND dynaaminen_{$param}_{$count_row['syvyys']}.laji = {$param}_alkio{$count_row['syvyys']}.laji)\n\n";
 							$dynaaminen_syvintaso[$param] = $count_row['syvyys'];
+							$lisa_dynaaminen_liitokset[$param] = $kaikki_puun_tunnukset_row["liitokset"];
 						}
 					}
+				}
+			}
+		}
+	}
+
+	// Dynaamisen puun rajaukset2
+	if (isset($lisa_dynaaminen_liitokset) and count($lisa_dynaaminen_liitokset) > 0) {
+		foreach ($lisa_dynaaminen_liitokset as $d_param => $d_liitokset) {
+			if ($d_liitokset != "") {
+				if ($param == "tuote") {
+					$lisa .= " and tuote.tuoteno in ($d_liitokset) ";
+				}
+				elseif ($param == "asiakas") {
+					$lisa .= " and asiakas.tunnus in ($d_liitokset) ";
+				}
+				elseif ($param == "kuka") {
+					$lisa .= " and kuka.kuka in ($d_liitokset) ";
 				}
 			}
 		}

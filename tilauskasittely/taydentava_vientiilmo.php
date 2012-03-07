@@ -215,7 +215,7 @@
 
 			if (mysql_num_rows($cresult) == 0) {
 				///* Tarkistetaan, että tilausrivejä löytyy*///
-				echo "Laskunumero: $laskurow[laskunro], ".t("Virhe! Laskulla ei ole yhtään tilausriviä tai laskun summa oli nolla")."!<br>";
+				echo "Laskunumero: $laskurow[laskunro], ".t("VIRHE: Laskulla ei ole yhtään tilausriviä tai laskun summa oli nolla")."!<br>";
 			}
 			else {
 

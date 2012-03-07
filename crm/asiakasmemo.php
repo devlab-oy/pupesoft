@@ -18,7 +18,7 @@
 
 			echo "<br><table>";
 			echo "<tr>
-					<th>".t("Asiakas").": </th>
+					<th>".t("Asiakas").":</th>
 					<form action = '$PHP_SELF' method = 'post'>
 					<td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
@@ -125,23 +125,23 @@
 			echo "<form action='$PHP_SELF' method='POST'>
 					<input type='hidden' name='tee' value='LISAAASANALYYSI'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='asiakasid' value='$asiakasid'>
 					<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
 
-			echo "<tr><th colspan='2' align='left'><br>".t("Asiakasvertailu:")."</th></tr>";
-			echo "<tr><td>".t("Miten tuotteet esilla:")."</td><td><textarea name='esilla' cols='40' rows=5' wrap='hard'></textarea></td></tr>";
-			echo "<tr><td>".t("Myymalan ileisilme:")."</td><td><textarea name='yleisilme' cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-			echo "<tr><th colspan='2' align='left'><br>".t("Tuotteiden jakauma merkeittain:")."</th></tr>";
-			echo "<tr><td>".t("Puvut:")."</td><td><textarea name='puvut' 			cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-			echo "<tr><td>".t("Kyparat:")."</td><td><textarea name='kyparat' 		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-			echo "<tr><td>".t("Saappaat:")."</td><td><textarea name='saappaat' 		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-			echo "<tr><td>".t("Hanskat:")."</td><td><textarea name='hanskat'		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
+			echo "<tr><th colspan='2' align='left'><br>".t("Asiakasvertailu").":</th></tr>";
+			echo "<tr><td>".t("Miten tuotteet esillä").":</td><td><textarea name='esilla' cols='40' rows=5' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Myymälän ileisilme").":</td><td><textarea name='yleisilme' cols='40' rows='5' wrap='hard'></textarea></td></tr>";
+			echo "<tr><th colspan='2' align='left'><br>".t("Tuotteiden jakauma merkeittäin").":</th></tr>";
+			echo "<tr><td>".t("Puvut").":</td><td><textarea name='puvut' 			cols='40' rows='2' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Kypärät").":</td><td><textarea name='kyparat' 		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Saappaat").":</td><td><textarea name='saappaat' 		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Hanskat").":</td><td><textarea name='hanskat'		cols='40' rows='2' wrap='hard'></textarea></td></tr>";
 			echo "<tr><th><br></th><th></th></tr>";
-			echo "<tr><td>".t("Muut huomiot:")."</td><td><textarea name='muuta' 	cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-			echo "<tr><td>".t("Keskustelut/sovitut extrat:")."</td><td><textarea name='extrat' 	cols='40' rows='5' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Muut huomiot").":</td><td><textarea name='muuta' 	cols='40' rows='5' wrap='hard'></textarea></td></tr>";
+			echo "<tr><td>".t("Keskustelut/sovitut extrat").":</td><td><textarea name='extrat' 	cols='40' rows='5' wrap='hard'></textarea></td></tr>";
 			echo "<tr><th align='left'><input type='submit' name='submit' value='".t("Tallenna")."'></th></tr>";
 			echo "</form></table>";
-
 		}
 
 		///* Lisätään uusi memeotietue*///
@@ -337,7 +337,7 @@
 			$query = "	SELECT *
 						FROM kalenteri
 						WHERE liitostunnus 	= '$asiakasid'
-						and tyyppi			in ('Memo','Muistutus','Kuittaus','Lead')
+						and tyyppi			in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
 						and tapa		   != 'asiakasanalyysi'
 						and yhtio			= '$kukarow[yhtio]'
 						and (perheid=0 or tunnus=perheid)
@@ -388,12 +388,15 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$asiakasid'
+							WHERE yhtio		 = '$kukarow[yhtio]'
+							and liitostunnus = '$asiakasid'
+							and tyyppi 		 = 'A'
 							ORDER BY nimi";
 				$result = pupe_query($query);
 
 				$yhenkilo = "<form action='$PHP_SELF' method='POST'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<select name='yhtunnus' Onchange='submit();'>
 							<option value=''>".t("Yleistiedot")."</option>";
@@ -435,10 +438,10 @@
 				echo "<table>";
 
 				echo "<tr>";
-				echo "<th align='left'>".t("Laskutusasiakas:")." </th>";
-				echo "<th align='left'>".t("Toimitusasiakas:")." </th>";
-				echo "<th align='left'>".t("Muut tiedot:")."</th>";
-				echo "<th align='left'>".t("Toiminnot:")."</th>";
+				echo "<th align='left'>".t("Laskutusasiakas").":</th>";
+				echo "<th align='left'>".t("Toimitusasiakas").":</th>";
+				echo "<th align='left'>".t("Muut tiedot").":</th>";
+				echo "<th align='left'>".t("Toiminnot").":</th>";
 				echo "</tr>";
 
 
@@ -472,7 +475,7 @@
 
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>$asiakasrow[nimitark]</td><td>$asiakasrow[toim_nimitark]</td><td>".t("Puh.")." $ypuh</td>";
+				echo "<td>$asiakasrow[nimitark]</td><td>$asiakasrow[toim_nimitark]</td><td>".t("Puh").": $ypuh</td>";
 
 
 				if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
@@ -484,7 +487,7 @@
 
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax.")." $yfax</td>";
+				echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax").": $yfax</td>";
 
 				// Päivämäärät rappareita varten
 				$kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
@@ -512,7 +515,7 @@
 
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>$asiakasrow[postino] $asiakasrow[postitp]</td><td>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td><td>".t("Gsm.")." $ygsm</td>";
+				echo "<td>$asiakasrow[postino] $asiakasrow[postitp]</td><td>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td><td>".t("Gsm").": $ygsm</td>";
 
 
 				$query = "	SELECT yhtio
@@ -532,10 +535,12 @@
 
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email.")." $yemail";
+				echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email").": $yemail";
+
 				if ($yemail != "") {
 					echo " &nbsp; <a href=\"mailto:$yemail\">".t("Email")."</a>";
 				}
+
 				echo "</td>";
 
 				$query = "	SELECT yhtio
@@ -557,6 +562,7 @@
 				echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
 				echo "<form action='$PHP_SELF' method='POST'>";
 				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='asiakasid' value='$asiakasid'>
 						<input type='hidden' name='tee' value='paivita_tila'>";
 				echo "<select name='astila' Onchange='submit();'>";
@@ -595,6 +601,7 @@
 						<input type='hidden' name='korjaus' 	value='$tunnus'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
+						<input type='hidden' name='lopetus' 	value='$lopetus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
 						<input type='hidden' name='muistutusko' value='$muistutusko'>";
 
@@ -605,10 +612,10 @@
 				echo "<tr><th>".t("Lisää")."</th>";
 
 				if ($yhtunnus > 0) {
-					echo "<th>".t("Yhteyshenkilö:")." $ynimi</th>";
+					echo "<th>".t("Yhteyshenkilö").": $ynimi</th>";
 				}
 				else {
-					echo "<th></th>";
+					echo "<td></td>";
 				}
 
 				$sel = array();
@@ -617,7 +624,8 @@
 				echo "<td><select name='tyyppi' Onchange='submit();'>
 						<option value='Memo' $sel[Memo]>".t("Memo")."</option>
 						<option value='Muistutus' $sel[Muistutus]>".t("Muistutus")."</option>
-						<option value='Lead' $sel[Lead]>".t("Lead")."</option>";
+						<option value='Lead' $sel[Lead]>".t("Lead")."</option>
+						<option value='Myyntireskontraviesti' $sel[Myyntireskontraviesti]>".t("Myyntireskontraviesti")."</option>";
 
 				if ($tyyppi == "Kuittaus") {
 					echo "<option value='Kuittaus' $sel[Kuittaus]>".t("Kuittaus")."</option>";
@@ -625,7 +633,7 @@
 
 				echo "</select></td>";
 
-				echo "	<tr><th>Tallenna tiedosto liitteeksi</th>";
+				echo "	<tr><th>".t("Tallenna tiedosto liitteeksi")."</th>";
 				echo "	<td colspan='2'><input type = 'file' name = 'userfile' />";
 				echo "	<input type='hidden' name='teeliite'	value='tallenna_pdf'>";
 				echo "  <input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
@@ -637,7 +645,7 @@
 
 				if ($tyyppi == "Muistutus") {
 					echo "	<tr>
-							<th>".t("Yhteydenottaja: ")."</th>
+							<th>".t("Yhteydenottaja").":</th>
 							<td colspan='2'><select name='kuka'>
 							<option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
@@ -690,14 +698,14 @@
 					}
 
 					echo"	<tr>
-							<th>".t("Ei kuittausta:")." </th><td colspan='2'><input type='checkbox' name='kuittaus' value='E' $sel>
+							<th>".t("Ei kuittausta").":</th><td colspan='2'><input type='checkbox' name='kuittaus' value='E' $sel>
 							</td>
 							</tr>";
 				}
 				if ($tyyppi == "Lead") {
 
 					echo "	<tr>
-							<th>".t("Leadia valvoo: ")."</th>
+							<th>".t("Leadia valvoo").":</th>
 							<td colspan='2'><select name='myyntipaallikko'>";
 
 					$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
@@ -724,7 +732,7 @@
 
 
 					echo "	<tr>
-							<th>".t("Leadia hoitaa: ")."</th>
+							<th>".t("Leadia hoitaa").":</th>
 							<td colspan='2'><select name='kuka'>
 							<option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
@@ -765,7 +773,7 @@
 							<input type='text' name='mmm' value='$lmm' size='3'></td></tr>";
 				}
 
-				echo "<tr><th>".t("Tapa:")."</th>";
+				echo "<tr><th>".t("Tapa").":</th>";
 
 				$vresult = t_avainsana("KALETAPA");
 
@@ -793,6 +801,7 @@
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
+						<input type='hidden' name='lopetus' 	value='$lopetus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
 						<input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
 						</form>
@@ -815,7 +824,7 @@
 						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
 						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
-						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus
+						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
 						LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
 						LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -835,23 +844,23 @@
 			$res = pupe_query($query);
 
 			while ($memorow = mysql_fetch_array($res)) {
-				if($memorow["tapa"] == "asiakasanalyysi") {
+				if ($memorow["tapa"] == "asiakasanalyysi") {
 					echo "<tr>
 						<th>$memorow[tyyppi]</th><th>$memorow[laatija]</th><th>$memorow[laatija]@$memorow[paivamaara]
-						</th><th>".t("Tapa:")." $memorow[tapa]</th><th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>
+						</th><th>".t("Tapa").": $memorow[tapa]</th><th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>
 						</tr>
 						<tr>
-						<td colspan='4'><pre>".t("Miten tuotteet esilla:")."<br>$memorow[viesti]<br><br>".t("Myymalan yleisilme:")."<br>$memorow[kentta02]<br><br>".t("Tuotteiden jakauma merkeittain:")."<br>Puvut:<br>$memorow[kentta03]<br>".t("Kyparat:")."<br>$memorow[kentta04]<br>".t("Saappaat:")."<br>$memorow[kentta05]<br>".t("Hanskat:")."<br>$memorow[kentta06]<br>".t("Muut huomiot:")."<br>$memorow[kentta07]<br><br>".t("Keskustelut/sovitut extrat")."<br>$memorow[kentta08]<br></pre></td>
+						<td colspan='4'><pre>".t("Miten tuotteet esillä").":<br>$memorow[viesti]<br><br>".t("Myymälän yleisilme").":<br>$memorow[kentta02]<br><br>".t("Tuotteiden jakauma merkeittäin").":<br>".t("Puvut").":<br>$memorow[kentta03]<br>".t("Kypärät").":<br>$memorow[kentta04]<br>".t("Saappaat").":<br>$memorow[kentta05]<br>".t("Hanskat").":<br>$memorow[kentta06]<br>".t("Muut huomiot").":<br>$memorow[kentta07]<br><br>".t("Keskustelut/sovitut extrat").":<br>$memorow[kentta08]<br></pre></td>
 						</tr>";
 				}
-				else{
+				else {
 					if ($memorow["perheid"] == 0) {
 						echo "<tr>";
 						echo "	<th>$memorow[tyyppi]</th>
 								<th>$memorow[laatija]</th>
 								<th>".tv1dateconv($memorow["paivamaara"])."</th>
-								<th>".t("Tapa:")." $memorow[tapa]</th>
-								<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
+								<th>".t("Tapa").": $memorow[tapa]</th>
+								<th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>";
 
 						if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
 							echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
@@ -885,6 +894,7 @@
 						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
 						echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
 						echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+						echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
@@ -920,7 +930,7 @@
 			}
 
 			echo "</table>";
-			
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
 				if ($naytapoistetut == "") {
 					echo "<br>";

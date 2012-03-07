@@ -6,8 +6,10 @@
 
 	// Haetaan ostoreskontralaskun tiedot
 	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	
 	$osres = pupe_query($query);
 	$osrow = mysql_fetch_array($osres);
+	$laskun_numero = $osrow["laskunro"]; // ‰l‰ mene muuttaamaan tai poistamaan t‰t‰ muuttujaa.!!! Tai no joo... Ongelma..
 
 	if ($osrow["ebid"] != "TECCOM-INVOICE") {
 		$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
@@ -139,22 +141,24 @@
 		}
 		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0) {
 			// Onko ostolaskua ja onko kohdistamatta
+			
 			$query = "	SELECT tilausrivi.*
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus)
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
-										AND toimi.tunnus = '$trow[tunnus]')
+										AND toimi.tunnus = '{$trow["tunnus"]}')
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno = '".$rtuoteno[$i]["tuoteno"]."')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+														AND tuotteen_toimittajat.toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}')
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.otunnus = '".$rtuoteno[$i]["ostotilausnro"]."'
-						AND (tilausrivi.tunnus = '".$rtuoteno[$i]["tilaajanrivinro"]."' OR tilausrivi.tilaajanrivinro = '".$rtuoteno[$i]["tilaajanrivinro"]."')";
+						AND tilausrivi.otunnus = '{$rtuoteno[$i]["ostotilausnro"]}'
+						AND (tilausrivi.tunnus = '{$rtuoteno[$i]["tilaajanrivinro"]}' OR tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]["tilaajanrivinro"]}')";
 			$checkres = pupe_query($query);
 			$tilausrivirow = mysql_fetch_array($checkres);
+query_dump($query);
 
 			if (mysql_num_rows($checkres) == 1 and $tilausrivirow['uusiotunnus'] == 0) {
 				// lˆytyi, ei ole keikalla
@@ -163,6 +167,7 @@
 					$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
 					$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
 					$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+					$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 				}
 				else {
 					echo "Virheellisi‰ kappalem‰‰ri‰ tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
@@ -176,6 +181,7 @@
 					$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
 					$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
 					$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
+					$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 				}
 				else {
 					echo "Virheellisi‰ kappalem‰‰ri‰ tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
@@ -247,6 +253,8 @@
 
 	// Jos kyseess‰ on TecCom oastolasku
 	if ($osrow["ebid"] == "TECCOM-INVOICE") {
+		$update_asn_chk = true;
+
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
 
@@ -312,14 +320,23 @@
 				$results = pupe_query($query);
 				$tilausrivirow = mysql_fetch_assoc($results);
 
-				// jos ei splitata, p‰ivitet‰‰n hinta, mutta ei kohdisteta.
+				// jos ei splitata, p‰ivitet‰‰n hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $pointteri["kpl"]) {
+					$update_asn = "	UPDATE asn_sanomat SET
+									tilausrivi = '{$pointteri['tunnus']}',
+									keikkarivinhinta = '{$tilausrivirow['hinta']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tilausnumero = '{$laskun_numero}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
+									AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
+					pupe_query($update_asn);
+
 					$update = "	UPDATE tilausrivi SET
 								hinta		= '$pointteri[hinta]',
 								uusiotunnus = '$keikan_tunnus'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$pointteri[tunnus]'";
 					pupe_query($update);
+
 				}
 				elseif ($pointteri["kpl"] < $tilausrivirow["varattu"]) {
 					// Splitataan tilausrivi, tallennetaan vanha rivitunnus tilausrivi.tilaajanrivinro kentt‰‰n
@@ -354,6 +371,7 @@
 								hyllytaso = '$tilausrivirow[hyllytaso]',
 								hyllyvali = '$tilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$tilausrivirow[tunnus]'";
+								
 					$inskres = pupe_query($query);
 				}
 				else {
@@ -368,6 +386,19 @@
 			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]["uusiotunnus"]);
 
 			foreach ($keikoilla as $pointteri) {
+
+				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$hinta_chk_res = pupe_query($query);
+				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+				$update_asn = "	UPDATE asn_sanomat SET
+								tilausrivi = '{$pointteri['tunnus']}',
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$hinta_chk_row["otunnus"]}'
+								AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
+				pupe_query($update_asn);
+
 				$update = "UPDATE tilausrivi set hinta = '".$pointteri["hinta"]."' where yhtio='$kukarow[yhtio]' and tunnus = '".$pointteri["tunnus"]."'";
 				pupe_query($update);
 			}
@@ -375,6 +406,62 @@
 		}
 		else {
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
+			$update_asn_chk = false;
+		}
+
+		if ($update_asn_chk) {
+
+			if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
+
+				$upd_chk = true;
+
+				foreach ($ostoilla as $osto_loop) {
+					$query = "	SELECT tilausrivi
+								FROM asn_sanomat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'
+								AND tilausrivinpositio = '{$osto_loop['tilaajanrivinro']}'";
+					$chk_res = pupe_query($query);
+					$chk_row = mysql_fetch_assoc($chk_res);
+query_dump($query);
+
+					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
+				}
+
+				if ($upd_chk) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'";
+					$chk_res = pupe_query($query);
+query_dump($query);
+					
+				}
+			}
+			elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
+
+				$upd_chk = true;
+
+				foreach ($keikoilla as $keikka_loop) {
+					$query = "	SELECT tilausrivi
+								FROM asn_sanomat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'
+								AND tilausrivinpositio = '{$keikka_loop['tilaajanrivinro']}'";
+					$chk_res = pupe_query($query);
+					$chk_row = mysql_fetch_assoc($chk_res);
+
+					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
+				}
+
+				if ($upd_chk) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'";
+					$chk_res = pupe_query($query);					
+				}
+			}
 		}
 	}
 

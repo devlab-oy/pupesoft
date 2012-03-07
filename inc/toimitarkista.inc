@@ -4,7 +4,7 @@ if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi, $tmp_asn;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -280,6 +280,18 @@ if(!function_exists("toimitarkista")) {
 				}
 			}
 		}
+		
+		if (mysql_field_name($result, $i) == "edi_kuvaus") {
+			$tmp_asn = $t[$i];
+		}
+		
+		if (mysql_field_name($result, $i) == "asn_sanomat") {
+			$asn_tyyppi = trim($t[$i]);
+			if ($tmp_asn == "editilaus_out_teccom.inc" and $asn_tyyppi == "") {
+				$virhe[$i] = t("Toimittajalle on laitettu TecCom-editilaus. Mit‰ sanomia toimittaja l‰hett‰‰")." ?";
+			}
+
+		}		
 	}
 }
 

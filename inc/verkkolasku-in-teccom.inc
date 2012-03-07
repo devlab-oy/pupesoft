@@ -6,7 +6,7 @@
 	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
 	$laskun_tyyppi 			= "TECCOM-INVOICE";
-	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId;
+	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId; // Tämä on lähettäjän laskunnumero
 	$laskun_ebid 			= "TECCOM-INVOICE";
 	$laskun_tilausviite		= "";
 
@@ -35,6 +35,9 @@
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
 		$laskuttajan_toimittajanumero = "123067";
+	}
+	elseif (strtoupper($laskuttajan_toimittajanumero) == "LES-7") {
+		$laskuttajan_toimittajanumero = "123080";
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "NISSENS") {
 		$laskuttajan_toimittajanumero = "123403";
@@ -197,7 +200,7 @@
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 				}
 
-				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber; // mihin tätä tarvitiin ?
+				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
 
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
 
@@ -218,9 +221,54 @@
 					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ;
 				}
 
+				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
+					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->"Value";
+					
+					if (strtoupper($attribute) == "ALLOW") {
+						
+					}
+					// $rtuoteno[$i]["kate"]
+				}
+
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+
+				/**
+				 * tallennetaan tieto asn_tauluun lajina tec, jotta se voidaan helposti hakea feilinki-ohjelmassa (ostolasku_asn_tarkastelu.php)
+				 * tarvitaan: 
+				 * - toimittajanumero
+				 * - asn numero
+				 * - saapumispvm
+				 * - vastaanottaja
+				 * - tilausnumero
+				 * - toimittajan tuotenumero
+				 * - kpl
+				 * - tilausrivinpositio
+				 */ 
+
+				// $saapumispvm_chk = trim($laskun_paiva) != '' ? substr($laskun_paiva, 0, 4).'-'.substr($laskun_paiva, 4, 2).'-'.substr($laskun_paiva, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
+				// $vastaanottaja_chk = isset($xml->InvoiceHeader->BuyerParty->Address->Name1) ? $xml->InvoiceHeader->BuyerParty->PartyNumber.' , '.$xml->InvoiceHeader->BuyerParty->Address->Name1 : '';
+
+				// $query = "	INSERT INTO asn_sanomat SET
+				// 			yhtio = '{$kukarow['yhtio']}',
+				// 			laji = 'tec',
+				// 			toimittajanumero = '{$laskuttajan_toimittajanumero}',
+				// 			saapumispvm = '{$saapumispvm_chk}',
+				// 			vastaanottaja = '{$vastaanottaja_chk}',
+				// 			tilausnumero = '{$laskun_numero}',
+				// 			tilausrivi = '',
+				// 			paketintunniste = '',
+				// 			paketinnumero = '',
+				// 			lahetyslistannro = '',
+				// 			toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}',
+				// 			kappalemaara = '{$rtuoteno[$i]["kpl"]}',
+				// 			hinta = '{$rtuoteno[$i]["hinta"]}',
+				// 			tilausrivinpositio = '{$rtuoteno[$i]["tilaajanrivinro"]}',
+				// 			laatija = 'crond',
+				// 			luontiaika = now()";
+				// $asn_ins_res = pupe_query($query);
 			}
 			else {
 				//	Poistetaan tämä tietue

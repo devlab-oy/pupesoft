@@ -3,20 +3,36 @@
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	if ($_REQUEST["tee"] == "NAYTATILAUS") {
+	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
 		$no_head = "yes";
 
-		header("Content-type: text/xml");
+		if (isset($_REQUEST["xml"])) {
+			header("Content-type: text/xml");
+		}
+
+		if (isset($_REQUEST["pdf"])) {
+			header("Content-type: application/pdf");
+			header("Content-length: ".strlen(urldecode($_REQUEST["pdf"])));
+			header("Content-Disposition: inline; filename=Pupesoft_lasku");
+			header("Content-Description: Pupesoft_lasku");
+		}
+
 		flush();
 	}
 
 	require ("inc/parametrit.inc");
 
-	if ($_REQUEST["tee"] == "NAYTATILAUS") {
+	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
 		$xml = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xml);
 		$xml = str_replace("<?xml-stylesheet type=\"text/xsl\" href=\"", "<?xml-stylesheet type=\"text/xsl\" href=\"$palvelin2", $xml);
 		echo $xml;
+		exit;
+	}
+
+	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["pdf"])) {
+		$pdf = urldecode($_REQUEST["pdf"]);
+		echo $pdf;
 		exit;
 	}
 
@@ -108,12 +124,11 @@
 						$laskuttajan_maa 		= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->CountryCode);
 
 						$laskuttajan_tilino		= utf8_decode($xml->SellerInformationDetails->SellerAccountDetails->SellerAccountID);
-
 					}
 
 					echo "<tr><td>";
 
-					//Olisiko toimittaja sittenkin jossain (väärin perustettu)
+					// Olisiko toimittaja sittenkin jossain (väärin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
 						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
 						$siivottu = preg_replace('/^\s*/', '', $siivottu);
@@ -187,10 +202,40 @@
 						echo "<a href='$url' target='laskuikkuna'>". t('Näytä lasku')."</a>";
 					}
 					else {
-						echo "<form id='form_$valitutlaskut' name='form_$valitutlaskut' action='$PHP_SELF' method='post'>
+
+						// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritetään hakea laskun kuva mukaan
+						if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+
+							// Otetaan laskun ID tiedostonimestä, löydyy "maventa_" ja "_maventa" stringien välistä
+							$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+
+							// Loppupositio löytyi, joten tiedosto on oikein nimetty
+							if ($id_loppupositio !== FALSE) {
+
+								// Laskun ID
+								$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
+
+								// Haetaan liitteet
+								unset($liitefilet);
+								$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$maventa_lasku_id}_maventa*\"", $liitefilet);
+
+								if ($liitteet != "") {
+									foreach ($liitefilet as $liitefile) {
+										if (strtoupper(substr($liitefile, -4)) == ".PDF") {
+											echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' action='$PHP_SELF' method='post'>
+												<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
+												<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
+												<input type='submit' value = '".t("Näytä Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
+										}
+									}
+								}
+							}
+						}
+
+						echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' action='$PHP_SELF' method='post'>
 							<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 							<input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
-							<input type='submit' value = '".t("Näytä lasku")."' onClick=\"js_openFormInNewWindow('form_$valitutlaskut', 'form_$valitutlaskut'); return false;\"></form>";
+							<input type='submit' value = '".t("Näytä Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";
 					}
 
 					echo "</td>";
@@ -207,6 +252,7 @@
 		closedir($handle);
 		echo "</table>";
 	}
+
 	if ($valitutlaskut == 0) {
 		echo "<font class='message'>".t("Ei hylättyjä laskuja")."</font><br>";
 	}

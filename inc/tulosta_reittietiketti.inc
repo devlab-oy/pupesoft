@@ -202,6 +202,7 @@
 			$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 						IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
 						kerayserat.pakkausnro, 
+						kerayserat.sscc,
 						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 						ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
 						FROM kerayserat
@@ -211,13 +212,14 @@
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 						AND kerayserat.nro = '{$kerayseran_numero}'
 						AND kerayserat.otunnus = '{$row['tunnus']}'
-						GROUP BY 1,2,3";
+						GROUP BY 1,2,3,4";
 			$keraysera_res = pupe_query($query);
 
 			while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
 				$row['pakkausid'] = $keraysera_row['pakkausnro'];
 				$row['kollilaji'] = $keraysera_row['kollilaji'];
+				$row['sscc'] = $keraysera_row['sscc'];
 
 				$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
 

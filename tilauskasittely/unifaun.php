@@ -306,6 +306,10 @@ class Unifaun {
 			$uni_shipment = $xml->addChild('shipment');	# Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
 			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["tunnus"]));
 
+			if ($this->toitarow['tulostustapa'] == 'E') {
+				$uni_shipment->addAttribute('mergeid', utf8_encode($this->postirow["toimitustavan_lahto"]));
+			}
+
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); # Defines the sender. Refers to the sndid value for sender.
 				$uni_shi_val->addAttribute('n', "from");
 
@@ -358,10 +362,10 @@ class Unifaun {
 				$uni_shi_val->addAttribute('n', "eurpallets");
 
 				# lähettäjän viite
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment reference. Any contents. Max. 17 characters.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "reference");
 
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment reference as barcode. Max. 17 numeric characters.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference as barcode. Max. 17 numeric characters.
 				$uni_shi_val->addAttribute('n', "referencebarcode");
 
 				# vastaanottajan viite

@@ -358,10 +358,10 @@ class Unifaun {
 				$uni_shi_val->addAttribute('n', "eurpallets");
 
 				# lähettäjän viite
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment reference. Any contents. Max. 17 characters.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "reference");
 
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment reference as barcode. Max. 17 numeric characters.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference as barcode. Max. 17 numeric characters.
 				$uni_shi_val->addAttribute('n', "referencebarcode");
 
 				# vastaanottajan viite

@@ -546,6 +546,8 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', "PC"); # Package code. See SUP-112-Services-en.xls for valid package codes.
 		$uni_par_val->addAttribute('n', "packagecode");
 
+		$pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 1 ? 1 : $pakkaustiedot['paino'];		
+
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 

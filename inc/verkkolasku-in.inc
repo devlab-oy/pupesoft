@@ -971,6 +971,7 @@
 							postitp 			= '$trow[postitp]',
 							maa 				= '$trow[maa]',
 							toim_maa			= '$trow[verovelvollinen]',
+							ultilno_maa			= '$trow[ultilno_maa]',
 							viite 				= '$viite',
 							viesti 				= '$viesti',
 							sisviesti1 			= '$laskun_tilausviite',

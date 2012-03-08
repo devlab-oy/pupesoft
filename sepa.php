@@ -65,7 +65,7 @@
 
 			$PmtInfId = $PmtInf->addChild('PmtInfId', $laskurow['tunnus']);																	// PaymentInformationIdentification, Pakollinen kenttä
 			$PmtMtd = $PmtInf->addChild('PmtMtd', 'TRF'); 																					// PaymentMethod, Pakollinen kenttä (TRF = transfer)
-		if (tarkista_sepa($laskurow["maa"]) !== FALSE) {
+		if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
 			$PmtTpInf = $PmtInf->addChild('PmtTpInf');																						// Jos SEPA maa, laitetaan nämä segmentit mukaan
 //			 	$InstrPrty = $PmtTpInf->addChild('InstrPrty');
 			 	$SvcLvl = $PmtTpInf->addChild('SvcLvl');
@@ -294,7 +294,7 @@
 			$CtryOfRes = $Cdtr->addChild('CtryOfRes', sprintf("%-2.2s", $laskurow['maa']));
 			$CdtrAcct = $CdtTrfTxInf->addChild('CdtrAcct', '');									// CreditorAccount
 				$Id = $CdtrAcct->addChild('Id', '');											// Identification
-					if (tarkista_sepa($laskurow["maa"]) !== FALSE) {
+					if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
 						$Id->addChild('IBAN', $laskurow['ultilno']);							// IBAN = kotimaa, BBAN = ulkomaa, Pakollinen tieto
 					}
 					else {
@@ -367,9 +367,9 @@
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($netotetut_rivit)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
-				while ($nettorow = mysql_fetch_array($result)) {
+				while ($nettorow = mysql_fetch_assoc($result)) {
 
 					// Jos laskunumero on syötetty, lisätään se viestiin mukaan
 		            if ($nettorow['laskunro'] != 0 and $nettorow['laskunro'] != $nettorow['viesti']) {
@@ -457,14 +457,15 @@
 	}
 
 	// Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
-	$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+	$haku_query = "	SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+					yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					$lisa
 					ORDER BY maksu_tili, olmapvm, ultilno";
-	$result = mysql_query($haku_query) or pupe_error($haku_query);
+	$result = pupe_query($haku_query);
 
 	if ($tee == "") {
 
@@ -474,10 +475,10 @@
 
 		$virheita = 0;
 
-		while ($laskurow = mysql_fetch_array($result)) {
+		while ($laskurow = mysql_fetch_assoc($result)) {
 
 			// Tehdään oikeellisuustarkastuksia
-			if (tarkista_iban($laskurow["ultilno"]) != $laskurow["ultilno"] and tarkista_sepa($laskurow["maa"]) !== FALSE) {
+			if (tarkista_iban($laskurow["ultilno"]) != $laskurow["ultilno"] and tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
 				echo "<font class='error'>Laskun tilinumero ei ole oikeellinen IBAN tilinumero, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) $laskurow[ultilno]</font><br>";
 				$virheita++;
 				continue;
@@ -574,9 +575,9 @@
 					$lisa
 					AND summa < 0
 					GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		while ($laskurow = mysql_fetch_array($result)) {
+		while ($laskurow = mysql_fetch_assoc($result)) {
 
 			// Etsitään samalle päivälle tarpeeksi veloituksia, haetaan ensin kaikki miinukset, sitten summan mukaan desc
 			$query = "	SELECT lasku.tunnus laskutunnus, if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
@@ -588,7 +589,7 @@
 						AND maksu_tili	= '$laskurow[maksu_tili]'
 						AND olmapvm 	= '$laskurow[olmapvm]'
 						ORDER BY if(summa < 0, 1, 2), summa DESC";
-			$nettolaskures = mysql_query($query) or pupe_error($query);
+			$nettolaskures = pupe_query($query);
 
 			// Tällä lasketaan monta laskua tarvitaan mukaan
 			$nettosumma_yhteensa = 0;
@@ -598,7 +599,7 @@
 			$nettolaskujen_tunnukset = "";
 
 			// Loopataan laskuja läpi, kunnes päästään plussalle
-			while ($nettolaskurow = mysql_fetch_array($nettolaskures)) {
+			while ($nettolaskurow = mysql_fetch_assoc($nettolaskures)) {
 
 				$nettosumma_yhteensa += $nettolaskurow["maksettavasumma"];
 				$nettolaskujen_tunnukset .= "$nettolaskurow[laskutunnus],";
@@ -645,14 +646,15 @@
 
 		// Tehdään netotetut tapahtumat
 		foreach ($netotettava_laskut as $i => $tunnukset) {
-			$query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+			$query = "	SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+						yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 						FROM lasku
 						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tunnus in ($tunnukset)
 						LIMIT 1";
-			$result = mysql_query($query) or pupe_error($query);
-			$nettorow = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$nettorow = mysql_fetch_assoc($result);
 
 			$nettorow["viite"]		= '';						// Viitenroa ei sallita netotetulla tapahtumalla
 			$nettorow["alatila"]	= '';						// Ei käteisalennusta netotetulla tapahtumalla
@@ -669,7 +671,7 @@
 							popvm = '$popvm_nyt'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($tunnukset)";
-				$uresult = mysql_query($query) or pupe_error($query);
+				$uresult = pupe_query($query);
 			}
 		}
 
@@ -680,16 +682,17 @@
 			$lisa .= " and lasku.tunnus not in ($netotetut_laskut) ";
 		}
 
-		$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+		$haku_query = "	SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+						yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 						FROM lasku
 						JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
 						WHERE lasku.yhtio	= '$kukarow[yhtio]'
 						$lisa
 						ORDER BY maksu_tili, olmapvm, ultilno";
-		$result = mysql_query($haku_query) or pupe_error($haku_query);
+		$result = pupe_query($haku_query);
 
-		while ($laskurow = mysql_fetch_array($result)) {
+		while ($laskurow = mysql_fetch_assoc($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
             if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
@@ -716,7 +719,7 @@
 							popvm = '$popvm_nyt'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$laskurow[tunnus]'";
-				$uresult = mysql_query($query) or pupe_error($query);
+				$uresult = pupe_query($query);
 			}
 		}
 

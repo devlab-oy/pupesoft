@@ -18322,3 +18322,163 @@ if (!function_exists('myyntitili_varastopaikka')) {
 		return array("!!M", $hyllypaikka[0], $hyllypaikka[1], $hyllypaikka[2]);
 	}
 }
+
+if (!function_exists("tuotteen_ostohinta")) {
+	function tuotteen_ostohinta ($laskurow, $trow, $kpl, $naytetaanko_netto = "") {
+		global $yhtiorow, $kukarow;
+
+
+		/*
+		Kohta 1. Haetaan TUOTTEEN_TOIMITTAJAN omalla tuotekoodilla laskun valuutalla.
+		Kohta 2. Haetaan TUOTTEEN_TOIMITTAJAN omalla tuotekoodilla yhtion valuutalla.
+		Kohta 3. Haetaan PUPEN omalla tuotekoodilla laskun valuutalla.
+		Kohta 4. Haetaan PUPEN omalla tuotekoodilla yhtion valuutalla.
+		Kohta 5. Haetaan TUOTTEEN_TOIMITTAJAN ostohinnalla, mikäli hinnastosta ei löydy.
+		*/
+
+		// palautetaan tuotteen SVH laskun valuutassa
+		// tämä funktion on kopsattu tuotteen_myyntihinta-funktiosta sopivilta osilta
+		$hinta 			= 0;
+		$netto			= "";
+		$valuutta		= "";
+		$lisahaku 		= "";
+		$toim_tuoteno   = "";
+
+		$prequery = "	SELECT toim_tuoteno
+						FROM tuotteen_toimittajat
+						WHERE tuoteno = '$trow[tuoteno]'
+						AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+						LIMIT 1";
+		$preres = pupe_query($prequery);
+
+ 		if (mysql_num_rows($preres) > 0) {
+			$prerow = mysql_fetch_assoc($preres);
+			$toim_tuoteno = trim($prerow['toim_tuoteno']);
+		}
+
+		// 1. Laskun valuutalla, toimittajan tuoteno:lla,
+		if ($toim_tuoteno != "" and $hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$toim_tuoteno'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = pupe_query($query);
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow       	= mysql_fetch_assoc($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+
+		}
+
+		// 2. yhtion valuutalla, toimittajan tuoteno
+		if ($toim_tuoteno != "" and $hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$toim_tuoteno'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi in ('$yhtiorow[valkoodi]','')
+						and ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00','9999-12-31',hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm='0000-00-00' and hinnasto.loppupvm='0000-00-00'))
+						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
+						LIMIT 1";
+			$hresult = pupe_query($query);
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow       	= mysql_fetch_assoc($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+
+		}
+
+		// 3. laskun valuutalla, omalla tuoteno
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = pupe_query($query);
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow			= mysql_fetch_assoc($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+
+		}
+
+		// 4. yhtiön valuutalla, omalla tuoteno
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi in ('$yhtiorow[valkoodi]','')
+						and ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00','9999-12-31',hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm='0000-00-00' and hinnasto.loppupvm='0000-00-00'))
+						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
+						LIMIT 1";
+			$hresult = pupe_query($query);
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow			= mysql_fetch_assoc($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+		}
+
+		// 5. tuotteen toimittajan ostohinta
+		if ($hinta == 0) {
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$trow[tuoteno]'
+						and liitostunnus = '$laskurow[liitostunnus]'";
+			$hresult = pupe_query($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow			= mysql_fetch_assoc($hresult);
+				$hinta 			= $hrow["ostohinta"];
+				$netto			= "";
+				$valuutta		= $hrow["valuutta"];
+			}
+		}
+
+		if ($valuutta == "") $valuutta = $yhtiorow["valkoodi"];
+
+		if ($laskurow["valkoodi"] != $valuutta) {
+			$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+		}
+
+		return $hinta;
+
+	}
+}

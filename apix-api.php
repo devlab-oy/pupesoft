@@ -11,8 +11,10 @@
 	// otetaan tietokanta connect
 	require ($pupesoft_polku."/inc/connect.inc");
 
-	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in)) {
-		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
+	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) {
+		// VIRHE: verkkolaskut_in-kansio ei ole määritelty!
+		// Ei echota mitään, niin tän voi laittaa aina croniin
+		exit;
 	}
 
 	// Asetukset
@@ -28,14 +30,10 @@
 					AND yhtion_parametrit.apix_avain != ''";
 	$apix_result = mysql_query($sql_query) or die("Virhe SQL kyselyssä");
 
-	if (mysql_num_rows($maventa_result) == 0) {
-		die("Apixia käyttäviä yrityksiä ei löytynyt!");
-	}
-
 	while ($apix_keys = mysql_fetch_assoc($apix_result)) {
 
-	#$url = "https://test-terminal.apix.fi/receive";
-	$url = "https://terminal.apix.fi/receive";
+		#$url = "https://test-terminal.apix.fi/receive";
+		$url = "https://terminal.apix.fi/receive";
 		$timestamp	= gmdate("YmdHis");
 
 		// Muodostetaan apixin vaatima salaus ja url
@@ -82,4 +80,4 @@
 			continue;
 		}
 	}
-?>
+

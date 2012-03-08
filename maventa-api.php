@@ -11,8 +11,10 @@
 	# otetaan tietokanta connect
 	require ($pupesoft_polku."/inc/connect.inc");
 
-	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in)) {
-		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
+	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) {
+		// VIRHE: verkkolaskut_in-kansio ei ole määritelty!
+		// Ei echota mitään, niin tän voi laittaa aina croniin
+		exit;
 	}
 
 	# Testaus
@@ -30,10 +32,6 @@
 					WHERE yhtion_parametrit.maventa_api_avain != ''
 					AND yhtion_parametrit.maventa_ohjelmisto_api_avain != ''";
 	$maventa_result = mysql_query($sql_query) or die("Error in query: ".$sql_query);
-
-	if (mysql_num_rows($maventa_result) == 0) {
-		die("Maventaa käyttäviä yrityksiä ei löytynyt!");
-	}
 
 	while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
 
@@ -113,5 +111,3 @@
 			}
 		}
 	}
-
-?>

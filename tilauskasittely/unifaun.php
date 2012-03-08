@@ -130,6 +130,27 @@ class Unifaun {
 		}
 	}
 
+	public function _discardParcel($mergeid, $parcelno) {
+
+		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+
+		// Luodaan UNIFAUN-XML
+		$xml = new SimpleXMLElement($xmlstr);
+
+		$xml->addChild('control');
+		$uni_discard = $xml->addChild('discard');
+		$uni_discard->addAttribute('type', 'parcel');
+
+		$uni_discard_val = $uni_discard->addChild('val', $mergeid);
+		$uni_discard_val->addAttribute('n', 'mergeid');
+
+		$uni_discard_val = $uni_discard->addChild('val', $parcelno);
+		$uni_discard_val->addAttribute('n', 'parcelno');
+
+		$this->xml = $xml;
+
+	}
+
 	public function _getXML() {
 
 		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';

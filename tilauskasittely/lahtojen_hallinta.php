@@ -1933,6 +1933,7 @@
 						lasku.vakisin_kerays,
 						kerayserat.nro AS 'erat',
 						kerayserat.sscc,
+						kerayserat.sscc_ulkoinen,
 						kerayserat.pakkausnro,
 						IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) AS toimitustavan_lahto_siirto,
 						GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
@@ -1944,7 +1945,7 @@
 						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
 			$lahto_res = pupe_query($query);
 
 			if (!isset($child_row_select_status)) $child_row_select_status = "";
@@ -2149,6 +2150,7 @@
 				echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 				if ($lahto_row['sscc'] != '') {
+
 					$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
 								tuoteperhe.ohita_kerays AS 'ohitakerays',
 								COUNT(kerayserat.tunnus) AS 'rivit',
@@ -2195,12 +2197,21 @@
 
 				echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 
-				echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-
-				if ($lahto_row['sscc'] != '') {
-					echo "<button type='button'>{$lahto_row['sscc']}</button>";
+				if (trim($lahto_row['sscc_ulkoinen']) != '' and $lahto_row['sscc_ulkoinen'] != 0) {
+					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
+					echo "</td>";
 				}
-				echo "</td>";
+				else {
+					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+
+
+					if ($lahto_row['sscc'] != '') {
+						echo "<button type='button'>{$lahto_row['sscc']}</button>";
+					}
+
+					echo "</td>";
+				}
 
 				if ($lahto_row['pakkausnro'] != '') {
 
@@ -2251,7 +2262,7 @@
 				$colspan_child = 18;
 
 				$query = "	SELECT tilausrivi.tuoteno,
-							kerayserat.sscc,
+							IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc,
 							tuote.nimitys,
 							ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
 							tilausrivi.yksikko,

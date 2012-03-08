@@ -32,7 +32,7 @@
 
 				$tiedosto = $folder."/".$file;
 
-				list($tilausnumero, $sscc_ulkoinen, $sscc, $timestamp) = explode(";", file_get_contents($tiedosto));
+				list($tilausnumero, $sscc_ulkoinen, , $timestamp, $sscc) = explode(";", file_get_contents($tiedosto));
 
 				$query = "	UPDATE kerayserat SET
 							sscc_ulkoinen = '{$sscc_ulkoinen}',
@@ -43,7 +43,7 @@
 							AND otunnus = '{$tilausnumero}'";
 				$upd_res = pupe_query($query);
 
-				unlink($folder."/".$file);
+				rename($folder."/".$file, $folder_ok."/".$file);
 			}
 		}
 	}

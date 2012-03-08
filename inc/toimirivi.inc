@@ -305,7 +305,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys") {
+	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys" or mysql_field_name($result, $i) == "ultilno_maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
@@ -315,17 +315,18 @@
 
 		$ulos .= "<option value = '' ></option>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
 			}
-			elseif($trow[$i] == "" and $trow["maa"] != "" and strtoupper($vrow[0]) == $trow["maa"]) {
+			elseif (mysql_field_name($result, $i) != "ultilno_maa" and $trow[$i] == "" and $trow["maa"] != "" and strtoupper($vrow[0]) == $trow["maa"]) {
 				$sel = "selected";
 			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+			elseif (mysql_field_name($result, $i) != "ultilno_maa" and $trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
 				$sel = "selected";
 			}
+			
 			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
 		}
 

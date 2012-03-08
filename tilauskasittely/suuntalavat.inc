@@ -86,7 +86,7 @@
 		$sscc_chk_res = pupe_query($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-		if ($sscc_chk_row['sscc'] == 0) {
+		if ($sscc_chk_row["sscc"] == "") {
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {
@@ -201,7 +201,7 @@
 			$virheviesti['paino'] = $error;
 			$tee = 'uusi';
 		}
-
+		
 		if ($tee == '') {
 
 			$paino = str_replace(",", ".", $paino);

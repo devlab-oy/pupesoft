@@ -1676,6 +1676,7 @@ if ($tee == 'I') {
 				postitp 			= '$trow[postitp]',
 				maa 				= '$trow[maa]',
 				toim_maa			= '$trow[verovelvollinen]',
+				ultilno_maa			= '$trow[ultilno_maa]',
 				viite 				= '$viite',
 				viesti 				= '$viesti',
 				vienti 				= '$vienti',

@@ -93,9 +93,14 @@
 						$ftpget_dest[$operaattori] .= "/";
 					}
 
-					$fileget = ftp_get($conn_id, $ftpget_dest[$operaattori].$file, $file, FTP_ASCII);
+					$temp_filename = tempnam("/tmp", "ftp");
+
+					$fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
 
 					if ($fileget) {
+
+						rename($temp_filename, $ftpget_dest[$operaattori].$file);
+
 						fwrite($filehandle, "File $file was successfully downloaded!\n");
 
 						if (ftp_delete($conn_id, $file)) {
@@ -108,6 +113,8 @@
 					else {
 						fwrite($filehandle, "Failed to download file $file!\n");
 					}
+
+					unlink($temp_filename);
 				}
 			}
 			else {

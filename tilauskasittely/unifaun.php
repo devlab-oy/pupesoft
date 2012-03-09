@@ -2,7 +2,6 @@
 
 class Unifaun {
 
-	private $palvelin2;
 	private $hostname;
 	private $username;
 	private $password;
@@ -25,10 +24,6 @@ class Unifaun {
 		$this->password = $password;
 		$this->path = $path;
 
-	}
-
-	public function setPalvelin2($palvelin2) {
-		$this->palvelin2 = $palvelin2;
 	}
 
 	public function setYhtioRow($yhtiorow) {
@@ -106,7 +101,7 @@ class Unifaun {
 			$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 		}
 
-		$filenimi = "{$this->palvelin2}/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
+		$filenimi = dirname(dirname(__FILE__))."/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		/* HUOM! TESTIPATH */
 		// $filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
@@ -130,6 +125,30 @@ class Unifaun {
 		}
 	}
 
+	public function _closeWithPrinter($mergeid, $printer) {
+		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+
+		// Luodaan UNIFAUN-XML
+		$xml = new SimpleXMLElement($xmlstr);
+
+		$xml->addChild('control');
+
+		$uni_ready = $xml->addChild('ready');
+
+		$uni_ready_val = $uni_ready->addChild('val', $mergeid);
+		$uni_ready_val->addAttribute('n', 'mergeid');
+
+		$uni_close = $xml->addChild('close');
+
+		$uni_close_val = $uni_close->addChild('val', $printer);
+		$uni_close_val->addAttribute('n', 'printer');
+
+		$uni_close_val = $uni_close->addChild('val', $mergeid);
+		$uni_close_val->addAttribute('n', 'mergeid');
+
+		$this->xml = $xml;
+	}
+
 	public function _discardParcel($mergeid, $parcelno) {
 
 		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
@@ -141,8 +160,10 @@ class Unifaun {
 		$uni_discard = $xml->addChild('discard');
 		$uni_discard->addAttribute('type', 'parcel');
 
-		$uni_discard_val = $uni_discard->addChild('val', $mergeid);
-		$uni_discard_val->addAttribute('n', 'mergeid');
+		if ($mergeid != 0) {
+			$uni_discard_val = $uni_discard->addChild('val', $mergeid);
+			$uni_discard_val->addAttribute('n', 'mergeid');
+		}
 
 		$uni_discard_val = $uni_discard->addChild('val', $parcelno);
 		$uni_discard_val->addAttribute('n', 'parcelno');

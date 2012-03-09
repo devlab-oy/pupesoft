@@ -3,7 +3,7 @@
 # Pupesoft -> Unifaun datasiirto
 
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
-if ($kollityht > 0) {
+if (1 == 2 and $kollityht > 0) {
 
 	if (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "") {
 

@@ -24,8 +24,13 @@
 
 	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
-		$xml = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xml);
-		$xml = str_replace("<?xml-stylesheet type=\"text/xsl\" href=\"", "<?xml-stylesheet type=\"text/xsl\" href=\"$palvelin2", $xml);
+
+		$xml = str_replace("\"Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
+		$xml = str_replace("\"Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
+
+		$xml = str_replace("\"datain/Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
+		$xml = str_replace("\"datain/Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
+
 		echo $xml;
 		exit;
 	}
@@ -81,7 +86,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -91,23 +96,36 @@
 
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
 
-				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
+				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 
 					$valitutlaskut++;
 
 					// Otetaan tarvittavat muuttujat tännekin
 					$xml = simplexml_load_string($xmlstr);
 
-					if (strpos($file, "finvoice-") !== false) {
+					// Katsotaan mitä aineistoa käpistellään
+					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
-
 						$kumpivoice = "FINVOICE";
+					}
+					elseif (strpos($file, "_invoice") !== false){
+						require("inc/verkkolasku-in-teccom.inc");
+						$kumpivoice = "TECCOM";
+					}
+					elseif (strpos($file, "ORAO") !== false){
+						require("inc/verkkolasku-in-unikko.inc");
+						$kumpivoice = "ORAO";
 					}
 					else {
 						require("inc/verkkolasku-in-pupevoice.inc");
-
 						$kumpivoice = "PUPEVOICE";
 					}
+
+				 	$laskuttajan_osoite 	= "";
+					$laskuttajan_postitp 	= "";
+					$laskuttajan_postino 	= "";
+					$laskuttajan_maa 		= "";
+					$laskuttajan_tilino 	= "";
 
 					if ($kumpivoice == "PUPEVOICE") {
 						$laskuttajan_osoite 	= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC059.3042.1')));
@@ -117,7 +135,7 @@
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
 					}
-					else {
+					elseif ($kumpivoice = "FINVOICE") {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
 						$laskuttajan_postitp 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerTownName);
 						$laskuttajan_postino 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerPostCodeIdentifier);
@@ -126,7 +144,16 @@
 						$laskuttajan_tilino		= utf8_decode($xml->SellerInformationDetails->SellerAccountDetails->SellerAccountID);
 					}
 
-					echo "<tr><td>";
+					echo "<tr>";
+
+					if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
+						echo "<td>$yhtiorow[nimi]</td>";
+					}
+					else {
+						echo "<td>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja epäselvä")."!</font></td>";
+					}
+
+					echo "<td>";
 
 					// Olisiko toimittaja sittenkin jossain (väärin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
@@ -203,30 +230,20 @@
 					}
 					else {
 
-						// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritetään hakea laskun kuva mukaan
-						if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+						// Jos on Maventa-lasku niin yritetään hakea laskun kuva mukaan
+						if (preg_match("/maventa_(.*?)_maventa/", basename($file), $match)) {
 
-							// Otetaan laskun ID tiedostonimestä, löydyy "maventa_" ja "_maventa" stringien välistä
-							$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+							// Haetaan liitteet
+							unset($liitefilet);
+							$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$match[1]}_maventa*\"", $liitefilet);
 
-							// Loppupositio löytyi, joten tiedosto on oikein nimetty
-							if ($id_loppupositio !== FALSE) {
-
-								// Laskun ID
-								$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
-
-								// Haetaan liitteet
-								unset($liitefilet);
-								$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$maventa_lasku_id}_maventa*\"", $liitefilet);
-
-								if ($liitteet != "") {
-									foreach ($liitefilet as $liitefile) {
-										if (strtoupper(substr($liitefile, -4)) == ".PDF") {
-											echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' action='$PHP_SELF' method='post'>
-												<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
-												<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
-												<input type='submit' value = '".t("Näytä Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
-										}
+							if ($liitteet != "") {
+								foreach ($liitefilet as $liitefile) {
+									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
+										echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' action='$PHP_SELF' method='post'>
+											<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
+											<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
+											<input type='submit' value = '".t("Näytä Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
 									}
 								}
 							}

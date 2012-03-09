@@ -20,17 +20,19 @@
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-	$folder 		= "/Users/sami/temp/unifaun/export";			// muuta näiden polut oikeiksi
-	$folder_ok	 	= "/Users/sami/temp/unifaun/export/ok";	// muuta näiden polut oikeiksi
-	$folder_error 	= "/Users/sami/temp/unifaun/export/error";		// muuta näiden polut oikeiksi
+	// kansiot laitetaan salasanat.php
+	// $unifaun_fetch_folder 		= "/Users/sami/temp/unifaun/export";			// muuta näiden polut oikeiksi
+	// $unifaun_fetch_folder_ok	= "/Users/sami/temp/unifaun/export/ok";	// muuta näiden polut oikeiksi
 
-	if ($handle = opendir($folder)) {
+	// $folder_error 	= "/Users/sami/temp/unifaun/export/error";		// muuta näiden polut oikeiksi
+
+	if ($handle = opendir($unifaun_fetch_folder)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
 
-			if (is_file($folder."/".$file)) {
+			if (is_file($unifaun_fetch_folder."/".$file)) {
 
-				$tiedosto = $folder."/".$file;
+				$tiedosto = $unifaun_fetch_folder."/".$file;
 
 				list($tilausnumero, $sscc_ulkoinen, , $timestamp, $sscc) = explode(";", file_get_contents($tiedosto));
 
@@ -43,7 +45,7 @@
 							AND otunnus = '{$tilausnumero}'";
 				$upd_res = pupe_query($query);
 
-				rename($folder."/".$file, $folder_ok."/".$file);
+				rename($unifaun_fetch_folder."/".$file, $unifaun_fetch_folder_ok."/".$file);
 			}
 		}
 	}

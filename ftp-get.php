@@ -111,10 +111,10 @@
 						}
 					}
 					else {
+						unlink($temp_filename);
+
 						fwrite($filehandle, "Failed to download file $file!\n");
 					}
-
-					unlink($temp_filename);
 				}
 			}
 			else {

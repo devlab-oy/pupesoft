@@ -49,7 +49,7 @@
 		curl_close($ch);
 
 		if ($response != '') {
-			$tiedosto = $verkkolaskut_in."apix_".md5(uniqid(mt_rand(), true))."_nimi.zip";
+			$tiedosto = $verkkolaskut_in."/apix_".md5(uniqid(mt_rand(), true))."_nimi.zip";
 			$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu luoda!");
 			fwrite($fd, $response);
 
@@ -62,7 +62,7 @@
 
 					// Puretaan vain .xml tiedostot ja nimetään se uudelleen.
 					if ($zip->extractTo($verkkolaskut_in, substr($file, 0, -4).".xml")) {
-						rename($verkkolaskut_in.substr($file, 0, -4).".xml", $verkkolaskut_in."apix_".md5(uniqid(mt_rand(), true)).".xml");
+						rename($verkkolaskut_in."/".substr($file, 0, -4).".xml", $verkkolaskut_in."/apix_".md5(uniqid(mt_rand(), true)).".xml");
 						echo "Haettiin lasku yritykselle: {$apix_keys['nimi']}\n";
 					}
 				}

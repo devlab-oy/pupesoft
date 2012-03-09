@@ -240,13 +240,6 @@ $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"]
 if (!isset($login))		$login = "";
 if (!isset($extranet)) 	$extranet = "";
 
-// Siivotaan dirikkapolut
-if (isset($verkkolaskut_in) and substr($verkkolaskut_in, -1) != "/") $verkkolaskut_in = $verkkolaskut_in."/";
-if (isset($verkkolaskut_ok) and substr($verkkolaskut_ok, -1) != "/") $verkkolaskut_ok = $verkkolaskut_ok."/";
-if (isset($verkkolaskut_orig) and substr($verkkolaskut_orig, -1) != "/") $verkkolaskut_orig = $verkkolaskut_orig."/";
-if (isset($verkkolaskut_error) and substr($verkkolaskut_error, -1) != "/") $verkkolaskut_error = $verkkolaskut_error."/";
-if (isset($verkkolaskut_reject) and substr($verkkolaskut_reject, -1) != "/") $verkkolaskut_reject = $verkkolaskut_reject."/";
-
 // jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
 

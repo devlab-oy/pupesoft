@@ -99,14 +99,14 @@
 				# Finvoice - XML
 				if ($liite->attachment_type == "FINVOICE") {
 					# Tiedoston nimeen id mukaan, ettei tule samoja nimiä. Älä muuta nimeä, koska siitä etsitään ID myöhemmässä vaiheessa (verkkolasku-in.inc)
-					file_put_contents($verkkolaskut_in."maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
+					file_put_contents($verkkolaskut_in."/maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
 
 					echo "Haettiin yritykselle: $maventa_keys[nimi] lasku toimittajalta: {$lasku->company_name}, {$lasku->invoice_nr}\n";
 				}
 
 				# Laskun kuva ja liitteet tallennetaan $verkkolaskut_orig-kansioon
 				if ($liite->attachment_type == "INVOICE_IMAGE" or $liite->attachment_type == "ATTACHMENT") {
-					file_put_contents($verkkolaskut_orig."maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
+					file_put_contents($verkkolaskut_orig."/maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
 				}
 			}
 		}

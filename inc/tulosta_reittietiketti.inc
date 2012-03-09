@@ -223,7 +223,6 @@
 
 				$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
 
-				$unifaun->setPalvelin2($palvelin2);
 				$unifaun->setYhtioRow($yhtiorow);
 				$unifaun->setKukaRow($kukarow);
 				$unifaun->setPostiRow($row);

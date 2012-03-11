@@ -138,9 +138,10 @@
 						echo "<td>{$era_row['osoite']}</td>";
 						echo "</tr>";
 
-						$query = "	SELECT kerayserat.otunnus, tilausrivi.tuoteno
+						$query = "	SELECT kerayserat.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, kuka.nimi AS keraaja, ROUND(kerayserat.kpl_keratty, 0) kpl_keratty
 									FROM kerayserat
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+									JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND (kerayserat.sscc = '{$era_row['sscc']}' OR kerayserat.sscc_ulkoinen = '{$era_row['sscc']}')";
 						$sscc_res = pupe_query($query);
@@ -152,18 +153,18 @@
 						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
 						echo "<th>",t("Tilausnumero"),"</th>";
 						echo "<th>",t("Tuotenumero"),"</th>";
-						echo "<th></th>";
-						echo "<th></th>";
-						echo "<th></th>";
+						echo "<th>",t("Nimitys"),"</th>";
+						echo "<th>",t("Kpl ker‰tty"),"</th>";
+						echo "<th>",t("Ker‰‰j‰"),"</th>";
 						echo "</tr>";
 
 						while ($sscc_row = mysql_fetch_assoc($sscc_res)) {
 							echo "<tr class='{$era_row['sscc']}' style='display:none'>";
 							echo "<td>{$sscc_row['otunnus']}</td>";
 							echo "<td>{$sscc_row['tuoteno']}</td>";
-							echo "<td></td>";
-							echo "<td></td>";
-							echo "<td></td>";
+							echo "<td>{$sscc_row['nimitys']}</td>";
+							echo "<td>{$sscc_row['kpl_keratty']}</td>";
+							echo "<td>{$sscc_row['keraaja']}</td>";
 							echo "</tr>";
 						}
 

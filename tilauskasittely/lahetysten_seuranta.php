@@ -102,10 +102,10 @@
 
 				if ($row['sscc'] == "") continue;
 
-				$query = "	SELECT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc, pakkaus.pakkauskuvaus, lasku.ohjausmerkki, CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite, ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + pakkaus.oma_paino), 1) AS kg
+				$query = "	SELECT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc, IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus, lasku.ohjausmerkki, CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite, ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + pakkaus.oma_paino), 1) AS kg
 							FROM kerayserat
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+							LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'

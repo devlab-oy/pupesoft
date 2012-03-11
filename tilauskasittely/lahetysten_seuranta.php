@@ -61,7 +61,7 @@
 		$nimilisa = trim($asiakas) != "" ? " AND (lasku.nimi LIKE ('%".mysql_real_escape_string($asiakas)."%') OR lasku.toim_nimi LIKE ('%".mysql_real_escape_string($asiakas)."%'))" : "";
 		$postitplisa = trim($paikkakunta) != "" ? " AND (lasku.postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%') OR lasku.toim_postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%'))" : "";
 
-		$query = "	SELECT TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi, toimitustapa.selite AS toimitustapa, lahdot.pvm, group_concat(DISTINCT kerayserat.sscc) AS sscc
+		$query = "	SELECT lahdot.pvm, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi, toimitustapa.selite AS toimitustapa, group_concat(DISTINCT kerayserat.sscc) AS sscc
 					FROM kerayserat
 					JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus {$nimilisa} {$postitplisa})
 					JOIN lahdot ON (lahdot.yhtio = kerayserat.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = 'S' AND lahdot.pvm >= '{$vvalku}-{$kkalku}-{$ppalku}' AND lahdot.pvm <= '{$vvloppu}-{$kkloppu}-{$pploppu}')

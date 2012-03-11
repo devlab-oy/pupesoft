@@ -96,6 +96,11 @@
 				$era_res = pupe_query($query);
 
 				if (mysql_num_rows($era_res) > 0) {
+
+					echo "<tr>";
+					echo "<td class='back' colspan='5'><font class='message'>",tv1dateconv($row['pvm']),"</font></td>";
+					echo "</tr>";
+
 					echo "<tr>";
 					echo "<th>{$row['nimi']}</th>";
 					echo "<th>{$row['toimitustapa']}</th>";

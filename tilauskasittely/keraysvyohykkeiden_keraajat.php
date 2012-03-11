@@ -111,14 +111,14 @@
 
 				$(document).ready(function() {
 
-			        var stickyHeaderTop = $('#keraajat thead').offset().top;
+			        var stickyHeaderTop = $('#keraajat thead').offset().top-25;
 			        var stickyHeaderWidth = $('#keraajat').css('width');
 			        var stickyHeaderPosition = $('#keraajat').position();
 
 			        var ii = 0;
 
 			        if ($('#chart_div_values').html() != undefined) {
-			        	stickyHeaderTop += 300;
+			        	stickyHeaderTop += 300+21;
 			        }
 
 			        $('#keraajat th').each(function() {

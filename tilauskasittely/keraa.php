@@ -39,6 +39,8 @@
 	js_popup();
 
 	if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
+		require("tilauskasittely/unifaun.php");
+
 		echo "	<script type='text/javascript' language='JavaScript'>
 					$(document).ready(function() {
 
@@ -507,7 +509,7 @@
 										$keraysera_maara[$keraysera_chk_row['tunnus']] = 0;
 									}
 
-									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
+									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}', muutospvm = now(), muuttaja = '{$kukarow['kuka']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
 									$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
 								}
 
@@ -1566,6 +1568,112 @@
 													yhtio = '{$kukarow['yhtio']}'";
 									$ker_res = mysql_query($query_ker) or pupe_error($query_ker);
 
+									// TODO: tehdään toleranssitarkastus ja jos ylitetään raja, niin silloin tulostetaan uudet laput
+									if (1 == 2) {
+
+										// haetaan toimitustavan tiedot
+										$query    = "	SELECT *
+														FROM toimitustapa
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND selite = '{$laskurow['toimitustapa']}'";
+										$toitares = pupe_query($query);
+										$toitarow = mysql_fetch_assoc($toitares);
+
+										$query = "	SELECT nro, sscc, sscc_ulkoinen, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
+													FROM kerayserat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND otunnus = '{$otun}'
+													GROUP BY 1,2,3
+													ORDER BY 1";
+										$kpl_chk_res = pupe_query($query);
+
+										while ($kpl_chk_row = mysql_fetch_assoc($kpl_chk_res)) {
+
+											if ($kpl_chk_row['kpl'] != $kpl_chk_row['kpl_keratty']) {
+
+												$query = "SELECT toimitustavan_lahto FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otun}'";
+												$lahto_chk_res = pupe_query($query);
+												$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
+
+												$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
+												$parcelno = $kpl_chk_row['sscc_ulkoinen'];
+
+												$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+												$unifaun->_discardParcel($mergeid, $parcelno);
+
+												$unifaun->ftpSend();
+
+												// tehdään palautussanoma
+
+												$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['maksuehto']}'";
+												$mehto_res = pupe_query($query);
+												$mehto = mysql_fetch_assoc($mehto_res);
+
+												$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+															lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
+															if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+															asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+															FROM lasku
+															JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+															JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+															WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+															AND lasku.tunnus = '{$laskurow['tunnus']}'";
+												$rakir_res = pupe_query($query);
+												$rakir_row = mysql_fetch_assoc($rakir_res);
+
+												$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
+															IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
+															kerayserat.pakkausnro, 
+															kerayserat.sscc,
+															COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
+															ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
+															FROM kerayserat
+															JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+															JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+															LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+															WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+															AND kerayserat.nro = '{$kpl_chk_row['nro']}'
+															AND kerayserat.sscc = '{$kpl_chk_row['sscc']}'
+															AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+															GROUP BY 1,2,3,4";
+												$keraysera_res = pupe_query($query);
+
+												while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+
+													$laskurow['pakkausid'] = $keraysera_row['pakkausnro'];
+													$laskurow['kollilaji'] = $keraysera_row['kollilaji'];
+													$laskurow['sscc'] = $keraysera_row['sscc'];
+
+													$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+													$unifaun->setYhtioRow($yhtiorow);
+													$unifaun->setKukaRow($kukarow);
+													$unifaun->setPostiRow($laskurow);
+													$unifaun->setToimitustapaRow($toitarow);
+													$unifaun->setMehto($mehto);
+
+													$unifaun->setRahtikirjaRow($rakir_row);
+
+													$unifaun->setYhteensa($laskurow['summa']);
+													$unifaun->setViite($laskurow['viesti']);
+
+													$unifaun->_getXML();
+
+													$kollitiedot = array(
+														'maara' => $keraysera_row['maara'],
+														'paino' => $keraysera_row['tuotemassa'],
+														'pakkauskuvaus' => $keraysera_row['pakkauskuvaus']
+													);
+
+													$unifaun->setContainerRow($kollitiedot);
+
+													$unifaun->ftpSend();
+												}
+											}
+										}
+									}
+
 									// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
 									if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
 
@@ -1581,6 +1689,7 @@
 										// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
 										// $tee						tässä pitää olla teksti tulosta
 
+										/*
 										// otetaan talteen tee-muuttuja
 										$tee_tmp = $tee;
 
@@ -1590,6 +1699,7 @@
 										require ("rahtikirja-tulostus.php");
 
 										$tee = $tee_tmp;
+										*/
 									}
 								}
 							}

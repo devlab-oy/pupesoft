@@ -221,9 +221,10 @@
 				$row['kollilaji'] = $keraysera_row['kollilaji'];
 				$row['sscc'] = $keraysera_row['sscc'];
 
+				$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
+
 				$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
 
-				$unifaun->setPalvelin2($palvelin2);
 				$unifaun->setYhtioRow($yhtiorow);
 				$unifaun->setKukaRow($kukarow);
 				$unifaun->setPostiRow($row);
@@ -245,7 +246,22 @@
 
 				$unifaun->setContainerRow($kollitiedot);
 
+				// $unifaun->_saveForDebug();
+
 				$unifaun->ftpSend();
+
+				// $mergeid = $toitarow['tulostustapa'] == 'E' ? $row['toimitustavan_lahto'] : 0;
+				// $parcelno = $kpl_chk_row['sscc'];
+
+				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+				// $unifaun->_discardParcel($mergeid, $parcelno);
+				// $unifaun->_saveForDebug();
+
+				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+				// $unifaun->_closeWithPrinter($mergeid, "|LASER1|");
+				// $unifaun->_saveForDebug();
 			}
 		}
 	}

@@ -127,6 +127,7 @@ class Unifaun {
 
 	public function _saveForDebug() {
 		$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
+		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {

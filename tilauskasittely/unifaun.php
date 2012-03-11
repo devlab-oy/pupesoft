@@ -125,20 +125,29 @@ class Unifaun {
 		}
 	}
 
+	public function _saveForDebug() {
+		$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
+
+		//kirjoitetaan faili levylle..
+		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
+			echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus epäonnistui")."!</font><br>";
+		}
+	}
+
 	public function _closeWithPrinter($mergeid, $printer) {
 		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 
 		// Luodaan UNIFAUN-XML
 		$xml = new SimpleXMLElement($xmlstr);
 
-		$xml->addChild('control');
+		$control = $xml->addChild('control');
 
-		$uni_ready = $xml->addChild('ready');
+		$uni_ready = $control->addChild('ready');
 
 		$uni_ready_val = $uni_ready->addChild('val', $mergeid);
 		$uni_ready_val->addAttribute('n', 'mergeid');
 
-		$uni_close = $xml->addChild('close');
+		$uni_close = $control->addChild('close');
 
 		$uni_close_val = $uni_close->addChild('val', $printer);
 		$uni_close_val->addAttribute('n', 'printer');
@@ -156,8 +165,9 @@ class Unifaun {
 		// Luodaan UNIFAUN-XML
 		$xml = new SimpleXMLElement($xmlstr);
 
-		$xml->addChild('control');
-		$uni_discard = $xml->addChild('discard');
+		$control = $xml->addChild('control');
+
+		$uni_discard = $control->addChild('discard');
 		$uni_discard->addAttribute('type', 'parcel');
 
 		if ($mergeid != 0) {
@@ -180,14 +190,17 @@ class Unifaun {
 		$xml = new SimpleXMLElement($xmlstr);
 
 			// Metatiedot
-			#<meta>
-			#	<val n="printer"></val>							# Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
-			#	<val n="favorite"></val>						# Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
-			#	<val n="partition"></val>						# Defines the profile group where the shipment should be stored in the online system.
-			#</meta>
+			$uni_meta = $xml->addChild('meta');
 
-		$search = array('Ä', 'ä', 'Ö', 'ö', 'Å', 'å');
-		$replace = array('A', 'a', 'O', 'o', 'A', 'a');
+			// $uni_meta_val = $uni_meta->addChild('val', '|LASER1|'); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
+			$uni_meta_val = $uni_meta->addChild('val', ''); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
+			$uni_meta_val->addAttribute('n', 'printer');
+
+			#$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
+			#$uni_meta_val->addAttribute('n', 'favorite');
+
+			#$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the profile group where the shipment should be stored in the online system.
+			#$uni_meta_val->addAttribute('n', 'partition');
 
 			// Lähettäjän tiedot
 			$uni_sender = $xml->addChild('sender');	# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
@@ -346,7 +359,7 @@ class Unifaun {
 
 			// Lähetyksen tiedot
 			$uni_shipment = $xml->addChild('shipment');	# Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
-			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["tunnus"]));
+			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
 
 			if ($this->toitarow['tulostustapa'] == 'E') {
 				$uni_shipment->addAttribute('mergeid', utf8_encode($this->postirow["toimitustavan_lahto"]));
@@ -373,8 +386,8 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Importer
 				#$uni_shi_val->addAttribute('n', "customsto");
 
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment ID. UFPS only.
-				$uni_shi_val->addAttribute('n', "shpid");
+				#$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment ID. UFPS only.
+				#$uni_shi_val->addAttribute('n', "shpid");
 
 				# PakkausID
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr(chr(64+$this->postirow['pakkausid']), 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
@@ -477,7 +490,7 @@ class Unifaun {
 					$uni_ser_val = $uni_service->addChild('val', "RETURN"); # Defines action when the package is undeliverable. Only for Posten Postpaket Utrikes. RETURN = Return to sender, ABANDON = Treat as abandoned in receiver's country.
 					$uni_ser_val->addAttribute('n', "nondelivery");
 
-					$uni_booking = $uni_service->addChild('service'); # Booking information for pick up with DBSchenker. UFPS only.
+					#$uni_booking = $uni_service->addChild('booking'); # Booking information for pick up with DBSchenker. UFPS only.
 
 						#$uni_ser_val = $uni_booking->addChild('val', ""); # OPAL-number. Acquired from DBSchenker.
 						#$uni_ser_val->addAttribute('n', "bookingid");

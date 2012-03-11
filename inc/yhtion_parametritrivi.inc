@@ -3103,4 +3103,9 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "maventa_aikaleima") {
+		$tyyppi = 3;
+	}
+
 ?>

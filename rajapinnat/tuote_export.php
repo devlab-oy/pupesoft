@@ -237,7 +237,12 @@
 				hinnasto.hinta, 
 				tuote.alv
 				FROM hinnasto
-				JOIN tuote on (tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno)
+				JOIN tuote on (tuote.yhtio = hinnasto.yhtio 
+					AND tuote.tuoteno = hinnasto.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
 				WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
 				AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
 				AND hinnasto.laji != 'O'

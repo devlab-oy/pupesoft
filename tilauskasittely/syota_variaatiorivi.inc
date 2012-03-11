@@ -32,7 +32,7 @@
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 					AND tuotteen_avainsanat.kieli = '$yhtiorow[kieli]'
 					AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-					ORDER BY t2j2, t3j3, tuotteen_avainsanat.tuoteno";
+					ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
 		$variaatiores = mysql_query($query) or pupe_error($query);
 	}
 
@@ -188,7 +188,7 @@
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 					AND tuotteen_avainsanat.kieli = '$yhtiorow[kieli]'
 					AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-					ORDER BY t2j2, t3j3, tuotteen_avainsanat.tuoteno";
+					ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
 		$variaatiores = mysql_query($query) or pupe_error($query);
 
 		while ($varirow = mysql_fetch_assoc($variaatiores)) {

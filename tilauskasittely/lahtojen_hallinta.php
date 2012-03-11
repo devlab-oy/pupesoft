@@ -190,6 +190,7 @@
 							AND lahdot.tunnus != '{$valittu_lahto}'
 							AND lahdot.varasto = '{$select_varasto}'
 							AND lahdot.asiakasluokka = '{$asluok_row['asiakasluokka']}'
+							AND lahdot.pvm >= CURDATE()
 							ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika";
 				$lahdot_res = pupe_query($query);
 

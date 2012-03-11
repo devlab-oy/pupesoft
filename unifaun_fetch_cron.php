@@ -34,7 +34,9 @@
 
 				$tiedosto = $unifaun_fetch_folder."/".$file;
 
-				list($tilausnumero, $sscc_ulkoinen, , $timestamp, $sscc) = explode(";", file_get_contents($tiedosto));
+				list($tilausnumero_sscc, $sscc_ulkoinen, , $timestamp, $_sscc) = explode(";", file_get_contents($tiedosto));
+
+				list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);
 
 				$query = "	UPDATE kerayserat SET
 							sscc_ulkoinen = '{$sscc_ulkoinen}',

@@ -2,6 +2,26 @@
 
 	require("../inc/parametrit.inc");
 
+	enable_jquery();
+
+	echo "	<script type='text/javascript' language='JavaScript'>
+
+				$(document).ready(function() {
+					$('.sscc').click(function() {
+						$(this).toggleClass('tumma');
+						var sscc = $(this).attr('id');
+
+						if ($('.'+sscc).is(':visible')) {
+							$('.'+sscc).hide();
+						}
+						else {
+							$('.'+sscc).show();
+						}
+					});
+				});
+
+			</script>";
+
 	echo "<font class='head'>",t("Lähetysten seuranta"),"</font><hr>";
 
 	if ((isset($ppalku) and trim($ppalku) == '') or (isset($kkalku) and trim($kkalku) == '') or (isset($vvalku) and trim($vvalku) == '')) {
@@ -111,11 +131,44 @@
 
 					while ($era_row = mysql_fetch_assoc($era_res)) {
 						echo "<tr>";
-						echo "<td>{$era_row['sscc']}</td>";
+						echo "<td class='sscc' id='{$era_row['sscc']}'>{$era_row['sscc']}</td>";
 						echo "<td>{$era_row['pakkauskuvaus']}</td>";
 						echo "<td>{$era_row['kg']}</td>";
 						echo "<td>{$era_row['ohjausmerkki']}</td>";
 						echo "<td>{$era_row['osoite']}</td>";
+						echo "</tr>";
+
+						$query = "	SELECT kerayserat.otunnus, tilausrivi.tuoteno
+									FROM kerayserat
+									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND (kerayserat.sscc = '{$era_row['sscc']}' OR kerayserat.sscc_ulkoinen = '{$era_row['sscc']}')";
+						$sscc_res = pupe_query($query);
+
+						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+						echo "<td class='back' colspan='5'>&nbsp;</td>";
+						echo "</tr>";
+
+						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+						echo "<th>",t("Tilausnumero"),"</th>";
+						echo "<th>",t("Tuotenumero"),"</th>";
+						echo "<th></th>";
+						echo "<th></th>";
+						echo "<th></th>";
+						echo "</tr>";
+
+						while ($sscc_row = mysql_fetch_assoc($sscc_res)) {
+							echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+							echo "<td>{$sscc_row['otunnus']}</td>";
+							echo "<td>{$sscc_row['tuoteno']}</td>";
+							echo "<td></td>";
+							echo "<td></td>";
+							echo "<td></td>";
+							echo "</tr>";
+						}
+
+						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+						echo "<td class='back' colspan='5'>&nbsp;</td>";
 						echo "</tr>";
 					}
 

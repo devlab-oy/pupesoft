@@ -5,7 +5,7 @@
 
 	if (!function_exists("verkkolasku_in")) {
 		function verkkolasku_in ($file, $luolasku = TRUE) {
-			global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto;
+			global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto, $verkkolaskut_orig;
 
 			if (!is_file($file)) {
 				echo ("Tiedostoa $file ei lˆydy!\n");
@@ -427,8 +427,26 @@
 				}
 			}
 
+			if (!isset($trow) and $laskuttajan_nimi != "") {
+
+				$laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
+
+				// 8 etsit‰‰n IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-tyˆnnetaan laskun nimi-kentt‰‰n...)
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '$yhtio'
+							and ultilno = '$laskuttajan_nimi'
+							and ultilno not in ('','0')
+							and tyyppi != 'P'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
 			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
-				// 8 etsit‰‰n toimittaja teccomi-specific
+				// 9 etsit‰‰n toimittaja teccomi-specific
 				$query = "	SELECT *
 							FROM toimi
 							WHERE yhtio = '$yhtio'
@@ -990,6 +1008,8 @@
 							postino 			= '$trow[postino]',
 							postitp 			= '$trow[postitp]',
 							maa 				= '$trow[maa]',
+							toim_maa			= '$trow[verovelvollinen]',
+							ultilno_maa			= '$trow[ultilno_maa]',
 							viite 				= '$viite',
 							viesti 				= '$viesti',
 							sisviesti1 			= '$laskun_tilausviite',
@@ -1655,49 +1675,45 @@
 						// Loppupositio lˆytyi, joten tiedosto on oikein nimetty
 						if ($id_loppupositio !== FALSE) {
 
-							// Maventa avaimet
-							$api_keys = array();
-							$api_keys["user_api_key"] = $yhtiorow['maventa_api_avain'];
-							$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
-
-							// Vaihtoehtoinen company_uuid
-							if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
-								$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
-							}
-
 							// Laskun ID
 							$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
 
-							// Haetaan kuva
-							$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
-							$invoice = $client->inbound_invoice_show($api_keys, $maventa_lasku_id, true, "finvoice");
+							// Haetaan liitteet
+							unset($liitefilet);
+							$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$maventa_lasku_id}_maventa*\"", $liitefilet);
 
-							foreach ($invoice->attachments as $liite) {
-								if ($liite->attachment_type == "INVOICE_IMAGE") {
+							if ($liitteet != "") {
+								foreach ($liitefilet as $liitefile) {
+									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
 
-									$data = mysql_real_escape_string(base64_decode($liite->file));
-									$filesize = strlen($data);
+										$data = file_get_contents($liitefile);
+										$filesize = strlen($data);
 
-									// lis‰t‰‰n kuva
-									$query = "	INSERT INTO liitetiedostot SET
-												yhtio    			= '$kukarow[yhtio]',
-												liitos   			= 'lasku',
-												liitostunnus 		= '$tunnus',
-												data     			= '$data',
-												selite   			= '$selite',
-												kieli				= '$yhtiorow[kieli]',
-												filename 			= '$liite->filename',
-												filesize 			= '$filesize',
-												filetype 			= 'application/pdf',
-												image_width			= '',
-												image_height		= '',
-												image_bits			= '',
-												image_channels		= '',
-												kayttotarkoitus		= 'VERKKOLASKU',
-												jarjestys			= '1',
-												laatija				= '$kukarow[kuka]',
-												luontiaika			= now()";
-									$Xresult = pupe_query($query);
+										$data = mysql_real_escape_string($data);
+
+										$filename = str_replace("maventa_{$maventa_lasku_id}_maventa-", "", basename($liitefile));
+
+										// Lis‰t‰‰n kuva
+										$query = "	INSERT INTO liitetiedostot SET
+													yhtio    			= '$kukarow[yhtio]',
+													liitos   			= 'lasku',
+													liitostunnus 		= '$tunnus',
+													data     			= '$data',
+													selite   			= '$selite',
+													kieli				= '$yhtiorow[kieli]',
+													filename 			= '$filename',
+													filesize 			= '$filesize',
+													filetype 			= 'application/pdf',
+													image_width			= '',
+													image_height		= '',
+													image_bits			= '',
+													image_channels		= '',
+													kayttotarkoitus		= 'VERKKOLASKU',
+													jarjestys			= '1',
+													laatija				= '$kukarow[kuka]',
+													luontiaika			= now()";
+										$Xresult = pupe_query($query);
+									}
 								}
 							}
 						}

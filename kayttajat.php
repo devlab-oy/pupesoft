@@ -21,7 +21,7 @@
 	if (!isset($oletus_asiakas)) 	$oletus_asiakas = "";
 	if (!isset($oletus_profiili))	$oletus_profiili = '';
 	if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
-	
+
 	if (isset($toim) and $toim == 'extranet') {
 		echo "Extranet-";
 	}
@@ -144,7 +144,7 @@
 					SET profiilit 	= '',
 					muuttaja		= '{$kukarow['kuka']}',
 					muutospvm		= now()
-					WHERE kuka = '{$selkuka}' 
+					WHERE kuka = '{$selkuka}'
 					AND yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
@@ -184,6 +184,34 @@
 	}
 	else {
 		$hierarkia = "";
+	}
+
+	if ($tee == "UUSI" or $tee == "MUUTA") {
+
+		$myyja = (int) $myyja;
+
+		if ($myyja != 0) {
+
+			if (strlen($myyja) > 5) {
+				echo "<font class='error'>",t("Myyjänumero enintään 5 merkkiä"),"</font><br>";
+				$jatka = 1; // ei perusteta
+				unset($submit_button);
+			}
+			else {
+				$query = "	SELECT tunnus 
+							FROM kuka 
+							WHERE yhtio = '{$kukarow["yhtio"]}' 
+							AND myyja = $myyja
+							AND kuka != '{$kuka}'";
+				$resmyyja = pupe_query($query);
+
+				if (mysql_num_rows($resmyyja) > 0) {
+					echo "<font class='error'>",t("Myyjänumero on jo käytössä"),": $myyja.</font><br><br>";
+					$jatka = 1; // ei perusteta
+					unset($submit_button);
+				}
+			}
+		}
 	}
 
 	// Perustetaan uusi käyttäjä

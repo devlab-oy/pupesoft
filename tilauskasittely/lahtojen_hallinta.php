@@ -375,6 +375,8 @@
 
 				$select_varasto = (int) $select_varasto;
 
+				require("tilauskasittely/unifaun.php");
+
 				foreach ($checkbox_parent as $lahto) {
 
 					$sel_ltun = array();
@@ -390,14 +392,41 @@
 					$result = pupe_query($query);
 
 					$toimitustapa_varasto = "";
+					$lahetetaanko_unifaun = false;
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$sel_ltun[] = $row['tunnus'];
 
 						$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
+
+						$query = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND selite = '{$row['toimitustapa']}'";
+						$toimitustapa_res = pupe_query($query);
+						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+						if ($toimitustapa_row['tulostustapa'] == 'E') {
+							$lahetetaanko_unifaun = true;
+						}
 					}
 
 					if (count($sel_ltun) > 0) {
+
+						if ($lahetetaanko_unifaun) {
+							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+							$query = "	SELECT unifaun_nimi
+										FROM kirjoittimet
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND komento = '{$komento}'";
+							$kires = pupe_query($query);
+							$kirow = mysql_fetch_assoc($kires);
+
+							$unifaun->_closeWithPrinter($lahto, $kirow['unifaun_nimi']);
+
+							$unifaun->ftpSend();
+						}
 
 						// $query = "	SELECT toimitustapa.selite
 						// 			FROM lahdot

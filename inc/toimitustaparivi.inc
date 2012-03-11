@@ -225,6 +225,7 @@
 		$ulos .= "<optgroup label='Unifaun / DB Schenker Finland (SBTLFI)'>";
 		$ulos .= "<option value='SBTLFIDI' {$sel['SBTLFIDI']}>Schenker Finland Direct</option>";
 		$ulos .= "<option value='SBTLFISY' {$sel['SBTLFISY']}>Schenker Finland System</option>";
+		$ulos .= "<option value='SBTLFIEXP' {$sel['SBTLFIEXP']}>Schenker Finland Express</option>";
 		$ulos .= "</optgroup>";
 
 		$ulos .= "<optgroup label='Unifaun / Kiitolinja (KL)'>";

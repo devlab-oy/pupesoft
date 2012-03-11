@@ -118,10 +118,11 @@
 				if (mysql_num_rows($era_res) > 0) {
 
 					echo "<tr>";
-					echo "<td class='back' colspan='5'><font class='message'>",tv1dateconv($row['pvm']),"</font></td>";
+					echo "<td class='back' colspan='6'><font class='message'>",tv1dateconv($row['pvm']),"</font></td>";
 					echo "</tr>";
 
 					echo "<tr>";
+					echo "<th>",t("Status"),"</th>";
 					echo "<th>{$row['nimi']}</th>";
 					echo "<th>{$row['toimitustapa']}</th>";
 					echo "<th>",t("Kg"),"</th>";
@@ -131,6 +132,7 @@
 
 					while ($era_row = mysql_fetch_assoc($era_res)) {
 						echo "<tr>";
+						echo "<td>",t("Lähetetty"),"</td>";
 						echo "<td class='sscc' id='{$era_row['sscc']}'>{$era_row['sscc']}<img title='",t("Näytä kollin sisältö"),"' alt='",t("Näytä kollin sisältö"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 						echo "<td>{$era_row['pakkauskuvaus']}</td>";
 						echo "<td>{$era_row['kg']}</td>";
@@ -147,10 +149,11 @@
 						$sscc_res = pupe_query($query);
 
 						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
-						echo "<td class='back' colspan='5'>&nbsp;</td>";
+						echo "<td class='back' colspan='6'>&nbsp;</td>";
 						echo "</tr>";
 
 						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+						echo "<th></th>";
 						echo "<th>",t("Tilausnumero"),"</th>";
 						echo "<th>",t("Tuotenumero"),"</th>";
 						echo "<th>",t("Nimitys"),"</th>";
@@ -160,6 +163,7 @@
 
 						while ($sscc_row = mysql_fetch_assoc($sscc_res)) {
 							echo "<tr class='{$era_row['sscc']}' style='display:none'>";
+							echo "<td></td>";
 							echo "<td>{$sscc_row['otunnus']}</td>";
 							echo "<td>{$sscc_row['tuoteno']}</td>";
 							echo "<td>{$sscc_row['nimitys']}</td>";
@@ -169,11 +173,11 @@
 						}
 
 						echo "<tr class='{$era_row['sscc']}' style='display:none'>";
-						echo "<td class='back' colspan='5'>&nbsp;</td>";
+						echo "<td class='back' colspan='6'>&nbsp;</td>";
 						echo "</tr>";
 					}
 
-					echo "<tr><td class='back' colspan='5'>&nbsp;</td></tr>";
+					echo "<tr><td class='back' colspan='6'>&nbsp;</td></tr>";
 				}
 			}
 

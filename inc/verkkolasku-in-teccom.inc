@@ -223,7 +223,7 @@
 
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
-					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->"Value";
+					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
 					
 					if (strtoupper($attribute) == "ALLOW") {
 						

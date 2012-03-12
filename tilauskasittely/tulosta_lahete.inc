@@ -1252,7 +1252,9 @@ if (!function_exists('rivi_lahete')) {
 		$row["tilkpl"] 	= ($row["tilkpl"]*1);
 		$row["varattu"] = ($row["varattu"]*1);
 		$row["kpl"] 	= ($row["kpl"]*1);
-		$kpl_rivilla = (($row["kpl"]+$row["varattu"]+$row["jt"])*1);
+		$kpl_rivilla 	= (($row["kpl"]+$row["varattu"]+$row["jt"])*1);
+
+		if ($piilotarivi != 1) $yhteensamaara += $kpl_rivilla;
 
 		$row['varattu_orig'] = $kpl_rivilla;
 
@@ -2645,6 +2647,10 @@ if (!function_exists('loppu_lahete')) {
 				$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
 				$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
 			}
+		}
+
+		if ($tots == 1 and $yhtiorow["naytayhteensamaarat"] == "K") {
+			$pdf->draw_text(250, 72, t("Tuotteita yhteensä", $kieli).": ".(float) sprintf("%.2f", $yhteensamaara), $thispage, $norm);
 		}
 
 		if ($tots != 1) {

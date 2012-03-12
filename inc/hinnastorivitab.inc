@@ -1,9 +1,24 @@
 <?php
 
+function hinnastoriviotsikot() {
+	$out  = t('tuoteno')."\t";			// tuotenumero
+	$out .= t('nimitys')."\t";			// tuotteen nimitys
+	$out .= t('eankoodi')."\t";			// tuotteen eankoodi alennusryhmä kahteen merkkiin asti zeropaddattuna
+	$out .= t('yksikko')."\t";			// tuotteen yksikko
+	$out .= t('aleryhma')."\t"; 		// tuotteen aleryhmä
+	$out .= t('hinta')."\t";	   		// tuotteen luettelohint
+	$out .= t('tuotemerkki')."\t";		// tuotemerkki
+	$out .= t('osasto')."\t";	   		// tuotteen osasto
+	$out .= t('try')."\t";				// tuoteryhmä
+	$out .= t('korvaava tuote')."\t\n";	// korvaava tuote
+
+	return $out;
+}
+
 function hinnastorivi($tuote, $laskurow) {
     global $kukarow;
-	
-	
+
+
 	//korvaavat tuotteet
 	$koti 		= '';
 	$edellinen 	= '';
@@ -39,9 +54,9 @@ function hinnastorivi($tuote, $laskurow) {
 			$seuraava	= $korvaavat[$koti+1];
 		}
 	}
-	
+
 	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
-    			
+
     // tehdään tietuetta
 	$out = $tuote['tuoteno']."\t";		// tuotenumero
 	$out .= t_tuotteen_avainsanat($tuote, 'nimitys')."\t";		// tuotteen nimitys
@@ -54,7 +69,7 @@ function hinnastorivi($tuote, $laskurow) {
 	$out .= $tuote['try']."\t";			// tuoteryhmä
 	$out .= $seuraava;					// korvaava tuote
 	$out .= "\n";
-	
+
     return $out;
 }
 

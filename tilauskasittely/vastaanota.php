@@ -1002,14 +1002,14 @@
 			// Myyntitileill‰ on speciaali vastaanotto
 			if ($toim == "MYYNTITILI") {
 
-				$asiakkaan_tunnus = str_pad($row["asiakkaan_tunnus"], 15, 0, STR_PAD_LEFT);
-				$hyllypaikka = str_split($asiakkaan_tunnus, 5);
+				// Tehd‰‰n asiakkaan tunnuksesta myyntitili-varastopaikka
+				list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = myyntitili_varastopaikka($row["asiakkaan_tunnus"]);
 
 				echo "<td>";
-				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='!!M' maxlength='5' size='5'>";
-				echo "<input type='hidden' name='t2[$rivirow[tunnus]]' value='$hyllypaikka[0]' maxlength='5' size='5'>";
-				echo "<input type='hidden' name='t3[$rivirow[tunnus]]' value='$hyllypaikka[1]' maxlength='5' size='5'>";
-				echo "<input type='hidden' name='t4[$rivirow[tunnus]]' value='$hyllypaikka[2]' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$hyllyalue' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t2[$rivirow[tunnus]]' value='$hyllynro' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t3[$rivirow[tunnus]]' value='$hyllyvali' maxlength='5' size='5'>";
+				echo "<input type='hidden' name='t4[$rivirow[tunnus]]' value='$hyllytaso' maxlength='5' size='5'>";
 				echo "{$row["asiakkaan_nimi"]}";
 				echo "</td>";
 			}

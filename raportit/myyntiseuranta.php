@@ -644,7 +644,7 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.maksuteksti = '{$rajaus[$i]}' ";
 						}
-					}					
+					}
 				}
 
 				if ($sarjanumerot != '') {
@@ -664,7 +664,7 @@
 					$select .= "tilausrivi.kommentti, ";
 					$gluku++;
 				}
-				
+
 				if ($naytamaksupvm != "") {
 					if ($group!="") $group .= ",lasku.mapvm";
 					else $group  .= "lasku.mapvm";
@@ -771,7 +771,7 @@
 				}
 
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
-					$lisa .= " and lasku.laatija = 'Magento' ";
+					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
 
 				$vvaa = $vva - '1';
@@ -2185,7 +2185,6 @@
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
-			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
@@ -2365,7 +2364,7 @@
 				<td><input type='text' name='jarjestys[210]' size='2' value='{$jarjestys[210]}'></td>
 				<td><input type='checkbox' name='ruksit[210]' value='maksuehdoittain' {$ruk210chk}></td>
 				<td><input type='text' name='rajaus[210]' value='{$rajaus[210]}'></td>
-				</tr>				
+				</tr>
 				<tr>
 				<th>",t("Listaa asiakkaan tilausnumeroittain"),"</th>
 				<td><input type='text' name='jarjestys[220]' size='2' value='{$jarjestys[220]}'></td>
@@ -2506,9 +2505,22 @@
 
 			echo "</select></td></tr>";
 
+			$vsel[$verkkokaupat] = "SELECTED";
+
 			echo "<tr>
-				<th>",t("Näytä vain verkkokauppatilauksia"),"</th>
-				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
+				<th>",t("Ohjelmamoduli"),"</th>
+				<td>
+				<select name='verkkokaupat'>
+				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
+				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
+				<option value='EXTRANET'		{$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
+				<option value='MAGENTO'			{$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
+				<option value='VARAOSASELAIN'	{$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
+				<option value='VERKKOKAUPPA'	{$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
+				<option value='EDIFACT911'		{$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
+				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+				</select>
+				</td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

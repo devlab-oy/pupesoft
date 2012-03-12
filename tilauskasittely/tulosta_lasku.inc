@@ -1586,7 +1586,7 @@ if (!function_exists('loppu')) {
 }
 
 if (!function_exists('alvierittely')) {
-	function alvierittely ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $toim, $kala, $summa, $arvo, $kassa_ale = '') {
+	function alvierittely ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $toim, $kala, $summa, $arvo, $kassa_ale = '', $yhteensamaara=0) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$kassa_ale_lisa = '';
@@ -1599,6 +1599,12 @@ if (!function_exists('alvierittely')) {
 			$kala -=10;
 			$pdf_lasku->draw_text(360, $kala, t("Kassa-alennuksella", $kieli), 		$thispage, $norm);
 			$kala -= 10;
+		}
+
+		if ($yhtiorow["naytayhteensamaarat"] == "K" and $kassa_ale == '') {
+			$pdf_lasku->draw_text(190, $kala, t("Tuotteita yhteens‰", $kieli).":", 	$thispage, $norm);
+			$pdf_lasku->draw_text(340, $kala, sprintf('%.2f', $yhteensamaara), 		$thispage, $norm);
+			$kala -=10;
 		}
 
 		//loppusummat vain vikalle sivulle
@@ -2046,6 +2052,7 @@ if (!function_exists("tulosta_lasku")) {
 		list($page_lasku, $sivu, $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu);
 
 		$rivigrouppaus = FALSE;
+		$yhteensamaara = 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
 
@@ -2062,6 +2069,10 @@ if (!function_exists("tulosta_lasku")) {
 
 			if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 				$rivigrouppaus = TRUE;
+			}
+
+			if (($laskutyyppi != 2) or ($laskutyyppi == 2 and $row["perheid"] > 0 and $row["perheid"] == $row["tunnus"])) {
+				$yhteensamaara += $row["kpl"];
 			}
 
 			// Otetaan yhteens‰kommentti pois jos summataan rivej‰
@@ -2083,7 +2094,7 @@ if (!function_exists("tulosta_lasku")) {
 			// Mahtuuko rivi t‰lle sivulle
 			$devnull = "";
 
-			list($devnull, $devnullkala, $devnullsumma, $devnullarvo) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $devnull, $kala, $laskutyyppi, $toim, $summa, $arvo);
+			list($devnull, $devnullkala, $devnullsumma, $devnullarvo) = rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $devnull, $kala, $laskutyyppi, $toim, $summa, $arvo, '');
 
 			// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 			if ($devnullkala <= 130) {
@@ -2104,7 +2115,7 @@ if (!function_exists("tulosta_lasku")) {
 		}
 
 		// Mahtuuko erittely samalle sivulle?
-		$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, "");
+		$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, "", "");
 
 		if ($devnullkala <= 110+$vientikala+$barcode_korkeus) {
 			loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $page_lasku[$sivu], $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
@@ -2114,12 +2125,12 @@ if (!function_exists("tulosta_lasku")) {
 			list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
 		}
 
-		$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, "");
+		$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, "", $yhteensamaara);
 
 		if ($masrow['kassa_alepros'] > 0) {
 
 			// Mahtuuko erittely samalle sivulle?
-			$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, $masrow['kassa_alepros']);
+			$devnullkala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $devnull, $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $yhteensamaara);
 
 			if ($devnullkala <= 110+$vientikala+$barcode_korkeus) {
 				loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $page_lasku[$sivu], $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, "");
@@ -2129,7 +2140,7 @@ if (!function_exists("tulosta_lasku")) {
 				list($page_lasku[$sivu], $kala) = uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, '');
 			}
 
-			$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, $masrow['kassa_alepros']);
+			$kala = alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $toim, $kala, $summa, $arvo, $masrow['kassa_alepros'], $yhteensamaara);
 		}
 
 		// Vikan sivun loppulaatikko

@@ -237,7 +237,12 @@
 				hinnasto.hinta, 
 				tuote.alv
 				FROM hinnasto
-				JOIN tuote on (tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno)
+				JOIN tuote on (tuote.yhtio = hinnasto.yhtio 
+					AND tuote.tuoteno = hinnasto.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
 				WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
 				AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
 				AND hinnasto.laji != 'O'
@@ -318,6 +323,7 @@
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
 							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
 							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";

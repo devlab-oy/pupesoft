@@ -123,7 +123,6 @@
 						AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
 					JOIN lasku on (lasku.yhtio = tuote.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					{$lisa_parametri}
-					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
 					{$lisa}
@@ -150,7 +149,6 @@
 						AND tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' and '{$pvmloppu} 23:59:59')
 					JOIN lasku on (lasku.yhtio = tuote.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					{$lisa_parametri}
-					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.status != 'P'
 					{$lisa}

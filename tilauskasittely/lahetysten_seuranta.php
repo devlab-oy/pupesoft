@@ -7,15 +7,20 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 
 				$(document).ready(function() {
-					$('.sscc').click(function() {
+
+					$('a.linkki').click(function(event) {
+						event.stopPropagation();
+					});
+
+					$('td.sscc').click(function() {
 						$(this).toggleClass('tumma');
 						var sscc = $(this).attr('id');
 
-						if ($('.'+sscc).is(':visible')) {
-							$('.'+sscc).hide();
+						if ($('tr.'+sscc).is(':visible')) {
+							$('tr.'+sscc).hide();
 						}
 						else {
-							$('.'+sscc).show();
+							$('tr.'+sscc).show();
 						}
 					});
 				});
@@ -102,7 +107,14 @@
 
 				if ($row['sscc'] == "") continue;
 
-				$query = "	SELECT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc, IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus, lasku.ohjausmerkki, CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite, ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + IFNULL(pakkaus.oma_paino, 0)), 1) AS kg
+				$query = "	SELECT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc, 
+							kerayserat.sscc_ulkoinen, 
+							kerayserat.sscc AS sscc_vanha, 
+							kerayserat.otunnus,
+							IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus, 
+							lasku.ohjausmerkki, 
+							CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite, 
+							ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + IFNULL(pakkaus.oma_paino, 0)), 1) AS kg
 							FROM kerayserat
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 							LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
@@ -110,7 +122,7 @@
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND (kerayserat.sscc IN ({$row['sscc']}) OR kerayserat.sscc_ulkoinen IN ({$row['sscc']}))
-							GROUP BY 1,2,3,4
+							GROUP BY 1,2,3,4,5,6,7
 							ORDER BY 1";
 				// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$era_res = pupe_query($query);
@@ -133,7 +145,18 @@
 					while ($era_row = mysql_fetch_assoc($era_res)) {
 						echo "<tr>";
 						echo "<td>",t("Lähetetty"),"</td>";
-						echo "<td class='sscc' id='{$era_row['sscc']}'>{$era_row['sscc']}<img title='",t("Näytä kollin sisältö"),"' alt='",t("Näytä kollin sisältö"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+
+						echo "<td class='sscc' id='{$era_row['sscc']}'>";
+
+						if ($era_row['sscc_ulkoinen'] != 0) {
+							echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key=0020008411&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+						}
+						else {
+							echo "{$era_row['sscc']}";
+						}
+
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<img title='",t("Näytä kollin sisältö"),"' alt='",t("Näytä kollin sisältö"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+
 						echo "<td>{$era_row['pakkauskuvaus']}</td>";
 						echo "<td>{$era_row['kg']}</td>";
 						echo "<td>{$era_row['ohjausmerkki']}</td>";

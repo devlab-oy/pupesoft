@@ -977,124 +977,130 @@
 						AND tunnus IN ({$row['otunnukset']})";
 			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksia p‰ivitett‰ess‰\r\n\r\n");
 
-			$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, lasku.alatila,
-						toimitustapa.rahtikirja,
-						toimitustapa.tulostustapa,
-						toimitustapa.nouto,
-						lasku.varasto,
-						lasku.toimitustapa,
-						lasku.jaksotettu
-						FROM lasku
-						LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio AND lasku.toimitustapa = toimitustapa.selite AND toimitustapa.nouto = '')
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tunnus IN ({$row['otunnukset']})";
-			$lasresult = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksia haettaessa\r\n\r\n");
+			$query = "	SELECT pakkaus.pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset,
+						ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + pakkaus.oma_paino, 1) tuotemassa,
+						ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) * IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)), 2) as kuutiot,
+						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
+						FROM kerayserat
+						JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.otunnus IN ({$row['otunnukset']})
+						AND kerayserat.tila = 'K'
+						GROUP BY 1
+						ORDER BY pakkausnro ASC";
+			$keraysera_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe painotietoja rahtikirjalle haettaessa\r\n\r\n");
 
-			while ($laskurow = mysql_fetch_assoc($lasresult)) {
-				$query = "	SELECT pakkaus.pakkaus,
-							SUM(tuote.tuotemassa) tuotemassa,
-							SUM((pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys)) as kuutiot,
-							SUM(kerayserat.kpl) AS kpl,
-							COUNT(kerayserat.tunnus) AS maara
-							FROM kerayserat
-							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND kerayserat.otunnus = '{$laskurow['tunnus']}'
-							AND kerayserat.tila = 'T'
-							GROUP BY 1
-							ORDER BY pakkausnro ASC";
-				$keraysera_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe pakkaustietoja haettaessa\r\n\r\n");
+			$rahtikirjan_pakkaukset = array();
 
-				$rahtikirjan_pakkaukset = array();
+			while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
 
-				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-					if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] = 0;
-					if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
-					if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
-					if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['paino'] 	= $keraysera_row['tuotemassa'];
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['kuutiot'] 	= $keraysera_row['kuutiot'];
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
+			}
 
-					$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kpl'] 		= $keraysera_row['kpl'];
-					$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] 	= ($keraysera_row['tuotemassa'] * $keraysera_row['kpl']);
-					$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] 	= $keraysera_row['kuutiot'];
-					$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara']		= $keraysera_row['maara'];
-				}
+			$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset, 
+						ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty), 1) tuotemassa,
+						ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty), 2) as kuutiot,
+						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
+						FROM kerayserat
+						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.otunnus IN ({$row['otunnukset']})
+						AND kerayserat.tila = 'K'
+						AND kerayserat.pakkaus = '999'
+						GROUP BY 1
+						ORDER BY pakkausnro ASC";
+			$keraysera_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe painotietoja rahtikirjalle haettaessa\r\n\r\n");
 
-				// esisyˆtet‰‰n rahtikirjan tiedot
-				if (count($rahtikirjan_pakkaukset) > 0) {
+			while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
+				if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
 
-					foreach ($rahtikirjan_pakkaukset as $pak => $arr) {
-						// LOGY:n rahtikirjanumerot?
-						$query_ker  = "	INSERT INTO rahtikirjat SET
-										kollit 			= '{$arr['maara']}',
-										kilot 			= '{$arr['paino']}',
-										kuutiot 		= '{$arr['kuutiot']}',
-										pakkauskuvaus 	= '',
-										pakkaus 		= '{$pak}',
-										rahtikirjanro 	= '{$laskurow['tunnus']}',
-										otsikkonro 		= '{$laskurow['tunnus']}',
-										tulostuspaikka 	= '{$laskurow['varasto']}',
-										toimitustapa 	= '{$laskurow['toimitustapa']}',
-										yhtio 			= '{$kukarow['yhtio']}'";
-						$ker_res = mysql_query($query_ker) or die("1, Tietokantayhteydess‰ virhe rahtikirjaa lis‰tt‰ess‰\r\n\r\n");
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['paino'] 	= $keraysera_row['tuotemassa'];
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['kuutiot'] 	= $keraysera_row['kuutiot'];
+				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
+			}
 
-						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-						$alatila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe laskua p‰ivitett‰ess‰\r\n\r\n");
+			// p‰ivitet‰‰n ker‰yser‰n tila "Ker‰tty"-tilaan
+			$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN ({$row['otunnukset']})";
+			$tila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
 
-						// jos kyseess‰ on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myˆs rahtikirja t‰ss‰ vaiheessa
-						if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
+			// esisyˆtet‰‰n rahtikirjan tiedot
+			if (count($rahtikirjan_pakkaukset) > 0) {
 
-							// p‰ivitet‰‰n ker‰yser‰n tila "Rahtikirja tulostettu"-tilaan
-							$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
-							$tila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+				foreach ($rahtikirjan_pakkaukset as $pak => $otun_arr) {
 
-							// rahtikirjojen tulostus vaatii seuraavat muuttujat:
+					$maara_x = 0;
+					$paino_x = 0;
+					$kuutiot_x = 0;
+					$otsikkonro = 0;
 
-							// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
-							// $tee						t‰ss‰ pit‰‰ olla teksti tulosta
+					foreach ($otun_arr as $otun_x => $arr) {
 
-							$toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
-							$tee				  = "tulosta";
+						foreach (explode(",", $otun_x) as $otun) {
 
-							$nayta_pdf = 'foo';
+							if ($maara_x == 0 and $paino_x == 0 and $kuutiot_x == 0 and $otsikkonro == 0) {
+								$maara_x = $arr['maara'];
+								$paino_x = $arr['paino'];
+								$kuutiot_x = $arr['kuutiot'];
+							}
+							else {
+								$maara_x = 0;
+								$paino_x = 0;
+								$kuutiot_x = 0;
+							}
 
-							// $vain_tulostus muuttujaan laitetaan rahtikirjan tulostuksessa printteri mihin tulostetaan ja sill‰ haetaan jarjestys joka echotetaan
+							if ($otsikkonro == 0) $otsikkonro = $otun;
 
-							require ("rahtikirja-tulostus.php");
-						}
-						else {
-							// p‰ivitet‰‰n ker‰yser‰n tila "Ker‰tty"-tilaan
-							$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
-							$tila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+							$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otun}'";
+							$laskures = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen tietoja haettaessa\r\n\r\n");
+							$laskurow = mysql_fetch_assoc($laskures);
+
+							$query_ker  = "	INSERT INTO rahtikirjat SET
+											kollit = '{$maara_x}',
+											kilot = '{$paino_x}',
+											kuutiot = '{$kuutiot_x}',
+											pakkauskuvaus = '',
+											pakkaus = '{$pak}',
+											rahtikirjanro = '{$laskurow['tunnus']}',
+											otsikkonro = '{$otsikkonro}',
+											tulostuspaikka = '{$laskurow['varasto']}',
+											toimitustapa = '{$laskurow['toimitustapa']}',
+											yhtio = '{$kukarow['yhtio']}'";
+							$ker_res = mysql_query($query_ker) or die("1, Tietokantayhteydess‰ virhe rahtikirjan tietoja tallentaessa\r\n\r\n");
+
+							// jos kyseess‰ on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myˆs rahtikirja t‰ss‰ vaiheessa
+							if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
+
+								$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
+								$alatila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen tilaa p‰ivitett‰ess‰\r\n\r\n");
+
+								// p‰ivitet‰‰n ker‰yser‰n tila "Rahtikirja tulostettu"-tilaan
+								$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
+								$tila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n tilaa p‰ivitett‰ess‰\r\n\r\n");
+
+								// rahtikirjojen tulostus vaatii seuraavat muuttujat:
+
+								// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
+								// $tee						t‰ss‰ pit‰‰ olla teksti tulosta
+
+								$toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
+								$tee				  = "tulosta";
+
+								$nayta_pdf = 'foo';
+
+								require ("rahtikirja-tulostus.php");
+							}
 						}
 					}
-				}
-				else {
-					// p‰ivitet‰‰n ker‰yser‰n tila "Ker‰tty"-tilaan
-					$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
-					$tila_upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
-				}
-
-				//haetaan osoitelapun tulostuskomento
-				$query  = "SELECT * FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$printteri_row['printteri3']}'";
-				$kirres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoitinta haettaessa");
-				$kirrow = mysql_fetch_assoc($kirres);
-
-				$oslapp = $kirrow['komento'];
-				$oslappkpl = 1;
-
-				$tunnus = $laskurow["tunnus"];
-
-				$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' and selite = '{$laskurow['toimitustapa']}'";
-				$oslares = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe osoitelappua haettaessa");
-				$oslarow = mysql_fetch_assoc($oslares);
-
-				if ($oslarow['osoitelappu'] == 'intrade') {
-					require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-				}
-				else {
-					require ("tilauskasittely/osoitelappu_pdf.inc");
 				}
 			}
 

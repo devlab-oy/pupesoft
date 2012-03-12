@@ -173,6 +173,10 @@
 	if ($toim == "REKLAMAATIO") {
 		$fuse = t("Reklamaatio/Purkulista");
 	}
+	if ($toim == "VAKADR") {
+		$fuse = t("VAK/ADR-erittely");
+	}
+
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
@@ -605,7 +609,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD" or $toim == "VAKADR") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -1236,6 +1240,14 @@
 				$komento["Keräyslista"] .= " -# $kappaleet ";
 			}
 		}
+		
+		if ($toim == "VAKADR") {
+			$tulostimet[0] = 'vakadr';
+			if ($kappaleet > 0 and $komento["vakadr"] != 'email') {
+				$komento["vakadr"] .= " -# $kappaleet ";
+			}
+		}
+		
 		if (isset($tulostukseen)) {
 			$tilausnumero = implode(",", $tulostukseen);
 		}
@@ -1734,6 +1746,78 @@
 
 				$tee = '';
 			}
+			
+			if ($toim == "VAKADR") {
+
+				$otunnus = $laskurow["tunnus"];
+				$vakquery	= "SELECT * FROM kerayserat WHERE otunnus='{$otunnus}' group by otunnus";
+				
+				// JOSSAIN vaiheessa tulostakopio laitetaan kuntoon että voidaan etsiä "keräyseristä" ja tehdä keräyserän vak-adr-kopio lapuista.
+				//$vakquery	= "SELECT * FROM kerayserat WHERE nro='7268' group by otunnus";
+				$vakres		= pupe_query($vakquery);
+				
+				while($vakrow = mysql_fetch_assoc($vakres)) {
+					
+					$toinen = "SELECT * from lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$vakrow["otunnus"]}'";
+					$results = pupe_query($toinen);
+					$todlasku = mysql_fetch_assoc($results);
+					
+					$apuquery ="SELECT tuote.tuoteno, tuote.vakkoodi, kerayserat.sscc, kerayserat.tilausrivi, tuote.tuotemassa
+								FROM kerayserat
+								JOIN tilausrivi on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
+								JOIN tuote on (kerayserat.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.vakkoodi !='')
+								WHERE kerayserat.yhtio='{$kukarow["yhtio"]}'
+								AND tilausrivi.otunnus = '{$vakrow["otunnus"]}'";
+					$apuresult = pupe_query($apuquery);
+					
+					if (mysql_num_rows($apuresult) > 0) {
+						unset($koodit);
+						unset($tuotet);
+						
+						while($vika = mysql_fetch_assoc($apuresult)) {
+							$koodit[$vika["sscc"]][$vika["vakkoodi"]] = $vika["vakkoodi"];
+							$tuotet[$vika["sscc"]][] = $vika["tilausrivi"];
+						}
+						
+						$params_vak = array(
+						'boldi'						=> $boldi,
+						'norm'						=> $norm,
+						'pieni'						=> $pieni,
+						'pieni_boldi'				=> $pieni_boldi,
+						'iso'						=> $iso,
+						'kieli'						=> $kieli,
+						'laskurow'					=> $todlasku,
+						'page'						=> NULL,
+						'pdf'						=> NULL,
+						'row'						=> NULL,
+						'sivu'						=> 1,
+						'thispage'					=> NULL,
+						'koodit'					=> $koodit,
+						'tuotteet'					=> $tuotet,
+						'tee'						=> $tee,
+						);
+						
+						// kutsutaan nyt erittelyä ?
+						require('tulosta_vakerittely.inc');
+						
+						// Aloitellaan vakadr:n teko
+						$params_vak = otsikot($params_vak);
+						$params_vak = rivi_paketti($params_vak);
+						$params_vak = loppu_vakadr($params_vak);
+						
+						$params_vak["komento"] = $komento;
+						
+						//tulostetaan sivu
+						print_pdf_vakadr($params_vak);
+						
+						unset($params_vak);
+						
+					}
+				} //wile
+
+				$tee = '';
+			}
+			
 
 			if ($toim == "DGD") {
 

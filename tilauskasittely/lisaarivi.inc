@@ -11,9 +11,7 @@
 	// $kerayspvm			--> toivottu ker‰ysaika
 	// $hinta				--> k‰ytt‰j‰n syˆtt‰m‰ hinta
 	// $netto				--> k‰ytt‰j‰n syˆtt‰m‰ netto
-	// $ale					--> k‰ytt‰j‰n syˆtt‰m‰ ale (generoidaan yhtiˆn parametreist‰)
-	// $ale2				--> k‰ytt‰j‰n syˆtt‰m‰ ale2 (generoidaan yhtiˆn parametreist‰)
-	// $ale3				--> k‰ytt‰j‰n syˆtt‰m‰ ale3 (generoidaan yhtiˆn parametreist‰)
+	// $ale1,2,3,4,5...		--> k‰ytt‰j‰n syˆtt‰m‰ ale
 	// $var					--> H,J,P varrit
 	// $varasto				--> myyd‰‰n vain t‰st‰/n‰ist‰ varastosta
 	// $paikka				--> myyd‰‰n vain t‰lt‰ paikalta
@@ -223,9 +221,17 @@
 	$kpl	= str_replace(',', '.', $kpl);
 	$hinta	= str_replace(',', '.', $hinta);
 
-	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-		${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
-		${'alkupera_ale'.$alepostfix} = ${'ale'.$alepostfix};
+	if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+			${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
+			${'alkupera_ale'.$alepostfix} = ${'ale'.$alepostfix};
+		}
+	}
+	else {
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
+			${'alkupera_ale'.$alepostfix} = ${'ale'.$alepostfix};
+		}
 	}
 
 	// Alkuper‰iset tiedot talteen
@@ -382,7 +388,7 @@
 
 	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
 
-	if ($lisaarivi_debug==1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
+	if ($lisaarivi_debug == 1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
 
 	// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "°°°") {
@@ -488,7 +494,7 @@
 		$tlisatied_lisa = " , tilausrivilinkki = '$tilausrivilinkki' ";
 	}
 
-	if ($laskurow['tila'] != "O" and trim($var) == "" and $trow["tuoteno"] != "") {
+	if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
 		// Katsotaan onko maksuehto j‰lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
 		if (!isset($jvtsekres)) {
@@ -1682,7 +1688,7 @@
 
 	// jos tultiin ulos loopista, ett‰ meill‰ on toimittamattomia rivej‰, tehd‰‰n niist‰ puuterivi
 	// tai jos tullaan niin, ett‰ var-kent‰ss‰ on J tai P tai jotain
-	if ($toimittamatta > 0 or trim($var) != '' or $laskurow['tila'] == 'O') {
+	if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
 		if ($lisaarivi_debug==1) echo "<br>Menn‰‰n puutehaaraan: $tuoteno hinta $hinta toimittamatta: $toimittamatta var: $var laskuntila: $laskurow[tila]<br>";
 
@@ -1726,7 +1732,7 @@
 			}
 		}
 
-		if ($laskurow['tila'] == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
+		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
 			if ($toimittamatta >= $suoratoimitus_rivikpl) {
 				$toimittamatta = $suoratoimitus_rivikpl;
@@ -1779,7 +1785,7 @@
 			$puu_var[]		= $var;
 		}
 
-		if ($laskurow['tila'] != 'O' and $perheid == 0 and $perhekielto == "") {
+		if ($rivityyppi != 'O' and $perheid == 0 and $perhekielto == "") {
 
 			$riikoko 		= 1;
 			$isat_array 	= array();
@@ -1869,7 +1875,7 @@
 			}
 
 			// Jos ollaan lis‰‰m‰ss‰ alkuper‰ist‰ tuotetta niin otetaan takaisin k‰ytt‰j‰n syˆtetyt alkuper‰iset hinnat
-			if ($laskurow['tila'] != 'O' and strtoupper($trow["tuoteno"]) == strtoupper($alkupera_trow["tuoteno"])) {
+			if ($rivityyppi != 'O' and strtoupper($trow["tuoteno"]) == strtoupper($alkupera_trow["tuoteno"])) {
 				$hinta	= $alkupera_hinta;
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1879,7 +1885,7 @@
 				$netto	= $alkupera_netto;
 				$alv	= $alkupera_alv;
 			}
-			elseif ($laskurow['tila'] != 'O' and $i > 0) {
+			elseif ($rivityyppi != 'O' and $i > 0) {
 				//K‰sinsyˆteyt hinnat nollataan kun lis‰t‰‰n tuoteperheiden lapsia
 				$hinta	= "";
 
@@ -1895,24 +1901,22 @@
 				}
 			}
 
-			// Ostossa splittaukset menee aina samalla hinnalla
-			if ($laskurow['tila'] == 'O' and $hinta == "") {
-				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($laskurow, $trow, $kpl);
-			}
-			elseif ($laskurow['tila'] == 'O') {
-				$lis_hinta = $hinta;
+			if ($rivityyppi == 'O') {
+				$ale_kaikki_array = array();
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-					$lis_ale_kaikki['ale'.$alepostfix] = ${'alkupera_ale'.$alepostfix};
+					$ale_kaikki_array['ale'.$alepostfix] = ${'alkupera_ale'.$alepostfix};
 				}
+
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($laskurow, $trow, $kpl, "", $hinta, $ale_kaikki_array);
 			}
 
 			// jos k‰ytˆss‰ on hintakertoimet, niin muutetaan yksikkˆ kuntoon
-			if ($laskurow["tila"] == 'O' and $trow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
+			if ($rivityyppi == 'O' and $trow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
 				$lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 			}
 
-			if ($laskurow['tila'] != 'O') {
+			if ($rivityyppi != 'O') {
 				$ale_kaikki_array = array();
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1930,7 +1934,7 @@
 				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 
-			if ($laskurow['tila'] != 'O') {
+			if ($rivityyppi != 'O') {
 				switch ($var) {
 					case 'J' : // J‰lkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
@@ -2285,11 +2289,16 @@
 
 			$query_insert_ale_lisa = '';
 
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+			if ($rivityyppi == 'O') {
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+				}
 			}
-
-
+			else {
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+				}
+			}
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
@@ -2486,7 +2495,7 @@
 				}
 			}
 
-			if (count($puu_tuoteno) > 1 and $laskurow['tila'] != 'O' and $lop == "") {
+			if (count($puu_tuoteno) > 1 and $rivityyppi != 'O' and $lop == "") {
 				//P‰ivitet‰‰n is‰n perhetunnus
 				if ($rivityyppi == 'V') {
 					$query = "	SELECT tuoteno

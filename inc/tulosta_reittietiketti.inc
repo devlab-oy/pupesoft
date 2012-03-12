@@ -238,12 +238,30 @@
 
 				$unifaun->_getXML();
 
+				$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+				$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+
+				$query = "	SELECT tuote.vakkoodi, {$selectlisa}
+							FROM kerayserat
+							{$joinlisa}
+							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.sscc = '{$row['sscc']}'";
+				$pakkaus_info_res = pupe_query($query);
+				$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
 				$kollitiedot = array(
 					'maara' => $keraysera_row['maara'],
 					'paino' => $keraysera_row['tuotemassa'],
-					'pakkauskuvaus' => $keraysera_row['pakkauskuvaus']
+					'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
+					'leveys' => $pakkaus_info_row['leveys'],
+					'korkeus' => $pakkaus_info_row['korkeus'],
+					'syvyys' => $pakkaus_info_row['syvyys'],
+					'vakkoodi' => $pakkaus_info_row['vakkoodi']
 				);
 
+				/* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
 				$unifaun->setContainerRow($kollitiedot);
 
 				// $unifaun->_saveForDebug();

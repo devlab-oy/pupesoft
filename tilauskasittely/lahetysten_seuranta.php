@@ -149,7 +149,7 @@
 						echo "<td class='sscc' id='{$era_row['sscc']}'>";
 
 						if ($era_row['sscc_ulkoinen'] != 0) {
-							echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key=0020008411&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+							echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
 						}
 						else {
 							echo "{$era_row['sscc']}";

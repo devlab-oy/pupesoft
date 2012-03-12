@@ -86,7 +86,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -147,10 +147,10 @@
 					echo "<tr>";
 
 					if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
-						echo "<td>$yhtiorow[nimi]</td>";
+						echo "<td>$yhtio<br>$yhtiorow[nimi]</td>";
 					}
 					else {
-						echo "<td>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja epäselvä")."!</font></td>";
+						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja epäselvä")."!</font></td>";
 					}
 
 					echo "<td>";

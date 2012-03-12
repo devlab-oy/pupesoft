@@ -4,8 +4,8 @@
 
 	echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
 
-	$kansio 					= "/Users/tony/Desktop/e3/";			//Pit‰‰ vaihtaa !!
-	$kansio_valmis				= "/Users/tony/Desktop/e3/valmis/";	//Pit‰‰ vaihtaa !!
+	$kansio 					= $e3ostot;			//Pit‰‰ vaihtaa !!
+	$kansio_valmis				= $e3ostot_kansio;	//Pit‰‰ vaihtaa !!
 	$toimittajaytunnus 			= "";
 	$e3ostotilausnumero 		= "";
 	$tuoteno					= "";

@@ -2795,6 +2795,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "vak_erittely") {
+
+		$sel = "";
+
+		if ($trow[$i] != '') {
+			$sel = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Ei tulosteta VAK/ADR-erittelyä lähetteen kanssa")."</option>
+					<option value = 'K' $sel>".t("Tulostetaan VAK/ADR-erittely lähetteen tulostuksen kanssa")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat

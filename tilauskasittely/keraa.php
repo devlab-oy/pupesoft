@@ -1461,7 +1461,88 @@
 					$lasresult = mysql_query($query) or pupe_error($query);
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
+						
+						// Tulostetaan VAK/ADR-erittely ennen lähetteitä ja osoitelappuja.
+						if ($vakadr_tulostin != "") {
+							//haetaan VAK/ADR tulostuskomento
+							$query   = "SELECT * FROM kirjoittimet WHERE yhtio='{$kukarow["yhtio"]}' AND tunnus='{$vakadr_tulostin}'";
+							$kirres  = pupe_query($query);
+							$kirrow  = mysql_fetch_assoc($kirres);
+							$vakadr_komento = $kirrow['komento'];
+						}
+						
+						// Tulostetaan VAK/ADR-erittely
+						if ($vakadr_tulostin != "" and $vakadr_komento != '' and $vakadrkpl > 0 and $yhtiorow["kerayserat"] == "K" and $yhtiorow["vak_erittely"] == "K") {
+														
+							// keraa.php:ssä "ID" tarkoittaa keräyserän numeroa jota käytetään.
+							// Koska whilessä mennään tunnus kerrallaan niin tehdään samaa tahtia lappujakin.
+							// Haluamme vak-adr-lapulle "kyseisen" laskun tiedot niin haetaan uusiksi kyseisen laskun tiedot ja passataan se vak-adr:lle
+							
+							$vakquery	= "SELECT * FROM kerayserat WHERE nro = '{$id}' and otunnus = '{$laskurow["tunnus"]}'";
+							$vakres		= pupe_query($vakquery);
 
+							while($vakrow = mysql_fetch_assoc($vakres)) {
+
+								$haetaan_todellinen_lasku = "SELECT * FROM lasku WHERE yhtio = '{$kukarow["yhtio"]}' AND tunnus = '{$vakrow["otunnus"]}'";
+								$todlasku_results = pupe_query($haetaan_todellinen_lasku);
+								$todlasku = mysql_fetch_assoc($todlasku_results);
+
+								$apuquery ="SELECT tuote.tuoteno, tuote.vakkoodi, kerayserat.sscc, kerayserat.tilausrivi
+											FROM kerayserat
+											JOIN tilausrivi on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
+											JOIN tuote on (kerayserat.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.vakkoodi not in ('','0'))
+											WHERE kerayserat.yhtio = '{$kukarow["yhtio"]}'
+											AND tilausrivi.otunnus = '{$vakrow["otunnus"]}'";
+								$apuresult = pupe_query($apuquery);
+
+								if (mysql_num_rows($apuresult) > 0) {
+							
+									unset($koodit);
+									unset($tuotet);
+									
+									while($vika = mysql_fetch_assoc($apuresult)) {
+										$koodit[$vika["sscc"]][$vika["vakkoodi"]] = $vika["vakkoodi"];
+										$tuotet[$vika["sscc"]][] = $vika["tilausrivi"];
+									}
+
+									$params_vak = array(
+									'boldi'						=> $boldi,
+									'norm'						=> $norm,
+									'pieni'						=> $pieni,
+									'pieni_boldi'				=> $pieni_boldi,
+									'iso'						=> $iso,
+									'kieli'						=> $kieli,
+									'laskurow'					=> $todlasku,
+									'page'						=> NULL,
+									'pdf'						=> NULL,
+									'row'						=> NULL,
+									'sivu'						=> 1,
+									'thispage'					=> NULL,
+									'koodit'					=> $koodit,
+									'tuotteet'					=> $tuotet,
+									);
+									
+									// kutsutaan nyt erittely
+									require('tulosta_vakerittely.inc');
+
+									// Aloitellaan vakadr:n teko
+									$params_vak = otsikot($params_vak);
+
+									$params_vak = rivi_paketti($params_vak);
+
+									$params_vak = loppu_vakadr($params_vak);
+
+									$params_vak["komento"] = $vakadr_komento;
+
+									//tulostetaan sivu
+									print_pdf_vakadr($params_vak);
+
+									unset($params_vak);
+								}
+							}
+
+						} 
+						
 						if ($valittu_tulostin != "") {
 							//haetaan lähetteen tulostuskomento
 							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_tulostin'";
@@ -2674,6 +2755,7 @@
 			if ($toim != 'VALMISTUS' and $otsik_row["tila"] != 'V') {
 				$oslappkpl 	= $yhtiorow["oletus_oslappkpl"];
 				$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
+				$vakadrkpl	= $yhtiorow["oletus_lahetekpl"];
 			}
 
 			$spanni = 3;
@@ -2763,6 +2845,31 @@
 				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 					echo "<th>&nbsp;</th>";
 				}
+				echo "</tr>";
+			}
+
+			if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K") {
+				echo "<tr>";
+				echo "<th>".t("VAK/ADR-erittely").":</th>";
+				echo "<th colspan='$spanni'>";
+
+				$query = "	SELECT *
+							FROM kirjoittimet
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							ORDER by kirjoitin";
+				$kirre = pupe_query($query);
+
+				echo "<select name='vakadr_tulostin'>";
+				echo "<option value=''>".t("Ei tulosteta")."</option>";
+
+				while ($kirrow = mysql_fetch_assoc($kirre)) {
+
+					$sel = $sel_lahete[$kirrow["tunnus"]] ? " selected" : "";
+
+					echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
+				}
+
+				echo "</select> ".t("Kpl").": <input type='text' size='4' name='vakadrkpl' value='$vakadrkpl'>";
 				echo "</tr>";
 			}
 

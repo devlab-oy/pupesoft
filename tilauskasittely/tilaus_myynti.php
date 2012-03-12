@@ -2805,7 +2805,7 @@ if ($tee == '') {
 				echo "<th align='left'>".t("Laatija").":</th>";
 			}
 
-			echo "<td><input type='text' name='myyjanro' size='8' $state> tai ";
+			echo "<td><input type='text' name='myyjanro' size='8' $state> ".t("tai")." ";
 			echo "<select name='myyja' onchange='submit();' $state>";
 
 			$query = "	SELECT DISTINCT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema

@@ -482,6 +482,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("Hälytysrajan laskenta")."</th>\n";
 	echo "<td><select name='tarve'>\n";
+	echo "<option value='3'>".t("3 pv tarve")."</option>";
 	echo "<option value='7'>".t("7 pv tarve")."</option>";
 	echo "<option value='14' selected>".t("14 pv tarve")."</option>";
 	echo "<option value='21'>".t("21 pv tarve")."</option>";

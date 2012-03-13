@@ -483,11 +483,11 @@
 		$joinlisa = "";
 
 		if (isset($reservipaikka)) {
-			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."'" : "";
+			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
 
 			$joinlisa = " JOIN varaston_hyllypaikat ON (
 							{$ressulisa}
-							AND varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
+							varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
 							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
 							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 
 							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso 

@@ -340,7 +340,7 @@
 			}
 		}
 
-		echo "{$chk} / {$row['tilatut']}<br>$row[tilaukset]</td>";
+		echo "{$chk} / {$row['tilatut']}</td>";
 
 		echo "<td>{$row['keratyt']} / {$row['suunnittelussa']}</td>";
 		echo "<td>{$row['kg_ker']} / {$row['kg_suun']}</td>";

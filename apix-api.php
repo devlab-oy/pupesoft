@@ -17,23 +17,15 @@
 		exit;
 	}
 
-	// Asetukset
-	$software = "Pupesoft";
-	$version  = "1.0";
+	function apix_receive ($apix_keys) {
 
-	// Haetaan api_keyt yhtion_parametreistä
-	$sql_query = "	SELECT yhtion_parametrit.apix_tunnus, yhtion_parametrit.apix_avain, yhtio.nimi
-					FROM yhtio
-					JOIN yhtion_parametrit USING (yhtio)
-					WHERE yhtio.yhtio = '{$kukarow['yhtio']}'
-					AND yhtion_parametrit.apix_tunnus != ''
-					AND yhtion_parametrit.apix_avain != ''";
-	$apix_result = mysql_query($sql_query) or die("Virhe SQL kyselyssä");
-
-	while ($apix_keys = mysql_fetch_assoc($apix_result)) {
+		// Asetukset
+		$software = "Pupesoft";
+		$version  = "1.0";
 
 		#$url = "https://test-terminal.apix.fi/receive";
 		$url = "https://terminal.apix.fi/receive";
+
 		$timestamp	= gmdate("YmdHis");
 
 		// Muodostetaan apixin vaatima salaus ja url
@@ -48,36 +40,66 @@
 		$response = curl_exec($ch);
 		curl_close($ch);
 
-		if ($response != '') {
-			$tiedosto = $verkkolaskut_in."/apix_".md5(uniqid(mt_rand(), true))."_nimi.zip";
-			$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu luoda!");
-			fwrite($fd, $response);
+		return $response;
+	}
 
-			$zip = new ZipArchive();
+	// Haetaan api_keyt yhtion_parametreistä
+	$sql_query = "	SELECT yhtion_parametrit.apix_tunnus, yhtion_parametrit.apix_avain, yhtio.nimi
+					FROM yhtio
+					JOIN yhtion_parametrit USING (yhtio)
+					WHERE yhtion_parametrit.apix_tunnus != ''
+					AND yhtion_parametrit.apix_avain != ''";
+	$apix_result = mysql_query($sql_query) or die("Virhe SQL kyselyssä");
 
-			if ($zip->open($tiedosto) === TRUE) {
-				// Loopataan tiedostot läpi
-				for ($i = 0; $i < $zip->numFiles; $i++) {
-					$file = $zip->getNameIndex($i);
+	while ($apix_keys = mysql_fetch_assoc($apix_result)) {
 
-					// Puretaan vain .xml tiedostot ja nimetään se uudelleen.
-					if ($zip->extractTo($verkkolaskut_in, substr($file, 0, -4).".xml")) {
-						rename($verkkolaskut_in."/".substr($file, 0, -4).".xml", $verkkolaskut_in."/apix_".md5(uniqid(mt_rand(), true)).".xml");
-						echo "Haettiin lasku yritykselle: {$apix_keys['nimi']}\n";
+		while (($response = apix_receive($apix_keys)) != "") {
+
+			// Randomstringi filenimiin
+			$apix_nimi = md5(uniqid(mt_rand(), true));
+
+			// Luodaan temppidirikka jonne työnnetään tän haun kaikki apixfilet
+			$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+
+			if (mkdir($apix_tmpdirnimi)) {
+
+				$tiedosto = $apix_tmpdirnimi."/apix_laskupaketti.zip";
+				$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu luoda!");
+				fwrite($fd, $response);
+
+				$zip = new ZipArchive();
+
+				if ($zip->open($tiedosto) === TRUE) {
+
+					if ($zip->extractTo($apix_tmpdirnimi)) {
+
+						// Loopataan tiedostot läpi
+						for ($i = 0; $i < $zip->numFiles; $i++) {
+
+							$file = $zip->getNameIndex($i);
+
+							if (strtoupper(substr($file, -4)) == ".XML") {
+								// Tämä on itse verkkolaskuaineisto
+								rename($apix_tmpdirnimi."/".$file, $verkkolaskut_in."/apix_".$apix_nimi."_apix-$file");
+
+								echo "Haettiin lasku yritykselle: {$apix_keys['nimi']}\n";
+							}
+							else {
+								// Nämä ovat liitteitä
+								rename($apix_tmpdirnimi."/".$file, $verkkolaskut_orig."/apix_".$apix_nimi."_apix-$file");
+							}
+						}
 					}
 				}
 
 				fclose($fd);
 
-				// Poistetaan zippi
-				unlink($tiedosto);
+				// Poistetaan apix-tmpdir
+				exec("rm -rf $apix_tmpdirnimi");
 			}
 			else {
-				echo "Virhe, tiedoston purussa!\n";
+				echo "Virhe APIX-tiedoston purkamisessa!\n";
 			}
-		}
-		else {
-			continue;
 		}
 	}
 

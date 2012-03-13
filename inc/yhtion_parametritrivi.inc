@@ -870,7 +870,9 @@
 		}
 
 		$ulos .= "<option value='2' $sel1>".t("Yksikkö- ja rivihinnat pyöristetään kahteen desimaaliin")."</option>";
+		$ulos .= "<option value='3' $sel2>".t("Yksikkö- ja rivihinnat pyöristetään kolmeen desimaaliin")."</option>";
 		$ulos .= "<option value='4' $sel2>".t("Yksikkö- ja rivihinnat pyöristetään neljään desimaaliin")."</option>";
+		$ulos .= "<option value='5' $sel2>".t("Yksikkö- ja rivihinnat pyöristetään viiteen desimaaliin")."</option>";
 		$ulos .= "<option value='6' $sel3>".t("Yksikkö- ja rivihinnat pyöristetään kuuteen desimaaliin")."</option>";
 		$ulos .= "</select></td>";
 

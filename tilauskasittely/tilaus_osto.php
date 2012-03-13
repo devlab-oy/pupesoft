@@ -97,15 +97,6 @@
 
 	if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
-		//korjataan hintaa ja aleprossaa
-		$hinta	= str_replace(',','.',$hinta);
-
-		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-			${'ale'.$alepostfix} = str_replace(',','.',${'ale'.$alepostfix});
-		}
-
-		$kpl 	= str_replace(',','.',$kpl);
-
 		// Hateaan tilauksen tiedot
 		$query = "	SELECT *
 					FROM lasku
@@ -473,7 +464,7 @@
 			$kayttajan_alv		= $alv;
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
+				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};				
 			}
 
 			foreach ($tuoteno_array as $tuoteno) {
@@ -521,7 +512,7 @@
 						${'ale'.$alepostfix} = ${'ale_array'.$alepostfix}[$tuoteno];
 					}
 					else {
-						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};
+						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};						
 					}
 				}
 
@@ -553,7 +544,7 @@
 					$alv = $kayttajan_alv;
 				}
 
-				if ($kpl != 0) {
+				if ($kpl != "") {
 					require ('lisaarivi.inc');
 				}
 
@@ -579,6 +570,7 @@
 			}
 
 			$tee = "Y";
+			
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				unset(${'ale'.$alepostfix});
 				unset(${'ale_array'.$alepostfix});

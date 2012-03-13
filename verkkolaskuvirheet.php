@@ -87,7 +87,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -104,7 +104,7 @@
 					// Otetaan tarvittavat muuttujat tännekin
 					$xml = simplexml_load_string($xmlstr);
 					// Katsotaan mitä aineistoa käpistellään
-					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
+					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
@@ -157,10 +157,10 @@
 					echo "<tr>";
 
 					if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
-						echo "<td>$yhtiorow[nimi]</td>";
+						echo "<td>$yhtio<br>$yhtiorow[nimi]</td>";
 					}
 					else {
-						echo "<td>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja epäselvä")."!</font></td>";
+						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja epäselvä")."!</font></td>";
 					}
 
 					echo "<td>";
@@ -240,12 +240,12 @@
 					}
 					else {
 
-						// Jos on Maventa-lasku niin yritetään hakea laskun kuva mukaan
-						if (preg_match("/maventa_(.*?)_maventa/", basename($file), $match)) {
+						// Maventa- tai APIX-lasku, niin yritetään hakea laskun kuva mukaan
+						if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
 
 							// Haetaan liitteet
 							unset($liitefilet);
-							$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$match[1]}_maventa*\"", $liitefilet);
+							$liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
 
 							if ($liitteet != "") {
 								foreach ($liitefilet as $liitefile) {

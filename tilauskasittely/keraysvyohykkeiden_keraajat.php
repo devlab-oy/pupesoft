@@ -269,7 +269,6 @@
 				JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
-				#LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus {$kerayserat_tilalisa})
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				{$wherelisa}
 				GROUP BY keraysvyohyke.nimitys
@@ -363,8 +362,8 @@
 		echo "</tr>";
 
 		$query = "	SELECT kuka.nimi AS 'keraaja', 
-					GROUP_CONCAT(kerayserat.nro) AS 'erat',
-					GROUP_CONCAT(kerayserat.otunnus) AS 'otunnukset',
+					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
+					GROUP_CONCAT(DISTINCT kerayserat.otunnus) AS 'otunnukset',
 					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
 					ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg',
 					COUNT(DISTINCT kerayserat.tilausrivi) AS 'rivit',
@@ -416,7 +415,7 @@
 							GROUP_CONCAT(DISTINCT lasku.prioriteettinro ORDER BY prioriteettinro SEPARATOR ', ') AS 'prioriteettinro',
 							GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tunnus'
 							FROM kerayserat
-							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus {$wherelisa})
+							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus AND lasku.tunnus IN ({$row['tilaukset']}))
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.nro IN ({$era_row['erat']})
 							GROUP BY 1

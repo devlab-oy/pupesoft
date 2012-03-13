@@ -1565,12 +1565,12 @@
 						}
 					}
 
-					// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritet‰‰n hakea laskun kuva mukaan
-					if (preg_match("/maventa_(.*?)_maventa/", basename($file), $match)) {
+					// Maventa- tai APIX-lasku, niin yritet‰‰n hakea laskun kuva mukaan
+					if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
 
 						// Haetaan liitteet
 						unset($liitefilet);
-						$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$match[1]}_maventa*\"", $liitefilet);
+						$liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
 
 						if ($liitteet != "") {
 							foreach ($liitefilet as $liitefile) {
@@ -1581,7 +1581,7 @@
 
 									$data = mysql_real_escape_string($data);
 
-									$filename = str_replace("maventa_{$maventa_lasku_id}_maventa-", "", basename($liitefile));
+									$filename = str_replace("maventa_{$match[2]}_maventa-", "", basename($liitefile));
 
 									// Lis‰t‰‰n kuva
 									$query = "	INSERT INTO liitetiedostot SET

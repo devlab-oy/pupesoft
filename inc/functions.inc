@@ -15812,6 +15812,18 @@ if (!function_exists("tee_keraysera2")) {
 				if ($debug) echo "juokseva_nro $juokseva_nro > käyttäjän max_keraysera_alustat $kukarow[max_keraysera_alustat]<br>";
 				if ($debug) echo "((int) $rivit >= (int) $keraysvyohyketiedot[max_keraysera_rivit]) or ((int) $juokseva_nro > (int) $keraysvyohyketiedot[max_keraysera_alustat]) or ((int) $juokseva_nro > (int) $kukarow[max_keraysera_alustat])<br><br>";
 
+				if ($debug) {
+					if (((int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit'])) {
+						echo "boo1<br>";
+					}
+					if (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat'])) {
+						echo "boo2<br>";
+					}
+					if (((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
+						echo "boo3<br>";
+					}
+				}
+
 				if (((int) $rivit >= (int) $keraysvyohyketiedot['max_keraysera_rivit']) or ((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 					if ($debug and (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat']))) {
 						echo "1.) ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>";

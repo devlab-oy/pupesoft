@@ -275,12 +275,6 @@
 				ORDER BY 1";
 	$result = pupe_query($query);
 
-	$rivit = 1;
-	$juokseva_nro = 1;
-	$keraysvyohyketiedot['max_keraysera_alustat'] = 10;
-	$keraysvyohyketiedot['max_keraysera_rivit'] = 200;
-	$kukarow['max_keraysera_alustat'] = 9999999999;
-
 	echo "<table>";
 
 	echo "<tr>";

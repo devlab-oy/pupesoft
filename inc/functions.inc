@@ -10760,7 +10760,8 @@ if (!function_exists("tarkista_oikeus")) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND kuka = '$kukarow[kuka]'
 					AND nimi LIKE '%$ohjelma'
-					$querylisa";
+					$querylisa
+					ORDER BY length(alanimi)";
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {

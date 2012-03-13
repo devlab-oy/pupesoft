@@ -204,6 +204,9 @@ class Unifaun {
 			#$uni_meta_val->addAttribute('n', 'partition');
 
 			// Lähettäjän tiedot
+			/** tehdään yhtiön parametri "unifaun pikahakuarvo"
+			 * voidaan silloin jättää nimitiedot tyhjiksi
+			*/
 			$uni_sender = $xml->addChild('sender');	# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
 			$uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
 
@@ -286,7 +289,10 @@ class Unifaun {
 
 			// Vastaanottajan tiedot
 			$uni_receiver = $xml->addChild('receiver');	# Any contents. Mandatory.
-			$uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
+
+			$receiver_id = trim($this->toitarow['jalleenmyyjanro']) != "" ? $this->toitarow["jalleenmyyjanro"] : $this->asiakasrow["tunnus"]; # HIT InNight mandatory toimitustapa.jalleenmyyjanro
+
+			$uni_receiver->addAttribute('rcvid', utf8_encode($receiver_id));
 
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); # Receiver's name
 				$uni_rcv_val->addAttribute('n', "name");
@@ -485,6 +491,11 @@ class Unifaun {
 				$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
 				$uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
 
+					if (trim($this->toitarow['lajittelupiste']) != "") {
+						$uni_ser_val = $uni_service->addChild('val', $this->toitarow['lajittelupiste']); # HIT InNight mandatory.
+						$uni_ser_val->addAttribute('n', "sortpos");
+					}
+
 					$uni_ser_val = $uni_service->addChild('val', "no"); # Defines if the shipment is a return shipment or not. Valid values: yes, no
 					$uni_ser_val->addAttribute('n', "returnlabel");
 
@@ -592,14 +603,14 @@ class Unifaun {
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
 		#$uni_par_val->addAttribute('n', "area");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Length
-		#$uni_par_val->addAttribute('n', "length");
+		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length
+		$uni_par_val->addAttribute('n', "length");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Width
-		#$uni_par_val->addAttribute('n', "width");
+		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['leveys'])); # Width
+		$uni_par_val->addAttribute('n', "width");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Height
-		#$uni_par_val->addAttribute('n', "height");
+		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['korkeus'])); # Height
+		$uni_par_val->addAttribute('n', "height");
 
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Item number
 		#$uni_par_val->addAttribute('n', "itemno");

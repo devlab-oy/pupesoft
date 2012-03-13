@@ -34,6 +34,34 @@
 
 				$tiedosto = $unifaun_fetch_folder."/".$file;
 
+				/*
+ 				 * pupessa tilausnumerona lähetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
+				 */
+
+				/* Normaalisanoma ilman viitettä
+				 * tilnro;sscc_ulkoinen;rahtikirjanro;datetime
+				 * 12345;373325380188609457;1000017762;2012-01-20 13:51:50
+				 */
+
+				/* Normaalisanoma viitteen kanssa
+				 * tilnro;sscc_ulkoinen;rahtikirjanro;datetime;reference
+				 * 12345;373325380188609457;1000017762;2012-01-20 13:51:50;77777777
+				 */
+
+				/* Sanomien erikoiskeissit (Itella, TNT, DPD, Matkahuolto)
+				 * tilnro;ensimmäinen kollitunniste on lähetysnumero;sama ensimmäinen kollitunniste on rahtikirjanumerona;timestamp
+				 * 199188177;MA1234567810000009586;MA1234567810000009586;2012-01-23 10:58:57 (Kimi: MAtkahuolto)
+				 * 
+				 * tilnro;sscc_ulkoinen;LOGY rahtikirjanro;timestamp
+				 * 12345;373325380188816602;200049424052;2012-01-23 10:59:03 (Kimi: Kaukokiito, Kiitolinja ja Vr Transpoint; SSCC + LOGY-rahtikirjanumero)
+				 * 
+				 * 
+				 * 555555;JJFI65432110000070773;;2012-01-24 11:12:56; (Kimi: Itella)
+				 *
+				 * 
+				 * 14656099734;1;GE249908410WW;2012-01-24 11:12:49;52146882 (Kimi: TNT)
+				 */
+
 				list($tilausnumero_sscc, $sscc_ulkoinen, , $timestamp, $_sscc) = explode(";", file_get_contents($tiedosto));
 
 				list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);

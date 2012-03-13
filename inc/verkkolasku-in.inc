@@ -31,7 +31,7 @@
 			require_once("inc/functions.inc");
 
 			// Katsotaan mit‰ aineistoa k‰pistell‰‰n
-			if (strpos($file, "finvoice-") !== false) {
+			if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
 			elseif (strpos($file, "_invoice") !== false){
@@ -1565,54 +1565,44 @@
 						}
 					}
 
-					// Jos tiedostonimi alkaa "finvoice-maventa_", niin yritet‰‰n hakea laskun kuva mukaan
-					if (substr(basename($file), 0, 17) == "finvoice-maventa_") {
+					// Maventa- tai APIX-lasku, niin yritet‰‰n hakea laskun kuva mukaan
+					if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
 
-						// Otetaan laskun ID tiedostonimest‰, lˆydyy "maventa_" ja "_maventa" stringien v‰list‰
-						$id_loppupositio = strpos(basename($file), "_maventa") - 17;
+						// Haetaan liitteet
+						unset($liitefilet);
+						$liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
 
-						// Loppupositio lˆytyi, joten tiedosto on oikein nimetty
-						if ($id_loppupositio !== FALSE) {
+						if ($liitteet != "") {
+							foreach ($liitefilet as $liitefile) {
+								if (strtoupper(substr($liitefile, -4)) == ".PDF") {
 
-							// Laskun ID
-							$maventa_lasku_id = substr(basename($file), 17, $id_loppupositio);
+									$data = file_get_contents($liitefile);
+									$filesize = strlen($data);
 
-							// Haetaan liitteet
-							unset($liitefilet);
-							$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$maventa_lasku_id}_maventa*\"", $liitefilet);
+									$data = mysql_real_escape_string($data);
 
-							if ($liitteet != "") {
-								foreach ($liitefilet as $liitefile) {
-									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
+									$filename = str_replace("maventa_{$match[2]}_maventa-", "", basename($liitefile));
 
-										$data = file_get_contents($liitefile);
-										$filesize = strlen($data);
-
-										$data = mysql_real_escape_string($data);
-
-										$filename = str_replace("maventa_{$maventa_lasku_id}_maventa-", "", basename($liitefile));
-
-										// Lis‰t‰‰n kuva
-										$query = "	INSERT INTO liitetiedostot SET
-													yhtio    			= '$kukarow[yhtio]',
-													liitos   			= 'lasku',
-													liitostunnus 		= '$tunnus',
-													data     			= '$data',
-													selite   			= '$selite',
-													kieli				= '$yhtiorow[kieli]',
-													filename 			= '$filename',
-													filesize 			= '$filesize',
-													filetype 			= 'application/pdf',
-													image_width			= '',
-													image_height		= '',
-													image_bits			= '',
-													image_channels		= '',
-													kayttotarkoitus		= 'VERKKOLASKU',
-													jarjestys			= '1',
-													laatija				= '$kukarow[kuka]',
-													luontiaika			= now()";
-										$Xresult = pupe_query($query);
-									}
+									// Lis‰t‰‰n kuva
+									$query = "	INSERT INTO liitetiedostot SET
+												yhtio    			= '$kukarow[yhtio]',
+												liitos   			= 'lasku',
+												liitostunnus 		= '$tunnus',
+												data     			= '$data',
+												selite   			= '$selite',
+												kieli				= '$yhtiorow[kieli]',
+												filename 			= '$filename',
+												filesize 			= '$filesize',
+												filetype 			= 'application/pdf',
+												image_width			= '',
+												image_height		= '',
+												image_bits			= '',
+												image_channels		= '',
+												kayttotarkoitus		= 'VERKKOLASKU',
+												jarjestys			= '1',
+												laatija				= '$kukarow[kuka]',
+												luontiaika			= now()";
+									$Xresult = pupe_query($query);
 								}
 							}
 						}

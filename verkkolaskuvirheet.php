@@ -104,7 +104,7 @@
 					$xml = simplexml_load_string($xmlstr);
 
 					// Katsotaan mit‰ aineistoa k‰pistell‰‰n
-					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
+					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
@@ -230,12 +230,12 @@
 					}
 					else {
 
-						// Jos on Maventa-lasku niin yritet‰‰n hakea laskun kuva mukaan
-						if (preg_match("/maventa_(.*?)_maventa/", basename($file), $match)) {
+						// Maventa- tai APIX-lasku, niin yritet‰‰n hakea laskun kuva mukaan
+						if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
 
 							// Haetaan liitteet
 							unset($liitefilet);
-							$liitteet = exec("find $verkkolaskut_orig -name \"*maventa_{$match[1]}_maventa*\"", $liitefilet);
+							$liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
 
 							if ($liitteet != "") {
 								foreach ($liitefilet as $liitefile) {

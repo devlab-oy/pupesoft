@@ -200,7 +200,7 @@ unset($siirrasuoritustilille);
 unset($ohjewiki_url);
 unset($synkronoi_kiellot);
 unset($alv_laskelman_sallittu_erotus);
-unset($e3_ehdotuskansio);
+unset($e3_params);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();

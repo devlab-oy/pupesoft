@@ -85,6 +85,65 @@ if (!function_exists("query_dump")) {
 	}
 }
 
+// Tehd‰‰n REST-kutsuja. Data aina JSON:ia.
+if (!function_exists("pupesoft_rest")) {
+
+	function pupesoft_rest($parameters) {
+
+		if (!isset($parameters["method"]) or !in_array($parameters["method"], array("GET", "POST", "PUT", "DELETE"))) {
+			return array(FALSE, "Invalid method");
+		}
+
+		if (!isset($parameters["data"]) or !is_array($parameters["data"])) {
+			return array(FALSE, "Invalid data");
+		}
+
+		if (!isset($parameters["url"]) or parse_url($parameters["url"]) === FALSE) {
+			return array(FALSE, "Invalid URL");
+		}
+
+		if (!isset($parameters["headers"]) or !is_array($parameters["headers"])) {
+			$parameters["headers"] = array(	'Accept: application/json',
+											'Content-Type: application/json',
+											);
+		}
+
+		$handle = curl_init();
+		curl_setopt($handle, CURLOPT_URL, $parameters["url"]);
+		curl_setopt($handle, CURLOPT_HTTPHEADER, $parameters["headers"]);
+		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+
+		$data_json = json_encode($parameters["data"]);
+
+		switch ($parameters["method"]) {
+			case "GET":
+				// Default
+				break;
+			case "POST":
+				curl_setopt($handle, CURLOPT_POST, true);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				break;
+			case "PUT":
+				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				break;
+			case "DELETE":
+				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'DELETE');
+				break;
+		}
+
+		$response_json = curl_exec($handle);
+		$response = json_decode($response_json, true);
+
+		$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+
+		return array($code, $response);
+	}
+
+}
+
 if (!function_exists("tv1dateconv")) {
 	function tv1dateconv($date, $pitka = "", $lyhyt = "") {
 

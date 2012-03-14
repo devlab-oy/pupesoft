@@ -62,7 +62,9 @@
 				 * 14656099734;1;GE249908410WW;2012-01-24 11:12:49;52146882 (Kimi: TNT)
 				 */
 
-				list($tilausnumero_sscc, $sscc_ulkoinen, , $timestamp, $_sscc) = explode(";", file_get_contents($tiedosto));
+				list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($tiedosto));
+
+				$sscc_ulkoinen = $sscc_ulkoinen == 1 ? 0 : $sscc_ulkoinen;
 
 				list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);
 

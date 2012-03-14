@@ -240,14 +240,18 @@
 
 				$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
 				$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+				$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
-				$query = "	SELECT tuote.vakkoodi, {$selectlisa}
+				$query = "	SELECT tuote.vakkoodi, 
+							{$selectlisa},
+							ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 							FROM kerayserat
 							{$joinlisa}
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND kerayserat.sscc = '{$row['sscc']}'";
+							AND kerayserat.sscc = '{$row['sscc']}'
+							GROUP BY 1,2,3,4";
 				$pakkaus_info_res = pupe_query($query);
 				$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
 
@@ -258,13 +262,14 @@
 					'leveys' => $pakkaus_info_row['leveys'],
 					'korkeus' => $pakkaus_info_row['korkeus'],
 					'syvyys' => $pakkaus_info_row['syvyys'],
-					'vakkoodi' => $pakkaus_info_row['vakkoodi']
+					'vakkoodi' => $pakkaus_info_row['vakkoodi'],
+					'kuutiot' => $pakkaus_info_row['kuutiot']
 				);
 
 				/* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
 				$unifaun->setContainerRow($kollitiedot);
 
-				// $unifaun->_saveForDebug();
+				// $unifaun->_saveForDebug("shipment");
 
 				$unifaun->ftpSend();
 
@@ -273,13 +278,15 @@
 
 				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
 
+				// $unifaun->setToimitustapaRow($toitarow);
 				// $unifaun->_discardParcel($mergeid, $parcelno);
-				// $unifaun->_saveForDebug();
+				// $unifaun->_saveForDebug("discardparcel");
 
 				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
 
+				// $unifaun->setToimitustapaRow($toitarow);
 				// $unifaun->_closeWithPrinter($mergeid, "|LASER1|");
-				// $unifaun->_saveForDebug();
+				// $unifaun->_saveForDebug("closewithprinter");
 			}
 		}
 	}

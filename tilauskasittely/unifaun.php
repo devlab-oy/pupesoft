@@ -125,9 +125,9 @@ class Unifaun {
 		}
 	}
 
-	public function _saveForDebug() {
-		$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
-		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
+	public function _saveForDebug($postfix = "") {
+		#$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(),true)).".txt";
+		$filenimi = "/tmp/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(),true)).".txt";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
@@ -423,11 +423,15 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Number of EUR pallets in the shipment. Requires palletregno for sender and receiver.
 				#$uni_shi_val->addAttribute('n', "eurpallets");
 
+				$reference = utf8_encode(substr($this->postirow["viesti"], 0, 17));
+
 				# lähettäjän viite
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference. Any contents. Max. 17 characters.
+				$uni_shi_val = $uni_shipment->addChild('val', "reference example"); # Shipment reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "reference");
 
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["sscc"])); # Shipment reference as barcode. Max. 17 numeric characters.
+				$referencebarcode = (trim($reference) != "" and is_int($reference)) ? $reference : "";
+
+				$uni_shi_val = $uni_shipment->addChild('val', $referencebarcode); # Shipment reference as barcode. Max. 17 numeric characters.
 				$uni_shi_val->addAttribute('n', "referencebarcode");
 
 				# vastaanottajan viite
@@ -597,11 +601,17 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Volume
-		#$uni_par_val->addAttribute('n', "volume");
+		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];		
+
+		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
+		$uni_par_val->addAttribute('n', "volume");
 
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Loadmeter. Can only be specified for entire shipment.
 		#$uni_par_val->addAttribute('n', "area");
+
+		$pakkaustiedot['syvyys'] = $pakkaustiedot['syvyys'] < 0.25 ? 0.25 : $pakkaustiedot['syvyys'];
+		$pakkaustiedot['leveys'] = $pakkaustiedot['leveys'] < 0.25 ? 0.25 : $pakkaustiedot['leveys'];
+		$pakkaustiedot['korkeus'] = $pakkaustiedot['korkeus'] < 0.25 ? 0.25 : $pakkaustiedot['korkeus'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['syvyys'])); # Length
 		$uni_par_val->addAttribute('n', "length");

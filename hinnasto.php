@@ -5,7 +5,7 @@ $useslave = 1;
 
 if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	header("Content-type: application/force-download");
-	header("Content-Disposition: attachment; filename=hinnasto.zip");
+	header("Content-Disposition: attachment; filename=".$_POST['kaunisnimi'].".zip");
 	header("Content-Description: File Transfer");
 
 	$filenimi = '/tmp/' . basename($_POST['filenimi']);
@@ -168,6 +168,11 @@ if (isset($submitnappi)) {
 	$elements = mysql_num_rows($result); // total number of elements to process
 	$bar->initialize($elements); // print the empty bar
 
+	if ($kukarow["extranet"] != "" and function_exists("hinnastoriviotsikot")) {
+		$ulos = hinnastoriviotsikot();
+		fwrite($fh, $ulos);
+	}
+
 	while ($tuoterow = mysql_fetch_array($result)) {
 
 		$ohitus = 0;
@@ -227,6 +232,7 @@ if (isset($submitnappi)) {
 	echo "<td>";
 	echo "<form method='post' action=''>";
 	echo "<input type='hidden' name='filenimi' value='$filenimi'>";
+	echo "<input type='hidden' name='kaunisnimi' value='".t("hinnasto")."'>";
 	echo "<input type='submit' value='".t("Tallenna")."'>";
 	echo "</form>";
 	echo "</td>";

@@ -26,41 +26,45 @@
 	$uusean = '';
 
 	if ($updateean != '' and $uuseankoodi != '' and $tee != '' and $toim != 'YKS') {
-		$query = "UPDATE tuote SET eankoodi = '$uuseankoodi' WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+		$query = "	UPDATE tuote 
+					SET eankoodi = '$uuseankoodi' 
+					WHERE yhtio  = '$kukarow[yhtio]' 
+					and tuoteno  = '$tuoteno'";
 		$resulteankoodi = mysql_query($query) or pupe_error($query);
 	}
 
 	$koodi = 'eankoodi';
+	
 	if ($toim == 'YKS') {
 		$koodi = 'tuoteno';
 	}
-	
+
 	if ($tee == 'H') {
-		
+
 		if ($ahyllyalue == '' or $ahyllynro == '' or $ahyllyvali == '' or $ahyllytaso == '' or $lhyllyalue == '' or $lhyllynro == '' or $lhyllyvali == '' or $lhyllytaso == '') {
 			$tee = 'Y';
 			$varaosavirhe =  t("Sinun on annettava täydellinen osoiteväli")."<br>";
 		}
-		$lisa = "";
 		
+		$lisa = "";
+
 		if ($saldo == '1'){
 			$lisa = " AND saldo > 0	";
 		}
-		
+
 		if ($tee == 'H') {
-			
+
 			$sql = "SELECT tuotepaikat.tuoteno tuoteno
-					#tuotepaikat.saldo, concat_ws('-',tuotepaikat.hyllyalue,if(tuotepaikat.hyllynro!='',tuotepaikat.hyllynro,0),if(tuotepaikat.hyllyvali!='',tuotepaikat.hyllyvali,0),if(tuotepaikat.hyllytaso!='',tuotepaikat.hyllytaso,0)) as paikka, tuotepaikat.tunnus 
-					FROM tuotepaikat 
+					FROM tuotepaikat
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
 					concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
 					concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
 					$lisa
 					ORDER BY 1";
 			$res = mysql_query($sql) or pupe_error($sql);
-			
+
 			$tuotteet = array();
-			
+
 			while ($resrows = mysql_fetch_assoc($res)) {
 				$tuotteet[$resrows['tuoteno']] = $resrows['tuoteno'];
 			}
@@ -116,15 +120,15 @@
 	}
 
 	if ($tee == 'Y') echo "<font class='error'>$varaosavirhe</font>";
-	
+
 	$tkpl = $tulostakappale;
-	
+
 	if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
 		if ($lets == 'go') {
-			$query = "	SELECT komento 
-						FROM kirjoittimet 
-						WHERE yhtio = '$kukarow[yhtio]' 
+			$query = "	SELECT komento
+						FROM kirjoittimet
+						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$kirjoitin'";
 			$komres = mysql_query($query) or pupe_error($query);
 			$komrow = mysql_fetch_array($komres);
@@ -148,7 +152,6 @@
 				}
 			}
 
-
 			foreach ($tuotteet as $key => $tuoteno) {
 				if ($malli != 'Zebra' and $malli != 'Zebra_hylly' and $malli != 'Zebra_tuote') {
 					for ($a = 0; $a < $tkpl; $a++) {
@@ -167,7 +170,7 @@
 					require("inc/tulosta_tuotetarrat_zebra.inc");
 				}
 			}
-			
+
 			if ($malli == 'PDF24' or $malli == 'PDF40') {
 				//keksitään uudelle failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
@@ -185,7 +188,7 @@
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdffilenimi");
 			}
-			
+
 			$tuoteno = '';
 			$tee = '';
 		}
@@ -219,8 +222,8 @@
 		echo "<td><select name='kirjoitin'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-		$query = "	SELECT * 
-					FROM kirjoittimet 
+		$query = "	SELECT *
+					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]'
 					and komento != 'email'
 					order by kirjoitin";
@@ -267,16 +270,16 @@
 		 // tästä alkaa toinen formi
 		$sel = "";
 		$lisa = "";
-	
+
 		if ($saldo =='1') {
 			$sel = "CHECKED";
 		}
-	
+
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='H'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<br>";
-		
+
 		echo "<table>";
 		echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen väliltä")."</center></th><tr>";
 		echo "<tr><th>".t("Alkuosoite")."</th>";
@@ -296,12 +299,12 @@
 		echo "<input type='text' name='lhyllyvali' size='5' maxlength='5' value='$lhyllyvali'>";
 		echo "-";
 		echo "<input type='text' name='lhyllytaso' size='5' maxlength='5' value='$lhyllytaso'></td></tr>";
-		echo "<tr><th>".t("Vain tuotteet joilla on saldoa hyllyillä")."</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";	
-	
+		echo "<tr><th>".t("Vain tuotteet joilla on saldoa hyllyillä")."</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
+
 		echo "<tr><th>".t("KPL")."</th><td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td><tr>";
 		echo "<tr><th>".t("Kirjoitin")."</th><td><select name='kirjoitin'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-	
+
 		mysql_data_seek($kires,0);
 
 		while ($kirow = mysql_fetch_array($kires)) {

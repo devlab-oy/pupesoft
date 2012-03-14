@@ -3,20 +3,41 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	if ($_REQUEST["tee"] == "NAYTATILAUS") {
+	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
 		$no_head = "yes";
 
-		header("Content-type: text/xml");
+		if (isset($_REQUEST["xml"])) {
+			header("Content-type: text/xml");
+		}
+
+		if (isset($_REQUEST["pdf"])) {
+			header("Content-type: application/pdf");
+			header("Content-length: ".strlen(urldecode($_REQUEST["pdf"])));
+			header("Content-Disposition: inline; filename=Pupesoft_lasku");
+			header("Content-Description: Pupesoft_lasku");
+		}
+
 		flush();
 	}
 
 	require ("inc/parametrit.inc");
 
-	if ($_REQUEST["tee"] == "NAYTATILAUS") {
+	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
 		$xml = urldecode($_REQUEST["xml"]);
-		$xml = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xml);
-		$xml = str_replace("<?xml-stylesheet type=\"text/xsl\" href=\"", "<?xml-stylesheet type=\"text/xsl\" href=\"$palvelin2", $xml);
+
+		$xml = str_replace("\"Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
+		$xml = str_replace("\"Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
+
+		$xml = str_replace("\"datain/Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
+		$xml = str_replace("\"datain/Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
+
 		echo $xml;
+		exit;
+	}
+
+	if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["pdf"])) {
+		$pdf = urldecode($_REQUEST["pdf"]);
+		echo $pdf;
 		exit;
 	}
 
@@ -65,7 +86,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+		echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiˆ")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -75,23 +96,36 @@
 
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
 
-				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
+				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"] or $lasku_yhtio["yhtio"] == "") {
 
 					$valitutlaskut++;
 
 					// Otetaan tarvittavat muuttujat t‰nnekin
 					$xml = simplexml_load_string($xmlstr);
 
-					if (strpos($file, "finvoice-") !== false) {
+					// Katsotaan mit‰ aineistoa k‰pistell‰‰n
+					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
-
 						$kumpivoice = "FINVOICE";
+					}
+					elseif (strpos($file, "_invoice") !== false){
+						require("inc/verkkolasku-in-teccom.inc");
+						$kumpivoice = "TECCOM";
+					}
+					elseif (strpos($file, "ORAO") !== false){
+						require("inc/verkkolasku-in-unikko.inc");
+						$kumpivoice = "ORAO";
 					}
 					else {
 						require("inc/verkkolasku-in-pupevoice.inc");
-
 						$kumpivoice = "PUPEVOICE";
 					}
+
+				 	$laskuttajan_osoite 	= "";
+					$laskuttajan_postitp 	= "";
+					$laskuttajan_postino 	= "";
+					$laskuttajan_maa 		= "";
+					$laskuttajan_tilino 	= "";
 
 					if ($kumpivoice == "PUPEVOICE") {
 						$laskuttajan_osoite 	= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC059.3042.1')));
@@ -101,19 +135,27 @@
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
 					}
-					else {
+					elseif ($kumpivoice = "FINVOICE") {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
 						$laskuttajan_postitp 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerTownName);
 						$laskuttajan_postino 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerPostCodeIdentifier);
 						$laskuttajan_maa 		= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->CountryCode);
 
 						$laskuttajan_tilino		= utf8_decode($xml->SellerInformationDetails->SellerAccountDetails->SellerAccountID);
-
 					}
 
-					echo "<tr><td>";
+					echo "<tr>";
 
-					//Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
+					if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
+						echo "<td>$yhtio<br>$yhtiorow[nimi]</td>";
+					}
+					else {
+						echo "<td>$yhtio<br>{$ostaja_asiakkaantiedot["nimi"]}<br><font class='error'>".t("HUOM: Laskun vastaanottaja ep‰selv‰")."!</font></td>";
+					}
+
+					echo "<td>";
+
+					// Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
 						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
 						$siivottu = preg_replace('/^\s*/', '', $siivottu);
@@ -187,10 +229,30 @@
 						echo "<a href='$url' target='laskuikkuna'>". t('N‰yt‰ lasku')."</a>";
 					}
 					else {
-						echo "<form id='form_$valitutlaskut' name='form_$valitutlaskut' action='$PHP_SELF' method='post'>
+
+						// Maventa- tai APIX-lasku, niin yritet‰‰n hakea laskun kuva mukaan
+						if (preg_match("/(maventa|apix)_(.*?)_(maventa|apix)/", basename($file), $match)) {
+
+							// Haetaan liitteet
+							unset($liitefilet);
+							$liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
+
+							if ($liitteet != "") {
+								foreach ($liitefilet as $liitefile) {
+									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
+										echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' action='$PHP_SELF' method='post'>
+											<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
+											<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
+											<input type='submit' value = '".t("N‰yt‰ Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
+									}
+								}
+							}
+						}
+
+						echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' action='$PHP_SELF' method='post'>
 							<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 							<input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
-							<input type='submit' value = '".t("N‰yt‰ lasku")."' onClick=\"js_openFormInNewWindow('form_$valitutlaskut', 'form_$valitutlaskut'); return false;\"></form>";
+							<input type='submit' value = '".t("N‰yt‰ Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";
 					}
 
 					echo "</td>";
@@ -207,6 +269,7 @@
 		closedir($handle);
 		echo "</table>";
 	}
+
 	if ($valitutlaskut == 0) {
 		echo "<font class='message'>".t("Ei hyl‰ttyj‰ laskuja")."</font><br>";
 	}

@@ -42,6 +42,7 @@
 				tuote.nimitys,
 				tuote.yksikko,
 				tuote.myyntihinta,
+				tuote.myymalahinta,
 				tuote.eankoodi,
 				tuote.osasto,
 				tuote.try,
@@ -62,16 +63,36 @@
 
 	// Pyöräytetään muuttuneet tuotteet läpi
 	while ($row = mysql_fetch_array($res)) {
-		$dnstuote[] = array('tuoteno'		=> $row["tuoteno"],
-							'nimi'			=> $row["nimitys"],
-							'yksikko'		=> $row["yksikko"],
-							'myyntihinta'	=> $row["myyntihinta"],
-							'ean'			=> $row["eankoodi"],
-							'osasto'		=> $row["osasto"],
-							'try'			=> $row["try"],
-							'alv'			=> $row["alv"],
-							'nimi_swe'		=> $row["nimi_swe"],
-							'nimi_eng'		=> $row["nimi_eng"],
+		
+		// Jos yhtiön hinnat eivät sisällä alv:tä
+		if ($yhtiorow["alv_kasittely"] != "") {
+			$myyntihinta					= hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+			$myyntihinta_veroton 			= $row["myyntihinta"];
+			
+			$myymalahinta					= hintapyoristys($row["myymalahinta"] * (1+($row["alv"]/100)));
+			$myymalahinta_veroton 			= $row["myymalahinta"];
+		}
+		else {
+			$myyntihinta					= $row["myyntihinta"];
+			$myyntihinta_veroton 			= hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
+			
+			$myymalahinta					= $row["myymalahinta"];
+			$myymalahinta_veroton 			= hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
+		}
+		
+		$dnstuote[] = array('tuoteno'				=> $row["tuoteno"],
+							'nimi'					=> $row["nimitys"],
+							'yksikko'				=> $row["yksikko"],
+							'myyntihinta'			=> $myyntihinta,
+							'myyntihinta_veroton'	=> $myyntihinta_veroton,
+							'myymalahinta'			=> $myymalahinta,
+							'myymalahinta_veroton'	=> $myymalahinta_veroton,
+							'ean'					=> $row["eankoodi"],
+							'osasto'				=> $row["osasto"],
+							'try'					=> $row["try"],
+							'alv'					=> $row["alv"],
+							'nimi_swe'				=> $row["nimi_swe"],
+							'nimi_eng'				=> $row["nimi_eng"],
 							);
 	}
 
@@ -208,13 +229,20 @@
 		$muutoslisa = "";
 	}
 
-	// Haetaan kaikki hinnastot
+	// Haetaan kaikki hinnastot ja alv
 	$query = "	SELECT hinnasto.tuoteno,
 				hinnasto.selite,
 				hinnasto.alkupvm,
 				hinnasto.loppupvm,
-				hinnasto.hinta
+				hinnasto.hinta, 
+				tuote.alv
 				FROM hinnasto
+				JOIN tuote on (tuote.yhtio = hinnasto.yhtio 
+					AND tuote.tuoteno = hinnasto.tuoteno
+					AND tuote.status != 'P'
+					AND tuote.tuotetyyppi NOT in ('A','B')
+					AND tuote.tuoteno != ''
+					AND tuote.nakyvyys != '')
 				WHERE hinnasto.yhtio = '{$kukarow["yhtio"]}'
 				AND (hinnasto.minkpl = 0 AND hinnasto.maxkpl = 0)
 				AND hinnasto.laji != 'O'
@@ -225,11 +253,23 @@
 
 	// Tehdään hinnastot läpi
 	while ($row = mysql_fetch_array($res)) {
-		$dnshinnasto[] = array(	'tuoteno'	=> $row["tuoteno"],
-								'selite'	=> $row["selite"],
-								'alkupvm'	=> $row["alkupvm"],
-								'loppupvm'	=> $row["loppupvm"],
-								'hinta'		=> $row["hinta"],
+
+		// Jos yhtiön hinnat eivät sisällä alv:tä
+		if ($yhtiorow["alv_kasittely"] != "") {
+			$hinta					= hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
+			$hinta_veroton 			= $row["hinta"];
+		}
+		else {
+			$hinta		 			= $row["hinta"];
+			$hinta_veroton			= hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
+		}
+		
+		$dnshinnasto[] = array(	'tuoteno'				=> $row["tuoteno"],
+								'selite'				=> $row["selite"],
+								'alkupvm'				=> $row["alkupvm"],
+								'loppupvm'				=> $row["loppupvm"],
+								'hinta'					=> $hinta,
+								'hinta_veroton'			=> $hinta_veroton, 
 								);
 	}
 
@@ -255,7 +295,9 @@
 						ta_nimitys_se.selite nimi_swe,
 						ta_nimitys_en.selite nimi_eng,
 						tuote.myyntihinta,
-						tuote.eankoodi
+						tuote.myymalahinta,
+						tuote.eankoodi, 
+						tuote.alv
 						FROM tuotteen_avainsanat
 						JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
 							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
@@ -267,7 +309,8 @@
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 						AND tuotteen_avainsanat.selite = '{$rowselite["selite"]}'
-						$muutoslisa";
+						{$muutoslisa}
+						ORDER BY tuote.tuoteno";
 		$alires = pupe_query($aliselect);
 
 		while ($alirow = mysql_fetch_assoc($alires)) {
@@ -280,8 +323,10 @@
 								AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
 							WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
 							AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+							AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
 							AND tuotteen_avainsanat.laji like 'parametri_%'
-							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'";
+							AND tuotteen_avainsanat.tuoteno = '{$alirow["tuoteno"]}'
+							ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
 			$alinres = pupe_query($alinselect);
 			$properties = array();
 
@@ -289,14 +334,33 @@
 				$properties[] = array($syvinrow["selitetark"] => $syvinrow["selite"]);
 			}
 
-			$dnslajitelma[$rowselite["selite"]][] = array(	'tuoteno' 		=> $alirow["tuoteno"],
-															'nimitys'		=> $alirow["nimitys"],
-															'nimi_swe'		=> $alirow["nimi_swe"],
-															'nimi_eng'		=> $alirow["nimi_eng"],
-															'variaatio' 	=> $rowselite["selite"],
-															'myyntihinta'	=> $alirow["myyntihinta"],
-															'ean'			=> $alirow["eankoodi"],
-															'parametrit'	=> $properties);
+			// Jos yhtiön hinnat eivät sisällä alv:tä
+			if ($yhtiorow["alv_kasittely"] != "") {
+				$myyntihinta					= hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
+				$myyntihinta_veroton 			= $alirow["myyntihinta"];
+				
+				$myymalahinta					= hintapyoristys($alirow["myymalahinta"] * (1+($alirow["alv"]/100)));
+				$myymalahinta_veroton 			= $alirow["myymalahinta"];
+			}
+			else {
+				$myyntihinta					= $alirow["myyntihinta"];
+				$myyntihinta_veroton 			= hintapyoristys($alirow["myyntihinta"] / (1+($alirow["alv"]/100)));
+				
+				$myymalahinta					= $alirow["myymalahinta"];
+				$myymalahinta_veroton 			= hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
+			}
+
+			$dnslajitelma[$rowselite["selite"]][] = array(	'tuoteno' 				=> $alirow["tuoteno"],
+															'nimitys'				=> $alirow["nimitys"],
+															'nimi_swe'				=> $alirow["nimi_swe"],
+															'nimi_eng'				=> $alirow["nimi_eng"],
+															'variaatio' 			=> $rowselite["selite"],
+															'myyntihinta'			=> $myyntihinta,
+															'myyntihinta_veroton'	=> $myyntihinta_veroton,
+															'myymalahinta'			=> $myymalahinta,
+															'myymalahinta_veroton'	=> $myymalahinta_veroton,
+															'ean'					=> $alirow["eankoodi"],
+															'parametrit'			=> $properties);
 		}
 
 	}

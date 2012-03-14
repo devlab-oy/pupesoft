@@ -295,13 +295,13 @@
 			elseif ($toim == "OSTO") {
 				$query = "	SELECT *
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila = ''";
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi != 'O' and alatila = ''";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTOSUPER") {
 				$query = "	SELECT *
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila in ('A','')";
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi != 'O' and alatila in ('A','')";
 				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "HAAMU") {
@@ -1153,10 +1153,10 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tila		= 'O'
-						and lasku.alatila	= ''
-						and lasku.tilaustyyppi	= ''
+						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+						and lasku.tila		 	= 'O'
+						and lasku.alatila		= ''
+						and lasku.tilaustyyppi != 'O'
 						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
@@ -1174,10 +1174,10 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tila = 'O'
+						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+						and lasku.tila 			= 'O'
 						and lasku.alatila in ('A','')
-						and lasku.tilaustyyppi	= ''
+						and lasku.tilaustyyppi != 'O'
 						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";

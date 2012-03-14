@@ -22,7 +22,6 @@
 	$tuoteryhmittain = isset($tuoteryhmittain) ? trim($tuoteryhmittain) : "";
 	$lisa = isset($lisa) ? trim($lisa) : "";
 	$lisa_parametri = isset($lisa_parametri) ? trim($lisa_parametri) : "";
-	$lisa_dynaaminen = isset($lisa_dynaaminen) ? $lisa_dynaaminen : array("tuote" => "", "asiakas" => "");
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
 	$asiakasid = isset($asiakasid) ? (int) $asiakasid : 0;
 	$toimittajaid = isset($toimittajaid) ? (int) $toimittajaid : 0;
@@ -245,12 +244,12 @@
 	}
 
 	// Ollaan uploadttu Excel
-	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain") {
+	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain" and $toim == "TUOTE") {
 		echo "<font class='error'>".t("Tiedostoja voidaan ajaa sis‰‰n vain kuukausittain aikav‰lill‰")."!</font><br><br>";
 		$tee = "";
 	}
-	elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso == "kuukausittain") {
-		
+	elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = strtoupper($path_parts['extension']);
 
@@ -321,7 +320,7 @@
 			for ($excej = $lukualku; $excej < count($headers); $excej++) {
 				$kasiind = str_replace("-", "", $headers[$excej]);
 
-				if ($tuoteryhmittain != "") {					
+				if ($tuoteryhmittain != "") {
 					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
 				}
 				else {
@@ -358,7 +357,7 @@
 		}
 
 		if (isset($poikkeus_haku) and $poikkeus_haku != "try" and $poikkeus_haku != "osasto" and $poikkeus_haku != "kummatkin") {
-			echo "<font class='error'>".t("Virhe: Budjetinluonnissa on tapahtunut vakava k‰sittelyvirhe, keskeytet‰‰n prosessi")."!<br><br></font>";
+			echo "<font class='error'>".t("VIRHE: Budjetinluonnissa on tapahtunut vakava k‰sittelyvirhe, keskeytet‰‰n prosessi")."!<br><br></font>";
 			$tee = "";
 	}
 
@@ -390,7 +389,7 @@
 		if (isset($poikkeus) and $poikkeus == "totta") {
 
 			unset($luvut); // poistetaan ja alustetaan sek‰ rakennetaan uudestaan.
-			
+
 			// Normaali tapaus miss‰ on TRY tai OSASTO
 			if ($poikkeus_haku == "try" or $poikkeus_haku == "osasto") {
 				foreach ($muunto_luvut as $litunnus => $rivit) {
@@ -932,7 +931,7 @@
 			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
 				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syˆtt‰‰ indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
-			}			
+			}
 			if ($budjetointi_taso == "kuukausittain") {
 				echo "<font class='error'>".t("VIRHE: Kokonaisbudjettia ei voida syˆtt‰‰ kuukausittain aikav‰lill‰!")."</font><br>";
 				$tee = "";
@@ -1061,7 +1060,6 @@
 			$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys, tuote.try, tuote.osasto $selectlisa
 						FROM tuote
 						{$lisa_parametri}
-						{$lisa_dynaaminen["tuote"]}
 						{$joinlisa}
 						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 						AND tuote.status != 'P'
@@ -1089,7 +1087,6 @@
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
 						FROM asiakas
-						{$lisa_dynaaminen["asiakas"]}
 						WHERE asiakas.yhtio = '{$kukarow["yhtio"]}'
 						$lisa";
 		}

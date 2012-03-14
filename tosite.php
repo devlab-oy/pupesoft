@@ -282,56 +282,69 @@
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
 
-						if (strtolower($otsikot[$e]) == "kustp") {
-							// Kustannuspaikka
-							$ikustp_tsk  	 = trim($eriv);
-							$ikustp[$maara]  = 0;
+						if (strtolower($otsikot[$e]) == "kustp" or strtolower($otsikot[$e]) == "kohde" or strtolower($otsikot[$e]) == "projekti") {
+							// Kustannuspaikka, kohde, projekti
+							$kukopr = strtolower($otsikot[$e]);
 
-							if ($ikustp_tsk != "") {
+							if ($kukopr == "kustp") {
+								$ikukopr_tyyppi = "K";
+							}
+							elseif ($kukopr == "kohde") {
+								$ikukopr_tyyppi = "O";
+							}
+							elseif ($kukopr == "projekti") {
+								$ikukopr_tyyppi = "P";
+							}
+
+							${"i".$kukopr}[$maara] = 0;
+
+							$ikukopr_tsk = trim($eriv);
+
+							if ($ikukopr_tsk != "") {
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and nimi = '{$ikustp_tsk}'";
+											and nimi = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 
-							if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
+							if ($ikukopr_tsk != "" and ${"i".$kukopr}[$maara] == 0) {
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and koodi = '{$ikustp_tsk}'";
+											and koodi = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 
-							if (is_numeric($ikustp_tsk) and (int) $ikustp_tsk > 0 and $ikustp[$maara] == 0) {
+							if (is_numeric($ikukopr_tsk) and (int) $ikukopr_tsk > 0 and ${"i".$kukopr}[$maara] == 0) {
 
-								$ikustp_tsk = (int) $ikustp_tsk;
+								$ikukopr_tsk = (int) $ikukopr_tsk;
 
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and tunnus = '{$ikustp_tsk}'";
+											and tunnus = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 						}
@@ -339,7 +352,6 @@
 							${"i".strtolower($otsikot[$e])}[$maara] = sprintf("%.2f",round($eriv, 2));
 						}
 						else {
-
 							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 						}
 
@@ -520,7 +532,7 @@
 
 		$summa = $turvasumma;
 	}
-	
+
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I' and isset($teetosite)) {
 
@@ -586,7 +598,7 @@
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
 
-				$tili				= $itili[$i];
+				$tili				= trim($itili[$i]);
 				$kustp				= $ikustp[$i];
 				$kohde				= $ikohde[$i];
 				$projekti			= $iprojekti[$i];
@@ -646,6 +658,8 @@
 		$avaavatase 		= "";
 		$gokfrom 			= "";
 		$tilikausi 			= "";
+		$asiakasid			= "";
+		$toimittajaid		= "";
 
 		if ($lopetus != '' and $tullaan == "muutosite") {
 			lopetus($lopetus, "META");

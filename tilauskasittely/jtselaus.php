@@ -278,12 +278,20 @@
 
 				require ("tilaus-valmis-siirtolista.inc");
 
+				$aika=date("d.m.y @ G:i:s", time());
+				echo "<font class='message'>".t("Siirtolista")." $laskurow[tunnus] ".t("valmis")."! ($aika)</font><br>";
+
 				$toim = $vanhatoim;
 				$vanhatoim = "";
 			}
 			else {
 				$mista = "jtselaus";
+				$tilausvalmiskutsuja = "JTSELAUS";
+
 				require ("tilaus-valmis.inc");
+
+				$aika=date("d.m.y @ G:i:s", time());
+				echo "<font class='message'>".t("Myyntitilaus")." $laskurow[tunnus], $laskurow[nimi] ".t("valmis")."! ($aika)</font><br>";
 			}
 
 			//	Katsotaan toimitettiinko jotain mistä meidän tulee laittaa viestiä
@@ -425,13 +433,13 @@
 					<input type='hidden' name='tee' value='TOIMITA'>";
 
 			if ($toim == "ENNAKKO") {
-				echo "	<font class='error'>".t("HUOM! Sinulla on toimittamattomia ennakkorivejä")."</font><br>
+				echo "	<font class='error'>".t("HUOM: Sinulla on toimittamattomia ennakkorivejä")."</font><br>
 						<table>
 						<tr>
 						<td>".t("Toimita poimitut ennakko-rivit").": </td>";
 			}
 			else {
-				echo "	<font class='error'>".t("HUOM! Sinulla on toimittamattomia jt-rivejä")."</font><br>
+				echo "	<font class='error'>".t("HUOM: Sinulla on toimittamattomia jt-rivejä")."</font><br>
 						<table>
 						<tr>
 						<td>".t("Laske alennukset uudelleen")."</td>
@@ -1310,7 +1318,7 @@
 								}
 
 								if ($kukarow["extranet"] == "") {
-									echo "<td valign='top' $class>$ins <a href='../tuote.php?tee=Z&tuoteno=".urlencode($jtrow["tuoteno"])."'>$jtrow[tuoteno]</a>";
+									echo "<td valign='top' $class>$ins <a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($jtrow["tuoteno"])."'>$jtrow[tuoteno]</a>";
 								}
 								else {
 									echo "<td valign='top' $class>$ins $jtrow[tuoteno]";
@@ -1325,7 +1333,7 @@
 									echo "<td valign='top' $class>$jtrow[ytunnus]<br>";
 
 									if ($kukarow["extranet"] == "") {
-										echo "<a href='../tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
+										echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
 									}
 									else {
 										echo "$jtrow[nimi]<br>";
@@ -1775,7 +1783,7 @@
 									}
 
 									if ($kukarow["extranet"] == "") {
-										echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($perherow["tuoteno"])."'>$perherow[tuoteno]</a>";
+										echo "<td valign='top' $class><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($perherow["tuoteno"])."'>$perherow[tuoteno]</a>";
 									}
 									else {
 										echo "<td valign='top' $class>$perherow[tuoteno]";
@@ -1790,7 +1798,7 @@
 										echo "<td valign='top' $class>$perherow[ytunnus]<br>";
 
 										if ($kukarow["extranet"] == "") {
-											echo "<a href='../tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
+											echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
 										}
 										else {
 											echo "$perherow[nimi]<br>";
@@ -2024,7 +2032,7 @@
 				$huomio = "";
 
 				if ($vrow['tyyppi'] == 'E') {
-					$huomio = "<td class='back'><font class='error'>".t("HUOM!!! Erikoisvarasto!")."</font></td>";
+					$huomio = "<td class='back'><font class='error'>".t("HUOM: Erikoisvarasto!")."</font></td>";
 				}
 
 				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td>$huomio</tr>";

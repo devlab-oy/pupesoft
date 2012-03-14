@@ -326,7 +326,7 @@
 						unset($kplt);
 					}
 					else {
-						echo t("Virhe! Tavarantoimittajan numero puuttuu sekä ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
+						echo t("VIRHE: Tavarantoimittajan numero puuttuu sekä ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
 						rename($kansio."/".$file, $kansio_error."/".$file);
 					}
 				}

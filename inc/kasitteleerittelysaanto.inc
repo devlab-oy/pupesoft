@@ -11,7 +11,7 @@
 
 	if (mysql_num_rows($tiliotesaantoresult) > 0) { // Jotain löytyy
 		$kuittikoodi=' ';
-		echo "<font class='message'>".t("Erittely pyydettiin käsittelemään")."</font><br>";
+		echo "<font class='message'>".t("Erittely pyydettiin käsittelemään")."</font><br>\n";
 	}
 
 ?>

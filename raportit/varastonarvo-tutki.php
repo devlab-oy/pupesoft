@@ -322,7 +322,7 @@
 						FROM tilausrivi
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.uusiotunnus = $trow[uusiotunnus]
+						and tilausrivi.uusiotunnus = '$trow[uusiotunnus]'
 						and tilausrivi.tyyppi = 'L'";
 			$sres = pupe_query($query);
 			$srow = mysql_fetch_assoc($sres);

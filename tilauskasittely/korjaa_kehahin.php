@@ -6,7 +6,7 @@
 	echo "<font class='head'>".t("J‰lkilaske tapahtuma")."</font><hr>";
 
 	if ($kukarow["kuka"] != "admin") {
-		echo "<br><font class='error'>".t("HUOM!! T‰m‰ ohjelma sekoittaa kirjanpidon/logistiikan varastonarvon. T‰t‰ EI saa k‰ytt‰‰!")."</font>";
+		echo "<br><font class='error'>".t("HUOM: T‰m‰ ohjelma sekoittaa kirjanpidon/logistiikan varastonarvon. T‰t‰ EI saa k‰ytt‰‰!")."</font>";
 		$tee = "DONTDOIT!!";
 	}
 

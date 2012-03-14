@@ -23,7 +23,9 @@
 		echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font>";
 	}
 	else {
-
+		
+		if ($laskurow['tilaustyyppi'] == '' OR $laskurow['tilaustyyppi'] == '0') $laskurow['tilaustyyppi'] = '2';
+		
 		// Otsikkoa
 		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU
 		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 6 merkkiä
@@ -31,7 +33,7 @@
 		$out .= sprintf("%-20.20s", $yhtiorow['nimi']);				// Lähettäjän nimi 20 merkkiä
 		$out .= sprintf("%08.8s", $laskurow['tunnus']);				// Ostotilauksen numero 8 merkkiä
 		$out .= sprintf("%4.4s", "");								// Toimitustapa 4 merkkiä, ei käytössä
-		$out .= sprintf("%-1.1s", "2");								// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus
+		$out .= sprintf("%-1.1s", $laskurow['tilaustyyppi']);		// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus, 3 = Yölähetys
 		fwrite($toot, $out . "\n");
 
 		while ($tilausrivirow = mysql_fetch_array($result)) {

@@ -209,12 +209,13 @@
 		$tunnus = $_POST['tunnus'];
 		$otunnus = $_POST['otunnus'];
 		$suoratoimitukset = $_POST['suoratoimitukset'];
-
+		$monesko_kentta = $_POST['monesko_kentta'];
+		
 		$query  = "	UPDATE tilausrivi SET
-					ale1 = '{$ale}'
+					ale{$monesko_kentta} = '{$ale}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tunnus}'
-					AND ale1 <> '{$ale}'";
+					AND ale{$monesko_kentta} <> '{$ale}'";
 		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($laskurow, $tunnus, $suoratoimitukset);

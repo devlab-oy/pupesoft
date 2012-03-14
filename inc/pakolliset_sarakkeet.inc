@@ -123,6 +123,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "rahtimaksut" :
 				$pakolliset = array("TOIMITUSTAPA", "KILOTALKU", "KILOTLOPPU", "KMALKU", "KMLOPPU");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuotteen_avainsanat" :
 				$pakolliset = array("TUOTENO", "LAJI", "KIELI");

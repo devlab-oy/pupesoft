@@ -270,6 +270,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "puun_alkio" :
 				$pakolliset = array("TUNTEMATON_TAULU");

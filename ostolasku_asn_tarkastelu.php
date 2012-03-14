@@ -346,6 +346,9 @@
 			$toimittaja = $kollirow['toimittajanumero'];
 			$asn_numero = $kollirow['asn_numero'];
 			$paketin_tunnukset[] = $kollirow['tunnus'];
+			
+			// haetaan tuotekohtaisesti lapsituote tilaukselta ja lis‰t‰‰n sekin paketin-rivit alkioon 
+			
 
 			if (strpos($kollirow['tilausrivi'], ",") !== false) {
 
@@ -365,9 +368,9 @@
 
 		$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
 
-		require('inc/asn_kohdistus.inc');
+	//	require('inc/asn_kohdistus.inc');
 
-		asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+	//	asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
 
 		$tee = '';
 	}

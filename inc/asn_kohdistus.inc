@@ -44,6 +44,7 @@
 
 			// Loopataan tuoterivit l‰pi
 			while ($row = mysql_fetch_assoc($result)) {
+				unset($loysin_lapsen);
 				$loysin_lapsen = FALSE;
 				
 				if (count($kaytetyt_tilausrivit) == 0) {
@@ -55,6 +56,9 @@
 
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheit‰, teid‰‰n keikka ja suuntalava sek‰ kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
+					// 
+					
+					
 					if ($virheet == 0) {
 						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 					}
@@ -244,6 +248,7 @@
 					// Jos t‰nne menn‰‰n niin jotenkin lis‰t‰‰n tilausriville runko.
 					// Fundeeraus paussi.
 					$loysin_lapsen = TRUE;
+					echo "0. Olen lapsi: riville: {$tilausrivirow["tunnus"]} : {$tilausrivirow["tuoteno"]} => {$lisatavarat["tuoteno"]} <br>";
 				}
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VƒHEMMƒN kuin tilausrivill‰, vanhan tilausrivin tunnus j‰‰ j‰ljell‰
@@ -261,38 +266,10 @@
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);
 					$kaytetyt_tilausrivit[] = $tilausrivirow['tunnus'];
-					
-					// Jos lˆytyy lapsi (runko) niin lis‰t‰‰n kappalem‰‰r‰n mukaisesti lapsia tilaukselle.
-					if ($loysin_lapsen === TRUE) {
-						// Lis‰t‰‰n puuttuvat rungot
-						// Tehd‰‰n uusi rivi, jossa on puuttuvat 'Rungot'
-						$lisainsert = "	INSERT INTO tilausrivi SET
-									yhtio			= '$tilausrivirow[yhtio]',
-									tyyppi			= '$tilausrivirow[tyyppi]',
-									toimaika		= '$tilausrivirow[toimaika]',
-									kerayspvm		= '$tilausrivirow[kerayspvm]',
-									otunnus			= '$tilausrivirow[otunnus]',
-									tuoteno			= '$lisatavarat[tuoteno]',
-									try				= '$lisatavarat[try]',
-									osasto			= '$lisatavarat[osasto]',
-									nimitys			= '$lisatavarat[nimitys]',
-									yksikko			= '$lisatavarat[yksikko]',
-									tilkpl			= '$row[kappalemaara]',
-									varattu			= '$row[kappalemaara]',
-									hinta			= '$lisatavarat[myyntihinta]',
-									laatija			= 'lapset',
-									kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuotteelle: {$tilausrivirow["tuoteno"]} lis‰t‰‰n lapsituote: {$lisatavarat["tuoteno"]}',
-									laadittu		=  now(),
-									hyllyalue		= '$lisatavarat[hyllyalue]',
-									hyllynro		= '$lisatavarat[hyllynro]',
-									hyllytaso		= '$lisatavarat[hyllytaso]',
-									hyllyvali		= '$lisatavarat[hyllyvali]'";
-						$inskres			= pupe_query($lisainsert);
-						$paketin_rivit[]	= mysql_insert_id();
-					}
+					$paketin_rivit[] = $tilausrivirow["tunnus"]; 
 				}
 				elseif ($row["kappalemaara"] > $tilausrivirow["varattu"] and $tilausrivirow["varattu"] > 0) {
-					
+					// tuli enemm‰n kuin tilattu
 					$laskuri = 0;
 					$kohdistamatta = $row["kappalemaara"];
 					$lisa_array = array();
@@ -300,15 +277,14 @@
 					// Lasketaan ensin kaikki rivit yhteen ja sen j‰lkeen katsotaan tarvitaanko lis‰rivi‰
 					$olen_apu_result = pupe_query($query);
 					while ($roll = mysql_fetch_assoc($olen_apu_result)) {
-						if ($kohdistamatta <= 0) continue; //test
+						if ($kohdistamatta <= 0) continue; 
 						$laskuri += $roll["varattu"];
 						$lisa_array[] = $roll["tunnus"];
-						$split_array[] = $roll["tunnus"]; // test
-						$kohdistamatta -= $roll["varattu"]; // test
+						$split_array[] = $roll["tunnus"]; 
+						$kohdistamatta -= $roll["varattu"]; 
 					}
 					
 					$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
-				//	echo "Debug, ylim‰‰r‰ist‰: $ylimaaraista kpl: {$row["kappalemaara"]} laskuri: $laskuri kohdistamatta: $kohdistamatta <br>";
 							
 					if ($ylimaaraista > 0) {
 						// Tehd‰‰n uusi rivi, jossa on ylim‰‰r‰iset kappaleet
@@ -340,6 +316,7 @@
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$paketin_rivit			= array_unique(array_merge($paketin_rivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
+						$lisa_array[]			= $extraa;
 					
 						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 						$updatequery = "UPDATE asn_sanomat SET
@@ -351,34 +328,6 @@
 						$kaytetyt_tilausrivit[] = $extraa;
 						$paketin_rivit[]		= $extraa;
 						
-						// Jos lˆytyy lapsi (runko) niin lis‰t‰‰n kappalem‰‰r‰n mukaisesti lapsia tilaukselle.
-						if ($loysin_lapsen === TRUE) {
-							// Lis‰t‰‰n puuttuvat rungot
-							// Tehd‰‰n uusi rivi, jossa on puuttuvat 'Rungot'
-							$lisainsert = "	INSERT INTO tilausrivi SET
-										yhtio			= '$tilausrivirow[yhtio]',
-										tyyppi			= '$tilausrivirow[tyyppi]',
-										toimaika		= '$tilausrivirow[toimaika]',
-										kerayspvm		= '$tilausrivirow[kerayspvm]',
-										otunnus			= '$tilausrivirow[otunnus]',
-										tuoteno			= '$lisatavarat[tuoteno]',
-										try				= '$lisatavarat[try]',
-										osasto			= '$lisatavarat[osasto]',
-										nimitys			= '$lisatavarat[nimitys]',
-										yksikko			= '$lisatavarat[yksikko]',
-										tilkpl			= '$row[kappalemaara]',
-										varattu			= '$row[kappalemaara]',
-										hinta			= '$lisatavarat[myyntihinta]',
-										laatija			= 'lapset',
-										kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuotteelle: {$tilausrivirow["tuoteno"]} lis‰t‰‰n lapsituote: {$lisatavarat["tuoteno"]}',
-										laadittu		=  now(),
-										hyllyalue		= '$lisatavarat[hyllyalue]',
-										hyllynro		= '$lisatavarat[hyllynro]',
-										hyllytaso		= '$lisatavarat[hyllytaso]',
-										hyllyvali		= '$lisatavarat[hyllyvali]'";
-							$inskres			= pupe_query($lisainsert);
-							$paketin_rivit[]	= mysql_insert_id();
-						}
 					}
 					elseif ($ylimaaraista == 0) {
 						// Jos menee tasan tilatut ja tulleet.
@@ -394,45 +343,17 @@
 										AND tunnus = '{$row['tunnus']}'";
 						$upd_res = pupe_query($updatequery);
 						
-						// Jos lˆytyy lapsi (runko) niin lis‰t‰‰n kappalem‰‰r‰n mukaisesti lapsia tilaukselle.
-						if ($loysin_lapsen === TRUE) {
-							// Lis‰t‰‰n puuttuvat rungot
-							// Tehd‰‰n uusi rivi, jossa on puuttuvat 'Rungot'
-							$lisainsert = "	INSERT INTO tilausrivi SET
-										yhtio			= '$tilausrivirow[yhtio]',
-										tyyppi			= '$tilausrivirow[tyyppi]',
-										toimaika		= '$tilausrivirow[toimaika]',
-										kerayspvm		= '$tilausrivirow[kerayspvm]',
-										otunnus			= '$tilausrivirow[otunnus]',
-										tuoteno			= '$lisatavarat[tuoteno]',
-										try				= '$lisatavarat[try]',
-										osasto			= '$lisatavarat[osasto]',
-										nimitys			= '$lisatavarat[nimitys]',
-										yksikko			= '$lisatavarat[yksikko]',
-										tilkpl			= '$row[kappalemaara]',
-										varattu			= '$row[kappalemaara]',
-										hinta			= '$lisatavarat[myyntihinta]',
-										laatija			= 'lapset',
-										kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuotteelle: {$tilausrivirow["tuoteno"]} lis‰t‰‰n lapsituote: {$lisatavarat["tuoteno"]}',
-										laadittu		=  now(),
-										hyllyalue		= '$lisatavarat[hyllyalue]',
-										hyllynro		= '$lisatavarat[hyllynro]',
-										hyllytaso		= '$lisatavarat[hyllytaso]',
-										hyllyvali		= '$lisatavarat[hyllyvali]'";
-							$inskres			= pupe_query($lisainsert);
-							$paketin_rivit[]	= mysql_insert_id();
-						}
 					}
 					elseif ($ylimaaraista < 0) {
 						$positiivinen_arvo = abs($ylimaaraista);
 						$vika_rivi = array_pop($split_array);
 						// vika_rivi on se tilausrivi joka splitataan ett‰ m‰‰r‰ t‰sm‰‰
 						
-						$split_query	= "SELECT * from tilausrivi where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$vika_rivi'";
+						$split_query	= "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow["yhtio"]}' AND tunnus = '$vika_rivi'";
 						$split_result	= pupe_query($split_query);
 						$split_row		= mysql_fetch_assoc($split_result);
 						$erotus			= $split_row["tilkpl"] - $positiivinen_arvo;
-						
+												
 						// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
 						$query = "	UPDATE tilausrivi SET
 									varattu = '$positiivinen_arvo',
@@ -479,34 +400,6 @@
 									tilaajanrivinro = '$split_row[tilaajanrivinro]'";
 						$inskres = pupe_query($query);
 
-						// Jos lˆytyy lapsi (runko) niin lis‰t‰‰n lapsia tilaukselle.
-						if ($loysin_lapsen === TRUE) {
-							// Tehd‰‰n uusi rivi, jossa on puuttuvat 'Rungot'
-							$lisainsert = "	INSERT INTO tilausrivi SET
-										yhtio			= '$tilausrivirow[yhtio]',
-										tyyppi			= '$tilausrivirow[tyyppi]',
-										toimaika		= '$tilausrivirow[toimaika]',
-										kerayspvm		= '$tilausrivirow[kerayspvm]',
-										otunnus			= '$tilausrivirow[otunnus]',
-										tuoteno			= '$lisatavarat[tuoteno]',
-										try				= '$lisatavarat[try]',
-										osasto			= '$lisatavarat[osasto]',
-										nimitys			= '$lisatavarat[nimitys]',
-										yksikko			= '$lisatavarat[yksikko]',
-										tilkpl			= '$row[kappalemaara]',
-										varattu			= '$row[kappalemaara]',
-										hinta			= '$lisatavarat[myyntihinta]',
-										laatija			= 'lapset',
-										kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuotteelle: {$tilausrivirow["tuoteno"]} lis‰t‰‰n lapsituote: {$lisatavarat["tuoteno"]}',
-										laadittu		=  now(),
-										hyllyalue		= '$lisatavarat[hyllyalue]',
-										hyllynro		= '$lisatavarat[hyllynro]',
-										hyllytaso		= '$lisatavarat[hyllytaso]',
-										hyllyvali		= '$lisatavarat[hyllyvali]'";
-							$inskres			= pupe_query($lisainsert);
-							$paketin_rivit[]	= mysql_insert_id();
-						}
-						
 					}
 				}
 				elseif ($row["kappalemaara"] < $tilausrivirow["varattu"]) {
@@ -544,8 +437,8 @@
 								osasto			= '$tilausrivirow[osasto]',
 								nimitys			= '$tilausrivirow[nimitys]',
 								yksikko			= '$tilausrivirow[yksikko]',
-								tilkpl			= '$row[kappalemaara]',
-								varattu			= '$row[kappalemaara]',
+								tilkpl			= '$kappaleerotus',
+								varattu			= '$kappaleerotus',
 								hinta			= '$tilausrivirow[hinta]',
 								laatija			= 'split',
 								kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta lˆytyi {$tilausrivirow["tilkpl"]} Tehtiin tilausrivi {$kappaleerotus} m‰‰r‰lle',
@@ -557,33 +450,6 @@
 								tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
 					$inskres = pupe_query($query);
 					
-					// Jos lˆytyy lapsi (runko) niin lis‰t‰‰n lapsia tilaukselle.
-					if ($loysin_lapsen === TRUE) {
-						// Tehd‰‰n uusi rivi, jossa on puuttuvat 'Rungot'
-						$lisainsert = "	INSERT INTO tilausrivi SET
-									yhtio			= '$tilausrivirow[yhtio]',
-									tyyppi			= '$tilausrivirow[tyyppi]',
-									toimaika		= '$tilausrivirow[toimaika]',
-									kerayspvm		= '$tilausrivirow[kerayspvm]',
-									otunnus			= '$tilausrivirow[otunnus]',
-									tuoteno			= '$lisatavarat[tuoteno]',
-									try				= '$lisatavarat[try]',
-									osasto			= '$lisatavarat[osasto]',
-									nimitys			= '$lisatavarat[nimitys]',
-									yksikko			= '$lisatavarat[yksikko]',
-									tilkpl			= '$row[kappalemaara]',
-									varattu			= '$row[kappalemaara]',
-									hinta			= '$lisatavarat[myyntihinta]',
-									laatija			= 'lapset',
-									kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuotteelle: {$tilausrivirow["tuoteno"]} lis‰t‰‰n lapsituote: {$lisatavarat["tuoteno"]}',
-									laadittu		=  now(),
-									hyllyalue		= '$lisatavarat[hyllyalue]',
-									hyllynro		= '$lisatavarat[hyllynro]',
-									hyllytaso		= '$lisatavarat[hyllytaso]',
-									hyllyvali		= '$lisatavarat[hyllyvali]'";
-						$inskres			= pupe_query($lisainsert);
-						$paketin_rivit[]	= mysql_insert_id();
-					}
 				}
 				else {
 					echo "Kaasuu lis‰‰, puut senkun isonee<br>";
@@ -595,8 +461,58 @@
 				$edellinen_paketinnumero = $row["paketinnumero"];
 				$edellinen_paketintunniste = $row["paketintunniste"];
 				$paketin_tunnukset[] = $row["tunnus"];
-				$paketin_rivit[] = $tilausrivirow["tunnus"];
 				$paketin_tuotteet[] = $tilausrivirow["tuoteno"];
+			}
+
+			// Tehd‰‰n ennen suuntalavakohdistusta lapsicheckit kun tullaan pois while-loopista.
+			if (count($paketin_rivit) > 0) {
+				foreach ($paketin_rivit as $tilausrivitunnus) {
+					// tehd‰‰n tuoteperhe-satula-tapaus-checkki
+					$lapsiperhesql = "	SELECT 
+										tuoteperhe.isatuoteno, 
+										tuoteperhe.tuoteno,
+										tuote.tuoteno, tuote.try,tuote.osasto, 
+										tuote.nimitys,tuote.yksikko,tuote.myyntihinta, 
+										tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
+										tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+										tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+										FROM tilausrivi 
+										JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
+										JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
+										JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
+										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+										AND tilausrivi.tunnus = '{$tilausrivitunnus}'
+										ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
+										
+					$lapsiresult = pupe_query($lapsiperhesql);
+					while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
+						// hae tuotteen ostohinta
+						$lisainsert = "	INSERT INTO tilausrivi SET
+										yhtio			= '$lapsitieto[yhtio]',
+										tyyppi			= '$lapsitieto[tyyppi]',
+										toimaika		= '$lapsitieto[toimaika]',
+										kerayspvm		= '$lapsitieto[kerayspvm]',
+										otunnus			= '$lapsitieto[otunnus]',
+										tuoteno			= '$lapsitieto[tuoteno]',
+										try				= '$lapsitieto[try]',
+										osasto			= '$lapsitieto[osasto]',
+										nimitys			= '$lapsitieto[nimitys]',
+										yksikko			= '$lapsitieto[yksikko]',
+										tilkpl			= '$lapsitieto[tilkpl]',
+										varattu			= '$lapsitieto[varattu]',
+										hinta			= '',
+										laatija			= 'lapset',
+										kommentti		= 'ASN-sanoma: tuotteelle: {$lapsitieto["isatuoteno"]} lis‰t‰‰n lapsituote: {$lapsitieto["tuoteno"]}',
+										laadittu		=  now(),
+										hyllyalue		= '$lapsitieto[hyllyalue]',
+										hyllynro		= '$lapsitieto[hyllynro]',
+										hyllytaso		= '$lapsitieto[hyllytaso]',
+										hyllyvali		= '$lapsitieto[hyllyvali]', 
+										perheid			= '$lapsitieto[tunnus]'";
+						$inskres = pupe_query($lisainsert);
+						// updateta isatuote-perheid
+					}
+				}
 			}
 
 			if ($virheet == 0 and count($paketin_rivit) > 0) {
@@ -698,26 +614,16 @@
 					$keikkarow = mysql_fetch_array($checkres);
 					$keikan_tunnus = $keikkarow["tunnus"];
 				}
-				$query = "	SELECT th.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
-							FROM tuotepaikat as tp
-							JOIN varaston_hyllypaikat as th on (th.yhtio = tp.yhtio and th.hyllyalue=tp.hyllyalue and th.hyllynro=tp.hyllynro and th.hyllyvali=tp.hyllyvali and th.hyllytaso=tp.hyllyvali)
-							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tp.yhtio and keraysvyohyke.tunnus = th.keraysvyohyke)
+				
+				$query = "	SELECT vh.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
+							FROM tilausrivi as tp
+							JOIN varaston_hyllypaikat as vh on (vh.yhtio = tp.yhtio and vh.hyllyalue=tp.hyllyalue and vh.hyllynro=tp.hyllynro and vh.hyllyvali=tp.hyllyvali and vh.hyllytaso=tp.hyllytaso)
+							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tp.yhtio and keraysvyohyke.tunnus = vh.keraysvyohyke)
 							WHERE tp.yhtio = '$kukarow[yhtio]'
-							AND tp.tuoteno IN ('".implode("','", $paketin_tuotteet)."')
-							AND tp.oletus = 'x'
-							GROUP BY 1
+							AND tp.tunnus IN ('".implode("','", $paketin_rivit)."')
+							GROUP BY 1,2
 							ORDER BY 3 DESC
 							LIMIT 1";
-/*
-$VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
-							FROM tuote
-							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
-							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							AND tuote.tuoteno IN ('".implode("','", $paketin_tuotteet)."')
-							GROUP BY 1
-							ORDER BY 3 DESC
-							LIMIT 1";
-*/
 				$checkres = pupe_query($query);
 				$row = mysql_fetch_array($checkres);
 
@@ -758,8 +664,6 @@ $VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialu
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
-
-				
 				
 				// Laitetaan suuntalava siirtovalmiiksi.
 				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;

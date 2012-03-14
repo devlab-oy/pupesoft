@@ -36,9 +36,11 @@
 						'kaytettavyys' => '',
 						'terminaalialue' => '',
 						'korkeus' => '',
-						'paino' => '');
+						'paino' => '', 
+						'sallitaan_poikkeukset' => '',
+						);
 
-	if (!isset($sscc)) $sscc = 0;
+	if (!isset($sscc)) $sscc = '';
 	if (!isset($alkuhyllyalue)) $alkuhyllyalue = '';
 	if (!isset($alkuhyllynro)) $alkuhyllynro = '';
 	if (!isset($alkuhyllyvali)) $alkuhyllyvali = '';
@@ -86,7 +88,7 @@
 		$sscc_chk_res = pupe_query($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-		if ($sscc_chk_row['sscc'] == 0) {
+		if ((string) $sscc_chk_row['sscc'] == '') {
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {
@@ -261,6 +263,7 @@
 							keraysvyohyke = '{$keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
+							sallitaan_poikkeukset = '{$sallitaan_poikkeukset}',
 							korkeus = '{$korkeus}',
 							paino = '{$paino}',
 							muuttaja = '{$kukarow['kuka']}',
@@ -288,6 +291,7 @@
 							keraysvyohyke = '{$keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
+							sallitaan_poikkeukset = '{$sallitaan_poikkeukset}',
 							korkeus = '{$korkeus}',
 							paino = '{$paino}',
 							laatija = '{$kukarow['kuka']}',
@@ -488,6 +492,7 @@
 			$keraysvyohyke = $suuntalavat_row['keraysvyohyke'];
 			$kaytettavyys = $suuntalavat_row['kaytettavyys'];
 			$terminaalialue = $suuntalavat_row['terminaalialue'];
+			$sallitaan_poikkeukset = $suuntalavat_row['sallitaan_poikkeukset'];
 			$korkeus = $suuntalavat_row['korkeus'];
 			$paino = $suuntalavat_row['paino'];
 		}
@@ -497,7 +502,8 @@
 
 		echo "<table>";
 		echo "<tr><th colspan='2'>",t("Uusi suuntalava"),"</th></tr>";
-		echo "<tr><th>SSCC-",t("koodi"),"</th><td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi täytyy olla vähintää 7 merkkiä pitkä"),".</font></td></tr>";
+		echo "<tr><th>SSCC-",t("koodi"),"</th>";
+		echo "<td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi täytyy olla vähintää 7 merkkiä pitkä"),".</font></td></tr>";
 		echo "<tr><th>",t("Varastopaikkaväli alku"),"</th><td><input type='text' name='alkuhyllyalue' size='6' maxlength='5' value='{$alkuhyllyalue}' />{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
 		echo "<tr><th>",t("Varastopaikkaväli loppu"),"</th><td><input type='text' name='loppuhyllyalue' size='6' maxlength='5' value='{$loppuhyllyalue}' />{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
 
@@ -506,7 +512,8 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$pakkaus_result = pupe_query($query);
 
-		echo "<tr><th>",t("Tyyppi"),"</th><td><select name='tyyppi'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Tyyppi"),"</th>";
+		echo "<td><select name='tyyppi'><option value=''>",t("Valitse"),"</option>";
 
 		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
 			$sel = $tyyppi == $pakkaus_row['tunnus'] ? ' selected' : '';
@@ -516,7 +523,8 @@
 
 		echo "</select>{$virheviesti['tyyppi']}</td></tr>";
 
-		echo "<tr><th>",t("Keräysvyöhyke"),"</th><td><select name='keraysvyohyke'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
+		echo "<td><select name='keraysvyohyke'><option value=''>",t("Valitse"),"</option>";
 
 		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
 		$keraysvyohyke_result = pupe_query($query);
@@ -532,12 +540,14 @@
 		$sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
 		// $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
-		echo "<tr><th>",t("Käytettävyys"),"</th><td><select name='kaytettavyys'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Käytettävyys"),"</th>";
+		echo "<td><select name='kaytettavyys'><option value=''>",t("Valitse"),"</option>";
 		echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
 		// echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
 		echo "</select>{$virheviesti['kaytettavyys']}</td></tr>";
 
-		echo "<tr><th>",t("Terminaalialue"),"</th><td><select name='terminaalialue'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Terminaalialue"),"</th>";
+		echo "<td><select name='terminaalialue'><option value=''>",t("Valitse"),"</option>";
 
 		$terminaalialue_result = t_avainsana("TERMINAALIALUE");
 
@@ -548,6 +558,20 @@
 		}
 
 		echo "</select>{$virheviesti['terminaalialue']}</td></tr>";
+		
+		if ($sallitaan_poikkeukset != "") {
+			$sel_sp = "SELECTED";
+		}
+		else {
+			$sel_sp = "";
+		}
+		
+		echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivyöhykkeiltä tuotteita",$kieli,'<br>')."</th>";
+		echo "<td><select name='sallitaan_poikkeukset'>";
+		echo "<option value='' $sel_sp>".t("Ei Sallita")."</option>";
+		echo "<option value='K' $sel_sp>".t("Sallitaan")."</option>";
+		echo "</select>";
+		echo "</td></tr>";
 
 		echo "<tr><th>",t("Korkeus"),"</th><td><input type='text' name='korkeus' value='{$korkeus}' />{$virheviesti['korkeus']}</td></tr>";
 		echo "<tr><th>",t("Paino"),"</th><td><input type='text' name='paino' value='{$paino}' />{$virheviesti['paino']}<br/><font class='info'>",t("Paino lasketaan automaattisesti tuotteiden takaa, jos paino jätetään nollaksi"),".</font></td></tr>";

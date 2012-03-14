@@ -5,19 +5,19 @@
 		require ("inc/parametrit.inc");
 	}
 	else {
-	error_reporting(E_ALL);
-	ini_set("display_errors", 1);
+		error_reporting(E_ALL);
+		ini_set("display_errors", 1);
 
-	require ("inc/connect.inc");
-	require ("inc/functions.inc");
+		require ("inc/connect.inc");
+		require ("inc/functions.inc");
 
-	if ($argv[1] == '') {
-		echo "Yhtiötä ei ole annettu, ei voida toimia\n";
-		die;
-	}
-	else {
-		$kukarow["yhtio"] = $argv[1];
-	}
+		if ($argv[1] == '') {
+			echo "Yhtiötä ei ole annettu, ei voida toimia\n";
+			die;
+		}
+		else {
+			$kukarow["yhtio"] = $argv[1];
+		}
 	}
 
 	// määritellään polut
@@ -157,15 +157,15 @@
 						}
 
 						if ($tavarantoimittajanumero != "123085") {
-						foreach ($paketti->PkgItem as $xxx) {
-							$tuote = (string) $xxx->ProductId->ProductNumber;
-							$tuote = utf8_decode($tuote);
+							foreach ($paketti->PkgItem as $xxx) {
+								$tuote = (string) $xxx->ProductId->ProductNumber;
+								$tuote = utf8_decode($tuote);
 								$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
 								$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
-							$lisays[$p][$c]['ProductId'] = $tuote;
+								$lisays[$p][$c]['ProductId'] = $tuote;
 								$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
-							$c++;
-						}
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -195,11 +195,11 @@
 							$lisays[$p][$c]['DeliveredQuantity'] = "";
 						}
 						if ($tavarantoimittajanumero != "123085") {
-						foreach ($paketti2->PkgItem as $yyy) {
-							$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
-							$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
-							$c++;
-						}
+							foreach ($paketti2->PkgItem as $yyy) {
+								$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
+								$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -233,12 +233,12 @@
 						}
 
 						if ($tavarantoimittajanumero != "123085" and $tavarantoimittajanumero != "123342"){
-						foreach ($paketti3->PkgItem as $zzz) {
-								$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
-							$positio = utf8_decode($positio);
-								$lisays[$p][$c]['PositionNumber'] = (int) $positio;
-							$c++;
-						}
+							foreach ($paketti3->PkgItem as $zzz) {
+									$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
+									$positio = utf8_decode($positio);
+									$lisays[$p][$c]['PositionNumber'] = (int) $positio;
+									$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -267,11 +267,11 @@
 						}
 
 						if ($tavarantoimittajanumero != "123085") {
-						foreach ($tuotteelta_tilausno->PkgItem as $www) {
-							$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
-							$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
-							$c++;
-						}
+							foreach ($tuotteelta_tilausno->PkgItem as $www) {
+								$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
+								$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
+								$c++;
+							}
 						}
 						$p++;
 						$c=1;
@@ -307,10 +307,10 @@
 									$sscc = $laatikkoind;
 								}
 								if ($tavarantoimittajanumero !="123085") {
-								$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
+									$lisays[$p][$c]['PkgIdentNumber'] = $laatikkoind;
 									$lisays[$p][$c]['SSCC'] = $sscc;
+								}
 							}
-						}
 						}
 						elseif ($tavarantoimittajanumero == "123312" and trim($laatikosta->PkgNumber) == 1) {
 							$lisays[$p][$c]['PkgIdentNumber'] = "TOTAL PACKS";
@@ -360,6 +360,10 @@
 									$laatikkoid = utf8_decode($laatikkoid);
 									$SSCC		= $lisays[$i][1]["SSCC"];
 									$SSCC 		= utf8_decode($SSCC);
+									
+									if ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
+										$SSCC = $asn_numero;
+									}
 								}
 								else {
 									$laatikkoid = "";
@@ -368,7 +372,7 @@
 
 								foreach ($lisays[$i] as $value) {
 
-									if (($laatikkoid == "TOTAL PACKS" and $tavarantoimittajanumero == "123220" and $value["ProductId"] != "" and $value["DeliveredQuantity"] != '') or 
+									if (($laatikkoid == "TOTAL PACKS" and ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") and $value["ProductId"] != "" and $value["DeliveredQuantity"] != '') or 
 										($laatikkoid != "TOTAL PACKS" and ($value["ProductId"] != "" and $value["DeliveredQuantity"] != ''))) { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 										
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET

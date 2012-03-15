@@ -349,15 +349,40 @@
 			
 			// haetaan tuotekohtaisesti lapsituote tilaukselta ja lis‰t‰‰n sekin paketin-rivit alkioon 
 			
-
 			if (strpos($kollirow['tilausrivi'], ",") !== false) {
-
 				foreach (explode(",", $kollirow['tilausrivi']) as $tun) {
 					$paketin_rivit[] = $tun;
+
+					$lapset = "	SELECT tuoteperhe.isatuoteno, tuoteperhe.tuoteno, tilausrivi.tilkpl,tilausrivi.tunnus tilausrivitunnus, 
+								tilausrivi.otunnus, tr.tunnus lapsitunnus, tr.perheid trperheid 
+								FROM tilausrivi 
+								JOIN tuoteperhe on (tuoteperhe.yhtio=tilausrivi.yhtio and tuoteperhe.isatuoteno=tilausrivi.tuoteno and tuoteperhe.ohita_kerays !='') 
+								JOIN tilausrivi as tr on (tr.yhtio=tilausrivi.yhtio and tr.tuoteno=tuoteperhe.tuoteno and tr.perheid=tilausrivi.perheid and tr.tunnus != tilausrivi.tunnus)
+								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+								AND tilausrivi.tunnus = '{$tun}'";
+					$resultti = pupe_query($lapset);
+					$rivi = mysql_fetch_assoc($resultti);
+					if ($rivi["lapsitunnus"] !='') {
+						$paketin_rivit[] = $rivi["lapsitunnus"];
+					}
 				}
 			}
 			else {
 				$paketin_rivit[] = $kollirow['tilausrivi'];
+				
+				$lapset = "	SELECT tuoteperhe.isatuoteno, tuoteperhe.tuoteno, tilausrivi.tilkpl,tilausrivi.tunnus tilausrivitunnus, 
+							tilausrivi.otunnus, tr.tunnus lapsitunnus, tr.perheid trperheid 
+							FROM tilausrivi 
+							JOIN tuoteperhe on (tuoteperhe.yhtio=tilausrivi.yhtio and tuoteperhe.isatuoteno=tilausrivi.tuoteno and tuoteperhe.ohita_kerays !='') 
+							JOIN tilausrivi as tr on (tr.yhtio=tilausrivi.yhtio and tr.tuoteno=tuoteperhe.tuoteno and tr.perheid=tilausrivi.perheid and tr.tunnus != tilausrivi.tunnus)
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+							AND tilausrivi.tunnus = '{$kollirow["tilausrivi"]}'";
+				$resultti = pupe_query($lapset);
+				$rivi = mysql_fetch_assoc($resultti);
+				
+				if ($rivi["lapsitunnus"] !='') {
+					$paketin_rivit[] = $rivi["lapsitunnus"];
+				}
 			}
 			$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 		}
@@ -367,7 +392,7 @@
 		$tuotenorow = mysql_fetch_assoc($tuotenores);
 
 		$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
-
+		
 		require('inc/asn_kohdistus.inc');
 
 		asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);

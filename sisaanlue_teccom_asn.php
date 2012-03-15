@@ -129,9 +129,9 @@
 							foreach ($paketti->Package as $paketti) {
 								foreach ($paketti->PkgItem as $xxx) {
 									$tuote = (string) $xxx->ProductId->ProductNumber;
-									$tuote = utf8_decode($tuote);
+									$tuote = utf8_decode(trim($tuote));
 									$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
-									$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
+									$tuote2 = utf8_decode(trim($tuote2)); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
 									$lisays[$p][$c]['ProductId'] = $tuote;
 									$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
 									$c++;
@@ -159,9 +159,9 @@
 						if ($tavarantoimittajanumero != "123085") {
 							foreach ($paketti->PkgItem as $xxx) {
 								$tuote = (string) $xxx->ProductId->ProductNumber;
-								$tuote = utf8_decode($tuote);
+								$tuote = utf8_decode(trim($tuote));
 								$tuote2 = (string) $xxx->ProductId->BuyerProductNumber;
-								$tuote2 = utf8_decode($tuote2); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
+								$tuote2 = utf8_decode(trim($tuote2)); // tämä on overkilliä muillakuin 123067 ja 123310 mutta kuitenkin.
 								$lisays[$p][$c]['ProductId'] = $tuote;
 								$lisays[$p][$c]['BuyerProductNumber'] = $tuote2;
 								$c++;
@@ -196,7 +196,7 @@
 						}
 						if ($tavarantoimittajanumero != "123085") {
 							foreach ($paketti2->PkgItem as $yyy) {
-								$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
+								$kpl = (float) $yyy->DeliveredQuantity->Quantity;
 								$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
 								$c++;
 							}
@@ -362,12 +362,13 @@
 									$SSCC 		= utf8_decode($SSCC);
 									
 									if ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
-										$SSCC = $asn_numero;
+										$SSCC		= $asn_numero;
+										$laatikkoid = $asn_numero;
 									}
 								}
 								else {
-									$laatikkoid = "";
-									$SSCC		= "";
+									$laatikkoid = $asn_numero;
+									$SSCC		= $asn_numero;
 								}
 
 								foreach ($lisays[$i] as $value) {

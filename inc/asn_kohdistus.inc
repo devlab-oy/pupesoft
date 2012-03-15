@@ -116,7 +116,7 @@
 								$talteen_paketin_tiedot[] = mysql_insert_id();
 								
 								// päivitetään isä
-								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["tunnus"]}'";
+								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
 								$updateres = pupe_query($updateisa);
 								
 								
@@ -374,7 +374,7 @@
 									varattu			= '$ylimaaraista',
 									hinta			= '$tilausrivirow[hinta]',
 									laatija			= 'extraa',
-									kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle',
+									kommentti		= 'ASN-sanomalla 1: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle',
 									laadittu		=  now(),
 									hyllyalue		= '$tilausrivirow[hyllyalue]',
 									hyllynro		= '$tilausrivirow[hyllynro]',
@@ -462,7 +462,7 @@
 									varattu			= '$erotus',
 									hinta			= '$split_row[hinta]',
 									laatija			= 'split',
-									kommentti		= 'ASN-sanomalla: {$row["asn_numero"]}. Tehtiin puuttuva tilausrivi määrälle {$erotus} tuotteelle {$split_row["tuoteno"]}',
+									kommentti		= 'ASN-sanomalla 2: {$row["asn_numero"]}. Tehtiin puuttuva tilausrivi määrälle {$erotus} tuotteelle {$split_row["tuoteno"]}',
 									laadittu		=  now(),
 									hyllyalue		= '$split_row[hyllyalue]',
 									hyllynro		= '$split_row[hyllynro]',
@@ -513,7 +513,7 @@
 								varattu			= '$kappaleerotus',
 								hinta			= '$tilausrivirow[hinta]',
 								laatija			= 'split',
-								kommentti		= 'ASN-sanomalla: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$tilausrivirow["tilkpl"]} Tehtiin tilausrivi {$kappaleerotus} määrälle',
+								kommentti		= 'ASN-sanomalla 3: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$tilausrivirow["tilkpl"]} Tehtiin tilausrivi {$kappaleerotus} määrälle',
 								laadittu		=  now(),
 								hyllyalue		= '$tilausrivirow[hyllyalue]',
 								hyllynro		= '$tilausrivirow[hyllynro]',
@@ -594,11 +594,11 @@
 										perheid			= '$lapsitieto[tunnus]'";
 						$inskres = pupe_query($lisainsert);
 						$talteen_paketin_tiedot[] = mysql_insert_id();
-
+			
 						// päivitetään isä
-						$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["tunnus"]}'";
+						$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
 						$updateres = pupe_query($updateisa);
-
+			
 					}
 				}
 				// unsetataan alkuperäinen paketin_rivit ja korvataan se talteen otetulla.

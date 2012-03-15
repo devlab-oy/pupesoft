@@ -14546,6 +14546,86 @@ if (!function_exists("tee_keraysera2")) {
 		// esim. muutetaan metrit senteiksi
 		$mittakerroin = 100;
 
+		// $wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) BETWEEN (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) AND ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
+		#$wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
+
+		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään 
+		# tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi), 
+		# muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
+
+		$query = "	(SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
+					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+					lasku1.h1time,
+					keraysvyohyke1.tunnus AS ker_tunnus,
+					lasku1.ohjausmerkki, 
+					lahdot1.asiakasluokka,
+					lasku1.liitostunnus,
+					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
+					lahdot1.tunnus as lahto,
+					lahdot1.lahdon_kellonaika,
+					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
+					FROM lasku AS lasku1
+					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
+					JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
+					JOIN tilausrivin_lisatiedot AS tilrivlis1 ON (tilrivlis1.yhtio = tilausrivi1.yhtio AND tilrivlis1.tilausrivitunnus = tilausrivi1.tunnus AND tilrivlis1.ohita_kerays = '')
+					JOIN varaston_hyllypaikat AS vh1 ON (vh1.yhtio = tilausrivi1.yhtio AND vh1.hyllyalue = tilausrivi1.hyllyalue AND vh1.hyllynro = tilausrivi1.hyllynro AND vh1.hyllyvali = tilausrivi1.hyllyvali AND vh1.hyllytaso = tilausrivi1.hyllytaso AND vh1.keraysvyohyke IN ({$keraysvyohyke}))
+					JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
+					JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke1.tunnus = vh1.keraysvyohyke)
+					JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
+				 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
+									AND lahdot1.liitostunnus = toimitustapa1.tunnus
+									AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+									#AND lahdot1.lahdon_kellonaika >= CURTIME()
+									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
+									AND lahdot1.aktiivi = ''
+									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+									#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
+									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+ 									)
+					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
+					AND lasku1.tila = 'N'
+					AND lasku1.alatila = 'A'
+					AND lasku1.vakisin_kerays = ''
+					AND lasku1.varasto = '{$varasto}'
+					GROUP BY 1,2,3,4,5,6,7,8,9)
+					UNION
+					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
+					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
+					keraysvyohyke2.tunnus AS ker_tunnus,
+					lasku2.h1time,
+					lasku2.ohjausmerkki, 
+					999999999999 as asiakasluokka,
+					lasku2.liitostunnus,
+					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
+					999999999999 as lahto,
+					999999999999 as lahdon_kellonaika,
+					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
+					FROM lasku AS lasku2
+					JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
+					JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
+					JOIN tilausrivin_lisatiedot AS tilrivlis2 ON (tilrivlis2.yhtio = tilausrivi2.yhtio AND tilrivlis2.tilausrivitunnus = tilausrivi2.tunnus AND tilrivlis2.ohita_kerays = '')
+					JOIN varaston_hyllypaikat AS vh2 ON (vh2.yhtio = tilausrivi2.yhtio AND vh2.hyllyalue = tilausrivi2.hyllyalue AND vh2.hyllynro = tilausrivi2.hyllynro AND vh2.hyllyvali = tilausrivi2.hyllyvali AND vh2.hyllytaso = tilausrivi2.hyllytaso AND vh2.keraysvyohyke IN ({$keraysvyohyke}))
+					JOIN tuote AS tuote2 ON (tuote2.yhtio = tilausrivi2.yhtio AND tuote2.tuoteno = tilausrivi2.tuoteno)
+					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke2.tunnus = vh2.keraysvyohyke)
+					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
+					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
+					AND lasku2.tila = 'N'
+					AND lasku2.alatila = 'A'
+					AND lasku2.vakisin_kerays != ''
+					AND lasku2.varasto = '{$varasto}'
+					GROUP BY 1,2,3,4,5,6,7,8,9)
+					ORDER BY 1,2,3,4";
+		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
+		$res = pupe_query($query);
+
+		if (mysql_num_rows($res) == 0) {
+			return array('tilaukset' => array(), 'msg' => $query);
+		}
+
+		$row = mysql_fetch_assoc($res);
+		$keraysvyohyke = $row['ker_tunnus'];
+
 		$query = "	SELECT nimitys, sallitut_alustat,
 					IF(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
 					max_keraysera_rivit,
@@ -14615,363 +14695,6 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
-		/*
-		saa olla useita asiakkaita = S
-		saa olla useita lähtöjä = K
-		saa olla useita prioriteettejä = P
-
-		1)
-		ORDER BY erotus, prioriteetti ASC, lasku.h1time ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi
-		[] saa olla useita asiakkaita
-		[] saa olla useita lähtöjä
-		[] saa olla useita prioriteettejä
-
-		2)
-		ORDER BY erotus, prioriteetti ASC, lahto, lasku.liitostunnus, lasku.sisviesti2, lasku.h1time ASC, minimi_indeksi
-		[x] saa olla useita asiakkaita
-		[] saa olla useita lähtöjä
-		[] saa olla useita prioriteettejä
-
-		3)
-		ORDER BY erotus, prioriteetti ASC, lasku.h1time ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi
-		[x] saa olla useita asiakkaita
-		[x] saa olla useita lähtöjä
-		[] saa olla useita prioriteettejä
-
-		4)
-		ORDER BY erotus, lasku.h1time ASC, prioriteetti ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi
-		[x] saa olla useita asiakkaita
-		[x] saa olla useita lähtöjä
-		[x] saa olla useita prioriteettejä
-
-		5)
-		ORDER BY erotus, lahto, lasku.h1time ASC, prioriteetti ASC, lasku.liitostunnus, lasku.sisviesti2, minimi_indeksi
-		[x] saa olla useita asiakkaita
-		[] saa olla useita lähtöjä
-		[x] saa olla useita prioriteettejä
-
-		6)
-		ORDER BY erotus, lasku.liitostunnus, lasku.h1time ASC, prioriteetti ASC, lahto, lasku.sisviesti2, minimi_indeksi
-		[] saa olla useita asiakkaita
-		[x] saa olla useita lähtöjä
-		[x] saa olla useita prioriteettejä
-
-		7)
-		ORDER BY erotus, lasku.liitostunnus, lasku.h1time ASC, prioriteetti ASC, lahto, lasku.sisviesti2, minimi_indeksi
-		[] saa olla useita asiakkaita
-		[x] saa olla useita lähtöjä
-		[] saa olla useita prioriteettejä
-
-		8)
-		ORDER BY erotus, lasku.liitostunnus, lasku.h1time ASC, prioriteetti ASC, lahto, lasku.sisviesti2, minimi_indeksi
-		[] saa olla useita asiakkaita
-		[] saa olla useita lähtöjä
-		[x] saa olla useita prioriteettejä
-		*/
-
-		// $wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) BETWEEN (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) AND ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
-		$wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
-
-		if ($debug) {
-			echo "<br>";
-			echo strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') !== false ? "[x] saa olla useita asiakkaita<br>" : "[ ] saa olla useita asiakkaita<br>";
-			echo strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') !== false ? "[x] saa olla useita lähtöjä<br>" : "[ ] saa olla useita lähtöjä<br>";
-			echo strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') !== false ? "[x] saa olla useita prioriteetteja<br>" : "[ ] saa olla useita prioriteetteja<br>";
-		}
-
-		$yhdistelysaanto_s = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') !== false ? true : false;
-		$yhdistelysaanto_k = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') !== false ? true : false;
-		$yhdistelysaanto_p = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') !== false ? true : false;
-
-		/**
-		 * [x] saa olla useita asiakkaita
-		 * [] saa olla useita lähtöjä
-		 * [] saa olla useita prioriteettejä
-		 */
-		if ($yhdistelysaanto_s and !$yhdistelysaanto_k and !$yhdistelysaanto_p) {
-			#2
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [x] saa olla useita asiakkaita
-		 * [x] saa olla useita lähtöjä
-		 * [] saa olla useita prioriteettejä
-		 */
-		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
-			#3
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lasku1.h1time ASC, lasku.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lasku2.h1time ASC, lasku.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lasku1.h1time ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [x] saa olla useita asiakkaita
-		 * [x] saa olla useita lähtöjä
-		 * [x] saa olla useita prioriteettejä
-		 */
-		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
-			#4
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [x] saa olla useita asiakkaita
-		 * [] saa olla useita lähtöjä
-		 * [x] saa olla useita prioriteettejä
-		 */
-		elseif ($yhdistelysaanto_s and !$yhdistelysaanto_k and $yhdistelysaanto_p) {
-			#5
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lahto, lasku1.h1time ASC, lasku1.liitostunnus, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lahto, lasku2.h1time ASC, lasku2.liitostunnus, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku1.h1time ASC, lasku1.liitostunnus, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.h1time ASC, lasku2.liitostunnus, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [] saa olla useita asiakkaita
-		 * [x] saa olla useita lähtöjä
-		 * [x] saa olla useita prioriteettejä
-		 */
-		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
-			#6
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lasku1.h1time ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lasku1.h1time ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [] saa olla useita asiakkaita
-		 * [x] saa olla useita lähtöjä
-		 * [] saa olla useita prioriteettejä
-		 */
-		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
-			#7
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lasku1.h1time ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lasku1.h1time ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.h1time ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-		}
-		/**
-		 * [] saa olla useita asiakkaita
-		 * [] saa olla useita lähtöjä
-		 * [x] saa olla useita prioriteettejä
-		 */
-		elseif (!$yhdistelysaanto_s and !$yhdistelysaanto_k and $yhdistelysaanto_p) {
-			#8
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lahto, lasku1.liitostunnus, lasku1.ohjausmerkki, lasku1.h1time ASC";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lahto, lasku2.liitostunnus, lasku2.ohjausmerkki, lasku2.h1time ASC";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku1.liitostunnus, lasku1.ohjausmerkki, lasku1.h1time ASC";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lahto, lasku2.liitostunnus, lasku2.ohjausmerkki, lasku2.h1time ASC";
-			}
-		}
-		/**
-		 * [] saa olla useita asiakkaita
-		 * [] saa olla useita lähtöjä
-		 * [] saa olla useita prioriteettejä
-		 */
-		else {
-			#1
-			$select1 = "GROUP_CONCAT(DISTINCT lasku1.tunnus)";
-			$select2 = "GROUP_CONCAT(DISTINCT lasku2.tunnus)";
-
-			if ($keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-				$groupby1 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY prioriteetti ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY prioriteetti ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-			else {
-				$groupby1 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku1.ohjausmerkki";
-				$orderby1 = "ORDER BY erotus, prioriteetti ASC, lasku1.liitostunnus, lahto, lasku1.ohjausmerkki";
-
-				$groupby2 = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku2.ohjausmerkki";
-				$orderby2 = "ORDER BY erotus, prioriteetti ASC, lasku2.liitostunnus, lahto, lasku2.ohjausmerkki";
-			}
-		}
-
-		$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.h1time";
-		$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.h1time";
-
-		$groupby1 = "GROUP BY 1,2,3,4,5";
-		$groupby2 = "GROUP BY 1,2,3,4,5";
-
-		if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false) {
-			$orderby1 = "ORDER BY lahdot1.asiakasluokka, (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60), lasku1.prioriteettinro, lasku1.liitostunnus, lasku1.h1time";
-			$orderby2 = "ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot2.lahdon_kellonaika, CURTIME())) / 60), lasku2.prioriteettinro, lasku2.liitostunnus, lasku2.h1time";
-		}
-
-		if ($debug) echo "$groupby<br>$orderby<br><br>";
-
-		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään 
-		# tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi), 
-		# muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
-
-		$query = "	(SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
-					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					lasku1.h1time,
-					lasku1.ohjausmerkki, 
-					lahdot1.asiakasluokka,
-					lasku1.liitostunnus,
-					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
-					lahdot1.tunnus as lahto,
-					lahdot1.lahdon_kellonaika,
-					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
-					FROM lasku AS lasku1
-					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
-					JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
-					JOIN tilausrivin_lisatiedot AS tilrivlis1 ON (tilrivlis1.yhtio = tilausrivi1.yhtio AND tilrivlis1.tilausrivitunnus = tilausrivi1.tunnus AND tilrivlis1.ohita_kerays = '')
-					JOIN varaston_hyllypaikat AS vh1 ON (vh1.yhtio = tilausrivi1.yhtio AND vh1.hyllyalue = tilausrivi1.hyllyalue AND vh1.hyllynro = tilausrivi1.hyllynro AND vh1.hyllyvali = tilausrivi1.hyllyvali AND vh1.hyllytaso = tilausrivi1.hyllytaso AND vh1.keraysvyohyke = '{$keraysvyohyke}')
-					JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
-					JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
-					JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
-				 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
-									AND lahdot1.liitostunnus = toimitustapa1.tunnus
-									AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
-									#AND lahdot1.lahdon_kellonaika >= CURTIME()
-									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
-									AND lahdot1.aktiivi = ''
-									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
-									#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
-									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
- 									)
-					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
-					AND lasku1.tila = 'N'
-					AND lasku1.alatila = 'A'
-					AND lasku1.vakisin_kerays = ''
-					AND lasku1.varasto = '{$varasto}'
-					{$wherelisa}
-					GROUP BY 1,2,3,4,5,6,7,8)
-					UNION
-					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
-					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
-					lasku2.h1time,
-					lasku2.ohjausmerkki, 
-					999999999999 as asiakasluokka,
-					lasku2.liitostunnus,
-					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
-					999999999999 as lahto,
-					999999999999 as lahdon_kellonaika,
-					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
-					FROM lasku AS lasku2
-					JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
-					JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
-					JOIN tilausrivin_lisatiedot AS tilrivlis2 ON (tilrivlis2.yhtio = tilausrivi2.yhtio AND tilrivlis2.tilausrivitunnus = tilausrivi2.tunnus AND tilrivlis2.ohita_kerays = '')
-					JOIN varaston_hyllypaikat AS vh2 ON (vh2.yhtio = tilausrivi2.yhtio AND vh2.hyllyalue = tilausrivi2.hyllyalue AND vh2.hyllynro = tilausrivi2.hyllynro AND vh2.hyllyvali = tilausrivi2.hyllyvali AND vh2.hyllytaso = tilausrivi2.hyllytaso AND vh2.keraysvyohyke = '{$keraysvyohyke}')
-					JOIN tuote AS tuote2 ON (tuote2.yhtio = tilausrivi2.yhtio AND tuote2.tuoteno = tilausrivi2.tuoteno)
-					JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
-					JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
-					JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
-					WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
-					AND lasku2.tila = 'N'
-					AND lasku2.alatila = 'A'
-					AND lasku2.vakisin_kerays != ''
-					AND lasku2.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8)
-					ORDER BY 1,2,3,4";
-		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
-		$res = pupe_query($query);
-
-		if (mysql_num_rows($res) == 0) {
-			return array('tilaukset' => array(), 'msg' => $query);
-		}
-
-		$row = mysql_fetch_assoc($res);
-
 		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 			$aikarajaus = $row['lahdon_kellonaika'];
 
@@ -15013,7 +14736,35 @@ if (!function_exists("tee_keraysera2")) {
 			$res = pupe_query($query);
 		}
 		else {
-			mysql_data_seek($res, 0);
+
+			$query = "	SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
+						(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
+						lasku2.h1time,
+						lasku2.ohjausmerkki, 
+						999999999999 as asiakasluokka,
+						lasku2.liitostunnus,
+						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
+						999999999999 as lahto,
+						999999999999 as lahdon_kellonaika,
+						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
+						FROM lasku AS lasku2
+						JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
+						JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
+						JOIN tilausrivin_lisatiedot AS tilrivlis2 ON (tilrivlis2.yhtio = tilausrivi2.yhtio AND tilrivlis2.tilausrivitunnus = tilausrivi2.tunnus AND tilrivlis2.ohita_kerays = '')
+						JOIN varaston_hyllypaikat AS vh2 ON (vh2.yhtio = tilausrivi2.yhtio AND vh2.hyllyalue = tilausrivi2.hyllyalue AND vh2.hyllynro = tilausrivi2.hyllynro AND vh2.hyllyvali = tilausrivi2.hyllyvali AND vh2.hyllytaso = tilausrivi2.hyllytaso AND vh2.keraysvyohyke = '{$keraysvyohyke}')
+						JOIN tuote AS tuote2 ON (tuote2.yhtio = tilausrivi2.yhtio AND tuote2.tuoteno = tilausrivi2.tuoteno)
+						JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
+						JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
+						JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+						WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
+						AND lasku2.tila = 'N'
+						AND lasku2.alatila = 'A'
+						AND lasku2.vakisin_kerays != ''
+						AND lasku2.varasto = '{$varasto}'
+						GROUP BY 1,2,3,4,5,6,7,8)
+						ORDER BY 1,2,3,4";
+			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
+			$res = pupe_query($query);
 		}
 
 		/**

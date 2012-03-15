@@ -368,9 +368,9 @@
 
 		$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
 
-	//	require('inc/asn_kohdistus.inc');
+		require('inc/asn_kohdistus.inc');
 
-	//	asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+		asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
 
 		$tee = '';
 	}
@@ -419,7 +419,7 @@
 			$result = pupe_query($query);
 			$trow = mysql_fetch_assoc($result);
 
-			$hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
+			list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
 
 			//pidet‰‰n kaikki muuttujat tallessa
 			$muut_siirrettavat = $asn_rivi."!°!".$toimittaja."!°!".$tilausnro."!°!".$tuoteno."!°!".$tilaajanrivinro."!°!".$kpl."!°!".$valitse;

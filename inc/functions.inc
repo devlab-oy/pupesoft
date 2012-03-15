@@ -10760,8 +10760,7 @@ if (!function_exists("tarkista_oikeus")) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND kuka = '$kukarow[kuka]'
 					AND nimi LIKE '%$ohjelma'
-					$querylisa
-					ORDER BY length(alanimi)";
+					$querylisa";
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
@@ -11574,11 +11573,11 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][10];
+									valuutta = aaData[aiDisplay[i]][9];
 									valuutat[valuutta] = valuutta;
 
 									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-									avoimety[valuutta] += aaData[aiDisplay[i]][9]*1;
+									avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
 								}
 
 								// Tyhjennetään kaikki summat

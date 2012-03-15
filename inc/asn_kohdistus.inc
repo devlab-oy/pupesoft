@@ -171,6 +171,16 @@
 					
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
+				elseif ($row["toimittajanumero"] == "123084") {
+					
+					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
+					
+					if ($row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = ltrim($row["toim_tuoteno2"],'0');
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					$poikkeus_tuoteno = " in ('$tuote','$lyhennetty' $toinen_tuoteno) ";
+				}
 				else {
 					
 					if ($row["toim_tuoteno2"] != "") {
@@ -300,27 +310,6 @@
 				$checkres = pupe_query($query);
 				
 				$tilausrivirow = mysql_fetch_array($checkres);
-				
-				// tehdään tuoteperhe-satula-tapaus-checkki
-				$tuoteperhesql = "	SELECT tuoteperhe.*, tuote.*, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
-									FROM tuoteperhe
-									JOIN tuote on (tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-									JOIN tuotepaikat ON (tuotepaikat.yhtio = tuoteperhe.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
-									WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
-									AND tuoteperhe.isatuoteno = '{$tilausrivirow["tuoteno"]}'
-									AND tuoteperhe.tyyppi in ('P','')
-									AND tuoteperhe.ohita_kerays !=''
-									ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus
-									LIMIT 1";
-				$tuoteresult = pupe_query($tuoteperhesql);
-				
-				if (mysql_num_rows($tuoteresult) > 0) {
-					$lisatavarat = mysql_fetch_assoc($tuoteresult);
-					// Jos tänne mennään niin jotenkin lisätään tilausriville runko.
-					// Fundeeraus paussi.
-					$loysin_lapsen = TRUE;
-					echo "0. Olen lapsi: riville: {$tilausrivirow["tunnus"]} : {$tilausrivirow["tuoteno"]} => {$lisatavarat["tuoteno"]} kpl:{$tilausrivirow["tilkpl"]} <br>";
-				}
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VÄHEMMÄN kuin tilausrivillä, vanhan tilausrivin tunnus jää jäljellä
 				if (mysql_num_rows($checkres) == 0) {
@@ -429,7 +418,7 @@
 						$query = "	UPDATE tilausrivi SET
 									varattu = '$positiivinen_arvo',
 									tilkpl	= '$positiivinen_arvo', 
-									kommentti = concat(kommentti,' ennen splittausta {$split_row["tilkpl"]} : {$split_row["varattu"]}')
+									kommentti = concat(kommentti,' ennen splittausta {$split_row["tilkpl"]} : {$split_row["varattu"]}, kohdistettiin {$positiivinen_arvo}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$split_row[tunnus]'";
 						$upres = pupe_query($query);
@@ -481,7 +470,7 @@
 					$query = "	UPDATE tilausrivi SET
 								varattu = '$row[kappalemaara]',
 								tilkpl	= '$row[kappalemaara]', 
-								kommentti = concat(kommentti,' ennen splittausta {$tilausrivirow["tilkpl"]} : {$tilausrivirow["varattu"]}')
+								kommentti = concat(kommentti,' ennen splittausta {$tilausrivirow["tilkpl"]} : {$tilausrivirow["varattu"]}, kohdistettiin {$positiivinen_arvo}')
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$tilausrivirow[tunnus]'";
 					$upres = pupe_query($query);

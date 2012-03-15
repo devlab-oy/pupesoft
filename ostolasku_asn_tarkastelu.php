@@ -794,6 +794,16 @@
 					
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
+				elseif ($asn_row["toimittajanumero"] == "123084") {
+					
+					$lyhennetty = ltrim($asn_row["toim_tuoteno"],'0');
+					
+					if ($asn_row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = ltrim($asn_row["toim_tuoteno2"],'0');
+						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					$poikkeus_tuoteno = " in ('$tuote','$lyhennetty' $toinen_tuoteno) ";
+				}
 				else {
 					
 					if ($asn_row["toim_tuoteno2"] != "") {
@@ -1078,6 +1088,16 @@
 					}
 					
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
+				}
+				elseif ($row["toimittajanumero"] == "123084") {
+					
+					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
+					
+					if ($row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = ltrim($row["toim_tuoteno2"],'0');
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					$poikkeus_tuoteno = " in ('$tuote','$lyhennetty' $toinen_tuoteno) ";
 				}
 				else {
 					

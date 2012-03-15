@@ -200,11 +200,11 @@
 				$nrospanni2 = 6;
 
 				$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-				
+
 				if ($yhtiorow['rivinumero_syotto'] != '') {
 					$nrospanni2++;
 				}
-				
+
 				echo "<tr>{$jarjlisa}
 						<th colspan='{$nrospanni2}' align='left'>",t("Tuotteen nimitys"),"</th>
 						</tr><tr>{$jarjlisa}
@@ -274,7 +274,8 @@
 
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
+				// Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, "", $tila)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
@@ -403,7 +404,7 @@
 		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			$nrospanni++;
 		}
-	
+
 		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
@@ -488,7 +489,7 @@
 			$nrospanni2 = 7;
 
 			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-			
+
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				$nrospanni2++;
 			}
@@ -566,7 +567,8 @@
 
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
+				// Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, "", $tila)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";

@@ -62,9 +62,9 @@
 						unset($talteen_paketin_tiedot);
 						$talteen_paketin_tiedot = array();
 						$talteen_paketin_tiedot = $paketin_rivit;
-						echo "<pre>",var_dump($paketin_rivit),"</pre>";
-
+						
 						foreach ($paketin_rivit as $tilausrivitunnus) {
+							
 							// tehd‰‰n tuoteperhe-satula-tapaus-checkki
 							$lapsiperhesql = "	SELECT 
 												tuoteperhe.isatuoteno, 
@@ -105,7 +105,7 @@
 												varattu			= '$lapsitieto[varattu]',
 												hinta			= '$hinta',
 												laatija			= 'lapset',
-												kommentti		= 'ASN-sanoma: tuotteelle: {$lapsitieto["isatuoteno"]} lis‰t‰‰n lapsituote: {$lapsitieto["tuoteno"]}',
+												kommentti		= 'ASN-sanoma: TL:{$lapsitieto["tunnus"]} tuotteelle: {$lapsitieto["isatuoteno"]} lis‰t‰‰n lapsituote: {$lapsitieto["tuoteno"]}',
 												laadittu		=  now(),
 												hyllyalue		= '$lapsitieto[hyllyalue]',
 												hyllynro		= '$lapsitieto[hyllynro]',
@@ -113,20 +113,21 @@
 												hyllyvali		= '$lapsitieto[hyllyvali]', 
 												perheid			= '$lapsitieto[tunnus]'";
 								$inskres = pupe_query($lisainsert);
-								query_dump($lisainsert);
+								$talteen_paketin_tiedot[] = mysql_insert_id();
 								
 								// p‰ivitet‰‰n is‰
-								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
+								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["tunnus"]}'";
 								$updateres = pupe_query($updateisa);
-								$talteen_paketin_tiedot = mysql_insert_id();
+								
+								
 							}
 						}
 						// unsetataan alkuper‰inen paketin_rivit ja korvataan se talteen otetulla.
 						unset($paketin_rivit);
+						$paketin_rivit = array();
 						$paketin_rivit = $talteen_paketin_tiedot;
-						echo "<pre>",var_dump($paketin_rivit),"</pre>";
+
 					}
-					
 					
 					if ($virheet == 0) {
 						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
@@ -318,7 +319,7 @@
 					// Jos t‰nne menn‰‰n niin jotenkin lis‰t‰‰n tilausriville runko.
 					// Fundeeraus paussi.
 					$loysin_lapsen = TRUE;
-					echo "0. Olen lapsi: riville: {$tilausrivirow["tunnus"]} : {$tilausrivirow["tuoteno"]} => {$lisatavarat["tuoteno"]} <br>";
+					echo "0. Olen lapsi: riville: {$tilausrivirow["tunnus"]} : {$tilausrivirow["tuoteno"]} => {$lisatavarat["tuoteno"]} kpl:{$tilausrivirow["tilkpl"]} <br>";
 				}
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VƒHEMMƒN kuin tilausrivill‰, vanhan tilausrivin tunnus j‰‰ j‰ljell‰
@@ -492,6 +493,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);
+					$paketin_rivit[] = $tilausrivirow['tunnus'];
 
 					$kaytetyt_tilausrivit[] = $tilausrivirow['tunnus'];
 
@@ -540,9 +542,9 @@
 				unset($talteen_paketin_tiedot);
 				$talteen_paketin_tiedot = array();
 				$talteen_paketin_tiedot = $paketin_rivit;
-				echo "<pre>",var_dump($paketin_rivit),"</pre>";
-				
+
 				foreach ($paketin_rivit as $tilausrivitunnus) {
+					
 					// tehd‰‰n tuoteperhe-satula-tapaus-checkki
 					$lapsiperhesql = "	SELECT 
 										tuoteperhe.isatuoteno, 
@@ -583,7 +585,7 @@
 										varattu			= '$lapsitieto[varattu]',
 										hinta			= '$hinta',
 										laatija			= 'lapset',
-										kommentti		= 'ASN-sanoma: tuotteelle: {$lapsitieto["isatuoteno"]} lis‰t‰‰n lapsituote: {$lapsitieto["tuoteno"]}',
+										kommentti		= 'ASN-sanoma: TL:{$lapsitieto["tunnus"]} tuotteelle: {$lapsitieto["isatuoteno"]} lis‰t‰‰n lapsituote: {$lapsitieto["tuoteno"]}',
 										laadittu		=  now(),
 										hyllyalue		= '$lapsitieto[hyllyalue]',
 										hyllynro		= '$lapsitieto[hyllynro]',
@@ -591,17 +593,20 @@
 										hyllyvali		= '$lapsitieto[hyllyvali]', 
 										perheid			= '$lapsitieto[tunnus]'";
 						$inskres = pupe_query($lisainsert);
-						query_dump($lisainsert);
+						$talteen_paketin_tiedot[] = mysql_insert_id();
+
 						// p‰ivitet‰‰n is‰
-						$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
+						$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["tunnus"]}'";
 						$updateres = pupe_query($updateisa);
-						$talteen_paketin_tiedot = mysql_insert_id();
+
 					}
 				}
 				// unsetataan alkuper‰inen paketin_rivit ja korvataan se talteen otetulla.
 				unset($paketin_rivit);
+				$paketin_rivit =  array();
 				$paketin_rivit = $talteen_paketin_tiedot;
-				echo "<pre>",var_dump($paketin_rivit),"</pre>";
+				$talteen_paketin_tiedot = array();
+
 			}
 
 			if ($virheet == 0 and count($paketin_rivit) > 0) {
@@ -610,9 +615,7 @@
 			elseif ($virheet != 0) {
 				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
 			}
-
 		}
-
 	}
 
 	if (!function_exists("asn_kohdista_suuntalava")) {

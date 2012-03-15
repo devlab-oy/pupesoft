@@ -512,6 +512,13 @@
 		$ulos .= "<option value='DTPG' {$sel['DTPG']}>Tollpost-Globe AS</option>";
 		$ulos .= "<option value='TP' {$sel['TP']}>Transpoint</option>";
 		$ulos .= "<option value='TG' {$sel['TG']}>Transportgruppen</option>";
+
+		$uf_rahkul_avainsanat_result = t_avainsana('UNIFAUN_RAHKULJ', '', " and selite != '' ");
+
+		while ($uf_rahkulj_avainsanat_row = mysql_fetch_assoc($uf_rahkul_avainsanat_result)) {
+			$ulos .= "<option value='{$uf_rahkulj_avainsanat_row['selite']}' {$sel[$uf_rahkulj_avainsanat_row['selite']]}>{$uf_rahkulj_avainsanat_row['selitetark']}</option>";
+		}
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

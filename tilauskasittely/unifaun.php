@@ -426,16 +426,16 @@ class Unifaun {
 				$reference = utf8_encode(substr($this->postirow["viesti"], 0, 17));
 
 				# lähettäjän viite
-				$uni_shi_val = $uni_shipment->addChild('val', "reference example"); # Shipment reference. Any contents. Max. 17 characters.
+				$uni_shi_val = $uni_shipment->addChild('val', $reference); # Shipment reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "reference");
 
-				$referencebarcode = (trim($reference) != "" and is_int($reference)) ? $reference : "";
-
-				$uni_shi_val = $uni_shipment->addChild('val', $referencebarcode); # Shipment reference as barcode. Max. 17 numeric characters.
-				$uni_shi_val->addAttribute('n', "referencebarcode");
+				if (trim($reference) != "" and is_int($reference)) {
+					$uni_shi_val = $uni_shipment->addChild('val', $reference); # Shipment reference as barcode. Max. 17 numeric characters.
+					$uni_shi_val->addAttribute('n', "referencebarcode");
+				}
 
 				# vastaanottajan viite
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($this->viite, 0, 17))); # Receiver's reference. Any contents. Max. 17 characters.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($this->postirow["asiakkaan_tilausnumero"], 0, 17))); # Receiver's reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "rcvreference");
 
 				#$uni_shi_val = $uni_shipment->addChild('val', "sisfreetext1"); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 5 lines available, sisfreetext1-5. Max. 30 characters/line.

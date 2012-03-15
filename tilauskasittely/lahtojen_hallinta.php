@@ -1625,7 +1625,7 @@
 						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
 						avainsana.selitetark_3 AS 'prioriteetti',
 						toimitustapa.selite AS 'toimitustapa',
-						toimitustapa.rahdinkuljettaja,
+						toimitustapa.lahdon_selite,
 						lahdot.aktiivi,
 						GROUP_CONCAT(IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) SEPARATOR '') AS 'toimitustavan_lahto_siirto',
 						GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
@@ -1663,7 +1663,7 @@
 				$deliveries[$row['toimitustapa']] = $row['toimitustapa'];
 				$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
 				$priorities[$row['prioriteetti']] = $row['prioriteetti'];
-				$carriers[$row['rahdinkuljettaja']] = $row['rahdinkuljettaja'];
+				$carriers[$row['lahdon_selite']] = $row['lahdon_selite'];
 			}
 
 			echo "<br /><br />";
@@ -1856,7 +1856,7 @@
 				echo "</form>";
 				echo "</td>";
 				echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
-				echo "<td class='toggleable_parent_row_carrier' id='{$row['rahdinkuljettaja']}__{$row['lahdon_tunnus']}__{$y}'>{$row['rahdinkuljettaja']}</td>";
+				echo "<td class='toggleable_parent_row_carrier' id='{$row['lahdon_selite']}__{$row['lahdon_tunnus']}__{$y}'>{$row['lahdon_selite']}</td>";
 				echo "<td class='toggleable_parent_row_delivery' id='{$row['toimitustapa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['toimitustapa']}</td>";
 				echo "<td class='center toggleable_parent_row_date' id='",tv1dateconv($row['lahdon_pvm']),"__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 				echo "<td class='center toggleable_parent_row_time1' id='{$row['viimeinen_tilausaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['viimeinen_tilausaika']}</td>";
@@ -1942,7 +1942,7 @@
 						SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
 						avainsana.selitetark_3 AS 'prioriteetti',
 						toimitustapa.selite AS 'toimitustapa',
-						toimitustapa.rahdinkuljettaja
+						toimitustapa.lahdon_selite
 						FROM lasku
 						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
@@ -2004,7 +2004,7 @@
 			echo "<tr>";
 			echo "<td class='data'>{$info_row['lahdon_tunnus']}</td>";
 			echo "<td class='data'>{$info_row['prioriteetti']}</td>";
-			echo "<td class='data'>{$info_row['rahdinkuljettaja']}</td>";
+			echo "<td class='data'>{$info_row['lahdon_selite']}</td>";
 			echo "<td class='data'>{$info_row['toimitustapa']}</td>";
 			echo "<td class='data'>",tv1dateconv($info_row['lahdon_pvm']),"</td>";
 			echo "<td class='data'>{$info_row['viimeinen_tilausaika']}</td>";

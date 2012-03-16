@@ -146,7 +146,6 @@
 				// Siirtym‰vaiheen j‰lkeen poista lasku.comments tilausnumero ehto !!!!
 
 				// poikkeusk‰sittely‰ muutamalle toimittajalle.
-				// Kun haetaan ja kohdistetaan niin t‰ll‰ toimittajalla pit‰‰ ensin "t‰ydell‰", sitten lopusta 3-merkki‰ pois, sen j‰lkeen viel‰ lis‰t‰‰n "090"
 
 				if ($row["toimittajanumero"] == "123067") {
 					$orgtuote = $row["toim_tuoteno"];
@@ -171,6 +170,17 @@
 
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
+				elseif ($row["toimittajanumero"] == "123178") {
+					$orgtuote = $row["toim_tuoteno"];
+					$lyhennetty = substr($row["toim_tuoteno"],3);
+
+					if ($row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = substr($row["toim_tuoteno2"],3);
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
+				}
 				elseif ($row["toimittajanumero"] == "123084") {
 					$orgtuote = $row["toim_tuoteno"];
 					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
@@ -182,7 +192,6 @@
 					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
 				}
 				else {
-
 					if ($row["toim_tuoteno2"] != "") {
 						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}'";
 					}

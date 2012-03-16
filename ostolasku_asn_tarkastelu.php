@@ -794,6 +794,17 @@
 					
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
+				elseif ($asn_row["toimittajanumero"] == "123178") {
+					$orgtuote = $asn_row["toim_tuoteno"];
+					$lyhennetty = substr($asn_row["toim_tuoteno"],3);
+
+					if ($row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = substr($asn_row["toim_tuoteno2"],3);
+						$toinen_tuoteno = ",'{$asn_row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
+				}
 				elseif ($asn_row["toimittajanumero"] == "123084") {
 					$orgtuote = $asn_row["toim_tuoteno"];
 					$lyhennetty = ltrim($asn_row["toim_tuoteno"],'0');
@@ -1088,6 +1099,17 @@
 					}
 					
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
+				}
+				elseif ($row["toimittajanumero"] == "123178") {
+					$orgtuote = $row["toim_tuoteno"];
+					$lyhennetty = substr($row["toim_tuoteno"],3);
+
+					if ($row["toim_tuoteno2"] != "") {
+						$lyhennetty_toinen = substr($row["toim_tuoteno2"],3);
+						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
+					}
+					
+					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
 				}
 				elseif ($row["toimittajanumero"] == "123084") {
 					$orgtuote = $row["toim_tuoteno"];

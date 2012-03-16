@@ -406,6 +406,11 @@ if (!function_exists('alku_kerayslista')) {
 				$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
 			}
 
+			// Jos keräyslistat/lähetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan
+			if (trim($laskurow['clearing']) == 'JT-TILAUS' and $yhtiorow["lahetteen_tulostustapa"] != "K") {
+				$komm .= "\n*** ".t("JÄLKITOIMITUS")." ***";
+			}
+
 			//Tulostetaan laskun kommentti
 			if (trim($komm) != '') {
 				$kommentit = explode("\n", trim($komm));

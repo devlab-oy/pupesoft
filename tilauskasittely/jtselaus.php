@@ -1318,7 +1318,7 @@
 								}
 
 								if ($kukarow["extranet"] == "") {
-									echo "<td valign='top' $class>$ins <a href='../tuote.php?tee=Z&tuoteno=".urlencode($jtrow["tuoteno"])."'>$jtrow[tuoteno]</a>";
+									echo "<td valign='top' $class>$ins <a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($jtrow["tuoteno"])."'>$jtrow[tuoteno]</a>";
 								}
 								else {
 									echo "<td valign='top' $class>$ins $jtrow[tuoteno]";
@@ -1333,7 +1333,7 @@
 									echo "<td valign='top' $class>$jtrow[ytunnus]<br>";
 
 									if ($kukarow["extranet"] == "") {
-										echo "<a href='../tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
+										echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
 									}
 									else {
 										echo "$jtrow[nimi]<br>";
@@ -1783,7 +1783,7 @@
 									}
 
 									if ($kukarow["extranet"] == "") {
-										echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($perherow["tuoteno"])."'>$perherow[tuoteno]</a>";
+										echo "<td valign='top' $class><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($perherow["tuoteno"])."'>$perherow[tuoteno]</a>";
 									}
 									else {
 										echo "<td valign='top' $class>$perherow[tuoteno]";
@@ -1798,7 +1798,7 @@
 										echo "<td valign='top' $class>$perherow[ytunnus]<br>";
 
 										if ($kukarow["extranet"] == "") {
-											echo "<a href='../tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
+											echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
 										}
 										else {
 											echo "$perherow[nimi]<br>";

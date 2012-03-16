@@ -25,7 +25,11 @@
 
 		ntsysv
 
-		4. Uudelleenkäynnistä XINETD
+		4. Varmista, että optiscan.php:llä on execute oikeus (tämä on hyvätä lisätä myös pupesoft päivitys scriptiin!)
+
+		chmod a+x /var/www/html/pupesoft/optiscan.php
+
+		5. Uudelleenkäynnistä XINETD
 
 		service xinetd restart
 	*/
@@ -38,7 +42,8 @@
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
 
-	chdir('/var/www/html/demo/orumstatic/');
+	$pupe_root_polku = dirname(__FILE__);
+	chdir($pupe_root_polku);
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');

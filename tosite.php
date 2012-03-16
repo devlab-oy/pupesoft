@@ -598,7 +598,7 @@
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
 
-				$tili				= $itili[$i];
+				$tili				= trim($itili[$i]);
 				$kustp				= $ikustp[$i];
 				$kohde				= $ikohde[$i];
 				$projekti			= $iprojekti[$i];

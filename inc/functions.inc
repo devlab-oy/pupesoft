@@ -1597,7 +1597,7 @@ if (!function_exists("desim")) {
 
 				list($koko, $desi) = explode(".",trim($summa));
 
-				//echo "3 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
+				// echo "3 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
 
 				if (strlen($desi) > 2 and substr($desi,-1) == '0') {
 
@@ -9464,7 +9464,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		if (mysql_num_rows($result) == 1) {
 			$yhtion_parametritrow = mysql_fetch_assoc($result);
 
-			if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
+			if ($yhtion_parametritrow['hintapyoristys'] < 2 or $yhtion_parametritrow['hintapyoristys'] > 6) {
 				$yhtion_parametritrow['hintapyoristys'] = 2;
 			}
 
@@ -10760,7 +10760,8 @@ if (!function_exists("tarkista_oikeus")) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND kuka = '$kukarow[kuka]'
 					AND nimi LIKE '%$ohjelma'
-					$querylisa";
+					$querylisa
+					ORDER BY length(alanimi)";
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
@@ -11573,11 +11574,11 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][9];
+									valuutta = aaData[aiDisplay[i]][10];
 									valuutat[valuutta] = valuutta;
 
 									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-									avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
+									avoimety[valuutta] += aaData[aiDisplay[i]][9]*1;
 								}
 
 								// Tyhjennetään kaikki summat

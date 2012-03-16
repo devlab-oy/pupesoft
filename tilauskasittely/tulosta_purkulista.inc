@@ -308,7 +308,8 @@
 	if ($tulostin_row["merkisto"] != 0) {
 
 		// RIVI 1
-		$out  = sprintf('%-20.20s',	$yhtiorow["nimi"]);
+		$out  = chr(10);
+		$out .= sprintf('%-20.20s',	$yhtiorow["nimi"]);
 		$out .= sprintf('%4s',		' ');
 		$out .= sprintf('%-26.26s',	'PURKULISTA');
 		$out .= sprintf('%16s', 	' ');

@@ -172,14 +172,14 @@
 					$poikkeus_tuoteno = " in ('$tuote','$yhteen' $toinen_tuoteno) ";
 				}
 				elseif ($row["toimittajanumero"] == "123084") {
-
+					$orgtuote = $row["toim_tuoteno"];
 					$lyhennetty = ltrim($row["toim_tuoteno"],'0');
 
 					if ($row["toim_tuoteno2"] != "") {
 						$lyhennetty_toinen = ltrim($row["toim_tuoteno2"],'0');
 						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
 					}
-					$poikkeus_tuoteno = " in ('$tuote','$lyhennetty' $toinen_tuoteno) ";
+					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
 				}
 				else {
 

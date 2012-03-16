@@ -32,7 +32,16 @@
 
 	js_popup();
 
-	if ($toim == 'SIIRTOLISTA') {
+	if ($toim == 'KAIKKILISTAT') {
+		$tila 				= "N";
+		$lalatila			= "A";
+		$tila_lalatila_lisa = " OR (lasku.tila = 'G' AND lasku.alatila = 'J' and lasku.tilaustyyppi != 'M')
+								OR (lasku.tila = 'S' AND lasku.alatila = 'J' and lasku.tilaustyyppi = 'S')
+								OR (lasku.tila = 'G' AND lasku.alatila = 'J' and lasku.tilaustyyppi = 'M')
+								OR (lasku.tila = 'V' AND lasku.alatila = 'J')
+								OR (lasku.tila = 'C' AND lasku.alatila = 'B')";
+	}
+	elseif ($toim == 'SIIRTOLISTA') {
 		$tila 				= "G";
 		$lalatila			= "J";
 		$tila_lalatila_lisa = "";
@@ -226,14 +235,19 @@
 							$tilausnumero	= $laskurow["tunnus"];
 							$tee			= "valmis";
 							$tulostetaan	= "OK";
+							$toim_bck		= $toim;
+							if ($toim == "KAIKKILISTAT") {
+								if ($laskurow["tilaustyyppi"] == "M") $toim = "MYYNTITILI";
+								else $toim = "SIIRTOLISTA";	
+							}
 
 							require("tilaus-valmis-siirtolista.inc");
 
+							$toim			= $toim_bck;
 						}
 						elseif ($laskurow["tila"] == 'V') {
 							$tilausnumero	= $laskurow["tunnus"];
 							$tulostetaan	= "OK";
-
 							$toim_bck		= $toim;
 							$toim 			= "VALMISTAVARASTOON";
 
@@ -247,12 +261,19 @@
 							$toim_bck		= $toim;
 							$takas 			= 1;
 							$tyyppi 		= "REKLAMAATIO";
+							if ($toim == "KAIKKILISTAT") $toim = "VASTAANOTA_REKLAMAATIO";
 
 							require("tilaus-valmis-tulostus.inc");
 
+							$toim = $toim_bck;
 						}
 						else {
+							$toim_bck		= $toim;
+							if ($toim == "KAIKKILISTAT") $toim = "";
+
 							require("tilaus-valmis-tulostus.inc");
+
+							$toim			= $toim_bck;
 						}
 					}
 					else {

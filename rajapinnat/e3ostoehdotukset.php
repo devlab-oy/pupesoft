@@ -54,10 +54,18 @@
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 
+		if (!isset($e3_params[$yhtiorow["yhtio"]]["ekansio"]) or !is_dir($e3_params[$yhtiorow["yhtio"]]["ekansio"])) {
+			echo "VIRHE: 'e3_ehdotuskansio' puuttuu!";
+			exit;
+		}
+		else {
+			$e3_ehdotuskansio = $e3_params[$yhtiorow["yhtio"]]["ekansio"];
+		}
+
 		$filet = array();
 
 		// Avataan kansio
-		if ($handle = opendir($argv[1])) {
+		if ($handle = opendir($e3_ehdotuskansio)) {
 		    while (false !== ($file = readdir($handle))) {
 				// Napataan headerfilet arrayseen
 				if (substr($file, 0, 1) == "h") {
@@ -77,14 +85,6 @@
 		require('../inc/parametrit.inc');
 
 		echo "<font class='head'>".t("E3-ostoehdotuksen sisäänluku")."</font><hr>";
-	}
-
-	if (!isset($e3_params[$yhtiorow["yhtio"]]["ekansio"]) or !is_dir($e3_params[$yhtiorow["yhtio"]]["ekansio"])) {
-		echo "VIRHE: 'e3_ehdotuskansio' puuttuu!";
-		exit;
-	}
-	else {
-		$e3_ehdotuskansio = $e3_params[$yhtiorow["yhtio"]]["ekansio"];
 	}
 
 	if (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") < 900) {
@@ -286,7 +286,7 @@
 										toimaika		= '$toimituspaiva',
 										myyja			= '$myyjannumero',
 										tila			= 'O',
-										viesti			= '$e3ostotilausnumero',
+										comments		= '$e3ostotilausnumero',
 										laatija			= 'E3',
 										luontiaika		= now()";
 						$otsikkoinsert = mysql_query($insquery) or pupe_error($insquery);

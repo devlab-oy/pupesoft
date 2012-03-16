@@ -200,6 +200,7 @@ unset($siirrasuoritustilille);
 unset($ohjewiki_url);
 unset($synkronoi_kiellot);
 unset($alv_laskelman_sallittu_erotus);
+unset($e3_params);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -632,7 +633,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
-		if (isset($lopetus) and $lopetus != '') {
+		if (!isset($no_head) or (isset($no_head) and $no_head != "yes") and isset($lopetus) and $lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

@@ -855,23 +855,14 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel1="";
-		$sel2="";
-		$sel3="";
+		$sel = array_fill(2, 5, "");
+		$sel[$trow[$i]] = "SELECTED";
 
-		if ($trow[$i] == "4") {
-			$sel2 = "selected";
-		}
-		elseif ($trow[$i] == "6") {
-			$sel3 = "selected";
-		}
-		else {
-			$sel1 = "selected";
-		}
-
-		$ulos .= "<option value='2' $sel1>".t("Yksikkö- ja rivihinnat pyöristetään kahteen desimaaliin")."</option>";
-		$ulos .= "<option value='4' $sel2>".t("Yksikkö- ja rivihinnat pyöristetään neljään desimaaliin")."</option>";
-		$ulos .= "<option value='6' $sel3>".t("Yksikkö- ja rivihinnat pyöristetään kuuteen desimaaliin")."</option>";
+		$ulos .= "<option value='2' $sel[2]>".t("Yksikkö- ja rivihinnat pyöristetään kahteen desimaaliin")."</option>";
+		$ulos .= "<option value='3' $sel[3]>".t("Yksikkö- ja rivihinnat pyöristetään kolmeen desimaaliin")."</option>";
+		$ulos .= "<option value='4' $sel[4]>".t("Yksikkö- ja rivihinnat pyöristetään neljään desimaaliin")."</option>";
+		$ulos .= "<option value='5' $sel[5]>".t("Yksikkö- ja rivihinnat pyöristetään viiteen desimaaliin")."</option>";
+		$ulos .= "<option value='6' $sel[6]>".t("Yksikkö- ja rivihinnat pyöristetään kuuteen desimaaliin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

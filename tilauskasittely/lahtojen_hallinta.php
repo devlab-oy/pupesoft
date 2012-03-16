@@ -96,7 +96,7 @@
 				}
 
 				// haetaan vanhan lähdön toimitustapa
-				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
+				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite, toimitustapa.tulostustapa
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
@@ -105,7 +105,7 @@
 				$old_row = mysql_fetch_assoc($old_res);
 
 				// haetaan uuden lähdön toimitustapa
-				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite
+				$query = "	SELECT lahdot.liitostunnus, toimitustapa.selite, toimitustapa.tulostustapa
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
@@ -114,6 +114,9 @@
 				$new_row = mysql_fetch_assoc($new_res);
 
 				$erat = array('tilaukset' => array(), 'pakkaukset' => array());
+
+				// otetaan duplikaatit pois.
+				$checkbox_child = array_unique($checkbox_child);
 
 				foreach ($checkbox_child as $tilausnumero) {
 
@@ -145,11 +148,150 @@
 					$res = pupe_query($query);
 				}
 
-				if (count($erat['tilaukset']) > 0) {
-					$ei_tallenneta = true;
+				// palautetaan pointeri alkuun
+				reset($checkbox_child);
 
-					require('inc/tulosta_reittietiketti.inc');
+				$sscc_chk_arr = array();
+
+				require("tilauskasittely/unifaun.php");
+
+				foreach ($checkbox_child as $tilnro) {
+
+					$query = "	SELECT DISTINCT sscc_ulkoinen, tila
+								FROM kerayserat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$tilnro}'";
+					$sscc_chk_res = pupe_query($query);
+
+					while($sscc_chk_row = mysql_fetch_assoc($sscc_chk_res)) {
+
+						if ($old_row['tulostustapa'] == 'E' and $sscc_chk_row['tila'] == 'K' and $old_row['liitostunnus'] != $new_row['liitostunnus'] and !in_array($sscc_chk_row['sscc_ulkoinen'], $sscc_chk_arr)) {
+
+							$mergeid = $valittu_lahto;
+							$parcelno = $sscc_chk_row['sscc_ulkoinen'];
+
+							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+							// haetaan toimitustavan tiedot
+							$query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$old_row['selite']}'";
+							$toitares = pupe_query($query);
+							$toitarow = mysql_fetch_assoc($toitares);
+
+							$unifaun->setToimitustapaRow($toitarow);
+							$unifaun->_discardParcel($mergeid, $parcelno);
+							#$unifaun->_saveForDebug("discardparcel");
+							$unifaun->ftpSend();
+
+							$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilnro}'";
+							$res = pupe_query($query);
+							$row = mysql_fetch_assoc($res);
+
+							// haetaan toimitustavan tiedot
+							$query    = "	SELECT *
+											FROM toimitustapa
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND selite = '{$new_row['selite']}'";
+							$toitares = pupe_query($query);
+							$toitarow = mysql_fetch_assoc($toitares);
+
+							$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['maksuehto']}'";
+							$mehto_res = pupe_query($query);
+							$mehto = mysql_fetch_assoc($mehto_res);
+
+							$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+										lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
+										if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+										asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+										FROM lasku
+										JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+										JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+										AND lasku.tunnus = '{$row['tunnus']}'";
+							$rakir_res = pupe_query($query);
+							$rakir_row = mysql_fetch_assoc($rakir_res);
+
+							$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
+										IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
+										kerayserat.pakkausnro, 
+										kerayserat.sscc,
+										COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
+										ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
+										FROM kerayserat
+										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+										LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+										AND kerayserat.sscc_ulkoinen = '{$sscc_chk_row['sscc_ulkoinen']}'
+										#AND kerayserat.otunnus = '{$row['tunnus']}'
+										GROUP BY 1,2,3,4";
+							$keraysera_res = pupe_query($query);
+
+							while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+
+								$row['pakkausid'] = $keraysera_row['pakkausnro'];
+								$row['kollilaji'] = $keraysera_row['kollilaji'];
+								$row['sscc'] = $keraysera_row['sscc'];
+
+								$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
+
+								$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+
+								$unifaun->setYhtioRow($yhtiorow);
+								$unifaun->setKukaRow($kukarow);
+								$unifaun->setPostiRow($row);
+								$unifaun->setToimitustapaRow($toitarow);
+								$unifaun->setMehto($mehto);
+
+								$unifaun->setRahtikirjaRow($rakir_row);
+
+								$unifaun->setYhteensa($row['summa']);
+								$unifaun->setViite($row['viesti']);
+
+								$unifaun->_getXML();
+
+								$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+								$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+								$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
+
+								$query = "	SELECT tuote.vakkoodi, 
+											{$selectlisa},
+											ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
+											FROM kerayserat
+											{$joinlisa}
+											JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+											JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+											WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+											AND kerayserat.sscc = '{$row['sscc']}'
+											GROUP BY 1,2,3,4";
+								$pakkaus_info_res = pupe_query($query);
+								$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+								$kollitiedot = array(
+									'maara' => $keraysera_row['maara'],
+									'paino' => $keraysera_row['tuotemassa'],
+									'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
+									'leveys' => $pakkaus_info_row['leveys'],
+									'korkeus' => $pakkaus_info_row['korkeus'],
+									'syvyys' => $pakkaus_info_row['syvyys'],
+									'vakkoodi' => $pakkaus_info_row['vakkoodi'],
+									'kuutiot' => $pakkaus_info_row['kuutiot']
+								);
+
+								$unifaun->setContainerRow($kollitiedot);
+								#$unifaun->_saveForDebug("shipment");
+								$unifaun->ftpSend();
+							}
+
+							$sscc_chk_arr[$sscc_chk_row['sscc_ulkoinen']] = $sscc_chk_row['sscc_ulkoinen'];
+						}
+					}
 				}
+
+				// if (count($erat['tilaukset']) > 0) {
+				// 	$ei_tallenneta = true;
+
+				// 	require('inc/tulosta_reittietiketti.inc');
+				// }
 			}
 			else {
 

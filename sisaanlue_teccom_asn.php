@@ -221,20 +221,13 @@
 								$p++;
 							}
 						}
-						elseif ($tavarantoimittajanumero == "123342") {
-							foreach ($paketti3->PkgItem as $www) {
-								$positio = (int) $www->OrderRef->BuyerOrderNumber;
-								$lisays[$p][$c]['PositionNumber'] = $positio;
-								$c++;
-							}
-						}
 						elseif (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
 							$paketti3 = $paketti3->Package;
 						}
 
-						if ($tavarantoimittajanumero != "123085" and $tavarantoimittajanumero != "123342"){
+						if ($tavarantoimittajanumero != "123085"){
 							foreach ($paketti3->PkgItem as $zzz) {
-									$positio = (string) $zzz->OrderItemRef->BuyerOrderItemRef;
+									$positio = (int) $zzz->OrderItemRef->BuyerOrderItemRef;
 									$positio = utf8_decode($positio);
 									$lisays[$p][$c]['PositionNumber'] = (int) $positio;
 									$c++;

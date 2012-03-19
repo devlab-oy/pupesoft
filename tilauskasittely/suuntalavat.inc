@@ -37,7 +37,7 @@
 						'terminaalialue' => '',
 						'korkeus' => '',
 						'paino' => '', 
-						'sallitaan_poikkeukset' => '',
+						'usea_keraysvyohyke' => '',
 						);
 
 	if (!isset($sscc)) $sscc = '';
@@ -263,7 +263,7 @@
 							keraysvyohyke = '{$keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
-							sallitaan_poikkeukset = '{$sallitaan_poikkeukset}',
+							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
 							korkeus = '{$korkeus}',
 							paino = '{$paino}',
 							muuttaja = '{$kukarow['kuka']}',
@@ -291,7 +291,7 @@
 							keraysvyohyke = '{$keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
-							sallitaan_poikkeukset = '{$sallitaan_poikkeukset}',
+							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
 							korkeus = '{$korkeus}',
 							paino = '{$paino}',
 							laatija = '{$kukarow['kuka']}',
@@ -492,7 +492,7 @@
 			$keraysvyohyke = $suuntalavat_row['keraysvyohyke'];
 			$kaytettavyys = $suuntalavat_row['kaytettavyys'];
 			$terminaalialue = $suuntalavat_row['terminaalialue'];
-			$sallitaan_poikkeukset = $suuntalavat_row['sallitaan_poikkeukset'];
+			$usea_keraysvyohyke = $suuntalavat_row['usea_keraysvyohyke'];
 			$korkeus = $suuntalavat_row['korkeus'];
 			$paino = $suuntalavat_row['paino'];
 		}
@@ -559,7 +559,7 @@
 
 		echo "</select>{$virheviesti['terminaalialue']}</td></tr>";
 		
-		if ($sallitaan_poikkeukset != "") {
+		if ($usea_keraysvyohyke != "") {
 			$sel_sp = "SELECTED";
 		}
 		else {
@@ -567,7 +567,7 @@
 		}
 		
 		echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivyöhykkeiltä tuotteita",$kieli,'<br>')."</th>";
-		echo "<td><select name='sallitaan_poikkeukset'>";
+		echo "<td><select name='usea_keraysvyohyke'>";
 		echo "<option value='' $sel_sp>".t("Ei Sallita")."</option>";
 		echo "<option value='K' $sel_sp>".t("Sallitaan")."</option>";
 		echo "</select>";

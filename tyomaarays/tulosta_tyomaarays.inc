@@ -28,11 +28,14 @@ $lineparam["width"] 	= 1;
 $rivinkorkeus			= 17;
 // t‰‰ t‰ss‰ kusee
 if (!function_exists('tyomaarays_alku')) {
-	function tyomaarays_alku($tyyppi = "") {
-		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
+	function tyomaarays_alku($params) {
+		global $yhtiorow, $kukarow;
 
-		//PDF parametrit
-		if (!isset($pdf)) {
+		// Luodaan muuttujat
+		extract($params);
+
+		// PDF parametrit
+		if ($pdf === NULL) {
 			$pdf = new pdffile;
 			$pdf->set_default('margin-top', 	0);
 			$pdf->set_default('margin-bottom', 	0);
@@ -42,21 +45,26 @@ if (!function_exists('tyomaarays_alku')) {
 
 		$thispage = $pdf->new_page("a4");
 
+		$page[$sivu] = $thispage;
+
 		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
+		$output   		= "png";
+		$width    		= "140";
+		$height   		= "20";
+		$xres     		= "1";
+		$font     		= "2";
+		$drawtext 		= "off";
+		$border	  		= "off";
+		$stretchtext	= "off";
+        $negative 		= "off";
 
 		$style  = BCS_ALIGN_CENTER;
-		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-		$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-		$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-		$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
+		$style |= ($output  == "png" )   ? BCS_IMAGE_PNG  : 0;
+		$style |= ($output  == "jpeg")   ? BCS_IMAGE_JPEG : 0;
+		$style |= ($border  == "on"  )   ? BCS_BORDER 	: 0;
+		$style |= ($drawtext== "on"  )   ? BCS_DRAW_TEXT  : 0;
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
+		$style |= ($negative== "on"  )   ? BCS_REVERSE_COLOR  : 0;
 
 		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
@@ -103,7 +111,7 @@ if (!function_exists('tyomaarays_alku')) {
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 			$thispage, $pieni);
-		$pdf->draw_text(310, 782, $tilausnumeroita,							$thispage, $boldi);
+		$pdf->draw_text(310, 782, $laskurow["tunnus"],							$thispage, $boldi);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
@@ -153,8 +161,9 @@ if (!function_exists('tyomaarays_alku')) {
 
 		//etsit‰‰n myyj‰n nimi
 		$query  = "	SELECT nimi
-					from kuka
-					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+					FROM kuka
+					WHERE tunnus = '$laskurow[myyja]'
+					AND yhtio	 = '$kukarow[yhtio]'";
 		$myyresult = pupe_query($query);
 		$myyrow = mysql_fetch_array($myyresult);
 
@@ -281,7 +290,7 @@ if (!function_exists('tyomaarays_alku')) {
 			$pohja  = $kala;
 			$maxoik = 0;
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 				if(strpos($kommentti, "###") !== FALSE) {
 					list($o, $v) = explode("###", $kommentti);
 
@@ -293,7 +302,25 @@ if (!function_exists('tyomaarays_alku')) {
 				}
 			}
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
+
+				if ($pohja <= 130) {
+
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = tyomaarays_loppu($return);
+					$params = tyomaarays_uusi_sivu($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$pohja = $kala;
+					$page[$sivu] = $thispage;
+				}
+
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);
 
@@ -347,23 +374,32 @@ if (!function_exists('tyomaarays_alku')) {
 			system("rm -f $nimi1 $nimi2");
 		}
 
-		return($thispage);
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_uusi_sivu')) {
-	function tyomaarays_uusi_sivu ($tyyppi = "") {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
+	function tyomaarays_uusi_sivu ($params) {
+		global $yhtiorow, $kukarow;
+
+		// Luodaan muuttujat
+		extract($params);
 
 		$thispage = $pdf->new_page("a4");
 
 		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
+		$output   		= "png";
+		$width    		= "140";
+		$height   		= "20";
+		$xres     		= "1";
+		$font     		= "2";
+		$drawtext 		= "off";
+		$border	  		= "off";
+		$stretchtext	= "off";
+        $negative 		= "off";
 
 		$style  = BCS_ALIGN_CENTER;
 		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
@@ -376,14 +412,6 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 		tulosta_logo_pdf($pdf, $thispage, $laskurow);
-
-		// haetaan maksuehdon tiedot
-		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$masresult = pupe_query($query);
-		$masrow = mysql_fetch_array($masresult);
-
-		//maksuehto tekstin‰
-		$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 		$thispage, $iso);
 
@@ -399,7 +427,7 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 			$thispage, $pieni);
-		$pdf->draw_text(310, 782, $tilausnumeroita,							$thispage, $boldi);
+		$pdf->draw_text(310, 782, $laskurow["tunnus"],						$thispage, $boldi);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
@@ -472,13 +500,19 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 
 		$kala = 710;
 
-		return($thispage);
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_rivi_otsikot')) {
-	function tyomaarays_rivi_otsikot ($thispage, $tuotetyyppi, $tyyppi='') {
-		global $pdf, $kieli, $lahetetyyppi, $norm, $boldi, $rectparam, $kala, $yhtiorow;
+	function tyomaarays_rivi_otsikot ($params) {
+		global $yhtiorow, $kukarow;
+
+		// Luodaan muuttujat
+		extract($params);
 
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
@@ -531,12 +565,20 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
 		}
 
 		$kala -= 3;
+
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_rivi')) {
-	function tyomaarays_rivi($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $edtuotetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $toim;
+	function tyomaarays_rivi($params) {
+		global $yhtiorow, $kukarow;
+
+		// Luodaan muuttujat
+		extract($params);
 
 		// viivat rivien v‰liin...
 		$x[0] = 20;
@@ -549,15 +591,19 @@ if (!function_exists('tyomaarays_rivi')) {
 
 		//jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
 		if ($kala < 95) {
-
 			$sivu++;
+			$uudehko = "ON";
 
-			tyomaarays_loppu($thispage, 0);
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
 
-			$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
-			$thispage    = $page[$sivu];
-			$uudehko 	 = "ON";
+			$return = tyomaarays_loppu($return);
+			$params = tyomaarays_uusi_sivu($return);
 
+			// Luodaan muuttujat
+			extract($params);
+
+			$page[$sivu] = $thispage;
 		}
 		else {
 			$uudehko 	 = "";
@@ -567,17 +613,29 @@ if (!function_exists('tyomaarays_rivi')) {
 			$kala -= $rivinkorkeus*3;
 
 			if ($kala < 95) {
-
 				$sivu++;
+				$uudehko = "ON";
 
-				tyomaarays_loppu($thispage, 0);
+				// Luodaan palautettavat
+				$return = compact(array_keys($params));
 
-				$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
-				$thispage    = $page[$sivu];
-				$uudehko 	 = "ON";
+				$return = tyomaarays_loppu($return);
+				$params = tyomaarays_uusi_sivu($return);
+
+				// Luodaan muuttujat
+				extract($params);
+
+				$page[$sivu] = $thispage;
 			}
 
-			tyomaarays_rivi_otsikot($thispage, $row["tuotetyyppi"], $tyyppi);
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
+			$return["tuotetyyppi"] = $row["tuotetyyppi"];
+
+			$params = tyomaarays_rivi_otsikot($return);
+
+			// Luodaan muuttujat
+			extract($params);
 		}
 
 		$edtuotetyyppi = $row["tuotetyyppi"];
@@ -814,13 +872,19 @@ if (!function_exists('tyomaarays_rivi')) {
 		$perheid  = $row["perheid"];
 		$perheid2 = $row["perheid2"];
 
-		return($thispage);
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_loppu')) {
-	function tyomaarays_loppu($thispage, $tots) {
-		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
+	function tyomaarays_loppu($params) {
+		global $yhtiorow, $kukarow;
+
+		// Luodaan muuttujat
+		extract($params);
 
 		//Alimmat kolme laatikkoa, yhtiˆtietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
@@ -888,12 +952,20 @@ if (!function_exists('tyomaarays_loppu')) {
 				$pdf->draw_text(330, 803, "$pp / $sivu", $page[$pp], $norm);
 			}
 		}
+
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_loppu_lisarivit')) {
-	function tyomaarays_loppu_lisarivit($thispage, $tots) {
-		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $lineparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
+	function tyomaarays_loppu_lisarivit($params) {
+		global $yhtiorow, $kukarow;
+
+		// Luodaan muuttujat
+		extract($params);
 
 		//Alimmat kolme laatikkoa, yhtiˆtietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
@@ -1005,23 +1077,36 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
 		}
 		else {
 
-			tyomaarays_loppu($thispage, 0);
-
 			$sivu++;
-			$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
-			$thispage    = $page[$sivu];
-			$uudehko 	 = "ON";
+			$uudehko = "ON";
+
+			// Luodaan palautettavat
+			$return = compact(array_keys($params));
+
+			$return = tyomaarays_loppu($return);
+			$params = tyomaarays_uusi_sivu($return);
+
+			// Luodaan muuttujat
+			extract($params);
+
+			$page[$sivu] = $thispage;
 
 			tyomaarays_loppu_lisarivit($thispage, 1);
 		}
+
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
 	}
 }
 
 if (!function_exists('tyomaarays_print_pdf')) {
-	function tyomaarays_print_pdf($komento) {
-		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee;
+	function tyomaarays_print_pdf($params) {
+		global $yhtiorow, $kukarow;
 
-		$returnvalue=0;
+		// Luodaan muuttujat
+		extract($params);
 
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());

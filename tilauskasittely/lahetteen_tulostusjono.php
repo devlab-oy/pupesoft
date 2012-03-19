@@ -815,11 +815,11 @@
 		}
 
 		// Vain keräyslistat saa groupata
-		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
+		if (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
 		}
-		elseif ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
+		elseif (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus";
 		}
 		else {

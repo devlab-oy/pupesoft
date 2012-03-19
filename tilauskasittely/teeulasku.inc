@@ -452,7 +452,7 @@
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus in ($tunnukset)
-					and tilausrivi.tuoteno != '$yhtiorow[kuljetusvakuutus_tuotenumero]'
+					and tilausrivi.tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
 					and tilausrivi.kpl != 0
 					ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$valsures = pupe_query($query);
@@ -480,7 +480,7 @@
 				$query = "	SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno != '$yhtiorow[kuljetusvakuutus_tuotenumero]'
+							and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
 							and otunnus = '$edotunnus'";
 				$sumsresult = pupe_query($query);
 				$sumsrow2	= mysql_fetch_assoc($sumsresult);
@@ -522,7 +522,7 @@
 			$query = "	SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno != '$yhtiorow[kuljetusvakuutus_tuotenumero]'
+						and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
 						and otunnus = '$edotunnus'";
 			$sumsresult = pupe_query($query);
 			$sumsrow2	= mysql_fetch_assoc($sumsresult);

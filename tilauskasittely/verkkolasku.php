@@ -982,6 +982,7 @@
 								and lasku.maksuehto = maksuehto.tunnus
 								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa, maksuehto.jv";
 					$result  = pupe_query($query);
+
 					$yhdista = array();
 
 					while ($row = mysql_fetch_assoc($result)) {
@@ -1023,6 +1024,7 @@
 							if ($rahrow["pvm"]!='') $pvm = $rahrow["pvm"]; // pit‰s olla kyll‰ aina sama
 							$rahtikirjanrot .= "$rahrow[rahtikirjanro] ";
 						}
+
 						//vika pilkku pois
 						$rahtikirjanrot = substr($rahtikirjanrot,0,-1);
 
@@ -1094,7 +1096,6 @@
 				// katsotaan halutaanko laskuille lis‰t‰ lis‰kulu prosentti
 				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and ($yhtiorow["laskutuslisa"] > 0 or $yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') and $yhtiorow["laskutuslisa_tyyppi"] != "") {
 
-					$yhdista = array();
 					$laskutuslisa_tyyppi_ehto = "";
 
 					//ei k‰teislaskuihin
@@ -1151,6 +1152,8 @@
 								$ketjutus_group";
 					$result = pupe_query($query);
 
+					$yhdista = array();
+
 					while ($row = mysql_fetch_assoc($result)) {
 						$yhdista[] = $row["tunnukset"];
 					}
@@ -1174,12 +1177,12 @@
 						$listilre = pupe_query($query);
 
 						if (mysql_num_rows($listilre) == 0) {
-							//haetaan ekan otsikon tiedot
+							//haetaan vikan otsikon tiedot
 							$query = "  SELECT lasku.*
 										FROM lasku
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
 										AND lasku.tunnus in ($otsikot)
-										ORDER BY lasku.tunnus
+										ORDER BY lasku.tunnus DESC
 										LIMIT 1";
 							$otsre = pupe_query($query);
 							$laskurow = mysql_fetch_assoc($otsre);
@@ -1197,7 +1200,7 @@
 									$query_ale_lisa = generoi_alekentta('M');
 
 									// Prosentuaalinen laskutuslis‰
-									// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
+									// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa! Jos on verottomat hinnat niin lis‰prossa lasketaan verottomasta summasta, jos on verolliset hinnat niin lasketaan verollisesta summasta)
 									$query = "  SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
 												FROM tilausrivi
 												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -1219,7 +1222,7 @@
 								$alemuuttuja = "";
 
 								if ($yhtiorow["laskutuslisa_tyyppi"] == 'T' or $yhtiorow["laskutuslisa_tyyppi"] == 'U' or $yhtiorow["laskutuslisa_tyyppi"] == 'V') {
-									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', '');
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', '', array());
 									$netto = $lis_netto;
 
 									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1229,69 +1232,286 @@
 									}
 								}
 								else {
-									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+									list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, array());
 									$netto = 'N';
 									$alemuuttuja = "ale1 = '0',";
 								}
 
 								list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-								// lis‰t‰‰n laskutuslis‰
-								$query = "  INSERT into tilausrivi set
-											hyllyalue       = '',
-											hyllynro        = '',
-											hyllyvali       = '',
-											hyllytaso       = '',
-											tilaajanrivinro = '',
-											laatija         = '$kukarow[kuka]',
-											laadittu        = now(),
-											yhtio           = '$kukarow[yhtio]',
-											tuoteno         = '$trow[tuoteno]',
-											varattu         = '1',
-											yksikko         = '$trow[yksikko]',
-											kpl             = '0',
-											kpl2            = '0',
-											tilkpl          = '1',
-											jt              = '0',
-											{$alemuuttuja}
-											netto           = '{$netto}',
-											hinta           = '$lkhinta',
-											alv             = '$alv',
-											kerayspvm       = now(),
-											otunnus         = '$laskurow[tunnus]',
-											tyyppi          = 'L',
-											toimaika        = now(),
-											kommentti       = '',
-											var             = '',
-											try             = '$trow[try]',
-											osasto          = '$trow[osasto]',
-											perheid         = '',
-											perheid2        = '',
-											nimitys         = '$trow[nimitys]',
-											jaksotettu      = '',
-											kerattyaika     = now()";
-								$addtil = pupe_query($query);
-								$lisatty_tun = mysql_insert_id();
+								$lkhinta = hintapyoristys($lkhinta);
 
-								$query = "  INSERT INTO tilausrivin_lisatiedot
-											SET yhtio           = '$kukarow[yhtio]',
-											positio             = '',
-											tilausrivilinkki    = '',
-											toimittajan_tunnus  = '',
-											tilausrivitunnus    = '$lisatty_tun',
-											jarjestys           = '',
-											vanha_otunnus       = '$laskurow[tunnus]',
-											ei_nayteta          = '',
-											luontiaika          = now(),
-											laatija             = '$kukarow[kuka]'";
-								$addtil = pupe_query($query);
+								if ($lkhinta > 0) {
 
-								if ($silent == "") {
-									$tulos_ulos .= t("Lis‰ttiin lis‰kuluja")." $laskurow[tunnus]: $lkhinta $laskurow[valkoodi]<br>\n";
+									// lis‰t‰‰n laskutuslis‰
+									$query = "  INSERT into tilausrivi set
+												hyllyalue       = '',
+												hyllynro        = '',
+												hyllyvali       = '',
+												hyllytaso       = '',
+												tilaajanrivinro = '',
+												laatija         = '$kukarow[kuka]',
+												laadittu        = now(),
+												yhtio           = '$kukarow[yhtio]',
+												tuoteno         = '$trow[tuoteno]',
+												varattu         = '1',
+												yksikko         = '$trow[yksikko]',
+												kpl             = '0',
+												kpl2            = '0',
+												tilkpl          = '1',
+												jt              = '0',
+												{$alemuuttuja}
+												netto           = '{$netto}',
+												hinta           = '$lkhinta',
+												alv             = '$alv',
+												kerayspvm       = now(),
+												otunnus         = '$laskurow[tunnus]',
+												tyyppi          = 'L',
+												toimaika        = now(),
+												kommentti       = '',
+												var             = '',
+												try             = '$trow[try]',
+												osasto          = '$trow[osasto]',
+												perheid         = '',
+												perheid2        = '',
+												nimitys         = '$trow[nimitys]',
+												jaksotettu      = '',
+												kerattyaika     = now()";
+									$addtil = pupe_query($query);
+									$lisatty_tun = mysql_insert_id();
+
+									$query = "  INSERT INTO tilausrivin_lisatiedot
+												SET yhtio           = '$kukarow[yhtio]',
+												positio             = '',
+												tilausrivilinkki    = '',
+												toimittajan_tunnus  = '',
+												tilausrivitunnus    = '$lisatty_tun',
+												jarjestys           = '',
+												vanha_otunnus       = '$laskurow[tunnus]',
+												ei_nayteta          = '',
+												luontiaika          = now(),
+												laatija             = '$kukarow[kuka]'";
+									$addtil = pupe_query($query);
+
+									if ($silent == "") {
+										$tulos_ulos .= t("Lis‰ttiin lis‰kuluja")." $laskurow[tunnus]: $lkhinta $alemuuttuja $laskurow[valkoodi]<br>\n";
+									}
 								}
 							}
 							else {
 								$tulos_ulos .= t("Lis‰kulua ei voitu lis‰t‰")." $laskurow[tunnus]!<br>\n";
+							}
+						}
+					}
+				}
+
+				// Onko toimitustapoja joilla on kuljetusvakuutus p‰‰ll‰
+				$query = "  SELECT group_concat(selite) toimitustavat
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND (kuljetusvakuutus_tuotenumero != '' or '$yhtiorow[kuljetusvakuutus_tuotenumero]' != '')
+							AND (kuljetusvakuutus > 0 or '$yhtiorow[kuljetusvakuutus]' > 0 or kuljetusvakuutus_tyyppi = 'F' or '$yhtiorow[kuljetusvakuutus_tyyppi]' = 'F')
+							AND kuljetusvakuutus_tyyppi not in ('','E')";
+				$kulvare = pupe_query($query);
+				$kulvaro = mysql_fetch_assoc($kulvare);
+
+				// katsotaan halutaanko tilauksille lis‰t‰ kuljetusvakuutus, joko yhtiˆn parametri p‰‰ll‰ tai toimitustapojen takana p‰‰ll‰
+				if ($kulvaro["toimitustavat"] != "" or ($yhtiorow["kuljetusvakuutus_tuotenumero"] != "" and ($yhtiorow["kuljetusvakuutus"] > 0 or $yhtiorow["kuljetusvakuutus_tyyppi"] == 'F') and $yhtiorow["kuljetusvakuutus_tyyppi"] != "")) {
+
+					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kuin alhaalla) rivi ~1243
+					$query = "  SELECT
+								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+								group_concat(lasku.tunnus) tunnukset
+								FROM lasku
+								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+								where lasku.yhtio = '$kukarow[yhtio]'
+								and lasku.tunnus in ($tunnukset)
+								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
+								$ketjutus_group";
+					$result = pupe_query($query);
+
+					$yhdista = array();
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$yhdista[] = $row["tunnukset"];
+					}
+
+					foreach ($yhdista as $otsikot) {
+
+						$query_ale_lisa = generoi_alekentta('M');
+
+						// lasketaan tilauksen loppusumma (HUOM ei tarvitse huomioida veroa! Jos on verottomat hinnat niin lis‰prossa lasketaan verottomasta summasta, jos on verolliset hinnat niin lasketaan verollisesta summasta)
+						$query = "  SELECT lasku.tunnus,
+									lasku.nimi,
+									lasku.toimitustapa,
+									if (toimitustapa.kuljetusvakuutus_tyyppi != '', toimitustapa.kuljetusvakuutus_tyyppi, '$yhtiorow[kuljetusvakuutus_tyyppi]') kv_tyyppi,
+									if (toimitustapa.kuljetusvakuutus != '', toimitustapa.kuljetusvakuutus, '$yhtiorow[kuljetusvakuutus]') kv_kuljetusvakuutus,
+									if (toimitustapa.kuljetusvakuutus_tuotenumero != '', toimitustapa.kuljetusvakuutus_tuotenumero, '$yhtiorow[kuljetusvakuutus_tuotenumero]') kv_tuotenumero,
+									sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
+									FROM lasku
+									LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+									JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus and asiakas.kuljetusvakuutus_tyyppi != 'E')
+									JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa and toimitustapa.kuljetusvakuutus_tyyppi != 'E')
+									JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+									JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.tunnus in ($otsikot)
+									GROUP BY 1,2,3,4,5,6
+									ORDER BY lasku.tunnus";
+						$kvak_result = pupe_query($query);
+
+						$kv_vakhinta = 0;
+						$kv_vakalvi  = 0;
+						$kv_tilaukset= "";
+						$kv_vaktuote = $yhtiorow["kuljetusvakuutus_tuotenumero"];
+
+						while ($row = mysql_fetch_assoc($kvak_result)) {
+							if ($row["kv_tuotenumero"] != "" and ($row["kv_kuljetusvakuutus"] > 0 or $row["kv_tyyppi"] == 'F') and $row["kv_tyyppi"] != "") {
+
+								// haetaan kuljetusvakuutus_tuotenumero-tuotteen tiedot
+								$query = "  SELECT *
+											FROM tuote
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND tuoteno = '$row[kv_tuotenumero]'";
+								$rhire = pupe_query($query);
+
+								if (mysql_num_rows($rhire) == 1) {
+									$trow = mysql_fetch_assoc($rhire);
+
+									if ($kv_vaktuote == "") $kv_vaktuote = $row["kv_tuotenumero"];
+
+									//haetaan otsikon tiedot
+									$query = "  SELECT lasku.*
+												FROM lasku
+												WHERE lasku.yhtio = '$kukarow[yhtio]'
+												AND lasku.tunnus = '$row[tunnus]'";
+									$otsre = pupe_query($query);
+									$laskurow = mysql_fetch_assoc($otsre);
+
+									if ($row["kv_tyyppi"] == 'B' or $row["kv_tyyppi"] == 'G') {
+										// Prosentuaalinen kuljetusvakuutus
+										// tapauksissa B,G
+										$hinta = $row["laskun_loppusumma"] * $row["kv_kuljetusvakuutus"] / 100;
+									}
+									elseif ($row["kv_tyyppi"] == 'A') {
+										// Raham‰‰r‰inen kuljetusvakuutus
+										// tapauksissa A
+										$hinta = $row["kv_kuljetusvakuutus"];
+									}
+									else {
+										// Raham‰‰r‰inen kuljetusvakuutus, k‰ytet‰‰n tuotteen myyntihintaa
+										// tapauksissa F
+										$hinta = "";
+									}
+
+									$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+									$alemuuttuja = "";
+
+									if ($row["kv_tyyppi"] == 'F' or $row["kv_tyyppi"] == 'G') {
+										list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', '', $hinta, array());
+										$netto = $lis_netto;
+
+										$kv_ale = 1;
+
+										for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											if (isset($lis_ale["ale".$alepostfix])) {
+												$kv_ale *= (1 - $row["ale{$alepostfix}"] / 100);
+											}
+										}
+
+										$kv_ale = round($kv_ale, 4);
+
+										$lis_hinta = $lis_hinta * (1 - ($kv_ale/100));
+
+									}
+									else {
+										list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, array());
+										$netto = 'N';
+										$alemuuttuja = "ale1 = '0',";
+									}
+
+									list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+
+									if ($lkhinta > 0) {
+										// Lasketaan hinnat yhteen. (HUOM: Menee mets‰‰n jos on useita eri kuljetusvakuutustuotteita eri alvikannoilla.)
+										$kv_vakhinta += hintapyoristys($lkhinta);
+
+										// Otetaan vikan tuotteen alvikanta ja menn‰‰n sill‰
+										$kv_vakalvi = $alv;
+
+										$kv_tilaukset .= $row["tunnus"].", ";
+									}
+								}
+							}
+						}
+
+						if ($kv_vakhinta > 0 and $kv_vaktuote != "") {
+
+							$query = "  SELECT *
+										FROM tuote
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tuoteno = '$kv_vaktuote'";
+							$rhire = pupe_query($query);
+							$trow = mysql_fetch_assoc($rhire);
+
+							$kv_komm = t("Kuljetusvakuutus muodostuu tilauksista", $kieli).": ".substr($kv_tilaukset, 0, -2);
+
+							// laskurow-valuut tosta edellisesta while loopista. Siin‰ on vikan otsikon tiedot.
+							// lis‰t‰‰n kuljetusvakuutus
+							$query = "  INSERT into tilausrivi set
+										hyllyalue       = '',
+										hyllynro        = '',
+										hyllyvali       = '',
+										hyllytaso       = '',
+										tilaajanrivinro = '',
+										laatija         = '$kukarow[kuka]',
+										laadittu        = now(),
+										yhtio           = '$kukarow[yhtio]',
+										tuoteno         = '$trow[tuoteno]',
+										varattu         = '1',
+										yksikko         = '$trow[yksikko]',
+										kpl             = '0',
+										kpl2            = '0',
+										tilkpl          = '1',
+										jt              = '0',
+										netto           = 'N',
+										hinta           = '$kv_vakhinta',
+										alv             = '$kv_vakalvi',
+										kerayspvm       = now(),
+										otunnus         = '$laskurow[tunnus]',
+										tyyppi          = 'L',
+										toimaika        = now(),
+										kommentti       = '$kv_komm',
+										var             = '',
+										try             = '$trow[try]',
+										osasto          = '$trow[osasto]',
+										perheid         = '',
+										perheid2        = '',
+										nimitys         = '$trow[nimitys]',
+										jaksotettu      = '',
+										kerattyaika     = now()";
+							$addtil = pupe_query($query);
+							$lisatty_tun = mysql_insert_id();
+
+							$query = "  INSERT INTO tilausrivin_lisatiedot
+										SET yhtio           = '$kukarow[yhtio]',
+										positio             = '',
+										tilausrivilinkki    = '',
+										toimittajan_tunnus  = '',
+										tilausrivitunnus    = '$lisatty_tun',
+										jarjestys           = '',
+										vanha_otunnus       = '$laskurow[tunnus]',
+										ei_nayteta          = '',
+										luontiaika          = now(),
+										laatija             = '$kukarow[kuka]'";
+							$addtil = pupe_query($query);
+
+							if ($silent == "") {
+								$tulos_ulos .= t("Lis‰ttiin kuljetusvakuutusta")." $laskurow[tunnus]: $kv_vakhinta $laskurow[valkoodi]<br>\n";
 							}
 						}
 					}
@@ -1924,7 +2144,7 @@
 										and tilausrivi.kpl != 0
 										and tilausrivi.otunnus in ($tunnukset)
 										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-										ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+										ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$tilres = pupe_query($query);
 
 							$rivinumerot 	= array(0 => 0);
@@ -2104,7 +2324,13 @@
 								if ($rivilaskuri < $rivimaara) {
 									$tilrow_seuraava = mysql_fetch_assoc($tilres);
 									mysql_data_seek($tilres, $rivilaskuri);
-									$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+									
+									if ($tilrow_seuraava['tuoteno'] == $yhtiorow["kuljetusvakuutus_tuotenumero"] or $tilrow_seuraava['tuoteno'] == $yhtiorow["laskutuslisa_tuotenumero"]) {
+										$tilrow['seuraava_otunnus'] = 0;
+									}
+									else {									
+										$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+									}
 								}
 								else {
 									$tilrow['seuraava_otunnus'] = 0;

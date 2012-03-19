@@ -2166,7 +2166,6 @@ if (!function_exists("synkronoi")) {
 									and lauantai		= '$aburow[lauantai]'
 									and maa_maara		= '$aburow[maa_maara]'
 									and merahti			= '$aburow[merahti]'
-									and multi_jv		= '$aburow[multi_jv]'
 									and nouto			= '$aburow[nouto]'
 									and sallitut_maat	= '$aburow[sallitut_maat]'";
 						$tarkres=pupe_query($query);

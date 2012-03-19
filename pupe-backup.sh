@@ -12,11 +12,12 @@ if [ ! -z $6 ]; then
 fi
 
 if [ ! -z $7 ]; then
-	SAMBAHOST=$7
-	SAMBAUSER=$8
-	SAMBAPASS=$9
-	SAMBAREMDIR=${10}
-	SAMBALOCALDIR=${11}
+	EXTRABACKUP=$7
+	REMOTEHOST=$8
+	REMOTEUSER=$9
+	REMOTEPASS=${10}
+	REMOTEREMDIR=${11}
+	REMOTELOCALDIR=${12}
 fi
 
 # Katsotaan, että parametrit on annettu
@@ -173,25 +174,37 @@ if [ ! -z ${SALAUSAVAIN} ]; then
 fi
 
 #Siirretäänkö tuorein backuppi myös sambaserverille jos sellainen on konffattu
-if [ ! -z ${SAMBAHOST} ]; then
-	checksamba=`mount -t cifs -o username=${SAMBAUSER},password=${SAMBAPASS} //${SAMBAHOST}/${SAMBAREMDIR} ${SAMBALOCALDIR}`
+if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SAMBA" ]; then
+	checksamba=`mount -t cifs -o username=${REMOTEUSER},password=${REMOTEPASS} //${REMOTEHOST}/${REMOTEREMDIR} ${REMOTELOCALDIR}`
 
 	if [[ $? != 0 ]]; then
 		echo "Sambamount ei onnistunut!"
 		echo
 	else
 		#Poistetaan vanha backuppi
-		rm -f ${SAMBALOCALDIR}/${DBKANTA}-backup-*
-		rm -f ${SAMBALOCALDIR}/linux-backup-*
+		rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		rm -f ${REMOTELOCALDIR}/linux-backup-*
 
 		# Siirretään tämä
-		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${SAMBALOCALDIR}
-		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${SAMBALOCALDIR}
+		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTELOCALDIR}
+		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTELOCALDIR}
 
-		umount ${SAMBALOCALDIR}
+		umount ${REMOTELOCALDIR}
 	fi
 fi
 
+#Pidetäänkö kaikki backupit eri serverillä
+if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SSH" ]; then
+	# Siirretään failit remoteserverille
+	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+
+	# Siivotaan vanhat backupit pois remoteserveriltä
+	ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -mtime +${BACKUPPAIVAT} -delete";
+
+	# Pidetään master serverillä vain uusin backuppi
+	BACKUPPAIVAT=1
+fi
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

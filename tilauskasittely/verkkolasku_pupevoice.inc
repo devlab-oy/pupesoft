@@ -210,8 +210,8 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("ArticleName",						$tilrow['nimitys'], 						$tootxml);
 
 		$toim_query = "	SELECT toim_tuoteno, if (jarjestys = 0, 9999, jarjestys) sorttaus
-						FROM tuotteen_toimittajat 
-						WHERE yhtio = '$kukarow[yhtio]' 
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$tilrow[tuoteno]'
 						ORDER BY sorttaus
 						LIMIT 1";
@@ -238,7 +238,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("RowTotalVatIncludedAmount",		$totalvat, 									$tootxml); // verollinen rivihinta
 
 		// Jos tämä on tän tilauksen vika rivi
-		if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
+		if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
 			$lisakomm = "";
 
 			// Laitetaan tilausviite tähän

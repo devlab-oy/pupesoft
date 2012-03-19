@@ -1177,12 +1177,12 @@
 						$listilre = pupe_query($query);
 
 						if (mysql_num_rows($listilre) == 0) {
-							//haetaan ekan otsikon tiedot
+							//haetaan vikan otsikon tiedot
 							$query = "  SELECT lasku.*
 										FROM lasku
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
 										AND lasku.tunnus in ($otsikot)
-										ORDER BY lasku.tunnus
+										ORDER BY lasku.tunnus DESC
 										LIMIT 1";
 							$otsre = pupe_query($query);
 							$laskurow = mysql_fetch_assoc($otsre);
@@ -1360,7 +1360,8 @@
 									JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.tunnus in ($otsikot)
-									GROUP BY 1,2,3,4,5,6";
+									GROUP BY 1,2,3,4,5,6
+									ORDER BY lasku.tunnus";
 						$kvak_result = pupe_query($query);
 
 						$kv_vakhinta = 0;
@@ -1383,7 +1384,7 @@
 
 									if ($kv_vaktuote == "") $kv_vaktuote = $row["kv_tuotenumero"];
 
-									//haetaan ekan otsikon tiedot
+									//haetaan otsikon tiedot
 									$query = "  SELECT lasku.*
 												FROM lasku
 												WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1459,6 +1460,7 @@
 
 							$kv_komm = t("Kuljetusvakuutus muodostuu tilauksista", $kieli).": ".substr($kv_tilaukset, 0, -2);
 
+							// laskurow-valuut tosta edellisesta while loopista. Siinä on vikan otsikon tiedot.
 							// lisätään kuljetusvakuutus
 							$query = "  INSERT into tilausrivi set
 										hyllyalue       = '',
@@ -2142,7 +2144,7 @@
 										and tilausrivi.kpl != 0
 										and tilausrivi.otunnus in ($tunnukset)
 										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-										ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+										ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$tilres = pupe_query($query);
 
 							$rivinumerot 	= array(0 => 0);
@@ -2322,7 +2324,13 @@
 								if ($rivilaskuri < $rivimaara) {
 									$tilrow_seuraava = mysql_fetch_assoc($tilres);
 									mysql_data_seek($tilres, $rivilaskuri);
-									$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+									
+									if ($tilrow_seuraava['tuoteno'] == $yhtiorow["kuljetusvakuutus_tuotenumero"] or $tilrow_seuraava['tuoteno'] == $yhtiorow["laskutuslisa_tuotenumero"]) {
+										$tilrow['seuraava_otunnus'] = 0;
+									}
+									else {									
+										$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+									}
 								}
 								else {
 									$tilrow['seuraava_otunnus'] = 0;

@@ -4,10 +4,28 @@ if (@include_once("inc/functions.inc"));
 elseif (@include_once("functions.inc"));
 else exit;
 
-// tarvitaan $ftphost $ftpuser $ftppass $ftppath $ftpfile
-// palautetaan $palautus ja $syy
+// Parametrit:
+# $ftphost --> FTP-palvelin
+# $ftpuser --> Käyttäjätunnus
+# $ftppass --> Salasana
+# $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
+# $ftpfile --> Siirrettävä tiedosto
+# $ftpport --> Custom portti, ei pakollinen
+# $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 
-$dummy				= array();
+// Palautetaan:
+# $palautus
+# $syy
+
+// Debug:
+# echo "ftphost --> $ftphost<br>";
+# echo "ftpuser --> $ftpuser<br>";
+# echo "ftppass --> $ftppass<br>";
+# echo "ftppath --> $ftppath<br>";
+# echo "ftpfile --> $ftpfile<br>";
+# echo "ftpport --> $ftpport<br>";
+# echo "ftpfail --> $ftpfail<br>";
+
 $syy				= "";
 $palautus			= 0;
 $tulos_ulos_ftp		= "";
@@ -15,15 +33,23 @@ $renameftpfile		= isset($renameftpfile) ? trim($renameftpfile) : "";
 $palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi			= basename($ftpfile);
 
-if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile=='') {
+if ($ftphost == '' or $ftpuser == '' or $ftppass == '' or $ftppath == '' or $ftpfile == '') {
 	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
 	$palautus = 9;
 	$syy = t("Lähetykseen tarvittavia tietoja puuttuu");
 }
 else {
-
 	//lähetetään tiedosto
-	$conn_id = ftp_connect($ftphost);
+
+	// Onko käytössä custom portti
+	if (isset($ftpport) and (int) $ftpport > 0) {
+		$ftpport = (int) $ftpport;
+
+		$conn_id = ftp_connect($ftphost, $ftpport);
+	}
+	else {
+		$conn_id = ftp_connect($ftphost);
+	}
 
 	// jos connectio ok, kokeillaan loginata
 	if ($conn_id) {
@@ -35,29 +61,48 @@ else {
 		$ftppath .= "/";
 	}
 
-	$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
+	if ($renameftpfile != "") {
+		// ncftp:llä ei hanskata uudelleennimeämistä, joten laitetaan suoraan lopullisella nimellä...
+		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($renameftpfile);
+	}
+	else {
+		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
+	}
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
 
-		ftp_pasv($conn_id, false);
-		$upload = @ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+		// Käytetään aina .TMP päätettä kun siirto on kesken
+		$ftpfile_tmp = $filenimi.".TMP";
 
-		// kokeillaan passiivista siirtoa jos aktiivi feilaa
+		// Kokeillaan aktiivista siirtoa
+		ftp_pasv($conn_id, FALSE);
+		$upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+
+		// Kokeillaan passiivista siirtoa jos aktiivi feilaa
 		if ($upload === FALSE) {
-			ftp_pasv($conn_id, true);
-			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+			ftp_pasv($conn_id, TRUE);
+			$upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
 		}
 
-		if ($upload === FALSE) {
-			exec($cmd, $skit, $upload_ncftp);
-
-			if ($upload_ncftp == 0) $upload = TRUE;
+		// Otetaan .TMP pääte veks ku siirto on valmis
+		if ($upload === TRUE) {
+			$rename = ftp_rename($conn_id, $ftppath.$ftpfile_tmp, $ftppath.$filenimi);
 		}
 
+		// Pitääkö faili vielä nimetä kokonana uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
 			$renameftpfile = basename($renameftpfile);
 			$rename = ftp_rename($conn_id, $ftppath.$filenimi, $ftppath.$renameftpfile);
+		}
+
+		// Kokeillaan ncftp-ohjelmalla, uudelleenimeäminen ei onnaa joten laitetaan suoraan lopullisella nimellä
+		if ($upload === FALSE) {
+			exec($cmd, $skit, $upload_ncftp);
+
+			if ($upload_ncftp == 0) {
+				$upload = TRUE;
+			}
 		}
 	}
 
@@ -79,10 +124,13 @@ else {
 		$palautus = 4;
 	}
 
-	$to_email = $yhtiorow['alert_email'];
-
 	// jos siirto epäonnistuu
-	if ($palautus<>0) {
+	if ($palautus != 0) {
+
+		// Siirretään faili outboxiin odottamaan uutta yritystä jos siirto feilasi
+		if (isset($ftpfail)) {
+			rename($ftpfile, $ftpfail."/".$filenimi);
+		}
 
 		// ncftpput:in exit valuet
 		switch ($palautus) {
@@ -110,17 +158,17 @@ else {
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
 
-		$boob = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		$boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
-			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $to_email ".t("epäonnistui myös!")."\n";
+			$tulos_ulos_ftp .= t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
 			$tulos_ulos_ftp .= "</font><br>\n";
 
 			$tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
 		}
 		else {
-			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $to_email)</font><br>\n";
+			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
 		}
 	}
 	elseif ($palautus_pyynto != "") {
@@ -132,7 +180,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "\n";
 
-		$silari = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		$silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 

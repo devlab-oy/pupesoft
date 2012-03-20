@@ -525,7 +525,7 @@
 
 									// haetaan lapset, ei oteta isää huomioon
 									$query_lapset = "	SELECT tunnus, tuoteno, varattu
-														FROM tilausrivi 
+														FROM tilausrivi
 														WHERE yhtio = '{$kukarow['yhtio']}'
 														AND perheid = '{$perheid_chk_row['perheid']}'
 														AND tunnus != '{$apui}'";
@@ -534,7 +534,7 @@
 									while ($lapset_chk_row = mysql_fetch_assoc($lapset_chk_res)) {
 
 										$query_ohita = "	SELECT ohita_kerays, kerroin
-															FROM tuoteperhe 
+															FROM tuoteperhe
 															WHERE yhtio = '{$kukarow['yhtio']}'
 															AND tyyppi = 'P'
 															AND isatuoteno = '{$perheid_chk_row['tuoteno']}'
@@ -1495,7 +1495,7 @@
 						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
 					}
 
-					$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset, 
+					$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset,
 								ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty), 1) tuotemassa,
 								ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty), 2) as kuutiot,
 								COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
@@ -1598,7 +1598,7 @@
 												$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
 												$parcelno = $kpl_chk_row['sscc_ulkoinen'];
 
-												$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+												$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 												$unifaun->_discardParcel($mergeid, $parcelno);
 
@@ -1612,7 +1612,7 @@
 
 												$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 															lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-															if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+															if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 															asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 															FROM lasku
 															JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -1624,7 +1624,7 @@
 
 												$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 															IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
-															kerayserat.pakkausnro, 
+															kerayserat.pakkausnro,
 															kerayserat.sscc,
 															COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 															ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
@@ -1645,7 +1645,7 @@
 													$laskurow['kollilaji'] = $keraysera_row['kollilaji'];
 													$laskurow['sscc'] = $keraysera_row['sscc'];
 
-													$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+													$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 													$unifaun->setYhtioRow($yhtiorow);
 													$unifaun->setKukaRow($kukarow);
@@ -2272,11 +2272,11 @@
 						COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja'
 						FROM lasku USE INDEX (tila_index)
 						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (
-							tilausrivi.yhtio = lasku.yhtio AND 
-							tilausrivi.otunnus = lasku.tunnus AND 
-							tilausrivi.tyyppi = 'L' AND 
-							tilausrivi.var IN ('', 'H') AND 
-							tilausrivi.keratty = '' AND 
+							tilausrivi.yhtio = lasku.yhtio AND
+							tilausrivi.otunnus = lasku.tunnus AND
+							tilausrivi.tyyppi = 'L' AND
+							tilausrivi.var IN ('', 'H') AND
+							tilausrivi.keratty = '' AND
 							tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND
 							((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
 						JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
@@ -2442,7 +2442,7 @@
 				else {
 					echo "<input type='hidden' name='id' value='{$row['tunnus']}' />";
 				}
-						
+
 				echo "	<input type='hidden' name='toim' value='{$toim}' />
 						<input type='hidden' name='lasku_yhtio' value='{$row['yhtio']}' />
 						<input type='submit' name='tila' value='",t("Kerää"),"' /></form></td></tr>";

@@ -1084,14 +1084,13 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
 			$return = compact(array_keys($params));
 
 			$return = tyomaarays_loppu($return);
-			$params = tyomaarays_uusi_sivu($return);
+			$return = tyomaarays_uusi_sivu($return);
+			$params = tyomaarays_loppu_lisarivit($return);
 
 			// Luodaan muuttujat
 			extract($params);
 
 			$page[$sivu] = $thispage;
-
-			tyomaarays_loppu_lisarivit($thispage, 1);
 		}
 
 		// Luodaan palautettavat

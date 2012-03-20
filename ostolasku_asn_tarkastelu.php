@@ -1232,6 +1232,12 @@
 
 			$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}'";
 			$laskures = pupe_query($query);
+
+			if (mysql_num_rows($laskures) == 0) {
+				$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}'";
+				$laskures = pupe_query($query);
+			}
+
 			$laskurow = mysql_fetch_assoc($laskures);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
@@ -1248,7 +1254,7 @@
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
-						AND asn_sanomat.tilausnumero = '{$lasku}'
+						AND asn_sanomat.asn_numero LIKE '%{$lasku}'
 						AND asn_sanomat.laji = 'tec'
 						#AND asn_sanomat.tilausrivi != ''
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
@@ -1259,7 +1265,11 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				$query = "SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$kukarow['yhtio']}' AND toim_tuoteno = '{$row['toim_tuoteno']}' AND liitostunnus = '{$laskurow['liitostunnus']}'";
+				$query = "	SELECT tuoteno 
+							FROM tuotteen_toimittajat 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND toim_tuoteno = '{$row['toim_tuoteno']}' 
+							AND liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
 
 				if (mysql_num_rows($res) > 0) {
@@ -1461,7 +1471,7 @@
 									toimi.postitp, 
 									toimi.maa, 
 									toimi.swift,
-									asn_sanomat.tilausnumero, 
+									asn_sanomat.asn_numero as tilausnumero, 
 									asn_sanomat.paketintunniste, 
 									asn_sanomat.toimittajanumero,
 									count(asn_sanomat.tunnus) AS rivit,
@@ -1470,7 +1480,7 @@
 							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 							AND asn_sanomat.laji = 'tec'
-							GROUP BY asn_sanomat.tilausnumero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
+							GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 							ORDER BY toimi.nimi, toimi.ytunnus";
 				$result = pupe_query($query);
 

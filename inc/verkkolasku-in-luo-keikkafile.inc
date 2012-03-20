@@ -1014,14 +1014,24 @@
 
 				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikan_tunnus}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
-
 			}
+
+			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikan_tunnus}'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			$tee_kululaskut = "liita";
+ 			$silent = "SILENT";
+ 			$keikanalatila = "";
+ 			$laskutunnus = $tunnus;
+
+			require("tilauskasittely/kululaskut.inc");
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
 		#elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166
 			// muutetaan hinta ja rivi on ok.
-			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]["uusiotunnus"]);
+			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus']);
 
 			foreach ($keikoilla as $pointteri) {
 
@@ -1072,6 +1082,18 @@
 				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
 			}
+
+			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";
+			$laskures = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			$tee_kululaskut = "liita";
+ 			$silent = "SILENT";
+ 			$keikanalatila = "";
+ 			$laskutunnus = $tunnus;
+
+			require("tilauskasittely/kululaskut.inc");
+
 		}
 		else {
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";

@@ -637,7 +637,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
-		if (!isset($no_head) or (isset($no_head) and $no_head != "yes") and isset($lopetus) and $lopetus != '') {
+		if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

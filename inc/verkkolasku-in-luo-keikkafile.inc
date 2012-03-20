@@ -1024,6 +1024,7 @@
  			$silent = "SILENT";
  			$keikanalatila = "";
  			$laskutunnus = $tunnus;
+ 			$otunnus = $keikan_tunnus;
 
 			require("tilauskasittely/kululaskut.inc");
 		}
@@ -1091,6 +1092,7 @@
  			$silent = "SILENT";
  			$keikanalatila = "";
  			$laskutunnus = $tunnus;
+ 			$otunnus = $keikan_tunnus;
 
 			require("tilauskasittely/kululaskut.inc");
 

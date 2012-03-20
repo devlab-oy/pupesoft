@@ -594,7 +594,7 @@
 					$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
 					$parcelno = $chk_sscc_row['sscc_ulkoinen'];
 
-					$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+					$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 					$unifaun->_discardParcel($mergeid, $parcelno);
 
@@ -657,7 +657,7 @@
 					$row['kollilaji'] = $keraysera_row['kollilaji'];
 					$row['sscc'] = $keraysera_row['sscc'];
 
-					$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+					$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 					$unifaun->setYhtioRow($yhtiorow);
 					$unifaun->setKukaRow($kukarow);

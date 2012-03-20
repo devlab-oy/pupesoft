@@ -5,7 +5,9 @@ class Unifaun {
 	private $hostname;
 	private $username;
 	private $password;
-	private $path;
+	private $ftppath;
+	private $ftpport;
+	private $ftpfaildir;
 	private $yhtiorow;
 	private $kukarow;
 	private $postirow;
@@ -17,13 +19,13 @@ class Unifaun {
 	private $mehto;
 	private $xml;
 
-	public function __construct($hostname, $username, $password, $path) {
-
-		$this->hostname = $hostname;
-		$this->username = $username;
-		$this->password = $password;
-		$this->path = $path;
-
+	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfaildir) {
+		$this->hostname 	= $hostname;
+		$this->username 	= $username;
+		$this->password 	= $password;
+		$this->ftppath 		= $ftppath;
+		$this->ftpport 		= $ftpport;
+		$this->ftpfaildir 	= $ftpfaildir;
 	}
 
 	public function setYhtioRow($yhtiorow) {
@@ -91,11 +93,12 @@ class Unifaun {
 	}
 
 	public function ftpSend() {
-		if ($this->path != '') {
-			if (substr($this->path,-1) != '/') {
-				$this->path .= '/';
+				
+		if ($this->ftppath != '') {
+			if (substr($this->ftppath,-1) != '/') {
+				$this->ftppath .= '/';
 			}
-			$filenimi = $this->path."unifaun-".md5(uniqid(rand(),true)).".txt";
+			$filenimi = $this->ftppath."unifaun-".md5(uniqid(rand(),true)).".txt";
 		}
 		else {
 			$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
@@ -103,8 +106,6 @@ class Unifaun {
 
 		$filenimi = dirname(dirname(__FILE__))."/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
 
-		/* HUOM! TESTIPATH */
-		// $filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
 		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		//kirjoitetaan faili levylle..
@@ -112,13 +113,17 @@ class Unifaun {
 			echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus epäonnistui")."!</font><br>";
 		}
 
-		if ($this->hostname != "" and $this->username != "" and $this->password != "" and $this->path != "") {
+		if ($this->hostname != "" and $this->username != "" and $this->password != "" and $this->ftppath != "") {
 			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 			// palautetaan $palautus ja $syy
-			$ftphost = $this->hostname;
-			$ftpuser = $this->username;
-			$ftppass = $this->password;
-			$ftppath = $this->path;
+			$ftphost  = $this->hostname;
+			$ftpuser  = $this->username;
+			$ftppass  = $this->password;
+			$ftppath  = $this->ftppath;
+			$ftpport  = $this->ftpport;
+			$ftpfail  = $this->ftpfaildir;
+			$yhtiorow = $this->yhtiorow;
+
 			$ftpfile = realpath($filenimi);
 
 			require ("inc/ftp-send.inc");
@@ -596,12 +601,12 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', "PC"); # Package code. See SUP-112-Services-en.xls for valid package codes.
 		$uni_par_val->addAttribute('n', "packagecode");
 
-		$pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 1 ? 1 : $pakkaustiedot['paino'];		
+		$pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 1 ? 1 : $pakkaustiedot['paino'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); # Weight
 		$uni_par_val->addAttribute('n', "weight");
 
-		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];		
+		$pakkaustiedot['kuutiot'] = $pakkaustiedot['kuutiot'] < 0.01 ? 0.01 : $pakkaustiedot['kuutiot'];
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['kuutiot'])); # Volume
 		$uni_par_val->addAttribute('n', "volume");

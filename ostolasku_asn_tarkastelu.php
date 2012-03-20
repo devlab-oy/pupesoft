@@ -1252,7 +1252,7 @@
 						asn_sanomat.keikkarivinhinta,
 						asn_sanomat.tunnus
 						FROM asn_sanomat
-						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
+						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.asn_numero LIKE '%{$lasku}'
 						AND asn_sanomat.laji = 'tec'
@@ -1265,11 +1265,12 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				$query = "	SELECT tuoteno 
+				$query = "	SELECT tuotteen_toimittajat.tuoteno 
 							FROM tuotteen_toimittajat 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
-							AND toim_tuoteno = '{$row['toim_tuoteno']}' 
-							AND liitostunnus = '{$laskurow['liitostunnus']}'";
+							JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
+							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}' 
+							AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}' 
+							AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
 
 				if (mysql_num_rows($res) > 0) {
@@ -1280,7 +1281,8 @@
 					$query = "	SELECT nimitys
 								FROM tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tuoteno = '{$ttrow['tuoteno']}'";
+								AND tuoteno = '{$ttrow['tuoteno']}'
+								AND status != 'P'";
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
 

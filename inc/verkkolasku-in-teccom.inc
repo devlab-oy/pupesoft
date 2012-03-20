@@ -195,6 +195,8 @@
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
 
+				echo "tuoteno: ".$rtuoteno[$i]["tuoteno"]."<br>";
+
 				// Tallennetaan riville jos tämä on kauttalaskutusta
 				if ($kauttalaskutus == "KAUTTALASKUTUS") {
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";

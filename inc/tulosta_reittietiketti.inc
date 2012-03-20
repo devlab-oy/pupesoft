@@ -18,8 +18,8 @@
 
 		if ($era_key == 'pakkaukset') {
 
-			$query = "	SELECT ifnull(max(nro), 0) AS nro 
-						FROM kerayserat 
+			$query = "	SELECT ifnull(max(nro), 0) AS nro
+						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'";
 			$nro_fetch_res = pupe_query($query);
 			$nro_fetch_row = mysql_fetch_assoc($nro_fetch_res);
@@ -61,7 +61,7 @@
 						$max_perhe_res = pupe_query($query);
 						$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
 
-						$query = "	INSERT INTO avainsana SET 
+						$query = "	INSERT INTO avainsana SET
 									yhtio = '{$kukarow['yhtio']}',
 									perhe = '{$max_perhe_row['perhe']}',
 									kieli = '{$kukarow['kieli']}',
@@ -162,7 +162,7 @@
 		} #end if
 	} #end foreach $erat
 
-	if ($kerayseran_numero > 0 and (!isset($ei_tulosteta) or !$ei_tulosteta) and (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "")) {
+	if ($kerayseran_numero > 0 and (!isset($ei_tulosteta) or !$ei_tulosteta) and $unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") {
 
 		require("tilauskasittely/unifaun.php");
 
@@ -189,7 +189,7 @@
 
 			$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 						lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-						if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+						if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 						asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 						FROM lasku
 						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -201,7 +201,7 @@
 
 			$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 						IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
-						kerayserat.pakkausnro, 
+						kerayserat.pakkausnro,
 						kerayserat.sscc,
 						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 						ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
@@ -223,7 +223,7 @@
 
 				$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 
-				$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+				$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 				$unifaun->setYhtioRow($yhtiorow);
 				$unifaun->setKukaRow($kukarow);
@@ -242,7 +242,7 @@
 				$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
 				$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
-				$query = "	SELECT tuote.vakkoodi, 
+				$query = "	SELECT tuote.vakkoodi,
 							{$selectlisa},
 							ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 							FROM kerayserat
@@ -276,13 +276,13 @@
 				// $mergeid = $toitarow['tulostustapa'] == 'E' ? $row['toimitustavan_lahto'] : 0;
 				// $parcelno = $kpl_chk_row['sscc'];
 
-				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 				// $unifaun->setToimitustapaRow($toitarow);
 				// $unifaun->_discardParcel($mergeid, $parcelno);
 				// $unifaun->_saveForDebug("discardparcel");
 
-				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+				// $unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 				// $unifaun->setToimitustapaRow($toitarow);
 				// $unifaun->_closeWithPrinter($mergeid, "|LASER1|");

@@ -503,7 +503,7 @@
 											WHERE yhtio = '{$kukarow["yhtio"]}' 
 											AND laji = 'asn' 
 											AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
-											AND tilausnumero in ({$laskun_tilausviite})";
+											AND tilausnumero in ('".str_replace(",", "','", $laskun_tilausviite)."')";
 						$tarkistusres = pupe_query($tarkistusquery);
 						$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
 					}

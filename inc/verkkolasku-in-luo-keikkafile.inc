@@ -952,7 +952,7 @@
 			$checkres = pupe_query($query);
 			$row = mysql_fetch_array($checkres);
 			$kurssi = $row["kurssi"];
-			
+
 			$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
 			$result = pupe_query($query);
 
@@ -1000,10 +1000,24 @@
 			// lis‰t‰‰n tuotteet keikalle ja kohdistetaan
 			foreach ($ostoilla as $pointteri) {
 
+				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$hinta_chk_res = pupe_query($query);
+				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+				$update_asn = "	UPDATE asn_sanomat SET
+								#tilausrivi = '{$pointteri['tunnus']}',
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$pointteri['insert_id']}'
+								AND laji = 'tec'";
+				pupe_query($update_asn);
+
+				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikan_tunnus}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
+				pupe_query($update);
 
 			}
 		}
-		elseif (count($ostoilla) == 0 and count($keikoilla) > 0) {
+		elseif (count($keikoilla) > 0 and $virheet == 0) {
 		#elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166
 			// muutetaan hinta ja rivi on ok.
@@ -1011,33 +1025,51 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "	SELECT tunnus 
-							FROM asn_sanomat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							#AND tilausnumero = '{$hinta_chk_row['otunnus']}'
-							#AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'
-							AND laji = 'asn'
-							AND tilausrivi = '{$pointteri['tunnus']}'";
-				$chk_res = pupe_query($query);
+				// $query = "	SELECT tunnus 
+				// 			FROM asn_sanomat
+				// 			WHERE yhtio = '{$kukarow['yhtio']}'
+				// 			#AND tilausnumero = '{$hinta_chk_row['otunnus']}'
+				// 			#AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'
+				// 			AND laji = 'asn'
+				// 			AND tilausrivi = '{$pointteri['tunnus']}'";
+				// $chk_res = pupe_query($query);
 
-				if (mysql_num_rows($chk_res) == 0) {
-					$virheet++;
-					#continue;
-				}
+				// if (mysql_num_rows($chk_res) == 0) {
+				// 	$virheet++;
+				// 	#continue;
+				// }
 
 				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
 				$update_asn = "	UPDATE asn_sanomat SET
-								tilausrivi = '{$pointteri['tunnus']}',
+								#tilausrivi = '{$pointteri['tunnus']}',
 								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				$update = "UPDATE tilausrivi set hinta = '".$pointteri["hinta"]."' where yhtio='$kukarow[yhtio]' and tunnus = '".$pointteri["tunnus"]."'";
+				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
+				pupe_query($update);
+			}
+
+			foreach ($ostoilla as $pointteri) {
+
+				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$hinta_chk_res = pupe_query($query);
+				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+				$update_asn = "	UPDATE asn_sanomat SET
+								#tilausrivi = '{$pointteri['tunnus']}',
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$pointteri['insert_id']}'
+								AND laji = 'tec'";
+				pupe_query($update_asn);
+
+				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
 			}
 		}

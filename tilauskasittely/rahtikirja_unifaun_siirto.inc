@@ -2,14 +2,15 @@
 
 # Pupesoft -> Unifaun datasiirto
 
-//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
+// jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if (1 == 2 and $kollityht > 0) {
 
-	if (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "") {
+	if ($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") {
 
 		require("tilauskasittely/unifaun.php");
 
-		$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+		$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
+		
 		$unifaun->setYhtioRow($yhtiorow);
 		$unifaun->setKukaRow($kukarow);
 		$unifaun->setToimitustapaRow($toitarow);

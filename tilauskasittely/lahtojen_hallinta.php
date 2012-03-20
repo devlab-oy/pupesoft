@@ -170,7 +170,7 @@
 							$mergeid = $valittu_lahto;
 							$parcelno = $sscc_chk_row['sscc_ulkoinen'];
 
-							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 							// haetaan toimitustavan tiedot
 							$query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$old_row['selite']}'";
@@ -200,7 +200,7 @@
 
 							$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 										lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-										if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+										if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 										asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 										FROM lasku
 										JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -212,7 +212,7 @@
 
 							$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 										IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
-										kerayserat.pakkausnro, 
+										kerayserat.pakkausnro,
 										kerayserat.sscc,
 										COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 										ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
@@ -234,7 +234,7 @@
 
 								$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 
-								$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+								$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 								$unifaun->setYhtioRow($yhtiorow);
 								$unifaun->setKukaRow($kukarow);
@@ -253,7 +253,7 @@
 								$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
 								$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
-								$query = "	SELECT tuote.vakkoodi, 
+								$query = "	SELECT tuote.vakkoodi,
 											{$selectlisa},
 											ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 											FROM kerayserat
@@ -557,7 +557,7 @@
 					if (count($sel_ltun) > 0) {
 
 						if ($lahetetaanko_unifaun) {
-							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path);
+							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
 
 							$query = "	SELECT unifaun_nimi
 										FROM kirjoittimet
@@ -755,8 +755,8 @@
 				$(document).ready(function() {
 
 					$('div.vihrea, div.keltainen, div.punainen, div.sininen').css({
-						'width': '15px', 
-						'height': '15px', 
+						'width': '15px',
+						'height': '15px',
 						'margin-left': 'auto',
 						'margin-right': 'auto',
 						'margin-top': '2px',
@@ -1329,7 +1329,7 @@
 
 								empty_all = false;
 							}
-							
+
 						}
 
 						if (empty_all) {
@@ -1341,7 +1341,7 @@
 								$(selectedx[i]).show();
 							}
 						}
-						
+
 					});
 
 					// 1. tason lähdön napin eventti
@@ -1717,10 +1717,10 @@
 			$isatuote_chk_res = pupe_query($query);
 			$isatuote_chk_row = mysql_fetch_assoc($isatuote_chk_res);
 
-			$query = "	SELECT ohita_kerays 
-						FROM tuoteperhe 
-						WHERE yhtio = '{$kukarow['yhtio']}' 
-						AND isatuoteno = '{$isatuote_chk_row['tuoteno']}' 
+			$query = "	SELECT ohita_kerays
+						FROM tuoteperhe
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND isatuoteno = '{$isatuote_chk_row['tuoteno']}'
 						AND tuoteno = '{$row['tuoteno']}'
 						AND tyyppi = 'P'";
 			$ohita_kerays_chk_res = pupe_query($query);

@@ -1467,7 +1467,7 @@
 									count(asn_sanomat.tunnus) AS rivit,
 									sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat
-							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
+							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 							AND asn_sanomat.laji = 'tec'
 							GROUP BY asn_sanomat.tilausnumero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift

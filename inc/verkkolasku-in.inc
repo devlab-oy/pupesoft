@@ -583,6 +583,7 @@
 				$oletusprojekti = $trow['projekti'];
 				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
 				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
+				$onko_duplikaatti = false;
 
 				// Onko t‰m‰ kauttalaskutusta?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
@@ -907,6 +908,7 @@
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
+						$onko_duplikaatti = true;
 					}
 				}
 
@@ -1362,7 +1364,7 @@
 							}
 						}
 						
-						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
 							// Koodaajan kommentti. tilausnumeroon on mennyt kokoajan ihan v‰‰r‰ kentt‰. {$laskun_numero} Pit‰is menn‰ asn-kentt‰‰n
 							
 							$insertquery = "INSERT INTO asn_sanomat SET
@@ -1431,8 +1433,10 @@
 										AND tunnus  = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
-						
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+
+						if ($laskun_tyyppi != "TECCOM-INVOICE" or !$onko_duplikaatti) {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
 					}
 				}
 

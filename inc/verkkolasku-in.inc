@@ -1650,7 +1650,7 @@
 									list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $tunnus);
 
 									if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
-										if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+										if (count($purchaseorder_ei_loydy) == 0 and count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
 											$ok = 'ok';
 
 											foreach ($loytyy_kummastakin as $tuoteno => $null) {

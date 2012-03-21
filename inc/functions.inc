@@ -14668,7 +14668,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 		*/
 
-		require("tilauskasittely/tulosta_lahete.inc");
+		if (@include("tilauskasittely/tulosta_lahete.inc"));
+		else require("tulosta_lahete.inc");
 
 		//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 		if (function_exists("tulosta_lahete")) {

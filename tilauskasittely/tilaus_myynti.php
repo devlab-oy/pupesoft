@@ -6778,9 +6778,9 @@ if ($tee == '') {
 
 					if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {
 
-						$query = "	SELECT * 
-									FROM lahdot 
-									WHERE yhtio = '{$kukarow['yhtio']}' 
+						$query = "	SELECT *
+									FROM lahdot
+									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$laskurow['toimitustavan_lahto']}'";
 						$lahdot_res = pupe_query($query);
 						$lahdot_row = mysql_fetch_assoc($lahdot_res);
@@ -6842,14 +6842,14 @@ if ($tee == '') {
 
 							echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
 
-							$query = "	SELECT * 
-										FROM lahdot 
-										WHERE yhtio = '{$kukarow['yhtio']}' 
-										AND liitostunnus = '{$toimitustavan_tunnus}' 
+							$query = "	SELECT *
+										FROM lahdot
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND liitostunnus = '{$toimitustavan_tunnus}'
 										AND asiakasluokka = '{$laskurow['prioriteettinro']}'
 										AND aktiivi IN ('', 'P')
 										AND varasto = '{$vrst}'
-										AND ((pvm = '".date("Y-m-d")."' AND viimeinen_tilausaika > '".date("H:i:s")."') OR pvm > '".date("Y-m-d")."')
+										AND ((pvm = curdate() AND viimeinen_tilausaika > curtime()) OR pvm > curdate())
 										ORDER BY pvm, lahdon_kellonaika";
 							$lahdot_res = pupe_query($query);
 

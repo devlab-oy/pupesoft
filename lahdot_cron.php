@@ -84,6 +84,10 @@
 
 				$asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");
 
+				if ((int) $asiakasluokka <= 0) {
+					continue;
+				}
+
 				// Onko tälle päivälle jo generoitu tän skriptin toimesta lähtöjä
 				$query = "	SELECT *
 							FROM lahdot

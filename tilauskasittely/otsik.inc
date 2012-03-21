@@ -1726,7 +1726,9 @@
 
 				if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
-				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
+				echo "<option value='$row[selite]' $sel>$row[selite]";
+				if ($row["selitetark"] != "") echo " - $row[selitetark]";
+				echo "</option>";
 			}
 			echo "</select>";
 

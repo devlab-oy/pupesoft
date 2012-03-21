@@ -1,5 +1,7 @@
 <?php
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
@@ -20,6 +22,10 @@
 	else {
 
 		touch("/tmp/##ftp-get-in.lock");
+
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
 
 		require ("inc/salasanat.php");
 		require ("inc/functions.inc");

@@ -1141,7 +1141,7 @@
  			$silent = "SILENT";
  			$keikanalatila = "";
  			$laskutunnus = $tunnus;
- 			$otunnus = $keikan_tunnus;
+ 			$otunnus = $keikoilla[0]['uusiotunnus'];
 
 			require("tilauskasittely/kululaskut.inc");
 

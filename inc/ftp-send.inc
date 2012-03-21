@@ -29,6 +29,7 @@ else exit;
 $syy				= "";
 $palautus			= 0;
 $tulos_ulos_ftp		= "";
+$ncftplisa			= "";
 $renameftpfile		= isset($renameftpfile) ? trim($renameftpfile) : "";
 $palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi			= basename($ftpfile);
@@ -44,6 +45,8 @@ else {
 	// Onko k‰ytˆss‰ custom portti
 	if (isset($ftpport) and (int) $ftpport > 0) {
 		$ftpport = (int) $ftpport;
+
+		$ncftplisa = "-P $ftpport";
 
 		$conn_id = ftp_connect($ftphost, $ftpport);
 	}
@@ -63,17 +66,18 @@ else {
 
 	if ($renameftpfile != "") {
 		// ncftp:ll‰ ei hanskata uudelleennime‰mist‰, joten laitetaan suoraan lopullisella nimell‰...
-		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($renameftpfile);
+		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." $ncftplisa ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($renameftpfile);
 	}
 	else {
-		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
+		$cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." $ncftplisa ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
 	}
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
 
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
-		$ftpfile_tmp = $filenimi.".TMP";
+		#$ftpfile_tmp = $filenimi.".TMP";
+		$ftpfile_tmp = $filenimi;
 
 		// Kokeillaan aktiivista siirtoa
 		ftp_pasv($conn_id, FALSE);
@@ -87,7 +91,7 @@ else {
 
 		// Otetaan .TMP p‰‰te veks ku siirto on valmis
 		if ($upload === TRUE) {
-			$rename = ftp_rename($conn_id, $ftppath.$ftpfile_tmp, $ftppath.$filenimi);
+			#$rename = ftp_rename($conn_id, $ftppath.$ftpfile_tmp, $ftppath.$filenimi);
 		}
 
 		// Pit‰‰kˆ faili viel‰ nimet‰ kokonana uudestaan (Finvoice iPost)
@@ -152,7 +156,7 @@ else {
 
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
-		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("l‰hetys ep‰onnistui")."!\n";
+		$rivi .= t("Tiedoston")." '$ftpfile' ".t("l‰hetys ep‰onnistui")."!\n";
 		$rivi .= "\n";
 		$rivi .= "$cmd\n";
 		$rivi .= "\n";

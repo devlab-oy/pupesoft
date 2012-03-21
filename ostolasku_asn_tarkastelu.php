@@ -1288,6 +1288,14 @@
 					$row['nimitys'] = $trow['nimitys'];
 				}
 
+				if ($row['tilausrivi'] != '') {
+					$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$row['tilausrivi']})";
+					$hinta_chk_res = pupe_query($query);
+					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+					$row['tilausnumero'] = $hinta_chk_row['otunnus'];
+				}
+
 				echo "<tr>";
 				echo "<td align='right'>{$row['toimittajanumero']}</td>";
 				echo "<td align='right'>{$row['tilausnumero']}</td>";
@@ -1303,10 +1311,6 @@
 				if ($row['tilausrivi'] != '') {
 					echo "<font class='ok'>Ok</font>"; 
 					$ok++;
-
-					$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivinpositio']}'";
-					$hinta_chk_res = pupe_query($query);
-					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
 					if ($row['keikkarivinhinta'] != $hinta_chk_row['hinta']) {
 						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";

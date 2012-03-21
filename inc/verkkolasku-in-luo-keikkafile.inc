@@ -408,6 +408,7 @@
 					$chk_res = pupe_query($query);
 
 					if (mysql_num_rows($chk_res) == 0) {
+						echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
 						$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 					}
 				}
@@ -614,8 +615,11 @@
 						if ($kohdistamatta <= 0) break;
 
 						$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+						echo "<pre>$query</pre>";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
+
+						echo "varattu: $kpl_chk_row[varattu]<br>";
 
 						$laskuri += $kpl_chk_row["varattu"];
 						$lisa_array[] = $tilriv;
@@ -624,6 +628,8 @@
 					}
 
 					$ylimaaraista = $rtuoteno[$i]["kpl"] - $laskuri; // liikaa miinus tilauksella
+
+					echo "$ylimaaraista = {$rtuoteno[$i]['kpl']} - $laskuri<br><br>";
 
 					if ($ylimaaraista > 0) {
 
@@ -647,6 +653,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
 									ORDER BY uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
+						echo "<pre>$query</pre>";
 						$kokeillaan = pupe_query($query);
 
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
@@ -677,8 +684,11 @@
 							}
 
 							$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
+							echo "<pre>$query</pre>";
 							$kpl_chk_res = pupe_query($query);
 							$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
+
+							echo "varattu: $kpl_chk_row[varattu]<br>";
 
 							$laskuri += $kpl_chk_row["varattu"];
 							$lisa_array[] = $kokeiltiin['tunnus'];
@@ -728,6 +738,7 @@
 						}
 
 						$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+						echo "<pre>$kysely</pre>";
 						$uusires = pupe_query($kysely);
 						$extraa = mysql_insert_id();
 						$lisa_array[]			= $extraa;
@@ -754,6 +765,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						echo "<pre>$query</pre>";
 						$upd_res = pupe_query($updatequery);
 					}
 					elseif ($ylimaaraista == 0) {

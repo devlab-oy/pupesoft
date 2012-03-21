@@ -1243,7 +1243,6 @@
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
 						asn_sanomat.tilausrivinpositio,
-						asn_sanomat.kappalemaara,
 						asn_sanomat.status,
 						asn_sanomat.tilausnumero,
 						asn_sanomat.kappalemaara,

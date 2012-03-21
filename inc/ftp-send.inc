@@ -30,7 +30,7 @@ $syy				= "";
 $palautus			= 0;
 $tulos_ulos_ftp		= "";
 $ncftplisa			= "";
-$renameftpfile		= isset($renameftpfile) ? trim($renameftpfile) : "";
+$renameftpfile		= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
 $palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi			= basename($ftpfile);
 
@@ -76,8 +76,7 @@ else {
 	if ($login_result) {
 
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
-		#$ftpfile_tmp = $filenimi.".TMP";
-		$ftpfile_tmp = $filenimi;
+		$ftpfile_tmp = $filenimi.".TMP";
 
 		// Kokeillaan aktiivista siirtoa
 		ftp_pasv($conn_id, FALSE);
@@ -91,13 +90,12 @@ else {
 
 		// Otetaan .TMP p‰‰te veks ku siirto on valmis
 		if ($upload === TRUE) {
-			#$rename = ftp_rename($conn_id, $ftppath.$ftpfile_tmp, $ftppath.$filenimi);
+			$rename = ftp_exec($conn_id, "mv $ftppath.$ftpfile_tmp $ftppath.$filenimi");
 		}
 
 		// Pit‰‰kˆ faili viel‰ nimet‰ kokonana uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			$renameftpfile = basename($renameftpfile);
-			$rename = ftp_rename($conn_id, $ftppath.$filenimi, $ftppath.$renameftpfile);
+			$rename = ftp_exec($conn_id, "mv $ftppath.$filenimi $ftppath.$renameftpfile");
 		}
 
 		// Kokeillaan ncftp-ohjelmalla, uudelleenime‰minen ei onnaa joten laitetaan suoraan lopullisella nimell‰

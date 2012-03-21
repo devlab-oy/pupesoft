@@ -173,10 +173,6 @@
 	if ($toim == "REKLAMAATIO") {
 		$fuse = t("Reklamaatio/Purkulista");
 	}
-	if ($toim == "VAKADR") {
-		$fuse = t("VAK/ADR-erittely");
-	}
-
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
@@ -609,7 +605,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD" or $toim == "VAKADR") {
+		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan l‰hete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -1240,14 +1236,6 @@
 				$komento["Ker‰yslista"] .= " -# $kappaleet ";
 			}
 		}
-		
-		if ($toim == "VAKADR") {
-			$tulostimet[0] = 'vakadr';
-			if ($kappaleet > 0 and $komento["vakadr"] != 'email') {
-				$komento["vakadr"] .= " -# $kappaleet ";
-			}
-		}
-		
 		if (isset($tulostukseen)) {
 			$tilausnumero = implode(",", $tulostukseen);
 		}
@@ -1777,116 +1765,7 @@
 
 				$tee = '';
 			}
-			
-			if ($toim == "VAKADR") {
-				
-				$huijari = 6173580; //6174091
-				// huijar  = otunnus
-				// 6169533 == samalle SSCC:lle monta massaa
-				// 6174091 == 2 sscc, 
-				// 6173580 == 7 pakeetia
-				
-				$toinen = "SELECT * from lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$huijari'";
-				$results = pupe_query($toinen);
-				$todlasku = mysql_fetch_assoc($results);
-				
-				// t‰ss‰ yll‰ on "huijaus" jolla voidaan tehd‰ pdf-filuja
-								
-				// kutsutaan nyt erittely
-				require('tulosta_vakerittely.inc');
 
-				$params_vak = array(
-					'pieni'			=> $pieni,
-					'norm'			=> $norm,
-					'boldi'			=> $boldi,
-					'iso'			=> $iso,
-					'kieli'			=> $kieli,
-					'laskurow'		=> $todlasku,
-					'page'			=> NULL,
-					'pdf'			=> NULL,
-					'sivu'			=> 1,
-					'thispage'		=> NULL,
-					);
-
-				// VAK lapun otsikko
-				$params_vak = vakadr_otsikko($params_vak);
-
-				// Haetaan kaikki tilauksen SSCC koodit
-				
-				$query = "	SELECT distinct sscc, sscc_ulkoinen 
-							FROM tilausrivi
-							JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.otunnus = '{$huijari}'";
-				$result_sscc = pupe_query($query);
-				
-				while ($row = mysql_fetch_assoc($result_sscc)) {
-					extract($params_vak);
-					$params = array(
-						'pieni'			=> $pieni,
-						'norm'			=> $norm,
-						'boldi'			=> $boldi,
-						'iso'			=> $iso,
-						'kieli'			=> $kieli,
-						'laskurow'		=> $laskurow,
-						'pdf'			=> $pdf,
-						'thispage'		=> $thispage,
-						'kala'			=> $kala,
-						'sscc' 			=> $row["sscc"],
-						'sscc_ulkoinen' => $row["sscc_ulkoinen"], 
-						'tilausnumero' 	=> $huijari, 
-						);
-		
-					$params_vak = vakadr_rivi($params);
-									
-					$aliquery = "	SELECT tuote.vakkoodi, 
-									sum(kerayserat.kpl*tuote.tuotemassa*0.95) as massa 
-									FROM tilausrivi 
-									JOIN kerayserat on (kerayserat.yhtio=tilausrivi.yhtio and kerayserat.tilausrivi=tilausrivi.tunnus and kerayserat.sscc = '{$row['sscc']}') 
-									JOIN tuote on (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi !='') 
-									WHERE tilausrivi.yhtio='{$kukarow['yhtio']}' 
-									AND tilausrivi.otunnus='{$huijari}' 
-									GROUP BY vakkoodi";
-					$apuresult = pupe_query($aliquery);
-					
-					while ($sscc_rivi = mysql_fetch_assoc($apuresult)) {
-
-						extract($params_vak);
-						// vakkoodi 
-						
-						$params_rivi = array(
-							'pieni'			=> $pieni,
-							'norm'			=> $norm,
-							'boldi'			=> $boldi,
-							'iso'			=> $iso,
-							'kieli'			=> $kieli,
-							'laskurow'		=> $laskurow,
-							'pdf'			=> $pdf,
-							'thispage'		=> $thispage,
-							'kala'			=> $kala,
-							'vakkoodi' 		=> $sscc_rivi["vakkoodi"],
-							'massa'			=> $sscc_rivi["massa"],
-							'tilaus'		=> $huijari,
-						);
-
-						// Piirret‰‰n rivi
-						$params_vak = vakadr_rivi($params_rivi);
-					}
-				}
-				// Piirret‰‰n footer
-				$params_vak = vakadr_loppu($params_vak);
-
-				$params_vak["komento"] = "email"; // "NAYTATILAUS" / "email"
-				// $params_vak["tee"] = "NAYTATILAUS";
-
-				// Tulostetaan PDF
-				print_pdf_vakadr($params_vak);
-
-				unset($params_vak);
-
-				$tee = '';
-			}
-			
 			if ($toim == "DGD") {
 
 				$otunnus = $laskurow["tunnus"];

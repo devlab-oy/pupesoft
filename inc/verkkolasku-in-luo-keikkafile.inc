@@ -86,8 +86,6 @@
 
 	for ($i=0; $i<count($rtuoteno); $i++) {
 
-		echo "$osrow[ebid] == 'TECCOM-INVOICE' and {$rtuoteno[$i]["kauttalaskutus"]} != 'KAUTTALASKUTUS' and (int) {$rtuoteno[$i]["tilaajanrivinro"]} != 0<br><br>";
-
 		// tehd‰‰n t‰‰ vaan jos meill‰ on rivinumero
 		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE") {
 
@@ -142,7 +140,7 @@
 				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa keikkaan")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
 			}
 		}
-		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0) {
+		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mik‰li toimittajalla on kentt‰ "asn_sanomat" arvoja, ja ne on

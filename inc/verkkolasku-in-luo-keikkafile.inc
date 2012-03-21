@@ -413,7 +413,9 @@
 					}
 				}
 
-				$tilausrivi_nro = array_shift($kaytettavat_tilausrivit);
+				$tmp_kaytettavat_tilausrivit = $kaytettavat_tilausrivit;
+
+				$tilausrivi_nro = array_shift($tmp_kaytettavat_tilausrivit);
 
 				$query = "	SELECT *
 							FROM tilausrivi

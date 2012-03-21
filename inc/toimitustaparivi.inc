@@ -5,7 +5,7 @@
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
 
 	if (mysql_field_name($result, $i) == "tunnus" or
-	 mysql_field_name($result, $i) == "yhtio") {
+	    mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
 
@@ -14,7 +14,7 @@
 		$sel='';
 		if ($trow[$i]!='') $sel = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Tilaukset toimitetaan asiakkaalle")."</option>";
 		$ulos .= "<option value='o' $sel>".t("Asiakas noutaa tilaukset")."</option>";
 		$ulos .= "</select></td>";
@@ -26,33 +26,19 @@
 		$sel='';
 		if ($trow[$i]!='') $sel = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
 		$ulos .= "<option value='o' $sel>".t("Itella lis‰palvelu: Lauantaijakelu")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 
-	/* ei k‰ytˆss‰
-	if (mysql_field_name($result, $i) == "multi_jv") {
-
-		$sel='';
-		if ($trow[$i]!='') $sel = 'SELECTED';
-
-		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei k‰ytˆss‰")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Ei k‰ytˆss‰")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	*/
-
 	if (mysql_field_name($result, $i) == "kuljyksikko") {
 
 		$sel='';
 		if ($trow[$i]!='') $sel = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei kuljetusyksikkˆkuljetusta")."</option>";
 		$ulos .= "<option value='o' $sel>".t("Itella lis‰palvelu: Kuljetusyksikkˆkuljetus")."</option>";
 		$ulos .= "</select></td>";
@@ -64,7 +50,7 @@
 		$sel = '';
 		if ($trow[$i] != '') $sel[$trow[$i]] = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
 
 		$ulos .= "<optgroup label='Pupesoft / Itella'>";
@@ -533,7 +519,7 @@
 		else
 			$sel1 = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $sel1>".t("Ei k‰ytet‰ LOGY:n rahtikirjanumeroita")."</option>";
 		$ulos .= "<option value='K' $sel2>".t("K‰ytet‰‰n LOGY:n rahtikirjanumeroita")."</option>";
 		$ulos .= "</select></td>";
@@ -549,9 +535,9 @@
 		else
 			$sel2 = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='K' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
-		$ulos .= "<option value='' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
+		$ulos .= "<option value=''  $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -575,7 +561,7 @@
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimitustapa n‰ytet‰‰n vain myynniss‰")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimitustapa n‰ytet‰‰n vain extranetiss‰")."</option>";
 		$ulos .= "<option value='M' $sel[M]>".t("Toimitustapa n‰ytet‰‰n molemmissa")."</option>";
@@ -614,8 +600,8 @@
 			$sel1 = 'selected';
 		}
 
-		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' 		 $sel1>".t("Normaali")."</option>";
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
 		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
 		$ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
 		$ulos .= "</select></td>";
@@ -682,7 +668,7 @@
 
 	if (mysql_field_name($result, $i) == "kontti") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Valitse")."</option>";
 
 		$chk1 = '';
@@ -708,7 +694,7 @@
 		if ($trow[$i]!='') $sel = 'SELECTED';
 		else $sela = 'SELECTED';
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa j‰lkivaatimuksia")."</option>";
 		$ulos .= "<option value='o' $sel>".t("Toimitustavalla ei saa toimittaa j‰lkivaatimuksia")."</option>";
 		$ulos .= "</select></td>";
@@ -720,7 +706,7 @@
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
 
@@ -749,7 +735,7 @@
 			$sela = 'selected';
 		}
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa erikoispakkauksia")."</option>";
 		$ulos .= "<option value='K' $sel>".t("Toimitustavalla ei saa toimittaa erikoispakkauksia")."</option>";
 		$ulos .= "</select></td>";
@@ -758,7 +744,7 @@
 
 	if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$chk1 = '';
 		$chk2 = '';
 
@@ -778,7 +764,7 @@
 
 	if (mysql_field_name($result, $i) == "erittely") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 		$chk1 = '';
 		$chk2 = '';
 
@@ -798,7 +784,7 @@
 
 	if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi'>";
 
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
@@ -830,5 +816,34 @@
 		}
 
 		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "jvkulu" OR
+		mysql_field_name($result, $i) == "kuluprosentti" OR
+		mysql_field_name($result, $i) == "ulkomaanlisa" OR
+		mysql_field_name($result, $i) == "kuljetusvakuutus") {
+
+		if ($trow[$i] == 0) {
+			$trow[$i] = "";
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Yhtiˆn oletus")."</option>";
+		$ulos .= "<option value = 'E'>".t("Ei kuljetusvakuutusta")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'F' $sel[F]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";
+		$ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakasalennusta")."</option>";
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}

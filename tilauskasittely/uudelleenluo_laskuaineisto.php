@@ -567,7 +567,7 @@
 							and tilausrivi.kpl != 0
 							and tilausrivi.uusiotunnus 	= '$lasrow[tunnus]'
 							GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-							ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+							ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$tilres = mysql_query($query) or pupe_error($query);
 
 				$rivinumerot = array(0 => 0);
@@ -748,7 +748,13 @@
 					if ($rivilaskuri < $rivimaara) {
 						$tilrow_seuraava = mysql_fetch_assoc($tilres);
 						mysql_data_seek($tilres, $rivilaskuri);
-						$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+
+						if ($tilrow_seuraava['tuoteno'] == $yhtiorow["kuljetusvakuutus_tuotenumero"] or $tilrow_seuraava['tuoteno'] == $yhtiorow["laskutuslisa_tuotenumero"]) {
+							$tilrow['seuraava_otunnus'] = 0;
+						}
+						else {
+							$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+						}
 					}
 					else {
 						$tilrow['seuraava_otunnus'] = 0;

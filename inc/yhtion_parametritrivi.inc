@@ -75,6 +75,7 @@
 		$sel1 = "";
 		$sel2 = "";
 		$sel3 = "";
+		$sel4 = "";
 
 		if ($trow[$i] == 'A') {
 			$sel1 = "selected";
@@ -85,10 +86,14 @@
 		if ($trow[$i] == 'B') {
 			$sel3 = "selected";
 		}
+		if ($trow[$i] == 'L') {
+			$sel4 = "selected";
+		}
 
-		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."";
-		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti")."";
-		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti")."";
+		$ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
+		$ulos .= "<option value = 'L' $sel4>".t("Myyntitilausten ker‰yslistojen ja l‰hetteen tulostukseen k‰ytet‰‰n tulostusjonoa");
+		$ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti");
+		$ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2080,6 +2085,14 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "laskutuslisa" OR
+		mysql_field_name($result, $i) == "kuljetusvakuutus") {
+
+		if ($trow[$i] == 0) {
+			$trow[$i] = "";
+		}
+	}
+
 	if (mysql_field_name($result, $i) == "laskutuslisa_tyyppi") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2099,6 +2112,24 @@
 		$ulos .= "<option value = 'T' $sel[T]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
 		$ulos .= "<option value = 'U' $sel[U]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi k‰teislaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
 		$ulos .= "<option value = 'V' $sel[V]>".t("Laskutuslis‰ lis‰t‰‰n muihin laskuihin paitsi noutolaskuihin. K‰ytet‰‰n laskutuslis‰tuotteen asiakashintaa ja alennusta.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei kuljetusvakuutusta")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'F' $sel[F]>".t("Valuuttam‰‰r‰inen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";
+		$ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lis‰t‰‰n. K‰ytet‰‰n kuljetusvakuutustuotteen asiakasalennusta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

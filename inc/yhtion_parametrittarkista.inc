@@ -3,7 +3,7 @@
 if(!function_exists("yhtion_parametrittarkista")) {
 	function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $tiedostopaate;
-		
+
 		static $verkkolasku_lah_talteen, $verkkolasku_lah_talteen_i;
 
 		if (mysql_field_name($result, $i) == "admin_email" or
@@ -13,7 +13,6 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu!");
 			}
-
 		}
 
 		if (mysql_field_name($result, $i) == "kuvapankki_polku") {
@@ -28,6 +27,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		    mysql_field_name($result, $i) == "laskutuslisa_tuotenumero" OR
 		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR
 		    mysql_field_name($result, $i) == "alennus_tuotenumero" OR
+			mysql_field_name($result, $i) == "kuljetusvakuutus_tuotenumero" OR
 			mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
 
 			$tuote = mysql_real_escape_string(trim($t[$i]));
@@ -134,27 +134,27 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		if (mysql_field_name($result, $i) == "logo") {
 			$tiedostopaate = array("JPG","PNG", "GIF");
 		}
-		
+
 		if (mysql_field_name($result, $i) == "maventa_api_avain") {
 			if ($verkkolasku_lah_talteen == "maventa" and trim($t[$i]) == "") {
 				$virhe[$i] = t("Pakollinen: maventa_api_avain ja maventa_ohjelmisto_api_avain!!");
 				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: maventa_api_avain ja maventa_ohjelmisto_api_avain!!");
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "maventa_ohjelmisto_api_avain") {
-			
+
 			if ($verkkolasku_lah_talteen == "maventa" and trim($t[$i]) == "") {
 				$virhe[$i] = t("Pakollinen:  maventa_ohjelmisto_api_avain!!");
 				$virhe[$verkkolasku_lah_talteen_i] = t("Pakollisia: maventa_api_avain ja maventa_ohjelmisto_api_avain!!");
 			}
 		}
-		
-		if (mysql_field_name($result, $i) == "verkkolasku_lah") {		
+
+		if (mysql_field_name($result, $i) == "verkkolasku_lah") {
 			$verkkolasku_lah_talteen = trim($t[$i]);
 			$verkkolasku_lah_talteen_i = $i;
 		}
-		
+
 	}
 }
 

@@ -2166,7 +2166,6 @@ if (!function_exists("synkronoi")) {
 									and lauantai		= '$aburow[lauantai]'
 									and maa_maara		= '$aburow[maa_maara]'
 									and merahti			= '$aburow[merahti]'
-									and multi_jv		= '$aburow[multi_jv]'
 									and nouto			= '$aburow[nouto]'
 									and sallitut_maat	= '$aburow[sallitut_maat]'";
 						$tarkres=pupe_query($query);
@@ -17404,7 +17403,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 		*/
 
-		require("tilauskasittely/tulosta_lahete.inc");
+		if (@include("tilauskasittely/tulosta_lahete.inc"));
+		else require("tulosta_lahete.inc");
 
 		//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 		if (function_exists("tulosta_lahete")) {

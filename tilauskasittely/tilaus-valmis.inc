@@ -27,6 +27,8 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 
 	$query_alennuksia = generoi_alekentta('M');
 
+	$saatavat_liitostunnukset = "";
+
 	// Jos saatavat on ytunnus tasolla, pit‰‰ hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
@@ -37,7 +39,8 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 		$saatavat_row = mysql_fetch_assoc($saatavat_result);
 		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
 	}
-	else {
+
+	if ($saatavat_liitostunnukset == "") {
 		$saatavat_liitostunnukset = $laskurow["liitostunnus"];
 	}
 

@@ -2593,9 +2593,8 @@ if ($tee == '') {
 
 				echo "<option value='{$row['selite']}' {$sel}>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
 				echo "</option>";
-				}
+			}
 			echo "</select>";
 
 			// HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰

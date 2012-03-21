@@ -416,7 +416,7 @@
 					$sel = " selected";
 				}
 
-				echo "<option value='{$kirow['komento']}' {$sel}>{$kirow['kirjoitin']}</option>";
+				echo "<option value='{$kirow['kir_tunnus']}' {$sel}>{$kirow['kirjoitin']}</option>";
 			}
 
 			echo "</select></td>";

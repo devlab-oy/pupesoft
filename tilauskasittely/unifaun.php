@@ -18,6 +18,7 @@ class Unifaun {
 	private $viite;
 	private $mehto;
 	private $xml;
+	private $kirjoitin;
 
 	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfaildir) {
 		$this->hostname 	= $hostname;
@@ -90,6 +91,10 @@ class Unifaun {
 		}
 
 		$this->setAsiakasRow();
+	}
+
+	public function setKirjoitin($kirjoitin) {
+		$this->kirjoitin = $kirjoitin;
 	}
 
 	public function ftpSend() {
@@ -199,7 +204,7 @@ class Unifaun {
 			$uni_meta = $xml->addChild('meta');
 
 			// $uni_meta_val = $uni_meta->addChild('val', '|LASER1|'); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
-			$uni_meta_val = $uni_meta->addChild('val', ''); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
+			$uni_meta_val = $uni_meta->addChild('val', "{$this->kirjoitin}"); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
 			$uni_meta_val->addAttribute('n', 'printer');
 
 			#$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.

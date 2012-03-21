@@ -187,6 +187,10 @@
 			$mehto_res = pupe_query($query);
 			$mehto = mysql_fetch_assoc($mehto_res);
 
+			$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
+			$kirjoitin_res = pupe_query($query);
+			$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
+
 			$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 						lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 						if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
@@ -235,6 +239,8 @@
 
 				$unifaun->setYhteensa($row['summa']);
 				$unifaun->setViite($row['viesti']);
+
+				$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
 
 				$unifaun->_getXML();
 

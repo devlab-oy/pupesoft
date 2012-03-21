@@ -697,7 +697,8 @@
 				if ($erotus != 0) {
 					// tehd‰‰n splitti
 					// haetaan ostotilauksen rivitiedot kyseiselle riville.
-					$query = "SELECT * from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus ='{$asn_row_haku["tilausnumero"]}' and tunnus='{$tunnukset[0]}'";
+					$query = "SELECT * from tilausrivi where yhtio='{$kukarow["yhtio"]}' and tunnus='{$tunnukset[0]}'";
+
 					$ostores = pupe_query($query);
 					$ostotilausrivirow = mysql_fetch_assoc($ostores);
 					
@@ -752,6 +753,7 @@
 			}
 			else {
 				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."', muuttaja ='{$kukarow["kuka"]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
+
 				$updres = pupe_query($query);
 			}
 

@@ -35,27 +35,12 @@ $iso_boldi["font"] 			= "Helvetica-Bold";
 $rectparam["width"] 		= 0.3;
 $rivinkorkeus				= 17;
 
-if (!function_exists('otsikot')) {
-	function otsikot ($params) {
+if (!function_exists('vakadr_otsikko')) {
+	function vakadr_otsikko ($params) {
 		global $kukarow, $yhtiorow;
 
 		// Luodaan muuttujat
 		extract($params);
-
-		$iso["height"] 				= 14;
-		$iso["font"] 				= "Helvetica-Bold";
-
-		$norm["height"] 			= 10;
-		$norm["font"] 				= "Times-Roman";
-
-		$pieni["height"] 			= 8;
-		$pieni["font"] 				= "Times-Roman";
-
-		$boldi["height"] 			= 10;
-		$boldi["font"] 				= "Times-Bold";
-
-		$pieni_boldi["height"] 		= 8;
-		$pieni_boldi["font"] 		= "Times-Bold";
 
 		//PDF parametrit
 		if ($pdf === NULL) {
@@ -98,20 +83,21 @@ if (!function_exists('otsikot')) {
 		$pdf->draw_text(290, 673, $laskurow["toim_maa"], $thispage, $norm);
 
 		// OIKEA PUOLI
-		
+
 		$pdf->draw_text(290, 792, t("Toimitustapa", $kieli), $thispage, $boldi);
-		$pdf->draw_text(370, 792, $laskurow["toimitustapa"], $thispage, $boldi); 
-		 
+		$pdf->draw_text(370, 792, $laskurow["toimitustapa"], $thispage, $boldi);
+
 		$pdf->draw_text(290, 780, t("Tilausnumero", $kieli),$thispage, $norm);
-		$pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm); // t‰h‰n rahtikirjannumero MIKƒ PITƒƒ TULLA UNIFAU:nista, mutta toistaiseksi ei saada
+		$pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm); 
 
 		$pdf->draw_text(290, 770, t("P‰iv‰m‰‰r‰", $kieli), $thispage, $norm);
-		$pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm); 
+		$pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm);
 
-		// Otsikon viimeisin rivi on pikseliss‰ 673, joten voidaan olettaa ett‰ aloitetaan kohdasta 650 ja kala on ekalla kerralla 650
+		// Otsikon viimeisin rivi on pikseliss‰ 673
+		// 665 on laskettu ottaen huomioon ett‰ jokaisen SSCC:n alussa tiputetaan $kala-15 (650), joka on oikeakohta aloittaa piirt‰minen.
 
-		$params["kala"] = 650;
-		$kala			= 650;
+		$params["kala"] = 665;
+		$kala			= 665;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
@@ -120,248 +106,75 @@ if (!function_exists('otsikot')) {
 	}
 }
 
-if (!function_exists('rivi_paketti')) {
-	function rivi_paketti($params) {
+if (!function_exists('vakadr_rivi')) {
+	function vakadr_rivi($params) {
 		global $kukarow, $yhtiorow;
 
 		// Luodaan muuttujat
 		extract($params);
-
-		$iso["height"] 				= 14;
-		$iso["font"] 				= "Helvetica-Bold";
-
-		$norm["height"] 			= 10;
-		$norm["font"] 				= "Times-Roman";
-
-		$pieni["height"] 			= 8;
-		$pieni["font"] 				= "Times-Roman";
-
-		$boldi["height"] 			= 10;
-		$boldi["font"] 				= "Times-Bold";
-
-		$pieni_boldi["height"] 		= 8;
-		$pieni_boldi["font"] 		= "Times-Bold";
 
 		// Jos on paljon rivej‰ tehd‰‰n uusi sivu...
-		if ($kala <= 70) {
+		if ($kala <= 100) {
 			$sivu++;
 
 			// Luodaan palautettavat
 			$return = compact(array_keys($params));
 
-			$return = loppu_vakadr($return);
-			$params = uusi_sivu_lahete($return);
+			$return = vakadr_loppu($return);
+			$params = vakadr_otsikko($return);
 
 			// Luodaan muuttujat
 			extract($params);
-
 			$page[$sivu] = $thispage;
 		}
 
-		// Mahtuuko rivi t‰lle sivulle
-		$kalatest = $kala;
+		if (isset($sscc)) {
 
-		// Luodaan palautettavat
-		$returntest = compact(array_keys($params));
+			$kala = $kala-15; // oikeasta kohtaan ja ett‰ SSCC v‰liin tulee v‰li‰
 
-		//Fuulataan t‰m‰, jotta voidaan kokeilla mahtuuko rivi sivulle
-		$returntest["thispage"] = "TESTISIVU";
-
-		$returntest = piirra_rivi($returntest);
-
-		// Otetaan vain kalamuuttuja t‰st‰
-		$kalatest = $returntest["kala"];
-
-		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($kalatest <= 70 or $kalatest > $kala) {
-			$sivu++;
-
-			// Luodaan palautettavat
-			$return = compact(array_keys($params));
-
-			$return = loppu_vakadr($return);
-			$params = uusi_sivu_lahete($return);
-
-			// Luodaan muuttujat
-			extract($params);
-
-			$page[$sivu] = $thispage;
-		}
-
-		// T‰h‰n kutsu joka piirt‰‰ sen rivin.
-		$params = piirra_rivi($params);
-
-		extract($params);
-
-		// Luodaan palautettavat
-		$return = compact(array_keys($params));
-
-		return $return;
-	}
-}
-
-if (!function_exists('piirra_rivi')) {
-	function piirra_rivi($params) {
-		global $kukarow, $yhtiorow;
-
-		// Luodaan muuttujat
-		extract($params);
-
-		$iso["height"] 				= 14;
-		$iso["font"] 				= "Helvetica-Bold";
-
-		$norm["height"] 			= 10;
-		$norm["font"] 				= "Times-Roman";
-
-		$pieni["height"] 			= 8;
-		$pieni["font"] 				= "Times-Roman";
-
-		$boldi["height"] 			= 10;
-		$boldi["font"] 				= "Times-Bold";
-
-		$pieni_boldi["height"] 		= 8;
-		$pieni_boldi["font"] 		= "Times-Bold";
-
-		foreach ($koodit as $index => $vakit) {
-			// Haetaan, mik‰li on "ulkoinen_sscc"-koodi, niin k‰ytet‰‰n sit‰, muuten sis‰isi‰ sscc-koodia
-			$hae_select = "SELECT * from kerayserat where yhtio = '{$kukarow["yhtio"]}' and sscc = '$index' and otunnus = '{$laskurow["tunnus"]}' limit 1";
-			$hae_result = pupe_query($hae_select);
-			$hae_rivi = mysql_fetch_assoc($hae_result);
-
-			if ($hae_rivi["sscc_ulkoinen"] != 0) {
-				$pdf->draw_text(150,$kala, $hae_rivi["sscc_ulkoinen"], $thispage, $boldi); // ULKOINEN_SSCC t‰h‰n jos lˆytyy
+			if ($sscc_ulkoinen != 0) {
+				$pdf->draw_text(150,$kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC t‰h‰n jos lˆytyy
 			}
 			else {
-				$pdf->draw_text(150,$kala, $index, $thispage, $boldi); // SSCC t‰h‰n
+				$pdf->draw_text(150,$kala, $sscc, $thispage, $boldi); // SSCC t‰h‰n
 			}
 
+			// t‰‰ on se ongelma.
 			// tehd‰‰n kollikohtaiset otsikot.
 			$pdf->draw_text(30,	$kala, t("Kollitunniste (SSCC)", $kieli), $thispage, $boldi);
 			$pdf->draw_text(290,$kala, t("Tilaus", $kieli), $thispage, $boldi);
-			$pdf->draw_text(330,$kala, $laskurow["tunnus"], $thispage, $norm); // Tilausnumero
+			$pdf->draw_text(330,$kala, $tilausnumero, $thispage, $norm); // Tilausnumero
 			$pdf->draw_text(520,$kala, t("M‰‰r‰ kg", $kieli), $thispage, $boldi);
 			$kala = $kala-12;
-			$i = 0;
-			foreach ($vakit as $koodi) {
 
-				if (strlen($koodi) >= 80) {
-					list($ff_string, $ff_font) = pdf_fontfit($koodis, 500, $pdf, $norm);
-					$pdf->draw_text(30, $kala, $ff_string, $thispage, $ff_font);
-				}
-				else {
-					$pdf->draw_text(30,$kala, $koodi, $thispage, $norm);
-				}
-
-				// tied‰n koodinimen ja otunnus, nyt haen
-				// TOI 0.95 on sovittu "nettokerroin", poistetaan kun saadaan vakm‰‰r‰ toimimaan oikein ja sielt‰ kertoimet.
-
-				$query = "	SELECT ((tilausrivi.tilkpl * tuote.tuotemassa) * 0.95) as massa, tilausrivi.tuoteno
-							FROM tilausrivi
-							JOIN tuote on (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi='{$koodi}')
-							JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.tunnus='{$laskurow["tunnus"]}')
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-							AND tilausrivi.tunnus = '{$tuotteet[$index][$i]}'";
-				$result = pupe_query($query);
-				$toot = mysql_fetch_assoc($result);
-
-				$pdf->draw_text(520,$kala, sprintf("%.2f",$toot["massa"]), $thispage, $boldi);
-				$kala = $kala-11;
-			}
-			$kala = $kala-15;
 		}
 
+		if (isset($vakkoodi) and isset($massa)) {
+		
+			if (strlen($vakkoodi) >= 80) {
+				list($ff_string, $ff_font) = pdf_fontfit($vakkoodi, 500, $pdf, $norm);
+				$pdf->draw_text(30, $kala, $ff_string, $thispage, $ff_font);
+			}
+			else {
+				$pdf->draw_text(30,$kala, $vakkoodi, $thispage, $norm);
+			}
+
+			$pdf->draw_text(520,$kala, sprintf("%.2f",$massa), $thispage, $boldi);
+			$kala = $kala-11;
+		}
+		
 		$return = compact(array_keys($params));
 
 		return $return;
 	}
 }
 
-if (!function_exists('uusi_sivu_lahete')) {
-	function uusi_sivu_lahete ($params) {
+if (!function_exists('vakadr_loppu')) {
+	function vakadr_loppu($params) {
 		global $kukarow, $yhtiorow;
 
 		// Luodaan muuttujat
 		extract($params);
-
-		$iso["height"] 				= 14;
-		$iso["font"] 				= "Helvetica-Bold";
-
-		$norm["height"] 			= 10;
-		$norm["font"] 				= "Times-Roman";
-
-		$pieni["height"] 			= 8;
-		$pieni["font"] 				= "Times-Roman";
-
-		$boldi["height"] 			= 10;
-		$boldi["font"] 				= "Times-Bold";
-
-		$pieni_boldi["height"] 		= 8;
-		$pieni_boldi["font"] 		= "Times-Bold";
-
-		$thispage = $pdf->new_page("a4");
-
-		$page[$sivu] = $thispage;
-
-		tulosta_logo_pdf($pdf, $thispage, $laskurow);
-
-		$pdf->draw_text(290,815, t("Kuljetuksen VAK/ADR-erittely", $kieli), $thispage, $iso);
-
-		// VASEN PUOLI
-		// Myyj‰n tiedot
-		$pdf->draw_text(30, 792, t("L‰hett‰j‰", $kieli),$thispage, $boldi);
-		$pdf->draw_text(30, 780, $yhtiorow["nimi"],	$thispage, $norm);
-		$pdf->draw_text(30, 770, $yhtiorow["osoite"],	$thispage, $norm);
-		$pdf->draw_text(30, 760, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $thispage, $norm);
-		$pdf->draw_text(30, 750, $yhtiorow["maa"],	$thispage, $norm);
-
-		// Tilaajantiedot
-		$pdf->draw_text(30, 725, t("Tilaaja", $kieli), 	$thispage, $boldi);
-		$pdf->draw_text(30, 713, $laskurow["nimi"],	$thispage, $norm);
-		$pdf->draw_text(30, 703, $laskurow["nimitark"],	$thispage, $norm);
-		$pdf->draw_text(30, 693, $laskurow["osoite"],	$thispage, $norm);
-		$pdf->draw_text(30, 683, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-		$pdf->draw_text(30, 673, $laskurow["maa"],	$thispage, $norm);
-		// Toimitustosoite
-		$pdf->draw_text(290, 725, t("Toimitustosoite", $kieli), 	$thispage, $boldi);
-		$pdf->draw_text(290, 713, $laskurow["toim_nimi"],	$thispage, $norm);
-		$pdf->draw_text(290, 703, $laskurow["toim_nimitark"],	$thispage, $norm);
-		$pdf->draw_text(290, 693, $laskurow["toim_osoite"],	$thispage, $norm);
-		$pdf->draw_text(290, 683, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
-		$pdf->draw_text(290, 673, $laskurow["toim_maa"], $thispage, $norm);
-
-		// OIKEA PUOLI
-		$pdf->draw_text(290, 792, t("Toimitustapa", $kieli), $thispage, $boldi);
-		$pdf->draw_text(370, 792, $laskurow["toimitustapa"], $thispage, $boldi); 
-		 
-		$pdf->draw_text(290, 780, t("Tilausnumero", $kieli),$thispage, $norm);
-		$pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm); // t‰h‰n rahtikirjannumero MIKƒ PITƒƒ TULLA UNIFAU:nista, mutta toistaiseksi ei saada
-
-		$pdf->draw_text(290, 770, t("P‰iv‰m‰‰r‰", $kieli), $thispage, $norm);
-		$pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm); 
-
-		$params["kala"] = 650;
-		$kala			= 650;
-
-		// Luodaan palautettavat
-		$return = compact(array_keys($params));
-
-		return $return;
-
-	}
-}
-
-if (!function_exists('loppu_vakadr')) {
-	function loppu_vakadr($params) {
-		global $kukarow, $yhtiorow;
-
-		// Luodaan muuttujat
-		extract($params);
-
-		$norm["height"] 			= 10;
-		$norm["font"] 				= "Times-Roman";
-
-		$pieni["height"] 			= 8;
-		$pieni["font"] 				= "Times-Roman";
 
 		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
 			// et‰yhtiˆn yhtiˆtiedot
@@ -485,9 +298,7 @@ if (!function_exists('print_pdf_vakadr')) {
 		$returnvalue = 0;
 
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdffilenimi = "/tmp/VakAdr-".md5(uniqid(mt_rand(), true)).".pdf";
+		$pdffilenimi = tempnam("/tmp", "VakAdr").".pdf";
 
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
@@ -535,6 +346,4 @@ if (!function_exists('print_pdf_vakadr')) {
 		system("rm -f $pdffilenimi");
 	}
 }
-
-
 ?>

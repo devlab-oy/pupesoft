@@ -28,22 +28,24 @@
 	// $pvmnimet[6] = t("Lauantai");
 	// $pvmnimet[0] = t("Sunnuntai");
 
-	$query = "	SELECT lahdot.tunnus, lasku.tunnus AS ltunnus
+	$query = "	SELECT lahdot.tunnus
 				FROM lahdot
-				LEFT JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila = 'N')
+				LEFT JOIN lasku ON (lasku.yhtio = lahdot.yhtio AND lasku.toimitustavan_lahto = lahdot.tunnus AND lasku.tila  IN ('N','L'))
 				WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
 				AND lahdot.aktiivi = ''
 				AND lahdot.pvm < CURDATE()
-				HAVING ltunnus IS NULL";
+				AND lasku.tunnus IS NULL";
 	$chk_res = pupe_query($query);
 
 	while ($chk_row = mysql_fetch_assoc($chk_res)) {
-		$query = "DELETE FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$chk_row['tunnus']}'";
+		$query = "	DELETE FROM lahdot 
+					WHERE yhtio = '{$kukarow['yhtio']}' 
+					AND tunnus = '{$chk_row['tunnus']}'";
 		$del_res = pupe_query($query);
 	}
 
-	$paivia_eteenpain = trim($argv[2] == 'create') ? 14 : 1;
-	$init_i = trim($argv[2] == 'create') ? 0 : 1;
+	$paivia_eteenpain = trim($argv[2]) == 'create' ? 14 : 1;
+	$init_i = trim($argv[2]) == 'create' ? 0 : 1;
 
 	for ($i = $init_i; $i <= $paivia_eteenpain; $i++) {
 
@@ -54,15 +56,19 @@
 		// haetaan ajan viikonpäivä
 		$aika_vkonpvm = date("w", $time);
 
-		$query = "SELECT * FROM toimitustavan_lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND lahdon_viikonpvm = '{$aika_vkonpvm}' ORDER BY liitostunnus, asiakasluokka";
+		$query = "	SELECT *
+					FROM toimitustavan_lahdot
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND lahdon_viikonpvm = '{$aika_vkonpvm}'
+					ORDER BY liitostunnus, asiakasluokka";
 		$toimitustavan_lahdot_res = pupe_query($query);
 
 		while ($t_row = mysql_fetch_assoc($toimitustavan_lahdot_res)) {
 
 			$asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");
 
-			$query = "	SELECT * 
-						FROM lahdot 
+			$query = "	SELECT *
+						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND pvm = '{$pvm}'
 						AND lahdon_viikonpvm = '{$aika_vkonpvm}'
@@ -94,19 +100,17 @@
 							muutospvm = now(),
 							muuttaja = '{$kukarow['kuka']}'";
 				$ins_res = pupe_query($query);
-				// echo str_replace("\t", "", str_replace(array("\r\n", "\n"), " ", $query))."\n";
 			}
 		}
-
 	}
 
 	$query = "UPDATE lahdot SET vakisin_kerays = '' WHERE yhtio = '{$kukarow['yhtio']}' AND vakisin_kerays != ''";
 	$upd_res = pupe_query($query);
 
-	$query = "	UPDATE lasku SET 
-				vakisin_kerays = '' 
-				WHERE yhtio = '{$kukarow['yhtio']}' 
+	$query = "	UPDATE lasku SET
+				vakisin_kerays = ''
+				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND vakisin_kerays != ''
-				AND lasku.tila = 'N' 
+				AND lasku.tila = 'N'
 				AND lasku.alatila = 'A'";
 	$upd_res = pupe_query($query);

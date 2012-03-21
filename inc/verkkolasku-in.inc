@@ -485,41 +485,41 @@
 				
 				// T‰h‰n myˆs toi logiikka, K (tarkista), S/L (ei v‰li‰)
 				// TecCom-lasku
-				if ($trow["asn_sanomat"] == "K" or $trow["asn_sanomat"] == "L") {
-					// TecCom-lasku
-					$tarkq = "	SELECT count(*) lasku 
-								FROM asn_sanomat 
-								WHERE yhtio = '{$yhtio}'
-								AND laji = 'tec'
-								AND asn_numero = '{$laskun_numero}'
-								AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
-					$tarkresult = pupe_query($tarkq);
-					$tarkrivi = mysql_fetch_assoc($tarkresult);
-					
-					if ($trow["asn_sanomat"] == "K") {
-						// asn-sanoma
-						$tarkistusquery = "	SELECT count(*) sanomat
-											FROM asn_sanomat 
-											WHERE yhtio = '{$kukarow["yhtio"]}' 
-											AND laji = 'asn' 
-											AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
-											AND tilausnumero in ('".str_replace(",", "','", $laskun_tilausviite)."')";
-						$tarkistusres = pupe_query($tarkistusquery);
-						$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
-					}
-					
-					
-					if ($trow["asn_sanomat"] == "K" and $tarkrivi["lasku"] > 0 and $tarkistusrivi["sanomat"] == 0) {
-						$return .= "Kannassa on jo lasku mutta ei sanomaa tilauksille ({$laskun_tilausviite})####ASN\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-sanoma ja lasku", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-						return ($return);
-					}
-					if ($trow["asn_sanomat"] == "L" and $tarkrivi["lasku"] > 0) {
-						$return .= "Kannassa on jo lasku mutta ei mene eteenp‰in ({$laskun_tilausviite})####ASN\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-laskun eteenp‰in menemisen ongelma", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-						return ($return);
-					}
-				}
+				// if ($trow["asn_sanomat"] == "K" or $trow["asn_sanomat"] == "L") {
+				// 	// TecCom-lasku
+				// 	$tarkq = "	SELECT count(*) lasku 
+				// 				FROM asn_sanomat 
+				// 				WHERE yhtio = '{$yhtio}'
+				// 				AND laji = 'tec'
+				// 				AND asn_numero = '{$laskun_numero}'
+				// 				AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+				// 	$tarkresult = pupe_query($tarkq);
+				// 	$tarkrivi = mysql_fetch_assoc($tarkresult);
+
+				// 	if ($trow["asn_sanomat"] == "K") {
+				// 		// asn-sanoma
+				// 		$tarkistusquery = "	SELECT count(*) sanomat
+				// 							FROM asn_sanomat 
+				// 							WHERE yhtio = '{$kukarow['yhtio']}' 
+				// 							AND laji = 'asn' 
+				// 							AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
+				// 							AND tilausnumero in ('".str_replace(",", "','", $laskun_tilausviite)."')";
+				// 		$tarkistusres = pupe_query($tarkistusquery);
+				// 		$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
+				// 	}
+
+				// 	if ($trow["asn_sanomat"] == "K" and $tarkrivi["lasku"] > 0 and $tarkistusrivi["sanomat"] == 0) {
+				// 		$return .= "Kannassa on jo lasku mutta ei sanomaa tilauksille ({$laskun_tilausviite})####ASN\n";
+				// 		mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-sanoma ja lasku", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				// 		return ($return);
+				// 	}
+
+				// 	if ($trow["asn_sanomat"] == "L" and $tarkrivi["lasku"] > 0) {
+				// 		$return .= "Kannassa on jo lasku mutta ei mene eteenp‰in ({$laskun_tilausviite})####ASN\n";
+				// 		mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-laskun eteenp‰in menemisen ongelma", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				// 		return ($return);
+				// 	}
+				// }
 				
 				// katotaan pit‰‰ks vaihtaa oletus_vienti‰
 				if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {

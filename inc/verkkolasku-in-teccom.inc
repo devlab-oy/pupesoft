@@ -174,11 +174,11 @@
 			// Haetaan poikkeustapaksien käsittely
 			if ($laskuttajan_toimittajanumero == 123085) {
 				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
-				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero}<br><br>";
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123067) {
 				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,10);
-				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero}<br><br>";
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123007) {
 				$aputuoteno = utf8_decode($tuotetieto->ProductId->ProductNumber);
@@ -190,7 +190,7 @@
 				else {
 					$rtuoteno[$i]["tuoteno"] = $aputuoteno;
 				}
-				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero}<br><br>";
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			else {
 				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
@@ -238,7 +238,9 @@
 					// $rtuoteno[$i]["kate"]
 				}
 
-				$rtuoteno[$i]["documentnumber"] = $tuotetieto->DesAdvRef->DocumentNumber;
+				if (isset($tuotetieto->DesAdvRef->DocumentNumber)) {
+					$rtuoteno[$i]["documentnumber"] = $tuotetieto->DesAdvRef->DocumentNumber;
+				}
 
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%

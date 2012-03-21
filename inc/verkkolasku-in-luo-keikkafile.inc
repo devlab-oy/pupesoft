@@ -396,25 +396,21 @@
 			// if (mysql_num_rows($checkres) == 1 and $tilausrivirow['uusiotunnus'] == 0 and $tilausrivirow['asn_sanomat'] == 'L') {
 			if (mysql_num_rows($checkres) == 1) {
 
-				/*
-				// löytyi, ei ole keikalla
-				$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-				$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-				$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-				$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-				$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-				$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-
-				// löytyi, on jo keikalla
-				$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
-				$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
-				$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-				$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-				$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-
-				*/
-
 				while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
+
+					if ($tilausrivirow['asn_sanomat'] == 'K') {
+						$query = "	SELECT tunnus 
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) == 0) {
+							$virheet++;
+						}
+					}
+
 					// tilausrivi ei saa olla jo kohdistettu
 					$query = "	SELECT tunnus 
 								FROM asn_sanomat
@@ -646,12 +642,25 @@
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'tec'
-										AND tilausrivi = '{$tilausrivirow['tunnus']}'";
+										AND tilausrivi = '{$kokeiltiin['tunnus']}'";
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) != 0 or in_array($kokeiltiin['tunnus'], $kaytettavat_tilausrivit)) continue;
 
 							if ($kohdistamatta <= 0) break;
+
+							if ($kokeiltiin['asn_sanomat'] == 'K') {
+								$query = "	SELECT tunnus 
+											FROM asn_sanomat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND laji = 'asn'
+											AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'";
+								$chk_res = pupe_query($query);
+
+								if (mysql_num_rows($chk_res) == 0) {
+									$virheet++;
+								}
+							}
 
 							$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
 							$kpl_chk_res = pupe_query($query);
@@ -1031,26 +1040,11 @@
 			require("tilauskasittely/kululaskut.inc");
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
-		#elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
 			// jos tullaan tähän kohtaan niin kappalemäärät täsmää. On jo tarkistettu rivillä 166
 			// muutetaan hinta ja rivi on ok.
 			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus']);
 
 			foreach ($keikoilla as $pointteri) {
-
-				// $query = "	SELECT tunnus 
-				// 			FROM asn_sanomat
-				// 			WHERE yhtio = '{$kukarow['yhtio']}'
-				// 			#AND tilausnumero = '{$hinta_chk_row['otunnus']}'
-				// 			#AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'
-				// 			AND laji = 'asn'
-				// 			AND tilausrivi = '{$pointteri['tunnus']}'";
-				// $chk_res = pupe_query($query);
-
-				// if (mysql_num_rows($chk_res) == 0) {
-				// 	$virheet++;
-				// 	#continue;
-				// }
 
 				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);

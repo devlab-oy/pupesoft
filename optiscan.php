@@ -544,14 +544,14 @@
 		$nro = mysql_real_escape_string(trim($sisalto[3]));
 		$printer_id = (int) trim($sisalto[4]);
 
-		$query = "	SELECT komento
+		$query = "	SELECT unifaun_nimi
 					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND jarjestys = '{$printer_id}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoittimen komentoa haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
 
-		$komento = $row['komento'];
+		$komento = $row['unifaun_nimi'];
 
 		$query = "	SELECT *
 					FROM kerayserat
@@ -664,6 +664,8 @@
 					$unifaun->setPostiRow($row);
 					$unifaun->setToimitustapaRow($toitarow);
 					$unifaun->setMehto($mehto);
+
+					$unifaun->setKirjoitin($komento);
 
 					$unifaun->setRahtikirjaRow($rakir_row);
 

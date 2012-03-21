@@ -407,7 +407,7 @@ if (!function_exists('alku_kerayslista')) {
 			}
 
 			// Jos keräyslistat/lähetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan
-			if (trim($laskurow['clearing']) == 'JT-TILAUS' and $yhtiorow["lahetteen_tulostustapa"] != "K") {
+			if (trim($laskurow['clearing']) == 'JT-TILAUS' and $yhtiorow["lahetteen_tulostustapa"] != "K" and $yhtiorow["lahetteen_tulostustapa"] != "L") {
 				$komm .= "\n*** ".t("JÄLKITOIMITUS")." ***";
 			}
 

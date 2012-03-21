@@ -32,7 +32,16 @@
 
 	js_popup();
 
-	if ($toim == 'SIIRTOLISTA') {
+	if ($toim == 'KAIKKILISTAT') {
+		$tila 				= "N";
+		$lalatila			= "A";
+		$tila_lalatila_lisa = " OR (lasku.tila = 'G' AND lasku.alatila = 'J' and lasku.tilaustyyppi != 'M')
+								OR (lasku.tila = 'S' AND lasku.alatila = 'J' and lasku.tilaustyyppi = 'S')
+								OR (lasku.tila = 'G' AND lasku.alatila = 'J' and lasku.tilaustyyppi = 'M')
+								OR (lasku.tila = 'V' AND lasku.alatila = 'J')
+								OR (lasku.tila = 'C' AND lasku.alatila = 'B')";
+	}
+	elseif ($toim == 'SIIRTOLISTA') {
 		$tila 				= "G";
 		$lalatila			= "J";
 		$tila_lalatila_lisa = "";
@@ -226,14 +235,19 @@
 							$tilausnumero	= $laskurow["tunnus"];
 							$tee			= "valmis";
 							$tulostetaan	= "OK";
+							$toim_bck		= $toim;
+							if ($toim == "KAIKKILISTAT") {
+								if ($laskurow["tilaustyyppi"] == "M") $toim = "MYYNTITILI";
+								else $toim = "SIIRTOLISTA";	
+							}
 
 							require("tilaus-valmis-siirtolista.inc");
 
+							$toim			= $toim_bck;
 						}
 						elseif ($laskurow["tila"] == 'V') {
 							$tilausnumero	= $laskurow["tunnus"];
 							$tulostetaan	= "OK";
-
 							$toim_bck		= $toim;
 							$toim 			= "VALMISTAVARASTOON";
 
@@ -247,12 +261,19 @@
 							$toim_bck		= $toim;
 							$takas 			= 1;
 							$tyyppi 		= "REKLAMAATIO";
+							if ($toim == "KAIKKILISTAT") $toim = "VASTAANOTA_REKLAMAATIO";
 
 							require("tilaus-valmis-tulostus.inc");
 
+							$toim = $toim_bck;
 						}
 						else {
+							$toim_bck		= $toim;
+							if ($toim == "KAIKKILISTAT") $toim = "";
+
 							require("tilaus-valmis-tulostus.inc");
+
+							$toim			= $toim_bck;
 						}
 					}
 					else {
@@ -794,11 +815,11 @@
 		}
 
 		// Vain keräyslistat saa groupata
-		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
+		if (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
 		}
-		elseif ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
+		elseif (($yhtiorow["lahetteen_tulostustapa"] == "K" or $yhtiorow["lahetteen_tulostustapa"] == "L") and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
 			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus";
 		}
 		else {

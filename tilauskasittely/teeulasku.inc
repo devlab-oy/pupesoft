@@ -398,9 +398,9 @@
 	$lisatiedot_result = pupe_query($query);
 
 	// haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
-	$query = "	SELECT * 
-				FROM lasku 
-				WHERE yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
@@ -408,10 +408,10 @@
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
-	$query = "	UPDATE tilausrivi 
-				SET uusiotunnus = '$laskurow[tunnus]' 
-				WHERE otunnus in ($tunnukset) 
-				and yhtio = '$kukarow[yhtio]' 
+	$query = "	UPDATE tilausrivi
+				SET uusiotunnus = '$laskurow[tunnus]'
+				WHERE otunnus in ($tunnukset)
+				and yhtio = '$kukarow[yhtio]'
 				and var not in ('P','J')";
 	$ulasr = pupe_query($query);
 
@@ -452,6 +452,7 @@
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus in ($tunnukset)
+					and tilausrivi.tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
 					and tilausrivi.kpl != 0
 					ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$valsures = pupe_query($query);
@@ -470,15 +471,21 @@
 				$sumsrow	= mysql_fetch_assoc($sumsresult);
 
 				if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
-					$query = "	SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and otunnus = '$edotunnus'";
-					$sumsresult = pupe_query($query);
-					$sumsrow2	= mysql_fetch_assoc($sumsresult);
-
-					$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
+					$sumvieku = $sumsrow["vienti_kurssi"];
 				}
+				else {
+					$sumvieku = 1;
+				}
+
+				$query = "	SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+							and otunnus = '$edotunnus'";
+				$sumsresult = pupe_query($query);
+				$sumsrow2	= mysql_fetch_assoc($sumsresult);
+
+				$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
 
 				// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
 				if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
@@ -505,20 +512,22 @@
 
 		//laitetaan välisumma vikallekin tilaukselle
 		if ($edtunnus != "") {
-			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
-							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus = '$edotunnus'";
-			$sumsresult = pupe_query($query);
-			$sumsrow	= mysql_fetch_assoc($sumsresult);
-
 			if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
-				$query 		= "SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and otunnus='$edotunnus'";
-				$sumsresult = pupe_query($query);
-				$sumsrow2	= mysql_fetch_assoc($sumsresult);
-
-				$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
+				$sumvieku = $sumsrow["vienti_kurssi"];
 			}
+			else {
+				$sumvieku = 1;
+			}
+
+			$query = "	SELECT sum(round((rivihinta/$sumvieku)*(1+alv/100), 2)) summa
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+						and otunnus = '$edotunnus'";
+			$sumsresult = pupe_query($query);
+			$sumsrow2	= mysql_fetch_assoc($sumsresult);
+
+			$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
 
 			// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
 			if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or
@@ -544,7 +553,7 @@
 	// haetaan asiakkaan tiedot (esim konserniyhtiö)
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio = '$kukarow[yhtio]' 
+				WHERE yhtio = '$kukarow[yhtio]'
 				and ytunnus = '$laskurow[ytunnus]'";
 	$konsres = pupe_query($query);
 	$konsrow = mysql_fetch_assoc($konsres);

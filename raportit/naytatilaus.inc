@@ -34,7 +34,7 @@
 				laskun_lisatiedot.laskutus_postitp,
 				laskun_lisatiedot.laskutus_maa,
 				if (lasku.tila = 'L' and lasku.laskunro > 0, (SELECT lasku.mapvm FROM lasku l WHERE l.yhtio = lasku.yhtio AND l.laskunro = lasku.laskunro AND l.tila = 'U'), lasku.mapvm) mapvm,
-				(SELECT group_concat(distinct alv SEPARATOR ' ') FROM tilausrivi WHERE tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D') alv
+				(SELECT group_concat(distinct alv SEPARATOR ' ') FROM tilausrivi WHERE tilausrivi.yhtio = lasku.yhtio AND if(lasku.tila = 'U', tilausrivi.uusiotunnus, tilausrivi.otunnus) = lasku.tunnus AND tilausrivi.tyyppi != 'D') alv
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.tunnus = '$tunnus'

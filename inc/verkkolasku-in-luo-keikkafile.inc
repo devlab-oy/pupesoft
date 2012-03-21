@@ -399,19 +399,6 @@
 
 				while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 
-					if ($tilausrivirow['asn_sanomat'] == 'K') {
-						$query = "	SELECT tunnus 
-									FROM asn_sanomat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND laji = 'asn'
-									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-						$chk_res = pupe_query($query);
-
-						if (mysql_num_rows($chk_res) == 0) {
-							$virheet++;
-						}
-					}
-
 					// tilausrivi ei saa olla jo kohdistettu
 					$query = "	SELECT tunnus 
 								FROM asn_sanomat
@@ -443,6 +430,19 @@
 
 				// jos ei splitata, p‰ivitet‰‰n hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
+
+					if ($tilausrivirow['asn_sanomat'] == 'K') {
+						$query = "	SELECT tunnus 
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) == 0) {
+							$virheet++;
+						}
+					}
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
@@ -524,6 +524,19 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
+
+					if ($tilausrivirow['asn_sanomat'] == 'K') {
+						$query = "	SELECT tunnus 
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) == 0) {
+							$virheet++;
+						}
+					}
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
@@ -722,6 +735,19 @@
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
 
+						if ($tilausrivirow['asn_sanomat'] == 'K') {
+							$query = "	SELECT tunnus 
+										FROM asn_sanomat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'asn'
+										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+							$chk_res = pupe_query($query);
+
+							if (mysql_num_rows($chk_res) == 0) {
+								$virheet++;
+							}
+						}
+
 						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 						$updatequery = "UPDATE asn_sanomat SET
 										tilausrivi = '{$siistitty}',
@@ -734,6 +760,19 @@
 						// Jos menee tasan tilatut ja tulleet.
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
+
+						if ($tilausrivirow['asn_sanomat'] == 'K') {
+							$query = "	SELECT tunnus 
+										FROM asn_sanomat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'asn'
+										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+							$chk_res = pupe_query($query);
+
+							if (mysql_num_rows($chk_res) == 0) {
+								$virheet++;
+							}
+						}
 
 						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 						$updatequery = "UPDATE asn_sanomat SET
@@ -810,6 +849,19 @@
 
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
+
+						if ($tilausrivirow['asn_sanomat'] == 'K') {
+							$query = "	SELECT tunnus 
+										FROM asn_sanomat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'asn'
+										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+							$chk_res = pupe_query($query);
+
+							if (mysql_num_rows($chk_res) == 0) {
+								$virheet++;
+							}
+						}
 
 						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 						$updatequery = "UPDATE asn_sanomat SET

@@ -5,7 +5,7 @@
 		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 	}
 
-	require ("inc/salasanat.php");
+	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -15,16 +15,16 @@
 
 	if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi"; 			# kenelle meilataan jos on ongelma
 	if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi"; 	# mill‰ osoitteella meili l‰hetet‰‰n
-	 
+
 	// ja operaattori komentorivilt‰
-	$operaattori = $argv[1]; 
+	$operaattori = $argv[1];
 	// itella, servinet, yms
 	// pit‰‰ olla m‰‰ritettyn‰ salasanat.inc:iss‰ tai sitten t‰m‰ menee puihin.
-	
+
 	if ($operaattori == "") {
 		mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "Tilausten sis‰‰nluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 		die;
-	} 
+	}
 
 	# jos lukkofaili lˆytyy, mutta se on yli 15 minsaa vanha niin dellatan se
 	if (@fopen($tmpfile, "r") !== FALSE) {
@@ -171,6 +171,6 @@
 	}
 	else {
 		mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "Tilausten sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
-		
+
 	}
 ?>

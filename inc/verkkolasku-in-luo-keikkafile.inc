@@ -389,6 +389,8 @@
 			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$checkres = pupe_query($query);
 
+			echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
+
 			$kaytettavat_tilausrivit = array();
 
 			// if (mysql_num_rows($checkres) == 1 and $tilausrivirow['uusiotunnus'] == 0 and $tilausrivirow['asn_sanomat'] == 'L') {

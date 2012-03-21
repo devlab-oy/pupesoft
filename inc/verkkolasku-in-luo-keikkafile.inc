@@ -386,7 +386,7 @@
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 			}
-
+			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$checkres = pupe_query($query);
 
 			$kaytettavat_tilausrivit = array();

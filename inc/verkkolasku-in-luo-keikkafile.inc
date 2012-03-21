@@ -85,6 +85,9 @@
 	$virheet 	= 0;
 
 	for ($i=0; $i<count($rtuoteno); $i++) {
+
+		echo "$osrow[ebid] == 'TECCOM-INVOICE' and {$rtuoteno[$i]["kauttalaskutus"]} != 'KAUTTALASKUTUS' and (int) {$rtuoteno[$i]["tilaajanrivinro"]} != 0<br><br>";
+
 		// tehd‰‰n t‰‰ vaan jos meill‰ on rivinumero
 		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE") {
 

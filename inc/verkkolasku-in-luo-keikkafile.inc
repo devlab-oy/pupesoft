@@ -607,7 +607,7 @@
 				else {
 					// tuli enemmän kuin tilattu
 					$laskuri = 0;
-					$kohdistamatta = $tilausrivirow["varattu"];
+					$kohdistamatta = $rtuoteno[$i]["kpl"];
 					$lisa_array = array();
 					$split_array = array();
 

@@ -173,11 +173,12 @@
 			// tuotekoodi
 			// Haetaan poikkeustapaksien käsittely
 			if ($laskuttajan_toimittajanumero == 123085) {
-				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123067) {
-				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,10);
+				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
+				$rtuoteno[$i]["tuoteno2"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3)."090";
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123007) {
@@ -185,15 +186,27 @@
 				$pituus 	= strlen(trim($aputuoteno));
 
 				if ($pituus == 8 and strpos(' ',$aputuoteno) == 6) {
-					$rtuoteno[$i]["tuoteno"] = substr($aputuoteno,0,5);
+					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = substr($aputuoteno,0,5);
 				}
 				else {
-					$rtuoteno[$i]["tuoteno"] = $aputuoteno;
+					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = $aputuoteno;
 				}
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
+			elseif ($laskuttajan_toimittajanumero == "123453") {
+				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
+				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+			}
+			elseif ($laskuttajan_toimittajanumero == "123178") {
+				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,3);
+				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+			}
+			elseif ($laskuttajan_toimittajanumero == "123084") {
+				$rtuoteno[$i]["tuoteno"] = $tuotetieto->ProductId->ProductNumber;
+				$rtuoteno[$i]["tuoteno2"] = ltrim($tuotetieto->ProductId->ProductNumber, '0');
+			}
 			else {
-				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
 				echo "Ei poikkeuskäsittelyä tuotteelle ".$rtuoteno[$i]["tuoteno"]."<br><br>";
 			}
 

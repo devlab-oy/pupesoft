@@ -1487,6 +1487,7 @@
 							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 							AND asn_sanomat.laji = 'tec'
+							AND asn_sanomat.status != 'X'
 							GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 							ORDER BY toimi.nimi, toimi.ytunnus";
 				$result = pupe_query($query);

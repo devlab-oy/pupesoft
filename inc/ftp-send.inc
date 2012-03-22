@@ -90,12 +90,12 @@ else {
 
 		// Otetaan .TMP pääte veks ku siirto on valmis
 		if ($upload === TRUE) {
-			$rename = ftp_exec($conn_id, "mv $ftppath$ftpfile_tmp $ftppath$filenimi");
+			$rename1 = ftp_raw($conn_id, "rename {$ftppath}{$ftpfile_tmp} {$ftppath}{$filenimi}");
 		}
 
 		// Pitääkö faili vielä nimetä kokonana uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			#$rename = ftp_exec($conn_id, "mv $ftppath$filenimi $ftppath$renameftpfile");
+			$rename2 = ftp_raw($conn_id, "rename {$ftppath}{$filenimi} {$ftppath}{$renameftpfile}");
 		}
 
 		// Kokeillaan ncftp-ohjelmalla, uudelleenimeäminen ei onnaa joten laitetaan suoraan lopullisella nimellä
@@ -122,8 +122,11 @@ else {
 	if (isset($upload) and $upload === FALSE) {
 		$palautus = 3;
 	}
-	if (isset($rename) and $rename === FALSE) {
+	if (isset($rename1) and $rename1 === FALSE) {
 		$palautus = 4;
+	}
+	if (isset($rename2) and $rename2 === FALSE) {
+		$palautus = 5;
 	}
 
 	// jos siirto epäonnistuu
@@ -140,13 +143,16 @@ else {
 				$syy = "Could not connect to remote host. ($ftphost)";
 				break;
 			case  2:
-				$syy = "Could not login to remote host ($conn_id, $ftpuser, $ftppass)";
+				$syy = "Could not login to remote host ($ftpuser, $ftppass)";
 				break;
 			case  3:
-				$syy = "Transfer failed ($conn_id, $ftppath, ".realpath($ftpfile).")";
+				$syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
 				break;
 			case  4:
-				$syy = "Rename failed ($conn_id, $ftppath, $ftppath.$filenimi -> $ftppath.$renameftpfile)";
+				$syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
+				break;
+			case  5:
+				$syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
 				break;
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
@@ -162,7 +168,7 @@ else {
 
 		$boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-		if ($boob===FALSE) {
+		if ($boob === FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
 			$tulos_ulos_ftp .= t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
 			$tulos_ulos_ftp .= "</font><br>\n";

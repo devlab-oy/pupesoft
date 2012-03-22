@@ -1451,6 +1451,7 @@
 							toim_tuoteno = '{$pointteri['tuoteno']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
+				echo "<pre>$query</pre>";
 				pupe_query($update);							
 			}
 
@@ -1525,6 +1526,7 @@
 							toim_tuoteno = '{$pointteri['tuoteno']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
+				echo "<pre>$query</pre>";
 				pupe_query($update);							
 			}
 
@@ -1579,6 +1581,7 @@
 							toim_tuoteno = '{$pointteri['tuoteno']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
+				echo "<pre>$query</pre>";
 				pupe_query($update);							
 			}
 

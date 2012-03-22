@@ -235,7 +235,11 @@
 					if (strtoupper($attribute) == "ALLOW") {
 						
 					}
-					// $rtuoteno[$i]["kate"]
+					elseif (strtolower($attribute) == "charge") {
+						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {
+							$rtuoteno[$i]["runkoarvo"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+						}
+					}
 				}
 
 				if (isset($tuotetieto->DesAdvRef->DocumentNumber)) {

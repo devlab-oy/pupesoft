@@ -135,7 +135,7 @@
 
 		$lasku = (int) $lasku;
 
-		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$lasku}'";
+		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$lasku}' AND laji = 'tec'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 

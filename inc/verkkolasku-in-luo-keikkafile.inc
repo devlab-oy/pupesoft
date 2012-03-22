@@ -443,6 +443,7 @@
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) == 0) {
+							echo "1 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 							$virheet++;
 						}
 					}
@@ -538,6 +539,7 @@
 
 						if (mysql_num_rows($chk_res) == 0) {
 							$virheet++;
+							echo "2 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 						}
 					}
 
@@ -681,6 +683,7 @@
 								$chk_res = pupe_query($query);
 
 								if (mysql_num_rows($chk_res) == 0) {
+								echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 									$virheet++;
 								}
 							}
@@ -757,6 +760,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) == 0) {
+								echo "4 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -784,6 +788,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) == 0) {
+								echo "5 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -873,6 +878,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) == 0) {
+								echo "6 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -957,6 +963,7 @@
 			else {
 				// ei löydy tai joku muu virhe
 				echo "Virheellisiä kappalemääriä tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
+				echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']}<br><br>";
 				$virheet++;
 				continue;
 			}

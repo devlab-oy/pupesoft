@@ -526,6 +526,7 @@
 						$ostoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 						$ostoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 						$ostoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 					else {
 						// löytyi, on jo keikalla
@@ -540,6 +541,7 @@
 						$keikoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 						$keikoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 						$keikoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 				}
 				elseif ($rtuoteno[$i]["kpl"] < $tilausrivirow["varattu"]) {
@@ -681,6 +683,7 @@
 						$ostoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 						$ostoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 						$ostoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 					else {
 						// löytyi, on jo keikalla
@@ -695,6 +698,7 @@
 						$keikoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 						$keikoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 						$keikoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
@@ -1250,6 +1254,7 @@
 							$ostoilla[$indx]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 							$ostoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 							$ostoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+							$ostoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
 						}
 						else {
 							$indx = count($keikoilla);
@@ -1266,6 +1271,7 @@
 							$keikoilla[$indx]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
 							$keikoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 							$keikoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+							$keikoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
 						}
 					}
 				}
@@ -1435,7 +1441,8 @@
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
-							uusiotunnus = '{$keikan_tunnus}'
+							uusiotunnus = '{$keikan_tunnus}',
+							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1503,7 +1510,8 @@
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
-							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
+							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' ,
+							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1551,7 +1559,8 @@
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
-							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
+							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}',
+							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";

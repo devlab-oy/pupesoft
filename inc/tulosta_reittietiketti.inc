@@ -203,8 +203,8 @@
 			$rakir_res = pupe_query($query);
 			$rakir_row = mysql_fetch_assoc($rakir_res);
 
-			$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
-						IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
+			$query = "	SELECT IF(kerayserat.pakkaus = '999', 'KLI', pakkaus.pakkaus) AS pakkauskuvaus,
+						IF(kerayserat.pakkaus = '999', 'KLI', pakkaus.pakkauskuvaus) AS kollilaji,
 						kerayserat.pakkausnro,
 						kerayserat.sscc,
 						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
@@ -244,9 +244,9 @@
 
 				$unifaun->_getXML();
 
-				$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
-				$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
-				$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
+				$selectlisa = $keraysera_row['kollilaji'] == 'KLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+				$joinlisa = $keraysera_row['kollilaji'] == 'KLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+				$puukotuslisa = $keraysera_row['kollilaji'] != 'KLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
 				$query = "	SELECT tuote.vakkoodi,
 							{$selectlisa},

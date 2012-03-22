@@ -11,11 +11,25 @@ BACKUPUSER="pupe"
 BACKUPPASS="pupe1"
 BACKUPSAVEDAYS="30"
 
+# Salausavain varmistuksen salaamiseen
+SALAUSAVAIN=""
+
+# Lisavarmistuksen tiedot
+EXTRABACKUP=""
+REMOTEHOST=""
+REMOTEUSER=""
+REMOTEPASS=""
+REMOTEREMDIR=""
+REMOTELOCALDIR=""
+
+# Amazon S3 bucket
+S3BUCKET=""
+
 # Komennot
-sh ${POLKU}pupe-cron.sh $YHTIO
-sh ${POLKU}pupe-cron-server.sh $BACKUPSAVEDAYS
-sh ${POLKU}pupe-backup.sh $BACKUPDIR $BACKUPDB $BACKUPUSER $BACKUPPASS $BACKUPSAVEDAYS
+sh ${POLKU}pupe-cron.sh "$YHTIO"
+sh ${POLKU}pupe-cron-server.sh "$BACKUPSAVEDAYS"
+sh ${POLKU}pupe-backup.sh "$BACKUPDIR" "$BACKUPDB" "$BACKUPUSER" "$BACKUPPASS" "$BACKUPSAVEDAYS" "$SALAUSAVAIN" "$EXTRABACKUP" "$REMOTEHOST" "$REMOTEUSER" "$REMOTEPASS" "$REMOTEREMDIR" "$REMOTELOCALDIR" "$S3BUCKET"
 
 # Jos haluat seurata hitaita kyselyitä
 #SLOWLOG="/var/lib/mysql/mysqld-slow.log"
-#sh ${POLKU}mysql-slow-log.sh $SLOWLOG $BACKUPUSER $BACKUPPASS
+#sh ${POLKU}mysql-slow-log.sh "$SLOWLOG" "$BACKUPUSER" "$BACKUPPASS"

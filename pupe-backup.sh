@@ -20,6 +20,10 @@ if [ ! -z $7 ]; then
 	REMOTELOCALDIR=${12}
 fi
 
+if [ ! -z ${13} ]; then
+	S3BUCKET=${13}
+fi
+
 # Katsotaan, että parametrit on annettu
 if [ -z ${BACKUPDIR} ] || [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
@@ -82,12 +86,23 @@ tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Bzip2 done."
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Laitetaan salausavain fileen
+	echo "${SALAUSAVAIN}" > /root/salausavain
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		echo -n `date "+%Y-%m-%d %H:%M:%S"`
+		echo " - Encrypt done."
 	fi
 fi
 
@@ -164,17 +179,28 @@ fi
 
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		echo -n `date "+%Y-%m-%d %H:%M:%S"`
+		echo " - Encrypt done."
 	fi
+
+	# Dellataan salausavain file
+	rm -f /root/salausavain
 fi
 
 #Siirretäänkö tuorein backuppi myös sambaserverille jos sellainen on konffattu
-if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SAMBA" ]; then
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 	checksamba=`mount -t cifs -o username=${REMOTEUSER},password=${REMOTEPASS} //${REMOTEHOST}/${REMOTEREMDIR} ${REMOTELOCALDIR}`
 
 	if [[ $? != 0 ]]; then
@@ -194,7 +220,7 @@ if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SAMBA" ]; then
 fi
 
 #Pidetäänkö kaikki backupit eri serverillä
-if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SSH" ]; then
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	# Siirretään failit remoteserverille
 	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
@@ -208,6 +234,11 @@ fi
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
+
+# Synkataan backuppi Amazon S3:een
+if [ ! -z "${S3BUCKET}" ]; then
+	s3cmd --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+fi
 
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - All done."

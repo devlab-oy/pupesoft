@@ -1442,11 +1442,16 @@
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikan_tunnus}',
-							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
+
+				$update = "	UPDATE asn_sanomat SET
+							toim_tuoteno = '{$pointteri['tuoteno']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$pointteri['insert_id']}'";
+				pupe_query($update);							
 			}
 
 			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikan_tunnus}'";
@@ -1511,11 +1516,16 @@
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' ,
-							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
+
+				$update = "	UPDATE asn_sanomat SET
+							toim_tuoteno = '{$pointteri['tuoteno']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$pointteri['insert_id']}'";
+				pupe_query($update);							
 			}
 
 			foreach ($ostoilla as $pointteri) {
@@ -1560,11 +1570,16 @@
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}',
-							tuoteno = '{$pointteri['tuoteno']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
+
+				$update = "	UPDATE asn_sanomat SET
+							toim_tuoteno = '{$pointteri['tuoteno']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$pointteri['insert_id']}'";
+				pupe_query($update);							
 			}
 
 			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";

@@ -1385,7 +1385,7 @@
 				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
 
 					$update = "	UPDATE tilausrivi SET 
-								hinta = {$pointteri['lisakulu']} / varattu, 
+								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,

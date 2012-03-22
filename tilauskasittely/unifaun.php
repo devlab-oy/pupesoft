@@ -411,7 +411,10 @@ class Unifaun {
 				$uni_shi_val->addAttribute('n', "freetext1");
 
 				# kollilaji
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($this->postirow['kollilaji'], 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+
+				$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro'];
+
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($kollilaji, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext2");
 
 				if (strlen($this->postirow["ohjausmerkki"]) > 30) {

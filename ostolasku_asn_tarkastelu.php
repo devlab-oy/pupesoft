@@ -194,12 +194,17 @@
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 
+			$hintaero = round($row['keikkarivinhinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
+			$rivihintaero = round(($row['keikkarivinhinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']);
+
+			if ($hintaero == 0 and $rivihintaero == 0) continue;
+
 			$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 			$pdf->draw_text(200, $kala, $rivirow['kpl'], $thispage, $norm);
 			$pdf->draw_text(260, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 			$pdf->draw_text(340, $kala, round($rivirow['hinta'] * $rivirow['kpl'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
-			$pdf->draw_text(425, $kala, round($row['keikkarivinhinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']), $thispage, $norm);
-			$pdf->draw_text(500, $kala, round(($row['keikkarivinhinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']), $thispage, $norm);
+			$pdf->draw_text(425, $kala, $hintaero, $thispage, $norm);
+			$pdf->draw_text(500, $kala, $rivihintaero, $thispage, $norm);
 
 			$kala -= $rivinkorkeus;
 

@@ -1030,6 +1030,8 @@
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
 
+			echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
+
 			$query = "	SELECT kurssi
 						FROM valuu
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1114,6 +1116,9 @@
 			require("tilauskasittely/kululaskut.inc");
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
+
+			echo "Debug: kululaskut haara, count(keikoilla) > 0 and virheet == 0<br><br>";
+
 			// jos tullaan tähän kohtaan niin kappalemäärät täsmää. On jo tarkistettu rivillä 166
 			// muutetaan hinta ja rivi on ok.
 			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus']);
@@ -1176,6 +1181,8 @@
 
 			if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
 
+				echo "Debug: status x haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
+
 				$upd_chk = true;
 
 				foreach ($ostoilla as $osto_loop) {
@@ -1198,7 +1205,9 @@
 					$chk_res = pupe_query($query);
 				}
 			}
-			elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
+			elseif (count($keikoilla) > 0 and $virheet == 0) {
+
+				echo "Debug: status x haara, count(keikoilla) > 0 and virheet == 0<br><br>";
 
 				$upd_chk = true;
 

@@ -78,13 +78,13 @@ else {
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
 		$ftpfile_tmp = $filenimi.".TMP";
 
-		// Kokeillaan aktiivista siirtoa
-		ftp_pasv($conn_id, FALSE);
+		// Kokeillaan passiivista siirtoa
+		ftp_pasv($conn_id, TRUE);
 		$upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
 
-		// Kokeillaan passiivista siirtoa jos aktiivi feilaa
+		// Kokeillaan aktiivista siirtoa jos passiivi feilaa
 		if ($upload === FALSE) {
-			ftp_pasv($conn_id, TRUE);
+			ftp_pasv($conn_id, FALSE);
 			$upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
 		}
 

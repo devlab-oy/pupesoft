@@ -237,7 +237,7 @@
 					}
 					elseif (strtolower($attribute) == "charge") {
 						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {
-							$rtuoteno[$i]["runkoarvo"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
 						}
 					}
 				}

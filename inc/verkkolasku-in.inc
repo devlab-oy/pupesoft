@@ -1382,6 +1382,7 @@
 											toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}',
 											kappalemaara = '{$rtuoteno[$i]['kpl']}',
 											hinta = '{$rtuoteno[$i]['hinta']}',
+											lisakulu = '{$rtuoteno[$i]['lisakulu']}',
 											tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
 											laatija = 'crond',
 											luontiaika = now()";

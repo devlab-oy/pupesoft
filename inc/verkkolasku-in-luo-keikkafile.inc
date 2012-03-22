@@ -522,6 +522,7 @@
 						$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 						$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
 						$ostoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$ostoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
 					}
 					else {
 						// löytyi, on jo keikalla
@@ -531,6 +532,7 @@
 						$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 						$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
 						$keikoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$keikoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
 					}
 				}
 				elseif ($rtuoteno[$i]["kpl"] < $tilausrivirow["varattu"]) {
@@ -668,6 +670,7 @@
 						$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 						$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
 						$ostoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$ostoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
 					}
 					else {
 						// löytyi, on jo keikalla
@@ -677,6 +680,7 @@
 						$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 						$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
 						$keikoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$keikoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
 					}
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
@@ -1228,6 +1232,7 @@
 							$ostoilla[$indx]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 							$ostoilla[$indx]["insert_id"] = $rtuoteno[$i]["insert_id"];
 							$ostoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+							$ostoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
 						}
 						else {
 							$indx = count($keikoilla);
@@ -1239,7 +1244,8 @@
 							$keikoilla[$indx]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 							$keikoilla[$indx]["insert_id"] = $rtuoteno[$i]["insert_id"];
 							$keikoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						}
+							$keikoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+					}
 					}
 				}
 			}
@@ -1396,9 +1402,17 @@
 					pupe_query($update);
 				}
 
+				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
+					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
+				}
+				else {
+					$kululisa = "";
+				}
+
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
-							uusiotunnus = '{$keikan_tunnus}' 
+							uusiotunnus = '{$keikan_tunnus}'
+							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
@@ -1426,7 +1440,7 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$query = "SELECT hinta, otunnus, perheid FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
@@ -1439,13 +1453,39 @@
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
+				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+
+					$update = "	UPDATE tilausrivi SET 
+								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
+								ale1 = 0,
+								ale2 = 0,
+								ale3 = 0,
+								uusiotunnus = '{$keikan_tunnus}' 
+								WHERE yhtio = '{$kukarow['yhtio']}' 
+								AND perheid = '{$hinta_chk_row['perheid']}'
+								AND tunnus != '{$hinta_chk_row['perheid']}'";
+					pupe_query($update);
+				}
+
+				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
+					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
+				}
+				else {
+					$kululisa = "";
+				}
+
+				$update = "	UPDATE tilausrivi SET 
+							hinta = '{$pointteri['hinta']}', 
+							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
+							{$kululisa}
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
 			}
 
 			foreach ($ostoilla as $pointteri) {
 
-				$query = "SELECT hinta, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$query = "SELECT hinta, otunnus, perheid FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
@@ -1458,7 +1498,33 @@
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				$update = "UPDATE tilausrivi set hinta = '{$pointteri['hinta']}', uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$pointteri['tunnus']}'";
+				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+
+					$update = "	UPDATE tilausrivi SET 
+								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
+								ale1 = 0,
+								ale2 = 0,
+								ale3 = 0,
+								uusiotunnus = '{$keikan_tunnus}' 
+								WHERE yhtio = '{$kukarow['yhtio']}' 
+								AND perheid = '{$hinta_chk_row['perheid']}'
+								AND tunnus != '{$hinta_chk_row['perheid']}'";
+					pupe_query($update);
+				}
+
+				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
+					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
+				}
+				else {
+					$kululisa = "";
+				}
+
+				$update = "	UPDATE tilausrivi SET
+							hinta = '{$pointteri['hinta']}', 
+							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
+							{$kululisa}
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
 			}
 

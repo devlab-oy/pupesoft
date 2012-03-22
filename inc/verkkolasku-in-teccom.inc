@@ -239,6 +239,10 @@
 						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {
 							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
 						}
+						else {
+							if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
+							$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+						}
 					}
 				}
 

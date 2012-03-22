@@ -231,9 +231,47 @@
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
 					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
-					
-					if (strtoupper($attribute) == "ALLOW") {
-						
+
+					if (strtolower($attribute) == "allow") {
+						if (!isset($rtuoteno[$i]['ale1'])) {
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
+							}
+							else {
+								$rtuoteno[$i]['ale1'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
+							}
+						}
+						elseif (!isset($rtuoteno[$i]['ale2'])) {
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
+							}
+							else {
+								$rtuoteno[$i]['ale2'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
+							}
+						}
+						else {
+
+							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								// 100-(1-50/100)*(1-50/100)*100
+								if (isset($rtuoteno[$i]['ale3'])) {
+									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - $tuotetieto->AllowOrCharge->Percent / 100) * 100, 2);
+									}
+								else {
+									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
+								}
+							}
+							else {
+								// 100-(1-50/100)*(1-50/100)*100
+								if (isset($rtuoteno[$i]['ale3'])) {
+									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100) * 100, 2);
+								}
+								else {
+									$rtuoteno[$i]['ale3'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['hinta'] * 100, 2);
+								}
+							}
+						}
 					}
 					elseif (strtolower($attribute) == "charge") {
 						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {

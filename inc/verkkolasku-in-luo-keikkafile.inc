@@ -1092,7 +1092,8 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
@@ -1113,12 +1114,6 @@
  			$otunnus = $keikan_tunnus;
 
 			require("tilauskasittely/kululaskut.inc");
-
-			$query = "	UPDATE asn_sanomat SET
-						status = 'X'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tilausnumero = '{$laskun_numero}'";
-			$chk_res = pupe_query($query);
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
 
@@ -1136,7 +1131,8 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
@@ -1154,7 +1150,8 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
@@ -1175,12 +1172,6 @@
  			$otunnus = $keikoilla[0]['uusiotunnus'];
 
 			require("tilauskasittely/kululaskut.inc");
-
-			$query = "	UPDATE asn_sanomat SET
-						status = 'X'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tilausnumero = '{$laskun_numero}'";
-			$chk_res = pupe_query($query);					
 		}
 		else {
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";

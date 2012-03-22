@@ -90,12 +90,22 @@ else {
 
 		// Otetaan .TMP pääte veks ku siirto on valmis
 		if ($upload === TRUE) {
-			$rename1 = ftp_raw($conn_id, "rename {$ftppath}{$ftpfile_tmp} {$ftppath}{$filenimi}");
+			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
+            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+
+			if (stripos($rename[0], "command successful") === FALSE) {
+				$rename1 = FALSE;
+			}
 		}
 
 		// Pitääkö faili vielä nimetä kokonana uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			$rename2 = ftp_raw($conn_id, "rename {$ftppath}{$filenimi} {$ftppath}{$renameftpfile}");
+			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
+            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+
+			if (stripos($rename[0], "command successful") === FALSE) {
+				$rename2 = FALSE;
+			}
 		}
 
 		// Kokeillaan ncftp-ohjelmalla, uudelleenimeäminen ei onnaa joten laitetaan suoraan lopullisella nimellä

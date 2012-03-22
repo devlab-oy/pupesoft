@@ -1025,7 +1025,6 @@
 
 	// Jos kyseessä on TecCom oastolasku
 	if ($osrow["ebid"] == "TECCOM-INVOICE") {
-		$update_asn_chk = true;
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
@@ -1114,6 +1113,12 @@
  			$otunnus = $keikan_tunnus;
 
 			require("tilauskasittely/kululaskut.inc");
+
+			$query = "	UPDATE asn_sanomat SET
+						status = 'X'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tilausnumero = '{$laskun_numero}'";
+			$chk_res = pupe_query($query);
 		}
 		elseif (count($keikoilla) > 0 and $virheet == 0) {
 
@@ -1171,66 +1176,14 @@
 
 			require("tilauskasittely/kululaskut.inc");
 
+			$query = "	UPDATE asn_sanomat SET
+						status = 'X'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tilausnumero = '{$laskun_numero}'";
+			$chk_res = pupe_query($query);					
 		}
 		else {
 			echo "Laskulla oli virheitä, emme tehneet mitään.\n";
-			$update_asn_chk = false;
-		}
-
-		if ($update_asn_chk) {
-
-			if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
-
-				echo "Debug: status x haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
-
-				$upd_chk = true;
-
-				foreach ($ostoilla as $osto_loop) {
-					$query = "	SELECT tilausrivi
-								FROM asn_sanomat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tilausnumero = '{$laskun_numero}'
-								AND tilausrivinpositio = '{$osto_loop['tilaajanrivinro']}'";
-					$chk_res = pupe_query($query);
-					$chk_row = mysql_fetch_assoc($chk_res);
-
-					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
-				}
-
-				if ($upd_chk) {
-					$query = "	UPDATE asn_sanomat SET
-								status = 'X'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tilausnumero = '{$laskun_numero}'";
-					$chk_res = pupe_query($query);
-				}
-			}
-			elseif (count($keikoilla) > 0 and $virheet == 0) {
-
-				echo "Debug: status x haara, count(keikoilla) > 0 and virheet == 0<br><br>";
-
-				$upd_chk = true;
-
-				foreach ($keikoilla as $keikka_loop) {
-					$query = "	SELECT tilausrivi
-								FROM asn_sanomat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tilausnumero = '{$laskun_numero}'
-								AND tilausrivinpositio = '{$keikka_loop['tilaajanrivinro']}'";
-					$chk_res = pupe_query($query);
-					$chk_row = mysql_fetch_assoc($chk_res);
-
-					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
-				}
-
-				if ($upd_chk) {
-					$query = "	UPDATE asn_sanomat SET
-								status = 'X'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tilausnumero = '{$laskun_numero}'";
-					$chk_res = pupe_query($query);					
-				}
-			}
 		}
 	}
 

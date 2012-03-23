@@ -242,7 +242,7 @@ find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
 # Synkataan backuppi Amazon S3:een
 if [ ! -z "${S3BUCKET}" ]; then
 	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
-	echo -n `date "+%Y-%m-%d @ %H:%M:%S"`
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 	echo ": S3 copy done."		
 fi
 

@@ -14218,7 +14218,6 @@ if (!function_exists("tee_keraysera")) {
 					WHERE keraysvyohyke.yhtio = '{$kukarow['yhtio']}'
 					AND keraysvyohyke.tunnus = '{$keraysvyohyke}'";
 		$ker_result = pupe_query($query);
-
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
 		$kukarow['max_keraysera_alustat'] = (int) $kukarow['max_keraysera_alustat'] != 0 ? (int) $kukarow['max_keraysera_alustat'] : 9999999;
@@ -14690,7 +14689,7 @@ if (!function_exists("tee_keraysera")) {
 		$eran_paino = 0;
 		$era_valmis = false;
 
-		$erat = array('tilaukset' => array(), 'pakkaukset' => array());
+		$erat = array('tilaukset' => array(), 'pakkaukset' => array(), 'keraysvyohyketiedot' => $keraysvyohyketiedot);
 
 		if ($debug) {
 			enable_ajax();

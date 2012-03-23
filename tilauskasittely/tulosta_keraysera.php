@@ -106,7 +106,7 @@
 				$max_perhe_res = pupe_query($query);
 				$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
 
-				$query = "	INSERT INTO avainsana SET 
+				$query = "	INSERT INTO avainsana SET
 							yhtio = '{$kukarow['yhtio']}',
 							perhe = '{$max_perhe_row['perhe']}',
 							kieli = '{$kukarow['kieli']}',
@@ -162,20 +162,20 @@
 	if ($tee == 'muuta') {
 		if (trim($kayttaja) != '') {
 			list($nro, $kayttaja) = explode('##', $kayttaja);
-	
+
 			$query = "UPDATE kerayserat SET laatija = '{$kayttaja}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}'";
 			$update_res = pupe_query($query);
 		}
-	
+
 		if (count($pakkaukset) > 0) {
 
 			foreach ($pakkaukset as $pak_nro => $pak) {
 				list($rivitunnus, $pak_nro) = explode('##', $pak_nro);
 				list($rivitunnus, $pakkaus) = explode('##', $pak);
 
-				$query = "	UPDATE kerayserat SET 
-							pakkaus = '{$pakkaus}' 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+				$query = "	UPDATE kerayserat SET
+							pakkaus = '{$pakkaus}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND pakkausnro = '{$pak_nro}'";
 				$update_res = pupe_query($query);
 
@@ -205,10 +205,10 @@
 						}
 						else {
 							// katsotaan onko nollarivej‰ (eli tyhj‰ pakkaus)
-							$query = "	SELECT * 
-										FROM kerayserat 
-										WHERE yhtio = '{$kukarow['yhtio']}' 
-										AND nro = '{$kpl_chk_row['nro']}' 
+							$query = "	SELECT *
+										FROM kerayserat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND nro = '{$kpl_chk_row['nro']}'
 										AND pakkausnro = '{$mihin_siirretaan}'";
 							$chk_res = pupe_query($query);
 							$chk_row = mysql_fetch_assoc($chk_res);
@@ -330,7 +330,7 @@
 					);
 
 					tulosta_reittietiketti($params);
-					
+
 					if (trim($komento['reittietiketti']) != '') {
 						echo t("Reittietiketti tulostuu"),"...<br />";
 					}
@@ -467,158 +467,88 @@
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
 				echo "<div id='content'></div>";
 
-				// $locktables = array(
-				// 		'lasku', 
-				// 		'lasku1', 
-				// 		'lasku2', 
-				// 		'laskun_lisatiedot', 
-				// 		'asiakas1', 
-				// 		'asiakas2', 
-				// 		'tilausrivi', 
-				// 		'tilausrivi1', 
-				// 		'tilausrivi2', 
-				// 		'tilausrivin_lisatiedot', 
-				// 		'vh',
-				// 		'vh1', 
-				// 		'vh2', 
-				// 		'tuote',
-				// 		'tuote1', 
-				// 		'tuote2',
-				// 		'keraysvyohyke1', 
-				// 		'keraysvyohyke2',
-				// 		'toimitustapa1', 
-				// 		'toimitustapa2', 
-				// 		'lahdot1',
-				// 		'lahdot2',
-				// 		'tuoteperhe',
-				// 		'kerayserat',
-				// 		'tuotteen_toimittajat',
-				// 		'pakkaus',
-				// 		'avainsana',
-				// 		'keraysvyohyke',
-				// 		'asiakas',
-				// 		'liitetiedostot', 
-				// 		't2', 
-				// 		'tlt2', 
-				// 		'tilausrivi_osto', 
-				// 		'tilausrivi_myynti', 
-				// 		'sarjanumeroseuranta', 
-				// 		't3', 
-				// 		'sanakirja', 
-				// 		'a', 
-				// 		'b', 
-				// 		'varaston_tulostimet', 
-				// 		'tuotepaikat', 
-				// 		'maksuehto', 
-				// 		'varastopaikat', 
-				// 		'kirjoittimet', 
-				// 		'kuka', 
-				// 		'asiakaskommentti', 
-				// 		'tuotteen_avainsanat', 
-				// 		'pankkiyhteystiedot', 
-				// 		'toimitustapa', 
-				// 		'yhtion_toimipaikat', 
-				// 		'yhtion_parametrit', 
-				// 		'tuotteen_alv', 
-				// 		'maat', 
-				// 		'rahtisopimukset', 
-				// 		'rahtisopimukset2', 
-				// 		'pakkaamo', 
-				// 		'avainsana_kieli', 
-				// 		'vanha_lasku', 
-				// 		'vanha_varaston_tulostimet', 
-				// 		'yhtio'
-				// 	);
-
-				// $lukotetaan = check_lock_tables($locktables);
-
-				// if ($lukotetaan) {
 					// lukitaan tableja
-					$query = "	LOCK TABLES lasku WRITE, 
-								lasku AS lasku1 WRITE, 
-								lasku AS lasku2 WRITE, 
-								laskun_lisatiedot WRITE, 
-								asiakas AS asiakas1 READ, 
-								asiakas AS asiakas2 READ, 
-								tilausrivi WRITE, 
-								tilausrivi AS tilausrivi1 READ, 
-								tilausrivi AS tilausrivi2 READ, 
-								tilausrivin_lisatiedot WRITE, 
-								tilausrivin_lisatiedot AS tilrivlis1 READ,
-								tilausrivin_lisatiedot AS tilrivlis2 READ,
-								messenger WRITE,
-								varaston_hyllypaikat AS vh READ,
-								varaston_hyllypaikat AS vh1 READ, 
-								varaston_hyllypaikat AS vh2 READ, 
-								tuote READ,
-								tuote AS tuote1 READ, 
-								tuote AS tuote2 READ,
-								keraysvyohyke AS keraysvyohyke1 READ, 
-								keraysvyohyke AS keraysvyohyke2 READ,
-								toimitustapa AS toimitustapa1 READ, 
-								toimitustapa AS toimitustapa2 READ, 
-								lahdot READ,
-								lahdot AS lahdot1 WRITE,
-								lahdot AS lahdot2 WRITE,
-								tuoteperhe READ,
-								kerayserat WRITE,
-								tuotteen_toimittajat READ,
-								pakkaus READ,
-								avainsana WRITE,
-								keraysvyohyke READ,
-								asiakas READ,
-								liitetiedostot READ, 
-								tilausrivi AS t2 READ, 
-								tilausrivin_lisatiedot AS tlt2 READ, 
-								tilausrivi AS tilausrivi_osto READ, 
-								tilausrivi AS tilausrivi_myynti READ, 
-								sarjanumeroseuranta READ, 
-								tilausrivi AS t3 READ, 
-								sanakirja WRITE, 
-								avainsana as a READ, 
-								avainsana as b READ, 
-								varaston_tulostimet READ, 
-								tuotepaikat READ, 
-								maksuehto READ, 
-								varastopaikat READ, 
-								kirjoittimet READ, 
-								kuka WRITE, 
-								asiakaskommentti READ, 
-								tuotteen_avainsanat READ, 
-								pankkiyhteystiedot READ, 
-								toimitustapa READ, 
-								yhtion_toimipaikat READ, 
-								yhtion_parametrit READ, 
-								tuotteen_alv READ, 
-								maat READ, 
-								rahtisopimukset READ, 
-								rahtisopimukset AS rahtisopimukset2 READ, 
-								pakkaamo WRITE, 
-								avainsana as avainsana_kieli READ, 
-								lasku as vanha_lasku READ, 
-								varaston_tulostimet as vanha_varaston_tulostimet READ, 
-								yhtio READ";
-					$result = pupe_query($query);
-				// }
+				$query = "	LOCK TABLES lasku WRITE,
+							lasku AS lasku1 WRITE,
+							lasku AS lasku2 WRITE,
+							laskun_lisatiedot WRITE,
+							asiakas AS asiakas1 READ,
+							asiakas AS asiakas2 READ,
+							tilausrivi WRITE,
+							tilausrivi AS tilausrivi1 READ,
+							tilausrivi AS tilausrivi2 READ,
+							tilausrivin_lisatiedot WRITE,
+							tilausrivin_lisatiedot AS tilrivlis1 READ,
+							tilausrivin_lisatiedot AS tilrivlis2 READ,
+							messenger WRITE,
+							varaston_hyllypaikat AS vh READ,
+							varaston_hyllypaikat AS vh1 READ,
+							varaston_hyllypaikat AS vh2 READ,
+							tuote READ,
+							tuote AS tuote1 READ,
+							tuote AS tuote2 READ,
+							keraysvyohyke AS keraysvyohyke1 READ,
+							keraysvyohyke AS keraysvyohyke2 READ,
+							toimitustapa AS toimitustapa1 READ,
+							toimitustapa AS toimitustapa2 READ,
+							lahdot READ,
+							lahdot AS lahdot1 WRITE,
+							lahdot AS lahdot2 WRITE,
+							tuoteperhe READ,
+							kerayserat WRITE,
+							tuotteen_toimittajat READ,
+							pakkaus READ,
+							avainsana WRITE,
+							keraysvyohyke READ,
+							asiakas READ,
+							liitetiedostot READ,
+							tilausrivi AS t2 READ,
+							tilausrivin_lisatiedot AS tlt2 READ,
+							tilausrivi AS tilausrivi_osto READ,
+							tilausrivi AS tilausrivi_myynti READ,
+							sarjanumeroseuranta READ,
+							tilausrivi AS t3 READ,
+							sanakirja WRITE,
+							avainsana as a READ,
+							avainsana as b READ,
+							varaston_tulostimet READ,
+							tuotepaikat READ,
+							maksuehto READ,
+							varastopaikat READ,
+							kirjoittimet READ,
+							kuka WRITE,
+							asiakaskommentti READ,
+							tuotteen_avainsanat READ,
+							pankkiyhteystiedot READ,
+							toimitustapa READ,
+							yhtion_toimipaikat READ,
+							yhtion_parametrit READ,
+							tuotteen_alv READ,
+							maat READ,
+							rahtisopimukset READ,
+							rahtisopimukset AS rahtisopimukset2 READ,
+							pakkaamo WRITE,
+							avainsana as avainsana_kieli READ,
+							lasku as vanha_lasku READ,
+							varaston_tulostimet as vanha_varaston_tulostimet READ,
+							yhtio READ";
+				$result = pupe_query($query);
 
 				$debug = true;
-
 				$lukotetaan = false;
 
-				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
+				$erat = tee_keraysera($keraysvyohyke, $select_varasto);
 
-				if (count($erat['tilaukset']) != 0) {
+				if (count($erat['tilaukset']) > 0) {
 
 					$otunnukset = implode(",", $erat['tilaukset']);
-
-					require('inc/tulosta_reittietiketti.inc');
 
 					$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ($otunnukset)";
 					$res = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($res);
 
-					$tilausnumeroita = $otunnukset;
-					$valittu_tulostin = $komento['kerayslista'];
+					$tilausnumeroita  	  = $otunnukset;
+					$valittu_tulostin 	  = $komento['kerayslista'];
 					$tullaan_kerayserasta = 'joo';
 
 					$laskuja = count($erat['tilaukset']);
@@ -632,6 +562,11 @@
 				// lukitaan tableja
 		 		$query = "UNLOCK TABLES";
 				$result = pupe_query($query);
+
+				if (count($erat['tilaukset']) > 0) {
+					// Tulostetaan kollilappu
+					require('inc/tulosta_reittietiketti.inc');
+				}
 			}
 
 			echo "<br /><br />";
@@ -860,13 +795,13 @@
 						echo "</tr>";
 
 						if ($tee == 'muokkaa') {
-							$query = "	SELECT kerayserat.pakkaus, 
-										kerayserat.tunnus AS rivitunnus, 
-										kerayserat.pakkausnro, 
-										tilausrivi.tuoteno, 
-										TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, 
-										kerayserat.kpl, 
-										lasku.liitostunnus, 
+							$query = "	SELECT kerayserat.pakkaus,
+										kerayserat.tunnus AS rivitunnus,
+										kerayserat.pakkausnro,
+										tilausrivi.tuoteno,
+										TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi,
+										kerayserat.kpl,
+										lasku.liitostunnus,
 										CONCAT(hyllyalue, ' ', hyllynro, ' ', hyllyvali, ' ', hyllytaso) hyllypaikka,
 										tilausrivi.tunnus AS tilausrivin_tunnus
 							 			FROM kerayserat
@@ -909,7 +844,7 @@
 									echo "<td>{$content_row['asiakasnimi']}</td>";
 									echo "<td>";
 
-									$query = "	SELECT DISTINCT kerayserat.pakkausnro 
+									$query = "	SELECT DISTINCT kerayserat.pakkausnro
 												FROM kerayserat
 												LEFT JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 												WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'

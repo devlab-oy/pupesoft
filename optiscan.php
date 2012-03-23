@@ -271,26 +271,26 @@
 			$row = mysql_fetch_assoc($result);
 
 			// $locktables = array(
-			// 		'lasku', 
-			// 		'lasku1', 
-			// 		'lasku2', 
-			// 		'laskun_lisatiedot', 
-			// 		'asiakas1', 
-			// 		'asiakas2', 
-			// 		'tilausrivi', 
-			// 		'tilausrivi1', 
-			// 		'tilausrivi2', 
-			// 		'tilausrivin_lisatiedot', 
+			// 		'lasku',
+			// 		'lasku1',
+			// 		'lasku2',
+			// 		'laskun_lisatiedot',
+			// 		'asiakas1',
+			// 		'asiakas2',
+			// 		'tilausrivi',
+			// 		'tilausrivi1',
+			// 		'tilausrivi2',
+			// 		'tilausrivin_lisatiedot',
 			// 		'vh',
-			// 		'vh1', 
-			// 		'vh2', 
+			// 		'vh1',
+			// 		'vh2',
 			// 		'tuote',
-			// 		'tuote1', 
+			// 		'tuote1',
 			// 		'tuote2',
-			// 		'keraysvyohyke1', 
+			// 		'keraysvyohyke1',
 			// 		'keraysvyohyke2',
-			// 		'toimitustapa1', 
-			// 		'toimitustapa2', 
+			// 		'toimitustapa1',
+			// 		'toimitustapa2',
 			// 		'lahdot1',
 			// 		'lahdot2',
 			// 		'tuoteperhe',
@@ -300,36 +300,36 @@
 			// 		'avainsana',
 			// 		'keraysvyohyke',
 			// 		'asiakas',
-			// 		'liitetiedostot', 
-			// 		't2', 
-			// 		'tlt2', 
-			// 		'tilausrivi_osto', 
-			// 		'tilausrivi_myynti', 
-			// 		'sarjanumeroseuranta', 
-			// 		't3', 
-			// 		'sanakirja', 
-			// 		'a', 
-			// 		'b', 
-			// 		'varaston_tulostimet', 
-			// 		'tuotepaikat', 
-			// 		'maksuehto', 
-			// 		'varastopaikat', 
-			// 		'kirjoittimet', 
-			// 		'kuka', 
-			// 		'asiakaskommentti', 
-			// 		'tuotteen_avainsanat', 
-			// 		'pankkiyhteystiedot', 
-			// 		'toimitustapa', 
-			// 		'yhtion_toimipaikat', 
-			// 		'yhtion_parametrit', 
-			// 		'tuotteen_alv', 
-			// 		'maat', 
-			// 		'rahtisopimukset', 
-			// 		'rahtisopimukset2', 
-			// 		'pakkaamo', 
-			// 		'avainsana_kieli', 
-			// 		'vanha_lasku', 
-			// 		'vanha_varaston_tulostimet', 
+			// 		'liitetiedostot',
+			// 		't2',
+			// 		'tlt2',
+			// 		'tilausrivi_osto',
+			// 		'tilausrivi_myynti',
+			// 		'sarjanumeroseuranta',
+			// 		't3',
+			// 		'sanakirja',
+			// 		'a',
+			// 		'b',
+			// 		'varaston_tulostimet',
+			// 		'tuotepaikat',
+			// 		'maksuehto',
+			// 		'varastopaikat',
+			// 		'kirjoittimet',
+			// 		'kuka',
+			// 		'asiakaskommentti',
+			// 		'tuotteen_avainsanat',
+			// 		'pankkiyhteystiedot',
+			// 		'toimitustapa',
+			// 		'yhtion_toimipaikat',
+			// 		'yhtion_parametrit',
+			// 		'tuotteen_alv',
+			// 		'maat',
+			// 		'rahtisopimukset',
+			// 		'rahtisopimukset2',
+			// 		'pakkaamo',
+			// 		'avainsana_kieli',
+			// 		'vanha_lasku',
+			// 		'vanha_varaston_tulostimet',
 			// 		'yhtio'
 			// 	);
 
@@ -337,29 +337,29 @@
 
 			// if ($lukotetaan) {
 				// lukitaan tableja
-				$query = "	LOCK TABLES lasku WRITE, 
-							lasku AS lasku1 WRITE, 
-							lasku AS lasku2 WRITE, 
-							laskun_lisatiedot WRITE, 
-							asiakas AS asiakas1 READ, 
-							asiakas AS asiakas2 READ, 
-							tilausrivi WRITE, 
-							tilausrivi AS tilausrivi1 READ, 
-							tilausrivi AS tilausrivi2 READ, 
-							tilausrivin_lisatiedot WRITE, 
+				$query = "	LOCK TABLES lasku WRITE,
+							lasku AS lasku1 WRITE,
+							lasku AS lasku2 WRITE,
+							laskun_lisatiedot WRITE,
+							asiakas AS asiakas1 READ,
+							asiakas AS asiakas2 READ,
+							tilausrivi WRITE,
+							tilausrivi AS tilausrivi1 READ,
+							tilausrivi AS tilausrivi2 READ,
+							tilausrivin_lisatiedot WRITE,
 							tilausrivin_lisatiedot AS tilrivlis1 READ,
 							tilausrivin_lisatiedot AS tilrivlis2 READ,
 							messenger WRITE,
 							varaston_hyllypaikat AS vh READ,
-							varaston_hyllypaikat AS vh1 READ, 
-							varaston_hyllypaikat AS vh2 READ, 
+							varaston_hyllypaikat AS vh1 READ,
+							varaston_hyllypaikat AS vh2 READ,
 							tuote READ,
-							tuote AS tuote1 READ, 
+							tuote AS tuote1 READ,
 							tuote AS tuote2 READ,
-							keraysvyohyke AS keraysvyohyke1 READ, 
+							keraysvyohyke AS keraysvyohyke1 READ,
 							keraysvyohyke AS keraysvyohyke2 READ,
-							toimitustapa AS toimitustapa1 READ, 
-							toimitustapa AS toimitustapa2 READ, 
+							toimitustapa AS toimitustapa1 READ,
+							toimitustapa AS toimitustapa2 READ,
 							lahdot READ,
 							lahdot AS lahdot1 WRITE,
 							lahdot AS lahdot2 WRITE,
@@ -370,43 +370,43 @@
 							avainsana WRITE,
 							keraysvyohyke READ,
 							asiakas READ,
-							liitetiedostot READ, 
-							tilausrivi AS t2 READ, 
-							tilausrivin_lisatiedot AS tlt2 READ, 
-							tilausrivi AS tilausrivi_osto READ, 
-							tilausrivi AS tilausrivi_myynti READ, 
-							sarjanumeroseuranta READ, 
-							tilausrivi AS t3 READ, 
-							sanakirja WRITE, 
-							avainsana as a READ, 
-							avainsana as b READ, 
-							varaston_tulostimet READ, 
-							tuotepaikat READ, 
-							maksuehto READ, 
-							varastopaikat READ, 
-							kirjoittimet READ, 
-							kuka WRITE, 
-							asiakaskommentti READ, 
-							tuotteen_avainsanat READ, 
-							pankkiyhteystiedot READ, 
-							toimitustapa READ, 
-							yhtion_toimipaikat READ, 
-							yhtion_parametrit READ, 
-							tuotteen_alv READ, 
-							maat READ, 
-							rahtisopimukset READ, 
-							rahtisopimukset AS rahtisopimukset2 READ, 
-							pakkaamo WRITE, 
-							avainsana as avainsana_kieli READ, 
-							lasku as vanha_lasku READ, 
-							varaston_tulostimet as vanha_varaston_tulostimet READ, 
+							liitetiedostot READ,
+							tilausrivi AS t2 READ,
+							tilausrivin_lisatiedot AS tlt2 READ,
+							tilausrivi AS tilausrivi_osto READ,
+							tilausrivi AS tilausrivi_myynti READ,
+							sarjanumeroseuranta READ,
+							tilausrivi AS t3 READ,
+							sanakirja WRITE,
+							avainsana as a READ,
+							avainsana as b READ,
+							varaston_tulostimet READ,
+							tuotepaikat READ,
+							maksuehto READ,
+							varastopaikat READ,
+							kirjoittimet READ,
+							kuka WRITE,
+							asiakaskommentti READ,
+							tuotteen_avainsanat READ,
+							pankkiyhteystiedot READ,
+							toimitustapa READ,
+							yhtion_toimipaikat READ,
+							yhtion_parametrit READ,
+							tuotteen_alv READ,
+							maat READ,
+							rahtisopimukset READ,
+							rahtisopimukset AS rahtisopimukset2 READ,
+							pakkaamo WRITE,
+							avainsana as avainsana_kieli READ,
+							lasku as vanha_lasku READ,
+							varaston_tulostimet as vanha_varaston_tulostimet READ,
 							yhtio READ";
 				$result = pupe_query($query);
 			// }
 
 			$lukotetaan = false;
 
-			$erat = tee_keraysera2($row['keraysvyohyke'], $row['oletus_varasto'], false);
+			$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto'], false);
 
 			if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 				$otunnukset = implode(",", $erat['tilaukset']);
@@ -533,7 +533,7 @@
 		}
 		else {
 			$response .= "\r\n";
-	}
+		}
 	}
 	elseif ($sanoma == "PrintContainers") {
 
@@ -625,7 +625,7 @@
 
 				$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 							lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-							if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, 
+							if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 							asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -637,7 +637,7 @@
 
 				$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 							IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
-							kerayserat.pakkausnro, 
+							kerayserat.pakkausnro,
 							kerayserat.sscc,
 							COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 							ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
@@ -870,7 +870,7 @@
 		}
 		// ei splitata rivi‰ eli normaali rivi, $splitlineflag == 0
 		else {
-			
+
 		}
 
 		// katsotaan m‰ts‰‰v‰tkˆ kappalem‰‰r‰t. jos ei niin pit‰‰ splitata tilausrivi ja laittaa loput puutteeksi
@@ -936,7 +936,7 @@
 
 			$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ p‰ivitett‰ess‰\r\n\r\n");
-			
+
 		}
 
 		$response = "0x100";
@@ -1011,7 +1011,7 @@
 				$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
 				}
 
-			$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset, 
+			$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset,
 						ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty), 1) tuotemassa,
 						ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty), 2) as kuutiot,
 						COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
@@ -1196,7 +1196,7 @@
 		/**
 		 * Case1 (Normaali):
 		 * Kaikki edelliset rivit jotka ker‰tty A:han s‰ilyv‰t kyseisess‰ alustassa, mutta nykyinen/tulevat rivit menev‰t B:hen.
-		 * 
+		 *
 		 * Case2 (Jaa rivi):
 		 * Edelliset rivit + se m‰‰r‰ jaetusta rivist‰ ovat alustassa A. Seuraavat rivit + jaetun rivin loput menev‰t B:hen.
 		 */
@@ -1320,11 +1320,11 @@
 		/**
 		 * Case1 (Normaali):
 		 * Jos pyydet‰‰n ker‰yksen yhteydess‰ "Vaihda alusta", niin WMS palauttaa Vocollectille pakkauskirjaimen, joka on sallittu (sama asiakas) ja siirt‰‰ sinne joko kyseisen rivin tai kaikki loput ker‰yksess‰ olevat rivit.
-		 * 
+		 *
 		 * Case2 (Jaa rivi):
-		 * Ensimm‰iseen laatikkoon laitetaan 5 kpl, jonka j‰lkeen halutaan "vaihda alusta", 
-		 * niin WMS ei p‰ivit‰ A-kirjainta, vaan palauttaa Vocollectille pakkauskirjaimen, joka on sallittu (sama asiakas). 
-		 * Toisen jaetun rivin kuittauksen kohdalla p‰ivitt‰‰ uudelle ker‰ysriville pakkauskirjaimeksi aiemmin valitun pakkauskirjaimen. 
+		 * Ensimm‰iseen laatikkoon laitetaan 5 kpl, jonka j‰lkeen halutaan "vaihda alusta",
+		 * niin WMS ei p‰ivit‰ A-kirjainta, vaan palauttaa Vocollectille pakkauskirjaimen, joka on sallittu (sama asiakas).
+		 * Toisen jaetun rivin kuittauksen kohdalla p‰ivitt‰‰ uudelle ker‰ysriville pakkauskirjaimeksi aiemmin valitun pakkauskirjaimen.
 		 * Ei tulosteta SSCC-koodia.
 		 */
 

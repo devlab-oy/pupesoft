@@ -381,7 +381,6 @@
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu asc";
 						$loysa_result = pupe_query($query);
-						query_dump($query);
 						
 						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
 							if ($kohdistamatta <= 0) break;

@@ -130,10 +130,10 @@
 					
 				}
 				elseif ($tavarantoimittajanumero == "123007") {
-					$laatikko = (string) $element->PkgInfo->PacketKind;
-					$laatikko = utf8_decode($laatikko);	
-					$parameters["laatikkoind"]	= $laatikko;
-					$parameters["sscc"]			= $laatikko;
+					// emme luekkaan tämän toimittajan PacketKind-arvoa, vaan generoidaan tietyistä arvoista.
+					$laatikko = (int) $element->PkgNumber;
+					$parameters["laatikkoind"]	= $asn_numero.$laatikko;
+					$parameters["sscc"]			= $asn_numero.$laatikko;
 				}
 				elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
 					$parameters["laatikkoind"]	= $asn_numero;

@@ -101,6 +101,8 @@ if [ ! -z "${SALAUSAVAIN}" ]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
 	else
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"		
 		echo -n `date "+%Y-%m-%d %H:%M:%S"`
 		echo " - Encrypt done."
 	fi
@@ -191,6 +193,8 @@ if [ ! -z "${SALAUSAVAIN}" ]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
 	else
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
 		echo -n `date "+%Y-%m-%d %H:%M:%S"`
 		echo " - Encrypt done."
 	fi

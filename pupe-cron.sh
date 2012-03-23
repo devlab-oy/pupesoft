@@ -17,8 +17,8 @@ fi
 # Teh‰‰n pupesoftin iltasiivo
 cd ${POLKU};php iltasiivo.php $YHTIO
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - ABC Aputaulujen rakennus."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": ABC Aputaulujen rakennus."
 
 # Rakennetaan Asiakas-ABC-analyysin aputaulut
 cd ${POLKU}/raportit/; php abc_asiakas_aputaulun_rakennus.php $YHTIO rivia
@@ -33,6 +33,6 @@ cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kate
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kpl
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kulutus
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - ABC Aputaulujen rakennus. Done!"
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": ABC Aputaulujen rakennus. Done!"
 echo

@@ -1523,11 +1523,31 @@
 								// piirretään riviotsikko (koska meillä on sscc setattu)
 								$params_vak = vakadr_rivi($params);
 
+								// Käytetäänkö VAK-tietokantaa
+								if ($yhtiorow["vak_kasittely"] != "") {
+
+									if (isset($kieli) and strtolower($kieli) != "fi") {
+										$nimityskuvaus = "name_and_description";
+									}
+									else {
+										$nimityskuvaus = "nimi_ja_kuvaus";
+									}
+
+									$vakselect = " concat('UN ',vak.yk_nro,' ', vak.{$nimityskuvaus},', ', vak.lipukkeet,', ', vak.pakkausryhma) as vakkoodi,";
+									$vakjoin   = " JOIN vak ON (tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus)";
+								}
+								else {
+									$vakselect = " tuote.vakkoodi vakkoodi,";
+									$vakjoin   = "";
+								}
+								
 								// Haetaan paketille (SSCC) kaikki vakkoodit ja niiden massa (kerroin 0.95, koska koko tuotteen massa ei ole yleensä vaarallista ainetta)
-								$aliquery = "	SELECT tuote.vakkoodi,
+								$aliquery = "	SELECT {$vakselect}
 												sum(kerayserat.kpl * tuote.tuotemassa * 0.95) as massa
 												FROM tilausrivi
 												JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.sscc = {$row['sscc']})
+												JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuoteno.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
+												{$vakjoin}
 												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 												AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 												group by vakkoodi";

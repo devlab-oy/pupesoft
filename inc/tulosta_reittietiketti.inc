@@ -160,7 +160,7 @@
 			if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
 				($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
-				require("tilauskasittely/unifaun.php");
+				require("tilauskasittely/unifaun_send.php");
 
 				$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
 				$kirjoitin_res = pupe_query($query);
@@ -266,6 +266,18 @@
 					// $unifaun->_saveForDebug("shipment");
 
 					$unifaun->ftpSend();
+
+					// Haetaan vastaussanoma
+					if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $ftpget_host['unifaun_ps'] != "" and $ftpget_user['unifaun_ps'] != "" and $ftpget_pass['unifaun_ps'] != "" and $ftpget_path['unifaun_ps'] != "" and $ftpget_dest['unifaun_ps'] != '') {
+						$operaattori = "unifaun_ps";
+
+						require("unifaun_fetch.php");
+					}
+					elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $ftpget_host['unifaun_uo'] != "" and $ftpget_user['unifaun_uo'] != "" and $ftpget_pass['unifaun_uo'] != "" and $ftpget_path['unifaun_uo'] != "" and $ftpget_dest['unifaun_uo'] != '') {
+						$operaattori = "unifaun_uo";
+
+						require("unifaun_fetch.php");
+					}
 				}
 				else {
 					// HUOM: T‰m‰ viel‰‰ off line, v‰‰r‰t muuttujat $params-arrayssa!!!!

@@ -1,11 +1,11 @@
 <?php
 
-# Pupesoft -> Unifaun Online datasiirto
+# Pupesoft -> Unifaun Printserver datasiirto
 
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if (1 == 2 and $kollityht > 0) {
 
-	if ($unifaun_uo_host != "" and ($unifaun_uo_user != "" and ($unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+	if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 
 		require("tilauskasittely/unifaun.php");
 

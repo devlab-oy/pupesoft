@@ -67,7 +67,7 @@
 	$xf02loppulause = "";
 
 	$path = "/tmp/e3siirto_siirto_$yhtiorow[yhtio]/";
-
+	
 	// Sivotaan eka vanha pois
 	system("rm -rf $path");
 
@@ -338,9 +338,23 @@
 			$korvaavarows = mysql_num_rows($korvaavaresult);
 			if ($korvaavarows == 0) continue;
 			$korvaava = mysql_fetch_assoc($korvaavaresult);
-
-			$lause = "E3T001$tuto[tutotunnus] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
-			$xf02loppulause .= "$tuto[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
+			
+			$query2 = " SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
+					   	FROM tuotteen_toimittajat
+					   	JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+					   	WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+					   	AND tuotteen_toimittajat.tuoteno = '$korvaava[tuoteno]'
+					   	ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+					   	LIMIT 1";
+			$tutoq2 = mysql_query($query2) or pupe_error($query2);
+			$tuto2 = mysql_fetch_assoc($tutoq2);
+			
+			if ($tuto2['toimittaja'] == '' or $tuto2['tyyppi'] == 'P') continue;
+			
+			// eka korvatun toimittaja + tuoteno, sitten korvaavan toimittaja ja tuoteno
+			$lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
+			// laitetaan xf02 loppuun tieto mikä tuote on poistettu. toimittaja ja tuoteno
+			$xf02loppulause .= "$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
 
 			if (!fwrite($fp, $lause . "\n")) {
 				echo "Failed writing row.\n";

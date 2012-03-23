@@ -194,6 +194,10 @@
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
 
+							$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
+							$kirjoitin_res = pupe_query($query);
+							$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
+
 							$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['maksuehto']}'";
 							$mehto_res = pupe_query($query);
 							$mehto = mysql_fetch_assoc($mehto_res);
@@ -241,6 +245,8 @@
 								$unifaun->setPostiRow($row);
 								$unifaun->setToimitustapaRow($toitarow);
 								$unifaun->setMehto($mehto);
+
+								$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
 
 								$unifaun->setRahtikirjaRow($rakir_row);
 
@@ -357,9 +363,9 @@
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
-					$sel = (isset($komento['reittietiketti']) and $komento['reittietiketti'] == $kirow['komento']) ? " selected" : "";
+					$sel = (isset($komento['reittietiketti']) and $komento['reittietiketti'] == $kirow['tunnus']) ? " selected" : "";
 
-					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select>&nbsp;<input type='submit' value='",t("Siirrä"),"' />";
@@ -562,7 +568,7 @@
 							$query = "	SELECT unifaun_nimi
 										FROM kirjoittimet
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND komento = '{$komento}'";
+										AND tunnus = '{$komento}'";
 							$kires = pupe_query($query);
 							$kirow = mysql_fetch_assoc($kires);
 

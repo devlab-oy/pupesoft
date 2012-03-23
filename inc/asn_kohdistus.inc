@@ -343,10 +343,11 @@
 					$kohdistamatta = $row["kappalemaara"];
 					$lisa_array = array();
 					$split_array = array();
+					
 					// Lasketaan ensin kaikki rivit yhteen ja sen j‰lkeen katsotaan tarvitaanko lis‰rivi‰
 					$olen_apu_result = pupe_query($query);
 					while ($roll = mysql_fetch_assoc($olen_apu_result)) {
-						if ($kohdistamatta <= 0) continue;
+						if ($kohdistamatta <= 0) break;
 						$laskuri += $roll["varattu"];
 						$lisa_array[] = $roll["tunnus"];
 						$split_array[] = $roll["tunnus"];
@@ -354,6 +355,45 @@
 					}
 
 					$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
+
+					// haetaan viel‰ varmuudeksi lˆysimm‰ll‰ queryll‰ lis‰rivej‰.
+					if ($ylimaaraista > 0) {
+						  
+						// $tilausrivi_muuttuja sis‰lt‰‰ jo k‰ytetyt rivit. Otetaan lisa_array:sta extraa viel‰.
+						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $kaytetyt_tilausrivit)."','".implode("','",$lisa_array)."')";
+						
+						$query = "	SELECT tilausrivi.*
+									FROM tilausrivi
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+													AND lasku.tunnus = tilausrivi.otunnus)
+									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
+													AND toimi.tunnus = lasku.liitostunnus
+													AND toimi.toimittajanro = '$row[toimittajanumero]'
+													AND toimi.tyyppi !='P')
+									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+																	AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno})
+									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuote.status != 'P')
+									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+									AND tilausrivi.tyyppi = 'O'
+									AND tilausrivi.uusiotunnus = 0
+									{$loysan_tilausrivi_muuttuja}
+									ORDER BY laadittu asc";
+						$loysa_result = pupe_query($query);
+						query_dump($query);
+						
+						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
+							if ($kohdistamatta <= 0) break;
+							$laskuri		+= $loysatpois["varattu"];
+							$lisa_array[]	 = $loysatpois["tunnus"];
+							$split_array[]	 = $loysatpois["tunnus"];
+							$kohdistamatta 	-= $loysatpois["varattu"];
+						}
+						
+						$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
+						
+					}
 
 					if ($ylimaaraista > 0) {
 						// Tehd‰‰n uusi rivi, jossa on ylim‰‰r‰iset kappaleet

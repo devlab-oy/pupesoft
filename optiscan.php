@@ -565,7 +565,7 @@
 
 		if (trim($response) == '') {
 
-			require("tilauskasittely/unifaun.php");
+			require("tilauskasittely/unifaun_send.php");
 
 			$query = "	SELECT otunnus, sscc, sscc_ulkoinen
 						FROM kerayserat

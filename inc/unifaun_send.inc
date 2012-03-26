@@ -702,5 +702,4 @@ class Unifaun {
 			$uni_par_val->addAttribute('n', "dngnetweight");
 		}
 	}
-
 }

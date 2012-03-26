@@ -464,10 +464,10 @@
 
 			if ($tee == 'keraysera' and trim($keraysvyohyke) != '' and $select_varasto > 0) {
 
-				echo "<font class='head'>Kerääjä: $who</font><br>";
+				echo "<font class='head'>".t("Kerääjä").": $who</font><br>";
 				echo "<div id='content'></div>";
 
-					// lukitaan tableja
+				// lukitaan tableja
 				$query = "	LOCK TABLES lasku WRITE,
 							lasku AS lasku1 WRITE,
 							lasku AS lasku2 WRITE,
@@ -564,8 +564,15 @@
 				$result = pupe_query($query);
 
 				if (count($erat['tilaukset']) > 0) {
+					// Tallennetaan keröyserä
+					require('inc/tallenna_keraysera.inc');
+
 					// Tulostetaan kollilappu
 					require('inc/tulosta_reittietiketti.inc');
+
+					if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
+						require("inc/kardex_send.inc");
+					}
 				}
 			}
 

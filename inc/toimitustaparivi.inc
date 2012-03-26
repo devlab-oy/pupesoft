@@ -472,6 +472,7 @@
 		$ulos .= "<option value='DANX' {$sel['DANX']}>DANX</option>";
 		$ulos .= "<option value='SBTLNO' {$sel['SBTLNO']}>DB Schenker Norge</option>";
 		$ulos .= "<option value='SBTL' {$sel['SBTL']}>DB Schenker</option>";
+		$ulos .= "<option value='SBTLFI' {$sel['SBTLFI']}>DB Schenker Finland</option>";
 		$ulos .= "<option value='DLG' {$sel['DLG']}>Delego</option>";
 		$ulos .= "<option value='ASG' {$sel['ASG']}>DHL Day Definite</option>";
 		$ulos .= "<option value='DGF' {$sel['DGF']}>DHL Global Forwarding</option>";

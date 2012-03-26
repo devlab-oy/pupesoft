@@ -63,9 +63,9 @@
 					require("inc/kardex_send.inc");
 				}
 			}
-		}
 
-		closedir($dh);
+			closedir($handle);
+		}
 
 		unlink("/tmp/##kardex-resend.lock");
 	}

@@ -1,39 +1,58 @@
 <?php
 
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
-		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+		$php_cli = TRUE;
 	}
 
-	if (trim($argv[1]) == '') {
-		echo "Et antanut yhtiötä!\n";
+	if ($php_cli) {
+
+		if (trim($argv[1]) == '') {
+			echo "Et antanut yhtiötä!\n";
+			exit;
+		}
+
+		// otetaan includepath aina rootista
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
+
+		// otetaan tietokanta connect
+		require("inc/connect.inc");
+		require("inc/functions.inc");
+
+		$kukarow['yhtio'] = (string) $argv[1];
+		$kukarow['kuka']  = 'cron';
+		$kukarow['kieli'] = 'fi';
+		$operaattori 	  = (string) $argv[2];
+
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+
+	if (trim($operaattori) == '') {
+		echo "Operaattori puuttuu: unifaun_ps/unifaun_uo!\n";
 		exit;
 	}
 
-	require ("inc/connect.inc");
-	require ("inc/functions.inc");
-
-	if (trim($unifaun_retd) == '') {
+	if (trim($ftpget_dest[$operaattori]) == '') {
 		echo "Unifaun return-kansio puuttuu!\n";
 		exit;
 	}
 
-	if (!is_dir($unifaun_retd)) {
+	if (!is_dir($ftpget_dest[$operaattori])) {
 		echo "Unifaun return-kansio virheellinen!\n";
 		exit;
 	}
 
-	$kukarow['yhtio'] = (string) $argv[1];
-	$kukarow['kuka']  = 'cron';
-	$kukarow['kieli'] = 'fi';
+	require('ftp-get.php');
 
-	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
-	if ($handle = opendir($unifaun_retd)) {
+	if ($handle = opendir($ftpget_dest[$operaattori])) {
 
 		while (($file = readdir($handle)) !== FALSE) {
 
-			if (is_file($unifaun_retd."/".$file)) {
+			if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
 				/*
  				 * pupessa tilausnumerona lähetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
@@ -63,7 +82,7 @@
 				 * 14656099734;1;GE249908410WW;2012-01-24 11:12:49;52146882 (Kimi: TNT)
 				 */
 
-				list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($unifaun_retd."/".$file));
+				list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($ftpget_dest[$operaattori]."/".$file));
 
 				$sscc_ulkoinen = $sscc_ulkoinen == 1 ? 0 : $sscc_ulkoinen;
 
@@ -78,7 +97,7 @@
 							AND otunnus = '{$tilausnumero}'";
 				$upd_res = pupe_query($query);
 
-				rename($unifaun_retd."/".$file, $unifaun_retd."/ok/".$file);
+				rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
 			}
 		}
 	}

@@ -1,10 +1,10 @@
 <?php
 
-	date_default_timezone_set('Europe/Helsinki');
-
 	// Kutsutaanko CLI:stä
-	if (php_sapi_name() != 'cli') {
-		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+		$php_cli = TRUE;
 	}
 
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
@@ -23,20 +23,24 @@
 
 		touch("/tmp/##ftp-get-in.lock");
 
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-		ini_set("display_errors", 0);
+		if ($php_cli) {
+			date_default_timezone_set('Europe/Helsinki');
 
-		require ("inc/salasanat.php");
-		require ("inc/functions.inc");
+			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+			ini_set("display_errors", 0);
 
-		if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi"; 			# kenelle meilataan jos on ongelma
-		if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi"; 	# millä osoitteella meili lähetetään
+			require ("inc/salasanat.php");
+			require ("inc/functions.inc");
 
-		// ja operaattori komentoriviltä
-		// itella, servinet, yms
-		// pitää olla määritettynä salasanat.inc:issä tai sitten tämä menee puihin.
-		$operaattori = $argv[1];
+			if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi"; 			# kenelle meilataan jos on ongelma
+			if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi"; 	# millä osoitteella meili lähetetään
+
+			// ja operaattori komentoriviltä
+			// itella, servinet, yms
+			// pitää olla määritettynä salasanat.inc:issä tai sitten tämä menee puihin.
+			$operaattori = $argv[1];
+		}
 
 		if ($operaattori == "") {
 			mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sisäänluvussa ongelma, ei operaattoria valittuna. Tutki asia!", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");

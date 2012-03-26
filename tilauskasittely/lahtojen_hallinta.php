@@ -153,7 +153,7 @@
 
 				$sscc_chk_arr = array();
 
-				require("tilauskasittely/unifaun.php");
+				require("tilauskasittely/unifaun_send.php");
 
 				foreach ($checkbox_child as $tilnro) {
 
@@ -524,7 +524,7 @@
 
 				$select_varasto = (int) $select_varasto;
 
-				require("tilauskasittely/unifaun.php");
+				require("tilauskasittely/unifaun_send.php");
 
 				foreach ($checkbox_parent as $lahto) {
 

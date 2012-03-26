@@ -665,22 +665,21 @@ class Unifaun {
 			$uni_par_val->addAttribute('n', "dnguncode");
 		}
 
-		if ($pakkaustiedot['vakkoodi'][''] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', ""); # Label number for ADR
+		if ($pakkaustiedot['vakkoodi']['lipukkeet'] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['lipukkeet'])); # Label number for ADR
 			$uni_par_val->addAttribute('n', "dnghzcode");
 		}
 
-		if ((int) $pakkaustiedot['vakkoodi']['luokka'] > 0) {
+		if ((int) $pakkaustiedot['vakkoodi']['pakkausryhma'] > 0) {
+			$pakkaustiedot['vakkoodi']['pakkausryhma'] = (int) $pakkaustiedot['vakkoodi']['pakkausryhma'];
+			$pakkaustiedot['vakkoodi']['pakkausryhma'] = $pakkaustiedot['vakkoodi']['pakkausryhma'] > 3 ? 3 : $pakkaustiedot['vakkoodi']['pakkausryhma']; 
 
-			$pakkaustiedot['vakkoodi']['luokka'] = (int) $pakkaustiedot['vakkoodi']['luokka'];
-			$pakkaustiedot['vakkoodi']['luokka'] = $pakkaustiedot['vakkoodi']['luokka'] > 3 ? 3 : $pakkaustiedot['vakkoodi']['luokka']; 
-
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode(str_repeat("I", $pakkaustiedot['vakkoodi']['luokka']))); # Packaging group/ADR-class. Supplied as I, II or III.
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode(str_repeat("I", $pakkaustiedot['vakkoodi']['pakkausryhma']))); # Packaging group/ADR-class. Supplied as I, II or III.
 			$uni_par_val->addAttribute('n', "dngpkcode");
 		}
 
-		if ($pakkaustiedot['vakkoodi']['luokituskoodi'] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['luokituskoodi'])); # ADR-class
+		if ($pakkaustiedot['vakkoodi']['luokka'] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['luokka'])); # ADR-class
 			$uni_par_val->addAttribute('n', "dngadrclass");
 		}
 

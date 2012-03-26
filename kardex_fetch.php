@@ -66,6 +66,9 @@
 			exit;
 		}
 
+		// Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
+		$argv[1] = $operaattori;
+
 		require('ftp-get.php');
 
 		if ($handle = opendir($ftpget_dest[$operaattori])) {

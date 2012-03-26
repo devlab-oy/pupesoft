@@ -244,10 +244,40 @@
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-								AND kerayserat.sscc = '{$row['sscc']}'
+								AND kerayserat.sscc = '{$keraysera_row['sscc']}'
 								GROUP BY 1,2,3,4";
 					$pakkaus_info_res = pupe_query($query);
 					$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+					if ($pakkaus_info_row['vakkoodi'] != '') {
+
+						$query = "	SELECT SUM(tuote.tuotemassa) AS paino
+									FROM kerayserat
+									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.sscc = '{$keraysera_row['sscc']}'";
+						$paino_chk_res = pupe_query($query);
+						$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
+
+						$query = "	SELECT *
+									FROM vak
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$pakkaus_info_row['vakkoodi']}'";
+						$vakkoodi_res = pupe_query($query);
+						$vakkoodi_row = mysql_fetch_assoc($vakkoodi_res);
+
+						$vakkoodi = array(
+							'yk_nro' => $vakkoodi_row['yk_nro'],
+							'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
+							'luokka' => $vakkoodi_row['luokka'],
+							'luokituskoodi' => $vakkoodi_row['luokituskoodi'],
+							'paino' => $paino_chk_row['paino']
+						);
+					}
+					else {
+						$vakkoodi = array();
+					}
 
 					$kollitiedot = array(
 						'maara' => $keraysera_row['maara'],
@@ -256,7 +286,7 @@
 						'leveys' => $pakkaus_info_row['leveys'],
 						'korkeus' => $pakkaus_info_row['korkeus'],
 						'syvyys' => $pakkaus_info_row['syvyys'],
-						'vakkoodi' => $pakkaus_info_row['vakkoodi'],
+						'vakkoodi' => $vakkoodi,
 						'kuutiot' => $pakkaus_info_row['kuutiot']
 					);
 

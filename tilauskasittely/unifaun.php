@@ -264,8 +264,27 @@ class Unifaun {
 				$uni_partner = $uni_sender->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
 				$uni_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
-					$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number
-					$uni_par_val->addAttribute('n', "custno");
+					// jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
+					if ($this->toitarow['merahti'] == '') {
+
+						$query = "	SELECT rahtisopimus
+									FROM rahtisopimukset
+									WHERE yhtio = '{$this->kukarow['yhtio']}'
+									AND asiakas = '{$this->postirow['liitostunnus']}'
+									AND toimitustapa = '{$this->toitarow['selite']}'
+									AND rahtisopimus != ''";
+						$rahtisopimus_res = pupe_query($query);
+						$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
+
+						$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
+
+						$uni_par_val = $uni_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
+						$uni_par_val->addAttribute('n', "custno");
+					}
+					else {
+						$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number
+						$uni_par_val->addAttribute('n', "custno");
+					}
 
 					$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number for international services
 					$uni_par_val->addAttribute('n', "custno_international");
@@ -641,20 +660,34 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['pakkauskuvaus'])); # Contents
 		$uni_par_val->addAttribute('n', "contents");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # UN-number for ADR. Supplied as a 4 digit code.
-		#$uni_par_val->addAttribute('n', "dnguncode");
+		if ($pakkaustiedot['vakkoodi']['yk_nro'] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['yk_nro'])); # UN-number for ADR. Supplied as a 4 digit code.
+			$uni_par_val->addAttribute('n', "dnguncode");
+		}
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Label number for ADR
-		#$uni_par_val->addAttribute('n', "dnghzcode");
+		if ($pakkaustiedot['vakkoodi'][''] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', ""); # Label number for ADR
+			$uni_par_val->addAttribute('n', "dnghzcode");
+		}
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Packaging group/ADR-class. Supplied as I, II or III.
-		#$uni_par_val->addAttribute('n', "dngpkcode");
+		if ((int) $pakkaustiedot['vakkoodi']['luokka'] > 0) {
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # ADR-class
-		#$uni_par_val->addAttribute('n', "dngadrclass");
+			$pakkaustiedot['vakkoodi']['luokka'] = (int) $pakkaustiedot['vakkoodi']['luokka'];
+			$pakkaustiedot['vakkoodi']['luokka'] = $pakkaustiedot['vakkoodi']['luokka'] > 3 ? 3 : $pakkaustiedot['vakkoodi']['luokka']; 
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Official transport name for item regarding ADR
-		#$uni_par_val->addAttribute('n', "dngdescr");
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode(str_repeat("I", $pakkaustiedot['vakkoodi']['luokka']))); # Packaging group/ADR-class. Supplied as I, II or III.
+			$uni_par_val->addAttribute('n', "dngpkcode");
+		}
+
+		if ($pakkaustiedot['vakkoodi']['luokituskoodi'] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['luokituskoodi'])); # ADR-class
+			$uni_par_val->addAttribute('n', "dngadrclass");
+		}
+
+		if ($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'] != '') {
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'])); # Official transport name for item regarding ADR
+			$uni_par_val->addAttribute('n', "dngdescr");
+		}
 
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
 		#$uni_par_val->addAttribute('n', "dngmpcode");
@@ -662,9 +695,13 @@ class Unifaun {
 		#$uni_par_val = $uni_parcel->addChild('val', ""); # Note for ADR goods
 		#$uni_par_val->addAttribute('n', "dngnote");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
-		#$uni_par_val->addAttribute('n', "dngnetweight");
+		if ($pakkaustiedot['vakkoodi']['paino'] != '') {
 
+			$pakkaustiedot['vakkoodi']['paino'] = $pakkaustiedot['vakkoodi']['paino'] < 1 ? 1 : $pakkaustiedot['vakkoodi']['paino'];
+
+			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['paino'])); # Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
+			$uni_par_val->addAttribute('n', "dngnetweight");
+		}
 	}
 
 }

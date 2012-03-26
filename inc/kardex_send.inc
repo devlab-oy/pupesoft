@@ -63,6 +63,12 @@
 		}
 
 		if ($kardex_ok) {
+
+			// Remmataan faili $kardex_sscc-kansiosta jos se on siellä
+			if (file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
+				unlink($kardex_sscc."/".$kerayseran_numero.".txt");
+			}
+
 			$kardexnimi = "/tmp/kardex-".md5(uniqid(mt_rand(), true)).".txt";
 			$fh = fopen($kardexnimi, "w+");
 			fputs($fh, $sisalto);
@@ -80,7 +86,7 @@
 		}
 		elseif ($kardex_sscc != "") {
 			// Katotaan, ettei tätä ole jo siirretty uudelleenkäsiteltävien joukkoon
-			if (!file_exists($kardex_sscc."/".$kerayseran_numero.".txt") and !file_exists($kardex_sscc."/ok/".$kerayseran_numero.".txt")) {
+			if (!file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
 				// Työnnetään uudelleenkäsiteltävien joukkoon jos ulkoinen SSCC puuttuu
 				$kardexnimi = $kardex_sscc."/".$kerayseran_numero.".txt";
 				$fh = fopen($kardexnimi, "w+");

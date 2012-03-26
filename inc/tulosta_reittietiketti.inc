@@ -272,7 +272,9 @@
 							'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
 							'luokka' => $vakkoodi_row['luokka'],
 							'luokituskoodi' => $vakkoodi_row['luokituskoodi'],
-							'paino' => $paino_chk_row['paino']
+							'pakkausryhma' => $vakkoodi_row['pakkausryhma'],
+							'lipukkeet' => $vakkoodi_row['lipukkeet'],
+							'paino' => $paino_chk_row['paino'],
 						);
 					}
 					else {

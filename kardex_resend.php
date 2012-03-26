@@ -3,7 +3,7 @@
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
 
-	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+	if (php_sapi_name() == 'cli') {
 		$php_cli = TRUE;
 	}
 
@@ -43,7 +43,6 @@
 			$kukarow['yhtio'] = (string) $argv[1];
 			$kukarow['kuka']  = 'cron';
 			$kukarow['kieli'] = 'fi';
-			$operaattori 	  = (string) $argv[2];
 
 			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		}

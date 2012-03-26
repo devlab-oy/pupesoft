@@ -182,7 +182,7 @@
 
 		$kal = 1;
 
-		while ($row = mysql_fetch_array($riresult)) {
+		while ($row = mysql_fetch_assoc($riresult)) {
 			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$rivinumerot[$row["ker_tunnus"]] = $kal;
 			}
@@ -191,8 +191,8 @@
 			}
 			$kal++;
 		}
-
-		mysql_data_seek($riresult,0);
+		
+		mysql_data_seek($riresult, 0);
 
 		if (!isset($kieli)) $kieli = "";
 		if (!isset($toim)) $toim = "";

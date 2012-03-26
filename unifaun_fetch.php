@@ -1,22 +1,22 @@
 <?php
 
-	// Kutsutaanko CLI:st√§
+	// Kutsutaanko CLI:st‰
 	$php_cli = FALSE;
 
 	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
 		$php_cli = TRUE;
 	}
 
-	// jos meill√§ on lock-file ja se on alle 15 minuuttia vanha
+	// jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") < 300) {
-		echo "Unifaun-fetch sis√§√§nluku k√§ynniss√§, odota hetki!";
+		echo "Unifaun-fetch sis‰‰nluku k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") >= 300) {
-		echo "VIRHE: Unifaun-fetch sis√§√§nluku jumissa! Ota yhteys tekniseen tukeen!!!";
+		echo "VIRHE: Unifaun-fetch sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
 
 		// Onko nagios monitor asennettu?
 		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-fetch sis√§√§nluku jumissa!", FILE_APPEND);
+			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Unifaun-fetch sis‰‰nluku jumissa!", FILE_APPEND);
 		}
 	}
 	else {
@@ -26,7 +26,7 @@
 		if ($php_cli) {
 
 			if (trim($argv[1]) == '') {
-				echo "Et antanut yhti√∂t√§!\n";
+				echo "Et antanut yhtiˆt‰!\n";
 				unlink("/tmp/##unifaun-fetch.lock");
 				exit;
 			}
@@ -75,10 +75,10 @@
 				if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
 					/*
-	 				 * pupessa tilausnumerona l√§hetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
+	 				 * pupessa tilausnumerona l‰hetettiin tilausnumero_ssccvanha esim.: 6215821_1025616
 					 */
 
-					/* Normaalisanoma ilman viitett√§
+					/* Normaalisanoma ilman viitett‰
 					 * tilnro;sscc_ulkoinen;rahtikirjanro;datetime
 					 * 12345;373325380188609457;1000017762;2012-01-20 13:51:50
 					 */
@@ -89,7 +89,7 @@
 					 */
 
 					/* Sanomien erikoiskeissit (Itella, TNT, DPD, Matkahuolto)
-					 * tilnro;ensimm√§inen kollitunniste on l√§hetysnumero;sama ensimm√§inen kollitunniste on rahtikirjanumerona;timestamp
+					 * tilnro;ensimm‰inen kollitunniste on l‰hetysnumero;sama ensimm‰inen kollitunniste on rahtikirjanumerona;timestamp
 					 * 199188177;MA1234567810000009586;MA1234567810000009586;2012-01-23 10:58:57 (Kimi: MAtkahuolto)
 					 *
 					 * tilnro;sscc_ulkoinen;LOGY rahtikirjanro;timestamp

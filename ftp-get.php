@@ -131,8 +131,6 @@
 					default:
 						$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 				}
-
-				fwrite($filehandle, "Error message: $syy\n");
 			}
 
 			unlink("/tmp/##ftp-get-in.lock");

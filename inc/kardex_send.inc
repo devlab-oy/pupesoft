@@ -78,13 +78,15 @@
 
 			require('inc/ftp-send.inc');
 		}
-		elseif ($kardex_fail_sscc != "") {
-			// Työnnetään uudelleenkäsiteltävien joukkoon jos ulkoinen SSCC puuttuu
-			$kardexnimi = $kardex_fail_sscc."/".$kerayseran_numero.".txt";
-
-			$fh = fopen($kardexnimi, "w+");
-			fputs($fh, $kerayseran_numero);
-			fclose($fh);
+		elseif ($kardex_sscc != "") {
+			// Katotaan, ettei tätä ole jo siirretty uudelleenkäsiteltävien joukkoon
+			if (!file_exists($kardex_sscc."/".$kerayseran_numero.".txt") and !file_exists($kardex_sscc."/ok/".$kerayseran_numero.".txt")) {
+				// Työnnetään uudelleenkäsiteltävien joukkoon jos ulkoinen SSCC puuttuu
+				$kardexnimi = $kardex_sscc."/".$kerayseran_numero.".txt";
+				$fh = fopen($kardexnimi, "w+");
+				fputs($fh, $kerayseran_numero);
+				fclose($fh);
+			}
 		}
 	}
 ?>

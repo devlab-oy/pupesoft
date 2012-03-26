@@ -9,10 +9,10 @@
 
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") < 300) {
-		echo "FTP-get sisäänluku käynnissä, odota hetki!";
+		echo "Unifaun-fetch sisäänluku käynnissä, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") >= 300) {
-		echo "VIRHE: FTP-get sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
+		echo "VIRHE: Unifaun-fetch sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";
 
 		// Onko nagios monitor asennettu?
 		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {

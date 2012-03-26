@@ -3,7 +3,7 @@
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
 
-	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+	if (php_sapi_name() == 'cli') {
 		$php_cli = TRUE;
 	}
 

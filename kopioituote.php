@@ -114,11 +114,6 @@
 					elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
-					// luontiaika
-					elseif (mysql_field_name($stresult,$i) == 'muutospvm') {
-						$query .= mysql_field_name($stresult,$i)."=now(),";
-					}
-
 					// n‰m‰ kent‰t tyhjennet‰‰n
 					elseif (mysql_field_name($stresult,$i) == 'kehahin' or
 							mysql_field_name($stresult,$i) == 'vihahin' or
@@ -127,7 +122,9 @@
 							mysql_field_name($stresult,$i) == 'epakurantti50pvm' or
 							mysql_field_name($stresult,$i) == 'epakurantti75pvm' or
 							mysql_field_name($stresult,$i) == 'epakurantti100pvm' or
-							mysql_field_name($stresult,$i) == 'eankoodi') {
+							mysql_field_name($stresult,$i) == 'eankoodi' or
+							mysql_field_name($stresult,$i) == 'muutospvm' or
+							mysql_field_name($stresult,$i) == 'muuttaja') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan
@@ -157,6 +154,19 @@
 							// tuotenumeroksi tietenkin uustuoteno
 							if (mysql_field_name($stresult,$i) == 'tuoteno') {
 								$query .= "tuoteno='$uustuoteno',";
+							}
+							// laatijaksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'laatija') {
+								$query .= "laatija='$kukarow[kuka]',";
+							}
+							// luontiaika
+							elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
+								$query .= mysql_field_name($stresult,$i)."=now(),";
+							}
+							// n‰m‰ kent‰t tyhjennet‰‰n
+							elseif (mysql_field_name($stresult,$i) == 'muutospvm' or
+									mysql_field_name($stresult,$i) == 'muuttaja') {
+								$query .= mysql_field_name($stresult,$i)."='',";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
 							elseif (mysql_field_name($stresult,$i) != 'tunnus') {

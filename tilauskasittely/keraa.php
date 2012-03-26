@@ -39,7 +39,7 @@
 	js_popup();
 
 	if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
-		require("tilauskasittely/unifaun_send.php");
+		require("inc/unifaun_send.inc");
 
 		echo "	<script type='text/javascript' language='JavaScript'>
 					$(document).ready(function() {

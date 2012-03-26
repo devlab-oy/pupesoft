@@ -153,7 +153,7 @@
 
 				$sscc_chk_arr = array();
 
-				require("tilauskasittely/unifaun_send.php");
+				require("inc/unifaun_send.inc");
 
 				foreach ($checkbox_child as $tilnro) {
 
@@ -187,10 +187,10 @@
 							$row = mysql_fetch_assoc($res);
 
 							// haetaan toimitustavan tiedot
-							$query    = "	SELECT *
-											FROM toimitustapa
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND selite = '{$new_row['selite']}'";
+							$query = "	SELECT *
+										FROM toimitustapa
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '{$new_row['selite']}'";
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
 
@@ -292,12 +292,6 @@
 						}
 					}
 				}
-
-				// if (count($erat['tilaukset']) > 0) {
-				// 	$ei_tallenneta = true;
-
-				// 	require('inc/tulosta_reittietiketti.inc');
-				// }
 			}
 			else {
 
@@ -524,7 +518,7 @@
 
 				$select_varasto = (int) $select_varasto;
 
-				require("tilauskasittely/unifaun_send.php");
+				require("inc/unifaun_send.inc");
 
 				foreach ($checkbox_parent as $lahto) {
 

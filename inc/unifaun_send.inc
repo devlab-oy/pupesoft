@@ -524,8 +524,17 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Customs currency unit
 				#$uni_shi_val->addAttribute('n', "customsunit");
 
-				$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-				$uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
+				$avainsana_result = t_avainsana('UNIFAUN_RAHKULJ', '', " and selite='{$this->toitarow['virallinen_selite']}' ");
+
+				if (mysql_num_rows($avainsana_result) > 0) {
+					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
+					$uni_service->addAttribute('srvid', utf8_encode('FREEG'));
+					$uni_service->addAttribute('subid', utf8_encode($this->toitarow['virallinen_selite']));
+				}
+				else {
+					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
+					$uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
+				}
 
 					if (trim($this->toitarow['lajittelupiste']) != "") {
 						$uni_ser_val = $uni_service->addChild('val', $this->toitarow['lajittelupiste']); # HIT InNight mandatory.

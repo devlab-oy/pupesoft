@@ -9938,16 +9938,27 @@ if (!function_exists("viivakoodi")) {
 
 		$lisa = $teksti != "" ? "" : "-n";
 
-		ob_start();
-		passthru("barcode -b $viivakoodi -e \"$encoding\" -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white -quality 80 ps:- jpg:-", $return);
-		$barcode = ob_get_contents();
-		ob_end_clean();
+		// Tehdään tempfilet viivakoodille ja kuvalle
+		$postscript = tempnam("/tmp", "barcode-");
+		$image = tempnam("/tmp", "image-");
 
-		if ($return === FALSE) {
-			return FALSE;
-		}
+		// Tehdään viivakoodi PostScript
+		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\"");
 
-		return $barcode;
+		// Ghostscript konversioon yksikkö kuntoon
+		$leveys = round($leveys * 3.03);
+		$korkeus = round($korkeus * 4.8);
+
+		// Käännetään PostScript JPG:ksi
+		shell_exec("gs -dSAFER -dBATCH -dNOPAUSE -r72x72 -g{$leveys}x{$korkeus} -sDEVICE=jpeg -sOutputFile=\"$image\" \"$postscript\"");
+		// Otetaan data muuttujaan
+		$data = file_get_contents($image);
+
+		// Dellataan temp-filet
+		unlink($postscript);
+		unlink($image);
+
+		return $data;
 	}
 }
 
@@ -11936,8 +11947,12 @@ if (!function_exists("pupe_DataTables")) {
 											$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
 										}
 									);
+									
+									if (kpl == 0) {
+										$('#refresh_screen_ajaxille').val('true');
+									}
 
-									if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl) {
+									if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
 										var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
 
 										$.post('{$_SERVER['SCRIPT_NAME']}',
@@ -16117,6 +16132,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		/*
 		Testausta varten.....
 		$lahetetyyppi = "tulosta_lahete.inc";
+		$lahetetyyppi = "tulosta_lahete_ean.inc";
 		$lahetetyyppi = "tulosta_lahete_brutto.inc";
 		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 		$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";

@@ -173,27 +173,46 @@
 			// tuotekoodi
 			// Haetaan poikkeustapaksien käsittely
 			if ($laskuttajan_toimittajanumero == 123085) {
-				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123067) {
-				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,10);
+				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
+				$rtuoteno[$i]["tuoteno2"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3)."090";
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == 123007) {
 				$aputuoteno = utf8_decode($tuotetieto->ProductId->ProductNumber);
 				$pituus 	= strlen(trim($aputuoteno));
 
 				if ($pituus == 8 and strpos(' ',$aputuoteno) == 6) {
-					$rtuoteno[$i]["tuoteno"] = substr($aputuoteno,0,5);
+					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = substr($aputuoteno,0,5);
 				}
 				else {
-					$rtuoteno[$i]["tuoteno"] = $aputuoteno;
+					$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = $aputuoteno;
 				}
+				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
+			}
+			elseif ($laskuttajan_toimittajanumero == "123453") {
+				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
+				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+			}
+			elseif ($laskuttajan_toimittajanumero == "123178") {
+				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,3);
+				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
+			}
+			elseif ($laskuttajan_toimittajanumero == "123084") {
+				$rtuoteno[$i]["tuoteno"] = $tuotetieto->ProductId->ProductNumber;
+				$rtuoteno[$i]["tuoteno2"] = ltrim($tuotetieto->ProductId->ProductNumber, '0');
 			}
 			else {
-				$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+				echo "Ei poikkeuskäsittelyä tuotteelle ".$rtuoteno[$i]["tuoteno"]."<br><br>";
 			}
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
+
+				echo "tuoteno: ".$rtuoteno[$i]["tuoteno"]."<br>";
 
 				// Tallennetaan riville jos tämä on kauttalaskutusta
 				if ($kauttalaskutus == "KAUTTALASKUTUS") {
@@ -202,7 +221,8 @@
 
 				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
 
-				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
+				// $rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
+				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->OrderItemRef->BuyerOrderItemRef;
 
 				$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->Quantity);
 
@@ -224,51 +244,72 @@
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
 					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
+<<<<<<< HEAD
 					
 					if (strtoupper($attribute) == "ALLOW") {
 						
+=======
+
+					if (strtolower($attribute) == "allow") {
+						if (!isset($rtuoteno[$i]['ale1'])) {
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
+							}
+							else {
+								$rtuoteno[$i]['ale1'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
+							}
+						}
+						elseif (!isset($rtuoteno[$i]['ale2'])) {
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
+							}
+							else {
+								$rtuoteno[$i]['ale2'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
+							}
+						}
+						else {
+
+							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+
+							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+								// 100-(1-50/100)*(1-50/100)*100
+								if (isset($rtuoteno[$i]['ale3'])) {
+									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - $tuotetieto->AllowOrCharge->Percent / 100) * 100, 2);
+									}
+								else {
+									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
+								}
+							}
+							else {
+								// 100-(1-50/100)*(1-50/100)*100
+								if (isset($rtuoteno[$i]['ale3'])) {
+									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100) * 100, 2);
+								}
+								else {
+									$rtuoteno[$i]['ale3'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['hinta'] * 100, 2);
+								}
+							}
+						}
+>>>>>>> sami/asn
 					}
-					// $rtuoteno[$i]["kate"]
+					elseif (strtolower($attribute) == "charge") {
+						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {
+							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+						}
+						else {
+							if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
+							$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+						}
+					}
+				}
+
+				if (isset($tuotetieto->DesAdvRef->DocumentNumber)) {
+					$rtuoteno[$i]["documentnumber"] = $tuotetieto->DesAdvRef->DocumentNumber;
 				}
 
 				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
-
-				/**
-				 * tallennetaan tieto asn_tauluun lajina tec, jotta se voidaan helposti hakea feilinki-ohjelmassa (ostolasku_asn_tarkastelu.php)
-				 * tarvitaan: 
-				 * - toimittajanumero
-				 * - asn numero
-				 * - saapumispvm
-				 * - vastaanottaja
-				 * - tilausnumero
-				 * - toimittajan tuotenumero
-				 * - kpl
-				 * - tilausrivinpositio
-				 */ 
-
-				// $saapumispvm_chk = trim($laskun_paiva) != '' ? substr($laskun_paiva, 0, 4).'-'.substr($laskun_paiva, 4, 2).'-'.substr($laskun_paiva, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
-				// $vastaanottaja_chk = isset($xml->InvoiceHeader->BuyerParty->Address->Name1) ? $xml->InvoiceHeader->BuyerParty->PartyNumber.' , '.$xml->InvoiceHeader->BuyerParty->Address->Name1 : '';
-
-				// $query = "	INSERT INTO asn_sanomat SET
-				// 			yhtio = '{$kukarow['yhtio']}',
-				// 			laji = 'tec',
-				// 			toimittajanumero = '{$laskuttajan_toimittajanumero}',
-				// 			saapumispvm = '{$saapumispvm_chk}',
-				// 			vastaanottaja = '{$vastaanottaja_chk}',
-				// 			tilausnumero = '{$laskun_numero}',
-				// 			tilausrivi = '',
-				// 			paketintunniste = '',
-				// 			paketinnumero = '',
-				// 			lahetyslistannro = '',
-				// 			toim_tuoteno = '{$rtuoteno[$i]["tuoteno"]}',
-				// 			kappalemaara = '{$rtuoteno[$i]["kpl"]}',
-				// 			hinta = '{$rtuoteno[$i]["hinta"]}',
-				// 			tilausrivinpositio = '{$rtuoteno[$i]["tilaajanrivinro"]}',
-				// 			laatija = 'crond',
-				// 			luontiaika = now()";
-				// $asn_ins_res = pupe_query($query);
 			}
 			else {
 				//	Poistetaan tämä tietue

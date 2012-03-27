@@ -286,7 +286,12 @@
 						and {$tunken} = '{$tunnus}'";
 			$sarjares = pupe_query($query);
 		}
-
+		
+		if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
+		}
+		
 		$hinnat = laske_hinta($laskurow, $tunnus, $suoratoimitukset);
 
 		$data = array('rivihinta' => (float) $hinnat['rivihinta'], 'alerivihinta' => (float) $hinnat['alerivihinta'], 'ulkkpl' => (float) $hinnat['ulkkpl']);
@@ -342,7 +347,7 @@
 					$query .= mysql_field_name($result, $i)." = '".$rivi[mysql_field_name($result, $i)]."',";
 			}
 		}
-
+		
 		$query = substr($query, 0, -1);
 		$result = pupe_query($query);
 

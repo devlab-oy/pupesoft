@@ -55,7 +55,7 @@
 	$verkkolaskuvirheet_kasittele	= $verkkolaskut_in;
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
-	
+
 
 	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
 	js_openFormInNewWindow();
@@ -103,6 +103,7 @@
 
 					// Otetaan tarvittavat muuttujat t‰nnekin
 					$xml = simplexml_load_string($xmlstr);
+
 					// Katsotaan mit‰ aineistoa k‰pistell‰‰n
 					if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
 						require("inc/verkkolasku-in-finvoice.inc");
@@ -175,9 +176,9 @@
 									FROM toimi
 									WHERE yhtio = '$yhtiorow[yhtio]'
 									and nimi like '%$siivottu%'";
-						$lahellaresult = pupe_query($query);	
+						$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
 					}
-					
+
 					if ($lasku_toimittaja["tunnus"] == 0) {
 						if (mysql_num_rows($lahellaresult) > 0) {
 

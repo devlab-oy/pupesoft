@@ -154,8 +154,7 @@
 						$joinlisa 	  = $keraysera_row['kollilaji'] == 'KLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
 						$puukotuslisa = $keraysera_row['kollilaji'] != 'KLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
-						$query = "	SELECT tuote.vakkoodi,
-									{$selectlisa},
+						$query = "	SELECT {$selectlisa},
 									ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 									FROM kerayserat
 									{$joinlisa}
@@ -163,40 +162,121 @@
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND kerayserat.sscc = '{$keraysera_row['sscc']}'
-									GROUP BY 1,2,3,4";
+									GROUP BY 1,2,3";
 						$pakkaus_info_res = pupe_query($query);
 						$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
 
-						if ($pakkaus_info_row['vakkoodi'] != '') {
+						$query = "	SELECT SUM(tuote.tuotemassa) AS paino
+									FROM kerayserat
+									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+									AND kerayserat.sscc = '{$keraysera_row['sscc']}'";
+						$paino_chk_res = pupe_query($query);
+						$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
 
-							$query = "	SELECT SUM(tuote.tuotemassa) AS paino
+						$vakkoodi = array();
+
+						if ($paino_chk_row['paino'] != 0) {
+
+							/*
+							 * DSV Roadilla, Kaukokiidolla sekä VR Transpointilla voi ilmoittaa eri VAK-tuotteet per paketti
+							 * Kiitolinjan kohdalla vain yksi UN-numero per kolli
+							 * HIT-palvelun kohdalla sallitaan vain rajoitettu määrä vaarallisia aineita
+							 */
+
+							$query = "	SELECT tuote.vakkoodi, tuote.vakmaara
 										FROM kerayserat
 										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
 										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 										AND kerayserat.sscc = '{$keraysera_row['sscc']}'";
-							$paino_chk_res = pupe_query($query);
-							$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
 
-							$query = "	SELECT *
-										FROM vak
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$pakkaus_info_row['vakkoodi']}'";
-							$vakkoodi_res = pupe_query($query);
-							$vakkoodi_row = mysql_fetch_assoc($vakkoodi_res);
+							if ($toitarow['rahdinkuljettaja'] == 'DSV' or $toitarow['rahdinkuljettaja'] == 'KK' or $toitarow['rahdinkuljettaja'] == 'TP') {
+								$limit = "";
+							}
+							elseif ($toitarow['rahdinkuljettaja'] == 'KL') {
+								$limit = "LIMIT 1";
+							}
+							elseif ($toitarow['rahdinkuljettaja'] == 'HIT') {
+								$limit = "LIMIT 1";
+							}
+							else {
+								$limit = "LIMIT 1";
+							}
 
-							$vakkoodi = array(
-								'yk_nro' => $vakkoodi_row['yk_nro'],
-								'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
-								'luokka' => $vakkoodi_row['luokka'],
-								'luokituskoodi' => $vakkoodi_row['luokituskoodi'],
-								'pakkausryhma' => $vakkoodi_row['pakkausryhma'],
-								'lipukkeet' => $vakkoodi_row['lipukkeet'],
-								'paino' => $paino_chk_row['paino'],
+							$vak_chk_res = pupe_query($query);
+
+							$limited_qty = array(
+								"LQ0"	=> "0",
+								"LQ1"	=> "120",
+								"LQ2"	=> "1000",
+								"LQ3"	=> "500",
+								"LQ4"	=> "3000",
+								"LQ5"	=> "5000",
+								"LQ6"	=> "5000",
+								"LQ7"	=> "5000",
+								"LQ8"	=> "3000",
+								"LQ9"	=> "6000",
+								"LQ10"	=> "500",
+								"LQ11"	=> "500",
+								"LQ12"	=> "1000",
+								"LQ13"	=> "1000",
+								"LQ14"	=> "25",
+								"LQ15"	=> "100",
+								"LQ16"	=> "125",
+								"LQ17"	=> "500",
+								"LQ18"	=> "1000",
+								"LQ19"	=> "5000",
+								"LQ20"	=> "0",
+								"LQ21"	=> "0",
+								"LQ22"	=> "1000",
+								"LQ23"	=> "3000",
+								"LQ24"	=> "6000",
+								"LQ25"	=> "1000",
+								"LQ26"	=> "500",
+								"LQ27"	=> "6000",
+								"LQ28"	=> "3000"
 							);
-						}
-						else {
-							$vakkoodi = array();
+
+							while ($vak_chk_row = mysql_fetch_assoc($vak_chk_res)) {
+
+								$query = "	SELECT *, rajoitetut_maarat_ja_poikkeusmaarat_1 AS limited_qty
+											FROM vak
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$vak_chk_row['vakkoodi']}'";
+								$vakkoodi_res = pupe_query($query);
+								$vakkoodi_row = mysql_fetch_assoc($vakkoodi_res);
+
+								$limited_qty_val = '';
+
+								if ($vakkoodi_row['limited_qty'] != '' and $vak_chk_row['vakmaara'] != '' and isset($limited_qty[$vakkoodi_row["limited_qty"]])) {
+
+									$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($vak_chk_row["vakmaara"]));
+
+									$ltq_maara = (float) preg_replace("/[^0-9,\.]/", "", str_replace(",", ".", $vak_chk_row["vakmaara"]));
+
+									// Käytetään vain millilitroja ja grammoja
+									if ($ltq_yks == 'l' or $ltq_yks == 'kg') {
+										$ltq_maara = $ltq_maara * 1000;
+									}
+
+									if ($ltq_maara > 0 and $ltq_maara <= $limited_qty[$vakkoodi_row["limited_qty"]]) {
+										$limited_qty_val = "LTD QTY";
+									}
+								}
+
+								$vakkoodi[] = array(
+									'yk_nro' => $vakkoodi_row['yk_nro'],
+									'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
+									'luokka' => $vakkoodi_row['luokka'],
+									'luokituskoodi' => $vakkoodi_row['luokituskoodi'],
+									'pakkausryhma' => $vakkoodi_row['pakkausryhma'],
+									'lipukkeet' => $vakkoodi_row['lipukkeet'],
+									'limited_qty' => $limited_qty_val,
+									'paino' => $paino_chk_row['paino'],
+								);
+							}
 						}
 
 						$kollitiedot = array(

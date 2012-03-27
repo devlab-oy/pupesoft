@@ -669,46 +669,51 @@ class Unifaun {
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['pakkauskuvaus'])); # Contents
 		$uni_par_val->addAttribute('n', "contents");
 
-		if ($pakkaustiedot['vakkoodi']['yk_nro'] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['yk_nro'])); # UN-number for ADR. Supplied as a 4 digit code.
-			$uni_par_val->addAttribute('n', "dnguncode");
-		}
+		if (count($pakkaustiedot['vakkoodi']) > 0) {
+			if ($pakkaustiedot['vakkoodi']['yk_nro'] != '') {
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['yk_nro'])); # UN-number for ADR. Supplied as a 4 digit code.
+				$uni_par_val->addAttribute('n', "dnguncode");
+			}
 
-		if ($pakkaustiedot['vakkoodi']['lipukkeet'] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['lipukkeet'])); # Label number for ADR
-			$uni_par_val->addAttribute('n', "dnghzcode");
-		}
+			if ($pakkaustiedot['vakkoodi']['lipukkeet'] != '') {
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['lipukkeet'])); # Label number for ADR
+				$uni_par_val->addAttribute('n', "dnghzcode");
+			}
 
-		if ((int) $pakkaustiedot['vakkoodi']['pakkausryhma'] > 0) {
-			$pakkaustiedot['vakkoodi']['pakkausryhma'] = (int) $pakkaustiedot['vakkoodi']['pakkausryhma'];
-			$pakkaustiedot['vakkoodi']['pakkausryhma'] = $pakkaustiedot['vakkoodi']['pakkausryhma'] > 3 ? 3 : $pakkaustiedot['vakkoodi']['pakkausryhma']; 
+			if ((int) $pakkaustiedot['vakkoodi']['pakkausryhma'] > 0) {
+				$pakkaustiedot['vakkoodi']['pakkausryhma'] = (int) $pakkaustiedot['vakkoodi']['pakkausryhma'];
+				$pakkaustiedot['vakkoodi']['pakkausryhma'] = $pakkaustiedot['vakkoodi']['pakkausryhma'] > 3 ? 3 : $pakkaustiedot['vakkoodi']['pakkausryhma']; 
 
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode(str_repeat("I", $pakkaustiedot['vakkoodi']['pakkausryhma']))); # Packaging group/ADR-class. Supplied as I, II or III.
-			$uni_par_val->addAttribute('n', "dngpkcode");
-		}
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode(str_repeat("I", $pakkaustiedot['vakkoodi']['pakkausryhma']))); # Packaging group/ADR-class. Supplied as I, II or III.
+				$uni_par_val->addAttribute('n', "dngpkcode");
+			}
 
-		if ($pakkaustiedot['vakkoodi']['luokka'] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['luokka'])); # ADR-class
-			$uni_par_val->addAttribute('n', "dngadrclass");
-		}
+			if ($pakkaustiedot['vakkoodi']['luokka'] != '') {
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['luokka'])); # ADR-class
+				$uni_par_val->addAttribute('n', "dngadrclass");
+			}
 
-		if ($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'] != '') {
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'])); # Official transport name for item regarding ADR
-			$uni_par_val->addAttribute('n', "dngdescr");
-		}
+			if ($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'] != '') {
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['nimi_ja_kuvaus'])); # Official transport name for item regarding ADR
+				$uni_par_val->addAttribute('n', "dngdescr");
+			}
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
-		#$uni_par_val->addAttribute('n', "dngmpcode");
+			#$uni_par_val = $uni_parcel->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
+			#$uni_par_val->addAttribute('n', "dngmpcode");
 
-		#$uni_par_val = $uni_parcel->addChild('val', ""); # Note for ADR goods
-		#$uni_par_val->addAttribute('n', "dngnote");
+			if ($pakkaustiedot['vakkoodi']['limited_qty'] != '') {
+				$uni_par_val = $uni_parcel->addChild('val', $pakkaustiedot['vakkoodi']['limited_qty']); # Note for ADR goods
+				$uni_par_val->addAttribute('n', "dngnote");
+			}
 
-		if ($pakkaustiedot['vakkoodi']['paino'] != '') {
+			if ($pakkaustiedot['vakkoodi']['paino'] != '') {
 
-			$pakkaustiedot['vakkoodi']['paino'] = $pakkaustiedot['vakkoodi']['paino'] < 1 ? 1 : $pakkaustiedot['vakkoodi']['paino'];
+				$pakkaustiedot['vakkoodi']['paino'] = $pakkaustiedot['vakkoodi']['paino'] < 1 ? 1 : $pakkaustiedot['vakkoodi']['paino'];
 
-			$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['paino'])); # Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
-			$uni_par_val->addAttribute('n', "dngnetweight");
+				# Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
+				$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['vakkoodi']['paino']));
+				$uni_par_val->addAttribute('n', "dngnetweight");
+			}
 		}
 	}
 }

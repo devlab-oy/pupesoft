@@ -1526,7 +1526,8 @@
 												jarjestys				= '$jarjestys',
 												luontiaika				= now(),
 												laatija 				= '$kukarow[kuka]'
-												{$tlisatied_lisa}";
+												{$tlisatied_lisa}
+												{$tlisatied_lisa2}";
 
 									if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
 										$query .= " , osto_vai_hyvitys='O' ";
@@ -2427,7 +2428,8 @@
 							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
-							{$tlisatied_lisa}";
+							{$tlisatied_lisa}
+							{$tlisatied_lisa2}";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
 					$query .= " , osto_vai_hyvitys='O' ";

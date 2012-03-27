@@ -885,6 +885,20 @@ if (!function_exists('rivi_kerayslista')) {
 					$row['kommentti'] .= "\n".$trow['kerayskommentti'];
 				}
 
+				
+				//varaston sisäisen siirron kohdetuotepaikka, tsekataan onko tietoja ja onko kyseessä varmasti varaston sisäinen siirto. Jos, laitetaan siirtolistalle kohdetuotepaikasta infoa.
+				$query = "	SELECT kohde_hyllyalue, kohde_hyllynro, kohde_hyllyvali, kohde_hyllytaso
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$row[tunnus]'";
+				$kohderesult = mysql_query($query) or pupe_error($query);
+				$kohderow	 = mysql_fetch_assoc($kohderesult);
+				$varastopaikkakohde = '';
+				
+				if ($laskurow['varasto'] == $laskurow['clearing'] AND $kohderow['kohde_hyllyalue'] != '' AND $kohderow['kohde_hyllynro'] != '' AND $kohderow['kohde_hyllyvali'] != '' AND $kohderow['kohde_hyllytaso'] != '') {
+					$varastopaikkakohde = $kohderow["kohde_hyllyalue"] . " " . $kohderow["kohde_hyllynro"] . " " . $kohderow["kohde_hyllyvali"] . " " . $kohderow["kohde_hyllytaso"];
+					$row['kommentti'] .= "\nVie paikalle ".$varastopaikkakohde;
+				}
+				
 				$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
 
 				$rivipaikkahyllyssa  = 0;

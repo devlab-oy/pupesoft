@@ -143,7 +143,7 @@
 
 		// Piirret‰‰n yhteens‰rivi
 		echo "<tr>";
-		echo "<th>".t("Yhteens‰")."</th>";
+		echo "<th>".t("Yhteens‰ summa")."<br>".t("Yhteens‰ kate")."<br>".t("Kateprosentti")."</th>";
 
 		$yhteensa_summa = 0;
 		$yhteensa_kate = 0;

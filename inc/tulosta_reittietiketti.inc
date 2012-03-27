@@ -108,6 +108,7 @@
 				$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 							IF(kerayserat.pakkaus = '999', 'KLI', pakkaus.pakkauskuvaus) AS kollilaji,
 							kerayserat.pakkausnro,
+							kerayserat.pakkaus,
 							kerayserat.sscc,
 							COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 							ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
@@ -118,7 +119,7 @@
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.nro = '{$kerayseran_numero}'
 							AND kerayserat.otunnus = '{$row['tunnus']}'
-							GROUP BY 1,2,3,4";
+							GROUP BY 1,2,3,4,5";
 				$keraysera_res = pupe_query($query);
 
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
@@ -155,6 +156,14 @@
 						$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
 
 						$unifaun->_getXML();
+
+						$query = "	SELECT koodi
+									FROM pakkauskoodit
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}'
+									AND pakkaus = '{$keraysera_row['pakkaus']}'";
+						$pakkauskoodit_res = pupe_query($query);
+						$pakkauskoodit_row = mysql_fetch_assoc($pakkauskoodit_res);
 
 						$selectlisa   = $keraysera_row['kollilaji'] == 'KLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
 						$joinlisa 	  = $keraysera_row['kollilaji'] == 'KLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
@@ -289,6 +298,7 @@
 							'maara' => $keraysera_row['maara'],
 							'paino' => $keraysera_row['tuotemassa'],
 							'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
+							'pakkauskoodi' => $pakkauskoodit_row['koodi'],
 							'leveys' => $pakkaus_info_row['leveys'],
 							'korkeus' => $pakkaus_info_row['korkeus'],
 							'syvyys' => $pakkaus_info_row['syvyys'],

@@ -23,7 +23,8 @@
 
 		touch("/tmp/##unifaun-fetch.lock");
 
-		if ($php_cli) {
+		// haetaan yhtiön tiedot vain jos tätä tiedostoa kutsutaan komentoriviltä suoraan
+		if ($php_cli and count(debug_backtrace()) == 1) {
 
 			if (trim($argv[1]) == '') {
 				echo "Et antanut yhtiötä!\n";

@@ -203,7 +203,7 @@ class Unifaun {
 
 		$query = "	SELECT *
 					FROM rahdinkuljettajat
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$this->kukarow['yhtio']}'
 					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
 		$rahdinkuljettaja_res = pupe_query($query);
 		$rahdinkuljettaja_row = mysql_fetch_assoc($rahdinkuljettaja_res);

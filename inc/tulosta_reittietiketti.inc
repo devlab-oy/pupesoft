@@ -200,13 +200,6 @@
 							 * HIT-palvelun kohdalla sallitaan vain rajoitettu määrä vaarallisia aineita
 							 */
 
-							$query = "	SELECT tuote.vakkoodi, tuote.vakmaara
-										FROM kerayserat
-										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
-										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-										AND kerayserat.sscc = '{$keraysera_row['sscc']}'";
-
 							if ($toitarow['rahdinkuljettaja'] == 'DSV' or $toitarow['rahdinkuljettaja'] == 'KK' or $toitarow['rahdinkuljettaja'] == 'TP') {
 								$limit = "";
 							}
@@ -220,6 +213,13 @@
 								$limit = "LIMIT 1";
 							}
 
+							$query = "	SELECT tuote.vakkoodi, tuote.vakmaara, tuote.tuoteno, tuote.nimitys, kerayserat.kpl, (kerayserat.kpl * tuote.tuotemassa) AS kpl_paino
+										FROM kerayserat
+										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+										AND kerayserat.sscc = '{$keraysera_row['sscc']}'
+										{$limit}";
 							$vak_chk_res = pupe_query($query);
 
 							$limited_qty = array(
@@ -282,6 +282,10 @@
 								}
 
 								$vakkoodi[] = array(
+									'tuoteno' => $vakkoodi_row['tuoteno'],
+									'tuotenimitys' => $vakkoodi_row['nimitys'],
+									'kpl' => $vakkoodi_row['kpl'],
+									'kpl_paino' => $vakkoodi_row['kpl_paino'],
 									'yk_nro' => $vakkoodi_row['yk_nro'],
 									'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
 									'luokka' => $vakkoodi_row['luokka'],

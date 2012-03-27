@@ -1599,10 +1599,10 @@
 												$parcelno = $kpl_chk_row['sscc_ulkoinen'];
 
 												if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
-													$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail);
+													$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 												}
 												elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
-													$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail);
+													$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 												}
 
 												$unifaun->_discardParcel($mergeid, $parcelno);
@@ -1651,10 +1651,10 @@
 													$laskurow['sscc'] = $keraysera_row['sscc'];
 
 													if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail);
+														$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 													}
 													elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail);
+														$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 													}
 
 													$unifaun->setYhtioRow($yhtiorow);

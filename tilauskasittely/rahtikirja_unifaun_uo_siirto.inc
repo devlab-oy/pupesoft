@@ -9,7 +9,7 @@ if (1 == 2 and $kollityht > 0) {
 
 		require("inc/unifaun_send.inc");
 
-		$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail);
+		$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 		
 		$unifaun->setYhtioRow($yhtiorow);
 		$unifaun->setKukaRow($kukarow);

@@ -11947,8 +11947,12 @@ if (!function_exists("pupe_DataTables")) {
 											$('#alerivihintaalkuperainen_'+tun).val(data.alerivihinta);
 										}
 									);
+									
+									if (kpl == 0) {
+										$('#refresh_screen_ajaxille').val('true');
+									}
 
-									if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl) {
+									if (rivi_kpl_alkuperainen > 1 && rivi_kpl_alkuperainen > kpl && kpl > 0) {
 										var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
 
 										$.post('{$_SERVER['SCRIPT_NAME']}',

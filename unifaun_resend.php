@@ -54,6 +54,7 @@
 			$ftppath = $unifaun_ps_path;
 			$ftpport = $unifaun_ps_port;
 			$ftpfail = $unifaun_ps_fail;
+			$ftpsucc = $unifaun_ps_succ;
 
 			if ($handle = opendir($ftpfail)) {
 
@@ -66,7 +67,7 @@
 
 						// Jos siirto meni ok, niin remmataan faili
 						if ($palautus == 0) {
-							unlink($ftpfail."/".$file);
+							@unlink($ftpfail."/".$file);
 						}
 					}
 				}
@@ -82,6 +83,7 @@
 			$ftppath = $unifaun_uo_path;
 			$ftpport = $unifaun_uo_port;
 			$ftpfail = $unifaun_uo_fail;
+			$ftpsucc = $unifaun_uo_succ;
 
 			if ($handle = opendir($ftpfail)) {
 
@@ -94,7 +96,7 @@
 
 						// Jos siirto meni ok, niin remmataan faili
 						if ($palautus == 0) {
-							unlink($ftpfail."/".$file);
+							@unlink($ftpfail."/".$file);
 						}
 					}
 				}

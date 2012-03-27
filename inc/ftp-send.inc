@@ -12,6 +12,7 @@ else exit;
 # $ftpfile --> Siirrett‰v‰ tiedosto
 # $ftpport --> Custom portti, ei pakollinen
 # $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
+# $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
 
 // Palautetaan:
 # $palautus
@@ -25,6 +26,7 @@ else exit;
 # echo "ftpfile --> $ftpfile<br>";
 # echo "ftpport --> $ftpport<br>";
 # echo "ftpfail --> $ftpfail<br>";
+# echo "ftpsucc --> $ftpsucc<br>";
 
 $syy				= "";
 $palautus			= 0;
@@ -139,14 +141,18 @@ else {
 		$palautus = 5;
 	}
 
+	// Siirto onnistui
+	if ($palautus == 0 and isset($ftpsucc)) {
+		// Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
+		rename($ftpfile, $ftpsucc."/".$filenimi);
+	}
+	elseif ($palautus != 0 and isset($ftpfail)) {
+		// Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
+		rename($ftpfile, $ftpfail."/".$filenimi);
+	}
+
 	// jos siirto ep‰onnistuu
 	if ($palautus != 0) {
-
-		// Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
-		if (isset($ftpfail)) {
-			rename($ftpfile, $ftpfail."/".$filenimi);
-		}
-
 		// ncftpput:in exit valuet
 		switch ($palautus) {
 			case  1:

@@ -7,7 +7,8 @@ class Unifaun {
 	private $password;
 	private $ftppath;
 	private $ftpport;
-	private $ftpfaildir;
+	private $ftpfail;
+	private $ftpsucc;
 	private $yhtiorow;
 	private $kukarow;
 	private $postirow;
@@ -20,13 +21,15 @@ class Unifaun {
 	private $xml;
 	private $kirjoitin;
 
-	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfaildir) {
-		$this->hostname 	= $hostname;
-		$this->username 	= $username;
-		$this->password 	= $password;
-		$this->ftppath 		= $ftppath;
-		$this->ftpport 		= $ftpport;
-		$this->ftpfaildir 	= $ftpfaildir;
+	public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
+		$this->hostname = $hostname;
+		$this->username = $username;
+		$this->password = $password;
+		$this->ftppath 	= $ftppath;
+		$this->ftpport 	= $ftpport;
+		$this->ftpfail 	= $ftpfail;
+		$this->ftpsucc 	= $ftpsucc;
+
 	}
 
 	public function setYhtioRow($yhtiorow) {
@@ -98,7 +101,7 @@ class Unifaun {
 	}
 
 	public function ftpSend() {
-				
+
 		if ($this->ftppath != '') {
 			if (substr($this->ftppath,-1) != '/') {
 				$this->ftppath .= '/';
@@ -126,7 +129,8 @@ class Unifaun {
 			$ftppass  = $this->password;
 			$ftppath  = $this->ftppath;
 			$ftpport  = $this->ftpport;
-			$ftpfail  = $this->ftpfaildir;
+			$ftpfail  = $this->ftpfail;
+			$ftpsucc  = $this->ftpsucc;
 			$yhtiorow = $this->yhtiorow;
 
 			$ftpfile = realpath($filenimi);
@@ -712,7 +716,7 @@ class Unifaun {
 
 				if (isset($vak['pakkausryhma']) and (int) $vak['pakkausryhma'] > 0) {
 					$vak['pakkausryhma'] = (int) $vak['pakkausryhma'];
-					$vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma']; 
+					$vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma'];
 
 					$uni_par_val = $uni_article->addChild('val', utf8_encode(str_repeat("I", $vak['pakkausryhma']))); # Packaging group/ADR-class. Supplied as I, II or III.
 					$uni_par_val->addAttribute('n', "dngpkcode");

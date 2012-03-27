@@ -80,6 +80,7 @@
 			$ftppath = $kardex_path;
 			$ftpport = $kardex_port;
 		    $ftpfail = $kardex_fail;
+			$ftpsucc = $kardex_succ;
 			$ftpfile = $kardexnimi;
 
 			require('inc/ftp-send.inc');

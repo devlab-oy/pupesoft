@@ -1268,7 +1268,7 @@ while ($tietue = fgets($fd)) {
 						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
 						$mail .= "--$bound--\n";
 
-						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+						#$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
 					}
 				}
 			}
@@ -1850,10 +1850,10 @@ while ($tietue = fgets($fd)) {
 
 						foreach ($chk_arr as $vrst) {
 
-							$query = "	SELECT * 
-										FROM lahdot 
-										WHERE yhtio = '{$kukarow['yhtio']}' 
-										AND liitostunnus = '{$toimitustavan_tunnus}' 
+							$query = "	SELECT *
+										FROM lahdot
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND liitostunnus = '{$toimitustavan_tunnus}'
 										AND asiakasluokka = '{$laskurow['prioriteettinro']}'
 										AND aktiivi IN ('', 'P')
 										AND varasto = '{$vrst}'
@@ -2078,7 +2078,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
-	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	#$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {
 	echo "\n";

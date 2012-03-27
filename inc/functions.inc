@@ -9938,16 +9938,27 @@ if (!function_exists("viivakoodi")) {
 
 		$lisa = $teksti != "" ? "" : "-n";
 
-		ob_start();
-		passthru("barcode -b $viivakoodi -e \"$encoding\" -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white -quality 80 ps:- jpg:-", $return);
-		$barcode = ob_get_contents();
-		ob_end_clean();
+		// Tehd‰‰n tempfilet viivakoodille ja kuvalle
+		$postscript = tempnam("/tmp", "barcode-");
+		$image = tempnam("/tmp", "image-");
 
-		if ($return === FALSE) {
-			return FALSE;
-		}
+		// Tehd‰‰n viivakoodi PostScript
+		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\"");
 
-		return $barcode;
+		// Ghostscript konversioon yksikkˆ kuntoon
+		$leveys = round($leveys * 3.03);
+		$korkeus = round($korkeus * 4.8);
+
+		// K‰‰nnet‰‰n PostScript JPG:ksi
+		shell_exec("gs -dSAFER -dBATCH -dNOPAUSE -r72x72 -g{$leveys}x{$korkeus} -sDEVICE=jpeg -sOutputFile=\"$image\" \"$postscript\"");
+		// Otetaan data muuttujaan
+		$data = file_get_contents($image);
+
+		// Dellataan temp-filet
+		unlink($postscript);
+		unlink($image);
+
+		return $data;
 	}
 }
 
@@ -14660,6 +14671,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		/*
 		Testausta varten.....
 		$lahetetyyppi = "tulosta_lahete.inc";
+		$lahetetyyppi = "tulosta_lahete_ean.inc";
 		$lahetetyyppi = "tulosta_lahete_brutto.inc";
 		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 		$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
@@ -14672,7 +14684,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 		*/
 
-		require("tilauskasittely/tulosta_lahete.inc");
+		if (@include("tilauskasittely/tulosta_lahete.inc"));
+		else require("tulosta_lahete.inc");
 
 		//	Jos meill‰ on funktio tulosta_lahete meill‰ on suora funktio joka hoitaa koko tulostuksen
 		if (function_exists("tulosta_lahete")) {

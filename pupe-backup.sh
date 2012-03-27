@@ -20,6 +20,10 @@ if [ ! -z $7 ]; then
 	REMOTELOCALDIR=${12}
 fi
 
+if [ ! -z ${13} ]; then
+	S3BUCKET=${13}
+fi
+
 # Katsotaan, että parametrit on annettu
 if [ -z ${BACKUPDIR} ] || [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
@@ -64,8 +68,8 @@ if [ ! -d /tmp/${DBKANTA} ]; then
 	exit
 fi
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Backup ${DBKANTA}."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup ${DBKANTA}."
 
 # Siirrytään temppidirriin
 cd /tmp/${DBKANTA}
@@ -73,29 +77,42 @@ cd /tmp/${DBKANTA}
 # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylös, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
 mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/pupesoft-backup.info
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy done."
 
 # Pakataan failit
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Bzip2 done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Bzip2 done."
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Laitetaan salausavain fileen
+	echo "${SALAUSAVAIN}" > /root/salausavain
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		# Päivitetään oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"		
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
 fi
 
 # Dellataan pois tempit
 rm -rf /tmp/${DBKANTA}
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy config files."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy config files."
 
 # Backupataan Pupeasenukseen liittyvät asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
@@ -164,17 +181,30 @@ fi
 
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi tehtävä file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup käyttäen Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		# Päivitetään oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
+
+	# Dellataan salausavain file
+	rm -f /root/salausavain
 fi
 
 #Siirretäänkö tuorein backuppi myös sambaserverille jos sellainen on konffattu
-if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SAMBA" ]; then
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
 	checksamba=`mount -t cifs -o username=${REMOTEUSER},password=${REMOTEPASS} //${REMOTEHOST}/${REMOTEREMDIR} ${REMOTELOCALDIR}`
 
 	if [[ $? != 0 ]]; then
@@ -194,7 +224,7 @@ if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SAMBA" ]; then
 fi
 
 #Pidetäänkö kaikki backupit eri serverillä
-if [ ! -z ${EXTRABACKUP} -a "${EXTRABACKUP}" == "SSH" ]; then
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	# Siirretään failit remoteserverille
 	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
@@ -209,6 +239,13 @@ fi
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - All done."
+# Synkataan backuppi Amazon S3:een
+if [ ! -z "${S3BUCKET}" ]; then
+	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": S3 copy done."		
+fi
+
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup done."
 echo

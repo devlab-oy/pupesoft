@@ -277,7 +277,8 @@
 	$query = "	SELECT distinct selite
 				FROM tuotteen_avainsanat
 				WHERE yhtio = '{$kukarow["yhtio"]}'
-				AND laji = 'parametri_variaatio'";
+				AND laji = 'parametri_variaatio'
+				AND trim(selite) != ''";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -330,7 +331,8 @@
 			$properties = array();
 
 			while ($syvinrow = mysql_fetch_assoc($alinres)) {
-				$properties[] = array($syvinrow["selitetark"] => $syvinrow["selite"]);
+				$properties[] = array(	"nimi" => $syvinrow["selitetark"],
+				 						"arvo" => $syvinrow["selite"]);
 			}
 
 			// Jos yhtiön hinnat eivät sisällä alv:tä
@@ -353,7 +355,6 @@
 															'nimitys'				=> $alirow["nimitys"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],
-															'variaatio' 			=> $rowselite["selite"],
 															'myyntihinta'			=> $myyntihinta,
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,

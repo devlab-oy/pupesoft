@@ -1821,8 +1821,7 @@ if ($tee == '') {
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
 	if ($kukarow["kesken"] > 0 and (
-		(isset($toimitustapa) and strpos($toimitustapa, "###") === FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
-		(isset($toimitustapa) and strpos($toimitustapa, "###") !== FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]."###".$laskurow["toimitustavan_lahto"]) or
+		(isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
@@ -1852,13 +1851,6 @@ if ($tee == '') {
 		}
 		elseif ((int) $myyja > 0) {
 			$pika_paiv_myyja = " myyja = '$myyja', ";
-		}
-
-		if (strpos($toimitustapa, "###") !== FALSE) {
-			list($toimitustapa, $toimitustavan_lahto) = explode("###", $toimitustapa);
-		}
-		else {
-			$toimitustavan_lahto = "";
 		}
 
 		if ($maksutapa != '') {
@@ -1941,7 +1933,7 @@ if ($tee == '') {
 
 		$query  = "	UPDATE lasku SET
 					toimitustapa		= '$toimitustapa',
-					toimitustavan_lahto	= '$toimitustavan_lahto',
+					toimitustavan_lahto	= '',
 					viesti 				= '$viesti',
 					tilausvahvistus 	= '$tilausvahvistus',
 					$pika_paiv_merahti
@@ -2588,27 +2580,16 @@ if ($tee == '') {
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
 			mysql_data_seek($tresult, 0);
 
-			if ($laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>$toimtapa_kv - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."</option>";
-			}
-
 			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $laskurow["toimitustapa"] and $laskurow["toimitustavan_lahto"] == '0000-00-00 00:00:00') {
+				if ($row["selite"] == $laskurow["toimitustapa"]) {
 					$sel = 'selected';
 					$tm_toimitustaparow = $row;
 				}
 
-				$toimitustava_lahto = seuraava_lahtoaika($row['tunnus']);
-
-				echo "<option value='$row[selite]###$toimitustava_lahto' $sel>";
+				echo "<option value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
-				if ($toimitustava_lahto != "0000-00-00 00:00:00") {
-					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
-				}
-
 				echo "</option>";
 			}
 			echo "</select>";

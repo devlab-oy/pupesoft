@@ -332,13 +332,13 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "pakkauskoodit":
 				$pakolliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
-				$wherelliset = array();
+				$wherelliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
 			case "rahdinkuljettajat":
 				$pakolliset = array("NIMI", "KOODI");
-				$wherelliset = array();
+				$wherelliset = array("NIMI", "KOODI", "NEUTRAALI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;

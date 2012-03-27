@@ -11,5 +11,9 @@
 					$t[$i] = trim(mysql_real_escape_string($t[$i]));
 				}
 			}
+
+			if (mysql_field_name($result, $i) == "neutraali") {
+				$t[$i] = trim($t[$i]) == '' ? "" : $t[$i];
+			}
 		}
 	}

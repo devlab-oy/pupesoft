@@ -3,5 +3,5 @@
 	$otsikko = 'Rahdinkuljettajat';
 	$otsikko_nappi 	= 'rahdinkuljettaja';
 
-	$kentat = "tunnus, koodi, nimi";
-	$jarjestys = 'koodi, nimi';
+	$kentat = "tunnus, koodi, nimi, neutraali";
+	$jarjestys = 'koodi, nimi, neutraali';

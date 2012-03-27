@@ -319,9 +319,7 @@ class Unifaun {
 			// Vastaanottajan tiedot
 			$uni_receiver = $xml->addChild('receiver');	# Any contents. Mandatory.
 
-			$receiver_id = trim($this->toitarow['jalleenmyyjanro']) != "" ? $this->toitarow["jalleenmyyjanro"] : $this->asiakasrow["tunnus"]; # HIT InNight mandatory toimitustapa.jalleenmyyjanro
-
-			$uni_receiver->addAttribute('rcvid', utf8_encode($receiver_id));
+			$uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); # Receiver's name
 				$uni_rcv_val->addAttribute('n', "name");
@@ -524,9 +522,14 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Customs currency unit
 				#$uni_shi_val->addAttribute('n', "customsunit");
 
-				$avainsana_result = t_avainsana('UNIFAUN_RAHKULJ', '', " and selite='{$this->toitarow['virallinen_selite']}' ");
+				$query = "	SELECT *
+							FROM rahdinkuljettajat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
+				$rahdinkuljettaja_res = pupe_query($query);
+				$rahdinkuljettaja_row = mysql_fetch_assoc($rahdinkuljettaja_res);
 
-				if (mysql_num_rows($avainsana_result) > 0) {
+				if (trim($rahdinkuljettaja_row['neutraali']) != "") {
 					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
 					$uni_service->addAttribute('srvid', utf8_encode('FREEG'));
 					$uni_service->addAttribute('subid', utf8_encode($this->toitarow['virallinen_selite']));

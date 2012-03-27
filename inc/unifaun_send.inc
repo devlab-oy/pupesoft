@@ -201,6 +201,13 @@ class Unifaun {
 
 		$xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 
+		$query = "	SELECT *
+					FROM rahdinkuljettajat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
+		$rahdinkuljettaja_res = pupe_query($query);
+		$rahdinkuljettaja_row = mysql_fetch_assoc($rahdinkuljettaja_res);
+
 		// Luodaan UNIFAUN-XML
 		$xml = new SimpleXMLElement($xmlstr);
 
@@ -324,6 +331,11 @@ class Unifaun {
 			$uni_receiver = $xml->addChild('receiver');	# Any contents. Mandatory.
 
 			$uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
+
+				if ($rahdinkuljettaja_row['jalleenmyyjanro'] != 0 and $rahdinkuljettaja_row['jalleenmyyjanro'] != "") {
+					$uni_rcv_val = $uni_receiver->addChild('val', $rahdinkuljettaja_row['jalleenmyyjanro']); # HIT InNight mandatory.
+					$uni_rcv_val->addAttribute('n', "id4user");
+				}
 
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); # Receiver's name
 				$uni_rcv_val->addAttribute('n', "name");
@@ -525,13 +537,6 @@ class Unifaun {
 
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Customs currency unit
 				#$uni_shi_val->addAttribute('n', "customsunit");
-
-				$query = "	SELECT *
-							FROM rahdinkuljettajat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND koodi = '{$this->toitarow['rahdinkuljettaja']}'";
-				$rahdinkuljettaja_res = pupe_query($query);
-				$rahdinkuljettaja_row = mysql_fetch_assoc($rahdinkuljettaja_res);
 
 				if (trim($rahdinkuljettaja_row['neutraali']) != "") {
 					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.

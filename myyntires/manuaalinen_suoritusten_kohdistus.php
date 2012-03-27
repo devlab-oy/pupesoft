@@ -1236,12 +1236,20 @@ if ($tila == 'tee_kohdistus') {
 							lukko				= '1'";
 				$result = pupe_query($query);
 
+
+				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+					$ervains = $erotus_valuutassa;
+				}
+				else {
+					$ervains = $erotus;
+				}
+
 				// Luodaan suoritus johon ylij‰‰nyt saldo laitetaan
 				$query = "	INSERT INTO suoritus SET
 							yhtio			= '$suoritus[yhtio]',
 							tilino			= '$suoritus[tilino]',
 							nimi_maksaja	= '$suoritus[nimi_maksaja]',
-							summa			= $erotus * -1,
+							summa			= $ervains * -1,
 							kirjpvm			= '$suoritus[kirjpvm]',
 							maksupvm		= '$suoritus[maksupvm_clean]',
 							asiakas_tunnus	= '$suoritus[asiakas_tunnus]',

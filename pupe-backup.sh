@@ -68,8 +68,8 @@ if [ ! -d /tmp/${DBKANTA} ]; then
 	exit
 fi
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Backup ${DBKANTA}."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup ${DBKANTA}."
 
 # Siirryt‰‰n temppidirriin
 cd /tmp/${DBKANTA}
@@ -77,14 +77,14 @@ cd /tmp/${DBKANTA}
 # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
 mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/pupesoft-backup.info
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy done."
 
 # Pakataan failit
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Bzip2 done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Bzip2 done."
 
 if [ ! -z "${SALAUSAVAIN}" ]; then
 
@@ -101,16 +101,18 @@ if [ ! -z "${SALAUSAVAIN}" ]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
 	else
-		echo -n `date "+%Y-%m-%d %H:%M:%S"`
-		echo " - Encrypt done."
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"		
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
 fi
 
 # Dellataan pois tempit
 rm -rf /tmp/${DBKANTA}
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy config files."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy config files."
 
 # Backupataan Pupeasenukseen liittyv‰t asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
@@ -191,8 +193,10 @@ if [ ! -z "${SALAUSAVAIN}" ]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
 	else
-		echo -n `date "+%Y-%m-%d %H:%M:%S"`
-		echo " - Encrypt done."
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
 
 	# Dellataan salausavain file
@@ -237,9 +241,11 @@ find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
 
 # Synkataan backuppi Amazon S3:een
 if [ ! -z "${S3BUCKET}" ]; then
-	s3cmd --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": S3 copy done."		
 fi
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - All done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup done."
 echo

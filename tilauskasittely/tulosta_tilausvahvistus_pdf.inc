@@ -139,6 +139,11 @@
 	}
 
 	$riresult = mysql_query($query) or pupe_error($query);
+	
+	// tämä siksi koska halutaan alkuperäisen tilauksen tilausnumero pdf-filuun.
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$laskurow["tunnus"] = $laskurow['vanhatunnus'];
+	}
 
 	$params_lahete = array(
 	'arvo'						=> 0,

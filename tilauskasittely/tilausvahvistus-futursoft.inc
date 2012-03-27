@@ -82,14 +82,21 @@ if (!file_exists($tilvahvfilenimi)) {
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = pupe_query($query);
 
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	if (mysql_num_rows($tilvahresult) > 0) {
 
 		$ulos = "*IS\n";
 		$ulos .= "*MS\n";
-		$ulos .= "*RS TILVAHV " . $laskurow['tunnus'] . "\n";
-		$ulos .= "TILVAHV.TLV_NRO:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "*RS TILVAHV " . $tulostettava_tunnus . "\n";
+		$ulos .= "TILVAHV.TLV_NRO:" . $tulostettava_tunnus . "\n";
 		$ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
-		$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $tulostettava_tunnus . "\n";
 		$ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['luontiaika']) . "\n";
 		$ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'],-8,8) . "\n";
 		$ulos .= "TILVAHV.TLV_TILAAJA_OVT:" . $laskurow['ovttunnus'] . "\n";
@@ -112,7 +119,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "TILVAHV.TLV_TOIMITUSTAPA:".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."\n";
 		$ulos .= "TILVAHV.TLV_SUMMA:" . $laskurow['summa'] . "\n";
 		$ulos .= "TILVAHV.TLV_SISALTOKOODI:29\n";
-		$ulos .= "*RE TILVAHV " . $laskurow['tunnus'] . "\n";
+		$ulos .= "*RE TILVAHV " . $tulostettava_tunnus . "\n";
 
 		$rivino = 1; // dummy rivino, kun elma ei handlaa pitkiä
 
@@ -122,7 +129,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			if ($tvtilausrivirow['eankoodi'] == 0) $tvtilausrivirow['eankoodi'] = '';
 
 			$ulos .= "*RS TILVAHVRIV "            . $rivino . "\n";
-			$ulos .= "TILVAHVRIV.TVR_NRO:"        . $laskurow['tunnus'] . "\n";
+			$ulos .= "TILVAHVRIV.TVR_NRO:"        . $tulostettava_tunnus . "\n";
 			$ulos .= "TILVAHVRIV.TVR_RIVINRO:"    . $rivino . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TIL_RIVINRO:". $tvtilausrivirow['tilaajanrivinro'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TILAUSNRO:"  . $laskurow['asiakkaan_tilausnumero'] . "\n";

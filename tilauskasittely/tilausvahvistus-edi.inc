@@ -96,18 +96,25 @@ if (!file_exists($tilvahvfilenimi)) {
 		$mehtorow = mysql_fetch_array($xresult);
 	}
 
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	if (mysql_num_rows($tilvahresult) > 0) {
 
-		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "ICHG_TYPE:POS\n";
-		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
-		$ulos .= "RHDRSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
+		$ulos .= "RHDRSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "RBGMITYPE:231\n";
 		$ulos .= "RBGMINUMB:" . $laskurow['tunnus'] . "\n";
 		$ulos .= "RBGMIACKR:NA\n";
 		$ulos .= "RDTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 		$ulos .= "RRFFCR_NU:" . tv2dateconv($laskurow['luontiaika']) . "\n";
-		$ulos .= "RRFFVN_NU:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "RRFFVN_NU:" . $tulostettava_tunnus . "\n";
 		$ulos .= "RRFFCO_NU:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['viesti'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['comments'] . "\n";
@@ -150,7 +157,7 @@ if (!file_exists($tilvahvfilenimi)) {
 
 		$ulos .= "RCUX5__CR:" . $laskurow['valkoodi'] . "\n";
 		$ulos .= "RTDT20_TT:" . "ZNN " . $laskurow['toimitustapa'] . "\n";
-		$ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		fputs($toot,$ulos);
 
 		$rivino = 1; // dummy rivino, kun elma ei handlaa pitkiä
@@ -179,8 +186,8 @@ if (!file_exists($tilvahvfilenimi)) {
 			fputs($toot,$ulos);
 			$rivino++;
 		}
-		$ulos  = "RMSG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
-		$ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos  = "RMSG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
+		$ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		fputs($toot,$ulos);
 		fclose ($toot);
 

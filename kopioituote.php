@@ -27,7 +27,7 @@
 
 	if ($tee == 'PERUSTA') {
 
-		if(strpos($tuoteno, '####') !== FALSE) {
+		if (strpos($tuoteno, '####') !== FALSE) {
 			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);
 			$tuoteno 	= substr($tuoteno, 0, strpos($tuoteno, '####'));
 		}
@@ -37,7 +37,8 @@
 
 		$query = "	SELECT tunnus
 					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$uustuoteno'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0 ) {
@@ -47,10 +48,11 @@
 		else {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
+						WHERE yhtio = '$hakyhtio'
+						and tuoteno = '$tuoteno'";
 			$stresult = pupe_query($query);
 
-			if (mysql_num_rows($stresult) == 0 ) {
+			if (mysql_num_rows($stresult) == 0) {
 				$tee = 'HAKU';
 				$varaosavirhe = t("VIRHE: Vanha tuote")." $tuoteno ".t("on kadonnut, ei uskalleta tehd‰ mit‰‰n")."!";
 			}
@@ -59,7 +61,8 @@
 
 				$tuotepaikat_query = "	SELECT *
 										FROM tuotepaikat
-										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
+										WHERE tuoteno = '$tuoteno'
+										and yhtio = '$kukarow[yhtio]'";
 				$tuotepaikat_result = pupe_query($tuotepaikat_query);
 
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($tuotepaikat_result) == 0 and $otsikkorivi["ei_saldoa"] == "") {
@@ -97,21 +100,25 @@
 				// tehd‰‰n vanhasta tuotteesta 1:1 kopio...
 				$query = "INSERT into tuote set ";
 
-				for ($i=0; $i<mysql_num_fields($stresult); $i++) {
+				for ($i = 0; $i < mysql_num_fields($stresult); $i++) {
 
-					if (mysql_field_name($stresult,$i) == 'yhtio') {
+					if (mysql_field_name($stresult, $i) == 'yhtio') {
 						$query .= "yhtio='$kukarow[yhtio]',";
 					}
 					// tuotenumeroksi tietenkin uustuoteno
-					elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
+					elseif (mysql_field_name($stresult, $i) == 'tuoteno') {
 						$query .= "tuoteno='$uustuoteno',";
 					}
 					// laatijaksi klikkaaja
 					elseif (mysql_field_name($stresult,$i) == 'laatija') {
 						$query .= "laatija='$kukarow[kuka]',";
 					}
+					// muuttajaksi klikkaaja
+					elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+						$query .= "muuttaja='$kukarow[kuka]',";
+					}
 					// luontiaika
-					elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
+					elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
 					// n‰m‰ kent‰t tyhjennet‰‰n
@@ -122,9 +129,7 @@
 							mysql_field_name($stresult,$i) == 'epakurantti50pvm' or
 							mysql_field_name($stresult,$i) == 'epakurantti75pvm' or
 							mysql_field_name($stresult,$i) == 'epakurantti100pvm' or
-							mysql_field_name($stresult,$i) == 'eankoodi' or
-							mysql_field_name($stresult,$i) == 'muutospvm' or
-							mysql_field_name($stresult,$i) == 'muuttaja') {
+							mysql_field_name($stresult,$i) == 'eankoodi') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan
@@ -133,40 +138,44 @@
 					}
 				}
 				$query = substr($query,0,-1);
-
 				$stresult = pupe_query($query);
-				$id = mysql_insert_id();
+
+				$tuote_id = mysql_insert_id();
 
 				//	T‰m‰ funktio tekee myˆs oikeustarkistukset!
-				synkronoi($kukarow["yhtio"], "tuote", $id, "", "");
+				synkronoi($kukarow["yhtio"], "tuote", $tuote_id, "", "");
 
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat
-							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+							WHERE yhtio = '$hakyhtio'
+							and tuoteno = '$tuoteno'";
 				$stresult = pupe_query($query);
 
 				if (mysql_num_rows($stresult) != 0 ) {
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
 						// tehd‰‰n vanhoista tuotteen_toimittajista 1:1 kopio...
 						$query = "INSERT into tuotteen_toimittajat set ";
+
 						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
+							if (mysql_field_name($stresult,$i) == 'yhtio') {
+								$query .= "yhtio='$kukarow[yhtio]',";
+							}
 							// tuotenumeroksi tietenkin uustuoteno
-							if (mysql_field_name($stresult,$i) == 'tuoteno') {
+							elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
 								$query .= "tuoteno='$uustuoteno',";
 							}
 							// laatijaksi klikkaaja
 							elseif (mysql_field_name($stresult,$i) == 'laatija') {
 								$query .= "laatija='$kukarow[kuka]',";
 							}
-							// luontiaika
-							elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
-								$query .= mysql_field_name($stresult,$i)."=now(),";
+							// muuttajaksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+								$query .= "muuttaja='$kukarow[kuka]',";
 							}
-							// n‰m‰ kent‰t tyhjennet‰‰n
-							elseif (mysql_field_name($stresult,$i) == 'muutospvm' or
-									mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query .= mysql_field_name($stresult,$i)."='',";
+							// luontiaika
+							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
+								$query .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
 							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
@@ -183,19 +192,20 @@
 				}
 
 				// kopioidaan dynaamisen puun tiedot uudelle tuotteelle
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM puun_alkio
-							WHERE yhtio = '$kukarow[yhtio]' and liitos = '$tuoteno'";
+							WHERE yhtio = '$hakyhtio'
+							and liitos  = '$tuoteno'";
 				$stresult = pupe_query($query);
-				
+
 				if (mysql_num_rows($stresult) != 0) {
-					
-					while($otsikkorivi = mysql_fetch_array($stresult)) {
+
+					while ($otsikkorivi = mysql_fetch_array($stresult)) {
 
 						// tehd‰‰n vanhasta alkiosta kopio...
 						$query = "INSERT into puun_alkio set ";
-					
-						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
+
+						for ($i = 0; $i < mysql_num_fields($stresult); $i++) {
 
 							if (mysql_field_name($stresult,$i) == 'yhtio') {
 								$query .= "yhtio='$kukarow[yhtio]',";
@@ -208,38 +218,37 @@
 							elseif (mysql_field_name($stresult,$i) == 'laatija') {
 								$query .= "laatija='$kukarow[kuka]',";
 							}
-							// luontiaika
-							elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
-								$query .= mysql_field_name($stresult,$i)."=now(),";
+							// muuttajaksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
+								$query .= "muuttaja='$kukarow[kuka]',";
 							}
-							// n‰m‰ kent‰t tyhjennet‰‰n
-							elseif (mysql_field_name($stresult,$i) == 'muutospvm' or
-									mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query .= mysql_field_name($stresult,$i)."='',";
+							// luontiaika
+							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
+								$query .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
 							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
 								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 							}
 						}
-						
+
 						$query = substr($query,0,-1);
 						$puunalkio_result = pupe_query($query);
+
+						$id2 = mysql_insert_id();
+
+						synkronoi($kukarow["yhtio"], "puun_alkio", $id2, "", "");
 					}
 				}
-				
-				$query = "	SELECT tunnus
-							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-				$result = pupe_query($query);
-				$rivi = mysql_fetch_array($result);
 
 				//	L‰hetet‰‰n mailia t‰st‰ eteenp‰in jos meill‰ on vastaanottajia
 				if ($yhtiorow["tuotekopio_email"] != "") {
 					$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 
-					$query = "SELECT * from yhtio where yhtio='$hakyhtio'";
+					$query = "	SELECT *
+								FROM yhtio
+								WHERE yhtio = '$hakyhtio'";
 					$yres = pupe_query($query);
 					$yrow = mysql_fetch_array($yres);
 
@@ -249,7 +258,7 @@
 				}
 
 				$toim 	= 'tuote';
-				$tunnus = $rivi['tunnus'];
+				$tunnus = $tuote_id;
 				$tee 	= '';
 
 				require ("yllapito.php");
@@ -263,7 +272,8 @@
 
 		$query = "	SELECT tunnus
 					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {

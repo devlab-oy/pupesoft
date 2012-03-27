@@ -330,6 +330,18 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
+			case "pakkauskoodit":
+				$pakolliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
+				$wherelliset = array();
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "rahdinkuljettajat":
+				$pakolliset = array("NIMI", "KOODI");
+				$wherelliset = array();
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

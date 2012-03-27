@@ -1712,6 +1712,12 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'pakkaus') {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "pakkauskoodit%", "", "OK")) !== FALSE) {
+				echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);
@@ -1755,6 +1761,8 @@
 			$toim == "auto_vari_korvaavat" or
 			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
+			$toim == "pakkauskoodit" or
+			$toim == "rahdinkuljettajat" or
 			$toim == "keraysvyohyke" or
 			$toim == "avainsana" or
 			$toim == "pakkaus" or
@@ -1908,6 +1916,10 @@
 
 	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "pakkauskoodit") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('pakkauskoodit_iframe' {$jcsmaxheigth});</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "auto_vari_tuote") {

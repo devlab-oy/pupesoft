@@ -170,12 +170,17 @@
 							$mergeid = $valittu_lahto;
 							$parcelno = $sscc_chk_row['sscc_ulkoinen'];
 
-							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
-
 							// haetaan toimitustavan tiedot
 							$query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$old_row['selite']}'";
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
+
+							if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+								$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+							}
+							elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+								$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+							}
 
 							$unifaun->setToimitustapaRow($toitarow);
 							$unifaun->_discardParcel($mergeid, $parcelno);
@@ -238,7 +243,12 @@
 
 								$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 
-								$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
+								if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+								}
+								elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+								}
 
 								$unifaun->setYhtioRow($yhtiorow);
 								$unifaun->setKukaRow($kukarow);
@@ -535,7 +545,7 @@
 					$result = pupe_query($query);
 
 					$toimitustapa_varasto = "";
-					$lahetetaanko_unifaun = false;
+					$lahetetaanko_unifaun = FALSE;
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$sel_ltun[] = $row['tunnus'];
@@ -549,15 +559,20 @@
 						$toimitustapa_res = pupe_query($query);
 						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
-						if ($toimitustapa_row['tulostustapa'] == 'E') {
-							$lahetetaanko_unifaun = true;
+						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
+							$lahetetaanko_unifaun = $toimitustapa_row["rahtikirja"];
 						}
 					}
 
 					if (count($sel_ltun) > 0) {
 
-						if ($lahetetaanko_unifaun) {
-							$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
+						if ($lahetetaanko_unifaun !== FALSE) {
+							if ($lahetetaanko_unifaun == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+								$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+							}
+							elseif ($lahetetaanko_unifaun == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+								$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+							}
 
 							$query = "	SELECT unifaun_nimi
 										FROM kirjoittimet
@@ -571,16 +586,6 @@
 
 							$unifaun->ftpSend();
 						}
-
-						// $query = "	SELECT toimitustapa.selite
-						// 			FROM lahdot
-						// 			JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-						// 			WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-						// 			AND lahdot.tunnus = '{$lahto}'";
-						// $toimitustapa_result = pupe_query($query);
-						// $toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
-						//
-						// $toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
 
 						$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN (".implode(",", $sel_ltun).")";
 						$ures  = pupe_query($query);

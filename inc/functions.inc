@@ -14656,6 +14656,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		/*
 		Testausta varten.....
 		$lahetetyyppi = "tulosta_lahete.inc";
+		$lahetetyyppi = "tulosta_lahete_ean.inc";
 		$lahetetyyppi = "tulosta_lahete_brutto.inc";
 		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 		$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";

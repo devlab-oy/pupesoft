@@ -460,6 +460,8 @@
 					ORDER BY nimi";
 		$rahdinkuljettajat_res = pupe_query($query);
 
+		$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
+
 		while ($rahdinkuljettajat_row = mysql_fetch_assoc($rahdinkuljettajat_res)) {
 			$sel = (isset($trow[$i]) and $trow[$i] == $rahdinkuljettajat_row['koodi']) ? " selected" : "";
 

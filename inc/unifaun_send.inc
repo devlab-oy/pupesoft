@@ -677,37 +677,37 @@ class Unifaun {
 
 				$uni_article = $uni_parcel->addChild('article');
 
-				if ($vak['tuoteno'] != '') {
+				if (isset($vak['tuoteno']) and $vak['tuoteno'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['tuoteno'])); # article number
 					$uni_par_val->addAttribute('n', "articleno");
 				}
 
-				if ($vak['tuotenimitys'] != '') {
+				if (isset($vak['tuotenimitys']) and $vak['tuotenimitys'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['tuotenimitys'])); # UN-number for ADR. Supplied as a 4 digit code.
 					$uni_par_val->addAttribute('n', "name");
 				}
 
-				if ($vak['kpl'] != '') {
+				if (isset($vak['kpl']) and $vak['kpl'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl'])); # UN-number for ADR. Supplied as a 4 digit code.
 					$uni_par_val->addAttribute('n', "count");
 				}
 
-				if ($vak['kpl_paino'] != '') {
+				if (isset($vak['kpl_paino']) and $vak['kpl_paino'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'])); # UN-number for ADR. Supplied as a 4 digit code.
 					$uni_par_val->addAttribute('n', "weight");
 				}
 
-				if ($vak['yk_nro'] != '') {
+				if (isset($vak['yk_nro']) and $vak['yk_nro'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['yk_nro'])); # UN-number for ADR. Supplied as a 4 digit code.
 					$uni_par_val->addAttribute('n', "dnguncode");
 				}
 
-				if ($vak['lipukkeet'] != '') {
+				if (isset($vak['lipukkeet']) and $vak['lipukkeet'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['lipukkeet'])); # Label number for ADR
 					$uni_par_val->addAttribute('n', "dnghzcode");
 				}
 
-				if ((int) $vak['pakkausryhma'] > 0) {
+				if (isset($vak['pakkausryhma']) and (int) $vak['pakkausryhma'] > 0) {
 					$vak['pakkausryhma'] = (int) $vak['pakkausryhma'];
 					$vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma']; 
 
@@ -715,12 +715,12 @@ class Unifaun {
 					$uni_par_val->addAttribute('n', "dngpkcode");
 				}
 
-				if ($vak['luokka'] != '') {
+				if (isset($vak['luokka']) and $vak['luokka'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['luokka'])); # ADR-class
 					$uni_par_val->addAttribute('n', "dngadrclass");
 				}
 
-				if ($vak['nimi_ja_kuvaus'] != '') {
+				if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
 					$uni_par_val = $uni_article->addChild('val', utf8_encode($vak['nimi_ja_kuvaus'])); # Official transport name for item regarding ADR
 					$uni_par_val->addAttribute('n', "dngdescr");
 				}
@@ -728,12 +728,12 @@ class Unifaun {
 				#$uni_par_val = $uni_article->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
 				#$uni_par_val->addAttribute('n', "dngmpcode");
 
-				if ($vak['limited_qty'] != '') {
+				if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
 					$uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); # Note for ADR goods
 					$uni_par_val->addAttribute('n', "dngnote");
 				}
 
-				if ($vak['paino'] != '') {
+				if (isset($vak['paino']) and $vak['paino'] != '') {
 
 					$vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
 

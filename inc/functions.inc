@@ -8946,6 +8946,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}
+		elseif (strpos($laskurow['tilausvahvistus'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
+		}
 		elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
 		}
@@ -8963,6 +8966,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mellä on tilausvahvistuksessa ykkönen, halutaan nähä alet
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
@@ -9224,7 +9230,7 @@ if (!function_exists("t_avainsana")) {
 								FROM avainsana as avainsana_kieli
 								WHERE avainsana_kieli.yhtio = avainsana.yhtio
 								and avainsana_kieli.laji = avainsana.laji
-								and avainsana_kieli.perhe = avainsana.perhe
+								and avainsanatulsota_lahete = avainsana.perhe
 								and avainsana_kieli.perhe > 0
 								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
 		}

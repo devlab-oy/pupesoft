@@ -534,7 +534,7 @@
 							yhtio READ";
 				$result = pupe_query($query);
 
-				$debug = true;
+				$debug 		= true;
 				$lukotetaan = false;
 
 				$erat = tee_keraysera($keraysvyohyke, $select_varasto);
@@ -543,7 +543,10 @@
 
 					$otunnukset = implode(",", $erat['tilaukset']);
 
-					$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ($otunnukset)";
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus IN ($otunnukset)";
 					$res = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($res);
 

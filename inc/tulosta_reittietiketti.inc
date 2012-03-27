@@ -39,7 +39,13 @@
 					$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
 					$parcelno = $chk_sscc_row['sscc_ulkoinen'];
 
-					$unifaun = new Unifaun($unifaun_host, $unifaun_user, $unifaun_pass, $unifaun_path, $unifaun_port, $unifaun_fail);
+
+					if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
+						$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail);
+					}
+					elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+						$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail);
+					}
 
 					$unifaun->_discardParcel($mergeid, $parcelno);
 
@@ -78,7 +84,7 @@
 				if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
 					($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
-					require("inc/unifaun_send.inc");
+					require_once("inc/unifaun_send.inc");
 
 					$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
 					$kirjoitin_res = pupe_query($query);

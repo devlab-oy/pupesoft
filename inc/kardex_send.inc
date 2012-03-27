@@ -47,7 +47,7 @@
 			$query = "	SELECT tunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$chk_sscc_row['otunnus']}'";
+						AND tunnus = '{$kardex_row['otunnus']}'";
 			$tilriv_tiedot_res = pupe_query($query);
 			$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
 
@@ -63,6 +63,12 @@
 		}
 
 		if ($kardex_ok) {
+
+			// Remmataan faili $kardex_sscc-kansiosta jos se on siellä
+			if (file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
+				unlink($kardex_sscc."/".$kerayseran_numero.".txt");
+			}
+
 			$kardexnimi = "/tmp/kardex-".md5(uniqid(mt_rand(), true)).".txt";
 			$fh = fopen($kardexnimi, "w+");
 			fputs($fh, $sisalto);
@@ -78,13 +84,15 @@
 
 			require('inc/ftp-send.inc');
 		}
-		elseif ($kardex_fail_sscc != "") {
-			// Työnnetään uudelleenkäsiteltävien joukkoon jos ulkoinen SSCC puuttuu
-			$kardexnimi = $kardex_fail_sscc."/".$kerayseran_numero.".txt";
-
-			$fh = fopen($kardexnimi, "w+");
-			fputs($fh, $kerayseran_numero);
-			fclose($fh);
+		elseif ($kardex_sscc != "") {
+			// Katotaan, ettei tätä ole jo siirretty uudelleenkäsiteltävien joukkoon
+			if (!file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
+				// Työnnetään uudelleenkäsiteltävien joukkoon jos ulkoinen SSCC puuttuu
+				$kardexnimi = $kardex_sscc."/".$kerayseran_numero.".txt";
+				$fh = fopen($kardexnimi, "w+");
+				fputs($fh, $kerayseran_numero);
+				fclose($fh);
+			}
 		}
 	}
 ?>

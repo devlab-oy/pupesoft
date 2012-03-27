@@ -3,7 +3,7 @@
 	// Kutsutaanko CLI:st‰
 	$php_cli = FALSE;
 
-	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+	if (php_sapi_name() == 'cli') {
 		$php_cli = TRUE;
 	}
 
@@ -131,14 +131,12 @@
 					default:
 						$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 				}
-
-				fwrite($filehandle, "Error message: $syy\n");
 			}
-
-			unlink("/tmp/##ftp-get-in.lock");
 		}
 		else {
 			mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 		}
+
+		unlink("/tmp/##ftp-get-in.lock");
 	}
 ?>

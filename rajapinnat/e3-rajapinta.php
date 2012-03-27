@@ -58,8 +58,20 @@
 		echo "Voidaan ajaa vain komentoriviltä!!!\n";
 		die;
 	}
+	
+	//monenko päivän takaa haetaan mm myynnit ja ostot skriptin ajohetkellä, älä aseta isommaksi kuin 2
+	$ajopaiva = 1;
+	// 1 = maanantai, 7 = sunnuntai
+	$weekday = date("N");
+	$weekday = $weekday-$ajopaiva;
 
-	$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if ($weekday <= 0 OR $weekday == 6 OR $weekday == 7) {
+		// tällä hetkellä aineiston saa ainoastaan ma-pe päiviltä
+		echo "\n\nTätä skriptiä voi ajaa vain arkipäiviltä!\n\n";
+		die;
+	}
+
+	$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-$ajopaiva, date("Y")));
 
 	//rajaukset
 	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = ''";
@@ -86,6 +98,8 @@
 
 	//testausta varten limit
 	$limit = "";
+	//xf02:sta varten
+	$korvatut = "";
 
 	// Ajetaan kaikki operaatiot
 	xauxi($limit);
@@ -94,6 +108,8 @@
 	xvni($limit);
 	xf04($limit);
 	xf01($limit);
+	$korvatut = "yes";
+	xswp($limit);
 	xf02($limit);
 
 	//Siirretään failit e3 palvelimelle
@@ -229,7 +245,7 @@
 					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset AND tuote.ostoehdotus = '')
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus AND lasku.tila = 'K' AND lasku.alatila != 'I')
 					#tää ei ole aukoton ratkaisu ratkaista sitä, että vain e3:lla tehtyjä tilauksia vastaan tehdyt tuloutukset.. jotkut tulot ei tuu osumaan jatkossa jos tälleen tehdään (jos asn/ostolasku kohdistuksien vuoksi uupuu ja tehdään käsin rivejä)
-					#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+					JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 					WHERE tilausrivi.yhtio	= '$yhtiorow[yhtio]'
 					AND tilausrivi.tyyppi = 'O'
@@ -285,9 +301,18 @@
 	}
 
 	function xswp($limit = '') {
-		global $path_wswp, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
+		global $path_wswp, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $korvatut, $ajopaiva, $xf02loppulause, $weekday;
 
 		echo "TULOSTETAAN xswp...";
+
+		//xf02:sta varten otetaan korvatut vuorokauden myöhemmin, eli esim maanantaina korvattu esitetään xf02:ssa tiistain aineistossa
+		if ($korvatut != "") {
+			$ajopaiva = $ajopaiva + 1;
+			if ($weekday == 1) {		//ma aineistoon korvatut perjantailta. Su->La->Pe eli + 2
+				$ajopaiva = $ajopaiva + 2;
+			}
+			$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-$ajopaiva, date("Y")));
+		}
 
 		$query = " SELECT korvaavat.id,
 				   tuote.tuoteno,
@@ -308,7 +333,7 @@
 		$rows = mysql_num_rows($rest);
 		$row  = 0;
 
-		$fp = fopen($path_wswp, 'w+');
+		if ($korvatut == "") $fp = fopen($path_wswp, 'w+');
 
 		$xf02loppulause = '';
 
@@ -350,30 +375,32 @@
 			$tuto2 = mysql_fetch_assoc($tutoq2);
 			
 			if ($tuto2['toimittaja'] == '' or $tuto2['tyyppi'] == 'P') continue;
-			
-			// eka korvatun toimittaja + tuoteno, sitten korvaavan toimittaja ja tuoteno
-			$lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
-			// laitetaan xf02 loppuun tieto mikä tuote on poistettu. toimittaja ja tuoteno
-			$xf02loppulause .= "$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
 
-			if (!fwrite($fp, $lause . "\n")) {
-				echo "Failed writing row.\n";
-				die();
+			if ($korvatut != "") {
+				// laitetaan xf02 loppuun tieto mikä tuote on poistettu. toimittaja ja tuoteno.
+				$xf02loppulause .= "$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
 			}
+			else {
+				// eka korvatun toimittaja + tuoteno, sitten korvaavan toimittaja ja tuoteno
+				$lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
+				
+				if (!fwrite($fp, $lause . "\n")) {
+					echo "Failed writing row.\n";
+					die();
+				}
 
-			$progress = floor(($row/$rows) * 40);
-			$str = sprintf("%10s", "$row/$rows");
-			$hash = '';
+				$progress = floor(($row/$rows) * 40);
+				$str = sprintf("%10s", "$row/$rows");
+				$hash = '';
 
-			for ($i=0; $i < (int) $progress; $i++) {
-				$hash .= "#";
+				for ($i=0; $i < (int) $progress; $i++) {
+					$hash .= "#";
+				}
 			}
 
 		}
-
-		fclose($fp);
-
-		return $xf02loppulause;
+		if ($korvatut != "") return $xf02loppulause;
+		else fclose($fp);
 	}
 
 	function xvni($limit = '') {
@@ -650,7 +677,7 @@
 			//avoimet ostokappaleet
 			$Q3 = 	"	SELECT round(SUM(tilausrivi.varattu),0) as tilauksessa, tilausrivin_lisatiedot.tilausrivitunnus
 						FROM tilausrivi
-						#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+						JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
 						WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
 						AND tilausrivi.tyyppi = 'O'

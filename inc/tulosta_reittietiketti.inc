@@ -105,7 +105,7 @@
 				$rakir_res = pupe_query($query);
 				$rakir_row = mysql_fetch_assoc($rakir_res);
 
-				$query = "	SELECT IF(kerayserat.pakkaus = '999', 'KLI', pakkaus.pakkaus) AS pakkauskuvaus,
+				$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 							IF(kerayserat.pakkaus = '999', 'KLI', pakkaus.pakkauskuvaus) AS kollilaji,
 							kerayserat.pakkausnro,
 							kerayserat.sscc,

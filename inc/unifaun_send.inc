@@ -260,67 +260,71 @@ class Unifaun {
 				#$uni_snd_val->addAttribute('n', "sms");
 
 				// Lähettäjän rahtisopimustiedot
-				$uni_partner = $uni_sender->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
-				$uni_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+				$uni_sender_partner = $uni_sender->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
+				$uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
-					// jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
-					if ($this->toitarow['merahti'] == '') {
-
-						$query = "	SELECT rahtisopimus
-									FROM rahtisopimukset
-									WHERE yhtio = '{$this->kukarow['yhtio']}'
-									AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
-									AND toimitustapa = '{$this->toitarow['selite']}'
-									AND rahtisopimus != ''
-									ORDER BY asiakas DESC 
-									LIMIT 1";
-						$rahtisopimus_res = pupe_query($query);
-						$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
-
-						$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
-
-						$uni_par_val = $uni_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
-						$uni_par_val->addAttribute('n', "custno");
-					}
-					else {
-						$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number
-						$uni_par_val->addAttribute('n', "custno");
-					}
-
-					$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number for international services
+					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number for international services
 					$uni_par_val->addAttribute('n', "custno_international");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# EDI-address. UFPS only.
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# EDI-address. UFPS only.
 					#$uni_par_val->addAttribute('n', "ediaddress");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Pallet reg. number for EUR-pallets
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Pallet reg. number for EUR-pallets
 					#$uni_par_val->addAttribute('n', "palletregno");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Terminal, used with delivery terms for international freights.
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Terminal, used with delivery terms for international freights.
 					#$uni_par_val->addAttribute('n', "terminal");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Number for PlusGiro. Used mostly by Cash On Delivery add-on.
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Number for PlusGiro. Used mostly by Cash On Delivery add-on.
 					#$uni_par_val->addAttribute('n', "postgiro");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Number for BankGiro. Used mostly by Cash On Delivery add-on.
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Number for BankGiro. Used mostly by Cash On Delivery add-on.
 					#$uni_par_val->addAttribute('n', "bankgiro");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Specifies an offshore account.
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Specifies an offshore account.
 					#$uni_par_val->addAttribute('n', "konto");
 
-					$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->yhtiorow["pankkitili1"])); 	# IBAN account number
+					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkitili1"])); 	# IBAN account number
 					$uni_par_val->addAttribute('n', "iban");
 
-					$uni_par_val = $uni_partner->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"])); 	# BIC number
+					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"])); 	# BIC number
 					$uni_par_val->addAttribute('n', "bic");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Payment method. Used for Posten's mail services. Valid values: INVO = Credit without delivery note INVODN = Credit with delivery note METERED = Domestic franking STAMP = Stamp/cash
+					#$uni_par_val = $uni_sender_partner->addChild('val', ""); 	# Payment method. Used for Posten's mail services. Valid values: INVO = Credit without delivery note INVODN = Credit with delivery note METERED = Domestic franking STAMP = Stamp/cash
 					#$uni_par_val->addAttribute('n', "paymentmethod");
 
 			// Vastaanottajan tiedot
 			$uni_receiver = $xml->addChild('receiver');	# Any contents. Mandatory.
 
 			$uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
+
+				// jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
+				if ($this->toitarow['merahti'] == '') {
+
+					// Lähettäjän rahtisopimustiedot
+					$uni_receiver_partner = $uni_receiver->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
+					$uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+
+					$query = "	SELECT rahtisopimus
+								FROM rahtisopimukset
+								WHERE yhtio = '{$this->kukarow['yhtio']}'
+								AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
+								AND toimitustapa = '{$this->toitarow['selite']}'
+								AND rahtisopimus != ''
+								ORDER BY asiakas DESC 
+								LIMIT 1";
+					$rahtisopimus_res = pupe_query($query);
+					$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
+
+					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
+
+					$uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
+					$uni_par_val->addAttribute('n', "custno");
+				}
+				else {
+					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number
+					$uni_par_val->addAttribute('n', "custno");
+				}
 
 				if ($rahdinkuljettaja_row['jalleenmyyjanro'] != 0 and $rahdinkuljettaja_row['jalleenmyyjanro'] != "") {
 					$uni_rcv_val = $uni_receiver->addChild('val', $rahdinkuljettaja_row['jalleenmyyjanro']); # HIT InNight mandatory.
@@ -373,28 +377,29 @@ class Unifaun {
 				#$uni_rcv_val->addAttribute('n', "doorcode");
 
 				// Vastaanottajan rahtisopimustiedot
+				// tämä on jo setattu ylempää
 				#$uni_partner = $uni_receiver->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
 				#$uni_partner->addAttribute('parid', "");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Customer number
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Customer number
 					#$uni_par_val->addAttribute('n', "custno");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Pallet reg. number for EUR-pallets
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Pallet reg. number for EUR-pallets
 					#$uni_par_val->addAttribute('n', "palletregno");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Terminal, used with delivery terms for international freights.
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Terminal, used with delivery terms for international freights.
 					#$uni_par_val->addAttribute('n', "terminal");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Number for PlusGiro. Used mostly by Cash On Delivery add-on.
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Number for PlusGiro. Used mostly by Cash On Delivery add-on.
 					#$uni_par_val->addAttribute('n', "postgiro");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Number for BankGiro. Used mostly by Cash On Delivery add-on.
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Number for BankGiro. Used mostly by Cash On Delivery add-on.
 					#$uni_par_val->addAttribute('n', "bankgiro");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Specifies an offshore account.
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Specifies an offshore account.
 					#$uni_par_val->addAttribute('n', "konto");
 
-					#$uni_par_val = $uni_partner->addChild('val', ""); 	# Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
+					#$uni_par_val = $uni_receiver_partner->addChild('val', ""); 	# Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
 					#$uni_par_val->addAttribute('n', "agentno");
 
 			// Lähetyksen tiedot

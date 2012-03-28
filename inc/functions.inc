@@ -9230,7 +9230,7 @@ if (!function_exists("t_avainsana")) {
 								FROM avainsana as avainsana_kieli
 								WHERE avainsana_kieli.yhtio = avainsana.yhtio
 								and avainsana_kieli.laji = avainsana.laji
-								and avainsanatulsota_lahete = avainsana.perhe
+								and avainsana_kieli.perhe = avainsana.perhe
 								and avainsana_kieli.perhe > 0
 								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
 		}

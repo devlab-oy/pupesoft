@@ -283,7 +283,8 @@ class Unifaun {
 									WHERE yhtio = '{$this->kukarow['yhtio']}'
 									AND (asiakas = '{$this->postirow['liitostunnus']}' OR (asiakas = 0 AND ytunnus = '{$this->postirow['ytunnus']}'))
 									AND toimitustapa = '{$this->toitarow['selite']}'
-									AND rahtisopimus != ''";
+									AND rahtisopimus != ''
+									ORDER BY asiakas DESC LIMIT 1";
 						$rahtisopimus_res = pupe_query($query);
 						$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
 

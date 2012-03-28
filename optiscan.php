@@ -469,6 +469,14 @@
 
 		$kukarow['yhtio'] = 'artr';
 		$kukarow['kuka']  = mysql_real_escape_string(trim($sisalto[2]));
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kuka = '{$kukarow['kuka']}'";
+		$kukares = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe k‰ytt‰j‰‰ haettaessa\r\n\r\n");
+		$kukarow = mysql_fetch_assoc($kukares);
+
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		$nro = mysql_real_escape_string(trim($sisalto[3]));

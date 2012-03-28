@@ -14126,7 +14126,7 @@ if (!function_exists('arrcmp')) {
 
 if (!function_exists("tee_keraysera")) {
 	function tee_keraysera($keraysvyohyke, $varasto, $debug_x = true) {
-		global $kukarow, $yhtiorow, $debug;
+		global $kukarow, $yhtiorow;
 
 		// HUOM!!! NÄITÄ LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
 		$query = "	LOCK TABLES lasku WRITE,

@@ -531,7 +531,7 @@ class Unifaun {
 				if (trim($rahdinkuljettaja_row['neutraali']) != "") {
 					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
 					$uni_service->addAttribute('srvid', utf8_encode('FREEG'));
-					$uni_service->addAttribute('subid', utf8_encode($this->toitarow['virallinen_selite']));
+					$uni_service->addAttribute('subid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 				}
 				else {
 					$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.

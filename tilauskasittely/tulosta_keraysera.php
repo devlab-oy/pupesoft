@@ -82,10 +82,7 @@
 	}
 
 	if ($tee == 'uusi_pakkaus') {
-
 		if (isset($kerayseranro) and trim($kerayseranro) > 0) {
-
-			// $lukotetaan = check_lock_tables(array('avainsana'));
 
 			// emuloidaan transactioita mysql LOCK komennolla
 			$query = "LOCK TABLES avainsana WRITE";
@@ -467,10 +464,8 @@
 				echo "<font class='head'>".t("Ker‰‰j‰").": $who</font><br>";
 				echo "<div id='content'></div>";
 
-				$debug 		= true;
-
 				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($keraysvyohyke, $select_varasto);
+				$erat = tee_keraysera($keraysvyohyke, $select_varasto, TRUE);
 
 				if (count($erat['tilaukset']) > 0) {
 

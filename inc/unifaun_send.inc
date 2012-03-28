@@ -281,7 +281,7 @@ class Unifaun {
 						$query = "	SELECT rahtisopimus
 									FROM rahtisopimukset
 									WHERE yhtio = '{$this->kukarow['yhtio']}'
-									AND asiakas = '{$this->postirow['liitostunnus']}'
+									AND (asiakas = '{$this->postirow['liitostunnus']}' OR (asiakas = 0 AND ytunnus = '{$this->postirow['ytunnus']}'))
 									AND toimitustapa = '{$this->toitarow['selite']}'
 									AND rahtisopimus != ''";
 						$rahtisopimus_res = pupe_query($query);
@@ -580,6 +580,12 @@ class Unifaun {
 						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
 						$uni_addon->addAttribute('adnid', "NOTLTR");
 					}
+
+					/*
+					TEHDÄÄN TÄMÄ JOS VAK TAI MUU KOLLI
+					$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+					$uni_addon->addAttribute('adnid', "SPTR");
+					*/
 
 					if ($this->rakir_row["jv"] != '' or $this->mehto['jv'] != '') {
 						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.

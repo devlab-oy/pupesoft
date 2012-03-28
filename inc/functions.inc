@@ -3004,6 +3004,20 @@ if (!function_exists("alehinta")) {
 		$vanha_yhtio	= "";
 		$vanha_liitostunnus = 0;
 
+		// Tässä katotaan onko epäkuranttiutta
+		if ($trow["epakurantti100pvm"] != "0000-00-00") {
+			$trow["kehahin"] = 0;
+		}
+		elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
+		}
+		elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
+		}
+		elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
+		}
+
 		// KAUTTALASKUTUSKIKKARE
 		if ($yhtio != '') {
 			$vanha_yhtio 		= $kukarow['yhtio'];
@@ -4217,25 +4231,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//Tässä katotaan onko epäkuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4283,25 +4280,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//Tässä katotaan onko epäkuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4352,25 +4332,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//Tässä katotaan onko epäkuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4421,25 +4384,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//Tässä katotaan onko epäkuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4683,6 +4629,28 @@ if (!function_exists("alehinta")) {
 				$aleperuste["ale".$alepostfix] = 4;
 
 				$aperuste .= " Ei alennusta (Aletaso: $alepostfix)";
+			}
+			elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] < 0) {
+				// 5. käyttäjän syöttämä katejuttu
+				// Nolla keskihankintahinta tai kokoepäkurantti, katemyynti ei onnaa laitetaan sentti-hinnalla
+				if ($trow['kehahin'] <= 0) {
+					$hinta = 0.01;
+				}
+				elseif ($trow['kehahin'] > 0) {
+
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+					}
+					else {
+						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))), $yhtiorow['hintapyoristys']);
+					}
+				}
+
+				$aleperuste["ale".$alepostfix] = 5;
+				$ale["ale".$alepostfix] = 0;
+				$netto = "";
+				$hintaperuste = 10;
+				$aperuste .= "Katemyyntihinta. ";
 			}
 		}
 

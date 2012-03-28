@@ -315,7 +315,7 @@ if ($tee == "ETSILASKU") {
 
 		}
 		elseif ($toim == 'TARJOUS') {
-			$where 	= " tila = 'T' and tunnus = '{$otunnus}' ";
+			$where 	= " tila in ('T','L','N') and tunnus = '{$otunnus}' ";
 			$use 	= " ";
 		}
 		elseif ($toim == 'TYOMAARAYS') {
@@ -352,7 +352,7 @@ if ($tee == "ETSILASKU") {
 			$use 	= " ";
 		}
 		elseif ($toim == 'TARJOUS') {
-			$where = "	tila = 'T'
+			$where = "	tila in ('T','L','N')
 						and lasku.liitostunnus = '{$asiakasid}' ";
 			$use 	= " ";
 		}
@@ -1193,6 +1193,15 @@ if ($tee == 'MONISTA') {
 								$rvalues .= ", '{$asiakrow['alv']}'";
 
 								$rivirow['alv'] = $asiakrow['alv'];
+							}
+							else {
+								$rvalues .= ", '".$rivirow[$i]."'";
+							}
+							break;
+						case 'tyyppi':
+							// Tarjouskase
+							if ($toim == 'TARJOUS') {
+								$rvalues .= ", 'T'";
 							}
 							else {
 								$rvalues .= ", '".$rivirow[$i]."'";

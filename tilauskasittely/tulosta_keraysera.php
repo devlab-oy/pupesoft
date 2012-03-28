@@ -467,76 +467,9 @@
 				echo "<font class='head'>".t("Ker‰‰j‰").": $who</font><br>";
 				echo "<div id='content'></div>";
 
-				// lukitaan tableja
-				$query = "	LOCK TABLES lasku WRITE,
-							lasku AS lasku1 WRITE,
-							lasku AS lasku2 WRITE,
-							laskun_lisatiedot WRITE,
-							asiakas AS asiakas1 READ,
-							asiakas AS asiakas2 READ,
-							tilausrivi WRITE,
-							tilausrivi AS tilausrivi1 READ,
-							tilausrivi AS tilausrivi2 READ,
-							tilausrivin_lisatiedot WRITE,
-							tilausrivin_lisatiedot AS tilrivlis1 READ,
-							tilausrivin_lisatiedot AS tilrivlis2 READ,
-							messenger WRITE,
-							varaston_hyllypaikat AS vh READ,
-							varaston_hyllypaikat AS vh1 READ,
-							varaston_hyllypaikat AS vh2 READ,
-							tuote READ,
-							tuote AS tuote1 READ,
-							tuote AS tuote2 READ,
-							keraysvyohyke AS keraysvyohyke1 READ,
-							keraysvyohyke AS keraysvyohyke2 READ,
-							toimitustapa AS toimitustapa1 READ,
-							toimitustapa AS toimitustapa2 READ,
-							lahdot READ,
-							lahdot AS lahdot1 WRITE,
-							lahdot AS lahdot2 WRITE,
-							tuoteperhe READ,
-							kerayserat WRITE,
-							tuotteen_toimittajat READ,
-							pakkaus READ,
-							avainsana WRITE,
-							keraysvyohyke READ,
-							asiakas READ,
-							liitetiedostot READ,
-							tilausrivi AS t2 READ,
-							tilausrivin_lisatiedot AS tlt2 READ,
-							tilausrivi AS tilausrivi_osto READ,
-							tilausrivi AS tilausrivi_myynti READ,
-							sarjanumeroseuranta READ,
-							tilausrivi AS t3 READ,
-							sanakirja WRITE,
-							avainsana as a READ,
-							avainsana as b READ,
-							varaston_tulostimet READ,
-							tuotepaikat READ,
-							maksuehto READ,
-							varastopaikat READ,
-							kirjoittimet READ,
-							kuka WRITE,
-							asiakaskommentti READ,
-							tuotteen_avainsanat READ,
-							pankkiyhteystiedot READ,
-							toimitustapa READ,
-							yhtion_toimipaikat READ,
-							yhtion_parametrit READ,
-							tuotteen_alv READ,
-							maat READ,
-							rahtisopimukset READ,
-							rahtisopimukset AS rahtisopimukset2 READ,
-							pakkaamo WRITE,
-							avainsana as avainsana_kieli READ,
-							lasku as vanha_lasku READ,
-							varaston_tulostimet as vanha_varaston_tulostimet READ,
-							yhtio READ";
-				$result = pupe_query($query);
-
 				$debug 		= true;
-				$lukotetaan = false;
 
+				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
 				$erat = tee_keraysera($keraysvyohyke, $select_varasto);
 
 				if (count($erat['tilaukset']) > 0) {
@@ -555,6 +488,8 @@
 					$tullaan_kerayserasta = 'joo';
 
 					$laskuja = count($erat['tilaukset']);
+
+					$lukotetaan = false;
 
 					require("tilauskasittely/tilaus-valmis-tulostus.inc");
 				}

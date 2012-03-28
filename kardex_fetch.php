@@ -77,169 +77,115 @@
 
 				if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
+					$keraysera_nro = "";
+					$maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = array();
+
 					$_fh = fopen($ftpget_dest[$operaattori]."/".$file, "r+");
 
 					while ($_content = fgets($_fh)) {
 						$_content = explode(';', $_content);
 
 						// index 0, tilaustyyppi = aina 4
-						// index 1, pakkaus
+						// index 1, sscc ulkoinen
 						// index 2, tuoteno
 						// index 3, kpl
-						// index 4, tilausrivin tunnus
+						// index 4, keräyserän rivin tunnus
 						// index 5, hyllypaikka
 						// index 6, kerääjä
 
 						$_content[4] = (int) $_content[4];
 
-						// haetaan keräyserän numero
-						$query = "	SELECT nro
-									FROM kerayserat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi = '{$_content[4]}'";
-						$keraysera_nro_res = pupe_query($query);
-						$keraysera_nro_row = mysql_fetch_assoc($keraysera_nro_res);
-
-						// haetaan kaikki keräyserän otunnukset
-						$query = "	SELECT GROUP_CONCAT(DISTINCT otunnus) AS otunnukset
-									FROM kerayserat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND nro = '{$keraysera_nro_row['nro']}'";
-						$otunnukset_res = pupe_query($query);
-						$otunnukset_row = mysql_fetch_assoc($otunnukset_res);
-
-						if (trim($otunnukset_row['otunnukset']) != '' and is_numeric($_content[3]) and is_numeric($_content[4]) and $_content[4] > 0) {
-
-							// pitää saada kerääjä selville
-							$query = "	SELECT laatija
+						if ($keraysera_nro == "") {
+							$query = "	SELECT nro
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND otunnus IN ({$otunnukset_row['otunnukset']})";
-							$laatija_chk_res = pupe_query($query);
-							$laatija_chk_row = mysql_fetch_assoc($laatija_chk_res);
+										AND tunnus = '{$_content[4]}'
+										AND tila = 'X'";
+							$nro_chk_res = pupe_query($query);
+							$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
 
-							// päivitetään rivi kerätyksi
-							$query = "	UPDATE tilausrivi SET
-										keratty = '{$laatija_chk_row['laatija']}',
-										kerattyaika = now() ,
-										varattu = '{$_content[3]}'
+							$keraysera_nro = $nro_chk_row['nro'];
+						}
+
+						$query = "	UPDATE kerayserat SET
+									tila = 'K',
+									kpl_keratty = '{$_content[3]}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$_content[4]}'
+									AND tila = 'X'";
+						$upd_res = pupe_query($query);
+
+						$keraajalist = $_content[6];
+					}
+
+					if ($keraysera_nro != "") {
+						$query = "	SELECT *
+									FROM kerayserat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tila = 'X'
+									AND nro = '{$keraysera_nro}'";
+						$onko_valmis_chk = pupe_query($query);
+
+						if (mysql_num_rows($onko_valmis_chk) == 0) {
+
+							$query = "	SELECT tilausrivi, SUM(kpl_keratty) AS kpl_keratty
+										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$_content[4]}'";
-							$upd_res = pupe_query($query);
+										AND tila = 'K'
+										AND nro = '{$keraysera_nro}'
+										GROUP BY tilausrivi";
+							$valmis_era_chk_res = pupe_query($query);
 
-							$query = "	UPDATE kerayserat SET
-										kpl = '{$_content[3]}',
-										kpl_keratty = '{$_content[3]}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi = '{$_content[4]}'";
-							$upd_res = pupe_query($query);
-
-							// onko kaikki keräyserän rivit kerätty
-							$query = "	SELECT SUM(IF((tilausrivi.keratty = '' and tilausrivi.kerattyaika = '0000-00-00 00:00:00'), 1, 0)) AS chk
-										FROM tilausrivi
-										JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.otunnus IN ({$otunnukset_row['otunnukset']})";
-							$chk_res = pupe_query($query);
-							$chk_row = mysql_fetch_assoc($chk_res);
-
-							if ($chk_row['chk'] == 0) {
-
-								// päivitetään tilaus kerätyksi
-								$query = "UPDATE lasku SET alatila = 'C' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$otunnukset_row['otunnukset']})";
-								$upd_res = pupe_query($query);
-
-								// päivitetään keräyserä kerätyksi
-								$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN ({$otunnukset_row['otunnukset']})";
-								$upd_res = pupe_query($query);
-
-								if ($yhtiorow['oletus_lahetekpl'] != 0 or $yhtiorow['oletus_oslappkpl'] != 0) {
-
-									// pitää saada keräysvyöhyke selville
-									$query = "SELECT keraysvyohyke FROM kuka WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$laatija_chk_row['laatija']}'";
-									$keraysvyohyke_chk_res = pupe_query($query);
-									$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
-
-									// pitää saada lähete- ja osoitelappu-printterit selville
-									$query = "SELECT printteri1, printteri3 FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysvyohyke_chk_row['keraysvyohyke']}'";
-									$printteri_res = pupe_query($query);
-									$printteri_row = mysql_fetch_assoc($printteri_res);
-
-									// loopataan tilaukset
-									$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$otunnukset_row['otunnukset']})";
-									$laskures = pupe_query($query);
-
-									while ($laskurow = mysql_fetch_assoc($laskures)) {
-
-										if ($yhtiorow['oletus_lahetekpl'] > 0 AND $printteri_row['printteri1'] != '') {
-
-											//haetaan lähetteen tulostuskomento
-											$query   = "SELECT * from kirjoittimet where yhtio='{$kukarow['yhtio']}' and tunnus='{$printteri_row['printteri1']}'";
-											$kirres  = pupe_query($query);
-											$kirrow  = mysql_fetch_assoc($kirres);
-											$komento = $kirrow['komento'];
-
-											if (($komento != "" and $yhtiorow['oletus_lahetekpl'] > 0) or ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "")) {
-
-												if ($yhtiorow['oletus_lahetekpl'] > 0 and $komento != 'email') {
-													$komento .= " -# $yhtiorow[oletus_lahetekpl] ";
-												}
-
-												if ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "") {
-													$komento = array($komento);
-													$komento[] = "asiakasemail".$laskurow['email'];
-												}
-
-												$params = array(
-													'laskurow'					=> $laskurow,
-													'sellahetetyyppi' 			=> '',
-													'extranet_tilausvahvistus' 	=> '',
-													'naytetaanko_rivihinta'		=> '',
-													'tee'						=> $tee,
-													'toim'						=> $toim,
-													'komento' 					=> $komento,
-													'kieli' 					=> $kieli
-													);
-
-												pupesoft_tulosta_lahete($params);
-											}
-										}
-
-										if ($yhtiorow['oletus_oslappkpl'] != 0 AND $printteri_row['printteri3'] != '') {
-											$valittu_oslapp_tulostin = $printteri_row['printteri3'];
-											$oslappkpl = $yhtiorow['oletus_oslappkpl'];
-
-											$tunnus = $laskurow['tunnus'];
-
-											//haetaan osoitelapun tulostuskomento
-											$query  = "SELECT * from kirjoittimet where yhtio='{$kukarow['yhtio']}' and tunnus='{$valittu_oslapp_tulostin}'";
-											$kirres = pupe_query($query);
-											$kirrow = mysql_fetch_assoc($kirres);
-											$oslapp = $kirrow['komento'];
-
-											if ($oslappkpl > 1) {
-												$oslapp .= " -#$oslappkpl ";
-											}
-
-											$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' and selite = '{$laskurow['toimitustapa']}'";
-											$oslares = pupe_query($query);
-											$oslarow = mysql_fetch_assoc($oslares);
-
-											if ($oslarow['osoitelappu'] == 'intrade') {
-												require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-											}
-											else {
-												require ("tilauskasittely/osoitelappu_pdf.inc");
-											}
-										}
-									}
-								}
+							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+								$kerivi[] = $valmis_era_chk_row['tilausrivi'];
+								$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
 							}
+
+							$query = "	SELECT *
+										FROM kerayserat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tila = 'K'
+										AND nro = '{$keraysera_nro}'";
+							$valmis_era_chk_res = pupe_query($query);
+
+							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+								$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
+
+								$query = "	SELECT tilausrivi.varattu, 
+											tilausrivi.tuoteno AS puhdas_tuoteno,
+											concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
+											concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
+											FROM tilausrivi
+											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
+								$varattu_res = pupe_query($query);
+								$varattu_row = mysql_fetch_assoc($varattu_res);
+
+								$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
+								$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
+								$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
+								$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+							}
+
+							// setataan muuttujat keraa.php:ta varten
+							$tee = "P";
+							$toim = "";
+							$id = $keraysera_nro_row['nro'];
+							$keraajanro = "";
+							$valittu_tulostin = "";
+							$lahetekpl = 1;
+							$valittu_oslapp_tulostin = "";
+							$oslappkpl = 1;
+							$lasku_yhtio = "";
+							$real_submit = "Merkkaa kerätyksi";
+
+							require('tilauskasittely/keraa.php');
 						}
 					}
-				}
 
-				fclose($_fh);
+					fclose($_fh);
+					$keraysera_nro = "";
+				}
 
 				rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
 			}

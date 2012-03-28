@@ -1,10 +1,10 @@
 <?php
 
-	$query = "	SELECT otunnus, tilausrivi, sscc, sscc_ulkoinen, kpl
+	$query = "	SELECT otunnus, tilausrivi, sscc, sscc_ulkoinen, kpl, tunnus
 				FROM kerayserat
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND nro 	= '{$kerayseran_numero}'
-				AND tila    = 'K'";
+				AND tila    = 'X'";
 	$kardex_res = pupe_query($query);
 
 	if (mysql_num_rows($kardex_res) > 0) {
@@ -51,14 +51,14 @@
 			$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
 
 			// index 0, tilaustyyppi = aina 4
-			// index 1, pakkaus
+			// index 1, sscc
 			// index 2, tuoteno
 			// index 3, nimitys
 			// index 4, kpl
 			// index 5, hyllypaikka
-			// index 6, tilausrivin tunnus
+			// index 6, keräyserärivin tunnus
 
-			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$tilriv_tiedot_row['tunnus']};\r\n";
+			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$kardex_row['tunnus']};\r\n";
 		}
 
 		if ($kardex_ok) {

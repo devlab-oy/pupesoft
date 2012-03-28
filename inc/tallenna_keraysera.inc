@@ -107,11 +107,14 @@
 						$res = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($res);
 
+						// jos ulkoinen järjestelmä 
+						$tilalisa = $erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K" ? "X" : "K";
+
 						// tila = 'K' tarkoittaa "Keräyksessä"
 						$query = "	INSERT INTO kerayserat SET
 									yhtio 		= '{$kukarow['yhtio']}',
 									nro 		= {$kerayseran_numero},
-									tila 		= 'K',
+									tila 		= '{$tilalisa}',
 									sscc 		= {$sscc},
 									otunnus 	= '{$laskurow['tunnus']}',
 									tilausrivi 	= '{$tilriv}',

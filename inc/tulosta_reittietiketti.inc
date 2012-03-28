@@ -169,13 +169,13 @@
 						$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
 						$query = "	SELECT {$selectlisa},
-									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa,
+									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus2.oma_paino, 0), 1) tuotemassa,
 									ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 									FROM kerayserat
 									{$joinlisa}
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+									LEFT JOIN pakkaus AS pakkaus2 ON (pakkaus2.yhtio = kerayserat.yhtio AND pakkaus2.tunnus = kerayserat.pakkaus)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND kerayserat.sscc = '{$keraysera_row['sscc']}'
 									GROUP BY 1,2,3";

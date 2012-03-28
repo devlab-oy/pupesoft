@@ -14159,6 +14159,7 @@ if (!function_exists("tee_keraysera")) {
 					kerayserat WRITE,
 					tuotteen_toimittajat READ,
 					pakkaus READ,
+					pakkaus AS pakkaus2 READ,
 					avainsana WRITE,
 					keraysvyohyke READ,
 					asiakas READ,

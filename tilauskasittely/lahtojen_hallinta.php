@@ -681,7 +681,6 @@
 
 				echo "<tr><td>",t("Valitse tulostin"),":</td>";
 				echo "<td><select name='komento'>";
-				echo "<option value='' selected>",t("Oletustulostimelle"),"</option>";
 
 				mysql_data_seek($kires, 0);
 

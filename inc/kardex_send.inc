@@ -29,6 +29,8 @@
 			$toitares = pupe_query($query);
 			$toitarow = mysql_fetch_assoc($toitares);
 
+			$kardex_sscc_sisalto = $kardex_row['sscc'];
+
 			if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
 				($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
@@ -38,10 +40,7 @@
 					break;
 				}
 
-				$kardex_sscc = $kardex_row['sscc_ulkoinen'];
-			}
-			else {
-				$kardex_sscc = $kardex_row['sscc'];
+				$kardex_sscc_sisalto = $kardex_row['sscc_ulkoinen'];
 			}
 
 			$query = "	SELECT tunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
@@ -59,7 +58,7 @@
 			// index 5, hyllypaikka
 			// index 6, tilausrivin tunnus
 
-			$sisalto .= "4;{$kardex_sscc};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$tilriv_tiedot_row['tunnus']};\r\n";
+			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$tilriv_tiedot_row['tunnus']};\r\n";
 		}
 
 		if ($kardex_ok) {

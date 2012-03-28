@@ -682,6 +682,7 @@
 				echo "<tr><td>",t("Valitse tulostin"),":</td>";
 				echo "<td><select name='komento'>";
 
+				// Oletustulostin rahtikirjojen tulostukseen. K‰ytet‰‰n oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kentt‰‰.
 				$query = "	SELECT printteri6
 							FROM varastopaikat
 							WHERE yhtio = '{$kukarow['yhtio']}'

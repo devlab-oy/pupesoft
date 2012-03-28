@@ -244,11 +244,6 @@
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
 					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
-<<<<<<< HEAD
-					
-					if (strtoupper($attribute) == "ALLOW") {
-						
-=======
 
 					if (strtolower($attribute) == "allow") {
 						if (!isset($rtuoteno[$i]['ale1'])) {
@@ -290,7 +285,6 @@
 								}
 							}
 						}
->>>>>>> sami/asn
 					}
 					elseif (strtolower($attribute) == "charge") {
 						if (strtolower($tuotetieto->AllowOrCharge->AllowOrChargeDescription) == "bx runkoarvo") {

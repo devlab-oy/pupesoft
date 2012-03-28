@@ -88,11 +88,7 @@
 		$sscc_chk_res = pupe_query($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-<<<<<<< HEAD
-		if ($sscc_chk_row["sscc"] == "") {
-=======
 		if ((string) $sscc_chk_row['sscc'] == '') {
->>>>>>> sami/asn
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {

@@ -742,25 +742,6 @@
 					$keikkarow = mysql_fetch_array($checkres);
 					$keikan_tunnus = $keikkarow["tunnus"];
 				}
-<<<<<<< HEAD
-				$query = "	SELECT vh.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
-							FROM tuotepaikat as tp
-							JOIN varaston_hyllypaikat as vh on (vh.yhtio = tp.yhtio and vh.hyllyalue=tp.hyllyalue and vh.hyllynro=tp.hyllynro and vh.hyllyvali=tp.hyllyvali and vh.hyllytaso=tp.hyllytaso)
-							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tp.yhtio and keraysvyohyke.tunnus = vh.keraysvyohyke)
-							WHERE tp.yhtio = '$kukarow[yhtio]'
-							AND tp.tuoteno IN ('".implode("','", $paketin_tuotteet)."')
-							AND tp.oletus = 'x'
-							GROUP BY 1,2
-							ORDER BY 3 DESC
-							LIMIT 1";
-/*
-$VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
-							FROM tuote
-							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
-							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							AND tuote.tuoteno IN ('".implode("','", $paketin_tuotteet)."')
-							GROUP BY 1
-=======
 
 				$query = "	SELECT vh.keraysvyohyke, keraysvyohyke.terminaalialue, count(*)
 							FROM tilausrivi as tp
@@ -769,7 +750,6 @@ $VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialu
 							WHERE tp.yhtio = '$kukarow[yhtio]'
 							AND tp.tunnus IN ('".implode("','", $paketin_rivit)."')
 							GROUP BY 1,2
->>>>>>> sami/asn
 							ORDER BY 3 DESC
 							LIMIT 1";
 				$checkres = pupe_query($query);
@@ -812,11 +792,7 @@ $VANHA_TALTEEN_query = "	SELECT tuote.keraysvyohyke, keraysvyohyke.terminaalialu
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
-<<<<<<< HEAD
-				
-=======
 
->>>>>>> sami/asn
 				// Laitetaan suuntalava siirtovalmiiksi.
 				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;
 				$tee = "siirtovalmis";

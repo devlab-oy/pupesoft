@@ -110,8 +110,7 @@
 							kerayserat.pakkausnro,
 							kerayserat.pakkaus,
 							kerayserat.sscc,
-							COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
-							ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
+							COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
 							FROM kerayserat
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -170,11 +169,13 @@
 						$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
 
 						$query = "	SELECT {$selectlisa},
+									ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa,
 									ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 									FROM kerayserat
 									{$joinlisa}
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 									AND kerayserat.sscc = '{$keraysera_row['sscc']}'
 									GROUP BY 1,2,3";
@@ -300,7 +301,7 @@
 
 						$kollitiedot = array(
 							'maara' => $keraysera_row['maara'],
-							'paino' => $keraysera_row['tuotemassa'],
+							'paino' => $pakkaus_info_row['tuotemassa'],
 							'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
 							'pakkauskoodi' => $pakkauskoodit_row['koodi'],
 							'leveys' => $pakkaus_info_row['leveys'],

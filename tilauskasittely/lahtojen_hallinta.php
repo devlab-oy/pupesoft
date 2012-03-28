@@ -682,6 +682,17 @@
 				echo "<tr><td>",t("Valitse tulostin"),":</td>";
 				echo "<td><select name='komento'>";
 
+				$query = "	SELECT printteri6
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$select_varasto}'";
+				$default_printer_res = pupe_query($query);
+				$default_printer_row = mysql_fetch_assoc($default_printer_res);
+
+				if ($default_printer_row['printteri6'] != '') {
+					echo "<option value='{$default_printer_row['printteri6']}'>",t("Oletustulostin"),"</option>";
+				}
+
 				mysql_data_seek($kires, 0);
 
 				while ($kirow = mysql_fetch_assoc($kires)) {

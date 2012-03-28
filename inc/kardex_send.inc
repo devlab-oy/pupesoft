@@ -47,7 +47,7 @@
 			$query = "	SELECT tunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$kardex_row['otunnus']}'";
+						AND tunnus = '{$kardex_row['tilausrivi']}'";
 			$tilriv_tiedot_res = pupe_query($query);
 			$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
 

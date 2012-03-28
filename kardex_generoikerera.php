@@ -28,12 +28,16 @@
 		$kukarow['kuka']  = 'cron';
 		$kukarow['kieli'] = 'fi';
 
+		if (trim($argv[2]) != '') {
+			$kukarow['kuka'] = trim($argv[2]);
+		}
+
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		$query = "	SELECT varasto, tunnus
 					FROM keraysvyohyke
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND ulkoinen_jarjestelma = '{$kukarow['kuka']}'";
+					AND ulkoinen_jarjestelma = 'K'";
 		$gen_ker_res_result = pupe_query($query);
 
 		while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {

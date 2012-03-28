@@ -102,15 +102,7 @@ class Unifaun {
 
 	public function ftpSend() {
 
-		if ($this->ftppath != '') {
-			if (substr($this->ftppath,-1) != '/') {
-				$this->ftppath .= '/';
-			}
-			$filenimi = $this->ftppath."unifaun-".md5(uniqid(rand(),true)).".txt";
-		}
-		else {
-			$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
-		}
+		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {

@@ -53,6 +53,7 @@
 			exit;
 		}
 
+		// jos ulkoinen sscc on puuttunut, koitetaan l‰hett‰‰ kardex-tiedosto uudelleen
 		if ($handle = opendir($kardex_sscc)) {
 
 			while (($file = readdir($handle)) !== FALSE) {
@@ -61,6 +62,37 @@
 					$kerayseran_numero = preg_replace("/[^0-9]/", "", $file);
 
 					require("inc/kardex_send.inc");
+				}
+			}
+
+			closedir($handle);
+		}
+
+		// koitetaan uudelleen l‰hett‰‰ kardex-tiedosto, jos FTP-siirto on feilannut aikaisemmin
+		if ($kardex_host != "" and $kardex_user != "" and $kardex_pass != "" and $kardex_path != "" and $kardex_fail != "") {
+			$ftphost = $kardex_host;
+			$ftpuser = $kardex_user;
+			$ftppass = $kardex_pass;
+			$ftppath = $kardex_path;
+			$ftpport = $kardex_port;
+		    $ftpfail = $kardex_fail;
+			$ftpsucc = $kardex_succ;
+			$ftpfile = $kardexnimi;
+
+			if ($handle = opendir($ftpfail)) {
+
+				while (($file = readdir($handle)) !== FALSE) {
+
+					if (is_file($ftpfail."/".$file)) {
+						$ftpfile = realpath($ftpfail."/".$file);
+
+						require ("inc/ftp-send.inc");
+
+						// Jos siirto meni ok, niin remmataan faili
+						if ($palautus == 0) {
+							@unlink($ftpfail."/".$file);
+						}
+					}
 				}
 			}
 

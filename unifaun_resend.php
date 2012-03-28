@@ -47,6 +47,8 @@
 			$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		}
 
+		// PrintServer
+		// koitetaan uudelleen l‰hett‰‰ unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 		if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "" and $unifaun_ps_fail != "") {
 			$ftphost = $unifaun_ps_host;
 			$ftpuser = $unifaun_ps_user;
@@ -76,6 +78,8 @@
 			closedir($handle);
 		}
 
+		// UnifaunOnline
+		// koitetaan uudelleen l‰hett‰‰ unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 		if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "" and $unifaun_uo_fail != "") {
 			$ftphost = $unifaun_uo_host;
 			$ftpuser = $unifaun_uo_user;

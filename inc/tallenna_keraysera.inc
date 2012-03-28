@@ -7,20 +7,14 @@
 		exit;
 	}
 
-	$otunnukset = implode(",", $erat['tilaukset']);
-
-	$tilausrivit = '';
+	$otunnukset 	   = implode(",", $erat['tilaukset']);
+	$tilausrivit 	   = '';
 	$pakkaus_kirjaimet = array();
-
 	$kerayseran_numero = 0;
 
 	foreach ($erat as $era_key => $era_arr) {
 
 		if ($era_key == 'pakkaukset') {
-
-			if (!isset($lukotetaan) or $lukotetaan) {
-				$res = pupe_query("LOCK TABLES kerayserat WRITE, avainsana WRITE");
-			}
 
 			$query = "	SELECT ifnull(max(nro), 0) AS nro
 						FROM kerayserat
@@ -107,10 +101,11 @@
 						$res = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($res);
 
-						// jos ulkoinen järjestelmä 
+						// jos ulkoinen järjestelmä
+						// tila = 'K' tarkoittaa "Keräyksessä"-normivarastossa
+						// tila = 'X' tarkoittaa "Keräyksessä"-kardexvarastossa
 						$tilalisa = $erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K" ? "X" : "K";
 
-						// tila = 'K' tarkoittaa "Keräyksessä"
 						$query = "	INSERT INTO kerayserat SET
 									yhtio 		= '{$kukarow['yhtio']}',
 									nro 		= {$kerayseran_numero},
@@ -128,10 +123,6 @@
 						$insert_res = pupe_query($query);
 					}
 				}
-			}
-
-			if (!isset($lukotetaan) or $lukotetaan) {
-				$res = pupe_query("UNLOCK TABLES");
 			}
 		}
 	}

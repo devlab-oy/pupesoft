@@ -112,10 +112,6 @@ class Unifaun {
 			$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
 		}
 
-		$filenimi = dirname(dirname(__FILE__))."/dataout/unifaun-".md5(uniqid(rand(),true)).".txt";
-
-		$filenimi = "/tmp/unifaun-".md5(uniqid(rand(),true)).".txt";
-
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
 			echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus epäonnistui")."!</font><br>";

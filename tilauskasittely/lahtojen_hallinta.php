@@ -582,7 +582,6 @@
 							$kirow = mysql_fetch_assoc($kires);
 
 							$unifaun->_closeWithPrinter($lahto, $kirow['unifaun_nimi']);
-							$unifaun->_saveForDebug();
 
 							$unifaun->ftpSend();
 						}

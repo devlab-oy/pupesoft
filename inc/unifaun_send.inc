@@ -263,6 +263,11 @@ class Unifaun {
 				$uni_sender_partner = $uni_sender->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
 				$uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
+					$lahettajan_sopimusnro = $this->toitarow['sopimusnro'] != "" ? $this->toitarow['sopimusnro'] : "n/a";
+
+					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($lahettajan_sopimusnro)); 	# Customer number
+					$uni_par_val->addAttribute('n', "custno");
+
 					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number for international services
 					$uni_par_val->addAttribute('n', "custno_international");
 
@@ -319,10 +324,6 @@ class Unifaun {
 					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
 
 					$uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
-					$uni_par_val->addAttribute('n', "custno");
-				}
-				else {
-					$uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro'])); 	# Customer number
 					$uni_par_val->addAttribute('n', "custno");
 				}
 

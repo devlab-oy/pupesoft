@@ -5,7 +5,7 @@
 				FROM asiakas
 				WHERE tunnus = '$laskurow[liitostunnus]'
 				and yhtio = '$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$asrow = mysql_fetch_assoc($result);
 
 	if ($naytatvale == 2) {
@@ -22,6 +22,9 @@
 	}
 	elseif ($naytatvale == 6) {
 		$lahetetyyppi = "tulosta_lahete_custom.inc";
+	}	
+	elseif ($naytatvale == 7) {
+		$lahetetyyppi = "tulosta_lahete_ean.inc";
 	}
 	else {
 		$lahetetyyppi = "tulosta_lahete.inc";
@@ -42,7 +45,7 @@
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -60,7 +63,7 @@
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -138,7 +141,12 @@
 					ORDER BY $pjat_sortlisa jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 	}
 
-	$riresult = mysql_query($query) or pupe_error($query);
+	$riresult = pupe_query($query);
+	
+	// tämä siksi koska halutaan alkuperäisen tilauksen tilausnumero pdf-filuun.
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$laskurow["tunnus"] = $laskurow['vanhatunnus'];
+	}
 
 	$params_lahete = array(
 	'arvo'						=> 0,

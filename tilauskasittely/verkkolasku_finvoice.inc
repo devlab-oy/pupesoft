@@ -626,7 +626,7 @@ if (!function_exists('finvoice_rivi')) {
 
 			$lisakomm = "";
 
-			if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
+			if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
 
 				// Laitetaan tilausviite tähän
 				if ($tilrow["laskuviesti"] != "") {

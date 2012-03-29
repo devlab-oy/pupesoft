@@ -277,7 +277,8 @@
 	$query = "	SELECT distinct selite
 				FROM tuotteen_avainsanat
 				WHERE yhtio = '{$kukarow["yhtio"]}'
-				AND laji = 'parametri_variaatio'";
+				AND laji = 'parametri_variaatio'
+				AND trim(selite) != ''";
 	$resselite = pupe_query($query);
 
 	if ($ajetaanko_kaikki == "NO") {
@@ -303,8 +304,7 @@
 							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
 							AND tuote.status != 'P'
 							AND tuote.tuotetyyppi NOT in ('A','B')
-							AND tuote.tuoteno != ''
-							AND tuote.nakyvyys != '')
+							AND tuote.tuoteno != '')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'
@@ -331,7 +331,8 @@
 			$properties = array();
 
 			while ($syvinrow = mysql_fetch_assoc($alinres)) {
-				$properties[] = array($syvinrow["selitetark"] => $syvinrow["selite"]);
+				$properties[] = array(	"nimi" => $syvinrow["selitetark"],
+				 						"arvo" => $syvinrow["selite"]);
 			}
 
 			// Jos yhtiön hinnat eivät sisällä alv:tä
@@ -354,7 +355,6 @@
 															'nimitys'				=> $alirow["nimitys"],
 															'nimi_swe'				=> $alirow["nimi_swe"],
 															'nimi_eng'				=> $alirow["nimi_eng"],
-															'variaatio' 			=> $rowselite["selite"],
 															'myyntihinta'			=> $myyntihinta,
 															'myyntihinta_veroton'	=> $myyntihinta_veroton,
 															'myymalahinta'			=> $myymalahinta,

@@ -314,7 +314,7 @@
 		$result = pupe_query($query);
 
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
-		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
+		if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
 			$tilausnumeroita = $laskurow["tunnus"];
 			require("tilaus-valmis-tulostus.inc");
 

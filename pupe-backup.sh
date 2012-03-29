@@ -12,11 +12,16 @@ if [ ! -z $6 ]; then
 fi
 
 if [ ! -z $7 ]; then
-	SAMBAHOST=$7
-	SAMBAUSER=$8
-	SAMBAPASS=$9
-	SAMBAREMDIR=${10}
-	SAMBALOCALDIR=${11}
+	EXTRABACKUP=$7
+	REMOTEHOST=$8
+	REMOTEUSER=$9
+	REMOTEPASS=${10}
+	REMOTEREMDIR=${11}
+	REMOTELOCALDIR=${12}
+fi
+
+if [ ! -z ${13} ]; then
+	S3BUCKET=${13}
 fi
 
 # Katsotaan, ett‰ parametrit on annettu
@@ -63,8 +68,8 @@ if [ ! -d /tmp/${DBKANTA} ]; then
 	exit
 fi
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Backup ${DBKANTA}."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup ${DBKANTA}."
 
 # Siirryt‰‰n temppidirriin
 cd /tmp/${DBKANTA}
@@ -72,29 +77,42 @@ cd /tmp/${DBKANTA}
 # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
 mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/pupesoft-backup.info
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy done."
 
 # Pakataan failit
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Bzip2 done."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Bzip2 done."
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Laitetaan salausavain fileen
+	echo "${SALAUSAVAIN}" > /root/salausavain
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi teht‰v‰ file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup k‰ytt‰en Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"		
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
 fi
 
 # Dellataan pois tempit
 rm -rf /tmp/${DBKANTA}
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - Copy config files."
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Copy config files."
 
 # Backupataan Pupeasenukseen liittyv‰t asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
@@ -163,39 +181,71 @@ fi
 
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
 
-if [ ! -z ${SALAUSAVAIN} ]; then
-	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+if [ ! -z "${SALAUSAVAIN}" ]; then
+
+	# Mcrypt ei osaa ylikirjottaa tiedostoa, joten poistetaan varmuuden vuoksi teht‰v‰ file
+	rm -f "${BACKUPDIR}/${FILENAME}.nc"
+
+	# Salataan backup k‰ytt‰en Rijndael-256 algoritmia ja poistetaan salaamaton versio jos salaus onnistuu
+	checkcrypt=`mcrypt -a rijndael-256 -f /root/salausavain --unlink --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
 		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
 		echo
+	else
+		# P‰ivitet‰‰n oikeudet kuntoon
+		chmod 664 "${BACKUPDIR}/${FILENAME}.nc"
+		echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+		echo ": Encrypt done."
 	fi
+
+	# Dellataan salausavain file
+	rm -f /root/salausavain
 fi
 
 #Siirret‰‰nkˆ tuorein backuppi myˆs sambaserverille jos sellainen on konffattu
-if [ ! -z ${SAMBAHOST} ]; then
-	checksamba=`mount -t cifs -o username=${SAMBAUSER},password=${SAMBAPASS} //${SAMBAHOST}/${SAMBAREMDIR} ${SAMBALOCALDIR}`
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
+	checksamba=`mount -t cifs -o username=${REMOTEUSER},password=${REMOTEPASS} //${REMOTEHOST}/${REMOTEREMDIR} ${REMOTELOCALDIR}`
 
 	if [[ $? != 0 ]]; then
 		echo "Sambamount ei onnistunut!"
 		echo
 	else
 		#Poistetaan vanha backuppi
-		rm -f ${SAMBALOCALDIR}/${DBKANTA}-backup-*
-		rm -f ${SAMBALOCALDIR}/linux-backup-*
+		rm -f ${REMOTELOCALDIR}/${DBKANTA}-backup-*
+		rm -f ${REMOTELOCALDIR}/linux-backup-*
 
 		# Siirret‰‰n t‰m‰
-		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${SAMBALOCALDIR}
-		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${SAMBALOCALDIR}
+		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTELOCALDIR}
+		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTELOCALDIR}
 
-		umount ${SAMBALOCALDIR}
+		umount ${REMOTELOCALDIR}
 	fi
 fi
 
+#Pidet‰‰nkˆ kaikki backupit eri serverill‰
+if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
+	# Siirret‰‰n failit remoteserverille
+	scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+
+	# Siivotaan vanhat backupit pois remoteserverilt‰
+	ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -mtime +${BACKUPPAIVAT} -delete";
+
+	# Pidet‰‰n master serverill‰ vain uusin backuppi
+	BACKUPPAIVAT=1
+fi
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`
-echo " - All done."
+# Synkataan backuppi Amazon S3:een
+if [ ! -z "${S3BUCKET}" ]; then
+	s3cmd --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
+	echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+	echo ": S3 copy done."		
+fi
+
+echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
+echo ": Backup done."
 echo

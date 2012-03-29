@@ -761,7 +761,6 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-
 		if ($laskunro > 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
@@ -815,10 +814,32 @@
 		if ($toim == "DGD") {
 			$joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
 		}
-		
+
 		if ($toim == "VASTAANOTTORAPORTTI") {
 			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
 			$where5 = " AND tilausrivi.kpl !=0 ";
+		}
+
+		if ($toim == "VAKADR") {
+			//myyntitilaus. Tulostetaan vakadr-kopio.
+			$where1 .= " lasku.tila in ('L') ";
+
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+				$where2 .= $wherenimi;
+			}
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
+						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')";
+
+			if (!isset($jarj)) $jarj = "ORDER BY lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
 		// Etsitään muutettavaa tilausta
@@ -1236,6 +1257,13 @@
 				$komento["Keräyslista"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "VAKADR") {
+			$tulostimet[0] = 'VAK_ADR';
+			if ($kappaleet > 0 and $komento["VAK_ADR"] != 'email') {
+				$komento["VAK_ADR"] .= " -# $kappaleet ";
+			}
+		}
+
 		if (isset($tulostukseen)) {
 			$tilausnumero = implode(",", $tulostukseen);
 		}
@@ -1276,6 +1304,11 @@
 
 		while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
+			if ($toim == "VAKADR") {
+				tulosta_vakadr_erittely($laskurow["tunnus"], $komento["VAK_ADR"], $tee);
+				$tee = '';
+			}
+
 			if ($toim == "OSTO") {
 				$otunnus = $laskurow["tunnus"];
 				$mista = 'tulostakopio';
@@ -1303,6 +1336,7 @@
 				require('tulosta_purkulista.inc');
 				$tee = '';
 			}
+
 			if ($toim == "VASTAANOTTORAPORTTI") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_vastaanottoraportti.inc');
@@ -1545,17 +1579,23 @@
 				$query = "  SELECT tyomaarays.*, lasku.*
 							FROM lasku
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-							WHERE lasku.yhtio='$kukarow[yhtio]'
-							and lasku.tunnus='$laskurow[tunnus]'";
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tunnus = '$laskurow[tunnus]'";
 				$result = pupe_query($query);
 				$laskurow = mysql_fetch_assoc($result);
 
+				//haetaan asiakkaan tiedot
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+							FROM asiakas
+							WHERE tunnus = '$laskurow[liitostunnus]'
+							and yhtio = '$kukarow[yhtio]'";
+				$result = pupe_query($query);
+				$asrow = mysql_fetch_assoc($result);
+
 				require_once ("tyomaarays/tulosta_tyomaarays.inc");
 
-				$otunnus = $laskurow["tunnus"];
-
-				$sorttauskentta = generoi_sorttauskentta($asrow["tyomaarayksen_jarjestys"]);
-				$order_sorttaus = $asrow["tyomaarayksen_jarjestys_suunta"];
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
+				$order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];
 
 				if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 				else $pjat_sortlisa = "";
@@ -1570,14 +1610,12 @@
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-							WHERE tilausrivi.otunnus = '$otunnus'
+							WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
 							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$result = pupe_query($query);
-
-				$tilausnumeroita = $otunnus;
 
 				//generoidaan rivinumerot
 				$rivinumerot = array();
@@ -1591,44 +1629,70 @@
 
 				mysql_data_seek($result,0);
 
-				unset($pdf);
-				unset($page);
-
-				$sivu  = 1;
-				$paino = 0;
-
 				if ($toim == "SIIRTOTYOMAARAYS") {
 					$tyyppi = "SISAINEN";
 				}
-				elseif ($tyomtyyppi == "O" or $kukarow['hinnat'] != 0) {
+				elseif ((isset($tyomtyyppi) and $tyomtyyppi == "O") or $kukarow['hinnat'] != 0) {
 					$tyyppi = "O";
 				}
-				elseif ($tyomtyyppi == "P") {
+				elseif (isset($tyomtyyppi) and $tyomtyyppi == "P") {
 					$tyyppi = "P";
 				}
-				elseif ($tyomtyyppi == "A") {
+				elseif (isset($tyomtyyppi) and $tyomtyyppi == "A") {
 					$tyyppi = "";
 				}
 				else {
 					$tyyppi = $yhtiorow["tyomaaraystyyppi"];
 				}
 
-				// Aloitellaan lähetteen teko
-				$page[$sivu] = tyomaarays_alku($tyyppi);
+				$params_tyomaarays = array( "asrow"           => $asrow,
+											"boldi"           => $boldi,
+											"edtuotetyyppi"   => "",
+											"iso"             => $iso,
+											"kala"            => 0,
+											"kieli"           => $kieli,
+											"komento"		  => $komento["Työmääräys"],
+											"laskurow"        => $laskurow,
+											"lineparam"       => $lineparam,
+											"norm"            => $norm,
+											"page"            => NULL,
+											"pdf"             => NULL,
+											"perheid"         => 0,
+											"perheid2"        => 0,
+											"pieni"           => $pieni,
+											"pieni_boldi"     => $pieni_boldi,
+											"rectparam"       => $rectparam,
+											"returnvalue"     => 0,
+											"rivinkorkeus"    => $rivinkorkeus,
+											"rivinumerot"     => $rivinumerot,
+											"row"             => NULL,
+											"sivu"            => 1,
+											"tee"             => $tee,
+											"thispage"		  => NULL,
+											"toim"            => $toim,
+											"tots"			  => 0,
+											"tyyppi"          => $tyyppi,);
+
+				// Aloitellaan lomakkeen teko
+				$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
 
 				while ($row = mysql_fetch_assoc($result)) {
-					tyomaarays_rivi($page[$sivu], $tyyppi);
+					$params_tyomaarays["row"] = $row;
+					$params_tyomaarays = tyomaarays_rivi($params_tyomaarays);
 				}
 
 				if ($yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
-					tyomaarays_loppu_lisarivit($page[$sivu], 1);
+					$params_tyomaarays["tots"] = 1;
+					$params_tyomaarays = tyomaarays_loppu_lisarivit($params_tyomaarays);
 				}
 				else {
-					tyomaarays_loppu($page[$sivu], 1);
+					$params_tyomaarays["tots"] = 1;
+					$params_tyomaarays = tyomaarays_loppu($params_tyomaarays);
 				}
 
 				//tulostetaan sivu
-				tyomaarays_print_pdf($komento["Työmääräys"]);
+				tyomaarays_print_pdf($params_tyomaarays);
+
 				$tee = '';
 			}
 

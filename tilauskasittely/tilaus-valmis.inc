@@ -14,6 +14,9 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+// päivitetään myös muuttuja
+$laskurow["vanhatunnus"] = $laskurow["tunnus"];
+
 // Katsotaan onko asiakas myyntikiellossa
 $query  = "	SELECT *
 			FROM asiakas
@@ -27,6 +30,8 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 
 	$query_alennuksia = generoi_alekentta('M');
 
+	$saatavat_liitostunnukset = "";
+
 	// Jos saatavat on ytunnus tasolla, pitää hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
@@ -37,7 +42,8 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 		$saatavat_row = mysql_fetch_assoc($saatavat_result);
 		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
 	}
-	else {
+
+	if ($saatavat_liitostunnukset == "") {
 		$saatavat_liitostunnukset = $laskurow["liitostunnus"];
 	}
 

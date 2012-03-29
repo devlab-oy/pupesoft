@@ -21,11 +21,13 @@
 		// HINNASTOJEN PERUSTIEDOT
 		$information = $xml->addChild('information');
 
-		// ensimmäinen on "variaatio"
+		// Lajitelma/variaatio
 		$product = $information->addChild('product');
-		$product->addChild('code',$dnslajitelma[$key][$laskuri]["variaatio"]);
+		$product->addChild('code', $key);
 
+		// Loopataan lajitelman tiedot
 		foreach ($lajitelma as $tiedot) {
+
 			$assortment = $product->addChild('assortment');
 				$assortment->addChild('code', utf8_encode(xmlentities($tiedot["tuoteno"])));
 				$assortment->addChild('assortmentname', utf8_encode(xmlentities($tiedot["nimitys"])));
@@ -35,19 +37,13 @@
 				$assortment->addChild('assortmentprice',$tiedot["myyntihinta"]);
 				$assortment->addChild('kuluttajahinta',$tiedot["myymalahinta"]);
 				$properties = $assortment->addChild('properties');
-				$propertytype = $properties->addChild('propertytype');
 
-				// tiedot->parametrit->0->parametri_pituus = 45
-				foreach ($tiedot["parametrit"] as $value) {
-
-					foreach ($value as $par) {
-						// avain on arrayn key-nimi
-						$avain = key($value);
-
-						$propertytype->addChild('propertytypename', utf8_encode(xmlentities($avain)));
+				// Loopataan lajitelman parametrit
+				foreach ($tiedot["parametrit"] as $parametrit) {
+					$propertytype = $properties->addChild('propertytype');
+						$propertytype->addChild('propertytypename', utf8_encode(xmlentities($parametrit["nimi"])));
 							$property = $propertytype->addChild('property');
-							$property->addChild('propertyname', utf8_encode(xmlentities($par)));
-					}
+							$property->addChild('propertyname', utf8_encode(xmlentities($parametrit["arvo"])));
 				}
 		}
 

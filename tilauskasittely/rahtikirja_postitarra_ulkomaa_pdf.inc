@@ -80,17 +80,29 @@
 	// tulostetaan niin monta lappua kun on kollejakin
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-		$juokseva = sprintf("%02d", $tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
-
 		if (substr($rivi["rahtikirjanro"], 0, 2) == "CE") {
-			$oma = sprintf("%02d", substr($rivi["rahtikirjanro"], -5));
+			$rakirritn = explode(" ", trim($rivi["rahtikirjanro"]));
+
+			$juokseva = $rakirritn[($tulostuskpl-1)];
 		}
 		else {
-			$oma = sprintf("%02d", substr($rtunnus, -2)); // 2, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+			// Haetaan seuraava vapaa numero
+			$query = "  SELECT rahtikirjanro
+						FROM rahtikirjat
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND rahtikirjanro LIKE 'CE%FI%'
+						ORDER BY tunnus desc
+						LIMIT 1";
+			$ranres = pupe_query($query);
+			$ranrow = mysql_fetch_assoc($ranres);
+
+			$edmax = array_pop(explode(" ", trim($ranrow["rahtikirjanro"])));
+
+			$juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, 6, 4));
 		}
 
-		#Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
-		$viiva = mod11_tarkiste($toitarow['tunhalnro'].$oma.$juokseva);
+		// Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
+		$viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
 
 		$viiva1   = "CE".$viiva."FI";
 		$viivaedi = "CE".$viiva."FI";

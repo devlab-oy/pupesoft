@@ -562,6 +562,13 @@ class Unifaun {
 						#$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
 						#$uni_ser_val->addAttribute('n', "bookingoffice");
 
+					if ($this->toitarow['merahti'] == "") {
+						$uni_addon = $uni_service->addChild('addon');
+						$uni_addon->addAttribute('adnid', 'rpay');
+
+						$uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
+						$uni_add_val->addAttribute('n', 'custno');
+					}
 
 					if ($this->toitarow['virallinen_selite'] == "P19" and $this->rakir_row["puhelin"] != "") {
 						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
@@ -575,12 +582,6 @@ class Unifaun {
 						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
 						$uni_addon->addAttribute('adnid', "NOTLTR");
 					}
-
-					/*
-					TEHDÄÄN TÄMÄ JOS VAK TAI MUU KOLLI
-					$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
-					$uni_addon->addAttribute('adnid', "SPTR");
-					*/
 
 					if ($this->rakir_row["jv"] != '' or $this->mehto['jv'] != '') {
 						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
@@ -687,6 +688,16 @@ class Unifaun {
 
 		$uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['pakkauskuvaus'])); # Contents
 		$uni_par_val->addAttribute('n', "contents");
+
+		if (count($pakkaustiedot['vakkoodi']) > 0 or $pakkaustiedot['pakkauskuvaus'] == 'MUU KOLLI') {
+			/*
+			TEHDÄÄN TÄMÄ JOS VAK TAI MUU KOLLI
+			$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+			$uni_addon->addAttribute('adnid', "SPTR");
+			*/
+			$uni_addon = $this->xml->shipment->service->addChild('addon');
+			$uni_addon->addAttribute('adnid', "SPTR");
+		}
 
 		if (count($pakkaustiedot['vakkoodi']) > 0) {
 

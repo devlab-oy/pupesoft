@@ -76,20 +76,32 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TEKSTI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
+			case "asiakaskommentti" :
+				$pakolliset = array("YTUNNUS", "TUOTENO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			case "asiakashinta" :
 				$pakolliset = array("HINTA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
 				$saakopoistaa = TRUE;
 				break;
-			case "asiakaskommentti" :
-				$pakolliset = array("YTUNNUS", "TUOTENO");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				break;
 			case "asiakasalennus" :
 				$pakolliset = array("ALENNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
+				$saakopoistaa = TRUE;
+				break;
+			case "toimittajahinta" :
+				$pakolliset = array("HINTA");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "RYHMA", "TOIMITTAJA", "YTUNNUS", "LAJI");
+				$saakopoistaa = TRUE;
+				break;
+			case "toimittajaalennus" :
+				$pakolliset = array("ALENNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "RYHMA", "TOIMITTAJA", "YTUNNUS");
 				$saakopoistaa = TRUE;
 				break;
 			case "perusalennus" :

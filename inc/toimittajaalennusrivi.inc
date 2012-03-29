@@ -92,11 +92,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "alennuslaji") {
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['oston_alekentat'], '');
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			$ulos .= "<option value = '$alepostfix' {$sel[$alepostfix]}>".t("Alennus")." $alepostfix</option>";
 		}
 

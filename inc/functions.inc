@@ -11514,8 +11514,11 @@ if (!function_exists("laskutuspaiva")) {
 			// Vika
 			$vikapaiva = date('N', mktime(0,0,0,(date('m')+1),0,date('Y')));
 
-			if ($arki and $vikapaiva > 5) {
-				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), 0-(8-$vikapaiva), date('Y')));
+			if ($arki and $vikapaiva == 7) {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), -2, date('Y')));
+			}
+			elseif ($arki and $vikapaiva == 6) {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), -1, date('Y')));
 			}
 			else {
 				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1),0,date('Y')));

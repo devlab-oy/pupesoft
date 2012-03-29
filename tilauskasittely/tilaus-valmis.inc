@@ -14,6 +14,9 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+// päivitetään myös muuttuja
+$laskurow["vanhatunnus"] = $laskurow["tunnus"];
+
 // Katsotaan onko asiakas myyntikiellossa
 $query  = "	SELECT *
 			FROM asiakas

@@ -22,6 +22,9 @@
 	}
 	elseif ($naytatvale == 6) {
 		$lahetetyyppi = "tulosta_lahete_custom.inc";
+	}	
+	elseif ($naytatvale == 7) {
+		$lahetetyyppi = "tulosta_lahete_ean.inc";
 	}
 	else {
 		$lahetetyyppi = "tulosta_lahete.inc";

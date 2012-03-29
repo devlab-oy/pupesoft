@@ -187,7 +187,7 @@ if(!function_exists("toimittajaalennustarkista")) {
 
 			// Ei tsekata turhaan kun rivi dellataan luedatasta
 			if (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA") {
-				if ($chalennuslaji < 1 or $chalennuslaji > $yhtiorow['myynnin_alekentat']) {
+				if ($chalennuslaji < 1 or $chalennuslaji > $yhtiorow['oston_alekentat']) {
 					$virhe[$i] = t("Virheellinen alennuslaji!");
 				}
 			}

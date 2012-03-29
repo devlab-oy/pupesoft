@@ -569,7 +569,6 @@ class Unifaun {
 						'KL',
 						'MH',
 						'TNT',
-						'TP'
 					);
 
 					if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['rahdinkuljettaja'], $allowed_rpay)) {

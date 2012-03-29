@@ -650,7 +650,9 @@
 			$lasku_yhtio = "";
 			$real_submit = "Merkkaa kerätyksi";
 
+			ob_start();
 			require('tilauskasittely/keraa.php');
+			ob_end_clean();
 
 			$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
 

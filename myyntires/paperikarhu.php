@@ -58,20 +58,19 @@
 				//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
 				$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
 
-				if ((($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" or $asiakastiedot["maksukehotuksen_osoitetiedot"] == "") and $yhtiorow["maksukehotuksen_osoitetiedot"] == "")
-						or ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" and $yhtiorow["maksukehotuksen_osoitetiedot"] == "K")) {
-					$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
-					$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
-					$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
-					$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
-					$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
-				}
-				elseif ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == "")) {
+				if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
 					$pdf->draw_text(50, 717, $asiakastiedot["laskutus_nimi"], 		$firstpage, $norm);
 					$pdf->draw_text(50, 707, $asiakastiedot["laskutus_nimitark"], 	$firstpage, $norm);
 					$pdf->draw_text(50, 697, $asiakastiedot["laskutus_osoite"], 	$firstpage, $norm);
 					$pdf->draw_text(50, 687, $asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"], $firstpage, $norm);
 					$pdf->draw_text(50, 677, $asiakastiedot["laskutus_maa"], 		$firstpage, $norm);
+				}
+				else {
+					$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
+					$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
+					$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
+					$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+					$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
 				}
 			}
 			else {
@@ -83,14 +82,7 @@
 				$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]),$firstpage, $iiso);
 
 				// vastaanottaja
-				if ((($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" or $asiakastiedot["maksukehotuksen_osoitetiedot"] == "") and $yhtiorow["maksukehotuksen_osoitetiedot"] == "")
-						or ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" and $yhtiorow["maksukehotuksen_osoitetiedot"] == "K")) {
-					$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 		$firstpage, $iiso);
-					$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 	$firstpage, $iiso);
-					$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 	$firstpage, $iiso);
-					$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iiso);
-				}
-				elseif ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == "")) {
+				if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
 					$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["laskutus_nimi"]), 	$firstpage, $iiso);
 					$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["laskutus_nimitark"]), $firstpage, $iiso);
 					$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["laskutus_osoite"]), 	$firstpage, $iiso);
@@ -98,6 +90,13 @@
 					// Laitetaan laskutus_maa asiakas_maaksi niin saadaan ilman ehtomuuttujia kyselystä oikea lopputulos.
 					$asiakastiedot['maa'] = $asiakastiedot["laskutus_maa"];
 				}
+				else {
+					$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 		$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iiso);
+				}
+
 
 				// jos vastaanottaja on eri maassa kuin yhtio niin lisätään maan nimi
 				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
@@ -695,31 +694,21 @@
 	        'yritys_maa'            => $yhtiorow['maa'],
 	        'sivumaara'             => $sivu,
 		);
-		// talteen
-		// 'vastaanottaja_nimi'    => trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']),
-		// 'vastaanottaja_osoite'  => $asiakastiedot['osoite'],
-		// 'vastaanottaja_postino' => $asiakastiedot['postino'],
-		// 'vastaanottaja_postitp' => $asiakastiedot['postitp'],
-		// 'vastaanottaja_maa'     => $asiakastiedot['maa'],
 
-
-		if ((($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" or $asiakastiedot["maksukehotuksen_osoitetiedot"] == "") and $yhtiorow["maksukehotuksen_osoitetiedot"] == "")
-				or ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "A" and $yhtiorow["maksukehotuksen_osoitetiedot"] == "K")) {
-			$info['vastaanottaja_osoite'] 	= trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']);
-			$info['vastaanottaja_osoite'] 	= $asiakastiedot["osoite"];
-			$info['vastaanottaja_postino']  = $asiakastiedot["postino"];
-			$info['vastaanottaja_postitp']	= $asiakastiedot["postitp"];
-			$info['vastaanottaja_maa']		= $asiakastiedot["maa"];
-		}
-		elseif ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == "")) {
+		if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
 			$info['vastaanottaja_osoite'] 	= trim($asiakastiedot['laskutus_nimi'] . ' ' . $asiakastiedot['laskutus_nimitark']);
 			$info['vastaanottaja_osoite'] 	= $asiakastiedot["laskutus_osoite"];
 			$info['vastaanottaja_postino']  = $asiakastiedot["laskutus_postino"];
 			$info['vastaanottaja_postitp']	= $asiakastiedot["laskutus_postitp"];
 			$info['vastaanottaja_maa']		= $asiakastiedot["laskutus_maa"];
 		}
-
-
+		else {
+			$info['vastaanottaja_osoite'] 	= trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']);
+			$info['vastaanottaja_osoite'] 	= $asiakastiedot["osoite"];
+			$info['vastaanottaja_postino']  = $asiakastiedot["postino"];
+			$info['vastaanottaja_postitp']	= $asiakastiedot["postitp"];
+			$info['vastaanottaja_maa']		= $asiakastiedot["maa"];
+		}
 
 		// otetaan configuraatio filestä salasanat ja muut
 		$info = array_merge($info, (array) $ekirje_config);

@@ -1643,8 +1643,8 @@
 								}
 							}
 
-								if ($ei_tyhja == '') {
-									echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
+							if ($ei_tyhja == '') {
+								echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
 							}
 
 							echo "</table></td>";

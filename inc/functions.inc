@@ -4242,10 +4242,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 10;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
+						if ($yhtiorow['alv_kasittely'] == '') {
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
+						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4291,12 +4302,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4343,12 +4363,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4395,12 +4424,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4637,13 +4675,21 @@ if (!function_exists("alehinta")) {
 					$hinta = 0.01;
 				}
 				elseif ($trow['kehahin'] > 0) {
+					// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+					$hinta = $trow['kehahin'] / (1 - (abs($ale["ale".$alepostfix]) / 100));
 
+					// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+					if ($trow["myyntihinta_maara"] != 0) {
+						$hinta = $hinta * $trow["myyntihinta_maara"];
+					}
+
+					// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 					if ($yhtiorow['alv_kasittely'] == '') {
-						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+						$hinta = $hinta * (1 + ($trow['alv'] / 100));
 					}
-					else {
-						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))), $yhtiorow['hintapyoristys']);
-					}
+
+					// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+					$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 				}
 
 				$aleperuste["ale".$alepostfix] = 5;

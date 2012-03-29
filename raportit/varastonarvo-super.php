@@ -970,7 +970,12 @@
 				}
 
 				// haetaan tuotteen myydyt kappaleet
-				$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl, date_format(max(tilausrivi.laskutettuaika),'%Y%m%d') laskutettuaika
+				$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl,
+							(SELECT date_format(max(til2.laskutettuaika), '%Y%m%d')
+								FROM tilausrivi til2
+								WHERE til2.yhtio = tilausrivi.yhtio
+								AND til2.tuoteno = tilausrivi.tuoteno
+								AND til2.tyyppi = tilausrivi.tyyppi) laskutettuaika
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 													and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -986,7 +991,12 @@
 				$xmyyrow = mysql_fetch_assoc($xmyyres);
 
 				// haetaan tuotteen kulutetut kappaleet
-				$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl, date_format(max(tilausrivi.toimitettuaika),'%Y%m%d') kulutettuaika
+				$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl,
+							(SELECT date_format(max(til2.toimitettuaika), '%Y%m%d')
+								FROM tilausrivi til2
+								WHERE til2.yhtio = tilausrivi.yhtio
+								AND til2.tuoteno = tilausrivi.tuoteno
+								AND til2.tyyppi = tilausrivi.tyyppi) kulutettuaika
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 													and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))

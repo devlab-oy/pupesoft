@@ -14395,7 +14395,7 @@ if (!function_exists("tee_keraysera")) {
 						AND lasku2.alatila = 'A'
 						AND lasku2.vakisin_kerays != ''
 						AND lasku2.varasto = '{$varasto}'
-						GROUP BY 1,2,3,4,5,6,7,8)
+						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER BY 1,2,3,4";
 			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 

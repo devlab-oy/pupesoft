@@ -1620,7 +1620,7 @@ if ($kasitellaan_tiedosto) {
 						$and .= " and toimittaja = '$chtoimittaja'";
 					}
 
-					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajahinta') {
+					if ($table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta') {
 						if ($chmaxkpl != 0) {
 							$and .= " and maxkpl = '$chmaxkpl'";
 						}

@@ -3,14 +3,6 @@
 if (@require_once("pdflib/phppdflib.class.php"));
 else require_once("phppdflib.class.php");
 
-if ($kieli == '') {
-	$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-	$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
-	$kielrow = mysql_fetch_assoc($kielresult);
-	$kieli = strtolower($kielrow['kieli']);
-}
-
-
 $norm["height"] 			= 10;
 $norm["font"] 				= "Times-Roman";
 
@@ -61,34 +53,33 @@ if (!function_exists('vakadr_otsikko')) {
 
 		// VASEN PUOLI
 		// Myyjän tiedot
-		$pdf->draw_text(30, 792, t("Lähettäjä", $kieli),$thispage, $boldi);
-		$pdf->draw_text(30, 780, $yhtiorow["nimi"],	$thispage, $norm);
-		$pdf->draw_text(30, 770, $yhtiorow["osoite"],	$thispage, $norm);
-		$pdf->draw_text(30, 760, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $thispage, $norm);
-		$pdf->draw_text(30, 750, $yhtiorow["maa"],	$thispage, $norm);
+		$pdf->draw_text(30, 717, t("Lähettäjä", $kieli),$thispage, $boldi);
+		$pdf->draw_text(30, 707, $yhtiorow["nimi"],	$thispage, $norm);
+		$pdf->draw_text(30, 697, $yhtiorow["osoite"],	$thispage, $norm);
+		$pdf->draw_text(30, 687, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $thispage, $norm);
+		$pdf->draw_text(30, 677, $yhtiorow["maa"],	$thispage, $norm);
 
 		// Tilaajantiedot
-		$pdf->draw_text(30, 725, t("Tilaaja", $kieli), 	$thispage, $boldi);
-		$pdf->draw_text(30, 713, $laskurow["nimi"],	$thispage, $norm);
-		$pdf->draw_text(30, 703, $laskurow["nimitark"],	$thispage, $norm);
-		$pdf->draw_text(30, 693, $laskurow["osoite"],	$thispage, $norm);
-		$pdf->draw_text(30, 683, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-		$pdf->draw_text(30, 673, $laskurow["maa"],	$thispage, $norm);
+		$pdf->draw_text(30, 656, t("Tilaaja", $kieli), 	$thispage, $boldi);
+		$pdf->draw_text(30, 644, $laskurow["nimi"],	$thispage, $norm);
+		$pdf->draw_text(30, 634, $laskurow["nimitark"],	$thispage, $norm);
+		$pdf->draw_text(30, 624, $laskurow["osoite"],	$thispage, $norm);
+		$pdf->draw_text(30, 614, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
+		$pdf->draw_text(30, 604, $laskurow["maa"],	$thispage, $norm);
 		// Toimitustosoite
-		$pdf->draw_text(290, 725, t("Toimitustosoite", $kieli), 	$thispage, $boldi);
-		$pdf->draw_text(290, 713, $laskurow["toim_nimi"],	$thispage, $norm);
-		$pdf->draw_text(290, 703, $laskurow["toim_nimitark"],	$thispage, $norm);
-		$pdf->draw_text(290, 693, $laskurow["toim_osoite"],	$thispage, $norm);
-		$pdf->draw_text(290, 683, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
-		$pdf->draw_text(290, 673, $laskurow["toim_maa"], $thispage, $norm);
+		$pdf->draw_text(290, 656, t("Toimitustosoite", $kieli), 	$thispage, $boldi);
+		$pdf->draw_text(290, 644, $laskurow["toim_nimi"],	$thispage, $norm);
+		$pdf->draw_text(290, 634, $laskurow["toim_nimitark"],	$thispage, $norm);
+		$pdf->draw_text(290, 624, $laskurow["toim_osoite"],	$thispage, $norm);
+		$pdf->draw_text(290, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
+		$pdf->draw_text(290, 604, $laskurow["toim_maa"], $thispage, $norm);
 
 		// OIKEA PUOLI
-
 		$pdf->draw_text(290, 792, t("Toimitustapa", $kieli), $thispage, $boldi);
 		$pdf->draw_text(370, 792, $laskurow["toimitustapa"], $thispage, $boldi);
 
 		$pdf->draw_text(290, 780, t("Tilausnumero", $kieli),$thispage, $norm);
-		$pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm); 
+		$pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm);
 
 		$pdf->draw_text(290, 770, t("Päivämäärä", $kieli), $thispage, $norm);
 		$pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm);
@@ -96,8 +87,8 @@ if (!function_exists('vakadr_otsikko')) {
 		// Otsikon viimeisin rivi on pikselissä 673
 		// 665 on laskettu ottaen huomioon että jokaisen SSCC:n alussa tiputetaan $kala-15 (650), joka on oikeakohta aloittaa piirtäminen.
 
-		$params["kala"] = 665;
-		$kala			= 665;
+		$params["kala"] = 595;
+		$kala			= 595;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
@@ -143,14 +134,14 @@ if (!function_exists('vakadr_rivi')) {
 			// tehdään kollikohtaiset otsikot.
 			$pdf->draw_text(30,	$kala, t("Kollitunniste (SSCC)", $kieli), $thispage, $boldi);
 			$pdf->draw_text(290,$kala, t("Tilaus", $kieli), $thispage, $boldi);
-			$pdf->draw_text(330,$kala, $tilausnumero, $thispage, $norm); // Tilausnumero
+			$pdf->draw_text(330,$kala, $laskurow["tunnus"], $thispage, $norm);
 			$pdf->draw_text(520,$kala, t("Määrä kg", $kieli), $thispage, $boldi);
 			$kala = $kala-12;
 
 		}
 
 		if (isset($vakkoodi) and isset($massa)) {
-		
+
 			if (strlen($vakkoodi) >= 80) {
 				list($ff_string, $ff_font) = pdf_fontfit($vakkoodi, 500, $pdf, $norm);
 				$pdf->draw_text(30, $kala, $ff_string, $thispage, $ff_font);
@@ -162,7 +153,7 @@ if (!function_exists('vakadr_rivi')) {
 			$pdf->draw_text(520,$kala, sprintf("%.2f",$massa), $thispage, $boldi);
 			$kala = $kala-11;
 		}
-		
+
 		$return = compact(array_keys($params));
 
 		return $return;
@@ -176,85 +167,67 @@ if (!function_exists('vakadr_loppu')) {
 		// Luodaan muuttujat
 		extract($params);
 
-		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc") {
-			// etäyhtiön yhtiötiedot
-			$y_puhelin		= $GLOBALS['eta_yhtio_puhelin'];
-			$y_fax			= $GLOBALS['eta_yhtio_fax'];
-			$y_email		= $GLOBALS['eta_yhtio_email'];
-			$y_www			= $GLOBALS['eta_yhtio_email'];
-			$y_nimi 		= $GLOBALS['eta_yhtio_nimi'];
-			$y_osoite 		= $GLOBALS['eta_yhtio_osoite'];
-			$y_postino	 	= $GLOBALS['eta_yhtio_postino'];
-			$y_postitp	 	= $GLOBALS['eta_yhtio_postitp'];
-			$y_maa 			= $GLOBALS['eta_yhtio_maa'];
-			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
-			$y_vatnumero	= str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
-			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
-			$y_iban 		= "";
-			$y_swift 		= "";
-		}
-		else {
-			// yhtiötiedot
-			$y_tiedot_ok	= FALSE;
-			$y_nimi 		= $laskurow["yhtio_nimi"];
-			$y_osoite 		= $laskurow["yhtio_osoite"];
-			$y_postino	 	= $laskurow["yhtio_postino"];
-			$y_postitp	 	= $laskurow["yhtio_postitp"];
-			$y_maa 			= $laskurow["yhtio_maa"];
-			$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
-			$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
-			$y_iban 		= $yhtiorow['pankkiiban1'];
-			$y_swift 		= $yhtiorow['pankkiswift1'];
+		// yhtiötiedot
+		$y_tiedot_ok	= FALSE;
+		$y_nimi 		= $laskurow["yhtio_nimi"];
+		$y_osoite 		= $laskurow["yhtio_osoite"];
+		$y_postino	 	= $laskurow["yhtio_postino"];
+		$y_postitp	 	= $laskurow["yhtio_postitp"];
+		$y_maa 			= $laskurow["yhtio_maa"];
+		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
+		$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+		$y_iban 		= $yhtiorow['pankkiiban1'];
+		$y_swift 		= $yhtiorow['pankkiswift1'];
 
-			if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
-				if (mysql_num_rows($alhire) == 1) {
-					$alhiro = mysql_fetch_assoc($alhire);
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
 
-					$y_tiedot_ok	= TRUE;
-					$y_puhelin		= $alhiro['puhelin'];
-					$y_fax			= $alhiro['fax'];
-					$y_email		= $alhiro['email'];
-					$y_www			= $alhiro['www'];
-				}
-			}
-
-			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-			if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
-				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
-
-				if (mysql_num_rows($alhire) == 1) {
-					$alhiro = mysql_fetch_assoc($alhire);
-
-					$y_tiedot_ok	= TRUE;
-					$y_puhelin		= $alhiro['puhelin'];
-					$y_fax			= $alhiro['fax'];
-					$y_email		= $alhiro['email'];
-					$y_www			= $alhiro['www'];
-				}
-			}
-
-			// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
-			if (!$y_tiedot_ok) {
-				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
-
-				if (mysql_num_rows($alhire) == 1) {
-					$alhiro = mysql_fetch_assoc($alhire);
-
-					$y_puhelin		= $alhiro['puhelin'];
-					$y_fax			= $alhiro['fax'];
-					$y_email		= $alhiro['email'];
-					$y_www			= $alhiro['www'];
-				}
+				$y_tiedot_ok	= TRUE;
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
+
+		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_tiedot_ok	= TRUE;
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
+			}
+		}
+
+		// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+		if (!$y_tiedot_ok) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
+			}
+		}
+
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
@@ -325,7 +298,7 @@ if (!function_exists('print_pdf_vakadr')) {
 
 					echo t("VAK/ADR-erittely tulostuu")."...<br>";
 
-					$kutsu = t("VAK/ADR-erittely %s", $kieli, $laskurow["tilaus"]);
+					$kutsu = t("VAK/ADR-erittely %s", $kieli, $laskurow["tunnus"]);
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
@@ -346,4 +319,5 @@ if (!function_exists('print_pdf_vakadr')) {
 		system("rm -f $pdffilenimi");
 	}
 }
+
 ?>

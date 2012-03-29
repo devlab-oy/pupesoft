@@ -15359,35 +15359,22 @@ if (!function_exists('myyntitili_varastopaikka')) {
 
 // Tulostetaan VAK/ADR-erittely
 if (!function_exists('tulosta_vakadr_erittely')) {
-	function tulosta_vakadr_erittely($parametrit) {
-		global $yhtiorow, $kukarow;
+	function tulosta_vakadr_erittely($laskun_tunnus, $vakadr_komento, $tee) {
+		global $yhtiorow, $kukarow, $kieli;
 
-		$tulostin_tunnus = (int) $parametrit["tulostin_tunnus"]; 
-		$vakadrkpl		 = (int) $parametrit["kpl"]; 
-		$laskun_tunnus	 = (int) $parametrit["laskun_tunnus"];
-		$vakadr_komento  = $parametrit["komento"];
-		
-		require("tilauskasittely/tulosta_vakerittely.inc");
-		
 		if ($yhtiorow["kerayserat"] != "K") {
-			echo t("Pitää olla käytössä keräyserät, ei tulosteta VAK-erittelyä");
-			return;
-		}
-		
-		if ($yhtiorow["vak_erittely"] != "K") {
-			echo t("Pitää olla käytössä vak-erittely, ei tulosteta VAK-erittelyä");
-			return;
-		}
-	
-		if ($vakadrkpl <= 0) {
-			echo t("Kpl-määrä ei voi olla 0 tai tyhjää, ei tulosteta VAK-erittelyä");
+			echo t("Keräyserät pitää olla käytössä, ei tulosteta VAK-erittelyä");
 			return;
 		}
 
-				
-		$query = "	SELECT * 
-					FROM lasku 
-					WHERE yhtio = '{$kukarow["yhtio"]}' 
+		if ($yhtiorow["vak_erittely"] != "K") {
+			echo t("Vak-erittely pitää olla käytössä, ei tulosteta VAK-erittelyä");
+			return;
+		}
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow["yhtio"]}'
 					AND tunnus = '$laskun_tunnus'";
 		$result = pupe_query($query);
 
@@ -15398,24 +15385,14 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 
 		$laskurow = mysql_fetch_assoc($result);
 
-		// muuttuja 
-		$tulostin_where = ($tulostin_tunnus == 0) ? " AND komento = '{$vakadr_komento}'" : " AND tunnus = '{$tulostin_tunnus}'";
+		require("tilauskasittely/tulosta_vakerittely.inc");
 
-		//haetaan VAK/ADR tulostuskomento
-		$query   = "SELECT * 
-					FROM kirjoittimet 
-					WHERE yhtio = '{$kukarow["yhtio"]}' 
-					{$tulostin_where} 
-					and komento != ''";
-		$result  = pupe_query($query);
-		
-		if (mysql_num_rows($result) == 0) {
-			echo t("Kirjoitinta ei löydy");
-			return;
+		if ($kieli == '') {
+			$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+			$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+			$kielrow = mysql_fetch_assoc($kielresult);
+			$kieli = strtolower($kielrow['kieli']);
 		}
-
-		$kirrow  = mysql_fetch_assoc($result);
-		$vakadr_komento = $kirrow['komento'];
 
 		// Haetaan kaikki tilauksen SSCC koodit
 		$query = "	SELECT distinct sscc, sscc_ulkoinen
@@ -15423,47 +15400,46 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 					JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 					JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.tyyppi != 'D'
+					AND tilausrivi.kpl+tilausrivi.varattu > 0";
 		$result_sscc = pupe_query($query);
 
 		if (mysql_num_rows($result_sscc) > 0) {
 
 			$params_vak = array(
-						'kieli'			=> $kieli,
-						'pieni'			=> $pieni,
-						'norm'			=> $norm,
 						'boldi'			=> $boldi,
 						'iso'			=> $iso,
+						'kala'			=> 0,
+						'kieli'			=> $kieli,
+						'komento' 		=> $vakadr_komento,
 						'laskurow'		=> $laskurow,
+						'massa'			=> 0,
+						'norm'			=> $norm,
 						'page'			=> NULL,
 						'pdf'			=> NULL,
+						'pieni'			=> $pieni,
 						'sivu'			=> 1,
-						'thispage'		=> NULL,);
+						'rectparam'		=> $rectparam,
+						'tee'			=> $tee,
+						'sscc' 			=> NULL,
+						'sscc_ulkoinen' => NULL,
+						'thispage'		=> NULL,
+						'vakkoodi' 		=> NULL,
+						);
 
 			// VAK lapun otsikko
 			$params_vak = vakadr_otsikko($params_vak);
 
 			while ($row = mysql_fetch_assoc($result_sscc)) {
 
-				extract($params_vak);
-
-				$params = array(
-					'pieni'			=> $pieni,
-					'norm'			=> $norm,
-					'boldi'			=> $boldi,
-					'iso'			=> $iso,
-					'kieli'			=> $kieli,
-					'laskurow'		=> $laskurow,
-					'pdf'			=> $pdf,
-					'thispage'		=> $thispage,
-					'kala'			=> $kala,
-					'sscc' 			=> $row["sscc"],
-					'sscc_ulkoinen' => $row["sscc_ulkoinen"],
-					'tilausnumero' 	=> $laskurow['tunnus'],
-					);
+				$params_vak['sscc'] 			= $row["sscc"];
+				$params_vak['sscc_ulkoinen'] 	= $row["sscc_ulkoinen"];
+				$params_vak['vakkoodi'] 		= NULL;
+				$params_vak['massa']	 		= NULL;
 
 				// piirretään riviotsikko (koska meillä on sscc setattu)
-				$params_vak = vakadr_rivi($params);
+				$params_vak = vakadr_rivi($params_vak);
 
 				// Käytetäänkö VAK-tietokantaa
 				if ($yhtiorow["vak_kasittely"] != "") {
@@ -15482,7 +15458,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 					$vakselect = " tuote.vakkoodi vakkoodi,";
 					$vakjoin   = "";
 				}
-	
+
 				// Haetaan paketille (SSCC) kaikki vakkoodit ja niiden massa (kerroin 0.95, koska koko tuotteen massa ei ole yleensä vaarallista ainetta)
 				$aliquery = "	SELECT {$vakselect}
 								sum(kerayserat.kpl * tuote.tuotemassa * 0.95) as massa
@@ -15492,43 +15468,27 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 								{$vakjoin}
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+								AND tilausrivi.tyyppi != 'D'
+								AND tilausrivi.kpl+tilausrivi.varattu > 0
 								group by vakkoodi";
 				$apuresult = pupe_query($aliquery);
 
 				while ($sscc_rivi = mysql_fetch_assoc($apuresult)) {
-
-					extract($params_vak);
-
-					$params_rivi = array(
-						'pieni'			=> $pieni,
-						'norm'			=> $norm,
-						'boldi'			=> $boldi,
-						'iso'			=> $iso,
-						'kieli'			=> $kieli,
-						'laskurow'		=> $laskurow,
-						'pdf'			=> $pdf,
-						'thispage'		=> $thispage,
-						'kala'			=> $kala,
-						'vakkoodi' 		=> $sscc_rivi["vakkoodi"],
-						'massa'			=> $sscc_rivi["massa"],
-						'tilaus'		=> $laskurow["tunnus"],
-					);
+					$params_vak['sscc'] 			= NULL;
+					$params_vak['sscc_ulkoinen'] 	= NULL;
+					$params_vak['vakkoodi'] 		= $sscc_rivi["vakkoodi"];
+					$params_vak['massa']	 		= $sscc_rivi["massa"];
 
 					// Piirretään vakkoodit (koska meillä on vakkoodi ja massa setattu)
-					$params_vak = vakadr_rivi($params_rivi);
+					$params_vak = vakadr_rivi($params_vak);
 				}
 			}
-		
+
 			// Piirretään footer
 			$params_vak = vakadr_loppu($params_vak);
 
-			$params_vak["komento"] = $vakadr_komento;
-
 			// Tulostetaan PDF
 			print_pdf_vakadr($params_vak);
-
-			unset($params_vak);
-			unset($params_rivi);
 		}
 	}
 }

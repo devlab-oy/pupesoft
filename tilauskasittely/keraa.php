@@ -1463,17 +1463,13 @@
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='') {
-							// Pakolliset kenttien selitys
-							// vakadr_tulostin = tulostimen tunnus
-							// vakadrkpl = montako kpl tulostetaan
-							// laskun_tunnus = laskun tunnus
-
-							$parametrit = array('tulostin_tunnus' 	=> $vakadr_tulostin,
-												'kpl'			 	=> $vakadrkpl,
-												'laskun_tunnus'	 	=> $laskurow["tunnus"],
-												);
-
-							tulosta_vakadr_erittely($parametrit);
+							//haetaan lähetteen tulostuskomento
+							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$vakadr_tulostin'";
+							$kirres  = pupe_query($query);
+							$kirrow  = mysql_fetch_assoc($kirres);
+							$vakadr_komento = $kirrow['komento'];
+							
+							tulosta_vakadr_erittely($laskurow["tunnus"], $vakadr_komento, $tee);
 						}
 						
 						if ($valittu_tulostin != "") {

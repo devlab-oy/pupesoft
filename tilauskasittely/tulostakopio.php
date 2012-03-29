@@ -1258,10 +1258,9 @@
 			}
 		}
 		if ($toim == "VAKADR") {
-
-			$tulostimet[0] = 'vakadr';
-			if ($kappaleet > 0 and $komento["vakadr"] != 'email') {
-				$komento["vakadr"] .= " -# $kappaleet ";
+			$tulostimet[0] = 'VAK_ADR';
+			if ($kappaleet > 0 and $komento["VAK_ADR"] != 'email') {
+				$komento["VAK_ADR"] .= " -# $kappaleet ";
 			}
 		}
 
@@ -1306,15 +1305,7 @@
 		while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
 			if ($toim == "VAKADR") {
-
-				$kpl = ((int) $kappaleet == 0) ? 1 : (int) $kappaleet;
-
-				$parametrit = array('laskun_tunnus'	 	=> $laskurow["tunnus"],
-									'kpl'				=> $kpl,
-									'komento'			=> $komento["vakadr"],
-									);
-
-				tulosta_vakadr_erittely($parametrit);
+				tulosta_vakadr_erittely($laskurow["tunnus"], $komento["VAK_ADR"], $tee);
 				$tee = '';
 			}
 

@@ -123,7 +123,7 @@ if (!function_exists('vakadr_rivi')) {
 
 			$kala = $kala-15; // oikeasta kohtaan ja että SSCC väliin tulee väliä
 
-			if ($sscc_ulkoinen != 0) {
+			if ((is_numeric($sscc_ulkoinen) and (int) $sscc_ulkoinen > 0) or (!is_numeric($sscc_ulkoinen) and (string) $sscc_ulkoinen != "")) {
 				$pdf->draw_text(150,$kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC tähän jos löytyy
 			}
 			else {

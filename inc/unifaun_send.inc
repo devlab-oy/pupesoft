@@ -327,8 +327,8 @@ class Unifaun {
 					$uni_par_val->addAttribute('n', "custno");
 				}
 
-				if ($rahdinkuljettaja_row['jalleenmyyjanro'] != 0 and $rahdinkuljettaja_row['jalleenmyyjanro'] != "") {
-					$uni_rcv_val = $uni_receiver->addChild('val', $rahdinkuljettaja_row['jalleenmyyjanro']); # HIT InNight mandatory.
+				if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
+					$uni_rcv_val = $uni_receiver->addChild('val', $this->asiakasrow['tunnus']); # HIT InNight mandatory.
 					$uni_rcv_val->addAttribute('n', "id4user");
 				}
 

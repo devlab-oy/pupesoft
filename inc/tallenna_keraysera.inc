@@ -45,16 +45,9 @@
 
 					if (trim($row['selite']) == '') {
 
-						// haetaan aluksi max perhe
-						$query = "	SELECT max(perhe)+1 perhe
-									FROM avainsana
-									WHERE yhtio = '{$kukarow['yhtio']}'";
-						$max_perhe_res = pupe_query($query);
-						$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
-
 						$query = "	INSERT INTO avainsana SET
 									yhtio 			= '{$kukarow['yhtio']}',
-									perhe 			= '{$max_perhe_row['perhe']}',
+									perhe 			= '666',
 									kieli 			= '{$kukarow['kieli']}',
 									laji 			= 'SSCC',
 									nakyvyys 		= '',

@@ -148,10 +148,12 @@
 										AND nro = '{$keraysera_nro}'";
 							$valmis_era_chk_res = pupe_query($query);
 
+							$otunnus_chk = "";
+
 							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 								$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
 
-								$query = "	SELECT tilausrivi.varattu, 
+								$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu, 
 											tilausrivi.tuoteno AS puhdas_tuoteno,
 											concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 											concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
@@ -161,21 +163,35 @@
 								$varattu_res = pupe_query($query);
 								$varattu_row = mysql_fetch_assoc($varattu_res);
 
+								$otunnus_chk = $varattu_row['otunnus'];
+
 								$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
 								$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
 								$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
 								$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
 							}
 
+							$query = "	SELECT varastopaikat.printteri1, varastopaikat.printteri3
+										FROM lasku
+										JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+										AND lasku.tunnus = '{$otunnus_chk}'";
+							$printteri_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoitinta haettaessa\r\n\r\n");
+							$printteri_row = mysql_fetch_assoc($printteri_res);
+
 							// setataan muuttujat keraa.php:ta varten
 							$tee = "P";
 							$toim = "";
 							$id = $keraysera_nro_row['nro'];
 							$keraajanro = "";
-							$valittu_tulostin = "";
-							$lahetekpl = 1;
-							$valittu_oslapp_tulostin = "";
-							$oslappkpl = 1;
+
+							// vakadr-tulostin on aina sama kuin lähete-tulostin
+							$valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
+							$valittu_oslapp_tulostin = $printteri_row['printteri3'];
+
+							$lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
+							$oslappkpl = $yhtiorow["oletus_oslappkpl"];
+
 							$lasku_yhtio = "";
 							$real_submit = "Merkkaa kerätyksi";
 

@@ -563,7 +563,16 @@ class Unifaun {
 						#$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
 						#$uni_ser_val->addAttribute('n', "bookingoffice");
 
-					if ($this->toitarow['merahti'] == "") {
+					$allowed_rpay = array(
+						'HIT',
+						'KK',
+						'KL',
+						'MH',
+						'TNT',
+						'TP'
+					);
+
+					if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['rahdinkuljettaja'], $allowed_rpay)) {
 						$uni_addon = $uni_service->addChild('addon');
 						$uni_addon->addAttribute('adnid', 'rpay');
 

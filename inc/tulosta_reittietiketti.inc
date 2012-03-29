@@ -2,10 +2,15 @@
 
 	if ($kerayseran_numero > 0) {
 
-		$query = "	SELECT otunnus, sscc, sscc_ulkoinen
+		$pakkauskirjainlisa = (isset($uusi_pakkauskirjain) and trim($uusi_pakkauskirjain) != "") ? " AND kerayserat.pakkausnro = '{$uusi_pakkauskirjain}' " : "";
+		$sscclisa = (isset($uusi_sscc) and trim($uusi_sscc) != "") ? " AND kerayserat.sscc = '{$uusi_sscc}' " : "";
+
+		$query = "	SELECT kerayserat.otunnus, kerayserat.sscc, kerayserat.sscc_ulkoinen
 					FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$kerayseran_numero}'
+					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+					AND kerayserat.nro = '{$kerayseran_numero}'
+					{$pakkauskirjainlisa}
+					{$sscclisa}
 					GROUP BY 1,2,3
 					ORDER BY 1";
 		$chk_sscc_res = pupe_query($query);
@@ -38,7 +43,6 @@
 
 					$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
 					$parcelno = $chk_sscc_row['sscc_ulkoinen'];
-
 
 					if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
 						$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
@@ -118,6 +122,8 @@
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.nro = '{$kerayseran_numero}'
 							AND kerayserat.otunnus = '{$row['tunnus']}'
+							{$pakkauskirjainlisa}
+							{$sscclisa}
 							GROUP BY 1,2,3,4,5";
 				$keraysera_res = pupe_query($query);
 

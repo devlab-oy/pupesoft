@@ -14307,11 +14307,6 @@ if (!function_exists("tee_keraysera")) {
 
 		if ($debug) echo "Kerääjän max_keraysera_alustat $kukarow[max_keraysera_alustat]<br><br>";
 
-		if (trim($keraysvyohyketiedot['sallitut_alustat']) == '') {
-			if ($debug) echo "<font class='error'>",t("Keräysvyöhykkeeseen")," ({$keraysvyohyketiedot['nimitys']}) ",t("ei ole määritelty sallittuja alustoja"),"!</font><br>";
-			return array();
-		}
-
 		if ($debug) echo "<font class='head'>".t("Keräysvyöhyke").": $keraysvyohyketiedot[nimitys]</font><br>";
 
 		$query = "	SELECT pakkaus.tunnus,

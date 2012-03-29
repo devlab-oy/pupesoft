@@ -603,7 +603,7 @@
 
 			if ($splitlineflag == 0) {
 				$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-		$updres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää päivitettäessä\r\n\r\n");
+				$updres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää päivitettäessä\r\n\r\n");
 			}
 
 			$query = "UPDATE tilausrivi SET keratty = '{$kukarow['kuka']}', kerattyaika = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
@@ -890,100 +890,53 @@
 		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
 
 		if ($splitlineflag == 0) {
-		###### TEHDÄÄN UUSI SSCC-NUMERO
-		// emuloidaan transactioita mysql LOCK komennolla
-		$query = "LOCK TABLES avainsana WRITE";
-		$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukituksen yhteydessä\r\n\r\n");
+			###### TEHDÄÄN UUSI SSCC-NUMERO
+			// emuloidaan transactioita mysql LOCK komennolla
+			$query = "LOCK TABLES avainsana WRITE";
+			$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukituksen yhteydessä\r\n\r\n");
 
-		$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa haettaessa\r\n\r\n");
-		$row = mysql_fetch_assoc($result);
+			$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa haettaessa\r\n\r\n");
+			$row = mysql_fetch_assoc($result);
 
-		$uusi_sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$uusi_sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
 
-		$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-		$update_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä\r\n\r\n");
+			$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$update_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä\r\n\r\n");
 
-		// poistetaan lukko
-		$query = "UNLOCK TABLES";
-		$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukitusta poistettaessa\r\n\r\n");
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe lukitusta poistettaessa\r\n\r\n");
 		}
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 		$chkres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
 		$chkrow = mysql_fetch_array($chkres);
 
-		$sscclisa = $splitlineflag == 0 ? " sscc = '{$uusi_sscc}', " : "";
+		$sscclisa = $splitlineflag == 0 ? " kerayserat.sscc = '{$uusi_sscc}', " : "";
 
 		$query = "	UPDATE kerayserat SET
 					{$sscclisa}
-					pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila = 'K'
-					AND pakkausnro = '{$chkrow['pakkausnro']}'
-					AND nro = '{$nro}'";
+					kerayserat.pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
+					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+					AND kerayserat.tila = 'K'
+					AND kerayserat.pakkausnro = '{$chkrow['pakkausnro']}'
+					AND kerayserat.nro = '{$nro}'";
 		$updres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserän rivejä päivitettäessä\r\n\r\n");
 
-		$query = "	SELECT *
-					FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$nro}'
-					AND pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
-
-		$rivit = $paino = $tilavuus = 0;
-		$otunnus = 0;
-
-		while ($row = mysql_fetch_assoc($result)) {
-
-			$query = "	SELECT round((tuote.tuotemassa * (tilausrivi.kpl+tilausrivi.varattu)), 2) as paino, round(((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) * (tilausrivi.kpl+tilausrivi.varattu)), 4) as tilavuus, tilausrivi.otunnus
-						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.tunnus = '{$row['tilausrivi']}'";
-			$paino_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe mittatietoja haettaessa\r\n\r\n");
-			$paino_row = mysql_fetch_assoc($paino_res);
-
-			$paino += $paino_row['paino'];
-			$tilavuus += $paino_row['tilavuus'];
-			$rivit += 1;
-			$otunnus = $row['otunnus'];
-		}
-
-		$query = "	SELECT komento
+		$query = "	SELECT tunnus
 					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND jarjestys = '{$printer_id}'";
-		$print_result = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoittimen komentoa haettaessa\r\n\r\n");
-		$print_row = mysql_fetch_assoc($print_result);
+		$printer_chk_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoitinta haettaessa\r\n\r\n");
+		$printer_chk_row = mysql_fetch_assoc($printer_chk_res);
 
-		$komento = $print_row['komento'];
+		$kerayseran_numero = $nro;
+		$komento['reittietiketti'] = $printer_chk_row['tunnus'];
+		$uusi_pakkauskirjain = $uusi_paknro_row['uusi_pakkauskirjain'];
 
-		$query = "SELECT toimitustapa, nimi, nimitark, osoite, postino, postitp, viesti, sisviesti2 FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otunnus}'";
-		$laskures = mysql_query($query) or die("1, Tietokantayhteydessä virhe tilausta haettaessa\r\n\r\n");
-		$laskurow = mysql_fetch_assoc($laskures);
+		require("inc/tulosta_reittietiketti.inc");			
 
-		$params = array(
-			'tilriv' => $chkrow['tilausrivi'],
-			'pakkaus_kirjain' => $pakkaus_kirjain,
-			'sscc' => $uusi_sscc,
-			'toimitustapa' => $laskurow['toimitustapa'],
-			'rivit' => $rivit,
-			'paino' => $paino,
-			'tilavuus' => $tilavuus,
-			'lask_nimi' => $laskurow['nimi'],
-			'lask_nimitark' => $laskurow['nimitark'],
-			'lask_osoite' => $laskurow['osoite'],
-			'lask_postino' => $laskurow['postino'],
-			'lask_postitp' => $laskurow['postitp'],
-			'lask_viite' => $laskurow['viesti'],
-			'lask_merkki' => $laskurow['sisviesti2'],
-			'komento_reittietiketti' => $komento,
-		);
-
-		if ($komento != 'email') {
-			tulosta_reittietiketti($params);
-		}
 
 		$response = "{$pakkaus_kirjain},0,\r\n\r\n";
 	}

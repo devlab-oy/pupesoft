@@ -14280,47 +14280,53 @@ if (!function_exists("tee_keraysera")) {
 
 		if ($debug) echo "<font class='head'>".t("Keräysvyöhyke").": $keraysvyohyketiedot[nimitys]</font><br>";
 
-		$query = "	SELECT pakkaus.tunnus,
-					pakkaus.pakkauskuvaus,
-					pakkaus.pakkaus,
-					pakkaus.yksin_eraan,
-					pakkaus.paino,
-					pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
-					pakkaus.minimi_paino,
-					(pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
-					if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
-					if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
-					if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
-					if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
-					FROM pakkaus
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND paino > 0
-					AND leveys > 0
-					AND syvyys > 0
-					AND korkeus > 0
-					AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
-					ORDER BY tilavuus ASC";
-		$pakkaus_result = pupe_query($query);
+		if ($keraysvyohyketiedot['sallitut_alustat'] != "") {
 
-		$yksin_eraan = false;
+			$query = "	SELECT pakkaus.tunnus,
+						pakkaus.pakkauskuvaus,
+						pakkaus.pakkaus,
+						pakkaus.yksin_eraan,
+						pakkaus.paino,
+						pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
+						pakkaus.minimi_paino,
+						(pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
+						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
+						if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
+						if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
+						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
+						FROM pakkaus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND paino > 0
+						AND leveys > 0
+						AND syvyys > 0
+						AND korkeus > 0
+						AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
+						ORDER BY tilavuus ASC";
+			$pakkaus_result = pupe_query($query);
 
-		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
-			$pakkaukset[$pakkaus_row['tunnus']]['nimi']					= $pakkaus_row['pakkauskuvaus'];
-			$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 				= $pakkaus_row['leveys'];
-			$pakkaukset[$pakkaus_row['tunnus']]['korkeus'] 				= $pakkaus_row['korkeus'];
-			$pakkaukset[$pakkaus_row['tunnus']]['syvyys'] 				= $pakkaus_row['syvyys'];
-			$pakkaukset[$pakkaus_row['tunnus']]['paino'] 				= $pakkaus_row['paino'];
-			$pakkaukset[$pakkaus_row['tunnus']]['minimi_tilavuus'] 		= $pakkaus_row['minimi_tilavuus'];
-			$pakkaukset[$pakkaus_row['tunnus']]['minimi_paino'] 		= $pakkaus_row['minimi_paino'];
-			$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] 			= $pakkaus_row['tilavuus'] * $pakkaus_row['kayttoprosentti'];
-			$pakkaukset[$pakkaus_row['tunnus']]['yksin_eraan'] 			= $pakkaus_row['yksin_eraan'];
-			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
-			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
-			$pakkaukset[$pakkaus_row['tunnus']]['pahvipintaala']		= (2 * ($pakkaus_row['leveys'] * $pakkaus_row['korkeus'] + $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] + $pakkaus_row['korkeus'] * $pakkaus_row['syvyys']) + ($pakkaus_row['leveys'] * $pakkaus_row['syvyys']));
+			$yksin_eraan = false;
 
-			if (!$yksin_eraan and $pakkaus_row['yksin_eraan'] == 'K') {
-				$yksin_eraan = true;
+			while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
+				$pakkaukset[$pakkaus_row['tunnus']]['nimi']					= $pakkaus_row['pakkauskuvaus'];
+				$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 				= $pakkaus_row['leveys'];
+				$pakkaukset[$pakkaus_row['tunnus']]['korkeus'] 				= $pakkaus_row['korkeus'];
+				$pakkaukset[$pakkaus_row['tunnus']]['syvyys'] 				= $pakkaus_row['syvyys'];
+				$pakkaukset[$pakkaus_row['tunnus']]['paino'] 				= $pakkaus_row['paino'];
+				$pakkaukset[$pakkaus_row['tunnus']]['minimi_tilavuus'] 		= $pakkaus_row['minimi_tilavuus'];
+				$pakkaukset[$pakkaus_row['tunnus']]['minimi_paino'] 		= $pakkaus_row['minimi_paino'];
+				$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] 			= $pakkaus_row['tilavuus'] * $pakkaus_row['kayttoprosentti'];
+				$pakkaukset[$pakkaus_row['tunnus']]['yksin_eraan'] 			= $pakkaus_row['yksin_eraan'];
+				$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
+				$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
+				$pakkaukset[$pakkaus_row['tunnus']]['pahvipintaala']		= (2 * ($pakkaus_row['leveys'] * $pakkaus_row['korkeus'] + $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] + $pakkaus_row['korkeus'] * $pakkaus_row['syvyys']) + ($pakkaus_row['leveys'] * $pakkaus_row['syvyys']));
+
+				if (!$yksin_eraan and $pakkaus_row['yksin_eraan'] == 'K') {
+					$yksin_eraan = true;
+				}
 			}
+		}
+		else {
+			$pakkaukset = array();
 		}
 
 		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {

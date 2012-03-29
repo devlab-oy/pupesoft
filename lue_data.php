@@ -1414,8 +1414,8 @@ if ($kasitellaan_tiedosto) {
 
 							if ($otsikko == 'TOIMITTAJA' and (int) $rivi[$r] > 0) {
 								$chtoimittaja = $rivi[$r];
-							}							
-							
+							}
+
 							if ($otsikko == 'TUOTENO' and $rivi[$r] != '') {
 								$chtuoteno = trim($rivi[$r]);
 							}
@@ -1436,7 +1436,7 @@ if ($kasitellaan_tiedosto) {
 								$chloppupvm = $rivi[$r];
 							}
 
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) { 
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) {
 								// 1 tarkoittaa dynaamisen puun KOODIA
 								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$rivi[$r]'";
 								$etsiresult = pupe_query($etsitunnus);
@@ -1445,7 +1445,7 @@ if ($kasitellaan_tiedosto) {
 								$chsegmentti = $etsirow['tunnus'];
 							}
 
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $rivi[$r] > 0) { 
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $rivi[$r] > 0) {
 								// 2 tarkoittaa dynaamisen puun TUNNUSTA
 								$chsegmentti = $rivi[$r];
 							}
@@ -1464,10 +1464,6 @@ if ($kasitellaan_tiedosto) {
 
 							if ($otsikko == 'ALENNUSLAJI' and (int) $rivi[$r] > 0) {
 								$chalennuslaji = (int) $rivi[$r];
-							}
-							
-							if ($table_mysql == 'toimittajahinta' and $otsikko == 'LAJI' and trim($rivi[$r]) !="") {
-								$chalennuslaji = (string) trim($rivi[$r]);
 							}
 
 							if ($otsikko == 'MONIKERTA' and $rivi[$r] != '') {
@@ -1619,7 +1615,7 @@ if ($kasitellaan_tiedosto) {
 					if ($chminkpl != 0) {
 						$and .= " and minkpl = '$chminkpl'";
 					}
-					
+
 					if ($chtoimittaja != '') {
 						$and .= " and toimittaja = '$chtoimittaja'";
 					}
@@ -1642,21 +1638,11 @@ if ($kasitellaan_tiedosto) {
 						if ($chalennuslaji == 0) {
 							$and .= " and alennuslaji = '1'";
 						}
-						elseif ($chalennuslaji != 0) {	
+						elseif ($chalennuslaji != 0) {
 							$and .= " and alennuslaji = '$chalennuslaji'";
 						}
 					}
-					
-					if ($table_mysql == 'toimittajahinta') {
-						if ($chalennuslaji == "") {
-							$and .= " and laji = 'N'";
-						}
-						elseif ($chalennuslaji != "") {	
-							$and .= " and laji = '$chalennuslaji'";
-						}
-					}
-					
-					
+
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
 

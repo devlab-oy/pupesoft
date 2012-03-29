@@ -85,6 +85,65 @@ if (!function_exists("query_dump")) {
 	}
 }
 
+// Tehd‰‰n REST-kutsuja. Data aina JSON:ia.
+if (!function_exists("pupesoft_rest")) {
+
+	function pupesoft_rest($parameters) {
+
+		if (!isset($parameters["method"]) or !in_array($parameters["method"], array("GET", "POST", "PUT", "DELETE"))) {
+			return array(FALSE, "Invalid method");
+		}
+
+		if (!isset($parameters["data"]) or !is_array($parameters["data"])) {
+			return array(FALSE, "Invalid data");
+		}
+
+		if (!isset($parameters["url"]) or parse_url($parameters["url"]) === FALSE) {
+			return array(FALSE, "Invalid URL");
+		}
+
+		if (!isset($parameters["headers"]) or !is_array($parameters["headers"])) {
+			$parameters["headers"] = array(	'Accept: application/json',
+											'Content-Type: application/json',
+											);
+		}
+
+		$handle = curl_init();
+		curl_setopt($handle, CURLOPT_URL, $parameters["url"]);
+		curl_setopt($handle, CURLOPT_HTTPHEADER, $parameters["headers"]);
+		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+
+		$data_json = json_encode($parameters["data"]);
+
+		switch ($parameters["method"]) {
+			case "GET":
+				// Default
+				break;
+			case "POST":
+				curl_setopt($handle, CURLOPT_POST, true);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				break;
+			case "PUT":
+				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				break;
+			case "DELETE":
+				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'DELETE');
+				break;
+		}
+
+		$response_json = curl_exec($handle);
+		$response = json_decode($response_json, true);
+
+		$code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+
+		return array($code, $response);
+	}
+
+}
+
 if (!function_exists("tv1dateconv")) {
 	function tv1dateconv($date, $pitka = "", $lyhyt = "") {
 
@@ -4242,10 +4301,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 10;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
+						if ($yhtiorow['alv_kasittely'] == '') {
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
+						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4291,12 +4361,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4343,12 +4422,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4395,12 +4483,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4637,13 +4734,21 @@ if (!function_exists("alehinta")) {
 					$hinta = 0.01;
 				}
 				elseif ($trow['kehahin'] > 0) {
+					// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+					$hinta = $trow['kehahin'] / (1 - (abs($ale["ale".$alepostfix]) / 100));
 
+					// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+					if ($trow["myyntihinta_maara"] != 0) {
+						$hinta = $hinta * $trow["myyntihinta_maara"];
+					}
+
+					// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 					if ($yhtiorow['alv_kasittely'] == '') {
-						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+						$hinta = $hinta * (1 + ($trow['alv'] / 100));
 					}
-					else {
-						$hinta = round(($trow['kehahin'] / (1-(abs($ale["ale".$alepostfix])/100))), $yhtiorow['hintapyoristys']);
-					}
+
+					// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+					$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 				}
 
 				$aleperuste["ale".$alepostfix] = 5;
@@ -14221,7 +14326,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					UNION
 					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
@@ -14248,7 +14353,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					ORDER BY 1,2,3,4";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);

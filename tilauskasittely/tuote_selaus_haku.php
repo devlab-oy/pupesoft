@@ -1636,20 +1636,15 @@
 
 							$ei_tyhja = "";
 
-							if ($hae_ja_selaa_row['selite'] == 'B' and $row['ei_saldoa'] != '') {
-								echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='green'>".t("Saldoton")."</font></td></tr>";
+							foreach ($saldot as $varaso => $saldo) {
+								if ($saldo != 0) {
+									$ei_tyhja = 'yes';
+									echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+								}
 							}
-							else {
-								foreach ($saldot as $varaso => $saldo) {
-									if ($saldo != 0) {
-										$ei_tyhja = 'yes';
-										echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
-									}
-								}
 
-								if ($ei_tyhja == '') {
-									echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
-								}
+							if ($ei_tyhja == '') {
+								echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
 							}
 
 							echo "</table></td>";

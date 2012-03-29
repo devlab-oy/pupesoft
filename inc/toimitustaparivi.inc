@@ -33,20 +33,6 @@
 		$jatko = 0;
 	}
 
-/* ei käytössä
-	if (mysql_field_name($result, $i) == "multi_jv") {
-
-		$sel='';
-		if ($trow[$i]!='') $sel = 'SELECTED';
-
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Ei käytössä")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-*/
-
 	if (mysql_field_name($result, $i) == "kuljyksikko") {
 
 		$sel='';
@@ -75,10 +61,11 @@
 		$ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
 		$ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
 		$ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
+		$ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan lähetys</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
 
 		$sel1='';
@@ -386,5 +373,34 @@
 		}
 
 		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "jvkulu" OR
+		mysql_field_name($result, $i) == "kuluprosentti" OR
+		mysql_field_name($result, $i) == "ulkomaanlisa" OR
+		mysql_field_name($result, $i) == "kuljetusvakuutus") {
+
+		if ($trow[$i] == 0) {
+			$trow[$i] = "";
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
+		$ulos .= "<option value = 'E'>".t("Ei kuljetusvakuutusta")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Valuuttamääräinen kuljetusvakuutus lisätään")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Prosentuaalinen kuljetusvakuutus lisätään")."</option>";
+		$ulos .= "<option value = 'F' $sel[F]>".t("Valuuttamääräinen kuljetusvakuutus lisätään. Käytetään kuljetusvakuutustuotteen asiakashintaa ja alennusta")."</option>";
+		$ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lisätään. Käytetään kuljetusvakuutustuotteen asiakasalennusta")."</option>";
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}

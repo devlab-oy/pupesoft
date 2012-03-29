@@ -685,11 +685,11 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 				$suuntalavajoin
-				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.tila = 'K'
-				and lasku.alatila = ''
+				WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
+				and lasku.tila 		  = 'K'
+				and lasku.alatila 	  = ''
 				and lasku.vanhatunnus = 0
-				and lasku.mapvm = '0000-00-00'
+				and lasku.mapvm 	  = '0000-00-00'
 				$laatijalisa
 				GROUP BY liitostunnus, ytunnus, nimi, osoite, postitp, swift
 				ORDER BY nimi, nimitark, ytunnus";

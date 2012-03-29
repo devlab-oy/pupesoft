@@ -19,7 +19,6 @@ if ($tee == "VALMIS") {
 	$tilausnumero = 0;
 }
 
-
 if ($tee == "UUSI") {
 
 	//	tarkastetaan ett‰ k‰ytt‰j‰lle voidaan perustaa matkalaskuja
@@ -120,12 +119,8 @@ if ($tee == "UUSI") {
 						postino 		= '$trow[postino]',
 						postitp 		= '$trow[postitp]',
 						maa 			= '$trow[maa]',
-						toim_nimi 		= '$asiakasrow[nimi]',
-						toim_nimitark 	= '".t("Matkalasku")."',
-						toim_osoite 	= '$asiakasrow[osoite]',
-						toim_postino 	= '$asiakasrow[postino]',
-						toim_postitp 	= '$asiakasrow[postitp]',
-						toim_maa 		= '$asiakasrow[maa]',
+						toim_maa		= '$trow[verovelvollinen]',
+						ultilno_maa		= '$trow[ultilno_maa]',
 						vienti 			= 'A',
 						ebid 			= '',
 						tila 			= 'H',
@@ -150,8 +145,14 @@ if ($tee == "UUSI") {
 
 			//	T‰nne voisi laittaa myˆs tuon asiakasidn jos t‰st‰ voitaisiin l‰hett‰‰ myˆs lasku asiakkaalle
 			$query = "	INSERT into laskun_lisatiedot set
-						yhtio = '$kukarow[yhtio]',
-						otunnus = '$tilausnumero'";
+						yhtio 				= '$kukarow[yhtio]',
+						laskutus_nimi    	= '$asiakasrow[nimi]',
+						laskutus_nimitark	= '".t("Matkalasku")."',
+						laskutus_osoite		= '$asiakasrow[osoite]',
+						laskutus_postino	= '$asiakasrow[postino]',
+						laskutus_postitp	= '$asiakasrow[postitp]',
+						laskutus_maa		= '$asiakasrow[maa]',
+						otunnus 			= '$tilausnumero'";
 			$result = pupe_query($query);
 
 			$tee = "MUOKKAA";
@@ -161,7 +162,7 @@ if ($tee == "UUSI") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE!!! Anna asiakkaan nimi")."</font><br>";
+		echo "<font class='error'>".t("VIRHE: Anna asiakkaan nimi")."</font><br>";
 		$tee="";
 	}
 }
@@ -175,8 +176,11 @@ if ($tee != "") {
 	}
 	else {
 
-		$query = "	SELECT lasku.*, toimi.kustannuspaikka, toimi.kohde, toimi.projekti
+		$query = "	SELECT lasku.*,
+					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+					toimi.kustannuspaikka, toimi.kohde, toimi.projekti
 					FROM lasku
+					LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
 					WHERE lasku.tunnus = '$tilausnumero'
 					AND lasku.yhtio = '$kukarow[yhtio]'
@@ -223,7 +227,7 @@ if ($tee != "") {
 				$tres = pupe_query($query);
 
 				if (mysql_num_rows($tres) != 1) {
-					echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." $tuoteno</font><br>";
+					echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (2) $tuoteno</font><br>";
 					return;
 				}
 				else {
@@ -267,8 +271,8 @@ if ($tee != "") {
 						$loppu = mktime($loppuhh, $loppumm, 0, $loppukk, $loppupp, $loppuvv);
 
 						//	Tarkastetaan ett‰ t‰ll‰ v‰lill‰ ei jo ole jotain arvoa
-						//	HUOM! Koitetaan tarkastaa kaikki k‰ytt‰j‰n matkalaskut..
-						$query = "	SELECT lasku.toim_nimi,
+						//	HUOM: Koitetaan tarkastaa kaikki k‰ytt‰j‰n matkalaskut..
+						$query = "	SELECT laskun_lisatiedot.laskutus_nimi,
 									lasku.summa,
 									lasku.tapvm tapvm,
 									tilausrivi.nimitys,
@@ -277,26 +281,27 @@ if ($tee != "") {
 									date_format(tilausrivi.toimitettuaika, '%d.%m.%Y') toimitettuaika,
 									tilausrivi.kommentti kommentti
 									FROM lasku
+									LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 									LEFT JOIN tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi 	= 'M'
 									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotetyyppi IN ('A')
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and lasku.tilaustyyppi	= 'M'
 									and lasku.tila IN ('H','Y','M','P','Q')
-									and liitostunnus = '$laskurow[liitostunnus]'
-									and ((kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika < '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
-										(kerattyaika < '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
-										(toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm'))
-									GROUP BY otunnus";
+									and lasku.liitostunnus = '$laskurow[liitostunnus]'
+									and ((tilausrivi.kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and tilausrivi.kerattyaika < '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
+										(tilausrivi.kerattyaika < '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and tilausrivi.toimitettuaika > '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
+										(tilausrivi.toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and tilausrivi.toimitettuaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm'))
+									GROUP BY tilausrivi.otunnus";
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) > 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! P‰iv‰m‰‰r‰ on menee p‰‰llekk‰in toisen matkalaskun kanssa")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: P‰iv‰m‰‰r‰ on menee p‰‰llekk‰in toisen matkalaskun kanssa")."</font><br>";
 
 							$errori .= "<table><tr><th>".t("Asiakas")."</th><th>".t("viesti")."</th><th>".t("Summa/tapvm")."</th><th>".t("Tuote")."</th><th>".t("Ajalla")."</th><th>".t("Viesti")."</th></tr>";
 
 							while ($erow = mysql_fetch_assoc($result)) {
 								$errori .=  "<tr>
-												<td>$erow[toim_nimi]</td>
+												<td>$erow[laskutus_nimi]</td>
 												<td>$erow[viesti]</td>
 												<td>$erow[summa]@$erow[tapvm]</td>
 												<td>$erow[tuoteno] - $erow[nimitys]</td>
@@ -308,7 +313,7 @@ if ($tee != "") {
 						}
 
 						if ($loppuvv.$loppukk.$loppupp > date("Ymd")) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Matkalaskua ei voi tehd‰ etuk‰teen!")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Matkalaskua ei voi tehd‰ etuk‰teen!")."</font><br>";
 						}
 
 						$paivat = $puolipaivat = $ylitunnit = $tunnit = 0;
@@ -337,7 +342,7 @@ if ($tee != "") {
 							$tres2 = pupe_query($query);
 
 							if (mysql_num_rows($tres2) != 1) {
-								$errori .= t("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (2). Puolip‰iv‰rahaa ei voitu lis‰t‰!")."</font><br>");
+								$errori .= "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu. Puolip‰iv‰rahaa ei voitu lis‰t‰")."!</font><br>";
 							}
 							else {
 								$trow2 = mysql_fetch_assoc($tres2);
@@ -353,11 +358,11 @@ if ($tee != "") {
 							}
 						}
 						elseif ($ylitunnit <= 10 and $trow["vienti"] != "FI" and $paivat == 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
 							//	T‰nne pit‰isi joskus koodata se puolikas ulkomaanp‰iv‰raha..
 						}
 						elseif ($paivat == 0 and $puolipaivat == 0) {
-							$errori .= "<font class='error'>".t("VIRHE!!! Liian lyhyt aikav‰li")."</font><br>";
+							$errori .= "<font class='error'>".t("VIRHE: Liian lyhyt aikav‰li")."</font><br>";
 						}
 
 						//	Lis‰t‰‰n myˆs saldoton isatuote jotta tied‰mme mist‰ puolip‰iv‰raha periytyy!
@@ -374,16 +379,16 @@ if ($tee != "") {
 						//echo "SAATIIN p‰ivarahoja: $paivat puolip‰iv‰rahoja: $puolipaivat<br>";
 					}
 					else {
-						$errori .= "<font class='error'>".t("VIRHE!!! P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
 					}
 				}
 				elseif ($tyyppi == "B") {
 					if ($kpl == 0) {
-						$errori .= "<font class='error'>".t("VIRHE!!! kappalem‰‰r‰ on annettava")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: kappalem‰‰r‰ on annettava")."</font><br>";
 					}
 
 					if ($kommentti == "" and $trow["kommentoitava"] != "") {
-						$errori .= "<font class='error'>".t("VIRHE!!! Kululle on annettava selite")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: Kululle on annettava selite")."</font><br>";
 					}
 
 					if ($trow["myyntihinta"]>0) {
@@ -392,7 +397,7 @@ if ($tee != "") {
 
 					$hinta = str_replace ( ",", ".", $hinta);
 					if ($hinta <= 0) {
-						$errori .= "<font class='error'>".t("VIRHE!!! Kulun hinta puuttuu")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE: Kulun hinta puuttuu")."</font><br>";
 					}
 
 					$tuoteno_array[$trow["tuoteno"]] = $trow["tuoteno"];
@@ -521,7 +526,7 @@ if ($tee != "") {
 							$summa += $rivihinta;
 						}
 						else {
-							echo "<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (1)")." $lisaa_tuoteno</font><br>";
+							echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (1) $lisaa_tuoteno</font><br>";
 						}
 					}
 
@@ -541,7 +546,7 @@ if ($tee != "") {
 					if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos t‰t‰ ei tarvita
 
 					if ($toim == "SUPER" and $tilino > 0 and $trow["tilino"] != $tilino) {
-						echo "<font class='message'>".t("HUOM! tiliˆid‰‰n poikkeavalle tilille '$tilino'<br>");
+						echo "<font class='message'>".t("HUOM: tiliˆid‰‰n poikkeavalle tilille '$tilino'<br>");
 						$trow["tilino"] = $tilino;
 					}
 
@@ -734,7 +739,7 @@ if ($tee != "") {
 				$ero = round($rivisumma["summa"], 2) + round($summarow["summa"], 2);
 
 				if ($ero <> 0) {
-					echo "	<font class='error'>".t("VIRHE!!! Matkalasku ja kirjanpito ei t‰sm‰‰!!!")."</font><br>
+					echo "	<font class='error'>".t("VIRHE: Matkalasku ja kirjanpito ei t‰sm‰‰!!!")."</font><br>
 							<font class='message'>".t("Heitto on")." $ero [rivit $rivirow[summa]] (kp $summarow[summa])</font><br>";
 				}
 			}
@@ -1328,10 +1333,10 @@ if ($tee == "MUOKKAA") {
 	echo "<td>$laskurow[nimi]<br>$laskurow[nimitark]<br>$laskurow[osoite]<br>$laskurow[postino] $laskurow[postitp]</td>";
 	echo "</tr>";
 
-	if ($laskurow["toim_nimi"] != "") {
+	if ($laskurow["laskutus_nimi"] != "") {
 		echo "<tr>";
 		echo "<th align='left'>".t("Asiakas").":</th>";
-		echo "<td>$laskurow[toim_nimi]<br>$laskurow[toim_nimitark]<br>$laskurow[toim_osoite]<br>$laskurow[toim_postino] $laskurow[toim_postitp]</td>";
+		echo "<td>$laskurow[laskutus_nimi]<br>$laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]</td>";
 		echo "</tr>";
 	}
 
@@ -1530,7 +1535,7 @@ if ($tee == "MUOKKAA") {
 			$trow = mysql_fetch_assoc($tres);
 		}
 		else {
-			die("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (3)")."</font><br>");
+			die("<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (3)</font><br>");
 		}
 
 		echo "<br><font class='message'>".t("Lis‰‰")." $trow[nimitys]</font><hr>$errori";
@@ -1546,7 +1551,7 @@ if ($tee == "MUOKKAA") {
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
 		if ($rivitunnus > 0) {
-			echo "<font class='error'>".t("HUOM! Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
+			echo "<font class='error'>".t("HUOM: Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
 		}
 
 		echo "<table><tr>";
@@ -2171,8 +2176,11 @@ if ($tee == "") {
 	echo "</table>";
 	echo "</form>";
 
-	$query = "	SELECT lasku.*, kuka.nimi kayttajanimi
+	$query = "	SELECT lasku.*,
+				laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+				kuka.nimi kayttajanimi
 				FROM lasku
+				LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 				LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and kuka.kuka=lasku.hyvak1
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila = 'H'
@@ -2195,7 +2203,7 @@ if ($tee == "") {
 			echo "<tr>";
 			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[kayttajanimi]</td>";
-			echo "<td>$row[toim_nimi]</td>";
+			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
@@ -2218,14 +2226,16 @@ if ($tee == "") {
 		echo "</table>";
 	}
 
-	$query = "	SELECT *
+	$query = "	SELECT lasku.*,
+				laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 				FROM lasku
-				WHERE yhtio 		= '$kukarow[yhtio]'
-				and tila 			= 'H'
-				and mapvm 			= '0000-00-00'
-				and toim_ovttunnus	= '$kukarow[kuka]'
-				and h1time 			= '0000-00-00 00:00:00'
-				and tilaustyyppi 	= 'M'";
+				LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+				WHERE lasku.yhtio 		 = '$kukarow[yhtio]'
+				and lasku.tila 			 = 'H'
+				and lasku.mapvm 		 = '0000-00-00'
+				and lasku.toim_ovttunnus = '$kukarow[kuka]'
+				and lasku.h1time 		 = '0000-00-00 00:00:00'
+				and lasku.tilaustyyppi 	 = 'M'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -2237,7 +2247,7 @@ if ($tee == "") {
 			echo "<tr>";
 			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[nimi]</td>";
-			echo "<td>$row[toim_nimi]</td>";
+			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
 			echo "<td class='back'><form action = '$PHP_SELF' method='post' autocomplete='off'>";
@@ -2259,14 +2269,16 @@ if ($tee == "") {
 		echo "</table>";
 	}
 
-	$query = "	SELECT *
+	$query = "	SELECT lasku.*,
+				laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 				FROM lasku
-				WHERE yhtio 		= '$kukarow[yhtio]'
-				and tila 		   IN ('H','Y','M','P','Q')
-				and mapvm 			= '0000-00-00'
-				and toim_ovttunnus 	= '$kukarow[kuka]'
-				and h1time 		   != '0000-00-00 00:00:00'
-				and tilaustyyppi 	= 'M'
+				LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+				WHERE lasku.yhtio 		 = '$kukarow[yhtio]'
+				and lasku.tila 		    IN ('H','Y','M','P','Q')
+				and lasku.mapvm 		 = '0000-00-00'
+				and lasku.toim_ovttunnus = '$kukarow[kuka]'
+				and lasku.h1time 		!= '0000-00-00 00:00:00'
+				and lasku.tilaustyyppi 	 = 'M'
 				ORDER BY luontiaika DESC";
 	$result = pupe_query($query);
 
@@ -2289,7 +2301,7 @@ if ($tee == "") {
 			echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 			echo "<tr>";
 			echo "<td>$row[laskunro]</td>";
-			echo "<td>$row[toim_nimi]</td>";
+			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
 			echo "<td>".t($laskutyyppi)."</td>";

@@ -456,7 +456,6 @@
 							lauantai 				= '$row[lauantai]',
 							kuljyksikko 			= '$row[kuljyksikko]',
 							merahti 				= '$row[merahti]',
-							multi_jv 				= '$row[multi_jv]',
 							extranet 				= '$row[extranet]',
 							ei_pakkaamoa 			= '$row[ei_pakkaamoa]',
 							kuluprosentti 			= '$row[kuluprosentti]',

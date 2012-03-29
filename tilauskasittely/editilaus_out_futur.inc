@@ -143,7 +143,7 @@
 					$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);
 				}
 
-				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta
+				// HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
 				$hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
 
 				// nettorivihinta

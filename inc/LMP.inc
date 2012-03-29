@@ -12,7 +12,7 @@
 
 			if (!isset($aineistojafailissa)) $aineistojafailissa = 0;
 			$aineistojafailissa++;
-			if ($aineistojafailissa > 1) echo "</table><br><br>";
+			if ($aineistojafailissa > 1) echo "</table><br>\n<br>\n";
 
 			echo "<table>";
 			echo "<tr><th>".t("asiakas")."</th><th>" . t("tilino") .  "</th></tr>";
@@ -24,7 +24,7 @@
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font class='message'>".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
+				echo "<font class='message'>".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>\n";
 				$toim = 'E';
 			}
 			else {
@@ -33,14 +33,14 @@
 				// Setataan kukarow-yhtiö
 				$kukarow["yhtio"] = $yritirow["yhtio"];
 
-				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
+				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>\n";
 
 				if (strlen($yritirow["oletus_rahatili"]) == 0) { // Tarkistetaan tilit
 					echo "<font class='message'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
 					$toim = 'E';
 				}
 				else {
-					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[oletus_kulutili]'</font><br>";
+					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[oletus_kulutili]'</font><br>\n";
 				}
 
 				$query = "	SELECT *
@@ -49,7 +49,7 @@
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
-					echo "<font class='message'>".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
+					echo "<font class='message'>".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>\n";
 					$toim = 'E';
 				}
 				else {
@@ -69,7 +69,7 @@
 						}
 					}
 
-					echo "<font class='message'>".t("Yritys löytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>";
+					echo "<font class='message'>".t("Yritys löytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>\n";
 					$toim = "K";
 				}
 			}
@@ -79,7 +79,7 @@
 				exit;
 			}
 
-			echo "</td></tr></table><br>";
+			echo "</td></tr></table><br>\n";
 			echo "<table><tr><th>".t("Pvm")."</th><th>".t("Maksaja")."</th><th>".t("Maksajan tilinumero")."</th><th>".t("Summa")."</th><th></th></tr>";
 			break;
 
@@ -106,7 +106,7 @@
 				echo "<td>".pankkipvm($pvm)."</td>";
 			}
 
-			//echo "Etumerkki: '" .  $etumerkki . "'<br>";
+			//echo "Etumerkki: '" .  $etumerkki . "'<br>\n";
 			$etumerkki = substr($tietue, 87, 1);
 			$maara = substr($tietue, 88, 18) / 100;
 			$kohdm = 0; // määrä valuutassa
@@ -134,7 +134,7 @@
 				echo "<td>";
 
 				if ($viite > 0) {
-					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti viiteno")."</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti viiteno")."</font><br>\n";
 
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
@@ -145,7 +145,7 @@
 					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 1) {
-							echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua viitteella")." '$viite' ".t("ei löytynyt")."!</font><br>";
+							echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua viitteella")." '$viite' ".t("ei löytynyt")."!</font><br>\n";
 					}
 					else {
 						$loytyi = 1;
@@ -153,7 +153,7 @@
 				}
 
 				if ($loytyi == 0) {
-					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & määrä")."</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & määrä")."</font><br>\n";
 
 					// tarkka 35 merkkiä <-> 35 merkkiä nimihaku
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -218,7 +218,7 @@
 					}
 
 					if (mysql_num_rows($result) != 1) {
-						echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei löytynyt")."</font><br>";
+						echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei löytynyt")."</font><br>\n";
 					}
 					else {
 						$loytyi = 1;
@@ -227,11 +227,11 @@
 
 				if ($loytyi == 1) {
 					$trow = mysql_fetch_assoc ($result);
-					echo "<font class='message'>Pupesoft: ".t("maksu löytyi")." '$trow[tunnus]' '$trow[nimi]'</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("maksu löytyi")." '$trow[tunnus]' '$trow[nimi]'</font><br>\n";
 					require "inc/teemaksutosite.inc";
 				}
 				else {
-					echo "<font class='message'>Pupesoft: ".t("maksu ei löydy")."!</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("maksu ei löydy")."!</font><br>\n";
 					require "inc/teeselvittely.inc";
 				}
 				echo "</td></tr>";
@@ -240,7 +240,7 @@
 				echo "<td>";
 
 				if ($taso != '1') {
-					echo "<font class='message'>".t("Tapahtumat yhteensä")."</font><br>";
+					echo "<font class='message'>".t("Tapahtumat yhteensä")."</font><br>\n";
 				}
 
 				if ($tiliotedataka != '0000-00-00') {
@@ -251,11 +251,11 @@
 					$tiliointiresult = pupe_query($query);
 
 					if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
-						echo "<font class='message'>".t("Tapahtuma on käsitelty"). " ". tv1dateconv($tiliotedataka) ."<br>";
-						echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
+						echo "<font class='message'>".t("Tapahtuma on käsitelty"). " ". tv1dateconv($tiliotedataka) ."<br>\n";
+						echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>\n";
 
 						if ($tiliointirow['korjattu'] != "0000-00-00 00:00:00" and $tiliointirow['korjattu'] != "@0000-00-00 00:00:00") {
-							echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font><br>";
+							echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font><br>\n";
 						}
 					}
 

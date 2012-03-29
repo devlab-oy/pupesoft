@@ -134,7 +134,7 @@ if ($tee == 'poistalasku') {
 	$tee = '';
 
 	if ($boob === FALSE) {
-		echo t("Virhe: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
+		echo t("VIRHE: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
 	}
 	else {
 		unlink($skannatut_laskut_polku.$skannattu_lasku);
@@ -685,7 +685,7 @@ if ($tee == 'I') {
 			require 'inc/pankkitilinoikeellisuus.php';
 
 			if ($pankkitili == '') {
-				$errormsg .= "<font class='error'>".t("Pankkitili '%s' on virheellinen", "", $trow['tilinumero'])."</font><br>";
+				$errormsg .= "<font class='error'>".t("Pankkitili %s on virheellinen", "", $trow['tilinumero'])."</font><br>";
 				$tee = 'E';
 			}
 			else {
@@ -1674,7 +1674,9 @@ if ($tee == 'I') {
 				osoitetark 			= '$trow[osoitetark]',
 				postino 			= '$trow[postino]',
 				postitp 			= '$trow[postitp]',
-				maa 				=  '$trow[maa]',
+				maa 				= '$trow[maa]',
+				toim_maa			= '$trow[verovelvollinen]',
+				ultilno_maa			= '$trow[ultilno_maa]',
 				viite 				= '$viite',
 				viesti 				= '$viesti',
 				vienti 				= '$vienti',

@@ -57,7 +57,7 @@
 	echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
 	echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyjän nimellä"),"</option>";
 	echo "</select></td>";
-	echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
+	echo "<td><input type = 'text' name = 'summa1' size='13'> - <input type = 'text' name = 'summa2' size='13'></td>";
 	echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
 	echo "</tr>";
 	echo "</table>";

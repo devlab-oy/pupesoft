@@ -14221,7 +14221,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					UNION
 					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
 					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
@@ -14248,7 +14248,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					ORDER BY 1,2,3,4";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);

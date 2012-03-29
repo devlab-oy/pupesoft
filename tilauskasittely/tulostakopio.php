@@ -761,7 +761,6 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-
 		if ($laskunro > 0) {
 			$where2 .= " and lasku.laskunro = '$laskunro' ";
 
@@ -819,6 +818,28 @@
 		if ($toim == "VASTAANOTTORAPORTTI") {
 			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
 			$where5 = " AND tilausrivi.kpl !=0 ";
+		}
+
+		if ($toim == "VAKADR") {
+			//myyntitilaus. Tulostetaan vakadr-kopio.
+			$where1 .= " lasku.tila in ('L') ";
+
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+				$where2 .= $wherenimi;
+			}
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
+						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')";
+
+			if (!isset($jarj)) $jarj = "ORDER BY lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
 		// Etsitään muutettavaa tilausta
@@ -1236,6 +1257,13 @@
 				$komento["Keräyslista"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "VAKADR") {
+			$tulostimet[0] = 'VAK_ADR';
+			if ($kappaleet > 0 and $komento["VAK_ADR"] != 'email') {
+				$komento["VAK_ADR"] .= " -# $kappaleet ";
+			}
+		}
+
 		if (isset($tulostukseen)) {
 			$tilausnumero = implode(",", $tulostukseen);
 		}
@@ -1276,6 +1304,11 @@
 
 		while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
+			if ($toim == "VAKADR") {
+				tulosta_vakadr_erittely($laskurow["tunnus"], $komento["VAK_ADR"], $tee);
+				$tee = '';
+			}
+
 			if ($toim == "OSTO") {
 				$otunnus = $laskurow["tunnus"];
 				$mista = 'tulostakopio';
@@ -1303,7 +1336,7 @@
 				require('tulosta_purkulista.inc');
 				$tee = '';
 			}
-			
+
 			if ($toim == "VASTAANOTTORAPORTTI") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_vastaanottoraportti.inc');
@@ -1659,7 +1692,7 @@
 
 				//tulostetaan sivu
 				tyomaarays_print_pdf($params_tyomaarays);
-				
+
 				$tee = '';
 			}
 

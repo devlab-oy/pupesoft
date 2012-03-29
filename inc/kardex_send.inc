@@ -58,6 +58,8 @@
 			// index 5, hyllypaikka
 			// index 6, keräyserärivin tunnus
 
+			$kardex_row['kpl'] = str_replace(".", ",", $kardex_row['kpl']);
+
 			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$kardex_row['tunnus']};\r\n";
 		}
 

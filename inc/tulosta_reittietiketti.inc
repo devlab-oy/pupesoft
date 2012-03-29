@@ -143,7 +143,6 @@
 							$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 						}
 						else {
-							echo t("VIRHE: Unifaun parametrit virheelliset")."!<br>";
 							continue;
 						}
 

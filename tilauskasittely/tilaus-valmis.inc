@@ -14,6 +14,9 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+// päivitetään myös muuttuja
+$laskurow["vanhatunnus"] = $laskurow["tunnus"];
+
 // Katsotaan onko asiakas myyntikiellossa
 $query  = "	SELECT *
 			FROM asiakas
@@ -1166,8 +1169,6 @@ else {
 					$uusires = pupe_query($kysely);
 
 					$laskurow['tunnus'] = mysql_insert_id();
-					// Sanotaan laskurow:lle että sen vanhatunnus on sen tunnus. 
-					$laskurow["vanhatunnus"] = $temp_laskutunnus;
 
 					// Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
 					$varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
@@ -1254,10 +1255,10 @@ else {
 						AND tunnus = '{$varasto}'";
 			$ulkoinen_jarjestelma_res = pupe_query($query);
 			$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-			
+
 			// Intrastat-tiedot
 			$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-			
+
 			// Laitetaan alkuperäisen tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
 			$varasto_chk_array[$temp_laskutunnus] = $varaston_row['ulkoinen_jarjestelma'];
 

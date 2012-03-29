@@ -52,7 +52,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	}
 	else {
 		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
-			$laskurow["nippu"] = $laskurow["tunnus"];
+		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
 	$ale_query_select_lisa = '';
@@ -68,6 +68,13 @@ if (!file_exists($tilvahvfilenimi)) {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -81,13 +88,6 @@ if (!file_exists($tilvahvfilenimi)) {
 				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = pupe_query($query);
-
-	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
-		$tulostettava_tunnus = $laskurow['vanhatunnus'];
-	}
-	else {
-		$tulostettava_tunnus = $laskurow['tunnus'];
-	}
 
 	if (mysql_num_rows($tilvahresult) > 0) {
 

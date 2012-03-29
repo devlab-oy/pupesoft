@@ -67,6 +67,13 @@ if (!file_exists($tilvahvfilenimi)) {
 	else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
+	
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
 				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
@@ -96,13 +103,6 @@ if (!file_exists($tilvahvfilenimi)) {
 		$mehtorow = mysql_fetch_array($xresult);
 	}
 
-	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
-		$tulostettava_tunnus = $laskurow['vanhatunnus'];
-	}
-	else {
-		$tulostettava_tunnus = $laskurow['tunnus'];
-	}
-
 	if (mysql_num_rows($tilvahresult) > 0) {
 
 		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
@@ -110,7 +110,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "RHDRSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "RBGMITYPE:231\n";
-		$ulos .= "RBGMINUMB:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "RBGMINUMB:" . $tulostettava_tunnus . "\n";
 		$ulos .= "RBGMIACKR:NA\n";
 		$ulos .= "RDTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 		$ulos .= "RRFFCR_NU:" . tv2dateconv($laskurow['luontiaika']) . "\n";

@@ -30,7 +30,9 @@
 				unlink("/tmp/##kardex-fetch.lock");
 				exit;
 			}
-
+			
+			date_default_timezone_set('Europe/Helsinki');
+			
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);

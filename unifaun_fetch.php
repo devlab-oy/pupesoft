@@ -108,7 +108,7 @@
 
 					list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($ftpget_dest[$operaattori]."/".$file));
 
-					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? 0 : $sscc_ulkoinen;
+					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : $sscc_ulkoinen;
 
 					list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);
 

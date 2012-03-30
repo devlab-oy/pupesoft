@@ -14333,8 +14333,8 @@ if (!function_exists("tee_keraysera")) {
 					UNION
 					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
 					0 as erotus,
-					keraysvyohyke2.tunnus AS ker_tunnus,
 					lasku2.h1time,
+					keraysvyohyke2.tunnus AS ker_tunnus,
 					lasku2.ohjausmerkki,
 					999999999999 as asiakasluokka,
 					lasku2.liitostunnus,

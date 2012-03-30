@@ -1,6 +1,6 @@
 <?php
 
-	$teccom_editilaus = "../dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+	$teccom_editilaus = $pupe_root_polku."/dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 	if (!$toot = fopen($teccom_editilaus, "w")) die("Filen $teccom_editilaus luonti epaonnistui!");
 
@@ -10,22 +10,24 @@
 				ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno
 				FROM tilausrivi
 				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-					AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-					AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
+				AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+				AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				AND tilausrivi.tyyppi = 'O'
-				AND otunnus = '$laskurow[tunnus]'
-				AND varattu > 0
-				ORDER BY tunnus";
+				AND tilausrivi.tyyppi  = 'O'
+				AND tilausrivi.otunnus = '$laskurow[tunnus]'
+				AND tilausrivi.varattu > 0
+				ORDER BY tilausrivi.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font>";
 	}
 	else {
-		
-		if ($laskurow['tilaustyyppi'] == '' OR $laskurow['tilaustyyppi'] == '0') $laskurow['tilaustyyppi'] = '2';
-		
+
+		if ($laskurow['tilaustyyppi'] == '' or $laskurow['tilaustyyppi'] == '0') {
+			$laskurow['tilaustyyppi'] = '2';
+		}
+
 		// Otsikkoa
 		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU
 		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 6 merkkiä
@@ -46,7 +48,7 @@
 			fwrite($toot, $out . "\n");
 		}
 
-		fclose ($toot);
+		fclose($toot);
 
 		// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
 		// palautetaan $palautus ja $syy
@@ -56,20 +58,18 @@
 		$ftppath = $toimirow['edi_polku'];
 		$ftpfile = realpath($teccom_editilaus);
 
+		// Portti
+		if (isset($toimirow['edi_portti'])) $ftpport = $toimirow['edi_portti'];
+
 		require ("inc/ftp-send.inc");
 
 		if ($palautus == 0) {
 			echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";
-			$sqlquery = "	UPDATE lasku SET
-							kirjoitin = 'edi'
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$laskurow[tunnus]'";
-			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
-			
-			//päivitetään lisäksi aina teccom-ostotilauksissa tilausrivi.tunnus tilausrivi.tilaajanrivinro:ksi, 
+
+			//päivitetään lisäksi aina teccom-ostotilauksissa tilausrivi.tunnus tilausrivi.tilaajanrivinro:ksi,
 			//jotta sitten teccom asn/ostolaskuissa osataan pointata oikeaan riviin, ja handlataan tilanne, missä rivi voi splittaantua jne (rivinumero on tallessa!)
-			
 			mysql_data_seek($result, 0);
+
 			while ($tilausrivirow = mysql_fetch_assoc($result)) {
 				$sqlquery = "	UPDATE tilausrivi SET
 								tilaajanrivinro = tunnus
@@ -77,12 +77,20 @@
 								AND tunnus = '$tilausrivirow[tunnus]'";
 				$tresult = pupe_query($sqlquery);
 			}
-			
+
+			$sqlquery = "	UPDATE lasku
+							SET kirjoitin = 'edi'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$laskurow[tunnus]'";
+			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
 		}
 		else {
 			echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";
 		}
 	}
+
+	// Nollataan tarkoituksella lopetusmuuttuja
+	$lopetus = "";
 
 	$teccom_editilaus = "";
 	$out = "";

@@ -7,7 +7,17 @@
 		unset($nayta_pdf);
 	}
 
-	require('../inc/parametrit.inc');
+	if (isset($_REQUEST["tee"])) {
+		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+	}
+
+	require ("../inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("$pupe_root_polku/dataout/".basename($filenimi));
+		exit;
+	}
 
 	if (!isset($nayta_pdf)) {
 		// scripti balloonien tekemiseen
@@ -464,7 +474,7 @@
 			$kayttajan_alv		= $alv;
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};				
+				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
 			}
 
 			foreach ($tuoteno_array as $tuoteno) {
@@ -512,7 +522,7 @@
 						${'ale'.$alepostfix} = ${'ale_array'.$alepostfix}[$tuoteno];
 					}
 					else {
-						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};						
+						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};
 					}
 				}
 
@@ -570,7 +580,7 @@
 			}
 
 			$tee = "Y";
-			
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				unset(${'ale'.$alepostfix});
 				unset(${'ale_array'.$alepostfix});

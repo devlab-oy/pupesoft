@@ -12,10 +12,11 @@ if(!function_exists("tuotetarkista")) {
 			}
 			else {
 				$temp_ekakirjain = (substr(trim($t[$i]),0,1));
+
 				if (($temp_ekakirjain == '*') or ($temp_ekakirjain == '@') or ($temp_ekakirjain == '?')) {
 					$virhe[$i] = t("Tuotenumero ei voi alkaa merkeill‰ *, @ tai ?");
 				}
-				else { 
+				else {
 					if (substr(trim($t[$i]),-1) == '*') {
 						$virhe[$i] = t("Tuotenumero ei voi loppua merkkiin *");
 					}
@@ -293,7 +294,7 @@ if(!function_exists("tuotetarkista")) {
 				if (mysql_num_rows($chkressiresult) > 0) {
 					$virhe[$i] = t("EAN-koodi on jo perustettu j‰rjestelm‰‰n");
 				}
-				
+
 				if ($yhtiorow["tarkista_eankoodi"] == "K" and tarkista_ean13(trim($t[$i])) === FALSE) {
 					$virhe[$i] = t("EAN-koodi on virheellinen");
 				}

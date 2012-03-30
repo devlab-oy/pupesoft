@@ -352,43 +352,48 @@
 			$asn_numero = $kollirow['asn_numero'];
 			$paketin_tunnukset[] = $kollirow['tunnus'];
 			
-			// haetaan tuotekohtaisesti lapsituote tilaukselta ja lisätään sekin paketin-rivit alkioon 
-			
+			// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
 			if (strpos($kollirow['tilausrivi'], ",") !== false) {
-				foreach (explode(",", $kollirow['tilausrivi']) as $tun) {
-					$paketin_rivit[] = $tun;
-
-					$lapset = "	SELECT tuoteperhe.isatuoteno, tuoteperhe.tuoteno, tilausrivi.tilkpl,tilausrivi.tunnus tilausrivitunnus, 
-								tilausrivi.otunnus, tr.tunnus lapsitunnus, tr.perheid trperheid 
-								FROM tilausrivi 
-								JOIN tuoteperhe on (tuoteperhe.yhtio=tilausrivi.yhtio and tuoteperhe.isatuoteno=tilausrivi.tuoteno and tuoteperhe.ohita_kerays !='') 
-								JOIN tilausrivi as tr on (tr.yhtio=tilausrivi.yhtio and tr.tuoteno=tuoteperhe.tuoteno and tr.perheid=tilausrivi.perheid and tr.tunnus != tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
-								AND tilausrivi.tunnus = '{$tun}'";
-					$resultti = pupe_query($lapset);
-					$rivi = mysql_fetch_assoc($resultti);
-					if ($rivi["lapsitunnus"] !='') {
-						$paketin_rivit[] = $rivi["lapsitunnus"];
-					}
+				foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
+					$paketin_rivit[] = $tunnus;
 				}
 			}
 			else {
 				$paketin_rivit[] = $kollirow['tilausrivi'];
-				
-				$lapset = "	SELECT tuoteperhe.isatuoteno, tuoteperhe.tuoteno, tilausrivi.tilkpl,tilausrivi.tunnus tilausrivitunnus, 
-							tilausrivi.otunnus, tr.tunnus lapsitunnus, tr.perheid trperheid 
-							FROM tilausrivi 
-							JOIN tuoteperhe on (tuoteperhe.yhtio=tilausrivi.yhtio and tuoteperhe.isatuoteno=tilausrivi.tuoteno and tuoteperhe.ohita_kerays !='') 
-							JOIN tilausrivi as tr on (tr.yhtio=tilausrivi.yhtio and tr.tuoteno=tuoteperhe.tuoteno and tr.perheid=tilausrivi.perheid and tr.tunnus != tilausrivi.tunnus)
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
-							AND tilausrivi.tunnus = '{$kollirow["tilausrivi"]}'";
-				$resultti = pupe_query($lapset);
-				$rivi = mysql_fetch_assoc($resultti);
-				
-				if ($rivi["lapsitunnus"] !='') {
-					$paketin_rivit[] = $rivi["lapsitunnus"];
-				}
 			}
+			
+			// Haetaan tuotteen lapset jotka ovat runkoveloituksia
+			$query = "	SELECT group_concat(concat('\"', tuoteperhe.tuoteno, '\"')) lapset
+						FROM tuoteperhe
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND isatuoteno = '{$kollirow["tuoteno"]}'
+						AND ohita_kerays != ''";
+			$result = pupe_query($query);
+			$lapset = mysql_fetch_assoc($result);
+			
+			// Lapsia löytyi, tämä on isätuote 
+			if ($lapset["lapset"] != NULL) {
+				// Haetaan tilausnumerot joilla tämä tuote on
+				$query = "	SELECT group_concat(otunnus) tilaukset
+							FROM tilausrivi 
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+							AND tilausrivi.tunnus in ({$kollirow["tilausrivi"]})";
+				$result = pupe_query($query);
+				$tilaukset = mysql_fetch_assoc($result);
+			
+				// Haetaan tämän isätuotteen lapsituotteiden tunnukset
+				$query = " 	SELECT tunnus 
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+							AND tilausrivi.otunnus in ({$tilaukset["tilaukset"]})
+							AND tilausrivi.tuoteno in ({$lapset["lapset"]})"; 
+				$result = pupe_query($query);
+				
+				while ($rivi = mysql_fetch_assoc($result)) {
+					$paketin_rivit[] = $rivi["tunnus"];
+				}				
+			}
+			
 			$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 		}
 

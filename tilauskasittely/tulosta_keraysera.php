@@ -289,51 +289,19 @@
 
 				if (isset($tulostettavat_reittietiketit[$pak_nro]) and count($tulostettavat_reittietiketit) > 0 and trim($tulostettavat_reittietiketit[$pak_nro]) != '') {
 
-					$query = "	SELECT kerayserat.tilausrivi,
-								lasku.toimitustapa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.viesti, lasku.sisviesti2,
-								kerayserat.sscc,
-								COUNT(kerayserat.tunnus) AS rivit,
-								ROUND(SUM(tuote.tuotemassa), 2) AS paino,
-								ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys), 4) AS tilavuus
+					$query = "	SELECT nro, sscc
 								FROM kerayserat
-								JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-								AND kerayserat.pakkausnro = '{$pak_nro}'
-								AND kerayserat.nro = '{$tulostettavat_reittietiketit[$pak_nro]}'
-								GROUP by 1,2,3,4,5,6,7,8,9";
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND pakkausnro 	= '{$pak_nro}'
+								AND nro 		= '{$tulostettavat_reittietiketit[$pak_nro]}'";
 					$reittietiketti_res = pupe_query($query);
 					$reittietiketti_row = mysql_fetch_assoc($reittietiketti_res);
 
-					$pakkaus_kirjain = chr((64+$pak_nro));
+					$kerayseran_numero = $reittietiketti_row["nro"];
+					$sscclisa = $reittietiketti_row["sscc"];
 
-					$params = array(
-						'tilriv' => $reittietiketti_row['tilausrivi'],
-						'pakkaus_kirjain' => $pakkaus_kirjain,
-						'sscc' => $reittietiketti_row['sscc'],
-						'toimitustapa' => $reittietiketti_row['toimitustapa'],
-						'rivit' => $reittietiketti_row['rivit'],
-						'paino' => $reittietiketti_row['paino'],
-						'tilavuus' => $reittietiketti_row['tilavuus'],
-						'lask_nimi' => $reittietiketti_row['nimi'],
-						'lask_nimitark' => $reittietiketti_row['nimitark'],
-						'lask_osoite' => $reittietiketti_row['osoite'],
-						'lask_postino' => $reittietiketti_row['postino'],
-						'lask_postitp' => $reittietiketti_row['postitp'],
-						'lask_viite' => $reittietiketti_row['viesti'],
-						'lask_merkki' => $reittietiketti_row['sisviesti2'],
-						'komento_reittietiketti' => $komento['reittietiketti'],
-					);
-
-					tulosta_reittietiketti($params);
-
-					if (trim($komento['reittietiketti']) != '') {
-						echo t("Reittietiketti tulostuu"),"...<br />";
-					}
-					else {
-						echo t("Reittietiketin tulostinta ei ole valittu. Reittietiketti ei tulostu"),"...<br />";
-					}
+					// Tulostetaan kollilappu
+					require('inc/tulosta_reittietiketti.inc');
 				}
 			}
 		}

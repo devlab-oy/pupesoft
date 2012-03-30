@@ -465,7 +465,7 @@
 
 		// splitataan rivi, splittauksen ensimm‰inen rivi
 		if ($splitlineflag == 1) {
-			$query = "UPDATE kerayserat SET tila = 'T', kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 			$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰ ({$query})\r\n\r\n");
 		}
 		// 2 = 2 ... n splitattu rivi
@@ -556,7 +556,7 @@
 		}
 		// ei splitata rivi‰ eli normaali rivi, $splitlineflag == 0
 		else {
-			$query = "UPDATE kerayserat SET tila = 'T', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+			$query = "UPDATE kerayserat SET kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
 			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰ ({$query})\r\n\r\n");
 		}
 
@@ -606,7 +606,7 @@
 			$query = "	SELECT *
 						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila = 'T'
+						AND tila = 'K'
 						AND nro = '{$nro}'";
 			$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
@@ -662,9 +662,10 @@
 			require('tilauskasittely/keraa.php');
 			ob_end_clean();
 
-			$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
+			//$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
 
-			$response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
+			// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
+			$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
 		}
 	}
 	elseif ($sanoma == "StopAssignment") {

@@ -1681,9 +1681,6 @@
 										}
 									}
 
-									$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-									$alatila_upd_res = mysql_query($query) or pupe_error($query);
-
 									// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
 									if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
 

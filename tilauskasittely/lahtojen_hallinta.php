@@ -2385,7 +2385,7 @@
 
 				echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 
-				if (trim($lahto_row['sscc_ulkoinen']) != '' and $lahto_row['sscc_ulkoinen'] != 0) {
+				if (trim($lahto_row['sscc_ulkoinen']) != '') {
 					echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 					echo "<button type='button'>{$lahto_row['sscc_ulkoinen']}</button>";
 					echo "</td>";
@@ -2450,7 +2450,7 @@
 				$colspan_child = 18;
 
 				$query = "	SELECT tilausrivi.tuoteno,
-							IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc,
+							IF(kerayserat.sscc_ulkoinen != '', kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc,
 							tuote.nimitys,
 							ROUND(IFNULL(kerayserat.kpl, tilausrivi.varattu), 0) AS 'suunniteltu',
 							tilausrivi.yksikko,

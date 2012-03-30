@@ -502,15 +502,35 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$kres1 = pupe_query($query);
 
-
 			while ($krow1 = mysql_fetch_array($kres1)) {
-
-				if ($yhtiorow["korvaavat_alaspain"] == "K") {
-					$korvaavat_alaspainlisa = " and (korvaavat.jarjestys >= '{$krow1["jarjestys"]}' or korvaavat.jarjestys = 0) ";
+				
+				/*
+				+-----------+-----------+-----------+------+--------+
+				| tuoteno   | jarjestys | tuoteno   | id   | tunnus |
+				+-----------+-----------+-----------+------+--------+
+				| 114908S   |         1 | 114908S   | 1346 | 117116 |
+				| 1130882   |         2 | 1130882   | 1346 | 116000 |
+				| 113909    |         3 | 113909    | 1346 |  23715 |
+				| 113909B   |         4 | 113909B   | 1346 |  23717 |
+				| 113909T   |         5 | 113909T   | 1346 |  23716 |
+				| 114908    |         6 | 114908    | 1346 |  23718 |
+				| 114908B   |         7 | 114908B   | 1346 |  23719 |
+				| 114908T   |         8 | 114908T   | 1346 |  23720 |
+				| A-1130882 |         9 | A-1130882 | 1346 |  82820 |
+				| A-114908S |        10 | A-114908S | 1346 |  75424 |
+				+-----------+-----------+-----------+------+--------+
+				*/
+				// myimme 114908T, listan 3 alin, niin korvaavat_alasp‰in tarkoittaa ett‰ korvaavat taulusta otetaan j‰rjestykseset‰ < 8 tuotteet ja ensimm‰iseen jolla on saldoa.
+				// Muussa tapauksessa myyd‰‰n mit‰tahansa tuotetta jolla on saldoa.
+				
+				if ($yhtiorow["korvaavat_alaspain"] == "K" and ($yhtiorow["korvaavat_tuote"] == "" or $yhtiorow["korvaavat_tuote"] == "K")) { //114908S, 114908T
+					$korvaavat_alaspainlisa = " and (korvaavat.jarjestys <= '{$krow1["jarjestys"]}' or korvaavat.jarjestys = 0) ";
 				}
 				else {
 					$korvaavat_alaspainlisa = "";
 				}
+
+				echo "<br>{$yhtiorow["korvaavat_alaspain"]} : {$yhtiorow["korvaavat_tuote"]}<br>";
 
 				// K‰yd‰‰n l‰pi kaikki korvaavat...
 				$query = "	SELECT tuote.*
@@ -521,9 +541,10 @@
 							{$korvaavat_alaspainlisa}
 							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
+query_dump($query);
 
 				while ($krow2 = mysql_fetch_array($kres2)) {
-
+					
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
 
@@ -1360,6 +1381,18 @@
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									$query_ale_lrivi .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 								}
+
+								if ($alkupera_trow["tuoteno"] == $myy_tuoteno["$indeksi"] and $yhtiorow["korvaavat_tuote"] == "K") {
+									$paatuotteen = "SELECT tuoteno 
+													FROM korvaavat 
+													WHERE yhtio = '{$kukarow["yhtio"]}'
+													AND tuoteno = '{$alkupera_trow["tuoteno"]}'
+													order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno
+													limit 1";
+									query_dump($paatuotteen);
+									
+								}
+							
 
 								$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
 
@@ -2257,6 +2290,28 @@
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+			}
+
+
+			if ($alkupera_trow["tuoteno"] == $trow["tuoteno"] and $yhtiorow["korvaavat_tuote"] == "K") {
+				$query = "	SELECT id 
+							FROM korvaavat 
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$alkupera_trow["tuoteno"]}'
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno
+							limit 1";
+				$presult = pupe_query($query);
+				$prow = mysql_fetch_assoc($presult);
+				
+				$query = "	SELECT tuoteno 
+							FROM korvaavat 
+							WHERE yhtio = '{$kukarow["yhtio"]}' 
+							AND id = '{$prow["id"]}'
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno
+							limit 1";
+				$tresult = pupe_query($query);
+				$korvaava_row = mysql_fetch_assoc($tresult);
+				
 			}
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';

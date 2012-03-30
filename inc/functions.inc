@@ -14480,7 +14480,7 @@ if (!function_exists("tee_keraysera")) {
 		}
 		else {
 			$query = "	SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
-						(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
+						0 as erotus,
 						lasku2.h1time,
 						lasku2.ohjausmerkki,
 						999999999999 as asiakasluokka,

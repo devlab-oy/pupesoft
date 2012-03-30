@@ -29,12 +29,34 @@
 		    $i = 0;
 		}
 
-		$productquery = "	SELECT tuoteno, try, nimitys, kehahin, myyntihinta, eankoodi
+		// Tarkastetaan yhtion parametreista tuotteiden_jarjestys_raportoinnissa (V = variaation, koon ja varin mukaan)
+		if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
+			// Order by lisa
+			$order_extra = 'variaatio, vari, koko';
+
+			// queryyn muutoksia jos lajitellaan näin
+			$jarjestys_sel = ", 	t1.selite as variaatio,
+									t2.selite as vari,
+									t3.selite as kokoselite,
+									if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko";
+
+			$jarjestys_join = " LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = '{$yhtiorow['kieli']}'
+								LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = '{$yhtiorow['kieli']}'
+								LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = '{$yhtiorow['kieli']}'";
+		}
+		else {
+			$order_extra = 'tuoteno';
+		}
+
+		$productquery = "	SELECT tuote.tuoteno, tuote.try, tuote.nimitys, tuote.kehahin, tuote.myyntihinta, tuote.eankoodi
+							$jarjestys_sel
 							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND hinnastoon != 'E'
-							and (tuote.status != ('P') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-							and tuotetyyppi not in ('A','B')";
+							$jarjestys_join
+							WHERE tuote.yhtio = '$kukarow[yhtio]'
+							AND tuote.hinnastoon != 'E'
+							and (tuote.status != 'P' or (SELECT sum(tuotepaikat.saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							and tuote.tuotetyyppi not in ('A','B')
+							ORDER BY $order_extra";
 		$productqueryresult = mysql_query($productquery) or pupe_error($productquery);
 
 		$showprod = TRUE;
@@ -136,7 +158,7 @@
 					$bar->increase();
 				}
 			}
-	    }
+		}
 
 		if ($showprod) echo "</table>";
 

@@ -3004,6 +3004,20 @@ if (!function_exists("alehinta")) {
 		$vanha_yhtio	= "";
 		$vanha_liitostunnus = 0;
 
+		// T‰ss‰ katotaan onko ep‰kuranttiutta
+		if ($trow["epakurantti100pvm"] != "0000-00-00") {
+			$trow["kehahin"] = 0;
+		}
+		elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
+		}
+		elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
+		}
+		elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
+			$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
+		}
+
 		// KAUTTALASKUTUSKIKKARE
 		if ($yhtio != '') {
 			$vanha_yhtio 		= $kukarow['yhtio'];
@@ -4217,25 +4231,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//T‰ss‰ katotaan onko ep‰kuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4245,10 +4242,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 10;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
+						if ($yhtiorow['alv_kasittely'] == '') {
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
+						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4283,25 +4291,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//T‰ss‰ katotaan onko ep‰kuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4311,12 +4302,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4352,25 +4352,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//T‰ss‰ katotaan onko ep‰kuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4380,12 +4363,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4421,25 +4413,8 @@ if (!function_exists("alehinta")) {
 
 					$hrow = mysql_fetch_assoc($hresult);
 
-					//T‰ss‰ katotaan onko ep‰kuranttiutta
-					$kokoepakurantti = "";
-
-					if ($trow["epakurantti100pvm"] != "0000-00-00") {
-						$trow["kehahin"] = 0;
-						$kokoepakurantti = "ON";
-					}
-					elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.25, 6);
-					}
-					elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.5, 6);
-					}
-					elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
-						$trow["kehahin"] = round($trow["kehahin"] * 0.75, 6);
-					}
-
 					// Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
-					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					if ($trow['kehahin'] <= 0) {
 						$hinta 		= 0.01;
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4449,12 +4424,21 @@ if (!function_exists("alehinta")) {
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
+						// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+						$hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+						// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+						if ($trow["myyntihinta_maara"] != 0) {
+							$hinta = $hinta * $trow["myyntihinta_maara"];
+						}
+
+						// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
 						if ($yhtiorow['alv_kasittely'] == '') {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
+							$hinta = $hinta * (1 + ($trow['alv'] / 100));
 						}
-						else {
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
-						}
+
+						// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+						$hinta = round($hinta, $yhtiorow['hintapyoristys']);
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							$ale["ale".$alepostfix] = 0;
@@ -4683,6 +4667,36 @@ if (!function_exists("alehinta")) {
 				$aleperuste["ale".$alepostfix] = 4;
 
 				$aperuste .= " Ei alennusta (Aletaso: $alepostfix)";
+			}
+			elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] < 0) {
+				// 5. k‰ytt‰j‰n syˆtt‰m‰ katejuttu
+				// Nolla keskihankintahinta tai kokoep‰kurantti, katemyynti ei onnaa laitetaan sentti-hinnalla
+				if ($trow['kehahin'] <= 0) {
+					$hinta = 0.01;
+				}
+				elseif ($trow['kehahin'] > 0) {
+					// Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+					$hinta = $trow['kehahin'] / (1 - (abs($ale["ale".$alepostfix]) / 100));
+
+					// Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+					if ($trow["myyntihinta_maara"] != 0) {
+						$hinta = $hinta * $trow["myyntihinta_maara"];
+					}
+
+					// Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$hinta = $hinta * (1 + ($trow['alv'] / 100));
+					}
+
+					// Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+					$hinta = round($hinta, $yhtiorow['hintapyoristys']);
+				}
+
+				$aleperuste["ale".$alepostfix] = 5;
+				$ale["ale".$alepostfix] = 0;
+				$netto = "";
+				$hintaperuste = 10;
+				$aperuste .= "Katemyyntihinta. ";
 			}
 		}
 
@@ -8946,6 +8960,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 		}
+		elseif (strpos($laskurow['tilausvahvistus'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+		}
 		elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
 		}
@@ -8963,6 +8980,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
@@ -15358,5 +15378,141 @@ if (!function_exists('myyntitili_varastopaikka')) {
 
 		// Palautetaan hyllyalue, hyllynro, hyllyvali, hyllytaso
 		return array("!!M", $hyllypaikka[0], $hyllypaikka[1], $hyllypaikka[2]);
+	}
+}
+
+// Tulostetaan VAK/ADR-erittely
+if (!function_exists('tulosta_vakadr_erittely')) {
+	function tulosta_vakadr_erittely($laskun_tunnus, $vakadr_komento, $tee) {
+		global $yhtiorow, $kukarow, $kieli;
+
+		if ($yhtiorow["kerayserat"] != "K") {
+			echo t("Ker‰yser‰t pit‰‰ olla k‰ytˆss‰, ei tulosteta VAK-erittely‰");
+			return;
+		}
+
+		if ($yhtiorow["vak_erittely"] != "K") {
+			echo t("Vak-erittely pit‰‰ olla k‰ytˆss‰, ei tulosteta VAK-erittely‰");
+			return;
+		}
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND tunnus = '$laskun_tunnus'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo t("Laskua ei lˆydy");
+			return;
+		}
+
+		$laskurow = mysql_fetch_assoc($result);
+
+		require("tilauskasittely/tulosta_vakerittely.inc");
+
+		if ($kieli == '') {
+			$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+			$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+			$kielrow = mysql_fetch_assoc($kielresult);
+			$kieli = strtolower($kielrow['kieli']);
+		}
+
+		// Haetaan kaikki tilauksen SSCC koodit
+		$query = "	SELECT distinct sscc, sscc_ulkoinen
+					FROM tilausrivi
+					JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
+					JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+					AND tilausrivi.tyyppi != 'D'
+					AND tilausrivi.kpl+tilausrivi.varattu > 0";
+		$result_sscc = pupe_query($query);
+
+		if (mysql_num_rows($result_sscc) > 0) {
+
+			$params_vak = array(
+						'boldi'			=> $boldi,
+						'iso'			=> $iso,
+						'kala'			=> 0,
+						'kieli'			=> $kieli,
+						'komento' 		=> $vakadr_komento,
+						'laskurow'		=> $laskurow,
+						'massa'			=> 0,
+						'norm'			=> $norm,
+						'page'			=> NULL,
+						'pdf'			=> NULL,
+						'pieni'			=> $pieni,
+						'sivu'			=> 1,
+						'rectparam'		=> $rectparam,
+						'tee'			=> $tee,
+						'sscc' 			=> NULL,
+						'sscc_ulkoinen' => NULL,
+						'thispage'		=> NULL,
+						'vakkoodi' 		=> NULL,
+						);
+
+			// VAK lapun otsikko
+			$params_vak = vakadr_otsikko($params_vak);
+
+			while ($row = mysql_fetch_assoc($result_sscc)) {
+
+				$params_vak['sscc'] 			= $row["sscc"];
+				$params_vak['sscc_ulkoinen'] 	= $row["sscc_ulkoinen"];
+				$params_vak['vakkoodi'] 		= NULL;
+				$params_vak['massa']	 		= NULL;
+
+				// piirret‰‰n riviotsikko (koska meill‰ on sscc setattu)
+				$params_vak = vakadr_rivi($params_vak);
+
+				// K‰ytet‰‰nkˆ VAK-tietokantaa
+				if ($yhtiorow["vak_kasittely"] != "") {
+
+					if (isset($kieli) and strtolower($kieli) != "fi") {
+						$nimityskuvaus = "name_and_description";
+					}
+					else {
+						$nimityskuvaus = "nimi_ja_kuvaus";
+					}
+
+					$vakselect = " concat('UN ',vak.yk_nro,' ', vak.{$nimityskuvaus},', ', vak.lipukkeet,', ', vak.pakkausryhma) as vakkoodi,";
+					$vakjoin   = " JOIN vak ON (tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus)";
+				}
+				else {
+					$vakselect = " tuote.vakkoodi vakkoodi,";
+					$vakjoin   = "";
+				}
+
+				// Haetaan paketille (SSCC) kaikki vakkoodit ja niiden massa (kerroin 0.95, koska koko tuotteen massa ei ole yleens‰ vaarallista ainetta)
+				$aliquery = "	SELECT {$vakselect}
+								sum(kerayserat.kpl * tuote.tuotemassa * 0.95) as massa
+								FROM tilausrivi
+								JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus and kerayserat.sscc = {$row['sscc']})
+								JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
+								{$vakjoin}
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+								AND tilausrivi.tyyppi != 'D'
+								AND tilausrivi.kpl+tilausrivi.varattu > 0
+								group by vakkoodi";
+				$apuresult = pupe_query($aliquery);
+
+				while ($sscc_rivi = mysql_fetch_assoc($apuresult)) {
+					$params_vak['sscc'] 			= NULL;
+					$params_vak['sscc_ulkoinen'] 	= NULL;
+					$params_vak['vakkoodi'] 		= $sscc_rivi["vakkoodi"];
+					$params_vak['massa']	 		= $sscc_rivi["massa"];
+
+					// Piirret‰‰n vakkoodit (koska meill‰ on vakkoodi ja massa setattu)
+					$params_vak = vakadr_rivi($params_vak);
+				}
+			}
+
+			// Piirret‰‰n footer
+			$params_vak = vakadr_loppu($params_vak);
+
+			// Tulostetaan PDF
+			print_pdf_vakadr($params_vak);
+		}
 	}
 }

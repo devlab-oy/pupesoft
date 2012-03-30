@@ -229,7 +229,7 @@
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
-			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -451,11 +451,30 @@
 
 			echo "</select></td><td></td></tr>";
 
+			$vsel[$verkkokaupat] = "SELECTED";
+
 			echo "<tr>
-				<th>",t("N‰yt‰ vain verkkokauppatilauksia"),"</th>
-				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
+				<th>",t("Ohjelmamoduli"),"</th>
+				<td>
+				<select name='verkkokaupat'>
+				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
+				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
+				<option value='EXTRANET'		{$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
+				<option value='MAGENTO'			{$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
+				<option value='VARAOSASELAIN'	{$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
+				<option value='VERKKOKAUPPA'	{$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
+				<option value='EDIFACT911'		{$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
+				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+				</select>
+				</td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("N‰yt‰ laskun maksup‰iv‰m‰‰r‰"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "<tr>
@@ -1118,7 +1137,7 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group .= ",lasku.maksuteksti";
+						$group  .= ",lasku.maksuteksti";
 						$select .= "lasku.maksuteksti maksuehto, ";
 						$order  .= "lasku.maksuteksti,";
 						$gluku++;
@@ -1147,6 +1166,13 @@
 				if ($tilrivikomm != "") {
 					$group .= ",tilausrivi.tunnus";
 					$select .= "tilausrivi.kommentti, ";
+					$gluku++;
+					$muutgroups++;
+				}
+
+				if ($naytamaksupvm != "") {
+					$group .= ",lasku.mapvm";
+					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
 				}
@@ -1223,7 +1249,10 @@
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
 					}
-					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+
+					if ($tuoterajaus != "") {
+						$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+					}
 				}
 
 				if (isset($status) and $status != '') {
@@ -1231,7 +1260,7 @@
 				}
 
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
-					$lisa .= " and lasku.laatija = 'Magento' ";
+					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
 
 				$vvaa = $vva - '1';
@@ -1328,7 +1357,7 @@
 						$tee = '';
 					}
 				}
-				
+
 				if ($naytakaikkityypit != "") {
 					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
 				}
@@ -1775,7 +1804,7 @@
 									if (!${"dyn_".$dynlaji}) {
 										$dynpuu_q = " 	SELECT subparent.nimi
 														FROM dynaaminen_puu AS subnode
-														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
+														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subparent.lft < subnode.lft AND subparent.rgt > subnode.lft)
 														WHERE subnode.tunnus = ".$row[mysql_field_name($result, $i)]."
 														ORDER BY subparent.lft";
 										$dynpuu_r = pupe_query($dynpuu_q);

@@ -43,7 +43,7 @@
 		$laskurow['h1time'] = date('Y-m-d H:i:s');
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
-
+	
 	//otetaan varmuuden vuoksi alkuperäisen otsikon tunnus
 	$alkuplaskutunnus = $laskurow["tunnus"];
 
@@ -121,6 +121,7 @@
 			$varasto   = 'x';
 			$edvarasto = 'x';
 			$tulostusalue = $edtulostusalue = "x";
+			unset($laskusplitres);
 
 			while ($row = mysql_fetch_array($result)) {
 				// Mihin varastoon
@@ -375,8 +376,21 @@
 			// tilaus ei enää kesken...
 			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
+
+			// Lähetteet tulostetaan automaattisesti
+			if (($toim == "MYYNTITILI" and $yhtiorow["myyntitilin_tulostustapa"] == "A") or ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "VALMISTAVARASTOON" and $yhtiorow["valmistuksen_tulostustapa"] == "A") or ($toim == "SIIRTOLISTA" and $yhtiorow["siirtolistan_tulostustapa"] == "A")) {
+				#TODO: Otetaan tässä vain alkuperäinen tilaus ja tulostetaan se.. Jos tilaus splittaantui, muut jäävät keräyslistajonoon.
+				$query = "SELECT * FROM lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$alkuplaskutunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+				$laskurow = mysql_fetch_assoc($result);
+				
+				$tee = "valmis";
+				$tulostetaan = "OK";
+			}
 		}
-		else {
+
+		if ($tulostetaan == "OK") {
+
 			//Tulostetaan lista
 			$query = "	SELECT tuote.tuoteno, tilausrivi.*
 						FROM tilausrivi use index (yhtio_otunnus), tuote use index (tuoteno_index)
@@ -509,6 +523,9 @@
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$tyyppi = "";
 				}
+				elseif ($toim == "MYYNTITILI") {
+					$tyyppi = "MYYNTITILI";
+				}
 				else {
 					$tyyppi = "SIIRTOLISTA";
 				}
@@ -572,7 +589,7 @@
 				if (mysql_num_rows($prires) > 0) {
 					$prirow = mysql_fetch_array($prires);
 
-					if ($valittu_tulostin == "oletukselle") {
+					if (!isset($valittu_tulostin) or $valittu_tulostin == "oletukselle") {
 						$apuprintteri = $prirow['printteri1']; // läheteprintteri
 					}
 					else {
@@ -679,7 +696,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					if ($yhtiorow["kerataanko_valmistukset"] == "E") {
+					if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
 						$query = "	UPDATE lasku
 									SET alatila='C', lahetepvm=now()
 									where yhtio='$kukarow[yhtio]'

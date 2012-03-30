@@ -2,6 +2,7 @@
 
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos = "";
+$luottotilanne_nyt = 0;
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -13,6 +14,9 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = pupe_query($query);
 
+// p‰ivitet‰‰n myˆs muuttuja
+$laskurow["vanhatunnus"] = $laskurow["tunnus"];
+
 // Katsotaan onko asiakas myyntikiellossa
 $query  = "	SELECT *
 			FROM asiakas
@@ -21,15 +25,98 @@ $query  = "	SELECT *
 $tilausvalmis_asiakas_res = pupe_query($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 
-if ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
+// Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
+if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) {
+
+	$query_alennuksia = generoi_alekentta('M');
+
+	$saatavat_liitostunnukset = "";
+
+	// Jos saatavat on ytunnus tasolla, pit‰‰ hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
+	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
+							FROM asiakas
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND ytunnus = '{$laskurow["ytunnus"]}'";
+		$saatavat_result = pupe_query($saatavat_query);
+		$saatavat_row = mysql_fetch_assoc($saatavat_result);
+		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
+	}
+
+	if ($saatavat_liitostunnukset == "") {
+		$saatavat_liitostunnukset = $laskurow["liitostunnus"];
+	}
+
+	// haetaan kaikkien avoimien tilausten arvo
+	$sumquery = "	SELECT round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo
+					FROM lasku
+					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+					)
+					AND lasku.liitostunnus in ($saatavat_liitostunnukset)";
+	$sumresult = pupe_query($sumquery);
+	$avoimetrow = mysql_fetch_assoc($sumresult);
+
+	// Parametrej‰ saatanat.php:lle
+	$sytunnus 	 	 = $laskurow['ytunnus'];
+	$sliitostunnus	 = $laskurow['liitostunnus'];
+	$eiliittymaa 	 = "ON";
+	$luottorajavirhe = "";
+	$jvvirhe 		 = "";
+	$ylivito 		 = "";
+	$trattavirhe 	 = "";
+	$laji 			 = "MA";
+	$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
+
+	ob_start();
+
+	if ($toim != "EXTRANET") {
+		require ("raportit/saatanat.php");
+	}
+	else {
+		require ("saatanat.php");
+	}
+
+	$retval = ob_get_contents();
+	ob_end_clean();
+
+	// Lasketaan luottotilanne nyt, $avoimia_yhteensa ja $kaato_yhteensa tulee saatanat.php:st‰
+	$luottotilanne_nyt = $tilausvalmis_asiakas_row["luottoraja"] - $avoimia_yhteensa - $kaato_yhteensa - $avoimetrow["avoimet_arvo"];
+}
+
+if ($luottotilanne_nyt < 0) {
+	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
+		$alatila = "F";
+	}
+	else {
+		$alatila = "";
+	}
+
+	$query = "	UPDATE lasku SET
+				alatila = '$alatila'
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskurow[tunnus]'";
+	$myyntikielto_res = pupe_query($query);
+
+	echo "<font class='error'>",t("Asiakkaan luottoraja on ylitetty"),". ",t("Tilausta ei merkit‰ valmiiksi"),".</font><br/><br/>";
+
+	// Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
+}
+elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
 	$query = "	UPDATE lasku SET
 				alatila = ''
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$laskurow[tunnus]'";
 	$myyntikielto_res = pupe_query($query);
 
-	echo "<font class='message'>",t("Asiakas on myyntikiellossa"),". ",t("Tilausta ei merkit‰ valmiiksi"),".</font><br/>";
+	echo "<font class='error'>",t("Asiakas on myyntikiellossa"),". ",t("Tilausta ei merkit‰ valmiiksi"),".</font><br/>";
 
+	// Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
+	$lopetus = "";
 }
 elseif ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset
@@ -326,16 +413,27 @@ else {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
-		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta
+		$tilausriviquery = "SELECT tilausrivi.tuoteno, (tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta, (tilausrivi.varattu+tilausrivi.jt) kplmaara
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
 							AND tilausrivi.tyyppi != 'D'";
 		$rivihintaresult = pupe_query($tilausriviquery);
-		$totaalirivi = mysql_fetch_assoc($rivihintaresult);
+
+		$rahtivapaa_alarajasumma_rivit = 0;
+
+		while ($totaalirivi = mysql_fetch_assoc($rivihintaresult)) {
+			// KAUTTALASKUTUSKIKKARE
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) {
+				$rahtivapaa_alarajasumma_rivit += etayhtio_hinta($totaalirivi["tuoteno"], $totaalirivi["kplmaara"], $laskurow);
+			}
+			else {
+				$rahtivapaa_alarajasumma_rivit += $totaalirivi["rivihinta"];
+			}
+		}
 
 		// kaikkiyhteens‰ ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
-		if ($totaalirivi["rivihinta"] > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
+		if ($rahtivapaa_alarajasumma_rivit > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 
 			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
@@ -958,6 +1056,7 @@ else {
 			$sisviesti2_numerointi	= 1;
 			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
+			unset($laskusplitres);
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1370,7 +1469,17 @@ else {
 				}
 			}
 
-			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS' or $tullaanko_tilausten_sisaanluvusta == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
+			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
+
+				#if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
+				#	$herminator = $totarowx['herminator2'];
+				#}
+				#else {
+				#	$herminator = $totarowx['herminator'];
+				#}
+
+				$herminator = $totarowx['herminator'];
+
 				foreach ($tilausnumerot as $til_nro) {
 
 					// Jos tilauksista yksikin menee "Unikko"-j‰rjestelm‰‰n, p‰ivitet‰‰n kaikki tilaukset rahtivapaiksi
@@ -1417,7 +1526,7 @@ else {
 							'lisatiedot' => $laskun_lisatiedot,
 							'asiakasrow' => $asiakas_chk_row,
 							'tilaustyyppi' => $pupesoft_tilaustyyppi,
-							'toimitustapa' => $totarowx['herminator'],
+							'toimitustapa' => $herminator,
 							'toim' => $toim,
 						);
 

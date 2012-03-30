@@ -523,6 +523,7 @@
 	}
 
 	if ($tee == "") {
+		echo "<div style='width:99%; height:82%; position: absolute; overflow:auto;'>";
 		echo "<table style='width: 90%; height: 90%;'>";
 
 		$korkeus = floor(100 / (count($AIKA_ARRAY)+2))."%";
@@ -809,6 +810,7 @@
 
 		echo "</tr>";
 		echo "</table>";
+		echo "</div>";
 	}
 
 	require("inc/footer.inc");

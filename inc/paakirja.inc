@@ -665,7 +665,7 @@
 					$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];
 				}
 
-				if ($trow["alv_taso"] == "fi305") {
+				if ($trow["alv_taso"] == "fi305" or $trow["alv_taso"] == "fi307") {
 					// Onko tosite liitetty keikkaan
 					$query = "SELECT nimi, laskunro, mapvm from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[ltunnus]'";
 					$keikres = pupe_query($query);

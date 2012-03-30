@@ -492,6 +492,11 @@ if ($kasitellaan_tiedosto) {
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 			}
 
+			if (substr($row[1], 0, 7) == "decimal" or substr($row[1], 0, 3) == "int") {
+				// Sallitaan myös miinusmerkki...
+				$tlengthpit++;
+			}
+
 			$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
 		}
 
@@ -636,7 +641,7 @@ if ($kasitellaan_tiedosto) {
 			$eilisataeikamuuteta = "";
 			$rivilaskuri++;
 
-			//asiakashinta/asiakasalennus spessuja
+			//asiakashinta/asiakasalennus/toimittajahinta/toimittajaalennus spessuja
 			$chasiakas_ryhma 	= '';
 			$chytunnus 			= '';
 			$chryhma 			= '';
@@ -653,6 +658,7 @@ if ($kasitellaan_tiedosto) {
 			$and 				= '';
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
+			$chtoimittaja		= '';
 
 			if ($cli === FALSE and ($rivilaskuri % 500) == 0) {
 				echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
@@ -1082,13 +1088,13 @@ if ($kasitellaan_tiedosto) {
 					$rivi[$postoiminto] = "LISAA";
 				}
 				elseif ($rivi[$postoiminto] == 'LISAA' and mysql_num_rows($fresult) != 0) {
-					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta') {
+					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta') {
 						lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>");
 						$tila = 'ohita';
 					}
 				}
 				elseif ($rivi[$postoiminto] == 'MUUTA' and mysql_num_rows($fresult) == 0) {
-					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta') {
+					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta') {
 						lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")."</font> $valinta<br>");
 						$tila = 'ohita';
 					}
@@ -1397,7 +1403,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//tarkistetaan asiakasalennus ja asiakashinta juttuja
-						if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+						if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajaalennus' or $table_mysql == 'toimittajahinta') {
 							if ($otsikko == 'RYHMA' and $rivi[$r] != '') {
 								$chryhma = $rivi[$r];
 							}
@@ -1406,8 +1412,12 @@ if ($kasitellaan_tiedosto) {
 								$chasiakas = $rivi[$r];
 							}
 
+							if ($otsikko == 'TOIMITTAJA' and (int) $rivi[$r] > 0) {
+								$chtoimittaja = $rivi[$r];
+							}
+
 							if ($otsikko == 'TUOTENO' and $rivi[$r] != '') {
-								$chtuoteno = $rivi[$r];
+								$chtuoteno = trim($rivi[$r]);
 							}
 
 							if ($otsikko == 'ASIAKAS_RYHMA' and $rivi[$r] != '') {
@@ -1415,7 +1425,7 @@ if ($kasitellaan_tiedosto) {
 							}
 
 							if ($otsikko == 'YTUNNUS' and $rivi[$r] != '') {
-								$chytunnus = $rivi[$r];
+								$chytunnus = trim($rivi[$r]);
 							}
 
 							if ($otsikko == 'ALKUPVM' and $rivi[$r] != '') {
@@ -1426,7 +1436,8 @@ if ($kasitellaan_tiedosto) {
 								$chloppupvm = $rivi[$r];
 							}
 
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) { // 1 tarkoittaa dynaamisen puun KOODIA
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) {
+								// 1 tarkoittaa dynaamisen puun KOODIA
 								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$rivi[$r]'";
 								$etsiresult = pupe_query($etsitunnus);
 								$etsirow = mysql_fetch_assoc($etsiresult);
@@ -1434,7 +1445,8 @@ if ($kasitellaan_tiedosto) {
 								$chsegmentti = $etsirow['tunnus'];
 							}
 
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $rivi[$r] > 0) { // 2 tarkoittaa dynaamisen puun TUNNUSTA
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $rivi[$r] > 0) {
+								// 2 tarkoittaa dynaamisen puun TUNNUSTA
 								$chsegmentti = $rivi[$r];
 							}
 
@@ -1501,9 +1513,9 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//muutetaan riviä, silloin ei saa päivittää pakollisia kenttiä
-						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
+						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 							///* Tässä on kaikki oikeellisuuscheckit *///
-							if ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
+							if (($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') or ($table_mysql == 'toimittajahinta' and $otsikko == 'HINTA')) {
 								if ($rivi[$r] != 0 and $rivi[$r] != '') {
 									$query .= ", $otsikko = '$rivi[$r]' ";
 								}
@@ -1575,8 +1587,8 @@ if ($kasitellaan_tiedosto) {
 					}
 				}
 
-				// tarkistetaan asiakasalennus ja asiakashinta keisseissä onko tällanen rivi jo olemassa
-				if ($hylkaa == 0 and ($chasiakas != 0 or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != 0) and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
+				// tarkistetaan asiakasalennus ja asiakashinta keisseissä onko tällanen rivi jo olemassa, sekä toimittajahinta että toimittajaalennus
+				if ($hylkaa == 0 and ($chasiakas != 0 or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != 0 or $chtoimittaja != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
 					}
@@ -1604,13 +1616,17 @@ if ($kasitellaan_tiedosto) {
 						$and .= " and minkpl = '$chminkpl'";
 					}
 
-					if ($table_mysql == 'asiakasalennus') {
+					if ($chtoimittaja != '') {
+						$and .= " and toimittaja = '$chtoimittaja'";
+					}
+
+					if ($table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta') {
 						if ($chmaxkpl != 0) {
 							$and .= " and maxkpl = '$chmaxkpl'";
 						}
 					}
 
-					if ($table_mysql == 'asiakasalennus') {
+					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajaalennus') {
 
 						if ($chmonikerta != '') {
 							$and .= " and monikerta != ''";
@@ -1640,7 +1656,7 @@ if ($kasitellaan_tiedosto) {
 				}
 
 				if ($rivi[$postoiminto] == 'MUUTA') {
-					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
+					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
 						$query .= $and;
 					}
@@ -1652,7 +1668,7 @@ if ($kasitellaan_tiedosto) {
 				}
 
 				if ($rivi[$postoiminto] == 'POISTA') {
-					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
+					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
 						$query .= $and;
 					}
@@ -1680,7 +1696,7 @@ if ($kasitellaan_tiedosto) {
 
 				$tarq = "	SELECT *
 							FROM $table_mysql";
-				if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+				if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
 					$tarq .= " WHERE yhtio = '$kukarow[yhtio]'";
 					$tarq .= $and;
 				}
@@ -1694,7 +1710,7 @@ if ($kasitellaan_tiedosto) {
 				}
 				elseif ($rivi[$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
 
-					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
 						lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>");
 					}
 				}
@@ -1737,7 +1753,7 @@ if ($kasitellaan_tiedosto) {
 						unset($virhe);
 
 						if (function_exists($funktio)) {
-							$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
+							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 						}
 
 						if ($tassafailissa) {
@@ -1791,7 +1807,7 @@ if ($kasitellaan_tiedosto) {
 						$syncquery = "	SELECT *
 										FROM $table_mysql";
 
-						if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+						if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
 							$syncquery .= " WHERE yhtio = '$kukarow[yhtio]'";
 							$syncquery .= $and;
 						}
@@ -1930,6 +1946,8 @@ if (!$cli) {
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
+		'toimittajahinta'                 => 'Toimittajan hinnat',
+		'toimittajaalennus'               => 'Toimittajan alennukset',
 	);
 
 	// Lisätään dynaamiset tiedot

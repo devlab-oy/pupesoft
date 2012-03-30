@@ -68,7 +68,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "oletus_valkoodi") { //valuutta
-		$query = "SELECT nimi, tunnus
+		$query = "	SELECT nimi, tunnus
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
@@ -305,7 +305,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys") {
+	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys" or mysql_field_name($result, $i) == "ultilno_maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
@@ -315,17 +315,18 @@
 
 		$ulos .= "<option value = '' ></option>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
 			}
-			elseif($trow[$i] == "" and $trow["maa"] != "" and strtoupper($vrow[0]) == $trow["maa"]) {
+			elseif (mysql_field_name($result, $i) != "ultilno_maa" and $trow[$i] == "" and $trow["maa"] != "" and strtoupper($vrow[0]) == $trow["maa"]) {
 				$sel = "selected";
 			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+			elseif (mysql_field_name($result, $i) != "ultilno_maa" and $trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
 				$sel = "selected";
 			}
+			
 			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
 		}
 
@@ -378,8 +379,8 @@
 		else $selo = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>Ei automaattitoimitusta</option>";
-		$ulos .= "<option value='S' $sels>Suoratoimitukset toimitetaan automaattisesti</option>";
+		$ulos .= "<option value='' $selo>".t("Ei automaattitoimitusta")."</option>";
+		$ulos .= "<option value='S' $sels>".t("Suoratoimitukset toimitetaan automaattisesti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -392,8 +393,8 @@
 		else $selo = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>Ostolaskua ei voi eritellä</option>";
-		$ulos .= "<option value='S' $sels>Ostolaskun voi eritellä</option>";
+		$ulos .= "<option value='' $selo>".t("Ostolaskua ei voi eritellä")."</option>";
+		$ulos .= "<option value='S' $sels>".t("Ostolaskun voi eritellä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -459,6 +460,24 @@
 			$ulos .= "</td>";
 			$jatko = 0;
 		}
+	}
+	
+	if (mysql_field_name($result, $i) == "verovelvollinen") {
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "selected";
+		
+		$query = "SELECT nimi FROM maat WHERE koodi='{$yhtiorow["maa"]}' limit 1";
+		$maare = pupe_query($query);
+		$maaro = mysql_fetch_assoc($maare);
+		
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja ei ole verovelvollinen maassa").": $maaro[nimi]</option>";
+		$ulos .= "<option value='$yhtiorow[maa]' $sel>".t("Toimittaja on verovelvollinen maassa").": $maaro[nimi]</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "maksukielto") {

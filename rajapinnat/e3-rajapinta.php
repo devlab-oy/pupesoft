@@ -1,55 +1,88 @@
 <?php
 
-	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
-	$useslave = 1;
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
 
-	if (empty($argv)) {
-	    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
+	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+		$php_cli = TRUE;
 	}
 
-	if ($argv[1] == '') {
-		die("Yhtiö on annettava!!");
+	if ($php_cli) {
+
+		if (!isset($argv[1]) or $argv[1] == '') {
+			echo "Anna yhtiö!!!\n";
+			die;
+		}
+
+		// otetaan includepath aina rootista
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
+
+		// otetaan tietokanta connect
+		require("inc/connect.inc");
+		require("inc/functions.inc");
+
+		// hmm.. jännää
+		$kukarow['yhtio'] = $argv[1];
+
+		//Pupeasennuksen root
+		$pupe_root_polku = dirname(dirname(__FILE__));
+
+		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
+		$yhtiores = pupe_query($query);
+
+		if (mysql_num_rows($yhtiores) == 1) {
+			$yhtiorow = mysql_fetch_assoc($yhtiores);
+
+			// haetaan yhtiön parametrit
+			$query = "  SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$yhtiorow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_assoc($result);
+
+				// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
+				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+				}
+			}
+		}
+		else {
+			die ("Yhtiö $kukarow[yhtio] ei löydy!");
+		}
+	}
+	else {
+		echo "Voidaan ajaa vain komentoriviltä!!!\n";
+		die;
 	}
 
-	$yhtio = $argv[1];
+	$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
-	// otetaan includepath aina rootista
-	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
-	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-	ini_set("display_errors", 0);
+	//rajaukset
+	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = ''";
+	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
+	$xf02loppulause = "";
 
-	require('inc/connect.inc');
-	require('inc/functions.inc');
-
-	$today = date("dmy");
-
-	$path = "/Users/jamppa/tmp/E3/E3_$yhtio/";
+	$path = "/tmp/e3siirto_siirto_$yhtiorow[yhtio]/";
 
 	// Sivotaan eka vanha pois
-  	system("rm -rf $path");
+	system("rm -rf $path");
 
 	// Tehään uysi dirikka
 	system("mkdir $path");
 
-	$path_xauxi      = $path . 'xauxi.txt';
-	$path_xlto    	 = $path . 'xlt0.txt';
-	$path_wswp 		 = $path . 'xswp.txt';
-	$path_xvni    	 = $path . 'xvni.txt';
-	$path_xf04 		 = $path . 'xf04.txt';
-	$path_xf01     	 = $path . 'xf01'.$today.'.txt';
-	$path_xf02       = $path . 'xf02.txt';
+	$path_xauxi = $path . 'xauxi.txt';
+	$path_xlto  = $path . 'xlt0.txt';
+	$path_wswp  = $path . 'xswp.txt';
+	$path_xvni  = $path . 'xvni.txt';
+	$path_xf04  = $path . 'xf04.txt';
+	$path_xf01  = $path . 'xf01'.$tanaan.'.txt';
+	$path_xf02  = $path . 'xf02.txt';
 
-	$query = "SELECT * from yhtio where yhtio='$yhtio'";
-	$res = mysql_query($query) or pupe_error($query);
-	$yhtiorow = mysql_fetch_assoc($res);
-
-	$query = "SELECT * from yhtion_parametrit where yhtio='$yhtio'";
-	$res = mysql_query($query) or pupe_error($query);
-	$params = mysql_fetch_assoc($res);
-
-	$yhtiorow = array_merge($yhtiorow, $params);
-
-	echo "E3rajapinta siirto: $yhtio\n";
+	echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
 	//testausta varten limit
 	$limit = "";
@@ -63,62 +96,60 @@
 	xf01($limit);
 	xf02($limit);
 
-	//Siirretään failit logisticar palvelimelle
-	#siirto($path);
+	//Siirretään failit e3 palvelimelle
+	siirto();
 
-	function siirto ($path) {
-		GLOBAL $logisticar, $yhtio;
+	function siirto () {
+		GLOBAL $e3_params, $yhtiorow, $path_xauxi, $path_xlto, $path_wswp, $path_xvni, $path_xf04, $path_xf01, $path_xf02;
 
-		$path_localdir 	 = "/mnt/logisticar_siirto/";
-		$user_logisticar = $logisticar[$yhtio]["user"];
-		$pass_logisticar = $logisticar[$yhtio]["pass"];
-		$host_logisticar = $logisticar[$yhtio]["host"];
-		$path_logisticar = $logisticar[$yhtio]["path"];
+		//lähetetään tiedosto
+		$conn_id = ftp_connect($e3_params[$yhtiorow["yhtio"]]["ftphost"]);
 
-		unset($retval);
-		system("mount -t cifs -o username=$user_logisticar,password=$pass_logisticar //$host_logisticar/$path_logisticar $path_localdir", $retval);
-
-		if ($retval != 0) {
-			echo "Mount failed! $retval\n";
+		// jos connectio ok, kokeillaan loginata
+		if ($conn_id) {
+			$login_result = ftp_login($conn_id, $e3_params[$yhtiorow["yhtio"]]["ftpuser"], $e3_params[$yhtiorow["yhtio"]]["ftppass"]);
 		}
-		else {
 
-			unset($retval);
-			system("cp -f $path/* $path_localdir", $retval);
+		// jos login ok kokeillaan uploadata
+		if ($login_result) {
+			ftp_exec ($conn_id, "put $path_xf01 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf01np.E3xf01np (Repla");
+			ftp_exec ($conn_id, "put $path_xf02 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf02np.E3xf02np (Repla");
+			ftp_exec ($conn_id, "put $path_xf04 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf04np.E3xf04np (Repla");
+			ftp_exec ($conn_id, "put $path_xvni {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xvninp.E3xvninp (Repla");
+			ftp_exec ($conn_id, "put $path_xauxi {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xauxinp.E3xauxinp (Repla");
+			ftp_exec ($conn_id, "put $path_xlto {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xlt0np.E3xlt0np (Repla");
+			ftp_exec ($conn_id, "put $path_wswp {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xswpmwnp.E3xswpmwnp (Repla");
+			ftp_exec ($conn_id, "quote rcmd E3nattsbm");
+			ftp_exec ($conn_id, "quit");
+		}
 
-			if ($retval != 0) {
-				echo "Copy failed! $retval\n";
-			}
-
-			unset($retval);
-			system("umount $path_localdir", $retval);
-
-			if ($retval != 0) {
-				echo "Unmount failed! $retval\n";
-			}
+		if ($conn_id) {
+			ftp_close($conn_id);
 		}
 	}
 
 	function xauxi($limit = '') {
-		global $path_xauxi, $yhtio, $logisticar;
-
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		global $path_xauxi, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xauxi...";
 
-		$query = "	SELECT 	RPAD(concat('E3T',tuote.tuoteno), 18,' ') as TUOTENO,
-						 	RPAD(concat('001',tuotteen_toimittajat.toimittaja), 11, ' ') as YTUNNUS,
-							RPAD(tuote.nimitys,45,' ') as Tuotenimi
+		//viedään nimityksen sijaan lyhytkuvaus -Satu 8.2.12
+		$query = "	SELECT 	tuote.tuoteno AS tuoteno,
+							tuote.lyhytkuvaus AS tuotenimi,
+							(
+								SELECT korv.tuoteno
+								FROM korvaavat AS korv
+								WHERE korv.yhtio = tuote.yhtio
+								AND korv.id = korvaavat.id
+								ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+								LIMIT 1
+							) korvaavatuoteno
 					FROM tuote
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-					WHERE tuote.yhtio = '$yhtio' $limit";
+					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
+					WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+					HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rested = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rested);
-
-		if ($rows == 0) {
-			echo "Yhtään tuotetta ei löytynyt\n $query\n";
-			die();
-		}
 
 		$fp = fopen($path_xauxi, 'w+');
 
@@ -126,12 +157,33 @@
 
 		while ($tuote = mysql_fetch_assoc($rested)) {
 
+			$query = "	SELECT toimi.herminator as toimittaja, toimi.tyyppi
+						FROM tuotteen_toimittajat
+						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+						AND tuotteen_toimittajat.tuoteno = '$tuote[tuoteno]'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$tutoq = mysql_query($query) or pupe_error($query);
+			$tuto = mysql_fetch_assoc($tutoq);
+
+			if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
+
 			// mones tämä on
 			$row++;
 
-			$tuote = implode("\t", $tuote);
+			$nimitys = $tuote['tuotenimi'];
+			$order   = array("\r\n", "\n", "\r", "\t");
+			$nimitys = str_replace($order, ' ', $nimitys);
+			$nimitys = preg_replace("~\s+~", " ", $nimitys);
 
-			if (! fwrite($fp, $tuote . "\n")) {
+			$out  = sprintf("%-3.3s",		"E3T");
+			$out .= sprintf("%-18.18s",		$tuote['tuoteno']);
+			$out .= sprintf("%-3.3s",		"001");
+			$out .= sprintf("%-8.8s",		$tuto['toimittaja']);
+			$out .= sprintf("%-45.45s",		$nimitys);
+
+			if (! fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
 				die();
 			}
@@ -143,59 +195,81 @@
 			for ($i=0; $i < (int) $progress; $i++) {
 				$hash .= "#";
 			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
-		echo "Done. Have An Ice Day\n";
 	}
 
 	function xlto($limit = '') {
-		global $path_xlto, $yhtio, $logisticar;
+		global $path_xlto, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		//Item Lead Time File XLT0 (toimitusaikaseuranta)
+		//Tiedot päivän aikaan tehdyistä tuloutuksista, jotka tehty E3:ssa syntynyttä tilausta vastaan
+		//tony: tein muutokset luonti ja lahete tietojen sisältöön. Sekä myös laskun tila semmoiseksi että on kyse tuloutetuista ostokeikasta
+		//jätetää täst aineistost ostoehdotus EI:t pois -satu 17-2-12
 
-		echo "Ulostetaan xlt0...\n";
-
-		$tanaan = date("Y-m-d"); // muodossa Y-m-d == 2005-10-29
-	//	$tanaan = '2010-10-13';
+		echo "TULOSTETAAN xlt0...\n";
 
 		$query = "	SELECT
-						tuotteen_toimittajat.toimittaja toimittaja,
 						tilausrivi.tuoteno tuoteno,
-						tilausrivi.kpl kpl ,
-						DATE_FORMAT(lasku.luontiaika,'%Y%m%d') luonti,
-						DATE_FORMAT(lasku.lahetepvm,'%Y%m%d') lahete
+						DATE_FORMAT(tilausrivi.laskutettuaika,'%Y%m%d') luonti,
+						DATE_FORMAT(tilausrivi.laadittu,'%Y%m%d') lahete,
+						tilausrivin_lisatiedot.tilausrivitunnus,
+						(
+							SELECT korv.tuoteno
+							FROM korvaavat AS korv
+							WHERE korv.yhtio = tuote.yhtio
+							AND korv.id = korvaavat.id
+							ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+							LIMIT 1
+						) korvaavatuoteno,
+					sum(round(tilausrivi.kpl)) kpl
 					FROM tilausrivi
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-					JOIN tuotteen_toimittajat on (tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio)
-					WHERE tilausrivi.yhtio	= '$yhtio'
-					AND laskutettuaika = '$tanaan'";
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
+					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset AND tuote.ostoehdotus = '')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus AND lasku.tila = 'K' AND lasku.alatila != 'I')
+					#tää ei ole aukoton ratkaisu ratkaista sitä, että vain e3:lla tehtyjä tilauksia vastaan tehdyt tuloutukset.. jotkut tulot ei tuu osumaan jatkossa jos tälleen tehdään (jos asn/ostolasku kohdistuksien vuoksi uupuu ja tehdään käsin rivejä)
+					#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
+					WHERE tilausrivi.yhtio	= '$yhtiorow[yhtio]'
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.laskutettuaika = '$tanaan'
+					GROUP BY tuoteno, luonti, lahete, tilausrivitunnus, korvaavatuoteno
+					HAVING tilausrivin_lisatiedot.tilausrivitunnus is null AND (korvaavatuoteno = tilausrivi.tuoteno OR korvaavatuoteno is null)";
 		$rest = mysql_query($query) or pupe_error($query);
 
-		$rows = mysql_num_rows($rest);
-		$row = 0;
+		$rows 	 = mysql_num_rows($rest);
+		$row 	 = 0;
 		$laskuri = 0;
-
-		if ($rows == 0) {
-			echo "Yhtään laskutustietoa ei löytynyt\n";
-			die();
-		}
 
 		$fp = fopen($path_xlto, 'w+');
 
 		while ($xlto = mysql_fetch_assoc($rest)) {
 
+			if ($xlto['kpl'] == 0 or $xlto['kpl'] < 0) continue;
+
+			$query = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
+						FROM tuotteen_toimittajat
+						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+						AND tuotteen_toimittajat.tuoteno = '$xlto[tuoteno]'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$tutoq = mysql_query($query) or pupe_error($query);
+			$tuto = mysql_fetch_assoc($tutoq);
+
+			//tyhjät pois ja jos ostorivin toimittaja ei oo päätoimittaja, ni skipataan (vain päätoimittajan ostoja e3)
+			if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
+
 			// mones tämä on
 			$row++;
 
-			$out   = sprintf("%-8.8s", $xlto['toimittaja']);	//LTVNDR
-			$out  .= sprintf("%-8.8s", $xlto['tuoteno']);		//LTITEM
-			$out  .= sprintf("%-8.8s", "001");					//LTWHSE
-			$out  .= sprintf("%-8.8s", $xlto['kpl']);			//LTRQTY
-			$out  .= sprintf("%-8.8s", $xlto['luonti']);		//LTRCDT
-			$out  .= sprintf("%-8.8s", $xlto['lahete']);		//LTORDT
+			$out   = sprintf("%-8.8s", $tuto['toimittaja']);	//LTVNDR
+			$out  .= sprintf("%-18.18s", $xlto['tuoteno']);		//LTITEM
+			$out  .= sprintf("%-3.3s", "001");					//LTWHSE
+			$out  .= sprintf("%07.7s", $xlto['kpl']);			//LTRQTY
+			$out  .= sprintf("%-8.8s", $xlto['luonti']);		//LTRCDT		oikeasti saapunut.määrä
+			$out  .= sprintf("%-8.8s", $xlto['lahete']);		//LTORDT		oikeasti tilauspvm
 
 			if (! fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
@@ -203,67 +277,70 @@
 			}
 
 			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\r";
 
+			echo "Kasitelty $laskuri / $rows\r";
 		}
 
 		fclose($fp);
-		echo "\nHave An Ice Day.\n";
 	}
 
 	function xswp($limit = '') {
-		global $path_wswp, $yhtio, $logisticar;
+		global $path_wswp, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		echo "TULOSTETAAN xswp...";
 
-		echo "Tulostetaan xswp...";
-
-		$query = "	SELECT korvaavat.id, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') as tunnus,
-		 			group_concat(korvaavat.tuoteno order by korvaavat.jarjestys, korvaavat.tunnus SEPARATOR '####') as tuotteet
-					FROM korvaavat
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = korvaavat.yhtio and tuotteen_toimittajat.tuoteno = korvaavat.tuoteno)
-					WHERE korvaavat.yhtio = '$yhtio'
-					GROUP BY id, toimittaja
-					$limit";
+		$query = " SELECT korvaavat.id,
+				   tuote.tuoteno,
+				   korvaavat.jarjestys,
+				   (
+				   	SELECT korv.tuoteno
+				   	FROM korvaavat AS korv
+				   	WHERE korv.yhtio = tuote.yhtio
+				   	AND korv.id = korvaavat.id
+				   	ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+				   	LIMIT 1
+				   ) korvaavatuoteno
+				   FROM tuote
+				   JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
+				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+				   HAVING tuote.tuoteno = korvaavatuoteno";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
-		$row = 0;
-
-		//echo "rivien lukumäärä on: ".$rows."\n";
-
-		if ($rows == 0) {
-			echo "nilkoille kusi\n";
-			die();
-		}
+		$row  = 0;
 
 		$fp = fopen($path_wswp, 'w+');
+
+		$xf02loppulause = '';
 
 		while ($korvaavat = mysql_fetch_assoc($rest)) {
 
 			// mones tämä on
 			$row++;
 
-			//// explode, tunniste , alikysely ///
-			$testi = explode("####", $korvaavat['tuotteet']);
-			$alitunniste = $testi[0];
+			$query = " SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
+					   FROM tuotteen_toimittajat
+					   JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+					   WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+					   AND tuotteen_toimittajat.tuoteno = '$korvaavat[tuoteno]'
+					   ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+					   LIMIT 1";
+			$tutoq = mysql_query($query) or pupe_error($query);
+			$tuto = mysql_fetch_assoc($tutoq);
 
-			// korjattu, herminator toimii
+			if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
 
-			$apuquery2 = "	SELECT DISTINCT RPAD(korvaavat.tuoteno,17,' ') as tuoteno, RPAD(toimi.ytunnus,7,' ') as tunnus
-							FROM korvaavat
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = korvaavat.yhtio and tuotteen_toimittajat.tuoteno = korvaavat.tuoteno)
-							JOIN toimi on (toimi.ytunnus = tuotteen_toimittajat.toimittaja and toimi.yhtio='$yhtio')
-							WHERE korvaavat.yhtio = '$yhtio'
-							AND korvaavat.tuoteno != '$alitunniste'
-							AND korvaavat.id = '$korvaavat[id]'";
-			$rested2 = mysql_query($apuquery2) or pupe_error($apuquery2);
+			$query = "			SELECT korvaavat.tuoteno
+								FROM korvaavat
+								WHERE korvaavat.yhtio = '$yhtiorow[yhtio]' AND korvaavat.id = '$korvaavat[id]' AND if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys) >= '$korvaavat[jarjestys]' AND korvaavat.tuoteno != '$korvaavat[tuoteno]'
+								ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
+								LIMIT 1";
+			$korvaavaresult = mysql_query($query) or pupe_error($query);
+			$korvaavarows = mysql_num_rows($korvaavaresult);
+			if ($korvaavarows == 0) continue;
+			$korvaava = mysql_fetch_assoc($korvaavaresult);
 
-			$i=1;
-
-			while ($ali2 = mysql_fetch_assoc($rested2)) {
-				//echo "alkuptuote: $alitunniste # alkuptoimittaja: $korvaavat[tunnus] # korvaavatuote: $ali2[tuoteno] # korvaavatoimittaja $ali2[tunnus]\n";
-				$lause = "E3T001$korvaavat[tunnus] ".str_pad($alitunniste,17)." 001$ali2[tunnus] $ali2[tuoteno] U1    000000000000000000000000000AYNY";
-			}
+			$lause = "E3T001$tuto[tutotunnus] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
+			$xf02loppulause .= "$tuto[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001000000000000000000000000000000000000000000000000000000                                                        D\n";
 
 			if (!fwrite($fp, $lause . "\n")) {
 				echo "Failed writing row.\n";
@@ -281,35 +358,31 @@
 		}
 
 		fclose($fp);
-		echo "Do Did Done.\n";
+
+		return $xf02loppulause;
 	}
 
 	function xvni($limit = '') {
-		global $path_xvni, $yhtio, $logisticar;
+		global $path_xvni, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		echo "TULOSTETAAN XVNI...";
 
-		echo "Ulostetaan XVNI...";
-
-		$qxvni = "	SELECT toimi.ytunnus tunnus, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
+		$qxvni = "	SELECT toimi.herminator AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
 					FROM toimi
-					WHERE toimi.yhtio = '$yhtio'
-					AND toimi.ytunnus != 0
+					WHERE toimi.yhtio = '$yhtiorow[yhtio]'
+					AND toimi.herminator not in ('0','')
+					AND tyyppi = '' $toimirajaus
 					ORDER BY 1 $limit";
 		$resto = mysql_query($qxvni) or pupe_error($qxvni);
 		$rows = mysql_num_rows($resto);
 
-		if ($rows == 0) {
-			echo "öö.. error, jotain ?\n";
-			die();
-		}
 		$fp = fopen($path_xvni, 'w+');
 
 		while ($xvni = mysql_fetch_assoc($resto)) {
 
 			$out = sprintf("%-3.3s", "E3T");					//XVCOMP
 			$out .= sprintf("%-3.3s", "001");					//XVWHSE
-			$out .= sprintf("%-8.8s", $xvni['tunnus']);			//XVVNDR
+			$out .= sprintf("%-8.8s", $xvni['toimittaja']);		//XVVNDR
 			$out .= sprintf("%-4.4s", "");						//XVSUBV
 			$out .= sprintf("%-30.30s", $xvni['nimi']);			//XVNAME
 			$out .= sprintf("%-18.18s", $xvni['lyhytnimi']);	//XVSEQ
@@ -355,72 +428,80 @@
 			$out .= sprintf("%-30.30s",	"");					//XVUSER
 			$out .= sprintf("%-1.1s",	"0");					//XVUSRU
 
-	//	echo $out."\n";
-
 			if (!fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
 				die();
 			}
-
 		}
 
 		fclose($fp);
-		echo "sniff.\n";
 	}
 
 	function xf04($limit = '') {
-		global $path_xf04, $yhtio, $logisticar;
+		global $path_xf04, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		echo "TULOSTETAAN xf04...\n";
 
-		echo "Tulostetaan xf04...\n";
 		// jos kirjaimet on A-I niin homma toimii, jos on enemmän niin homma kusee.
 
-		$qxf04 = "	SELECT toimi.tunnus tunnus, tuote.tuoteno as tuoteno, tuotteen_toimittajat.toim_tuoteno as ttuoteno, tuote.yksikko as yksikko , tuote.try as try,
+		$qxf04 = "	SELECT tuote.tuoteno as tuoteno, tuote.yksikko as yksikko , tuote.try as try,
 					tm.luokka,
 					if(tm.luokka=1,'A',if(tm.luokka=2,'B',if(tm.luokka=3,'C',if(tm.luokka=4,'D',if(tm.luokka=5,'E',if(tm.luokka=6,'F',if(tm.luokka=7,'G',if(tm.luokka=8,'H','I')))))))) as 'MYYNNINABC',
 					tr.luokka,
-					if(tr.luokka=1,'A',if(tr.luokka=2,'B',if(tr.luokka=3,'C',if(tr.luokka=4,'D',if(tr.luokka=5,'E',if(tr.luokka=6,'F',if(tr.luokka=7,'G',if(tr.luokka=8,'H','I')))))))) as 'POKEABC'
-					FROM toimi
-					JOIN tuote ON (tuote.yhtio = toimi.yhtio)
-					JOIN tuotteen_toimittajat on (tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuotteen_toimittajat.yhtio = tuote.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-					JOIN abc_aputaulu tm ON (tm.yhtio = toimi.yhtio AND tm.tuoteno = tuote.tuoteno AND tm.tyyppi = 'TM')
-					JOIN abc_aputaulu tr ON (tr.yhtio = toimi.yhtio AND tr.tuoteno = tuote.tuoteno AND tr.tyyppi = 'TR')
-					WHERE toimi.yhtio = '$yhtio'
-					AND tuote.status !='P'
-					ORDER BY tuote.tuoteno
-					$limit";
+					if(tr.luokka=1,'A',if(tr.luokka=2,'B',if(tr.luokka=3,'C',if(tr.luokka=4,'D',if(tr.luokka=5,'E',if(tr.luokka=6,'F',if(tr.luokka=7,'G',if(tr.luokka=8,'H','I')))))))) as 'POKEABC',
+					(
+						SELECT korv.tuoteno
+						FROM korvaavat AS korv
+						WHERE korv.yhtio = tuote.yhtio
+						AND korv.id = korvaavat.id
+						ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+						LIMIT 1
+					) korvaavatuoteno
+					FROM tuote
+					LEFT JOIN abc_aputaulu tm ON (tm.yhtio = tuote.yhtio AND tm.tuoteno = tuote.tuoteno AND tm.tyyppi = 'TM')
+					LEFT JOIN abc_aputaulu tr ON (tr.yhtio = tuote.yhtio AND tr.tuoteno = tuote.tuoteno AND tr.tyyppi = 'TR')
+					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
+					WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+					HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
+					ORDER BY tuote.tuoteno";
 		$resto = mysql_query($qxf04) or pupe_error($qxf04);
 		$rows = mysql_num_rows($resto);
-
 		$laskuri = 0;
 
-		if ($rows == 0) {
-			echo "öö.. error, jotain jossain...\n";
-			die();
-		}
 		$fp = fopen($path_xf04, 'w+');
 
 		while ($xf04 = mysql_fetch_assoc($resto)) {
 
-     		$out 	 = sprintf("%-8.8s", $xf04['tunnus']);			//XVNDR
+			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno as ttuoteno, toimi.herminator AS toimittaja, toimi.tyyppi
+						FROM tuotteen_toimittajat
+						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+						AND tuotteen_toimittajat.tuoteno = '$xf04[tuoteno]'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$tutoq = mysql_query($query) or pupe_error($query);
+			$tuto = mysql_fetch_assoc($tutoq);
+
+			if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
+
+     		$out 	 = sprintf("%-8.8s", $tuto['toimittaja']);		//XVNDR
 			$out   	.= sprintf("%-18.18s",$xf04['tuoteno']);		//XITEM
 			$out 	.= sprintf("%-3.3s", "001");					//XWHSE
 			$out 	.= sprintf("%-4.4s","");						//XSUBV
 			$out 	.= sprintf("%-3.3s","");						//XREGON
-			$out 	.= sprintf("%-25.25s",$xf04['ttuoteno']);		//XMFGID
-			$out 	.= sprintf("%-10.10s", $xf04['yksikko']);		//XPKSIZ
+			$out 	.= sprintf("%-25.25s",$tuto['ttuoteno']);		//XMFGID
+			$out 	.= sprintf("%-10.10s",$xf04['yksikko']);		//XPKSIZ
 			$out 	.= sprintf("%-15.15s", "");						//XUPC
 			$out 	.= sprintf("%-10.10s", "");						//XTIEHI
 			$out 	.= sprintf("%07.7s", "0");						//XQRSVR
-			$out 	.= sprintf("%01.1s", "0");						//XURSVR
+			$out 	.= sprintf("%01.1s", "1");						//XURSVR
 			$out 	.= sprintf("%07.7s", "0");						//XQHELD
 			$out 	.= sprintf("%08.8s", "0");						//XOHHDT
 			$out 	.= sprintf("%01.1s", "0");						//XUHELD
 			$out 	.= sprintf("%07.7s", "0");						//XRVUNT
 			$out 	.= sprintf("%07.7s", "0");						//XCNVPK
-			$out 	.= sprintf("%03.3s", "1");						//XCNVML
-			$out 	.= sprintf("%03.3s", "1");						//XCNVBP
+			$out 	.= sprintf("%03.3s", "0");						//XCNVML
+			$out 	.= sprintf("%03.3s", "0");						//XCNVBP
 			$out 	.= sprintf("%05.5s", "1");						//XCUBDV
 			$out 	.= sprintf("%05.5s", "1");						//XWGTDV
 			$out 	.= sprintf("%05.5s", "0");						//XCASUN
@@ -437,8 +518,8 @@
 			$out 	.= sprintf("%-5.5s",substr($xf04['try'],0,1));	//XGRP1
 			$out 	.= sprintf("%-5.5s",substr($xf04['try'],1,2));	//XGRP2
 			$out 	.= sprintf("%-5.5s",substr($xf04['try'],3,6));	//XGRP3
-			$out 	.= sprintf("%-5.5s", $xf04['MYYNNINABC']);		//XGRP4
-			$out 	.= sprintf("%-5.5s",$xf04['POKEABC']);			//XGRP5
+			$out 	.= sprintf("%-5.5s",$xf04['POKEABC']);			//XGRP4 $xf04['MYYNNINABC']);
+			$out 	.= sprintf("%-5.5s",$xf04['MYYNNINABC']);		//XGRP5 $xf04['POKEABC']);
 			$out 	.= sprintf("%-5.5s","");						//XGRP6
 			$out 	.= sprintf("%0-3.3s", "0");						//XOOPNT
 
@@ -449,79 +530,123 @@
 
 			$laskuri++;
 			echo "Kasitelty $laskuri / $rows\r";
-
 		}
 
 		fclose($fp);
-		echo "\nsniffer daa.\n";
 	}
 
 	function xf01($limit = '') {
-		global $path_xf01, $yhtiorow, $yhtio, $logisticar;
+		global $path_xf01, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
-
-		echo "Ajetaan xf01...\n";
+		echo "TULOSTETAAN xf01...\n";
 
 		$Q1 = " SELECT tuote.tuoteno,
-				ROUND(sum(tuotepaikat.saldo),0) saldo
+				tuote.status,
+				(
+					SELECT korv.tuoteno
+					FROM korvaavat AS korv
+					WHERE korv.yhtio = tuote.yhtio
+					AND korv.id = korvaavat.id
+					ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+					LIMIT 1
+				) korvaavatuoteno,
+				tuote.ostoehdotus,
+				(
+					SELECT ROUND(sum(tuotepaikat.saldo),0) saldo
+					FROM tuotepaikat
+					JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+					AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					AND varastopaikat.tyyppi = '')
+					WHERE tuotepaikat.yhtio = tuote.yhtio
+					AND tuotepaikat.tuoteno = tuote.tuoteno
+				) saldo
 				FROM tuote
-				JOIN tuotepaikat on (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
-				WHERE tuote.yhtio = '$yhtio'
-				AND tuote.status != 'P'
-				group by tuoteno";
+				LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
+				WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+				GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
+				HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rests = mysql_query($Q1) or pupe_error($Q1);
 		$rows = mysql_num_rows($rests);
 		$laskuri = 0;
 
-		if ($rows == 0) {
-			echo "öö.. error, jotain jossain...\n";
-			die();
-		}
 		$fp = fopen($path_xf01, 'w+');
-
-		$Lisamaare_Ajalle ='';
-
-		$tanaan = date("Y-m-d"); // muodossa Y-m-d == 2005-10-29
 
 		while ($tuoterow = mysql_fetch_assoc($rests)) {
 
-			$toimittajaquery = "	SELECT toimittaja
+			$toimittajaquery = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
 									FROM tuotteen_toimittajat
-									WHERE tuoteno = '{$tuoterow[tuoteno]}'
-									AND yhtio = '$yhtio'
-									ORDER BY tunnus
+									JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+									WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+									AND tuotteen_toimittajat.tuoteno = '$tuoterow[tuoteno]'
+									ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
 									LIMIT 1";
 			$toimires = mysql_query($toimittajaquery) or pupe_error($toimittajaquery);
 			$toimirow = mysql_fetch_assoc($toimires);
 
-			$Q2 =	"	SELECT round(SUM(tilausrivi.kpl), 0) myyty
-						FROM tilausrivi
-						WHERE tyyppi = 'L'
-						AND tilausrivi.yhtio = '$yhtio'
-						AND tilausrivi.laskutettuaika = '$tanaan'
-						AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'";
-			$q2r = 	mysql_query($Q2) or pupe_error($Q2);
-			$myyntirow = mysql_fetch_assoc($q2r);
+			if ($toimirow['toimittaja'] == '' or $toimirow['tyyppi'] == 'P') continue;
 
-			$Q3 = 	"	SELECT round(SUM(tilausrivi.kpl),0) as tilauksessa
-						FROM tilausrivi
-						WHERE tyyppi = 'O'
-						AND tilausrivi.tuoteno = '{$tuoterow[tuoteno]}'
-						AND tilausrivi.yhtio = '$yhtio'
-						AND tilausrivi.laskutettuaika = '$tanaan'";
-			$q3r = 	mysql_query($Q3) or pupe_error($Q3);
-			$ostorow = mysql_fetch_row($q3r);
+			//Jos ostoehdotus on kyllä, siirretään myyntilukuja. Muuten ei.
+			//Myynnit vaan "normaaleist" varastoist, tsekataa vaa varastopaikat-taulusta tyyppi '':stä myydyt
+			//Jos asiakkuuksilla palautetaan tavaraa (toimittajapalautus), ei oteta niitä palautuksia myyntilukuihin mukaan. Katotaan tää kauppatapahtuman luonteella
+			if ($tuoterow['ostoehdotus'] == '') {
 
-			// tarkistetaan ettei laitetan negatiivia arvoja
-			$myyntipvm = $myyntirow['myyty'];
+				$Q2 = " 	SELECT round(SUM(tilausrivi.kpl), 0) myyty
+				        	FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+				        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND varastopaikat.tyyppi = '')
+				        	WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
+				        	AND tilausrivi.tyyppi = 'L'
+				  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
+				  			AND laskutettuaika > '0000-00-00'
+				        	AND tilausrivi.toimitettuaika = '$tanaan'";
+				$q2r =  mysql_query($Q2) or pupe_error($Q2);
+				$myyntirow = mysql_fetch_assoc($q2r);
 
-			if ($myyntipvm < 0) {
+				$Q2 = " 	SELECT round(SUM(tilausrivi.varattu), 0) myyty2
+				        	FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.kauppatapahtuman_luonne != '21')
+				        	JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivin_lisatiedot.tilausrivilinkki = '')
+							JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+							AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							AND varastopaikat.tyyppi = '')
+				        	WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
+				        	AND tilausrivi.tyyppi = 'L'
+				  			AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
+				  			AND varattu != 0
+				        	AND tilausrivi.toimitettuaika = '$tanaan'";
+				$q2r2 =  mysql_query($Q2) or pupe_error($Q2);
+				$myyntirow2 = mysql_fetch_assoc($q2r2);
+
+				// tarkistetaan ettei laitetan negatiivia arvoja
+				$myyntipvm = $myyntirow['myyty'] + $myyntirow2['myyty2'];
+				if ($myyntipvm < 0) {
+					$myyntipvm = '0';
+				}
+			}
+			else {
 				$myyntipvm = '0';
 			}
 
-			$tilauksessa = $ostorow['tilauksessa'];
+			//avoimet ostokappaleet
+			$Q3 = 	"	SELECT round(SUM(tilausrivi.varattu),0) as tilauksessa, tilausrivin_lisatiedot.tilausrivitunnus
+						FROM tilausrivi
+						#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
+						WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.tuoteno = '$tuoterow[tuoteno]'
+						AND tilausrivi.laskutettuaika = '0000-00-00'
+						HAVING tilausrivin_lisatiedot.tilausrivitunnus is null";
+			$q3r = 	mysql_query($Q3) or pupe_error($Q3);
+			$ostorow = mysql_fetch_assoc($q3r);
 
+			$tilauksessa = $ostorow['tilauksessa'];
 			if ($tilauksessa < 0) {
 				$tilauksessa = '0';
 			}
@@ -534,13 +659,11 @@
 			$out 	  = sprintf("%-8.8s",	$toimirow['toimittaja']);			//XVNDR
 			$out 	 .= sprintf("%-18.18s",	$tuoterow['tuoteno']);				//XITEM
 			$out 	 .= sprintf("%-3.3s",	"001");								//XWHSE
-			$out 	 .= sprintf("%07.7s",	$tuoterow['saldo']);				//XONHD
-			$out 	 .= sprintf("%07.7s",	$tilauksessa);						//XOORD
+			$out 	 .= sprintf("%07.7s",	$saldo);							//XONHD
+			$out 	 .= sprintf("%07.7s",	$tilauksessa);						//XOORD (varasto.saapunut)
 			$out 	 .= sprintf("%07.7s",	"0");								//XBACK
 			$out 	 .= sprintf("%07.7s",	$myyntipvm);						//Päivänmyynti	//XSHIP
 			$out 	 .= sprintf("%07.7s",	"0");								//XLOST
-
-			//echo $out."\n";
 
 			if (!fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
@@ -552,109 +675,113 @@
 		}
 
 		fclose($fp);
-		echo "\nmelkein valmis.\n";
 	}
 
 	function xf02($limit = '') {
-		global $path_xf02, $yhtiorow, $yhtio, $logisticar;
+		global $path_xf02, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
 
-		$where_logisticar = $logisticar[$yhtio]["where"];
+		echo "TULOSTETAAN xf02...\n";
 
-		echo "Ajetaan xf02...\n";
-
-		$kyselyxfo2 = " SELECT tuote.tuoteno org_tuoteno,
-						round(tuotteen_toimittajat.osto_era,0) ostokpl,
-						round((abc_aputaulu.summa / abc_aputaulu.kpl),4) as KAhinta,
-						tuote.tuotemassa,
-						tuote.tuotekorkeus ,
-						tuote.tuoteleveys ,
-						tuote.tuotesyvyys ,
-						round(((tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys)/1000000000),4) as tilavuus,
+		$kyselyxfo2 = " SELECT tuote.tuoteno,
+						tuote.tuotekorkeus,
+						tuote.tuoteleveys,
+						tuote.tuotesyvyys,
 						tuote.nimitys,
-						tuote.status status,
+						tuote.status,
+						tuote.suoratoimitus,
 						tuote.epakurantti25pvm epakura,
-						tuotteen_toimittajat.valuutta
-						FROM tuote
-						JOIN tuotteen_toimittajat ON (tuote.yhtio=tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-						JOIN abc_aputaulu on (abc_aputaulu.yhtio=tuote.yhtio AND tuote.tuoteno=abc_aputaulu.tuoteno AND abc_aputaulu.tyyppi='TM')
-						WHERE tuote.status !='P' AND tuote.yhtio='$yhtio'
+						tuote.ostoehdotus,
+						(
+							SELECT korv.tuoteno
+							FROM korvaavat AS korv
+							WHERE korv.yhtio = tuote.yhtio
+							AND korv.id = korvaavat.id
+							ORDER BY if(korv.jarjestys = 0, 9999, korv.jarjestys), korv.tuoteno
+							LIMIT 1
+						) korvaavatuoteno,
+						round((abc_aputaulu.summa / abc_aputaulu.kpl),4) as KAhinta,
+						round(tuote.tuotemassa,3) tuotemassa,
+						round(((tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys)/1000000000),4) as tilavuus
+						FROM tuote use index (tuoteno_index)
+						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
+						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
+						WHERE tuote.yhtio='$yhtiorow[yhtio]' $tuoterajaukset
+						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
+						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";
 		$rests = mysql_query($kyselyxfo2) or pupe_error($kyselyxfo2);
 		$rows = mysql_num_rows($rests);
 		$laskuri = 0;
 
-		if ($rows == 0) {
-			echo "öö.. error, jotain jossain...\n";
-			die();
-		}
 		$fp = fopen($path_xf02, 'w+');
-
-		/*
-		$valuuttaQ = "SELECT nimi, kurssi FROM valuu WHERE nimi = '{$xf02['valuutta']}'";
-		$resaluutta = mysql_query($valuuttaQ) or pupe_error($valuuttaQ);
-		$valurow = mysql_fetch_assoc($resaluutta);
-		*/
 
 		while ($xf02 = mysql_fetch_assoc($rests)) {
 
-			$kysely_toimittajista = "	SELECT tuote.tuoteno,
-					(SELECT tuotteen_toimittajat.toimittaja
-					FROM tuotteen_toimittajat
-					WHERE tuotteen_toimittajat.tuoteno=tuote.tuoteno
-					AND tuote.yhtio=tuotteen_toimittajat.yhtio ORDER BY tuotteen_toimittajat.tunnus LIMIT 1) AS toimittaja,
-					(SELECT round(tuotteen_toimittajat.ostohinta,4)
-					FROM tuotteen_toimittajat
-					WHERE tuotteen_toimittajat.tuoteno=tuote.tuoteno
-					AND tuote.yhtio=tuotteen_toimittajat.yhtio ORDER BY tuotteen_toimittajat.tunnus LIMIT 1) as ostohinta
-				FROM tuote
-				JOIN tuotteen_toimittajat ON(tuotteen_toimittajat.yhtio=tuote.yhtio AND tuotteen_toimittajat.tuoteno=tuote.tuoteno)
-				WHERE tuote.yhtio='$yhtio'
-				AND tuote.status !='P'
-				AND tuote.tuoteno = '{$xf02['org_tuoteno']}'
-				ORDER BY 1";
-			$rest_toimittajista = mysql_query($kysely_toimittajista) or pupe_error($kysely_toimittajista);
+			$query = "	SELECT toimi.herminator AS toimittaja, round(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)),4) ostohinta, round(tuotteen_toimittajat.pakkauskoko,0) ostokpl, tuotteen_toimittajat.valuutta, toimi.tyyppi
+						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+						AND tuotteen_toimittajat.tuoteno = '$xf02[tuoteno]'
+						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
+						LIMIT 1";
+			$rest_toimittajista = mysql_query($query) or pupe_error($query);
 			$toim_row = mysql_fetch_assoc($rest_toimittajista);
+			if ($toim_row['toimittaja'] == '' or $toim_row['tyyppi'] == 'P') continue;
+
+			$valuuttaQ = "SELECT kurssi FROM valuu WHERE nimi = '$toim_row[valuutta]' AND yhtio='$yhtiorow[yhtio]' limit 1";
+			$resaluutta = mysql_query($valuuttaQ) or pupe_error($valuuttaQ);
+			$rowstest = mysql_num_rows($resaluutta);
+
+			if ($rowstest == 0) {
+				$valurow['kurssi'] = '1';
+			}
+			else {
+				$valurow = mysql_fetch_assoc($resaluutta);
+			}
 
 			$tilavuus = $xf02['tilavuus'];
-			$ostonetto = $toim_row['ostohinta'];
+
+			if ($toim_row['ostohinta'] > '0') $ostonetto = sprintf("%01.4f", round($toim_row['ostohinta'] / $valurow['kurssi'], 4));
+			elseif ($ostonetto < 0) $ostonetto = 999999999;
+			else $ostonetto = '0';
+
 			$KA_myynti_hinta = $xf02['KAhinta'];
-			$tuotestatus = $xf02['status'];
 
 			if ($tilavuus > 99) {$tilavuus = '9999999';} else {$tilavuus = $tilavuus*1000; $tilavuus = str_replace('.','',$tilavuus);}
-			if ($ostonetto < 0 ) {$ostonetto = 999999999;}
-			/// lisätään valuuttamuunnos jos on tarpeen. toistaiseksi yhtään riviä ei ole tullut vastaan jossa olisi ostettu muulla valuutalla kuin euroilla.
 
 			if ($KA_myynti_hinta == '') {
 				if ($ostonetto == 999999999) { $KA_myynti_hinta = 999999999; }
 				else {$KA_myynti_hinta = sprintf("%.4f",$ostonetto * 1.30);  }
 			}
 
-			if ($tuotestatus == 'T') {
-				$tuotestatus = 'M';
+			if ($xf02['status'] == 'T') {
+				$tuotestatus = 'M';										//tehdastoimitustuotteet
 			}
-			if ($xf02['epakura'] != 0) {
-				$tuotestatus = 'D';
+			elseif ($xf02['ostoehdotus'] == 'E') {
+				$tuotestatus = 'D';										//ostoehdotus=no tuotteet tänne
 			}
 			else {
 				$tuotestatus = 'R';
 			}
 
-			$out  = sprintf("%-8.8s",	$toim_row['toimittaja']);	   				 //XVNDR
-			$out .= sprintf("%-18.18s",	$xf02['org_tuoteno']);   	   				 //XITEM
-			$out .= sprintf("%-3.3s",	"001");   					   				 //XWHSE
-			$out .= sprintf("%013.13s",	str_replace('.','',$ostonetto));   			 //XPCHP
+			if ($toim_row['ostokpl'] == '0') $toim_row['ostokpl'] = '1';
+
+			$out  = sprintf("%-8.8s",	$toim_row['toimittaja']);	   				//XVNDR
+			$out .= sprintf("%-18.18s",	$xf02['tuoteno']);		   	   				//XITEM
+			$out .= sprintf("%-3.3s",	"001");   					   				//XWHSE
+			$out .= sprintf("%013.13s",	str_replace('.','',$ostonetto));   			//XPCHP
 			$out .= sprintf("%013.13s",	str_replace('.','',$KA_myynti_hinta));   	//XSLSP
-			$out .= sprintf("%07.7s",	$xf02['ostokpl']);   		   				 //XPACK
-			$out .= sprintf("%07.7s",	"1");   					   				 //XMINQ
+			$out .= sprintf("%07.7s",	$toim_row['ostokpl']);   		   			//XPACK
+			$out .= sprintf("%07.7s",	"1");   					   				//XMINQ
 			$out .= sprintf("%07.7s",	str_replace('.','',$xf02['tuotemassa']));   //XWGHT
 			$out .= sprintf("%07.7s",	$tilavuus);				  				  	//XVOLM
-			$out .= sprintf("%-35.35s",	$xf02['nimitys']);   	  				  	//XNAME
+			$out .= sprintf("%-35.35s",	trim($xf02['nimitys']));   	  				//XNAME
 			$out .= sprintf("%-2.2s",	"");   					  				  	//XUOMS
 			$out .= sprintf("%-1.1s",	$tuotestatus);   					  		//XDWO
 			$out .= sprintf("%-18.18s",	"");   					  				  	//XSEQ#
 			$out .= sprintf("%-1.1s",	"");   					  				  	//XDELET
 
-			if (!fwrite($fp, $out . "\n")) {
+			if (! fwrite($fp, $out . "\n")) {
 				echo "Failed writing row.\n";
 				die();
 			}
@@ -663,8 +790,12 @@
 			echo "Kasitelty $laskuri / $rows\r";
 		}
 
+		if (! fwrite($fp, $xf02loppulause . "\n")) {
+			echo "Failed writing row.\n";
+			die();
+		}
+
 		fclose($fp);
-		echo "melkein valmis.\n";
 	}
 
 	function create_headers($fp, array $cols) {

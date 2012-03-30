@@ -204,6 +204,9 @@ if (!function_exists('alku_kerayslista')) {
 			elseif ($tyyppi == "REKLAMAATIO") {
 				$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
 			}
+			elseif ($tyyppi == "MYYNTITILI") {
+				$pdf->draw_text(310,815, t("Myyntitili", $kieli), 		$thispage, $iso);
+			}
 			else {
 				$pdf->draw_text(310,815, t("Keräyslista", $kieli), 		$thispage, $iso);
 			}
@@ -325,8 +328,13 @@ if (!function_exists('alku_kerayslista')) {
 			}
 
 			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
+
+			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
 			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 	$thispage, $pieni);
-			$pdf->draw_text(310, 677, $laskurow["toimitusehto"], 	$thispage, $norm);
+			$pdf->draw_text(310, 677, $toimehto, 					$thispage, $norm);
 
 			$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 			$pdf->draw_text(310, 666, t("Maksuehto", $kieli), 		$thispage, $pieni);
@@ -396,6 +404,11 @@ if (!function_exists('alku_kerayslista')) {
 
 			if (trim($laskurow['sisviesti2']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
+			}
+
+			// Jos keräyslistat/lähetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan
+			if (trim($laskurow['clearing']) == 'JT-TILAUS' and $yhtiorow["lahetteen_tulostustapa"] != "K" and $yhtiorow["lahetteen_tulostustapa"] != "L") {
+				$komm .= "\n*** ".t("JÄLKITOIMITUS")." ***";
 			}
 
 			//Tulostetaan laskun kommentti
@@ -531,6 +544,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		}
 		elseif ($tyyppi == "REKLAMAATIO") {
 			$pdf->draw_text(310,815, t("Reklamaatio/Purkulista", $kieli), 		$thispage, $iso);
+		}
+		elseif ($tyyppi == "MYYNTITILI") {
+			$pdf->draw_text(310,815, t("Myyntitili", $kieli), 				$thispage, $iso);
 		}
 		else {
 			$pdf->draw_text(310,815, t("Keräyslista", $kieli), 				$thispage, $iso);
@@ -950,7 +966,7 @@ if (!function_exists('rivi_kerayslista')) {
 						$pdf->draw_text(465-$oikpos, $kala, $rivipaikkahyllyssa,	$thispage, $norm);
 					}
 
-					if ($tyyppi == "SIIRTOLISTA") {
+					if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 						list(, $kohde_hyllyssa, ) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["clearing"]);
 					}
 				}
@@ -985,7 +1001,7 @@ if (!function_exists('rivi_kerayslista')) {
 				list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
 				$pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 
-				if ($tyyppi == "SIIRTOLISTA") {
+				if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 					$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 	$thispage, $norm);
 				}
 
@@ -1025,7 +1041,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 				//Haetan sarjanumeron tiedot
 				if ($row["sarjanumeroseuranta"] != "") {
-					if ($tyyppi == "SIIRTOLISTA") {
+					if ($tyyppi == "SIIRTOLISTA" or $tyyppi == "MYYNTITILI") {
 						$sarjanutunnus = "siirtorivitunnus";
 					}
 					elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
@@ -1271,6 +1287,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				$kutsu = t("Reklamaatio/Purkulista", $kieli);
 				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 			}
+			elseif ($tyyppi == "MYYNTITILI") {
+				$kutsu = t("Myyntitili", $kieli);
+				echo t("Myyntitili tulostuu")."...<br>";
+			}
 			else {
 				$kutsu = t("Keräyslista", $kieli).": $laskurow[tunnus]";
 				echo t("Keräyslista tulostuu")."...<br>";
@@ -1305,6 +1325,10 @@ if (!function_exists('print_pdf_kerayslista')) {
 				elseif ($tyyppi == "REKLAMAATIO") {
 					$kutsu = t("Reklamaatio/Purkulista", $kieli);
 					echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
+				}
+				elseif ($tyyppi == "MYYNTITILI") {
+					$kutsu = t("Myyntitili", $kieli);
+					echo t("Myyntitili tulostuu")."...<br>";
 				}
 				else {
 					$kutsu = t("Keräyslista", $kieli);

@@ -16,7 +16,7 @@ if($tee == "perusta_uusi") {
 			echo "<font class='message'>".t("Kansio perustettu")."</font>";
 		}
 		else {
-			echo "<font class='error'>".t("Virhe!")." ".t($retval)."</font>";
+			echo "<font class='error'>".t("VIRHE:")." ".t($retval)."</font>";
 		}
 	}
 	else {
@@ -34,7 +34,7 @@ if($tee == "sulje") {
 			echo "<font class='message'>".t("Kansio siirretty")."</font>";
 		}
 		else {
-			echo "<font class='error'>".t("Virhe!")." ".t($retval)."</font>";
+			echo "<font class='error'>".t("VIRHE:")." ".t($retval)."</font>";
 		}
 	}
 	else {

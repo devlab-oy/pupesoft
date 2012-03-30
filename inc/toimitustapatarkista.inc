@@ -3,9 +3,9 @@
 if(!function_exists("toimitustapatarkista")) {
 	function toimitustapatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
-		
+
 		static $aputulostustapa, $apuvakkielto;
-		
+
 		if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
 			if (!file_exists("tilauskasittely/".$t[$i])) {
 				$virhe[$i] = "".t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
@@ -17,12 +17,6 @@ if(!function_exists("toimitustapatarkista")) {
 			$aputulostustapa = $t[$i];
 			if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L' and $t[$i]!='X') {
 				$virhe[$i] = t("Virheellinen tulostustapa")."!";
-			}
-		}
-
-		if ((mysql_field_name($result, $i)=="multi_jv") and ($t[$i]!='')) {
-			if ($aputulostustapa == 'H' and $t[$i] != '') {
-				$virhe[$i] = "".t("Multi-jälkivaatimus toimii vain erärahtikirjoissa")."!";
 			}
 		}
 
@@ -75,22 +69,23 @@ if(!function_exists("toimitustapatarkista")) {
 				echo "ja ".mysql_affected_rows()." ".t("tulostamatonta rahtikirjaa").".</font><br><br>";
 			}
 		}
-		
-		if ((mysql_field_name($result, $i)=="vak_kielto")) {
+
+		if ((mysql_field_name($result, $i) == "vak_kielto")) {
 			$apuvakkielto  = $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "rahti_tuotenumero") {
+		if (mysql_field_name($result, $i) == "rahti_tuotenumero" OR
+			mysql_field_name($result, $i) == "kuljetusvakuutus_tuotenumero") {
 
-			$tuote = trim($t[$i]);
+			$tuote = mysql_real_escape_string(trim($t[$i]));
 
-			// katotaan löytyykö tällänen saldoton tuote
 			if ($tuote != "") {
-
-				$query = "	SELECT *
+				// katotaan löytyykö tällänen saldoton tuote
+				$query = "	SELECT tunnus
 							FROM tuote
 							WHERE yhtio	= '$kukarow[yhtio]'
 							AND tuoteno = '$tuote'
+							AND tuoteno != ''
 							AND ei_saldoa != ''";
 				$xyresult = mysql_query($query) or pupe_error($query);
 
@@ -112,7 +107,6 @@ if(!function_exists("toimitustapatarkista")) {
 				}
 			}
 		}
-
 	}
 }
 

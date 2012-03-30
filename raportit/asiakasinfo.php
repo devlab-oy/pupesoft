@@ -40,7 +40,7 @@ if ($kukarow["extranet"] != "") {
 		$asiakasid = $asiakasrow["tunnus"];
 	}
 	else {
-		echo t("<font class='error'>VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."</font><br><br>";
+		echo "<font class='error'>".t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n")."!</font><br><br>";
 		exit;
 	}
 }
@@ -195,17 +195,18 @@ if ($kukarow["extranet"] == "" and $ytunnus != '') {
 if ($asiakasid > 0) {
 
 	// KAUTTALASKUTUSKIKKARE
-	if ($GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
-		unset($GLOBALS['eta_yhtio']);
+	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
+		$GLOBALS['eta_yhtio'] = "";
 	}
 
-	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
+	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
 		$asiakas_yhtio = $GLOBALS['eta_yhtio'];
 
 		// Toisen firman asiakastiedot
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '{$asiakas_yhtio}'
+					AND laji != 'P'
 					AND ytunnus = '{$asiakasrow['ytunnus']}'
 					AND toim_ovttunnus = '{$asiakasrow['toim_ovttunnus']}'";
 		$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
@@ -217,15 +218,12 @@ if ($asiakasid > 0) {
 
 	// haetaan asiakkaan segmentit
 	$query = "	SELECT group_concat(parent.tunnus) tunnukset
-   				FROM dynaaminen_puu AS node
-   				JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
-   				JOIN puun_alkio on (puun_alkio.yhtio = node.yhtio and puun_alkio.puun_tunnus = node.tunnus)
-   				JOIN asiakas on (asiakas.yhtio = node.yhtio and asiakas.tunnus = puun_alkio.liitos)
-   				WHERE asiakas.tunnus = '$asiakasrow[tunnus]'
-				AND asiakas.yhtio = '$kukarow[yhtio]'
-   				AND node.laji = parent.laji =  puun_alkio.laji = 'asiakas'
-   				AND parent.lft > 1
-   				HAVING tunnukset IS NOT NULL";
+   				FROM puun_alkio
+				JOIN dynaaminen_puu AS node ON (node.yhtio = puun_alkio.yhtio AND node.tunnus = puun_alkio.puun_tunnus AND node.laji = puun_alkio.laji)
+   				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 1)
+   				WHERE puun_alkio.yhtio 	= '$kukarow[yhtio]'
+				AND puun_alkio.laji 	= 'asiakas'
+				AND puun_alkio.liitos 	= '$asiakasrow[tunnus]'";
 	$almight = mysql_query($query) or pupe_error($query);
 
 	$alehi_assegmenttirow = mysql_fetch_assoc($almight);

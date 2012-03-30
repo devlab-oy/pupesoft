@@ -910,6 +910,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Yhtiön/toimitustavan oletus")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ei kuljetusvakuutusta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "laskutyyppi") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -1093,6 +1108,21 @@
 
 		$ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
 		$ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'maksukehotuksen_osoitetiedot') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Käytetään asiakkaan virallista osoitetta")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Käytetään asiakkaan laskutusosoitetta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

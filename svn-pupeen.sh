@@ -55,7 +55,8 @@ read jatketaanko
 if [ "$jatketaanko" = "k" ]; then
 	cd $pupedir
 	git checkout .             # revertataan kaikki local muutokset
-	git pull origin master     # paivitetaan aina varmasti master branchi
+	git checkout master        # varmistetaan, etta on master branchi kaytossa
+	git pull origin master     # paivitetaan master branchi
 	echo "Pupesoft paivitetty!"
 else
 	echo "Pupesoftia ei paivitetty!"

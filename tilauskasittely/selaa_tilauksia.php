@@ -48,11 +48,11 @@
 
 	$etsi = '';
 
-	if (is_string($haku)) {
+	if (is_string($haku) and trim($haku) != "") {
 		$etsi = "and (lasku.nimi LIKE '%$haku%' or lasku.toim_nimi LIKE '%$haku%') ";
 	}
 
-	if (is_numeric($haku)) {
+	if (is_numeric($haku) and trim($haku) != "") {
 		$etsi = "and lasku.ytunnus LIKE '%$haku%' ";
 	}
 
@@ -72,28 +72,28 @@
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
-					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and
-					tila in ('L') and
-					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 00:00:00'
+					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'L'
+					and lasku.luontiaika >= '$vv-$kk-01 00:00:00'
+					and lasku.luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
-					ORDER BY luontiaika";
+					ORDER BY pvm";
 
 		// päivänäkymä
 		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
-					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and
-					tila in ('L') and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
-					luontiaika <= '$vv-$kk-$pp 23:59:59'
+					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'L'
+					and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00'
+					and lasku.luontiaika <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY lasku.tunnus";
 
 		// tilausnäkymä
 		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, concat(nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
@@ -101,9 +101,9 @@
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
-					tyyppi != 'D' and
-					otunnus = '$tunnus'
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi != 'D'
+					and tilausrivi.otunnus = '$tunnus'
 					ORDER BY tilausrivi.tunnus";
 	}
 
@@ -356,7 +356,7 @@
 		echo "</tr>";
 		echo "</table>";
 
-		echo "</form>";
+		echo "</form><br>";
 	}
 
 	if (mysql_num_rows($result) > 0) {
@@ -397,7 +397,7 @@
 		}
 
 		// katotaan löytyykö oikeuksia vaihda_tilaan... tätä käytetään tuolla whilen sisällä
-		$oikeuquery = "select * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
+		$oikeuquery = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
 		$apuoikeures = mysql_query($oikeuquery) or pupe_error($oikeuquery);
 
 		while ($row = mysql_fetch_array($result)) {
@@ -453,7 +453,7 @@
 			if ($toim == "MYYNTI" and $tee == "paiva" and mysql_num_rows($apuoikeures) > 0) {
 
 				// haetaan tässä keisissä vielä tila ja alatila
-				$aputilaquery = "select tila, alatila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
+				$aputilaquery = "SELECT tila, alatila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
 				$aputilares = mysql_query($aputilaquery) or pupe_error($aputilaquery);
 				$tila_row = mysql_fetch_array($aputilares);
 
@@ -469,8 +469,6 @@
 			}
 
 			echo "</tr>";
-
-
 		}
 
 		if ($arvo != 0 or $summa != 0) {
@@ -482,6 +480,7 @@
 			echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
 			echo "<th align='right'>".sprintf('%.02f',$summa)."</td>";
 			echo "<th align='right'>".sprintf('%.02f',$arvo)."</td>";
+
 			if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
 				echo "<th align='right'>&nbsp;</td>";
 				echo "<th align='right'>&nbsp;$ostohinta_yhteesa</td>";
@@ -502,4 +501,5 @@
 	}
 
 	require ("inc/footer.inc");
+
 ?>

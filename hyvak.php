@@ -900,7 +900,7 @@
 			$tarkres = pupe_query($query);
 
 			if (mysql_num_rows($tarkres) != 0) {
-				echo "<br><font class = 'error'>".t("HUOM! Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
+				echo "<br><font class = 'error'>".t("HUOM: Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
 
 				while ($tarkrow = mysql_fetch_assoc($tarkres)) {
 					echo "<tr><td class='back'>$tarkrow[summa] $tarkrow[valkoodi]</td><td class='back'>$tarkrow[kuka]</td><td class='back'><a href='muutosite.php?tee=E&tunnus=$tarkrow[tunnus]'>".t("Avaa lasku")."</a></td>";
@@ -1159,7 +1159,7 @@
 						if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
 							$query = "	SELECT parent.tunnus tunnus
 										FROM dynaaminen_puu AS node
-										JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+										JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 										JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
 										WHERE node.tunnus IN ($hierarkia)
 										AND node.laji = 'kuka'
@@ -1219,7 +1219,7 @@
 					if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
 						$query = "	SELECT parent.tunnus tunnus
 									FROM dynaaminen_puu AS node
-									JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
 									JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
 									WHERE node.tunnus IN ($hierarkia)
 									AND node.laji = 'kuka'
@@ -1607,7 +1607,7 @@
 				list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
 
 				if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
-					if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+					if (count($purchaseorder_ei_loydy) == 0 and count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
 						$ok = 'ok';
 
 						foreach ($loytyy_kummastakin as $tuoteno => $null) {

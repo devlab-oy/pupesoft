@@ -4,7 +4,7 @@ if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi, $tmp_ultilno_maa;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
@@ -29,6 +29,10 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "nimi") {
 			$tmp_nimi = $t[$i];
+		}
+
+		if (mysql_field_name($result, $i) == "ultilno_maa") {
+			$tmp_ultilno_maa = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != "") {
@@ -57,7 +61,7 @@ if(!function_exists("toimitarkista")) {
 						require 'pankkitilinoikeellisuus.php';
 
 						if ($pankkitili == '') {
-							$virhe[$i] = t("Pankkitili '%s' on virheellinen", "", $t[$i]);
+							$virhe[$i] = t("Pankkitili %s on virheellinen", "", $t[$i]);
 						}
 						else {
 							$t[$i]=$pankkitili;
@@ -84,8 +88,11 @@ if(!function_exists("toimitarkista")) {
 			// Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
 
+			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
+			else $ibanmaa = $tmp_maakoodi;
+
 			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($tmp_maakoodi) and tarkista_iban($t[$i]) != $t[$i]) {
+			if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
 				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
 				$errori = 1;
 			}
@@ -112,8 +119,11 @@ if(!function_exists("toimitarkista")) {
 			// Vaaditaan isot kirjaimet
 			$t[$i] = trim(strtoupper($t[$i]));
 
+			if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
+			else $ibanmaa = $tmp_maakoodi;
+
 			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($tmp_maakoodi) and tarkista_bic($t[$i]) === FALSE) {
+			if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
 				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
 				$errori = 1;
 			}

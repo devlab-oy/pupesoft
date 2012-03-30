@@ -1,4 +1,5 @@
 <?php
+
 	require ("inc/parametrit.inc");
 
 	if ($toim == "vastaavat") {
@@ -43,7 +44,11 @@
 		$id		= $row['id'];
 
 		//muutetaan prio..
-		$query  = "UPDATE $taulu SET jarjestys = '$prio' WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+		$query  = "		UPDATE $taulu SET
+						jarjestys = '$prio',
+						muutospvm = now(),
+						muuttaja = '$kukarow[kuka]'
+						WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 		//näytetään silti loput.. kilttiä.
@@ -91,25 +96,29 @@
 				$id 	= $row[0]+1;
 
 				//lisätään "isä tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$id', '$tuoteno', '$kukarow[yhtio]')";
+				$query  = "	INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 
 				// lisätään korvaava tuote...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$id', '$korvaava', '$kukarow[yhtio]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$id', '$korvaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
 			//lapsi on löytynyt, isää ei
 			if (($cid != "") and ($fid == "")) {
 				//lisätään "isä tuote"...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
 			//isä on löytynyt, lapsi ei
 			if (($fid != "") and ($cid == "")) {
 				//lisätään korvaava...
-				$query  = "INSERT INTO $taulu (id, tuoteno, yhtio) VALUES ('$fid', '$korvaava', '$kukarow[yhtio]')";
+				$query  = " INSERT INTO $taulu (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+							VALUES ('$fid', '$korvaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
 				$result = pupe_query($query);
 			}
 
@@ -161,7 +170,7 @@
 			$row    = mysql_fetch_array($result);
 			$id		= $row['id'];
 
-			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+			$query = "SELECT * FROM $taulu WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 999, jarjestys), tuoteno";
 			$result = pupe_query($query);
 
 			echo "<br><table>";

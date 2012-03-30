@@ -25,7 +25,7 @@
 	$komento		= "";
 
 	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ";
+	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ, tilausrivin_lisatiedot READ, hinnasto READ, puun_alkio READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, asiakashinta READ, asiakashinta AS ashin1 READ, asiakashinta AS ashin2 READ, asiakasalennus READ, asiakasalennus asale1 READ, asiakasalennus asale2 READ, perusalennus READ";
 
 	if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 		$query .= ", keraysvyohyke READ, varaston_hyllypaikat AS vh READ, kerayserat READ";
@@ -98,7 +98,7 @@
 
 			if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 
-			// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+			// Summataan rivit yhteen (HUOM: unohdetaan kaikki perheet!)
 			if ($yhtiorow["valmistus_kerayslistan_jarjestys"] == "S") {
 				$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
 				$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
@@ -131,7 +131,7 @@
 
 				if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 
-				// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+				// Summataan rivit yhteen (HUOM: unohdetaan kaikki perheet!)
 				if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
 					$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
 					$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
@@ -291,6 +291,21 @@
 			//tulostetaan sivu
 			$params_kerayslista["komento"] = $komento;
 			print_pdf_kerayslista($params_kerayslista);
+
+			// jos halutaan MYÖS lähete
+			if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+				$params = array(
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> "",
+					'extranet_tilausvahvistus'	=> "",
+					'naytetaanko_rivihinta'		=> "",
+					'tee'						=> "",
+					'toim'						=> $toim,
+					'query_ale_lisa'			=> "",
+					'komento'					=> $komento
+					);
+				pupesoft_tulosta_lahete($params);
+			}
 
 			$returnvalue = 0;
 		}

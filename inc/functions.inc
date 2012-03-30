@@ -14332,7 +14332,7 @@ if (!function_exists("tee_keraysera")) {
 					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					UNION
 					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
-					(TIME_TO_SEC(TIMEDIFF(999999999999, CURTIME())) / 60) as erotus,
+					0 as erotus,
 					keraysvyohyke2.tunnus AS ker_tunnus,
 					lasku2.h1time,
 					lasku2.ohjausmerkki,

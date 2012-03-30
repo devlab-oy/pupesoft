@@ -93,6 +93,11 @@
 				$eiketjut = "KYLLA";
 			}
 
+			// jos komentorivin kolmas arg on "kaikki"
+			if ($argv[3] == "kaikki") {
+				$laskutakaikki = "ON";
+			}
+
 			$tee = "TARKISTA";
 		}
 		else {
@@ -2324,11 +2329,11 @@
 								if ($rivilaskuri < $rivimaara) {
 									$tilrow_seuraava = mysql_fetch_assoc($tilres);
 									mysql_data_seek($tilres, $rivilaskuri);
-									
+
 									if ($tilrow_seuraava['tuoteno'] == $yhtiorow["kuljetusvakuutus_tuotenumero"] or $tilrow_seuraava['tuoteno'] == $yhtiorow["laskutuslisa_tuotenumero"]) {
 										$tilrow['seuraava_otunnus'] = 0;
 									}
-									else {									
+									else {
 										$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
 									}
 								}

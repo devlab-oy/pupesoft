@@ -1,6 +1,6 @@
 <?php
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
+	if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
 
 		js_popup();
@@ -46,7 +46,7 @@
 	if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
 		require_once("inc/unifaun_send.inc");
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
+		if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
 			echo "	<script type='text/javascript' language='JavaScript'>
 						$(document).ready(function() {
 
@@ -2091,7 +2091,7 @@
 		}
 	}
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
+	if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
 		if ($id == '') {
 			$id = 0;
 			if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {

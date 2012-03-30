@@ -7,7 +7,7 @@ $query = "	SELECT *
 			FROM asiakas
 			WHERE yhtio = '$kukarow[yhtio]'
 			AND tunnus = '$laskurow[liitostunnus]'";
-$tilvahresult = mysql_query($query) or pupe_error($query);
+$tilvahresult = pupe_query($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
 $kieli = strtolower($tilvahasiakas['kieli']);
@@ -20,10 +20,11 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
 	$query = "	SELECT *
 				FROM yhteyshenkilo
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE yhtio 	 = '$kukarow[yhtio]'
 				AND liitostunnus = '$laskurow[liitostunnus]'
-				AND nimi = '$laskurow[tilausyhteyshenkilo]'";
-	$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
+				AND nimi 		 = '$laskurow[tilausyhteyshenkilo]'
+				and tyyppi		 = 'A'";
+	$yhteyshenkiloresult = pupe_query($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
 	if ($yhteyshenkiloasiakas['email'] != '') {
@@ -79,7 +80,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -97,7 +98,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -126,6 +127,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
+	
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
@@ -137,14 +145,15 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[myyja]'";
-	$kresult = mysql_query($query) or pupe_error($query);
+	$kresult = pupe_query($query);
 
 	$krow = mysql_fetch_array($kresult);
 
@@ -178,7 +187,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 						$tyyppilisa
 						and otunnus IN ($laskurow[nippu])
 						and toimaika != '0000-00-00'";
-			$toimaikares = mysql_query($query) or pupe_error($query);
+			$toimaikares = pupe_query($query);
 
 			if (mysql_num_rows($toimaikares) > 1) {
 				$useita = "JOO";
@@ -202,10 +211,15 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli))		.t("Toimitusaika", $kieli).": ".$taika."\n";
-		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ". $tulostettava_tunnus)			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
-		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$laskurow['toimitusehto'])."\n";
+
+		$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+		if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+		else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
+		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$toimehto)."\n";
 
 		if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
@@ -385,13 +399,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		unset($boob);
-		$boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 
 	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		unset($boob);
-		$boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 }

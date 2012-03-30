@@ -252,13 +252,7 @@
 					$jtkielto 		 = $laskurow['jtkielto'];
 					$varataan_saldoa = "";
 					$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
-
-					if ($tilpaikka[$yht_i] != '') {
-						$paikka	= $tilpaikka[$yht_i];
-					}
-					else {
-						$paikka	= "";
-					}
+					$paikka			 = "";
 
 					// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
 					if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
@@ -768,7 +762,7 @@
 		$submit_button = '';
 	}
 
-	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen["tuote"] != '' or $lisa_parametri != '')) {
+	if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
 		$tuotekyslinkki = "";
 
@@ -813,6 +807,10 @@
 							tuote.ei_saldoa,
 							tuote.yksikko,
 							tuote.tunnus,
+							tuote.epakurantti25pvm,
+							tuote.epakurantti50pvm,
+							tuote.epakurantti75pvm,
+							tuote.epakurantti100pvm,
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 							tuote.sarjanumeroseuranta
 							FROM {$tvk_taulu}
@@ -851,6 +849,10 @@
 								tuote.ei_saldoa,
 								tuote.yksikko,
 								tuote.tunnus,
+								tuote.epakurantti25pvm,
+								tuote.epakurantti50pvm,
+								tuote.epakurantti75pvm,
+								tuote.epakurantti100pvm,
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
 								tuoteperhe.tyyppi
@@ -893,12 +895,15 @@
 					tuote.ei_saldoa,
 					tuote.yksikko,
 					tuote.tunnus,
+					tuote.epakurantti25pvm,
+					tuote.epakurantti50pvm,
+					tuote.epakurantti75pvm,
+					tuote.epakurantti100pvm,
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status
 					FROM tuote use index (tuoteno, nimitys)
 					$lisa_parametri
-					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$kieltolisa
 					$lisa
@@ -1270,7 +1275,6 @@
 			}
 
 			$isan_kuva = '';
-
 			foreach ($rows as &$row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
@@ -1355,6 +1359,10 @@
 				if ($hae_ja_selaa_row['selite'] != 'B' and $verkkokauppa == "" and strtoupper($row["status"]) == "P") {
 					$vari = "tumma";
 					$row["nimitys"] .= "<br> * ".t("Poistuva tuote");
+				}
+
+				if ($yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00)) {
+					$vari = 'spec';
 				}
 
 				$tuotteen_lisatiedot = tuotteen_lisatiedot($row["tuoteno"]);
@@ -1628,20 +1636,15 @@
 
 							$ei_tyhja = "";
 
-							if ($hae_ja_selaa_row['selite'] == 'B' and $row['ei_saldoa'] != '') {
-								echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='green'>".t("Saldoton")."</font></td></tr>";
+							foreach ($saldot as $varaso => $saldo) {
+								if ($saldo != 0) {
+									$ei_tyhja = 'yes';
+									echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+								}
 							}
-							else {
-								foreach ($saldot as $varaso => $saldo) {
-									if ($saldo != 0) {
-										$ei_tyhja = 'yes';
-										echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
-									}
-								}
 
-								if ($ei_tyhja == '') {
-									echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
-								}
+							if ($ei_tyhja == '') {
+								echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'><font class='red'>".t("Tuote loppu")."</font></td></tr>";
 							}
 
 							echo "</table></td>";
@@ -1713,7 +1716,7 @@
 
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
-						if ($verkkokauppa == "" and $row['status'] == 'A' and $myytavissa <= 0) {
+						if ($verkkokauppa == "" and ($row['status'] == 'A' or $row['status'] == '') and $myytavissa <= 0) {
 
 							$tulossa_query = " 	SELECT min(toimaika) paivamaara
 							 					FROM tilausrivi

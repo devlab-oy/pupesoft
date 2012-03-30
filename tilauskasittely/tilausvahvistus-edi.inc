@@ -20,7 +20,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -38,7 +38,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -67,6 +67,13 @@ if (!file_exists($tilvahvfilenimi)) {
 	else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
+	
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
 				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
@@ -76,17 +83,18 @@ if (!file_exists($tilvahvfilenimi)) {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	//Myyjän email
 	$query = "SELECT * FROM kuka WHERE tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
-	$kukaresult = mysql_query($query) or pupe_error($query);
+	$kukaresult = pupe_query($query);
 	$myyjarow = mysql_fetch_array($kukaresult);
 
 	//Maskuehto
 	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-	$xresult = mysql_query($query) or pupe_error($query);
+	$xresult = pupe_query($query);
 
 	if (mysql_num_rows($xresult) == 0) {
 		echo "TILAUSVAHVISTUS: Maksuehto on kateissa!<br><br>";
@@ -97,16 +105,16 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	if (mysql_num_rows($tilvahresult) > 0) {
 
-		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "ICHG_TYPE:POS\n";
-		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
-		$ulos .= "RHDRSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
+		$ulos .= "RHDRSTART:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		$ulos .= "RBGMITYPE:231\n";
-		$ulos .= "RBGMINUMB:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "RBGMINUMB:" . $tulostettava_tunnus . "\n";
 		$ulos .= "RBGMIACKR:NA\n";
 		$ulos .= "RDTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 		$ulos .= "RRFFCR_NU:" . tv2dateconv($laskurow['luontiaika']) . "\n";
-		$ulos .= "RRFFVN_NU:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "RRFFVN_NU:" . $tulostettava_tunnus . "\n";
 		$ulos .= "RRFFCO_NU:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['viesti'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['comments'] . "\n";
@@ -149,7 +157,7 @@ if (!file_exists($tilvahvfilenimi)) {
 
 		$ulos .= "RCUX5__CR:" . $laskurow['valkoodi'] . "\n";
 		$ulos .= "RTDT20_TT:" . "ZNN " . $laskurow['toimitustapa'] . "\n";
-		$ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		fputs($toot,$ulos);
 
 		$rivino = 1; // dummy rivino, kun elma ei handlaa pitkiä
@@ -178,8 +186,8 @@ if (!file_exists($tilvahvfilenimi)) {
 			fputs($toot,$ulos);
 			$rivino++;
 		}
-		$ulos  = "RMSG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
-		$ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+		$ulos  = "RMSG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
+		$ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $tulostettava_tunnus . "\n";
 		fputs($toot,$ulos);
 		fclose ($toot);
 

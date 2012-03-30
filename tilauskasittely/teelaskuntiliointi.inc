@@ -71,7 +71,7 @@ else {
 		$projekti 	= $xrow["projekti"];
 
 		// otetaan suurimman myynnin tiedot
-		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $xrow["summa"] > $maksimisumma) {
+		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($lasku['summa'] > 0 and $xrow["summa"] > $maksimisumma) or ($lasku['summa'] < 0 and $xrow["summa"] < $maksimisumma))) {
 			$maksimisumma = $xrow["summa"];
 
 			$maksimisumma_kustp 	= $kustp;
@@ -378,6 +378,14 @@ else {
 		}
 	}
 
+	// Otetaan huomioon myös laskun pyöristykset
+	$loppusumma = $loppusumma - $laskun_pyoristys;
+	$loppusumma_valuutassa = $loppusumma_valuutassa - $laskun_pyoristys_valuutassa;
+
+	// Otetaan loppusumma myös apusumma muuttujaan
+	$apusumma = $loppusumma;
+	$apusumma_valuutassa = $loppusumma_valuutassa;
+
 	// Kirjataan myyntisaamiset tai kassa
 	if ($mehtorow['kateinen'] != '') {
 
@@ -430,12 +438,6 @@ else {
 			}
 		}
 
-		$loppusumma = $loppusumma - $laskun_pyoristys;
-		$loppusumma_valuutassa = $loppusumma_valuutassa - $laskun_pyoristys_valuutassa;
-
-		$apusumma = $loppusumma;
-		$apusumma_valuutassa = $loppusumma_valuutassa;
-
 		// Jos maksetaan käteisellä ja meillä on kassa-alennusta
 		if ($lasku['kasumma'] != '') {
 			// vähennetään loppusummasta kassa-ale
@@ -444,19 +446,13 @@ else {
 		}
 	}
 	elseif ($mehtorow["factoring"] != "") {
-		$myysaatili				= $yhtiorow['factoringsaamiset'];
-		$apusumma				= $loppusumma;
-		$apusumma_valuutassa	= $loppusumma_valuutassa;
+		$myysaatili	= $yhtiorow['factoringsaamiset'];
 	}
 	elseif ($konsrow["konserniyhtio"] != "") {
-		$myysaatili				= $yhtiorow['konsernimyyntisaamiset'];
-		$apusumma				= $loppusumma;
-		$apusumma_valuutassa	= $loppusumma_valuutassa;
+		$myysaatili	= $yhtiorow['konsernimyyntisaamiset'];
 	}
 	else {
-		$myysaatili				= $yhtiorow['myyntisaamiset'];
-		$apusumma				= $loppusumma;
-		$apusumma_valuutassa	= $loppusumma_valuutassa;
+		$myysaatili	= $yhtiorow['myyntisaamiset'];
 	}
 
 	$selite = "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
@@ -505,7 +501,6 @@ else {
 				$loppusumma_valuutassa += $arvo_valuutassa;
 			}
 		}
-
 	}
 	else {
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myysaatili, $maksimisumma_kustp, $maksimisumma_kohde, $maksimisumma_projekti);

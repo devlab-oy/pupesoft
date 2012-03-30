@@ -71,7 +71,7 @@
 	    $sresult = pupe_query($query);
 
 		if(mysql_num_rows($sresult) != 0) {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("Huom! Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
+			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("HUOM: Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
 			$jatko=0;
 		}
 	}
@@ -121,7 +121,8 @@
 		or mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
-		or mysql_field_name($result, $i) == "mallitarkenne") {
+		or mysql_field_name($result, $i) == "mallitarkenne"
+		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
@@ -696,4 +697,16 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 
+	}
+
+
+	if (mysql_field_name($result, $i) == "ostoehdotus") {
+
+		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi")."</option>";
+		$ulos .= "<option value='E'{$sel}>".t("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
 	}

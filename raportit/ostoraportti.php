@@ -74,19 +74,13 @@
 
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
-		// ABC luokkanimet
-		$ryhmanimet = $ryhmaprossat = array();
+		// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
+		$org_rajaus = $abcrajaus;
+		list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
 
-		$query = "	SELECT DISTINCT luokka, osuusprosentti
-					FROM abc_parametrit
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY osuusprosentti DESC";
-		$luokka_res = pupe_query($query);
+		if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
-		while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
-			$ryhmanimet[] = $luokka_row['luokka'];
-			$ryhmaprossat[] = $luokka_row['osuusprosentti'];
-		}
+		list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 		// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
 		if ($yhtiorow["varaako_jt_saldoa"] != "") {
@@ -377,7 +371,6 @@
 			$mul_tme = unserialize(urldecode($mul_tme));
 
 			$lisa = unserialize(urldecode($lisa));
-			$lisa_dynaaminen = unserialize(urldecode($lisa_dynaaminen));
 			$lisa_parametri = unserialize(urldecode($lisa_parametri));
 
 			// tallennamuisti-funkkarin takia joudutaan kaksi kertaa unserializee.
@@ -647,28 +640,29 @@
 				$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 			}
 
-			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
-			$query = "describe yhteensopivuus_rekisteri";
-			$res_rekyht = mysql_query($query);
-
-			$joinlisa = '';
+			$joinlisa 	= '';
 			$tyyppilisa = '';
-			$tyyppi = '';
+			$tyyppi 	= '';
 
-			if (mysql_error() == "") {
+			if (table_exists("yhteensopivuus_rekisteri")) {
 
-				$query = "	SELECT DISTINCT tyyppi
-							FROM yhteensopivuus_mp
-							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$res_rekyht = pupe_query($query);
+				if (table_exists("yhteensopivuus_mp")) {
+					$query = "	SELECT DISTINCT tyyppi
+								FROM yhteensopivuus_mp
+								WHERE yhtio = '{$kukarow['yhtio']}'";
+					$res_rekyht = pupe_query($query);
 
-				if (mysql_num_rows($res_rekyht) > 0) {
-					$tyyppi = 'mp';
-					while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
-						$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+					if (mysql_num_rows($res_rekyht) > 0) {
+						$tyyppi = 'mp';
+
+						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
+							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
+						}
 					}
 				}
-				else {
+
+
+				if ($tyyppi == "" and table_exists("yhteensopivuus_tuote")) {
 					$query = "	SELECT DISTINCT tyyppi
 								FROM yhteensopivuus_tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'";
@@ -676,6 +670,7 @@
 
 					if (mysql_num_rows($res_rekyht) > 0) {
 						$tyyppi = 'auto';
+
 						while ($tyyppi_row = mysql_fetch_assoc($res_rekyht)) {
 							$tyyppilisa .= "'$tyyppi_row[tyyppi]',";
 						}
@@ -702,21 +697,6 @@
 						$joinlisa .= ") ";
 					}
 				}
-			}
-
-			//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
-			// leveys x korkeus x syvyys
-			// leveys x korkeus x pituus
-			$query = "	SHOW columns
-						FROM tuote
-						LIKE 'tuotepituus'";
-			$spres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($spres) == 1) {
-				$splisa = "tuote.tuotepituus tuotesyvyys";
-			}
-			else {
-				$splisa = "tuote.tuotesyvyys";
 			}
 
 			//Ajetaan raportti tuotteittain
@@ -751,7 +731,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -760,7 +740,6 @@
 							LEFT JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus = 'X')
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
 							LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa')
-							$lisa_dynaaminen
 							$lisa_parametri
 							$lisaa2
 							WHERE tuote.$yhtiot
@@ -768,6 +747,7 @@
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -802,7 +782,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							$splisa,
+							tuote.tuotesyvyys,
 							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
@@ -816,12 +796,12 @@
 							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
-							$lisa_dynaaminen
 							$lisa_parametri
 							WHERE tuote.$yhtiot
 							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							$abcwhere
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
@@ -962,8 +942,8 @@
 
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				#$bar = new ProgressBar();
+				#$bar->initialize($elements); // print the empty bar
 			}
 
 			while ($row = mysql_fetch_array($res)) {
@@ -1122,7 +1102,7 @@
 				$laskurow["ykpl3"] = $laskurow["kpl3"] + $laskurow["e_kpl3"] + $kulutrow["kpl3"];
 				$laskurow["ykpl4"] = $laskurow["kpl4"] + $laskurow["e_kpl4"] + $kulutrow["kpl4"];
 
-				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa määritelty jo aiemmin!
+				//tilauksessa, ennakkopoistot ja jt	HUOM: varastolisa määritelty jo aiemmin!
 				$query = "	SELECT
 							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
 							sum(if(tyyppi = 'O', varattu, 0)) tilattu,
@@ -1307,6 +1287,7 @@
 					$asosresult = pupe_query($query);
 					$asosrow = mysql_fetch_array($asosresult);
 				}
+
 				if ($asiakasid != '') {
 					$query  = "	SELECT sum(if (t.laskutettuaika >= '$vva1-$kka1-$ppa1' and t.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,t.kpl,0)) kpl1,
 								sum(if (t.laskutettuaika >= '$vva2-$kka2-$ppa2' and t.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,t.kpl,0)) kpl2,
@@ -1705,8 +1686,7 @@
 					$excelsarake = 0;
 				}
 
-				$bar->increase();
-
+				#$bar->increase();
 			}
 
 			if ($korvaavien_otsikot > 0) {
@@ -1895,58 +1875,70 @@
 
 			// Otetaan monivalintalaatikoista palautuvat parametrit talteen ja laitetaan isoihin kyselyihin
 			echo "	<input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>
-					<input type='hidden' name='lisa_dynaaminen' value='".urlencode(serialize($lisa_dynaaminen["tuote"]))."'>
 					<input type='hidden' name='lisa_parametri' value='".urlencode(serialize($lisa_parametri))."'>";
 
 			echo "<br><br>";
 			echo "<table>";
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
-					// katotaan onko abc aputaulu rakennettu
-					$query  = "SELECT count(*) FROM abc_aputaulu WHERE yhtio='$kukarow[yhtio]' AND tyyppi IN ('TK','TR','TP')";
-					$abcres = mysql_query($query) or pupe_error($query);
-					$abcrow = mysql_fetch_array($abcres);
+			echo "<tr><th>".t("ABC-luokkarajaus ja rajausperuste")."</th><td>";
 
-					// jos on niin näytetään tällänen vaihtoehto
-					if ($abcrow[0] > 0) {
-						echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+			echo "<select name='abcrajaus' onchange='submit()'>";
+			echo "<option  value=''>".t("Valitse")."</option>";
 
-						$sel = array();
-						$sel[$abcrajaus] = "SELECTED";
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
 
-						echo "<select name='abcrajaus'>
-						<option value=''>Ei rajausta</option>
-						<option $sel[0] value='0'>Luokka A-30</option>
-						<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-						<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-						<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-						<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-						<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-						<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-						<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-						<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
-						</select>";
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
 
-						$sel = array();
-						$sel[$abcrajaustapa] = "SELECTED";
+				echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
+			}
 
-						echo "<select name='abcrajaustapa'>
-						<option $sel[TK] value='TK'>Myyntikate</option>
-						<option $sel[TR] value='TR'>Myyntirivit</option>
-						<option $sel[TP] value='TP'>Myyntikappaleet</option>
-						</select>";
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
 
-						$sel = array();
-						$sel[$abcrajausluokka] = "SELECTED";
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
 
-						echo "<select name='abcrajausluokka'>
-						<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>
-						<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>
-						<option {$sel['try']} value='try'>",t("Tuoteryhmän luokka"),"</option>
-						<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>
-						</select>
-						</td></tr>";
-					}
+				echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+
+			$teksti = "";
+			for ($i=0; $i < count($ryhmaprossat); $i++) {
+				$selabc = "";
+
+				if ($i > 0) $teksti = t("ja paremmat");
+				if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
+
+				echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
+			}
+
+			echo "</select>";
+
+			$sel = array();
+			$sel[$abcrajausluokka] = "SELECTED";
+
+			echo "<select name='abcrajausluokka'>";
+			echo "<option {$sel['y']} value='y'>",t("Yrityksen luokka"),"</option>";
+			echo "<option {$sel['os']} value='os'>",t("Osaston luokka"),"</option>";
+			echo "<option {$sel['try']} value='try'>",t("Tuoteryhmän luokka"),"</option>";
+			echo "<option {$sel['tme']} value='tme'>",t("Tuotemerkin luokka"),"</option>";
+			echo "</select>";
+			echo "</td></tr>";
+
 
 			echo "<tr><td colspan='2' class='back'><br></td></tr>";
 			echo "<tr><td colspan='2' class='back'>".t("Valitse jos haluat tulostaa asiakaan myynnit").":</td></tr>";
@@ -2006,7 +1998,6 @@
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
 					<input type='hidden' name='lisa' value='$lisa'>
-					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
 					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>
@@ -2161,7 +2152,6 @@
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
 					<input type='hidden' name='lisa' value='$lisa'>
-					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
 					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>
@@ -2262,7 +2252,7 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			if (table_exists(yhteensopivuus_rekisteri)) {
+			if (table_exists("yhteensopivuus_rekisteri")) {
 				echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
 				echo "<tr><td class='back'><br></td></tr>";
 			}

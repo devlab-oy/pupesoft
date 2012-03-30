@@ -1,14 +1,14 @@
 <?php
 
 //kayttaja on syottanyt tietonsa login formiin
-if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {	
+if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
 	$login = "yes";
 	require("inc/parametrit.inc");
 
 	$session = "";
 	$usea 	 = 0;
-	
+
 	srand((double) microtime() * 1000000);
 
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
@@ -79,11 +79,11 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 		if (!isset($err) or $err != 1) {
 			// Pit‰‰kˆ viel‰ kysy‰ yrityst‰???
 			if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
-				
+
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
-				
+
 				$query = "	UPDATE kuka
 							SET session = '$session',
 							lastlogin = now()
@@ -125,6 +125,9 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	else {
 		$errormsg = t("K‰ytt‰j‰tunnusta ei lˆydy ja/tai salasana on virheellinen", $browkieli)."!";
 	}
+
+	// Kirjataan ep‰onnistunut kirjautuminen virhelokiin...
+	error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 }
 else {
 	require_once("inc/parametrit.inc");
@@ -192,7 +195,7 @@ elseif (file_exists("pics/pupesoft_logo.png")) {
 	echo "<a target='_top' href='$palvelin2'><img src='pics/pupesoft_logo.png' border='0'>";
 }
 else {
-	echo "<a target='_top' href='$palvelin2'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='$palvelin2'><img src='http://api.devlab.fi/pupesoft.gif' border='0'>";
 }
 
 echo "</td><td><font class='head'>".t("Sis‰‰nkirjautuminen", $browkieli)."</font><br><br>";
@@ -201,7 +204,7 @@ if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio, if(yhtio.jarjestys=0, 9999, yhtio.jarjestys) jarj
 				FROM kuka
 				JOIN yhtio ON yhtio.yhtio = kuka.yhtio
-				WHERE kuka.kuka	= '$user'				
+				WHERE kuka.kuka	= '$user'
 				and kuka.extranet = ''
 				ORDER BY jarj, yhtio.nimi";
 	$result = mysql_query($query) or pupe_error($query);
@@ -235,7 +238,7 @@ if (isset($usea) and $usea == 1) {
 	if (isset($errormsg) and $errormsg != "") {
 		echo "<font class='error'>$errormsg</font><br><br>";
 	}
-	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
+	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
 
@@ -257,7 +260,7 @@ else {
 
 	echo "	<br><input type='submit' value='".t("Sis‰‰n",$browkieli)."'>
 			<br><br>
-			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>
+			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
 			</form>";
 
 	echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";

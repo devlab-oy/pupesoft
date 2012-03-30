@@ -1,10 +1,5 @@
 <?php
 
-/* Pupesoft -> UPS datasiirto
- * rahtikirja_ups_siirto.inc
- *************************************************************/
-
-//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
 	// katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
@@ -25,27 +20,30 @@ if ($kollityht > 0) {
 
 	if ($ups_host_x != "" and $ups_user_x != "" and $ups_pass_x != "" and $ups_path_x != "") {
 
-		// tarvitaan tilauksien tunnukset muuttujassa $otunnukset
-		// tarvitaan tilauksen tunnus muuttujassa $tunnus
-		// printterin komento muuttujassa $oslapp
-		// $kukarow[yhtio] jostain saadaan yhtio
-		// $yhtiorow array josta saada lähettäjän tiedot
+		if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
-		// nyt on kaikki tiedot rahtikirjaa varten haettu..
-		//
-		// arrayt:
-		// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-		// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-		//
-		// muuttujat:
-		// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-		// mehto sisältää maksuehdon tiedot
-		// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-		//
-		// tulostetaan rahtikirja
+			$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
+						FROM rahtikirjanumero
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytettyaika = '0000-00-00 00:00:00'";
+			$logyres = pupe_query($logyq);
+			$logyrow = mysql_fetch_assoc($logyres);
 
-		//Näin se oli muuallakin onkai se sitten oikein?
-		$rahtikirjanro = $lotsikot[0];
+			$rahtikirjanro = $logyrow["rahtikirjanro"];
+
+			$logyq = "	UPDATE rahtikirjanumero
+						SET kayttaja = '$kukarow[kuka]',
+						kaytettyaika = now()
+						WHERE yhtio = '$kukarow[yhtio]'
+						and rahtikirjanro = '$logyrow[rahtikirjanro]'";
+			$logyres = pupe_query($logyq);
+		}
+		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+			$rahtikirjanro = $lotsikot[0];
+		}
+		else {
+			$rahtikirjanro = $rivi["rahtikirjanro"];
+		}
 
 		if ($phpnimi == "rahtikirja_custom.php") {
 			$ups_laskurow = $osoitelappurow;
@@ -123,9 +121,10 @@ if ($kollityht > 0) {
 
 		$query = "	SELECT *
 					FROM yhteyshenkilo
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio 	 = '$kukarow[yhtio]'
 					AND liitostunnus = '$laskurow[liitostunnus]'
-					AND nimi = '$laskurow[tilausyhteyshenkilo]'";
+					AND nimi 		 = '$laskurow[tilausyhteyshenkilo]'
+					and tyyppi		 = 'A'";
 		$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
 		$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
@@ -143,8 +142,9 @@ if ($kollityht > 0) {
 		elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'
+						and tyyppi	= 'A'";
 			$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
 			$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 			if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
@@ -155,8 +155,9 @@ if ($kollityht > 0) {
 		elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ups_laskurow['yhteyshenkilo_tekninen']}'";
+						WHERE yhtio	= '{$kukarow['yhtio']}'
+						AND tunnus	= '{$ups_laskurow['yhteyshenkilo_tekninen']}'
+						and tyyppi	= 'A'";
 			$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
 			$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 			if ($yhteyshenkilo_tekninen_row['nimi'] == '') {

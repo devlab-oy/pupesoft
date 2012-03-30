@@ -130,7 +130,7 @@ if ($korjataan != '') {
 		}
 
 		$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
-					tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tilausmaara, tuotepaikat.tunnus,
+					tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tuotepaikat.tilausmaara, tuotepaikat.tunnus,
 					concat(rpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(tuotepaikat.hyllynro ,5,' ')) ihmepaikka
 					FROM tuotepaikat, varastopaikat, tuote
 					WHERE tuotepaikat.yhtio = varastopaikat.yhtio and tuotepaikat.yhtio = tuote.yhtio

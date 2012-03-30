@@ -4,7 +4,7 @@
 // tarvitaan $yhtiorow array
 
 $query         = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-$tilvahresult  = mysql_query($query) or pupe_error($query);
+$tilvahresult  = pupe_query($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
 $kieli = strtolower($tilvahasiakas['kieli']);
@@ -37,7 +37,7 @@ else {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -55,7 +55,7 @@ else {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -85,6 +85,13 @@ else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -95,14 +102,15 @@ else {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[myyja]'";
-	$kresult = mysql_query($query) or pupe_error($query);
+	$kresult = pupe_query($query);
 	$krow = mysql_fetch_array($kresult);
 
 	if (mysql_num_rows($tilvahresult) > 0) {
@@ -118,7 +126,7 @@ else {
 		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
 		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
 		$ulos .= "\r\n";
-		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")									.t("Toimitusosoite", $kieli).":\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
@@ -134,7 +142,7 @@ else {
 						$tyyppilisa
 						and otunnus IN ($laskurow[nippu])
 						and toimaika != '0000-00-00'";
-			$toimaikares = mysql_query($query) or pupe_error($query);
+			$toimaikares = pupe_query($query);
 
 			if (mysql_num_rows($toimaikares) > 1) {
 				$useita = "JOO";
@@ -160,10 +168,15 @@ else {
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)).t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
-		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$tulostettava_tunnus)			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
-		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$laskurow['toimitusehto'])."\n";
+
+		$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+		if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+		else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
+		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$toimehto)."\n";
 
 		if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");

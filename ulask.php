@@ -134,7 +134,7 @@ if ($tee == 'poistalasku') {
 	$tee = '';
 
 	if ($boob === FALSE) {
-		echo t("Virhe: Sinulta puuttuu s‰hkˆpostiosoite. Ei poisteta skannattua laskua");
+		echo t("VIRHE: Sinulta puuttuu s‰hkˆpostiosoite. Ei poisteta skannattua laskua");
 	}
 	else {
 		unlink($skannatut_laskut_polku.$skannattu_lasku);
@@ -183,7 +183,7 @@ if ($tee == 'VIIVA') {
 	if (strlen($nimi) == 54 and ( substr($nimi,0,1) == '2' or substr($nimi,0,1) == '4' or substr($nimi,0,1) == '5') ) {
 		$versio = substr($nimi,0,1);
 		$tee2	= "";
-		
+
 		if( $versio == '2' ){
 			$tilino = substr($nimi,1,14);
 			$summa  = substr($nimi,15,8) / 100;
@@ -540,8 +540,13 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}
 
-	if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+	if (strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 		$errormsg .= "<font class='error'>".t("Viite on v‰‰rin")."</font><br>";
+		$tee = 'E';
+	}
+
+	if (strlen($viite) > 0 and substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
+		$errormsg .= "<font class='error'>".t("RF-Viite on v‰‰rin")."</font><br>";
 		$tee = 'E';
 	}
 
@@ -680,7 +685,7 @@ if ($tee == 'I') {
 			require 'inc/pankkitilinoikeellisuus.php';
 
 			if ($pankkitili == '') {
-				$errormsg .= "<font class='error'>".t("Pankkitili '%s' on virheellinen", "", $trow['tilinumero'])."</font><br>";
+				$errormsg .= "<font class='error'>".t("Pankkitili %s on virheellinen", "", $trow['tilinumero'])."</font><br>";
 				$tee = 'E';
 			}
 			else {
@@ -1669,7 +1674,9 @@ if ($tee == 'I') {
 				osoitetark 			= '$trow[osoitetark]',
 				postino 			= '$trow[postino]',
 				postitp 			= '$trow[postitp]',
-				maa 				=  '$trow[maa]',
+				maa 				= '$trow[maa]',
+				toim_maa			= '$trow[verovelvollinen]',
+				ultilno_maa			= '$trow[ultilno_maa]',
 				viite 				= '$viite',
 				viesti 				= '$viesti',
 				vienti 				= '$vienti',

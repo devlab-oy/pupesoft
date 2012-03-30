@@ -94,42 +94,69 @@
 
 		// Aloitellaan lähetteen teko
 		if ($toim != "REKLAMAATIO") {
-			unset($pdf);
-			unset($page);
-
-			$sivu  = 1;
-
 			if ($toim == "SIIRTOTYOMAARAYS") {
 				$tyyppi = "SISAINEN";
 			}
-			elseif ($tyomtyyppi == "O" or $kukarow['hinnat'] != 0) {
+			elseif ((isset($tyomtyyppi) and $tyomtyyppi == "O") or $kukarow['hinnat'] != 0) {
 				$tyyppi = "O";
 			}
-			elseif ($tyomtyyppi == "P") {
+			elseif (isset($tyomtyyppi) and $tyomtyyppi == "P") {
 				$tyyppi = "P";
 			}
-			elseif ($tyomtyyppi == "A") {
+			elseif (isset($tyomtyyppi) and $tyomtyyppi == "A") {
 				$tyyppi = "";
 			}
 			else {
 				$tyyppi = $yhtiorow["tyomaaraystyyppi"];
 			}
 
-			$page[$sivu] = tyomaarays_alku($tyyppi);
+			$params_tyomaarays = array( "asrow"           => $asrow,
+										"boldi"           => $boldi,
+										"edtuotetyyppi"   => "",
+										"iso"             => $iso,
+										"kala"            => 0,
+										"kieli"           => $kieli,
+										"komento"		  => $komento[$tulostimet[0]],
+										"laskurow"        => $laskurow,
+										"lineparam"       => $lineparam,
+										"norm"            => $norm,
+										"page"            => NULL,
+										"pdf"             => NULL,
+										"perheid"         => 0,
+										"perheid2"        => 0,
+										"pieni"           => $pieni,
+										"pieni_boldi"     => $pieni_boldi,
+										"rectparam"       => $rectparam,
+										"returnvalue"     => 0,
+										"rivinkorkeus"    => $rivinkorkeus,
+										"rivinumerot"     => $rivinumerot,
+										"row"             => NULL,
+										"sivu"            => 1,
+										"tee"             => $tee,
+										"thispage"		  => NULL,
+										"toim"            => $toim,
+										"tots"			  => 0,
+										"tyyppi"          => $tyyppi,);
 
-			while ($row = mysql_fetch_array($riresult)) {
-				tyomaarays_rivi($page[$sivu], $tyyppi);
+			// Aloitellaan lomakkeen teko
+			$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
+
+			while ($row = mysql_fetch_assoc($riresult)) {
+				$params_tyomaarays["row"] = $row;
+				$params_tyomaarays = tyomaarays_rivi($params_tyomaarays);
 			}
 
 			if (($toim == 'TYOMAARAYS_ASENTAJA' or $toim == 'TYOMAARAYS') and $yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
-				tyomaarays_loppu_lisarivit($page[$sivu], 1);
+				$params_tyomaarays["tots"] = 1;
+				$params_tyomaarays = tyomaarays_loppu_lisarivit($params_tyomaarays);
 			}
 			else {
-				tyomaarays_loppu($page[$sivu], 1);
+				$params_tyomaarays["tots"] = 1;
+				$params_tyomaarays = tyomaarays_loppu($params_tyomaarays);
 			}
 
 			//tulostetaan sivu
-			tyomaarays_print_pdf($komento[$tulostimet[0]]);
+			tyomaarays_print_pdf($params_tyomaarays);
 		}
 		else {
 			$tyyppi = "REKLAMAATIO";

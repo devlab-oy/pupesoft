@@ -229,7 +229,7 @@
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
-			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
+			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -451,11 +451,30 @@
 
 			echo "</select></td><td></td></tr>";
 
+			$vsel[$verkkokaupat] = "SELECTED";
+
 			echo "<tr>
-				<th>",t("N‰yt‰ vain verkkokauppatilauksia"),"</th>
-				<td><input type='checkbox' name='verkkokaupat' {$verkkokaupatchk}></td>
+				<th>",t("Ohjelmamoduli"),"</th>
+				<td>
+				<select name='verkkokaupat'>
+				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
+				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
+				<option value='EXTRANET'		{$vsel["EXTRANET"]}>",t("Vain Extranet-tilauksia"),"</option>
+				<option value='MAGENTO'			{$vsel["MAGENTO"]}>",t("Vain Magento verkkokauppa-tilauksia"),"</option>
+				<option value='VARAOSASELAIN'	{$vsel["VARAOSASELAIN"]}>",t("Vain Varaosaselain-tilauksia"),"</option>
+				<option value='VERKKOKAUPPA'	{$vsel["VERKKOKAUPPA"]}>",t("Vain Pupesoft verkkokauppa-tilauksia"),"</option>
+				<option value='EDIFACT911'		{$vsel["EDIFACT911"]}>",t("Vain Orders 91.1 EDI-tilauksia"),"</option>
+				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
+				</select>
+				</td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("N‰yt‰ laskun maksup‰iv‰m‰‰r‰"),"</th>
+				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
+				<td></td>
+				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "<tr>
@@ -1118,7 +1137,7 @@
 
 					//**  Maksuehtogrouppaukset start **//
 					if ($mukaan == "maksuehdoittain") {
-						$group .= ",lasku.maksuteksti";
+						$group  .= ",lasku.maksuteksti";
 						$select .= "lasku.maksuteksti maksuehto, ";
 						$order  .= "lasku.maksuteksti,";
 						$gluku++;
@@ -1147,6 +1166,13 @@
 				if ($tilrivikomm != "") {
 					$group .= ",tilausrivi.tunnus";
 					$select .= "tilausrivi.kommentti, ";
+					$gluku++;
+					$muutgroups++;
+				}
+
+				if ($naytamaksupvm != "") {
+					$group .= ",lasku.mapvm";
+					$select .= "lasku.mapvm maksupvm, ";
 					$gluku++;
 					$muutgroups++;
 				}
@@ -1223,7 +1249,10 @@
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
 					}
-					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+
+					if ($tuoterajaus != "") {
+						$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+					}
 				}
 
 				if (isset($status) and $status != '') {
@@ -1231,18 +1260,11 @@
 				}
 
 				if (isset($verkkokaupat) and $verkkokaupat != '') {
-					$lisa .= " and lasku.laatija = 'Magento' ";
+					$lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
 				}
 
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
-
-				if ($naytakaikkityypit != "") {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
-				}
-				else {
-					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M') ";
-				}
 
 				if ($kateprossat != "") {
 					$katelisanyt = " 0 kateprosnyt, ";
@@ -1293,24 +1315,24 @@
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
 					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0) {
-						echo "<font class='error'>VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan asbury)
 					if ($vertailubu == "asbu" and $turyhgroups > 0) {
-						echo "<font class='error'>VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					// eik‰ rajata muiden kuin aiakkaan tietojen mukaan (t‰ss‰ on kaikki joinit ja wheren ehdot)
 					if (preg_match("/JOIN (tilausrivin_lisatiedot|asiakkaan_avainsanat|laskun_lisatiedot|varastopaikat)/i", $lisatiedot_join.$varasto_join.$kantaasiakas_join.$lisa_parametri) or $lisa_dynaaminen["tuote"] != '') {
-						echo "<font class='error'>VIRHE: Muita kuin asiakaaseen liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n asiakasbudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
-						echo "<font class='error'>VIRHE: Muita kuin asiakaaseen liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n asiakasbudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 				}
@@ -1320,20 +1342,27 @@
 
 					//siin‰ tapauksessa ei voi groupata muiden kuin asiakkaiden ja/tai tuoteryhm‰n tietojen mukaan
 					if ($asiakasgroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
-						echo "<font class='error'>VIRHE: Muita kuin tuotteisiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n tuotebudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					// eik‰ rajata muiden kuin tuotteen tietojen mukaan (t‰ss‰ on kaikki joinit ja wheren ehdot)
 					if (preg_match("/JOIN (tilausrivin_lisatiedot|asiakkaan_avainsanat|laskun_lisatiedot|varastopaikat)/i", $lisatiedot_join.$varasto_join.$kantaasiakas_join.$lisa_parametri) or $lisa_dynaaminen["asiakas"] != '') {
-						echo "<font class='error'>VIRHE: Muita kuin tuotteisiin liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n tuotebudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
-						echo "<font class='error'>VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotebudjetti!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
 						$tee = '';
 					}
+				}
+
+				if ($naytakaikkityypit != "") {
+					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
+				}
+				else {
+					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M') ";
 				}
 
 				if ($naytaennakko == "") {
@@ -1775,7 +1804,7 @@
 									if (!${"dyn_".$dynlaji}) {
 										$dynpuu_q = " 	SELECT subparent.nimi
 														FROM dynaaminen_puu AS subnode
-														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
+														JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subparent.lft < subnode.lft AND subparent.rgt > subnode.lft)
 														WHERE subnode.tunnus = ".$row[mysql_field_name($result, $i)]."
 														ORDER BY subparent.lft";
 										$dynpuu_r = pupe_query($dynpuu_q);

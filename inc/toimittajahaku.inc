@@ -12,9 +12,10 @@
 		if (!isset($aikalisa)) $aikalisa ='';
 
 		if ($laji == 'O') {
-			$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
+			$query = "	SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
 						FROM toimi
-						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+						LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+						WHERE toimi.tunnus = '$tunnus' and toimi.yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -130,20 +131,22 @@
 
 			if ($ytunnus != "") {
 				//Jos taas päässätään $ytunnusta niin haetaan sen perusteella
-				$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
+				$query = "	SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
 							FROM toimi
-							WHERE ytunnus 	= '$ytunnus'
-							and yhtio 		= '$kukarow[yhtio]'
-							ORDER by nimi";
+							LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+							WHERE toimi.ytunnus 	= '$ytunnus'
+							and toimi.yhtio 		= '$kukarow[yhtio]'
+							ORDER by toimi.nimi";
 
 				$toimiliilisa = " and ytunnus = '$ytunnus' ";
 			}
 			else {
 				//Jos käytetään $tunnusta niin käytetään liitostunnusta
-				$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
+				$query = "	SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
 							FROM toimi
-							WHERE tunnus 	= '$tunnus'
-							and yhtio 		= '$kukarow[yhtio]'";
+							LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+							WHERE toimi.tunnus 	= '$tunnus'
+							and toimi.yhtio 	= '$kukarow[yhtio]'";
 
 				$toimiliilisa = " and liitostunnus = '$tunnus' ";
 			}
@@ -174,7 +177,8 @@
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$tunnus'>
-						<input type='hidden' name='tee' value='A'>";
+						<input type='hidden' name='tee' value='A'>
+						<input type='hidden' name='lopetus' value='$lopetus'>";
 
 				$sel = array();
 				$sel[$laji]	= " selected";
@@ -212,7 +216,7 @@
 
 				echo "<br>";
 
-				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>".t("Näytä kaikki laskut")."</a><br><br>";
+				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("Näytä kaikki laskut")."</a><br><br>";
 
 				$lisa = '';
 
@@ -322,7 +326,8 @@
 									AND lasku.laskunro = keikka.laskunro
 									AND keikka.tila = 'K'
 									AND keikka.vanhatunnus = 0
-									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
+									AND lasku.tila 		  = 'K'
 									AND lasku.vanhatunnus = '$trow[tunnus]'";
 						$keikka_res = pupe_query($query);
 
@@ -401,28 +406,34 @@
 	}
 
 	if ($tee == 'N') { // N = nimihaku
-		$lisat = "and toimi.nimi like '%" . $nimi . "%'";
+		$lisat = "and (toimi.nimi like '%$nimi%' or kuka.nimi like '%$nimi%')";
 	}
 
 	if ($tee == 'Y') { // Y = yritystunnushaku
 		$lisat = "and toimi.ytunnus = '$nimi'";
 	}
 
+	if ($tee == 'T') { // T = toimittajanro
+		$lisat = "and toimi.toimittajanro = '$nimi'";
+	}
+
 	if ($lisat != '') {
-		$query = "	SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', toimi.nimi, toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
+		$query = "	SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
 					FROM toimi
-					LEFT JOIN lasku ON toimi.yhtio=lasku.yhtio and toimi.tunnus=lasku.liitostunnus and tila in ('H','M')
-					WHERE toimi.yhtio='$kukarow[yhtio]' $lisat
+					LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
+					LEFT JOIN lasku ON toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus and tila in ('H','M')
+					WHERE toimi.yhtio = '$kukarow[yhtio]'
+					$lisat
 					GROUP BY toimi.tunnus
-					ORDER BY selaus";
+					ORDER BY toimi.selaus, toimi.nimi";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
+			echo "<font class='error'>".t("Haulla ei löytynyt yhtään toimittajaa")."</font><br>";
+			$tee = '';
 		}
-
-		if (mysql_num_rows($result) > 40) {
-			echo "<b>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</b><br>";
+		elseif (mysql_num_rows($result) > 40) {
+			echo "<font class='error'>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</font><br>";
 			$tee = '';
 		}
 		else {
@@ -437,6 +448,7 @@
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tee=$tee//nimi=$nimi'>
 						<input type='hidden' name='tee' value='A'>";
 
 				echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
@@ -470,6 +482,7 @@
 				<option value = 'N'>".t("Toimittajan nimi")."
 				<option value = 'S'>".t("Toimittajan selaussana")."
 				<option value = 'Y'>".t("Y-tunnus")."
+				<option value = 'T'>".t("Toimittajanro")."
 				</select>
 				</td>
 				<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>

@@ -25,7 +25,11 @@
 
 		ntsysv
 
-		4. Uudelleenkäynnistä XINETD
+		4. Varmista, että optiscan.php:llä on execute oikeus (tämä on hyvätä lisätä myös pupesoft päivitys scriptiin!)
+
+		chmod a+x /var/www/html/pupesoft/optiscan.php
+
+		5. Uudelleenkäynnistä XINETD
 
 		service xinetd restart
 	*/
@@ -38,7 +42,8 @@
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
 
-	chdir('/var/www/html/demo/orumstatic/');
+	$pupe_root_polku = dirname(__FILE__);
+	chdir($pupe_root_polku);
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');
@@ -126,7 +131,7 @@
 					GROUP BY 1,2";
 		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe käyttäjätietoja haettaessa\r\n\r\n");
 		$krow = mysql_fetch_assoc($result);
-		
+
 		if (trim($krow['kuka']) == '') {
 			// Käyttäjänimeä ei löytynyt
 			$response = "1, Käyttäjää ei löydy\r\n\r\n";
@@ -512,9 +517,9 @@
 			$lasresult = mysql_query($query) or die("1, Tietokantayhteydessä virhe tilauksia haettaessa\r\n\r\n");
 
 			while ($laskurow = mysql_fetch_assoc($lasresult)) {
-				$query = "	SELECT pakkaus.pakkaus, 
-							pakkaus.pakkauskuvaus, 
-							tuote.tuotemassa, 
+				$query = "	SELECT pakkaus.pakkaus,
+							pakkaus.pakkauskuvaus,
+							tuote.tuotemassa,
 							(pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys) as kuutiot,
 							kerayserat.kpl,
 							kerayserat.pakkausnro
@@ -547,17 +552,18 @@
 				if (count($rahtikirjan_pakkaukset) > 0) {
 
 					foreach ($rahtikirjan_pakkaukset as $pak => $arr) {
+						// LOGY:n rahtikirjanumerot?
 						$query_ker  = "	INSERT INTO rahtikirjat SET
-										kollit = '{$arr['pakkausnro']}',
-										kilot = '{$arr['paino']}',
-										kuutiot = '{$arr['kuutiot']}',
-										pakkauskuvaus = '{$arr['pakkauskuvaus']}',
-										pakkaus = '{$pak}',
-										rahtikirjanro = '{$laskurow['tunnus']}',
-										otsikkonro = '{$laskurow['tunnus']}',
-										tulostuspaikka = '{$laskurow['varasto']}',
-										toimitustapa = '{$laskurow['toimitustapa']}',
-										yhtio = '{$kukarow['yhtio']}'";
+										kollit 			= '{$arr['pakkausnro']}',
+										kilot 			= '{$arr['paino']}',
+										kuutiot 		= '{$arr['kuutiot']}',
+										pakkauskuvaus 	= '{$arr['pakkauskuvaus']}',
+										pakkaus 		= '{$pak}',
+										rahtikirjanro 	= '{$laskurow['tunnus']}',
+										otsikkonro 		= '{$laskurow['tunnus']}',
+										tulostuspaikka 	= '{$laskurow['varasto']}',
+										toimitustapa 	= '{$laskurow['toimitustapa']}',
+										yhtio 			= '{$kukarow['yhtio']}'";
 						$ker_res = mysql_query($query_ker) or die("1, Tietokantayhteydessä virhe rahtikirjaa lisättäessä\r\n\r\n");
 
 						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";

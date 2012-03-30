@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Tuoteketjujen sisäänluku").":</font><hr>";
+echo "<font class='head'>".t("Tuoteketjujen sisäänluku")."</font><hr>";
 
 if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 	if ($uusi == 1) {
@@ -32,7 +32,7 @@ $kielletty		= 0;
 $table_apu		= '';
 $taulunrivit	= array();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = strtoupper($path_parts['extension']);
@@ -84,7 +84,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
 	$table_apu = $table;
-	$table = ($table == 'tuoteresepti') ? 'tuoteperhe' : $table;
+	$table = ($table != 'korvaavat' and $table != "vastaavat") ? 'tuoteperhe' : $table;
 
 	// haetaan valitun taulun sarakkeet
 	$query = "SHOW COLUMNS FROM $table";
@@ -155,11 +155,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	}
 
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
-	if ($vikaa != 0 or $tarkea < count($pakolliset) or $postoiminto == 'X') {
-		// suljetaan avattu faili.. kilttiä!
-		fclose ($file);
-		// ja kuollaan pois
-		die("<br><br><font class='error'>".t("Virheitä löytyi! Ei voida jatkaa")."!<br></font>");
+	if ($vikaa != 0 or $tarkea < count($pakolliset)) {
+		die("<br><br><font class='error'>".t("VIRHE: Pakollisisa sarakkeita puuttuu! Ei voida jatkaa")."!<br></font>");
+	}
+	
+	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
+	if ($postoiminto == 'X') {
+		die("<br><br><font class='error'>".t("VIRHE: Toiminto-sarake puuttuu! Ei voida jatkaa")."!<br></font>");
 	}
 
 	if ($kielletty > 0) {
@@ -195,6 +197,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		fclose($file);
 	}
 
+	/*
 	echo "<table>";
 	echo "<tr>";
 
@@ -214,6 +217,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	echo "</table><br>";
 	#exit;
+	*/
 
 	// luetaan tiedosto loppuun...
 	foreach ($taulunrivit as $rivinumero => $rivi) {
@@ -319,14 +323,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										$jarjestys = (int) $irow["jarjestys"] + 1;
 									}
 
-									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys' ";
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 								}
 								else {
-									$kysely = " and tuoteno='$rivi[$j]'";
+									$kysely = " and tuoteno='$rivi[$j]' ";
 								}
 
 								$query = $alku.$kysely.$loppu;
-								$iresult = mysql_query($query) or pupe_error($query);
+								$iresult = pupe_query($query);
 
 								if ($toiminto == 'LISAA') {
 									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}!<br>";
@@ -350,7 +354,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 								while ($irow = mysql_fetch_assoc($iresult)) {
 									$kquery = "	UPDATE $table
-												SET jarjestys = $siirtojarj
+												SET jarjestys = $siirtojarj,
+												muuttaja = '$kukarow[kuka]',
+												muutospvm = now()
 												WHERE tunnus = '$irow[tunnus]'";
 									$updres = pupe_query($kquery);
 
@@ -358,12 +364,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								}
 
 								$kquery = "	UPDATE $table
-											SET jarjestys = $jarjestys
+											SET jarjestys = $jarjestys,
+											muuttaja = '$kukarow[kuka]',
+											muutospvm = now()
 											WHERE tuoteno = '$rivi[$j]'
 											and id = '$id'
 											and yhtio = '{$kukarow['yhtio']}'";
 								$iresult = pupe_query($kquery);
-								
+
 								$lask++;
 							}
 							else {
@@ -386,7 +394,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$isatuote = "";
 
 			// tuoteresepteissä tyyppi pitää olla R, tuoteperheissä P
-			$tyyppi = ($table_apu == 'tuoteresepti') ? 'R' : 'P';
+			$tyyppi = "";
+			if ($table_apu == 'tuoteperhe') $tyyppi = 'P';
+			if ($table_apu == 'tuoteresepti') $tyyppi = 'R';
+			if ($table_apu == 'vsuunnittelu') $tyyppi = 'S';
+			if ($table_apu == 'osaluettelo') $tyyppi = 'O';
+			if ($table_apu == 'tuotekooste') $tyyppi = 'V';
+			if ($table_apu == 'lisavaruste') $tyyppi = 'L';
 
 			for ($r = 0; $r < count($headers); $r++) {
 
@@ -454,14 +468,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 					if (strtoupper(trim($headers[$r])) == "TUOTENO") {
 						$query  = "	INSERT INTO tuoteperhe SET
-									yhtio = '{$kukarow['yhtio']}',
-									isatuoteno = '$isatuote',
-									tuoteno = '{$rivi[$r]}',
-									tyyppi = '$tyyppi'";
+									yhtio 		= '{$kukarow['yhtio']}',
+									isatuoteno 	= '$isatuote',
+									tuoteno 	= '{$rivi[$r]}',
+									tyyppi 		= '$tyyppi',
+									laatija 	= '$kukarow[kuka]',
+									luontiaika 	= now(),
+									muuttaja 	= '$kukarow[kuka]',
+									muutospvm 	= now()";
 						$result = pupe_query($query);
 						$lask++;
 					}
-
 				}
 			}
 		}
@@ -471,15 +488,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 }
 else {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
-			<br><br>
 			<table border='0'>
 			<tr>
 				<th>",t("Valitse tietokannan taulu"),":</th>
 				<td><select name='table'>
-					<option value='korvaavat'>",t("Korvaavat"),"</option>
-					<option value='vastaavat'>",t("Vastaavat"),"</option>
+					<option value='korvaavat'>",t("Korvaavat tuotteet"),"</option>
+					<option value='vastaavat'>",t("Vastaavat tuotteet"),"</option>
 					<option value='tuoteperhe'>",t("Tuoteperheet"),"</option>
 					<option value='tuoteresepti'>",t("Tuotereseptit"),"</option>
+					<option value='osaluettelo'>",t("Tuotteen osaluettelo"),"</option>
+					<option value='tuotekooste'>",t("Tuotteen koosteluettelo"),"</option>
+					<option value='lisavaruste'>",t("Tuotteen lisävarusteet"),"</option>
+					<option value='vsuunnittelu'>",t("Samankaltaiset valmisteet"),"</option>
 				</select></td>
 			</tr>
 

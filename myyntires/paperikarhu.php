@@ -57,25 +57,46 @@
 				//Vasen sarake
 				//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
 				$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
-				$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
-				$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
-				$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
-				$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
-				$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
+
+				if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
+					$pdf->draw_text(50, 717, $asiakastiedot["laskutus_nimi"], 		$firstpage, $norm);
+					$pdf->draw_text(50, 707, $asiakastiedot["laskutus_nimitark"], 	$firstpage, $norm);
+					$pdf->draw_text(50, 697, $asiakastiedot["laskutus_osoite"], 	$firstpage, $norm);
+					$pdf->draw_text(50, 687, $asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"], $firstpage, $norm);
+					$pdf->draw_text(50, 677, $asiakastiedot["laskutus_maa"], 		$firstpage, $norm);
+				}
+				else {
+					$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
+					$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
+					$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
+					$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+					$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
+				}
 			}
 			else {
 				// l‰hett‰j‰
 				$iiso = array('height' => 11, 'font' => 'Times-Roman');
-				$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 										$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 									$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 									$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), 			$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 		$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]),	$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 	$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]),$firstpage, $iiso);
 
 				// vastaanottaja
-				$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 									$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 								$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 								$firstpage, $iiso);
-				$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iiso);
+				if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
+					$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["laskutus_nimi"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["laskutus_nimitark"]), $firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["laskutus_osoite"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"]), $firstpage, $iiso);
+					// Laitetaan laskutus_maa asiakas_maaksi niin saadaan ilman ehtomuuttujia kyselyst‰ oikea lopputulos.
+					$asiakastiedot['maa'] = $asiakastiedot["laskutus_maa"];
+				}
+				else {
+					$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 		$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 	$firstpage, $iiso);
+					$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iiso);
+				}
+
 
 				// jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
 				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
@@ -178,9 +199,12 @@
 			$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
 			$pdf->draw_text(240, $kala, t("Er‰p‰iv‰", $kieli),										$firstpage, $pieni);
 			$pdf->draw_text(295, $kala, t("Myˆh‰ss‰ pv", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
 			$pdf->draw_text(455, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
-			$pdf->draw_text(525, $kala, t("Perint‰kerta", $kieli),									$firstpage, $pieni);
+
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
+				$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
+				$pdf->draw_text(525, $kala, t("Perint‰kerta", $kieli),									$firstpage, $pieni);
+			}
 
 			$kala -= 15;
 
@@ -216,8 +240,6 @@
 			$oikpos = $pdf->strlen($row["ika"], $norm);
 			$pdf->draw_text(338-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
 
-			$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),				$firstpage, $norm);
-
 			if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
 				$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
 				$pdf->draw_text(500-$oikpos, $kala, $row["summa_valuutassa"]." ".$row["valkoodi"], 	$firstpage, $norm);
@@ -231,8 +253,11 @@
 				$karhukertanro = $row["karhuttu"] + 1;
 			}
 
-			$oikpos = $pdf->strlen($karhukertanro, $norm);
-			$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, 			$firstpage, $norm);
+			if ($yhtiorow["maksukehotus_kentat"] == "") {
+				$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]), $firstpage, $norm);
+				$oikpos = $pdf->strlen($karhukertanro, $norm);
+				$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, $firstpage, $norm);
+			}
 
 			$kala = $kala - 13;
 
@@ -483,11 +508,11 @@
 		$laskutiedot["kpvm"] = date("Y-m-d");
 	}
 
-	$query = "	SELECT SUM(summa) summa
+	$query = "	SELECT sum(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and ltunnus <> 0
-				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and (kohdpvm = '0000-00-00' or kohdpvm > '$laskutiedot[kpvm]')
+				and ltunnus  > 0
 				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = pupe_query($query);
@@ -667,13 +692,23 @@
 			'yritys_postino'        => $yhtiorow['postino'],
 			'yritys_postitp'        => $yhtiorow['postitp'],
 	        'yritys_maa'            => $yhtiorow['maa'],
-	        'vastaanottaja_nimi'    => trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']),
-	        'vastaanottaja_osoite'  => $asiakastiedot['osoite'],
-	        'vastaanottaja_postino' => $asiakastiedot['postino'],
-	        'vastaanottaja_postitp' => $asiakastiedot['postitp'],
-	        'vastaanottaja_maa'     => $asiakastiedot['maa'],
 	        'sivumaara'             => $sivu,
 		);
+
+		if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
+			$info['vastaanottaja_osoite'] 	= trim($asiakastiedot['laskutus_nimi'] . ' ' . $asiakastiedot['laskutus_nimitark']);
+			$info['vastaanottaja_osoite'] 	= $asiakastiedot["laskutus_osoite"];
+			$info['vastaanottaja_postino']  = $asiakastiedot["laskutus_postino"];
+			$info['vastaanottaja_postitp']	= $asiakastiedot["laskutus_postitp"];
+			$info['vastaanottaja_maa']		= $asiakastiedot["laskutus_maa"];
+		}
+		else {
+			$info['vastaanottaja_osoite'] 	= trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']);
+			$info['vastaanottaja_osoite'] 	= $asiakastiedot["osoite"];
+			$info['vastaanottaja_postino']  = $asiakastiedot["postino"];
+			$info['vastaanottaja_postitp']	= $asiakastiedot["postitp"];
+			$info['vastaanottaja_maa']		= $asiakastiedot["maa"];
+		}
 
 		// otetaan configuraatio filest‰ salasanat ja muut
 		$info = array_merge($info, (array) $ekirje_config);
@@ -713,7 +748,7 @@
 			if($kirow["komento"] == "email") {
 				$liite = $pdffilenimi;
 				$kutsu = "Karhukirje ".$asiakastiedot["ytunnus"];
-				echo t("Karhukirje l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n<br>";
+				echo t("Karhukirje l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...\n<br>";
 
 				require("inc/sahkoposti.inc");
 			}

@@ -677,7 +677,7 @@
 				}
 
 				if ($hyvrow["nollarivi"] > 0) {
-					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";
+					echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivejä!")."</font></td>";
 				}
 
 				if ($row["chn"] == "010") {

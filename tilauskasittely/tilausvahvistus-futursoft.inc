@@ -20,7 +20,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -38,7 +38,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -52,7 +52,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	}
 	else {
 		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
-			$laskurow["nippu"] = $laskurow["tunnus"];
+		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
 	$ale_query_select_lisa = '';
@@ -68,6 +68,13 @@ if (!file_exists($tilvahvfilenimi)) {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -78,17 +85,18 @@ if (!file_exists($tilvahvfilenimi)) {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	if (mysql_num_rows($tilvahresult) > 0) {
 
 		$ulos = "*IS\n";
 		$ulos .= "*MS\n";
-		$ulos .= "*RS TILVAHV " . $laskurow['tunnus'] . "\n";
-		$ulos .= "TILVAHV.TLV_NRO:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "*RS TILVAHV " . $tulostettava_tunnus . "\n";
+		$ulos .= "TILVAHV.TLV_NRO:" . $tulostettava_tunnus . "\n";
 		$ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
-		$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $laskurow['tunnus'] . "\n";
+		$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $tulostettava_tunnus . "\n";
 		$ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['luontiaika']) . "\n";
 		$ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'],-8,8) . "\n";
 		$ulos .= "TILVAHV.TLV_TILAAJA_OVT:" . $laskurow['ovttunnus'] . "\n";
@@ -111,7 +119,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "TILVAHV.TLV_TOIMITUSTAPA:".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."\n";
 		$ulos .= "TILVAHV.TLV_SUMMA:" . $laskurow['summa'] . "\n";
 		$ulos .= "TILVAHV.TLV_SISALTOKOODI:29\n";
-		$ulos .= "*RE TILVAHV " . $laskurow['tunnus'] . "\n";
+		$ulos .= "*RE TILVAHV " . $tulostettava_tunnus . "\n";
 
 		$rivino = 1; // dummy rivino, kun elma ei handlaa pitkiä
 
@@ -121,7 +129,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			if ($tvtilausrivirow['eankoodi'] == 0) $tvtilausrivirow['eankoodi'] = '';
 
 			$ulos .= "*RS TILVAHVRIV "            . $rivino . "\n";
-			$ulos .= "TILVAHVRIV.TVR_NRO:"        . $laskurow['tunnus'] . "\n";
+			$ulos .= "TILVAHVRIV.TVR_NRO:"        . $tulostettava_tunnus . "\n";
 			$ulos .= "TILVAHVRIV.TVR_RIVINRO:"    . $rivino . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TIL_RIVINRO:". $tvtilausrivirow['tilaajanrivinro'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TILAUSNRO:"  . $laskurow['asiakkaan_tilausnumero'] . "\n";

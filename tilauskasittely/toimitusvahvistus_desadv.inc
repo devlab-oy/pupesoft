@@ -65,7 +65,7 @@
 			$x 				= 0; // yhteensä rivejä koko filessä
 
 			if ($tulostauna != "") {
-				$kuljetustunnus = "PUPESOFT".sprintf("%06.6s",$rajaus); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+				$kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
 
 				// ED2 ja UNA kehykset.
 				// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
@@ -160,9 +160,10 @@
 			// CTA - contact information
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio 	 = '$kukarow[yhtio]'
 						AND liitostunnus = '$desadv_laskurow[liitostunnus]'
-						AND nimi = '$desadv_laskurow[tilausyhteyshenkilo]'";
+						AND nimi 		 = '$desadv_laskurow[tilausyhteyshenkilo]'
+						and tyyppi	 	 = 'A'";
 			$yhteyshenkiloresult = pupe_query($query);
 			$yhteyshenkiloasiakas = mysql_fetch_assoc($yhteyshenkiloresult);
 
@@ -177,7 +178,8 @@
 				$query = "	SELECT *
 							FROM yhteyshenkilo
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'";
+							AND tunnus 	= '$desadv_laskurow[yhteyshenkilo_kaupallinen]'
+							and tyyppi	= 'A'";
 				$yhteyshenkilo_kaupallinen_res = pupe_query($query);
 				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 
@@ -187,8 +189,9 @@
 			elseif ($desadv_laskurow['yhteyshenkilo_tekninen'] != '') {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$desadv_laskurow[yhteyshenkilo_tekninen]'";
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tunnus	= '$desadv_laskurow[yhteyshenkilo_tekninen]'
+							and tyyppi	= 'A'";
 				$yhteyshenkilo_tekninen_res = pupe_query($query);
 				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 
@@ -294,6 +297,7 @@
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
  						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
+						AND tilausrivi.tyyppi != 'D'
 						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 			$tuotteet_res = pupe_query($query);
 
@@ -334,7 +338,7 @@
 			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
 			if ($tulostauna != "") {
-				// loppuun pakollinen UNZ ja EOF. Huom! UNZ ja EOF pitää olla erillisillä riveillä !!!
+				// loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pitää olla erillisillä riveillä !!!
 				$desadv_message .= "\nUNZ+1+{$lahtunniste}'";
 				$desadv_message .= "\n'''EOF'''0'";
 			}

@@ -144,7 +144,7 @@
 					SET profiilit 	= '',
 					muuttaja		= '{$kukarow['kuka']}',
 					muutospvm		= now()
-					WHERE kuka = '{$selkuka}' 
+					WHERE kuka = '{$selkuka}'
 					AND yhtio = '{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 
@@ -184,6 +184,34 @@
 	}
 	else {
 		$hierarkia = "";
+	}
+
+	if ($tee == "UUSI" or $tee == "MUUTA") {
+
+		$myyja = (int) $myyja;
+
+		if ($myyja != 0) {
+
+			if (strlen($myyja) > 5) {
+				echo "<font class='error'>",t("Myyjänumero enintään 5 merkkiä"),"</font><br>";
+				$jatka = 1; // ei perusteta
+				unset($submit_button);
+			}
+			else {
+				$query = "	SELECT tunnus 
+							FROM kuka 
+							WHERE yhtio = '{$kukarow["yhtio"]}' 
+							AND myyja = $myyja
+							AND kuka != '{$kuka}'";
+				$resmyyja = pupe_query($query);
+
+				if (mysql_num_rows($resmyyja) > 0) {
+					echo "<font class='error'>",t("Myyjänumero on jo käytössä"),": $myyja.</font><br><br>";
+					$jatka = 1; // ei perusteta
+					unset($submit_button);
+				}
+			}
+		}
 	}
 
 	// Perustetaan uusi käyttäjä
@@ -1142,25 +1170,34 @@
 
 					echo "<tr><th align='left'>",t("Näytön koko"),":</th>
 							<td><select name='resoluutio'>
-							<option value='P' {$sel3}>",t("Pieni"),"</option>
-							<option value='N' {$sel1}>",t("Normaali"),"</option>
 							<option value='I' {$sel2}>",t("Iso"),"</option>
+							<option value='N' {$sel1}>",t("Normaali"),"</option>
+							<option value='P' {$sel3}>",t("Pieni"),"</option>
 							</select></td></tr>";
 
 					if ($krow['naytetaan_katteet_tilauksella'] == "") {
 						$sel1 = "SELECTED";
 						$sel2 = "";
 						$sel3 = "";
+						$sel4 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
 						$sel1 = "";
 						$sel2 = "SELECTED";
 						$sel3 = "";
+						$sel4 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "N") {
 						$sel1 = "";
 						$sel2 = "";
 						$sel3 = "SELECTED";
+						$sel4 = "";
+					}
+					if ($krow['naytetaan_katteet_tilauksella'] == "B") {
+						$sel1 = "";
+						$sel2 = "";
+						$sel3 = "";
+						$sel4 = "SELECTED";
 					}
 
 					echo "<tr><th align='left'>",t("Katteet näytetään tilauksentekovaiheessa"),":</th>
@@ -1168,6 +1205,7 @@
 							<option value=''  {$sel1}>",t("Oletus"),"</option>
 							<option value='Y' {$sel2}>",t("Kate näytetään"),"</option>
 							<option value='N' {$sel3}>",t("Katetta ei näytetä"),"</option>
+							<option value='B' {$sel4}>",t("Bruttokate näytetään tilauksentekovaiheessa ja tuotekyselyssä"),"</option>
 							</select></td></tr>";
 
 					echo "<tr><th align='left'>",t("Lomaoikeus"),":</th>

@@ -85,7 +85,6 @@
 						asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email,
 						asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio
 						FROM asiakas
-						{$lisa_dynaaminen["asiakas"]}
 						WHERE $konsernit
 						$lisa";
 			$tiednimi = "asiakaslista.xls";
@@ -96,7 +95,6 @@
 						if (asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino,
 						asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
 						FROM asiakas
-						{$lisa_dynaaminen["asiakas"]}
 						WHERE $konsernit
 						$lisa";
 			$tiednimi = "viikkosuunnitelma.xls";
@@ -107,7 +105,6 @@
 					asiakas.ytunnus, asiakas.asiakasnro, if (asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp,
 					asiakas.puhelin, asiakas.yhtio
 					FROM asiakas
-					{$lisa_dynaaminen["asiakas"]}
 					WHERE $konsernit
 					$lisa";
 	}

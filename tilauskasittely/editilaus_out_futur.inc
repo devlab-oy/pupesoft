@@ -86,7 +86,7 @@
 			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhjä niin asiakkaan osoitteesta), niin silloin se lisätään aineistoon
 			elseif (trim($asiakasrow['toim_osoite']) != '') {
 				// Kauttalaskutusasiakkaille ei tyhjennetä
-				if ($asiakasrow["osasto"] != "6" and $toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
+				if ($asiakasrow["osasto"] != "6" and $toim_yritys == substr(trim($asiakasrow['toim_nimi'].' '.$asiakasrow['toim_nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
 					$toim_yritys 	= '';
 					$toim_osoite 	= '';
 					$toim_postitp 	= '';
@@ -95,7 +95,7 @@
 				}
 			}
 			else {
-				if ($toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['postitp']), 0, 25) and $toim_postino == trim($asiakasrow['postino'])) {
+				if ($toim_yritys == substr(trim($asiakasrow['nimi'].' '.$asiakasrow['nimitark']), 0, 30) and $toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['postitp']), 0, 25) and $toim_postino == trim($asiakasrow['postino'])) {
 					$toim_yritys 	= '';
 					$toim_osoite 	= '';
 					$toim_postitp	= '';
@@ -143,7 +143,7 @@
 					$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);
 				}
 
-				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta
+				// HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
 				$hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
 
 				// nettorivihinta

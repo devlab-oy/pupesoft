@@ -148,7 +148,7 @@
 		if (isset($vain_tulostus) and $vain_tulostus != '') $vain_tulostus = $print['kirjoitin'];
 
 		// emuloidaan transactioita mysql LOCK komennolla
-		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, vak READ";
+		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, vak READ, rahtikirjanumero WRITE";
 		$res   = pupe_query($query);
 
 		if ($jv == 'vainjv') {
@@ -161,7 +161,7 @@
 		}
 		elseif ($jv == 'vainvak') {
 			if (!isset($nayta_pdf)) echo t("Vain VAK").". ";
-			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi not in ('','0')) ";
 		}
 		else {
@@ -402,7 +402,7 @@
 					// merkataan rahtikirjat tulostetuksi..
 					if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 						$query = "	UPDATE rahtikirjat
-									set tulostettu=now()
+									set tulostettu = now()
 									where tunnus in ($tunnukset)
 									and yhtio = '$kukarow[yhtio]'";
 						$ures  = pupe_query($query);
@@ -479,7 +479,7 @@
 				// merkataan rahtikirjat tulostetuksi..
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query = "	UPDATE rahtikirjat
-								set tulostettu=now()
+								set tulostettu = now()
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = pupe_query($query);
@@ -579,6 +579,9 @@
 				// tulostetaan toimitustavan määrittelemä rahtikirja
 				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
 
+					// Otetaan talteen tässä $rahtikirjanro talteen
+					$rahtikirjanro_alkuperainen = $rahtikirjanro;
+
 					if ($tulosta_vak_yleisrahtikirja != '') {
 						require("tilauskasittely/rahtikirja_pdf.inc");
 					}
@@ -586,6 +589,9 @@
 					if ($toitarow['erittely'] != '') {
 						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 					}
+
+					// palautetaan alkuperäinen $rahtikirjanro takaisin
+					$rahtikirjanro = $rahtikirjanro_alkuperainen;
 				}
 				else {
 					if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
@@ -601,7 +607,7 @@
 
 					if (trim($pakkaustieto_tunnukset) != '') {
 						$query = "	UPDATE rahtikirjat
-									set rahtikirjanro='$rahtikirjanro'
+									set rahtikirjanro = '$rahtikirjanro'
 									where tunnus in ($pakkaustieto_tunnukset)
 									and yhtio = '$kukarow[yhtio]'";
 						$ures  = pupe_query($query);
@@ -609,14 +615,14 @@
 				}
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
-					
+
 					$tulostauna		= "";
 
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
 						$tulostauna = "KYLLA";
 						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
 					}
-					
+
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
 					}

@@ -86,7 +86,9 @@
 					toim_maa    		= '',
 					laskutusvkopv		= '',
 					chn					= '',
-					verkkotunnus		= ''
+					verkkotunnus		= '',
+					toimitustapa		= '',
+					toimitustavan_lahto = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -277,14 +279,18 @@
 
 				unset($jatka);
 			}
-
 		}
 	}
 
 	//	Tarkastetaan käsinsyötetty viite
 	if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
-		if (tarkista_viite($kasinsyotetty_viite) === FALSE) {
-			echo "<font class='error'>".t("VIRHE: Syötetty viite '%' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
+		if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
+			echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
+			$tee	= "OTSIK";
+			unset($jatka);
+		}
+		elseif (substr($kasinsyotetty_viite, 0, 2) == "RF" and tarkista_rfviite($kasinsyotetty_viite) === FALSE) {
+			echo "<font class='error'>".t("VIRHE: Syötetty RF-viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
 			$tee	= "OTSIK";
 			unset($jatka);
 		}
@@ -434,6 +440,17 @@
 
 	}
 
+	// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+	if ($kukarow["kesken"] != 0) {
+		$query = "	SELECT *
+					FROM rahtikirjat
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					AND otsikkonro 	= '$kukarow[kesken]'
+					AND tulostettu != '0000-00-00 00:00:00'
+					LIMIT 1";
+		$rakre_chkres = pupe_query($query);
+	}
+
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
@@ -452,6 +469,20 @@
 		}
 		elseif ($toim == "MYYNTITILI") {
 			echo "<font class='head'>".t("Myyntitilin otsikko")."</font><hr>";
+			// Myyntitili oikeellisuustarkistus
+			$query = "	SELECT tunnus
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND alkuhyllyalue = '!!M'
+						AND loppuhyllyalue = '!!M'
+						AND tyyppi = 'E'";
+			$myyntitili_result = pupe_query($query);
+
+			if (mysql_num_rows($myyntitili_result) != 1) {
+				echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
+				require("inc/footer.inc");
+				exit;
+			}
 		}
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
@@ -490,13 +521,42 @@
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
 
+				if (!checkdate($toimkk,$toimpp,$toimvv)) {
+					$toimpp = date("j");
+					$toimkk = date("n");
+					$toimvv = date("Y");
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+				else {
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+
+				if (!checkdate($kerkk,$kerpp,$kervv)) {
+					$kerpp = date("j");
+					$kerkk = date("n");
+					$kervv = date("Y");
+					$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
+				else {
+				 	$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
+
 				if (trim($assrow["toim_nimi"]) == "") {
-					$assrow["toim_nimi"]	= $assrow["nimi"];
-					$assrow["toim_nimitark"]= $assrow["nimitark"];
-					$assrow["toim_osoite"]	= $assrow["osoite"];
-					$assrow["toim_postino"]	= $assrow["postino"];
-					$assrow["toim_postitp"]	= $assrow["postitp"];
-					$assrow["toim_maa"]		= $assrow["maa"];
+					$assrow["toim_nimi"]		= $assrow["nimi"];
+					$assrow["toim_nimitark"]	= $assrow["nimitark"];
+					$assrow["toim_osoite"]		= $assrow["osoite"];
+					$assrow["toim_postino"]		= $assrow["postino"];
+					$assrow["toim_postitp"]		= $assrow["postitp"];
+					$assrow["toim_maa"]			= $assrow["maa"];
+				}
+
+				if (trim($assrow["laskutus_nimi"]) == "") {
+					$assrow["laskutus_nimi"]	   = $assrow["nimi"];
+				 	$assrow["laskutus_nimitark"]   = $assrow["nimitark"];
+				 	$assrow["laskutus_osoite"]	   = $assrow["osoite"];
+				 	$assrow["laskutus_postino"]	   = $assrow["postino"];
+				 	$assrow["laskutus_postitp"]	   = $assrow["postitp"];
+				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
 				$query = "	UPDATE lasku
@@ -518,14 +578,22 @@
 							toim_maa    		= '$assrow[toim_maa]',
 							laskutusvkopv		= '$assrow[laskutusvkopv]',
 							chn					= '$assrow[chn]',
-							verkkotunnus		= '$assrow[verkkotunnus]'
+							verkkotunnus		= '$assrow[verkkotunnus]',
+							toimitustapa		= '$assrow[toimitustapa]',
+							maksuehto			= '$assrow[maksuehto]',
+							tilausvahvistus		= '$assrow[tilausvahvistus]',
+							piiri				= '$assrow[piiri]',
+							rahtivapaa			= '$assrow[rahtivapaa]',
+							toimaika 			= '$toimpvm',
+							kerayspvm			= '$kerpvm',
+							toimitusehto		= '$assrow[toimitusehto]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
 				$result = pupe_query($query);
 
 				if (mysql_affected_rows() > 0) {
-					echo "<font class='message'>".t("HUOM! Uudet otsikkotiedot haettu asiakasrekisteristä.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Uudet otsikkotiedot haettu asiakasrekisteristä.")."</font><br>";
 				}
 
 				$query = "	UPDATE laskun_lisatiedot
@@ -642,7 +710,7 @@
 				}
 
 				if ($tilausnumero == 0) {
-					echo "<font class='message'>".t("HUOM! Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
+					echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
 				}
 			}
 
@@ -787,7 +855,7 @@
 		}
 
 		if ($templ > 0 and $asiakasid == '') {
-			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
+			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
 		}
 
 		echo "</table>";
@@ -1074,6 +1142,12 @@
 			}
 			echo "</td>";
 
+			$state_chk = '';
+
+			if (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
+			}
+
 			// haetaan oletus rahdinmaksaja
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
@@ -1094,20 +1168,24 @@
 			$sel[$apu_rahdinmaksaja] = "selected";
 
 			echo "<td>".t("Rahtisopimus").":</td>
-				<td><select id='merahti' name='maksaja'>
+					<td><select id='merahti' name='maksaja' {$state_chk}>
 					<option value='O'>".t("Oletus")."</option>
 					<option value='K' $sel[K]>".t("Käytetään lähettäjän rahtisopimusta")."</option>
 					<option value=''  $sel[V]>".t("Käytetään vastaanottajan rahtisopimusta")."</option>
-					</select>
-				</td>
-				</tr>";
+					</select>";
+
+			// HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='maksaja' value='$apu_rahdinmaksaja'>";
+			}
+
+			echo "</td></tr>";
 
 			if ($yhtiorow["viitteen_kasinsyotto"] != "") {
 				echo "<tr><td>".t("Viitenumero").":</td><td>";
 				echo "<input type='text' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
 				echo "</td><td></td><td></td></tr>";
 			}
-
 
 			$query = "	SELECT tunnus, selite, merahti
 						FROM toimitustapa
@@ -1124,34 +1202,28 @@
 			mysql_data_seek($tresult, 0);
 
 			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();'>";
-
-			$lahtoseleted = FALSE;
-
-			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
-				$lahtoseleted = TRUE;
-			}
+			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
 
 			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"] and !$lahtoseleted) {
+				if ($row["selite"] == $srow["toimitustapa"]) {
 					$sel = 'selected';
 				}
 
-				$toimitustava_lahto = seuraava_lahtoaika($row['tunnus']);
-
-				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]#$toimitustava_lahto' $sel>";
+				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
-				if ($toimitustava_lahto != "0000-00-00 00:00:00") {
-					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
-				}
 
 				echo "</option>";
 			}
-			echo "</select></td>";
+			echo "</select>";
+
+			// HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='toimitustapa' value='$srow[toimitustapa]'>";
+			}
+
+			echo "</td>";
 
 			//yhtiön oletusalvi!
 			$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
@@ -1341,10 +1413,10 @@
 			echo "<td>".t("Myyjä")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+			$query = "	SELECT kuka.tunnus, kuka.kuka, kuka.nimi, kuka.myyja, kuka.asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$srow[myyja]')
-						ORDER BY nimi";
+						WHERE kuka.yhtio = '$kukarow[yhtio]' and (kuka.extranet = '' or kuka.tunnus='$srow[myyja]')
+						ORDER BY kuka.nimi";
 			$yresult = pupe_query($query);
 
 			while($row = mysql_fetch_assoc($yresult)) {
@@ -1370,7 +1442,9 @@
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
-							WHERE liitostunnus = '$srow[liitostunnus]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
 							ORDER BY nimi";
 				$yhresult = pupe_query($query);
 
@@ -1872,7 +1946,15 @@
 			echo "</select></td>";
 
 			echo "<td>",t("Rahtivapaa"),":</td>";
-			echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk></td>";
+			echo "<td>";
+			echo "<input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk {$state_chk}>";
+
+			// HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='rahtivapaa' value='$srow[rahtivapaa]'>";
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			if ($yhtiorow['laskutuskielto'] != 0) {
@@ -2339,7 +2421,8 @@
 							where yhtio = '$kukarow[yhtio]'
 							and liitostunnus = '$srow[liitostunnus]'
 							and tyyppi = 'A'
-							and tilausyhteyshenkilo != ''";
+							and tilausyhteyshenkilo != ''
+							ORDER BY nimi";
 			$yhteysresult = pupe_query($yhteysquery);
 
 			echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
@@ -2652,6 +2735,12 @@
 			if (isset($ohjelmamoduli) and $ohjelmamoduli != "") {
 				$postquery .= ",ohjelma_moduli = '$ohjelmamoduli'";
 			}
+			elseif (substr($toim, 0, 8) == "EXTRANET") {
+				$postquery .= ",ohjelma_moduli = 'EXTRANET'";
+			}
+			else {
+				$postquery .= ",ohjelma_moduli = 'PUPESOFT'";
+			}
 
 			$query2 = "INSERT into ";
 			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
@@ -2702,7 +2791,7 @@
 			}
 			else {
 				$query3 = "UPDATE ";
-				$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
+				$postquery3 = " WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 			}
 		}
 
@@ -3314,6 +3403,17 @@
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
 				$result = pupe_query($query3);
+			}
+
+			// Päivitetään rahtikirjatiedot jos ne on syötetty
+			if ($alatila == "B" or $alatila == "D" or $alatila == "J" or $alatila == "E") {
+				$query4 = "	UPDATE rahtikirjat
+							SET toimitustapa = '$toimitustapa',
+							merahti = '$maksaja'
+							where yhtio = '$kukarow[yhtio]'
+							and otsikkonro = '$kukarow[kesken]'
+							and tulostettu = '0000-00-00 00:00:00'";
+				$result = pupe_query($query4);
 			}
 
 			//	Tahdistetaan toimitukset

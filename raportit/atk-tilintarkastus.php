@@ -1,34 +1,36 @@
 <?php
 
-//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
-$useslave = 1;
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
 
-if (isset($_POST["tee"])) {
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
-}
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
 
-require("../inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 
-//Ja t‰ss‰ laitetaan ne takas
-$sqlhaku = $sqlapu;
-
-if (isset($tee)) {
+	$tee = isset($tee) ? trim($tee) : "";
+	$tositetyyppi_mukaan = isset($tositetyyppi_mukaan) ? trim($tositetyyppi_mukaan) : "";
+	
 	if ($tee == "lataa_tiedosto") {
-		readfile("/tmp/".$tmpfilenimi);
+		readfile("/tmp/$tmpfilenimi");
+		unlink("/tmp/$tmpfilenimi");
 		exit;
 	}
-}
-else {
 
 	// tehd‰‰n valtiontilintarkastajille atk-tarkistusmateriaalia
 	echo "<font class='head'>Atk-tilintarkastus</font><hr>";
+
+	// default arvot yhtiorowlta
+	if (!isset($alku))  $alku  = substr($yhtiorow['tilikausi_alku'],0,4)  - 1 . substr($yhtiorow['tilikausi_alku'],4);
+	if (!isset($loppu)) $loppu = substr($yhtiorow['tilikausi_loppu'],0,4) - 1 . substr($yhtiorow['tilikausi_loppu'],4);
 
 	if ($alku != '') {
 		list($vv, $kk, $pp) = explode("-", $alku);
 		if (!checkdate($kk, $pp, $vv)) {
 			echo "<font class='error'>Virheellinen alkupvm $alku</font><br><br>";
-			$alku = '';
+			$tee = "";
 		}
 	}
 
@@ -36,11 +38,11 @@ else {
 		list($vv, $kk, $pp) = explode("-", $loppu);
 		if (!checkdate($kk, $pp, $vv)) {
 			echo "<font class='error'>Virheellinen loppupvm $loppu</font><br><br>";
-			$loppu = '';
+			$tee = "";
 		}
 	}
 
-	if ($alku != '' and $loppu != '') {
+	if ($tee == "raportti") {
 
 		/* tiliˆinnit */
 
@@ -53,14 +55,14 @@ else {
 		// haetaan kaikki vuoden tapahtumat.. uh
 		$query  = "	SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
 					tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
-					tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp
+					tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp, lasku.alatila, lasku.tila
 					FROM tiliointi
 					JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
 					where tiliointi.yhtio	= '$kukarow[yhtio]'
 					and tiliointi.tapvm    >= '$alku'
 					and tiliointi.tapvm    <= '$loppu'
 					and tiliointi.korjattu	= ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while($row = mysql_fetch_array($result)) {
 
@@ -81,6 +83,29 @@ else {
 			$rivi .= sprintf("%-45.45s", $row['osoitetark']);	// asiakkaan/toimittajan osoitetarkenne 45 merkki‰
 			$rivi .= sprintf("%-15.15s", $row['postino']);		// asiakkaan/toimittajan postinumero 15 merkki‰
 			$rivi .= sprintf("%-45.45s", $row['postitp']);		// asiakkaan/toimittajan postitoimipaikka 45 merkki‰
+
+			if ($tositetyyppi_mukaan != "") {
+				// Laitetaan tositetyyppi mukaan selkokielisen‰
+				if ($row["tila"] == "U") {
+					$rivi .= sprintf("%-11.11s", "Myynti");
+				}
+				elseif (in_array($row["tila"], array("H", "Y", "M", "P", "Q"))) {
+					$rivi .= sprintf("%-11.11s", "Osto");
+				}
+				elseif ($row["tila"] == "X" and $row["alatila"] == "E") {
+					$rivi .= sprintf("%-11.11s", "Epakurantti");
+				}
+				elseif ($row["tila"] == "X" and $row["alatila"] == "I") {
+					$rivi .= sprintf("%-11.11s", "Inventointi");
+				}
+				elseif ($row["tila"] == "X") {
+					$rivi .= sprintf("%-11.11s", "Muu tosite");
+				}
+				else {
+					$rivi .= sprintf("%-11.11s", $row["tila"]);
+				}
+			}
+
 			$rivi .= "\r\n";									// windows rivinvaihto (cr lf)
 
 			if (fwrite($fh, $rivi) === FALSE) die("Tiedoston kirjoitus ep‰onnistui!");
@@ -99,7 +124,7 @@ else {
 
 		// haetaan kaikki tilit
 		$query  = "select * from tili where yhtio='$kukarow[yhtio]' order by tilino";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while($row = mysql_fetch_array($result)) {
 
@@ -127,7 +152,7 @@ else {
 					where yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					ORDER BY tyyppi, koodi+0, koodi, nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while($row = mysql_fetch_array($result)) {
 
@@ -156,8 +181,12 @@ else {
 		fclose($fh);
 
 		// tehd‰‰n failista zippi
-		exec("cd /tmp;/usr/bin/zip Tilintarkastus-$kukarow[yhtio].zip $file1 $file2 $file3");
-
+		chdir("/tmp");
+		exec("/usr/bin/zip Tilintarkastus-{$kukarow["yhtio"]}.zip ".escapeshellarg($file1)." ".escapeshellarg($file2)." ".escapeshellarg($file3));
+		unlink($file1);
+		unlink($file2);
+		unlink($file3);
+		
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -169,11 +198,9 @@ else {
 
 	}
 
-	// default arvot yhtiorowlta
-	if (!isset($alku))  $alku  = substr($yhtiorow['tilikausi_alku'],0,4)  - 1 . substr($yhtiorow['tilikausi_alku'],4);
-	if (!isset($loppu)) $loppu = substr($yhtiorow['tilikausi_loppu'],0,4) - 1 . substr($yhtiorow['tilikausi_loppu'],4);
-
 	echo "<form name='vero' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='raportti'>";
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>Anna alkupvm</th>";
@@ -181,6 +208,9 @@ else {
 	echo "</tr><tr>";
 	echo "<th>Anna alkupvm</th>";
 	echo "<td><input type='text' name='loppu' value='$loppu'></td>";
+	echo "</tr><tr>";
+	echo "<th>Lis‰‰ tositetyyppi ainestoon</th>";
+	echo "<td><input type='checkbox' name='tositetyyppi_mukaan'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "<br><input type='submit' value='Aja'>";
@@ -190,6 +220,4 @@ else {
 	$formi  = "vero";
 	$kentta = "alku";
 
-	require ("../inc/footer.inc");
-}
-?>
+	require ("inc/footer.inc");

@@ -21,7 +21,7 @@ if (-f $tmpfile) {
 	$smtp->mail($emailfrom);
 	$smtp->to($email);
 	$smtp->data();
-	$smtp->datasend("Subject: Editilaus HUOM!\n\n");
+	$smtp->datasend("Subject: Editilaus HUOM:\n\n");
 	$smtp->datasend("\nEditilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!");
 	$smtp->dataend();
 	$smtp->quit;
@@ -149,7 +149,7 @@ if (!-f $tmpfile) {
 
 	system("rm -f $tmpfile");
 
-	# siivotaan yli 180 p‰iv‰‰ vanhat aineistot
-	system("find $dirri2 -mtime +180 -delete");
+	# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
+	system("find $dirri2 -mtime +90 -delete");
 
 } # end temp if

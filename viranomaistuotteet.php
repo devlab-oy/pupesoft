@@ -201,15 +201,42 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 }
 
 if ($tee == 'LUO' and (trim($tilinumero) == '' or trim($annettuvuosi) == '')) {
-	echo t("Virhe: Joko tiedosto puuttui, tilinumero puuttui tai vuosi puuttui");
+	echo "<font class='error'>".t("VIRHE: Joko tiedosto puuttui, tilinumero puuttui tai vuosi puuttui")."!</font>";
 	unset($tee);
+}
+
+if ($tee == "synkronoi") {
+
+	$query = "	SELECT tunnus, tilino
+				FROM tili
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				and tilino = '{$ulkomaantilinumero}'
+				and tilino != ''";
+	$tilires = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($tilires) == 0) {
+		echo "<font class='error'>".t("VIRHE: Ulkomaanpäivärahojen tilinumero puuttuu")."!</font><br>";
+		$tee = '';
+	}
+
+	$query = "	SELECT tunnus, tilino
+				FROM tili
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				and tilino = '{$kotimaantilinumero}'
+				and tilino != ''";
+	$tilires = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($tilires) == 0) {
+		echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahojen tilinumero puuttuu")."!</font><br>";
+		$tee = '';
+	}
 }
 
 if ($tee == "synkronoi") {
 
 	$ok = FALSE;
 
-	if ($file = fopen("http://www.devlab.fi/softa/referenssiviranomaistuotteet.sql","r")) {
+	if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql","r")) {
 		$ok = TRUE;
 	}
 	elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql","r")) {

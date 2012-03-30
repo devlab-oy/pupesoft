@@ -61,8 +61,8 @@
 				<th>".t("Määrä")."</th>
 				<th>".t("Määrä")."</th>
 				<th>".t("Hinta")."</th>";
-
-				for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+				
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 					echo "<th>",t("Ale"),"{$alepostfix}</th>";
 				}
 
@@ -94,9 +94,11 @@
 		echo "<td>$kpl</td>
 			<td><input type='text' size='7' name='kpl' value = '$kpl'></td>
 			<td><input type='text' size='7' name='hinta' value = '$hinta'></td>";
-
-		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+		
+		$backspan = 5;	
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			echo "<td><input type='text' size='5' name='ale{$alepostfix}' value = '",${'ale'.$alepostfix},"'></td>";
+			$backspan++;
 		}
 
 		if ($alv=='') $alv=$laskurow['alv'];
@@ -106,8 +108,8 @@
 		if ($automatiikka == "ON" and $onjodropdowni != 'ON' and $laskurow['tila'] != 'O') {
 			echo "	".t("Valtse toiminto").": <select name='var'>";
 			echo "<option value=''>".t("Oletus")."</option>";
-			echo "<option value='LOJ#$kpl'>".t("Lisää syötetyt ja merkkaa erotus JT:ksi")."</option>
-				<option value='LOP#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
+			echo "<option value='LOJ#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus JT:ksi")."</option>
+				<option value='LOP#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
 			echo "</select>";
 		}
 
@@ -129,7 +131,7 @@
 		echo "<tr>
 				<th align='left'>".t("Toimitusaika")."</th>";
 
-		echo "<th colspan='6' align='left'>".t("Kommentti")."</th>";
+		echo "<th colspan='$backspan' align='left'>".t("Kommentti")."</th>";
 
 		echo "<td class='back'></td>
 				</tr>";
@@ -151,7 +153,7 @@
 
 		echo "<tr>
 				<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
-				<td colspan='6'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>";
+				<td colspan='$backspan'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>";
 
 		//Tyhjennetään kentät
 		echo "<td class='back'><input type='Submit' name= 'tyhjenna' value = '".t("Tyhjennä")."'></td></tr>";

@@ -2,12 +2,17 @@
 
 	date_default_timezone_set("Europe/Helsinki");
 
-	// jos meill‰ on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saataa tunti vier‰ht‰‰ aika nopeasti)
+	// jos meill‰ on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saattaa tunti vier‰ht‰‰ aika nopeasti)
 	if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") < 5400) {
 		echo "Verkkolaskujen sis‰‰nluku k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") >= 5400) {
 		echo "VIRHE: Verkkolaskujen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
+
+		// Onko nagios monitor asennettu?
+		if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+			file_put_contents("/home/nagios/nagios-pupesoft.log", "VIRHE: Verkkolaskujen sis‰‰nluku jumissa!", FILE_APPEND);
+		}
 	}
 	else {
 
@@ -50,7 +55,7 @@
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 			//Pupesoftista
-			echo "Aloitetaan verkkolaskun sis‰‰nluku...<br><br>";
+			echo "Aloitetaan verkkolaskun sis‰‰nluku...<br>\n<br>\n";
 
 			$laskut     = $verkkolaskut_in;
 			$oklaskut   = $verkkolaskut_ok;
@@ -61,7 +66,7 @@
 			$copy_boob = copy($filenimi, $laskut."/".$userfile);
 
 			if ($copy_boob === FALSE) {
-			    echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>";
+			    echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>\n";
 				unlink("/tmp/##verkkolasku-in.lock");
 				exit;
 			}
@@ -106,14 +111,14 @@
 
 				    if ($laskuvirhe == "") {
 						if (!$php_cli)  {
-							echo "Verkkolasku vastaanotettu onnistuneesti!<br><br>";
+							echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
 						}
 
 						rename($laskut."/".$file, $oklaskut."/".$file);
 				    }
 				    else {
 						if (!$php_cli)  {
-							echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br><pre>$laskuvirhe</pre><br>";
+							echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
 						}
 
 						rename($laskut."/".$file, $errlaskut."/".$file);
@@ -123,6 +128,9 @@
 		}
 
 		unlink("/tmp/##verkkolasku-in.lock");
+
+		# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
+		system("find $verkkolaskut_in -mtime +90 -delete");
 	}
 
 ?>

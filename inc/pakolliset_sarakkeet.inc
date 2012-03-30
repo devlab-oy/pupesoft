@@ -76,20 +76,32 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TEKSTI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
+			case "asiakaskommentti" :
+				$pakolliset = array("YTUNNUS", "TUOTENO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			case "asiakashinta" :
 				$pakolliset = array("HINTA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
 				$saakopoistaa = TRUE;
 				break;
-			case "asiakaskommentti" :
-				$pakolliset = array("YTUNNUS", "TUOTENO");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				break;
 			case "asiakasalennus" :
 				$pakolliset = array("ALENNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
+				$saakopoistaa = TRUE;
+				break;
+			case "toimittajahinta" :
+				$pakolliset = array("HINTA");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "RYHMA", "TOIMITTAJA", "YTUNNUS", "LAJI");
+				$saakopoistaa = TRUE;
+				break;
+			case "toimittajaalennus" :
+				$pakolliset = array("ALENNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "RYHMA", "TOIMITTAJA", "YTUNNUS");
 				$saakopoistaa = TRUE;
 				break;
 			case "perusalennus" :
@@ -112,6 +124,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("LAJI", "SELITE", "SELITETARK", "SELITETARK_2", "KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$joinattavat = array("PERHE" => "avainsana");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuoteperhe" :
 				$pakolliset  = array("ISATUOTENO", "TUOTENO", "TYYPPI");
@@ -122,6 +135,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "rahtimaksut" :
 				$pakolliset = array("TOIMITUSTAPA", "KILOTALKU", "KILOTLOPPU", "KMALKU", "KMLOPPU");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "tuotteen_avainsanat" :
 				$pakolliset = array("TUOTENO", "LAJI", "KIELI");
@@ -153,6 +167,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset  = array("TYYPPI", "ATUNNUS", "TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TYYPPI", "ATUNNUS", "TUOTENO");
+				$saakopoistaa = TRUE;
 				break;
 			case "yhteensopivuus_tuote_lisatiedot" :
 				$pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "ARVO", "KIELI");
@@ -161,10 +176,17 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");
 				$saakopoistaa = TRUE;
 				break;
+			case "yhteensopivuus_rekisteri" :
+				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TUOTENO", "ORIG_TUOTENO", "MERKKI");
+				$saakopoistaa = TRUE;
 				break;
 			case "autodata" :
 				$pakolliset = array("AUTODATAID");
@@ -260,6 +282,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "puun_alkio" :
 				$pakolliset = array("TUNTEMATON_TAULU");
@@ -312,6 +335,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "toimitustavan_lahdot":
 				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
 				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "AKTIIVI", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "rahtikirjanumero":
+				$pakolliset = array("RAHTIKIRJANRO");
+				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			default :

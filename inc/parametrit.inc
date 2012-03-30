@@ -199,12 +199,15 @@ unset($liitetaanko_editilaus_laskulle_hakemisto);
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
 unset($synkronoi_kiellot);
+unset($alv_laskelman_sallittu_erotus);
+unset($e3_params);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
 
 require("salasanat.php");
+
 // haetaan jotain tarpeellisia funktioita mukaan..
 if (@include_once("inc/functions.inc"));
 elseif (@include_once("functions.inc"));
@@ -212,6 +215,7 @@ else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
+mysql_set_charset("latin1");
 
 // Pupeasennuksen root polku
 $pupe_root_polku = dirname(dirname(__FILE__));
@@ -235,8 +239,8 @@ $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pup
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
 //Initioidaan pari muuttujaa
-if(!isset($login))		$login = "";
-if(!isset($extranet)) 	$extranet = "";
+if (!isset($login))		$login = "";
+if (!isset($extranet)) 	$extranet = "";
 
 // jos saamme nämä muuttujat getissä, kokeillaan logata niillä sisään
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
@@ -417,7 +421,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<table width='100%' height='70%'>";
 				echo "<tr>";
 				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-				echo "<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
+				echo "<img src='http://api.devlab.fi/pupesoft.gif'><br><br>";
 				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
 				echo "</td>";
 				echo "</tr>";
@@ -461,6 +465,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			if (isset($filenimi) and $filenimi != '') {
 				header("Content-Length: ".filesize("$pupe_root_polku/dataout/".basename($filenimi)));
+			}
+			elseif (isset($datain_filenimi) and $datain_filenimi != '') {
+				header("Content-Length: ".filesize("$pupe_root_polku/datain/".basename($datain_filenimi)));
 			}
 			elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
 				header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
@@ -627,7 +634,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
-		if (isset($lopetus) and $lopetus != '') {
+		if (!isset($no_head) or (isset($no_head) and $no_head != "yes") and isset($lopetus) and $lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

@@ -119,8 +119,8 @@
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
-						round(sum(tilausrivi.kpl),0) kpl,
-						if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
+						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0, 1, 0)), round(sum(tilausrivi.kpl * tuote.tuotemassa), 0), if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1)) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -159,8 +159,8 @@
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
-						round(sum(tilausrivi.kpl),0) kpl,
-						if (round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0, 1, 0)), round(sum(tilausrivi.kpl * tuote.tuotemassa), 0), if (round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -198,8 +198,8 @@
 						max(lasku.tunnus) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
-						round(sum(tilausrivi.kpl),0) kpl,
-						if (count(tilausrivi.tunnus) = count(if (tuote.tuotemassa > 0,1,0)),if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
+						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0,1,0)), round(sum(tilausrivi.kpl*tuote.tuotemassa),0),if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -408,6 +408,7 @@
 			$nim .= sprintf ('%-15.15s',	"");																								//ilmoitajan viite...
 			$nim .= sprintf ('%-3.3s',		"WT");																								//m‰‰r‰ntarkennin 1
 			$nim .= sprintf ('%-3.3s',		"KGM");																								//paljouden lajikoodi
+			if ($row["paino"] == 0) $row["paino"] = 1;
 			$nim .= sprintf ('%010d', 		$row["paino"]);																						//nettopaino
 			$nim .= sprintf ('%-3.3s',		"AAE");																								//m‰‰r‰ntarkennin 2, muu paljous
 
@@ -446,8 +447,8 @@
 				$tilastoarvot .= "<td>$row[paino] | $row[paino2]</td>";																							//nettopaino
 
 				if ($row["su"] != '') {
-					$tilastoarvot .= "<td>$row[su]</td>"; 																							//2 paljouden lajikoodi
-					$tilastoarvot .= "<td>$row[kpl]</td>";																							//2 paljouden m‰‰r‰
+					$tilastoarvot .= "<td>{$row["su"]}</td>"; 																							//2 paljouden lajikoodi
+					$tilastoarvot .= "<td>{$row["kpl"]}</td>";																							//2 paljouden m‰‰r‰
 				}
 				else {
 					$tilastoarvot .= "<td></td>"; 																									//2 paljouden lajikoodi
@@ -505,8 +506,14 @@
 				$ulos .= "<td valign='top'>".$row["kuljetusmuoto"]."</td>";
 				$ulos .= "<td valign='top' align='right'>".$row["rivihinta"]."</td>";
 				$ulos .= "<td valign='top' align='right'>".$row["paino"]."</td>";
-				$ulos .= "<td valign='top'>".$row["su"]."</td>";
-				$ulos .= "<td valign='top' align='right'>".$row["kpl"]."</td>";
+				if ($row["su"] != "") {
+					$ulos .= "<td valign='top'>".$row["su"]."</td>";
+					$ulos .= "<td valign='top' align='right'>".$row["kpl"]."</td>";
+				}
+				else {
+					$ulos .= "<td></td>";
+					$ulos .= "<td></td>";
+				}
 
 				if ($lisavar == "S") {
 					if ($row["perheid2set"] != "0") {
@@ -532,8 +539,10 @@
 					$worksheet->write($excelrivi, 9, $row["kuljetusmuoto"]);
 					$worksheet->write($excelrivi, 10, $row["rivihinta"]);
 					$worksheet->write($excelrivi, 11, $row["paino"]);
-					$worksheet->write($excelrivi, 12, $row["su"]);
-					$worksheet->write($excelrivi, 13, $row["kpl"]);
+					if ($row["su"] != '') {
+						$worksheet->write($excelrivi, 12, $row["su"]);
+						$worksheet->write($excelrivi, 13, $row["kpl"]);
+					}
 					if ($lisavar == "S") {
 						$worksheet->write($excelrivi, 12, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
 					}
@@ -546,7 +555,10 @@
 			$arvoyht		+= $row["rivihinta"];
 			$bruttopaino	+= $row["paino"];
 			$totsumma		+= $row["rivihinta"];
-			$totkpl			+= $row["kpl"];
+
+			if ($row["su"] != '') {
+				$totkpl += $row["kpl"];
+			}
 		}
 
 		// 4. Summatietue

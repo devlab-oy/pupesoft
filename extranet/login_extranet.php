@@ -15,8 +15,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana
 				FROM kuka
 				JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
-				WHERE kuka.kuka = '$user' 
-				AND kuka.extranet != '' 
+				WHERE kuka.kuka = '$user'
+				AND kuka.extranet != ''
 				AND kuka.oletus_asiakas != ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($result);
@@ -70,6 +70,9 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	}
 	else {
 		$errormsg = "<br><font class='error'>".t("Käyttäjätunnusta ei löydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
+
+		// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+		error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 	}
 }
 else {
@@ -139,7 +142,7 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
 	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='/'><img src='http://api.devlab.fi/pupesoft.gif' border='0'>";
 }
 
 echo "</a></td>
@@ -178,7 +181,7 @@ if (isset($usea) and $usea == 1) {
 	echo "</table>";
 
 	echo "$errormsg<br>";
-	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
+	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
 
@@ -201,7 +204,7 @@ else {
 			$errormsg
 			<br><input type='submit' value='".t("Kirjaudu sisään",$browkieli)."'>
 			<br><br>
-			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>
+			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
 			</form>
 	";
 }

@@ -282,56 +282,69 @@
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
 
-						if (strtolower($otsikot[$e]) == "kustp") {
-							// Kustannuspaikka
-							$ikustp_tsk  	 = trim($eriv);
-							$ikustp[$maara]  = 0;
+						if (strtolower($otsikot[$e]) == "kustp" or strtolower($otsikot[$e]) == "kohde" or strtolower($otsikot[$e]) == "projekti") {
+							// Kustannuspaikka, kohde, projekti
+							$kukopr = strtolower($otsikot[$e]);
 
-							if ($ikustp_tsk != "") {
+							if ($kukopr == "kustp") {
+								$ikukopr_tyyppi = "K";
+							}
+							elseif ($kukopr == "kohde") {
+								$ikukopr_tyyppi = "O";
+							}
+							elseif ($kukopr == "projekti") {
+								$ikukopr_tyyppi = "P";
+							}
+
+							${"i".$kukopr}[$maara] = 0;
+
+							$ikukopr_tsk = trim($eriv);
+
+							if ($ikukopr_tsk != "") {
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and nimi = '{$ikustp_tsk}'";
+											and nimi = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 
-							if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
+							if ($ikukopr_tsk != "" and ${"i".$kukopr}[$maara] == 0) {
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and koodi = '{$ikustp_tsk}'";
+											and koodi = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 
-							if (is_numeric($ikustp_tsk) and (int) $ikustp_tsk > 0 and $ikustp[$maara] == 0) {
+							if (is_numeric($ikukopr_tsk) and (int) $ikukopr_tsk > 0 and ${"i".$kukopr}[$maara] == 0) {
 
-								$ikustp_tsk = (int) $ikustp_tsk;
+								$ikukopr_tsk = (int) $ikukopr_tsk;
 
 								$query = "	SELECT tunnus
 											FROM kustannuspaikka
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											and tyyppi = 'K'
+											and tyyppi = '$ikukopr_tyyppi'
 											and kaytossa != 'E'
-											and tunnus = '{$ikustp_tsk}'";
+											and tunnus = '{$ikukopr_tsk}'";
 								$ikustpres = pupe_query($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $ikustprow["tunnus"];
+									${"i".$kukopr}[$maara] = $ikustprow["tunnus"];
 								}
 							}
 						}
@@ -339,7 +352,6 @@
 							${"i".strtolower($otsikot[$e])}[$maara] = sprintf("%.2f",round($eriv, 2));
 						}
 						else {
-
 							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 						}
 
@@ -586,7 +598,7 @@
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
 
-				$tili				= $itili[$i];
+				$tili				= trim($itili[$i]);
 				$kustp				= $ikustp[$i];
 				$kohde				= $ikohde[$i];
 				$projekti			= $iprojekti[$i];
@@ -617,32 +629,37 @@
 			require("inc/kuitti.inc");
 		}
 
-		$alv_tili = "";
-		$asiakas_y = "";
-		$comments = "";
-		$ed_iliitos = "";
-		$ed_iliitostunnus = "";
-		$ikohde = "";
-		$ikustp = "";
-		$iliitos = "";
-		$iprojekti = "";
-		$iselite = "";
-		$isumma = "";
-		$itili = "";
-		$ivero = "";
-		$maara = "";
-		$nimi = "";
-		$selite = "";
-		$summa = "";
-		$tee = "";
-		$teetosite = "";
-		$tiliointirivit = "";
-		$toimittaja_y = "";
-		$tositesum = "";
-		$tpk = "";
-		$tpp = "";
-		$tpv = "";
-		$valkoodi = "";
+		$alv_tili 			= "";
+		$asiakas_y 			= "";
+		$comments 			= "";
+		$ed_iliitos 		= "";
+		$ed_iliitostunnus 	= "";
+		$ikohde 			= "";
+		$ikustp 			= "";
+		$iliitos 			= "";
+		$iprojekti 			= "";
+		$iselite 			= "";
+		$isumma 			= "";
+		$itili 				= "";
+		$ivero 				= "";
+		$maara 				= "";
+		$nimi 				= "";
+		$selite 			= "";
+		$summa 				= "";
+		$tee 				= "";
+		$teetosite 			= "";
+		$tiliointirivit 	= "";
+		$toimittaja_y 		= "";
+		$tositesum 			= "";
+		$tpk 				= "";
+		$tpp 				= "";
+		$tpv 				= "";
+		$valkoodi 			= "";
+		$avaavatase 		= "";
+		$gokfrom 			= "";
+		$tilikausi 			= "";
+		$asiakasid			= "";
+		$toimittajaid		= "";
 
 		if ($lopetus != '' and $tullaan == "muutosite") {
 			lopetus($lopetus, "META");
@@ -652,6 +669,7 @@
 			echo "<font class='message'>".t("Tosite luotu")."!</font>\n";
 			echo "	<form action = 'muutosite.php' method='post'>
 					<input type='hidden' name='tee' value='E'>
+					<input type='hidden' name='lopetus' value='{$lopetus}'>
 					<input type='hidden' name='tunnus' value='{$tunnus}'>
 					<input type='Submit' value='".t("Näytä tosite")."'>
 					</form><br><hr><br>";
@@ -789,6 +807,10 @@
 		$formi = 'tosite';
 		$kentta = 'tpp';
 
+		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($avaavatase) and $avaavatase == 'joo')) {
+			echo "<br><br><font class='error'>".t("HUOM: Avaavaa tasetta ei ole vielä kirjattu")."!<br>".t("HUOM: Tarkista tämä tosite ja tee kirjaukset klikkamalla *Tee tosite*-nappia")."!</font><br>";
+		}
+
 		echo "<br>\n";
 		echo "<font class='head'>".t("Tositteen otsikkotiedot").":</font>\n";
 
@@ -808,7 +830,7 @@
 
 		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($tilikausi) and is_numeric($tilikausi))) {
 			echo "<input type='hidden' name='avaavatase' value='joo' />";
-			echo "<input type='hidden' name='tilikausi' value='{$tilikausi}' />";
+			echo "<input type='hidden' name='tilikausi'  value='{$tilikausi}' />";
 		}
 
 		// Uusi tosite
@@ -839,7 +861,11 @@
 
 			foreach ($tiliointirivit as $xxx => $rivix) {
 
-				$query = "SELECT * FROM tiliointi WHERE yhtio = '{$kukarow['yhtio']}' AND ltunnus = '{$tunnus}' AND tunnus = '{$rivix}'";
+				$query = "	SELECT *
+							FROM tiliointi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ltunnus = '{$tunnus}'
+							AND tunnus = '{$rivix}'";
 				$info_res = pupe_query($query);
 				$info_row = mysql_fetch_assoc($info_res);
 
@@ -1216,6 +1242,9 @@
 			if (isset($ivirhe[$i])) echo "<font class='error'>{$ivirhe[$i]}</font>";
 			echo "</td>\n";
 			echo "</tr>\n";
+
+			// Ei rikota rivinvaihtoja
+			$iselite[$i] = str_ireplace("<br>", "(br)", $iselite[$i]);
 
 			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";

@@ -1,88 +1,113 @@
 #!/usr/bin/php
 <?php
 
-	// Kutsutaanko CLI:stä
+	# Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
-	$pupesoft_polku = "/var/www/html/pupesoft/";
+	$pupesoft_polku = dirname(__FILE__);
 
-	// otetaan tietokanta connect
-	require ($pupesoft_polku."inc/connect.inc");
+	# otetaan tietokanta connect
+	require ($pupesoft_polku."/inc/connect.inc");
 
-	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in)) {
-		die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
+	if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) {
+		// VIRHE: verkkolaskut_in-kansio ei ole määritelty!
+		// Ei echota mitään, niin tän voi laittaa aina croniin
+		exit;
 	}
 
-	$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+	# Testaus
+	#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
-	// Haetaan api_keyt yhtion_parametrit taulusta
-	// Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
-	$sql_query = "	SELECT yhtion_parametrit.maventa_api_avain, yhtion_parametrit.maventa_ohjelmisto_api_avain, yhtion_parametrit.maventa_yrityksen_uuid, yhtio.nimi
+	# Tuotanto
+	$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+
+	# Haetaan api_keyt yhtion_parametrit taulusta
+	# Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
+	$sql_query = "	SELECT yhtion_parametrit.maventa_api_avain, yhtion_parametrit.maventa_ohjelmisto_api_avain, yhtion_parametrit.maventa_yrityksen_uuid, yhtio.nimi, yhtio.yhtio,
+					date_sub(yhtion_parametrit.maventa_aikaleima, INTERVAL 5 MINUTE) maventa_aikaleima
 					FROM yhtio
 					JOIN yhtion_parametrit USING (yhtio)
 					WHERE yhtion_parametrit.maventa_api_avain != ''
 					AND yhtion_parametrit.maventa_ohjelmisto_api_avain != ''";
-	$maventa_result = mysql_query($sql_query) or die("Error in query");
-
-	if (mysql_num_rows($maventa_result) == 0) {
-		die("Maventaa käyttäviä yrityksiä ei löytynyt!");
-	}
-
-	// Mistä lähtien uudet laskut noudetaan, "YYYYMMDDHHMMSS"
-	// Tyhjä hakee vain uudet
-	define("TIMESTAMP", "");
+	$maventa_result = mysql_query($sql_query) or die("Error in query: ".$sql_query);
 
 	while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
 
+		# Kun ajetaan ekan kerran niin ajetaan ilman akaleimaa, niin saadaan kaikki "unseen"-laskut.
+		if ($maventa_keys["maventa_aikaleima"] == "0000-00-00 00:00:00") {
+			$maventa_keys["maventa_aikaleima"] = "";
+		}
+
 		#echo $maventa_keys['nimi']."\n";
 		#echo "api_avain: ".$maventa_keys['maventa_api_avain']."\n";
-		#echo "UUID: ".$maventa_keys['maventa_yrityksen_uuid'];
-		#echo ", API_KEY: ".$maventa_keys['maventa_ohjelmisto_api_avain']."\n";
+		#echo "UUID: ".$maventa_keys['maventa_yrityksen_uuid'].", API_KEY: ".$maventa_keys['maventa_ohjelmisto_api_avain']."\n";
 		#echo "Haetaan laskuja...\n";
 
-		// Täytetään api_keys, näillä kirjaudutaan Maventaan
+		# Täytetään api_keys, näillä kirjaudutaan Maventaan
 		$api_keys = array();
-		$api_keys["user_api_key"] 	= $maventa_keys['maventa_api_avain'];
+		$api_keys["user_api_key"]   = $maventa_keys['maventa_api_avain'];
 		$api_keys["vendor_api_key"] = $maventa_keys['maventa_ohjelmisto_api_avain'];
 
-		// Vaihtoehtoinen company_uuid
+		# Vaihtoehtoinen company_uuid
 		if ($maventa_keys['maventa_yrityksen_uuid'] != "") {
 			$api_keys["company_uuid"] = $maventa_keys['maventa_yrityksen_uuid'];
 		}
 
-		// Used for getting list of outbound invoices.
-		// Haetaan lista kaikista inbound invoiceista, listaa vain _unseen_ laskut!
-		$uudet_laskut = $client->invoice_list_inbound($api_keys, TIMESTAMP);
+		# Kellonaika Maventan serverillä "YYYYMMDDHHMMSS"
+		$maventan_kellonaika = $client->server_time();
+		$maventan_kellonaika = date("Y-m-d H:i:s", strtotime(substr($maventan_kellonaika, 0, 8)."T".substr($maventan_kellonaika, 8)));
 
-		// Jos uusia laskuja ei löydy
+		# Haetaan uudet laskut
+		# $maventa_keys["maventa_aikaleima"] --> viimeisin laskuhaku kannassa, tästä otettu 5 minsaa pois niin pelataan aikaikkunoiden suhteen varman päälle.
+		# Duplikaattitsekki kuitenkin laskuloopissa.
+		$uudet_laskut = $client->invoice_list_inbound($api_keys, preg_replace("/[^0-9]/", "", $maventa_keys["maventa_aikaleima"]));
+
+		# Päivitetään aikaleima kantaan
+		$aika_query = "	UPDATE yhtion_parametrit
+						SET maventa_aikaleima = '$maventan_kellonaika'
+						WHERE yhtio = '$maventa_keys[yhtio]'";
+		$aika_res = mysql_query($aika_query) or die("Error in query: ".$aika_query);
+
+		# Jos uusia laskuja ei löydy
 		if (!$uudet_laskut) {
-			#echo "Ei uusia laskuja!\n";
-			exit;
+			continue;
 		}
 
-		// Haetaan uudet laskut ja niiden liitteet
+		# Haetaan uudet laskut ja niiden liitteet
 		foreach ($uudet_laskut as $lasku) {
 
-			// Haetaan tiedostot ID:n mukaan
+			# Jos id on tyhjää niin ohitetaan
+			if ($lasku->id == "") {
+				continue;
+			}
+
+			$find = exec("find $verkkolaskut_in -name \"*maventa_{$lasku->id}_maventa*\"");
+
+			# Tsekataan ettei tää lasku oo jo noudettu
+			if ($find != "") {
+				continue;
+			}
+
+			# Haetaan tiedostot ID:n mukaan
 			$invoice = $client->inbound_invoice_show($api_keys, $lasku->id, true, "finvoice");
 
-			// Loopataan kaikki liitteet läpi
+			# Loopataan kaikki liitteet läpi
 			foreach ($invoice->attachments as $liite) {
-				//Finvoice - XML
-				if ($liite->attachment_type == "FINVOICE") {
 
-					// Tiedoston nimeen joku hash ettei tule samoja nimiä.
-					$tiedosto = $verkkolaskut_in."maventa_".md5(uniqid(mt_rand(), true))."_".$liite->filename;
-					$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu tallentaa\n");
-					fwrite($fd, base64_decode($liite->file));
-					fclose($fd);
+				# Finvoice - XML
+				if ($liite->attachment_type == "FINVOICE") {
+					# Tiedoston nimeen id mukaan, ettei tule samoja nimiä. Älä muuta nimeä, koska siitä etsitään ID myöhemmässä vaiheessa (verkkolasku-in.inc)
+					file_put_contents($verkkolaskut_in."/maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
 
 					echo "Haettiin yritykselle: $maventa_keys[nimi] lasku toimittajalta: {$lasku->company_name}, {$lasku->invoice_nr}\n";
+				}
+
+				# Laskun kuva ja liitteet tallennetaan $verkkolaskut_orig-kansioon
+				if ($liite->attachment_type == "INVOICE_IMAGE" or $liite->attachment_type == "ATTACHMENT") {
+					file_put_contents($verkkolaskut_orig."/maventa_".$lasku->id."_maventa-".$liite->filename, base64_decode($liite->file));
 				}
 			}
 		}
 	}
-
-?>

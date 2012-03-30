@@ -264,6 +264,9 @@
 		case "O":
 			$laskutyyppi = "Varaston ostotilaus";
 			switch($alatila) {
+				case "":
+					$alatila = "kesken";
+					break;				
 				case "A":
 					$alatila = "Tilaus lähetetty/tulostettu";
 					break;

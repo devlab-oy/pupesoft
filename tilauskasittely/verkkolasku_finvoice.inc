@@ -20,7 +20,7 @@ if (!function_exists('finvoice_otsik')) {
 		$senderpartyid 			= str_replace(" ", "", $yhtiorow['finvoice_senderpartyid']);
 		$senderintermediator	= str_replace(" ", "", $yhtiorow['finvoice_senderintermediator']);
 
-		//	Osataanko tämän käsitellä tämän pankin finvoiceaineistoa?
+		//	Osataanko käsitellä tämän pankin finvoiceaineistoa?
 		switch ($senderintermediator) {
 			case 'NDEAFIHH':
 			$tulostuspalvelu	= "tulostukseen";
@@ -50,20 +50,24 @@ if (!function_exists('finvoice_otsik')) {
 
 		//	Aloitellaan aineiston luontia
 		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
+			$receiverpartyid = "";
+			$receiverintermediator = "";
 
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$receiverpartyid = $lasrow["verkkotunnus"];
 				$receiverintermediator = "003710948874";
 			}
-			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
-
-				if ($receiverintermediator == "") {
-					$receiverintermediator = "003723327487";
+			else {
+				if (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
+					list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+				}
+				else {
+					$receiverpartyid = $lasrow["verkkotunnus"];
 				}
 			}
-			else {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
+				$receiverintermediator = "003723327487";
 			}
 
 			// jos tänne ei saada mitään arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
@@ -123,56 +127,65 @@ if (!function_exists('finvoice_otsik')) {
 				fputs ($tootfinvoice, "</SOAP-ENV:Envelope>\r\n");
 			}
 
-			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-			if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+			// yhtiötiedot
+			$y_tiedot_ok	= FALSE;
+			$y_nimi 		= $lasrow["yhtio_nimi"];
+			$y_osoite 		= $lasrow["yhtio_osoite"];
+			$y_postino	 	= $lasrow["yhtio_postino"];
+			$y_postitp	 	= $lasrow["yhtio_postitp"];
+			$y_maa 			= $lasrow["yhtio_maa"];
+			$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
+			$y_vatnumero	= $lasrow["yhtio_ovttunnus"];
+			$y_iban 		= $yhtiorow['pankkiiban1'];
+			$y_swift 		= $yhtiorow['pankkiswift1'];
 
+			if ((int) $lasrow["yhtio_toimipaikka"] != 0) {
 				// haetaan toimipaikan tiedot
-				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
-				$alhire = pupe_query($alhqur);
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[yhtio_toimipaikka]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
 
-					// haetaan toimipaikan tiedot
+					$y_tiedot_ok	= TRUE;
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
+
+			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+			if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
+					$alhiro = mysql_fetch_assoc($alhire);
+
+					$y_tiedot_ok	= TRUE;
+					$y_puhelin		= $alhiro['puhelin'];
+					$y_fax			= $alhiro['fax'];
+					$y_email		= $alhiro['email'];
+					$y_www			= $alhiro['www'];
+				}
+			}
+
+			// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+			if (!$y_tiedot_ok) {
+				// haetaan toimipaikan tiedot
+				$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$lasrow[yhtio]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+				if (mysql_num_rows($alhire) == 1) {
 					$alhiro = mysql_fetch_assoc($alhire);
 
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
 					$y_email		= $alhiro['email'];
-					$y_www			= $yhtiorow['www'];
-					$y_nimi 		= $lasrow["yhtio_nimi"];
-					$y_osoite 		= $lasrow["yhtio_osoite"];
-					$y_postino	 	= $lasrow["yhtio_postino"];
-					$y_postitp	 	= $lasrow["yhtio_postitp"];
-					$y_maa 			= $lasrow["yhtio_maa"];
-					$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
-					$y_vatnumero	= $lasrow["yhtio_ovttunnus"];
+					$y_www			= $alhiro['www'];
 				}
-				else {
-					$y_puhelin		= $yhtiorow['puhelin'];
-					$y_fax			= $yhtiorow['fax'];
-					$y_email		= $yhtiorow['email'];
-					$y_www			= $yhtiorow['www'];
-					$y_nimi 		= $yhtiorow["nimi"];
-					$y_osoite 		= $yhtiorow["osoite"];
-					$y_postino	 	= $yhtiorow["postino"];
-					$y_postitp	 	= $yhtiorow["postitp"];
-					$y_maa 			= $yhtiorow["maa"];
-					$y_kotipaikka	= $yhtiorow["kotipaikka"];
-					$y_vatnumero	= $yhtiorow["ovttunnus"];
-				}
-			}
-			else {
-				$y_puhelin		= $yhtiorow['puhelin'];
-				$y_fax			= $yhtiorow['fax'];
-				$y_email		= $yhtiorow['email'];
-				$y_www			= $yhtiorow['www'];
-				$y_nimi 		= $yhtiorow["nimi"];
-				$y_osoite 		= $yhtiorow["osoite"];
-				$y_postino	 	= $yhtiorow["postino"];
-				$y_postitp	 	= $yhtiorow["postitp"];
-				$y_maa 			= $yhtiorow["maa"];
-				$y_kotipaikka	= $yhtiorow["kotipaikka"];
-				$y_vatnumero	= $yhtiorow["ovttunnus"];
 			}
 
 			// haetaan asiakkaan tiedot
@@ -300,7 +313,9 @@ if (!function_exists('finvoice_otsik')) {
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
 				xml_add("InvoiceRecipientPartyIdentifier", 						"", 							$tootfinvoice, 35);
 				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), $tootfinvoice, 35, 1);
-				xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35);
+				if ($yhtiorow["verkkolasku_lah"] != "maventa") {
+					xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
+				}
 				fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
 				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
 				xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);
@@ -611,7 +626,7 @@ if (!function_exists('finvoice_rivi')) {
 
 			$lisakomm = "";
 
-			if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
+			if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
 
 				// Laitetaan tilausviite tähän
 				if ($tilrow["laskuviesti"] != "") {

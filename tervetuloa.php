@@ -140,7 +140,7 @@ if (!isset($tee) or $tee == '') {
 	$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo,
 				kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa $selectlisa
 				FROM kalenteri
-				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
 				LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
 				WHERE kalenteri.kuka = '$kukarow[kuka]'
 				and kalenteri.tyyppi = 'Muistutus'
@@ -197,29 +197,28 @@ if (!isset($tee) or $tee == '') {
 	$tyojonosql = "	SELECT lasku.tunnus,
 					lasku.nimi,
 					lasku.toimaika,
-					avainsana.selitetark_2 tyostatusvari
+					a2.selitetark tyostatus,
+					a2.selitetark_2 tyostatusvari,
+					a5.selitetark tyom_prioriteetti
 					FROM lasku
-					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio
-						AND tyomaarays.otunnus = lasku.tunnus
-						AND tyomaarays.tyojono != ''
-						AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-					LEFT JOIN avainsana ON (avainsana.yhtio = tyomaarays.yhtio 
-						AND avainsana.selite = tyomaarays.tyostatus 
-						AND avainsana.laji = 'TYOM_TYOSTATUS')
+					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+					LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+					LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY toimaika ASC";
+					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<td colspan='3' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
+		echo "<td colspan='4' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>".t("Työnumero")."</th>";
+		echo "<th>".t("Prioriteetti")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
 		echo "<th>".t("Päivämäärä")."</th>";
 		echo "</tr>";
@@ -228,8 +227,9 @@ if (!isset($tee) or $tee == '') {
 			// Laitetetaan taustaväri jos sellainen on syötetty
 			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
-			echo "<tr$varilisa>";
+			echo "<tr $varilisa>";
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
+			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
 			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
 			echo "</tr>";
@@ -252,8 +252,8 @@ if (!isset($tee) or $tee == '') {
 		$ulos = '';
 
 		// Katsotaan pienin tilikausi, josta lähetään esittämään
-		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min 
-						FROM tilikaudet 
+		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
+						FROM tilikaudet
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tilikausi_alku >= '2010-11-01'";
 		$min_result = pupe_query($min_query);

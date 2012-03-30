@@ -542,6 +542,7 @@
 			}
 
 			$query = "INSERT INTO kerayserat ({$fields}) VALUES ({$values})";
+
 			$insres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivi‰ luodessa ({$query})\r\n\r\n");
 
 			$kerayseran_numero = $nro;
@@ -581,7 +582,7 @@
 		$row = mysql_fetch_assoc($result);
 
 		if ($row['kpl'] == 0) {
-			$response = ",0,Virhe ei ker‰yser‰‰\r\n\r\n";
+			$response = "1,Virhe ei ker‰yser‰‰\r\n\r\n";
 		}
 		else {
 

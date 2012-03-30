@@ -2,6 +2,11 @@
 
 	if ($kerayseran_numero > 0) {
 
+		if (($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
+			($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
+			require_once("inc/unifaun_send.inc");
+		}
+
 		$pakkauskirjainlisa = (isset($uusi_pakkauskirjain) and trim($uusi_pakkauskirjain) != "") ? " AND kerayserat.pakkausnro = '{$uusi_pakkauskirjain}' " : "";
 		$sscclisa = (isset($uusi_sscc) and trim($uusi_sscc) != "") ? " AND kerayserat.sscc = '{$uusi_sscc}' " : "";
 
@@ -87,8 +92,6 @@
 
 				if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
 					($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
-
-					require_once("inc/unifaun_send.inc");
 
 					$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
 					$kirjoitin_res = pupe_query($query);

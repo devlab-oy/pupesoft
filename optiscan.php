@@ -43,6 +43,8 @@
 	ini_set("display_errors", 0);
 	ini_set("log_errors", 1);
 
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+
 	$pupe_root_polku = dirname(__FILE__);
 	chdir($pupe_root_polku);
 

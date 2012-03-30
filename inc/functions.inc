@@ -9506,7 +9506,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>Käyttäjän yritys ei löydy! ($yhtio) (".__FILE__.")";
+			echo "<b>Käyttäjän yritys ei löydy! ($yhtio)";
 			exit;
 		}
 		$yhtiorow = mysql_fetch_assoc($result);

@@ -1112,3 +1112,18 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'maksukehotuksen_osoitetiedot') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("K‰ytet‰‰n yhtiˆn oletuksia")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n asiakkaan virallista osoitetta")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

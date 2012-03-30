@@ -194,6 +194,11 @@
 					and $logistiikka_yhtiolisa)
 					UNION
 					(SELECT laskunro, ytunnus, liitostunnus
+					FROM lasku use index (yhtio_vanhatunnus)
+					WHERE vanhatunnus='$otunnus'
+					and $logistiikka_yhtiolisa)
+					UNION
+					(SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku use index (yhtio_tunnusnippu)
 					WHERE tunnusnippu = '$otunnus'
 					and $logistiikka_yhtiolisa)";
@@ -286,13 +291,12 @@
 
 	if ($ytunnus != '') {
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
-			<input type='hidden' name='asiakasid' value='$asiakasid'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='nimi' value='$nimi'>
-			<input type='hidden' name='tee' value='TULOSTA'>";
-
+				<input type='hidden' name='ytunnus' value='$ytunnus'>
+				<input type='hidden' name='asiakasid' value='$asiakasid'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='nimi' value='$nimi'>
+				<input type='hidden' name='tee' value='TULOSTA'>";
 
 		if ($asiakasid > 0) {
 			$query  = "	SELECT concat_ws(' ', nimi, nimitark) nimi
@@ -400,13 +404,21 @@
 							and lasku.laskunro='$laskunro'";
 			}
 			elseif ($sopimus > 0) {
-				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.tunnus tilaus2
 							FROM lasku
 							$yhtioekojoin
 							WHERE lasku.$logistiikka_yhtiolisa
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$sopimus')
+							UNION
+							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+							FROM lasku
+							$yhtioekojoin
+							WHERE lasku.$logistiikka_yhtiolisa
+							and lasku.liitostunnus = '$litunn'
+							and $til
+							and lasku.vanhatunnus='$sopimus')
 							UNION
 							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
@@ -425,6 +437,14 @@
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$otunnus')
+							UNION
+							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+							FROM lasku
+							$yhtioekojoin
+							WHERE lasku.$logistiikka_yhtiolisa
+							and lasku.liitostunnus = '$litunn'
+							and $til
+							and lasku.vanhatunnus='$otunnus')
 							UNION
 							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
@@ -670,7 +690,7 @@
 						echo "<input type='hidden' name='nippu' value='$otunnus'>";
 					}
 				}
-				elseif ($sopimus>0) {
+				elseif ($sopimus > 0) {
 					echo "<input type='hidden' name='sopimus' value='$sopimus'>";
 				}
 				else {

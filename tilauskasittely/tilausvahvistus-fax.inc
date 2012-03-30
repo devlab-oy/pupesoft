@@ -85,6 +85,13 @@ else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
+	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+		$tulostettava_tunnus = $laskurow['vanhatunnus'];
+	}
+	else {
+		$tulostettava_tunnus = $laskurow['tunnus'];
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -119,7 +126,7 @@ else {
 		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
 		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
 		$ulos .= "\r\n";
-		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")									.t("Toimitusosoite", $kieli).":\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
@@ -161,7 +168,7 @@ else {
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)).t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
-		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$tulostettava_tunnus)			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
 

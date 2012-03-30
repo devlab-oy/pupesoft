@@ -509,6 +509,7 @@
 						break;
 					case 'kpl':
 						$values .= ", '{$qty_kpl}'";
+						break;
 					case 'kpl_keratty':
 						$values .= ", '{$qty}'";
 						break;

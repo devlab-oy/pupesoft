@@ -544,7 +544,6 @@
 			}
 
 			$query = "INSERT INTO kerayserat ({$fields}) VALUES ({$values})";
-
 			$insres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivi‰ luodessa ({$query})\r\n\r\n");
 
 			$kerayseran_numero = $nro;
@@ -598,74 +597,80 @@
 						GROUP BY tilausrivi";
 			$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
-			while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
-				$kerivi[] = $valmis_era_chk_row['tilausrivi'];
-				$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+			if (mysql_num_rows($valmis_era_chk_res) == 0) {
+				$response = "1,Virhe ei ker‰yser‰‰\r\n\r\n";
 			}
+			else {
 
-			$query = "	SELECT *
-						FROM kerayserat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila = 'K'
-						AND nro = '{$nro}'";
-			$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+				while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+					$kerivi[] = $valmis_era_chk_row['tilausrivi'];
+					$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+				}
 
-			$otunnus_chk = "";
+				$query = "	SELECT *
+							FROM kerayserat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'K'
+							AND nro = '{$nro}'";
+				$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
-			while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
-				$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
+				$otunnus_chk = "";
 
-				$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu, 
-							tilausrivi.tuoteno AS puhdas_tuoteno,
-							concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
-							concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
-							FROM tilausrivi
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
-				$varattu_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ haettaessa\r\n\r\n");
-				$varattu_row = mysql_fetch_assoc($varattu_res);
+				while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+					$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
 
-				$otunnus_chk = $varattu_row['otunnus'];
+					$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu, 
+								tilausrivi.tuoteno AS puhdas_tuoteno,
+								concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
+								concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
+								FROM tilausrivi
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
+					$varattu_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ haettaessa\r\n\r\n");
+					$varattu_row = mysql_fetch_assoc($varattu_res);
 
-				$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
-				$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
-				$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
-				$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+					$otunnus_chk = $varattu_row['otunnus'];
+
+					$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
+					$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
+					$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
+					$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+				}
+
+				$query = "	SELECT varastopaikat.printteri1, varastopaikat.printteri3
+							FROM lasku
+							JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+							AND lasku.tunnus = '{$otunnus_chk}'";
+				$printteri_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoitinta haettaessa\r\n\r\n");
+				$printteri_row = mysql_fetch_assoc($printteri_res);
+
+				// setataan muuttujat keraa.php:ta varten
+				$tee = "P";
+				$toim = "";
+				$id = $nro;
+				$keraajanro = "";
+				$keraajalist = $kukarow['kuka'];
+
+				// vakadr-tulostin on aina sama kuin l‰hete-tulostin
+				$valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
+				$valittu_oslapp_tulostin = $printteri_row['printteri3'];
+
+				$lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
+				$oslappkpl = $yhtiorow["oletus_oslappkpl"];
+
+				$lasku_yhtio = "";
+				$real_submit = "Merkkaa ker‰tyksi";
+
+				ob_start();
+				require('tilauskasittely/keraa.php');
+				ob_end_clean();
+
+				//$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
+
+				// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
+				$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
 			}
-
-			$query = "	SELECT varastopaikat.printteri1, varastopaikat.printteri3
-						FROM lasku
-						JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tunnus = '{$otunnus_chk}'";
-			$printteri_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoitinta haettaessa\r\n\r\n");
-			$printteri_row = mysql_fetch_assoc($printteri_res);
-
-			// setataan muuttujat keraa.php:ta varten
-			$tee = "P";
-			$toim = "";
-			$id = $nro;
-			$keraajanro = "";
-			$keraajalist = $kukarow['kuka'];
-
-			// vakadr-tulostin on aina sama kuin l‰hete-tulostin
-			$valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
-			$valittu_oslapp_tulostin = $printteri_row['printteri3'];
-
-			$lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
-			$oslappkpl = $yhtiorow["oletus_oslappkpl"];
-
-			$lasku_yhtio = "";
-			$real_submit = "Merkkaa ker‰tyksi";
-
-			ob_start();
-			require('tilauskasittely/keraa.php');
-			ob_end_clean();
-
-			//$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
-
-			// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
-			$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
 		}
 	}
 	elseif ($sanoma == "StopAssignment") {

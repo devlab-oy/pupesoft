@@ -29,23 +29,27 @@
 		}
 
 		// Otsikkoa
-		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU
-		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 6 merkkiä
+		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU 10 merkkiä
+		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 9 merkkiä
 		$out .= sprintf("%-20.20s", $laskurow['nimi']);				// Toimittajan nimi 20 merkkiä
 		$out .= sprintf("%-20.20s", $yhtiorow['nimi']);				// Lähettäjän nimi 20 merkkiä
-		$out .= sprintf("%08.8s", $laskurow['tunnus']);				// Ostotilauksen numero 8 merkkiä
+		$out .= sprintf("%06.6s", substr($laskurow['tunnus'], -6));	// Ostotilauksen numero 6 merkkiä
 		$out .= sprintf("%4.4s", "");								// Toimitustapa 4 merkkiä, ei käytössä
 		$out .= sprintf("%-1.1s", $laskurow['tilaustyyppi']);		// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus, 3 = Yölähetys
 		fwrite($toot, $out . "\n");
 
+		$lask = 1;
+
 		while ($tilausrivirow = mysql_fetch_array($result)) {
-			$out = sprintf("%-7.7s", "000ORDI");							// VAKIOALKU
-			$out .= sprintf("%-11.11s", $tilausrivirow['tunnus']);			// Tilausrivin numero 11 merkkiä
-			$out .= sprintf("%-60.60s", $tilausrivirow['toim_tuoteno']);	// Toimittajan Tuoteno 60 merkkiä
+			$out = sprintf("%-7.7s", "000ORDI");							// VAKIOALKU 7 merkkiä
+			$out .= sprintf("%03.3s", $lask);								// Tilausrivin numero 3 merkkiä
+			$out .= sprintf("%-22.22s", $tilausrivirow['toim_tuoteno']);	// Toimittajan Tuoteno 22 merkkiä
 			$out .= sprintf("%-6.6s", $toimirow['toimittajanro']);			// toimittajan numero 6 merkkiä
-			$out .= sprintf("%05.0f", $tilausrivirow['varattu']);			// tilausmäärä 5 merkkiä
-			$out .= sprintf("%03.3s",$tilausrivirow['yksikko']); 			// yksikkö 3 merkkiä
+			$out .= sprintf("%05.5s", round($tilausrivirow['varattu']));	// tilausmäärä 5 merkkiä
+			$out .= sprintf("%2.2s", "01");						 			// yksikkö 2 merkkiä
 			fwrite($toot, $out . "\n");
+
+			$lask++;
 		}
 
 		fclose($toot);
@@ -70,12 +74,16 @@
 			//jotta sitten teccom asn/ostolaskuissa osataan pointata oikeaan riviin, ja handlataan tilanne, missä rivi voi splittaantua jne (rivinumero on tallessa!)
 			mysql_data_seek($result, 0);
 
+			$lask = 1;
+
 			while ($tilausrivirow = mysql_fetch_assoc($result)) {
 				$sqlquery = "	UPDATE tilausrivi SET
-								tilaajanrivinro = tunnus
+								tilaajanrivinro = $lask
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$tilausrivirow[tunnus]'";
 				$tresult = pupe_query($sqlquery);
+
+				$lask++;
 			}
 
 			$sqlquery = "	UPDATE lasku

@@ -100,7 +100,7 @@ else {
 			}
 		}
 
-		// Pitääkö faili vielä nimetä kokonana uudestaan (Finvoice iPost)
+		// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
 			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
             $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");

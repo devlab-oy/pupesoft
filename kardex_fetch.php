@@ -102,7 +102,7 @@
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$_content[4]}'
-										AND tila = 'X'";
+										AND tila in ('X','K')";
 							$nro_chk_res = pupe_query($query);
 							$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
 
@@ -114,10 +114,10 @@
 									kpl_keratty = '{$_content[3]}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$_content[4]}'
-									AND tila = 'X'";
+									AND tila in ('X','K')";
 						$upd_res = pupe_query($query);
 
-						$keraajalist = $_content[6];
+						$keraajalist = trim($_content[6]);
 					}
 
 					if ($keraysera_nro > 0) {

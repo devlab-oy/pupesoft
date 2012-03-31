@@ -7,12 +7,6 @@
 	# tuotekoodi x(18)
 	# m‰‰r‰ 9999
 
-	$wabco_editilaus = $pupe_root_polku."/dataout/wabco-order-$kukarow[yhtio]-$laskurow[tunnus]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
-
-	echo "$wabco_editilaus<br>";
-
-	if (!$toot = fopen($wabco_editilaus, "w")) die("Filen $wabco_editilaus luonti epaonnistui!");
-
 	$query = "  SELECT tilausrivi.tunnus,
 				tilausrivi.otunnus,
 				tilausrivi.varattu,
@@ -32,6 +26,10 @@
 	}
 	else {
 
+		$wabco_editilaus = $pupe_root_polku."/dataout/wabco-order-$laskurow[tunnus].xls";
+
+		if (!$toot = fopen($wabco_editilaus, "w")) die("Filen $wabco_editilaus luonti epaonnistui!");
+
 		while ($tilausrivirow = mysql_fetch_assoc($result)) {
 
 			$out  = sprintf("%-6.6s",   $toimirow["toimittajanro"]);		// toimittajanro
@@ -44,31 +42,14 @@
 
 		fclose($toot);
 
-		// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-		// palautetaan $palautus ja $syy
-		$ftphost = $toimirow['edi_palvelin'];
-		$ftpuser = $toimirow['edi_kayttaja'];
-		$ftppass = $toimirow['edi_salasana'];
-		$ftppath = $toimirow['edi_polku'];
-		$ftpfile = realpath($wabco_editilaus);
-
-		// Portti
-		if (isset($toimirow['edi_portti'])) $ftpport = $toimirow['edi_portti'];
-
-		require ("inc/ftp-send.inc");
-
-		if ($palautus == 0) {
-			echo "<font class='message'>".t("Tilaus l‰hetettiin onnistuneesti")."!</font><br>";
-
-			$sqlquery = "	UPDATE lasku
-							SET kirjoitin = 'edi'
-							WHERE yhtio   = '$kukarow[yhtio]'
-							AND tunnus	  = '$laskurow[tunnus]'";
-			$result = pupe_query($sqlquery);
-		}
-		else {
-			echo "<font class='error'>".t("Tilauksen l‰hetys ep‰onnistui")."!</font><br>";
-		}
+		echo "<table>";
+		echo "<tr><th>".t("Tallenna ostotilaus").":</th>";
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Order_{$laskurow["tunnus"]}.txt'>";
+		echo "<input type='hidden' name='filenimi' value='$wabco_editilaus'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+		echo "</table><br>";
 	}
 
 	// Nollataan tarkoituksella lopetusmuuttuja

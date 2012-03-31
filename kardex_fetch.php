@@ -7,6 +7,8 @@
 		$php_cli = TRUE;
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") < 300) {
 		echo "Kardex-fetch sisäänluku käynnissä, odota hetki!";
@@ -30,9 +32,7 @@
 				unlink("/tmp/##kardex-fetch.lock");
 				exit;
 			}
-			
-			date_default_timezone_set('Europe/Helsinki');
-			
+
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -155,7 +155,7 @@
 							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 								$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
 
-								$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu, 
+								$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu,
 											tilausrivi.tuoteno AS puhdas_tuoteno,
 											concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 											concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla

@@ -7,6 +7,8 @@
 		$php_cli = TRUE;
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") < 300) {
 		echo "FTP-get sisäänluku ($argv[1]) käynnissä, odota hetki!";
@@ -24,7 +26,6 @@
 		touch("/tmp/##ftp-get-in.lock");
 
 		if ($php_cli) {
-			date_default_timezone_set('Europe/Helsinki');
 
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);

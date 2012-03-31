@@ -7,6 +7,8 @@
 		$php_cli = TRUE;
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##kardex-resend.lock") and mktime()-filemtime("/tmp/##kardex-resend.lock") < 300) {
 		echo "Kardex-resend lähetys käynnissä, odota hetki!";
@@ -30,8 +32,6 @@
 				unlink("/tmp/##kardex-resend.lock");
 				exit;
 			}
-
-			date_default_timezone_set('Europe/Helsinki');
 
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");

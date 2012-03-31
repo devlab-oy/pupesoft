@@ -9,6 +9,8 @@
 
 	if ($php_cli) {
 
+		date_default_timezone_set('Europe/Helsinki');
+
 		if (!isset($argv[1]) or $argv[1] == '') {
 			echo "Anna yhtiö!!!\n";
 			die;

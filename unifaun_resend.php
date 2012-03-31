@@ -7,6 +7,8 @@
 		$php_cli = TRUE;
 	}
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##unifaun-resend.lock") and mktime()-filemtime("/tmp/##unifaun-resend.lock") < 300) {
 		echo "Unifaun-resend lähetys käynnissä, odota hetki!";

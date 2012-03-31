@@ -130,7 +130,7 @@
 
 						if (mysql_num_rows($onko_valmis_chk) == 0) {
 
-							$query = "	SELECT tilausrivi, SUM(kpl_keratty) AS kpl_keratty
+							$query = "	SELECT tilausrivi, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tila 	= 'K'
@@ -140,7 +140,13 @@
 
 							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 								$kerivi[] = $valmis_era_chk_row['tilausrivi'];
-								$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+
+								if ($valmis_era_chk_row['kpl'] != $valmis_era_chk_row['kpl_keratty']) {
+									$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+								}
+								else {
+									$maara[$valmis_era_chk_row['tilausrivi']] = "";
+								}
 							}
 
 							$query = "	SELECT *

@@ -271,13 +271,13 @@
 						AND oletus_varasto != ''";
 			$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräysvyöhykettä haettaessa\r\n\r\n");
 			$row = mysql_fetch_assoc($result);
-			
+
 			// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
 			$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto'], FALSE);
 
 			if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 				$otunnukset = implode(",", $erat['tilaukset']);
-				
+
 				ob_start();
 				require('inc/tallenna_keraysera.inc');
 				ob_end_clean();
@@ -435,9 +435,9 @@
 		if (trim($response) == '') {
 			// Tulostetaan keräyserä
 			$kerayseran_numero = $nro;
-			
+
 			ob_start();
-			require("inc/tulosta_reittietiketti.inc");			
+			require("inc/tulosta_reittietiketti.inc");
 			ob_end_clean();
 
 			$response = "0, Tulostus onnistui\r\n\r\n";
@@ -589,11 +589,11 @@
 
 			$maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = array();
 
-			$query = "	SELECT tilausrivi, SUM(kpl_keratty) AS kpl_keratty
+			$query = "	SELECT tilausrivi, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
 						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila = 'K'
-						AND nro = '{$nro}'
+						AND tila 	= 'K'
+						AND nro 	= '{$nro}'
 						GROUP BY tilausrivi";
 			$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserää haettaessa\r\n\r\n");
 
@@ -604,7 +604,13 @@
 
 				while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 					$kerivi[] = $valmis_era_chk_row['tilausrivi'];
-					$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+
+					if ($valmis_era_chk_row['kpl'] != $valmis_era_chk_row['kpl_keratty']) {
+						$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+					}
+					else {
+						$maara[$valmis_era_chk_row['tilausrivi']] = "";
+					}
 				}
 
 				$query = "	SELECT *
@@ -619,7 +625,7 @@
 				while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 					$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
 
-					$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu, 
+					$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu,
 								tilausrivi.tuoteno AS puhdas_tuoteno,
 								concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 								concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
@@ -782,7 +788,7 @@
 		$uusi_pakkauskirjain = $uusi_paknro_row['uusi_pakkauskirjain'];
 
 		ob_start();
-		require("inc/tulosta_reittietiketti.inc");			
+		require("inc/tulosta_reittietiketti.inc");
 		ob_end_clean();
 
 		$response = "{$pakkaus_kirjain},0,\r\n\r\n";

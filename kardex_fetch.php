@@ -203,9 +203,9 @@
 
 					fclose($_fh);
 					$keraysera_nro = "";
-				}
 
-				rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
+					rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
+				}
 			}
 		}
 

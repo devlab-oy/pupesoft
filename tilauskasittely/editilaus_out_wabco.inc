@@ -46,7 +46,7 @@
 		echo "<tr><th>".t("Tallenna ostotilaus").":</th>";
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Order_{$laskurow["tunnus"]}.txt'>";
+		echo "<input type='hidden' name='kaunisnimi' value='{$laskurow["tunnus"]}.txt'>";
 		echo "<input type='hidden' name='filenimi' value='$wabco_editilaus'>";
 		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";

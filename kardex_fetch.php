@@ -79,7 +79,7 @@
 
 				if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
-					$keraysera_nro = "";
+					$keraysera_nro = 0;
 					$maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = array();
 
 					$_fh = fopen($ftpget_dest[$operaattori]."/".$file, "r+");
@@ -97,7 +97,7 @@
 
 						$_content[4] = (int) $_content[4];
 
-						if ($keraysera_nro == "") {
+						if ($keraysera_nro == 0) {
 							$query = "	SELECT nro
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
@@ -120,12 +120,12 @@
 						$keraajalist = $_content[6];
 					}
 
-					if ($keraysera_nro != "") {
+					if ($keraysera_nro > 0) {
 						$query = "	SELECT *
 									FROM kerayserat
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tila = 'X'
-									AND nro = '{$keraysera_nro}'";
+									AND tila 	= 'X'
+									AND nro 	= '{$keraysera_nro}'";
 						$onko_valmis_chk = pupe_query($query);
 
 						if (mysql_num_rows($onko_valmis_chk) == 0) {
@@ -133,8 +133,8 @@
 							$query = "	SELECT tilausrivi, SUM(kpl_keratty) AS kpl_keratty
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tila = 'K'
-										AND nro = '{$keraysera_nro}'
+										AND tila 	= 'K'
+										AND nro 	= '{$keraysera_nro}'
 										GROUP BY tilausrivi";
 							$valmis_era_chk_res = pupe_query($query);
 
@@ -146,8 +146,8 @@
 							$query = "	SELECT *
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tila = 'K'
-										AND nro = '{$keraysera_nro}'";
+										AND tila 	= 'K'
+										AND nro 	= '{$keraysera_nro}'";
 							$valmis_era_chk_res = pupe_query($query);
 
 							$otunnus_chk = "";
@@ -178,13 +178,13 @@
 										JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
 										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 										AND lasku.tunnus = '{$otunnus_chk}'";
-							$printteri_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoitinta haettaessa\r\n\r\n");
+							$printteri_res = pupe_query($query);
 							$printteri_row = mysql_fetch_assoc($printteri_res);
 
 							// setataan muuttujat keraa.php:ta varten
-							$tee = "P";
-							$toim = "";
-							$id = $keraysera_nro_row['nro'];
+							$tee 		= "P";
+							$toim 		= "";
+							$id 		= $keraysera_nro;
 							$keraajanro = "";
 
 							// vakadr-tulostin on aina sama kuin lähete-tulostin
@@ -202,7 +202,7 @@
 					}
 
 					fclose($_fh);
-					$keraysera_nro = "";
+					$keraysera_nro = 0;
 
 					rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
 				}

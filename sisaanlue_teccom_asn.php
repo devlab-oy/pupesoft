@@ -25,7 +25,7 @@
 		$teccomkansio = "/home/teccom";
 	}
 	if (!isset($teccomkansio_valmis)){
-		$teccomkansio_valmis = "/home/teccom/valmis";
+		$teccomkansio_valmis = "/home/teccom/ok";
 	}
 	if (!isset($teccomkansio_error)) {
 		$teccomkansio_error = "/home/teccom/error";

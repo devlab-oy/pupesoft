@@ -122,7 +122,10 @@
 
 					$tilausnumero = (int) $tilausnumero;
 
-					$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$tilausnumero}'";
+					$query = "	SELECT *
+								FROM kerayserat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$tilausnumero}'";
 					$tila_chk_res = pupe_query($query);
 					$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
@@ -139,12 +142,17 @@
 					}
 
 					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
-
-						$query = "UPDATE rahtikirjat SET toimitustapa = '{$new_row['selite']}' WHERE yhtio = '{$kukarow['yhtio']}' AND rahtikirjanro = '{$tilausnumero}'";
+						$query = "	UPDATE rahtikirjat
+									SET toimitustapa = '{$new_row['selite']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND rahtikirjanro = '{$tilausnumero}'";
 						$upd_res = pupe_query($query);
 					}
 
-					$query = "UPDATE lasku SET toimitustavan_lahto = '{$uusi_lahto}', toimitustapa = '{$new_row['selite']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+					$query = "	UPDATE lasku
+								SET toimitustavan_lahto = '{$uusi_lahto}', toimitustapa = '{$new_row['selite']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tilausnumero}'";
 					$res = pupe_query($query);
 				}
 
@@ -163,15 +171,18 @@
 								AND otunnus = '{$tilnro}'";
 					$sscc_chk_res = pupe_query($query);
 
-					while($sscc_chk_row = mysql_fetch_assoc($sscc_chk_res)) {
+					while ($sscc_chk_row = mysql_fetch_assoc($sscc_chk_res)) {
 
-						if ($old_row['tulostustapa'] == 'E' and $sscc_chk_row['tila'] == 'K' and $old_row['liitostunnus'] != $new_row['liitostunnus'] and !in_array($sscc_chk_row['sscc_ulkoinen'], $sscc_chk_arr)) {
+						if ($old_row['tulostustapa'] == 'E' and $old_row['liitostunnus'] != $new_row['liitostunnus'] and !in_array($sscc_chk_row['sscc_ulkoinen'], $sscc_chk_arr)) {
 
 							$mergeid = $valittu_lahto;
 							$parcelno = $sscc_chk_row['sscc_ulkoinen'];
 
 							// haetaan toimitustavan tiedot
-							$query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$old_row['selite']}'";
+							$query = "	SELECT *
+										FROM toimitustapa
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND selite = '{$old_row['selite']}'";
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
 

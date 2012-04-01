@@ -298,7 +298,7 @@
 					$reittietiketti_row = mysql_fetch_assoc($reittietiketti_res);
 
 					$kerayseran_numero = $reittietiketti_row["nro"];
-					$sscclisa = $reittietiketti_row["sscc"];
+					$uusi_sscc = $reittietiketti_row["sscc"];
 
 					// Tulostetaan kollilappu
 					require('inc/tulosta_reittietiketti.inc');

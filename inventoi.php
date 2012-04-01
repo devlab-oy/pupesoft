@@ -180,7 +180,7 @@
 
 						if (mysql_num_rows($tapahtuma_res) == 0)  {
 							echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
-							$virhe = 1;
+							//$virhe = 1;
 						}
 					}
 

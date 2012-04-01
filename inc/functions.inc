@@ -14365,7 +14365,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.varasto = '{$varasto}'
 					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					UNION
-					(lasku2.prioriteettinro as prioriteetti,
+					(SELECT lasku2.prioriteettinro as prioriteetti,
 					0 as erotus,
 					lasku2.h1time,
 					keraysvyohyke2.tunnus AS ker_tunnus,

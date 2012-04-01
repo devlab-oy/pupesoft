@@ -16425,7 +16425,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			}
 
 			//Haetaan erikseen toimitettavat tuotteet
-			if ($laskurow["vanhatunnus"] != 0) {
+			if ($yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
 				$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 							FROM lasku use index (yhtio_vanhatunnus)
 							WHERE yhtio		= '$kukarow[yhtio]'

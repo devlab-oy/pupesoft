@@ -51,15 +51,15 @@
 					data.addRows(jQuery.parseJSON($('#chart_div_values').html()));
 
 					var options = {
-						width: 800, 
+						width: 800,
 						height: 320,
 						title: '",t("Keräilyn kuormitus lähdön ajan mukaan"),"',
 						hAxis: {
-							title: '",t("Klo"),"', 
+							title: '",t("Klo"),"',
 							titleTextStyle: {color: 'black'}
 						},
 						vAxis: {
-							title: $('#chart_div_volume').html(), 
+							title: $('#chart_div_volume').html(),
 							titleTextStyle: {color: 'black'}
 						},
 						isStacked: true,
@@ -69,19 +69,19 @@
 						},
 						series: {
 							0:{
-								color: 'green', 
+								color: 'green',
 								visibleInLegend: true
-							}, 
+							},
 							1:{
-								color: 'blue', 
+								color: 'blue',
 								visibleInLegend: true
-							}, 
+							},
 							2:{
-								color: 'red', 
+								color: 'red',
 								visibleInLegend: true
-							}, 
+							},
 							3:{
-								color: '#FE0', 
+								color: '#FE0',
 								visibleInLegend: true
 							}
 						}
@@ -96,7 +96,7 @@
 				});
 
 				function translate(element, x, y)
-				{    
+				{
 				    var translation = 'translate(' + x + 'px,' + y + 'px)';
 				    var translation = 'translateY('+y+'px)';
 
@@ -139,7 +139,7 @@
 			                        $('#keraajat').css({width: stickyHeaderWidth});
 			                        $('#divi').show();
 			                        $('#divi').css({position: 'fixed', top: '-1px', left: stickyHeaderPosition.left});
-			                } 
+			                }
 			                else {
 		                        $('#divi').css({position: 'static', top: '0px'}).hide();
 			                }
@@ -175,7 +175,7 @@
 
 					if ($('#chart_div_values').html() != undefined) {
 						google.setOnLoadCallback(drawChart);
-					} 
+					}
 
 					$('th.keraysvyohyke').click(function() {
 						var id = $(this).attr('id');
@@ -205,7 +205,7 @@
 				});
 
 				//-->
-			</script>";	
+			</script>";
 
 	echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
 
@@ -241,11 +241,11 @@
 				break;
 			case 'aloitettu':
 				$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
-				$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila = 'K'" : "kerayserat.tila = 'K'";
+				$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila IN ('K','X')" : "kerayserat.tila IN ('K','X')";
 				break;
 			case 'keratty':
 				$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
-				$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T', 'R'))" : "(kerayserat.tila IN ('T', 'R'))";
+				$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T','R'))" : "(kerayserat.tila IN ('T','R'))";
 				break;
 		}
 
@@ -315,7 +315,7 @@
 		echo "<td>";
 
 		$query = "	SELECT lasku.tunnus, SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 0, 1)) AS 'keratyt'
-					FROM lasku 
+					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.varattu > 0)
 					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -355,7 +355,7 @@
 		echo "<td>{$kap_row['kapasiteettitarve']} h</td>";
 		echo "</tr>";
 
-		$query = "	SELECT kuka.nimi AS 'keraaja', 
+		$query = "	SELECT kuka.nimi AS 'keraaja',
 					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.otunnus) AS 'otunnukset',
 					MIN(SUBSTRING(kerayserat.luontiaika, 12, 5)) AS 'aloitusaika',
@@ -368,7 +368,6 @@
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.otunnus IN ({$row['tilaukset']})
-					#AND kerayserat.tila IN ('K', 'T', 'R')
 					{$kerayserat_tilalisa}
 					GROUP BY 1
 					ORDER BY 1";
@@ -442,8 +441,8 @@
 					echo "<td></td>";
 					echo "</tr>";
 
-					$query = "	SELECT tilausrivi.tuoteno, 
-								tuote.nimitys, 
+					$query = "	SELECT tilausrivi.tuoteno,
+								tuote.nimitys,
 								CONCAT(tilausrivi.hyllyalue, '-', tilausrivi.hyllynro, '-', tilausrivi.hyllyvali, '-', tilausrivi.hyllytaso) AS 'kerayspaikka',
 								tilausrivi.otunnus,
 								CONCAT(lasku.nimi, ' ', lasku.nimitark) AS 'nimi',
@@ -482,7 +481,7 @@
 							echo "<td>{$rivi_row['otunnus']}</td>";
 							echo "<td></td>";
 							echo "</tr>";
-						}						
+						}
 
 						if ($y != $max_y) {
 							echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
@@ -874,9 +873,9 @@
 		echo "</tr>";
 		echo "</thead>";
 
-		$query = "	SELECT * 
-					FROM kuka 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND extranet = ''
 					AND keraajanro != 0
 					ORDER BY nimi";

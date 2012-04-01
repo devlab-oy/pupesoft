@@ -1935,6 +1935,7 @@ if (!$cli) {
 		'toimi'                           => 'Toimittaja',
 		'toimitustapa'                    => 'Toimitustavat',
 		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
+		'lahdot'            			  => 'Lähdöt',
 		'tullinimike'                     => 'Tullinimikeet',
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',

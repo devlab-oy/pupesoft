@@ -53,13 +53,15 @@
 			$viivakoodi1 .= ">5";
 			$viivakoodi1 .= substr($row['eankoodi'],2);
 		}
-		
+
 		$sscc_clean = preg_replace("/[^0-9]/", "", $row['sscc']);
-		
-		$viivakoodi2  = ">6";
-		$viivakoodi2 .= substr($sscc_clean,0,1);
-		$viivakoodi2 .= ">5";
-		$viivakoodi2 .= substr($sscc_clean,1);
+
+		if ($sscc_clean != "") {
+			$viivakoodi2  = ">6";
+			$viivakoodi2 .= substr($sscc_clean,0,1);
+			$viivakoodi2 .= ">5";
+			$viivakoodi2 .= substr($sscc_clean,1);
+		}
 
 		$sivu = "*** ETIKETIN KOKO ***
             	 {D1530,1040,1470|}

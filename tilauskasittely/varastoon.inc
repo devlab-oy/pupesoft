@@ -544,7 +544,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$tapahtumaid = mysql_insert_id();
 
 		// Viedään koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille päivitetään sama tuotepaikka
-		if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
+		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus) and trim($koko_suuntalava) == 'X') {
 
 			$query = "	SELECT *
 						FROM tuotepaikat
@@ -737,6 +737,14 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 			$millepakallemeni = " ,".$millepakallemeni;
 		}
 
+		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
+		$suuntalavalisa = "";
+
+		// Viedään koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille päivitetään sama tuotepaikka
+		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
+			$suuntalavalisa = ", suuntalava = 0 ";
+		}
+
 		// päivitetään tilaus saapuneeksi varastoon
 		// päivitetään myös tehdaslisävarusteet saapuneiksi
 		// päivitetään riville paikat jolle saldo loppupeleissä meni (jos meni ok niin $millepakallemeni on tyhjä)
@@ -745,7 +753,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					varattu = 0,
 					laskutettuaika = '$varastoonvientipva',
 					laskutettu = '$kukarow[kuka]'
-					$millepakallemeni
+					{$millepakallemeni}
+					{$suuntalavalisa}
 					WHERE yhtio='$kukarow[yhtio]'
 					and otunnus='$tilrivirow[otunnus]'
 					and (tunnus='$tilrivirow[tunnus]' or perheid='$tilrivirow[tunnus]')";
@@ -798,7 +807,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$varastoon_msg .= "</td>";
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+			$query = "	SELECT sscc
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -825,7 +837,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+			$query = "	SELECT sscc
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -1152,7 +1167,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 		// JÄMÄRIVEILTÄ tyhjennetään netto-kenttä, jotta tuotteet menevät seuraavalla kerralla varastoon.
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
-		 			SET tilausrivi.netto = '', suuntalavat.tila = 'S'
+		 			SET tilausrivi.netto = '',
+					suuntalavat.tila = 'S'
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'
 					AND tilausrivi.netto = 'X'

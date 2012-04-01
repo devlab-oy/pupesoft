@@ -110,9 +110,15 @@
 
 					list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($ftpget_dest[$operaattori]."/".$file));
 
-					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : $sscc_ulkoinen;
+					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 
 					list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);
+
+					// Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
+					// Palautussanomasta etunollaat puuttuu, joten lis‰t‰‰n ne t‰ss‰
+					if (is_numeric($sscc_ulkoinen)) {
+						$sscc_ulkoinen = "00".$sscc_ulkoinen;
+					}
 
 					$query = "	UPDATE kerayserat SET
 								sscc_ulkoinen = '{$sscc_ulkoinen}',

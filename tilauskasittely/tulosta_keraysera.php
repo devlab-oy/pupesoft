@@ -317,7 +317,6 @@
 						from kuka
 						where yhtio = '{$kukarow['yhtio']}'
 						and keraajanro = '{$keraajanro}'";
-
 		}
 		else {
 			$query = "	SELECT *
@@ -437,6 +436,9 @@
 
 				if (count($erat['tilaukset']) > 0) {
 
+					// Tallennetaan keräyserä
+					require('inc/tallenna_keraysera.inc');
+
 					$otunnukset = implode(",", $erat['tilaukset']);
 
 					$query = "	SELECT *
@@ -465,8 +467,6 @@
 				$result = pupe_query($query);
 
 				if (count($erat['tilaukset']) > 0) {
-					// Tallennetaan keröyserä
-					require('inc/tallenna_keraysera.inc');
 
 					// Tulostetaan kollilappu
 					require('inc/tulosta_reittietiketti.inc');
@@ -797,7 +797,7 @@
 	}
 	else {
 		if (trim($kukarow['keraysvyohyke']) == '') {
-			echo "<font class='error'>",t("Keräysvyöhyke täytyy valita käyttäjän takanta"),"</font><br />";
+			echo "<font class='error'>",t("Keräysvyöhyke täytyy valita käyttäjälle"),"!</font><br />";
 		}
 	}
 

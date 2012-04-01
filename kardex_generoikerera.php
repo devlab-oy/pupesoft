@@ -47,6 +47,9 @@
 
 			if (count($erat['tilaukset']) > 0) {
 
+				// Tallennetaan keröyserä
+				require('inc/tallenna_keraysera.inc');
+
 				$otunnukset = implode(",", $erat['tilaukset']);
 
 				$query = "	SELECT *
@@ -70,9 +73,6 @@
 			$result = pupe_query($query);
 
 			if (count($erat['tilaukset']) > 0) {
-				// Tallennetaan keröyserä
-				require('inc/tallenna_keraysera.inc');
-
 				// Tulostetaan kollilappu
 				require('inc/tulosta_reittietiketti.inc');
 

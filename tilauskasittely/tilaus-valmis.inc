@@ -3,6 +3,7 @@
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos = "";
 $luottotilanne_nyt = 0;
+$ohjausmerkkilisa = "";
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -10,8 +11,17 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 	exit;
 }
 
+//jos tilaustyyppi on 2 ja ohjausmerkki on tyhj‰‰, niin pistet‰‰n ohjausmerkiksi tilaustyypin selkokielinen nimi
+if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") {
+	$ohjausmerkkilisa = ", ohjausmerkki = 'Varastot‰ydennys'";
+	$laskurow["ohjausmerkki"] = "Varastot‰ydennys";
+}
+
 // p‰ivitet‰‰n vanhatunnus laskulle
-$query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
+$query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa 
+			WHERE yhtio='$kukarow[yhtio]' 
+			AND tunnus='$laskurow[tunnus]' 
+			AND vanhatunnus=0";
 $oldtur = pupe_query($query);
 
 // p‰ivitet‰‰n myˆs muuttuja

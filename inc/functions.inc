@@ -14232,8 +14232,10 @@ if (!function_exists("tee_keraysera")) {
 					toimitustapa AS toimitustapa1 READ,
 					toimitustapa AS toimitustapa2 READ,
 					lahdot READ,
-					lahdot AS lahdot1 WRITE,
-					lahdot AS lahdot2 WRITE,
+					lahdot AS lahdot1 READ,
+					lahdot AS lahdot2 READ,
+					lahdot AS lahdot3 READ,
+					lahdot AS lahdot4 READ,
 					tuoteperhe READ,
 					kerayserat WRITE,
 					tuotteen_toimittajat READ,
@@ -14288,24 +14290,17 @@ if (!function_exists("tee_keraysera")) {
 		// esim. muutetaan metrit senteiksi
 		$mittakerroin = 100;
 
-		// $wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) BETWEEN (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) AND ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
-		#$wherelisa = $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0 ? " AND (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']}) " : "";
-
 		# Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
 		# tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
 		# muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
 
-		$query = "	(SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
-					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					lasku1.h1time,
-					keraysvyohyke1.tunnus AS ker_tunnus,
+		$query = "	(SELECT SQL_NO_CACHE
+					lasku1.prioriteettinro as prioriteetti,
+					(TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					lasku1.ohjausmerkki,
-					lahdot1.asiakasluokka,
-					lasku1.liitostunnus,
-					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
-					lahdot1.tunnus as lahto,
+					lasku1.h1time,
 					lahdot1.lahdon_kellonaika,
-					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
+					keraysvyohyke1.tunnus AS ker_tunnus
 					FROM lasku AS lasku1
 					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
 					JOIN tilausrivi AS tilausrivi1 ON (tilausrivi1.yhtio = lasku1.yhtio AND tilausrivi1.otunnus = lasku1.tunnus AND tilausrivi1.var NOT IN ('P', 'J') AND tilausrivi1.tyyppi != 'D' AND tilausrivi1.varattu > 0)
@@ -14317,31 +14312,24 @@ if (!function_exists("tee_keraysera")) {
 				 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
 									AND lahdot1.liitostunnus = toimitustapa1.tunnus
 									AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
-									#AND lahdot1.lahdon_kellonaika >= CURTIME()
 									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
 									AND lahdot1.aktiivi = ''
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
-									#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
-									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
- 									)
+									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
 					AND lasku1.alatila = 'A'
 					AND lasku1.vakisin_kerays = ''
 					AND lasku1.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9,10)
+					GROUP BY 1,2,3,4,5,6)
 					UNION
-					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
+					(SELECT SQL_NO_CACHE
+					lasku2.prioriteettinro as prioriteetti,
 					0 as erotus,
-					lasku2.h1time,
-					keraysvyohyke2.tunnus AS ker_tunnus,
 					lasku2.ohjausmerkki,
-					999999999999 as asiakasluokka,
-					lasku2.liitostunnus,
-					TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
-					999999999999 as lahto,
+					lasku2.h1time,
 					999999999999 as lahdon_kellonaika,
-					GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
+					keraysvyohyke2.tunnus AS ker_tunnus
 					FROM lasku AS lasku2
 					JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
 					JOIN tilausrivi AS tilausrivi2 ON (tilausrivi2.yhtio = lasku2.yhtio AND tilausrivi2.otunnus = lasku2.tunnus AND tilausrivi2.var NOT IN ('P', 'J') AND tilausrivi2.tyyppi != 'D' AND tilausrivi2.varattu > 0)
@@ -14356,8 +14344,8 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku2.alatila = 'A'
 					AND lasku2.vakisin_kerays != ''
 					AND lasku2.varasto = '{$varasto}'
-					GROUP BY 1,2,3,4,5,6,7,8,9,10)
-					ORDER BY 1,2,3,4";
+					GROUP BY 1,2,3,4,5,6)
+					ORDER BY 1,2,3,4,5,6";
 		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 
@@ -14365,8 +14353,12 @@ if (!function_exists("tee_keraysera")) {
 			return array('tilaukset' => array(), 'msg' => $query);
 		}
 
+		// Otetaan eka rivi, siinä on korkeimman prion vyöhyke
 		$row = mysql_fetch_assoc($res);
-		$keraysvyohyke = $row['ker_tunnus'];
+
+		// Tallennetaan prio 1 vyöhyke tänne
+		$keraysvyohyke 	= $row['ker_tunnus'];
+		$aikarajaus 	= $row['lahdon_kellonaika'];
 
 		$query = "	SELECT nimitys, sallitut_alustat,
 					IF(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
@@ -14376,7 +14368,7 @@ if (!function_exists("tee_keraysera")) {
 					lahtojen_valinen_enimmaisaika,
 					ulkoinen_jarjestelma
 					FROM keraysvyohyke
-					JOIN pakkaus ON (pakkaus.yhtio = keraysvyohyke.yhtio AND pakkaus.tunnus IN (keraysvyohyke.sallitut_alustat))
+					LEFT JOIN pakkaus ON (pakkaus.yhtio = keraysvyohyke.yhtio AND pakkaus.tunnus IN (keraysvyohyke.sallitut_alustat))
 					WHERE keraysvyohyke.yhtio = '{$kukarow['yhtio']}'
 					AND keraysvyohyke.tunnus = '{$keraysvyohyke}'";
 		$ker_result = pupe_query($query);
@@ -14437,17 +14429,36 @@ if (!function_exists("tee_keraysera")) {
 			$pakkaukset = array();
 		}
 
-		if ($row['lahdon_kellonaika'] != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-			$aikarajaus = $row['lahdon_kellonaika'];
+		if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
 
-			$query = "	SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
-						(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+			$query = "	SELECT SQL_NO_CACHE
+						lasku1.prioriteettinro as prioriteetti,
+						(	SELECT
+							(TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60)
+							FROM lahdot AS lahdot3
+							WHERE lahdot3.yhtio = toimitustapa1.yhtio
+							AND lahdot3.liitostunnus = toimitustapa1.tunnus
+							AND lahdot3.aktiivi = ''
+							AND ((lahdot3.pvm = CURDATE() AND lahdot3.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot3.kerailyn_aloitusaika <= CURTIME() AND lahdot3.tunnus = lasku1.toimitustavan_lahto) or lahdot3.vakisin_kerays != '')
+							AND (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']})
+							ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60), lahdot3.tunnus
+							LIMIT 1
+						) as erotus,
 						lasku1.ohjausmerkki,
-						lahdot1.asiakasluokka,
+						lasku1.h1time,
 						lasku1.liitostunnus,
 						TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
-						lahdot1.tunnus as lahto,
-						lahdot1.lahdon_kellonaika,
+						(	SELECT
+							CONCAT_WS('!¡!', lahdot4.tunnus, lahdot4.asiakasluokka, lahdot4.lahdon_kellonaika)
+							FROM lahdot AS lahdot4
+							WHERE lahdot4.yhtio = toimitustapa1.yhtio
+							AND lahdot4.liitostunnus = toimitustapa1.tunnus
+							AND lahdot4.aktiivi = ''
+							AND ((lahdot4.pvm = CURDATE() AND lahdot4.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot4.kerailyn_aloitusaika <= CURTIME() AND lahdot4.tunnus = lasku1.toimitustavan_lahto) or lahdot4.vakisin_kerays != '')
+							AND (TIME_TO_SEC(TIMEDIFF(lahdot4.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']})
+							ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot4.lahdon_kellonaika, CURTIME())) / 60), lahdot4.tunnus
+							LIMIT 1
+						) as lahdon_tiedot,
 						GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 						FROM lasku AS lasku1
 						JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
@@ -14456,38 +14467,24 @@ if (!function_exists("tee_keraysera")) {
 						JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
 						JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
-					 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
-										AND lahdot1.liitostunnus = toimitustapa1.tunnus
-										AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
-										#AND lahdot1.lahdon_kellonaika >= CURTIME()
-										AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
-										AND lahdot1.aktiivi = ''
-										AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
-										#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
-										AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
- 												)
 						WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 						AND lasku1.tila = 'N'
 						AND lasku1.alatila = 'A'
 						AND lasku1.vakisin_kerays = ''
 						AND lasku1.varasto = '{$varasto}'
-						AND (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']})
-						GROUP BY 1,2,3,4,5,6,7,8
-						ORDER BY prioriteetti, erotus, ohjausmerkki, h1time";
-			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
-
-			$res = pupe_query($query);
+						GROUP BY 1,2,3,4,5,6,7
+						HAVING lahdon_tiedot IS NOT NULL
+						ORDER BY 1,2,3,4";
 		}
 		else {
-			$query = "	SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
+			$query = "	SELECT SQL_NO_CACHE
+						lasku2.prioriteettinro as prioriteetti,
 						0 as erotus,
-						lasku2.h1time,
 						lasku2.ohjausmerkki,
-						999999999999 as asiakasluokka,
+						lasku2.h1time,
 						lasku2.liitostunnus,
 						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
-						999999999999 as lahto,
-						999999999999 as lahdon_kellonaika,
+						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot
 						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 						FROM lasku AS lasku2
 						JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)
@@ -14497,18 +14494,18 @@ if (!function_exists("tee_keraysera")) {
 						JOIN tuote AS tuote2 ON (tuote2.yhtio = tilausrivi2.yhtio AND tuote2.tuoteno = tilausrivi2.tuoteno)
 						JOIN keraysvyohyke AS keraysvyohyke2 ON (keraysvyohyke2.yhtio = lasku2.yhtio AND keraysvyohyke2.tunnus = '{$keraysvyohyke}')
 						JOIN toimitustapa AS toimitustapa2 ON (toimitustapa2.yhtio = lasku2.yhtio AND toimitustapa2.selite = lasku2.toimitustapa)
-						JOIN lahdot AS lahdot2 ON (lahdot2.yhtio = lasku2.yhtio AND lahdot2.tunnus = lasku2.toimitustavan_lahto)
+						JOIN lahdot AS lahdot3 ON (lahdot3.yhtio = lasku2.yhtio AND lahdot3.tunnus = lasku2.toimitustavan_lahto)
 						WHERE lasku2.yhtio = '{$kukarow['yhtio']}'
 						AND lasku2.tila = 'N'
 						AND lasku2.alatila = 'A'
 						AND lasku2.vakisin_kerays != ''
 						AND lasku2.varasto = '{$varasto}'
-						GROUP BY 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7
 						ORDER BY 1,2,3,4";
-			if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
-
-			$res = pupe_query($query);
 		}
+
+		if ($debug) echo "<pre>",str_replace("\t", "", $query),"</pre>";
+		$res = pupe_query($query);
 
 		/**
 		 * Keräilynippujen optimaalinen järjestäminen.
@@ -14527,6 +14524,8 @@ if (!function_exists("tee_keraysera")) {
 		$i = 1;
 
 		while ($row = mysql_fetch_assoc($res)) {
+
+			list($row["lahto"], $row["asiakasluokka"], $row["lahdon_kellonaika"]) = explode("!¡!", $row["lahdon_tiedot"]);
 
 			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') === false and trim($ed_prioriteetti) != '' and $ed_prioriteetti != $row['prioriteetti']) {
 				if ($debug) echo "EI SAA OLLA USEITA PRIORITEETTEJÄ ALUSTOISSA! BREAK<br>";
@@ -14557,7 +14556,7 @@ if (!function_exists("tee_keraysera")) {
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$row['tunnus']})
 						AND tilausrivi.varattu > 0
-						AND tilausrivi.var NOT IN ('P', 'J')
+						AND tilausrivi.var NOT IN ('P','J')
 						AND tilausrivi.tyyppi != 'D'
 						ORDER BY vh.indeksi";
 			$indeksi_res = pupe_query($query);
@@ -14585,7 +14584,7 @@ if (!function_exists("tee_keraysera")) {
 				}
 
 				$indeksit[] = $indeksi_row['indeksi'];
-				$til_koko += $indeksi_row['tilauksen_koko'];
+				$til_koko  += $indeksi_row['tilauksen_koko'];
 				$til_paino += $indeksi_row['tilauksen_paino'];
 			}
 
@@ -14621,7 +14620,7 @@ if (!function_exists("tee_keraysera")) {
 					1 => array(70 => 10)
 					);
 
-		foreach($kerailyniput as $pri => &$nippu) {
+		foreach ($kerailyniput as $pri => &$nippu) {
 			// mediaanien lukumäärä
 			$mediaanilkm = count($nippu);
 
@@ -14924,7 +14923,6 @@ if (!function_exists("tee_keraysera")) {
 
 		mysql_data_seek($res, 0);
 
-		// while ($row = mysql_fetch_assoc($res)) {
 		foreach ($fixed_main_array as $key => $tilaukset) {
 
 			if (isset($kaytettava_pakkaus) and $kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {

@@ -2298,7 +2298,7 @@
 
 				$status = $status_text = '';
 
-				if (strpos($lahto_row['tilat'], "K") !== FALSE) {
+				if (preg_match("/(K|X)/", $lahto_row['tilat'])) {
 					$status_text = t("Aloitettu");
 					$status = 2;
 				}

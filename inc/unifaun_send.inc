@@ -316,7 +316,7 @@ class Unifaun {
 								AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
 								AND toimitustapa = '{$this->toitarow['selite']}'
 								AND rahtisopimus != ''
-								ORDER BY asiakas DESC 
+								ORDER BY asiakas DESC
 								LIMIT 1";
 					$rahtisopimus_res = pupe_query($query);
 					$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
@@ -440,8 +440,7 @@ class Unifaun {
 				$uni_shi_val->addAttribute('n', "freetext1");
 
 				# kollilaji
-
-				$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro'];
+				$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus'];
 
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($kollilaji, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext2");

@@ -14295,16 +14295,60 @@ if (!function_exists("tee_keraysera")) {
 		# tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
 		# muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
 
-		$query = "	(SELECT SQL_NO_CACHE lasku1.prioriteettinro as prioriteetti,
-					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+		$query = "	(SELECT lasku1.prioriteettinro as prioriteetti,
+					(	SELECT (TIME_TO_SEC(TIMEDIFF(lahdot1.lahdon_kellonaika, CURTIME())) / 60)
+						FROM lahdot AS lahdot1
+						WHERE lahdot1.yhtio = toimitustapa1.yhtio
+						AND lahdot1.liitostunnus = toimitustapa1.tunnus
+						AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.lahdon_viikonpvm = 0 or lahdot1.vakisin_kerays != '')
+						AND lahdot1.aktiivi = ''
+						AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+						ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60), lahdot1.tunnus
+						LIMIT 1
+					) as erotus,
 					lasku1.h1time,
 					keraysvyohyke1.tunnus AS ker_tunnus,
 					lasku1.ohjausmerkki,
-					lahdot1.asiakasluokka,
+					(	SELECT lahdot1.asiakasluokka
+						FROM lahdot AS lahdot1
+						WHERE lahdot1.yhtio = toimitustapa1.yhtio
+						AND lahdot1.liitostunnus = toimitustapa1.tunnus
+						AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.lahdon_viikonpvm = 0 or lahdot1.vakisin_kerays != '')
+						AND lahdot1.aktiivi = ''
+						AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+						ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60), lahdot1.tunnus
+						LIMIT 1
+					) as asiakasluokka,
 					lasku1.liitostunnus,
 					TRIM(CONCAT(lasku1.toim_nimi, ' ', lasku1.toim_nimitark)) as asiakas_nimi,
-					lahdot1.tunnus as lahto,
-					lahdot1.lahdon_kellonaika,
+					(	SELECT lahdot1.tunnus
+						FROM lahdot AS lahdot1
+						WHERE lahdot1.yhtio = toimitustapa1.yhtio
+						AND lahdot1.liitostunnus = toimitustapa1.tunnus
+						AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.lahdon_viikonpvm = 0 or lahdot1.vakisin_kerays != '')
+						AND lahdot1.aktiivi = ''
+						AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+						ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60), lahdot1.tunnus
+						LIMIT 1
+					) as lahto,
+					(	SELECT lahdot1.lahdon_kellonaika
+						FROM lahdot AS lahdot1
+						WHERE lahdot1.yhtio = toimitustapa1.yhtio
+						AND lahdot1.liitostunnus = toimitustapa1.tunnus
+						AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.lahdon_viikonpvm = 0 or lahdot1.vakisin_kerays != '')
+						AND lahdot1.aktiivi = ''
+						AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
+						AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
+						ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60), lahdot1.tunnus
+						LIMIT 1
+					) as lahdon_kellonaika,
 					GROUP_CONCAT(DISTINCT lasku1.tunnus) AS tunnus
 					FROM lasku AS lasku1
 					JOIN asiakas AS asiakas1 ON (asiakas1.yhtio = lasku1.yhtio AND asiakas1.tunnus = lasku1.liitostunnus)
@@ -14314,16 +14358,6 @@ if (!function_exists("tee_keraysera")) {
 					JOIN tuote AS tuote1 ON (tuote1.yhtio = tilausrivi1.yhtio AND tuote1.tuoteno = tilausrivi1.tuoteno)
 					JOIN keraysvyohyke AS keraysvyohyke1 ON (keraysvyohyke1.yhtio = lasku1.yhtio AND keraysvyohyke1.tunnus IN ({$keraysvyohyke}) AND keraysvyohyke1.tunnus = vh1.keraysvyohyke)
 					JOIN toimitustapa AS toimitustapa1 ON (toimitustapa1.yhtio = lasku1.yhtio AND toimitustapa1.selite = lasku1.toimitustapa)
-				 	JOIN lahdot AS lahdot1 ON (lahdot1.yhtio = toimitustapa1.yhtio
-									AND lahdot1.liitostunnus = toimitustapa1.tunnus
-									AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
-									#AND lahdot1.lahdon_kellonaika >= CURTIME()
-									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
-									AND lahdot1.aktiivi = ''
-									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
-									#AND (lahdot1.asiakasluokka = lasku1.prioriteettinro or lahdot1.vakisin_kerays != '')
-									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != '')
- 									)
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
 					AND lasku1.tila = 'N'
 					AND lasku1.alatila = 'A'
@@ -14331,7 +14365,7 @@ if (!function_exists("tee_keraysera")) {
 					AND lasku1.varasto = '{$varasto}'
 					GROUP BY 1,2,3,4,5,6,7,8,9,10)
 					UNION
-					(SELECT SQL_NO_CACHE lasku2.prioriteettinro as prioriteetti,
+					(lasku2.prioriteettinro as prioriteetti,
 					0 as erotus,
 					lasku2.h1time,
 					keraysvyohyke2.tunnus AS ker_tunnus,

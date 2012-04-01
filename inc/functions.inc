@@ -14484,7 +14484,7 @@ if (!function_exists("tee_keraysera")) {
 						lasku2.h1time,
 						lasku2.liitostunnus,
 						TRIM(CONCAT(lasku2.toim_nimi, ' ', lasku2.toim_nimitark)) as asiakas_nimi,
-						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot
+						CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot,
 						GROUP_CONCAT(DISTINCT lasku2.tunnus) AS tunnus
 						FROM lasku AS lasku2
 						JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)

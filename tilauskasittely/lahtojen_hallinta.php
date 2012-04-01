@@ -173,7 +173,7 @@
 
 					while ($sscc_chk_row = mysql_fetch_assoc($sscc_chk_res)) {
 
-						if ($old_row['tulostustapa'] == 'E' and $old_row['liitostunnus'] != $new_row['liitostunnus'] and !in_array($sscc_chk_row['sscc_ulkoinen'], $sscc_chk_arr)) {
+						if ($old_row['liitostunnus'] != $new_row['liitostunnus'] and !in_array($sscc_chk_row['sscc_ulkoinen'], $sscc_chk_arr)) {
 
 							$mergeid = $valittu_lahto;
 							$parcelno = $sscc_chk_row['sscc_ulkoinen'];

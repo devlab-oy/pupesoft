@@ -34,7 +34,7 @@
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-		$query = "	SELECT varasto, tunnus
+		$query = "	SELECT *
 					FROM keraysvyohyke
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND ulkoinen_jarjestelma = 'K'";
@@ -60,7 +60,7 @@
 				$laskurow = mysql_fetch_assoc($res);
 
 				$tilausnumeroita  	  = $otunnukset;
-				$valittu_tulostin 	  = $komento['kerayslista'];
+				$valittu_tulostin 	  = $gen_ker_row['printteri0'];
 				$tullaan_kerayserasta = 'joo';
 				$laskuja 			  = count($erat['tilaukset']);
 				$lukotetaan 		  = FALSE;
@@ -73,6 +73,9 @@
 			$result = pupe_query($query);
 
 			if (count($erat['tilaukset']) > 0) {
+
+				$komento['reittietiketti'] = $gen_ker_row['printteri8'];
+
 				// Tulostetaan kollilappu
 				require('inc/tulosta_reittietiketti.inc');
 

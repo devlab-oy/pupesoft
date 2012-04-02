@@ -494,9 +494,9 @@ if (!function_exists('alku_lahete')) {
 
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
 			# viivakoodi
-			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
+			$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
+			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
 			$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 		}
@@ -668,11 +668,10 @@ if (!function_exists('uusi_sivu_lahete')) {
 			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
 			$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
-
-			# viivakoodi
-			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
+		
+			$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
+			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));						
 		}
 
 		$kala = 715;

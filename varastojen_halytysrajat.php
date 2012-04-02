@@ -458,7 +458,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
-				ORDER BY nimitys";
+				ORDER BY tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 
 

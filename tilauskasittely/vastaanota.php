@@ -610,7 +610,10 @@
 		echo "<td><select name='varasto'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
 
-		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$query  = "	SELECT tunnus, nimitys, maa
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tyyppi, nimitys";
 		$vares = mysql_query($query) or pupe_error($query);
 
 		while ($varow = mysql_fetch_array($vares)) {
@@ -879,7 +882,10 @@
 		echo "</table><br>";
 
 		//vastaanottavan varaston tiedot
-		$query  = "SELECT * FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' and tunnus = '$row[clearing]'";
+		$query  = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$row[clearing]'";
 		$vares = mysql_query($query) or pupe_error($query);
 		$varow = mysql_fetch_array($vares);
 
@@ -895,7 +901,7 @@
 					tilausrivi.hyllyalue,
 					tilausrivi.hyllynro,
 					tilausrivi.hyllyvali,
-					tilausrivi.hyllytaso,				
+					tilausrivi.hyllytaso,
 					tuote.ei_saldoa,
 					concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'), lpad(upper(tilausrivi.hyllyvali), 5, '0'), lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -991,7 +997,7 @@
 							AND tunnus = '$asiakkaan_tunnus'";
 				$asiakasresult = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasresult);
-				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";				
+				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";
 			}
 			else  {
 				echo "<td>$rivirow[paikka]</td>";

@@ -198,9 +198,9 @@
 				unset($submit_button);
 			}
 			else {
-				$query = "	SELECT tunnus 
-							FROM kuka 
-							WHERE yhtio = '{$kukarow["yhtio"]}' 
+				$query = "	SELECT tunnus
+							FROM kuka
+							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND myyja = $myyja
 							AND kuka != '{$kuka}'";
 				$resmyyja = pupe_query($query);
@@ -961,7 +961,11 @@
 					echo "<tr><th align='left'>",t("Henkilökohtainen tulostin:"),"</td>";
 					echo "<td><select name='kirjoitin'><option value=''>",t("Ei oletuskirjoitinta"),"</option>";
 
-					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}'";
+					$query  = "	SELECT tunnus, kirjoitin
+								FROM kirjoittimet
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND komento != 'EDI'
+								ORDER BY kirjoitin";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {

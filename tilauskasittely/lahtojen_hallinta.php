@@ -1700,7 +1700,7 @@
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY nimitys";
+					ORDER BY tyyppi, nimitys";
 		$varastores = pupe_query($query);
 
 		while ($varastorow = mysql_fetch_assoc($varastores)) {

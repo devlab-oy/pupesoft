@@ -1665,7 +1665,7 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						$varastot_lisa_query
-						order by tyyppi, nimitys";
+						ORDER BY tyyppi, nimitys";
 			$vares = pupe_query($query);
 
 			while ($varow = mysql_fetch_assoc($vares)) {

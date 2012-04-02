@@ -937,8 +937,8 @@
 
 			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
 						FROM kirjoittimet
-						WHERE
-						$logistiikka_yhtiolisa
+						WHERE $logistiikka_yhtiolisa
+						AND komento != 'EDI'
 						GROUP BY komento
 						ORDER BY kirjoitin";
 			$kires = pupe_query($query);

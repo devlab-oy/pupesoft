@@ -453,7 +453,10 @@
 
 			if ($tulosta != null) {
 				//haetaan tilausken tulostuskomento
-				$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
+				$query   = "	SELECT *
+								from kirjoittimet
+								where yhtio='$kukarow[yhtio]'
+								and tunnus='$printteri'";
 				$kirres  = pupe_query($query);
 				$kirrow  = mysql_fetch_assoc($kirres);
 				$komento = $kirrow['komento'];
@@ -1888,7 +1891,10 @@
 			fclose($fh);
 
 			//haetaan tilausken tulostuskomento
-			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
+			$query   = "SELECT *
+						from kirjoittimet
+						where yhtio='$kukarow[yhtio]'
+						and tunnus='$printteri'";
 			$kirres  = pupe_query($query);
 			$kirrow  = mysql_fetch_assoc($kirres);
 			$komento = $kirrow['komento'];
@@ -2075,7 +2081,11 @@
 	echo "<td colspan='3'><input type='checkbox' name='ulko' value='ULKO' $chk2></td>";
 	echo "</tr>";
 
-	$query = "SELECT * FROM kirjoittimet WHERE yhtio = '$kukarow[yhtio]'";
+	$query = "	SELECT *
+				FROM kirjoittimet
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND komento != 'EDI'
+				ORDER BY kirjoitin";
 	$kires = pupe_query($query);
 
 	echo "<tr>";

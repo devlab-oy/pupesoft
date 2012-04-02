@@ -239,7 +239,7 @@
 													tuote.kehahin * 0.5),
 												tuote.kehahin * 0.25),
 											0),
-										6) kehahin										
+										6) kehahin
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno = '$tuoteno'";
@@ -323,7 +323,10 @@
 				echo "<tr><td>".t("Lähdevarasto").":</td>";
 				echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+				$query  = "	SELECT tunnus, nimitys
+							FROM varastopaikat
+							WHERE yhtio='$kukarow[yhtio]'
+							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))
@@ -339,7 +342,10 @@
 				echo "<tr><td>".t("Kohdevarasto").":</td>";
 				echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+				$query  = "	SELECT tunnus, nimitys
+							FROM varastopaikat
+							WHERE yhtio='$kukarow[yhtio]'
+							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))

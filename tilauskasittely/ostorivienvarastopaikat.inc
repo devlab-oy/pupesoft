@@ -378,7 +378,10 @@ if ($tee == "") {
 			<option value='x' $selx>".t("Tuotteiden oletuspaikoille")."</option>
 			<option value='y' $sely>".t("Rivellä oleville paikoille")."</option>";
 
-	$query  = "SELECT * FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$query  = "	SELECT * 
+				FROM varastopaikat 
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {
@@ -523,9 +526,9 @@ if ($tee == "") {
 
 					$query  = "	SELECT tunnus
 								FROM varastopaikat
-								WHERE yhtio='$kukarow[yhtio]'
-								and alkuhyllyalue<='$paikkarow[hyllyalue]'
-								and loppuhyllyalue>='$paikkarow[hyllyalue]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and alkuhyllyalue <= '$paikkarow[hyllyalue]'
+								and loppuhyllyalue >= '$paikkarow[hyllyalue]'";
 					$vares = mysql_query($query) or pupe_error($query);
 					$varow = mysql_fetch_array($vares);
 

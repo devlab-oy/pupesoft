@@ -104,11 +104,11 @@
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY nimitys";
+					ORDER BY tyyppi, nimitys";
 		$varastores = pupe_query($query);
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=''>".t("Valitse")."</option>";
-		
+
 		while ($row = mysql_fetch_assoc($varastores)) {
 			$sel = $row["tunnus"] == $trow[$i] ? " selected" : "";
 

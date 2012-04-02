@@ -279,7 +279,8 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			while ($varow = mysql_fetch_array($vares)) {

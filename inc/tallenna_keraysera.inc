@@ -64,9 +64,9 @@
 					}
 					else {
 						$query = "	UPDATE avainsana
-									SET selite = '{$sscc}'
+									SET selite  = '{$sscc}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND laji	='SSCC'";
+									AND laji	= 'SSCC'";
 						$update_res = pupe_query($query);
 					}
 
@@ -100,19 +100,20 @@
 						$tilalisa = $erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K" ? "X" : "K";
 
 						$query = "	INSERT INTO kerayserat SET
-									yhtio 		= '{$kukarow['yhtio']}',
-									nro 		= {$kerayseran_numero},
-									tila 		= '{$tilalisa}',
-									sscc 		= {$sscc},
-									otunnus 	= '{$laskurow['tunnus']}',
-									tilausrivi 	= '{$tilriv}',
-									pakkaus 	= '{$pakkaus_nro}',
-									pakkausnro 	= '{$juokseva_nro}',
-									kpl 		= '{$kpl}',
-									laatija 	= '{$kukarow['kuka']}',
-									luontiaika 	= now(),
-									muuttaja 	= '{$kukarow['kuka']}',
-									muutospvm 	= now()";
+									yhtio 			= '{$kukarow['yhtio']}',
+									nro 			= '{$kerayseran_numero}',
+									keraysvyohyke 	= '{$erat['keraysvyohyketiedot']['keraysvyohyke']}',
+									tila 			= '{$tilalisa}',
+									sscc 			= '{$sscc}',
+									otunnus 		= '{$laskurow['tunnus']}',
+									tilausrivi 		= '{$tilriv}',
+									pakkaus 		= '{$pakkaus_nro}',
+									pakkausnro 		= '{$juokseva_nro}',
+									kpl 			= '{$kpl}',
+									laatija 		= '{$kukarow['kuka']}',
+									luontiaika 		= now(),
+									muuttaja 		= '{$kukarow['kuka']}',
+									muutospvm 		= now()";
 						$insert_res = pupe_query($query);
 					}
 				}

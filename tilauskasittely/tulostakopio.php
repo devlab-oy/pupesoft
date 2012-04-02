@@ -287,7 +287,8 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
 			echo "<select name='lahettava_varasto'>";
@@ -312,7 +313,7 @@
 			$query = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						order by nimitys";
+						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
 			echo "<select name='vastaanottava_varasto'>";

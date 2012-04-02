@@ -26,7 +26,10 @@
 	$varastosta = array(); // mistä varastoista saa myydä
 
 	// haetaan kaikki varastot jotka ei ole myyntikiellossa
-	$query = "SELECT tunnus from varastopaikat where yhtio='$kukarow[yhtio]' and tyyppi=''";
+	$query = "	SELECT tunnus
+				from varastopaikat
+				where yhtio='$kukarow[yhtio]'
+				and tyyppi=''";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {

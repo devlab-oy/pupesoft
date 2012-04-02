@@ -219,7 +219,10 @@
 
 		echo "</select></td></tr>";
 
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$query  = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 
 		echo "<tr>

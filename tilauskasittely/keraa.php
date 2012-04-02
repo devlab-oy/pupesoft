@@ -2235,7 +2235,9 @@
 			if ($tumaa != '') {
 				$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 							FROM varastopaikat
-							WHERE maa != '' AND {$logistiikka_yhtiolisa} and maa = '{$tumaa}'";
+							WHERE maa != ''
+							AND {$logistiikka_yhtiolisa}
+							AND maa = '{$tumaa}'";
 				$maare = pupe_query($query);
 				$maarow = mysql_fetch_assoc($maare);
 				$haku .= " AND lasku.varasto IN ({$maarow['tunnukset']}) ";

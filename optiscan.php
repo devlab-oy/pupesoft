@@ -421,6 +421,7 @@
 		$query = "	SELECT tunnus
 					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND komento != 'EDI'
 					AND jarjestys = '{$printer_id}'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoittimen komentoa haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
@@ -784,6 +785,7 @@
 		$query = "	SELECT tunnus
 					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND komento != 'EDI'
 					AND jarjestys = '{$printer_id}'";
 		$printer_chk_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoitinta haettaessa\r\n\r\n");
 		$printer_chk_row = mysql_fetch_assoc($printer_chk_res);

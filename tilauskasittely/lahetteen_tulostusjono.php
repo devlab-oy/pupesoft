@@ -238,7 +238,7 @@
 							$toim_bck		= $toim;
 							if ($toim == "KAIKKILISTAT") {
 								if ($laskurow["tilaustyyppi"] == "M") $toim = "MYYNTITILI";
-								else $toim = "SIIRTOLISTA";	
+								else $toim = "SIIRTOLISTA";
 							}
 
 							require("tilaus-valmis-siirtolista.inc");
@@ -524,8 +524,9 @@
 
 				//haetaan keräyslistan oletustulostin
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon'";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
 				$kirjoitin = $prirow['printteri0'];

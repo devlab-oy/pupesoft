@@ -1589,23 +1589,26 @@
 
 											if ($kpl_chk_row['kpl'] != $kpl_chk_row['kpl_keratty']) {
 
-												$query = "SELECT toimitustavan_lahto FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otun}'";
+												$query = "	SELECT toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
+															FROM lasku
+															WHERE yhtio = '{$kukarow['yhtio']}'
+															AND tunnus = '{$otun}'";
 												$lahto_chk_res = pupe_query($query);
 												$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
 
-												$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
-												$parcelno = $kpl_chk_row['sscc_ulkoinen'];
+												if ($toitarow['tulostustapa'] == 'E') {
+													if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
+														$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+													}
+													elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+														$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+													}
 
-												if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
-													$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+													$mergeid = md5($lahto_chk_row["toimitustavan_lahto"].$lahto_chk_row["ytunnus"].$lahto_chk_row["toim_osoite"].$lahto_chk_row["toim_postino"].$lahto_chk_row["toim_postitp"]);
+
+													$unifaun->_discardParcel($mergeid, $kpl_chk_row['sscc_ulkoinen']);
+													$unifaun->ftpSend();
 												}
-												elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
-													$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
-												}
-
-												$unifaun->_discardParcel($mergeid, $parcelno);
-
-												$unifaun->ftpSend();
 
 												// tehd‰‰n palautussanoma
 												$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['maksuehto']}'";

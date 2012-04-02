@@ -156,7 +156,7 @@
 										AND nro 	= '{$keraysera_nro}'";
 							$valmis_era_chk_res = pupe_query($query);
 
-							$otunnus_chk = "";
+							$keraysera_vyohyke = 0;
 
 							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
 								$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
@@ -171,19 +171,18 @@
 								$varattu_res = pupe_query($query);
 								$varattu_row = mysql_fetch_assoc($varattu_res);
 
-								$otunnus_chk = $varattu_row['otunnus'];
-
 								$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
 								$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
 								$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
 								$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+
+								$keraysera_vyohyke = $valmis_era_chk_row["keraysvyohyke"];
 							}
 
-							$query = "	SELECT varastopaikat.printteri1, varastopaikat.printteri3
-										FROM lasku
-										JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
-										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-										AND lasku.tunnus = '{$otunnus_chk}'";
+							$query = "	SELECT printteri1, printteri3
+										FROM keraysvyohyke
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$keraysera_vyohyke}'";
 							$printteri_res = pupe_query($query);
 							$printteri_row = mysql_fetch_assoc($printteri_res);
 

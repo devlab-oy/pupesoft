@@ -28,7 +28,7 @@
 
 			if ((is_numeric($chk_sscc_row['sscc_ulkoinen']) and (int) $chk_sscc_row['sscc_ulkoinen'] > 0) or (!is_numeric($chk_sscc_row['sscc_ulkoinen']) and (string) $chk_sscc_row['sscc_ulkoinen'] != "")) {
 
-				$query = "	SELECT toimitustavan_lahto, toimitustapa
+				$query = "	SELECT toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$chk_sscc_row['otunnus']}'";
@@ -43,11 +43,9 @@
 				$toitares = pupe_query($query);
 				$toitarow = mysql_fetch_assoc($toitares);
 
-				if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
-					($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
-
-					$mergeid = $toitarow['tulostustapa'] == 'E' ? $lahto_chk_row['toimitustavan_lahto'] : 0;
-					$parcelno = $chk_sscc_row['sscc_ulkoinen'];
+				if ($toitarow['tulostustapa'] == 'E' and
+					(($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
+					($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != ""))) {
 
 					if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
 						$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
@@ -56,8 +54,9 @@
 						$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 					}
 
-					$unifaun->_discardParcel($mergeid, $parcelno);
+					$mergeid = md5($lahto_chk_row["toimitustavan_lahto"].$lahto_chk_row["ytunnus"].$lahto_chk_row["toim_osoite"].$lahto_chk_row["toim_postino"].$lahto_chk_row["toim_postitp"]);
 
+					$unifaun->_discardParcel($mergeid, $chk_sscc_row['sscc_ulkoinen']);
 					$unifaun->ftpSend();
 				}
 			}

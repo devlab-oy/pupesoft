@@ -173,7 +173,7 @@ class Unifaun {
 		$uni_discard = $control->addChild('discard');
 		$uni_discard->addAttribute('type', 'parcel');
 
-		if ($mergeid != 0) {
+		if ($mergeid != "") {
 			$uni_discard_val = $uni_discard->addChild('val', $mergeid);
 			$uni_discard_val->addAttribute('n', 'mergeid');
 		}
@@ -408,7 +408,8 @@ class Unifaun {
 			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
 
 			if ($this->toitarow['tulostustapa'] == 'E') {
-				$uni_shipment->addAttribute('mergeid', utf8_encode($this->postirow["toimitustavan_lahto"]));
+				$mergeid = md5($this->postirow["toimitustavan_lahto"].$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				$uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
 			}
 
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); # Defines the sender. Refers to the sndid value for sender.

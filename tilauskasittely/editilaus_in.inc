@@ -932,44 +932,25 @@ while ($tietue = fgets($fd)) {
 				}
 
 				if (trim($editilaus_toimitustapa) != '') {
+					$query = "	SELECT *
+								FROM asiakkaan_avainsanat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tarkenne = '{$editilaus_toimitustapa}'
+								AND laji = 'editilaus_toimitustapa'
+								AND tarkenne != ''
+								AND avainsana != ''
+								AND liitostunnus = '{$arow['tunnus']}'
+								ORDER BY muutospvm DESC
+								LIMIT 1";
+					$toimitustapa_chk_res = pupe_query($query);
 
-					if ($yhtiorow['kerayserat'] == 'K') {
-						$query = "	SELECT *
-									FROM toimitustapa
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND herminator = '{$editilaus_toimitustapa}'";
-						$toimitustapa_chk_res = pupe_query($query);
-
-						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-							$editilaus_toimitustapa = $toimitustapa_chk_row['selite'];
-						}
-						else {
-							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
-							$editilaus_toimitustapa = '';
-						}
+					if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+						$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
 					}
 					else {
-						$query = "	SELECT *
-									FROM asiakkaan_avainsanat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tarkenne = '{$editilaus_toimitustapa}'
-									AND laji = 'editilaus_toimitustapa'
-									AND tarkenne != ''
-									AND avainsana != ''
-									AND liitostunnus = '{$arow['tunnus']}'
-									ORDER BY muutospvm DESC
-									LIMIT 1";
-						$toimitustapa_chk_res = pupe_query($query);
-
-						if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-							$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-							$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
-						}
-						else {
-							$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
-							$editilaus_toimitustapa = '';
-						}
+						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
+						$editilaus_toimitustapa = '';
 					}
 				}
 

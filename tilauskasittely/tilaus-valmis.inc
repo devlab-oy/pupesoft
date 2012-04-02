@@ -18,9 +18,9 @@ if ($laskurow['tilaustyyppi'] == "2" AND trim($laskurow['ohjausmerkki']) == "") 
 }
 
 // päivitetään vanhatunnus laskulle
-$query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa 
-			WHERE yhtio='$kukarow[yhtio]' 
-			AND tunnus='$laskurow[tunnus]' 
+$query  = "	UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa
+			WHERE yhtio='$kukarow[yhtio]'
+			AND tunnus='$laskurow[tunnus]'
 			AND vanhatunnus=0";
 $oldtur = pupe_query($query);
 
@@ -1532,16 +1532,6 @@ else {
 			}
 
 			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tilausvalmiskutsuja == 'EDITILAUS' or $tilausvalmiskutsuja == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
-
-				#if ($laskurow["kohdistettu"] == "K" and $laskurow["rahtivapaa"] != '') {
-				#	$herminator = $totarowx['herminator2'];
-				#}
-				#else {
-				#	$herminator = $totarowx['herminator'];
-				#}
-
-				$herminator = $totarowx['herminator'];
-
 				foreach ($tilausnumerot as $til_nro) {
 
 					// Jos tilauksista yksikin menee "Unikko"-järjestelmään, päivitetään kaikki tilaukset rahtivapaiksi
@@ -1588,7 +1578,7 @@ else {
 							'lisatiedot' => $laskun_lisatiedot,
 							'asiakasrow' => $asiakas_chk_row,
 							'tilaustyyppi' => $pupesoft_tilaustyyppi,
-							'toimitustapa' => $herminator,
+							#'toimitustapa' => $totarowx['herminator'],
 							'toim' => $toim,
 						);
 

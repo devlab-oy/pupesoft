@@ -1506,9 +1506,9 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 			$asiakas_chk_res = pupe_query($query);
 			$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
-			$query = "SELECT herminator FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$laskurow_edi['toimitustapa']}'";
-			$toimitustapa_chk_res = pupe_query($query);
-			$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+			#$query = "SELECT herminator FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' AND selite = '{$laskurow_edi['toimitustapa']}'";
+			#$toimitustapa_chk_res = pupe_query($query);
+			#$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
 
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
@@ -1522,7 +1522,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 				'lisatiedot' => $laskun_lisatiedot,
 				'asiakasrow' => $asiakas_chk_row,
 				'tilaustyyppi' => 3,
-				'toimitustapa' => $toimitustapa_chk_row['herminator'],
+				#'toimitustapa' => $toimitustapa_chk_row['herminator'],
 				'toim' => $toim,
 			);
 

@@ -14366,11 +14366,11 @@ if (!function_exists("tee_keraysera")) {
 					IF(max_keraysera_alustat = 0, 9999999999, max_keraysera_alustat) max_keraysera_alustat,
 					yhdistelysaanto,
 					lahtojen_valinen_enimmaisaika,
-					ulkoinen_jarjestelma
+					ulkoinen_jarjestelma,
+					tunnus as keraysvyohyke
 					FROM keraysvyohyke
-					LEFT JOIN pakkaus ON (pakkaus.yhtio = keraysvyohyke.yhtio AND pakkaus.tunnus IN (keraysvyohyke.sallitut_alustat))
-					WHERE keraysvyohyke.yhtio = '{$kukarow['yhtio']}'
-					AND keraysvyohyke.tunnus = '{$keraysvyohyke}'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$keraysvyohyke}'";
 		$ker_result = pupe_query($query);
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
@@ -15347,7 +15347,9 @@ if (!function_exists("tee_keraysera")) {
 
 					if ($debug) echo "FAIL-jonoon!<br><br>";
 					$fail = $fail != "" ? "{$fail}|||{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}" : "{$tuoterow['tuoteno']}###{$tuoterow['otunnus']}";
+
 					$kaytettavat_pakkaukset = array();
+
 					break 2;
 				}
 
@@ -15955,7 +15957,7 @@ if (!function_exists("tee_keraysera")) {
 
 		// nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.
 		// lähetetään tästä infomaili
-		if (count($fixed_main_array) > 0 and !$era_valmis and $fail != "" and $yhtiorow['alert_varasto_kayttajat'] != '') {
+		if (count($fixed_main_array) > 0 and !$era_valmis and $fail != "") {
 
 			if ($debug) {
 				echo "Virhe keräyserää tehdessä. Tarkista tuotteen mitat, paino, yksin keräilyalustalle ehto ja laita tilaukselle lähtö!<br>";
@@ -15975,15 +15977,17 @@ if (!function_exists("tee_keraysera")) {
 				$upd_res = pupe_query($query);
 			}
 
-			foreach(explode(",", $yhtiorow['alert_varasto_kayttajat']) as $admini) {
-				$query = "	INSERT INTO messenger SET
-							yhtio = '{$kukarow['yhtio']}',
-							kuka = '{$kukarow['kuka']}',
-							vastaanottaja = '{$admini}',
-							viesti = '{$message}',
-							status = 'X',
-							luontiaika = now()";
-				$messenger_result = pupe_query($query);
+			if ($yhtiorow['alert_varasto_kayttajat'] != '') {
+				foreach(explode(",", $yhtiorow['alert_varasto_kayttajat']) as $admini) {
+					$query = "	INSERT INTO messenger SET
+								yhtio 			= '{$kukarow['yhtio']}',
+								kuka 			= '{$kukarow['kuka']}',
+								vastaanottaja 	= '{$admini}',
+								viesti 			= '{$message}',
+								status 			= 'X',
+								luontiaika 		= now()";
+					$messenger_result = pupe_query($query);
+				}
 			}
 		}
 

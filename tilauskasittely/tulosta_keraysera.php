@@ -161,6 +161,11 @@
 		$view = 'yes';
 	}
 
+	if ($tee == 'palaa') {
+		$kerayseranro = "";
+		$tee = "selaa";
+	}
+
 	if ($tee == 'muuta') {
 		if (trim($kayttaja) != '') {
 			$query = "	UPDATE kerayserat
@@ -292,10 +297,10 @@
 												pakkaus 		= '{$kpl_chk_row['pakkaus']}',
 												pakkausnro 		= '{$mihin_siirretaan}',
 												kpl 			= '{$paljon_siirretaan}',
-												laatija 		= '{$who}',
+												laatija 		= '{$keraajarow['kuka']}',
 												luontiaika 		= now(),
 												muutospvm 		= now(),
-												muuttaja 		= '{$who}'";
+												muuttaja 		= '{$keraajarow['kuka']}'";
 									$ins_res = pupe_query($query);
 								}
 							}
@@ -342,19 +347,21 @@
 		$view = 'yes';
 	}
 
-	if ($tee != '' and trim($kukarow['keraysvyohyke']) != '') {
+	if ($tee != '') {
 
 		if ((int) $keraajanro > 0) {
 			$query = "	SELECT *
-						from kuka
-						where yhtio = '{$kukarow['yhtio']}'
-						and keraajanro = '{$keraajanro}'";
+						FROM kuka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND keraajanro = '{$keraajanro}'
+						AND keraysvyohyke != ''";
 		}
 		else {
 			$query = "	SELECT *
-						from kuka
-						where yhtio = '{$kukarow['yhtio']}'
-						and kuka = '{$keraajalist}'";
+						FROM kuka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kuka = '{$keraajalist}'
+						AND keraysvyohyke != ''";
 		}
 		$result = pupe_query($query);
 
@@ -366,17 +373,8 @@
 		}
 		else {
 
-			$keraaja = mysql_fetch_assoc($result);
-			$who = $keraaja['kuka'];
-
-			$query = "	SELECT keraysvyohyke
-						FROM kuka
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND kuka = '{$keraaja['kuka']}'";
-			$keraysvyohyke_res = pupe_query($query);
-			$keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res);
-
-			$keraysvyohyke = $keraysvyohyke_row['keraysvyohyke'];
+			// Valitun ker‰‰j‰n tiedot
+			$keraajarow = mysql_fetch_assoc($result);
 
 			echo "<form method='post'>";
 
@@ -384,13 +382,13 @@
 				echo "<input type='hidden' name='tee' value='keraysera' />";
 			}
 
-			echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 			echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 			echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
-			echo "<input type='hidden' name='who' value='{$who}' />";
 			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 
-			echo "<table><tr><th>",t("Valitse reittietiketin tulostin"),"</th><td>";
+			echo "<table>";
+			echo "<tr><th>",t("Ker‰‰j‰"),"</th><td>{$keraajarow['nimi']}</td></tr>";
+			echo "<tr><th>",t("Valitse reittietiketin tulostin"),"</th><td>";
 			echo "<select name='komento[reittietiketti]'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
@@ -398,8 +396,8 @@
 
 			$querykieli = "	SELECT DISTINCT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri8, kirjoittimet.tunnus as kir_tunnus
 							FROM kirjoittimet
-							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
-							JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus AND kuka.kuka = '{$who}')
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
+							JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus AND kuka.kuka = '{$keraajarow['kuka']}')
 							WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
 							AND kirjoittimet.komento != 'EDI'
 							GROUP BY 1,2,3,4,5
@@ -409,7 +407,7 @@
 			while ($kirow = mysql_fetch_assoc($kires)) {
 
 				$sel = "";
-				if (strpos($kukarow["keraysvyohyke"],$kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri8']) {
+				if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri8']) {
 					$sel = " selected";
 				}
 
@@ -431,7 +429,7 @@
 
 				$querykieli = "	SELECT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
 								FROM kirjoittimet
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
+								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
 								JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus)
 								WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
 								AND kirjoittimet.komento != 'EDI'
@@ -442,7 +440,7 @@
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
 					$sel = "";
-					if (strpos($kukarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri0']) {
+					if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri0']) {
 						$sel = " selected";
 					}
 
@@ -460,13 +458,19 @@
 				echo "</form>";
 			}
 
-			if ($tee == 'keraysera' and trim($keraysvyohyke) != '' and $select_varasto > 0) {
+			if ($tee == 'keraysera' and trim($keraajarow['keraysvyohyke']) != '' and $select_varasto > 0) {
 
-				echo "<font class='head'>".t("Ker‰‰j‰").": $who</font><br>";
+				echo "<br><br>";
 				echo "<div id='content'></div>";
 
+				// Otetaan alkup kukarow talteen
+				$kukarow_orig = $kukarow;
+
+				// HUOM: Generoidaan ker‰yser‰ valitulle k‰ytt‰j‰lle
+				$kukarow = $keraajarow;
+
 				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($keraysvyohyke, $select_varasto, TRUE);
+				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto, TRUE);
 
 				if (count($erat['tilaukset']) > 0) {
 
@@ -509,6 +513,9 @@
 						require("inc/kardex_send.inc");
 					}
 				}
+
+				// Palautetaan alkup kukarow
+				$kukarow = $kukarow_orig;
 			}
 
 			echo "<br /><br />";
@@ -521,9 +528,7 @@
 				echo "<form method='post'>";
 				echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 				echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
-				echo "<input type='hidden' name='who' value='{$who}' />";
 				echo "<input type='hidden' name='tee' value='selaa' />";
-				echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo t('Etsi'),":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
 				echo "<input type='submit' value='",t("Hae"),"' />";
@@ -532,8 +537,6 @@
 			}
 
 			$ker_lisa = (isset($kerayseranro) and $kerayseranro > 0) ? " AND kerayserat.nro = '{$kerayseranro}' " : '';
-
-			$kuka_lisa = (isset($who) and trim($who) != '') ? " AND kerayserat.laatija = '{$who}' " : '';
 
 			$query = "	SELECT kerayserat.nro,
 						keraysvyohyke.nimitys AS keraysvyohyke,
@@ -544,12 +547,12 @@
 						JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke IN ({$kukarow['keraysvyohyke']}))
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke IN ({$keraajarow['keraysvyohyke']}))
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-						AND kerayserat.tila = 'K'
+						AND kerayserat.tila in ('K','X')
+						AND kerayserat.laatija = '{$keraajarow['kuka']}'
 						{$ker_lisa}
-						{$kuka_lisa}
 						GROUP BY 1,2,3";
 			$kerayserat_res = pupe_query($query);
 
@@ -614,24 +617,20 @@
 						echo "<input type='hidden' name='kerayseranro' value='{$kerayserat_row['nro']}' />";
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
-						echo "<input type='hidden' name='who' value='{$who}' />";
 						echo "<input type='hidden' name='tee' value='muokkaa' />";
-						echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 						echo "<input type='submit' value='",t("Muokkaa"),"' />";
 						echo "</form>";
 					}
 					elseif ($tee == 'muokkaa') {
 						echo "<input type='hidden' name='kerayseranro' value='{$kerayserat_row['nro']}' />";
-						echo "<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
-						echo "<input type='hidden' name='who' value='{$who}' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 						echo "<select name='tee' id='tee'>";
 						echo "<option value='muuta'>",t("Tallenna"),"</option>";
 						echo "<option value='uusi_pakkaus'>",t("Uusi pakkaus"),"</option>";
-						echo "<option value='selaa'>",t("Palaa"),"</option>";
+						echo "<option value='palaa'>",t("Palaa"),"</option>";
 						echo "</select>";
 						echo "&nbsp;<input type='submit' value='",t("OK"),"' />";
 					}
@@ -832,11 +831,6 @@
 					echo "</form>";
 				}
 			}
-		}
-	}
-	else {
-		if (trim($kukarow['keraysvyohyke']) == '') {
-			echo "<font class='error'>",t("Ker‰ysvyˆhyke t‰ytyy valita k‰ytt‰j‰lle"),"!</font><br />";
 		}
 	}
 

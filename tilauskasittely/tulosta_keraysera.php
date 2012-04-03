@@ -26,14 +26,14 @@
 			</script>";
 
 	if (!isset($tee)) $tee = '';
+	if (!isset($keraajalist)) $keraajalist = '';
+	if (!isset($select_varasto)) $select_varasto = '';
 
 	if ($tee == '') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='selaa' />";
 
 		echo "<table>";
-		echo "<tr><th>",t("Ker‰‰j‰"),"</th><td><input type='text' size='5' name='keraajanro'> ",t("tai")," ";
-		echo "<select name='keraajalist'>";
 
 		$query = "	SELECT *
 					FROM kuka
@@ -42,6 +42,9 @@
 					AND (keraajanro > 0 OR kuka = '{$kukarow['kuka']}')
 					AND keraysvyohyke != ''";
 		$kuresult = pupe_query($query);
+
+		echo "<tr><th>",t("Ker‰‰j‰"),"</th><td><input type='text' size='5' name='keraajanro'> ",t("tai")," ";
+		echo "<select name='keraajalist'>";
 
 		while ($kurow = mysql_fetch_assoc($kuresult)) {
 
@@ -60,14 +63,14 @@
 		echo "</select>&nbsp;<input type='submit' value='",t("Valitse"),"' /></td>";
 		echo "</tr>";
 
-		echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
-		echo "<select name='select_varasto'>";
-
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					ORDER BY tyyppi, nimitys";
 		$varastores = pupe_query($query);
+
+		echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
+		echo "<select name='select_varasto'>";
 
 		while ($varastorow = mysql_fetch_assoc($varastores)) {
 
@@ -480,7 +483,6 @@
 
 					$tilausnumeroita  	  = $otunnukset;
 					$valittu_tulostin 	  = $kerayslistatulostin;
-					$tullaan_kerayserasta = 'joo';
 					$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
 					$laskuja 			  = count($erat['tilaukset']);
 					$lukotetaan 		  = FALSE;

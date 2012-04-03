@@ -61,7 +61,6 @@
 
 				$tilausnumeroita  	  = $otunnukset;
 				$valittu_tulostin 	  = $gen_ker_row['printteri0'];
-				$tullaan_kerayserasta = 'joo';
 				$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
 				$laskuja 			  = count($erat['tilaukset']);
 				$lukotetaan 		  = FALSE;

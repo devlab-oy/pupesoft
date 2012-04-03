@@ -28,7 +28,7 @@
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana WRITE, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ";
 
-		if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 			$query .= ", lasku AS lasku1 WRITE, lasku AS lasku2 WRITE, laskun_lisatiedot WRITE, asiakas AS asiakas1 READ, asiakas AS asiakas2 READ, tilausrivi AS tilausrivi1 READ, tilausrivi AS tilausrivi2 READ, tilausrivin_lisatiedot WRITE, varaston_hyllypaikat AS vh READ, varaston_hyllypaikat AS vh1 READ, varaston_hyllypaikat AS vh2 READ, tuote AS tuote1 READ, tuote AS tuote2 READ, keraysvyohyke AS keraysvyohyke1 READ, keraysvyohyke AS keraysvyohyke2 READ, toimitustapa AS toimitustapa1 READ, toimitustapa AS toimitustapa2 READ, lahdot READ, lahdot AS lahdot1 READ, lahdot AS lahdot2 READ, lahdot AS lahdot3 READ, lahdot AS lahdot4 READ, kerayserat WRITE, pakkaus READ, keraysvyohyke READ";
 		}
 
@@ -107,7 +107,7 @@
 			}
 		}
 		else {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$query = "	SELECT keraysjarjestys
 							FROM keraysvyohyke
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -124,8 +124,6 @@
 				else {
 					$sorttauskentta = 'vh.indeksi as sorttauskentta';
 				}
-
-				$tyyppi = 'KERAYSERA';
 			}
 			else {
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
@@ -141,8 +139,8 @@
 			}
 		}
 
-		//keräyslistan rivit
-		if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		// keräyslistan rivit
+		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 			$query = "	SELECT tilausrivi.*,
 						tuote.sarjanumeroseuranta,
 						kerayserat.kpl as tilkpl,
@@ -183,7 +181,7 @@
 		$kal = 1;
 
 		while ($row = mysql_fetch_assoc($riresult)) {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$rivinumerot[$row["ker_tunnus"]] = $kal;
 			}
 			else {

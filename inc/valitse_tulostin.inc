@@ -57,6 +57,8 @@
 		<input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
 		<input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
 		<input type='hidden' name='varastonarvo' value='$varastonarvo'>
+		<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
+		<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
 		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />";
 
 	if ($nappikeikalle == 'menossa') {

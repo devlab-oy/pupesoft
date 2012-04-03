@@ -773,10 +773,16 @@
 						}
 					}
 
-					if ($zrow['varasto'] == $kukarow['oletus_varasto']) {
+					if ($zrow['varasto'] == $kukarow['oletus_varasto'] and $zrow['oletus'] != '') {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 1
+						$zrow['oletus'] = 3;
+					}
+					elseif ($zrow['varasto'] == $kukarow['oletus_varasto']) {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 2
 						$zrow['oletus'] = 2;
 					}
 					elseif ($zrow['oletus'] != '') {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 1 jos käyttäjälle ei oo oletusvarastoa, muuten prio 3
 						$zrow['oletus'] = 1;
 					}
 
@@ -832,15 +838,14 @@
 						- Jos ei niin splitataan.
 						*/
 
-						$chk_yksi_paikka = false;
+						$chk_yksi_paikka = FALSE;
 
 						// Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
 						foreach ($arr as $indx => $chk_row) {
-
 							if ($chk_row['myytavissa'] >= $kpl) {
 								unset($arr[$indx]);
 								array_unshift($arr, $chk_row);
-								$chk_yksi_paikka = true;
+								$chk_yksi_paikka = TRUE;
 								break;
 							}
 						}

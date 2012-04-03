@@ -487,7 +487,7 @@
 
 	// Jos varastosiirto tehdään saman varaston sisällä, niin siiretään aina oletupaikalle
 	// Eli otetaan tuote joltain muulta paikalta kuin oletuspaikalta
-	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0) {
+	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] == $laskurow["varasto"]) {
 		$notfromvarasto = " and tuotepaikat.oletus = '' ";
 	}
 	else {

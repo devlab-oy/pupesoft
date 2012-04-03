@@ -2365,6 +2365,7 @@
 				$suoratoimitus_splittaus = FALSE;
 			}
 
+			$trivtyrow = array("selite" => "");
 			@include("trivityyppivalinta.inc");
 
 			$query = "	SELECT *

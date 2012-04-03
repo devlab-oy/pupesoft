@@ -35,10 +35,9 @@
 	*/
 
 	if (php_sapi_name() != 'cli') {
-		die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+		die("1, Voidaan ajaa vain komentorivilt‰\r\n\r\n");
 	}
 
-	// error_reporting(E_ALL);
 	error_reporting(0);
 	ini_set("display_errors", 0);
 	ini_set("log_errors", 1);
@@ -47,9 +46,6 @@
 
 	$pupe_root_polku = dirname(__FILE__);
 	chdir($pupe_root_polku);
-
-	require('inc/connect.inc');
-	require('inc/functions.inc');
 
 	$handle = fopen("php://stdin", "r");
 	$lines = array();
@@ -64,14 +60,12 @@
 
 	// Jos kuoltiin timeouttiin
 	if (!in_array("#EOM", $lines)) {
-		echo "1, Timeout\r\n\r\n";
-		exit;
+		die("1, Timeout\r\n\r\n");
 	}
 
 	// Jos saatiin laitteelta enemm‰n kuin yksi rivi
 	if (count($lines) != 2) {
-		echo "1, Virheellinen viesti\r\n\r\n";
-		exit;
+		die("1, Virheellinen viesti\r\n\r\n");
 	}
 
 	// Erotellaan sanomasta sanoman tyyppi ja sis‰ltˆ
@@ -79,8 +73,7 @@
 
 	// Varmistetaan, ett‰ splitti onnistui
 	if (!isset($matches[1]) or !isset($matches[2])) {
-		echo "1, Virheellinen sanomamuoto\r\n\r\n";
-		exit;
+		die("1, Virheellinen sanomamuoto\r\n\r\n");
 	}
 
 	$sanoma = $matches[1];
@@ -102,13 +95,18 @@
 
 	// Virheellinen sanoma tai tyhj‰ sis‰ltˆ
 	if (!in_array($sanoma, $sallitut_sanomat)) {
-		echo "1, Virheellinen sanoma\r\n\r\n";
-		exit;
+		die("1, Virheellinen sanoma\r\n\r\n");
 	}
 
 	// Erotellaan sanoman sis‰ltˆ arrayseen
 	$sisalto = explode(",", str_replace("'", "", $sisalto));
 	$response = "";
+
+	// K‰ynnistet‰‰n outputbufferi
+	ob_start();
+
+	require('inc/connect.inc');
+	require('inc/functions.inc');
 
 	if ($sanoma == "SignOn") {
 
@@ -132,7 +130,7 @@
 					AND kuka.extranet = ''
 					AND kuka.yhtio = '{$kukarow['yhtio']}'
 					GROUP BY 1,2";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe k‰ytt‰j‰tietoja haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 		$krow = mysql_fetch_assoc($result);
 
 		if (trim($krow['kuka']) == '') {
@@ -165,7 +163,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laatija = '{$kukarow['kuka']}'
 					AND tila    = 'K'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 
 		$row = mysql_fetch_assoc($result);
 
@@ -181,7 +179,7 @@
 						AND kuka = '{$kukarow['kuka']}'
 						AND extranet = ''
 						AND keraysvyohyke != ''";
-			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰ysvyˆhykett‰ haettaessa\r\n\r\n");
+			$result = pupe_query($query);
 			$ker_row = mysql_fetch_assoc($result);
 
 			// haetaan ker‰ysvyˆhykkeen takaa ker‰ysj‰rjestys
@@ -189,7 +187,7 @@
 						FROM keraysvyohyke
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$ker_row['keraysvyohyke']}'";
-			$keraysjarjestys_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+			$keraysjarjestys_res = pupe_query($query);
 			$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
 			$orderby_select = $keraysjarjestys_row['keraysjarjestys'] == "V" ? ",".generoi_sorttauskentta("3") : "";
@@ -211,7 +209,7 @@
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tunnus IN ({$row['tilausrivit']})
 						ORDER BY {$orderby}";
-			$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
+			$rivi_result = pupe_query($query);
 
 			while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
 
@@ -269,7 +267,7 @@
 						AND extranet = ''
 						AND keraysvyohyke != ''
 						AND oletus_varasto != ''";
-			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰ysvyˆhykett‰ haettaessa\r\n\r\n");
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				$response = "N,,,,,,,,,,,,,1,K‰ytt‰j‰tiedot virheelliset\r\n";
@@ -283,9 +281,7 @@
 				if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);
 
-					ob_start();
 					require('inc/tallenna_keraysera.inc');
-					ob_end_clean();
 
 					$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
 
@@ -296,14 +292,14 @@
 								kerayslista = '{$kerayslistatunnus}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus in ({$otunnukset})";
-					$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen p‰ivityksen yhteydess‰\r\n\r\n");
+					$upd_res = pupe_query($query);
 
 					$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laatija = '{$kukarow['kuka']}'
 								AND tila = 'K'";
-					$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+					$result = pupe_query($query);
 
 					$row = mysql_fetch_assoc($result);
 
@@ -316,7 +312,7 @@
 								FROM keraysvyohyke
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['keraysvyohyke']}'";
-					$keraysjarjestys_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+					$keraysjarjestys_res = pupe_query($query);
 					$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
 					$orderby_select = $keraysjarjestys_row['keraysjarjestys'] == "V" ? ",".generoi_sorttauskentta("3") : "";
@@ -338,7 +334,7 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus IN ({$row['tilausrivit']})
 								ORDER BY {$orderby}";
-					$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
+					$rivi_result = pupe_query($query);
 
 					while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
 
@@ -390,7 +386,7 @@
 
 				// poistetaan lukko
 				$query = "UNLOCK TABLES";
-				$res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+				$res   = pupe_query($query);
 			}
 		}
 
@@ -410,7 +406,7 @@
 					FROM kuka
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kuka = '{$kukarow['kuka']}'";
-		$kukares = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe k‰ytt‰j‰‰ haettaessa\r\n\r\n");
+		$kukares = pupe_query($query);
 		$kukarow = mysql_fetch_assoc($kukares);
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -423,7 +419,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND komento != 'EDI'
 					AND jarjestys = '{$printer_id}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoittimen komentoa haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		$reittietikettitulostin = $row['tunnus'];
@@ -432,7 +428,7 @@
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND nro = '{$nro}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			$response = "1, Ei printattavaa\r\n\r\n";
@@ -442,9 +438,7 @@
 			// Tulostetaan ker‰yser‰
 			$kerayseran_numero = $nro;
 
-			ob_start();
 			require("inc/tulosta_reittietiketti.inc");
-			ob_end_clean();
 
 			$response = "0, Tulostus onnistui\r\n\r\n";
 		}
@@ -466,13 +460,13 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND nro = '{$nro}'
 					AND tunnus = '{$row_id}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		// splitataan rivi, splittauksen ensimm‰inen rivi
 		if ($splitlineflag == 1) {
 			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-			$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+			$upd_res = pupe_query($query);
 		}
 		// 2 = 2 ... n splitattu rivi
 		// 3 = viimeinen splitattu rivi
@@ -483,11 +477,11 @@
 			if ($splitlineflag == 3) {
 
 				$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
-				$chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ haettaessa ({$query})\r\n\r\n");
+				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
 				$query = "SELECT SUM(kpl_keratty) kappaleet FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tilausrivi = '{$row['tilausrivi']}'";
-				$sum_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+				$sum_res = pupe_query($query);
 				$sum_row = mysql_fetch_assoc($sum_res);
 
 				if ($chk_row['varattu'] != $sum_row['kappaleet']) {
@@ -526,20 +520,20 @@
 						break;
 					case 'sscc':
 						$query = "LOCK TABLES avainsana WRITE";
-						$lock_res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukituksen yhteydess‰ ({$query})\r\n\r\n");
+						$lock_res = pupe_query($query);
 
 						$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-						$selite_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa haettaessa ({$query})\r\n\r\n");
+						$selite_result = pupe_query($query);
 						$selite_row = mysql_fetch_assoc($selite_result);
 
 						$uusi_sscc = is_numeric($selite_row['selite']) ? (int) $selite_row['selite'] + 1 : 1;
 
 						$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-						$update_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+						$update_res = pupe_query($query);
 
 						// poistetaan lukko
 						$query = "UNLOCK TABLES";
-						$unlock_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukitusta poistettaessa ({$query})\r\n\r\n");
+						$unlock_res = pupe_query($query);
 
 						$values .= ", '{$uusi_sscc}'";
 
@@ -550,7 +544,7 @@
 			}
 
 			$query = "INSERT INTO kerayserat ({$fields}) VALUES ({$values})";
-			$insres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivi‰ luodessa ({$query})\r\n\r\n");
+			$insres = pupe_query($query);
 
 			$kerayseran_numero = $nro;
 
@@ -558,14 +552,12 @@
 						FROM keraysvyohyke
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus  = '{$row['keraysvyohyke']}'";
-			$printteri_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+			$printteri_res = pupe_query($query);
 			$printteri_row = mysql_fetch_assoc($printteri_res);
 
 			$reittietikettitulostin = $printteri_row['printteri8'];
 
-			ob_start();
 			require('inc/tulosta_reittietiketti.inc');
-			ob_end_clean();
 		}
 		// ei splitata rivi‰ eli normaali rivi, $splitlineflag == 0
 		else {
@@ -574,7 +566,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND nro 	= '{$nro}'
 						AND tunnus 	= '{$row_id}'";
-			$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰ ({$query})\r\n\r\n");
+			$updres = pupe_query($query);
 		}
 
 		$response = "0x100";
@@ -588,7 +580,7 @@
 					FROM kuka
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kuka = '".mysql_real_escape_string(trim($sisalto[2]))."'";
-		$kukares = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe k‰ytt‰j‰‰ haettaessa\r\n\r\n");
+		$kukares = pupe_query($query);
 		$kukarow = mysql_fetch_assoc($kukares);
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -600,7 +592,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND nro 	= '{$nro}'
 					ORDER BY sscc";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		if ($row['kpl'] == 0) {
@@ -616,7 +608,7 @@
 						AND tila 	= 'K'
 						AND nro 	= '{$nro}'
 						GROUP BY tilausrivi";
-			$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+			$valmis_era_chk_res = pupe_query($query);
 
 			if (mysql_num_rows($valmis_era_chk_res) == 0) {
 				$response = "1,Virhe ei ker‰yser‰‰\r\n\r\n";
@@ -639,7 +631,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tila 	= 'K'
 							AND nro 	= '{$nro}'";
-				$valmis_era_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+				$valmis_era_chk_res = pupe_query($query);
 
 				$keraysera_vyohyke = 0;
 
@@ -653,7 +645,7 @@
 								FROM tilausrivi
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
-					$varattu_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausrivi‰ haettaessa\r\n\r\n");
+					$varattu_res = pupe_query($query);
 					$varattu_row = mysql_fetch_assoc($varattu_res);
 
 					$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
@@ -668,7 +660,7 @@
 							FROM keraysvyohyke
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$keraysera_vyohyke}'";
-				$printteri_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoitinta haettaessa\r\n\r\n");
+				$printteri_res = pupe_query($query);
 				$printteri_row = mysql_fetch_assoc($printteri_res);
 
 				// setataan muuttujat keraa.php:ta varten
@@ -688,11 +680,7 @@
 				$lasku_yhtio = "";
 				$real_submit = "Merkkaa ker‰tyksi";
 
-				ob_start();
 				require('tilauskasittely/keraa.php');
-				ob_end_clean();
-
-				//$dok = (isset($kirjoitin_row['jarjestys']) and trim($kirjoitin_row['jarjestys']) != '') ? ($kirjoitin_row['jarjestys']." ja ".$kirj_row['jarjestys']) : $kirj_row['jarjestys'];
 
 				// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
 				$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
@@ -708,7 +696,7 @@
 		$nro = (int) trim($sisalto[3]);
 
 		// $query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K'";
-		// $chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		// $chkres = pupe_query($query);
 
 		// if (mysql_num_rows($chkres) > 0) {
 		// 	$response = "1,Kaikki rivit ei ole ker‰tty\r\n\r\n";
@@ -723,7 +711,7 @@
 		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND laatija = '{$kukarow['kuka']}' AND tila = 'K'";
-		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$chkres = pupe_query($query);
 
 		if (mysql_num_rows($chkres) > 0) {
 			$response = "1,Kaikki rivit ei ole ker‰tty\r\n\r\n";
@@ -756,7 +744,7 @@
 
 		###### TEHDƒƒN UUSI PAKKAUSKIRJAIN
 		$query = "SELECT (MAX(pakkausnro) + 1) uusi_pakkauskirjain FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}'";
-		$uusi_paknro_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$uusi_paknro_res = pupe_query($query);
 		$uusi_paknro_row = mysql_fetch_assoc($uusi_paknro_res);
 
 		$pakkaus_kirjain = chr((64+$uusi_paknro_row['uusi_pakkauskirjain']));
@@ -765,24 +753,24 @@
 			###### TEHDƒƒN UUSI SSCC-NUMERO
 			// emuloidaan transactioita mysql LOCK komennolla
 			$query = "LOCK TABLES avainsana WRITE";
-			$res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukituksen yhteydess‰\r\n\r\n");
+			$res   = pupe_query($query);
 
 			$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-			$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa haettaessa\r\n\r\n");
+			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 
 			$uusi_sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
 
 			$query = "UPDATE avainsana SET selite = '{$uusi_sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-			$update_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe avainsanaa p‰ivitett‰ess‰\r\n\r\n");
+			$update_res = pupe_query($query);
 
 			// poistetaan lukko
 			$query = "UNLOCK TABLES";
-			$res   = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe lukitusta poistettaessa\r\n\r\n");
+			$res   = pupe_query($query);
 		}
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-		$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$chkres = pupe_query($query);
 		$chkrow = mysql_fetch_array($chkres);
 
 		$sscclisa = $splitlineflag == 0 ? " kerayserat.sscc = '{$uusi_sscc}', " : "";
@@ -794,23 +782,21 @@
 					AND kerayserat.tila = 'K'
 					AND kerayserat.pakkausnro = '{$chkrow['pakkausnro']}'
 					AND kerayserat.nro = '{$nro}'";
-		$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n rivej‰ p‰ivitett‰ess‰\r\n\r\n");
+		$updres = pupe_query($query);
 
 		$query = "	SELECT tunnus
 					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND komento != 'EDI'
 					AND jarjestys = '{$printer_id}'";
-		$printer_chk_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe kirjoitinta haettaessa\r\n\r\n");
+		$printer_chk_res = pupe_query($query);
 		$printer_chk_row = mysql_fetch_assoc($printer_chk_res);
 
 		$kerayseran_numero 		= $nro;
 		$reittietikettitulostin = $printer_chk_row['tunnus'];
 		$uusi_pakkauskirjain 	= $uusi_paknro_row['uusi_pakkauskirjain'];
 
-		ob_start();
 		require("inc/tulosta_reittietiketti.inc");
-		ob_end_clean();
 
 		$response = "{$pakkaus_kirjain},0,\r\n\r\n";
 	}
@@ -838,26 +824,26 @@
 
 		// haetaan ker‰tt‰v‰ ker‰ysrivi
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰n numeroa haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 		$orig_row = mysql_fetch_assoc($result);
 
 		// haetaan ker‰tt‰v‰n ker‰ysrivin tilauksen tiedot
 		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$orig_row['otunnus']}'";
-		$laskures = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausta haettaessa\r\n\r\n");
+		$laskures = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laskures);
 
 		// tehd‰‰n pakkauskirjaimesta numero
 		$pakkaus_kirjain_chk = ord($container_id) - 64;
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$orig_row['nro']}' AND pakkausnro = '{$pakkaus_kirjain_chk}' ORDER BY RAND()";
-		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
+		$result = pupe_query($query);
 
 		$response = "1,Uusi valittu pakkaus ei k‰y\r\n\r\n";
 
 		while ($row = mysql_fetch_assoc($result)) {
 
 			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['otunnus']}'";
-			$chkres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilausta haettaessa\r\n\r\n");
+			$chkres = pupe_query($query);
 			$chkrow = mysql_fetch_assoc($chkres);
 
 			if ($chkrow['liitostunnus'] == $laskurow['liitostunnus']) {
@@ -866,11 +852,11 @@
 				if ($all != '') {
 					if ($all == 1) {
 						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K' AND pakkausnro = '{$orig_row['pakkausnro']}' AND sscc = '{$orig_row['sscc']}'";
-						$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+						$updres = pupe_query($query);
 					}
 					else {
 						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
-						$updres = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ p‰ivitett‰ess‰\r\n\r\n");
+						$updres = pupe_query($query);
 					}
 				}
 
@@ -882,5 +868,14 @@
 	else {
 		$response = "1, Kui s‰‰ t‰nne jouduit?\r\n\r\n";
 	}
+
+	$fleur = ob_get_contents();
+
+	// Onko nagios monitor asennettu?
+	if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+		file_put_contents("/home/nagios/nagios-optiscan.log", "-----------------------------------------------\n$fleur\n-----------------------------------------------\n\n", FILE_APPEND);
+	}
+
+	ob_end_clean();
 
 	echo $response;

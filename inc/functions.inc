@@ -62,8 +62,22 @@ if (!function_exists("pupe_error")) {
 		// l‰hetet‰‰n se meilitse adminille
 		mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-		// kuollaan pois
-		exit(nl2br($puperror));
+		if (ob_get_level() > 1) {
+			$fleur = ob_get_contents();
+
+			// Onko nagios monitor asennettu?
+			if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
+				file_put_contents("/home/nagios/nagios-pupesoft.log", "-----------------------------------------------\n$fleur\n$puperror\n-----------------------------------------------\n", FILE_APPEND);
+			}
+
+			ob_end_clean();
+
+			die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
+		}
+		else {
+			// kuollaan pois
+			exit(nl2br($puperror));
+		}
 	}
 }
 

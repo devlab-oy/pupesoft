@@ -84,7 +84,11 @@
 
 						$fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
 
-						if ($fileget) {
+						if (filesize($temp_filename) == 0) {
+							#echo "VIRHE: Ladattava tiedotsto on tyhjä!\n";
+							unlink($temp_filename);
+						}
+						elseif ($fileget) {
 							rename($temp_filename, $ftpget_dest[$operaattori]."/".$file);
 							ftp_delete($conn_id, $file);
 						}

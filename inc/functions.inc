@@ -13200,8 +13200,8 @@ if (!function_exists('tulosta_reittietiketti')) {
 					{XS;I,0001,0002C3210|}
 					".chr(12);
 
-		if (trim($komento_reittietiketti) != '') {
-			$line = exec(" echo \"$sivu\" | $komento_reittietiketti");
+		if (trim($reittietikettitulostin) != '') {
+			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
 		}
 	}
 }

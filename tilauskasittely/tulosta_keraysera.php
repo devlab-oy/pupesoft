@@ -389,12 +389,12 @@
 			echo "<table>";
 			echo "<tr><th>",t("Ker‰‰j‰"),"</th><td>{$keraajarow['nimi']}</td></tr>";
 			echo "<tr><th>",t("Valitse reittietiketin tulostin"),"</th><td>";
-			echo "<select name='komento[reittietiketti]'>";
+			echo "<select name='reittietikettitulostin'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
 			$select_varasto = (int) $select_varasto;
 
-			$querykieli = "	SELECT DISTINCT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri8, kirjoittimet.tunnus as kir_tunnus
+			$querykieli = "	SELECT kirjoittimet.kirjoitin, keraysvyohyke.tunnus, keraysvyohyke.printteri8, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
 							FROM kirjoittimet
 							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
 							JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus AND kuka.kuka = '{$keraajarow['kuka']}')
@@ -407,7 +407,7 @@
 			while ($kirow = mysql_fetch_assoc($kires)) {
 
 				$sel = "";
-				if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri8']) {
+				if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri8']) {
 					$sel = " selected";
 				}
 
@@ -424,23 +424,15 @@
 
 			if ($tee != 'muuta' and $tee != 'muokkaa') {
 				echo "<tr><th>",t("Valitse ker‰yslistan tulostin"),"</th><td>";
-				echo "<select name='komento[kerayslista]'>";
+				echo "<select name='kerayslistatulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-				$querykieli = "	SELECT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
-								FROM kirjoittimet
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
-								JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus)
-								WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
-								AND kirjoittimet.komento != 'EDI'
-								GROUP BY 1,2,3,4,5
-								ORDER BY kirjoittimet.kirjoitin";
-				$kires = pupe_query($querykieli);
+				mysql_data_seek($kires, 0);
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
 					$sel = "";
-					if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== false and $kirow['kir_tunnus'] == $kirow['printteri0']) {
+					if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri0']) {
 						$sel = " selected";
 					}
 
@@ -487,7 +479,7 @@
 					$laskurow = mysql_fetch_assoc($res);
 
 					$tilausnumeroita  	  = $otunnukset;
-					$valittu_tulostin 	  = $komento['kerayslista'];
+					$valittu_tulostin 	  = $kerayslistatulostin;
 					$tullaan_kerayserasta = 'joo';
 					$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
 					$laskuja 			  = count($erat['tilaukset']);

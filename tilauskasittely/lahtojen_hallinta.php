@@ -213,7 +213,7 @@
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
 
-							$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$komento['reittietiketti']}'";
+							$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$reittietikettitulostin}'";
 							$kirjoitin_res = pupe_query($query);
 							$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
@@ -376,11 +376,11 @@
 				$kires = pupe_query($query);
 
 				echo "<tr><th>",t("Valitse tulostin"),":</th>";
-				echo "<td><select name='komento[reittietiketti]'>";
+				echo "<td><select name='reittietikettitulostin'>";
 
 				while ($kirow = mysql_fetch_assoc($kires)) {
 
-					$sel = (isset($komento['reittietiketti']) and $komento['reittietiketti'] == $kirow['tunnus']) ? " selected" : "";
+					$sel = (isset($reittietikettitulostin) and $reittietikettitulostin == $kirow['tunnus']) ? " selected" : "";
 
 					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}

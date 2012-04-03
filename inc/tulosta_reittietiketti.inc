@@ -95,7 +95,7 @@
 					$query = "	SELECT unifaun_nimi
 								FROM kirjoittimet
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$komento['reittietiketti']}'";
+								AND tunnus = '{$reittietikettitulostin}'";
 					$kirjoitin_res = pupe_query($query);
 					$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
@@ -360,7 +360,7 @@
 				 			'lask_postitp' => $laskurow['postitp'],
 				 			'lask_viite' => $laskurow['viesti'],
 				 			'lask_merkki' => $laskurow['sisviesti2'],
-				 			'komento_reittietiketti' => $komento['reittietiketti'],
+				 			'reittietikettitulostin' => $reittietikettitulostin,
 				 		);
 
 					 	tulosta_reittietiketti($params);

@@ -75,7 +75,7 @@
 
 			if (count($erat['tilaukset']) > 0) {
 
-				$komento['reittietiketti'] = $gen_ker_row['printteri8'];
+				$reittietikettitulostin = $gen_ker_row['printteri8'];
 
 				// Tulostetaan kollilappu
 				require('inc/tulosta_reittietiketti.inc');

@@ -189,7 +189,7 @@
 						FROM keraysvyohyke
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$ker_row['keraysvyohyke']}'";
-			$keraysjarjestys_res = pupe_query($query);
+			$keraysjarjestys_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä ({$query})\r\n\r\n");
 			$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
 			$orderby_select = $keraysjarjestys_row['keraysjarjestys'] == "V" ? ",".generoi_sorttauskentta("3") : "";
@@ -316,7 +316,7 @@
 								FROM keraysvyohyke
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['keraysvyohyke']}'";
-					$keraysjarjestys_res = pupe_query($query);
+					$keraysjarjestys_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä ({$query})\r\n\r\n");
 					$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
 					$orderby_select = $keraysjarjestys_row['keraysjarjestys'] == "V" ? ",".generoi_sorttauskentta("3") : "";
@@ -390,7 +390,7 @@
 
 				// poistetaan lukko
 				$query = "UNLOCK TABLES";
-				$res   = pupe_query($query);
+				$res   = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä ({$query})\r\n\r\n");
 			}
 		}
 
@@ -426,7 +426,7 @@
 		$result = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoittimen komentoa haettaessa\r\n\r\n");
 		$row = mysql_fetch_assoc($result);
 
-		$komento['reittietiketti'] = $row['tunnus'];
+		$reittietikettitulostin = $row['tunnus'];
 
 		$query = "	SELECT *
 					FROM kerayserat
@@ -553,7 +553,15 @@
 			$insres = mysql_query($query) or die("1, Tietokantayhteydessä virhe keräyserän riviä luodessa ({$query})\r\n\r\n");
 
 			$kerayseran_numero = $nro;
-			// $komento['reittietiketti'] = $printer_chk_row['tunnus'];
+
+			$query = "	SELECT printteri8
+						FROM keraysvyohyke
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$row['keraysvyohyke']}'";
+			$printteri_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe avainsanaa päivitettäessä ({$query})\r\n\r\n");
+			$printteri_row = mysql_fetch_assoc($printteri_res);
+
+			$reittietikettitulostin = $printteri_row['printteri8'];
 
 			ob_start();
 			require('inc/tulosta_reittietiketti.inc');
@@ -796,9 +804,9 @@
 		$printer_chk_res = mysql_query($query) or die("1, Tietokantayhteydessä virhe kirjoitinta haettaessa\r\n\r\n");
 		$printer_chk_row = mysql_fetch_assoc($printer_chk_res);
 
-		$kerayseran_numero = $nro;
-		$komento['reittietiketti'] = $printer_chk_row['tunnus'];
-		$uusi_pakkauskirjain = $uusi_paknro_row['uusi_pakkauskirjain'];
+		$kerayseran_numero 		= $nro;
+		$reittietikettitulostin = $printer_chk_row['tunnus'];
+		$uusi_pakkauskirjain 	= $uusi_paknro_row['uusi_pakkauskirjain'];
 
 		ob_start();
 		require("inc/tulosta_reittietiketti.inc");

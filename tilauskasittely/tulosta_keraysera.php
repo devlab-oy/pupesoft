@@ -489,10 +489,9 @@
 					$tilausnumeroita  	  = $otunnukset;
 					$valittu_tulostin 	  = $komento['kerayslista'];
 					$tullaan_kerayserasta = 'joo';
-
-					$laskuja = count($erat['tilaukset']);
-
-					$lukotetaan = false;
+					$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+					$laskuja 			  = count($erat['tilaukset']);
+					$lukotetaan 		  = FALSE;
 
 					require("tilauskasittely/tilaus-valmis-tulostus.inc");
 				}

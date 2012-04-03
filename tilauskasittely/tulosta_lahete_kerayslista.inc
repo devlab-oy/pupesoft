@@ -31,9 +31,7 @@ if (!function_exists('alku_kerayslista')) {
 		global $kukarow, $yhtiorow;
 
 		// Luodaan muuttujat
-		foreach ($params as $key => $val) {
-			${$key} = $val;
-		}
+		extract($params);
 
 		if ($kerayslistatyyppi == 'EXCEL1') {
 
@@ -208,7 +206,7 @@ if (!function_exists('alku_kerayslista')) {
 
 			//Oikea sarake
 			$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
-
+			
 			if ($yhtiorow['kerayserat'] == 'K' and $tyyppi == 'KERAYSERA' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 				$pdf->draw_text(310, 792, t("Keräyserä", $kieli), 			$thispage, $pieni);
 				$pdf->draw_text(310, 782, $kerayseran_numero,				$thispage, $boldi);
@@ -438,11 +436,7 @@ if (!function_exists('alku_kerayslista')) {
 		}
 
 		// Luodaan palautettavat
-		$return = array();
-
-		foreach ($params as $key => $null) {
-			$return[$key] = ${$key};
-		}
+		$return = compact(array_keys($params));
 
 		$return = rivi_otsikot_kerayslista($return);
 

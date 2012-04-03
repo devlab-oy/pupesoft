@@ -874,7 +874,7 @@
 
 	// Onko nagios monitor asennettu?
 	if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-		file_put_contents("/home/nagios/nagios-optiscan.log", "------------------------START------------------------\n$kukarow[kuka]\n{$lines[0]}\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
+		file_put_contents("/home/nagios/nagios-optiscan.log", "------------------------START------------------------\n$kukarow[kuka]: {$lines[0]}\npupe: ".trim($response)."\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
 	}
 
 	ob_end_clean();

@@ -323,22 +323,7 @@
 
 						/* VOIDAAN LƒHETTƒƒ MY÷S MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
 						$unifaun->setContainerRow($kollitiedot);
-
-						// $unifaun->_saveForDebug("shipment");
-
 						$unifaun->ftpSend();
-
-						// Haetaan vastaussanoma
-						if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $ftpget_host['unifaun_ps'] != "" and $ftpget_user['unifaun_ps'] != "" and $ftpget_pass['unifaun_ps'] != "" and $ftpget_path['unifaun_ps'] != "" and $ftpget_dest['unifaun_ps'] != '') {
-							$operaattori = "unifaun_ps";
-
-							require("unifaun_fetch.php");
-						}
-						elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $ftpget_host['unifaun_uo'] != "" and $ftpget_user['unifaun_uo'] != "" and $ftpget_pass['unifaun_uo'] != "" and $ftpget_path['unifaun_uo'] != "" and $ftpget_dest['unifaun_uo'] != '') {
-							$operaattori = "unifaun_uo";
-
-							require("unifaun_fetch.php");
-						}
 					}
 					else {
 						// HUOM: T‰m‰ viel‰‰ off line, v‰‰r‰t muuttujat $params-arrayssa!!!!
@@ -367,5 +352,18 @@
 					}
 				}
 			}
+		}
+
+		// Haetaan vastaussanoma
+		if ($ftpget_host['unifaun_ps'] != "" and $ftpget_user['unifaun_ps'] != "" and $ftpget_pass['unifaun_ps'] != "" and $ftpget_path['unifaun_ps'] != "" and $ftpget_dest['unifaun_ps'] != '') {
+			$operaattori = "unifaun_ps";
+
+			require("unifaun_fetch.php");
+		}
+
+		if ($ftpget_host['unifaun_uo'] != "" and $ftpget_user['unifaun_uo'] != "" and $ftpget_pass['unifaun_uo'] != "" and $ftpget_path['unifaun_uo'] != "" and $ftpget_dest['unifaun_uo'] != '') {
+			$operaattori = "unifaun_uo";
+
+			require("unifaun_fetch.php");
 		}
 	}

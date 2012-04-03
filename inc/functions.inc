@@ -14015,6 +14015,7 @@ if (!function_exists("splittaa_tilaus")) {
 								$values .= ", '{$uusitunnus}'";
 								break;
 							case 'varattu':
+							case 'tilkpl':
 								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
 								break;
 							default:
@@ -14143,7 +14144,11 @@ if (!function_exists("splittaa_tilaus")) {
 					}
 
 
-					$query = "UPDATE tilausrivi SET varattu = '{$splitattava_tilausrivi_kpl}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+					$query = "	UPDATE tilausrivi
+								SET tilkpl  = '{$splitattava_tilausrivi_kpl}',
+								varattu 	= '{$splitattava_tilausrivi_kpl}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$tilriv}'";
 					$updateres = pupe_query($query);
 					if ($debug) echo "$query<br><br>";
 

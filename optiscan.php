@@ -79,8 +79,6 @@
 	$sanoma = $matches[1];
 	$sisalto = $matches[2];
 
-	$logitetaan = $sanoma."\n".$sisalto;
-
 	// Sallittuja sanomia
 	$sallitut_sanomat = array(
 		"SignOn",
@@ -872,10 +870,11 @@
 	}
 
 	$fleur = ob_get_contents();
+	$fleur = ($fleur != "") ? $fleur."\n" : "";
 
 	// Onko nagios monitor asennettu?
 	if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
-		file_put_contents("/home/nagios/nagios-optiscan.log", "------------------------START------------------------\n$kukarow[kuka]\n$logitetaan\n$fleur\n------------------------STOP-------------------------\n\n", FILE_APPEND);
+		file_put_contents("/home/nagios/nagios-optiscan.log", "------------------------START------------------------\n$kukarow[kuka]\n{$lines[0]}\n$fleur------------------------STOP-------------------------\n\n", FILE_APPEND);
 	}
 
 	ob_end_clean();

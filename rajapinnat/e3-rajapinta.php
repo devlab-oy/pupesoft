@@ -102,15 +102,15 @@
 	$korvatut = "";
 
 	// Ajetaan kaikki operaatiot
-//	xauxi($limit);
+	xauxi($limit);
 	xlto($limit);
-//	xswp($limit);
-//	xvni($limit);
-//	xf04($limit);
-//	xf01($limit);
+	xswp($limit);
+	xvni($limit);
+	xf04($limit);
+	xf01($limit);
 	$korvatut = "yes";
-//	xswp($limit);
-//	xf02($limit);
+	xswp($limit);
+	xf02($limit);
 
 	//Siirret‰‰n failit e3 palvelimelle
 	siirto();
@@ -131,14 +131,14 @@
 
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
-		//	ftp_exec ($conn_id, "put $path_xf01 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf01np.E3xf01np (Repla");
-		//	ftp_exec ($conn_id, "put $path_xf02 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf02np.E3xf02np (Repla");
-		//	ftp_exec ($conn_id, "put $path_xf04 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf04np.E3xf04np (Repla");
-		//	ftp_exec ($conn_id, "put $path_xvni {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xvninp.E3xvninp (Repla");
-		//	ftp_exec ($conn_id, "put $path_xauxi {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xauxinp.E3xauxinp (Repla");
+			ftp_exec ($conn_id, "put $path_xf01 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf01np.E3xf01np (Repla");
+			ftp_exec ($conn_id, "put $path_xf02 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf02np.E3xf02np (Repla");
+			ftp_exec ($conn_id, "put $path_xf04 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf04np.E3xf04np (Repla");
+			ftp_exec ($conn_id, "put $path_xvni {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xvninp.E3xvninp (Repla");
+			ftp_exec ($conn_id, "put $path_xauxi {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xauxinp.E3xauxinp (Repla");
 			ftp_exec ($conn_id, "put $path_xlto {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xlt0np.E3xlt0np (Repla");
-		//	ftp_exec ($conn_id, "put $path_wswp {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xswpmwnp.E3xswpmwnp (Repla");
-		//	ftp_exec ($conn_id, "quote rcmd E3nattsbm");
+			ftp_exec ($conn_id, "put $path_wswp {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xswpmwnp.E3xswpmwnp (Repla");
+			ftp_exec ($conn_id, "quote rcmd E3nattsbm");
 			ftp_exec ($conn_id, "quit");
 		}
 		else {

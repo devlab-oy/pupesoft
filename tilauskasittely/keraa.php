@@ -43,24 +43,12 @@
 		$logistiikka_yhtiolisa = "yhtio = '{$kukarow['yhtio']}'";
 	}
 
-	if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
+	if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 		require_once("inc/unifaun_send.inc");
 
 		if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
 			echo "	<script type='text/javascript' language='JavaScript'>
 						$(document).ready(function() {
-
-							$('input[name^=\"keraysera_maara\"]').each(function() {
-								var rivitunnukset = $(this).attr('id').split(\"_\", 2);
-								var yhteensa = 0;
-
-								$('input[id^=\"'+rivitunnukset[0]+'\"]').each(function(){
-									yhteensa += Number($(this).val().replace(',', '.'));
-								});
-
-								$('#maara_'+rivitunnukset[0]).val(yhteensa);
-							});
-
 							$('input[name^=\"keraysera_maara\"]').keyup(function(){
 								var rivitunnukset = $(this).attr('id').split(\"_\", 2);
 								var yhteensa = 0;
@@ -130,7 +118,7 @@
 	}
 	else {
 
-		if ($yhtiorow['kerayserat'] == 'K') {
+		if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 		}
 		else {
@@ -171,7 +159,7 @@
 
 	if ($tee == 'P') {
 
-		if ($yhtiorow['kerayserat'] == 'K') {
+		if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 			$query = "	SELECT lasku.varasto, GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') AS 'tilaukset'
 						FROM kerayserat
 						JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
@@ -500,7 +488,7 @@
 							$maara[$apui] = (float) $maara[$apui];
 
 							// jos keräyserät on käytössä, päivitetään muuttuneet kappalemäärät keräyserään
-							if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
+							if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 								$query_ker = "SELECT tunnus FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivi = '{$apui}'";
 								$keraysera_chk_res = pupe_query($query_ker);
 
@@ -1747,7 +1735,7 @@
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
-						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='') {
+						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
 							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$vakadr_tulostin'";
 							$kirres  = pupe_query($query);
@@ -2051,7 +2039,7 @@
 						}
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilausnumeroita_backup})";
 						$alatila_upd_res = mysql_query($query) or pupe_error($query);
 					}
@@ -2108,7 +2096,7 @@
 			echo "<form action='' name='find' method='post'>";
 			echo "<input type='hidden' name='toim' value='{$toim}'>";
 			echo "<input type='hidden' id='jarj' name='jarj' value='{$jarj}'>";
-			echo "<tr><td>",t("Valitse varasto"),":</td><td><select name='tuvarasto' onchange='submit()'>";
+			echo "<tr><th>",t("Valitse varasto"),":</th><td><select name='tuvarasto' onchange='submit()'>";
 
 			$query = "	SELECT yhtio, tunnus, nimitys
 						FROM varastopaikat
@@ -2161,7 +2149,7 @@
 			}
 
 			echo "</td>";
-			echo "<td>",t("Valitse tilaustyyppi"),":</td><td><select name='tutyyppi' onchange='submit()'>";
+			echo "<th>",t("Valitse tilaustyyppi"),":</th><td><select name='tutyyppi' onchange='submit()'>";
 
 			$sela = $selb = $selc = "";
 
@@ -2182,7 +2170,7 @@
 
 			echo "</select></td></tr>";
 
-			echo "<tr><td>",t("Valitse toimitustapa"),":</td><td><select name='tutoimtapa' onchange='submit()'>";
+			echo "<tr><th>",t("Valitse toimitustapa"),":</th><td><select name='tutoimtapa' onchange='submit()'>";
 
 			$query = "	SELECT selite, MIN(tunnus) tunnus
 						FROM toimitustapa
@@ -2206,9 +2194,8 @@
 
 			echo "</select></td>";
 
-			echo "<td>",t("Etsi tilausta"),":</td><td><input type='text' name='etsi'>";
+			echo "<th>",t("Etsi tilausta"),":</th><td><input type='text' name='etsi'>";
 			echo "<input type='submit' value='",t("Etsi"),"'></form></td></tr>";
-
 			echo "</table>";
 
 			$haku = '';
@@ -2219,7 +2206,7 @@
 			}
 
 			if (is_numeric($etsi) and $etsi != '') {
-				if ($yhtiorow['kerayserat'] == 'K') {
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					$query = "SELECT nro FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$etsi}'";
 					$nro_chk_res = pupe_query($query);
 					$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
@@ -2266,7 +2253,7 @@
 				$jarjx = " ORDER BY {$jarj}";
 			}
 			else {
-				$jarjx = $yhtiorow['kerayserat'] == 'K' ? " ORDER BY kerayserat.nro" : " ORDER BY laadittu";
+				$jarjx = ($yhtiorow['kerayserat'] == 'K' and $toim == "") ? " ORDER BY kerayserat.nro" : " ORDER BY laadittu";
 			}
 
 			if ($toim == "VASTAANOTA_REKLAMAATIO") {
@@ -2276,7 +2263,7 @@
 				$alatilareklamaatio = 'A';
 			}
 
-			if ($yhtiorow['kerayserat'] == 'K') {
+			if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 				$query = "	SELECT lasku.yhtio AS 'yhtio',
 							lasku.yhtio_nimi AS 'yhtio_nimi',
 							kerayserat.nro AS 'keraysera',
@@ -2354,13 +2341,13 @@
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">",t("Pri"),"</a><br>";
 				//echo "<a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 
-				if ($yhtiorow['kerayserat'] == '') {
+				if ($yhtiorow['kerayserat'] == '' or $toim != "") {
 					echo "<a href='#'>",t("Varastoon"),"</a>";
 				}
 
 				echo "</th>";
 
-				if ($yhtiorow['kerayserat'] == 'K') {
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 					echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='keraysera'; document.forms['find'].submit();\">",t("Erä"),"</a></th>";
 				}
 
@@ -2402,7 +2389,7 @@
 						echo "<td valign='top' class='tooltip' id='{$row['tunnus']}'>{$row['t_tyyppi']} {$row['prioriteetti']} <img src='{$palvelin2}pics/lullacons/info.png' />";
 					}
 					else {
-						if ($yhtiorow['kerayserat'] == 'K') {
+						if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 							echo "<td valign='top'>{$row['prioriteetti']}";
 						}
 						else {
@@ -2414,20 +2401,20 @@
 
 					echo "</td>";
 
-					if ($yhtiorow['kerayserat'] == 'K') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						echo "<td valign='top'>{$row['keraysera']}</td>";
 					}
 
 					echo "<td valign='top'>{$row['tunnus']}</td>";
 
-					if ($yhtiorow['kerayserat'] == 'K') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						echo "<td valign='top'>{$row['asiakas']}</td>";
 					}
 					else {
 						echo "<td valign='top'>{$row['ytunnus']}<br />{$row['asiakas']}</td>";
 					}
 
-					if ($yhtiorow['kerayserat'] == 'K') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						echo "<td valign='top' nowrap align='right'></td>";
 						echo "<td valign='top' nowrap align='right'></td>";
 					}
@@ -2449,7 +2436,7 @@
 
 					echo "<td valign='top'><form method='post' action=''>";
 
-					if ($yhtiorow['kerayserat'] == 'K') {
+					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						echo "<input type='hidden' name='id' value='{$row['keraysera']}' />";
 					}
 					else {
@@ -2463,7 +2450,7 @@
 
 				$spanni = $logistiikka_yhtio != '' ? 7 : 6;
 
-				$spanni = $yhtiorow['kerayserat'] == 'K' ? $spanni + 1 : $spanni;
+				$spanni = ($yhtiorow['kerayserat'] == 'K' and $toim == "") ? $spanni + 1 : $spanni;
 
 				echo "<tr>";
 				echo "<td colspan='{$spanni}' style='text-align:right;' class='back'>",t("Rivejä yhteensä"),":</td>";
@@ -2484,7 +2471,7 @@
 			$otsik_row = array();
 			$keraysklontti = FALSE;
 
-			if ($yhtiorow['kerayserat'] == 'K') {
+			if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 				$query = "	SELECT lasku.varasto, GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') AS 'tilaukset'
 							FROM kerayserat
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
@@ -2566,7 +2553,7 @@
 
 				echo "<tr><th>",t("Tilaus"),"</th><th>",t("Ostaja"),"</th><th>",t("Toimitusosoite"),"</th></tr>";
 
-				if ($yhtiorow['kerayserat'] == 'K' and $toim != 'VASTAANOTA_REKLAMAATIO') {
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 
 					mysql_data_seek($result, 0);
 
@@ -2849,7 +2836,7 @@
 							}
 						}
 						else {
-							if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
+							if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 								echo "<span id='maaran_paivitys_{$row['tunnus']}'></span>";
 								echo "<input type='hidden' name='maara[$row[tunnus]]' id='maara_{$row['tunnus']}' value='' />";
 							}
@@ -3063,7 +3050,7 @@
 
 						echo "</tr>";
 
-						if ($yhtiorow['kerayserat'] == 'K' and trim($kukarow['keraysvyohyke']) != '' and $toim == "") {
+						if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 							$query = "	SELECT *
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
@@ -3188,7 +3175,7 @@
 					echo "</tr>";
 				}
 
-				if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K") {
+				if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $toim == "") {
 					echo "<tr>";
 					echo "<th>".t("VAK/ADR-erittely").":</th>";
 					echo "<th colspan='$spanni'>";

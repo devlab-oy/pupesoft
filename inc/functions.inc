@@ -9156,10 +9156,10 @@ if (!function_exists("t")) {
 
 		require("salasanat.php");
 
-		$useslave = (int) $useslave;
-
-		if (isset($slavedb)) {
-			if ($slavedb[$useslave] == '') $useslave = 0;
+		if (isset($slavedb) and isset($useslave) and $useslave > 0) {
+			if (!isset($slavedb[$useslave]) or $slavedb[$useslave] == '') {
+				$useslave = 0;
+			}
 		}
 		else {
 			$useslave = 0;
@@ -12519,61 +12519,68 @@ if (!function_exists('hae_suuntalava')) {
 	}
 }
 
-if (!function_exists("seuraava_lahtoaika")) {
-	function seuraava_lahtoaika($ttunnus, $asiakasluokka, $varasto, $exclude = 0) {
+if (!function_exists("seuraavat_lahtoajat")) {
+	function seuraavat_lahtoajat($toimitustapa, $asiakasluokka, $varasto, $exclude = 0, $eteenpain = 0) {
 
 		global $yhtiorow, $kukarow;
 
-		// ttunnus = toimitustapa tunnus
-		// $viikonpvmnro = viikonpäivän numero-arvo
-		// 0 = sunnuntai, 1 = maanantai ... 6 = lauantai
-		// Käytetään PHP:n syntaksia date("w"), ei mysql !!!
-		// Päivämäärä array, nimellinen ilmentymä toiselle puolelle on kiva.
-
-		$asiakasluokka = (int) $asiakasluokka;
-		$varasto = (int) $varasto;
-		$exclude = (int) $exclude;
+		$asiakasluokka 	= (int) $asiakasluokka;
+		$varasto 		= (int) $varasto;
+		$exclude 		= (int) $exclude;
 
 		$excludelisa = $exclude != 0 ? " and tunnus != '{$exclude}'" : "";
 
-		// $pvmnimet = array();
-		// $pvmnimet[1] = t("Maanantai");
-		// $pvmnimet[2] = t("Tiistai");
-		// $pvmnimet[3] = t("Keskiviikko");
-		// $pvmnimet[4] = t("Torstai");
-		// $pvmnimet[5] = t("Perjantai");
-		// $pvmnimet[6] = t("Lauantai");
-		// $pvmnimet[0] = t("Sunnuntai");
+		// Haetaan toimitustavan tunnus
+		$query = "	SELECT tunnus
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND selite  = '{$toimitustapa}'";
+		$chk_res = pupe_query($query);
+		$chk_row = mysql_fetch_assoc($chk_res);
 
-		$query = 	"	SELECT concat(pvm, ' ', lahdon_kellonaika) as lahto, tunnus
+		$toimitustavan_tunnus = $chk_row['tunnus'];
+
+		$pvmlisa = date("Y-m-d", mktime(0, 0, 0, date("m"), (date("d")+$eteenpain), date("Y")));
+
+		// Etsitään lähtöä asiakkaan omalla prioriteetilla
+		$query = "	SELECT *
+					FROM lahdot
+					WHERE yhtio 		= '{$kukarow['yhtio']}'
+					AND liitostunnus 	= '{$toimitustavan_tunnus}'
+					AND asiakasluokka 	= '{$asiakasluokka}'
+					AND varasto 		= '{$varasto}'
+					AND aktiivi IN ('', 'P')
+					AND ((viimeinen_tilausaika > curtime() and pvm = '{$pvmlisa}') or pvm > '{$pvmlisa}')
+					{$excludelisa}
+					ORDER BY pvm, lahdon_kellonaika";
+		$lahdot_res = pupe_query($query);
+
+		if (mysql_num_rows($lahdot_res) == 0) {
+			// Etsitään lähtöä kaikilla prioilla, ja valitaan niistä
+			$query = "	SELECT *
 						FROM lahdot
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND liitostunnus = '{$ttunnus}'
-						and ((viimeinen_tilausaika > curtime() and pvm = curdate()) or pvm > curdate())
-						and asiakasluokka = '{$asiakasluokka}'
-						and varasto = '{$varasto}'
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND liitostunnus 	= '{$toimitustavan_tunnus}'
+						AND varasto 		= '{$varasto}'
 						AND aktiivi IN ('', 'P')
+						AND ((viimeinen_tilausaika > curtime() and pvm = '{$pvmlisa}') or pvm > '{$pvmlisa}')
 						{$excludelisa}
-						ORDER BY lahto";
-		$result = pupe_query($query);
+						ORDER BY asiakasluokka DESC, pvm, lahdon_kellonaika";
+			$lahdot_res = pupe_query($query);
+		}
 
-		if (mysql_num_rows($result) > 0) {
-			$rivi = mysql_fetch_assoc($result);
-
-			if ($exclude != 0) {
-				return $rivi["tunnus"];
-			}
-			else {
-				return $rivi["lahto"];
-			}
+		if (mysql_num_rows($lahdot_res) == 0) {
+			return FALSE;
 		}
 		else {
-			if ($exclude != 0) {
-				return false;
+
+			$lahdot = array();
+
+			while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+				$lahdot[] = $lahdot_row;
 			}
-			else {
-				return "0000-00-00 00:00:00";
-			}
+
+			return $lahdot;
 		}
 	}
 }

@@ -91,7 +91,7 @@
 		"AllPicked",
 		"StopAssignment",
 		"SignOff",
-		"Replenishment",
+		#"Replenishment",
 		"NewContainer",
 		"ChangeContainer",
 	);

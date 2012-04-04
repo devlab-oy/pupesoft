@@ -2986,6 +2986,9 @@
 
 		$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
 
+		// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',

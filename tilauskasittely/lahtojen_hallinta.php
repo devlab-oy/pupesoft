@@ -639,27 +639,44 @@
 				}
 
 				foreach ($checkbox_parent as $lahto) {
-
+					// Siirretään ne tilaukset toiseen lähtöön jotka oli tässä lähdössä, mutta joiden rahtikirjat ei vielä tulostunu.
 					$lahto = (int) $lahto;
 
-					$query = "	SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, toimitustapa.tunnus AS liitostunnus
+					$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
 								FROM lasku
-								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','C')))
-								AND lasku.toimitustavan_lahto = '{$lahto}'";
+								AND lasku.tila = 'N'
+								AND lasku.alatila = 'A'
+								AND lasku.toimitustavan_lahto = '{$lahto}')
+								UNION
+								(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
+								FROM lasku
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'L'
+								AND lasku.alatila IN ('A','C')
+								AND lasku.toimitustavan_lahto = '{$lahto}')";
 					$result = pupe_query($query);
 
 					while ($row = mysql_fetch_assoc($result)) {
-						$lahto_x = seuraava_lahtoaika($row['liitostunnus'], $row['prioriteettinro'], $row['varasto'], $lahto);
+						$lahdot = seuraavat_lahtoajat($row['toimitustapa'], $row['prioriteettinro'], $row['varasto'], $lahto);
 
-						if ($lahto_x !== false) {
-							$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahto_x}', toimitustavan_lahto_siirto = '{$lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+						if ($lahdot !== FALSE) {
+							// Otetaan eka lähtö
+							$valitu_lahto = array_shift($lahdot);
+
+							$query = "	UPDATE lasku
+										SET toimitustavan_lahto    = '{$valitu_lahto["tunnus"]}',
+										toimitustavan_lahto_siirto = '{$lahto}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus  = '{$row['tunnus']}'";
 							$upd_res = pupe_query($query);
 						}
 					}
 
-					$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+					$query = "	UPDATE lahdot
+								SET aktiivi = 'S'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$lahto}'";
 					$upd_res = pupe_query($query);
 				}
 			}

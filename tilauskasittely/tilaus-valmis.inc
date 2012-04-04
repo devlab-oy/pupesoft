@@ -90,7 +90,6 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 		require ("saatanat.php");
 	}
 
-	$retval = ob_get_contents();
 	ob_end_clean();
 
 	// Lasketaan luottotilanne nyt, $avoimia_yhteensa ja $kaato_yhteensa tulee saatanat.php:stä
@@ -1425,14 +1424,16 @@ else {
 
 						$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
 
-						// Otetaan eka lähtö
-						$valitu_lahto = array_shift($lahdot);
+						if ($lahdot !== FALSE) {
+							// Otetaan eka lähtö
+							$valitu_lahto = array_shift($lahdot);
 
-						$query = "	UPDATE lasku
-									SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus  = '$tilausnumero'";
-						$upresult = pupe_query($query);
+							$query = "	UPDATE lasku
+										SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus  = '$tilausnumero'";
+							$upresult = pupe_query($query);
+						}
 					}
 				}
 			}

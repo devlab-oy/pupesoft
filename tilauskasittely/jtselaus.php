@@ -707,8 +707,18 @@
 			$laskulisa .= " and lasku.ytunnus = '$asiakasno' ";
 		}
 
-		if ($tuotenumero != '') {
-			$tilausrivilisa .= " and tilausrivi.tuoteno = '$tuotenumero' ";
+		if (isset($tuotteet_lista) and $tuotteet_lista != '') {
+			$tuotteet = explode("\n", $tuotteet_lista);
+			$tuoterajaus = "";
+			foreach($tuotteet as $tuotenumero) {
+				if (pupesoft_cleanstring($tuotenumero) != '') {
+					$tuoterajaus .= "'".pupesoft_cleanstring($tuotenumero)."',";
+				}
+			}
+
+			if ($tuoterajaus != "") {
+				$tuotelisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+			}
 		}
 
 		if ($tilaus != '') {
@@ -2216,12 +2226,9 @@
 		echo "</select></td>";
 		echo "</tr>\n";
 
-		echo "<tr>
-				<th>".t("Tuotenumero")."</th>
-				<td>
-				<input type='text' name='tuotenumero' value='$tuotenumero' size='10'>
-				</td>
-				</td>
+		echo "</tr>
+				<tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa näillä tuotteilla"),")</th><td colspan=''><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
+				<tr>
 			</tr>";
 
 		echo "<tr>

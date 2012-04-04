@@ -481,6 +481,7 @@
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+							and tyyppi != 'D'
 							and otunnus = '$edotunnus'";
 				$sumsresult = pupe_query($query);
 				$sumsrow2	= mysql_fetch_assoc($sumsresult);
@@ -523,6 +524,7 @@
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno not in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]')
+						and tyyppi != 'D'
 						and otunnus = '$edotunnus'";
 			$sumsresult = pupe_query($query);
 			$sumsrow2	= mysql_fetch_assoc($sumsresult);

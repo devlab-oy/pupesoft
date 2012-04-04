@@ -1081,7 +1081,7 @@ else {
 			$tilaus_splitattu 		= FALSE;
 			unset($laskusplitres);
 
-			if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
 				$toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
 			}
 
@@ -1149,6 +1149,13 @@ else {
 						$split_toimitustapa = $varaston_row["erikoistoimitus_toimitustapa"];
 					}
 
+					if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
+						$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+					}
+					else {
+						$toimitustavan_lahto = 0;
+					}
+
 					// Ei monisteta tunnusta
 					for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
@@ -1171,6 +1178,9 @@ else {
 								break;
 							case 'tulostusalue':
 								$values .= ", '$tulostusalue'";
+								break;
+							case 'toimitustavan_lahto':
+								$values .= ", '$toimitustavan_lahto'";
 								break;
 							case 'sisviesti2':
 								if ($row['omalle_tilaukselle'] != '') {
@@ -1239,15 +1249,6 @@ else {
 						if (isset($tulalue_kpl_array[$tulostusalue])) $tulalue_kpl_array[$tulostusalue]++;
 						else $tulalue_kpl_array[$tulostusalue] = 1;
 					}
-				}
-
-				if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto) and count($toimitustavan_lahto) > 0 and isset($toimitustavan_lahto[$varasto])) {
-
-					$query = "	UPDATE lasku SET
-								toimitustavan_lahto = '{$toimitustavan_lahto[$varasto]}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$laskurow['tunnus']}'";
-					$upd_res = pupe_query($query);
 				}
 
 				//	edellinen varasto talteen
@@ -1327,10 +1328,18 @@ else {
 			// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
 			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
 
+			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
+				$toimitustavan_lahto = $toimitustavan_lahto[$varasto];
+			}
+			else {
+				$toimitustavan_lahto = 0;
+			}
+
 			//päivitetään laskulle tieto mihin varastoon se kuuluu
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
 						tulostusalue						= '$tulostusalue',
+						toimitustavan_lahto					= '$toimitustavan_lahto',
 						ultilno 							= '$laskurow[ultilno]',
 						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
 						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
@@ -1383,7 +1392,7 @@ else {
 
 					$query = "	SELECT kerayspvm, toimaika
 								from lasku
-								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+								where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
 					$result = pupe_query($query);
 					$toimaikalaskurow = mysql_fetch_assoc($result);
 
@@ -1398,6 +1407,36 @@ else {
 					}
 				}
 			}
+
+			// Varmistetaan, että joakisella tilauksella on lähtö
+			if ($yhtiorow['kerayserat'] == 'K') {
+				foreach ($tilausnumerot as $tilausnumero) {
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus 	= '$tilausnumero'
+								AND toimitustavan_lahto = 0";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) > 0) {
+						$lahtorow = mysql_fetch_assoc($result);
+
+						$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
+
+						$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
+
+						// Otetaan eka lähtö
+						$valitu_lahto = array_shift($lahdot);
+
+						$query = "	UPDATE lasku
+									SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus  = '$tilausnumero'";
+						$upresult = pupe_query($query);
+					}
+				}
+			}
+
 
 			//tyhjennetään muuttujat
 			$varasto 	= '';

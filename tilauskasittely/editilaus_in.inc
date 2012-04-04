@@ -1043,19 +1043,30 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
-				$prioriteettinro = $hyvaksynnanmuutos = "";
+				$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$arow['luokka']}'", "", "", "selitetark_3");
 
-				if ($yhtiorow['kerayserat'] == 'K') {
-					$query = "SELECT luokka FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$arow['tunnus']}'";
-					$asluok_res = pupe_query($query);
-					$asluok_row = mysql_fetch_assoc($asluok_res);
+				// Default 9 myˆs kannassa, niin laitetaan t‰nnekki 9 jos avainsanoista ei lˆydy prioa
+				if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
-					$hyvaksynnanmuutos = $asluok_row['luokka'];
+				// Oletuksena n‰in
+				$ohjausmerkki = $lopviesti;
 
-					$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$asluok_row['luokka']}'", "", "", "selitetark_3");
+				if ($tilaustyyppilisa == 2) {
+					$ohjausmerkki = 'VARASTOTƒYDENNYS';
 				}
+				elseif (trim($ohjausmerkki) != "") {
+					$_ohjausmerkki = $ohjausmerkki;
+			 		$_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
+			 		$_ohjausmerkki = strtolower($_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("‰", "ƒ"), "a", $_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("ˆ", "÷"), "o", $_ohjausmerkki);
 
-				$ohjausmerkki = $yhtiorow['kerayserat'] == 'K' ? $lopviesti : "";
+					// FRSTTT = varastotayd joka on minimiss‰‰n se mik‰ hyv‰ksyt‰‰n varastot‰ydennys tekstin‰
+			 		if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
+						$ohjausmerkki 	  = 'VARASTOTƒYDENNYS';
+						$tilaustyyppilisa = 2;
+					}
+				}
 
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
@@ -1072,7 +1083,7 @@ while ($tietue = fgets($fd)) {
 							erpcm								= '',
 							hinta								= '$editilaus_loppuhinta',
 							huolitsija 							= '',
-							hyvaksynnanmuutos 					= '{$hyvaksynnanmuutos}',
+							hyvaksynnanmuutos 					= '{$arow['luokka']}',
 							jakelu 								= '',
 							jaksotettu							= '',
 							jtkielto							= '$arow[jtkielto]',
@@ -1773,88 +1784,6 @@ while ($tietue = fgets($fd)) {
 
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
 				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
-
-					$toimitustavan_lahto = array();
-
-					if ($yhtiorow['kerayserat'] == 'K') {
-
-						$query = "	SELECT tunnus
-									FROM toimitustapa
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND selite = '{$editilaus_toimitustapa}'";
-						$chk_res = pupe_query($query);
-						$chk_row = mysql_fetch_assoc($chk_res);
-
-						$toimitustavan_tunnus = $chk_row['tunnus'];
-
-						//haetaan kaikkien tilausrivien varastopaikat
-						$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
-									FROM tilausrivi
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									and tilausrivi.otunnus = '{$laskurow['tunnus']}'
-									AND tilausrivi.tyyppi != 'D'
-									and tilausrivi.hyllyalue != ''
-									and tilausrivi.varattu > 0
-									and tilausrivi.var NOT IN ('J','P')";
-						$chk_res = pupe_query($query);
-
-						$chk_arr = array();
-
-						while ($chk_row = mysql_fetch_assoc($chk_res)) {
-							// Mihin varastoon
-							$varasto = kuuluukovarastoon($chk_row["hyllyalue"], $chk_row["hyllynro"]);
-
-							$chk_arr[$varasto] = $varasto;
-						}
-
-						$pvmlisa = date("Y-m-d");
-
-						if (trim($laskurow['ohjausmerkki']) != "") {
-							$_ohjausmerkki = $laskurow['ohjausmerkki'];
-					 		$_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
-					 		$_ohjausmerkki = strtolower($_ohjausmerkki);
- 							$_ohjausmerkki = str_replace(array("‰", "ƒ"), "a", $_ohjausmerkki);
- 							$_ohjausmerkki = str_replace(array("ˆ", "÷"), "o", $_ohjausmerkki);
-
- 							// FRSTTT = varastotayd joka on minimiss‰‰n se mik‰ hyv‰ksyt‰‰n varastot‰ydennys tekstin‰
-					 		if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
-					 			$pvmlisa = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-					 		}
-						}
-
-						if ($laskurow['tilaustyyppi'] == 2) {
-							$query = "UPDATE lasku SET ohjausmerkki = 'VARASTOTƒYDENNYS' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-							$upd_tilaustyyppi_res = pupe_query($query);
-
-							$pvmlisa = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-						}
-
-						foreach ($chk_arr as $vrst) {
-
-							$query = "	SELECT *
-										FROM lahdot
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND liitostunnus = '{$toimitustavan_tunnus}'
-										AND asiakasluokka = '{$laskurow['prioriteettinro']}'
-										AND aktiivi IN ('', 'P')
-										AND varasto = '{$vrst}'
-										AND ((pvm = '{$pvmlisa}' AND viimeinen_tilausaika > '".date("H:i:s")."') OR pvm > '{$pvmlisa}')
-										ORDER BY pvm, lahdon_kellonaika";
-							$lahdot_res = pupe_query($query);
-
-							while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
-
-								$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
-
-								$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
-								break;
-							}
-						}
-
-						if (count($toimitustavan_lahto) > 0) {
-							$toimitustavan_lahto = urlencode(serialize($toimitustavan_lahto));
-						}
-					}
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille

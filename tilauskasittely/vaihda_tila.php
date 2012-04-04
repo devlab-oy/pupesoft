@@ -303,13 +303,15 @@
 					if ($tila_row["alatila"] != "") {
 						echo "<option value = '1'>",t("Reklamaatio kesken"),"</option>";
 					}
-					if (in_array($tila_row["alatila"], array('B','C'))) {
-						echo "<option value = '2'>",t("Reklamaatio odottaa tuotteita"),"</option>";
-					}		
-					if ($tila_row["alatila"] == "C") {
-						echo "<option value = '3'>",t("Reklamaatio vastaanotettu"),"</option>";
-					}
 
+					if ($yhtiorow['reklamaation_kasittely'] == 'U') {
+						if (in_array($tila_row["alatila"], array('B','C'))) {
+							echo "<option value = '2'>",t("Reklamaatio odottaa tuotteita"),"</option>";
+						}		
+						if ($tila_row["alatila"] == "C") {
+							echo "<option value = '3'>",t("Reklamaatio vastaanotettu"),"</option>";
+						}
+					}
 				}
 				else {
 

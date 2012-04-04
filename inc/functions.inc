@@ -9510,6 +9510,37 @@ if (!function_exists("jt_toimita")) {
 	}
 }
 
+if (!function_exists("hae_kukarow")) {
+	function hae_kukarow($kuka, $yhtio) {
+
+		$query = "	SELECT *
+					FROM yhtio
+					WHERE yhtio = '$yhtio'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "K‰ytt‰j‰n yritys ei lˆydy! ($yhtio)";
+			return;
+		}
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$yhtio'
+					and kuka	= '$kuka'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "K‰ytt‰j‰‰ ei lˆydy! ($yhtio/$kuka)";
+			return;
+		}
+
+		$kukarow = mysql_fetch_assoc($result);
+
+		return $kukarow;
+	}
+}
+
+
 if (!function_exists("hae_yhtion_parametrit")) {
 	function hae_yhtion_parametrit($yhtio) {
 		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
@@ -14393,7 +14424,7 @@ if (!function_exists("tee_keraysera")) {
 		$ker_result = pupe_query($query);
 		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
-		$kukarow['max_keraysera_alustat'] = (int) $kukarow['max_keraysera_alustat'] != 0 ? (int) $kukarow['max_keraysera_alustat'] : 9999999;
+		$kukarow['max_keraysera_alustat'] = ((int) $kukarow['max_keraysera_alustat'] > 0) ? (int) $kukarow['max_keraysera_alustat'] : 9999999;
 
 		if ($debug) echo "Ker‰‰j‰n max_keraysera_alustat $kukarow[max_keraysera_alustat]<br><br>";
 

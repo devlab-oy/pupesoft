@@ -489,7 +489,10 @@
 
 							// jos keräyserät on käytössä, päivitetään muuttuneet kappalemäärät keräyserään
 							if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-								$query_ker = "SELECT tunnus FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivi = '{$apui}'";
+								$query_ker = "	SELECT tunnus
+												FROM kerayserat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tilausrivi = '{$apui}'";
 								$keraysera_chk_res = pupe_query($query_ker);
 
 								while ($keraysera_chk_row = mysql_fetch_assoc($keraysera_chk_res)) {
@@ -497,7 +500,10 @@
 										$keraysera_maara[$keraysera_chk_row['tunnus']] = 0;
 									}
 
-									$query_upd = "UPDATE kerayserat SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}', muutospvm = now(), muuttaja = '{$kukarow['kuka']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keraysera_chk_row['tunnus']}'";
+									$query_upd = "	UPDATE kerayserat
+													SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}', muutospvm = now(), muuttaja = '{$kukarow['kuka']}'
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$keraysera_chk_row['tunnus']}'";
 									$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
 								}
 
@@ -1456,249 +1462,181 @@
 				}
 
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-					$query = "	SELECT pakkaus.pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset,
-								ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + pakkaus.oma_paino, 1) tuotemassa,
-								ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) * IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)), 2) as kuutiot,
-								COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
+					$query = "	SELECT
+								lasku.varasto,
+								lasku.toimitustapa,
+								kerayserat.otunnus,
+								IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
+								IFNULL(pakkaus.oma_paino, 0) oma_paino,
+								IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
+								SUM(tuote.tuotemassa * kerayserat.kpl_keratty) tuotemassa,
+								SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) as kuutiot,
+								COUNT(*) AS kollit
 								FROM kerayserat
-								JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+								LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+								JOIN lasku ON (kerayserat.yhtio=lasku.yhtio and kerayserat.otunnus=lasku.tunnus)
 								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 								AND kerayserat.otunnus IN ({$tilausnumeroita})
 								AND kerayserat.tila = 'K'
-								GROUP BY 1
-								ORDER BY pakkausnro ASC";
+								GROUP BY 1,2,3,4,5,6
+								ORDER BY otunnus, pakkausnro";
 					$keraysera_res = pupe_query($query);
 
-					$rahtikirjan_pakkaukset = array();
-
 					while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
 
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['paino'] 	= $keraysera_row['tuotemassa'];
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['kuutiot'] 	= $keraysera_row['kuutiot'];
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
-					}
+						$kilot = round($keraysera_row["tuotemassa"] + $keraysera_row["oma_paino"], 2);
+						$kuutiot = round($keraysera_row["kuutiot"] * $keraysera_row["puukotuskerroin"], 4);
 
-					$query = "	SELECT 'MUU KOLLI' AS pakkaus, GROUP_CONCAT(DISTINCT kerayserat.otunnus) tunnukset,
-								ROUND(SUM(tuote.tuotemassa * kerayserat.kpl_keratty), 1) tuotemassa,
-								ROUND(SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty), 2) as kuutiot,
-								COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
-								FROM kerayserat
-								JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-								AND kerayserat.otunnus IN ({$tilausnumeroita})
-								AND kerayserat.tila = 'K'
-								AND kerayserat.pakkaus = '999'
-								GROUP BY 1
-								ORDER BY pakkausnro ASC";
-					$keraysera_res = mysql_query($query) or pupe_error($query);
-
-					while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['paino'] = 0;
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['kuutiot'] = 0;
-						if (!isset($rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'])) $rahtikirjan_pakkaukset[$keraysera_row['pakkaus']]['maara'] = 0;
-
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['paino'] 	= $keraysera_row['tuotemassa'];
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['kuutiot'] 	= $keraysera_row['kuutiot'];
-						$rahtikirjan_pakkaukset[$keraysera_row['pakkaus']][$keraysera_row['tunnukset']]['maara']	= $keraysera_row['maara'];
+						// Insertöidään aina rahtikirjan tiedot per tilaus
+						$query_ker  = "	INSERT INTO rahtikirjat SET
+										kollit 			= '{$keraysera_row['kollit']}',
+										kilot 			= '{$kilot}',
+										kuutiot 		= '{$kuutiot}',
+										pakkauskuvaus 	= '',
+										pakkaus 		= '{$keraysera_row['pakkaus']}',
+										rahtikirjanro 	= '{$keraysera_row['otunnus']}',
+										otsikkonro 		= '{$keraysera_row['otunnus']}',
+										tulostuspaikka 	= '{$keraysera_row['varasto']}',
+										toimitustapa 	= '{$keraysera_row['toimitustapa']}',
+										yhtio 			= '{$kukarow['yhtio']}'";
+						$ker_res = pupe_query($query_ker);
 					}
 
 					// päivitetään keräyserän tila "Kerätty"-tilaan
-					$query = "UPDATE kerayserat SET tila = 'T' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus IN ({$tilausnumeroita})";
+					$query = "	UPDATE kerayserat
+								SET tila = 'T'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus IN ({$tilausnumeroita})";
 					$tila_upd_res = mysql_query($query) or pupe_error($query);
 
-					// esisyötetään rahtikirjan tiedot
-					if (count($rahtikirjan_pakkaukset) > 0) {
-						foreach ($rahtikirjan_pakkaukset as $pak => $otun_arr) {
+					// TODO: tehdään toleranssitarkastus ja jos ylitetään raja, niin silloin tulostetaan uudet laput
+					if (1 == 2) {
 
-							$maara_x    = 0;
-							$paino_x    = 0;
-							$kuutiot_x  = 0;
-							$otsikkonro = 0;
+						// haetaan toimitustavan tiedot
+						$query = "	SELECT *
+									FROM toimitustapa
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND selite = '{$laskurow['toimitustapa']}'";
+						$toitares = pupe_query($query);
+						$toitarow = mysql_fetch_assoc($toitares);
 
-							foreach ($otun_arr as $otun_x => $arr) {
-								foreach (explode(",", $otun_x) as $otun) {
+						$query = "	SELECT nro, sscc, sscc_ulkoinen, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
+									FROM kerayserat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$otun}'
+									GROUP BY 1,2,3
+									ORDER BY 1";
+						$kpl_chk_res = pupe_query($query);
 
-									if ($maara_x == 0 and $paino_x == 0 and $kuutiot_x == 0 and $otsikkonro == 0) {
-										$maara_x = $arr['maara'];
-										$paino_x = $arr['paino'];
-										$kuutiot_x = $arr['kuutiot'];
+						while ($kpl_chk_row = mysql_fetch_assoc($kpl_chk_res)) {
+
+							if ($kpl_chk_row['kpl'] != $kpl_chk_row['kpl_keratty']) {
+
+								$query = "	SELECT toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
+											FROM lasku
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$otun}'";
+								$lahto_chk_res = pupe_query($query);
+								$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
+
+								if ($toitarow['tulostustapa'] == 'E') {
+									if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
+										$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 									}
-									else {
-										$maara_x = 0;
-										$paino_x = 0;
-										$kuutiot_x = 0;
-									}
-
-									if ($otsikkonro == 0) $otsikkonro = $otun;
-
-									$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otun}'";
-									$laskures = pupe_query($query);
-									$laskurow = mysql_fetch_assoc($laskures);
-
-									$query_ker  = "	INSERT INTO rahtikirjat SET
-													kollit = '{$maara_x}',
-													kilot = '{$paino_x}',
-													kuutiot = '{$kuutiot_x}',
-													pakkauskuvaus = '',
-													pakkaus = '{$pak}',
-													rahtikirjanro = '{$laskurow['tunnus']}',
-													otsikkonro = '{$otsikkonro}',
-													tulostuspaikka = '{$laskurow['varasto']}',
-													toimitustapa = '{$laskurow['toimitustapa']}',
-													yhtio = '{$kukarow['yhtio']}'";
-									$ker_res = pupe_query($query_ker);
-
-									// TODO: tehdään toleranssitarkastus ja jos ylitetään raja, niin silloin tulostetaan uudet laput
-									if (1 == 2) {
-
-										// haetaan toimitustavan tiedot
-										$query = "	SELECT *
-													FROM toimitustapa
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND selite = '{$laskurow['toimitustapa']}'";
-										$toitares = pupe_query($query);
-										$toitarow = mysql_fetch_assoc($toitares);
-
-										$query = "	SELECT nro, sscc, sscc_ulkoinen, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
-													FROM kerayserat
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND otunnus = '{$otun}'
-													GROUP BY 1,2,3
-													ORDER BY 1";
-										$kpl_chk_res = pupe_query($query);
-
-										while ($kpl_chk_row = mysql_fetch_assoc($kpl_chk_res)) {
-
-											if ($kpl_chk_row['kpl'] != $kpl_chk_row['kpl_keratty']) {
-
-												$query = "	SELECT toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
-															FROM lasku
-															WHERE yhtio = '{$kukarow['yhtio']}'
-															AND tunnus = '{$otun}'";
-												$lahto_chk_res = pupe_query($query);
-												$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
-
-												if ($toitarow['tulostustapa'] == 'E') {
-													if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
-													}
-													elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
-													}
-
-													$mergeid = md5($lahto_chk_row["toimitustavan_lahto"].$lahto_chk_row["ytunnus"].$lahto_chk_row["toim_osoite"].$lahto_chk_row["toim_postino"].$lahto_chk_row["toim_postitp"]);
-
-													$unifaun->_discardParcel($mergeid, $kpl_chk_row['sscc_ulkoinen']);
-													$unifaun->ftpSend();
-												}
-
-												// tehdään palautussanoma
-												$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['maksuehto']}'";
-												$mehto_res = pupe_query($query);
-												$mehto = mysql_fetch_assoc($mehto_res);
-
-												$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-															lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-															if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
-															asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
-															FROM lasku
-															JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-															JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
-															WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-															AND lasku.tunnus = '{$laskurow['tunnus']}'";
-												$rakir_res = pupe_query($query);
-												$rakir_row = mysql_fetch_assoc($rakir_res);
-
-												$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
-															IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
-															kerayserat.pakkausnro,
-															kerayserat.sscc,
-															COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
-															ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
-															FROM kerayserat
-															JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-															JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-															LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-															WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-															AND kerayserat.nro = '{$kpl_chk_row['nro']}'
-															AND kerayserat.sscc = '{$kpl_chk_row['sscc']}'
-															AND kerayserat.otunnus = '{$laskurow['tunnus']}'
-															GROUP BY 1,2,3,4";
-												$keraysera_res = pupe_query($query);
-
-												while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-
-													$laskurow['pakkausid'] = $keraysera_row['pakkausnro'];
-													$laskurow['kollilaji'] = $keraysera_row['kollilaji'];
-													$laskurow['sscc'] = $keraysera_row['sscc'];
-
-													if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
-													}
-													elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
-														$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
-													}
-
-													$unifaun->setYhtioRow($yhtiorow);
-													$unifaun->setKukaRow($kukarow);
-													$unifaun->setPostiRow($laskurow);
-													$unifaun->setToimitustapaRow($toitarow);
-													$unifaun->setMehto($mehto);
-
-													$unifaun->setRahtikirjaRow($rakir_row);
-
-													$unifaun->setYhteensa($laskurow['summa']);
-													$unifaun->setViite($laskurow['viesti']);
-
-													$unifaun->_getXML();
-
-													$kollitiedot = array(
-														'maara' => $keraysera_row['maara'],
-														'paino' => $keraysera_row['tuotemassa'],
-														'pakkauskuvaus' => $keraysera_row['pakkauskuvaus']
-													);
-
-													$unifaun->setContainerRow($kollitiedot);
-
-													$unifaun->ftpSend();
-												}
-											}
-										}
+									elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+										$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 									}
 
-									// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
-									if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
+									$mergeid = md5($lahto_chk_row["toimitustavan_lahto"].$lahto_chk_row["ytunnus"].$lahto_chk_row["toim_osoite"].$lahto_chk_row["toim_postino"].$lahto_chk_row["toim_postitp"]);
 
-										// päivitetään keräyserän tila "Rahtikirja tulostettu"-tilaan
-										$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
-										$tila_upd_res = pupe_query($query);
+									$unifaun->_discardParcel($mergeid, $kpl_chk_row['sscc_ulkoinen']);
+									$unifaun->ftpSend();
+								}
 
-										// rahtikirjojen tulostus vaatii seuraavat muuttujat:
+								// tehdään palautussanoma
+								$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['maksuehto']}'";
+								$mehto_res = pupe_query($query);
+								$mehto = mysql_fetch_assoc($mehto_res);
 
-										// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
-										// $tee						tässä pitää olla teksti tulosta
+								$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+											lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
+											if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
+											asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+											FROM lasku
+											JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+											JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+											WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+											AND lasku.tunnus = '{$laskurow['tunnus']}'";
+								$rakir_res = pupe_query($query);
+								$rakir_row = mysql_fetch_assoc($rakir_res);
 
-										/*
-										// otetaan talteen tee-muuttuja
-										$tee_tmp = $tee;
+								$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
+											IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
+											kerayserat.pakkausnro,
+											kerayserat.sscc,
+											COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
+											ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
+											FROM kerayserat
+											JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+											JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+											LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+											WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+											AND kerayserat.nro = '{$kpl_chk_row['nro']}'
+											AND kerayserat.sscc = '{$kpl_chk_row['sscc']}'
+											AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+											GROUP BY 1,2,3,4";
+								$keraysera_res = pupe_query($query);
 
-										$toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
-										$tee				  = "tulosta";
+								while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
-										require ("rahtikirja-tulostus.php");
+									$laskurow['pakkausid'] = $keraysera_row['pakkausnro'];
+									$laskurow['kollilaji'] = $keraysera_row['kollilaji'];
+									$laskurow['sscc'] = $keraysera_row['sscc'];
 
-										$tee = $tee_tmp;
-										*/
+									if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
+										$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 									}
+									elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+										$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+									}
+
+									$unifaun->setYhtioRow($yhtiorow);
+									$unifaun->setKukaRow($kukarow);
+									$unifaun->setPostiRow($laskurow);
+									$unifaun->setToimitustapaRow($toitarow);
+									$unifaun->setMehto($mehto);
+
+									$unifaun->setRahtikirjaRow($rakir_row);
+
+									$unifaun->setYhteensa($laskurow['summa']);
+									$unifaun->setViite($laskurow['viesti']);
+
+									$unifaun->_getXML();
+
+									$kollitiedot = array(
+										'maara' => $keraysera_row['maara'],
+										'paino' => $keraysera_row['tuotemassa'],
+										'pakkauskuvaus' => $keraysera_row['pakkauskuvaus']
+									);
+
+									$unifaun->setContainerRow($kollitiedot);
+
+									$unifaun->ftpSend();
 								}
 							}
 						}
+					}
+
+					// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
+					if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
+						// päivitetään keräyserän tila "Rahtikirja tulostettu"-tilaan
+						$query = "	UPDATE kerayserat
+									SET tila = 'R'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$laskurow['tunnus']}'";
+						$tila_upd_res = pupe_query($query);
 					}
 				}
 

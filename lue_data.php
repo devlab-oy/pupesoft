@@ -1349,16 +1349,26 @@ if ($kasitellaan_tiedosto) {
 
 							$tpque = "	SELECT tunnus
 										from toimi
-										where yhtio	= '$kukarow[yhtio]'
-										and ytunnus	= '$rivi[$r]'
+										where yhtio	= '{$kukarow['yhtio']}'
+										and ytunnus	= '{$rivi[$r]}'
 										and tyyppi != 'P'";
 							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
 								$tpque = "	SELECT tunnus
 											from toimi
-											where yhtio	= '$kukarow[yhtio]'
-											and toimittajanro = '$rivi[$r]'
+											where yhtio	= '{$kukarow['yhtio']}'
+											and ovttunnus = '{$rivi[$r]}'
+											and ovttunnus != ''
+											and tyyppi != 'P'";
+								$tpres = pupe_query($tpque);
+							}
+
+							if (mysql_num_rows($tpres) != 1) {
+								$tpque = "	SELECT tunnus
+											from toimi
+											where yhtio	= '{$kukarow['yhtio']}'
+											and toimittajanro = '{$rivi[$r]}'
 											and toimittajanro != ''
 											and tyyppi != 'P'";
 								$tpres = pupe_query($tpque);

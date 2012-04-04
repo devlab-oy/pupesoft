@@ -32,7 +32,7 @@
 
 		while ($tilausrivirow = mysql_fetch_assoc($result)) {
 
-			$out  = sprintf("%-6.6s",   $toimirow["toimittajanro"]);		// toimittajanro
+			$out  = sprintf("%-6.6s",   $toimirow['edi_kayttaja']);			// toimittajanro
 			$out .= sprintf("%-4.4s",   "");								// tyhj‰‰
 			$out .= sprintf("%-13.13s", $tilausrivirow['otunnus']);			// tilausnumero
 			$out .= sprintf("%-18.18s", $tilausrivirow['toim_tuoteno']);	// tuotekoodi

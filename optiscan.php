@@ -38,9 +38,12 @@
 		die("1, Voidaan ajaa vain komentoriviltä\r\n\r\n");
 	}
 
-	error_reporting(0);
-	ini_set("display_errors", 0);
-	ini_set("log_errors", 1);
+	// Käynnistetään outputbufferi
+	ob_start();
+
+	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
+	ini_set("log_errors", 0);
 
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 
@@ -101,9 +104,6 @@
 	// Erotellaan sanoman sisältö arrayseen
 	$sisalto = explode(",", str_replace("'", "", $sisalto));
 	$response = "";
-
-	// Käynnistetään outputbufferi
-	ob_start();
 
 	require('inc/connect.inc');
 	require('inc/functions.inc');

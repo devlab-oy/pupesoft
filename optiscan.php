@@ -118,8 +118,9 @@
 		 * 4. Password
 		 */
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$pass = md5(trim($sisalto[3]));
 
@@ -153,9 +154,9 @@
 	elseif ($sanoma == "GetPicks") {
 		// Kent‰t: "Pick slot" sek‰ "Item number" tulee olla m‰‰r‰mittaisia. Paddataan loppuun spacella.
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka']  = mysql_real_escape_string(trim($sisalto[2]));
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		// Katsotaan onko k‰ytt‰j‰ll‰ jo ker‰yser‰ ker‰yksess‰
 		$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
@@ -164,7 +165,6 @@
 					AND laatija = '{$kukarow['kuka']}'
 					AND tila    = 'K'";
 		$result = pupe_query($query);
-
 		$row = mysql_fetch_assoc($result);
 
 		if (trim($row['tilausrivit']) != '') {
@@ -262,10 +262,10 @@
 
 			$query = "	SELECT keraysvyohyke, oletus_varasto
 						FROM kuka
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND kuka = '{$kukarow['kuka']}'
-						AND extranet = ''
-						AND keraysvyohyke != ''
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND kuka 			= '{$kukarow['kuka']}'
+						AND extranet 		= ''
+						AND keraysvyohyke  != ''
 						AND oletus_varasto != ''";
 			$result = pupe_query($query);
 
@@ -300,7 +300,6 @@
 								AND laatija = '{$kukarow['kuka']}'
 								AND tila = 'K'";
 					$result = pupe_query($query);
-
 					$row = mysql_fetch_assoc($result);
 
 					$kpl_arr = explode(",", $row['tilausrivit']);
@@ -399,17 +398,9 @@
 	}
 	elseif ($sanoma == "PrintContainers") {
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka']  = mysql_real_escape_string(trim($sisalto[2]));
-
-		$query = "	SELECT *
-					FROM kuka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND kuka = '{$kukarow['kuka']}'";
-		$kukares = pupe_query($query);
-		$kukarow = mysql_fetch_assoc($kukares);
-
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$nro = mysql_real_escape_string(trim($sisalto[3]));
 		$printer_id = (int) trim($sisalto[4]);
@@ -445,27 +436,31 @@
 	}
 	elseif ($sanoma == "Picked") {
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$nro = (int) trim($sisalto[3]);
-		$row_id = (int) trim($sisalto[4]);
-		$qty = (int) trim($sisalto[5]);
-		$package = mysql_real_escape_string(trim($sisalto[6]));
-		$splitlineflag = (int) trim($sisalto[7]);
+		$nro 			= (int) trim($sisalto[3]);
+		$row_id 		= (int) trim($sisalto[4]);
+		$qty 			= (int) trim($sisalto[5]);
+		$package 		= mysql_real_escape_string(trim($sisalto[6]));
+		$splitlineflag 	= (int) trim($sisalto[7]);
 
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$nro}'
-					AND tunnus = '{$row_id}'";
+					AND nro 	= '{$nro}'
+					AND tunnus 	= '{$row_id}'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		// splitataan rivi, splittauksen ensimm‰inen rivi
 		if ($splitlineflag == 1) {
-			$query = "UPDATE kerayserat SET kpl = '{$qty}', kpl_keratty = '{$qty}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+			$query = "	UPDATE kerayserat
+						SET kpl = '{$qty}', kpl_keratty = '{$qty}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND nro 	= '{$nro}'
+						AND tunnus 	= '{$row_id}'";
 			$upd_res = pupe_query($query);
 		}
 		// 2 = 2 ... n splitattu rivi
@@ -574,16 +569,9 @@
 	}
 	elseif ($sanoma == "AllPicked") {
 
-		$kukarow['yhtio'] = 'artr';
-
-		$query = "	SELECT *
-					FROM kuka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND kuka = '".mysql_real_escape_string(trim($sisalto[2]))."'";
-		$kukares = pupe_query($query);
-		$kukarow = mysql_fetch_assoc($kukares);
-
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$nro = (int) trim($sisalto[3]);
 
@@ -689,26 +677,19 @@
 	}
 	elseif ($sanoma == "StopAssignment") {
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$nro = (int) trim($sisalto[3]);
 
-		// $query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K'";
-		// $chkres = pupe_query($query);
-
-		// if (mysql_num_rows($chkres) > 0) {
-		// 	$response = "1,Kaikki rivit ei ole ker‰tty\r\n\r\n";
-		// }
-		// else {
-			$response = "0,\r\n\r\n";
-		// }
+		$response = "0,\r\n\r\n";
 	}
 	elseif ($sanoma == "SignOff") {
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND laatija = '{$kukarow['kuka']}' AND tila = 'K'";
 		$chkres = pupe_query($query);
@@ -733,9 +714,9 @@
 		 * Edelliset rivit + se m‰‰r‰ jaetusta rivist‰ ovat alustassa A. Seuraavat rivit + jaetun rivin loput menev‰t B:hen.
 		 */
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		$nro = (int) trim($sisalto[3]);
 		$row_id = (int) trim($sisalto[4]);
@@ -813,14 +794,14 @@
 		 * Ei tulosteta SSCC-koodia.
 		 */
 
-		$kukarow['yhtio'] = 'artr';
-		$kukarow['kuka'] = mysql_real_escape_string(trim($sisalto[2]));
-		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		// Napataan kukarow ja yhtorow
+		$yhtiorow = hae_yhtion_parametrit("artr");
+		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$nro = (int) trim($sisalto[3]);
-		$row_id = (int) trim($sisalto[4]);
-		$container_id = trim($sisalto[5]);
-		$all = trim($sisalto[6]);
+		$nro 			= (int) trim($sisalto[3]);
+		$row_id 		= (int) trim($sisalto[4]);
+		$container_id 	= trim($sisalto[5]);
+		$all 			= trim($sisalto[6]);
 
 		// haetaan ker‰tt‰v‰ ker‰ysrivi
 		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";

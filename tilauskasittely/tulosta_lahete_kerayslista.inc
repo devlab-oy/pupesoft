@@ -147,6 +147,7 @@ if (!function_exists('alku_kerayslista')) {
 					$laskurow['kohde']			= "";
 					$laskurow['viesti']			= "";
 					$laskurow['comments']		= "";
+					$laskurow['ohjausmerkki']	= "";
 					$laskurow['sisviesti2']		= "";
 					$laskurow['tilausyhteyshenkilo']	= "";
 					$laskurow['asiakkaan_tilausnumero']	= "";
@@ -360,6 +361,10 @@ if (!function_exists('alku_kerayslista')) {
 
 			if (trim($laskurow['comments']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 70, "\n###");
+			}
+			
+			if (trim($laskurow['ohjausmerkki']) != '') {
+				$komm .= "\n".t("Ohjausmerkki", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['ohjausmerkki']), 70, "\n###");
 			}
 
 			if (trim($laskurow['sisviesti2']) != '') {

@@ -1,6 +1,6 @@
 <?php
 
-	$teccom_editilaus = $pupe_root_polku."/dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+	$teccom_editilaus = $pupe_root_polku."/dataout/tc-".$laskurow['tunnus'].".txt";
 
 	if (!$toot = fopen($teccom_editilaus, "w")) die("Filen $teccom_editilaus luonti epaonnistui!");
 

@@ -9,9 +9,9 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
+	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
 	if (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") < 300) {
-		echo "Unifaun-fetch sis‰‰nluku k‰ynniss‰, odota hetki!";
+		#echo "Unifaun-fetch sis‰‰nluku k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##unifaun-fetch.lock") and mktime()-filemtime("/tmp/##unifaun-fetch.lock") >= 300) {
 		echo "VIRHE: Unifaun-fetch sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";

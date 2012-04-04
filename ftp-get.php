@@ -9,9 +9,9 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
+	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
 	if (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") < 300) {
-		echo "FTP-get sis‰‰nluku ($argv[1]) k‰ynniss‰, odota hetki!";
+		#echo "FTP-get sis‰‰nluku ($argv[1]) k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##ftp-get-in.lock") and mktime()-filemtime("/tmp/##ftp-get-in.lock") >= 300) {
 		echo "VIRHE: FTP-get sis‰‰nluku ($argv[1]) jumissa! Ota yhteys tekniseen tukeen!!!";

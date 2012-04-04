@@ -9,9 +9,9 @@
 
 	date_default_timezone_set('Europe/Helsinki');
 
-	// jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
+	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
 	if (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") < 300) {
-		echo "Kardex-fetch sis‰‰nluku k‰ynniss‰, odota hetki!";
+		#echo "Kardex-fetch sis‰‰nluku k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##kardex-fetch.lock") and mktime()-filemtime("/tmp/##kardex-fetch.lock") >= 300) {
 		echo "VIRHE: Kardex-fetch sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";

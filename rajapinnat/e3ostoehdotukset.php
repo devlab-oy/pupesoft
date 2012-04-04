@@ -89,8 +89,9 @@
 		echo "<font class='head'>".t("E3-ostoehdotuksen sis‰‰nluku")."</font><hr>";
 	}
 
+	// jos meill‰ on lock-file ja se on alle 5 minuuttia vanha
 	if (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") < 900) {
-		echo "E3-ostoehdotuksen sis‰‰nluku k‰ynniss‰, odota hetki!";
+		#echo "E3-ostoehdotuksen sis‰‰nluku k‰ynniss‰, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") >= 900) {
 		echo "VIRHE: E3-ostoehdotuksen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";

@@ -103,7 +103,12 @@ if (!function_exists('elmaedi_rivi')) {
 
 		fputs($tootedi, "ILINSTART:$rivinumero\n");
 		fputs($tootedi, "ILINEN_NU:$eanrow[eankoodi]\n");
-		fputs($tootedi, "ILINMF_PI:".sprintf("%-35.35s", $tilrow['tuoteno'])."@5\n");
+		if ($yhtiorow["yhtio"] == 'mast' and $tilrow['tuoteno'] == $yhtiorow["rahti_tuotenumero"]) {
+			fputs($tootedi, "ILINMF_PI:".sprintf("%-35.35s", '9943')."@5\n");
+		}
+		else {
+			fputs($tootedi, "ILINMF_PI:".sprintf("%-35.35s", $tilrow['tuoteno'])."@5\n");
+		}
 		fputs($tootedi, "ILIN8__IF:       @   @   @   @".sprintf("%-35.35s", $tilrow['nimitys'])."\n");
 		fputs($tootedi, "ILIN47_QT:".sprintf("%017.2f", $tilrow["kpl"])."@$tilrow[yksikko]\n");
 		fputs($tootedi, "ILININVIV:".sprintf("%017.2f", $tilrow["hinta"])."@   @   @   @          1@PCE\n");

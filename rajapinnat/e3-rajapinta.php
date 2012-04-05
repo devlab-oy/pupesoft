@@ -118,11 +118,9 @@
 	siirto($path_xauxi, "E3XAUXINP");
 	siirto($path_xlto,  "E3XLT0NP");
 	siirto($path_wswp,  "E3XSWPMWNP");
+	#siirto("", "", "QUOTE RCMD E3nattsbm");
 
-	#ftp_exec($conn_id, "quote rcmd E3nattsbm");
-	#ftp_exec($conn_id, "quit");
-
-	function siirto ($ftpfile, $renameftpfile) {
+	function siirto ($ftpfile, $renameftpfile, $komento = "") {
 		GLOBAL $e3_params, $yhtiorow;
 
 		$ftphost = $e3_params[$yhtiorow["yhtio"]]["ftphost"];
@@ -135,11 +133,8 @@
 
 		$yhtiorow['alert_email'] = "juppe@devlab.fi";
 
-		$syy				= "";
-		$palautus			= 0;
-		$renameftpfile		= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
-		$palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
-		$filenimi			= basename($ftpfile);
+		$syy		= "";
+		$palautus	= 0;
 
 		//l‰hetet‰‰n tiedosto
 		$conn_id = ftp_connect($ftphost);
@@ -149,37 +144,49 @@
 			$login_result = ftp_login($conn_id, $ftpuser, $ftppass);
 		}
 
-		// jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
-		if (substr($ftppath, -1) != "/") {
-			$ftppath .= "/";
-		}
-
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
+
 			// k‰ytet‰‰n active modea
 			ftp_pasv($conn_id, FALSE);
 
-			// Dellataan olemassaoleva faili eka, koska sit‰ ei osata ylikirjata
-			$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
-			var_dump($delete);
+			if ($ftpfile != "" and $renameftpfile != "") {
 
-			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
-			var_dump($upload);
+				// jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
+				if (substr($ftppath, -1) != "/") {
+					$ftppath .= "/";
+				}
 
-			// Pit‰‰kˆ faili viel‰ nimet‰ kokonaan uudestaan
-			if ($upload === TRUE) {
-				$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
+				$renameftpfile	= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
+				$filenimi		= basename($ftpfile);
+
+				// Dellataan olemassaoleva faili eka
+				$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
 				var_dump($delete);
 
-				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-	            var_dump($rename);
+				$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+				var_dump($upload);
 
-				$rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
-				var_dump($rename);
+				// Pit‰‰kˆ faili viel‰ nimet‰ kokonaan uudestaan
+				if ($upload === TRUE) {
+					$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
+					var_dump($delete);
 
-				if (stripos($rename[0], "command successful") === FALSE) {
-					$rename = FALSE;
+					$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
+		            var_dump($rename);
+
+					$rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+					var_dump($rename);
+
+					if (stripos($rename[0], "command successful") === FALSE) {
+						$rename = FALSE;
+					}
 				}
+			}
+
+			if ($komento != "") {
+				$cmd = ftp_raw($conn_id, $komento);
+				var_dump($cmd);
 			}
 		}
 

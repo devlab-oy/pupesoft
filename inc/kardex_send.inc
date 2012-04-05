@@ -67,7 +67,7 @@
 
 			// Remmataan faili $kardex_sscc-kansiosta jos se on siellä
 			if (file_exists($kardex_sscc."/".$kerayseran_numero.".txt")) {
-				unlink($kardex_sscc."/".$kerayseran_numero.".txt");
+				rename($kardex_sscc."/".$kerayseran_numero.".txt", $kardex_sscc."/ok/".$kerayseran_numero.".txt");
 			}
 
 			$kardexnimi = "/tmp/kardex-".md5(uniqid(mt_rand(), true)).".txt";

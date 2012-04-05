@@ -1090,7 +1090,7 @@
 
 				echo "<tr>
 						<th>".t("Asiakas/Toimittaja")."</th>
-						<th>".t("Tilaus/Keikka")."</th>
+						<th>".t("Tilaus/Saapuminen")."</th>
 						<th>".t("Tyyppi")."</th>
 						<th>".t("Pvm")."</th>
 						<th>".t("M‰‰r‰")."</th>
@@ -1110,7 +1110,7 @@
 					if ($jtrow["tyyppi"] == "O") {
 
 						if ($jtrow["laskutila"] == "K") {
-							$tyyppi = t("Lis‰tty suoraan keikalle");
+							$tyyppi = t("Lis‰tty suoraan saapumiselle");
 							$keikka = " / ".$jtrow["laskunro"];
 						}
 						else {
@@ -1991,7 +1991,7 @@
 						echo "<td valign='top'>$prow[selite]";
 
 						if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ keikka")." $prow[lasku2laskunro]</a>";
+							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
 						}
 
 						if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

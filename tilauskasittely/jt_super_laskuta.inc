@@ -144,10 +144,10 @@
 		}
 	}
 	elseif ($mista == 'varastoon.inc') {
-		$laskuvirhe .= t("Ei suoratoimitettavaa keikalta!")." ($otunnus)\n";
+		$laskuvirhe .= t("Ei suoratoimitettavaa saapumiselta!")." ($otunnus)\n";
 	}
 	else {
-		$laskuvirhe .= t("Suoratoimituksen laskutus ep‰onnistui! Yht‰‰n rivi‰ ei voitu toimittaa keikalta!")." ($otunnus)\n";
+		$laskuvirhe .= t("Suoratoimituksen laskutus ep‰onnistui! Yht‰‰n rivi‰ ei voitu toimittaa saapumiselta!")." ($otunnus)\n";
 	}
 
 	if ($mista == 'varastoon.inc') {

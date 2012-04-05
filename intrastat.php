@@ -857,7 +857,7 @@
 			<td>
 			<select name='tapahtumalaji'>
 			<option value='kaikki' 		$sel5[kaikki]>".t("Kaikki")."</option>
-			<option value='keikka' 		$sel5[keikka]>".t("Keikka")."</option>
+			<option value='keikka' 		$sel5[keikka]>".t("Saapuminen")."</option>
 			<option value='lasku'		$sel5[lasku]>".t("Lasku")."</option>
 			<option value='siirtolista' $sel5[siirtolista]>".t("Siirtolista")."</option>
 			</select>

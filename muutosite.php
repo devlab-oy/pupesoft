@@ -1270,7 +1270,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 		else { //Laajennetut
 			echo "<table>";
-			echo "<tr><th>".t("Keikka")."</th><td>$keikrow[laskunro]</td></tr>";
+			echo "<tr><th>".t("Saapuminen")."</th><td>$keikrow[laskunro]</td></tr>";
 			echo "<tr><th>".t("Lähetysmaa")."</th><td>$keikrow[maa_lahetys]</td></tr>";
 			echo "<tr><th>".t("Kuljetusmuoto")."</th><td>$keikrow[kuljetusmuoto]</td></tr>";
 			echo "<tr><th>".t("KT")."</th><td>$keikrow[kauppatapahtuman_luonne]</td></tr>";
@@ -1281,7 +1281,7 @@ if ($tee == 'E' or $tee == 'F') {
 			if ($keikrow["bruttopaino"] != 0) echo "<tr><th>".t("Paino")."</th><td>$keikrow[bruttopaino]</td></tr>";
 			echo "<tr><th>".t("Toimaika")."</th><td>".tv1dateconv($keikrow["toimaika"])."</td></tr>";
 			echo "<tr><th>".t("Kommentit")."</th><td>$keikrow[comments]</td></tr>";
-			echo "<tr><th>".t("Keikan muut laskut")."</td><td>";
+			echo "<tr><th>".t("Saapumisen muut laskut")."</td><td>";
 			while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {
 				echo "<a href='muutosite.php?tee=E&tunnus=$muutkeikrow[vanhatunnus]'>$muutkeikrow[nimi] ($muutkeikrow[summa])</a><br>";
 			}

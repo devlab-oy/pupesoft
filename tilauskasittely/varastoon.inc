@@ -246,7 +246,7 @@ else {
 
 if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	echo "<br>";
-	echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
+	echo "<font class='message'>".t("Saapuminen")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 	echo "<font class='message'>".t("Rahdin m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
@@ -544,7 +544,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$tapahtumaid = mysql_insert_id();
 
 		// Vied‰‰n koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille p‰ivitet‰‰n sama tuotepaikka
-		if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
+		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus) and trim($koko_suuntalava) == 'X') {
 
 			$query = "	SELECT *
 						FROM tuotepaikat
@@ -737,6 +737,14 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 			$millepakallemeni = " ,".$millepakallemeni;
 		}
 
+		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
+		$suuntalavalisa = "";
+
+		// Vied‰‰n koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille p‰ivitet‰‰n sama tuotepaikka
+		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
+			$suuntalavalisa = ", suuntalava = 0 ";
+		}
+
 		// p‰ivitet‰‰n tilaus saapuneeksi varastoon
 		// p‰ivitet‰‰n myˆs tehdaslis‰varusteet saapuneiksi
 		// p‰ivitet‰‰n riville paikat jolle saldo loppupeleiss‰ meni (jos meni ok niin $millepakallemeni on tyhj‰)
@@ -745,7 +753,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					varattu = 0,
 					laskutettuaika = '$varastoonvientipva',
 					laskutettu = '$kukarow[kuka]'
-					$millepakallemeni
+					{$millepakallemeni}
+					{$suuntalavalisa}
 					WHERE yhtio='$kukarow[yhtio]'
 					and otunnus='$tilrivirow[otunnus]'
 					and (tunnus='$tilrivirow[tunnus]' or perheid='$tilrivirow[tunnus]')";
@@ -798,7 +807,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$varastoon_msg .= "</td>";
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+			$query = "	SELECT sscc
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -825,7 +837,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+			$query = "	SELECT sscc
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -1020,7 +1035,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Keikkaan ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 
@@ -1126,11 +1141,11 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 }
 
 if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
-	echo "<br><font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
+	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	if ($mobiili_keikka != "yes") {
-		echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
+		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -1152,7 +1167,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 		// JƒMƒRIVEILTƒ tyhjennet‰‰n netto-kentt‰, jotta tuotteet menev‰t seuraavalla kerralla varastoon.
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
-		 			SET tilausrivi.netto = '', suuntalavat.tila = 'S'
+		 			SET tilausrivi.netto = '',
+					suuntalavat.tila = 'S'
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'
 					AND tilausrivi.netto = 'X'
@@ -1207,7 +1223,7 @@ if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kautta
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";

@@ -643,11 +643,11 @@ if ($tila == 'tee_siirto') {
 					$result = pupe_query($query);
 				}
 				else {
-					echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirretään ei löydy")."</font><br>!";
+					echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirretään ei löydy")."</font><br>!";
 				}
 			}
 			else {
-				echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirretään on lukittu")."</font><br>!";
+				echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirretään on lukittu")."</font><br>!";
 			}
 		}
 
@@ -1033,7 +1033,7 @@ if ($tila == '') {
 	#$kennim_array[] = t('Extrakulu');
 	$kennim_array[] = t('Toimaika');
 	$kennim_array[] = t('Kommentti');
-	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t('Keikka');
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t("Saapuminen");
 
 	$kenhak_array = array();
 	$kenhak_array[] = 'otunnus';
@@ -1261,7 +1261,7 @@ if ($tila == '') {
 
 	echo "<table>
 	<tr>
-		<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
+		<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
 		<th>".t("Laskun summa")."</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
 		<th>".t("Perusnäkymä").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
 	</tr>
@@ -1373,7 +1373,7 @@ if ($tila == '') {
 		echo $hiddenit;
 		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		echo "<input type='submit' value='".t("Siirrä rivejä toiselta keikalta")."'></form>";
+		echo "<input type='submit' value='".t("Siirrä rivejä toiselta saapumiselta")."'></form>";
 
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -1994,7 +1994,7 @@ if ($tila == '') {
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
 				<input type='hidden' name='otunnus' value='$otunnus'>
-				<input type='submit' value='".t("Siirrä rivejä toiselta keikalta")."'>
+				<input type='submit' value='".t("Siirrä rivejä toiselta saapumiselta")."'>
 				</form>";
 
 		echo "<form action='$PHP_SELF' method='post'>

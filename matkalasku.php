@@ -1143,7 +1143,7 @@ if ($tee == "MUOKKAA") {
 	if (mysql_num_rows($keikres) > 0) {
 		$keikrow = mysql_fetch_assoc($keikres);
 
-		echo "<br><font class='message'>".t("Lasku on liitetty keikkaan, alv tiliöintejä ei voi muuttaa")."! ".t("Keikka").": $keikrow[nimi] / $keikrow[laskunro]</font>";
+		echo "<br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tiliöintejä ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
 	}
 
 	if ($poistakuva > 0) {

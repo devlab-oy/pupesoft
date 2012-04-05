@@ -592,7 +592,7 @@
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>";
-		echo t("Syötä nimi")." / ".t("Laskunumero")." / ".t("Keikkanumero");
+		echo t("Syötä nimi")." / ".t("Laskunumero")." / ".t("Saapumisumero");
 		echo "</th>";
 		echo "<td>";
 		echo "<input type='text' name='etsi' value='$etsi'>";

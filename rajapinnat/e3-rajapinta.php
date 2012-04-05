@@ -84,13 +84,13 @@
 	// Tehään uysi dirikka
 	system("mkdir $path");
 
-	$path_xauxi = $path.'XAUXI.TXT';
-	$path_xlto  = $path.'XLT0.TXT';
-	$path_wswp  = $path.'XSWP.TXT';
-	$path_xvni  = $path.'XVNI.TXT';
-	$path_xf04  = $path.'XF04.TXT';
-	$path_xf01  = $path.'XF01'.$tanaan.'.TXT';
-	$path_xf02  = $path.'XF02.TXT';
+	$path_xauxi = $path.'XAUXI';
+	$path_xlto  = $path.'XLT0';
+	$path_wswp  = $path.'XSWP';
+	$path_xvni  = $path.'XVNI';
+	$path_xf04  = $path.'XF04';
+	$path_xf01  = $path.'XF01';
+	$path_xf02  = $path.'XF02';
 
 	echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
@@ -101,23 +101,23 @@
 	$korvatut = "yes";
 
 	// Ajetaan kaikki operaatiot
-	xauxi($limit);
-	xlto($limit);
-	xswp($limit);
-	xvni($limit);
-	xf04($limit);
-	xf01($limit);
-	xswp($limit);
-	xf02($limit);
+	#xauxi($limit);
+	#xlto($limit);
+	#xswp($limit);
+	#xvni($limit);
+	#xf04($limit);
+	#xf01($limit);
+	#xswp($limit);
+	#xf02($limit);
 
 	//Siirretään failit e3 palvelimelle
-	siirto($path_xf01,  "E3xf01np.E3xf01np");
-	siirto($path_xf02,  "E3xf02np.E3xf02np");
-	siirto($path_xf04,  "E3xf04np.E3xf04np");
-	siirto($path_xvni,  "E3xvninp.E3xvninp");
-	siirto($path_xauxi, "E3xauxinp.E3xauxinp");
-	siirto($path_xlto,  "E3xlt0np.E3xlt0np");
-	siirto($path_wswp,  "E3xswpmwnp.E3xswpmwnp");
+	siirto($path_xf01,  "E3XF01NP.E3XF01NP");
+	siirto($path_xf02,  "E3XF02NP.E3XF02NP");
+	siirto($path_xf04,  "E3XF04NP.E3XF04NP");
+	siirto($path_xvni,  "E3XVNINP.E3XVNINP");
+	siirto($path_xauxi, "E3XAUXINP.E3XAUXINP");
+	siirto($path_xlto,  "E3XLT0NP.E3XLT0NP");
+	siirto($path_wswp,  "E3XSWPMWNP.E3XSWPMWNP");
 
 	#ftp_exec($conn_id, "quote rcmd E3nattsbm");
 	#ftp_exec($conn_id, "quit");
@@ -155,27 +155,14 @@
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
 
-			// Käytetään aina .TMP päätettä kun siirto on kesken
-			$ftpfile_tmp = $filenimi.".TMP";
-
 			// Kokeillaan passiivista siirtoa
 			ftp_pasv($conn_id, TRUE);
-			$upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+			$upload = @ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
 
 			// Kokeillaan aktiivista siirtoa jos passiivi feilaa
 			if ($upload === FALSE) {
 				ftp_pasv($conn_id, FALSE);
-				$upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
-			}
-
-			// Otetaan .TMP pääte veks ku siirto on valmis
-			if ($upload === TRUE) {
-				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
-	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
-
-				if (stripos($rename[0], "command successful") === FALSE) {
-					$rename1 = FALSE;
-				}
+				$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
 			}
 
 			// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
@@ -183,8 +170,10 @@
 				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
 	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
 
+				var_dump($rename);
+
 				if (stripos($rename[0], "command successful") === FALSE) {
-					$rename2 = FALSE;
+					$rename = FALSE;
 				}
 			}
 		}
@@ -203,11 +192,8 @@
 		if (isset($upload) and $upload === FALSE) {
 			$palautus = 3;
 		}
-		if (isset($rename1) and $rename1 === FALSE) {
+		if (isset($rename) and $rename === FALSE) {
 			$palautus = 4;
-		}
-		if (isset($rename2) and $rename2 === FALSE) {
-			$palautus = 5;
 		}
 
 		// jos siirto epäonnistuu
@@ -224,10 +210,7 @@
 					$syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
 					break;
 				case  4:
-					$syy = "Rename1 failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
-					break;
-				case  5:
-					$syy = "Rename2 failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+					$syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$filenimi})";
 					break;
 				default:
 					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";

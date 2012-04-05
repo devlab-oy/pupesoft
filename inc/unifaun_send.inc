@@ -350,7 +350,10 @@ class Unifaun {
 				#$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
 				#$uni_rcv_val->addAttribute('n', "state");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row['toim_maa'])); # Country code according to ISO standard
+				// jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
+				$toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
+
+				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); # Country code according to ISO standard
 				$uni_rcv_val->addAttribute('n', "country");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["tilausyhteyshenkilo"])); # Contact person

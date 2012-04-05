@@ -84,13 +84,13 @@
 	// Tehään uysi dirikka
 	system("mkdir $path");
 
-	$path_xauxi = $path.'xauxi.txt';
-	$path_xlto  = $path.'xlt0.txt';
-	$path_wswp  = $path.'xswp.txt';
-	$path_xvni  = $path.'xvni.txt';
-	$path_xf04  = $path.'xf04.txt';
-	$path_xf01  = $path.'xf01'.$tanaan.'.txt';
-	$path_xf02  = $path.'xf02.txt';
+	$path_xauxi = $path.'XAUXI.TXT';
+	$path_xlto  = $path.'XLT0.TXT';
+	$path_wswp  = $path.'XSWP.TXT';
+	$path_xvni  = $path.'XVNI.TXT';
+	$path_xf04  = $path.'XF04.TXT';
+	$path_xf01  = $path.'XF01'.$tanaan.'.TXT';
+	$path_xf02  = $path.'XF02.TXT';
 
 	echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
@@ -133,7 +133,116 @@
 	    $ftpfail = "";
 		$ftpsucc = "";
 
-		require('inc/ftp-send.inc');
+		$syy				= "";
+		$palautus			= 0;
+		$renameftpfile		= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
+		$palautus_pyynto	= isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
+		$filenimi			= basename($ftpfile);
+
+		//lähetetään tiedosto
+		$conn_id = ftp_connect($ftphost);
+
+		// jos connectio ok, kokeillaan loginata
+		if ($conn_id) {
+			$login_result = ftp_login($conn_id, $ftpuser, $ftppass);
+		}
+
+		// jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
+		if (substr($ftppath, -1) != "/") {
+			$ftppath .= "/";
+		}
+
+		// jos login ok kokeillaan uploadata
+		if ($login_result) {
+
+			// Käytetään aina .TMP päätettä kun siirto on kesken
+			$ftpfile_tmp = $filenimi.".TMP";
+
+			// Kokeillaan passiivista siirtoa
+			ftp_pasv($conn_id, TRUE);
+			$upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+
+			// Kokeillaan aktiivista siirtoa jos passiivi feilaa
+			if ($upload === FALSE) {
+				ftp_pasv($conn_id, FALSE);
+				$upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+			}
+
+			// Otetaan .TMP pääte veks ku siirto on valmis
+			if ($upload === TRUE) {
+				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
+	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+
+				if (stripos($rename[0], "command successful") === FALSE) {
+					$rename1 = FALSE;
+				}
+			}
+
+			// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
+			if ($upload === TRUE and $renameftpfile != "") {
+				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
+	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+
+				if (stripos($rename[0], "command successful") === FALSE) {
+					$rename2 = FALSE;
+				}
+			}
+		}
+
+		if ($conn_id) {
+			ftp_close($conn_id);
+		}
+
+		// mikä feilas?
+		if (isset($conn_id) and $conn_id === FALSE) {
+			$palautus = 1;
+		}
+		if (isset($login_result) and $login_result === FALSE) {
+			$palautus = 2;
+		}
+		if (isset($upload) and $upload === FALSE) {
+			$palautus = 3;
+		}
+		if (isset($rename1) and $rename1 === FALSE) {
+			$palautus = 4;
+		}
+		if (isset($rename2) and $rename2 === FALSE) {
+			$palautus = 5;
+		}
+
+		// jos siirto epäonnistuu
+		if ($palautus != 0) {
+			// ncftpput:in exit valuet
+			switch ($palautus) {
+				case  1:
+					$syy = "Could not connect to remote host. ($ftphost)";
+					break;
+				case  2:
+					$syy = "Could not login to remote host ($ftpuser, $ftppass)";
+					break;
+				case  3:
+					$syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
+					break;
+				case  4:
+					$syy = "Rename1 failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
+					break;
+				case  5:
+					$syy = "Rename2 failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+					break;
+				default:
+					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+			}
+
+			$rivi  = "$PHP_SELF\n";
+			$rivi .= "\n";
+			$rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
+			$rivi .= "\n";
+			$rivi .= "$cmd\n";
+			$rivi .= "\n";
+			$rivi .= "$syy\n";
+
+			$boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		}
 	}
 
 	function xauxi($limit = '') {

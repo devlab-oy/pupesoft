@@ -105,6 +105,19 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
 			exit;
 		}
 	}
+
+	if ($_GET["tee"] == "KARDEX_SSCC_JONO") {
+		if (!isset($kardex_sscc) and $kardex_sscc != "") {
+			if ($handle = opendir($kardex_sscc)) {
+				while (($file = readdir($handle)) !== FALSE) {
+					if (is_file($kardex_sscc."/".$file) and mktime()-filemtime($kardex_sscc."/".$file) >= 300) {
+						echo "CRITICAL - Kardexfile ($file) over 5 minutes old $STATE_CRITICAL";
+						exit;
+					}
+				}
+			}
+		}
+	}
 }
 else {
 	echo "CRITICAL - Permission denied $STATE_CRITICAL";

@@ -331,7 +331,7 @@
 					JOIN tuote use index (tuoteno_index) ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno=tuote.tuoteno $tuoterajaukset AND tuote.ostoehdotus = '')
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus AND lasku.tila = 'K' AND lasku.alatila != 'I')
 					#t‰‰ ei ole aukoton ratkaisu ratkaista sit‰, ett‰ vain e3:lla tehtyj‰ tilauksia vastaan tehdyt tuloutukset.. jotkut tulot ei tuu osumaan jatkossa jos t‰lleen tehd‰‰n (jos asn/ostolasku kohdistuksien vuoksi uupuu ja tehd‰‰n k‰sin rivej‰)
-					JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+					#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 					LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
 					WHERE tilausrivi.yhtio	= '$yhtiorow[yhtio]'
 					AND tilausrivi.tyyppi = 'O'
@@ -763,7 +763,7 @@
 			//avoimet ostokappaleet
 			$Q3 = 	"	SELECT round(SUM(tilausrivi.varattu),0) as tilauksessa, tilausrivin_lisatiedot.tilausrivitunnus
 						FROM tilausrivi
-						JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
+						#JOIN lasku AS lasku2 ON (lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.otunnus AND lasku2.tila = 'O' AND lasku2.alatila = 'A' and lasku2.laatija = 'E3')
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
 						WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
 						AND tilausrivi.tyyppi = 'O'

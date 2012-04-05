@@ -31,28 +31,9 @@
 		//Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
 
-		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-		$yhtiores = pupe_query($query);
+		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
-		if (mysql_num_rows($yhtiores) == 1) {
-			$yhtiorow = mysql_fetch_assoc($yhtiores);
-
-			// haetaan yhtiön parametrit
-			$query = "  SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio = '$yhtiorow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_assoc($result);
-
-				// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-				}
-			}
-		}
-		else {
+		if ($yhtiorow["yhtio"] == "") {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 

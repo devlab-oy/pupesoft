@@ -157,7 +157,7 @@
 							AND keikkatunnus != 0
 							AND keikkatunnus IN ({$valittuotunnus}, {$otunnus})
 							AND tila = ''
-							AND sscc = 'Suoratoimitus'";
+							AND sscc = '".t("Suoratoimitus")."'";
 				$chk_suuntalava_res = pupe_query($query);
 				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
 

@@ -368,8 +368,8 @@ class Unifaun {
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["ytunnus"])); # VAT number
 				$uni_rcv_val->addAttribute('n', "vatno");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); # E-mail
-				$uni_rcv_val->addAttribute('n', "email");
+				#$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); # E-mail
+				#$uni_rcv_val->addAttribute('n', "email");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["puhelin"])); # Mobile phone number. For Sweden, the number must begin with 07 and contain 10 characters.
 				$uni_rcv_val->addAttribute('n', "sms");

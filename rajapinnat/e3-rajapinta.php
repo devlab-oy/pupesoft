@@ -111,13 +111,13 @@
 	#xf02($limit);
 
 	//Siirretään failit e3 palvelimelle
-	siirto($path_xf01,  "E3XF01NP");
-	siirto($path_xf02,  "E3XF02NP");
-	siirto($path_xf04,  "E3XF04NP");
-	siirto($path_xvni,  "E3XVNINP");
-	siirto($path_xauxi, "E3XAUXINP");
-	siirto($path_xlto,  "E3XLT0NP");
-	siirto($path_wswp,  "E3XSWPMWNP");
+	siirto($path_xf01,  "E3XF01NP.E3XF01NP");
+	siirto($path_xf02,  "E3XF02NP.E3XF02NP");
+	siirto($path_xf04,  "E3XF04NP.E3XF04NP");
+	siirto($path_xvni,  "E3XVNINP.E3XVNINP");
+	siirto($path_xauxi, "E3XAUXINP.E3XAUXINP");
+	siirto($path_xlto,  "E3XLT0NP.E3XLT0NP");
+	siirto($path_wswp,  "E3XSWPMWNP.E3XSWPMWNP");
 	#siirto("", "", "QUOTE RCMD E3nattsbm");
 
 	function siirto ($ftpfile, $renameftpfile, $komento = "") {
@@ -160,8 +160,8 @@
 				$renameftpfile	= isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
 				$filenimi		= basename($ftpfile);
 
-				// Dellataan olemassaoleva faili eka
-				$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
+				// Dellataan olemassaoleva faili eka jos se siellä jostain syystä jo on 
+				$delete = @ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
 				var_dump($delete);
 
 				$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
@@ -169,7 +169,7 @@
 
 				// Pitääkö faili vielä nimetä kokonaan uudestaan
 				if ($upload === TRUE) {
-					$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
+					$delete = @ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
 					var_dump($delete);
 
 					$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
@@ -178,7 +178,7 @@
 					$rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
 					var_dump($rename);
 
-					if (stripos($rename[0], "command successful") === FALSE) {
+					if (stripos($rename[0], "renamed as") === FALSE) {
 						$rename = FALSE;
 					}
 				}

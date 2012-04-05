@@ -111,13 +111,13 @@
 	#xf02($limit);
 
 	//Siirretään failit e3 palvelimelle
-	siirto($path_xf01,  "E3XF01NP.E3XF01NP");
-	siirto($path_xf02,  "E3XF02NP.E3XF02NP");
-	siirto($path_xf04,  "E3XF04NP.E3XF04NP");
-	siirto($path_xvni,  "E3XVNINP.E3XVNINP");
-	siirto($path_xauxi, "E3XAUXINP.E3XAUXINP");
-	siirto($path_xlto,  "E3XLT0NP.E3XLT0NP");
-	siirto($path_wswp,  "E3XSWPMWNP.E3XSWPMWNP");
+	siirto($path_xf01,  "E3XF01NP");
+	siirto($path_xf02,  "E3XF02NP");
+	siirto($path_xf04,  "E3XF04NP");
+	siirto($path_xvni,  "E3XVNINP");
+	siirto($path_xauxi, "E3XAUXINP");
+	siirto($path_xlto,  "E3XLT0NP");
+	siirto($path_wswp,  "E3XSWPMWNP");
 
 	#ftp_exec($conn_id, "quote rcmd E3nattsbm");
 	#ftp_exec($conn_id, "quit");
@@ -132,6 +132,8 @@
 		$ftpport = "";
 	    $ftpfail = "";
 		$ftpsucc = "";
+
+		$yhtiorow['alert_email'] = "juppe@devlab.fi";
 
 		$syy				= "";
 		$palautus			= 0;
@@ -155,15 +157,16 @@
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
 
-			// Kokeillaan passiivista siirtoa
-			ftp_pasv($conn_id, TRUE);
-			$upload = @ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+			ftp_pasv($conn_id, FALSE);
 
-			// Kokeillaan aktiivista siirtoa jos passiivi feilaa
-			if ($upload === FALSE) {
-				ftp_pasv($conn_id, FALSE);
-				$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
-			}
+			// Dellataan olemassaoleva faili
+			$delete = ftp_delete($conn_id, $ftppath.$filenimi);
+
+			var_dump($delete);
+
+			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+
+			var_dump($upload);
 
 			// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
 			if ($upload === TRUE and $renameftpfile != "") {
@@ -210,7 +213,7 @@
 					$syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
 					break;
 				case  4:
-					$syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$filenimi})";
+					$syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
 					break;
 				default:
 					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";

@@ -115,7 +115,18 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
 						exit;
 					}
 				}
+
+				echo "OK - Kardex SSCC queue OK $STATE_OK";
+				exit;
 			}
+			else {
+				echo "CRITICAL - $kardex_sscc directory could not be opened $STATE_CRITICAL";
+				exit;
+			}
+		}
+		else {
+			echo "CRITICAL - $kardex_sscc directory not set $STATE_CRITICAL";
+			exit;
 		}
 	}
 }

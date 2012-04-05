@@ -37,7 +37,7 @@
 		}
 	}
 
-	echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
+	echo "<font class='head'>".t("Datan sis‰‰nluku")." ".t("er‰ajo")."</font><hr>";
 
 	// Muuttujat
 	$tee = isset($tee) ? trim($tee) : "";

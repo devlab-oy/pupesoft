@@ -58,9 +58,10 @@
 		echo "Voidaan ajaa vain komentorivilt‰!!!\n";
 		die;
 	}
-	
+
 	//monenko p‰iv‰n takaa haetaan mm myynnit ja ostot skriptin ajohetkell‰, ‰l‰ aseta isommaksi kuin 2
 	$ajopaiva = 1;
+
 	// 1 = maanantai, 7 = sunnuntai
 	$weekday = date("N");
 	$weekday = $weekday-$ajopaiva;
@@ -78,28 +79,26 @@
 	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
 	$xf02loppulause = "";
 
-	$path = "/tmp/e3siirto_siirto_$yhtiorow[yhtio]/";
-	
-	// Sivotaan eka vanha pois
-	system("rm -rf $path");
+	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
 	// Teh‰‰n uysi dirikka
 	system("mkdir $path");
 
-	$path_xauxi = $path . 'xauxi.txt';
-	$path_xlto  = $path . 'xlt0.txt';
-	$path_wswp  = $path . 'xswp.txt';
-	$path_xvni  = $path . 'xvni.txt';
-	$path_xf04  = $path . 'xf04.txt';
-	$path_xf01  = $path . 'xf01'.$tanaan.'.txt';
-	$path_xf02  = $path . 'xf02.txt';
+	$path_xauxi = $path.'xauxi.txt';
+	$path_xlto  = $path.'xlt0.txt';
+	$path_wswp  = $path.'xswp.txt';
+	$path_xvni  = $path.'xvni.txt';
+	$path_xf04  = $path.'xf04.txt';
+	$path_xf01  = $path.'xf01'.$tanaan.'.txt';
+	$path_xf02  = $path.'xf02.txt';
 
 	echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
 	//testausta varten limit
 	$limit = "";
+
 	//xf02:sta varten
-	$korvatut = "";
+	$korvatut = "yes";
 
 	// Ajetaan kaikki operaatiot
 	xauxi($limit);
@@ -108,46 +107,33 @@
 	xvni($limit);
 	xf04($limit);
 	xf01($limit);
-	$korvatut = "yes";
 	xswp($limit);
 	xf02($limit);
 
 	//Siirret‰‰n failit e3 palvelimelle
-	siirto();
+	siirto($path_xf01,  "E3xf01np.E3xf01np");
+	siirto($path_xf02,  "E3xf02np.E3xf02np");
+	siirto($path_xf04,  "E3xf04np.E3xf04np");
+	siirto($path_xvni,  "E3xvninp.E3xvninp");
+	siirto($path_xauxi, "E3xauxinp.E3xauxinp");
+	siirto($path_xlto,  "E3xlt0np.E3xlt0np");
+	siirto($path_wswp,  "E3xswpmwnp.E3xswpmwnp");
 
-	function siirto () {
-		GLOBAL $e3_params, $yhtiorow, $path_xauxi, $path_xlto, $path_wswp, $path_xvni, $path_xf04, $path_xf01, $path_xf02;
+	#ftp_exec($conn_id, "quote rcmd E3nattsbm");
+	#ftp_exec($conn_id, "quit");
 
-		//l‰hetet‰‰n tiedosto
-		$conn_id = ftp_connect($e3_params[$yhtiorow["yhtio"]]["ftphost"]);
+	function siirto ($ftpfile, $renameftpfile) {
+		GLOBAL $e3_params, $yhtiorow;
 
-		// jos connectio ok, kokeillaan loginata
-		if ($conn_id) {
-			$login_result = ftp_login($conn_id, $e3_params[$yhtiorow["yhtio"]]["ftpuser"], $e3_params[$yhtiorow["yhtio"]]["ftppass"]);
-		}
-		else {
-			echo "\nconn_id false\n";
-		}
+		$ftphost = $e3_params[$yhtiorow["yhtio"]]["ftphost"];
+		$ftpuser = $e3_params[$yhtiorow["yhtio"]]["ftpuser"];
+		$ftppass = $e3_params[$yhtiorow["yhtio"]]["ftppass"];
+		$ftppath = $e3_params[$yhtiorow["yhtio"]]["ftppath"];
+		$ftpport = "";
+	    $ftpfail = "";
+		$ftpsucc = "";
 
-		// jos login ok kokeillaan uploadata
-		if ($login_result) {
-			ftp_exec ($conn_id, "put $path_xf01 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf01np.E3xf01np (Repla");
-			ftp_exec ($conn_id, "put $path_xf02 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf02np.E3xf02np (Repla");
-			ftp_exec ($conn_id, "put $path_xf04 {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xf04np.E3xf04np (Repla");
-			ftp_exec ($conn_id, "put $path_xvni {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xvninp.E3xvninp (Repla");
-			ftp_exec ($conn_id, "put $path_xauxi {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xauxinp.E3xauxinp (Repla");
-			ftp_exec ($conn_id, "put $path_xlto {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xlt0np.E3xlt0np (Repla");
-			ftp_exec ($conn_id, "put $path_wswp {$e3_params[$yhtiorow["yhtio"]]["ftppath"]}/E3xswpmwnp.E3xswpmwnp (Repla");
-			ftp_exec ($conn_id, "quote rcmd E3nattsbm");
-			ftp_exec ($conn_id, "quit");
-		}
-		else {
-			echo "\nlogin_result false\n";
-		}
-
-		if ($conn_id) {
-			ftp_close($conn_id);
-		}
+		require('inc/ftp-send.inc');
 	}
 
 	function xauxi($limit = '') {
@@ -369,7 +355,7 @@
 			$korvaavarows = mysql_num_rows($korvaavaresult);
 			if ($korvaavarows == 0) continue;
 			$korvaava = mysql_fetch_assoc($korvaavaresult);
-			
+
 			$query2 = " SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
 					   	FROM tuotteen_toimittajat
 					   	JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
@@ -379,7 +365,7 @@
 					   	LIMIT 1";
 			$tutoq2 = mysql_query($query2) or pupe_error($query2);
 			$tuto2 = mysql_fetch_assoc($tutoq2);
-			
+
 			if ($tuto2['toimittaja'] == '' or $tuto2['tyyppi'] == 'P') continue;
 
 			if ($korvatut != "") {
@@ -389,7 +375,7 @@
 			else {
 				// eka korvatun toimittaja + tuoteno, sitten korvaavan toimittaja ja tuoteno
 				$lause = "E3T001$tuto2[toimittaja] ".str_pad($korvaava['tuoteno'],17)." 001$tuto[toimittaja] ".str_pad($korvaavat['tuoteno'],17)." U1    000000000000000000000000000AYNY";
-				
+
 				if (!fwrite($fp, $lause . "\n")) {
 					echo "Failed writing row.\n";
 					die();

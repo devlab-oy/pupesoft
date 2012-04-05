@@ -6765,7 +6765,7 @@ if ($tee == '') {
 
 					echo "<tr>{$jarjlisa}";
 
-					echo "<form name='tilaus' action='' method='post' autocomplete='off'>
+					echo "<form action='' method='post' autocomplete='off'>
 							<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
 							<input type='hidden' name='mista' value='{$mista}'>
 							<input type='hidden' name='toim' value='{$toim}'>
@@ -6797,7 +6797,6 @@ if ($tee == '') {
 						$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
 						echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
-
 						echo "<td colspan='2' nowrap class='back'>";
 
 						echo "<select name='toimitustavan_lahto[{$lahdot_row['varasto']}]' onchange='submit()' {$state}>";

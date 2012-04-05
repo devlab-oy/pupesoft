@@ -156,23 +156,25 @@
 
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
-
+			// käytetään active modea
 			ftp_pasv($conn_id, FALSE);
 
-			// Dellataan olemassaoleva faili
-			$delete = ftp_delete($conn_id, $ftppath.$filenimi);
-
+			// Dellataan olemassaoleva faili eka, koska sitä ei osata ylikirjata
+			$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
 			var_dump($delete);
 
 			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
-
 			var_dump($upload);
 
-			// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
-			if ($upload === TRUE and $renameftpfile != "") {
-				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-	            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+			// Pitääkö faili vielä nimetä kokonaan uudestaan
+			if ($upload === TRUE) {
+				$delete = ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
+				var_dump($delete);
 
+				$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
+	            var_dump($rename);
+
+				$rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
 				var_dump($rename);
 
 				if (stripos($rename[0], "command successful") === FALSE) {

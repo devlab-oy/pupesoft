@@ -139,7 +139,7 @@
 	function xauxi($limit = '') {
 		global $path_xauxi, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		echo "TULOSTETAAN xauxi...";
+		echo "TULOSTETAAN xauxi...\n";
 
 		//viedään nimityksen sijaan lyhytkuvaus -Satu 8.2.12
 		$query = "	SELECT 	tuote.tuoteno AS tuoteno,
@@ -286,7 +286,7 @@
 
 			$laskuri++;
 
-			echo "Kasitelty $laskuri / $rows\r";
+			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -295,7 +295,7 @@
 	function xswp($limit = '') {
 		global $path_wswp, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $korvatut, $ajopaiva, $xf02loppulause, $weekday;
 
-		echo "TULOSTETAAN xswp...";
+		echo "TULOSTETAAN xswp...\n";
 
 		//xf02:sta varten otetaan korvatut vuorokauden myöhemmin, eli esim maanantaina korvattu esitetään xf02:ssa tiistain aineistossa
 		if ($korvatut != "") {
@@ -398,7 +398,7 @@
 	function xvni($limit = '') {
 		global $path_xvni, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
 
-		echo "TULOSTETAAN XVNI...";
+		echo "TULOSTETAAN XVNI...\n";
 
 		$qxvni = "	SELECT toimi.herminator AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
 					FROM toimi
@@ -562,7 +562,7 @@
 			}
 
 			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\r";
+			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -704,7 +704,7 @@
 			}
 
 			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\r";
+			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -820,7 +820,7 @@
 			}
 
 			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\r";
+			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		if (! fwrite($fp, $xf02loppulause . "\n")) {

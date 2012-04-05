@@ -37,7 +37,7 @@
 		}
 	}
 
-	echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
+	echo "<font class='head'>".t("Datan sis‰‰nluku")." ".t("er‰ajo")."</font><hr>";
 
 	// Muuttujat
 	$tee = isset($tee) ? trim($tee) : "";
@@ -313,7 +313,7 @@
 	asort($taulut);
 
 	// Selectoidaan aktiivi
-	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($taulut, '');
+	$sel = array_fill_keys(array($table), " selected") + array_fill_keys(array_keys($taulut), '');
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
 	echo "<input type='hidden' name='tee' value='file'>";

@@ -2783,6 +2783,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "reklamaation_kasittely_tuoteperhe") {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'U') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n normaaleja tuoteperheit‰")."</option>
+					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n vain is‰tuotetta")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "reklamaation_hinnoittelu") {
 
 		$sela = $selb = "";

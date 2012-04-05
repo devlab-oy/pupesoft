@@ -101,14 +101,14 @@
 	$korvatut = "yes";
 
 	// Ajetaan kaikki operaatiot
-	#xauxi($limit);
-	#xlto($limit);
-	#xswp($limit);
-	#xvni($limit);
-	#xf04($limit);
-	#xf01($limit);
-	#xswp($limit);
-	#xf02($limit);
+	xauxi($limit);
+	xlto($limit);
+	xswp($limit);
+	xvni($limit);
+	xf04($limit);
+	xf01($limit);
+	xswp($limit);
+	xf02($limit);
 
 	//Siirretään failit e3 palvelimelle
 	siirto($path_xf01,  "E3XF01NP");
@@ -118,21 +118,18 @@
 	siirto($path_xauxi, "E3XAUXINP");
 	siirto($path_xlto,  "E3XLT0NP");
 	siirto($path_wswp,  "E3XSWPMWNP");
-	#siirto("", "", "QUOTE RCMD E3nattsbm");
+	siirto("", "", "QUOTE RCMD E3nattsbm");
 
 	function siirto ($ftpfile, $renameftpfile, $komento = "") {
 		GLOBAL $e3_params, $yhtiorow;
 
-		$ftphost = $e3_params[$yhtiorow["yhtio"]]["ftphost"];
-		$ftpuser = $e3_params[$yhtiorow["yhtio"]]["ftpuser"];
-		$ftppass = $e3_params[$yhtiorow["yhtio"]]["ftppass"];
-		$ftppath = $e3_params[$yhtiorow["yhtio"]]["ftppath"];
-		$ftpport = "";
-	    $ftpfail = "";
-		$ftpsucc = "";
-
-		$yhtiorow['alert_email'] = "juppe@devlab.fi";
-
+		$ftphost 	= $e3_params[$yhtiorow["yhtio"]]["ftphost"];
+		$ftpuser 	= $e3_params[$yhtiorow["yhtio"]]["ftpuser"];
+		$ftppass 	= $e3_params[$yhtiorow["yhtio"]]["ftppass"];
+		$ftppath 	= $e3_params[$yhtiorow["yhtio"]]["ftppath"];
+		$ftpport 	= "";
+	    $ftpfail 	= "";
+		$ftpsucc 	= "";
 		$syy		= "";
 		$palautus	= 0;
 
@@ -162,21 +159,15 @@
 
 				// Dellataan olemassaoleva faili eka jos se siellä jostain syystä jo on
 				$delete = @ftp_raw($conn_id, "DLTF {$ftppath}{$filenimi}");
-				var_dump($delete);
 
 				$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
-				var_dump($upload);
 
 				// Pitääkö faili vielä nimetä kokonaan uudestaan
 				if ($upload === TRUE) {
 					$delete = @ftp_raw($conn_id, "DLTF {$ftppath}{$renameftpfile}");
-					var_dump($delete);
 
 					$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-		            var_dump($rename);
-
 					$rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
-					var_dump($rename);
 
 					if (stripos($rename[0], "renamed as") === FALSE) {
 						$rename = FALSE;
@@ -186,7 +177,6 @@
 
 			if ($komento != "") {
 				$cmd = ftp_raw($conn_id, $komento);
-				var_dump($cmd);
 			}
 		}
 

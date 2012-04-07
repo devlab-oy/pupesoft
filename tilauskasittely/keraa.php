@@ -1424,6 +1424,7 @@
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						$query = "	SELECT
 									IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
+									IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
 									IFNULL(pakkaus.oma_paino, 0) oma_paino,
 									IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
 									SUM(tuote.tuotemassa * kerayserat.kpl_keratty) tuotemassa,
@@ -1451,7 +1452,7 @@
 											kollit 			= '{$keraysera_row['kollit']}',
 											kilot 			= '{$kilot}',
 											kuutiot 		= '{$kuutiot}',
-											pakkauskuvaus 	= '',
+											pakkauskuvaus 	= '{$keraysera_row['pakkauskuvaus']}',
 											pakkaus 		= '{$keraysera_row['pakkaus']}',
 											rahtikirjanro 	= '{$laskurow['tunnus']}',
 											otsikkonro 		= '{$laskurow['tunnus']}',

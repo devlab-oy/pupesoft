@@ -1075,11 +1075,11 @@
 												muuttaja 		= '{$kukarow['kuka']}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus 	= '{$keraysera_chk_row['tunnus']}'";
-								$keraysera_update_res = mysql_query($query_upd) or pupe_error($query_upd);
+								$keraysera_update_res = pupe_query($query_upd);
 							}
 
 							// p‰ivitet‰‰n tuoteperhen lapset ker‰tyiksi jos niill‰ on ohita_ker‰ys t‰pp‰ p‰‰ll‰
-							$query_chk = "	SELECT perheid, tuoteno, varattu
+							$query_chk = "	SELECT perheid, tuoteno, varattu, otunnus
 											FROM tilausrivi
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus  = '{$apui}'
@@ -1094,6 +1094,7 @@
 								$query_lapset = "	SELECT tunnus, tuoteno, varattu
 													FROM tilausrivi
 													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND otunnus = '{$perheid_chk_row['otunnus']}'
 													AND perheid = '{$perheid_chk_row['perheid']}'
 													AND tunnus != '{$apui}'";
 								$lapset_chk_res = pupe_query($query_lapset);
@@ -1322,7 +1323,7 @@
 							and lasku.tunnus in ($tilausnumeroita)
 							and lasku.tila in ($tila)
 							and lasku.alatila = '$hakualatila'";
-				$lasresult = mysql_query($query) or pupe_error($query);
+				$lasresult = pupe_query($query);
 
 				$lask_nro = "";
 				$extra    = "";
@@ -1402,7 +1403,7 @@
 										otsikkonro 		= '$lask_nro',
 										tulostuspaikka 	= '$laskurow[varasto]',
 										yhtio 			= '$kukarow[yhtio]'";
-							$result_rk = mysql_query($query) or pupe_error($query);
+							$result_rk = pupe_query($query);
 						}
 
 						if (isset($pakkaamo_rullakko) and $pakkaamo_rullakko != '') {
@@ -1416,7 +1417,7 @@
 										otsikkonro 		= '$lask_nro',
 										tulostuspaikka 	= '$laskurow[varasto]',
 										yhtio 			= '$kukarow[yhtio]'";
-							$result_rk = mysql_query($query) or pupe_error($query);
+							$result_rk = pupe_query($query);
 						}
 					}
 
@@ -1477,7 +1478,7 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND nro 	= '$id'
 										AND otunnus = '{$laskurow['tunnus']}'";
-							$tila_upd_res = mysql_query($query) or pupe_error($query);
+							$tila_upd_res = pupe_query($query);
 						}
 					}
 				}
@@ -1824,7 +1825,7 @@
 									SET alatila = 'B'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus IN ({$tilausnumeroita_backup})";
-						$alatila_upd_res = mysql_query($query) or pupe_error($query);
+						$alatila_upd_res = pupe_query($query);
 					}
 
 					echo "<br><br>";

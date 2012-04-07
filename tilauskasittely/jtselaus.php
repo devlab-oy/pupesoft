@@ -720,7 +720,7 @@
 			}
 
 			if ($tuoterajaus != "") {
-				$tuotelisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+				$tilausrivilisa .= "and tilausrivi.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 			}
 		}
 

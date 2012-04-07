@@ -11864,12 +11864,15 @@ if (!function_exists("pupe_DataTables")) {
 
 							var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
 
+							var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+
 							$.post('{$_SERVER['SCRIPT_NAME']}',
 								{ 	keikan_otunnus: otunnus,
 									otunnus: otunnus,
 									ajax_toiminto: 'kohdista_rivi',
 									valittu: this.value,
 									suuntalavan_tunnus: suuntalavan_tunnus,
+									suoratoimitusrivi: suoratoimitusrivi,
 									no_head: 'yes',
 									ohje: 'off' },
 								function(return_value) {
@@ -11878,7 +11881,14 @@ if (!function_exists("pupe_DataTables")) {
 									var data = jQuery.parseJSON(return_value);
 
 									if (data.suuntalava != null && data.suuntalava > 0) {
-										$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+
+										if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
+											$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+										}
+										else {
+											$('#suuntalava_'+rivi_ja_otsikko[0]+' option:last').after('<option id=\"option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
+										}
+
 									}
 
 									var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
@@ -12273,19 +12283,28 @@ if (!function_exists("pupe_DataTables")) {
 							if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
 								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
 
+								var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
 										otunnus: otunnus,
 										ajax_toiminto: 'kohdista_rivi',
 										valittu: this.value,
 										suuntalavan_tunnus: suuntalavan_tunnus,
+										suoratoimitusrivi: suoratoimitusrivi,
 										no_head: 'yes',
 										ohje: 'off' },
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 
 										if (data.suuntalava != null && data.suuntalava > 0) {
-											$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+
+											if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
+												$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+											}
+											else {
+												$('#suuntalava_'+rivi_ja_otsikko[0]+' option:last').after('<option id=\"option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
+											}
 										}
 
 										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());

@@ -710,8 +710,18 @@
 			$laskulisa .= " and lasku.ytunnus = '$asiakasno' ";
 		}
 
-		if ($tuotenumero != '') {
-			$tilausrivilisa .= " and tilausrivi.tuoteno = '$tuotenumero' ";
+		if (isset($tuotenumero) and $tuotenumero != '') {
+			$tuotteet = explode("\n", $tuotenumero);
+			$tuoterajaus = "";
+			foreach($tuotteet as $tuotenumero) {
+				if (pupesoft_cleanstring($tuotenumero) != '') {
+					$tuoterajaus .= "'".pupesoft_cleanstring($tuotenumero)."',";
+				}
+			}
+
+			if ($tuoterajaus != "") {
+				$tilausrivilisa .= "and tilausrivi.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+			}
 		}
 
 		if ($tilaus != '') {
@@ -2224,6 +2234,9 @@
 		echo "</select></td>";
 		echo "</tr>\n";
 
+		echo "<tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa näillä tuotteilla"),")</th>
+			<td colspan=''><textarea name='tuotenumero' rows='5' cols='35'>{$tuotenumero}</textarea></td></tr>";
+
 		echo "<tr><th>",t("Myyjä"),"</th>";
 
 		$query = "	SELECT nimi, myyja
@@ -2245,16 +2258,6 @@
 		}
 
 		echo "</select></td></tr>\n";
-
-		echo "</tr>";
-
-		echo "<tr>
-				<th>".t("Tuotenumero")."</th>
-				<td>
-				<input type='text' name='tuotenumero' value='$tuotenumero' size='10'>
-				</td>
-				</td>
-			</tr>";
 
 		echo "<tr>
 				<th>".t("Tilaus")."</th>

@@ -144,7 +144,66 @@
 		$suuntalava_querylisa = '';
 
 		if ($yhtiorow['suuntalavat'] == 'S') {
+
 			$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
+
+			$suoratoimitusrivi = $_POST['suoratoimitusrivi'];
+
+			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
+
+				$query = "	SELECT *
+							FROM suuntalavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND keikkatunnus != 0
+							AND keikkatunnus IN ({$valittuotunnus}, {$otunnus})
+							AND tila = ''
+							AND sscc = '".t("Suoratoimitus")."'";
+				$chk_suuntalava_res = pupe_query($query);
+				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
+
+				if (mysql_num_rows($chk_suuntalava_res) == 0) {
+
+					$query = "	SELECT keraysvyohyke.terminaalialue, tuote.keraysvyohyke
+								FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus = '{$valittutunnus}'";
+					$info_res = pupe_query($query);
+					$info_row = mysql_fetch_assoc($info_res);
+
+					$suuntalavan_tunnus = "";
+
+					// Tehdään uusi suuntalava
+					$tee = "lisaa";
+					// $otunnus = $keikan_tunnus;
+					$sscc = t("Suoratoimitus");
+					$tyyppi = 0;
+					$keraysvyohyke = $info_row['keraysvyohyke'];
+					$usea_keraysvyohyke = 'K';
+					$kaytettavyys = "Y";
+					$terminaalialue = $info_row['terminaalialue'];
+					$korkeus = 0;
+					$paino = 0;
+					$alkuhyllyalue = "";
+					$alkuhyllynro = "";
+					$alkuhyllyvali = "";
+					$alkuhyllytaso = "";
+					$loppuhyllyalue = "";
+					$loppuhyllynro = "";
+					$loppuhyllyvali = "";
+					$loppuhyllytaso = "";
+					$automaattinen_paivitys = "";
+					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+
+					require ("../tilauskasittely/suuntalavat.inc");
+
+					$suuntalavan_tunnus = (int) $uusi_suuntalavan_tunnus;
+				}
+				else {
+					$suuntalavan_tunnus = $chk_suuntalava_row['tunnus'];
+				}
+			}
 
 			if ($suuntalavan_tunnus > 0) {
 				$suuntalava_querylisa = ", suuntalava = $suuntalavan_tunnus ";
@@ -188,12 +247,26 @@
 			$uudethinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"], $suoratoimitukset);
 		}
 
-		$data = array('vanhat_hinnat' => $vanhathinnat, 'uudet_hinnat' => $uudethinnat, 'suuntalava' => 0);
+		$data = array(
+			'vanhat_hinnat' => $vanhathinnat, 
+			'uudet_hinnat' => $uudethinnat, 
+			'suuntalava' => 0,
+			'suuntalava_sscc' => ''
+		);
 
 		// Tuotteet päivitetään kohdistuksissa automaattisesti oikeille suuntalavoille, mikäli sellainen on jo perustettu (suuntalavan määriteltyjen varastopaikkojen sekä keräysvyöhykkeen mukaan)
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
 			if ($suuntalavan_tunnus > 0) {
 				$data['suuntalava'] = $suuntalavan_tunnus;
+
+				$query = "	SELECT sscc
+							FROM suuntalavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$suuntalavan_tunnus}'";
+				$sscc_fetch_res = pupe_query($query);
+				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
+
+				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
 			}
 			else {
 				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti

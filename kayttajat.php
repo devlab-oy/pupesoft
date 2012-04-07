@@ -21,6 +21,7 @@
 	if (!isset($oletus_asiakas)) 	$oletus_asiakas = "";
 	if (!isset($oletus_profiili))	$oletus_profiili = '';
 	if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
+	if (!isset($myyja))				$myyja = "";
 
 	if (isset($toim) and $toim == 'extranet') {
 		echo "Extranet-";

@@ -1,12 +1,12 @@
-<?php	
+<?php
 
 if(!function_exists("tuotteen_toimittajattarkista")) {
 	function tuotteen_toimittajattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno, $lue_datasta, $toimi_liitostunnus, $toimi_ytunnus;
-		
+
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
-			
+
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
@@ -17,13 +17,13 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
 					else $tuoteno = $t[$i];
-			
+
 					$kutsuja 		= "yllapito.php";
 					$ulos			= "";
 
 					require ("inc/tuotehaku.inc");
 
-					if ($ulos != "") {	
+					if ($ulos != "") {
 						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
 					}
 
@@ -37,32 +37,32 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 
 		if (mysql_field_name($result, $i) == "toimittaja") {
 			if ($t[$i] != '') {
-				
+
 				$t[$i] = trim($t[$i]);
-				
+
 				if (isset($toimi_ytunnus) and $toimi_ytunnus != $t[$i]) {
 					$toimi_liitostunnus = 0;
 				}
-				
-				$query = "	SELECT * 
-							from toimi 
+
+				$query = "	SELECT *
+							from toimi
 							where yhtio = '$kukarow[yhtio]'
-							and tyyppi != 'P' 
+							and tyyppi != 'P'
 							and tunnus = ".(int) $toimi_liitostunnus."
 							ORDER by nimi";
 				$sresult = mysql_query($query) or pupe_error($query);
-												
+
 				if (mysql_num_rows($sresult) == 1) {
 					$srow = mysql_fetch_assoc($sresult);
-					
+
 					$t[$i] = $srow["ytunnus"];
 					$liitostunnus_static = $srow["tunnus"];
-				
+
 					if ((int) $tunnus == 0) {
-						$query = "	SELECT * 
-									from tuotteen_toimittajat 
-									where yhtio			= '$kukarow[yhtio]' 
-									and liitostunnus	= '$liitostunnus_static' 
+						$query = "	SELECT *
+									from tuotteen_toimittajat
+									where yhtio			= '$kukarow[yhtio]'
+									and liitostunnus	= '$liitostunnus_static'
 									and tuoteno			= '$chtuoteno'";
 						$sresult = mysql_query($query) or pupe_error($query);
 
@@ -73,30 +73,66 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 					}
 				}
 				else {
-				
-					$query = "	SELECT * 
-								from toimi 
-								where yhtio = '$kukarow[yhtio]'
-								and tyyppi != 'P' 
-								and (ytunnus like '%$t[$i]%' or nimi like '%$t[$i]%' or toimittajanro like '%$t[$i]%')
-								order by nimi";
-					$sresult = mysql_query($query) or pupe_error($query);
-						
+
+					$toimittaja_haku = pupesoft_cleanstring($t[$i]);
+
+					// Kokeillaan ovttunnuksella
+					$query = "	SELECT *
+								FROM toimi
+								WHERE yhtio = '$yhtio'
+								AND tyyppi != 'P'
+								AND ovttunnus = '$toimittaja_haku'
+								AND ovttunnus != ''";
+					$sresult = pupe_query($query);
+
+					// Kokeillaan ytunnuksella
+					if (mysql_num_rows($sresult) != 1) {
+						$query = "	SELECT *
+									FROM toimi
+									WHERE yhtio = '$yhtio'
+									AND tyyppi != 'P'
+									AND ytunnus = '$toimittaja_haku'
+									AND ytunnus != ''";
+						$sresult = pupe_query($query);
+					}
+
+					// Kokeillaan toimittajanumerolla
+					if (mysql_num_rows($sresult) != 1) {
+						$query = "	SELECT *
+									FROM toimi
+									WHERE yhtio = '$yhtio'
+									AND tyyppi != 'P'
+									AND toimittajanro = '$toimittaja_haku'
+									AND toimittajanro != ''";
+						$sresult = pupe_query($query);
+					}
+
+					// Kokeillaan vanhalla mallilla
+					if (mysql_num_rows($sresult) != 1) {
+						$query = "	SELECT *
+									from toimi
+									where yhtio = '$kukarow[yhtio]'
+									and tyyppi != 'P'
+									and (ytunnus like '%$t[$i]%' or nimi like '%$t[$i]%' or toimittajanro like '%$t[$i]%')
+									order by nimi";
+						$sresult = mysql_query($query) or pupe_error($query);
+					}
+
 					if (mysql_num_rows($sresult) == 0) {
 						$virhe[$i] = t("Toimittaja puuttuu!");
 						$errori = 1;
 					}
 					elseif (mysql_num_rows($sresult) == 1) {
 						$srow = mysql_fetch_assoc($sresult);
-						
+
 						$t[$i] = $srow["ytunnus"];
 						$liitostunnus_static = $srow["tunnus"];
-						
+
 						if ((int) $tunnus == 0) {
-							$query = "	SELECT * 
-										from tuotteen_toimittajat 
-										where yhtio			= '$kukarow[yhtio]' 
-										and liitostunnus	= '$liitostunnus_static' 
+							$query = "	SELECT *
+										from tuotteen_toimittajat
+										where yhtio			= '$kukarow[yhtio]'
+										and liitostunnus	= '$liitostunnus_static'
 										and tuoteno			= '$chtuoteno'";
 							$sresult = mysql_query($query) or pupe_error($query);
 
@@ -104,49 +140,49 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 								$virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
 								$errori = 1;
 							}
-						}											
+						}
 					}
 					else {
-				
+
 						$alasveto[$i] = "<input type='hidden' name='t[$i]' value='XXX'>
 										<select name='toimi_liitostunnus'>";
-						
+
 						while ($srow = mysql_fetch_assoc($sresult)) {
 							if ($srow['toimittajanro'] != '') $naytetaantoimittajanro = "(".$srow['toimittajanro'].")";
 							else $naytetaantoimittajanro = "";
 							$alasveto[$i] .= "<option value='$srow[tunnus]'>$srow[ytunnus] $srow[nimi] $srow[nimitark] $naytetaantoimittajanro </option>";
 						}
-					
+
 						$alasveto[$i] .= "</select>";
-				
+
 						$virhe[$i] = t("Valitse toimittaja")."!";
 						$errori = 1;
-					}					
-				}				
+					}
+				}
 			}
 			else {
 				$virhe[$i] = t("Toimittaja puuttuu!");
 				$errori = 1;
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "liitostunnus") {
 			$t[$i] = $liitostunnus_static;
 		}
-					
+
 		if (mysql_field_name($result, $i) == "alkuperamaa") {
 			if ($t[$i] == "") {
 				$virhe[$i] =  t("Tieto puuttuu")."!";
 				$errori = 1;
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "toim_tuoteno") {
-			
+
 			$query = "SELECT tyyppi from toimi where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus_static'";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tuotoimirow = mysql_fetch_assoc($sresult);
-			
+
 			if ($t[$i] == "" and $tuotoimirow["tyyppi"] != "") {
 				$virhe[$i] = t("Online/sisäinen toimittaja vaatii aina toimittajan tuotenumeron")."!";
 				$errori = 1;

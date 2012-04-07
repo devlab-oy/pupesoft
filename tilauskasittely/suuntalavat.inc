@@ -36,7 +36,7 @@
 						'kaytettavyys' => '',
 						'terminaalialue' => '',
 						'korkeus' => '',
-						'paino' => '', 
+						'paino' => '',
 						'usea_keraysvyohyke' => '',
 						);
 
@@ -57,6 +57,7 @@
 	if (!isset($korkeus)) $korkeus = 0;
 	if (!isset($paino)) $paino = 0;
 	if (!isset($suuntalavan_tunnus)) $suuntalavan_tunnus = '';
+	if (!isset($usea_keraysvyohyke)) $usea_keraysvyohyke = '';
 
 
 	if ($tee == 'peruutettu') {
@@ -88,7 +89,7 @@
 		$sscc_chk_res = pupe_query($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-		if ((string) $sscc_chk_row['sscc'] == '') {
+		if ($sscc_chk_row['sscc'] == '' or $sscc_chk_row['sscc'] == '0') {
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {
@@ -118,15 +119,15 @@
 						AND tunnus = '{$suuntalavan_tunnus}'";
 			$tila_res = pupe_query($query);
 		}
-		
+
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
 			$tee = 'EIHALUTANAYTTAAMITAAN';
 			$suuntalavan_tunnus = '';
 		}
 		else {
-			$tee = '';
-			$suuntalavan_tunnus = '';	
-		}
+		$tee = '';
+		$suuntalavan_tunnus = '';
+	}
 
 	}
 
@@ -146,24 +147,6 @@
 
 		$tee = '';
 		$error = " <img src='../pics/lullacons/stop.png' title='".t("Virhe")."' alt='".t("Virhe")."' />";
-
-		if ((trim($alkuhyllyalue) != '' or trim($alkuhyllynro) != '' or trim($alkuhyllyvali) != '' or trim($alkuhyllytaso) != '') and (trim($alkuhyllyalue) == '' or trim($alkuhyllynro) == '' or trim($alkuhyllyvali) == '' or trim($alkuhyllytaso) == '')) {
-			if (trim($alkuhyllyalue) == '') $virheviesti['alkuhyllyalue'] = $error;
-			// if (trim($alkuhyllynro) == '') $virheviesti['alkuhyllynro'] = $error;
-			// if (trim($alkuhyllyvali) == '') $virheviesti['alkuhyllyvali'] = $error;
-			// if (trim($alkuhyllytaso) == '') $virheviesti['alkuhyllytaso'] = $error;
-
-			$tee = 'uusi';
-		}
-
-		if ((trim($loppuhyllyalue) != '' or trim($loppuhyllynro) != '' or trim($loppuhyllyvali) != '' or trim($loppuhyllytaso) != '') and (trim($loppuhyllyalue) == '' or trim($loppuhyllynro) == '' or trim($loppuhyllyvali) == '' or trim($loppuhyllytaso) == '')) {
-			if (trim($loppuhyllyalue) == '') $virheviesti['loppuhyllyalue'] = $error;
-			// if (trim($loppuhyllynro) == '') $virheviesti['loppuhyllynro'] = $error;
-			// if (trim($loppuhyllyvali) == '') $virheviesti['loppuhyllyvali'] = $error;
-			// if (trim($loppuhyllytaso) == '') $virheviesti['loppuhyllytaso'] = $error;
-
-			$tee = 'uusi';
-		}
 
 		if (trim($sscc) == '') {
 			$virheviesti['sscc'] = $error;
@@ -203,7 +186,7 @@
 			$virheviesti['paino'] = $error;
 			$tee = 'uusi';
 		}
-		
+
 		if ($tee == '') {
 
 			$paino = str_replace(",", ".", $paino);
@@ -270,7 +253,7 @@
 							muutospvm = now()
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
-				$update_result = pupe_query($query);				
+				$update_result = pupe_query($query);
 			}
 			else {
 
@@ -289,6 +272,7 @@
 							loppuhyllytaso = '{$loppuhyllytaso}',
 							tyyppi = '{$tyyppi}',
 							keraysvyohyke = '{$keraysvyohyke}',
+							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
 							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
@@ -300,7 +284,7 @@
 							muutospvm = now()";
 				$insert_result = pupe_query($query);
 				$uusi_suuntalavan_tunnus = mysql_insert_id();
-				
+
 				// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
 				if (trim($automaattinen_paivitys) == 'K') {
 					$query = "	UPDATE tilausrivi
@@ -338,11 +322,11 @@
 
 			$suuntalavan_tunnus = '';
 		}
-		
+
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
 			$tee = "eihalutamitankayttoliittymaapliis";
 		}
-		
+
 	}
 
 	if ($tee == 'vie_koko_suuntalava') {
@@ -558,14 +542,14 @@
 		}
 
 		echo "</select>{$virheviesti['terminaalialue']}</td></tr>";
-		
+
 		if ($usea_keraysvyohyke != "") {
 			$sel_sp = "SELECTED";
 		}
 		else {
 			$sel_sp = "";
 		}
-		
+
 		echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivyöhykkeiltä tuotteita",$kieli,'<br>')."</th>";
 		echo "<td><select name='usea_keraysvyohyke'>";
 		echo "<option value='' $sel_sp>".t("Ei Sallita")."</option>";

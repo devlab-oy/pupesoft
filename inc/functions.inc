@@ -11255,11 +11255,17 @@ if (!function_exists("LisaaLapsi")) {
 				ORDER BY lft desc";
 		$re = pupe_query($qu);
 
-		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
 		$re = pupe_query($qu);
+
+		// palautetaan juuri luodun rivin tiedot
+		$qu = "SELECT tunnus, nimi, koodi, lft, rgt FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '$laji' AND koodi = '$koodi' AND nimi = '$nimi'";
+		$re = pupe_query($qu);
+		$row = mysql_fetch_assoc($re);
+		return $row;
 	}
 }
 
@@ -11480,6 +11486,40 @@ if (!function_exists("SiirraTaso")) {
 
 		return $kohde;
 
+	}
+}
+
+// Tarkistaa onko dynaamisen puun syvyys oikein ja paivittaa tarvittaessa
+if (!function_exists("paivitapuunsyvyys")) {
+	function paivitapuunsyvyys($laji) {
+		global $kukarow;
+
+		$qu = "	SELECT
+				node.lft AS lft,
+				node.rgt AS rgt,
+				node.tunnus AS node_tunnus,
+				node.syvyys as node_syvyys,
+				(COUNT(node.tunnus) - 1) AS syvyys
+				FROM dynaaminen_puu AS node
+				JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+				WHERE node.yhtio = '{$kukarow["yhtio"]}'
+				AND node.laji = '{$laji}'
+				GROUP BY node.lft
+				ORDER BY node.lft";
+		$re = pupe_query($qu);
+
+		while ($row = mysql_fetch_assoc($re)) {
+
+			if ($row["node_syvyys"] != $row["syvyys"]) {
+				$updqu = "	UPDATE dynaaminen_puu
+							SET syvyys = {$row["syvyys"]}
+							WHERE yhtio	= '{$kukarow["yhtio"]}'
+							AND laji	= '{$laji}'
+							AND tunnus 	= {$row["node_tunnus"]}";
+				$updateres = pupe_query($updqu);
+			}
+		}
+		return;
 	}
 }
 

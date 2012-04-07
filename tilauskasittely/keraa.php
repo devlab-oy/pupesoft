@@ -1109,18 +1109,9 @@
 									$ohita_chk_res = pupe_query($query_ohita);
 									$ohita_chk_row = mysql_fetch_assoc($ohita_chk_res);
 
-									if ($ohita_chk_row['ohita_kerays'] != '') {
-
-										$lapsok_kermaara = $perheid_chk_row["varattu"] * $ohita_chk_row["kerroin"];
-
-										// Merkataan myös tämä rivi kerätyksi
-										$query_upd = "	UPDATE tilausrivi SET
-														keratty 	= '{$kukarow['kuka']}',
-														kerattyaika = now(),
-														varattu 	= '$lapsok_kermaara'
-														WHERE yhtio = '{$kukarow['yhtio']}'
-														AND tunnus  = '{$lapset_chk_row['tunnus']}'";
-										$upd_res = pupe_query($query_upd);
+									// Pitääkö lapsen kerättymäärää muuttaa? (lapsi tulee myös $kerivi[] arrayssa, joten se merkataan joka tapauksessa kerätyksi, mutta muutetaan tässä määrä jos on tarvis)
+									if ($ohita_chk_row['ohita_kerays'] != '' and round($lapset_chk_row["varattu"], 2) != round($perheid_chk_row["varattu"] * $ohita_chk_row["kerroin"], 2)) {
+										$maara[$lapset_chk_row['tunnus']] = round($perheid_chk_row["varattu"] * $ohita_chk_row["kerroin"], 2);
 									}
 								}
 							}
@@ -1177,6 +1168,9 @@
 
 					//Keräämätön rivi
 					$keraamaton++;
+				}
+				else {
+					echo t("HUOM: Tämä rivi oli jo kerätty! Ei voida kerätä uudestaan.")."<br>";
 				}
 			}
 		}

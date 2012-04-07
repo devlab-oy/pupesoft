@@ -5,7 +5,7 @@
 	echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
 
 
-	$query = "	SELECT *
+	$query = "	SELECT tunnus, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto
 				FROM lasku
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tila in ('N','L')
@@ -45,13 +45,6 @@
 			$laskutyyppi = "Ennakkotilaus kesken";
 		}
 
-		if (isset($laskurow["varastokpl"]) and $laskurow["varastokpl"] > 0) {
-			$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
-		}
-		else {
-			$varastotila = "";
-		}
-
 		$rivi 		= "";
 		$naytarivi  = FALSE;
 
@@ -60,7 +53,7 @@
 		$rivi .= "<td class='spec'>$kala / <a target='Asiakkaantilaukset' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&tunnus=$laskurow[tunnus]'>$laskurow[tunnus]</a></td>";
 		$rivi .= "<td class='spec'>$laskurow[nimi]</td>";
 		$rivi .= "<td class='spec'>$laskurow[toimitustapa] / $laskurow[toimitustavan_lahto]</td>";
-		$rivi .= "<td class='spec'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
+		$rivi .= "<td class='spec'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
 		$rivi .= "</tr>";
 
 		// Tilausrivit
@@ -87,7 +80,7 @@
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilkpl</th>";
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Kpl</th>";
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Var</th>";
-		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Keräsyerä</th>";
+		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Keräyserä</th>";
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Pakkaus</th>";
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Vyöhyke</th>";
 		$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilrivi laadittu</th>";
@@ -132,7 +125,7 @@
 			$rivi .= "<td align='right'>$kerayserarow[kpl_keratty]</td>";
 			$rivi .= "</tr>";
 			
-			if ($tilausrivirow["kpl"] != 0 and $tilausrivirow["kpl"] != $kerayserarow["kpl_keratty"]) {
+			if ($tilausrivirow["kpl"] != 0 and $tilausrivirow["keratty"] == "") {
 				$naytarivi = TRUE;
 			}
 		}
@@ -183,24 +176,20 @@
 
 		$query = "	SELECT
 					kerayserat.nro,
-					lasku.varasto,
-					lasku.toimitustapa,
-					kerayserat.otunnus,
 					IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkaus,
 					IFNULL(pakkaus.oma_paino, 0) oma_paino,
 					IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
 					SUM(tuote.tuotemassa * kerayserat.kpl_keratty) tuotemassa,
 					SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) as kuutiot,
-					COUNT(*) AS kollit
-					FROM lasku
-					JOIN kerayserat ON (kerayserat.yhtio=lasku.yhtio and kerayserat.otunnus=lasku.tunnus)
+					COUNT(distinct kerayserat.pakkausnro) AS kollit
+					FROM kerayserat
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					and lasku.tunnus = '{$laskurow['tunnus']}'
-					GROUP BY 1,2,3,4,5,6,7
-					ORDER BY otunnus, pakkausnro";
+					WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+					AND kerayserat.otunnus 	= '{$laskurow['tunnus']}'
+					GROUP BY 1,2,3,4
+					ORDER BY kerayserat.pakkausnro";
 		$rakir_res = pupe_query($query);
 
 		while ($rakirrow = mysql_fetch_assoc($rakir_res)) {
@@ -220,7 +209,7 @@
 		$rivi .= "</table>";
 		$rivi .= "</td>";
 		$rivi .= "</tr>";
-
+		
 		// Välirivi
 		$rivi .= "<tr>";
 		$rivi .= "<td class='back' colspan='4' style='height:5px;'></td>";

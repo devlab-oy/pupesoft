@@ -54,6 +54,10 @@
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
 
+	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
+		$perhekielto = "Y";
+	}
+
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
 	unset($korvaavan_hinta_ylaraja_halvin_hinta);
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
@@ -638,7 +642,7 @@
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
-		if ($perheid == 0 and $perhekielto == "" and ($toim != "REKLAMAATIO" or ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] != 'U'))) {
+		if ($perheid == 0 and $perhekielto == "") {
 
 			foreach ($kaikkituotteet as $isatuoteno) {
 				$riikoko = 1;
@@ -1180,7 +1184,7 @@
 						$myynama 	= array();
 						$myynama[] 	= $i;
 
-						if (count($tuoteperhe) > 0 and ($toim != "REKLAMAATIO" or ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] != 'U'))) {
+						if (count($tuoteperhe) > 0) {
 
 							$riikoko 		= 1;
 							$isat_array 	= array();
@@ -1786,7 +1790,7 @@
 			$puu_var[]		= $var;
 		}
 
-		if ($rivityyppi != 'O' and $perheid == 0 and $perhekielto == "" and ($toim != "REKLAMAATIO" or ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] != 'U'))) {
+		if ($rivityyppi != 'O' and $perheid == 0 and $perhekielto == "") {
 
 			$riikoko 		= 1;
 			$isat_array 	= array();

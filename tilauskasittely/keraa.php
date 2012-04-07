@@ -1433,7 +1433,7 @@
 									IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
 									SUM(tuote.tuotemassa * kerayserat.kpl_keratty) tuotemassa,
 									SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) as kuutiot,
-									COUNT(*) AS kollit
+									COUNT(distinct kerayserat.pakkausnro) AS kollit
 									FROM kerayserat
 									LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)

@@ -2228,8 +2228,9 @@
 
 		$query = "	SELECT nimi, myyja
 					FROM kuka
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND myyja != 0
+					WHERE yhtio  = '{$kukarow['yhtio']}'
+					AND extranet = ''
+					AND myyja   != 0
 					ORDER BY nimi";
 		$result = pupe_query($query);
 

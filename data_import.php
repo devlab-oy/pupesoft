@@ -278,6 +278,8 @@
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
+		'toimittajahinta'                 => 'Toimittajan hinnat',
+		'toimittajaalennus'               => 'Toimittajan alennukset',
 	);
 
 	// Lisätään dynaamiset tiedot

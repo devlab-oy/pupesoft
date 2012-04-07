@@ -2795,8 +2795,8 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n normaaleja tuoteperheit‰")."</option>
-					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n vain is‰tuotetta")."</option>
+					<option value = '' $sela>".t("Reklamaatiolla k‰ytet‰‰n tuoteperheit‰")."</option>
+					<option value = 'U' $selb>".t("Reklamaatiolla ei k‰ytet‰ tuoteperheit‰")."</option>
 				</select></td>";
 
 		$jatko = 0;

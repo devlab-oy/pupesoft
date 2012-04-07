@@ -46,6 +46,7 @@
 	if(!isset($vain_rivit))         $vain_rivit = "";
 	if(!isset($varastosta))  		$varastosta = "";
 	if(!isset($ytunnus)) 	 		$ytunnus = "";
+	if(!isset($myyja))				$myyja = "";
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
@@ -430,6 +431,7 @@
 			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='maa' value='$maa'>
+					<input type='hidden' name='myyja' value='{$myyja}' />
 					<input type='hidden' name='tee' value='TOIMITA'>";
 
 			if ($toim == "ENNAKKO") {
@@ -546,6 +548,7 @@
 		echo "<input type='hidden' name='tilaus' value='$tilaus'>";
 		echo "<input type='hidden' name='rivinotunnus' value='$rivinotunnus'>";
 		echo "<input type='hidden' name='maa' value='$maa'>";
+		echo "<input type='hidden' name='myyja' value='{$myyja}' />";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -617,7 +620,7 @@
 	if ($kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == "" or $tee == "JATKA")) {
 
 		if (isset($muutparametrit)) {
-			list($tuotenumero, $tilaus,$jarj,$toimi,$ei_limiittia,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa) = explode('#', $muutparametrit);
+			list($tuotenumero, $tilaus,$jarj,$toimi,$ei_limiittia,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa,$myyja) = explode('#', $muutparametrit);
 
 			$varastot = explode('##', $tilausnumero);
 
@@ -626,7 +629,7 @@
 			}
 		}
 
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -654,7 +657,7 @@
 				$tee = "";
 			}
 		}
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -707,8 +710,8 @@
 			$laskulisa .= " and lasku.ytunnus = '$asiakasno' ";
 		}
 
-		if (isset($tuotteet_lista) and $tuotteet_lista != '') {
-			$tuotteet = explode("\n", $tuotteet_lista);
+		if (isset($tuotenumero) and $tuotenumero != '') {
+			$tuotteet = explode("\n", $tuotenumero);
 			$tuoterajaus = "";
 			foreach($tuotteet as $tuotenumero) {
 				if (pupesoft_cleanstring($tuotenumero) != '') {
@@ -751,6 +754,10 @@
 
 		if ($maa != '') {
 			$laskulisa .= " and lasku.maa = '$maa' ";
+		}
+
+		if ($myyja != '') {
+			$laskulisa .= " and lasku.myyja = '{$myyja}' ";
 		}
 
 		if ($automaaginen != '' or $ei_limiittia != '') {
@@ -1186,6 +1193,7 @@
 
 									echo "<form action='$PHP_SELF' method='post'>";
 									echo "<input type='hidden' name='maa' value='$maa'>";
+									echo "<input type='hidden' name='myyja' value='{$myyja}' />";
 
 									// Nämä ovat niitä hiddeneitä mitä ylläoleva js muokkaa (korvaa-nappi).
 									echo "<input type='hidden' name='korvattava_tilriv' id='korvattava_tilriv' value=''>";
@@ -2226,10 +2234,30 @@
 		echo "</select></td>";
 		echo "</tr>\n";
 
-		echo "</tr>
-				<tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa näillä tuotteilla"),")</th><td colspan=''><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
-				<tr>
-			</tr>";
+		echo "<tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa näillä tuotteilla"),")</th>
+			<td colspan=''><textarea name='tuotenumero' rows='5' cols='35'>{$tuotenumero}</textarea></td></tr>";
+
+		echo "<tr><th>",t("Myyjä"),"</th>";
+
+		$query = "	SELECT nimi, myyja
+					FROM kuka
+					WHERE yhtio  = '{$kukarow['yhtio']}'
+					AND extranet = ''
+					AND myyja   != 0
+					ORDER BY nimi";
+		$result = pupe_query($query);
+
+		echo "<td><select name='myyja'>";
+		echo "<option value=''>",t("Myyjä"),"</option>";
+
+		while ($row = mysql_fetch_assoc($result)) {
+
+			$sel = $row['myyja'] == $myyja ? " selected" : "";
+
+			echo "<option value='{$row['myyja']}'{$sel}>{$row['nimi']}</option>";
+		}
+
+		echo "</select></td></tr>\n";
 
 		echo "<tr>
 				<th>".t("Tilaus")."</th>

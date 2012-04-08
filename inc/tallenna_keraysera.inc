@@ -111,9 +111,7 @@
 									pakkausnro 		= '{$juokseva_nro}',
 									kpl 			= '{$kpl}',
 									laatija 		= '{$kukarow['kuka']}',
-									luontiaika 		= now(),
-									muuttaja 		= '{$kukarow['kuka']}',
-									muutospvm 		= now()";
+									luontiaika 		= now()";
 						$insert_res = pupe_query($query);
 					}
 				}

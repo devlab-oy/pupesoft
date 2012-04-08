@@ -720,7 +720,8 @@
 
 						if ($tee == 'muokkaa') {
 							echo "<select class='notoggle' name='pakkaukset[{$rivit_row['rivitunnus']}##{$rivit_row['pakkausnro']}]'>";
-
+							echo "<option value='{$rivit_row['rivitunnus']}##999'>".t("Muu")."</option>";
+							
 							$query = "	SELECT tunnus, TRIM(CONCAT(pakkaus, ' ', pakkauskuvaus)) pakkaus
 										FROM pakkaus
 										WHERE yhtio = '{$kukarow['yhtio']}'

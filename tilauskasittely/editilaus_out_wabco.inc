@@ -44,7 +44,7 @@
 
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna ostotilaus").":</th>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='{$laskurow["tunnus"]}.txt'>";
 		echo "<input type='hidden' name='filenimi' value='$wabco_editilaus'>";

@@ -762,7 +762,11 @@
 			$res   = pupe_query($query);
 		}
 
-		$query = "SELECT * FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+		$query = "	SELECT *
+					FROM kerayserat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND nro 	= '{$nro}'
+					AND tunnus 	= '{$row_id}'";
 		$chkres = pupe_query($query);
 		$chkrow = mysql_fetch_array($chkres);
 

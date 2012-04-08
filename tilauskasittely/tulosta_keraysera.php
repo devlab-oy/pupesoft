@@ -9,7 +9,7 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
 
-					$(':checkbox').click(function(event){
+					$('.notoggle').click(function(event){
 						event.stopPropagation();
 					});
 
@@ -28,6 +28,20 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($keraajalist)) $keraajalist = '';
 	if (!isset($select_varasto)) $select_varasto = '';
+
+	if ($tee == 'tee_arpajaiset') {
+		if (isset($palaa)) {
+			$kerayseranro = "";
+			$tee = "selaa";
+		}
+		if (isset($muuta)) {
+			$tee = "muuta";
+		}
+		if (isset($uusi_pakkaus)) {
+			$tee = "uusi_pakkaus";
+		}
+	}
+
 
 	if ($tee == '') {
 		echo "<form method='post'>";
@@ -74,7 +88,7 @@
 
 		while ($varastorow = mysql_fetch_assoc($varastores)) {
 
-			$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : "";
+			$sel = ($kukarow['oletus_varasto'] == $varastorow['tunnus']) ? " selected" : "";
 
 			echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
 		}
@@ -152,9 +166,7 @@
 						pakkausnro 		= '{$uusi_paknro_row['uusi_pakkauskirjain']}',
 						kpl 			= 0,
 						laatija 		= '{$kukarow['kuka']}',
-						luontiaika 		= now(),
-						muutospvm 		= now(),
-						muuttaja 		= '{$kukarow['kuka']}'";
+						luontiaika 		= now()";
 			$ins_uusi_pak_res = pupe_query($query);
 
 			echo "<br /><font class='message'>",t("Uusi pakkaus lis‰tty"),"!</font><br />";
@@ -162,11 +174,6 @@
 
 		$tee = 'muokkaa';
 		$view = 'yes';
-	}
-
-	if ($tee == 'palaa') {
-		$kerayseranro = "";
-		$tee = "selaa";
 	}
 
 	if ($tee == 'muuta') {
@@ -214,7 +221,8 @@
 						$mihin_siirretaan  = $siirra_tuote[$rivitunnukset_row['tunnus']];
 						$paljon_siirretaan = str_replace(",", ".", $siirra_kpl[$rivitunnukset_row['tunnus']]);
 
-						$query = "	SELECT *
+						$query = "	SELECT *,
+									if (kerattyaika = '0000-00-00 00:00:00', kpl, kpl_keratty) kpl
 									FROM kerayserat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND nro 	= '{$kerayseranro}'
@@ -226,6 +234,15 @@
 							echo "<br /><font class='error'>",t("Siirrett‰v‰ kappalem‰‰r‰ oli liian suuri"),"! ({$paljon_siirretaan} > {$kpl_chk_row['kpl']})</font><br />";
 						}
 						else {
+							$kerattylisa1 = $kerattylisa2 = $kerattylisa3 = "";
+
+							// Oliko t‰m‰ rivi ker‰tty?
+							if ($kpl_chk_row["kerattyaika"] != "0000-00-00 00:00:00") {
+								$kerattylisa1 = " , kpl_keratty = '{$paljon_siirretaan}', keratty = '{$kpl_chk_row['keratty']}', kerattyaika = '{$kpl_chk_row['kerattyaika']}' ";
+								$kerattylisa2 = " , kpl_keratty = kpl_keratty + {$paljon_siirretaan} ";
+								$kerattylisa3 = " , kpl_keratty = kpl_keratty - {$paljon_siirretaan} ";
+							}
+
 							// katsotaan onko nollarivej‰ (eli tyhj‰ pakkaus)
 							$query = "	SELECT *
 										FROM kerayserat
@@ -236,18 +253,11 @@
 							$chk_row = mysql_fetch_assoc($chk_res);
 
 							if ($chk_row['otunnus'] == 0 or $chk_row['tilausrivi'] == 0 or $chk_row['kpl'] == 0) {
-								$query = "	SELECT *
-											FROM kerayserat
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND nro 	= '{$kerayseranro}'
-											AND tunnus 	= '{$rivitunnukset_row['tunnus']}'";
-								$fill_res = pupe_query($query);
-								$fill_row = mysql_fetch_assoc($fill_res);
-
 								$query = "	UPDATE kerayserat SET
-											otunnus 	= '{$fill_row['otunnus']}',
-											tilausrivi 	= '{$fill_row['tilausrivi']}',
+											otunnus 	= '{$kpl_chk_row['otunnus']}',
+											tilausrivi 	= '{$kpl_chk_row['tilausrivi']}',
 											kpl 		= '{$paljon_siirretaan}'
+											{$kerattylisa1}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND nro 	= '{$kerayseranro}'
 											AND tunnus 	= '{$chk_row['tunnus']}'";
@@ -276,6 +286,7 @@
 									if ($kassellaan_row['tuoteno'] == $check_it_row['tuoteno']) {
 										$query = "	UPDATE kerayserat SET
 													kpl = kpl + {$paljon_siirretaan}
+													{$kerattylisa2}
 													WHERE yhtio = '{$kukarow['yhtio']}'
 													AND nro 	= '{$kerayseranro}'
 													AND tunnus 	= '{$chk_row['tunnus']}'";
@@ -301,9 +312,8 @@
 												pakkausnro 		= '{$mihin_siirretaan}',
 												kpl 			= '{$paljon_siirretaan}',
 												laatija 		= '{$keraajarow['kuka']}',
-												luontiaika 		= now(),
-												muutospvm 		= now(),
-												muuttaja 		= '{$keraajarow['kuka']}'";
+												luontiaika 		= now()
+												{$kerattylisa1}";
 									$ins_res = pupe_query($query);
 								}
 							}
@@ -318,6 +328,7 @@
 							else {
 								$query = "	UPDATE kerayserat
 											SET kpl = kpl - {$paljon_siirretaan}
+											{$kerattylisa3}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND nro 	= '{$kerayseranro}'
 											AND tunnus 	= '{$rivitunnukset_row['tunnus']}'";
@@ -534,6 +545,8 @@
 			$query = "	SELECT kerayserat.nro,
 						keraysvyohyke.nimitys AS keraysvyohyke,
 						kerayserat.laatija AS kayttaja,
+						max(kerayserat.luontiaika) luontiaika,
+						max(kerayserat.kerattyaika) kerattyaika,
 						COUNT(DISTINCT lasku.liitostunnus) AS asiakasmaara,
 						COUNT(*) AS rivimaara
 						FROM kerayserat
@@ -543,10 +556,11 @@
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke IN ({$keraajarow['keraysvyohyke']}))
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-						AND kerayserat.tila in ('K','X')
 						AND kerayserat.laatija = '{$keraajarow['kuka']}'
+						AND (kerayserat.luontiaika >= DATE_SUB(NOW(), INTERVAL 2 DAY) OR kerayserat.tila in ('K','X'))
 						{$ker_lisa}
-						GROUP BY 1,2,3";
+						GROUP BY 1,2,3
+						ORDER BY 1 desc";
 			$kerayserat_res = pupe_query($query);
 
 			if (mysql_num_rows($kerayserat_res) > 0) {
@@ -554,12 +568,12 @@
 
 				echo "<table>";
 				echo "<tr>";
-				echo "<th>",t("Tunnus"),"</th>";
+				echo "<th>",t("Nro"),"</th>";
 				echo "<th>",t("Ker‰ysvyˆhyke"),"</th>";
-				echo "<th>",t("Rivim‰‰r‰"),"</th>";
-				echo "<th>",t("Asiakasm‰‰r‰"),"</th>";
-				echo "<th>",t("K‰ytt‰j‰"),"</th>";
-				echo "<th>",t("Toiminto"),"</th>";
+				echo "<th>",t("Rivej‰"),"</th>";
+				echo "<th>",t("Asiakkaita"),"</th>";
+				echo "<th>",t("Laadittu"),"<br>",t("Ker‰tty"),"</th>";
+				echo "<th>",t("Ker‰‰j‰"),"</th>";
 				echo "</tr>";
 
 				while ($kerayserat_row = mysql_fetch_assoc($kerayserat_res)) {
@@ -568,10 +582,11 @@
 					echo "<td>{$kerayserat_row['keraysvyohyke']}</td>";
 					echo "<td>{$kerayserat_row['rivimaara']}</td>";
 					echo "<td>{$kerayserat_row['asiakasmaara']}</td>";
+					echo "<td>".tv1dateconv($kerayserat_row["luontiaika"], "PITKA", "LYHYT")."<br>".tv1dateconv($kerayserat_row["kerattyaika"], "PITKA", "LYHYT")."</td>";
 
 					echo "<td>";
 
-					$kuka_lisa = $tee != 'muokkaa' ? " AND kuka = '{$kerayserat_row['kayttaja']}' " : '';
+					$kuka_lisa = ($tee != 'muokkaa' or $kerayserat_row["kerattyaika"] != "0000-00-00 00:00:00") ? " AND kuka = '{$kerayserat_row['kayttaja']}' " : '';
 
 					$query = "	SELECT kuka, nimi
 								FROM kuka
@@ -583,9 +598,9 @@
 								ORDER BY nimi";
 					$kuka_res = pupe_query($query);
 
-					if ($tee == 'muokkaa') {
+					if ($tee == 'muokkaa' and $kerayserat_row["kerattyaika"] == "0000-00-00 00:00:00") {
 
-						echo "<select name='kayttaja'>";
+						echo "<select class='notoggle' name='kayttaja'>";
 
 						while ($kuka_row = mysql_fetch_assoc($kuka_res)) {
 
@@ -603,7 +618,7 @@
 
 					echo "</td>";
 
-					echo "<td>";
+					echo "<td class='back'>";
 
 					if ($tee == 'selaa' or $tee == 'keraysera') {
 						echo "<form method='post'>";
@@ -620,12 +635,10 @@
 						echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 						echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 						echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-						echo "<select name='tee' id='tee'>";
-						echo "<option value='muuta'>",t("Tallenna"),"</option>";
-						echo "<option value='uusi_pakkaus'>",t("Uusi pakkaus"),"</option>";
-						echo "<option value='palaa'>",t("Palaa"),"</option>";
-						echo "</select>";
-						echo "&nbsp;<input type='submit' value='",t("OK"),"' />";
+						echo "<input type='hidden' name='tee' value='tee_arpajaiset'>";
+						echo "<input class='notoggle' type='submit' name='muuta' value='",t("Tallenna"),"'>";
+						echo "<input class='notoggle' type='submit' name='uusi_pakkaus' value='",t("Uusi pakkaus"),"'>";
+						echo "<input class='notoggle' type='submit' name='palaa' value='",t("Palaa"),"'>";
 					}
 
 					echo "</td>";
@@ -640,7 +653,9 @@
 						$selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, kerayserat.kpl ";
 					}
 
-					$query = "	SELECT kerayserat.pakkaus, kerayserat.tunnus AS rivitunnus, kerayserat.pakkausnro, kerayserat.sscc, kerayserat.otunnus, {$selectlisa}
+					$query = "	SELECT kerayserat.pakkaus, kerayserat.tunnus AS rivitunnus,
+								kerayserat.pakkausnro, kerayserat.sscc,
+								kerayserat.otunnus, {$selectlisa}
 					 			FROM kerayserat
 								LEFT JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 								LEFT JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
@@ -695,7 +710,7 @@
 						echo "<td nowrap>";
 
 						if ($tee == 'muokkaa') {
-							echo "<select name='pakkaukset[{$rivit_row['rivitunnus']}##{$rivit_row['pakkausnro']}]'>";
+							echo "<select class='notoggle' name='pakkaukset[{$rivit_row['rivitunnus']}##{$rivit_row['pakkausnro']}]'>";
 
 							$query = "	SELECT tunnus, TRIM(CONCAT(pakkaus, ' ', pakkauskuvaus)) pakkaus
 										FROM pakkaus
@@ -727,7 +742,7 @@
 
 						if ($tee == 'muokkaa') {
 							echo "<td>";
-							echo "<input class='checkbox' type='checkbox' name='tulostettavat_reittietiketit[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' />";
+							echo "<input class='notoggle' type='checkbox' name='tulostettavat_reittietiketit[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' />";
 							echo "</td>";
 						}
 
@@ -739,17 +754,17 @@
 										kerayserat.pakkausnro,
 										tilausrivi.tuoteno,
 										TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi,
-										kerayserat.kpl,
+										if (kerayserat.kerattyaika = '0000-00-00 00:00:00', kerayserat.kpl, kerayserat.kpl_keratty) kpl,
 										lasku.liitostunnus,
-										CONCAT(hyllyalue, ' ', hyllynro, ' ', hyllyvali, ' ', hyllytaso) hyllypaikka,
+										CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) hyllypaikka,
 										tilausrivi.tunnus AS tilausrivin_tunnus
 							 			FROM kerayserat
 										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 										JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 										JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-										AND kerayserat.nro = '{$kerayserat_row['nro']}'
-										AND kerayserat.pakkausnro = '{$rivit_row['pakkausnro']}'
+										WHERE kerayserat.yhtio 		= '{$kukarow['yhtio']}'
+										AND kerayserat.nro 			= '{$kerayserat_row['nro']}'
+										AND kerayserat.pakkausnro 	= '{$rivit_row['pakkausnro']}'
 										ORDER BY pakkausnro";
 							$content_res = pupe_query($query);
 
@@ -763,7 +778,7 @@
 							echo "<table style='width:100%'>";
 
 							if (mysql_num_rows($content_res) == 0) {
-								echo "<tr><td>",t("Poista pakkaus")," <input type='checkbox' name='poista_pakkaus[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' /></td></tr>";
+								echo "<tr><td>",t("Poista pakkaus")," <input class='notoggle' type='checkbox' name='poista_pakkaus[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' /></td></tr>";
 							}
 							else {
 
@@ -807,7 +822,6 @@
 									echo "</td>";
 									echo "</tr>";
 								}
-
 							}
 
 							echo "</table>";

@@ -457,7 +457,10 @@
 		// splitataan rivi, splittauksen ensimmäinen rivi
 		if ($splitlineflag == 1) {
 			$query = "	UPDATE kerayserat
-						SET kpl = '{$qty}', kpl_keratty = '{$qty}'
+						SET kpl 	= '{$qty}',
+						kpl_keratty = '{$qty}',
+						keratty 	= '{$kukarow['kuka']}',
+						kerattyaika = now()
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND nro 	= '{$nro}'
 						AND tunnus 	= '{$row_id}'";
@@ -471,11 +474,18 @@
 
 			if ($splitlineflag == 3) {
 
-				$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+				$query = "	SELECT varattu
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$row['tilausrivi']}'";
 				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
-				$query = "SELECT SUM(kpl_keratty) kappaleet FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tilausrivi = '{$row['tilausrivi']}'";
+				$query = "	SELECT SUM(kpl_keratty) kappaleet
+							FROM kerayserat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							AND nro 		= '{$nro}'
+							AND tilausrivi 	= '{$row['tilausrivi']}'";
 				$sum_res = pupe_query($query);
 				$sum_row = mysql_fetch_assoc($sum_res);
 
@@ -557,7 +567,9 @@
 		// ei splitata riviä eli normaali rivi, $splitlineflag == 0
 		else {
 			$query = "	UPDATE kerayserat
-						SET kpl_keratty = '{$qty}'
+						SET kpl_keratty = '{$qty}',
+						keratty 		= '{$kukarow['kuka']}',
+						kerattyaika 	= now()
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND nro 	= '{$nro}'
 						AND tunnus 	= '{$row_id}'";
@@ -754,15 +766,15 @@
 		$chkres = pupe_query($query);
 		$chkrow = mysql_fetch_array($chkres);
 
-		$sscclisa = $splitlineflag == 0 ? " kerayserat.sscc = '{$uusi_sscc}', " : "";
+		$sscclisa = $splitlineflag == 0 ? " sscc = '{$uusi_sscc}', " : "";
 
 		$query = "	UPDATE kerayserat SET
 					{$sscclisa}
-					kerayserat.pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
-					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-					AND kerayserat.tila = 'K'
-					AND kerayserat.pakkausnro = '{$chkrow['pakkausnro']}'
-					AND kerayserat.nro = '{$nro}'";
+					pakkausnro = '{$uusi_paknro_row['uusi_pakkauskirjain']}'
+					WHERE yhtio 	= '{$kukarow['yhtio']}'
+					AND tila 		= 'K'
+					AND pakkausnro 	= '{$chkrow['pakkausnro']}'
+					AND nro 		= '{$nro}'";
 		$updres = pupe_query($query);
 
 		$query = "	SELECT tunnus
@@ -832,11 +844,21 @@
 
 				if ($all != '') {
 					if ($all == 1) {
-						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tila = 'K' AND pakkausnro = '{$orig_row['pakkausnro']}' AND sscc = '{$orig_row['sscc']}'";
+						$query = "	UPDATE kerayserat
+									SET pakkausnro = '{$pakkaus_kirjain_chk}'
+									WHERE yhtio 	= '{$kukarow['yhtio']}'
+									AND nro 		= '{$nro}'
+									AND tila 		= 'K'
+									AND pakkausnro 	= '{$orig_row['pakkausnro']}'
+									AND sscc 		= '{$orig_row['sscc']}'";
 						$updres = pupe_query($query);
 					}
 					else {
-						$query = "UPDATE kerayserat SET pakkausnro = '{$pakkaus_kirjain_chk}' WHERE yhtio = '{$kukarow['yhtio']}' AND nro = '{$nro}' AND tunnus = '{$row_id}'";
+						$query = "	UPDATE kerayserat
+									SET pakkausnro = '{$pakkaus_kirjain_chk}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND nro 	= '{$nro}'
+									AND tunnus 	= '{$row_id}'";
 						$updres = pupe_query($query);
 					}
 				}

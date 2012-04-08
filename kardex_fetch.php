@@ -110,8 +110,10 @@
 						}
 
 						$query = "	UPDATE kerayserat SET
-									tila = 'K',
-									kpl_keratty = '{$_content[3]}'
+									tila 		= 'K',
+									kpl_keratty = '{$_content[3]}',
+									keratty 	= '{$kukarow['kuka']}',
+									kerattyaika = now()
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$_content[4]}'
 									AND tila in ('X','K')";

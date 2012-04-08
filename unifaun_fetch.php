@@ -121,9 +121,7 @@
 					}
 
 					$query = "	UPDATE kerayserat SET
-								sscc_ulkoinen = '{$sscc_ulkoinen}',
-								muutospvm 	  = now(),
-								muuttaja 	  = 'cron'
+								sscc_ulkoinen = '{$sscc_ulkoinen}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND sscc 	= '{$sscc}'
 								AND otunnus = '{$tilausnumero}'";

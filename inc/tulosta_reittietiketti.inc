@@ -114,11 +114,13 @@
 				$rakir_res = pupe_query($query);
 				$rakir_row = mysql_fetch_assoc($rakir_res);
 
-				$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
-							IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
+				$query = "	SELECT
+							IFNULL(pakkaus.pakkaus, 'MUU KOLLI') pakkauskuvaus,
+							IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') kollilaji,
 							kerayserat.pakkausnro,
 							kerayserat.pakkaus,
 							kerayserat.sscc,
+							COUNT(CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) rivimaara,
 							COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara
 							FROM kerayserat
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -138,6 +140,7 @@
 						$row['pakkausid'] = $keraysera_row['pakkausnro'];
 						$row['kollilaji'] = $keraysera_row['kollilaji'];
 						$row['sscc'] 	  = $keraysera_row['sscc'];
+						$row['rivimaara'] = $keraysera_row['rivimaara'];
 
 						$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 

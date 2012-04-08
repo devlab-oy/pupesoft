@@ -1069,10 +1069,11 @@
 									$keraysera_maara[$keraysera_chk_row['tunnus']] = 0;
 								}
 
+								// Päivitetään kerääjä ja aika vain jos niitä ei olla jo aikaisemmin laitettu (optiscan tai kardex...)
 								$query_upd = "	UPDATE kerayserat
 												SET kpl_keratty = '{$keraysera_maara[$keraysera_chk_row['tunnus']]}',
-												muutospvm 		= now(),
-												muuttaja 		= '{$kukarow['kuka']}'
+												keratty 		= if(keratty = '', '{$kukarow['kuka']}', keratty),
+												kerattyaika 	= if(kerattyaika = '0000-00-00 00:00:00', now(), kerattyaika)
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus 	= '{$keraysera_chk_row['tunnus']}'";
 								$keraysera_update_res = pupe_query($query_upd);

@@ -177,12 +177,16 @@
 	}
 
 	if ($tee == 'muuta') {
+		$keraajasiirto = FALSE;
+
 		if (trim($kayttaja) != '') {
 			$query = "	UPDATE kerayserat
 						SET laatija = '{$kayttaja}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND nro 	= '{$kerayseranro}'";
 			$update_res = pupe_query($query);
+
+			$keraajasiirto = TRUE;
 		}
 
 		if (count($pakkaukset) > 0) {
@@ -359,6 +363,11 @@
 
 		$tee = 'muokkaa';
 		$view = 'yes';
+
+		if ($keraajasiirto) {
+			$kerayseranro = "";
+			$tee = 'selaa';
+		}
 	}
 
 	if ($tee != '') {

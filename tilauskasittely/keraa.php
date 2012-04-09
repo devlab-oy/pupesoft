@@ -1314,6 +1314,7 @@
 				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, lasku.alatila,
 							toimitustapa.rahtikirja,
 							toimitustapa.tulostustapa,
+							toimitustapa.rahtikirja,
 							toimitustapa.nouto,
 							lasku.varasto,
 							lasku.toimitustapa,
@@ -1448,6 +1449,13 @@
 							$kilot = round($keraysera_row["tuotemassa"] + $keraysera_row["oma_paino"], 2);
 							$kuutiot = round($keraysera_row["kuutiot"] * $keraysera_row["puukotuskerroin"], 4);
 
+							$tulostettulisa = "";
+
+							// Merataan tieto tulostetuksi jos tulostustapa on hetitulostus ja lappu on jo tullut Unifaunista
+							if ($laskurow['tulostustapa'] == 'H' and ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+								$tulostettulisa = " , tulostettu = now() ";
+							}
+
 							// Insertöidään aina rahtikirjan tiedot per tilaus
 							$query_ker  = "	INSERT INTO rahtikirjat SET
 											kollit 			= '{$keraysera_row['kollit']}',
@@ -1459,11 +1467,12 @@
 											otsikkonro 		= '{$laskurow['tunnus']}',
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',
-											yhtio 			= '{$kukarow['yhtio']}'";
+											yhtio 			= '{$kukarow['yhtio']}'
+											{$tulostettulisa}";
 							$ker_res = pupe_query($query_ker);
 						}
 
-						// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
+						// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus
 						if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
 							// päivitetään keräyserän tila "Rahtikirja tulostettu"-tilaan
 							$query = "	UPDATE kerayserat

@@ -411,9 +411,12 @@
 		// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 		js_openFormInNewWindow();
 
-		$where1 		= "";
-		$where2 		= "";
-		$where3 		= "";
+		$where1 	= "";
+		$where2 	= "";
+		$where3 	= "";
+		$where4		= "";
+		$where5		= "";
+		$joinlisa 	= "";
 
 		if (isset($asiakasrow)) {
 			$wherenimi = "	and lasku.nimi			= '$asiakasrow[nimi]'
@@ -808,9 +811,9 @@
 
 			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
-						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')";
+						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
-			if (!isset($jarj)) $jarj = "ORDER BY lasku.tunnus desc";
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
@@ -878,12 +881,6 @@
 		if ($toim != "HAAMU") {
 			$where4 = " and lasku.tila != 'D' ";
 		}
-		else {
-			$where4 = "";
-		}
-
-		$joinlisa = "";
-		$where5	="";
 
 		if ($toim == "DGD") {
 			$joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
@@ -918,7 +915,8 @@
 					WHERE $where1 $where2 $where3 $where5
 					and lasku.$logistiikka_yhtiolisa
 					$where4
-					$jarj";
+					$jarj
+					LIMIT 300";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {

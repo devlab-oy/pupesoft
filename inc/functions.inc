@@ -17133,7 +17133,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 		$query = "	SELECT distinct sscc, sscc_ulkoinen
 					FROM tilausrivi
 					JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
-					JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')
+					JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 					AND tilausrivi.tyyppi != 'D'

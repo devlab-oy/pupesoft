@@ -35,7 +35,7 @@
 		$out .= sprintf("%-20.20s", $yhtiorow['nimi']);				// Lähettäjän nimi 20 merkkiä
 		$out .= sprintf("%06.6s", substr($laskurow['tunnus'], -6));	// Ostotilauksen numero 6 merkkiä
 		$out .= sprintf("%4.4s", "");								// Toimitustapa 4 merkkiä, ei käytössä
-		$out .= sprintf("%-1.1s", $laskurow['tilaustyyppi']);		// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus, 3 = Yölähetys
+		$out .= sprintf("%-1.1s", $laskurow['tilaustyyppi']);		// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus, (3 = Yölähetys, ei tuettu)
 		fwrite($toot, $out . "\n");
 
 		$lask = 1;

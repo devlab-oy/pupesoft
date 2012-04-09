@@ -95,7 +95,6 @@
 					AND kerayserat.tila = 'R'
 					GROUP BY 1,2,3
 					ORDER BY 1,2,3 ";
-		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
@@ -107,13 +106,15 @@
 
 				if ($row['sscc'] == "") continue;
 
-				$query = "	SELECT IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc, 
-							kerayserat.sscc_ulkoinen, 
-							kerayserat.sscc AS sscc_vanha, 
+				$query = "	SELECT
+							kerayserat.nro,
+							IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc,
+							kerayserat.sscc_ulkoinen,
+							kerayserat.sscc AS sscc_vanha,
 							kerayserat.otunnus,
-							IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus, 
-							lasku.ohjausmerkki, 
-							CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite, 
+							IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
+							lasku.ohjausmerkki,
+							CONCAT(TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark)), ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp) AS osoite,
 							ROUND((SUM(tuote.tuotemassa * kerayserat.kpl_keratty) + IFNULL(pakkaus.oma_paino, 0)), 1) AS kg
 							FROM kerayserat
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
@@ -122,9 +123,8 @@
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND (kerayserat.sscc IN ({$row['sscc']}) OR kerayserat.sscc_ulkoinen IN ({$row['sscc']}))
-							GROUP BY 1,2,3,4,5,6,7
-							ORDER BY 1";
-				// echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							GROUP BY 1,2,3,4,5,6,7,8
+							ORDER BY 1,2";
 				$era_res = pupe_query($query);
 
 				if (mysql_num_rows($era_res) > 0) {
@@ -149,7 +149,14 @@
 						echo "<td class='sscc' id='{$era_row['sscc']}'>";
 
 						if ($era_row['sscc_ulkoinen'] != 0) {
-							echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+
+							// shipment_unique_id algoritmi vaihdettu.....
+							if ($era_row['nro'] <= 3281) {
+								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+							}
+							else {
+								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['nro']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+							}
 						}
 						else {
 							echo "{$era_row['sscc']}";

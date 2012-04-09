@@ -576,6 +576,11 @@
 
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
+				// Kopsutulostus toistaiseksi vain A4-paperille unifaun keississ‰
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+					$toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
+				}
+
 				// tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
 				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
 

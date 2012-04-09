@@ -10,28 +10,28 @@
 		$pakkauskirjainlisa = (isset($uusi_pakkauskirjain) and trim($uusi_pakkauskirjain) != "") ? " AND kerayserat.pakkausnro = '{$uusi_pakkauskirjain}' " : "";
 		$sscclisa = (isset($uusi_sscc) and trim($uusi_sscc) != "") ? " AND kerayserat.sscc = '{$uusi_sscc}' " : "";
 
-		$query = "	SELECT kerayserat.otunnus, kerayserat.sscc, kerayserat.sscc_ulkoinen
+		$query = "	SELECT kerayserat.sscc, kerayserat.sscc_ulkoinen, min(kerayserat.otunnus) otunnus
 					FROM kerayserat
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.nro = '{$kerayseran_numero}'
 					{$pakkauskirjainlisa}
 					{$sscclisa}
-					GROUP BY 1,2,3
+					GROUP BY 1,2
 					ORDER BY 1";
 		$chk_sscc_res = pupe_query($query);
 
-		$eran_otunnukset = array();
+		$eran_sscct = array();
 
 		while ($chk_sscc_row = mysql_fetch_assoc($chk_sscc_res)) {
 
-			$eran_otunnukset[$chk_sscc_row["otunnus"]] = $chk_sscc_row["otunnus"];
+			$eran_sscct[$chk_sscc_row["sscc"]] = $chk_sscc_row["otunnus"];
 
 			if ((is_numeric($chk_sscc_row['sscc_ulkoinen']) and (int) $chk_sscc_row['sscc_ulkoinen'] > 0) or (!is_numeric($chk_sscc_row['sscc_ulkoinen']) and (string) $chk_sscc_row['sscc_ulkoinen'] != "")) {
 
 				$query = "	SELECT toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$chk_sscc_row['otunnus']}'";
+							AND tunnus  = '{$chk_sscc_row['otunnus']}'";
 				$lahto_chk_res = pupe_query($query);
 				$lahto_chk_row = mysql_fetch_assoc($lahto_chk_res);
 
@@ -62,13 +62,13 @@
 			}
 		}
 
-		if (count($eran_otunnukset) > 0) {
-			foreach ($eran_otunnukset as $eranotunnus) {
+		if (count($eran_sscct) > 0) {
+			foreach ($eran_sscct as $eransscc => $ekatilaus) {
 
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus  = '{$eranotunnus}'";
+							AND tunnus  = '{$ekatilaus}'";
 				$res = pupe_query($query);
 				$row = mysql_fetch_assoc($res);
 
@@ -109,8 +109,8 @@
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 							JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
-							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-							AND lasku.tunnus = '{$row['tunnus']}'";
+							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
+							AND lasku.tunnus 	= '{$row['tunnus']}'";
 				$rakir_res = pupe_query($query);
 				$rakir_row = mysql_fetch_assoc($rakir_res);
 
@@ -126,9 +126,9 @@
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND kerayserat.nro = '{$kerayseran_numero}'
-							AND kerayserat.otunnus = '{$row['tunnus']}'
+							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+							AND kerayserat.nro 		= '{$kerayseran_numero}'
+							AND kerayserat.sscc 	= '{$eransscc}'
 							{$pakkauskirjainlisa}
 							{$sscclisa}
 							GROUP BY 1,2,3,4,5";
@@ -142,7 +142,7 @@
 						$row['sscc'] 	  = $keraysera_row['sscc'];
 						$row['rivimaara'] = $keraysera_row['rivimaara'];
 
-						$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
+						$row['shipment_unique_id'] = "{$kerayseran_numero}_{$eransscc}";
 
 						if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 							$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
@@ -171,9 +171,9 @@
 
 						$query = "	SELECT koodi
 									FROM pakkauskoodit
-									WHERE yhtio = '{$kukarow['yhtio']}'
+									WHERE yhtio 		 = '{$kukarow['yhtio']}'
 									AND rahdinkuljettaja = '{$toitarow['rahdinkuljettaja']}'
-									AND pakkaus = '{$keraysera_row['pakkaus']}'";
+									AND pakkaus 		 = '{$keraysera_row['pakkaus']}'";
 						$pakkauskoodit_res = pupe_query($query);
 						$pakkauskoodit_row = mysql_fetch_assoc($pakkauskoodit_res);
 
@@ -189,8 +189,8 @@
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									LEFT JOIN pakkaus AS pakkaus2 ON (pakkaus2.yhtio = kerayserat.yhtio AND pakkaus2.tunnus = kerayserat.pakkaus)
-									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-									AND kerayserat.sscc = '{$keraysera_row['sscc']}'
+									WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+									AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'
 									GROUP BY 1,2,3";
 						$pakkaus_info_res = pupe_query($query);
 						$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
@@ -199,8 +199,8 @@
 									FROM kerayserat
 									JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
-									WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-									AND kerayserat.sscc = '{$keraysera_row['sscc']}'";
+									WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+									AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'";
 						$paino_chk_res = pupe_query($query);
 						$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
 

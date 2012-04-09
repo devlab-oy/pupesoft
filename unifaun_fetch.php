@@ -108,11 +108,11 @@
 					 * 14656099734;1;GE249908410WW;2012-01-24 11:12:49;52146882 (Kimi: TNT)
 					 */
 
-					list($tilausnumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($ftpget_dest[$operaattori]."/".$file));
+					list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", file_get_contents($ftpget_dest[$operaattori]."/".$file));
 
 					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 
-					list($tilausnumero, $sscc) = explode("_", $tilausnumero_sscc);
+					list($eranumero, $sscc) = explode("_", $eranumero_sscc);
 
 					// Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
 					// Palautussanomasta etunollaat puuttuu, joten lis‰t‰‰n ne t‰ss‰
@@ -124,7 +124,7 @@
 								sscc_ulkoinen = '{$sscc_ulkoinen}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND sscc 	= '{$sscc}'
-								AND otunnus = '{$tilausnumero}'";
+								AND nro 	= '{$eranumero}'";
 					$upd_res = pupe_query($query);
 
 					rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);

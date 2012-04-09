@@ -84,6 +84,11 @@ if (!function_exists('vakadr_otsikko')) {
 		$pdf->draw_text(290, 770, t("Päivämäärä", $kieli), $thispage, $norm);
 		$pdf->draw_text(370, 770, date('d.m.Y H:i'), $thispage, $norm);
 
+		if (trim($laskurow['ohjausmerkki']) != '') {
+			$pdf->draw_text(290, 740, t("Ohjausmerkki", $kieli), $thispage, $norm);
+			$pdf->draw_text(370, 740, $laskurow['ohjausmerkki'], $thispage, $iso);
+		}
+
 		// Otsikon viimeisin rivi on pikselissä 673
 		// 665 on laskettu ottaen huomioon että jokaisen SSCC:n alussa tiputetaan $kala-15 (650), joka on oikeakohta aloittaa piirtäminen.
 

@@ -312,10 +312,8 @@ if ($toiminto == "tulosta") {
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
 
-
 		$laskurow["tapvm "] = $llrow["tapvm"];
 		$laskurow["viesti"] = $llrow["viesti"];
-
 	}
 
 	if (count($komento) == 0) {
@@ -351,9 +349,26 @@ if ($toiminto == "tulosta") {
 			}
 		}
 
-		echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br><br>";
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("ytunnus")."</th>";
+		echo "<th>".t("nimi")."</th>";	
+		echo "</tr>";
+		echo "<tr>
+				<td>$laskurow[laskunro]</td>
+				<td>$laskurow[ytunnus]</td>
+				<td>$laskurow[nimi]</td>
+				</tr>";
+		echo "</table><br>";
 
 		require('../inc/valitse_tulostin.inc');
+	}
+	else {
+		// takaisin selaukseen
+		$toiminto 	  = "";
+		$ytunnus  	  = $laskurow["ytunnus"];
+		$toimittajaid = $laskurow["liitostunnus"];
 	}
 
 	if ($komento["Purkulista"] != '') {
@@ -374,11 +389,7 @@ if ($toiminto == "tulosta") {
 
 	if ($komento["Tavaraetiketti"] != '') {
 		require('tulosta_tavaraetiketti.inc');
-	}
-
-	// takaisin selaukseen
-	$toiminto = "";
-	$ytunnus = $laskurow["ytunnus"];
+	}	
 }
 
 // syötetään keikan lisätietoja
@@ -412,7 +423,7 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		}
 
 		$suuntalavan_hyllyalue = mysql_real_escape_string($suuntalavan_hyllyalue);
-		$suuntalavan_hyllynro = mysql_real_escape_string($suuntalavan_hyllynro);
+		$suuntalavan_hyllynro  = mysql_real_escape_string($suuntalavan_hyllynro);
 		$suuntalavan_hyllyvali = mysql_real_escape_string($suuntalavan_hyllyvali);
 		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
 
@@ -525,54 +536,44 @@ if ($toiminto == "kohdista") {
 
 if ($ytunnus == "" and $keikka != "") {
 	$keikka = (int) $keikka;
-	$query = "	SELECT ytunnus, max(laskunro)
+	$query = "	SELECT ytunnus, liitostunnus, max(laskunro)
 				FROM lasku USE INDEX (tila_index)
 				LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-				where lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.tila = 'K'
-				and lasku.alatila = ''
-				and lasku.vanhatunnus = 0
-				and (lasku.laskunro = $keikka or tilausrivi.otunnus = $keikka)
+				where lasku.yhtio 		= '$kukarow[yhtio]'
+				and lasku.tila 			= 'K'
+				and lasku.alatila 		= ''
+				and lasku.vanhatunnus 	= 0
+				and (lasku.laskunro	 	= $keikka or tilausrivi.otunnus = $keikka)
 				group by lasku.ytunnus
 				order by lasku.laskunro desc";
 	$keikkahaku_res = pupe_query($query);
 	$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
 
 	if ($keikkahaku_row['laskunro'] == '' and $keikkahaku_row['ytunnus'] == '') {
-		$query = "	SELECT ytunnus
+		$query = "	SELECT ytunnus, liitostunnus
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila = 'O'
-					AND tunnus = '$keikka'";
+					AND tila 	= 'O'
+					AND tunnus 	= '$keikka'";
 		$ytunnus_res = pupe_query($query);
-		$ytunnus_row = mysql_fetch_assoc($ytunnus_res);
+		$keikkahaku_row = mysql_fetch_assoc($ytunnus_res);
 	}
 
-	$keikka = $keikkahaku_row["laskunro"];
-	$ytunnus = ($keikkahaku_row["ytunnus"] == '' and $ytunnus_row['ytunnus'] != '') ? $ytunnus_row['ytunnus'] : $keikkahaku_row['ytunnus'];
+	$keikka 		= $keikkahaku_row["laskunro"];
+	$ytunnus 		= $keikkahaku_row["ytunnus"];
+	$toimittajaid 	= $keikkahaku_row["liitostunnus"];
 }
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
 if ($ytunnus != "" or $toimittajaid != "") {
 	$keikkamonta = 0;
-	$hakutunnus = $ytunnus;
-	$hakuid		= $toimittajaid;
+	$hakutunnus  = $ytunnus;
+	$hakuid		 = $toimittajaid;
 
 	require ("../inc/kevyt_toimittajahaku.inc");
 
 	$keikkamonta += $monta;
-/*
-	if ($ytunnus == "") {
-		$ytunnus   = $hakutunnus;
-		$asiakasid = $hakuid;
 
-		require ("inc/asiakashaku.inc");
-
-		$toimittajaid  = $asiakasid;
-		$toimittajarow = $asiakasrow;
-		$keikkamonta  += $monta;
-	}
-*/
 	if ($keikkamonta > 1) {
 		$toimittajaid  = "";
 		$toimittajarow = "";
@@ -1056,7 +1057,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 $nappikeikka = "";
 
 // kohdisteaan keikkaa laskun tunnuksella $otunnus
-if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or $toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kalkyyli" or $toiminto == "kaikkiok") {
+if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or 
+	$toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kalkyyli" or $toiminto == "kaikkiok" or $toiminto == "suuntalavat") {
 
 	$query = "	SELECT *
 				FROM lasku
@@ -1122,12 +1124,10 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	}
 
 	// jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-	if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
+	if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
 		$nappikeikka .= "$formalku";
 		$nappikeikka .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
-		if ($yhtiorow['suuntalavat'] != 'S') {
-			$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";
-		}
+		$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";
 		$nappikeikka .= "$formloppu";
 	}
 

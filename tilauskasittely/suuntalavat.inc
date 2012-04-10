@@ -137,8 +137,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
 		$tila_res = pupe_query($query);
-
-
+		
 		$tee = '';
 		$suuntalavan_tunnus = '';
 	}
@@ -524,7 +523,8 @@
 		// $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
 		echo "<tr><th>",t("Käytettävyys"),"</th>";
-		echo "<td><select name='kaytettavyys'><option value=''>",t("Valitse"),"</option>";
+		echo "<td><select name='kaytettavyys'>";
+		// echo "<option value=''>",t("Valitse"),"</option>";
 		echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
 		// echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
 		echo "</select>{$virheviesti['kaytettavyys']}</td></tr>";
@@ -622,11 +622,18 @@
 
 	if ($tee == '') {
 
-		echo "<table>";
-		echo "<tr><th>",t("Keikka"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
-		echo "</table>";
-
-		echo "<br />";
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("ytunnus")."</th>";
+		echo "<th>".t("nimi")."</th>";
+		echo "</tr>";
+		echo "<tr>
+				<td>$laskurow[laskunro]</td>
+				<td>$laskurow[ytunnus]</td>
+				<td>$laskurow[nimi]</td>
+				</tr>";
+		echo "</table><br>";
 
 		echo "<form action='' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
@@ -652,7 +659,15 @@
 		echo "<br /><br />";
 
 		echo "<table>";
-		echo "<tr><th>SSCC-",t("koodi"),"</th><th>",t("Varastopaikkaväli"),"</th><th>",t("Tyyppi"),"</th><th>",t("Keräysvyohyke"),"</th><th>",t("Käytettavyys"),"</th><th>",t("Terminaalialue"),"</th><th>",t("Korkeus"),"</th><th>",t("Paino"),"</th><th>",t("Tila"),"</th></tr>";
+		echo "<tr><th>SSCC-",t("koodi"),"</th>";
+		echo "<th>",t("Varastopaikkaväli"),"</th>";
+		echo "<th>",t("Tyyppi"),"</th>";
+		echo "<th>",t("Keräysvyohyke"),"</th>";
+		#echo "<th>",t("Käytettavyys"),"</th>";
+		echo "<th>",t("Terminaalialue"),"</th>";
+		echo "<th>",t("Korkeus"),"</th>";
+		echo "<th>",t("Paino"),"</th>";
+		echo "<th>",t("Tila"),"</th></tr>";
 
 		$query = "	SELECT *, if(kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(tila = '', 0, if(tila = 'S', 1, 2)) sorttaus
 					FROM suuntalavat
@@ -686,19 +701,21 @@
 			$pakkaus_result = pupe_query($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
-
 			echo t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV");
 			echo "</td>";
 			echo "<td>";
 
-			$query = "SELECT nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavat_row['keraysvyohyke']}'";
+			$query = "	SELECT nimitys
+						FROM keraysvyohyke
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavat_row['keraysvyohyke']}'";
 			$keraysvyohyke_res = pupe_query($query);
 			$keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res);
 
 			echo $keraysvyohyke_row['nimitys'];
 
 			echo "</td>";
-			echo "<td>{$suuntalavat_row['kaytettavyys']}</td>";
+			#echo "<td>{$suuntalavat_row['kaytettavyys']}</td>";
 			echo "<td>{$suuntalavat_row['terminaalialue']}</td>";
 			echo "<td>{$suuntalavat_row['korkeus']}</td>";
 			echo "<td>{$suuntalavat_row['paino']}</td>";
@@ -800,14 +817,7 @@
 
 		if ($toiminto != "") {
 			echo "<hr>";
-			echo "<form action='' method='post'>";
-			echo "<input type='hidden' name='toiminto' value=''>";
-			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
-			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
-			echo "</form>";
-
-			echo "&nbsp;<form action='?indexvas=1' method='post'>";
+			echo "<form action='?indexvas=1' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
@@ -816,7 +826,7 @@
 			echo "<input type='hidden' name='laskunro' value='{$laskurow['laskunro']}'>";
 			echo "<input type='hidden' name='nappikeikalle' value='menossa'>";
 			echo "<input type='hidden' name='toiminto' value='kohdista'>";
-			echo "<input type='submit' value='",t("Kohdista rivejä"),"'>";
+			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
 			echo "</form>";
 		}
 	}

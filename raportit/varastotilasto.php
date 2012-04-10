@@ -172,9 +172,14 @@
 			$varattu = $saldo - $myytavissa;
 
 			// Jos kaikki luvut on nollaa, niin skipataan rivi
-			if ($nollapiilo != '' and (float) $saldo == 0 and (float) $ostorivi["tulossa"] == 0 and  (float) $varattu == 0 and (float) $myyntirivi["myyntiVA"] == 0) {
+			if ($nollapiilo != '' and (float) $saldo == 0 and (float) $ostorivi["tulossa"] == 0 and  (float) $varattu == 0 and (float) $myyntirivi["myynti12kk"] == 0) {
 				continue;
 			}
+
+			$myyntirivi["myyntiVA"] = ((int) $myyntirivi["myyntiVA"] == 0) ? "" : $myyntirivi["myyntiVA"];
+			$myyntirivi["myynti12kk"] = ((int) $myyntirivi["myynti12kk"] == 0) ? "" : $myyntirivi["myynti12kk"];
+			$myyntirivi["myynti6kk"] = ((int) $myyntirivi["myynti6kk"] == 0) ? "" : $myyntirivi["myynti6kk"];
+			$myyntirivi["myynti3kk"] = ((int) $myyntirivi["myynti3kk"] == 0) ? "" : $myyntirivi["myynti3kk"];
 
 			if ($rivimaara <= $rivilimitti) {
 				echo "<tr>";

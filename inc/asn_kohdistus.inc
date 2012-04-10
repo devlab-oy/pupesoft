@@ -178,7 +178,7 @@
 						$lyhennetty_toinen = substr($row["toim_tuoteno2"],3);
 						$toinen_tuoteno = ",'{$row["toim_tuoteno2"]}','$lyhennetty_toinen'";
 					}
-					
+
 					$poikkeus_tuoteno = " in ('$orgtuote','$lyhennetty' $toinen_tuoteno) ";
 				}
 				elseif ($row["toimittajanumero"] == "123084") {
@@ -343,7 +343,7 @@
 					$kohdistamatta = $row["kappalemaara"];
 					$lisa_array = array();
 					$split_array = array();
-					
+
 					// Lasketaan ensin kaikki rivit yhteen ja sen j‰lkeen katsotaan tarvitaanko lis‰rivi‰
 					$olen_apu_result = pupe_query($query);
 					while ($roll = mysql_fetch_assoc($olen_apu_result)) {
@@ -358,10 +358,10 @@
 
 					// haetaan viel‰ varmuudeksi lˆysimm‰ll‰ queryll‰ lis‰rivej‰.
 					if ($ylimaaraista > 0) {
-						  
+
 						// $tilausrivi_muuttuja sis‰lt‰‰ jo k‰ytetyt rivit. Otetaan lisa_array:sta extraa viel‰.
 						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $kaytetyt_tilausrivit)."','".implode("','",$lisa_array)."')";
-						
+
 						$query = "	SELECT tilausrivi.*
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
@@ -381,7 +381,7 @@
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu asc";
 						$loysa_result = pupe_query($query);
-						
+
 						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
 							if ($kohdistamatta <= 0) break;
 							$laskuri		+= $loysatpois["varattu"];
@@ -389,9 +389,9 @@
 							$split_array[]	 = $loysatpois["tunnus"];
 							$kohdistamatta 	-= $loysatpois["varattu"];
 						}
-						
+
 						$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
-						
+
 					}
 
 					if ($ylimaaraista > 0) {
@@ -756,27 +756,28 @@
 				$row = mysql_fetch_array($checkres);
 
 				// Tehd‰‰n uusi suuntalava
-				$tee = "lisaa";
-				$otunnus = $keikan_tunnus;
-				$sscc = $edellinen_paketintunniste;
-				$tyyppi = 10;
-				$keraysvyohyke = $row['keraysvyohyke'];
-				$kaytettavyys = "Y";
+				$tee 			= "lisaa";
+				$otunnus 		= $keikan_tunnus;
+				$sscc 			= $edellinen_paketintunniste;
+				$tyyppi 		= 10;
+				$keraysvyohyke 	= $row['keraysvyohyke'];
+				$kaytettavyys 	= "Y";
 				$terminaalialue = $row['terminaalialue'];
-				$korkeus = 0;
-				$paino = 0;
-				$alkuhyllyalue = "";
-				$alkuhyllynro = "";
-				$alkuhyllyvali = "";
-				$alkuhyllytaso = "";
+				$korkeus 		= 0;
+				$paino 			= 0;
+				$alkuhyllyalue 	= "";
+				$alkuhyllynro 	= "";
+				$alkuhyllyvali 	= "";
+				$alkuhyllytaso 	= "";
 				$loppuhyllyalue = "";
-				$loppuhyllynro = "";
+				$loppuhyllynro 	= "";
 				$loppuhyllyvali = "";
 				$loppuhyllytaso = "";
 				$automaattinen_paivitys = "";
 				$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
 				require ("tilauskasittely/suuntalavat.inc");
+
 				// Saadaan $uusi_suuntalavan_tunnus ^ incist‰.
 				// P‰ivitet‰‰n paketin ostotilausrivit kohdistetuksi keikkan ja oikealle suuntalavalle
 				$query = "	UPDATE tilausrivi SET
@@ -800,7 +801,6 @@
 				require ("tilauskasittely/suuntalavat.inc");
 
 			}
-
 		}
 	}
 

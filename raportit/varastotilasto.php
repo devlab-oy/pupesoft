@@ -143,10 +143,10 @@
 
 			// myyntipuoli
 			$query = "	SELECT
-						round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0)), 2) myyntiVA,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0)), 2) myynti12kk,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0)), 2) myynti6kk,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0)), 2) myynti3kk
+						round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) myyntiVA,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) myynti12kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) myynti6kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteno = '{$row["tuoteno"]}'

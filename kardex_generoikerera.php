@@ -52,20 +52,16 @@
 
 				$otunnukset = implode(",", $erat['tilaukset']);
 
-				$query = "	SELECT *
-							FROM lasku
+				$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
+
+				// tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
+				$query = "	UPDATE lasku SET
+							tila = 'L',
+							lahetepvm = now(),
+							kerayslista = '{$kerayslistatunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus IN ($otunnukset)";
-				$res = pupe_query($query);
-				$laskurow = mysql_fetch_assoc($res);
-
-				$tilausnumeroita  	  = $otunnukset;
-				$valittu_tulostin 	  = $gen_ker_row['printteri0'];
-				$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-				$laskuja 			  = count($erat['tilaukset']);
-				$lukotetaan 		  = FALSE;
-
-				require("tilauskasittely/tilaus-valmis-tulostus.inc");
+							AND tunnus in ({$otunnukset})";
+				$upd_res = pupe_query($query);
 			}
 
 			// lukitaan tableja
@@ -79,9 +75,8 @@
 				// Tulostetaan kollilappu
 				require('inc/tulosta_reittietiketti.inc');
 
-				if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
-					require("inc/kardex_send.inc");
-				}
+				// L‰hetet‰‰n tiedot kardexiin
+				require("inc/kardex_send.inc");
 			}
 		}
 	}

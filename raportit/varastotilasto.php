@@ -185,7 +185,7 @@
 			$saldo = ((int) $saldo == 0) ? "" : $saldo;
 
 			if ($rivimaara <= $rivilimitti) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td>$row[osasto]</td>";
 				echo "<td>$row[try]</td>";
 				echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";

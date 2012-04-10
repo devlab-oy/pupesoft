@@ -196,8 +196,8 @@ if (!isset($tee) or $tee == '') {
 	}
 
 	pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
-	// 
-	$space_muuttuja = " style='padding-right:15px;'";
+
+	$padding_muuttuja = " style='padding-right:15px;'";
 
 	// Näytetään käyttäjäkohtaiset työmääräykset
 	$tyojonosql = "	SELECT lasku.tunnus,
@@ -213,24 +213,24 @@ if (!isset($tee) or $tee == '') {
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
+					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
 
 		echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
 		echo "<thead>";
-		
+
 		echo "<tr>";
 		echo "<td colspan='5' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
 		echo "</tr>";
-		
+
 		echo "<tr>";
-		echo "<th $space_muuttuja>".t("Työnumero")."</th>";
-		echo "<th $space_muuttuja>".t("Prioriteetti")."</th>";
-		echo "<th $space_muuttuja>".t("Status")."</th>";
-		echo "<th $space_muuttuja>".t("Asiakas")."</th>";
-		echo "<th $space_muuttuja>".t("Päivämäärä")."</th>";
+		echo "<th $padding_muuttuja>".t("Työnumero")."</th>";
+		echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
+		echo "<th $padding_muuttuja>".t("Status")."</th>";
+		echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
+		echo "<th $padding_muuttuja>".t("Päivämäärä")."</th>";
 		echo "</tr>";
 
 		echo "</thead>";

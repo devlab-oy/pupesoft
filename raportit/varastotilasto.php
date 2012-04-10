@@ -130,7 +130,7 @@
 
 			// ostopuoli
 			$query = "	SELECT min(toimaika) toimaika,
-						sum(varattu) tulossa
+						round(sum(varattu)) tulossa
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteno = '{$row["tuoteno"]}'
@@ -180,6 +180,9 @@
 			$myyntirivi["myynti12kk"] = ((int) $myyntirivi["myynti12kk"] == 0) ? "" : $myyntirivi["myynti12kk"];
 			$myyntirivi["myynti6kk"] = ((int) $myyntirivi["myynti6kk"] == 0) ? "" : $myyntirivi["myynti6kk"];
 			$myyntirivi["myynti3kk"] = ((int) $myyntirivi["myynti3kk"] == 0) ? "" : $myyntirivi["myynti3kk"];
+			$row["varmuus_varasto"] = ((int) $row["varmuus_varasto"] == 0) ? "" : $row["varmuus_varasto"];
+			$varattu = ((int) $varattu == 0) ? "" : $varattu;
+			$saldo = ((int) $saldo == 0) ? "" : $saldo;
 
 			if ($rivimaara <= $rivilimitti) {
 				echo "<tr>";

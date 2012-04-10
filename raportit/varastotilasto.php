@@ -24,7 +24,18 @@
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 
 	echo "<table>";
-	echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
+
+	echo "<tr>";
+	echo "<th>".t("Listaustyyppi")."</th>";
+	echo "<td>";
+	echo "<select name='listaustyyppi'>";
+	echo "<option value = 'kappaleet'>".t("Listauksessa n‰ytet‰‰n myynti kappaleina")."</option>";
+	echo "<option value = 'hinnat'>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
+	echo "</select>";
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr><th>".t("Rajaukset")."</th><td>";
 
 	$monivalintalaatikot = array('OSASTO', 'TRY', '<br>TUOTEMERKKI');
 	require ("tilauskasittely/monivalintalaatikot.inc");
@@ -33,7 +44,7 @@
 
 	$nollapiilochk = "";
 	if (isset($nollapiilo) and $nollapiilo != '') $nollapiilochk	= "CHECKED";
-	echo "<tr><th>".t("Piilota nollarivit")."</th><td colspan='3'><input type='checkbox' name='nollapiilo' $nollapiilochk></td></tr>";
+	echo "<tr><th>".t("Piilota nollarivit")."</th><td><input type='checkbox' name='nollapiilo' $nollapiilochk></td></tr>";
 
 	echo "</table>";
 	echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
@@ -128,12 +139,14 @@
 			$ostoresult = pupe_query($query);
 			$ostorivi = mysql_fetch_assoc($ostoresult);
 
+			$tyyppi_lisa = ($listaustyyppi == "kappaleet") ? "kpl" : "rivihinta";
+
 			// myyntipuoli
 			$query = "	SELECT
-						round(sum(if(laskutettuaika >= '{$vvl}-01-01', rivihinta, 0)), 2) myyntiVA,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), rivihinta, 0)), 2) myynti12kk,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), rivihinta, 0)), 2) myynti6kk,
-						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), rivihinta, 0)), 2) myynti3kk
+						round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0)), 2) myyntiVA,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0)), 2) myynti12kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0)), 2) myynti6kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0)), 2) myynti3kk
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteno = '{$row["tuoteno"]}'

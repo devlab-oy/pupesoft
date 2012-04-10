@@ -1,5 +1,7 @@
 <?php
 
+$pupe_DataTables = array("etusivun_tyomaarays");
+
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
@@ -193,6 +195,10 @@ if (!isset($tee) or $tee == '') {
         echo "</table><br>";
 	}
 
+	pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
+	// 
+	$space_muuttuja = " style='padding-right:15px;'";
+
 	// Näytetään käyttäjäkohtaiset työmääräykset
 	$tyojonosql = "	SELECT lasku.tunnus,
 					lasku.nimi,
@@ -212,16 +218,23 @@ if (!isset($tee) or $tee == '') {
 
 	if (mysql_num_rows($tyoresult) > 0) {
 
-		echo "<table>";
+		echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+		echo "<thead>";
+		
 		echo "<tr>";
-		echo "<td colspan='4' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
+		echo "<td colspan='5' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
-		echo "<th>".t("Työnumero")."</th>";
-		echo "<th>".t("Prioriteetti")."</th>";
-		echo "<th>".t("Asiakas")."</th>";
-		echo "<th>".t("Päivämäärä")."</th>";
+		echo "<th $space_muuttuja>".t("Työnumero")."</th>";
+		echo "<th $space_muuttuja>".t("Prioriteetti")."</th>";
+		echo "<th $space_muuttuja>".t("Status")."</th>";
+		echo "<th $space_muuttuja>".t("Asiakas")."</th>";
+		echo "<th $space_muuttuja>".t("Päivämäärä")."</th>";
 		echo "</tr>";
+
+		echo "</thead>";
+		echo "<tbody>";
 
 	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
 			// Laitetetaan taustaväri jos sellainen on syötetty
@@ -230,10 +243,12 @@ if (!isset($tee) or $tee == '') {
 			echo "<tr $varilisa>";
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
+			echo "<td>{$tyorow["tyostatus"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
 			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
 			echo "</tr>";
 		}
+		echo "</tbody>";
 		echo "</table><br>";
 	}
 

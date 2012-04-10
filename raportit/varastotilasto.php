@@ -15,37 +15,15 @@
 		exit;
 	}
 
-	echo "<font class=head>".t("Varastotilasto")."</font><hr>";
+	$vvl = date("Y");
 
-	if (!isset($kka))
-		$kka = '01';
-	if (!isset($vva))
-		$vva = date("Y");
-	if (!isset($ppa))
-		$ppa = '01';
-
-	if (!isset($kkl))
-		$kkl = date("m");
-	if (!isset($vvl))
-		$vvl = date("Y");
-	if (!isset($ppl))
-		$ppl = date("d");
+	echo "<font class=head>".t("Varastotilasto")." $vvl</font><hr>";
 
 	// k‰yttis
 	echo "<form action='$PHP_SELF' method='POST'>";
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 
 	echo "<table>";
-	echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-			<td><input type='text' name='kka' value='$kka' size='3'></td>
-			<td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
-
-	echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
-			
 	echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
 	$monivalintalaatikot = array('OSASTO', 'TRY', '<br>TUOTEMERKKI');
@@ -63,9 +41,6 @@
 	echo "<br><br>";
 
 	if ($tee != "" and isset($painoinnappia)) {
-
-		// valitun jakson vika p‰iv‰
-		$ppl = date("t", mktime(0, 0, 0, $kkl, 1, $vvl));
 
 		if (@include('Spreadsheet/Excel/Writer.php')) {
 
@@ -94,19 +69,8 @@
 
 		$rivimaara   = mysql_num_rows($eresult);
 		$rivilimitti = 1000;
-		
-		echo "<table>
-				<tr>
-				<th>",t("Valittu aikav‰li"),"</th>
-				<td>{$ppa}</td>
-				<td>{$kka}</td>
-				<td>{$vva}</td>
-				<th>-</th>
-				<td>{$ppl}</td>
-				<td>{$kkl}</td>
-				<td>{$vvl}</td>
-				</tr>
-			</table><br><br>";
+
+		echo "<br>";
 
 		if ($rivimaara > $rivilimitti) {
 			echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
@@ -121,10 +85,11 @@
 			echo "<th>".t("Varastosaldo")."</th>";
 			echo "<th>".t("Myyntihinta")."</th>";
 			echo "<th>".t("Varmuusvarasto")."</th>";
-			echo "<th>".t("Tilattu")."</th>";
-			echo "<th>".t("Toimaika")."</th>";
-			echo "<th>".t("Varattu")."</th>";
-			echo "<th>".t("Myynti")."<br>".t("aikav‰lill‰")."</th>";
+			echo "<th>".t("Tilattu m‰‰r‰")."</th>";
+			echo "<th>".t("Toimitus aika")."</th>";
+			echo "<th>".t("Varattu saldo")."</th>";
+			echo "<th>".t("Myynti")."<br>$vvl</th>";
+			echo "<th>".t("Myynti")."<br>12kk</th>";
 			echo "<th>".t("Myynti")."<br>6kk</th>";
 			echo "<th>".t("Myynti")."<br>3kk</th>";
 		}
@@ -143,6 +108,7 @@
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 12kk"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 6kk"));
 			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 3kk"));
 
@@ -165,14 +131,14 @@
 			// myyntipuoli
 			$query = "	SELECT
 						round(sum(if(laskutettuaika >= '{$vvl}-01-01', rivihinta, 0)), 2) myyntiVA,
-						round(sum(if(laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 6 month), rivihinta, 0)), 2) myynti6kk,
-						round(sum(if(laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 3 month), rivihinta, 0)), 2) myynti3kk
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), rivihinta, 0)), 2) myynti12kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), rivihinta, 0)), 2) myynti6kk,
+						round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), rivihinta, 0)), 2) myynti3kk
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND tuoteno = '{$row["tuoteno"]}'
 						AND tyyppi = 'L'
-						and laskutettuaika >= if(date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month) < '{$vvl}-01-01', date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month), '{$vvl}-01-01')
-						and laskutettuaika >= if(date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month) < '{$vvl}-01-01', date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month), '{$vvl}-01-01')
+						and laskutettuaika >= date_sub(CURDATE(), interval 12 month)
 						AND kpl != 0";
 			$myyntiresult = pupe_query($query);
 
@@ -210,6 +176,7 @@
 				echo "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
 				echo "<td align='right'>$varattu</td>";
 				echo "<td align='right'>$myyntirivi[myyntiVA]</td>";
+				echo "<td align='right'>$myyntirivi[myynti12kk]</td>";
 				echo "<td align='right'>$myyntirivi[myynti6kk]</td>";
 				echo "<td align='right'>$myyntirivi[myynti3kk]</td>";
 				echo "</tr>";
@@ -229,6 +196,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake++, $row["toimaika"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
 

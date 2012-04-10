@@ -859,6 +859,7 @@ else {
 							AND tilausrivi.tyyppi != 'D'
 							AND tilausrivi.varattu > 1
 							AND tilausrivi.var NOT IN ('J','P')
+							AND (tilausrivi.perheid = 0 OR tilausrivi.perheid=tilausrivi.tunnus)
 							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
 
@@ -930,7 +931,10 @@ else {
 						// tuoteperhe-keissi
 						if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {
 							// päivitetään splitatulle riville perheid
-							$query = "UPDATE tilausrivi SET perheid = '{$split_tilausrivin_tunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$split_tilausrivin_tunnus}'";
+							$query = "	UPDATE tilausrivi
+										SET perheid = '{$split_tilausrivin_tunnus}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus  = '{$split_tilausrivin_tunnus}'";
 							$update_res = pupe_query($query);
 
 							$query = "	SELECT *
@@ -990,6 +994,9 @@ else {
 										case 'tilausrivitunnus':
 											$values .= ", '{$split_tilausrivin_tunnus_lapsi}'";
 											break;
+										case 'omalle_tilaukselle':
+											$values .= ", 'K'";
+											break;
 										default:
 											$values .= ", '".$lisatiedot_row[$fieldname]."'";
 									}
@@ -997,14 +1004,12 @@ else {
 
 								$query = "INSERT into tilausrivin_lisatiedot ($fields) VALUES ($values)";
 								$lisatiedot_result = pupe_query($query);
-
 							}
 						}
 					}
 
 					if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {
 						// jos on tuoteperhe, niin päivitetään lapsille varattu
-
 						$query = "	SELECT *
 									FROM tilausrivi
 									WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1015,36 +1020,58 @@ else {
 						$lapsires = pupe_query($query);
 
 						while ($lapsirow = mysql_fetch_assoc($lapsires)) {
-							$query = "UPDATE tilausrivi SET varattu = '".($lapsirow['varattu'] / $row['varattu'])."' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND tunnus = '{$lapsirow['tunnus']}'";
+							$query = "	UPDATE tilausrivi
+										SET varattu = '".($lapsirow['varattu'] / $row['varattu'])."'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$laskurow['tunnus']}'
+										AND tunnus  = '{$lapsirow['tunnus']}'";
 							$update_res = pupe_query($query);
+
+							// päivitetään alkuoeräinen lapsirivi
+							$query = "	UPDATE tilausrivin_lisatiedot
+										SET omalle_tilaukselle = 'K'
+										WHERE yhtio 		 = '{$kukarow['yhtio']}'
+										AND tilausrivitunnus = '{$lapsirow['tunnus']}'";
+							$lisatiedot_result = pupe_query($query);
 						}
 					}
 
 					// päivitetään alkuperäisen rivin varattu-kenttään 1
-					$query = "UPDATE tilausrivi SET varattu = 1 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+					$query = "	UPDATE tilausrivi
+								SET varattu = 1
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$row['tunnus']}'";
 					$update_res = pupe_query($query);
 				}
 			}
 
 			$kerayserat_select = $yhtiorow['kerayserat'] != '' ? "vh.keraysvyohyke, " : "";
-			// $kerayserat_select = $yhtiorow['kerayserat'] != '' ? "tuote.keraysvyohyke, " : "";
-			$kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
-			// $kerayserat_join = $yhtiorow['kerayserat'] != '' ? "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)" : "";
+			$kerayserat_join = $yhtiorow['kerayserat'] != '' ? " LEFT JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
 
 			if ($yhtiorow["splittauskielto"] == "K") {
-				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.kerayspvm, sorttauskentta";
+				$sorttaus = ", tilausrivi.kerayspvm, sorttauskentta";
 			}
 			else {
-				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, sorttauskentta";
+				$sorttaus = ", sorttauskentta";
 			}
 
 			if ($yhtiorow['kerayserat'] != '') {
-				// $sorttaus = "tuote.keraysvyohyke, {$sorttaus}";
-				$sorttaus = "vh.keraysvyohyke, {$sorttaus}";
+				$sorttaus = ", vh.keraysvyohyke {$sorttaus}";
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat (varattu+kpl koska magenton tilaukset on laskutettu jo tässä vaiheessa...)
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
+			$query = "	SELECT tilausrivi.otunnus,
+						tilausrivi.perheid,
+						tilausrivi.tunnus,
+						tilausrivi.hyllyalue,
+						tilausrivi.hyllynro,
+						tilausrivi.hyllyvali,
+						tilausrivi.hyllytaso,
+						tilausrivi.kerayspvm,
+						tilausrivi.toimaika,
+						tilausrivin_lisatiedot.erikoistoimitus_myynti,
+						if (tilausrivin_lisatiedot.omalle_tilaukselle != '', if(tilausrivi.perheid > 0, tilausrivi.perheid, tilausrivi.tunnus), 0) omalle_tilaukselle,
+						if (tilausrivin_lisatiedot.omalle_tilaukselle != '', concat(tilausrivi.perheid,tilausrivi.tunnus), 0) omalle_tilaukselle_sort,
 						tilausrivin_lisatiedot.ohita_kerays,
 						{$kerayserat_select}
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -1057,7 +1084,7 @@ else {
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
 						and tilausrivi.var not in ('J','P')
-						ORDER BY $sorttaus";
+						ORDER BY omalle_tilaukselle_sort $sorttaus";
 			$result = pupe_query($query);
 
 			//tässä muuttujassa on sit kaikki tunnukset splitin jälkeen
@@ -1065,7 +1092,7 @@ else {
 			$tilausnumerot[] = $laskurow["tunnus"];
 
 			//mihin varastoon lähete kuuluu. aluksi x
-			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = $keraysvyohyke = $edkeraysvyohyke = "x";
+			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = $keraysvyohyke = $edkeraysvyohyke = $edomalle_tilaukselle = "x";
 			$tulostusalue = $edtulostusalue = "x";
 
 			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimmäisen tilauksen tunnus vanhaksitunnukseksi
@@ -1076,7 +1103,6 @@ else {
 			$tulalue_kpl_array = array();
 
 			$sisviesti2_numerointi	= 1;
-			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
 			unset($laskusplitres);
 
@@ -1095,11 +1121,22 @@ else {
 				// Mikä keräysvyöhyke
 				$keraysvyohyke = $row['keraysvyohyke'];
 
+				// Mikä keräysvyöhyke
+				$omalle_tilaukselle = $row['omalle_tilaukselle'];
+
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '') or ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
+				// omalle_tilaukselle - tilauksia ei splitata muuten ku omiksi tilauksiksi (eli ei esim splitata varastoittain tai vyöhykkeittäin)
+				if (	((($varasto != $edvarasto and $edvarasto != 'x' and $edomalle_tilaukselle == 0) or
+						  ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $edomalle_tilaukselle == 0) or
+						  ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '' and $edomalle_tilaukselle == 0)
+						 ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E"
+						) or
+						($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
+						($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x')
+					) {
 
 					$tilaus_splitattu = TRUE;
 
@@ -1262,6 +1299,9 @@ else {
 				//	edellinen kerayspvm talteen
 				$edkerayspvm = $row["kerayspvm"];
 
+				//	edellinen omalle_tilaukselle talteen
+				$edomalle_tilaukselle = $row["omalle_tilaukselle"];
+
 				//jos tilausrivin laskunumero on eri
 				if ($row['otunnus'] != $laskurow['tunnus']) {
 					$query = "	UPDATE tilausrivi
@@ -1291,13 +1331,6 @@ else {
 							$ohno  = pupe_query($query);
 						}
 					}
-				}
-
-				if ($row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
-					$i_counter++;
-				}
-				elseif ($row['perheid'] == 0) {
-					$i_counter++;
 				}
 			}
 

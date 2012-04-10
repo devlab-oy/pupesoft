@@ -1102,8 +1102,8 @@ else {
 			$varasto_kpl_array = array();
 			$tulalue_kpl_array = array();
 
-			$sisviesti2_numerointi	= 1;
-			$tilaus_splitattu 		= FALSE;
+			$ohjausmerkki_nro	= 1;
+			$tilaus_splitattu 	= FALSE;
 			unset($laskusplitres);
 
 			if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
@@ -1218,13 +1218,13 @@ else {
 							case 'toimitustavan_lahto':
 								$values .= ", '$toimitustavan_lahto'";
 								break;
-							case 'sisviesti2':
-								if ($row['omalle_tilaukselle'] != '') {
-									$values .= ", '{$sisviesti2_numerointi}-{$laskurow['sisviesti2']}'";
-									$sisviesti2_numerointi++;
+							case 'ohjausmerkki':
+								if ($row['omalle_tilaukselle'] > 0) {
+									$values .= ", '{$ohjausmerkki_nro}-{$laskurow['ohjausmerkki']}'";
+									$ohjausmerkki_nro++;
 								}
 								else {
-									$values .= ", '{$laskurow['sisviesti2']}'";
+									$values .= ", '{$laskurow['ohjausmerkki']}'";
 								}
 								break;
 							case 'kohdistettu':

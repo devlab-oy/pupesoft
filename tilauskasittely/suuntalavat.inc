@@ -232,56 +232,55 @@
 				}
 
 				$query = "	UPDATE suuntalavat SET
-							sscc = '{$sscc}',
-							keikkatunnus = '{$keikkatunnus}',
-							alkuhyllyalue = '{$alkuhyllyalue}',
-							alkuhyllynro = '{$alkuhyllynro}',
-							alkuhyllyvali = '{$alkuhyllyvali}',
-							alkuhyllytaso = '{$alkuhyllytaso}',
-							loppuhyllyalue = '{$loppuhyllyalue}',
-							loppuhyllynro = '{$loppuhyllynro}',
-							loppuhyllyvali = '{$loppuhyllyvali}',
-							loppuhyllytaso = '{$loppuhyllytaso}',
-							tyyppi = '{$tyyppi}',
-							keraysvyohyke = '{$keraysvyohyke}',
-							kaytettavyys = '{$kaytettavyys}',
-							terminaalialue = '{$terminaalialue}',
-							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
-							korkeus = '{$korkeus}',
-							paino = '{$paino}',
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()
+							sscc 				= '{$sscc}',
+							keikkatunnus 		= '{$keikkatunnus}',
+							alkuhyllyalue 		= '{$alkuhyllyalue}',
+							alkuhyllynro 		= '{$alkuhyllynro}',
+							alkuhyllyvali 		= '{$alkuhyllyvali}',
+							alkuhyllytaso 		= '{$alkuhyllytaso}',
+							loppuhyllyalue 		= '{$loppuhyllyalue}',
+							loppuhyllynro 		= '{$loppuhyllynro}',
+							loppuhyllyvali 		= '{$loppuhyllyvali}',
+							loppuhyllytaso 		= '{$loppuhyllytaso}',
+							tyyppi 				= '{$tyyppi}',
+							keraysvyohyke 		= '{$keraysvyohyke}',
+							kaytettavyys 		= '{$kaytettavyys}',
+							terminaalialue 		= '{$terminaalialue}',
+							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+							korkeus 			= '{$korkeus}',
+							paino 				= '{$paino}',
+							muuttaja 			= '{$kukarow['kuka']}',
+							muutospvm 			= now()
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$suuntalavan_tunnus}'";
+							AND tunnus 	= '{$suuntalavan_tunnus}'";
 				$update_result = pupe_query($query);
 			}
 			else {
 
 				$query = "	INSERT INTO suuntalavat SET
-							yhtio = '{$kukarow['yhtio']}',
-							tila = '',
-							sscc = '{$sscc}',
-							keikkatunnus = '{$keikkatunnus}',
-							alkuhyllyalue = '{$alkuhyllyalue}',
-							alkuhyllynro = '{$alkuhyllynro}',
-							alkuhyllyvali = '{$alkuhyllyvali}',
-							alkuhyllytaso = '{$alkuhyllytaso}',
-							loppuhyllyalue = '{$loppuhyllyalue}',
-							loppuhyllynro = '{$loppuhyllynro}',
-							loppuhyllyvali = '{$loppuhyllyvali}',
-							loppuhyllytaso = '{$loppuhyllytaso}',
-							tyyppi = '{$tyyppi}',
-							keraysvyohyke = '{$keraysvyohyke}',
-							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
-							kaytettavyys = '{$kaytettavyys}',
-							terminaalialue = '{$terminaalialue}',
-							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
-							korkeus = '{$korkeus}',
-							paino = '{$paino}',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()";
+							yhtio 				= '{$kukarow['yhtio']}',
+							tila 				= '',
+							sscc 				= '{$sscc}',
+							keikkatunnus 		= '{$keikkatunnus}',
+							alkuhyllyalue 		= '{$alkuhyllyalue}',
+							alkuhyllynro 		= '{$alkuhyllynro}',
+							alkuhyllyvali 		= '{$alkuhyllyvali}',
+							alkuhyllytaso 		= '{$alkuhyllytaso}',
+							loppuhyllyalue		= '{$loppuhyllyalue}',
+							loppuhyllynro 		= '{$loppuhyllynro}',
+							loppuhyllyvali 		= '{$loppuhyllyvali}',
+							loppuhyllytaso 		= '{$loppuhyllytaso}',
+							tyyppi 				= '{$tyyppi}',
+							keraysvyohyke 		= '{$keraysvyohyke}',
+							kaytettavyys 		= '{$kaytettavyys}',
+							terminaalialue 		= '{$terminaalialue}',
+							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+							korkeus 			= '{$korkeus}',
+							paino 				= '{$paino}',
+							laatija 			= '{$kukarow['kuka']}',
+							luontiaika 			= now(),
+							muuttaja 			= '{$kukarow['kuka']}',
+							muutospvm 			= now()";
 				$insert_result = pupe_query($query);
 				$uusi_suuntalavan_tunnus = mysql_insert_id();
 
@@ -820,5 +819,4 @@
 			echo "<input type='submit' value='",t("Kohdista rivejä"),"'>";
 			echo "</form>";
 		}
-
 	}

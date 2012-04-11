@@ -213,8 +213,8 @@
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
-				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["tulossa"]);
-				$worksheet->writeString($excelrivi, $excelsarake++, $row["toimaika"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
 				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);

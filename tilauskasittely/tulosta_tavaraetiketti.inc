@@ -54,15 +54,6 @@
 			$viivakoodi1 .= substr($row['eankoodi'],2);
 		}
 
-		$sscc_clean = preg_replace("/[^0-9]/", "", $row['sscc']);
-
-		if ($sscc_clean != "") {
-			$viivakoodi2  = ">6";
-			$viivakoodi2 .= substr($sscc_clean,0,1);
-			$viivakoodi2 .= ">5";
-			$viivakoodi2 .= substr($sscc_clean,1);
-		}
-
 		$sivu = "*** ETIKETIN KOKO ***
             	 {D1530,1040,1470|}
                  {AX;+000,+000,+00|}
@@ -133,7 +124,7 @@
 	             {RC013;$row[eankoodi]|}
 
 			     {XB01;0050,1060,A,3,04,0,0270,+0000000000,000,0,00|}
-			     {RB01;$viivakoodi2|}
+			     {RB01;$row[sscc]|}
 
 				 {PC014;0100,1365,05,05,J,00,B|}
 	             {RC014;SSCC|}

@@ -5666,8 +5666,11 @@ if ($tee == '') {
 					if ($row["var"] == "B") {
 						echo t("Palautettu");
 					}
-					else {
+					elseif ($row["var"] == "A") {
 						echo t("Laskutettu");
+					}
+					else {
+						echo $row["varattu"];
 					}
 
 					echo "</td>";

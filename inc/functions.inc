@@ -13130,7 +13130,10 @@ if (!function_exists('tulosta_sscc')) {
 	function tulosta_sscc($komento) {
 		global $kukarow, $yhtiorow;
 
-		$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji	= 'SSCC'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
@@ -13176,37 +13179,32 @@ if (!function_exists('tulosta_sscc')) {
 			echo t("SSCC-tarraa ei voida tulostaa sähköpostiin"),"<br>";
 		}
 		else {
-			$line = exec(" echo \"$sivu\" | $komento");
+			$line = exec("echo \"$sivu\" | $komento");
 		}
 
 		if (trim($row['selite']) == '') {
-
-			// haetaan aluksi max perhe
-			$query = "	SELECT max(perhe)+1 perhe
-						FROM avainsana
-						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$max_perhe_res = pupe_query($query);
-			$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
-
 			$query = "	INSERT INTO avainsana SET
-						yhtio = '{$kukarow['yhtio']}',
-						perhe = '{$max_perhe_row['perhe']}',
-						kieli = '{$kukarow['kieli']}',
-						laji = 'SSCC',
-						nakyvyys = '',
-						selite = '{$sscc}',
-						selitetark = '',
-						selitetark_2 = '',
-						selitetark_3 = '',
-						jarjestys = 0,
-						laatija = '{$kukarow['kuka']}',
-						luontiaika = now(),
-						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'";
+						yhtio 			= '{$kukarow['yhtio']}',
+						perhe 			= '',
+						kieli 			= '{$kukarow['kieli']}',
+						laji 			= 'SSCC',
+						nakyvyys 		= '',
+						selite 			= '{$sscc}',
+						selitetark 		= '',
+						selitetark_2 	= '',
+						selitetark_3 	= '',
+						jarjestys 		= 0,
+						laatija 		= '{$kukarow['kuka']}',
+						luontiaika 		= now(),
+						muutospvm 		= now(),
+						muuttaja 		= '{$kukarow['kuka']}'";
 			$insert_res = pupe_query($query);
 		}
 		else {
-			$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$query = "	UPDATE avainsana
+						SET selite = '{$sscc}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
 			$update_res = pupe_query($query);
 		}
 

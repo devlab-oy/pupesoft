@@ -1,6 +1,5 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
+
 	echo "<form method='post' action='$PHP_SELF?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
@@ -252,15 +251,26 @@
 			echo "<option value='$makkoodi' $sel[$makkoodi]>".t("$maa")."</option>";
 		}
 	}
+
 	echo "</select></td></tr>";
 
 	foreach ($tulostimet as $tulostin) {
 
 		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
+
+			$valitut_suuntalavat = array();
+			$valitut_suuntalisa  = "";
+
+			if (isset($valitut_lavat) and $valitut_lavat != "") {
+				$valitut_suuntalavat = explode(",", $valitut_lavat);
+				$valitut_suuntalisa = " AND tunnus in (".mysql_real_escape_string($valitut_lavat).")";
+			}
+
 			$query = "	SELECT tunnus, sscc
 						FROM suuntalavat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila 	= 'S'";
+						AND tila 	= 'S'
+						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
@@ -329,7 +339,9 @@
 				echo "<tr><th>",t("Valitse suuntalavat"),"</th><td>";
 
 				while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_res)) {
-					echo "<input type='checkbox' name='suuntalavat[]' value='{$suuntalavat_row['tunnus']}' /> {$suuntalavat_row['sscc']}<br />";
+					$ched = (in_array($suuntalavat_row["tunnus"], $valitut_suuntalavat)) ? "CHECKED" : "";
+
+					echo "<input type='checkbox' name='suuntalavat[]' value='{$suuntalavat_row['tunnus']}' $ched> {$suuntalavat_row['sscc']}<br />";
 				}
 
 				echo "</td></tr>";

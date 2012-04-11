@@ -27,6 +27,7 @@
 		$paivia_eteenpain = 14;
 	}
 
+	/*
 	// Poistetaan aktiiviset, vanhentuneet lähdöt joihin ei oo liitetty yhtään tilausta
 	$query = "	SELECT lahdot.tunnus
 				FROM lahdot
@@ -43,6 +44,7 @@
 					AND tunnus = '{$chk_row['tunnus']}'";
 		$del_res = pupe_query($query);
 	}
+	*/
 
 	// Kuinka pitkälle ollaan jo generoitu tän skriptin toimesta lähtöjä per toimitustapa
 	$query = "	SELECT liitostunnus, max(pvm) maxpvm

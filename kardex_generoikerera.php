@@ -52,13 +52,11 @@
 
 				$otunnukset = implode(",", $erat['tilaukset']);
 
-				$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
-
 				// tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
 				$query = "	UPDATE lasku SET
 							tila = 'L',
 							lahetepvm = now(),
-							kerayslista = '{$kerayslistatunnus}'
+							kerayslista = '{$kerayseran_numero}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus in ({$otunnukset})";
 				$upd_res = pupe_query($query);

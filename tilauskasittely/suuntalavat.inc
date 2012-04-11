@@ -734,6 +734,7 @@
 					echo "<input type='hidden' name='keikkaid' value='{$laskurow['laskunro']}'>";
 					echo "<input type='hidden' name='tunnus' value='{$laskurow['tunnus']}'>";
 					echo "<input type='hidden' name='laskunro' value='{$laskurow['laskunro']}'>";
+					echo "<input type='hidden' name='valitut_lavat' value='{$suuntalavat_row['tunnus']}'>";
 					echo "<input type='hidden' name='nappikeikalle' value='menossa'>";
 					echo "<input type='submit' value='",t("Tulosta purkulista"),"' />";
 					echo "</form>";

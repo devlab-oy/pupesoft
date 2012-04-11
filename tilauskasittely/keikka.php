@@ -320,32 +320,39 @@ if ($toiminto == "tulosta") {
 		$tulostimet = array('Purkulista','Tuotetarrat','Tariffilista');
 
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus != '') {
-			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+
+			$valitut_lavat = "";
+
+			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
 						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
+						WHERE yhtio 	= '{$kukarow['yhtio']}'
 						AND uusiotunnus = '{$otunnus}'
-						AND tyyppi = 'O'
-						AND suuntalava != 0
-						AND kpl != 0";
+						AND tyyppi 		= 'O'
+						AND suuntalava  > 0
+						AND kpl 	   != 0";
 			$check_result = pupe_query($query);
 			$check_row = mysql_fetch_assoc($check_result);
 
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Vastaanottoraportti";
+
+				$valitut_lavat .= $check_row["suuntalavat"];
 			}
 
-			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
 						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
+						WHERE yhtio 	= '{$kukarow['yhtio']}'
 						AND uusiotunnus = '{$otunnus}'
-						AND tyyppi = 'O'
-						AND suuntalava != 0
-						AND kpl = 0";
+						AND tyyppi 		= 'O'
+						AND suuntalava  > 0
+						AND kpl 		= 0";
 			$check_result = pupe_query($query);
 			$check_row = mysql_fetch_assoc($check_result);
 
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Tavaraetiketti";
+
+				$valitut_lavat .= $check_row["suuntalavat"];
 			}
 		}
 
@@ -353,7 +360,7 @@ if ($toiminto == "tulosta") {
 		echo "<tr>";
 		echo "<th>".t("keikka")."</th>";
 		echo "<th>".t("ytunnus")."</th>";
-		echo "<th>".t("nimi")."</th>";	
+		echo "<th>".t("nimi")."</th>";
 		echo "</tr>";
 		echo "<tr>
 				<td>$laskurow[laskunro]</td>
@@ -389,7 +396,7 @@ if ($toiminto == "tulosta") {
 
 	if ($komento["Tavaraetiketti"] != '') {
 		require('tulosta_tavaraetiketti.inc');
-	}	
+	}
 }
 
 // syötetään keikan lisätietoja
@@ -1057,7 +1064,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 $nappikeikka = "";
 
 // kohdisteaan keikkaa laskun tunnuksella $otunnus
-if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or 
+if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or
 	$toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kalkyyli" or $toiminto == "kaikkiok" or $toiminto == "suuntalavat") {
 
 	$query = "	SELECT *

@@ -30,7 +30,7 @@
 				AND tilausrivi.uusiotunnus = '{$otunnus}'
 				AND tilausrivi.tyyppi = 'O'
 				AND tilausrivi.kpl = 0
-				AND tilausrivi.suuntalava != 0
+				AND tilausrivi.suuntalava > 0
 				ORDER BY suuntalavat.sscc, tilausrivi.tuoteno";
 	$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
 
@@ -139,6 +139,6 @@
 		$sivu = escapeshellarg($sivu);
 
 		if ($komento["Tavaraetiketti"] != '' and $komento["Tavaraetiketti"] != 'edi' and $komento["Tavaraetiketti"] != 'email') {
-			$line = exec(" echo \"$sivu\" | $komento[Tavaraetiketti]");
+			$line = exec("echo \"$sivu\" | $komento[Tavaraetiketti]");
 		}
 	}

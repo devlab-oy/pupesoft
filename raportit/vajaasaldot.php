@@ -90,7 +90,7 @@
 
 				if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td>$row[osasto]</td>";
 				echo "<td>$row[try]</td>";
 				echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";

@@ -5670,7 +5670,7 @@ if ($tee == '') {
 						echo t("Laskutettu");
 					}
 					else {
-						echo $row["varattu"];
+						echo ($row["varattu"] + $row["jt"]);
 					}
 
 					echo "</td>";

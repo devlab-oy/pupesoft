@@ -8590,25 +8590,33 @@ if (!function_exists("on_puhelinnumero")) {
 }
 
 if (!function_exists("hae_rahtisopimusnumero")) {
-	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus, $asiakastunnus = "") {
+	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "") {
 		global $kukarow;
 
-		//etsitään löytyykö rahtisopimusta
-		$query = "	(SELECT *, '1' prio
-					FROM rahtisopimukset
-					WHERE toimitustapa = '$toimitustapa'
-					AND asiakas = '$asiakastunnus'
-					AND asiakas != ''
-					AND yhtio = '$kukarow[yhtio]')
-					UNION
-					(SELECT *, '2' prio
-					FROM rahtisopimukset as rahtisopimukset2
-					WHERE toimitustapa = '$toimitustapa'
-					AND ytunnus = '$ytunnus'
-					AND ytunnus != ''
-					AND yhtio = '$kukarow[yhtio]')
-					ORDER BY prio
-					LIMIT 1";
+		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero 
+		if ($ytunnus == "" and $asiakastunnus == "") {
+			$query = "	SELECT sopimusnro
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND selite = '{$toimitustapa}'";
+		}
+		else {
+			$query = "	(SELECT *, '1' prio
+						FROM rahtisopimukset
+						WHERE toimitustapa = '$toimitustapa'
+						AND asiakas = '$asiakastunnus'
+						AND asiakas != ''
+						AND yhtio = '{$kukarow["yhtio"]}')
+						UNION
+						(SELECT *, '2' prio
+						FROM rahtisopimukset as rahtisopimukset2
+						WHERE toimitustapa = '$toimitustapa'
+						AND ytunnus = '$ytunnus'
+						AND ytunnus != ''
+						AND yhtio = '{$kukarow["yhtio"]}')
+						ORDER BY prio
+						LIMIT 1";
+		}
 		$rares = pupe_query($query);
 		$rarow = mysql_fetch_assoc($rares);
 

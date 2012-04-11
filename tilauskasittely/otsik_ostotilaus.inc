@@ -236,8 +236,9 @@
 				$sel[$srow["tilaustyyppi"]] = "selected";
 
 				echo "<option value='2' $sel[2]>".t("Normaalitilaus")."</option>";
-				echo "<option value='1' $sel[1]>".t("Pikal‰hetys")."</option>";
+				echo "<option value='3' $sel[3]>".t("Pikal‰hetys")."</option>";
 				echo "</select></td>";
+
 				//visuaalista s‰‰tˆ‰, "t‰ytet‰‰n" turha v‰li
 				echo "<td>";
 				echo "</td>";

@@ -39,11 +39,12 @@
 		$tee = "";
 	}
 
-	if ($tee != "" and isset($asiakas) and trim($asiakas) == "" and isset($paikkakunta) and trim($paikkakunta) == "" and isset($tilausnumero) and trim($tilausnumero == "")) {
-		echo "<font class='error'>",t("VIRHE: Asiakas / Paikkakunta / tilausnumero puuttuu"),"!</font><br /><br />";
+	if ($tee != "" and isset($asiakas) and trim($asiakas) == "" and isset($paikkakunta) and trim($paikkakunta) == "" and isset($tilausnumero) and trim($tilausnumero == "") and isset($sscc) and trim($sscc == "")) {
+		echo "<font class='error'>",t("VIRHE: Ainakin yksi hakuehto syötettävä"),"!</font><br /><br />";
 		$tee = "";
 	}
 
+	if (!isset($sscc)) $sscc = "";
 	if (!isset($asiakas)) $asiakas = "";
 	if (!isset($paikkakunta)) $paikkakunta = "";
 	if (!isset($tilausnumero)) $tilausnumero = "";
@@ -57,9 +58,10 @@
 
 	echo "<form method='post' action=''>";
 	echo "<table>";
-	echo "<tr><th>",t("Etsi asiakas"),"</th><td><input type='text' name='asiakas' value='{$asiakas}' />&nbsp;</td>";
+	echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='asiakas' value='{$asiakas}' />&nbsp;</td>";
 	echo "<th>",t("Paikkakunta"),"</th><td><input type='text' name='paikkakunta' value='{$paikkakunta}' /></td></tr>";
-	echo "<tr><th>",t("Etsi tilausnumero"),"</th><td colspan='3'><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td></tr>";
+	echo "<tr><th>",t("Tilausnumero"),"</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
+	echo "<th>",t("SSCC"),"</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
 	echo "<tr><th>",t("Päivämäärä"),"</th><td colspan='3' style='vertical-align:middle;'>";
 	echo "<input type='text' name='ppalku' value='{$ppalku}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkalku' value='{$kkalku}' size='3' />&nbsp;";
@@ -83,16 +85,30 @@
 		$kkloppu = (int) $kkloppu;
 		$vvloppu = (int) $vvloppu;
 
+		$pvmlisa = "AND lahdot.pvm >= '{$vvalku}-{$kkalku}-{$ppalku}' AND lahdot.pvm <= '{$vvloppu}-{$kkloppu}-{$pploppu}'";
+
+
 		$nimilisa = trim($asiakas) != "" ? " AND (lasku.nimi LIKE ('%".mysql_real_escape_string($asiakas)."%') OR lasku.toim_nimi LIKE ('%".mysql_real_escape_string($asiakas)."%'))" : "";
 		$postitplisa = trim($paikkakunta) != "" ? " AND (lasku.postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%') OR lasku.toim_postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%'))" : "";
+		$tilauslisa = trim($tilausnumero) != "" ? " AND kerayserat.otunnus = '".mysql_real_escape_string($tilausnumero)."'" : "";
+		$sscclisa = trim($sscc) != "" ? " AND (kerayserat.sscc LIKE ('%".mysql_real_escape_string($sscc)."%') OR kerayserat.sscc_ulkoinen LIKE ('%".mysql_real_escape_string($sscc)."%'))" : "";
 
-		$query = "	SELECT lahdot.pvm, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi, toimitustapa.selite AS toimitustapa, group_concat(DISTINCT kerayserat.sscc) AS sscc
+		if ($tilauslisa != "" or $sscclisa != "") {
+			$pvmlisa = "";
+		}
+
+		$query = "	SELECT lahdot.pvm,
+					TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) AS nimi,
+					toimitustapa.selite AS toimitustapa,
+					group_concat(DISTINCT kerayserat.sscc) AS sscc
 					FROM kerayserat
 					JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus {$nimilisa} {$postitplisa})
-					JOIN lahdot ON (lahdot.yhtio = kerayserat.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = 'S' AND lahdot.pvm >= '{$vvalku}-{$kkalku}-{$ppalku}' AND lahdot.pvm <= '{$vvloppu}-{$kkloppu}-{$pploppu}')
+					JOIN lahdot ON (lahdot.yhtio = kerayserat.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = 'S' $pvmlisa)
 					JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 					WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 					AND kerayserat.tila = 'R'
+					{$tilauslisa}
+					{$sscclisa}
 					GROUP BY 1,2,3
 					ORDER BY 1,2,3 ";
 		$res = pupe_query($query);
@@ -108,9 +124,8 @@
 
 				$query = "	SELECT
 							kerayserat.nro,
-							IF(kerayserat.sscc_ulkoinen != 0, kerayserat.sscc_ulkoinen, kerayserat.sscc) AS sscc,
+							kerayserat.sscc,
 							kerayserat.sscc_ulkoinen,
-							kerayserat.sscc AS sscc_vanha,
 							kerayserat.otunnus,
 							IFNULL(pakkaus.pakkauskuvaus, 'MUU KOLLI') pakkauskuvaus,
 							lasku.ohjausmerkki,
@@ -122,8 +137,8 @@
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND (kerayserat.sscc IN ({$row['sscc']}) OR kerayserat.sscc_ulkoinen IN ({$row['sscc']}))
-							GROUP BY 1,2,3,4,5,6,7,8
+							AND kerayserat.sscc IN ({$row['sscc']})
+							GROUP BY 1,2,3,4,5,6,7
 							ORDER BY 1,2";
 				$era_res = pupe_query($query);
 
@@ -148,14 +163,18 @@
 
 						echo "<td class='sscc' id='{$era_row['sscc']}'>";
 
-						if ($era_row['sscc_ulkoinen'] != 0) {
+						if ((is_numeric($era_row['sscc_ulkoinen']) and (int) $era_row['sscc_ulkoinen'] > 0) or (!is_numeric($era_row['sscc_ulkoinen']) and (string) $era_row['sscc_ulkoinen'] != "")) {
 
 							// shipment_unique_id algoritmi vaihdettu.....
 							if ($era_row['nro'] <= 3281) {
-								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['otunnus']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['otunnus']}_{$era_row['sscc']}' target='_blank'>{$era_row['sscc_ulkoinen']}</a>";
 							}
 							else {
-								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['nro']}_{$era_row['sscc_vanha']}' target='_blank'>{$era_row['sscc']}</a>";
+								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['nro']}_{$era_row['sscc']}' target='_blank'>{$era_row['sscc_ulkoinen']}</a>";
+							}
+
+							if (stripos($era_row['sscc_ulkoinen'],"JJFI") !== FALSE) {
+								echo " / <a class='linkki' target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$era_row['sscc_ulkoinen']}&LOTUS_hae=Hae'>Itella</a><br>";
 							}
 						}
 						else {

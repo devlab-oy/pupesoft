@@ -8595,7 +8595,7 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 
 		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero 
 		if ($ytunnus == "" and $asiakastunnus == "") {
-			$query = "	SELECT sopimusnro
+			$query = "	SELECT sopimusnro rahtisopimus
 						FROM toimitustapa
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND selite = '{$toimitustapa}'";

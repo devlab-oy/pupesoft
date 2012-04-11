@@ -173,8 +173,12 @@
 								echo "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$era_row['nro']}_{$era_row['sscc']}' target='_blank'>{$era_row['sscc_ulkoinen']}</a>";
 							}
 
-							if (stripos($era_row['sscc_ulkoinen'],"JJFI") !== FALSE) {
+							if (substr($era_row['sscc_ulkoinen'], 0, 4) == "JJFI") {
 								echo " / <a class='linkki' target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$era_row['sscc_ulkoinen']}&LOTUS_hae=Hae'>Itella</a><br>";
+							}
+
+							if (substr($era_row['sscc_ulkoinen'], 0, 2) == "MA") {
+								echo " / <a class='linkki' target=newikkuna href='http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$era_row['sscc_ulkoinen']}'>Matkahuolto</a><br>";
 							}
 						}
 						else {

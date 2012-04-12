@@ -327,7 +327,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET')) {
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
 		$org_kpl = $kpl;
 
 		if ($kpl <= $trow['myynti_era']) {
@@ -345,7 +345,9 @@
 			$kpl = (float) $test;
 		}
 
-		$myyntierahuomatus = TRUE;
+		if ($org_kpl != $kpl) {
+			$myyntierahuomatus = TRUE;
+		}
 	}
 
 	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
@@ -391,7 +393,10 @@
 			}
 
 		}
-		$ostoerahuomatus = TRUE;
+
+		if ($org_kpl != $kpl) {
+			$ostoerahuomatus = TRUE;
+		}
 	}
 
 	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
@@ -1337,6 +1342,12 @@
 								// Tilatut ja varatut kappaleet
 								$tilattu = $myy_kpl[$indeksi];
 								$varattu = $myy_kpl[$indeksi];
+
+								if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+									if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on")) === FALSE) {
+										$kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]";
+									}
+								}
 
 								// Jos hinta ja alekertoimet on setattu
 								if (isset($myy_hintakerr[$indeksi])) {
@@ -2284,6 +2295,12 @@
 						// poistetaan viimeinen pilkku ja lis‰t‰‰n piste siisteyden lis‰‰miseksi.
 						$kommentti .= substr($edivastaavattuotteet, 0, -2).".";
 					}
+				}
+			}
+
+			if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+				if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on")) === FALSE) {
+					$kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]";
 				}
 			}
 

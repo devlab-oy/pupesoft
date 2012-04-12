@@ -5232,7 +5232,11 @@ if (!function_exists("alehinta_osto")) {
 		// T‰m‰ rutiini m‰‰rittelee riville hinnan ja alennuksen
 		// siihen tarvitaan:
 		// $laskurow[] (laskun tiedot)
-		// $trow[] (select * from tuote)
+		//	-->	$laskurow["liitostunnus"]
+		//	-->	$laskurow["valkoodi"]
+		//	-->	$laskurow["vienti_kurssi"]
+		//	-->	$laskurow["ytunnus"]
+		// $trow[] (select tuoteno from tuote)
 		// $kpl tilatava m‰‰r‰
 		// $netto = N jos halutaan nettohinta
 		// $hinta k‰ytt‰j‰n syˆtt‰m‰ hinta
@@ -5245,16 +5249,13 @@ if (!function_exists("alehinta_osto")) {
 		// $ale
 		// $valuutta
 
-		// Otetaan $trow ja tehd‰‰n siit‰ v‰h‰n isompi. liitet‰‰n tuotteen_toimittaja taulu siihen. Saadaan isompi otanta dataa
+		// Otetaan $trow ja liitet‰‰n tuotteen_toimittaja taulu siihen
 		$query = "	SELECT tuote.*, tt.toim_tuoteno, tt.osto_era, tt.pakkauskoko, tt.ostohinta, tt.valuutta, tt.osto_alv
 					FROM tuote
 					JOIN tuotteen_toimittajat as tt on (tt.yhtio = tuote.yhtio and tuote.tuoteno = tt.tuoteno and tt.liitostunnus = '$laskurow[liitostunnus]')
-					WHERE tuote.yhtio='{$kukarow["yhtio"]}'
+					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.tuoteno = '{$trow["tuoteno"]}'";
 		$result = pupe_query($query);
-
-		// poistetaan vanha ja uusi tilalle
-		unset($trow);
 		$trow = mysql_fetch_assoc($result);
 
 		// Varmistetaan, ett‰ m‰‰r‰ on ok

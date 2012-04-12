@@ -5364,7 +5364,7 @@ if (!function_exists("alehinta_osto")) {
 				}
 			}
 
-			// 2B. toimi.toimittaja/asiakas.ytunnus tuote.tuotenumero nettohinta (toimittajan tuotteen hinta) yhtiön valuutassa
+			// 2B. toimi.toimittaja/toimi.ytunnus tuote.tuotenumero nettohinta (toimittajan tuotteen hinta) yhtiön valuutassa
 			if ($hinta == 0) {
 
 				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
@@ -5632,7 +5632,7 @@ if (!function_exists("alehinta_osto")) {
 
 		if ($jatka and $netto != 'N' and $netto != 'E') {
 
-			// 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (toimittajan tuotteen alennus)
+			// 5. toimi.tunnus/toimi.ytunnus tuote.tuotenumero aleprosentti (toimittajan tuotteen alennus)
 			$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
 						FROM toimittajaalennus asale1 USE INDEX (yhtio_toimittaja_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -5646,7 +5646,7 @@ if (!function_exists("alehinta_osto")) {
 						and alennus <= 100)
 						UNION
 						(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-						FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+						FROM toimittajaalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$laskurow[ytunnus]'
 						and ytunnus != ''
@@ -5661,10 +5661,10 @@ if (!function_exists("alehinta_osto")) {
 
 			list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 9, "Toimittajan tuotteen alennus");
 
-			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (toimittajan tuotealeryhmän alennus)
+			// 6. toimi.tunnus/toimi.ytunnus tuote.aleryhmä aleprosentti (toimittajan tuotealeryhmän alennus)
 			if (jatka_ale($ale)) {
 				$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM toimittajaalennus asale1 USE INDEX (yhtio_toimittaja_tuoteno)
+							FROM toimittajaalennus asale1 USE INDEX (yhtio_toimittaja_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toimittaja = '$laskurow[liitostunnus]'
 							and toimittaja > 0
@@ -5676,7 +5676,7 @@ if (!function_exists("alehinta_osto")) {
 							and alennus <= 100)
 							UNION
 							(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-							FROM toimittajaalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+							FROM toimittajaalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''

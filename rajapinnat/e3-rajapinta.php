@@ -338,11 +338,9 @@
 					HAVING tilausrivin_lisatiedot.tilausrivitunnus is null AND (korvaavatuoteno = tilausrivi.tuoteno OR korvaavatuoteno is null)";
 		$rest = mysql_query($query) or pupe_error($query);
 
-		$rows 	 = mysql_num_rows($rest);
-		$row 	 = 0;
-		$laskuri = 0;
-
-		$fp = fopen($path_xlto, 'w+');
+		$rows	= mysql_num_rows($rest);
+		$row	= 0;
+		$fp		= fopen($path_xlto, 'w+');
 
 		while ($xlto = mysql_fetch_assoc($rest)) {
 
@@ -375,10 +373,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$laskuri++;
-
-			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -591,7 +585,6 @@
 					ORDER BY tuote.tuoteno";
 		$resto = mysql_query($qxf04) or pupe_error($qxf04);
 		$rows = mysql_num_rows($resto);
-		$laskuri = 0;
 
 		$fp = fopen($path_xf04, 'w+');
 
@@ -652,9 +645,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -693,7 +683,6 @@
 				HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rests = mysql_query($Q1) or pupe_error($Q1);
 		$rows = mysql_num_rows($rests);
-		$laskuri = 0;
 
 		$fp = fopen($path_xf01, 'w+');
 
@@ -793,9 +782,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		fclose($fp);
@@ -835,7 +821,6 @@
 						ORDER BY 1";
 		$rests = mysql_query($kyselyxfo2) or pupe_error($kyselyxfo2);
 		$rows = mysql_num_rows($rests);
-		$laskuri = 0;
 
 		$fp = fopen($path_xf02, 'w+');
 
@@ -909,9 +894,6 @@
 				echo "Failed writing row.\n";
 				die();
 			}
-
-			$laskuri++;
-			echo "Kasitelty $laskuri / $rows\n";
 		}
 
 		if (! fwrite($fp, $xf02loppulause . "\n")) {

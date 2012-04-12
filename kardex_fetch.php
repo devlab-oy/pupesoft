@@ -73,14 +73,13 @@
 
 		require('ftp-get.php');
 
-		if ($handle = opendir($ftpget_dest[$operaattori])) {
+		if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
 
-			while (($file = readdir($handle)) !== FALSE) {
+			while (($file = readdir($kardex_handle)) !== FALSE) {
 
 				if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
-					$keraysera_nro = 0;
-					$maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = array();
+					$kerayserat_array = $maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = $keraysera_maara = array();
 
 					$_fh = fopen($ftpget_dest[$operaattori]."/".$file, "r+");
 
@@ -97,126 +96,125 @@
 
 						$_content[4] = (int) $_content[4];
 
-						if ($keraysera_nro == 0) {
-							$query = "	SELECT nro
-										FROM kerayserat
+						$query = "	SELECT nro
+									FROM kerayserat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus  = '{$_content[4]}'
+									AND tila in ('X','K')";
+						$nro_chk_res = pupe_query($query);
+
+						if (mysql_num_rows($nro_chk_res) == 1) {
+							$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
+
+							$kerayserat_array[$nro_chk_row['nro']] = trim($_content[6]);
+
+							$query = "	UPDATE kerayserat SET
+										tila 		= 'K',
+										kpl_keratty = '{$_content[3]}',
+										keratty 	= '{$kukarow['kuka']}',
+										kerattyaika = now()
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$_content[4]}'
 										AND tila in ('X','K')";
-							$nro_chk_res = pupe_query($query);
-							$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
-
-							$keraysera_nro = $nro_chk_row['nro'];
+							$upd_res = pupe_query($query);
 						}
-
-						$query = "	UPDATE kerayserat SET
-									tila 		= 'K',
-									kpl_keratty = '{$_content[3]}',
-									keratty 	= '{$kukarow['kuka']}',
-									kerattyaika = now()
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$_content[4]}'
-									AND tila in ('X','K')";
-						$upd_res = pupe_query($query);
-
-						$keraajalist = trim($_content[6]);
 					}
 
-					if ($keraysera_nro > 0) {
-						$query = "	SELECT *
-									FROM kerayserat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tila 	= 'X'
-									AND nro 	= '{$keraysera_nro}'";
-						$onko_valmis_chk = pupe_query($query);
-
-						if (mysql_num_rows($onko_valmis_chk) == 0) {
-
-							$query = "	SELECT tilausrivi, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
-										FROM kerayserat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tila 	= 'K'
-										AND nro 	= '{$keraysera_nro}'
-										GROUP BY tilausrivi";
-							$valmis_era_chk_res = pupe_query($query);
-
-							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
-								$kerivi[] = $valmis_era_chk_row['tilausrivi'];
-
-								if ($valmis_era_chk_row['kpl'] != $valmis_era_chk_row['kpl_keratty']) {
-									$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
-								}
-								else {
-									$maara[$valmis_era_chk_row['tilausrivi']] = "";
-								}
-							}
-
+					if (count($kerayserat_array) > 0) {
+						foreach ($kerayserat_array as $keraysera_nro => $keraajalist) {
 							$query = "	SELECT *
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tila 	= 'K'
+										AND tila 	= 'X'
 										AND nro 	= '{$keraysera_nro}'";
-							$valmis_era_chk_res = pupe_query($query);
+							$onko_valmis_chk = pupe_query($query);
 
-							$keraysera_vyohyke = 0;
+							if (mysql_num_rows($onko_valmis_chk) == 0) {
 
-							while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
-								$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
+								$query = "	SELECT tilausrivi, SUM(kpl) AS kpl, SUM(kpl_keratty) AS kpl_keratty
+											FROM kerayserat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tila 	= 'K'
+											AND nro 	= '{$keraysera_nro}'
+											GROUP BY tilausrivi";
+								$valmis_era_chk_res = pupe_query($query);
 
-								$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu,
-											tilausrivi.tuoteno AS puhdas_tuoteno,
-											concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
-											concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
-											FROM tilausrivi
-											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-											AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
-								$varattu_res = pupe_query($query);
-								$varattu_row = mysql_fetch_assoc($varattu_res);
+								while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+									$kerivi[] = $valmis_era_chk_row['tilausrivi'];
 
-								$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
-								$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
-								$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
-								$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+									if ($valmis_era_chk_row['kpl'] != $valmis_era_chk_row['kpl_keratty']) {
+										$maara[$valmis_era_chk_row['tilausrivi']] = $valmis_era_chk_row['kpl_keratty'];
+									}
+									else {
+										$maara[$valmis_era_chk_row['tilausrivi']] = "";
+									}
+								}
 
-								$keraysera_vyohyke = $valmis_era_chk_row["keraysvyohyke"];
+								$query = "	SELECT *
+											FROM kerayserat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tila 	= 'K'
+											AND nro 	= '{$keraysera_nro}'";
+								$valmis_era_chk_res = pupe_query($query);
+
+								$keraysera_vyohyke = 0;
+
+								while ($valmis_era_chk_row = mysql_fetch_assoc($valmis_era_chk_res)) {
+									$keraysera_maara[$valmis_era_chk_row['tunnus']] = $valmis_era_chk_row['kpl_keratty'];
+
+									$query = "	SELECT tilausrivi.otunnus, tilausrivi.varattu,
+												tilausrivi.tuoteno AS puhdas_tuoteno,
+												concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
+												concat_ws('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
+												FROM tilausrivi
+												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+												AND tilausrivi.tunnus = '{$valmis_era_chk_row['tilausrivi']}'";
+									$varattu_res = pupe_query($query);
+									$varattu_row = mysql_fetch_assoc($varattu_res);
+
+									$rivin_varattu[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varattu'];
+									$rivin_puhdas_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['puhdas_tuoteno'];
+									$rivin_tuoteno[$valmis_era_chk_row['tilausrivi']] = $varattu_row['tuoteno'];
+									$vertaus_hylly[$valmis_era_chk_row['tilausrivi']] = $varattu_row['varastopaikka_rekla'];
+
+									$keraysera_vyohyke = $valmis_era_chk_row["keraysvyohyke"];
+								}
+
+								$query = "	SELECT printteri1, printteri3
+											FROM keraysvyohyke
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$keraysera_vyohyke}'";
+								$printteri_res = pupe_query($query);
+								$printteri_row = mysql_fetch_assoc($printteri_res);
+
+								// setataan muuttujat keraa.php:ta varten
+								$tee 		= "P";
+								$toim 		= "";
+								$id 		= $keraysera_nro;
+								$keraajanro = "";
+
+								// vakadr-tulostin on aina sama kuin lähete-tulostin
+								$valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
+								$valittu_oslapp_tulostin = $printteri_row['printteri3'];
+
+								$lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
+								$oslappkpl = $yhtiorow["oletus_oslappkpl"];
+
+								$lasku_yhtio = "";
+								$real_submit = "Merkkaa kerätyksi";
+
+								require('tilauskasittely/keraa.php');
 							}
-
-							$query = "	SELECT printteri1, printteri3
-										FROM keraysvyohyke
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$keraysera_vyohyke}'";
-							$printteri_res = pupe_query($query);
-							$printteri_row = mysql_fetch_assoc($printteri_res);
-
-							// setataan muuttujat keraa.php:ta varten
-							$tee 		= "P";
-							$toim 		= "";
-							$id 		= $keraysera_nro;
-							$keraajanro = "";
-
-							// vakadr-tulostin on aina sama kuin lähete-tulostin
-							$valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
-							$valittu_oslapp_tulostin = $printteri_row['printteri3'];
-
-							$lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
-							$oslappkpl = $yhtiorow["oletus_oslappkpl"];
-
-							$lasku_yhtio = "";
-							$real_submit = "Merkkaa kerätyksi";
-
-							require('tilauskasittely/keraa.php');
 						}
 					}
 
 					fclose($_fh);
-					$keraysera_nro = 0;
-
 					rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
 				}
 			}
 		}
 
-		closedir($dh);
+		closedir($kardex_handle);
 
 		unlink("/tmp/##kardex-fetch.lock");
 	}

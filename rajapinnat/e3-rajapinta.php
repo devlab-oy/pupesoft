@@ -792,6 +792,17 @@
 
 		echo "TULOSTETAAN xf02...\n";
 
+		$valuuttaQ = "	SELECT nimi, kurssi
+						FROM valuu
+						WHERE yhtio  = '$yhtiorow[yhtio]'";
+		$resaluutta = mysql_query($valuuttaQ) or pupe_error($valuuttaQ);
+
+		$valuutat = array();
+
+		while ($valurow = mysql_fetch_assoc($resaluutta)) {
+			$valuutat[$valurow["nimi"]] = $valurow["kurssi"];
+		}
+
 		$kyselyxfo2 = " SELECT tuote.tuoteno,
 						tuote.tuotekorkeus,
 						tuote.tuoteleveys,
@@ -815,7 +826,7 @@
 						FROM tuote use index (tuoteno_index)
 						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
 						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-						WHERE tuote.yhtio='$yhtiorow[yhtio]' $tuoterajaukset
+						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset
 						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
 						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";
@@ -826,37 +837,56 @@
 
 		while ($xf02 = mysql_fetch_assoc($rests)) {
 
-			$query = "	SELECT toimi.herminator AS toimittaja, round(tuotteen_toimittajat.ostohinta * (1 - (tuotteen_toimittajat.alennus / 100)),4) ostohinta, round(tuotteen_toimittajat.pakkauskoko,0) ostokpl, tuotteen_toimittajat.valuutta, toimi.tyyppi
+			$query = "	SELECT
+						toimi.ytunnus,
+						toimi.tunnus,
+						tuotteen_toimittajat.valuutta,
+						toimi.toimittajanro,
+						tuotteen_toimittajat.ostohinta,
+						ROUND(tuotteen_toimittajat.pakkauskoko, 0) ostokpl,
+						toimi.tyyppi
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
-						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
+						JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
 						AND tuotteen_toimittajat.tuoteno = '$xf02[tuoteno]'
 						ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
 						LIMIT 1";
 			$rest_toimittajista = mysql_query($query) or pupe_error($query);
 			$toim_row = mysql_fetch_assoc($rest_toimittajista);
-			if ($toim_row['toimittaja'] == '' or $toim_row['tyyppi'] == 'P') continue;
 
-			$valuuttaQ = "SELECT kurssi FROM valuu WHERE nimi = '$toim_row[valuutta]' AND yhtio='$yhtiorow[yhtio]' limit 1";
-			$resaluutta = mysql_query($valuuttaQ) or pupe_error($valuuttaQ);
-			$rowstest = mysql_num_rows($resaluutta);
+			if ($toim_row['toimittajanro'] == '' or $toim_row['tyyppi'] == 'P') continue;
 
-			if ($rowstest == 0) {
-				$valurow['kurssi'] = '1';
+			// Hetaan ostohinta
+			$laskurow = array();
+			$laskurow["liitostunnus"] 	= $toim_row["tunnus"];
+			$laskurow["valkoodi"] 		= $toim_row["valuutta"];
+			$laskurow["vienti_kurssi"] 	= (isset($valuutat[$toim_row["valuutta"]]) and $valuutat[$toim_row["valuutta"]] > 0) ? $valuutat[$toim_row["valuutta"]] : 1;
+			$laskurow["ytunnus"]		= $toim_row["ytunnus"];
+
+			$tuote_row = array();
+			$tuote_row["tuoteno"]		= $xf02["tuoteno"];
+
+			list($hinta,$netto,$ale,$valuutta) = alehinta_osto($laskurow, $tuote_row, 1, "", "", "");
+
+			// Muutetaan valuuttahinta euroiksi.
+			if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$hinta = $hinta * $laskurow["vienti_kurssi"];
 			}
-			else {
-				$valurow = mysql_fetch_assoc($resaluutta);
-			}
+
+			$alennukset = generoi_alekentta_php($ale, 'O', 'kerto');
+			$ostonetto = sprintf("%01.4f", round($hinta * $alennukset, 4));
 
 			$tilavuus = $xf02['tilavuus'];
 
-			if ($toim_row['ostohinta'] > '0') $ostonetto = sprintf("%01.4f", round($toim_row['ostohinta'] / $valurow['kurssi'], 4));
-			elseif ($ostonetto < 0) $ostonetto = 999999999;
-			else $ostonetto = '0';
+			if ($tilavuus > 99) {
+				$tilavuus = '9999999';
+			}
+			else {
+				$tilavuus = $tilavuus*1000;
+				$tilavuus = str_replace('.','',$tilavuus);
+			}
 
 			$KA_myynti_hinta = $xf02['KAhinta'];
-
-			if ($tilavuus > 99) {$tilavuus = '9999999';} else {$tilavuus = $tilavuus*1000; $tilavuus = str_replace('.','',$tilavuus);}
 
 			if ($KA_myynti_hinta == '') {
 				if ($ostonetto == 999999999) { $KA_myynti_hinta = 999999999; }
@@ -875,7 +905,7 @@
 
 			if ($toim_row['ostokpl'] == '0') $toim_row['ostokpl'] = '1';
 
-			$out  = sprintf("%-8.8s",	$toim_row['toimittaja']);	   				//XVNDR
+			$out  = sprintf("%-8.8s",	$toim_row['toimittajanro']);				//XVNDR
 			$out .= sprintf("%-18.18s",	$xf02['tuoteno']);		   	   				//XITEM
 			$out .= sprintf("%-3.3s",	"001");   					   				//XWHSE
 			$out .= sprintf("%013.13s",	str_replace('.','',$ostonetto));   			//XPCHP

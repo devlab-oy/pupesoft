@@ -240,12 +240,11 @@
 										COUNT(DISTINCT CONCAT(kerayserat.nro,kerayserat.pakkaus,kerayserat.pakkausnro)) AS maara,
 										ROUND(SUM(tuote.tuotemassa * tilausrivi.varattu) + IFNULL(pakkaus.oma_paino, 0), 1) tuotemassa
 										FROM kerayserat
-										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 										LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 										AND kerayserat.sscc_ulkoinen = '{$sscc_chk_row['sscc_ulkoinen']}'
-										#AND kerayserat.otunnus = '{$row['tunnus']}'
 										GROUP BY 1,2,3,4";
 							$keraysera_res = pupe_query($query);
 
@@ -288,7 +287,7 @@
 											ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
 											FROM kerayserat
 											{$joinlisa}
-											JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+											JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 											JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 											WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 											AND kerayserat.sscc = '{$row['sscc']}'
@@ -1799,7 +1798,10 @@
 		echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
-			$query = "SELECT toimitustavan_lahto FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilaukset})";
+			$query = "	SELECT toimitustavan_lahto 
+						FROM lasku 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND tunnus IN ({$tilaukset})";
 			$chk_res = pupe_query($query);
 			$chk_row = mysql_fetch_assoc($chk_res);
 			$valittu_lahto = $chk_row['toimitustavan_lahto'];

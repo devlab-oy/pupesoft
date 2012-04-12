@@ -668,8 +668,9 @@
 
 			if (stristr($arvo, "pankkikortti")) {
 				$maksutapa = t("Pankkikortti");
-
+				
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
+				if ($tilino == "") $tilino = $yhtiorow["pankkikortti"];
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
@@ -688,6 +689,8 @@
 
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
+				if ($tilino == "") $tilino = $yhtiorow["luottokortti"];
+
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
 				$result = pupe_query($query);
@@ -704,6 +707,7 @@
 				$maksutapa = t("Käteinen");
 
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
+				if ($tilino == "") $tilino = $yhtiorow["kassa"];
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
@@ -728,6 +732,9 @@
 				// Jos kentän nimi on soluerotus niin se tiliöidään kassaerotustilille (eli täsmäyserot), muuten normaalisti ylempänä parsetettu tilinumero
 				if (stristr($kentta, "soluerotus")) {
 					$tilino = $kassalipasrow["kassaerotus"];
+					if ($kassalipasrow["kassaerotus"] == "") {
+						$tilino = $yhtiorow["kassaerotus"];
+					}
 				}
 
 				// Jos kenttä on soluerotus tai erotus niin kerrotaan arvo -1:llä
@@ -1617,7 +1624,7 @@
 
 					$kassalippaat[$edkassanimi] = $edkassanimi;
 					$kassalipas_tunnus[$edkassanimi] = $edktunnus;
-
+					
 					echo "<table width='100%'>";
 					echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 					echo "<tr>";

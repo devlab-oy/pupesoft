@@ -79,7 +79,7 @@
 
 				if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
-					$kerayserat_array = $maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = $keraysera_maara = array();
+					$kerayserat_array = array();
 
 					$_fh = fopen($ftpget_dest[$operaattori]."/".$file, "r+");
 
@@ -122,6 +122,9 @@
 
 					if (count($kerayserat_array) > 0) {
 						foreach ($kerayserat_array as $keraysera_nro => $keraajalist) {
+							// Nollataan muuttujat
+							$maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = $keraysera_maara = array();
+
 							$query = "	SELECT *
 										FROM kerayserat
 										WHERE yhtio = '{$kukarow['yhtio']}'

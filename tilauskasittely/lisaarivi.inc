@@ -1782,6 +1782,12 @@
 		else {
 			if ($lisaarivi_debug == 1) echo "Kaikki puutteeksi var $var<br>";
 
+			#TODO
+			// Hätäratkaisu! Myyntitilissä kaikki puutteeksi (ei JT), koska ei osata käsitellä jälkkäreitä vielä. :/
+			if ($toim == 'MYYNTITILI') {
+				$var = 'P';
+			}
+
 			$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 			$puu_kpl[]	 	= $toimittamatta;
 			$puu_hintake[]	= "X";

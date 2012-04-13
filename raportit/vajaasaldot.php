@@ -84,7 +84,6 @@
 		$eresult = pupe_query($query);
 
 		$total_rows = mysql_num_rows($eresult);
-		$curret_row = 1;
 
 		if ($total_rows > 0) {
 

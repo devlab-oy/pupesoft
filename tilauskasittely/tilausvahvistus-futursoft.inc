@@ -68,7 +68,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
-	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+	if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
 		$tulostettava_tunnus = $laskurow['vanhatunnus'];
 	}
 	else {

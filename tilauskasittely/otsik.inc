@@ -1246,7 +1246,7 @@
 						$sel_verollinen = 'selected';
 						$sel_veroton 	= '';
 					}
-					}
+				}
 
 				echo " <td>
 						<select name='alv'>
@@ -1345,10 +1345,6 @@
 
 			if ($srow["alv"] == 99.99) {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
-			}
-			elseif ($toim == "YLLAPITO") {
-				// aina kotimaa
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")."</td>";
 			}
 			elseif ($alv_velvollisuus != "") {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])</td>";

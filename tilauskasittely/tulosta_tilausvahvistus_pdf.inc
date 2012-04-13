@@ -22,7 +22,7 @@
 	}
 	elseif ($naytatvale == 6) {
 		$lahetetyyppi = "tulosta_lahete_custom.inc";
-	}	
+	}
 	elseif ($naytatvale == 7) {
 		$lahetetyyppi = "tulosta_lahete_ean.inc";
 	}
@@ -142,9 +142,9 @@
 	}
 
 	$riresult = pupe_query($query);
-	
+
 	// tämä siksi koska halutaan alkuperäisen tilauksen tilausnumero pdf-filuun.
-	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+	if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
 		$laskurow["tunnus"] = $laskurow['vanhatunnus'];
 	}
 

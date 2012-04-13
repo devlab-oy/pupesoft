@@ -805,7 +805,7 @@
 			$jarjx = " ORDER BY t_tyyppi desc, $jarj ";
 		}
 		else {
-			$jarjx = " ORDER BY t_tyyppi desc, prioriteetti, kerayspvm ";
+			$jarjx = " ORDER BY t_tyyppi desc, prioriteetti, kerayspvm, h1time ";
 		}
 
 		if ($toim == 'SIIRTOLISTA') {

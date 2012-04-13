@@ -8,6 +8,7 @@
 	echo "<font class=head>".t("Tuotteet joiden tulossa oleva saldo ei riitä")."</font><hr>";
 
 	if ($ytunnus != '') {
+		$toimittajaid = "";
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		if ($toimittajaid == "") {
@@ -41,6 +42,11 @@
 	echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
 	echo "</form>";
 	echo "<br><br>";
+
+	if ($tee != "" and isset($painoinnappia) and $lisa == "" and $toimittajaid == "") {
+		echo "<font class='error'>", t("Anna jokin rajaus"), "!</font>";
+		$tee = "";
+	}
 
 	if ($tee != "" and isset($painoinnappia)) {
 
@@ -84,6 +90,7 @@
 		$eresult = pupe_query($query);
 
 		$total_rows = mysql_num_rows($eresult);
+		$current_row = 0;
 
 		if ($total_rows > 0) {
 
@@ -145,14 +152,21 @@
 					$vajaasaldot_table .= "<td align='right'>$ostorivi[tulossa]</td>";
 					$vajaasaldot_table .= "<td>$ostorivi[toimaika]</td>";
 					$vajaasaldot_table .= "</tr>";
+					
+					$current_row++;
 				}
 			}
 
 			$vajaasaldot_table .= "</table>";
 
-			echo "<br><br>$vajaasaldot_table";
+			echo "<br>";
+			
+			if ($current_row > 0) {
+				echo "<br>", $vajaasaldot_table;
+			}
 		}
-		else {
+
+		if ($total_rows == 0 or $current_row == 0) {
 			echo "<font class='message'>", t("Yhtään soveltuvaa tuotetta ei löytynyt"), ".</font>";
 		}
 	}

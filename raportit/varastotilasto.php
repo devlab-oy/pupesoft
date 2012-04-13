@@ -20,6 +20,7 @@
 	echo "<font class=head>".t("Varastotilasto")." $vvl</font><hr>";
 
 	if ($ytunnus != '') {
+		$toimittajaid = "";		
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		if ($toimittajaid == "") {
@@ -283,11 +284,12 @@
 			if ($current_row > 2000) {
 				echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain excelissä"), ".</font><br><br>";
 			}
-			else {
+			elseif ($current_row > 0) {
 				echo "<br>", $varastotilasto_table;
 			}
 		}
-		else {
+		
+		if ($total_rows == 0 or $current_row == 0) {
 			echo "<font class='message'>", t("Yhtään soveltuvaa tuotetta ei löytynyt"), ".</font>";
 		}
 	}

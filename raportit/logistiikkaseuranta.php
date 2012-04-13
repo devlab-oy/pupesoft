@@ -7,16 +7,18 @@
 	echo "<br>";
 	echo "<table><form method='post' action=''>";
 	echo "<input type='hidden' name='tee' value='nayta'>";
-	echo "<tr><th>Valitse päivä:</th>";
 
+	echo "<tr><th>Tilausnumero</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
+	echo "<tr><th>Laskunumero</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
+	echo "<tr><th>Valitse päivä:</th>";
 	echo "<td><select name='paiva'>";
 
 	for ($y = 20120401; $y <= date("Ymd"); $y++) {
-		
+
 		$z = substr($y,0,4)."-".substr($y,4,2)."-".substr($y,6,2);
-		
+
 		$sel = ($paiva == $z) ? "SELECTED" : "";
-		
+
 		echo "<option value='$z' $sel>".substr($y,6,2).".".substr($y,4,2).".".substr($y,0,4)."</option>";
 	}
 
@@ -25,13 +27,45 @@
 
 	if ($tee == "nayta") {
 
+		$tilaus = mysql_real_escape_string($tilaus);
+		$lasku = mysql_real_escape_string($lasku);
+		$paiva = mysql_real_escape_string($paiva);
+
+		$pvmlisa = " and tapvm = '$paiva' and summa > 0 ";
+
+		if ($tilaus > 0) {
+			$query = "	SELECT laskunro
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tila 	= 'L'
+						AND alatila = 'X'
+						and tunnus = $tilaus";
+			$lasku_res = pupe_query($query);
+
+			if (mysql_num_rows($lasku_res) > 0) {
+				$laskurow = mysql_fetch_assoc($lasku_res);
+
+				$laskulisa 	= " and laskunro = {$laskurow['laskunro']} ";
+				$pvmlisa 	= "";
+				$lasku 		= "";
+			}
+			else {
+				$laskulisa 	= " and tunnus = 0 ";
+			}
+		}
+
+		if ($lasku > 0) {
+			$laskulisa 	= " and laskunro = {$laskurow['laskunro']} ";
+			$pvmlisa 	= "";
+		}
+
 		$query = "	SELECT tunnus, laskunro
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila 	= 'U'
 					AND alatila = 'X'
-					and tapvm   = '$paiva'
-					and summa > 0
+					{$laskulisa}
+					{$pvmlisa}
 					ORDER BY tunnus";
 		$lasku_res = pupe_query($query);
 
@@ -40,18 +74,18 @@
 		while ($laskurow = mysql_fetch_assoc($lasku_res)) {
 
 			$rivi 		= "";
-			$naytarivi  = FALSE;
+			$naytarivi  = TRUE;
 
-			$query = "	SELECT tunnus, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa
+			$query = "	SELECT tunnus, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa, eilahetetta
 						FROM lasku
 						WHERE yhtio  = '{$kukarow['yhtio']}'
-						and laskunro = '{$laskurow['laskunro']}'
+						and tunnus   = '{$laskurow['laskunro']}'
 						AND tila 	 = 'L'
 						AND alatila  = 'X'";
 			$tilaus_res = pupe_query($query);
 
 			$tilaukset = "";
-			
+
 			$rivi .= "<tr>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Lasku/Tilaus</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Asiakas</th>";
@@ -90,7 +124,7 @@
 				// Tilauksen tiedot
 				$rivi .= "<tr>";
 				$rivi .= "<td class='spec'>$laskurow[laskunro] / <a target='Asiakkaantilaukset' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&tunnus=$tilausrow[tunnus]'>$tilausrow[tunnus]</a></td>";
-				$rivi .= "<td class='spec'>$tilausrow[nimi]</td>";
+				$rivi .= "<td class='spec'>$tilausrow[nimi] / $tilausrow[eilahetetta]</td>";
 				$rivi .= "<td class='spec'>$tilausrow[toimitustapa] / $tilausrow[toimitustavan_lahto] / ($tilausrow[kohdistettu]|$tilausrow[rahtivapaa])</td>";
 				$rivi .= "<td class='spec'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
 				$rivi .= "</tr>";
@@ -105,10 +139,10 @@
 						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')
 						LEFT JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tilausrivi.yhtio AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)
 						LEFT JOIN keraysvyohyke ON (varaston_hyllypaikat.yhtio = keraysvyohyke.yhtio AND varaston_hyllypaikat.keraysvyohyke = keraysvyohyke.tunnus)
-						WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
-						and tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'
-						and tilausrivi.kpl 		   > 0
-						ORDER BY tilausrivi.tunnus";
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						and tilausrivi.otunnus in ($tilaukset)
+						#and tilausrivi.kpl	   > 0
+						ORDER BY tilausrivi.otunnus, tilausrivi.tunnus";
 			$tilausrivi_res = pupe_query($query);
 
 			$rivi .= "<tr>";
@@ -116,6 +150,7 @@
 			$rivi .= "<table style='width:100%; height:100%;'>";
 
 			$rivi .= "<tr>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilaus</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tuote</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilkpl</th>";
@@ -138,7 +173,7 @@
 
 				// Kerayserä/erät
 				$query = "	SELECT group_concat(luontiaika) luontiaika,
-							group_concat(nro) nro,
+							group_concat(distinct nro) nro,
 							group_concat(pakkausnro) pakkausnro,
 							round(sum(kpl)) kpl,
 							round(sum(kpl_keratty)) kpl_keratty
@@ -180,6 +215,7 @@
 				$kereraekotus = (isset($ohita_kerays[$tilausrivirow['tunnus']])) ? "KERÄYS OHITETEAAN" : $kerayserarow["nro"];
 
 				$rivi .= "<tr>";
+				$rivi .= "<td>$tilausrivirow[otunnus]</td>";
 				$rivi .= "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tilausrivirow["tuoteno"])."'>$tilausrivirow[tuoteno]</a></td>";
 				$rivi .= "<td>".substr($tilausrivirow["nimitys"],0,20)."</td>";
 				$rivi .= "<td align='right'>".(float) ($tilausrivirow["tilkpl"])."</td>";
@@ -218,7 +254,7 @@
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Pakkaus</th>";
 			$rivi .= "</tr>";
 
-			$query = "	SELECT rahtikirjanro, kollit, round(kilot,2) kilot, kuutiot, pakkaus
+			$query = "	SELECT otsikkonro, rahtikirjanro, kollit, round(kilot,2) kilot, kuutiot, pakkaus
 						FROM rahtikirjat
 						WHERE yhtio	= '{$kukarow['yhtio']}'
 						and otsikkonro in ($tilaukset)";
@@ -226,7 +262,7 @@
 
 			while ($rakirrow = mysql_fetch_assoc($rakir_res)) {
 				$rivi .= "<tr>";
-				$rivi .= "<td>$rakirrow[rahtikirjanro]</td>";
+				$rivi .= "<td>$rakirrow[otsikkonro]</td>";
 				$rivi .= "<td>$rakirrow[kollit]</td>";
 				$rivi .= "<td>$rakirrow[kilot]</td>";
 				$rivi .= "<td>$rakirrow[kuutiot]</td>";
@@ -298,9 +334,9 @@
 			// Rahtiveloitus
 			$query = "	SELECT tuoteno, nimitys, round(hinta, 2) hinta
 						FROM tilausrivi
-						WHERE yhtio 	= '{$kukarow['yhtio']}'
-						and uusiotunnus = '{$laskurow['tunnus']}'
-						and tuoteno 	= '{$yhtiorow['rahti_tuotenumero']}'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and otunnus in ($tilaukset)
+						and tuoteno = '{$yhtiorow['rahti_tuotenumero']}'";
 			$raku_res = pupe_query($query);
 
 			$veloitettu = 0;

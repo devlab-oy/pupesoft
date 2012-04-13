@@ -281,7 +281,7 @@
 				echo "</table><br>";
 			}
 
-			if ($current_row > 2000) {
+			if ($current_row > 10000000) {
 				echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain excelissä"), ".</font><br><br>";
 			}
 			elseif ($current_row > 0) {

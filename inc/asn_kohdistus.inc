@@ -29,6 +29,7 @@
 			$paketin_tuotteet = array();
 			$virheet = 0;
 			$virhe = "";
+			$talteen_tunnus = "";
 
 			// Haetaan kaikki k‰sittelem‰ttˆm‰t ASN-rivit
 			$query = "	SELECT *
@@ -44,8 +45,11 @@
 
 			// Loopataan tuoterivit l‰pi
 			while ($row = mysql_fetch_assoc($result)) {
-				unset($loysin_lapsen);
-				$loysin_lapsen = FALSE;
+				
+				$loysin_lapsen		= FALSE;
+				$tarvitaanko_insert	= "ENTARVITSE";
+				$kommentti			= "";
+				$lisatty_tun		= "";
 
 				if (count($kaytetyt_tilausrivit) == 0) {
 					$tilausrivi_muuttuja = "";
@@ -59,7 +63,6 @@
 
 					if (count($paketin_rivit) > 0) {
 
-						unset($talteen_paketin_tiedot);
 						$talteen_paketin_tiedot = array();
 						$talteen_paketin_tiedot = $paketin_rivit;
 
@@ -113,20 +116,56 @@
 												hyllyvali		= '$lapsitieto[hyllyvali]',
 												perheid			= '$lapsitieto[tunnus]'";
 								$inskres = pupe_query($lisainsert);
-								$talteen_paketin_tiedot[] = mysql_insert_id();
+								$talteen_tunnus = mysql_insert_id();
+								$talteen_paketin_tiedot[] = $talteen_tunnus;
 
 								// p‰ivitet‰‰n is‰
 								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
 								$updateres = pupe_query($updateisa);
 
-
+								//Tutkitaan lˆytyykˆ suoratoimitus-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin (alkuper‰inen myyntirivi)
+							   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen, tilausrivin_lisatiedot.tunnus
+							   				FROM tilausrivin_lisatiedot
+							   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+											JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							   				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+							   				and tilausrivin_lisatiedot.tilausrivilinkki  = '{$tilausrivitunnus}'";
+								$suora_result = pupe_query($query);
+								
+								if (mysql_num_rows($suora_result) > 0) {
+									
+									$suoratoimitus_row = mysql_fetch_assoc($suora_result);
+									
+									// Haetaan is‰tuotteelle sen lapsituote sek‰ lis‰tiedoista tunnus (ei voida hakea ohita_kerays alkuper‰iselt‰ myyntirivilt‰, koska sit‰ ei p‰ivitet‰ sinne)
+									$query =" 	SELECT tilausrivin_lisatiedot.tilausrivilinkki, tilausrivin_lisatiedot.tunnus as trlt_tunnus
+												FROM tilausrivi  
+												JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+												WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+												AND tilausrivi.otunnus = '{$suoratoimitus_row["otunnus"]}' 
+												AND tilausrivi.perheid = '{$suoratoimitus_row["tunnus"]}' 
+												AND tilausrivi.tunnus != '{$suoratoimitus_row["tunnus"]}'
+												AND tilausrivi.tuoteno = '{$lapsitieto["tuoteno"]}'
+												LIMIT 1";
+												
+									$result = pupe_query($query);
+								
+									$lisatiedot = mysql_fetch_assoc($result);
+								
+									// p‰ivitet‰‰n alkuper‰isen myyntitilauksen rungon tilausrivilinkin tunnukseksi juuri luotu tunnus
+									$query = "	UPDATE tilausrivin_lisatiedot
+												SET tilausrivin_lisatiedot.tilausrivilinkki = '{$talteen_tunnus}'
+												WHERE tilausrivin_lisatiedot.yhtio 			= '{$kukarow["yhtio"]}'
+												AND tilausrivin_lisatiedot.tunnus 			= '{$lisatiedot["trlt_tunnus"]}'";
+									$result = pupe_query($query);
+									
+								}
 							}
-						}
 						// unsetataan alkuper‰inen paketin_rivit ja korvataan se talteen otetulla.
-						unset($paketin_rivit);
-						$paketin_rivit = array();
-						$paketin_rivit = $talteen_paketin_tiedot;
+						
+							$paketin_rivit = array();
+							$paketin_rivit = $talteen_paketin_tiedot;
 
+						}
 					}
 
 					if ($virheet == 0) {
@@ -453,6 +492,10 @@
 
 					}
 					elseif ($ylimaaraista < 0) {
+						
+						$tarvitaanko_insert = "KYLLA";
+						$asnhaara 			= 2;
+						
 						$positiivinen_arvo = abs($ylimaaraista);
 						$vika_rivi = array_pop($split_array);
 						// vika_rivi on se tilausrivi joka splitataan ett‰ m‰‰r‰ t‰sm‰‰
@@ -482,34 +525,14 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
 						$upd_res = pupe_query($updatequery);
-
-						// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-						$query = "	INSERT INTO tilausrivi SET
-									yhtio			= '$split_row[yhtio]',
-									tyyppi			= '$split_row[tyyppi]',
-									toimaika		= '$split_row[toimaika]',
-									kerayspvm		= '$split_row[kerayspvm]',
-									otunnus			= '$split_row[otunnus]',
-									tuoteno			= '$split_row[tuoteno]',
-									try				= '$split_row[try]',
-									osasto			= '$split_row[osasto]',
-									nimitys			= '$split_row[nimitys]',
-									yksikko			= '$split_row[yksikko]',
-									tilkpl			= '$positiivinen_arvo',
-									varattu			= '$positiivinen_arvo',
-									hinta			= '$split_row[hinta]',
-									laatija			= 'split',
-									kommentti		= 'ASN-sanomalla 2: {$row["asn_numero"]}. Tehtiin puuttuva tilausrivi m‰‰r‰lle {$positiivinen_arvo} tuotteelle {$split_row["tuoteno"]}',
-									laadittu		=  now(),
-									hyllyalue		= '$split_row[hyllyalue]',
-									hyllynro		= '$split_row[hyllynro]',
-									hyllytaso		= '$split_row[hyllytaso]',
-									hyllyvali		= '$split_row[hyllyvali]',
-									tilaajanrivinro = '$split_row[tilaajanrivinro]'";
-						$inskres = pupe_query($query);
+					
+						$kommentti = "ASN-sanomalla 2: {$row["asn_numero"]}. Tehtiin puuttuva tilausrivi m‰‰r‰lle {$positiivinen_arvo} tuotteelle {$split_row["tuoteno"]}";
 					}
 				}
 				elseif ($row["kappalemaara"] < $tilausrivirow["varattu"]) {
+					$tarvitaanko_insert = "KYLLA";
+					$asnhaara			= 3;
+					
 					// Splitataan tilausrivi, tallennetaan vanha rivitunnus tilausrivi.tilaajanrivinro kentt‰‰n
 					$kappaleerotus = $tilausrivirow["varattu"] - $row["kappalemaara"];
 
@@ -529,40 +552,75 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
 					$upd_res = pupe_query($query);
+
 					$paketin_rivit[] = $tilausrivirow['tunnus'];
 
 					$kaytetyt_tilausrivit[] = $tilausrivirow['tunnus'];
 
-					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-					$query = "	INSERT INTO tilausrivi SET
-								yhtio			= '$tilausrivirow[yhtio]',
-								tyyppi			= '$tilausrivirow[tyyppi]',
-								toimaika		= '$tilausrivirow[toimaika]',
-								kerayspvm		= '$tilausrivirow[kerayspvm]',
-								otunnus			= '$tilausrivirow[otunnus]',
-								tuoteno			= '$tilausrivirow[tuoteno]',
-								try				= '$tilausrivirow[try]',
-								osasto			= '$tilausrivirow[osasto]',
-								nimitys			= '$tilausrivirow[nimitys]',
-								yksikko			= '$tilausrivirow[yksikko]',
-								tilkpl			= '$kappaleerotus',
-								varattu			= '$kappaleerotus',
-								hinta			= '$tilausrivirow[hinta]',
-								laatija			= 'split',
-								kommentti		= 'ASN-sanomalla 3: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta lˆytyi {$tilausrivirow["tilkpl"]} Tehtiin tilausrivi {$kappaleerotus} m‰‰r‰lle',
-								laadittu		=  now(),
-								hyllyalue		= '$tilausrivirow[hyllyalue]',
-								hyllynro		= '$tilausrivirow[hyllynro]',
-								hyllytaso		= '$tilausrivirow[hyllytaso]',
-								hyllyvali		= '$tilausrivirow[hyllyvali]',
-								tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
-					$inskres = pupe_query($query);
-
+					$kommentti = "ASN-sanomalla 3: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta lˆytyi {$tilausrivirow["tilkpl"]} Tehtiin tilausrivi {$kappaleerotus} m‰‰r‰lle";
+					
 				}
 				else {
 					echo "Kaasuu lis‰‰, puut senkun isonee<br>";
 				}
 
+				if ($tarvitaanko_insert == "KYLLA") {
+
+					/*
+					 * JOS asn-haara on 1, niin ei tehd‰ suoratoimitustarkistusta, itse asiassa 1 haaraa ei k‰sitell‰ t‰ss‰.
+					 * JOS asn-haara on 2, niin tiedot otetaan $split_row:sta
+					 * JOS asn-haara on 3, niin tiedot otetaan $tilausrivirow:sta
+					*/
+					
+					if ($asnhaara == 2) {
+						$haetaantiedot 	= $split_row;
+						$kappalemaara 	= $positiivinen_arvo;				
+					}
+					elseif ($asnhaara == 3) {
+						$haetaantiedot	= $tilausrivirow;
+						$kappalemaara	= $kappaleerotus;
+					}
+					
+					// Tehd‰‰n uusi rivi
+					$query = "	INSERT INTO tilausrivi SET
+								yhtio			= '$haetaantiedot[yhtio]',
+								tyyppi			= '$haetaantiedot[tyyppi]',
+								toimaika		= '$haetaantiedot[toimaika]',
+								kerayspvm		= '$haetaantiedot[kerayspvm]',
+								otunnus			= '$haetaantiedot[otunnus]',
+								tuoteno			= '$haetaantiedot[tuoteno]',
+								try				= '$haetaantiedot[try]',
+								osasto			= '$haetaantiedot[osasto]',
+								nimitys			= '$haetaantiedot[nimitys]',
+								yksikko			= '$haetaantiedot[yksikko]',
+								tilkpl			= '$kappalemaara',
+								varattu			= '$kappalemaara',
+								hinta			= '$haetaantiedot[hinta]',
+								laatija			= 'split',
+								kommentti		= '$kommentti',
+								laadittu		=  now(),
+								hyllyalue		= '$haetaantiedot[hyllyalue]',
+								hyllynro		= '$haetaantiedot[hyllynro]',
+								hyllytaso		= '$haetaantiedot[hyllytaso]',
+								hyllyvali		= '$haetaantiedot[hyllyvali]',
+								tilaajanrivinro = '$haetaantiedot[tilaajanrivinro]'";
+					$inskres = pupe_query($query);
+					$lisatty_tun = mysql_insert_id();
+					
+					//Tutkitaan lˆytyykˆ suoratoimitus-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin (alkuper‰inen myyntirivi)
+				   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen, tilausrivin_lisatiedot.tunnus
+				   				FROM tilausrivin_lisatiedot
+				   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+								JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+				   				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+				   				and tilausrivin_lisatiedot.tilausrivilinkki  = '{$haetaantiedot['tunnus']}'";
+					$suora_result = pupe_query($query);
+					
+					if (mysql_num_rows($suora_result) > 0) {
+						$uusi_suoratoimrivi = kopioi_tilausrivi($haetaantiedot["tunnus"], array("tilausrivi.tilkpl"=> $kappalemaara, "tilausrivi.varattu"=> $kappalemaara, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun));
+					}
+				}
+				
 				// Otetaan talteen t‰m‰n kierroksen tiedot
 				$edellinen_toimittaja = $row["toimittajanumero"];
 				$edellinen_asn_numero = $row["asn_numero"];
@@ -599,7 +657,7 @@
 										ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
 
 					$lapsiresult = pupe_query($lapsiperhesql);
-					while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
+					while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {	
 						// hae tuotteen ostohinta
 						$laskuselect= "SELECT * from lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["otunnus"]}'";
 						$laskures	= pupe_query($laskuselect);
@@ -629,12 +687,49 @@
 										hyllyvali		= '$lapsitieto[hyllyvali]',
 										perheid			= '$lapsitieto[tunnus]'";
 						$inskres = pupe_query($lisainsert);
-						$talteen_paketin_tiedot[] = mysql_insert_id();
-
+						$talteen_tunnus = mysql_insert_id();
+						$talteen_paketin_tiedot[] = $talteen_tunnus;
+					
 						// p‰ivitet‰‰n is‰
 						$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
 						$updateres = pupe_query($updateisa);
+						
+						//Tutkitaan lˆytyykˆ suoratoimitus-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin (alkuper‰inen myyntirivi)
+					   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen, tilausrivin_lisatiedot.tunnus
+					   				FROM tilausrivin_lisatiedot
+					   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+									JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+					   				WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+					   				and tilausrivin_lisatiedot.tilausrivilinkki  = '{$tilausrivitunnus}'";
+						$suora_result = pupe_query($query);
 
+						if (mysql_num_rows($suora_result) > 0) {
+
+							$suoratoimitus_row = mysql_fetch_assoc($suora_result);
+
+							// Haetaan is‰tuotteelle sen lapsituote sek‰ lis‰tiedoista tunnus (ei voida hakea ohita_kerays alkuper‰iselt‰ myyntirivilt‰, koska sit‰ ei p‰ivitet‰ sinne)
+							$query =" 	SELECT tilausrivin_lisatiedot.tilausrivilinkki, tilausrivin_lisatiedot.tunnus as trlt_tunnus
+										FROM tilausrivi  
+										JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+										AND tilausrivi.otunnus = '{$suoratoimitus_row["otunnus"]}' 
+										AND tilausrivi.perheid = '{$suoratoimitus_row["tunnus"]}' 
+										AND tilausrivi.tunnus != '{$suoratoimitus_row["tunnus"]}'
+										AND tilausrivi.tuoteno = '{$lapsitieto["tuoteno"]}'
+										LIMIT 1";
+
+							$result = pupe_query($query);
+
+							$lisatiedot = mysql_fetch_assoc($result);
+
+							// p‰ivitet‰‰n alkuper‰isen myyntitilauksen rungon tilausrivilinkin tunnukseksi juuri luotu tunnus
+							$query = "	UPDATE tilausrivin_lisatiedot
+										SET tilausrivin_lisatiedot.tilausrivilinkki = '{$talteen_tunnus}'
+										WHERE tilausrivin_lisatiedot.yhtio 			= '{$kukarow["yhtio"]}'
+										AND tilausrivin_lisatiedot.tunnus 			= '{$lisatiedot["trlt_tunnus"]}'";
+							$result = pupe_query($query);
+
+						}
 					}
 				}
 				// unsetataan alkuper‰inen paketin_rivit ja korvataan se talteen otetulla.

@@ -5,10 +5,13 @@
 	// Tarvitaan $rtuoteno jossa on array kaikista ostoreskontralaskun tuotteista
 
 	// Haetaan ostoreskontralaskun tiedot
-	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
-	
+	$query = "	SELECT * 
+				FROM lasku 
+				WHERE yhtio = '{$kukarow['yhtio']}' 
+				AND tunnus = '{$tunnus}'";
 	$osres = pupe_query($query);
 	$osrow = mysql_fetch_array($osres);
+
 	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
 	if ($osrow["ebid"] != "TECCOM-INVOICE") {
@@ -122,7 +125,12 @@
 
 				// jos rivi löytyi ja sitä ei ole kohdistettu vielä, kohdistetaan keikkaan ja päivitetään kpl
 				if ($rivirow["uusiotunnus"] == 0) {
-					$query = "UPDATE tilausrivi SET uusiotunnus='$keikantunnus', varattu='$kpl', hinta='$hinta' WHERE tunnus='$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
+					$query = "	UPDATE tilausrivi SET 
+								uusiotunnus = '{$keikantunnus}', 
+								varattu = '{$kpl}', 
+								hinta = '{$hinta}' 
+								WHERE tunnus = '{$rivirow['tunnus']}' 
+								AND yhtio = '{$kukarow['yhtio']}'";
 					$result = pupe_query($query);
 
 					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu keikkaan")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
@@ -1189,7 +1197,10 @@
 								$inskres = pupe_query($lisainsert);
 
 								// päivitetään isä
-								$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
+								$updateisa = "	UPDATE tilausrivi SET 
+												perheid = tunnus 
+												WHERE yhtio = '{$kukarow['yhtio']}' 
+												AND tunnus = '{$tilausrivirow['tunnus']}'";
 								$updateres = pupe_query($updateisa);
 							}
 						}

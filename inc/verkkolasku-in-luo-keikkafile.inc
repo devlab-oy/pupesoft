@@ -1516,7 +1516,7 @@
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
-							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' ,
+							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";

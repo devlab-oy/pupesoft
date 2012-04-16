@@ -2,6 +2,8 @@
 
 	require ("../inc/parametrit.inc");
 
+	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
+
 	if (isset($man_aloitus)) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
@@ -18,11 +20,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		unset($man_aloitus);
-		unset($vaihda_prio);
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($vaihda_prio)) {
@@ -58,6 +61,7 @@
 				echo "<form method='post' action=''>";
 				echo "<input type='hidden' name='vaihda_prio' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
+				echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
 				echo "<table>";
 				echo "<tr>";
@@ -75,10 +79,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		unset($vaihda_prio);
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($siirra_lahtoon)) {
@@ -395,10 +401,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		$valittu_lahto = "";
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($muokkaa_lahto)) {
@@ -527,8 +535,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
 		}
 
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
@@ -773,7 +785,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
 		}
 
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	enable_jquery();
@@ -1397,76 +1414,6 @@
 
 					});
 
-					// 1. tason lähdön napin eventti
-					// $('td.toggleable').live('click', function() {
-
-					// 	var id = this.id.split(\"__\", 2);
-
-					// 	var toggleable = $('#toggleable_'+id[0]+'__'+id[1]);
-
-					// 	if (toggleable.is(':visible')) {
-
-					// 		$('th.sort_row_by:visible').off();
-
-					// 		$('#valittu_lahto').val('');
-
-					// 		$('input.filter_row_by_text:visible').attr('disabled', false).val('');
-					// 		$('select.filter_row_by_select:visible').attr('disabled', false).each(function() {
-					// 			$(this).children('option:first').attr('selected', true);
-					// 		});
-
-					// 		$('div.toggleable_row_child_div_order:visible, div.toggleable_row_child_div_sscc:visible').hide();
-
-					// 		toggleable.hide();
-
-					// 		$('td.toggleable_row_order, td.toggleable_row_sscc').removeClass('tumma');
-
-					// 		$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
-					// 		$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').show();
-
-					// 		$('select.filter_parent_row_by').attr('disabled', false).trigger('change');
-
-					// 		$('#uni_client_search').attr('disabled', false);
-					// 		$('#uni_client_search[value!=\"\"]').trigger('keyup');
-
-					// 		$('#uni_locality_search').attr('disabled', false);
-					// 		$('#uni_locality_search[value!=\"\"]').trigger('keyup');
-
-					// 		$('#uni_order_search').attr('disabled', false);
-					// 		$('#uni_order_search[value!=\"\"]').trigger('keyup');
-
-					// 		$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
-
-					// 		$('#header_parent th.sort_parent_row_by:visible').on('click', column_sort);
-					// 	}
-					// 	else {
-
-					// 		$('#uni_client_search').attr('disabled', true);
-					// 		$('#uni_order_search').attr('disabled', true);
-					// 		$('#uni_locality_search').attr('disabled', true);
-
-					// 		$('select.filter_parent_row_by').attr('disabled', true);
-
-					// 		$('#header_parent th.sort_parent_row_by:visible').off();
-
-					// 		$('#valittu_lahto').val(id[0]+'__'+id[1]);
-
-					// 		var parent_element = toggleable.parent();
-
-					// 		$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
-					// 		$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
-
-					// 		toggleable.css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
-
-					// 		var children = toggleable.children().children().children();
-
-					// 		children.filter('tr[class=\"toggleable_row_tr\"]').show();
-					// 		children.filter('tr[id^=\"toggleable_row_child_\"]').hide();
-
-					// 		$('th.sort_row_by:visible').on('click', column_sort);
-					// 	}
-					// });
-
 					$('tr[id^=\"toggleable_row_child_\"]:visible').hide();
 
 					// 2. tason tilausnumeronapin eventti
@@ -1630,11 +1577,6 @@
 						}
 					});
 
-					if ($('#valittu_lahto').val() != '') {
-						var val = $('#valittu_lahto').val();
-						$('#'+val).trigger('click');
-					}
-
 					$('#select_varasto').live('change', function() {
 						$('#varastoformi').submit();
 					});
@@ -1652,15 +1594,26 @@
 					});
 
 					$('#tulosta_rahtikirjat').on('click', function() {
+
+						var lahdot = '';
+						var lahdotcount = 0;
+
 						$('input[name^=\"checkbox_parent\"]').each(function() {
 							if ($(this).is(':checked')) {
+
+								lahdot=lahdot+$(this).val()+', ';
+								lahdotcount++;
+
 								$('#tulosta_rahtikirjat').after('<input type=\"hidden\" name=\"checkbox_parent[]\" value=\"'+$(this).val()+'\">');
 							}
 						});
 
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						$('#napitformi').submit();
+						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						else lahdot = '".t("Oletko varma, että haluat sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+
+						if (confirm(lahdot)) $('#napitformi').submit();
 					});
 
 					$('#vaihda_prio').on('click', function() {
@@ -1704,8 +1657,6 @@
 				//-->
 			</script>";
 
-	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
-
 	if (!isset($parent_row_select_status)) $parent_row_select_status = "";
 	if (!isset($parent_row_select_prio)) $parent_row_select_prio = "";
 	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
@@ -1717,7 +1668,7 @@
 	if (!isset($tee)) $tee = "";
 
 	if ($tee == "") {
-		echo "<form method='post' id='varastoformi' action=''>";
+		echo "<br><form method='post' id='varastoformi' action=''>";
 		echo "<table>";
 
 		echo "<tr><th>",t("Valitse varasto"),"</th><td class='back' style='vertical-align:middle;'>&nbsp;";
@@ -1744,7 +1695,7 @@
 		echo "</select>";
 		echo "</td></tr>";
 		echo "</table>";
-		echo "</form>";
+		echo "</form><br>";
 	}
 
 	if ($select_varasto > 0) {
@@ -1795,12 +1746,17 @@
 		echo "<form method='post' id='napitformi' action=''>";
 		echo "<table>";
 		echo "<tr>";
-		echo "<td claass='back'>";
-		echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
-		echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-		echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
-		echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
-		echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+		echo "<td class='back'>";
+
+		if (isset($valittu_lahto) and $valittu_lahto > 0) {
+			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
+			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
+			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+		}
+		else {
+			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
+			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+		}
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
 			$query = "	SELECT toimitustavan_lahto
@@ -1869,7 +1825,7 @@
 				$carriers[$row['lahdon_selite']] = $row['lahdon_selite'];
 			}
 
-			echo "<br /><br />";
+			echo "<br />";
 
 			$colspan_parent = 17;
 
@@ -1879,7 +1835,7 @@
 			echo "<tr><th>",t("Etsi tilausnumero"),"</th><td colspan='3'><input type='text' class='order' id='uni_order_search' value='' /></td></tr>";
 			echo "</table>";
 
-			echo "<br /><br />";
+			echo "<br />";
 
 			echo "<form method='post' action=''>";
 			echo "<table>";
@@ -2055,7 +2011,7 @@
 				echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/lahtojen_hallinta.php////tee=//select_varasto={$select_varasto}' />";
 				echo "<input type='hidden' name='lahdon_tunnus' value='{$row['lahdon_tunnus']}' />";
 				echo "<input type='hidden' name='tilaukset' value='{$row['tilaukset']}' />";
-				echo "<button type='submit'>{$row['lahdon_tunnus']}</button>";
+				echo "<button type='submit' id='{$row['lahdon_tunnus']}'>{$row['lahdon_tunnus']}</button>";
 				echo "</form>";
 				echo "</td>";
 				echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";

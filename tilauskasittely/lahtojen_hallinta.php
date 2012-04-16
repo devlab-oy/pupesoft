@@ -1610,8 +1610,8 @@
 
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
-						else lahdot = '".t("Oletko varma, että haluat sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						else lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
 
 						if (confirm(lahdot)) $('#napitformi').submit();
 					});

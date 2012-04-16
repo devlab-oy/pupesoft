@@ -432,13 +432,6 @@
 				$tilausrivires = pupe_query($query);
 				$tilausrivirow = mysql_fetch_assoc($tilausrivires);
 
-				// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
-				// K = tulee asn-sanoma ja lasku
-				// S = tulee vain sanoma   <--- ei tehdä mitään
-				// L = tulee vain lasku
-
-				$asn_sanomat = $tilausrivirow['uusiotunnus'] == 0 ? "L" : "K";
-
 				// jos ei splitata, päivitetään hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
 
@@ -1353,8 +1346,14 @@
 	// Jos kyseessä on TecCom oastolasku
 	if ($osrow["ebid"] == "TECCOM-INVOICE") {
 
+		// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
+		// K = tulee asn-sanoma ja lasku
+		// S = tulee vain sanoma   <--- ei tehdä mitään
+		// L = tulee vain lasku
+
 		// ensin ostoilta, sitten keikalta, sitten virheet.
-		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
+		// saadaan luoda keikka vain, jos tulee pelkkä lasku
+		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0 and $trow['asn_sanomat'] == 'L') {
 
 			echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
 

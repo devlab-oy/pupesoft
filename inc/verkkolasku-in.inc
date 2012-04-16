@@ -1363,7 +1363,9 @@
 								$result = pupe_query($query);
 							}
 						}
-						
+
+						echo "rtuoteno: {$rtuoteno[$i]["tuoteno"]} laskun_tyyppi: $laskun_tyyppi sanomantarkistin: $sanomantarkistin onko_duplikaatti: ",(int) $onko_duplikaatti,"<br>";
+
 						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
 							// Koodaajan kommentti. tilausnumeroon on mennyt kokoajan ihan v‰‰r‰ kentt‰. {$laskun_numero} Pit‰is menn‰ asn-kentt‰‰n
 							
@@ -1391,6 +1393,8 @@
 						}
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
+
+					echo "<br>";
 
 	 				// Tuli pyˆristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {

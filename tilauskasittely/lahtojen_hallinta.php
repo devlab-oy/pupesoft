@@ -1748,7 +1748,7 @@
 		echo "<tr>";
 		echo "<td class='back'>";
 
-		if (isset($valittu_lahto) and $valittu_lahto > 0) {
+		if ($tee == 'lahto' and trim($tilaukset) != '') {
 			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
 			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
 			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";

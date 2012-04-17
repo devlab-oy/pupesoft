@@ -1261,7 +1261,8 @@
 						asn_sanomat.tilausrivi,
 						asn_sanomat.hinta,
 						asn_sanomat.keikkarivinhinta,
-						asn_sanomat.tunnus
+						asn_sanomat.tunnus,
+						toimi.asn_sanomat
 						FROM asn_sanomat
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
@@ -1330,6 +1331,7 @@
 					}
 				}
 				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
+
 					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus 
 								FROM lasku 
 								LEFT JOIN tilausrivi ON (
@@ -1341,7 +1343,7 @@
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
 								AND lasku.tila = 'O'
-								AND lasku.alatila = ''";
+								AND lasku.alatila IN ('', 'A')";
 					$kpl_chk_res = pupe_query($query);
 					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
 					

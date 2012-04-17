@@ -904,9 +904,11 @@
 								AND laskunro = '{$laskun_numero}'
 								AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
 								AND liitostunnus = '{$trow['tunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$duplikaattilasku_check_res = pupe_query($query);
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
+						echo "osumia: ",mysql_num_rows($duplikaattilasku_check_res)," onko_duplikaatti: kyllä<br><br>";
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
 						$onko_duplikaatti = true;
 					}

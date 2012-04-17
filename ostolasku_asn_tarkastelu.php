@@ -348,56 +348,67 @@
 		$kollires = pupe_query($query);
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
-			$toimittaja = $kollirow['toimittajanumero'];
-			$asn_numero = $kollirow['asn_numero'];
-			$paketin_tunnukset[] = $kollirow['tunnus'];
-			
-			// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
-			if (strpos($kollirow['tilausrivi'], ",") !== false) {
-				foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
-					$paketin_rivit[] = $tunnus;
+
+			if ($valitse == 'asn') {
+
+				$toimittaja = $kollirow['toimittajanumero'];
+				$asn_numero = $kollirow['asn_numero'];
+				$paketin_tunnukset[] = $kollirow['tunnus'];
+				
+				// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
+				if (strpos($kollirow['tilausrivi'], ",") !== false) {
+					foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
+						$paketin_rivit[] = $tunnus;
+					}
 				}
+				else {
+					$paketin_rivit[] = $kollirow['tilausrivi'];
+				}
+				
+				// Haetaan tuotteen lapset jotka ovat runkoveloituksia
+				$query = "	SELECT group_concat(concat('\"', tuoteperhe.tuoteno, '\"')) lapset
+							FROM tuoteperhe
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND isatuoteno = '{$kollirow["tuoteno"]}'
+							AND ohita_kerays != ''";
+				$result = pupe_query($query);
+				$lapset = mysql_fetch_assoc($result);
+				
+				// Lapsia löytyi, tämä on isätuote 
+				if ($lapset["lapset"] != NULL) {
+					// Haetaan tilausnumerot joilla tämä tuote on
+					$query = "	SELECT group_concat(otunnus) tilaukset
+								FROM tilausrivi 
+								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
+								AND tilausrivi.tunnus in ({$kollirow["tilausrivi"]})";
+					$result = pupe_query($query);
+					$tilaukset = mysql_fetch_assoc($result);
+				
+					// Haetaan tämän isätuotteen lapsituotteiden tunnukset
+					$query = " 	SELECT tunnus 
+								FROM tilausrivi
+								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+								AND tilausrivi.otunnus in ({$tilaukset["tilaukset"]})
+								AND tilausrivi.tuoteno in ({$lapset["lapset"]})"; 
+					$result = pupe_query($query);
+					
+					while ($rivi = mysql_fetch_assoc($result)) {
+						$paketin_rivit[] = $rivi["tunnus"];
+					}				
+				}
+				
+				$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 			}
 			else {
-				$paketin_rivit[] = $kollirow['tilausrivi'];
+				$query = "	UPDATE asn_sanomat SET
+							status = 'X'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$kollirow['tunnus']}'";
+				$updateres = pupe_query($query);
 			}
-			
-			// Haetaan tuotteen lapset jotka ovat runkoveloituksia
-			$query = "	SELECT group_concat(concat('\"', tuoteperhe.tuoteno, '\"')) lapset
-						FROM tuoteperhe
-						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND isatuoteno = '{$kollirow["tuoteno"]}'
-						AND ohita_kerays != ''";
-			$result = pupe_query($query);
-			$lapset = mysql_fetch_assoc($result);
-			
-			// Lapsia löytyi, tämä on isätuote 
-			if ($lapset["lapset"] != NULL) {
-				// Haetaan tilausnumerot joilla tämä tuote on
-				$query = "	SELECT group_concat(otunnus) tilaukset
-							FROM tilausrivi 
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' 
-							AND tilausrivi.tunnus in ({$kollirow["tilausrivi"]})";
-				$result = pupe_query($query);
-				$tilaukset = mysql_fetch_assoc($result);
-			
-				// Haetaan tämän isätuotteen lapsituotteiden tunnukset
-				$query = " 	SELECT tunnus 
-							FROM tilausrivi
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-							AND tilausrivi.otunnus in ({$tilaukset["tilaukset"]})
-							AND tilausrivi.tuoteno in ({$lapset["lapset"]})"; 
-				$result = pupe_query($query);
-				
-				while ($rivi = mysql_fetch_assoc($result)) {
-					$paketin_rivit[] = $rivi["tunnus"];
-				}				
-			}
-			
-			$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 		}
 
-		if (count($paketin_rivit) > 0) {
+		if (count($paketin_rivit) > 0 and $valitse == 'asn') {
 
 			$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
 			$tuotenores = pupe_query($query);

@@ -85,6 +85,7 @@ if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen =
 if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
 if (!isset($lisax)) $lisax = '';
 if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
+if (!isset($nayta_lisateksti)) $nayta_lisateksti = "";
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -902,7 +903,9 @@ if (isset($tyhjenna)) {
 	$omalle_tilaukselle = "";
 }
 
-if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) 
+	and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") 
+	and $kertakassa != '')) and $kukarow['extranet'] == '') {
 
 	if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and isset($kertakassa) and $kertakassa == 'EI_KASSAMYYNTIA') {
 		$kassamyyja_kesken 	= "";
@@ -5965,6 +5968,7 @@ if ($tee == '') {
 				}
 				if ($varaosakommentti != '') {
 					echo "<font class='info'>$varaosakommentti</font>";
+					$nayta_lisateksti = "TOTTA";
 				}
 
 				$varaosavirhe = "";
@@ -7004,6 +7008,7 @@ if ($tee == '') {
 
 	// tulostetaan loppuun parit napit..
 	if ((int) $kukarow["kesken"] != 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
+		$paivita_teksti = "";
 		echo "<br><table width='100%'><tr>$jarjlisa";
 
 		if ($kukarow["extranet"] == "" and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
@@ -7171,6 +7176,18 @@ if ($tee == '') {
 
 				$javalisa = "onSubmit = 'return ulkomaa_verify()'";
 			}
+			
+			if ($nayta_lisateksti == "TOTTA" and $kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
+				$paivita_teksti = "KYLLA";
+				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+						function ostotilaus_verify(){
+								msg = '".t("Olet p‰ivitt‰m‰ss‰ ostotilausta p‰ivitt‰m‰ll‰ t‰t‰ myyntitilausta")."! ".t("Oletko varma, ett‰ haluat p‰ivitt‰‰ ostotilausta myˆs")."?';
+								return confirm(msg);
+						}
+						</SCRIPT>";
+
+				$tilausjavalisa = "onSubmit = 'return ostotilaus_verify()'";
+			}
 
 			echo "<td class='back' valign='top'>";
 
@@ -7253,7 +7270,7 @@ if ($tee == '') {
 			elseif ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U') {
 
 				echo "
-					<form name='kaikkyht' action='$PHP_SELF' method='post' $javalisa>
+					<form name='kaikkyht' action='$PHP_SELF' method='post' $javalisa $tilausjavalisa>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
@@ -7283,7 +7300,8 @@ if ($tee == '') {
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
 				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
-					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."'> ";
+					if ($paivita_teksti == "KYLLA") $lisateksti = " & ".t("P‰ivit‰ ostotilausta samalla");
+					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")." $lisateksti'> ";
 				}
 
 				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {

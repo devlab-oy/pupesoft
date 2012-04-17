@@ -1352,7 +1352,7 @@
 		// L = tulee vain lasku
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
-		// saadaan luoda keikka vain, jos tulee pelkkä lasku
+		// saadaan luoda keikka vain, jos tulee pelkkä lasku (eli toimittajan takana on asn_sanomat = 'L')
 		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0 and $trow['asn_sanomat'] == 'L') {
 
 			echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";

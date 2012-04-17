@@ -35,7 +35,7 @@
 
 					$('.hintapoikkeavuusbutton').click(function(){
 						$('#tee').val('hintavertailu');
-						$('#riviformi').submit();
+						$('#kolliformi').submit();
 					});
 
 					$('.etsibutton').click(function(){
@@ -47,12 +47,12 @@
 					$('.etsibutton_osto').click(function(){
 						var rivitunniste = $(this).attr('id');
 						$('#lasku').val(rivitunniste);
-						$('#riviformi').submit();
+						$('#kolliformi').submit();
 					});
 
 					$('.vahvistabutton').click(function(){
 						$('#tee').val('vahvistakolli');
-						$('#riviformi').attr('action', '?').submit();
+						$('#kolliformi').attr('action', '?').submit();
 					});
 
 					$('.poistakohdistus').click(function(){
@@ -1288,7 +1288,7 @@
 
 			$lasku = (int) $lasku;
 
-			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' id='riviformi'>";
+			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='{$lasku}' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";

@@ -207,7 +207,7 @@
 
 			// Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä
 			if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
-				if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) $kukarow['taso'] = 1;
+				if ($kukarow['taso'] != 1) $kukarow['taso'] = 1;
 			}
 		}
 	}

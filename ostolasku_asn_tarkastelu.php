@@ -341,11 +341,15 @@
 			$wherelisa = "AND asn_numero = '{$lasku}'";
 		}
 
-		$paketin_rivit = array();
-		$paketin_tunnukset = array();
+		$paketin_rivit 		= array();
+		$paketin_tunnukset 	= array();
+		$rtuoteno			= array();
+		$laskuttajan_toimittajanumero = "";
 
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
+
+		$i = 0;
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
 
@@ -405,10 +409,53 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$kollirow['tunnus']}'";
 				$updateres = pupe_query($query);
+
+				$rtuoteno[$i]['tuoteno'] 			= $kollirow['tuoteno'];
+				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['tuoteno2'];
+				$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
+				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
+				$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
+				$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
+				$rtuoteno[$i]['ale1'] 				= $kollirow['ale1'];
+				$rtuoteno[$i]['ale2'] 				= $kollirow['ale2'];
+				$rtuoteno[$i]['ale3'] 				= $kollirow['ale3'];
+				$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
+				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
+				$rtuoteno[$i]['kauttalaskutus']		= "";
+
+				$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
+
+				$i++;
 			}
 		}
 
-		if (count($paketin_rivit) > 0 and $valitse == 'asn') {
+		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+			$query = "	SELECT tunnus
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laskunro = '{$lasku}'";
+			$tunnus_fetch_res = pupe_query($query);
+			$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
+
+			$tunnus = $tunnus_fetch_row['tunnus'];
+
+			$query = "	SELECT *
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and toimittajanro = '{$laskuttajan_toimittajanumero}'
+						and tyyppi != 'P'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$trow = mysql_fetch_assoc($result);
+
+				require('inc/verkkolasku-in-luo-keikkafile.inc');
+
+				verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+			}
+		}
+
+		if ($valitse == 'asn' and count($paketin_rivit) > 0) {
 
 			$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
 			$tuotenores = pupe_query($query);

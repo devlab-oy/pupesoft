@@ -171,7 +171,7 @@
 	if (count($tuotetiedot) > 0) {
 		foreach ($tuotetiedot as $tuotetieto) {
 			// tuotekoodi
-			// Haetaan poikkeustapaksien käsittely
+			// Tehdään poikkeustapaksien käsittely
 			if ($laskuttajan_toimittajanumero == 123085) {
 				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";

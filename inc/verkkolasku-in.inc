@@ -1369,8 +1369,6 @@
 						echo "rtuoteno: {$rtuoteno[$i]["tuoteno"]} laskun_tyyppi: $laskun_tyyppi sanomantarkistin: $sanomantarkistin onko_duplikaatti: ",(int) $onko_duplikaatti,"<br>";
 
 						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
-							// Koodaajan kommentti. tilausnumeroon on mennyt kokoajan ihan v‰‰r‰ kentt‰. {$laskun_numero} Pit‰is menn‰ asn-kentt‰‰n
-							
 							$insertquery = "INSERT INTO asn_sanomat SET
 											yhtio = '{$yhtio}',
 											laji = 'tec',
@@ -1384,6 +1382,7 @@
 											paketinnumero = '',
 											lahetyslistannro = '',
 											toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}',
+											toim_tuoteno2 = '{$rtuoteno[$i]['tuoteno2']}',
 											kappalemaara = '{$rtuoteno[$i]['kpl']}',
 											hinta = '{$rtuoteno[$i]['hinta']}',
 											lisakulu = '{$rtuoteno[$i]['lisakulu']}',

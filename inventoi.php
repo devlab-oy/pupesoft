@@ -121,7 +121,7 @@
 	}
 
 	// lukitaan tableja
-	$query = "LOCK TABLES tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi write, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, avainsana READ, tili READ";
+	$query = "LOCK TABLES tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi write, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, avainsana READ, tili READ, asiakas READ";
 	$result = pupe_query($query);
 
 	//tuotteen varastostatus
@@ -167,21 +167,6 @@
 					}
 					else {
 						$tuoteno = $tuote_row["tuoteno"];
-					}
-
-					if ($tuote_row["kehahin"] != 0) {
-						$query = "  SELECT tunnus
-									FROM tapahtuma
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									AND laji IN ('tulo', 'valmistus')
-									AND tuoteno = '{$tuoteno}'
-									LIMIT 1";
-						$tapahtuma_res = pupe_query($query);
-
-						if (mysql_num_rows($tapahtuma_res) == 0)  {
-							echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
-							$virhe = 1;
-						}
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
@@ -1273,7 +1258,23 @@
 						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi er‰numero")."</a>";
 					}
 
-					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>";
+					echo "</td><td valign='top'>";
+
+					if ($tuoterow["hyllyalue"] == "!!M") {
+						$asiakkaan_tunnus = (int) $tuoterow["hyllynro"].$tuoterow["hyllyvali"].$tuoterow["hyllytaso"];
+						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+									FROM asiakas
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									AND tunnus = '$asiakkaan_tunnus'";
+						$asiakasresult = pupe_query($query);
+						$asiakasrow = mysql_fetch_assoc($asiakasresult);
+						echo t("Myyntitili"), " ", $asiakasrow["asiakkaan_nimi"];
+					}
+					else {
+						echo "$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]";
+					}
+
+					echo "</td>";
 
 					if ($tuoterow["sarjanumeroseuranta"] != "S") {
 						echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";

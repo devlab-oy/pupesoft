@@ -326,7 +326,14 @@ if (!function_exists('alku_lahete')) {
 
 			if ($extranet_tilausvahvistus != 1) {
 				//etsitään löytyykö rahtisopimusta
-				$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				
+				// Käytetään LÄHETTÄJÄN rahtisopimusta, etsitään meidän oma rahtisopparinumero
+				if ($laskurow["kohdistettu"] == "K") {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+				}
+				else {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				}
 
 				$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
 				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);

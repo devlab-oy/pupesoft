@@ -1762,17 +1762,17 @@
 			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 
-			if (substr($var,0,8) == "LOJ#!¡!#") {
+			if (substr($var,0,8) == "LOJ#!¡!#" and substr($var, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($var,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($var, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
 				$puu_var[]		= "";
 			}
-			elseif (substr($lop,0,8) == "LOP#!¡!#") {
+			elseif (substr($lop,0,8) == "LOP#!¡!#" and substr($lop, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($lop,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($lop, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";

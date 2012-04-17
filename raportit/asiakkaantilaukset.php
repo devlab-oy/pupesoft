@@ -282,10 +282,10 @@
 		$ytunnus   = $row["ytunnus"];
 
 		if ($cleantoim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];
+			$toimittajaid = $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];
+			$asiakasid = $row["liitostunnus"];
 		}
 	}
 
@@ -404,7 +404,7 @@
 							and lasku.laskunro='$laskunro'";
 			}
 			elseif ($sopimus > 0) {
-				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.tunnus tilaus2
+				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
 							$yhtioekojoin
 							WHERE lasku.$logistiikka_yhtiolisa

@@ -359,9 +359,9 @@
 			// RIVI 2
 			$out .= sprintf('%99s',		' ');
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
-			$out .= chr(10).chr(13);
+			$out .= chr(10).chr(10).chr(13);
 		}
-		
+
 		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {

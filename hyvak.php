@@ -1127,9 +1127,9 @@
 
 			$query = "	SELECT kuka, nimi
 			          	FROM kuka
-			          	WHERE yhtio = '$kukarow[yhtio]'
-						and hyvaksyja = 'o'
-						and kuka = '$eka_hyvaksyja'
+			          	WHERE yhtio 	= '$kukarow[yhtio]'
+						and hyvaksyja 	= 'o'
+						and kuka 		= '{$laskurow['hyvak1']}'
 			          	ORDER BY nimi";
 			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_assoc($vresult);

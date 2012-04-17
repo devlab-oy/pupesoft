@@ -645,9 +645,13 @@
 				$alv = $kayttajan_alv;
 			}
 
+			$tmp_rivitunnus = $rivitunnus;
+
 			if ($kpl != 0) {
 				require ('tilauskasittely/lisaarivi.inc');
 			}
+
+			$rivitunnus = $tmp_rivitunnus;
 
 			$hinta 	= '';
 			$netto 	= '';
@@ -763,7 +767,6 @@
 			}
 			else {
 				$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."', muuttaja ='{$kukarow["kuka"]}', muutospvm = now() WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
-
 				$updres = pupe_query($query);
 			}
 

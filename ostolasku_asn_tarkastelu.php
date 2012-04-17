@@ -52,7 +52,7 @@
 
 					$('.vahvistabutton').click(function(){
 						$('#tee').val('vahvistakolli');
-						$('#kolliformi').attr('action', '?').submit();
+						$('#riviformi').attr('action', '?').submit();
 					});
 
 					$('.poistakohdistus').click(function(){
@@ -338,7 +338,7 @@
 		}
 		else {
 			$lasku = (int) $lasku;
-			$wherelisa = "AND tilausnumero = '{$lasku}'";
+			$wherelisa = "AND asn_numero = '{$lasku}'";
 		}
 
 		$paketin_rivit = array();
@@ -397,15 +397,19 @@
 			$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 		}
 
-		$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
-		$tuotenores = pupe_query($query);
-		$tuotenorow = mysql_fetch_assoc($tuotenores);
+		if (count($paketin_rivit) > 0) {
 
-		$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
-		
-		require('inc/asn_kohdistus.inc');
+			$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
+			$tuotenores = pupe_query($query);
+			$tuotenorow = mysql_fetch_assoc($tuotenores);
 
-		asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+			$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
+			
+			require('inc/asn_kohdistus.inc');
+
+			asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+
+		}
 
 		$tee = '';
 	}

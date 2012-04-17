@@ -1597,11 +1597,11 @@
 
 					echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
 					
-					if ($yhtiorow["yhtio"] == 'allr' and $poistetut != "") {
+					if ($yhtiorow["yhtio"] == 'allr' and $poistetut != "" and $kukarow["extranet"] != "") {
 						echo '<font style="text-decoration:line-through;">'.hintapyoristys($row["myymalahinta"]).' '.$yhtiorow["valkoodi"].'</font></br>';
 					}
 					
-					echo ($poistetut !="") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
+					echo ($poistetut !="" and $kukarow["extranet"] != "") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
 
 					if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 						echo "<br>".hintapyoristys($row["nettohinta"])." $yhtiorow[valkoodi]";

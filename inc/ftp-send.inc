@@ -105,7 +105,6 @@ else {
 
 			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
 				$rename1 = FALSE;
-				var_dump($rename);
 			}
 		}
 
@@ -116,7 +115,6 @@ else {
 
 			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
 				$rename2 = FALSE;
-				var_dump($rename);
 			}
 		}
 

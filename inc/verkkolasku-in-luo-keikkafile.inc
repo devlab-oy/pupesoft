@@ -1514,7 +1514,7 @@
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
-								uusiotunnus = '{$keikan_tunnus}' 
+								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
@@ -1569,7 +1569,7 @@
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
-								uusiotunnus = '{$keikan_tunnus}' 
+								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";

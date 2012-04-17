@@ -195,10 +195,6 @@ if (!isset($tee) or $tee == '') {
         echo "</table><br>";
 	}
 
-	pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
-
-	$padding_muuttuja = " style='padding-right:15px;'";
-
 	// Näytetään käyttäjäkohtaiset työmääräykset
 	$tyojonosql = "	SELECT lasku.tunnus,
 					lasku.nimi,
@@ -217,6 +213,10 @@ if (!isset($tee) or $tee == '') {
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
+
+		pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
+
+		$padding_muuttuja = " style='padding-right:15px;'";
 
 		echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
 		echo "<thead>";

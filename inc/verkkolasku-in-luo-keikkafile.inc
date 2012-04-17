@@ -1093,6 +1093,7 @@
 									break;
 								case 'laadittu':
 									$values .= ", now()";
+									break;
 								default:
 									$values .= ", '".$split_row[$fieldname]."'";
 							}

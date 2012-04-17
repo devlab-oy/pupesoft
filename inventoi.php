@@ -1017,6 +1017,9 @@
 			elseif ($jarjestys == 'osastotrytuoteno') {
 				$order = " osasto, try, tuoteno, sorttauskentta ";
 			}
+			elseif ($jarjestys == 'nimityssorttaus') {
+				$order = " nimitys, sorttauskentta ";
+			}
 			else {
 				$order = " sorttauskentta, tuoteno ";
 			}
@@ -1076,12 +1079,16 @@
 			$seljarj1 = "";
 			$seljarj2 = "";
 			$seljarj3 = "";
+			$seljarj4 = "";
 
 			if ($jarjestys == 'tuoteno') {
 				$seljarj2 = "SELECTED";
 			}
 			elseif ($jarjestys == 'osastotrytuoteno') {
 				$seljarj3 = "SELECTED";
+			}
+			elseif ($jarjestys == 'nimityssorttaus') {
+				$seljarj4 = "SELECTED";
 			}
 			else {
 				$seljarj1 = "SELECTED";
@@ -1097,6 +1104,7 @@
 				echo "<select name='jarjestys' onchange='submit()'>";
 				echo "<option value='' $seljarj1>".t("Tuotepaikkajärjestys")."</option>";
 				echo "<option value='tuoteno' $seljarj2>".t("Tuotenumerojärjestys")."</option>";
+				echo "<option value='nimityssorttaus' $seljarj4>".t("Nimitysjärjestykseen")."</option>";
 				echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhmä/Tuotenumerojärjestykseen")."</option>";
 				echo "</select>";
 				echo "<input type='hidden' name='tee' value='INVENTOI'>";

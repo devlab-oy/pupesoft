@@ -698,6 +698,18 @@
 	}
 	elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
 		// Extranetin syöttörivi
+		
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		}
+		else {
+			$toimkka = substr($toimaika, 5, 2);
+			$toimvva = substr($toimaika, 0, 4);
+			$toimppa = substr($toimaika, 8, 2);
+		}
+		
 		echo "<table>
 				<tr>$jarjlisa
 					<th align='left'>".t("Tuotenumero")."</th>
@@ -719,6 +731,14 @@
 				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
+			
+		echo "<tr colspan='4'><th colspan='2'>".t("Toimitusaika")."</th></tr>";
+		echo "<tr>";
+		echo "<td valign='top' colspan='2'>";
+		echo "<input type='text' size='3' name='toimppa' value='$toimppa'>";
+		echo "<input type='text' size='3' name='toimkka' value='$toimkka'>";
+		echo "<input type='text' size='5' name='toimvva' value='$toimvva'>";
+		echo "</td></tr>";
 
 		echo "<tr>$jarjlisa<th colspan='2'>".t("Rivikommentti").":</th></tr>";
 		echo "<tr>$jarjlisa<td valign='top' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea>";

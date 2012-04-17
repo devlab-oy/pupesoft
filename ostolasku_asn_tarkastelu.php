@@ -1348,7 +1348,7 @@
 					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
 					
 					if ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
-						echo "<font color='orange'>Kpl ongelma <br> sanomassa {$kpl_row["tilkpl"]} <br>tilauksella {$row["kappalemaara"]}</font>";
+						echo "<font color='orange'>Kpl ongelma <br>tilauksella {$kpl_row["tilkpl"]} <br>sanomassa {$row["kappalemaara"]}</font>";
 					}
 					if ($kpl_row["otunnus"] != 0 and ($row['tilausnumero'] != $kpl_row["otunnus"])) {
 						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei t‰sm‰‰<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font>";

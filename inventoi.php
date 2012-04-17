@@ -169,21 +169,6 @@
 						$tuoteno = $tuote_row["tuoteno"];
 					}
 
-					if ($tuote_row["kehahin"] != 0) {
-						$query = "  SELECT tunnus
-									FROM tapahtuma
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									AND laji IN ('tulo', 'valmistus')
-									AND tuoteno = '{$tuoteno}'
-									LIMIT 1";
-						$tapahtuma_res = pupe_query($query);
-
-						if (mysql_num_rows($tapahtuma_res) == 0)  {
-							echo "<font class='error'>".t("VIRHE: Et voi inventoida tuotetta, jolla on keskihankintahinta muttei yht‰‰n tuloa")."! ($tuoteno)</font><br>";
-							$virhe = 1;
-						}
-					}
-
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
 						echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n sarja- tai er‰numeroa").": $tuoteno!</font><br>";
 						$virhe = 1;
@@ -1017,6 +1002,9 @@
 			elseif ($jarjestys == 'osastotrytuoteno') {
 				$order = " osasto, try, tuoteno, sorttauskentta ";
 			}
+			elseif ($jarjestys == 'nimityssorttaus') {
+				$order = " nimitys, sorttauskentta ";
+			}
 			else {
 				$order = " sorttauskentta, tuoteno ";
 			}
@@ -1076,12 +1064,16 @@
 			$seljarj1 = "";
 			$seljarj2 = "";
 			$seljarj3 = "";
+			$seljarj4 = "";
 
 			if ($jarjestys == 'tuoteno') {
 				$seljarj2 = "SELECTED";
 			}
 			elseif ($jarjestys == 'osastotrytuoteno') {
 				$seljarj3 = "SELECTED";
+			}
+			elseif ($jarjestys == 'nimityssorttaus') {
+				$seljarj4 = "SELECTED";
 			}
 			else {
 				$seljarj1 = "SELECTED";
@@ -1097,6 +1089,7 @@
 				echo "<select name='jarjestys' onchange='submit()'>";
 				echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
 				echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
+				echo "<option value='nimityssorttaus' $seljarj4>".t("Nimitysj‰rjestykseen")."</option>";
 				echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhm‰/Tuotenumeroj‰rjestykseen")."</option>";
 				echo "</select>";
 				echo "<input type='hidden' name='tee' value='INVENTOI'>";

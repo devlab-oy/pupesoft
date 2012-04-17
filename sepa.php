@@ -427,9 +427,14 @@
 	require("inc/parametrit.inc");
 
 	// Onko maksuaineistoille annettu salasanat.php:ss‰ oma polku jonne tallennetaan
-
 	if (isset($tee) and $tee == "KIRJOITAKOPIO") {
 		$pankkitiedostot_polku = "/tmp/";
+	}
+	elseif (isset($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"])) {
+		$pankkitiedostot_polku = trim($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"]);
+		if (substr($pankkitiedostot_polku, -1) != "/") {
+			$pankkitiedostot_polku .= "/";
+		}
 	}
 	elseif (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
 		$pankkitiedostot_polku = trim($pankkitiedostot_polku);
@@ -783,5 +788,23 @@
 		}
 
 		echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+		echo "</tr>";
+		echo "</table>";
+
+		// Jos kaikki siirtoon tarvittavat parametrit on kunnossa, siirret‰‰n tiedosto!
+		$y = $kukarow["yhtio"];
+		if (isset(	$maksuaineiston_siirto[$y]["host"],
+					$maksuaineiston_siirto[$y]["user"],
+					$maksuaineiston_siirto[$y]["pass"],
+					$maksuaineiston_siirto[$y]["path"],
+					$maksuaineiston_siirto[$y]["type"],
+					$maksuaineiston_siirto[$y]["file"],
+					$maksuaineiston_siirto[$y]["local_dir"],
+					$maksuaineiston_siirto[$y]["local_dir_ok"],
+					$maksuaineiston_siirto[$y]["local_dir_error"])) {
+			require("maksuaineisto_send.php");
+			echo "<br><font class='message'>".t("Maksuaineisto siirretty pankkiyhteysohjelmaan").".</font>";
+		}
 	}
+
 ?>

@@ -22,7 +22,8 @@
 							tilatut: ['k".$yhtiorow["valkoodi"]."', 0]
 						}
 
-						var options = {	width: 800,
+						var options = {	forceIFrame: false,
+										width: 800,
 										height: 220,
 										min: 0,
 										max: 400000,
@@ -44,7 +45,8 @@
 							kate: ['Rivit', 0]
 						}
 
-						var options = {	width: 800,
+						var options = {	forceIFrame: false,
+										width: 800,
 										height: 220,
 										min: 0,
 										max: 8000,
@@ -66,7 +68,8 @@
 							katepros: ['Kate%', 0]
 						}
 
-						var options = {	width: 800,
+						var options = {	forceIFrame: false,
+										width: 800,
 										height: 220,
 										min: 0,
 										max: 100,

@@ -13,6 +13,7 @@ else exit;
 # $ftpport --> Custom portti, ei pakollinen
 # $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 # $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
+# $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
 
 // Palautetaan:
 # $palautus
@@ -77,8 +78,15 @@ else {
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
 
+		// Tehd‰‰n NAMEFMT komento, jos kyseess‰ on iSeries/AS400 palvelin
+		if (isset($ftptype) and $ftptype == "AS400") {
+			$quote = ftp_raw($conn_id, "quote SITE NAMEFMT 1");
+		}
+
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
 		$ftpfile_tmp = $filenimi.".TMP";
+
+		# ftp_chdir voisi olla hyv‰
 
 		// Kokeillaan passiivista siirtoa
 		ftp_pasv($conn_id, TRUE);
@@ -95,7 +103,7 @@ else {
 			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
             $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
 
-			if (stripos($rename[0], "command successful") === FALSE) {
+			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
 				$rename1 = FALSE;
 			}
 		}
@@ -105,7 +113,7 @@ else {
 			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
             $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
 
-			if (stripos($rename[0], "command successful") === FALSE) {
+			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
 				$rename2 = FALSE;
 			}
 		}
@@ -209,7 +217,7 @@ else {
 }
 
 //echotaan rudulle jos kyseess‰ ei ole batch-ajo
-if ($tulos_ulos == "") {
+if (!isset($tulos_ulos) or $tulos_ulos == "") {
 	echo $tulos_ulos_ftp;
 }
 elseif ($tulos_ulos == "edi") {

@@ -1330,7 +1330,7 @@
 					}
 				}
 				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
-					$query = "SELECT tilkpl, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivinpositio']}'";					
+					$query = "SELECT tilkpl, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tilaajanrivinro = '{$row['tilausrivinpositio']}'";					
 					$kpl_chk_res = pupe_query($query);
 					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
 					

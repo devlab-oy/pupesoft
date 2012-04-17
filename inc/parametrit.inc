@@ -139,6 +139,7 @@ unset($thumb_size_y);
 unset($nrahdemo);
 
 unset($pankkitiedostot_polku);
+unset($maksuaineiston_siirto);
 
 unset($postiedihost);
 unset($postiedipass);

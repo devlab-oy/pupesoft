@@ -2765,7 +2765,7 @@ if ($tee == '') {
 		elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 
-			if ($kukarow["extranet"] = "") {
+			if ($kukarow["extranet"] != "") {
 				$extralisa .= " and (avainsana.selite like '%S%' or avainsana.selite like '%O%') ";
 
 				if ($kukarow['hinnat'] == 1) {

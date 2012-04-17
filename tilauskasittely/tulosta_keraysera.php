@@ -344,7 +344,7 @@
 
 				if (isset($tulostettavat_reittietiketit[$pak_nro]) and count($tulostettavat_reittietiketit) > 0 and trim($tulostettavat_reittietiketit[$pak_nro]) != '') {
 
-					$query = "	SELECT nro, sscc
+					$query = "	SELECT nro, sscc, laatija
 								FROM kerayserat
 								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND pakkausnro 	= '{$pak_nro}'
@@ -352,11 +352,35 @@
 					$reittietiketti_res = pupe_query($query);
 					$reittietiketti_row = mysql_fetch_assoc($reittietiketti_res);
 
-					$kerayseran_numero = $reittietiketti_row["nro"];
-					$uusi_sscc = $reittietiketti_row["sscc"];
+					$query = "	SELECT *
+								FROM kuka
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kuka = '{$reittietiketti_row['laatija']}'";
+					$result = pupe_query($query);
 
-					// Tulostetaan kollilappu
-					require('inc/tulosta_reittietiketti.inc');
+					if (mysql_num_rows($result) == 0) {
+						echo "<font class='error'>",t("Ker‰‰j‰‰")," {$reittietiketti_row['laatija']} ",t("ei lˆydy"),"!</font><br>";
+					}
+					else {
+
+						// Valitun ker‰‰j‰n tiedot
+						$keraajarow = mysql_fetch_assoc($result);
+
+						// Otetaan alkup kukarow talteen
+						$kukarow_orig = $kukarow;
+
+						// HUOM: Generoidaan ker‰yser‰ valitulle k‰ytt‰j‰lle
+						$kukarow = $keraajarow;
+
+						$kerayseran_numero = $reittietiketti_row["nro"];
+						$uusi_sscc = $reittietiketti_row["sscc"];
+
+						// Tulostetaan kollilappu
+						require('inc/tulosta_reittietiketti.inc');
+
+						// Palautetaan alkup kukarow
+						$kukarow = $kukarow_orig;
+					}
 				}
 			}
 		}
@@ -721,7 +745,7 @@
 						if ($tee == 'muokkaa') {
 							echo "<select class='notoggle' name='pakkaukset[{$rivit_row['rivitunnus']}##{$rivit_row['pakkausnro']}]'>";
 							echo "<option value='{$rivit_row['rivitunnus']}##999'>".t("Muu")."</option>";
-							
+
 							$query = "	SELECT tunnus, TRIM(CONCAT(pakkaus, ' ', pakkauskuvaus)) pakkaus
 										FROM pakkaus
 										WHERE yhtio = '{$kukarow['yhtio']}'

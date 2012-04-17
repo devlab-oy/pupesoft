@@ -61,7 +61,7 @@
 				<th>".t("Määrä")."</th>
 				<th>".t("Määrä")."</th>
 				<th>".t("Hinta")."</th>";
-				
+
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 					echo "<th>",t("Ale"),"{$alepostfix}</th>";
 				}
@@ -94,8 +94,8 @@
 		echo "<td>$kpl</td>
 			<td><input type='text' size='7' name='kpl' value = '$kpl'></td>
 			<td><input type='text' size='7' name='hinta' value = '$hinta'></td>";
-		
-		$backspan = 5;	
+
+		$backspan = 5;
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 			echo "<td><input type='text' size='5' name='ale{$alepostfix}' value = '",${'ale'.$alepostfix},"'></td>";
 			$backspan++;
@@ -107,9 +107,9 @@
 
 		if ($automatiikka == "ON" and $onjodropdowni != 'ON' and $laskurow['tila'] != 'O') {
 			echo "	".t("Valtse toiminto").": <select name='var'>";
-			echo "<option value=''>".t("Oletus")."</option>";
-			echo "<option value='LOJ#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus JT:ksi")."</option>
-				<option value='LOP#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
+			echo "<option value='LOJ#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus JT:ksi")."</option>";
+#			echo "<option value='LOP#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
+			echo "<option value=''>".t("Päivitä rivin määrä")."</option>";
 			echo "</select>";
 		}
 

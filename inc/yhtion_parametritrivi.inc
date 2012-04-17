@@ -753,7 +753,8 @@
 
 		$ulos .= "<option value=''>".t("Jälkitoimitusrivejä ei toimiteta eikä kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
-		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä vain jos käyttäjälla on päivitysoikeus JT-selaukseen")."</option>";
+		$ulos .= "<option value='J' $sel[J]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";		
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä myyntitilaukselta varastoon tilatut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";

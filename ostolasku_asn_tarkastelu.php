@@ -1330,7 +1330,18 @@
 					}
 				}
 				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
-					$query = "SELECT tilkpl, otunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tilaajanrivinro = '{$row['tilausrivinpositio']}'";					
+					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus 
+								FROM lasku 
+								LEFT JOIN tilausrivi ON (
+									tilausrivi.yhtio = lasku.yhtio AND 
+									tilausrivi.otunnus = lasku.tunnus AND 
+									tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}' AND 
+									tilausrivi.tuoteno = '{$row['toim_tuoteno']}'
+								)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+								AND lasku.tila = 'O'
+								AND lasku.alatila = ''";
 					$kpl_chk_res = pupe_query($query);
 					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
 					

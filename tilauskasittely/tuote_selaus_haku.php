@@ -317,6 +317,7 @@
 	$origtuotteet 		= "";
 	$poislisa_mulsel 	= "";
 	$lisa_parametri		= "";
+	$hinta_rajaus		= "";
 
 	if (!isset($ojarj)) {
 		$ojarj = '';
@@ -1596,11 +1597,11 @@
 					}
 
 					echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
-					
-					if ($yhtiorow["yhtio"] == 'allr' and $poistetut != "" and $kukarow["extranet"] != "") {
+
+					if ($hinta_rajaus != "") {
 						echo '<font style="text-decoration:line-through;">'.hintapyoristys($row["myymalahinta"]).' '.$yhtiorow["valkoodi"].'</font></br>';
 					}
-					
+
 					echo ($poistetut !="" and $kukarow["extranet"] != "") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
 
 					if ($lisatiedot != "" and $kukarow["extranet"] == "") {
@@ -1629,7 +1630,9 @@
 							}
 
 							if ($kokonaismyytavissa > 0) {
-								echo "<td valign='top' class='$vari' $classrigh><font class='green'>".t("On")."</font></td>";
+								echo "<td valign='top' class='$vari' $classrigh>";
+								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+								echo "</td>";
 							}
 							else {
 								echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t("Ei")."</font></td>";
@@ -1837,7 +1840,7 @@
 								echo "</font>";
 							}
 							else {
-								echo ($yhtiorow["yhtio"] == 'allr') ? "<table style='width:100%;'><tr class='aktiivi'><td>".t("P‰‰varasto")."</td><td><font class='green'>".t("On")."</font></td></tr></table>": "<font class='green'>".t("On")."</font>";
+								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
 							}
 						}
 						elseif ($tilauslisa != "") {

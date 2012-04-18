@@ -777,6 +777,10 @@
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateistilitys")) {
 
 				$arvo = str_replace(",",".",$arvo);
+				
+				if ($kassalipasrow["kateistilitys"] == "") {
+					$kassalipasrow["kateistilitys"] = $yhtiorow["kateistilitys"];
+				}
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateistilitys"], $kustp);
 
@@ -797,7 +801,11 @@
 				$result = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
-
+				
+				if ($kassalipasrow["kassa"] == "") {
+					$kassalipasrow["kassa"] = $yhtiorow["kassa"];
+				}
+					
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
@@ -819,6 +827,10 @@
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateisotto")) {
 				$arvo = str_replace(",",".",$arvo);
 
+				if ($kassalipasrow["kateisotto"] == "") {
+					$kassalipasrow["kateisotto"] = $yhtiorow["kassaerotus"];
+				}
+
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateisotto"], $kustp);
 
 				$query = "	INSERT INTO tiliointi SET
@@ -834,6 +846,10 @@
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
+
+				if ($kassalipasrow["kassa"] == "") {
+					$kassalipasrow["kassa"] = $yhtiorow["kassa"];
+				}
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
 

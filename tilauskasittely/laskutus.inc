@@ -945,6 +945,16 @@
 			$viivastyskorko = 0;
 		}
 
+		// HUOM: Tallennetaan PY÷RISTETTY loppusumma laskun loppusummaksi.
+		$loppusumma 			= round($loppusumma - $pyorerotus, 2);
+		$loppusumma_valuutassa 	= round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
+		
+		// Jos kotivaluutassa niin vied‰‰n samat luvut n‰ihin kenttiin
+		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$loppusumma_valuutassa = $loppusumma;
+			$pyorerotus_valuutassa = $pyorerotus;
+		}
+		
 		$query = "	UPDATE lasku
 					SET alatila 			= 'V',
 					arvo 					= '$arvosumma',

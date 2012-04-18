@@ -194,7 +194,13 @@
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
 			elseif ($laskuttajan_toimittajanumero == "123453") {
-				$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
+				if (strpos($tuotetieto->ProductId->ProductNumber, "-") !== FALSE) {
+					$rtuoteno[$i]["tuoteno"] = str_replace("-", "", $tuotetieto->ProductId->ProductNumber);
+				}
+				else {
+					$rtuoteno[$i]["tuoteno"] = substr($tuotetieto->ProductId->ProductNumber,0,3)."-".substr($tuotetieto->ProductId->ProductNumber,3);
+				}
+
 				$rtuoteno[$i]["tuoteno2"] = $tuotetieto->ProductId->ProductNumber;
 			}
 			elseif ($laskuttajan_toimittajanumero == "123178") {

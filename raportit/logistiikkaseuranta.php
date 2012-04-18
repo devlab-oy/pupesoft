@@ -161,10 +161,10 @@
 			$tilaukset = substr($tilaukset, 0, -1);
 
 			if ($virhelaji == "nollarivit") {
-				$kpllisa = " and tilausrivi.kpl+tilausrivi.varattu = 0 ";
+				$kpllisa = " and tilausrivi.kpl+tilausrivi.varattu = 0 and tilausrivi.keratty = '' ";
 			}
 			else {
-				$kpllisa = " and tilausrivi.kpl+tilausrivi.varattu > 0 ";
+				$kpllisa = " and tilausrivi.tilkpl >= 0 ";
 			}
 
 			// Tilausrivit

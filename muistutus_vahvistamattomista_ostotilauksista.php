@@ -1,5 +1,4 @@
 <?php
-
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
@@ -18,7 +17,7 @@
 		$kukarow['yhtio'] = $argv[1];
 
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-		$yhtiores = mysql_query($query) or pupe_error($query);
+		$yhtiores = pupe_query($query);
 
 		if (mysql_num_rows($yhtiores) == 1) {
 			$yhtiorow = mysql_fetch_array($yhtiores);
@@ -55,31 +54,29 @@
 					AND kuka.eposti != ''
 					GROUP BY tilausrivi.otunnus
 					ORDER BY lasku.laatija";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		$veposti = "";
-		
+		$veposti	= "";
+		$meili		= "";
+
 		while ($trow = mysql_fetch_array($result)) {
 
 			if ($trow['eposti'] != $veposti and $veposti != "") {
 				$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
 				$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				$meili = '';
-				$veposti = $trow['eposti'];
 			}
 
+			// setataan sähköpostimuuttuja
+			$veposti = $trow['eposti'];
 
 			$meili .= "Ostotilaus: " . $trow['otunnus'] . "\n";
 			$meili .= "Toimittaja: " . $trow['nimi'] . "\n";
 			$meili .= "Vahvistamattomia rivejä: " . $trow['kpl'] . "\n\n";
-
 		}
 
 		if ($meili != '') {
 			$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
 			$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 		}
-
 	}
-
 ?>

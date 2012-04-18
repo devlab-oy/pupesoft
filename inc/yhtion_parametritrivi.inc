@@ -168,6 +168,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == '') {
 			$sel1 = "selected";
@@ -175,9 +176,13 @@
 		if ($trow[$i] == 'E') {
 			$sel2 = "selected";
 		}
+		if ($trow[$i] == 'F') {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value = '' $sel1>".t("Pankit ja p‰iv‰t yhdistet‰‰n")."";
 		$ulos .= "<option value = 'E' $sel2>".t("Jokainen pankki ja p‰iv‰ omaan tiedostoon")."";
+		$ulos .= "<option value = 'F' $sel3>".t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

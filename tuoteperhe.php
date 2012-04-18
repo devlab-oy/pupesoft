@@ -35,7 +35,7 @@
 	}
 
 	if ($tee == "KOPIOI") {
-
+		
 		if ($kop_isatuo == "") {
 				echo "<br><br>";
 				echo "<table>";
@@ -167,7 +167,7 @@
 		$formi  = 'performi';
 		$kentta = 'hakutuoteno';
 
-		if ($hakutuoteno2 != "") $hakutuoteno = $hakutuoteno2;
+		if ($hakutuoteno2 != "") $hakutuoteno = trim($hakutuoteno2);
 
 		echo "<br><table>";
 		echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>
@@ -233,6 +233,8 @@
 
 		if (trim($isatuoteno) != trim($tuoteno)) {
 			$ok = 1;
+			$isatuoteno = trim($isatuoteno);
+			$tuoteno = trim($tuoteno);
 
 			$query  = "	SELECT *
 						from tuoteperhe
@@ -333,6 +335,8 @@
 	}
 
 	if ($tee == 'POISTA') {
+		$isatuoteno = trim($isatuoteno);
+		
 		// Varmistetaan, että faktat ei mene rikki
 		$query = "	SELECT
 					group_concat(distinct if(fakta = '', null, fakta)) fakta,
@@ -360,6 +364,8 @@
 	}
 
 	if ($tee == 'TALLENNAFAKTA') {
+		$isatuoteno = trim($isatuoteno);
+
 		$query = "	UPDATE tuoteperhe
 					SET fakta = '', fakta2 = '', omasivu = ''
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -393,6 +399,9 @@
 	if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 		$lisa = "";
 		$tchk = "";
+		
+		$isatuoteno = trim($isatuoteno);
+		$hakutuoteno = trim($hakutuoteno);
 
 		if ($isatuoteno != '') {
 			$lisa = " and isatuoteno='$isatuoteno'";

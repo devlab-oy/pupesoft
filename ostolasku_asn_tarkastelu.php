@@ -1310,18 +1310,18 @@
 			echo "<th>&nbsp;</th>";
 			echo "</tr>";
 
-			$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}'";
+			$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}' AND tila = 'H'";
 			$laskures = pupe_query($query);
 
 			if (mysql_num_rows($laskures) == 0) {
-				$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}'";
+				$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}' AND tila = 'H'";
 				$laskures = pupe_query($query);
 			}
 
 			$laskurow = mysql_fetch_assoc($laskures);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
-						asn_sanomat.toim_tuoteno,
+						asn_sanomat.toim_tuoteno, asn_sanomat.toim_tuoteno2,
 						asn_sanomat.tilausrivinpositio,
 						asn_sanomat.status,
 						asn_sanomat.tilausnumero,
@@ -1345,11 +1345,11 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				$query = "	SELECT tuotteen_toimittajat.tuoteno 
+				$query = "	SELECT tuote.tuoteno 
 							FROM tuotteen_toimittajat 
 							JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}' 
-							AND tuotteen_toimittajat.toim_tuoteno = '{$row['toim_tuoteno']}' 
+							AND tuotteen_toimittajat.toim_tuoteno IN ('{$row['toim_tuoteno']}', '{$row['toim_tuoteno2']}') 
 							AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
 

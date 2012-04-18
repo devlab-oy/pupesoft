@@ -907,7 +907,7 @@
 						// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
 						$updatequery = "UPDATE asn_sanomat SET
 										tilausrivi = '{$siistitty}',
-										tuoteno = '{$tilausrivirow['tuoteno']}',
+										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
 						echo "<pre>$query</pre>";

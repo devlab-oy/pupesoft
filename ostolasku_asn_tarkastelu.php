@@ -419,6 +419,7 @@
 				$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
 				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
 				$rtuoteno[$i]['kauttalaskutus']		= "";
+				$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
 
 				$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
 

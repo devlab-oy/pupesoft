@@ -133,8 +133,6 @@
 
 		$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
 
-		$lasku = (int) $lasku;
-
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$lasku}' AND laji = 'tec'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
@@ -337,8 +335,7 @@
 			$wherelisa = "AND paketintunniste = '{$kolli}'";
 		}
 		else {
-			$lasku = (int) $lasku;
-			$wherelisa = "AND asn_numero = '{$lasku}'";
+			$wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";
 		}
 
 		$paketin_rivit 		= array();
@@ -1285,8 +1282,6 @@
 			echo "</form>";
 		}
 		else {
-
-			$lasku = (int) $lasku;
 
 			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";

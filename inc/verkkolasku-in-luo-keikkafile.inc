@@ -953,7 +953,7 @@
 												varattu			= '{$lapsitieto['varattu']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
-												kommentti		= 'ASN-sanoma: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
 												laadittu		=  now(),
 												hyllyalue		= '{$lapsitieto['hyllyalue']}',
 												hyllynro		= '{$lapsitieto['hyllynro']}',

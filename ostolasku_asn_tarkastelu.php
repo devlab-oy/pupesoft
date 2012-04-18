@@ -971,7 +971,7 @@
 			echo "<input type='hidden' name='lopetus' id='lopetus' value='{$lopetus}' />";
 
 			echo "<table>";
-			echo "<tr><th colspan='5'>",t("Haun tulokset"),"</th><th><input type='submit' value='",t("Kohdista"),"' /></th></tr>";
+			echo "<tr><th colspan='6'>",t("Haun tulokset"),"</th><th><input type='submit' value='",t("Kohdista"),"' /></th></tr>";
 			echo "<tr>";
 			echo "<th>",t("Tilausnro"),"</th>";
 			echo "<th>",t("Tuoteno"),"</th>";
@@ -1008,8 +1008,15 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				// katsotaan ettei riviä ole jo kohdistettu muuhun asn riviin
-				$query = "SELECT tunnus FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanumero = '{$toimittaja}' AND tilausrivi LIKE '%{$row['tunnus']}%'";
+				$querylisa = $valitse == 'asn' ? " AND laji = 'asn' " : " AND laji = 'tec' ";
+
+				// katsotaan ettei riviä ole jo kohdistettu muuhun riviin
+				$query = "	SELECT tunnus 
+							FROM asn_sanomat 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND toimittajanumero = '{$toimittaja}' 
+							AND tilausrivi LIKE '%{$row['tunnus']}%'
+							{$querylisa}";
 				$chkres = pupe_query($query);
 
 				if (mysql_num_rows($chkres) > 0) continue;

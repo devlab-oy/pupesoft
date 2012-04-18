@@ -1035,7 +1035,7 @@
 
 				echo "<td align='right'>$row[uusiotunnus]</td>";
 
-				if ($row['uusiotunnus'] != '' and $row['kpl'] == 0) {
+				if ($row['uusiotunnus'] != '' and $row['kpl'] == 0 and $valitse == 'asn') {
 					echo "<td>",t("Rivi on kohdistettu"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}

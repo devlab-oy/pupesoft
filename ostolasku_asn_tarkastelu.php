@@ -344,6 +344,7 @@
 		$laskuttajan_toimittajanumero = "";
 
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$kollires = pupe_query($query);
 
 		$i = 0;
@@ -427,11 +428,14 @@
 			}
 		}
 
+		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero rtuoteno: <pre>",var_dump($rtuoteno),"</pre>";
+
 		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laskunro = '{$lasku}'";
+			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$tunnus_fetch_res = pupe_query($query);
 			$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 
@@ -442,6 +446,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						and toimittajanro = '{$laskuttajan_toimittajanumero}'
 						and tyyppi != 'P'";
+			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {

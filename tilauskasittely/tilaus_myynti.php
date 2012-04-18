@@ -2773,7 +2773,7 @@ if ($tee == '') {
 			$extralisa = "";
 
 			if ($kukarow["extranet"] != "") {
-				$extralisa .= " and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
+				$extralisa .= " and (avainsana.selite like '%S%' or avainsana.selite like '%O%') ";
 
 				if ($kukarow['hinnat'] == 1) {
 					$extralisa .= " and avainsana.selite not like '1%' ";

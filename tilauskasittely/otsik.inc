@@ -1708,7 +1708,12 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
-			echo "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<tr><td>".t("Keräysprioriteetti").":</td><td>";
@@ -1729,7 +1734,12 @@
 			echo "</select>";
 
 			echo "</td>";
-			echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1794,7 +1804,12 @@
 			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$toimehtoseltark' size='20'>";
 			echo "</td>";
 
-			echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1865,8 +1880,13 @@
 				echo "<td></td><td></td>";
 			}
 
-			echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
-
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
+			echo "</tr>";
 			echo "<tr><td>".t("Asiakkaan piiri").":</td><td>";
 
 			$pres = t_avainsana("PIIRI");
@@ -1955,7 +1975,7 @@
 			echo "</td>";
 			echo "</tr>";
 
-			if ($yhtiorow['laskutuskielto'] != 0) {
+			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				echo "<tr>";
 				echo "<td></td><td></td>";
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";

@@ -2254,10 +2254,11 @@
 		echo "<option value=''>",t("Myyjä"),"</option>";
 
 		while ($row = mysql_fetch_assoc($result)) {
-
 			$sel = $row['myyja'] == $myyja ? " selected" : "";
 
-			echo "<option value='{$row['myyja']}'{$sel}>{$row['nimi']}</option>";
+			$row['nimi'] = ($row['myyja'] > 0) ? $row['nimi']." - ".$row['myyja'] : $row['nimi'];
+
+			echo "<option value='{$row['tunnus']}'{$sel}>{$row['nimi']}</option>";
 		}
 
 		echo "</select></td></tr>\n";

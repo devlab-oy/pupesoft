@@ -191,14 +191,18 @@
 	elseif ($jarjestys == 'osastotrytuoteno') {
 		$sel3 = "SELECTED";
 	}
+	elseif ($jarjestys == 'nimityssorttaus') {
+		$sel4 = "SELECTED";
+	}
 	else {
 		$sel1 = "SELECTED";
 	}
 
 	echo "<td><select name='jarjestys'>";
-	echo "<option value='' {$sel1}>",t("Osoitejärjestykseen"),"</option>";
-	echo "<option value='tuoteno' {$sel2}>",t("Tuotenumerojärjestykseen"),"</option>";
-	echo "<option value='osastotrytuoteno' {$sel3}>",t("Osasto/Tuoteryhmä/Tuotenumerojärjestykseen"),"</option>";
+	echo "<option value=''  $sel1>".t("Osoitejärjestykseen")."</option>";
+	echo "<option value='tuoteno' $sel2>".t("Tuotenumerojärjestykseen")."</option>";
+	echo "<option value='nimityssorttaus' $sel4>".t("Nimitysjärjestykseen")."</option>";
+	echo "<option value='osastotrytuoteno' $sel3>".t("Osasto/Tuoteryhmä/Tuotenumerojärjestykseen")."</option>";
 
 	echo "</td></tr>";
 
@@ -476,9 +480,9 @@
 		}
 
 		//hakulause, tämä on sama kaikilla vaihtoehdolilla ja gorup by lauyse joka on sama kaikilla
-		$select  = " tuote.tuoteno, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
-		{$sorttauskentan_jarjestys} sorttauskentta";
-		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
+		$select  = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
+		$sorttauskentan_jarjestys sorttauskentta";
+		$groupby = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
 		$joinlisa = "";
 
@@ -587,6 +591,9 @@
 			elseif ($jarjestys == 'osastotrytuoteno') {
 				$orderby = " osasto, try, tuoteno, sorttauskentta ";
 			}
+			elseif ($jarjestys == 'nimityssorttaus') {
+				$orderby = " nimitys, sorttauskentta ";
+			}
 			else {
 				$orderby = " sorttauskentta, tuoteno ";
 			}
@@ -619,6 +626,9 @@
 				elseif ($jarjestys == 'osastotrytuoteno') {
 					$orderby = " osasto, try, tuoteno, sorttauskentta ";
 				}
+				elseif ($jarjestys == 'nimityssorttaus') {
+					$orderby = " nimitys, sorttauskentta ";
+				}
 				else {
 					$orderby = " sorttauskentta, tuoteno ";
 				}
@@ -649,6 +659,9 @@
 				}
 				elseif ($jarjestys == 'osastotrytuoteno') {
 					$orderby = " osasto, try, tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'nimityssorttaus') {
+					$orderby = " nimitys, sorttauskentta ";
 				}
 				else {
 					$orderby = " sorttauskentta, tuotepaikat.tuoteno ";
@@ -686,6 +699,9 @@
 				}
 				elseif ($jarjestys == 'osastotrytuoteno') {
 					$orderby = " osasto, try, tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'nimityssorttaus') {
+					$orderby = " nimitys, sorttauskentta ";
 				}
 				else {
 					$orderby = " sorttauskentta, tuoteno ";
@@ -983,7 +999,7 @@
 				system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
 
 				if ($komento["Inventointi"] == 'email') {
-
+					
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";

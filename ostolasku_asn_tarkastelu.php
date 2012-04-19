@@ -84,6 +84,7 @@
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
+	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse) = explode("!°!", $muut_siirrettavat);
 
 	if ($tee == 'hintavertailu') {
 
@@ -603,6 +604,11 @@
 			//rivien splittausvaihtoehtot n‰kyviin
 			$automatiikka = 'ON';
 
+			//pidet‰‰n kaikki muuttujat tallessa
+			$muut_siirrettavat = $asn_rivi."!°!".$toimittaja."!°!".$tilausnro."!°!".$tuoteno."!°!".$tilaajanrivinro."!°!".$kpl."!°!".$valitse;
+
+			$rivinotunnus = $tilausnro;
+
 			echo t("Muuta rivi‰"),":<br>";
 			require('tilauskasittely/syotarivi_ostotilaus.inc');
 			require('inc/footer.inc');
@@ -616,6 +622,10 @@
 
 		$laskurow["tila"] = "O";
 		$kukarow["kesken"] = $rivinotunnus;
+
+		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivinotunnus}'";
+		$laskures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($laskures);
 
 		if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 			$tuoteno_array[] = $tuoteno;
@@ -711,6 +721,7 @@
 			}
 
 			$tmp_rivitunnus = $rivitunnus;
+			$rivitunnus = 0;
 
 			if ($kpl != 0) {
 				require ('tilauskasittely/lisaarivi.inc');
@@ -990,7 +1001,6 @@
 			$toimittaja = (int) $toimittaja;
 
 			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}' and tyyppi !='P'";
-			
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
 

@@ -24,6 +24,10 @@
 
 			$kerayseran_numero = $nro_fetch_row['nro'] + 1;
 
+			if (isset($kukarow['debugfile']) and $kukarow['debugfile'] != "") {
+				rename($tee_keraysera_debugdir."/".basename($kukarow['debugfile']), $tee_keraysera_debugdir."/Kerayseradebug-{$kerayseran_numero}.html");
+			}
+
 			foreach ($era_arr as $pakkaus_nro => $rarr) {
 				foreach ($rarr as $juokseva_nro => $pakkaus) {
 

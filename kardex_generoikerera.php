@@ -43,7 +43,7 @@
 		while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
 
 			// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-			$erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"], FALSE);
+			$erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
 			if (count($erat['tilaukset']) > 0) {
 

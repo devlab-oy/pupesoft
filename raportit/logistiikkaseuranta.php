@@ -1,5 +1,8 @@
 <?php
-
+	
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+	
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
@@ -261,7 +264,7 @@
 				$rivi .= "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tilausrivirow["tuoteno"])."'>$tilausrivirow[tuoteno]</a></td>";
 				$rivi .= "<td>".substr($tilausrivirow["nimitys"],0,20)."</td>";
 				$rivi .= "<td align='right'>".(float) ($tilausrivirow["tilkpl"])."</td>";
-				$rivi .= "<td align='right'>".(float) ($tilausrivirow["varattu"]+$tilausrivirow["kpl"])."</td>";
+				$rivi .= "<td align='right'>".(float) ($tilausrivirow["kpl"])."</td>";
 				$rivi .= "<td>$tilausrivirow[var]</td>";
 				$rivi .= "<td>$kereraekotus</td>";
 				$rivi .= "<td>$pakkaus_kirjain</td>";

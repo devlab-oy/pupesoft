@@ -28,13 +28,15 @@
 			$laskurow['tilaustyyppi'] = '2';
 		}
 
+		$tec_toimtapa = ($laskurow['tilaustyyppi'] == '1') ? '0003' : '';
+
 		// Otsikkoa
 		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU 10 merkkiä
 		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 9 merkkiä
 		$out .= sprintf("%-20.20s", $laskurow['nimi']);				// Toimittajan nimi 20 merkkiä
 		$out .= sprintf("%-20.20s", $yhtiorow['nimi']);				// Lähettäjän nimi 20 merkkiä
 		$out .= sprintf("%06.6s", substr($laskurow['tunnus'], -6));	// Ostotilauksen numero 6 merkkiä
-		$out .= sprintf("%4.4s", "");								// Toimitustapa 4 merkkiä, ei käytössä
+		$out .= sprintf("%4.4s", $tec_toimtapa);					// Toimitustapa 4 merkkiä
 		$out .= sprintf("%-1.1s", $laskurow['tilaustyyppi']);		// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus, (3 = Yölähetys, ei tuettu)
 		fwrite($toot, $out . "\n");
 

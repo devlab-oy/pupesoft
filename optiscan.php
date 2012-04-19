@@ -276,7 +276,7 @@
 				$row = mysql_fetch_assoc($result);
 
 				// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto'], FALSE);
+				$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto']);
 
 				if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);

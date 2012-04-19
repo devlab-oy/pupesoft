@@ -12089,9 +12089,8 @@ if (!function_exists("pupe_DataTables")) {
 						if (searchbox == 'tuoteno') {
 							kohde = 1;
 						}
-
-						datatablesit[0].fnFilter(tun, kohde);
-						$('input[name=\"search_'+searchbox+'\"]').val(tun);
+						
+						$('input[name=\"search_'+searchbox+'\"]').val(tun).keyup();
 					});
 
 					// JOS PAINETAAN 'TALLENNA SIVUN MUUTOKSET'-NAPPIA

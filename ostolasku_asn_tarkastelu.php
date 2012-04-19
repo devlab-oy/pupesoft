@@ -403,11 +403,6 @@
 				$sscc_paketti_tunnus = $kollirow["paketintunniste"];
 			}
 			else {
-				$query = "	UPDATE asn_sanomat SET
-							status = 'X'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$kollirow['tunnus']}'";
-				$updateres = pupe_query($query);
 
 				$rtuoteno[$i]['tuoteno'] 			= $kollirow['toim_tuoteno'];
 				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno2'];
@@ -429,7 +424,7 @@
 			}
 		}
 
-		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero<br>",var_dump($rtuoteno),"<br>";
+		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero<br><pre>",var_dump($rtuoteno),"</pre><br>";
 
 		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
 			$query = "	SELECT tunnus
@@ -455,7 +450,23 @@
 
 				require('inc/verkkolasku-in-luo-keikkafile.inc');
 
-				verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+				if ($virheet == 0) {
+
+					$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					$kollires = pupe_query($query);
+
+					while ($kollirow = mysql_fetch_assoc($kollires)) {
+						$query = "	UPDATE asn_sanomat SET
+									status = 'X'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$kollirow['tunnus']}'";
+						$updateres = pupe_query($query);
+					}
+
+				}
+
+				// verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 			}
 		}
 

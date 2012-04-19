@@ -1,8 +1,8 @@
 <?php
-	
+
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
-	
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
@@ -36,7 +36,7 @@
 	if ($virhelaji == "nollarivit") 	$sel3 = "SELECTED";
 
 	echo "<option value='' >Valitse</option>";
-	echo "<option value='rahtiveloitus' $sel1>V‰‰r‰ rahtimaksu</option>";
+	#echo "<option value='rahtiveloitus' $sel1>V‰‰r‰ rahtimaksu</option>";
 	echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei ker‰tty</option>";
 	echo "<option value='nollarivit' $sel3>Ker‰tt‰v‰ m‰‰r‰ nolla</option>";
 	echo "</select></td>";
@@ -80,10 +80,12 @@
 
 		if ($lasku > 0) {
 			$laskulisa 	= " and laskunro = {$lasku} AND tila = 'U' AND alatila = 'X' ";
+
+			$virhelaji  = "NAYTAKAIKKI";
 			$pvmlisa 	= "";
 		}
 
-		$query = "	SELECT tunnus, laskunro, vanhatunnus
+		$query = "	SELECT distinct laskunro, vanhatunnus
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					{$laskulisa}
@@ -175,7 +177,7 @@
 						keraysvyohyke.nimitys kervyohyke
 						FROM tilausrivi
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa ='')
-						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')
+						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 						LEFT JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tilausrivi.yhtio AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)
 						LEFT JOIN keraysvyohyke ON (varaston_hyllypaikat.yhtio = keraysvyohyke.yhtio AND varaston_hyllypaikat.keraysvyohyke = keraysvyohyke.tunnus)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -364,7 +366,7 @@
 			$rivi .= "</td>";
 			$rivi .= "</tr>";
 
-
+			/*
 			// Rahtiveloitus
 			$rivi .= "<tr>";
 			$rivi .= "<td class='back' colspan='4' style='padding:0px; margin:0px;'>";
@@ -372,7 +374,7 @@
 
 			$rivi .= "<tr>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 120px;'>Rahti laskutettu</th>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 420px;'>Toimitustapa</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Hinta</th>";
 			$rivi .= "</tr>";
 
@@ -408,7 +410,7 @@
 
 			$rivi .= "<tr>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 120px;'>Rahti laskennallinen</th>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 420px;'>Toimitustapa</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Hinta</th>";
 			$rivi .= "</tr>";
 
@@ -536,6 +538,7 @@
 			if ($virhelaji == "rahtiveloitus" and $veloitettu_oispitany != $veloitettu) {
 				$naytarivi = TRUE;
 			}
+			*/
 
 			// V‰lirivi
 			$rivi .= "<tr>";

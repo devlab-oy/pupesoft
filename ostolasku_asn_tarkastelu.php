@@ -349,6 +349,7 @@
 		$kollires = pupe_query($query);
 
 		$i = 0;
+		$tullaan_virhetarkistuksesta = true;
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
 
@@ -404,7 +405,7 @@
 			}
 			else {
 
-				$rtuoteno[$i]['tuoteno'] 			= $kollirow['toim_tuoteno'];
+				$rtuoteno[$i]['tuoteno'] 			= $kollirow['tuoteno'];
 				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno2'];
 				$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
 				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
@@ -447,8 +448,6 @@
 
 			if (mysql_num_rows($result) == 1) {
 				$trow = mysql_fetch_assoc($result);
-
-				$tullaan_virhetarkistuksesta = true;
 
 				require('inc/verkkolasku-in-luo-keikkafile.inc');
 

@@ -412,7 +412,7 @@
 								FROM asn_sanomat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = 'tec'
-								AND tilausrivi = '{$tilausrivirow['tunnus']}'";
+								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 					$chk_res = pupe_query($query);
 
 					if (isset($tullaan_virhetarkistuksesta) and $tullaan_virhetarkistuksesta) {
@@ -819,7 +819,7 @@
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'tec'
-										AND tilausrivi = '{$kokeiltiin['tunnus']}'";
+										AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'";
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) != 0 or in_array($kokeiltiin['tunnus'], $kaytettavat_tilausrivit)) continue;

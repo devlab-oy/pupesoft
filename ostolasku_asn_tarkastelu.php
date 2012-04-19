@@ -799,6 +799,21 @@
 			$ostores = pupe_query($query);
 			$ostotilausrivirow = mysql_fetch_assoc($ostores);
 
+			$query = "	SELECT liitostunnus
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$ostotilausrivirow['otunnus']}'";
+			$liit_res = pupe_query($query);
+			$liit_row = mysql_fetch_assoc($liit_res);
+
+			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno 
+						FROM tuotteen_toimittajat 
+						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P' AND tuote.tuoteno = '{$tuoteno}')
+						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}' 
+						AND tuotteen_toimittajat.liitostunnus = '{$liit_row['liitostunnus']}'";
+			$tuoteno_res = pupe_query($query);
+			$tuoteno_row = mysql_fetch_assoc($tuoteno_res);
+
 			if ($valitse == 'asn') {
 
 				// haetaan ASN-sanomalta kpl m‰‰r‰
@@ -846,18 +861,21 @@
 					$inskres = pupe_query($query);
 				}
 
+				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+
 				$query = "	UPDATE asn_sanomat SET 
 							tilausrivi = '".implode(",", $tunnukset)."', 
 							muuttaja ='{$kukarow['kuka']}', 
 							muutospvm = now(),
 							tuoteno = '{$ostotilausrivirow['tuoteno']}'
+							{$toim_tuotenolisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$asn_rivi}'";
 				$updres = pupe_query($query);
 
 				// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
 				if ($poista_tilausrivi["0"] != 0) {
-					$updatequery2 = "UPDATE tilausrivi set tilaajanrivinro ='{$poista_tilausrivi[0]}' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$asn_row_haku["tilausnumero"]}' and tunnus = '".implode(",", $tunnukset)."'";
+					$updatequery2 = "UPDATE tilausrivi set tilaajanrivinro ='{$poista_tilausrivi[0]}' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$asn_row_haku['tilausnumero']}' and tunnus = '".implode(",", $tunnukset)."'";
 					pupe_query($updatequery2);
 				}
 
@@ -869,11 +887,14 @@
 			}
 			else {
 
+				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+
 				$query = "	UPDATE asn_sanomat SET 
 							tilausrivi = '".implode(",", $tunnukset)."', 
 							muuttaja = '{$kukarow['kuka']}', 
 							muutospvm = now(),
 							tuoteno = '{$ostotilausrivirow['tuoteno']}'
+							{$toim_tuotenolisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$rivitunnus}'";
 				$updres = pupe_query($query);

@@ -421,6 +421,13 @@
 					}
 				}
 
+				if (count($kaytettavat_tilausrivit) == 0) {
+					echo "Ei yht‰‰n k‰ytett‰v‰‰ tilausrivi‰!!! ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."<br>";
+					echo "8 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+					$virheet++;
+					continue;
+				}
+
 				$tmp_kaytettavat_tilausrivit = $kaytettavat_tilausrivit;
 
 				$tilausrivi_nro = array_shift($tmp_kaytettavat_tilausrivit);

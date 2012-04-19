@@ -405,7 +405,7 @@
 			}
 			else {
 
-				$rtuoteno[$i]['tuoteno'] 			= $kollirow['tuoteno'];
+				$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno'];
 				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno2'];
 				$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
 				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
@@ -733,6 +733,7 @@
 			}
 
 			$tmp_rivitunnus = $rivitunnus;
+
 			$rivitunnus = 0;
 
 			if ($kpl != 0) {
@@ -740,6 +741,13 @@
 			}
 
 			$rivitunnus = $tmp_rivitunnus;
+
+			$query = "	UPDATE asn_sanomat SET
+						tuoteno = '{$tuoteno}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji = 'tec'
+						AND tunnus = '{$rivitunnus}'";
+			$upd_res = pupe_query($query);
 
 			$hinta 	= '';
 			$netto 	= '';

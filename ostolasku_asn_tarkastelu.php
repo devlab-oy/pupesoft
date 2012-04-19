@@ -861,18 +861,6 @@
 					$inskres = pupe_query($query);
 				}
 
-				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
-
-				$query = "	UPDATE asn_sanomat SET 
-							tilausrivi = '".implode(",", $tunnukset)."', 
-							muuttaja ='{$kukarow['kuka']}', 
-							muutospvm = now(),
-							tuoteno = '{$ostotilausrivirow['tuoteno']}'
-							{$toim_tuotenolisa}
-							WHERE yhtio = '{$kukarow['yhtio']}' 
-							AND tunnus = '{$asn_rivi}'";
-				$updres = pupe_query($query);
-
 				// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
 				if ($poista_tilausrivi["0"] != 0) {
 					$updatequery2 = "UPDATE tilausrivi set tilaajanrivinro ='{$poista_tilausrivi[0]}' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$asn_row_haku['tilausnumero']}' and tunnus = '".implode(",", $tunnukset)."'";
@@ -885,20 +873,20 @@
 
 				$kolli = $row['paketintunniste'];
 			}
-			else {
 
-				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+			$_tunn = $valitse == 'asn' ? $asn_rivi : $rivitunnus;
 
-				$query = "	UPDATE asn_sanomat SET 
-							tilausrivi = '".implode(",", $tunnukset)."', 
-							muuttaja = '{$kukarow['kuka']}', 
-							muutospvm = now(),
-							tuoteno = '{$ostotilausrivirow['tuoteno']}'
-							{$toim_tuotenolisa}
-							WHERE yhtio = '{$kukarow['yhtio']}' 
-							AND tunnus = '{$rivitunnus}'";
-				$updres = pupe_query($query);
-			}
+			$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+
+			$query = "	UPDATE asn_sanomat SET 
+						tilausrivi = '".implode(",", $tunnukset)."', 
+						muuttaja = '{$kukarow['kuka']}', 
+						muutospvm = now(),
+						tuoteno = '{$ostotilausrivirow['tuoteno']}'
+						{$toim_tuotenolisa}
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND tunnus = '{$_tunn}'";
+			$updres = pupe_query($query);
 
 			$tee = 'nayta';
 		}

@@ -448,6 +448,8 @@
 			if (mysql_num_rows($result) == 1) {
 				$trow = mysql_fetch_assoc($result);
 
+				$tullaan_virhetarkistuksesta = true;
+
 				require('inc/verkkolasku-in-luo-keikkafile.inc');
 
 				if ($virheet == 0) {

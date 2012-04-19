@@ -415,9 +415,17 @@
 								AND tilausrivi = '{$tilausrivirow['tunnus']}'";
 					$chk_res = pupe_query($query);
 
-					if (mysql_num_rows($chk_res) == 0) {
-						echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
-						$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+					if (isset($tullaan_virhetarkistuksesta) and $tullaan_virhetarkistuksesta) {
+						if (mysql_num_rows($chk_res) != 0) {
+							echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
+							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+						}
+					}
+					else {
+						if (mysql_num_rows($chk_res) == 0) {
+							echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
+							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+						}
 					}
 				}
 

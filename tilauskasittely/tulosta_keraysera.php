@@ -509,7 +509,7 @@
 				$kukarow = $keraajarow;
 
 				// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto, TRUE);
+				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
 
 				if (count($erat['tilaukset']) > 0) {
 

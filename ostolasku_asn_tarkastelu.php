@@ -429,6 +429,8 @@
 			}
 		}
 
+		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero<br>",var_dump($rtuoteno),"<br>";
+
 		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
 			$query = "	SELECT tunnus
 						FROM lasku
@@ -1364,6 +1366,7 @@
 							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}' 
 							AND tuotteen_toimittajat.toim_tuoteno IN ('{$row['toim_tuoteno']}', '{$row['toim_tuoteno2']}') 
 							AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$res = pupe_query($query);
 
 				if (mysql_num_rows($res) > 0) {

@@ -221,6 +221,23 @@
 									hyllyvali 	= '$khyllyvali',
 									hyllytaso 	= '$khyllytaso'";
 						$result = pupe_query($query);
+						
+						$tapahtumaquery = "	INSERT into tapahtuma set
+											yhtio 		= '$kukarow[yhtio]',
+											tuoteno 	= '$tuoteno',
+											kpl 		= 0,
+											kplhinta	= 0,
+											hinta 		= 0,
+											laji 		= 'uusipaikka',
+											hyllyalue 	= '$khyllyalue',
+											hyllynro 	= '$khyllynro',
+											hyllyvali 	= '$khyllyvali',
+											hyllytaso 	= '$khyllytaso',
+											selite 		= '".t("Siirräsaldoissa lisättiin tuotepaikka")." $khyllyalue $khyllynro $khyllyvali $khyllytaso',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+						$result = pupe_query($tapahtumaquery);
+						
 					}
 					else {
 						$query = "	UPDATE tuotepaikat set saldo = saldo + $maara, saldoaika=now()

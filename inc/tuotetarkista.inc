@@ -386,12 +386,33 @@ if(!function_exists("tuotetarkista")) {
 												muuttaja		= '{$kukarow['kuka']}'";
 						$tuotepaikka_result = pupe_query($tuotepaikka_query);
 
+						$tapahtumaquery = "	INSERT into tapahtuma set
+											yhtio 		= '{$kukarow['yhtio']}',
+											tuoteno 	= '{$tem_tuoteno}',
+											kpl 		= 0,
+											kplhinta	= 0,
+											hinta 		= 0,
+											laji 		= 'uusipaikka',
+											hyllyalue   = '{$hyllyalue}',
+											hyllynro    = '{$hyllynro}',
+											hyllyvali   = '{$hyllyvali}',
+											hyllytaso   = '{$hyllytaso}',
+											selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+						$tapahtumaresult = pupe_query($tapahtumaquery);
+
 						$_counter++;
 					}
 
 					if ($kukarow['yhtio'] == 'artr') {
-
+						
+						$hyllyalue	= "";
+						$hyllynro = $hyllyvali = $hyllytaso	= 0;
+						
 						if ($tem_status == 'A') {
+							$hyllyalue	= "UUSI";
+							
 							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
 							 						yhtio			= '{$kukarow['yhtio']}',
 										 			tuoteno     	= '{$tem_tuoteno}',
@@ -409,6 +430,7 @@ if(!function_exists("tuotetarkista")) {
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
 						elseif ($tem_status == 'T') {
+							$hyllyalue	= "T";
 							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
 							 						yhtio			= '{$kukarow['yhtio']}',
 										 			tuoteno     	= '{$tem_tuoteno}',
@@ -425,6 +447,23 @@ if(!function_exists("tuotetarkista")) {
 													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
+						
+						$tapahtumaquery = "	INSERT into tapahtuma set
+											yhtio 		= '{$kukarow['yhtio']}',
+											tuoteno 	= '{$tem_tuoteno}',
+											kpl 		= 0,
+											kplhinta	= 0,
+											hinta 		= 0,
+											laji 		= 'uusipaikka',
+											hyllyalue   = '{$hyllyalue}',
+											hyllynro    = '{$hyllynro}',
+											hyllyvali   = '{$hyllyvali}',
+											hyllytaso   = '{$hyllytaso}',
+											selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+						$tapahtumaresult = pupe_query($tapahtumaquery);
+						
 					}
 				}
 			}

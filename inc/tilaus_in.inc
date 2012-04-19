@@ -268,6 +268,22 @@ while ((!feof ($fd)) and ($error!=1)) {
 								tuoteno		= '$trow[tuoteno]',
 								yhtio		= '$trow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
+					
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$trow[yhtio]',
+								tuoteno 	= '$trow[tuoteno]',
+								kpl 		= 0,
+								kplhinta	= 0,
+								hinta 		= 0,
+								laji 		= 'uusipaikka',
+								hyllyalue 	= '$hyllyalue',
+								hyllynro 	= '$hyllynro',
+								hyllyvali 	= '$hyllyvali',
+								hyllytaso 	= '$hyllytaso',
+								selite 		= '".t("Inventoidessa lisättiin tuotepaikka")." $alue 0 0 0',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$result = pupe_query($query);
 				}
 			}
 

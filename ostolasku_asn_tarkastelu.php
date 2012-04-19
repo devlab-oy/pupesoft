@@ -886,6 +886,7 @@
 						{$toim_tuotenolisa}
 						WHERE yhtio = '{$kukarow['yhtio']}' 
 						AND tunnus = '{$_tunn}'";
+			echo "<pre>$query</pre>";
 			$updres = pupe_query($query);
 
 			$tee = 'nayta';

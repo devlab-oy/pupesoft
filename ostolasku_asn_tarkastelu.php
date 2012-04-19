@@ -429,8 +429,6 @@
 			}
 		}
 
-		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero rtuoteno: <pre>",var_dump($rtuoteno),"</pre>";
-
 		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
 			$query = "	SELECT tunnus
 						FROM lasku

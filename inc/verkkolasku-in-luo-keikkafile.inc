@@ -407,21 +407,29 @@
 
 				while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 
-					// tilausrivi ei saa olla jo kohdistettu
-					$query = "	SELECT tunnus 
-								FROM asn_sanomat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laji = 'tec'
-								AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-					$chk_res = pupe_query($query);
-
 					if (isset($tullaan_virhetarkistuksesta) and $tullaan_virhetarkistuksesta) {
+						// tilausrivi ei saa olla jo kohdistettu
+						$query = "	SELECT tunnus 
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						$chk_res = pupe_query($query);
+
 						if (mysql_num_rows($chk_res) != 0) {
 							echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
 							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 						}
 					}
 					else {
+						// tilausrivi ei saa olla jo kohdistettu
+						$query = "	SELECT tunnus 
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'tec'
+									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						$chk_res = pupe_query($query);
+
 						if (mysql_num_rows($chk_res) == 0) {
 							echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']}<br><br>";
 							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];

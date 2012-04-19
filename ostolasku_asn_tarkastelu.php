@@ -745,8 +745,9 @@
 			$query = "	UPDATE asn_sanomat SET
 						tuoteno = '{$tuoteno}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji = 'tec'
+						#AND laji = 'tec'
 						AND tunnus = '{$rivitunnus}'";
+			echo "<pre>$query</pre>";
 			$upd_res = pupe_query($query);
 
 			$hinta 	= '';

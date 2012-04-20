@@ -134,7 +134,7 @@
 					}
 					else {
 						$virheet = 0;
-						echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
+						echo "VIRHE 1: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
 					}
 					$paketin_rivit = array();
 					$paketin_tunnukset = array();
@@ -651,7 +651,7 @@
 				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 			}
 			elseif ($virheet != 0) {
-				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
+				echo "VIRHE 2: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
 			}
 		}
 	}

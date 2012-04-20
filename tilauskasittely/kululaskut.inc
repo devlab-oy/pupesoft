@@ -189,7 +189,6 @@ if ($tee_kululaskut == "liita") {
 					liitostunnus = '$oslasrow[liitostunnus]',
 					luontiaika	 = now(),
 					tila         = 'K'";
-		echo "Kululaskut: <pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";

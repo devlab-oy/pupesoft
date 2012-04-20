@@ -618,23 +618,29 @@
 
 			$laskurow = mysql_fetch_assoc($res);
 
-			$query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tuoteno}'";
-			$result = pupe_query($query);
-			$trow = mysql_fetch_assoc($result);
+			if ($laskurow['alatila'] == 'X') {
+				$error = t("Tilaus").' '.$tilausnro.' '.t("ei ole sopiva")."!";
+				$tee = 'etsi';
+			}
+			else {
+				$query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tuoteno}'";
+				$result = pupe_query($query);
+				$trow = mysql_fetch_assoc($result);
 
-			list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
+				list($hinta,,,) = alehinta_osto($laskurow, $trow, $kpl);
 
-			//pidetään kaikki muuttujat tallessa
-			$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse;
+				//pidetään kaikki muuttujat tallessa
+				$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl."!¡!".$valitse;
 
-			$rivinotunnus = $tilausnro;
-			$toimaika = date('Y')."-".date('m')."-".date('d');
+				$rivinotunnus = $tilausnro;
+				$toimaika = date('Y')."-".date('m')."-".date('d');
 
-			echo t("Tee uusi rivi").":<br>";
+				echo t("Tee uusi rivi").":<br>";
 
-			require('tilauskasittely/syotarivi_ostotilaus.inc');
-			require('inc/footer.inc');
-			exit;
+				require('tilauskasittely/syotarivi_ostotilaus.inc');
+				require('inc/footer.inc');
+				exit;
+			}
 		}
 		else {
 			$error = t("Ostotilausta").' '.$tilausnro.' '.t("ei löydy")."!";

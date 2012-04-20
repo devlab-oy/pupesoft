@@ -385,7 +385,7 @@
 								$t[$i] = $id;
 							}
 						}
-
+												
 						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
 
@@ -423,7 +423,8 @@
 										(tila IN ('A','0'))
 									)
 								and liitostunnus = '$otsikrow[tunnus]'
-								and tapvm = '0000-00-00'";
+								and tapvm = '0000-00-00'
+								and chn != 999";
 					$laskuores = pupe_query($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -613,10 +614,10 @@
 						}
 
 						if ($otsikrow["oletus_erapvm"] > 0) $oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
-						else $oletus_erapvm = 0;
+						else $oletus_erapvm = $laskuorow["erpcm"];
 
 						if ($otsikrow["oletus_kapvm"] > 0) $oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
-						else $oletus_kapvm = 0;
+						else $oletus_kapvm = $laskuorow["kapvm"];
 
 						$otsikrow["oletus_kasumma"] = round($laskuorow["summa"] * $otsikrow['oletus_kapro'] / 100, 2);
 

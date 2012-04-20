@@ -1185,7 +1185,7 @@
 		if ($muuttuiko == 'kylsemuuttu') {
 			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
+				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
 							FROM lasku
 							JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
@@ -1261,8 +1261,8 @@
 				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
 				$ulos .= "</body></html>";
 
-				// korvataan poikkeamameili keräysvahvistuksella
-				if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["kerayspoikkeama"] == 0) {
+				// korvataan poikkeama-meili keräysvahvistuksella
+				if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1515,7 +1515,7 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, asiakas.email
+					$query = "	SELECT lasku.*, asiakas.email, asiakas.keraysvahvistus_lahetys
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.tunnus in ($tilausnumeroita)
@@ -1553,7 +1553,7 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
 
 							$otunnus = $laskurow["tunnus"];
 
@@ -1792,7 +1792,7 @@
 									$komento .= " -#$lahetekpl ";
 								}
 
-								if ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "") {
+								if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
 									$komento = array($komento);
 									$komento[] = "asiakasemail".$laskurow['email'];
 								}

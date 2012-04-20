@@ -80,6 +80,32 @@
 		$suuntalavan_tunnus = '';
 	}
 
+	if ($tee == 'imaiserivit') {
+
+		$query = "	UPDATE tilausrivi
+					SET suuntalava = '{$suuntalavan_tunnus}'
+					WHERE yhtio 	 = '{$kukarow['yhtio']}'
+					AND uusiotunnus  = '{$otunnus}'
+					AND tyyppi 		 = 'O'
+					AND suuntalava   = 0
+					AND varattu 	<> 0
+					AND kpl			 = 0";
+		$tila_res = pupe_query($query);
+
+		$paivmaara = mysql_affected_rows();
+
+		echo "<br><br>".t("Suuntalavaan liitettiin %s riviä keikalta", "", $paivmaara)."!<br><br>";
+
+		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
+			$tee = 'EIHALUTANAYTTAAMITAAN';
+			$suuntalavan_tunnus = '';
+		}
+		else {
+			$tee = '';
+			$suuntalavan_tunnus = '';
+		}
+	}
+
 	if ($tee == 'siirtovalmis') {
 
 		$query = "	SELECT sscc, paino
@@ -125,10 +151,9 @@
 			$suuntalavan_tunnus = '';
 		}
 		else {
-		$tee = '';
-		$suuntalavan_tunnus = '';
-	}
-
+			$tee = '';
+			$suuntalavan_tunnus = '';
+		}
 	}
 
 	if ($tee == 'purettu') {
@@ -137,7 +162,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
 		$tila_res = pupe_query($query);
-		
+
 		$tee = '';
 		$suuntalavan_tunnus = '';
 	}
@@ -792,6 +817,16 @@
 						echo "<input type='submit' value='",t("Peruuta / Tyhjennä suuntalava"),"' />";
 						echo "</form>";
 					}
+
+					echo "<br><form action='' method='post'>";
+					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+					echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
+					echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+					echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+					echo "<input type='hidden' name='tee' value='imaiserivit' />";
+					echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+					echo "<input type='submit' value='",t("Liitä kaikki suuntalavattomat rivit tähän suuntalavaan"),"' />";
+					echo "</form>";
 				}
 				elseif ($suuntalavat_row['tila'] == 'P') {
 					echo "<font class='ok'>",t("Purettu"),"!</font>";
@@ -806,6 +841,16 @@
 				echo "<input type='hidden' name='tee' value='siirtovalmis' />";
 				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
 				echo "<input type='submit' value='",t("Siirtovalmis"),"' />";
+				echo "</form>";
+
+				echo "<br><form action='' method='post'>";
+				echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+				echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
+				echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+				echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+				echo "<input type='hidden' name='tee' value='imaiserivit' />";
+				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+				echo "<input type='submit' value='",t("Liitä kaikki suuntalavattomat rivit tähän suuntalavaan"),"' />";
 				echo "</form>";
 			}
 

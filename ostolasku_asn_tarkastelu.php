@@ -468,7 +468,7 @@
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
 												uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
 												perheid			= '{$isa_chk_row['tunnus']}'";
-								echo "<pre>",str_replace("\t", "", $query);
+								echo "<pre>",str_replace("\t", "", $lisainsert);
 								$inskres = pupe_query($lisainsert);
 
 								$paketin_rivit[] = mysql_insert_id();

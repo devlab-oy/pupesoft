@@ -46,6 +46,8 @@
 			$erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
 			if (count($erat['tilaukset']) > 0) {
+				// Tallennetaan missä tää erä on tehty
+				$ohjelma_moduli = "KARDEX";
 
 				// Tallennetaan keröyserä
 				require('inc/tallenna_keraysera.inc');

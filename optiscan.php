@@ -163,6 +163,7 @@
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laatija = '{$kukarow['kuka']}'
+					AND ohjelma_moduli IN ('','OPTISCAN')
 					AND tila    = 'K'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
@@ -175,9 +176,9 @@
 
 			$query = "	SELECT keraysvyohyke
 						FROM kuka
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND kuka = '{$kukarow['kuka']}'
-						AND extranet = ''
+						WHERE yhtio 	   = '{$kukarow['yhtio']}'
+						AND kuka 		   = '{$kukarow['kuka']}'
+						AND extranet	   = ''
 						AND keraysvyohyke != ''";
 			$result = pupe_query($query);
 			$ker_row = mysql_fetch_assoc($result);
@@ -186,7 +187,7 @@
 			$query = "	SELECT keraysjarjestys
 						FROM keraysvyohyke
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ker_row['keraysvyohyke']}'";
+						AND tunnus  = '{$ker_row['keraysvyohyke']}'";
 			$keraysjarjestys_res = pupe_query($query);
 			$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
@@ -252,7 +253,6 @@
 
 				$response .= "N,";
 				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-				// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
 				$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 				$n++;
@@ -281,6 +281,9 @@
 				if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);
 
+					// Tallennetaan miss‰ t‰‰ er‰ on tehty
+					$ohjelma_moduli = "OPTISCAN";
+
 					require('inc/tallenna_keraysera.inc');
 
 					$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
@@ -298,6 +301,7 @@
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laatija = '{$kukarow['kuka']}'
+								AND ohjelma_moduli IN ('','OPTISCAN')
 								AND tila = 'K'";
 					$result = pupe_query($query);
 					$row = mysql_fetch_assoc($result);
@@ -376,7 +380,6 @@
 
 						$response .= "N,";
 						$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-						// $response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
 						$response .= "{$kpl} rivi‰,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 						$n++;

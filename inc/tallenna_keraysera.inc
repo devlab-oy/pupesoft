@@ -103,6 +103,8 @@
 						// tila = 'X' tarkoittaa "Keräyksessä"-kardexvarastossa
 						$tilalisa = $erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K" ? "X" : "K";
 
+						$modulilisa = (isset($ohjelma_moduli) and $ohjelma_moduli != "") ? mysql_real_escape_string($ohjelma_moduli) : 'PUPESOFT';
+
 						$query = "	INSERT INTO kerayserat SET
 									yhtio 			= '{$kukarow['yhtio']}',
 									nro 			= '{$kerayseran_numero}',
@@ -115,7 +117,8 @@
 									pakkausnro 		= '{$juokseva_nro}',
 									kpl 			= '{$kpl}',
 									laatija 		= '{$kukarow['kuka']}',
-									luontiaika 		= now()";
+									luontiaika 		= now(),
+									ohjelma_moduli	= '$modulilisa'";
 						$insert_res = pupe_query($query);
 					}
 				}

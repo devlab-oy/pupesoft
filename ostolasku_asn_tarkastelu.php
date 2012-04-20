@@ -426,7 +426,7 @@
 										WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 										AND tuote.status != 'P'
 										AND tuote.tuoteno = '{$lapsi_tuoteno}'";
-							$lapsiresult = pupe_query($lapsiperhesql);
+							$lapsiresult = pupe_query($query);
 
 							while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
 								// hae tuotteen ostohinta

@@ -369,7 +369,7 @@
 				}
 
 				// Haetaan tuotteen lapset jotka ovat runkoveloituksia
-				$query = "	SELECT group_concat(concat('\"', tuoteperhe.tuoteno, '\"')) lapset
+				$query = "	SELECT GROUP_CONCAT(tuoteperhe.tuoteno) lapset
 							FROM tuoteperhe
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND isatuoteno = '{$kollirow['tuoteno']}'

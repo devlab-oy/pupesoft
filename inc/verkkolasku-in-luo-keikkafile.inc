@@ -178,7 +178,10 @@
 						AND tilausrivi.uusiotunnus != 0
 						ORDER BY laadittu ASC";
 			$kokeillaan = pupe_query($query);
-			echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+			if (mysql_num_rows($kokeillaan) > 0) {
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
 				// tiukka 2
@@ -203,7 +206,10 @@
 							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%' AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -229,7 +235,10 @@
 							AND tilausrivi.uusiotunnus != 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -255,7 +264,10 @@
 							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -280,7 +292,10 @@
 							AND tilausrivi.uusiotunnus != 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -305,7 +320,10 @@
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -330,7 +348,10 @@
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -355,7 +376,10 @@
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -380,7 +404,10 @@
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
 
 			if (mysql_num_rows($kokeillaan) == 0) {
@@ -403,8 +430,15 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
+				else {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				}
 			}
+
 			$checkres = pupe_query($query);
 
 			echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";

@@ -345,7 +345,6 @@
 		$laskuttajan_toimittajanumero = "";
 
 		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
-		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$kollires = pupe_query($query);
 
 		$i = 0;
@@ -1143,6 +1142,7 @@
 			$query = "	SELECT tilausrivi.*, if(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.kpl = 0 {$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('O', 'K')
 						AND lasku.alatila != 'X'
@@ -1495,7 +1495,6 @@
 							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}' 
 							AND tuotteen_toimittajat.toim_tuoteno IN ('{$row['toim_tuoteno']}', '{$row['toim_tuoteno2']}') 
 							AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$res = pupe_query($query);
 
 				if (mysql_num_rows($res) > 0) {

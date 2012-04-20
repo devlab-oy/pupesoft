@@ -180,13 +180,48 @@
 		$keraajasiirto = FALSE;
 
 		if (trim($kayttaja) != '') {
-			$query = "	UPDATE kerayserat
-						SET laatija = '{$kayttaja}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND nro 	= '{$kerayseranro}'";
-			$update_res = pupe_query($query);
 
-			$keraajasiirto = TRUE;
+			$query = "LOCK TABLES kerayserat WRITE";
+			$lock = mysql_query($query) or pupe_error($query);
+
+			// Tarkistetaan, ett‰ nykyisell‰ ker‰‰j‰ll‰ ei ole t‰t‰ keikkaa optiscanissa kesken
+			$query = "	SELECT tunnus
+						FROM kerayserat
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND nro 			= '{$kerayseranro}'
+						AND tila    		= 'K'
+						AND ohjelma_moduli	= 'OPTISCAN'";
+			$kerkeskres = pupe_query($query);
+			$keredkesk = (mysql_num_rows($kerkeskres) > 0) ? TRUE : FALSE;
+
+			// Tarkistetaan, ett‰ uudella ker‰‰j‰ll‰ ei ole toista keikkaa optiscanissa kesken
+			$query = "	SELECT tunnus
+						FROM kerayserat
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND laatija 		= '{$kayttaja}'
+						AND tila    		= 'K'
+						AND ohjelma_moduli	= 'OPTISCAN'";
+			$kerkeskres = pupe_query($query);
+			$kertukesk = (mysql_num_rows($kerkeskres) > 0) ? TRUE : FALSE;
+
+			if ($keredkesk) {
+				echo "<font class='error'><br>".t("VIRHE: Ker‰syer‰ on kesken ker‰‰j‰ll‰ puheker‰yksess‰")."!</font><br><br>";
+			}
+			elseif ($kertukesk) {
+				echo "<font class='error'><br>".t("VIRHE: Ker‰‰j‰ll‰ on jo toinen er‰ puheker‰yksess‰")."!</font><br><br>";
+			}
+			else {
+				$query = "	UPDATE kerayserat
+							SET laatija = '{$kayttaja}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND nro 	= '{$kerayseranro}'";
+				$update_res = pupe_query($query);
+
+				$keraajasiirto = TRUE;
+			}
+
+			$query = "UNLOCK TABLES";
+			$lock = mysql_query($query) or pupe_error($query);
 		}
 
 		if (count($pakkaukset) > 0) {
@@ -423,6 +458,16 @@
 			// Valitun ker‰‰j‰n tiedot
 			$keraajarow = mysql_fetch_assoc($result);
 
+			// Katotaan onko ker‰‰j‰ll‰ ker‰yser‰ kesken optiscanissa
+			$query = "	SELECT tunnus
+						FROM kerayserat
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND laatija 		= '{$keraajarow['kuka']}'
+						AND tila    		= 'K'
+						AND ohjelma_moduli	= 'OPTISCAN'";
+			$kerkeskres = pupe_query($query);
+			$kererkeskenoptiscanissa = (mysql_num_rows($kerkeskres) > 0) ? TRUE : FALSE;
+
 			echo "<form method='post'>";
 
 			if ($tee != 'muuta' and $tee != 'muokkaa') {
@@ -469,7 +514,7 @@
 
 			echo "</tr>";
 
-			if ($tee != 'muuta' and $tee != 'muokkaa') {
+			if (!$kererkeskenoptiscanissa and $tee != 'muuta' and $tee != 'muokkaa') {
 				echo "<tr><th>",t("Valitse ker‰yslistan tulostin"),"</th><td>";
 				echo "<select name='kerayslistatulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
@@ -489,6 +534,9 @@
 				echo "</select></td>";
 
 				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' /></td>";
+			}
+			elseif ($kererkeskenoptiscanissa) {
+				echo "<tr><td colspan='2' class='back'><font class='error'>",t("Ker‰‰j‰ll‰ ker‰yser‰ kesken puheker‰yksess‰"),"</font></td>";
 			}
 
 			echo "</tr></table>";

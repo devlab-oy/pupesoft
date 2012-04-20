@@ -466,6 +466,7 @@
 												hyllynro		= '{$lapsitieto['hyllynro']}',
 												hyllytaso		= '{$lapsitieto['hyllytaso']}',
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
+												uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
 												perheid			= '{$isa_chk_row['tunnus']}'";
 								echo "<pre>",str_replace("\t", "", $query);
 								$inskres = pupe_query($lisainsert);

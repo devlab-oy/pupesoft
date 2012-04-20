@@ -380,11 +380,14 @@
 				// Lapsia löytyi, tämä on isätuote 
 				if ($lapset["lapset"] != NULL) {
 
+					echo "Haetaan lapset!<br><br>";
+
 					// Haetaan tilausnumerot joilla tämä tuote on
 					$query = "	SELECT group_concat(otunnus) tilaukset
 								FROM tilausrivi 
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
 								AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
+					echo "<pre>",str_replace("\t", "", $query);
 					$result = pupe_query($query);
 					$tilaukset = mysql_fetch_assoc($result);
 
@@ -396,6 +399,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
 									AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'"; 
+						echo "<pre>",str_replace("\t", "", $query);
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 0) {
@@ -405,6 +409,7 @@
 										FROM tilausrivi
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus IN ({$kollirow['tilausrivi']})";
+							echo "<pre>",str_replace("\t", "", $query);
 							$isa_chk_res = pupe_query($query);
 							$isa_chk_row = mysql_fetch_assoc($isa_chk_res);
 
@@ -426,6 +431,7 @@
 										WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 										AND tuote.status != 'P'
 										AND tuote.tuoteno = '{$lapsi_tuoteno}'";
+							echo "<pre>",str_replace("\t", "", $query);
 							$lapsiresult = pupe_query($query);
 
 							while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {

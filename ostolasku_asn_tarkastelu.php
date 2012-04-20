@@ -460,7 +460,7 @@
 												varattu			= '{$isa_chk_row['varattu']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
-												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+												kommentti		= 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
 												laadittu		=  now(),
 												hyllyalue		= '{$lapsitieto['hyllyalue']}',
 												hyllynro		= '{$lapsitieto['hyllynro']}',

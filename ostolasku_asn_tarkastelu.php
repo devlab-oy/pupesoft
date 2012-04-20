@@ -405,8 +405,8 @@
 			}
 			else {
 
-				$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno'];
-				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno2'];
+				$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
+				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
 				$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
 				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
 				$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];

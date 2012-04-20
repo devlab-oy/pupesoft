@@ -1155,6 +1155,7 @@
 						AND lasku.alatila != 'X'
 						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
 						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
+			echo "<pre>$query</pre>";
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {

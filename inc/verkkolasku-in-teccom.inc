@@ -276,7 +276,7 @@
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
 									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - $tuotetieto->AllowOrCharge->Percent / 100) * 100, 2);
-									}
+								}
 								else {
 									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
 								}

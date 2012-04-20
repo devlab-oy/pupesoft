@@ -305,10 +305,10 @@
 					echo "<tr class='aktiivi'>";
 
 					if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
-						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</td>";
+						echo "<td valign='top'>{$trow["tapvm"]}<br>{$trow["erpcm"]}</td>";
 					}
 					else {
-						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//laji=$laji//tunnus=$tunnus'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
+						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//laji=$laji//tunnus=$tunnus'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
 					}
 
 					echo "<td valign='top' align='right'>$trow[summa]</td>";

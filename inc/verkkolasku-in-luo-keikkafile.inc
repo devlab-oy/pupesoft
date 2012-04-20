@@ -1569,7 +1569,7 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno
+				$query = "	SELECT hinta, otunnus, perheid, tuoteno, uusiotunnus
 							FROM tilausrivi 
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1623,7 +1623,15 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
 				echo "<pre>$query</pre>";
-				pupe_query($update);							
+				pupe_query($update);		
+
+				$query = "	UPDATE suuntalavat SET
+							keikkatunnus = '{$keikoilla[0]['uusiotunnus']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND keikkatunnus = '{$hinta_chk_row['uusiotunnus']}'";
+				echo "<pre>$query</pre>";
+				$suuntalava_upd_res = pupe_query($query);
+
 			}
 
 			foreach ($ostoilla as $pointteri) {

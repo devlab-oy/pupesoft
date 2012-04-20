@@ -474,7 +474,7 @@
 								$updateres = pupe_query($updateisa);
 							}
 
-							$paketin_rivit[] = $rivi["tunnus"];
+							$paketin_rivit[] = $isa_chk_row["tunnus"];
 						}
 						else {
 							while ($rivi = mysql_fetch_assoc($result)) {

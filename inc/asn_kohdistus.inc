@@ -316,6 +316,7 @@
 								ORDER BY laadittu asc";
 				}
 
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$checkres = pupe_query($query);
 
 				$tilausrivirow = mysql_fetch_array($checkres);
@@ -333,6 +334,7 @@
 								tuoteno = '{$tilausrivirow['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$upd_res = pupe_query($query);
 					$kaytetyt_tilausrivit[] = $tilausrivirow['tunnus'];
 					$paketin_rivit[] = $tilausrivirow["tunnus"];
@@ -732,6 +734,7 @@
 								tila         			= 'K',
 								luontiaika	 			= now(),
 								laatija		 			= '$kukarow[kuka]'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$insertres = pupe_query($query);
 					$keikan_tunnus = mysql_insert_id();
 
@@ -786,6 +789,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tunnus IN (".implode(",", $paketin_rivit).")";
 				$updateres = pupe_query($query);
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 
 				$query = "	UPDATE asn_sanomat SET
@@ -793,6 +797,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 				// Laitetaan suuntalava siirtovalmiiksi.
 				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;

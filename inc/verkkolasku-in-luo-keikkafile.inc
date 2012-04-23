@@ -468,6 +468,11 @@
 						}
 					}
 					else {
+
+						if ($rtuoteno[$i]['tuoteno'] == 'T1566NA014') {
+							echo "<pre>",var_dump($tilausrivirow),"</pre>";
+						}
+
 						// tilausrivi ei saa olla jo kohdistettu
 						$query = "	SELECT tunnus 
 									FROM asn_sanomat

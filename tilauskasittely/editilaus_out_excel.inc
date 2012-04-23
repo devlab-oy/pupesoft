@@ -10,7 +10,7 @@
 
 	$query = "  SELECT tilausrivi.tunnus,
 				tilausrivi.otunnus,
-				tilausrivi.varattu,
+				round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
 				tilausrivi.yksikko,
 				tilausrivi.tuoteno,
 				ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno,

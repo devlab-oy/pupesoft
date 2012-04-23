@@ -1369,6 +1369,13 @@
 						echo "rtuoteno: {$rtuoteno[$i]["tuoteno"]} laskun_tyyppi: $laskun_tyyppi sanomantarkistin: $sanomantarkistin onko_duplikaatti: ",(int) $onko_duplikaatti,"<br>";
 
 						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
+
+							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
+							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
+							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
+							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
+
 							$insertquery = "INSERT INTO asn_sanomat SET
 											yhtio = '{$yhtio}',
 											laji = 'tec',
@@ -1386,6 +1393,10 @@
 											kappalemaara = '{$rtuoteno[$i]['kpl']}',
 											hinta = '{$rtuoteno[$i]['hinta']}',
 											lisakulu = '{$rtuoteno[$i]['lisakulu']}',
+											kulu = '{$rtuoteno[$i]['kulu']}',
+											ale1 = '{$rtuoteno[$i]['ale1']}',
+											ale2 = '{$rtuoteno[$i]['ale2']}',
+											ale3 = '{$rtuoteno[$i]['ale3']}',
 											tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
 											laatija = 'crond',
 											luontiaika = now()";

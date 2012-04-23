@@ -234,9 +234,9 @@
 
 				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 							FROM toimi
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+														#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
 							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'

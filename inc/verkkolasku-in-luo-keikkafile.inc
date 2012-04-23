@@ -474,6 +474,7 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND laji = 'tec'
 									AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) == 0) {

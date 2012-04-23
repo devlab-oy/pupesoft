@@ -12089,7 +12089,7 @@ if (!function_exists("pupe_DataTables")) {
 						if (searchbox == 'tuoteno') {
 							kohde = 1;
 						}
-						
+
 						$('input[name=\"search_'+searchbox+'\"]').val(tun).keyup();
 					});
 
@@ -13982,27 +13982,33 @@ if (!function_exists("calculate_average")) {
 }
 
 if (!function_exists("splittaa_tilaus")) {
-	function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '') {
+	function splittaa_tilaus($lisatyt_tilausrivit) {
 		global $kukarow, $yhtiorow;
 
-		if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<br>otunnukset: $otunnukset<br>";
-
+		// $lisatyt_tilausrivit --> $lisatyt_tilausrivit[tilausrivi.otunnus][tilausrivi.tunnus] = sum(keraysera.kpl);
 		$uudelle_tilaukselle = array();
 
-		$lisatyt_tilausrivit_keys = array_keys($lisatyt_tilausrivit);
+		// Käsiteltävät tilaukset
+		$otunnukset = array_unique(array_keys($lisatyt_tilausrivit));
 
 		if (isset($kukarow['debugstring'])) {
-			$kukarow['debugstring'] .= "jo lisätyt tilausrivit:";
+			$kukarow['debugstring'] .= "<br>otunnukset:<pre>";
+			$kukarow['debugstring'] .= var_export($otunnukset, TRUE);
+			$kukarow['debugstring'] .= "</pre>Erään lisätyt tilausrivit:";
 			$kukarow['debugstring'] .= "<pre>";
 			$kukarow['debugstring'] .= var_export($lisatyt_tilausrivit, TRUE);
 			$kukarow['debugstring'] .= "</pre>";
 		}
 
-		$loop_array = array_unique(explode(",", $otunnukset));
+		foreach ($otunnukset as $otun) {
 
-		foreach ($loop_array as $otun) {
-
-			$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$otun}'";
+			$query = "	SELECT *
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$otun}'
+						AND var NOT IN ('P','J')
+						AND tyyppi != 'D'
+						AND varattu > 0";
 			$tilausrivires = pupe_query($query);
 
 			while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
@@ -14011,11 +14017,19 @@ if (!function_exists("splittaa_tilaus")) {
 				if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
 
 					// haetaan tuoteperheen isätuote
-					$query = "SELECT tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivirow['perheid']}'";
+					$query = "	SELECT tuoteno
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$tilausrivirow['perheid']}'";
 					$isa_tuoteno_chk_res = pupe_query($query);
 					$isa_tuoteno_chk_row = mysql_fetch_assoc($isa_tuoteno_chk_res);
 
-					$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tilausrivirow['tuoteno']}' AND isatuoteno = '{$isa_tuoteno_chk_row['tuoteno']}' AND tyyppi = 'P'";
+					$query = "	SELECT ohita_kerays
+								FROM tuoteperhe
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND tuoteno 	= '{$tilausrivirow['tuoteno']}'
+								AND isatuoteno 	= '{$isa_tuoteno_chk_row['tuoteno']}'
+								AND tyyppi 		= 'P'";
 					$ohita_kerays_chk_res = pupe_query($query);
 					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -14024,16 +14038,20 @@ if (!function_exists("splittaa_tilaus")) {
 					}
 				}
 
-				if (in_array($otun, $lisatyt_tilausrivit_keys) and !in_array($tilausrivirow['tunnus'], $lisatyt_tilausrivit[$otun])) {
-					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['tunnus'];
+				// riviä ei lisätty erään ollenkaan, siiretään se omalle tilaukselle
+				if (!isset($lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']])) {
+					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Riviä ei lisätty erään ollenkaan, siiretään se omalle tilaukselle: $otun, $tilausrivirow[tunnus]<br>";
+
+					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['varattu'];
+				}
+
+				// riviä ei kokonaan lisätty erään, splitataan ja siirretään loput se omalle tilaukselle
+				if (isset($lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) and $tilausrivirow['varattu'] != $lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) {
+					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Riviä ei kokonaan lisätty erään, splitataan ja siirretään loput se omalle tilaukselle: $otun, $tilausrivirow[tunnus] ({$tilausrivirow['varattu']} != {$lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]})<br>";
+
+					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']];
 				}
 			}
-		}
-
-		if ($splitattava_tilausrivi != '') {
-			list($splitattava_tilausrivi_otunnus, $splitattava_tilausrivi) = explode("#", $splitattava_tilausrivi);
-
-			$uudelle_tilaukselle[$splitattava_tilausrivi_otunnus][$splitattava_tilausrivi] = $splitattava_tilausrivi;
 		}
 
 		if (isset($kukarow['debugstring'])) {
@@ -14042,8 +14060,6 @@ if (!function_exists("splittaa_tilaus")) {
 			$kukarow['debugstring'] .= var_export($uudelle_tilaukselle, TRUE);
 			$kukarow['debugstring'] .= "</pre>";
 		}
-
-		$uudet_tunnukset_return = array();
 
 		foreach ($uudelle_tilaukselle as $otunn => $rivit) {
 
@@ -14078,8 +14094,6 @@ if (!function_exists("splittaa_tilaus")) {
 
 			if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "UUSI TILAUKSEN TUNNUS ON $uusitunnus<br><br>";
 
-			array_push($uudet_tunnukset_return, $uusitunnus);
-
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -14109,14 +14123,18 @@ if (!function_exists("splittaa_tilaus")) {
 			$query = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
 			$uusires = pupe_query($query);
 
-			foreach ($rivit as $tilriv) {
-				if ($splitattava_tilausrivi != '' and $splitattava_tilausrivi_kpl != '' and $tilriv == $splitattava_tilausrivi) {
-					$query = "	SELECT *
-								FROM tilausrivi
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus  = '{$tilriv}'";
-					$tilausrivisplitres = pupe_query($query);
-					$tilausrivisplitrow = mysql_fetch_assoc($tilausrivisplitres);
+			foreach ($rivit as $tilriv => $splitattava_tilausrivi_kpl) {
+				// Siirrettävän/splitattavat rivin tiedot
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$tilriv}'";
+				$tilausrivisplitres = pupe_query($query);
+				$tilausrivisplitrow = mysql_fetch_assoc($tilausrivisplitres);
+
+				if ($tilausrivisplitrow["varattu"] != $splitattava_tilausrivi_kpl) {
+					// Rivi splitataan
+					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Rivi splitataan: $tilausrivisplitrow[tunnus]. ($tilausrivisplitrow[varattu] != $splitattava_tilausrivi_kpl)<br>";
 
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
@@ -14257,7 +14275,7 @@ if (!function_exists("splittaa_tilaus")) {
 
 							$query = "	UPDATE tilausrivi
 										SET tilkpl  = '{$splitattava_tilausrivi_kpl}',
-										varattu = '{$splitattava_tilausrivi_kpl}'
+										varattu 	= '{$splitattava_tilausrivi_kpl}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND otunnus = '{$otunn}'
 										AND tunnus  = '{$lapsirow['tunnus']}'";
@@ -14275,20 +14293,28 @@ if (!function_exists("splittaa_tilaus")) {
 					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "$query<br><br>";
 				}
 				else {
-
-					$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
-					$tilausrivires = pupe_query($query);
-					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+					// Rivi siirretään
+					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Rivi siirretään: $tilausrivisplitrow[tunnus]<br>";
 
 					// katsotaan onko tuoteperheen lapsituotteella "ohita keräys"-täppä päällä
-					if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] = $tilausrivirow['tunnus']) {
+					if ($tilausrivisplitrow['perheid'] != 0 and $tilausrivisplitrow['perheid'] = $tilausrivisplitrow['tunnus']) {
 
-						$query = "SELECT tunnus, tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$tilausrivirow['otunnus']}' AND perheid = '{$tilausrivirow['perheid']}' AND tunnus != '{$tilausrivirow['perheid']}'";
+						$query = "	SELECT tunnus, tuoteno
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$tilausrivisplitrow['otunnus']}'
+									AND perheid = '{$tilausrivisplitrow['perheid']}'
+									AND tunnus != '{$tilausrivisplitrow['perheid']}'";
 						$lapsi_chk_res = pupe_query($query);
 
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 
-							$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$lapsi_chk_row['tuoteno']}' AND isatuoteno = '{$tilausrivirow['tuoteno']}' AND tyyppi = 'P'";
+							$query = "	SELECT ohita_kerays
+										FROM tuoteperhe
+										WHERE yhtio 	= '{$kukarow['yhtio']}'
+										AND tuoteno 	= '{$lapsi_chk_row['tuoteno']}'
+										AND isatuoteno 	= '{$tilausrivisplitrow['tuoteno']}'
+										AND tyyppi 		= 'P'";
 							$ohita_kerays_chk_res = pupe_query($query);
 							$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
 
@@ -14309,12 +14335,10 @@ if (!function_exists("splittaa_tilaus")) {
 				}
 			}
 		}
-
-		return $uudet_tunnukset_return;
 	}
 }
 
-// järjestellään keräilyniput bubble sortin avulla vartaamalla sitä ensimmäisen alkion mediaaniin, eli ensimmäisen = parhaaseen keskihajontaotokseen
+// järjestellään keräilyniput bubble sortin avulla vertaamalla sitä ensimmäisen alkion mediaaniin, eli ensimmäisen = parhaaseen keskihajontaotokseen
 if (!function_exists('arrcmp')) {
 	function arrcmp($a, $b) {
 		global $main_value;
@@ -14333,7 +14357,7 @@ if (!function_exists('arrcmp')) {
 
 if (!function_exists("tee_keraysera")) {
 	function tee_keraysera($keraysvyohyke, $varasto) {
-		global $kukarow, $yhtiorow, $tee_keraysera_debugdir, $css;
+		global $kukarow, $yhtiorow, $tee_keraysera_debugdir;
 
 		// HUOM!!! NÄITÄ LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
 		$query = "	LOCK TABLES lasku WRITE,
@@ -14419,7 +14443,7 @@ if (!function_exists("tee_keraysera")) {
 		if ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir)) {
 			// Käytetään globaalia muutujaa ja tehdään elämä helpoksi
 			$kukarow['debugstring']  = "<html>\n<head>";
-			$kukarow['debugstring'] .= "<style type='text/css'>$css</style>\n";
+			$kukarow['debugstring'] .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
 			$kukarow['debugstring'] .= "<title>$yhtiorow[nimi]</title>\n";
 			$kukarow['debugstring'] .= "</head>\n";
 			$kukarow['debugstring'] .= "<body>\n";
@@ -14993,7 +15017,7 @@ if (!function_exists("tee_keraysera")) {
 
 		$tuote_yksin_keraysalustalle = array();
 
-		$eran_koko = 0;
+		$eran_koko  = 0;
 		$eran_paino = 0;
 		$era_valmis = false;
 
@@ -15461,8 +15485,6 @@ if (!function_exists("tee_keraysera")) {
 
 					$era_valmis = true;
 
-					splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
 					// tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
 					list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
 
@@ -15517,8 +15539,6 @@ if (!function_exists("tee_keraysera")) {
 						if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E990): Tuote kuuluu yksin keräysalustalle! Keräyserä valmis!<br><br>\n";
 
 						$era_valmis = true;
-						splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
 						break 2;
 					}
 
@@ -15534,9 +15554,6 @@ if (!function_exists("tee_keraysera")) {
 						if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1000): Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
 
 						$era_valmis = true;
-
-						splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
 						break 2;
 					}
 				}
@@ -15632,11 +15649,6 @@ if (!function_exists("tee_keraysera")) {
 
 										if ($ix == 0) {
 											unset($kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
-
-											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-										}
-										else {
-											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", ($ix * $kappalemaara));
 										}
 
 										$era_valmis = true;
@@ -15658,8 +15670,6 @@ if (!function_exists("tee_keraysera")) {
 
 										if (((int) $juokseva_nro > (int) $keraysvyohyketiedot['max_keraysera_alustat']) or ((int) $juokseva_nro > (int) $kukarow['max_keraysera_alustat'])) {
 											if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1070): 2.) ALUSTOJA ON TARPEEKSI KERÄYSERÄÄ VARTEN (alustoja: $juokseva_nro max_alustat: keräysvyöhykkeellä $keraysvyohyketiedot[max_keraysera_alustat] / kerääjän $kukarow[max_keraysera_alustat])<br>\n";
-
-											splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
 
 											$era_valmis = true;
 											break 3;
@@ -15686,7 +15696,6 @@ if (!function_exists("tee_keraysera")) {
 									if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1090): RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_rivit])<br>\n";
 
 									unset($kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
 
 									$era_valmis = true;
 									break 2;
@@ -15725,13 +15734,6 @@ if (!function_exists("tee_keraysera")) {
 								}
 
 								$x--;
-
-								if ($x == 0) {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-								}
-								else {
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $x);
-								}
 
 								$era_valmis = true;
 								break 3;
@@ -15811,9 +15813,6 @@ if (!function_exists("tee_keraysera")) {
 
 					if ($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 						$era_valmis = true;
-
-						splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
 						break 2;
 					}
 				}
@@ -15874,8 +15873,6 @@ if (!function_exists("tee_keraysera")) {
 
 							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1260): splitattava määrä on $i (floor($i / $tuoterow[myynti_era]) * $tuoterow[myynti_era]<br>\n";
 
-							splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
-
 							$kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $i;
 
 							$era_valmis = true;
@@ -15904,7 +15901,6 @@ if (!function_exists("tee_keraysera")) {
 							// HUOM.!!!! TULEVAISUUDEN ITEROINTIA VARTEN
 							// TARVITAANKO SITTENKIN ALUKSI KATSOA MAHDOLLISTA ISOMPAA PAKETTIA JOHON MAHTUISI LOPUT TUOTTEET?????
 							// TALLENNETAAN ARRAYSEEN MYÖS PUUKOTUSKERROIN JONKA AVULLA VOIDAAN KERÄYKSEN PÄÄTTEEKSI LASKEA RAHTIKIRJALLE REALISTISEMMAT PAKKAUKSEN KUUTIOT (keraa.php rivi 1314)
-
 							$lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']] = $tuoterow['tunnus'];
 
 							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<br>(E1280): Tuote ei mahdu pakkaukseen!<br>\n";
@@ -15924,10 +15920,6 @@ if (!function_exists("tee_keraysera")) {
 
 									if ($i == 0) {
 										unset($lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']]);
-										splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-									}
-									else {
-										splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 									}
 								}
 
@@ -15978,14 +15970,7 @@ if (!function_exists("tee_keraysera")) {
 								if (count($chk_arr[$tuoterow['otunnus']]) > 0) {
 									if ($i == 0) {
 										unset($lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']]);
-										$uudet_tunnukset_array = splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
 									}
-									else {
-										$uudet_tunnukset_array = splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
-									}
-								}
-								else {
-									$uudet_tunnukset_array = array($tuoterow['otunnus']);
 								}
 
 								$era_valmis = true;
@@ -16025,8 +16010,6 @@ if (!function_exists("tee_keraysera")) {
 
 								$i--;
 
-								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
-
 								break 3;
 							}
 
@@ -16065,9 +16048,6 @@ if (!function_exists("tee_keraysera")) {
 								if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1490): Tuleva pakkaus ylittäisi keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
 
 								$era_valmis = true;
-
-								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
-
 								break 3;
 							}
 						}
@@ -16382,8 +16362,8 @@ if (!function_exists("tee_keraysera")) {
 
 			file_put_contents($tee_keraysera_debugdir."/".$filenimi, $kukarow['debugstring']);
 
-			// Nollataan tämä muuttuja
-			unset($kukarow['debugstring']);
+			// Tyhjennetään tämä tässä ja lisätään tallenna_keräyserässä vielä vähän lisää jos on tarvis
+			$kukarow['debugstring'] = "";
 
 			// Setataan filenimi, niin voidaan nimetä se uudestaan tallenna_kerayserä.incissä
 			$kukarow['debugfile'] = $filenimi;

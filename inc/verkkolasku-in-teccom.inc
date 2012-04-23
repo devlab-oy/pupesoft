@@ -241,7 +241,7 @@
 							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat IN ('K', 'L'))";
+							AND toimi.asn_sanomat IN ('K', 'L')";
 				$ostoera_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($ostoera_chk_res) > 0) {

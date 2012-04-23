@@ -232,6 +232,26 @@
 
 				$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->Quantity);
 
+				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
+							FROM toimi
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+							AND toimi.tyyppi != 'P'
+							AND toimi.asn_sanomat IN ('K', 'L'))";
+				$ostoera_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($ostoera_chk_res) > 0) {
+					$ostoera_chk_row = mysql_fetch_assoc($ostoera_chk_res);
+
+					if ($ostoera_chk_row['tuotekerroin'] > 0.000000) {
+						$rtuoteno[$i]['kpl'] *= $ostoera_chk_row['tuotekerroin'];
+					}
+				}
+
 				if (in_array($laskuttajan_toimittajanumero, array("123007","123442","123001"))) {
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount); // summa
 				}

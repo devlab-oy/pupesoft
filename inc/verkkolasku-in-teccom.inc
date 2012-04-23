@@ -247,7 +247,7 @@
 				if (mysql_num_rows($ostoera_chk_res) > 0) {
 					$ostoera_chk_row = mysql_fetch_assoc($ostoera_chk_res);
 
-					if ($ostoera_chk_row['tuotekerroin'] > 0.000000) {
+					if ($ostoera_chk_row['tuotekerroin'] != 0) {
 						$rtuoteno[$i]['kpl'] *= $ostoera_chk_row['tuotekerroin'];
 					}
 				}

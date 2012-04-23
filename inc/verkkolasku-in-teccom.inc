@@ -172,16 +172,16 @@
 		foreach ($tuotetiedot as $tuotetieto) {
 			// tuotekoodi
 			// Tehdään poikkeustapaksien käsittely
-			if ($laskuttajan_toimittajanumero == 123085) {
+			if ($laskuttajan_toimittajanumero == "123085") {
 				$rtuoteno[$i]["tuoteno"] = $rtuoteno[$i]["tuoteno2"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
-			elseif ($laskuttajan_toimittajanumero == 123067) {
+			elseif ($laskuttajan_toimittajanumero == "123067") {
 				$rtuoteno[$i]["tuoteno"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3);
 				$rtuoteno[$i]["tuoteno2"] = substr(utf8_decode($tuotetieto->ProductId->ProductNumber),0,-3)."090";
 				echo "Tuotenumeron ".$rtuoteno[$i]["tuoteno"]." poikkeuskäsittely (laskuttajan toimittajanumero {$laskuttajan_toimittajanumero})<br><br>";
 			}
-			elseif ($laskuttajan_toimittajanumero == 123007) {
+			elseif ($laskuttajan_toimittajanumero == "123007") {
 				$aputuoteno = utf8_decode($tuotetieto->ProductId->ProductNumber);
 				$pituus 	= strlen(trim($aputuoteno));
 

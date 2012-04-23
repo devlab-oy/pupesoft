@@ -200,7 +200,7 @@
 				}
 
 				// tiukka 1
-				$query = "	SELECT tilausrivi.*
+				$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus)
@@ -223,7 +223,7 @@
 
 				if (mysql_num_rows($kokeillaan) == 0) {
 					// tiukka 2
-					$query = "	SELECT tilausrivi.*
+					$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus)
@@ -247,7 +247,7 @@
 
 				if (mysql_num_rows($kokeillaan) == 0) {
 					// väljempi 1
-					$query = "	SELECT tilausrivi.*
+					$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus)
@@ -271,7 +271,7 @@
 
 				if (mysql_num_rows($kokeillaan) == 0) {
 					// väljempi 2
-					$query = "	SELECT tilausrivi.*
+					$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus)
@@ -296,7 +296,7 @@
 
 				if (mysql_num_rows($kokeillaan) == 0) {
 					// löysä
-					$query = "	SELECT tilausrivi.*
+					$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus)
@@ -364,7 +364,7 @@
 						// $tilausrivi_muuttuja sisältää jo käytetyt rivit. Otetaan lisa_array:sta extraa vielä.
 						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $kaytetyt_tilausrivit)."','".implode("','",$lisa_array)."')";
 
-						$query = "	SELECT tilausrivi.*
+						$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND lasku.tunnus = tilausrivi.otunnus)

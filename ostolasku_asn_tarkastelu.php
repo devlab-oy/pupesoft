@@ -1479,7 +1479,9 @@
 			$laskurow = mysql_fetch_assoc($laskures);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
-						asn_sanomat.toim_tuoteno, asn_sanomat.toim_tuoteno2,
+						asn_sanomat.toim_tuoteno, 
+						asn_sanomat.toim_tuoteno2,
+						asn_sanomat.tuoteno,
 						asn_sanomat.tilausrivinpositio,
 						asn_sanomat.status,
 						asn_sanomat.tilausnumero,

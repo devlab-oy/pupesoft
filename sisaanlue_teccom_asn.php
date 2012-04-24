@@ -81,10 +81,23 @@
 								AND toimi.asn_sanomat = 'K'";
 					$tuotekerroin_chk_res = pupe_query($query);
 
+					if ($tuote == 'Y100012310') {
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						echo "rivejä löytyi ",mysql_num_rows($tuotekerroin_chk_res),"<br>";
+					}
+
 					if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
 						$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
 
+						if ($tuote == 'Y100012310') {
+							echo "tuotekerroin: $tuotekerroin_chk_row[tuotekerroin]<br>";
+						}
+
 						if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+							if ($tuote == 'Y100012310') {
+								echo "{$kpl} /= {$tuotekerroin_chk_row['tuotekerroin']}<br><br>";
+							}
+
 							$kpl /= $tuotekerroin_chk_row['tuotekerroin'];
 						}
 					}

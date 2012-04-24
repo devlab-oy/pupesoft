@@ -321,6 +321,8 @@
 
 				$tilausrivirow = mysql_fetch_array($checkres);
 
+				echo "row[kappalemaara]: $row[kappalemaara] tilausrivirow varattu: $tilausrivirow[varattu]<br><br>";
+
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VÄHEMMÄN kuin tilausrivillä, vanhan tilausrivin tunnus jää jäljellä
 				if (mysql_num_rows($checkres) == 0) {
 					// muutos. Jos tulee enemmän kuin ollaan tilattu, niin tämä ei ole virhe, vaan lisätään se tilaukselle uudeksi riviksi.

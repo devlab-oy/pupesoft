@@ -548,7 +548,7 @@
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
-									keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									#keikkarivinhinta = '{$tilausrivirow['hinta']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -707,7 +707,7 @@
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
-									keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									#keikkarivinhinta = '{$tilausrivirow['hinta']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -1526,7 +1526,7 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								#keikkarivinhinta = '{$hinta_chk_row['hinta']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1605,7 +1605,7 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								#keikkarivinhinta = '{$hinta_chk_row['hinta']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1674,7 +1674,7 @@
 
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
-								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								#keikkarivinhinta = '{$hinta_chk_row['hinta']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'

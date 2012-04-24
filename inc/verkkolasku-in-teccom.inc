@@ -242,13 +242,13 @@
 							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
 							AND toimi.tyyppi != 'P'
 							AND toimi.asn_sanomat IN ('K', 'L')";
-				$ostoera_chk_res = pupe_query($query);
+				$tuotekerroin_chk_res = pupe_query($query);
 
-				if (mysql_num_rows($ostoera_chk_res) > 0) {
-					$ostoera_chk_row = mysql_fetch_assoc($ostoera_chk_res);
+				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
+					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
 
-					if ($ostoera_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] /= $ostoera_chk_row['tuotekerroin'];
+					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
 					}
 				}
 

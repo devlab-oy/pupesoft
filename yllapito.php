@@ -385,7 +385,7 @@
 								$t[$i] = $id;
 							}
 						}
-												
+
 						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
 
@@ -680,6 +680,23 @@
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
 						}
 
+						// Matkalasku
+						if ($laskuorow["tilaustyyppi"] == "M") {
+							$query = "	SELECT nimi
+										FROM kuka
+										WHERE yhtio = '$kukarow[yhtio]'
+										and kuka = '$otsikrow[nimi]'";
+							$kukores = pupe_query($query);
+							$kukorow = mysql_fetch_assoc($kukores);
+
+							$otsikrow_nimi = $kukorow["nimi"];
+							$otsikrow_nimitark = t("Matkalasku");
+						}
+						else {
+							$otsikrow_nimi = $otsikrow["nimi"];
+							$otsikrow_nimitark = $otsikrow["nimitark"];
+						}
+
 						$query = "	UPDATE lasku
 									SET erpcm 			= '$oletus_erapvm',
 									kapvm 				= '$oletus_kapvm',
@@ -698,8 +715,8 @@
 									hyvaksyja_nyt 		= '$laskuorow[hyvaksyja_nyt]',
 									ytunnus 			= '$otsikrow[ytunnus]',
 									tilinumero 			= '$otsikrow[tilinumero]',
-									nimi 				= '$otsikrow[nimi]',
-									nimitark 			= '$otsikrow[nimitark]',
+									nimi 				= '$otsikrow_nimi',
+									nimitark 			= '$otsikrow_nimitark',
 									osoite 				= '$otsikrow[osoite]',
 									osoitetark 			= '$otsikrow[osoitetark]',
 									postino 			= '$otsikrow[postino]',

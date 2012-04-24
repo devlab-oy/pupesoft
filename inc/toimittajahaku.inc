@@ -281,7 +281,7 @@
 						<th>".t("Valuutta")."</th>
 						<th>".t("Laskunro")."</th>
 						<th>".t("Viite/Viesti")."</th>
-						<th>".t("Keikka")."</th>
+						<th>".t("Saapuminen")."</th>
 						<th>".t("EBID")."</th>
 						<th>".t("Tila/Vienti")."</th>
 						</tr>

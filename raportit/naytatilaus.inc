@@ -229,7 +229,7 @@
 	echo "</tr>";
 	echo "<tr>";
 
-	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") echo "<th>".t("Keikkanumero")."</th>";
+	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") echo "<th>".t("Saapumisnumero")."</th>";
 	else echo "<th>".t("Laskunro")."</th>";
 
 	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") {
@@ -545,7 +545,7 @@
 			$muutkeikres = pupe_query($query);
 
 			if (mysql_num_rows($muutkeikres) > 0) {
-				echo "<tr><th colspan='6'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
+				echo "<tr><th colspan='6'>".t("Saapumiseen liitetyt ostolaskut:")."</th></tr>";
 				echo "<tr><td colspan='6'>";
 
 				while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {

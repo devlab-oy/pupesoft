@@ -581,7 +581,7 @@
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 			echo "<input type='hidden' name='suuntalavan_tunnus' value='' />";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 		}
 	}
@@ -589,7 +589,7 @@
 	if ($tee == '') {
 
 		echo "<table>";
-		echo "<tr><th>",t("Keikka"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
+		echo "<tr><th>",t("Saapuminen"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
 		echo "</table>";
 
 		echo "<br />";
@@ -768,7 +768,7 @@
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 
 			echo "&nbsp;<form action='?indexvas=1' method='post'>";

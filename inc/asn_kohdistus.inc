@@ -147,6 +147,8 @@
 
 				// poikkeuskäsittelyä muutamalle toimittajalle.
 
+				$toinen_tuoteno = "";
+
 				if ($row["toimittajanumero"] == "123067") {
 					$orgtuote = $row["toim_tuoteno"];
 					$lyhennetty_tuoteno = substr($row["toim_tuoteno"], 0, -3);

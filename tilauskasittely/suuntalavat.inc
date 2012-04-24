@@ -872,7 +872,7 @@
 			echo "<input type='hidden' name='laskunro' value='{$laskurow['laskunro']}'>";
 			echo "<input type='hidden' name='nappikeikalle' value='menossa'>";
 			echo "<input type='hidden' name='toiminto' value='kohdista'>";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 		}
 	}

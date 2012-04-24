@@ -1511,7 +1511,7 @@
 							AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}'";
 				$res = pupe_query($query);
 
-				if (mysql_num_rows($res) > 0) {
+				if (mysql_num_rows($res) > 0 and $row['tuoteno'] == '') {
 					$ttrow = mysql_fetch_assoc($res);
 
 					$row['tuoteno'] = $ttrow['tuoteno'];

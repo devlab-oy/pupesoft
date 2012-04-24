@@ -648,7 +648,7 @@
 
 					$kappaleerotus = $tilausrivirow["varattu"] - $rtuoteno[$i]["kpl"];
 
-					// // Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$fields = "yhtio";
 					$values = "'{$kukarow['yhtio']}'";
 

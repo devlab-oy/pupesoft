@@ -321,10 +321,47 @@ class Unifaun {
 					$rahtisopimus_res = pupe_query($query);
 					$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
 
-					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
+					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? 0 : $rahtisopimus_row['rahtisopimus'];
+
+					// Jos sopparinumero puuttuu
+					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
+						if ($this->toitarow['virallinen_selite'] == "KKSTD") 	 $rahtisopimusnro = 123456;
+						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234;
+						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
+						else $rahtisopimusnro = 123;
+					}
 
 					$uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
 					$uni_par_val->addAttribute('n', "custno");
+
+					// Nämä ovat nyt käytössä:
+					#FREEG 		--> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
+					#H48 		--> RPAY
+					#IT09 		--> OPAY
+					#IT14 		--> OPAY
+					#KKSTD 		--> OPAY tai RPAY, 6 numeroa
+					#KLGRP 		--> OPAY tai RPAY, min 4 max 8
+					#MH10 		--> RPAY, numeric minlength(8)
+					#MH20 		--> N/A
+					#MH30	 	--> RPAY
+					#SBTLFIEXP 	--> N/A
+					#TPSTD 		--> RPAY, 1-6 numeroa
+
+					// RPAY (receiver pays) and OPAY (other payer)
+					$allowed_rpay = array(
+						'FREEG',
+						'H48',
+						'KKSTD',
+						'KLGRP',
+						'MH10',
+						'MH30',
+						#'TPSTD',
+					);
+
+					$allowed_opay = array(
+						'IT09',
+						'IT14',
+					);
 				}
 
 				if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
@@ -565,36 +602,6 @@ class Unifaun {
 
 						#$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
 						#$uni_ser_val->addAttribute('n', "bookingoffice");
-
-
-					// Nämä ovat nyt käytössä:
-					#FREEG 		--> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
-					#H48 		--> RPAY
-					#IT09 		--> OPAY
-					#IT14 		--> OPAY
-					#KKSTD 		--> OPAY tai RPAY, 6 numeroa
-					#KLGRP 		--> OPAY tai RPAY, min 4 max 8
-					#MH10 		--> RPAY, numeric minlength(8)
-					#MH20 		--> N/A
-					#MH3050 	--> RPAY
-					#SBTLFIEXP 	--> N/A
-					#TPSTD 		--> RPAY, 1-6 numeroa
-
-					// RPAY (receiver pays) and OPAY (other payer)
-					$allowed_rpay = array(
-						'FREEG',
-						'H48',
-						'KKSTD',
-						'KLGRP',
-						'MH10',
-						'MH3050',
-						#'TPSTD',
-					);
-
-					$allowed_opay = array(
-						'IT09',
-						'IT14',
-					);
 
 					if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
 						$uni_addon = $uni_service->addChild('addon');

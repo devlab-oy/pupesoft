@@ -78,7 +78,7 @@
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$tavarantoimittajanumero}'
 								AND toimi.tyyppi != 'P'
-								AND toimi.asn_sanomat IN ('K', 'L')";
+								AND toimi.asn_sanomat = 'K'";
 					$tuotekerroin_chk_res = pupe_query($query);
 
 					if (mysql_num_rows($tuotekerroin_chk_res) > 0) {

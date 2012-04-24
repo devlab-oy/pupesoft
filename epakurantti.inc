@@ -143,7 +143,7 @@
 
 		if (mysql_num_rows($tilre) != 0 and $tee != "pois" and $tee != "peru") {
 			$tilro = mysql_fetch_assoc($tilre);
-			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viemättä varastoon keikalla")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
+			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viemättä varastoon saapumisella")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
 

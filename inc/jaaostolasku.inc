@@ -77,15 +77,15 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 		if ($jaettavalaskurow['summa'] == $keikkarow['summa']) {
 			$keikat[] = $keikkarow['laskunro'];
 
-			echo "<font class='error'>".t("Liitet‰‰n molemmat laskut uudestaan keikkaan")." $keikkarow[laskunro]</font><br>";
+			echo "<font class='error'>".t("Liitet‰‰n molemmat laskut uudestaan saapumiseen")." $keikkarow[laskunro]</font><br>";
 		}
 		else {
 			if (mysql_num_rows($check_res) > 0) {
-				echo "<font class='error'>".t("Laskua ei voida jakaa, koska se on liitetty vain osittain keikkaan %s ja keikka on j‰lkilaskettu", "", $keikkarow["laskunro"])."!</font><br>";
+				echo "<font class='error'>".t("Laskua ei voida jakaa, koska se on liitetty vain osittain saapumiseen %s ja keikka on j‰lkilaskettu", "", $keikkarow["laskunro"])."!</font><br>";
 				$keikatok = FALSE;
 			}
 			else {
-				echo "<font class='error'>".t("Lasku oli liitetty vain osittain keikkaan %s, joten uusia laskuja ei voitu liitt‰‰. K‰y korjaamassa keikan laskut manuaalisesti", "", $keikkarow["laskunro"]).".</font><br>";
+				echo "<font class='error'>".t("Lasku oli liitetty vain osittain saapumiseen %s, joten uusia laskuja ei voitu liitt‰‰. K‰y korjaamassa keikan laskut manuaalisesti", "", $keikkarow["laskunro"]).".</font><br>";
 			}
 		}
 	}

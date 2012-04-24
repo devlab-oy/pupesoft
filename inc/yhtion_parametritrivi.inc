@@ -2685,8 +2685,8 @@
 			$sel = "selected";
 		}
 
-		$ulos .= "<option value = ''>".t("Tavaran varastoonvientipäivä on keikan varastoonvientipäivä");
-		$ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientipäivä voidaan syöttää keikan varastoonviennissä");
+		$ulos .= "<option value = ''>".t("Tavaran varastoonvientipäivä on saapumisen varastoonvientipäivä");
+		$ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientipäivä voidaan syöttää saapumisen varastoonviennissä");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2993,8 +2993,8 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kulusummaa/kuluprosenttia")."</option>";
+		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään saapumiseen liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään saapumiselle syötettyä kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 

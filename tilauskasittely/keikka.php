@@ -204,7 +204,7 @@ if (!function_exists("tsekit")) {
 
 if (!isset($toiminto)) $toiminto = "";
 
-echo "<font class='head'>".t("Saapuva keikka")."</font><hr>";
+echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
 if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
@@ -220,12 +220,12 @@ if (isset($nappikeikalle) and $nappikeikalle == 'menossa') {
 	$nappiresult = pupe_query($query);
 }
 
-// yhdistetaan keikkaan $otunnus muita keikkoja
+// yhdistetaan saapumiseen $otunnus muita keikkoja
 if ($toiminto == "yhdista") {
 	require('ostotilausten_rivien_yhdistys.inc');
 }
 
-// poistetaan vanha keikka numerolla $keikkaid
+// poistetaan vanha saapuminen numerolla $keikkaid
 if ($toiminto == "poista") {
 	$eisaapoistaa = 0;
 
@@ -256,7 +256,7 @@ if ($toiminto == "poista") {
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆitiin ohjelmassa keikka.php")."<br>";
 
-		// Mit‰tˆid‰‰n keikka
+		// Mit‰tˆid‰‰n saapuminen
 		$query  = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
 		$result = pupe_query($query);
 
@@ -272,7 +272,7 @@ if ($toiminto == "poista") {
 		$toiminto = "";
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE: Keikkaan on jo liitetty laskuja tai kohdistettu rivej‰, sit‰ ei voi poistaa")."!<br>";
+		echo "<font class='error'>".t("VIRHE: Saapumiseen on jo liitetty laskuja tai kohdistettu rivej‰, sit‰ ei voi poistaa")."!<br>";
 		// formissa on tullut myˆs $ytunnus, joten n‰in p‰‰st‰‰n takaisin selaukseen
 		$toiminto = "";
 	}
@@ -280,7 +280,7 @@ if ($toiminto == "poista") {
 
 // tulostetaan tarvittavia papruja $otunnuksen mukaan
 if ($toiminto == "tulosta") {
-	// Haetaan itse keikka
+	// Haetaan itse saapuminen
 	$query    = "	SELECT *
 					from lasku
 					where tunnus = '$otunnus'
@@ -358,7 +358,7 @@ if ($toiminto == "tulosta") {
 
 		echo "<br><table>";
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("saapuminen")."</th>";
 		echo "<th>".t("ytunnus")."</th>";
 		echo "<th>".t("nimi")."</th>";
 		echo "</tr>";
@@ -483,12 +483,12 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 	$varastoerror = 0;
 
 	if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-		echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+		echo "<font class='error'>".t("VIRHE: Saapumista ei voi vied‰ varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
 		$varastoerror = 1;
 	}
 	elseif (mysql_num_rows($result) != 0){
 		while ($rivi = mysql_fetch_array($result)) {
-			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.")." ".sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Saapumista ei voi vied‰ varastoon.")." ".sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
 		}
 		$varastoerror = 1;
 	}
@@ -505,7 +505,7 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 		$suuntalavat_chk_row = mysql_fetch_assoc($suuntalavat_chk_result);
 
 		if (trim($suuntalavat_chk_row['suuntalavat']) == '') {
-			echo "<font class='error'>",t("VIRHE: Keikkaa ei voi vied‰ varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
+			echo "<font class='error'>",t("VIRHE: Saapumista ei voi vied‰ varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
 			$varastoerror = 1;
 		}
 	}
@@ -599,7 +599,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
 	echo "</tr>";
 	echo "<tr>";
-	echo "<th>".t("Etsi keikka-/tilausnumero")."</th>";
+	echo "<th>".t("Etsi saapuminen-/tilausnumero")."</th>";
 	echo "<td><input type='text' name='keikka' value='$keikka'></td>";
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";
@@ -627,7 +627,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		}
 
 		echo "<tr>";
-		echo "<th>",t("Etsi keikan laatijalla"),"</th>";
+		echo "<th>",t("Etsi saapumisen laatijalla"),"</th>";
 
 		$kukalisa = trim($keraysvyohyke) != '' ? " and keraysvyohyke = '{$keraysvyohyke}' " : '';
 
@@ -655,7 +655,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if ($yhtiorow['suuntalavat'] == 'S') {
 		echo "<tr>";
-		echo "<th>",t("N‰yt‰ vain keikat, joilla on siirtovalmiita suuntalavoja"),"</th>";
+		echo "<th>",t("N‰yt‰ vain saapumiset, joilla on siirtovalmiita suuntalavoja"),"</th>";
 
 		$chk = trim($nayta_siirtovalmiit_suuntalavat) != '' ? ' checked' : '';
 
@@ -705,10 +705,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 	if (mysql_num_rows($result) != 0) {
 
-		echo "<br><font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
+		echo "<br><font class='head'>".t("Keskener‰iset saapumiset")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("saapumisnumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -829,7 +829,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-	echo "<input type='submit' value='".t("Perusta uusi keikka")."'>";
+	echo "<input type='submit' value='".t("Perusta uusi saapuminen")."'>";
 	echo "</form>";
 	echo "</td>";
 	echo "</tr>";
@@ -871,10 +871,10 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<font class='head'>".t("Toimittajan keskener‰iset keikat")."</font><hr>";
+		echo "<font class='head'>".t("Toimittajan keskener‰iset saapumiset")."</font><hr>";
 
 		if (mysql_num_rows($result) == 50 and $naytakaikki == "") {
-			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa keikkaa! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";
+			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa saapumista! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";
 
 			echo "<td class='back'>";
 			echo "<form action='$PHP_SELF' method='post'>";
@@ -889,7 +889,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th valign='top'>".t("keikka")."</th>";
+		echo "<th valign='top'>".t("saapuminen")."</th>";
 		echo "<th valign='top'>&nbsp;</th>";
 		echo "<th valign='top'>".t("ytunnus")." /<br>".t("nimi")."</th>";
 		echo "<th valign='top'>".t("kohdistus")." /<br>".t("lis‰tiedot")."</th>";
@@ -922,7 +922,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
 				echo "<div id='div_$row[laskunro]' class='popup' style='width:500px;'>";
-				echo t("Keikka").": $row[laskunro] / $row[nimi]<br><br>";
+				echo t("Saapuminen").": $row[laskunro] / $row[nimi]<br><br>";
 				echo $row["comments"];
 				echo "</div>";
 				echo "<td valign='top' class='tooltip' id='$row[laskunro]'><img src='$palvelin2/pics/lullacons/info.png'></td>";
@@ -1008,13 +1008,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 				// n‰it‰ saa tehd‰ aina keikalle
 				echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
-				echo "<option value='kululaskut'>"       .t("Keikan laskut")."</option>";
+				echo "<option value='kululaskut'>"       .t("Saapumisen laskut")."</option>";
 				echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
-				echo "<option value='yhdista'>"          .t("Yhdist‰ keikkoja")."</option>";
+				echo "<option value='yhdista'>"          .t("Yhdist‰ saapumisia")."</option>";
 
 				// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
 				if ($kplyhteensa == 0 and $llrow["num"] == 0) {
-					echo "<option value='poista'>"       .t("Poista keikka")."</option>";
+					echo "<option value='poista'>"       .t("Poista saapuminen")."</option>";
 				}
 
 				if ($yhtiorow['suuntalavat'] == 'S') {
@@ -1101,7 +1101,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 
 	$nappikeikka .= "$formalku";
 	$nappikeikka .= "<input type='hidden' name='toiminto' value='kululaskut'>";
-	$nappikeikka .= "<input type='submit' value='".t("Keikan laskut")."'>";
+	$nappikeikka .= "<input type='submit' value='".t("Saapumisen laskut")."'>";
 	$nappikeikka .= "$formloppu";
 
 	$nappikeikka .= "$formalku";
@@ -1113,7 +1113,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	if ($kplyhteensa == 0 and $llrow["num"] == 0) {
 		$nappikeikka .= "$formalku";
 		$nappikeikka .= "<input type='hidden' name='toiminto' value='poista'>";
-		$nappikeikka .= "<input type='submit' value='".t("Poista keikka")."'>";
+		$nappikeikka .= "<input type='submit' value='".t("Poista saapuminen")."'>";
 		$nappikeikka .= "$formloppu";
 	}
 

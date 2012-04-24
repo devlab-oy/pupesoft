@@ -110,7 +110,7 @@ if ($tee == "") {
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
 	echo "<br><table>";
 	echo "<tr>";
-	echo "<th>".t("keikka")."</th>";
+	echo "<th>".t("saapuminen")."</th>";
 	echo "<th>".t("ytunnus")."</th>";
 	echo "<th>".t("nimi")."</th>";
 	echo "<th>".t("tapvm")."</th>";

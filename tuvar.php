@@ -345,7 +345,7 @@
 
 				echo "<tr>
 						<th>".t("Asiakas/Toimittaja")."</th>
-						<th>".t("Tilaus/Keikka")."</th>
+						<th>".t("Tilaus/Saapuminen")."</th>
 						<th>".t("Tyyppi")."</th>
 						<th>".t("Toimaika")."</th>
 						<th>".t("M‰‰r‰")."</th>

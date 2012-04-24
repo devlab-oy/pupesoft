@@ -1551,7 +1551,7 @@
 					echo "<font class='ok'>Ok</font>"; 
 					$ok++;
 
-					if ($row['keikkarivinhinta'] != $hinta_chk_row['hinta']) {
+					if ($row['hinta'] != $hinta_chk_row['hinta']) {
 						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
 						$hintapoikkeavuus = true;
 					}

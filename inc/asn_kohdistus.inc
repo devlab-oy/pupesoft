@@ -472,7 +472,7 @@
 						$query = "	UPDATE tilausrivi SET
 									varattu = '$erotus',
 									tilkpl	= '$erotus',
-									hinta 	= '{$split_row['hinta']}',
+									hinta 	= '{$tilausrivirow[hinta]}',
 									kommentti = concat(kommentti,' Ennen splittausta {$split_row["tilkpl"]} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$split_row[tunnus]'";

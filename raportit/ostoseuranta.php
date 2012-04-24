@@ -311,7 +311,7 @@
 
 							//KPLED
 							if ($piiloed == "") {
-								$query .= "	sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostokpl")."', ";
+								$query .= "	sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostokpl")."', ";
 							}
 						}
 

@@ -182,6 +182,22 @@
 							AND varattu > 0";
 				$ostoresult = pupe_query($query);
 				$ostorivi = mysql_fetch_assoc($ostoresult);
+				
+				$jalkitoimituksessa = 0;
+				
+				// Jos jälkitoimitukset eivät varaa saldoa, pitää ne ottaa mukaan
+				if ($yhtiorow["varaako_jt_saldoa"] == "") { 
+					$query = "	SELECT ifnull(round(sum(jt)), 0) jt
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND tuoteno = '{$row["tuoteno"]}'
+								AND tyyppi  = 'L'
+								AND var     = 'J'
+								AND jt      > 0";
+					$jt_result = pupe_query($query);
+					$jt_rivi = mysql_fetch_assoc($jt_result);
+					$jalkitoimituksessa = $jt_rivi["jt"];
+				}
 
 				$tyyppi_lisa = ($listaustyyppi == "kappaleet") ? "kpl" : "rivihinta";
 
@@ -201,7 +217,7 @@
 				$myyntirivi = mysql_fetch_assoc($myyntiresult);
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
-				$varattu = $saldo - $myytavissa;
+				$varattu = $saldo - $myytavissa + $jalkitoimituksessa;
 
 				// Jos kaikki luvut on nollaa, niin skipataan rivi
 				if ($nollapiilo != '' and (float) $saldo == 0 and (float) $ostorivi["tulossa"] == 0 and (float) $varattu == 0 and (float) $myyntirivi["myynti12kk"] == 0) {

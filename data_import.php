@@ -367,6 +367,12 @@
 				<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
 				</select></td>
 		</tr>";
+		echo "<tr><th>".t("Asiakkaan valinta").":</th>
+				<td><select name='asiakkaanvalinta'>
+				<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+				<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+				</select></td>
+		</tr>";
 	}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {

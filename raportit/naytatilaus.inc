@@ -284,7 +284,7 @@
 
 				foreach ($match[0] as $nro) {
 					$nro = str_replace(" ", "", $nro);
-					$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$nro}&LOTUS_hae=Hae'>{$nro}</a><br>";
+					$linkurl .= "<a target=newikkuna href='http://www.itella.fi/itemtracking/itella/search_by_shipment_id?ShipmentId={$nro}'>{$nro}</a><br>";
 				}
 
 				$linkurl = substr($linkurl,0,-4); // vika br pois

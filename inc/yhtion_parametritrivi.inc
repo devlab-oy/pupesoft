@@ -168,6 +168,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == '') {
 			$sel1 = "selected";
@@ -175,9 +176,13 @@
 		if ($trow[$i] == 'E') {
 			$sel2 = "selected";
 		}
+		if ($trow[$i] == 'F') {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value = '' $sel1>".t("Pankit ja p‰iv‰t yhdistet‰‰n")."";
 		$ulos .= "<option value = 'E' $sel2>".t("Jokainen pankki ja p‰iv‰ omaan tiedostoon")."";
+		$ulos .= "<option value = 'F' $sel3>".t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -753,8 +758,8 @@
 
 		$ulos .= "<option value=''>".t("J‰lkitoimitusrivej‰ ei toimiteta eik‰ kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("J‰lkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
-		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ vain jos k‰ytt‰j‰lla on p‰ivitysoikeus JT-selaukseen")."</option>";
-		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";		
+		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen")."</option>";
+		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sek‰ myyntitilaukselta varastoon tilatut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "</select></td>";
@@ -771,7 +776,8 @@
 
 		$ulos .= "<option value=''>".t("Valmistusrivej‰ ei toimiteta eik‰ kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("J‰lkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydess‰")."</option>";
-		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen")."</option>";
+		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sek‰ myyntitilaukselta varastoon valmistetut j‰lkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydess‰")."</option>";
 		$ulos .= "</select></td>";

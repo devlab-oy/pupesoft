@@ -1282,6 +1282,12 @@ if (!function_exists('rivi_lahete')) {
 					$row['varattu'] = t("PUUTE", $kieli);
 					$row['varattu_viivakoodi'] = 0;
 				}
+				elseif ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+					// Jos l‰hetett‰ tulostetaan ker‰yslistan kanssa yht‰aikaa, niin silloin pistet‰‰n aina toimitettu sarakkeeseen tilattum‰‰r‰
+					$row["varattu"] = $row["tilkpl"];
+					$row["kpl"] 	= "";
+					$row['varattu_viivakoodi'] = 0;					
+				}
 				else {
 					$row["varattu"] = "";
 					$row["kpl"] 	= "";

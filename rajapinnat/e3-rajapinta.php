@@ -74,10 +74,19 @@
 
 	$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-$ajopaiva, date("Y")));
 
+	//xf02:sta varten otetaan korvatut vuorokauden myöhemmin, eli esim maanantaina korvattu esitetään xf02:ssa tiistain aineistossa
+	$ajopaiva++;
+
+	if ($weekday == 1) {
+		// ma aineistoon korvatut perjantailta. Su->La->Pe eli + 2
+		$ajopaiva += 2;
+	}
+
+	$edellinen_arki = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-$ajopaiva, date("Y")));
+
 	//rajaukset
-	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = ''";
+	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = '' ";
 	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
-	$xf02loppulause = "";
 
 	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
@@ -94,21 +103,14 @@
 
 	echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
-	//testausta varten limit
-	$limit = "";
-
-	//xf02:sta varten
-	$korvatut = "yes";
-
 	// Ajetaan kaikki operaatiot
-	xauxi($limit);
-	xlto($limit);
-	xswp($limit);
-	xvni($limit);
-	xf04($limit);
-	xf01($limit);
-	xswp($limit);
-	xf02($limit);
+	xauxi($tanaan);
+	xlto($tanaan);
+	xswp($tanaan, "");
+	xvni($tanaan);
+	xf04($tanaan);
+	xf01($tanaan);
+	xf02($tanaan, xswp($edellinen_arki, "yes"));
 
 	//Siirretään failit e3 palvelimelle
 	siirto($path_xf01,  "E3XF01NP");
@@ -230,8 +232,8 @@
 		}
 	}
 
-	function xauxi($limit = '') {
-		global $path_xauxi, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
+	function xauxi($tanaan) {
+		global $path_xauxi, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xauxi...\n";
 
@@ -302,8 +304,8 @@
 		fclose($fp);
 	}
 
-	function xlto($limit = '') {
-		global $path_xlto, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
+	function xlto($tanaan) {
+		global $path_xlto, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		//Item Lead Time File XLT0 (toimitusaikaseuranta)
 		//Tiedot päivän aikaan tehdyistä tuloutuksista, jotka tehty E3:ssa syntynyttä tilausta vastaan
@@ -378,19 +380,10 @@
 		fclose($fp);
 	}
 
-	function xswp($limit = '') {
-		global $path_wswp, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $korvatut, $ajopaiva, $xf02loppulause, $weekday;
+	function xswp($tanaan, $korvatut) {
+		global $path_wswp, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xswp...\n";
-
-		//xf02:sta varten otetaan korvatut vuorokauden myöhemmin, eli esim maanantaina korvattu esitetään xf02:ssa tiistain aineistossa
-		if ($korvatut != "") {
-			$ajopaiva = $ajopaiva + 1;
-			if ($weekday == 1) {		//ma aineistoon korvatut perjantailta. Su->La->Pe eli + 2
-				$ajopaiva = $ajopaiva + 2;
-			}
-			$tanaan = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-$ajopaiva, date("Y")));
-		}
 
 		$query = " SELECT korvaavat.id,
 				   tuote.tuoteno,
@@ -475,14 +468,13 @@
 					$hash .= "#";
 				}
 			}
-
 		}
 		if ($korvatut != "") return $xf02loppulause;
 		else fclose($fp);
 	}
 
-	function xvni($limit = '') {
-		global $path_xvni, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
+	function xvni($tanaan) {
+		global $path_xvni, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN XVNI...\n";
 
@@ -491,7 +483,7 @@
 					WHERE toimi.yhtio = '$yhtiorow[yhtio]'
 					AND toimi.herminator not in ('0','')
 					AND tyyppi = '' $toimirajaus
-					ORDER BY 1 $limit";
+					ORDER BY 1";
 		$resto = mysql_query($qxvni) or pupe_error($qxvni);
 		$rows = mysql_num_rows($resto);
 
@@ -556,8 +548,8 @@
 		fclose($fp);
 	}
 
-	function xf04($limit = '') {
-		global $path_xf04, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
+	function xf04($tanaan) {
+		global $path_xf04, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xf04...\n";
 
@@ -650,8 +642,8 @@
 		fclose($fp);
 	}
 
-	function xf01($limit = '') {
-		global $path_xf01, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus;
+	function xf01($tanaan) {
+		global $path_xf01, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xf01...\n";
 
@@ -789,8 +781,8 @@
 		fclose($fp);
 	}
 
-	function xf02($limit = '') {
-		global $path_xf02, $yhtiorow, $tanaan, $tuoterajaukset, $toimirajaus, $xf02loppulause;
+	function xf02($tanaan, $xf02loppulause) {
+		global $path_xf02, $yhtiorow, $tuoterajaukset, $toimirajaus;
 
 		echo "TULOSTETAAN xf02...\n";
 
@@ -928,7 +920,7 @@
 			}
 		}
 
-		if (! fwrite($fp, $xf02loppulause . "\n")) {
+		if (!fwrite($fp, $xf02loppulause . "\n")) {
 			echo "Failed writing row.\n";
 			die();
 		}

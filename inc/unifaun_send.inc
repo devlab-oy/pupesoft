@@ -588,7 +588,7 @@ class Unifaun {
 						'KLGRP',
 						'MH10',
 						'MH3050',
-						'TPSTD',
+						#'TPSTD',
 					);
 
 					$allowed_opay = array(

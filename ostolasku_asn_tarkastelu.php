@@ -193,8 +193,8 @@
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 
-			$hintaero = round($row['keikkarivinhinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
-			$rivihintaero = round(($row['keikkarivinhinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']);
+			$hintaero = round($row['hinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
+			$rivihintaero = round(($row['hinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']);
 
 			if ($hintaero == 0 and $rivihintaero == 0) continue;
 

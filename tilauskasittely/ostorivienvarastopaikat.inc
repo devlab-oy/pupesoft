@@ -364,7 +364,7 @@ if ($tee == "") {
 
 	echo "<table>
 		<tr>
-			<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
+			<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
 			<th>".t("Nimi")."</th><td>$laskurow[nimi]</td>
 		</tr>";
 
@@ -373,7 +373,7 @@ if ($tee == "") {
 	echo "	<input type='hidden' name='toiminto' value='varastopaikat'>
 			<input type='hidden' name='otunnus' value='$otunnus'>";
 
-	echo "<tr><th>".t("Saavuta keikka").":</th>
+	echo "<tr><th>".t("Saavuta saapuminen").":</th>
 			<td><select name='varasto' onchange = 'submit()'>
 			<option value='x' $selx>".t("Tuotteiden oletuspaikoille")."</option>
 			<option value='y' $sely>".t("Rivellä oleville paikoille")."</option>";
@@ -721,7 +721,7 @@ if ($tee == "") {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
 		
-		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 		echo "</form>";
 	}
 

@@ -74,7 +74,8 @@
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$tuote}','{$tuote2}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ('{$tuote}','{$tuote2}')
+															AND tuotteen_toimittajat.toim_tuoteno != '')
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$tavarantoimittajanumero}'
 								AND toimi.tyyppi != 'P'

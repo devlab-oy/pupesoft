@@ -521,7 +521,8 @@
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laskunro = '{$lasku}'";
+						AND laskunro = '{$lasku}'
+						AND tila = 'H'";
 			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$tunnus_fetch_res = pupe_query($query);
 			$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);

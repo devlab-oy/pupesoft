@@ -1573,9 +1573,9 @@
 					pupe_query($update);
 				}
 
-				$ale1lisa = (trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
-				$ale2lisa = (trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
-				$ale3lisa = (trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
+				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
+				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
+				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
@@ -1585,6 +1585,7 @@
 							uusiotunnus = '{$keikan_tunnus}',
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
+				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
 
 				$update = "	UPDATE asn_sanomat SET
@@ -1651,9 +1652,9 @@
 					pupe_query($update);
 				}
 
-				$ale1lisa = (trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
-				$ale2lisa = (trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
-				$ale3lisa = (trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
+				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
+				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
+				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
@@ -1663,6 +1664,7 @@
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
+				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
 
 				$update = "	UPDATE asn_sanomat SET
@@ -1719,9 +1721,9 @@
 					pupe_query($update);
 				}
 
-				$ale1lisa = (trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
-				$ale2lisa = (trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
-				$ale3lisa = (trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
+				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
+				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
+				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}', 
@@ -1731,6 +1733,7 @@
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
+				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
 
 				$update = "	UPDATE asn_sanomat SET

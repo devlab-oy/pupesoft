@@ -236,7 +236,7 @@
 				// $rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->OrderItemRef->BuyerOrderItemRef;
 
-				$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->Quantity);
+				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
 				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 							FROM toimi

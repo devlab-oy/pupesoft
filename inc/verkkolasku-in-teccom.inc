@@ -50,6 +50,7 @@
 	$laskun_pankkiviite 	= "";
 	$laskun_asiakastunnus	= "";
 	$laskun_pakkauskulu		= 0;
+	$laskun_rahtikulu		= 0;
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
@@ -330,6 +331,9 @@
 							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
 							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
 							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+						}
+						elseif ($charge_description == 'freight costs') {
+							$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
 						}
 						else {
 							if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;

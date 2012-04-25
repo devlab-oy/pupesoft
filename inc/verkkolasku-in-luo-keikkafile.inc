@@ -478,7 +478,7 @@
 						}
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							// tilausrivi ei saa olla jo kohdistettu
+							// tilausrivi pit‰‰ olla jo kohdistettu
 							$query = "	SELECT tunnus 
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
@@ -558,6 +558,9 @@
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
 									keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									ale1 = '{$tilausrivirow['ale1']}',
+									ale2 = '{$tilausrivirow['ale2']}',
+									ale3 = '{$tilausrivirow['ale3']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -719,6 +722,9 @@
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
 									keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									ale1 = '{$tilausrivirow['ale1']}',
+									ale2 = '{$tilausrivirow['ale2']}',
+									ale3 = '{$tilausrivirow['ale3']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -1533,7 +1539,7 @@
 			// lis‰t‰‰n tuotteet keikalle ja kohdistetaan
 			foreach ($ostoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno 
+				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
 							FROM tilausrivi 
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1543,6 +1549,9 @@
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
 								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								ale1 = '{$hinta_chk_row['ale1']}',
+								ale2 = '{$hinta_chk_row['ale2']}',
+								ale3 = '{$hinta_chk_row['ale3']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1564,11 +1573,15 @@
 					pupe_query($update);
 				}
 
+				$ale1lisa = $pointteri['ale1'] != 0 ? " ale1 = '{$pointteri['ale1']}', " : "";
+				$ale2lisa = $pointteri['ale2'] != 0 ? " ale2 = '{$pointteri['ale2']}', " : "";
+				$ale3lisa = $pointteri['ale3'] != 0 ? " ale3 = '{$pointteri['ale3']}', " : "";
+
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
-							ale1 = '{$pointteri['ale1']}',
-							ale2 = '{$pointteri['ale2']}',
-							ale3 = '{$pointteri['ale3']}',
+							{$ale1lisa}
+							{$ale2lisa}
+							{$ale3lisa}
 							uusiotunnus = '{$keikan_tunnus}',
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1604,7 +1617,7 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno, uusiotunnus, suuntalava
+				$query = "	SELECT hinta, otunnus, perheid, tuoteno, uusiotunnus, suuntalava, ale1, ale2, ale3
 							FROM tilausrivi 
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1614,6 +1627,9 @@
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
 								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								ale1 = '{$hinta_chk_row['ale1']}',
+								ale2 = '{$hinta_chk_row['ale2']}',
+								ale3 = '{$hinta_chk_row['ale3']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1635,11 +1651,15 @@
 					pupe_query($update);
 				}
 
+				$ale1lisa = $pointteri['ale1'] != 0 ? " ale1 = '{$pointteri['ale1']}', " : "";
+				$ale2lisa = $pointteri['ale2'] != 0 ? " ale2 = '{$pointteri['ale2']}', " : "";
+				$ale3lisa = $pointteri['ale3'] != 0 ? " ale3 = '{$pointteri['ale3']}', " : "";
+
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
-							ale1 = '{$pointteri['ale1']}',
-							ale2 = '{$pointteri['ale2']}',
-							ale3 = '{$pointteri['ale3']}',
+							{$ale1lisa}
+							{$ale2lisa}
+							{$ale3lisa}
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1665,7 +1685,7 @@
 
 			foreach ($ostoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno
+				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
 							FROM tilausrivi 
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1675,6 +1695,9 @@
 				$update_asn = "	UPDATE asn_sanomat SET
 								#tilausrivi = '{$pointteri['tunnus']}',
 								keikkarivinhinta = '{$hinta_chk_row['hinta']}',
+								ale1 = '{$hinta_chk_row['ale1']}',
+								ale2 = '{$hinta_chk_row['ale2']}',
+								ale3 = '{$hinta_chk_row['ale3']}',
 								status = 'X',
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1696,11 +1719,15 @@
 					pupe_query($update);
 				}
 
+				$ale1lisa = $pointteri['ale1'] != 0 ? " ale1 = '{$pointteri['ale1']}', " : "";
+				$ale2lisa = $pointteri['ale2'] != 0 ? " ale2 = '{$pointteri['ale2']}', " : "";
+				$ale3lisa = $pointteri['ale3'] != 0 ? " ale3 = '{$pointteri['ale3']}', " : "";
+
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}', 
-							ale1 = '{$pointteri['ale1']}',
-							ale2 = '{$pointteri['ale2']}',
-							ale3 = '{$pointteri['ale3']}',
+							{$ale1lisa}
+							{$ale2lisa}
+							{$ale3lisa}
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";

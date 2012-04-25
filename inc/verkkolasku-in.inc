@@ -1410,9 +1410,6 @@
 											kulu = '{$rtuoteno[$i]['kulu']}',
 											pakkauskulu = '{$laskun_pakkauskulu}',
 											rahtikulu = '{$laskun_rahtikulu}',
-											ale1 = '{$rtuoteno[$i]['ale1']}',
-											ale2 = '{$rtuoteno[$i]['ale2']}',
-											ale3 = '{$rtuoteno[$i]['ale3']}',
 											tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
 											laatija = 'crond',
 											luontiaika = now()";

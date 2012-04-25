@@ -371,7 +371,7 @@
 				echo "<th align='right'>".($saatavat_array[$sa-1]+1)."-".$saatavat_array[$sa]." ".t("pv")."</th>";
 			}
 
-			echo "<th align='right'>".t("Yli")." {$saatavat_array[count($saatavat_array)-1]} ".t("pv")."</th>";
+			echo "<th align='right'>".t("Yli")." ".$saatavat_array[count($saatavat_array)-1]." ".t("pv")."</th>";
 			echo "<th align='right'>".t("Avoimia")."</th>";
 			echo "<th align='right'>".t("Kaatotili")."</th>";
 			echo "<th align='right'>".t("Yhteensä")."</th>";
@@ -380,6 +380,8 @@
 			echo "</thead>";
 
 			echo "<tbody>";
+
+			$divi = "";
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -432,13 +434,13 @@
 
 					// Ei näytetä nollia ruudulla
 					if ($asrow['luottoraja'] == 0) $asrow['luottoraja'] = '';
-					if ($row["alle_$saatavat_array[0]"] == 0) $row["alle_$saatavat_array[0]"] = "";
+					if ($row["alle_{$saatavat_array[0]}"] == 0) $row["alle_{$saatavat_array[0]}"] = "";
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
 						if ($row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] == 0) $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] = "";
 					}
 
-					if ($row["yli_{$saatavat_array[count($saatavat_array)-1]}"] == 0) $row["yli_{$saatavat_array[count($saatavat_array)-1]}"] = "";
+					if ($row["yli_".$saatavat_array[count($saatavat_array)-1]] == 0) $row["yli_".$saatavat_array[count($saatavat_array)-1]] = "";
 
 					echo "<tr class='aktiivi'>";
 
@@ -452,21 +454,52 @@
 						$query = "	SELECT nimi, koodi
 									FROM kustannuspaikka
 									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '{$row["kustannuspaikka"]}'";
+									and tunnus = '{$row['kustannuspaikka']}'";
 						$nimiresult = pupe_query($query);
 
 						if (mysql_num_rows($nimiresult) == 1) {
 							$nimirow = mysql_fetch_assoc($nimiresult);
+
 							echo "<td valign='top'>{$nimirow["nimi"]} {$nimirow["koodi"]}</td>";
+
 							$kustpmuuttuja = "{$nimirow["nimi"]} {$nimirow["koodi"]}";
 						}
 						else {
-							echo "<td valign='top'>".t("Ei Kustannuspaikkaa")."</td>";
+							echo "<td valign='top'>",t("Ei Kustannuspaikkaa"),"</td>";
 							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
 						}
 					}
 					else {
-						echo "<td valign='top'>$row[nimi]</td>";
+
+						if (substr_count($row['nimi'], '<br>') > 5) {
+
+							$divi .= "<div id='div_".str_replace(",", "", $row['liitostunnus'])."' class='popup' style='width:250px;'>";
+							$divi .= "<table style='width:250px;'>";
+							$divi .= "<tr><th nowrap>".t("Nimi")."</th></tr>";
+
+							$iii = 0;
+
+							echo "<td valign='top'>";
+
+							foreach (explode('<br>', $row['nimi']) as $_nimi) {
+
+								if ($iii > 4) {
+									$divi .= "<tr><td>$_nimi</td></tr>";
+								}
+								else {
+									echo "{$_nimi}<br>";
+								}
+
+								$iii++;
+							}
+
+							$divi .= "</table></div>";
+
+							echo "<br><a class='tooltip' id='".str_replace(",", "", $row['liitostunnus'])."'>",t("Useita"),"...</a></td>";
+						}
+						else {
+							echo "<td valign='top'>$row[nimi]</td>";
+						}
 					}
 
 					echo "<td valign='top' align='right'>".$row["alle_$saatavat_array[0]"]."</td>";
@@ -570,6 +603,10 @@
 
 			echo "</tfoot>";
 			echo "</table>";
+
+			if (trim($divi) != "") {
+				echo "{$divi}";
+			}
 
 			if ($sytunnus != '') {
 

@@ -139,6 +139,8 @@ unset($thumb_size_y);
 unset($nrahdemo);
 
 unset($pankkitiedostot_polku);
+unset($maksuaineiston_siirto);
+unset($pankkiaineiston_haku);
 
 unset($postiedihost);
 unset($postiedipass);
@@ -634,7 +636,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 		}
 
-		if (!isset($no_head) or (isset($no_head) and $no_head != "yes") and isset($lopetus) and $lopetus != '') {
+		if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

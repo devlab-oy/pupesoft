@@ -54,6 +54,10 @@
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
 
+	if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely_tuoteperhe'] == 'U') {
+		$perhekielto = "Y";
+	}
+
 	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
 	unset($korvaavan_hinta_ylaraja_halvin_hinta);
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
@@ -648,6 +652,7 @@
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
 		if ($perheid == 0 and $perhekielto == "") {
+
 			foreach ($kaikkituotteet as $isatuoteno) {
 				$riikoko = 1;
 				$isa_array[] = $isatuoteno;
@@ -1766,17 +1771,17 @@
 			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 
-			if (substr($var,0,8) == "LOJ#!¡!#") {
+			if (substr($var,0,8) == "LOJ#!¡!#" and substr($var, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($var,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($var, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
 				$puu_var[]		= "";
 			}
-			elseif (substr($lop,0,8) == "LOP#!¡!#") {
+			elseif (substr($lop,0,8) == "LOP#!¡!#" and substr($lop, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($lop,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($lop, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
@@ -2399,6 +2404,7 @@
 				$suoratoimitus_splittaus = FALSE;
 			}
 
+			$trivtyrow = array("selite" => "");
 			@include("trivityyppivalinta.inc");
 
 			$query = "	SELECT *

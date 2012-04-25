@@ -48,12 +48,11 @@
 		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";	
 	}
 
-	
 	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
-		$varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
-		$riviok++;
-		$tilausok++;
-		$saako_hyvaksya++;
+		// $varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
+		// $riviok++;
+		// $tilausok++;
+		// $saako_hyvaksya++;
 	}
 
 	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {

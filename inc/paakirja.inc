@@ -678,7 +678,7 @@
 						$keikres = pupe_query($query);
 						$keikrow2 = mysql_fetch_assoc($keikres);
 
-						echo "<td class='spec'>".t("Keikka").": $keikrow[laskunro], ".t("Pvm").": ".tv1dateconv($keikrow2["mapvm"])."</td>";
+						echo "<td class='spec'>".t("Saapuminen").": $keikrow[laskunro], ".t("Pvm").": ".tv1dateconv($keikrow2["mapvm"])."</td>";
 					}
 				}
 

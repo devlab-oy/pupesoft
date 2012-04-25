@@ -246,7 +246,7 @@ else {
 
 if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	echo "<br>";
-	echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
+	echo "<font class='message'>".t("Saapuminen")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 	echo "<font class='message'>".t("Rahdin m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
@@ -1020,7 +1020,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Keikkaan ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 
@@ -1126,11 +1126,11 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 }
 
 if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
-	echo "<br><font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
+	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	if ($mobiili_keikka != "yes") {
-		echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
+		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -1171,7 +1171,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 				and alanimi = ''";
 	$jtoikeudetres = pupe_query($query);
 
-	if (mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
+	if ((mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") or $yhtiorow["automaattinen_jt_toimitus"] == 'J')  {
 
 		$jtoikeudetrow = mysql_fetch_assoc($jtoikeudetres);
 		$mista = 'varastoon.inc';
@@ -1185,17 +1185,17 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 			}
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','S','V')) and trim($jtrivit) != "") {
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','S','V')) and trim($jtrivit) != "") {
 			$jtrivit = substr($jtrivit, 0, -1);
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T'))) {
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J'))) {
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "tosi_automaaginen", "JATKA");
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
-		if ($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) {
+		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','J','S','V'))) or $yhtiorow["automaattinen_jt_toimitus"] == 'J') {
 			jt_toimita("", "", "", "", "dummy", "TOIMITA");
 		}
 	}
@@ -1207,7 +1207,7 @@ if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kautta
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";

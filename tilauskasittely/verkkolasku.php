@@ -51,9 +51,9 @@
 			$kieli = $argv[2];
 		}
 
-		$kukarow['kuka']  = "crond";
+		$kukarow['kuka'] = "crond";
 
-		//Pupeasennuksen root
+		// Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
 
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
@@ -91,6 +91,11 @@
 			// jos komentorivin kolmas arg on "eiketjut"
 			if ($argv[3] == "eiketjut") {
 				$eiketjut = "KYLLA";
+			}
+
+			// jos komentorivin kolmas arg on "kaikki"
+			if ($argv[3] == "kaikki") {
+				$laskutakaikki = "ON";
 			}
 
 			$tee = "TARKISTA";
@@ -1953,13 +1958,10 @@
 							// Hoidetaan pyöristys sekä valuuttakäsittely
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$lasrow["kasumma"]   = $lasrow["kasumma_valuutassa"];
-								$lasrow["summa"]     = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+								$lasrow["summa"]     = $lasrow["summa_valuutassa"];
 								$lasrow["arvo"]      = $lasrow["arvo_valuutassa"];
 								$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
-							}
-							else {
-								$lasrow["summa"]    = sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);
-							}
+							}							
 
 							// Ulkomaisen ytunnuksen korjaus
 							if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
@@ -2324,11 +2326,11 @@
 								if ($rivilaskuri < $rivimaara) {
 									$tilrow_seuraava = mysql_fetch_assoc($tilres);
 									mysql_data_seek($tilres, $rivilaskuri);
-									
+
 									if ($tilrow_seuraava['tuoteno'] == $yhtiorow["kuljetusvakuutus_tuotenumero"] or $tilrow_seuraava['tuoteno'] == $yhtiorow["laskutuslisa_tuotenumero"]) {
 										$tilrow['seuraava_otunnus'] = 0;
 									}
-									else {									
+									else {
 										$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
 									}
 								}

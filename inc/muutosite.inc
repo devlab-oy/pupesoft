@@ -715,12 +715,12 @@
 		$keikres = pupe_query($query);
 
 		if (!(($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'])) {
-			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty keikkaan")."</font><br>";
+			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty saapumiseen")."</font><br>";
 
 			if (mysql_num_rows($keikres) > 0) {
 				$keikrow = mysql_fetch_assoc($keikres);
 
-				echo "<font class='message'>".t("Keikka").": $keikrow[nimi] / $keikrow[laskunro]</font><br>";
+				echo "<font class='message'>".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font><br>";
 			}
 
 			$tee = 'E';

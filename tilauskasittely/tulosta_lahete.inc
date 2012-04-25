@@ -326,7 +326,14 @@ if (!function_exists('alku_lahete')) {
 
 			if ($extranet_tilausvahvistus != 1) {
 				//etsit‰‰n lˆytyykˆ rahtisopimusta
-				$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				
+				// K‰ytet‰‰n LƒHETTƒJƒN rahtisopimusta, etsit‰‰n meid‰n oma rahtisopparinumero
+				if ($laskurow["kohdistettu"] == "K") {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+				}
+				else {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				}
 
 				$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
 				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
@@ -1272,6 +1279,12 @@ if (!function_exists('rivi_lahete')) {
 				elseif ($row["var"] == 'P') { // puute
 					$row['varattu'] = t("PUUTE", $kieli);
 					$row['varattu_viivakoodi'] = 0;
+				}
+				elseif ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+					// Jos l‰hetett‰ tulostetaan ker‰yslistan kanssa yht‰aikaa, niin silloin pistet‰‰n aina toimitettu sarakkeeseen tilattum‰‰r‰
+					$row["varattu"] = $row["tilkpl"];
+					$row["kpl"] 	= "";
+					$row['varattu_viivakoodi'] = 0;					
 				}
 				else {
 					$row["varattu"] = "";

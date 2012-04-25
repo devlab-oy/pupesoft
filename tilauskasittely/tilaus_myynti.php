@@ -2703,29 +2703,29 @@ if ($tee == '') {
 			echo "<optgroup label='".t("Perusta uusi")."'>";
 
 			if ($toim == "TARJOUS" and $laskurow["alatila"] != "B") {
-				echo "<option value='TARJOUS'>".T("Tarjouksen versio")."</option>";
+				echo "<option value='TARJOUS'>".t("Tarjouksen versio")."</option>";
 			}
 			else {
 
 				if ($yhtiorow["tilauksen_kohteet"] == "K") {
 					if ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-						echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
+						echo "<option value='VALMISTAVARASTOON'>".t("Valmistus")."</option>";
 					}
 					else {
-						echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
-						echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
-						echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
-						echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
+						echo "<option value='RIVISYOTTO'>".t("Toimitus")."</option>";
+						echo "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+						echo "<option value='REKLAMAATIO'>".t("Reklamaatio")."</option>";
+						echo "<option value='SIIRTOLISTA'>".t("Siirtolista")."</option>";
 					}
 				}
 				elseif ($laskurow["tilaustyyppi"] == "E") {
-					echo "<option value='ENNAKKO'>".T("Ennakkotilaus")."</option>";
+					echo "<option value='ENNAKKO'>".t("Ennakkotilaus")."</option>";
 				}
 				elseif ($toim == "PIKATILAUS") {
-					echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
+					echo "<option value='PIKATILAUS'>".t("Toimitus")."</option>";
 				}
 				else {
-					echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
+					echo "<option value='RIVISYOTTO'>".t("Toimitus")."</option>";
 				}
 			}
 
@@ -2766,7 +2766,7 @@ if ($tee == '') {
 			$extralisa = "";
 
 			if ($kukarow["extranet"] != "") {
-				$extralisa .= " and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
+				$extralisa .= " and (avainsana.selite like '%S%' or avainsana.selite like '%O%') ";
 
 				if ($kukarow['hinnat'] == 1) {
 					$extralisa .= " and avainsana.selite not like '1%' ";
@@ -3065,6 +3065,9 @@ if ($tee == '') {
 	$numres = pupe_query($query);
 
 	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
+
+		js_popup();
+
 		$sytunnus 	 	 = $laskurow['ytunnus'];
 		$sliitostunnus	 = $laskurow['liitostunnus'];
 		$eiliittymaa 	 = "ON";
@@ -5663,8 +5666,11 @@ if ($tee == '') {
 					if ($row["var"] == "B") {
 						echo t("Palautettu");
 					}
-					else {
+					elseif ($row["var"] == "A") {
 						echo t("Laskutettu");
+					}
+					else {
+						echo ($row["varattu"] + $row["jt"]);
 					}
 
 					echo "</td>";

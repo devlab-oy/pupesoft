@@ -41,6 +41,9 @@ if (!function_exists('finvoice_otsik')) {
 			$tulostuspalvelu	= "EKIRJE";
 				break;
 			case '003723327487':
+			$tulostuspalvelu	= "TULOSTUS";
+				break;
+			case '003721291126':
 			$tulostuspalvelu	= "TULOSTUSPALVELU";
 				break;
 			default:
@@ -68,6 +71,10 @@ if (!function_exists('finvoice_otsik')) {
 
 			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
 				$receiverintermediator = "003723327487";
+			}
+			
+			if ($yhtiorow["verkkolasku_lah"] == "maventa" and $receiverintermediator == "") {
+				$receiverintermediator = "003721291126";
 			}
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen

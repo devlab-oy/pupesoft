@@ -56,6 +56,7 @@
 	if (!isset($korkeus)) $korkeus = 0;
 	if (!isset($paino)) $paino = 0;
 	if (!isset($suuntalavan_tunnus)) $suuntalavan_tunnus = '';
+	if (!isset($usea_keraysvyohyke)) $usea_keraysvyohyke = '';
 
 	if ($tee == 'peruutettu') {
 		$query = "	UPDATE suuntalavat SET
@@ -86,7 +87,7 @@
 		$sscc_chk_res = mysql_query($query) or pupe_error($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-		if ($sscc_chk_row['sscc'] == 0) {
+		if ($sscc_chk_row['sscc'] == "") {
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {
@@ -136,24 +137,6 @@
 		$tee = '';
 
 		$error = " <img src='../pics/lullacons/stop.png' title='".t("Virhe")."' alt='".t("Virhe")."' />";
-
-		if ((trim($alkuhyllyalue) != '' or trim($alkuhyllynro) != '' or trim($alkuhyllyvali) != '' or trim($alkuhyllytaso) != '') and (trim($alkuhyllyalue) == '' or trim($alkuhyllynro) == '' or trim($alkuhyllyvali) == '' or trim($alkuhyllytaso) == '')) {
-			if (trim($alkuhyllyalue) == '') $virheviesti['alkuhyllyalue'] = $error;
-			// if (trim($alkuhyllynro) == '') $virheviesti['alkuhyllynro'] = $error;
-			// if (trim($alkuhyllyvali) == '') $virheviesti['alkuhyllyvali'] = $error;
-			// if (trim($alkuhyllytaso) == '') $virheviesti['alkuhyllytaso'] = $error;
-
-			$tee = 'uusi';
-		}
-
-		if ((trim($loppuhyllyalue) != '' or trim($loppuhyllynro) != '' or trim($loppuhyllyvali) != '' or trim($loppuhyllytaso) != '') and (trim($loppuhyllyalue) == '' or trim($loppuhyllynro) == '' or trim($loppuhyllyvali) == '' or trim($loppuhyllytaso) == '')) {
-			if (trim($loppuhyllyalue) == '') $virheviesti['loppuhyllyalue'] = $error;
-			// if (trim($loppuhyllynro) == '') $virheviesti['loppuhyllynro'] = $error;
-			// if (trim($loppuhyllyvali) == '') $virheviesti['loppuhyllyvali'] = $error;
-			// if (trim($loppuhyllytaso) == '') $virheviesti['loppuhyllytaso'] = $error;
-
-			$tee = 'uusi';
-		}
 
 		if (trim($sscc) == '') {
 			$virheviesti['sscc'] = $error;
@@ -278,6 +261,7 @@
 							loppuhyllytaso = '{$loppuhyllytaso}',
 							tyyppi = '{$tyyppi}',
 							keraysvyohyke = '{$keraysvyohyke}',
+							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
 							kaytettavyys = '{$kaytettavyys}',
 							terminaalialue = '{$terminaalialue}',
 							korkeus = '{$korkeus}',
@@ -597,7 +581,7 @@
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 			echo "<input type='hidden' name='suuntalavan_tunnus' value='' />";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 		}
 	}
@@ -605,7 +589,7 @@
 	if ($tee == '') {
 
 		echo "<table>";
-		echo "<tr><th>",t("Keikka"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
+		echo "<tr><th>",t("Saapuminen"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
 		echo "</table>";
 
 		echo "<br />";
@@ -784,7 +768,7 @@
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
-			echo "<input type='submit' value='",t("Takaisin keikalle"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 
 			echo "&nbsp;<form action='?indexvas=1' method='post'>";

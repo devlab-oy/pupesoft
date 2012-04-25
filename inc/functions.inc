@@ -8590,25 +8590,33 @@ if (!function_exists("on_puhelinnumero")) {
 }
 
 if (!function_exists("hae_rahtisopimusnumero")) {
-	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus, $asiakastunnus = "") {
+	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "") {
 		global $kukarow;
 
-		//etsitään löytyykö rahtisopimusta
-		$query = "	(SELECT *, '1' prio
-					FROM rahtisopimukset
-					WHERE toimitustapa = '$toimitustapa'
-					AND asiakas = '$asiakastunnus'
-					AND asiakas != ''
-					AND yhtio = '$kukarow[yhtio]')
-					UNION
-					(SELECT *, '2' prio
-					FROM rahtisopimukset as rahtisopimukset2
-					WHERE toimitustapa = '$toimitustapa'
-					AND ytunnus = '$ytunnus'
-					AND ytunnus != ''
-					AND yhtio = '$kukarow[yhtio]')
-					ORDER BY prio
-					LIMIT 1";
+		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero 
+		if ($ytunnus == "" and $asiakastunnus == "") {
+			$query = "	SELECT sopimusnro rahtisopimus
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND selite = '{$toimitustapa}'";
+		}
+		else {
+			$query = "	(SELECT *, '1' prio
+						FROM rahtisopimukset
+						WHERE toimitustapa = '$toimitustapa'
+						AND asiakas = '$asiakastunnus'
+						AND asiakas != ''
+						AND yhtio = '{$kukarow["yhtio"]}')
+						UNION
+						(SELECT *, '2' prio
+						FROM rahtisopimukset as rahtisopimukset2
+						WHERE toimitustapa = '$toimitustapa'
+						AND ytunnus = '$ytunnus'
+						AND ytunnus != ''
+						AND yhtio = '{$kukarow["yhtio"]}')
+						ORDER BY prio
+						LIMIT 1";
+		}
 		$rares = pupe_query($query);
 		$rarow = mysql_fetch_assoc($rares);
 
@@ -11255,11 +11263,17 @@ if (!function_exists("LisaaLapsi")) {
 				ORDER BY lft desc";
 		$re = pupe_query($qu);
 
-		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
+		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
 		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
 		$re = pupe_query($qu);
+
+		// palautetaan juuri luodun rivin tiedot
+		$qu = "SELECT tunnus, nimi, koodi, lft, rgt FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '$laji' AND koodi = '$koodi' AND nimi = '$nimi'";
+		$re = pupe_query($qu);
+		$row = mysql_fetch_assoc($re);
+		return $row;
 	}
 }
 
@@ -11480,6 +11494,40 @@ if (!function_exists("SiirraTaso")) {
 
 		return $kohde;
 
+	}
+}
+
+// Tarkistaa onko dynaamisen puun syvyys oikein ja paivittaa tarvittaessa
+if (!function_exists("paivitapuunsyvyys")) {
+	function paivitapuunsyvyys($laji) {
+		global $kukarow;
+
+		$qu = "	SELECT
+				node.lft AS lft,
+				node.rgt AS rgt,
+				node.tunnus AS node_tunnus,
+				node.syvyys as node_syvyys,
+				(COUNT(node.tunnus) - 1) AS syvyys
+				FROM dynaaminen_puu AS node
+				JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+				WHERE node.yhtio = '{$kukarow["yhtio"]}'
+				AND node.laji = '{$laji}'
+				GROUP BY node.lft
+				ORDER BY node.lft";
+		$re = pupe_query($qu);
+
+		while ($row = mysql_fetch_assoc($re)) {
+
+			if ($row["node_syvyys"] != $row["syvyys"]) {
+				$updqu = "	UPDATE dynaaminen_puu
+							SET syvyys = {$row["syvyys"]}
+							WHERE yhtio	= '{$kukarow["yhtio"]}'
+							AND laji	= '{$laji}'
+							AND tunnus 	= {$row["node_tunnus"]}";
+				$updateres = pupe_query($updqu);
+			}
+		}
+		return;
 	}
 }
 
@@ -11864,12 +11912,15 @@ if (!function_exists("pupe_DataTables")) {
 
 							var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
 
+							var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+
 							$.post('{$_SERVER['SCRIPT_NAME']}',
 								{ 	keikan_otunnus: otunnus,
 									otunnus: otunnus,
 									ajax_toiminto: 'kohdista_rivi',
 									valittu: this.value,
 									suuntalavan_tunnus: suuntalavan_tunnus,
+									suoratoimitusrivi: suoratoimitusrivi,
 									no_head: 'yes',
 									ohje: 'off' },
 								function(return_value) {
@@ -11878,7 +11929,14 @@ if (!function_exists("pupe_DataTables")) {
 									var data = jQuery.parseJSON(return_value);
 
 									if (data.suuntalava != null && data.suuntalava > 0) {
-										$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+
+										if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
+											$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+										}
+										else {
+											$('#suuntalava_'+rivi_ja_otsikko[0]+' option:last').after('<option id=\"option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
+										}
+
 									}
 
 									var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
@@ -12273,19 +12331,28 @@ if (!function_exists("pupe_DataTables")) {
 							if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
 								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
 
+								var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,
 										otunnus: otunnus,
 										ajax_toiminto: 'kohdista_rivi',
 										valittu: this.value,
 										suuntalavan_tunnus: suuntalavan_tunnus,
+										suoratoimitusrivi: suoratoimitusrivi,
 										no_head: 'yes',
 										ohje: 'off' },
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 
 										if (data.suuntalava != null && data.suuntalava > 0) {
-											$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+
+											if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
+												$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
+											}
+											else {
+												$('#suuntalava_'+rivi_ja_otsikko[0]+' option:last').after('<option id=\"option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
+											}
 										}
 
 										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());

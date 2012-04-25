@@ -531,7 +531,7 @@ if ($tee == 'I') {
 	}
 
 	if ($luouusikeikka == "LUO" and $vienti != "C" and $vienti != "J" and $vienti != "F" and $vienti != "K" and $vienti != "I" and $vienti != "L") {
-		$errormsg .= "<font class='error'>".t("Keikkaa ei voi perustaa kululaskulle")."</font><br>";
+		$errormsg .= "<font class='error'>".t("Saapumista ei voi perustaa kululaskulle")."</font><br>";
 		$tee = 'E';
 	}
 
@@ -1335,7 +1335,7 @@ if ($tee == 'P' or $tee == 'E') {
 	}
 
 	echo "<hr><table>";
-	echo "<tr><td>".t("Luo uusi keikka laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke tabindex='-1'></td>";
+	echo "<tr><td>".t("Luo uusi saapuminen laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke tabindex='-1'></td>";
 	echo "<td>".t("Kopio lasku")."</td><td><input type='input' name='kopioi' value='$kopioi' size='3' maxlength='2' tabindex='-1'></td><td>".t("kertaa")."</td></tr>";
 	echo "</table>";
 	echo "</td>";

@@ -227,6 +227,7 @@
 
 			$ftpfile = $unlink_filename = $filename;
 
+			/*
 			if (file_exists("ftp-send.inc")) {
 				require("ftp-send.inc");
 			}
@@ -236,8 +237,9 @@
 			else {
 				require("inc/ftp-send.inc");
 			}
+			*/
 
-			// unlink($unlink_filename);
+			$palautus = 0;
 
 			return $palautus;
 		}

@@ -202,8 +202,12 @@ if (!function_exists('alku_lahete')) {
 				}
 				else {
 					$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli), 				$thispage, $pieni);
-					$pdf->draw_text(310, 782, $laskurow["tunnusnippu"]."/".$laskurow["tunnus"],	$thispage, $boldi);
+					$pdf->draw_text(310, 782, $laskurow["tunnusnippu"]." / ".$laskurow["tunnus"],	$thispage, $boldi);
 				}
+			}
+			elseif ($laskurow["vanhatunnus"] > 0 and $laskurow["vanhatunnus"] != $laskurow["tunnus"]) {
+				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli), 				$thispage, $pieni);
+				$pdf->draw_text(310, 782, $laskurow["vanhatunnus"]." / ".$laskurow["tunnus"],	$thispage, $boldi);
 			}
 			else {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
@@ -326,7 +330,7 @@ if (!function_exists('alku_lahete')) {
 
 			if ($extranet_tilausvahvistus != 1) {
 				//etsit‰‰n lˆytyykˆ rahtisopimusta
-				
+
 				// K‰ytet‰‰n LƒHETTƒJƒN rahtisopimusta, etsit‰‰n meid‰n oma rahtisopparinumero
 				if ($laskurow["kohdistettu"] == "K") {
 					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
@@ -678,10 +682,10 @@ if (!function_exists('uusi_sivu_lahete')) {
 			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli), 							$thispage, $pieni);
 			$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
-		
+
 			$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));						
+			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 		}
 
 		$kala = 715;
@@ -1286,7 +1290,7 @@ if (!function_exists('rivi_lahete')) {
 					// Jos l‰hetett‰ tulostetaan ker‰yslistan kanssa yht‰aikaa, niin silloin pistet‰‰n aina toimitettu sarakkeeseen tilattum‰‰r‰
 					$row["varattu"] = $row["tilkpl"];
 					$row["kpl"] 	= "";
-					$row['varattu_viivakoodi'] = 0;					
+					$row['varattu_viivakoodi'] = 0;
 				}
 				else {
 					$row["varattu"] = "";
@@ -3138,14 +3142,30 @@ if (!function_exists('print_pdf_lahete')) {
 					elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 						echo t("Yll‰pitosopimus tulostuu")."...<br>";
 
-						$kutsu = t("Yll‰pitosopimus %s", $kieli, $laskurow["tilaus"]);
+						$kutsu = t("Yll‰pitosopimus %s", $kieli, $laskurow["tunnus"]);
 					}
 					else {
 						if (!isset($ei_echoa) or trim($ei_echoa) == '') {
 							echo t("L‰hete tulostuu")."...<br>";
 						}
 
-						$kutsu = t("L‰hete %s", $kieli, $laskurow["tilaus"]);
+						$kutsu = t("L‰hete %s", $kieli, $laskurow["tunnus"]);
+
+						if ($laskurow["tunnusnippu"] > 0) {
+							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= $laskurow["tunnusnippu"]." / ".$laskurow["tunnus"].".\n\n";
+						}
+						elseif ($laskurow["vanhatunnus"] > 0 and $laskurow["vanhatunnus"] != $laskurow["tunnus"]) {
+							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= $laskurow["vanhatunnus"]." / ".$laskurow["tunnus"].".\n\n";
+						}
+						else {
+							$content_body .= t("Tilausnumero", $kieli).": ";
+							$content_body .= $laskurow["tunnus"].".\n\n";
+						}
+
+						$content_body .= t("Yst‰v‰llisin terveisin", $kieli).",\n";
+						$content_body .= $yhtiorow["nimi"]."\n";
 					}
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {

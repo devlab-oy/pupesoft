@@ -2858,7 +2858,7 @@
 							echo "<tr><td colspan='{$colspanni}'>";
 
 							while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-								echo chr((64+$keraysera_row['pakkausnro']))," <input type='text' name='keraysera_maara[{$keraysera_row['tunnus']}]' id='{$row['tunnus']}_{$keraysera_row['tunnus']}' value='{$keraysera_row['kpl']}' size='4' />&nbsp;";
+								echo chr((64+$keraysera_row['pakkausnro']))," <input type='text' name='keraysera_maara[{$keraysera_row['tunnus']}]' id='{$row['tunnus']}_{$keraysera_row['tunnus']}' value='".(float) $keraysera_row['kpl']."' size='4' />&nbsp;";
 							}
 
 							echo "</td></tr>";

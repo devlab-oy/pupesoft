@@ -671,6 +671,8 @@
 
 						$fieldname = mysql_field_name($tilausrivires,$ii);
 
+						if ($fieldname == 'tunnus') continue;
+
 						$fields .= ", ".$fieldname;
 
 						switch ($fieldname) {
@@ -968,6 +970,8 @@
 
 							$fieldname = mysql_field_name($tilausrivires,$ii);
 
+							if ($fieldname == 'tunnus') continue;
+
 							$fields .= ", ".$fieldname;
 
 							switch ($fieldname) {
@@ -1193,6 +1197,8 @@
 						for ($ii = 1; $ii < mysql_num_fields($split_result) - 1; $ii++) {
 
 							$fieldname = mysql_field_name($split_result,$ii);
+
+							if ($fieldname == 'tunnus') continue;
 
 							$fields .= ", ".$fieldname;
 

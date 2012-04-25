@@ -1548,20 +1548,12 @@
 					pupe_query($update);
 				}
 
-				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
-					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
-				}
-				else {
-					$kululisa = "";
-				}
-
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikan_tunnus}',
-							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
@@ -1627,20 +1619,12 @@
 					pupe_query($update);
 				}
 
-				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
-					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
-				}
-				else {
-					$kululisa = "";
-				}
-
 				$update = "	UPDATE tilausrivi SET 
 							hinta = '{$pointteri['hinta']}', 
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
-							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);
@@ -1696,20 +1680,12 @@
 					pupe_query($update);
 				}
 
-				if (isset($pointteri['kulu']) and trim($pointteri['kulu']) != 0) {
-					$kululisa = ", kate = {$pointteri['kulu']} / {$pointteri['kpl']}";
-				}
-				else {
-					$kululisa = "";
-				}
-
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}', 
 							ale1 = '{$pointteri['ale1']}',
 							ale2 = '{$pointteri['ale2']}',
 							ale3 = '{$pointteri['ale3']}',
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
-							{$kululisa}
 							WHERE yhtio = '{$kukarow['yhtio']}' 
 							AND tunnus = '{$pointteri['tunnus']}'";
 				pupe_query($update);

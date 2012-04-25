@@ -289,6 +289,7 @@
 							else {
 								$rtuoteno[$i]['ale1'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
 							}
+							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') ale1: {$rtuoteno[$i]['ale1']}<br><br>";
 						}
 						elseif (!isset($rtuoteno[$i]['ale2'])) {
 							if (isset($tuotetieto->AllowOrCharge->Percent)) {
@@ -297,6 +298,7 @@
 							else {
 								$rtuoteno[$i]['ale2'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['rivihinta'] * 100, 2);
 							}
+							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') ale2: {$rtuoteno[$i]['ale2']}<br><br>";
 						}
 						else {
 
@@ -320,6 +322,7 @@
 									$rtuoteno[$i]['ale3'] = round($tuotetieto->AllowOrCharge->Amount / $rtuoteno[$i]['hinta'] * 100, 2);
 								}
 							}
+							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') ale3: {$rtuoteno[$i]['ale3']}<br><br>";
 						}
 					}
 					elseif (strtolower($attribute) == "charge") {

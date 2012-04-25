@@ -45,6 +45,69 @@
 
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table></form><br><br>";
 
+
+	echo "<table><form method='post' action=''>";
+	echo "<input type='hidden' name='tee' value='rahtisopparitilanne'>";
+	echo "<td class='back'><input type='submit' value='".t("Näytä asiakkaat/toimitustavat joilta puuttuu rahtisopimus")."'></td></tr></table></form><br><br>";
+
+
+	if ($tee == "rahtisopparitilanne") {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and laji not in ('P','R')
+					order by toimitustapa";
+		$asiakas_res = pupe_query($query);
+
+		echo "<table>";
+
+		echo "<tr>";
+		echo "<th>asiakasnro</th>";
+		echo "<th>ytunnus</th>";
+		echo "<th>nimi</th>";
+		echo "<th>toimitustapa</th>";
+		echo "<th>unifaun koodi</th>";
+		echo "<th>rahdinkuljettaja</th>";
+		echo "<th>kumman soppari</th>";
+		echo "<th>rahtisopimus</th>";
+		echo "<th>rahtikirjatyyppi</th>";
+		echo "</tr>";
+
+		while ($asiakasrow = mysql_fetch_assoc($asiakas_res)) {
+
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and selite  = '{$asiakasrow['toimitustapa']}'";
+			$toimtapa_res = pupe_query($query);
+			$toimtaparow = mysql_fetch_assoc($toimtapa_res);
+
+			if ($toimtaparow["nouto"] == "" and $toimtaparow["rahtikirja"] != "rahtikirja_tyhja.inc") {
+
+				if ($toimtaparow["merahti"] == "K") $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], "", "");
+				else $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], $asiakasrow["ytunnus"], $asiakasrow["tunnus"]);
+
+				$kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "Lähettäjän";
+
+				if ($rahsoprow["rahtisopimus"] == "") {
+				 	echo "<tr>";
+					echo "<td>$asiakasrow[asiakasnro]</td>";
+					echo "<td>$asiakasrow[ytunnus]</td>";
+					echo "<td>$asiakasrow[nimi]</td>";
+					echo "<td>$asiakasrow[toimitustapa]</td>";
+					echo "<td>$toimtaparow[virallinen_selite]</td>";
+					echo "<td>$toimtaparow[rahdinkuljettaja]</td>";
+					echo "<td>$kumman</td>";
+					echo "<td>$rahsoprow[rahtisopimus]</td>";
+					echo "<td>$toimtaparow[rahtikirja]</td>";
+					echo "</tr>";
+				}
+			}
+		}
+
+		echo "</table>";
+	}
+
 	if ($tee == "nayta") {
 
 		$tilaus = mysql_real_escape_string($tilaus);

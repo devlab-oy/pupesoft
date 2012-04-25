@@ -521,7 +521,7 @@
 
 				$tilausrivi_nro = array_shift($tmp_kaytettavat_tilausrivit);
 
-				$query = "	SELECT *
+				$query = "	SELECT *, kpl+varattu AS varattu
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$tilausrivi_nro}'";
@@ -548,7 +548,7 @@
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
-									#keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									keikkarivinhinta = '{$tilausrivirow['hinta']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -564,7 +564,7 @@
 											tuote.tuoteno, tuote.try,tuote.osasto,
 											tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 											tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
-											tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+											tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
 											tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
 											FROM tilausrivi
 											JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
@@ -595,6 +595,7 @@
 											yksikko			= '{$lapsitieto['yksikko']}',
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
+											kpl 			= '{$lapsitieto['kpl']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
@@ -680,12 +681,13 @@
 					$uusires = pupe_query($kysely);
 					$tilausrivi_id = mysql_insert_id();
 
-					$splitlisa = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : "";
+					$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
+					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
-								varattu = '{$rtuoteno[$i]['kpl']}'
 								{$splitlisa}
+								{$splitlisa2}
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
@@ -707,7 +709,7 @@
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
-									#keikkarivinhinta = '{$tilausrivirow['hinta']}',
+									keikkarivinhinta = '{$tilausrivirow['hinta']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
@@ -723,7 +725,7 @@
 											tuote.tuoteno, tuote.try,tuote.osasto,
 											tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 											tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
-											tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+											tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
 											tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
 											FROM tilausrivi
 											JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
@@ -754,6 +756,7 @@
 											yksikko			= '{$lapsitieto['yksikko']}',
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
+											kpl 			= '{$lapsitieto['kpl']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
@@ -851,7 +854,7 @@
 
 						if ($kohdistamatta <= 0) break;
 
-						$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
 						echo "<pre>$query</pre>";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
@@ -922,7 +925,7 @@
 								}
 							}
 
-							$query = "SELECT varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
+							$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$kokeiltiin['tunnus']}'";
 							echo "<pre>$query</pre>";
 							$kpl_chk_res = pupe_query($query);
 							$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
@@ -1018,7 +1021,7 @@
 												tuote.tuoteno, tuote.try,tuote.osasto,
 												tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 												tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
-												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
 												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
 												FROM tilausrivi
 												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
@@ -1049,6 +1052,7 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
 												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
@@ -1103,7 +1107,7 @@
 												tuote.tuoteno, tuote.try,tuote.osasto,
 												tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 												tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
-												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
 												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
 												FROM tilausrivi
 												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
@@ -1134,6 +1138,7 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
 												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
@@ -1206,12 +1211,13 @@
 						$uusires = pupe_query($kysely);
 						$tilausrivi_id = mysql_insert_id();
 
-						$splitlisa = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : "";
+						$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
+						$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
 
 						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 						$query = "	UPDATE tilausrivi SET
-									varattu = '{$erotus}',
 									{$splitlisa}
+									{$splitlisa2}
 									kommentti = concat(kommentti,' Ennen splittausta {$split_row['tilkpl']} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
@@ -1252,7 +1258,7 @@
 												tuote.tuoteno, tuote.try,tuote.osasto,
 												tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 												tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
-												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
+												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
 												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
 												FROM tilausrivi
 												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
@@ -1283,6 +1289,7 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
 												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',

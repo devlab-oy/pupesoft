@@ -287,7 +287,7 @@
 								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
 							}
 							else {
-								$rtuoteno[$i]['ale1'] = round((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100, 2);
+								$rtuoteno[$i]['ale1'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
 							}
 							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') rivihinta: {$rtuoteno[$i]['rivihinta']} ale1: {$rtuoteno[$i]['ale1']} Amount: {$tuotetieto->AllowOrCharge->Amount}<br><br>";
 						}
@@ -296,7 +296,7 @@
 								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
 							}
 							else {
-								$rtuoteno[$i]['ale2'] = round((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100, 2);
+								$rtuoteno[$i]['ale2'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
 							}
 							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') rivihinta: {$rtuoteno[$i]['rivihinta']} ale2: {$rtuoteno[$i]['ale2']} Amount: {$tuotetieto->AllowOrCharge->Amount}<br><br>";
 						}
@@ -307,7 +307,7 @@
 							if (isset($tuotetieto->AllowOrCharge->Percent)) {
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
-									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Percent) / 100) * 100, 2);
+									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Percent) / 100) * 100;
 								}
 								else {
 									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
@@ -316,10 +316,10 @@
 							else {
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
-									$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100) * 100, 2);
+									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100) * 100;
 								}
 								else {
-									$rtuoteno[$i]['ale3'] = round((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['hinta'] * 100, 2);
+									$rtuoteno[$i]['ale3'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['hinta'] * 100;
 								}
 							}
 							echo "tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}') rivihinta: {$rtuoteno[$i]['rivihinta']} ale3: {$rtuoteno[$i]['ale3']} Amount: {$tuotetieto->AllowOrCharge->Amount}<br><br>";

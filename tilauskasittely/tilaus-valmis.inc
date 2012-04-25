@@ -849,6 +849,7 @@ else {
 			// jos on, niin splitataan ne tilausrivit, joille ollaan valittu "omalle_tilaukselle" tilausriviä syötettäessä
 			// splittaus tapahtuu niin, että jokaiselle tilausriville jää yksi kappale
 			// eli jos "omalle_tilausriville"-tilausrivin kpl = 5, niin tehdään 4 uutta riviä ja jokaisella viidellä tilausrivillä on 1 kpl
+			// Otetaan mukaan myös varattu = 1 rivit niin saadaan omalle_tilaukselle-täppä kuntoon myös mahdolliselle tuoteperheelle.
 			if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '') {
 
 				$query = "	SELECT tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.*
@@ -857,7 +858,7 @@ else {
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 							AND tilausrivi.tyyppi != 'D'
-							AND tilausrivi.varattu > 1
+							AND tilausrivi.varattu >= 1
 							AND tilausrivi.var NOT IN ('J','P')
 							AND (tilausrivi.perheid = 0 OR tilausrivi.perheid=tilausrivi.tunnus)
 							ORDER BY tilausrivi.tunnus";
@@ -1219,8 +1220,12 @@ else {
 								$values .= ", '$toimitustavan_lahto'";
 								break;
 							case 'ohjausmerkki':
-								if ($row['omalle_tilaukselle'] > 0) {
+								if ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) != "") {
 									$values .= ", '{$ohjausmerkki_nro}-{$laskurow['ohjausmerkki']}'";
+									$ohjausmerkki_nro++;
+								}
+								elseif ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) == "") {
+									$values .= ", '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}'";
 									$ohjausmerkki_nro++;
 								}
 								else {
@@ -1367,6 +1372,13 @@ else {
 				$toimitustavan_lahto = 0;
 			}
 
+			$ohjausmerkkilisa = "";
+
+			// Jos sarjatilaus ja ohjausmerkki puuttuu
+			if ($omalle_tilaukselle > 0 AND trim($laskurow['ohjausmerkki']) == "") {
+				$ohjausmerkkilisa = " , ohjausmerkki = '{$ohjausmerkki_nro}-{$laskurow['vanhatunnus']}' ";
+			}
+
 			//päivitetään laskulle tieto mihin varastoon se kuuluu
 			$query = "	UPDATE lasku set
 						varasto 							= '$varasto',
@@ -1388,7 +1400,8 @@ else {
 						sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
 						sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
 						vahennettava_era 					= '$laskurow[vahennettava_era]'
-						$toimitustapalisa
+						{$ohjausmerkkilisa}
+						{$toimitustapalisa}
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$temp_laskutunnus'";
 			$varresult = pupe_query($query);

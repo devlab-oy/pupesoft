@@ -259,7 +259,8 @@
 					}
 				}
 
-				if (in_array($laskuttajan_toimittajanumero, array("123007","123442","123001"))) {
+				// in_array($laskuttajan_toimittajanumero, array("123007","123442","123001"))
+				if (isset($tuotetieto->TotalValue->Amount)) {
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount); // summa
 				}
 				else {

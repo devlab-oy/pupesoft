@@ -1215,12 +1215,17 @@
 					echo "<td>",t("Rivi on kohdistettu"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
-				elseif ($row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+				elseif ($valitse == 'asn' and $row['uusiotunnus'] != '' and $row['kpl'] != 0) {
 					echo "<td>",t("Viety varastoon"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
 				else {
-					echo "<td>&nbsp;</td>";
+					if ($row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+						echo "<td>",t("Viety varastoon"),"</td>";
+					}
+					else {
+						echo "<td>&nbsp;</td>";
+					}
 					echo "<td align='center'>";
 					echo "<input type='checkbox' name='tunnukset[]' class='tunnukset' value='{$row['tunnus']}' />";
 					echo "<input type='hidden' name='ostotilauksella_kpl[{$row['tunnus']}]' value='{$row['varattu']}' />";

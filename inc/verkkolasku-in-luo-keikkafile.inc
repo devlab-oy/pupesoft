@@ -496,7 +496,7 @@
 							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$chk_res2 = pupe_query($query);
 
-							if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res) == 0) {
+							if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
 								echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 							}

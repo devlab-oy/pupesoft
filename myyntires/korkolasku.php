@@ -59,7 +59,7 @@ if ($tee == "ALOITAKOROTUS") {
 
 	$minimisumma = (float) $minimisumma;
 
-	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
+	$query = "	SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
 				FROM yhtio
 				WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = pupe_query($query);

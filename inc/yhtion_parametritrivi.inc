@@ -3137,9 +3137,9 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Myynti‰ ei estet‰ jos luottoraja on ylitetty")."</option>";
-		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n jos luottoraja on ylitetty")."</option>";
-		$ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti esetet‰‰n jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = ''>".t("Myynti‰ ei estet‰, vaikka luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Kaikki myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
+		$ulos .= "<option value = 'E' {$sel["E"]}>".t("Muu kuin myyjien tekem‰ myynti estet‰‰n, jos luottoraja on ylitetty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -46,9 +46,10 @@
 		$laskuttajan_toimittajanumero = "123442";
 	}
 
-	$laskuttajan_vat				= "";
-	$laskun_pankkiviite 			= "";
-	$laskun_asiakastunnus			= "";
+	$laskuttajan_vat		= "";
+	$laskun_pankkiviite 	= "";
+	$laskun_asiakastunnus	= "";
+	$laskun_pakkauskulu		= 0;
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
@@ -58,6 +59,10 @@
 	}
 	else {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceGrossValue->Amount);
+	}
+
+	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount) and $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount != 0) {
+		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
 	}
 
 	if (isset($xml->InvoiceHeader->OrderRef)) {

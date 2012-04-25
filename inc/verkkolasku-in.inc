@@ -1394,6 +1394,7 @@
 											hinta = '{$rtuoteno[$i]['hinta']}',
 											lisakulu = '{$rtuoteno[$i]['lisakulu']}',
 											kulu = '{$rtuoteno[$i]['kulu']}',
+											pakkauskulu = '{$laskun_pakkauskulu}',
 											ale1 = '{$rtuoteno[$i]['ale1']}',
 											ale2 = '{$rtuoteno[$i]['ale2']}',
 											ale3 = '{$rtuoteno[$i]['ale3']}',

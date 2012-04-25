@@ -1152,9 +1152,27 @@
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuoteno like '".mysql_real_escape_string($tuoteno_valeilla)."' or tuoteno like '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 			$kpllisa = trim($kpl) != '' ? " and varattu = ".(float) $kpl : '';
 
+			if ($tuotenolisa != "") {
+				$query = "	SELECT status, tuoteno
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND status = 'P'
+							{$tuotenolisa}";
+				$status_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($status_chk_res) > 0) {
+
+					while ($status_chk_row = mysql_fetch_assoc($status_chk_res)) {
+						echo "<tr>";
+						echo "<td colspan='7'>",t("Tuote on poistunut"),"! ({$status_chk_row['tuoteno']})</td>";
+						echo "</tr>";
+					}
+				}
+			}
+
 			$query = "	SELECT tilausrivi.*, if(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.kpl = 0 {$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus {$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('O', 'K')

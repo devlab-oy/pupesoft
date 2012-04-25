@@ -174,7 +174,8 @@
 						JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.otunnus = '{$rtuoteno[$i]['ostotilausnro']}' AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
+						AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}' 
+						AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus != 0
 						ORDER BY laadittu ASC";
 			$kokeillaan = pupe_query($query);

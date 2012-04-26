@@ -89,7 +89,23 @@
 
 				$kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "Lähettäjän";
 
-				if ($rahsoprow["rahtisopimus"] == "") {
+				$pitvirh = FALSE;
+
+				if (strlen($rahsoprow['rahtisopimus']) > 0) {
+					if (($toimtaparow['virallinen_selite'] == "KKSTD" or
+						$toimtaparow['virallinen_selite'] == "IT09" or
+						$toimtaparow['virallinen_selite'] == "IT14") and strlen($rahsoprow['rahtisopimus']) < 6) {
+						$pitvirh = TRUE;
+					}
+					elseif ($toimtaparow['virallinen_selite'] == "KLGRP" and strlen($rahsoprow['rahtisopimus']) < 4) {
+						$pitvirh = TRUE;
+					}
+					elseif ($toimtaparow['virallinen_selite'] == "MH10" and strlen($rahsoprow['rahtisopimus']) < 8) {
+						$pitvirh = TRUE;
+					}
+				}
+
+				if ($rahsoprow["rahtisopimus"] == "" or $pitvirh) {
 				 	echo "<tr>";
 					echo "<td>$asiakasrow[asiakasnro]</td>";
 					echo "<td>$asiakasrow[ytunnus]</td>";
@@ -98,7 +114,9 @@
 					echo "<td>$toimtaparow[virallinen_selite]</td>";
 					echo "<td>$toimtaparow[rahdinkuljettaja]</td>";
 					echo "<td>$kumman</td>";
-					echo "<td>$rahsoprow[rahtisopimus]</td>";
+					echo "<td>$rahsoprow[rahtisopimus]";
+					if ($pitvirh) echo "<br><font class='error'>Liian lyhyt sopimusnro</font>";
+					echo "</td>";
 					echo "<td>$toimtaparow[rahtikirja]</td>";
 					echo "</tr>";
 				}

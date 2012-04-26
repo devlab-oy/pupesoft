@@ -590,7 +590,7 @@
 									ale3 = '{$tilausrivirow['ale3']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
+									AND tunnus = '{$rtuoteno[$i]['insert_id']}'
 									AND laji = 'tec'";
 					pupe_query($update_asn);
 
@@ -756,7 +756,7 @@
 									ale3 = '{$tilausrivirow['ale3']}',
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$rtuoteno[$i]['insert_id']}' ## v‰‰r‰ tilausnumero, nyt menee toimittajan laskun numero eik‰ pupen ostonumero !! KORJAA !!!
+									AND tunnus = '{$rtuoteno[$i]['insert_id']}'
 									AND laji = 'tec'";
 					$foo = pupe_query($update_asn);
 

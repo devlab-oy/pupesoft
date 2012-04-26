@@ -637,7 +637,7 @@
 
 				for ($i=1; $i<mysql_num_fields($result)-8; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<td valign='top' $class>".tv1dateconv($row[$i])."</td>";
+						echo "<td valign='top' $class>{$row[$i]}</td>";
 					}
 					elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
 						echo "<td valign='top' nowrap align='right' $class>";

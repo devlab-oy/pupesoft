@@ -1464,7 +1464,9 @@
 							$vienti_upd_res = pupe_query($query);
 						}
 
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						if ($laskun_tyyppi != "TECCOM-INVOICE" or !$onko_duplikaatti) {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
 					}
 				}
 

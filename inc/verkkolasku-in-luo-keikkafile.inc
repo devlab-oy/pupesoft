@@ -1618,10 +1618,16 @@
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+				if ($hinta_chk_row['perheid'] != 0) {
+
+					$lapsen_lisakululisa = "";
+
+					if (isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
+					}
 
 					$update = "	UPDATE tilausrivi SET 
-								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
+								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
@@ -1697,10 +1703,16 @@
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+				if ($hinta_chk_row['perheid'] != 0) {
+
+					$lapsen_lisakululisa = "";
+
+					if (isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
+					}
 
 					$update = "	UPDATE tilausrivi SET 
-								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
+								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
@@ -1766,10 +1778,16 @@
 								AND laji = 'tec'";
 				pupe_query($update_asn);
 
-				if ($hinta_chk_row['perheid'] != 0 and isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+				if ($hinta_chk_row['perheid'] != 0) {
+
+					$lapsen_lisakululisa = "";
+
+					if (isset($pointteri["lisakulu"]) and trim($pointteri["lisakulu"]) != 0) {
+						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
+					}
 
 					$update = "	UPDATE tilausrivi SET 
-								hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, 
+								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,

@@ -245,7 +245,7 @@ if (!isset($tee) or $tee == '') {
 			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
 			echo "<td>{$tyorow["tyostatus"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
-			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
+			echo "<td>{$tyorow["toimaika"]}</td>";
 			echo "</tr>";
 		}
 		echo "</tbody>";

@@ -1803,10 +1803,6 @@
 				pupe_query($update);							
 			}
 
-			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";
-			$laskures = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($laskures);
-
 			$tee_kululaskut = "liita";
  			$silent = "SILENT";
  			$keikanalatila = "";

@@ -35,12 +35,14 @@
 	if ($virhelaji == "laskeiker") 					$sel2 = "SELECTED";
 	if ($virhelaji == "nollarivit") 				$sel3 = "SELECTED";
 	if ($virhelaji == "lahtosuljettueilaskutettu") 	$sel4 = "SELECTED";
+	if ($virhelaji == "lahtosuljettueikeratty") 	$sel5 = "SELECTED";
 
 	echo "<option value='' >Valitse</option>";
 	#echo "<option value='rahtiveloitus' $sel1>Väärä rahtimaksu</option>";
 	echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei kerätty</option>";
 	echo "<option value='nollarivit' $sel3>Kerättävä määrä nolla</option>";
 	echo "<option value='lahtosuljettueilaskutettu' $sel4>Laskuttamaton tilaus suljetussa lähdössä (ei päivärajausta)</option>";
+	echo "<option value='lahtosuljettueikeratty' $sel5>Keräämätön tilaus suljetussa lähdössä (ei päivärajausta)</option>";
 	echo "</select></td>";
 
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table></form><br><br>";
@@ -168,6 +170,29 @@
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('N','L')
 						AND lasku.alatila not in ('D','X')
+						AND lasku.luontiaika > '2012-04-01 00:00:00'";
+			$lasku_res = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($lasku_res);
+
+			if ($laskurow["tunnukset"] != "") {
+				$laskulisa 	= " and tunnus in ({$laskurow['tunnukset']}) and tila in ('L','N') ";
+
+				$virhelaji  = "NAYTAKAIKKI";
+				$pvmlisa 	= "";
+				$lasku 		= "";
+			}
+			else {
+				$laskulisa 	= " and tunnus = 0 ";
+			}
+		}
+
+		if ($virhelaji == "lahtosuljettueikeratty") {
+			$query = "	SELECT group_concat(lasku.tunnus) tunnukset
+						FROM lasku
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto and lahdot.aktiivi='S')
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tila IN ('N','L')
+						AND lasku.alatila = 'A'
 						AND lasku.luontiaika > '2012-04-01 00:00:00'";
 			$lasku_res = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($lasku_res);

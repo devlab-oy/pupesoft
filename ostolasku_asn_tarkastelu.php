@@ -189,7 +189,13 @@
 				$kala -= 25;
 			}
 
-			$query = "SELECT tuoteno, nimitys, varattu + kpl AS kpl, hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+			$query = "	SELECT tuoteno, 
+						nimitys, 
+						varattu + kpl AS kpl, 
+						hinta 
+						FROM tilausrivi 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND tunnus = '{$row['tilausrivi']}'";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 

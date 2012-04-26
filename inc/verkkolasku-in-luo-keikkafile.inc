@@ -1204,6 +1204,13 @@
 
 							switch ($fieldname) {
 								case 'varattu':
+									if ($split_row['kpl'] == 0) {
+										$values .= ", '{$positiivinen_arvo}'";
+									}
+									else {
+										$values .= ", '0'";
+									}
+									break;
 								case 'tilkpl':
 									$values .= ", '{$positiivinen_arvo}'";
 									break;

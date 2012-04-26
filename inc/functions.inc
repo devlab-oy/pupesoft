@@ -119,7 +119,7 @@ if (!function_exists("pupesoft_rest")) {
 
 		switch ($parameters["method"]) {
 			case "GET":
-				// Default
+				curl_setopt($handle, CURLOPT_URL, $parameters["url"]."?".http_build_query($parameters["data"]));
 				break;
 			case "POST":
 				curl_setopt($handle, CURLOPT_POST, true);

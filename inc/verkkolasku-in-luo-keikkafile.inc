@@ -156,6 +156,11 @@
 			// S = tulee vain sanoma   <--- ei tehd‰ mit‰‰n
 			// L = tulee vain lasku
 
+			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
+
+			if (isset($rtuoteno[$i]['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
+
+
 			// tiukka 1
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 						FROM tilausrivi
@@ -170,7 +175,7 @@
 						JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 														AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+														AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 						JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tyyppi = 'O'
@@ -199,7 +204,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -228,7 +233,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -257,7 +262,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -286,7 +291,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -313,7 +318,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -341,7 +346,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -369,7 +374,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -397,7 +402,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -425,7 +430,7 @@
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'))
+															AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
@@ -474,10 +479,6 @@
 					}
 					else {
 
-						if ($rtuoteno[$i]['tuoteno'] == 'T1566NA014') {
-							echo "<pre>",var_dump($tilausrivirow),"</pre>";
-						}
-
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
 							// tilausrivi pit‰‰ olla jo kohdistettu
 							$query = "	SELECT tunnus 
@@ -522,7 +523,7 @@
 
 				if (count($kaytettavat_tilausrivit) == 0) {
 					echo "Ei yht‰‰n k‰ytett‰v‰‰ tilausrivi‰!!! ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."<br>";
-					echo "8 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+					echo "8 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 					$virheet++;
 					continue;
 				}
@@ -576,7 +577,7 @@
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) > 0) {
-							echo "1 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+							echo "1 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3: {$rtuoteno[$i]['tuoteno3']}<br><br>";
 							$virheet++;
 						}
 					}
@@ -743,7 +744,7 @@
 
 						if (mysql_num_rows($chk_res) > 0) {
 							$virheet++;
-							echo "2 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+							echo "2 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 						}
 					}
 
@@ -931,7 +932,7 @@
 									JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 																	AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 																	AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-																	AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}', '{$rtuoteno[$i]['tuoteno2']}'))
+																	AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
@@ -963,7 +964,7 @@
 								$chk_res = pupe_query($query);
 
 								if (mysql_num_rows($chk_res) > 0) {
-								echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+								echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 									$virheet++;
 								}
 							}
@@ -1045,7 +1046,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) > 0) {
-								echo "4 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+								echo "4 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -1136,7 +1137,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) > 0) {
-								echo "5 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+								echo "5 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -1305,7 +1306,7 @@
 							$chk_res = pupe_query($query);
 
 							if (mysql_num_rows($chk_res) > 0) {
-								echo "6 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+								echo "6 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 								$virheet++;
 							}
 						}
@@ -1467,7 +1468,7 @@
 			else {
 				// ei lˆydy tai joku muu virhe
 				echo "Virheellisi‰ kappalem‰‰ri‰ tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
-				echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']}<br><br>";
+				echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3: {$rtuoteno[$i]['tuoteno3']}<br><br>";
 				$virheet++;
 				continue;
 			}

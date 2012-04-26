@@ -386,15 +386,11 @@
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
-									WHERE kuka		= '{$ktunnus}'
+									WHERE yhtio		= '{$yhtio}'
+									and kuka		= '{$ktunnus}'
 									and sovellus	= '{$trow['sovellus']}'
 									and nimi		= '{$trow['nimi']}'
-									and alanimi 	= '{$trow['alanimi']}'
-									and nimitys		= '{$trow['nimitys']}'
-									and jarjestys 	= '{$trow['jarjestys']}'
-									and jarjestys2	= '{$trow['jarjestys2']}'
-									and hidden		= '{$trow['hidden']}'
-									and yhtio		= '{$yhtio}'";
+									and alanimi 	= '{$trow['alanimi']}'";
 						$tarkesult = pupe_query($query);
 						$tarkesultrow = mysql_fetch_array($tarkesult);
 
@@ -608,11 +604,15 @@
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
 							$query = "	UPDATE oikeu SET paivitys = '1'
-										WHERE yhtio		= '{$kukarow['yhtio']}'
-										AND kuka		= '{$kuka}'
+										WHERE kuka		= '{$kuka}'
 										AND sovellus	= '{$trow['sovellus']}'
 										AND nimi		= '{$trow['nimi']}'
-										AND alanimi 	= '{$trow['alanimi']}'";
+										AND alanimi 	= '{$trow['alanimi']}'
+										AND nimitys		= '{$trow['nimitys']}'
+										AND jarjestys 	= '{$trow['jarjestys']}'
+										AND jarjestys2	= '{$trow['jarjestys2']}'
+										AND hidden		= '{$trow['hidden']}'
+										AND yhtio		= '{$kukarow['yhtio']}'";
 							$rresult = pupe_query($query);
 						}
 					}

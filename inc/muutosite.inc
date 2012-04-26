@@ -715,12 +715,12 @@
 		$keikres = pupe_query($query);
 
 		if (!(($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'])) {
-			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty keikkaan")."</font><br>";
+			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty saapumiseen")."</font><br>";
 
 			if (mysql_num_rows($keikres) > 0) {
 				$keikrow = mysql_fetch_assoc($keikres);
 
-				echo "<font class='message'>".t("Keikka").": $keikrow[nimi] / $keikrow[laskunro]</font><br>";
+				echo "<font class='message'>".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font><br>";
 			}
 
 			$tee = 'E';
@@ -848,6 +848,88 @@
 
 		$tee = 'E';
 		$tila = 'X';
+	}
+
+	if ($tila == "konversio_avaa") {
+
+			// Tarkistetaan lasku
+			$query1 = "	SELECT *
+			 			FROM lasku
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tunnus = '$tunnus'
+						AND laskuttaja = ''
+						AND laatija = 'konversio'
+						AND tila = 'U'
+						AND alatila = 'X'
+						AND valkoodi = 'EUR'";
+			$result1 = pupe_query($query1);
+
+			if (mysql_num_rows($result1) != 1) {
+				echo t("Lasku katosi!");
+				echo "<br><br>";
+				$tee = 'M';
+				$tila = '';
+			}
+
+			// Tarkistetaan summa
+			if ($tila == "konversio_avaa") {
+				$laskurow = mysql_fetch_assoc($result1);
+
+				$syotetty_avoinsumma = (float) $syotetty_avoinsumma;
+				$saldo_maksettu = $laskurow["summa"] - $syotetty_avoinsumma;
+
+				if ($syotetty_avoinsumma > $laskurow["summa"] or $syotetty_avoinsumma <= 0) {
+					echo t("Virheellinen summa!");
+					echo "<br><br>";
+					$tee = 'M';
+					$tila = '';
+				}
+			}
+
+			// Avataan lasku
+			if ($tila == "konversio_avaa") {
+				$query1 = "	UPDATE lasku SET
+							mapvm = '0000-00-00',
+							saldo_maksettu = $saldo_maksettu
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tunnus = '{$laskurow["tunnus"]}'";
+				$result1 = pupe_query($query1);
+
+				// Lisätään myyntisaamiset-tiliöinti
+				$query1 = "	INSERT INTO tiliointi SET
+							yhtio            = '{$kukarow["yhtio"]}',
+							laatija          = 'konversio',
+							laadittu         = now(),
+							ltunnus          = '{$laskurow["tunnus"]}',
+							tilino           = '{$yhtiorow["myyntisaamiset"]}',
+							tapvm            = '{$laskurow["tapvm"]}',
+							summa            = $syotetty_avoinsumma,
+							summa_valuutassa = $syotetty_avoinsumma,
+							valkoodi         = '{$laskurow["valkoodi"]}',
+							selite           = 'Lasku {$laskurow["nimi"]}',
+							vero             = '0',
+							lukko            = '1'";
+				$result1 = pupe_query($query1);
+
+				// Lisätään dummy vastatiliöinti
+				$query1 = "	INSERT INTO tiliointi SET
+							yhtio            = '{$kukarow["yhtio"]}',
+							laatija          = 'konversio',
+							laadittu         = now(),
+							ltunnus          = '{$laskurow["tunnus"]}',
+							tilino           = '{$yhtiorow["muutkulut"]}',
+							tapvm            = '{$laskurow["tapvm"]}',
+							summa            = $syotetty_avoinsumma * -1,
+							summa_valuutassa = $syotetty_avoinsumma * -1,
+							valkoodi         = '{$laskurow["valkoodi"]}',
+							selite           = 'Lasku {$laskurow["nimi"]}',
+							vero             = '0',
+							lukko            = ''";
+				$result1 = pupe_query($query1);
+			}
+
+			$tee = 'E';
+			$tila = 'X';
 	}
 
 	if ($tila == 'jako') {
@@ -1508,6 +1590,26 @@
 			}
 		}
 
+		if ($trow['tila'] == 'U' and $trow['alatila'] == 'X' and $trow['laatija'] == 'konversio' and $trow['laskuttaja'] == '')  {
+
+			$konversio_check = "SELECT count(*) kpl from tiliointi where yhtio = '$kukarow[yhtio]' and ltunnus = '$trow[tunnus]'";
+			$konversio_check_res = pupe_query($konversio_check);
+			$konversio_check_row = mysql_fetch_assoc($konversio_check_res);
+
+			if ($konversio_check_row["kpl"] == 0) {
+				echo "	<form action = '$PHP_SELF' method='post'>
+						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name='tila' value='konversio_avaa'>
+						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<tr>
+						<th>".t("Muuta konversion lasku avoimeksi summalla")."</th>
+						<td><input type='text' name='syotetty_avoinsumma' value=''> $trow[valkoodi]</td>
+						<td class='back'><input type = 'submit' value = '".t("Avaa lasku")."'></td>
+						</tr>
+						</form>";
+			}
+		}
 
 		echo "</table><br><br>";
 	}

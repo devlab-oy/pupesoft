@@ -105,7 +105,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
 			// yht‰‰n kululaskua ei ole liitetty
 			if ($summa == 0) {
-				echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty keikkaan!")."<br>";
+				echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty saapumiseen!")."<br>";
 			}
 		}
 
@@ -140,7 +140,7 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 	}
 }
 else {
-	echo "<br><br><font class='error'>".t("Keikan tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
 
 // poistetaan lock file

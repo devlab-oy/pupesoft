@@ -1087,25 +1087,12 @@ if ($tee == "TALLENNA") {
 						$result = pupe_query($query);
 						$varirow = mysql_fetch_row($result);
 
-						$filetype = $_FILES['userfile']['type'];
-						$filesize = $_FILES['userfile']['size'];
-						$filename = $_FILES['userfile']['name'];
-
-						if ($filesize > $varirow[1]) {
+						if ($_FILES['userfile']['size'] > $varirow[1]) {
 							$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 						}
 						else {
 							// lisätään kuva
-							$query = "	INSERT into liitetiedostot set
-										yhtio    = '$kukarow[yhtio]',
-										liitos   = 'lasku',
-										liitostunnus = '$tilausnumero',
-										data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
-										selite   = '$kuvaselite',
-										filename = '$filename',
-										filesize = '$filesize',
-										filetype = '$filetype'";
-							$insre = pupe_query($query);
+							$kuva = tallenna_liite("userfile", "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
 
 							$kuvaselite = "";
 						}
@@ -1143,7 +1130,7 @@ if ($tee == "MUOKKAA") {
 	if (mysql_num_rows($keikres) > 0) {
 		$keikrow = mysql_fetch_assoc($keikres);
 
-		echo "<br><font class='message'>".t("Lasku on liitetty keikkaan, alv tiliöintejä ei voi muuttaa")."! ".t("Keikka").": $keikrow[nimi] / $keikrow[laskunro]</font>";
+		echo "<br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tiliöintejä ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
 	}
 
 	if ($poistakuva > 0) {

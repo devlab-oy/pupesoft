@@ -815,7 +815,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 			$jtrivit = "";
 
-			if (mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_valmistus"] != "") {
+			if ((mysql_num_rows($jtoikeudetres) <> 0 and $yhtiorow["automaattinen_jt_toimitus_valmistus"] != "") or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
 				$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
 				echo "<br>";
 
@@ -843,7 +843,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 				jt_toimita("", "", $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 
 				//	Laitetaan tavarat liikkeelle jos sallitaan!
-				if ($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) {
+				if (($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
 					jt_toimita("", "", "", "", "dummy", "TOIMITA");
 				}
 			}

@@ -80,13 +80,11 @@ else {
 
 		// Tehd‰‰n NAMEFMT komento, jos kyseess‰ on iSeries/AS400 palvelin
 		if (isset($ftptype) and $ftptype == "AS400") {
-			$quote = ftp_raw($conn_id, "quote SITE NAMEFMT 1");
+			$quote = ftp_site($conn_id, "NAMEFMT 1");
 		}
 
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
 		$ftpfile_tmp = $filenimi.".TMP";
-
-		# ftp_chdir voisi olla hyv‰
 
 		// Kokeillaan passiivista siirtoa
 		ftp_pasv($conn_id, TRUE);

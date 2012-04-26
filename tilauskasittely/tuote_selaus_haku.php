@@ -789,7 +789,7 @@
 
 		if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
 			function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
-				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus;
+				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
 
 				if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
 				else $kyselylisa = "";
@@ -822,6 +822,7 @@
 							$kyselylisa
 							$kieltolisa
 							$poislisa
+							$extra_poislisa
 							ORDER BY {$tvk_taulu}.jarjestys, {$tvk_taulu}.tuoteno";
 				$kores = pupe_query($query);
 
@@ -831,7 +832,7 @@
 
 		if (!function_exists("tuoteselaushaku_tuoteperhe")) {
 			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
-				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus;
+				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
 
 				if (!in_array($tuoteno, $isat_array)) {
 					$isat_array[] = $tuoteno;
@@ -866,6 +867,7 @@
 								AND tuoteperhe.tyyppi = '$tyyppi'
 								$kieltolisa
 								$poislisa
+								$extra_poislisa
 								ORDER BY tuoteperhe.tuoteno";
 					$kores = pupe_query($query);
 

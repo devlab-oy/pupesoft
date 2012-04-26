@@ -66,7 +66,7 @@
 		$result = pupe_query($query);
 
 		$keikantunnus = mysql_insert_id(); // tätä tarvitaan tilausrivien uusiotunnukseen
-		$laskuvirhe .= "\n".t("Perustettiin keikka").": $id $trow[nimi]\n";
+		$laskuvirhe .= "\n".t("Perustettiin saapuminen").": $id $trow[nimi]\n";
 
 		$query  = "UNLOCK TABLE";
 		$result = pupe_query($query);
@@ -133,7 +133,7 @@
 								AND yhtio = '{$kukarow['yhtio']}'";
 					$result = pupe_query($query);
 
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu keikkaan")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
 				}
 				// jos rivi löytyi, mutta se on jo kohdistettu.. lisätään uus samoilla tiedoilla
 				else {
@@ -141,11 +141,11 @@
 								(uusiotunnus, hinta, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
 								('$keikantunnus', '$hinta', '$rivirow[tuoteno]', '$rivirow[tilkpl]', '$kpl', '$rivirow[otunnus]', '$kukarow[yhtio]', 'O', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]','$rivirow[tilaajanrivinro]')";
 					$result = pupe_query($query);
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("lisätty keikkaan")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("lisätty saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
 				}
 			}
 			else {
-				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa keikkaan")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
 			}
 		}
 		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") {
@@ -1556,7 +1556,7 @@
 						rahti					= '$trow[oletus_kulupros]',
 						swift					= '$trow[swift]',
 						liitostunnus 			= '$trow[tunnus]',
-						comments				= '".t("Keikka luotu laskusta")." $osrow[laskunro]',
+						comments				= '".t("Saapuminen luotu laskusta")." $osrow[laskunro]',
 						tila         			= 'K',
 						luontiaika	 			= now(),
 						laatija		 			= '$kukarow[kuka]'";
@@ -1895,9 +1895,9 @@
 		$query = "DELETE from lasku WHERE yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkanumeroapu'";
 		$result = pupe_query($query);
 
-		$laskuvirhe .= t("Poistettiin")." ".t("keikka")." $keikkanumeroapu ".t("Yhtään riviä ei löytynyt")."!\n";
+		$laskuvirhe .= t("Poistettiin")." ".t("saapuminen")." $keikkanumeroapu ".t("Yhtään riviä ei löytynyt")."!\n";
 	}
 	else {
-		$laskuvirhe .= t("Keikka käsitelty loppuun").": $keikkanumeroapu $trow[nimi]\n";
+		$laskuvirhe .= t("Saapuminen käsitelty loppuun").": $keikkanumeroapu $trow[nimi]\n";
 	}
 ?>

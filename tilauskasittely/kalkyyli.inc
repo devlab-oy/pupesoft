@@ -117,7 +117,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 	}
 }
 else {
-	echo "<br><br><font class='error'>".t("Keikan tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
 
 // poistetaan lock file

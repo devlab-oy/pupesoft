@@ -87,9 +87,9 @@
 
 		$specutxt = "";
 
-		// erikoiskeissi jos kyseessä on keikka joka on vientiä
-		if ($tapa == "vienti" and $row["tapa"] == "Keikka") {
-			$specutxt = "Tämä on keikka joka on viety kotimaasta ulkomaanvarastoon.<br>";
+		// erikoiskeissi jos kyseessä on saapuminen joka on vientiä
+		if ($tapa == "vienti" and $row["tapa"] == "Saapuminen") {
+			$specutxt = "Tämä on saapuminen joka on viety kotimaasta ulkomaanvarastoon.<br>";
 			$tapa = "vientituonti";
 		}
 

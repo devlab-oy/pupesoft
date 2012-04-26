@@ -191,7 +191,7 @@ if ($tee_kululaskut == "liita") {
 					tila         = 'K'";
 		$result = pupe_query($query);
 
-		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
+		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
@@ -368,7 +368,7 @@ if ($silent == "") {
 
 		if (mysql_num_rows($result) != 0) {
 
-			echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+			echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("saapuminen").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
 			echo "<table>";
 			echo "<tr>
 					<th>".t("Nimi")."</th>
@@ -507,9 +507,9 @@ if ($silent == "") {
 
 		echo "<br><table>";
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("saapuminen")."</th>";
 		echo "<th>".t("ytunnus")."</th>";
-		echo "<th>".t("nimi")."</th>";	
+		echo "<th>".t("nimi")."</th>";
 		echo "</tr>";
 		echo "<tr>
 				<td>$laskurow[laskunro]</td>
@@ -517,7 +517,7 @@ if ($silent == "") {
 				<td>$laskurow[nimi]</td>
 				</tr>";
 		echo "</table><br>";
-		
+
 		echo "<table><tr>";
 		echo "<th>".t("Etsi lasku")."</th>";
 		echo "<th><SELECT name='hakutapa'>";
@@ -818,13 +818,13 @@ if ($silent == "") {
 					}
 					else {
 						echo "<td class='spec' valign='top'>";
-						echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle keikalle")."!";
+						echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle saapumiselle")."!";
 						echo "</td></tr>";
 					}
 				}
 				elseif ($listaustapa == "liitetyt" or $listaustapa == "") {
 					echo "<td valign='top' colspan='2'>";
-					echo t("Laskun summa on jo k‰ytetty keikalla/keikoilla")." $apurow[laskunrot]!";
+					echo t("Laskun summa on jo k‰ytetty saapumisella/keikoilla")." $apurow[laskunrot]!";
 					echo "</td></tr>";
 				}
 				else {
@@ -849,7 +849,7 @@ if ($silent == "") {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
 
-		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 		echo "</form>";
 	}
 }

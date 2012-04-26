@@ -1418,8 +1418,29 @@ if ($kasitellaan_tiedosto) {
 								$chryhma = $rivi[$r];
 							}
 
-							if ($otsikko == 'ASIAKAS' and (int) $rivi[$r] > 0) {
+							// Asiakas sarakkaassa on tunnus
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '1' and $rivi[$r] != "") {
 								$chasiakas = $rivi[$r];
+							}
+
+							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pitää olla setattu)
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2' and $rivi[$r] != "") {
+								$etsitunnus = " SELECT tunnus
+												FROM asiakas
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND toim_ovttunnus = '$rivi[$r]'
+												AND toim_ovttunnus != ''
+												AND ytunnus != ''
+												AND ytunnus = '".$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+								$etsiresult = pupe_query($etsitunnus);
+
+								if (mysql_num_rows($etsiresult) == 1) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
+									$chasiakas = $etsirow['tunnus'];
+								}
+								else {
+									$chasiakas = -1;
+								}
 							}
 
 							if ($otsikko == 'TOIMITTAJA' and (int) $rivi[$r] > 0) {
@@ -1605,7 +1626,7 @@ if ($kasitellaan_tiedosto) {
 					if ($chytunnus != '') {
 						$and .= " and ytunnus = '$chytunnus'";
 					}
-					if ($chasiakas > 0) {
+					if ($chasiakas != 0) {
 						$and .= " and asiakas = '$chasiakas'";
 					}
 					if ($chsegmentti > 0) {
@@ -2044,6 +2065,12 @@ if (!$cli) {
 					<td><select name='segmenttivalinta'>
 					<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
 					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
+					</select></td>
+			</tr>";
+		echo "<tr><th>".t("Asiakkaan valinta").":</th>
+					<td><select name='asiakkaanvalinta'>
+					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
 					</select></td>
 			</tr>";
 	}

@@ -378,7 +378,7 @@
 			echo "<tr>";
 
 			if ($toim == "PURKU" or $toim == "TARIFFI" or $toim == "VASTAANOTTORAPORTTI") {
-				echo "<th>".t("Keikkanumero")."</th>";
+				echo "<th>".t("Saapumisnumero")."</th>";
 			}
 			else {
 				echo "<th>".t("Laskunumero")."</th>";

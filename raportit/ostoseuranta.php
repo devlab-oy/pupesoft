@@ -311,7 +311,7 @@
 
 							//KPLED
 							if ($piiloed == "") {
-								$query .= "	sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostokpl")."', ";
+								$query .= "	sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostokpl")."', ";
 							}
 						}
 
@@ -734,9 +734,9 @@
 			echo "<tr>";
 			echo "<th>".t("Valitse ajotapa:")."</th>";
 			echo "<td><select name='ajotapa'>";
-			echo "<option value='valmiit'  				$chk1>".t("Valmiit keikat")." (".t("Varastoonvientipäivän mukaan").")</option>";
-			echo "<option value='kaikki' 				$chk2>".t("Valmiit keikat ja keskeneräiset keikat")." (".t("Varastoonvientipäivän mukaan").")</option>";
-			echo "<option value='valmiit_mapvm'			$chk3>".t("Valmiit keikat")." (".t("Virallisen varastonarvolaskentapäivän mukaan").")</option>";
+			echo "<option value='valmiit'  				$chk1>".t("Valmiit saapumiset")." (".t("Varastoonvientipäivän mukaan").")</option>";
+			echo "<option value='kaikki' 				$chk2>".t("Valmiit saapumiset ja keskeneräiset saapumiset")." (".t("Varastoonvientipäivän mukaan").")</option>";
+			echo "<option value='valmiit_mapvm'			$chk3>".t("Valmiit saapumiset")." (".t("Virallisen varastonarvolaskentapäivän mukaan").")</option>";
 			echo "</select></td>";
 
 			echo "</tr>";

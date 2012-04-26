@@ -2,7 +2,7 @@
 
 	require('../inc/parametrit.inc');
 
-	echo "<font class='head'>".t("Keikan varastopaikat")."</font><hr>";
+	echo "<font class='head'>".t("Saapumisen varastopaikat")."</font><hr>";
 
 	if ($otunnus != "") {	//toimittaja ja lasku on valittu. Nyt kohdistetaan, muutetaan ja lisätään rivejä.
 		require('ostorivienvarastopaikat.inc');
@@ -57,16 +57,16 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='message'>".t("Yhtään sopivaa keikkaa ei löytynyt").".</font><br><br>";
+			echo "<font class='message'>".t("Yhtään sopivaa saapumista ei löytynyt").".</font><br><br>";
 		}
 		elseif (mysql_num_rows($result) > 100) {
-			echo "<font class='message'>".t("Haulla löytyi liikaa keikkoja")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
+			echo "<font class='message'>".t("Haulla löytyi liikaa saapumisia")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
 		}
 		else {
 			echo "<table>";
 
 			echo "<tr>
-					<th>".t("Keikka")."</th>
+					<th>".t("Saapuminen")."</th>
 					<th>".t("Ytunnus")."</th>
 					<th>".t("Nimi")."</th>
 					<th></th>

@@ -91,7 +91,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
 		}
 	}
 
-	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
+	$query = "	SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
 				FROM yhtio
 				WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);

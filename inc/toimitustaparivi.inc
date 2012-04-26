@@ -349,7 +349,7 @@
 		$ulos .= "<option value='MH43' {$sel['MH43']}>Matkahuolto Dokumenttikuori</option>";
 		$ulos .= "<option value='MH57' {$sel['MH57']}>Matkahuolto Lavarahti</option>";
 		$ulos .= "<option value='MH80' {$sel['MH80']}>Matkahuolto Lähellä-paketti </option>";
-		$ulos .= "<option value='MH3050' {$sel['MH3050']}>Matkahuolto Jakopaketti/Paikallispaketti</option>";
+		$ulos .= "<option value='MH30' {$sel['MH30']}>Matkahuolto Jakopaketti/Paikallispaketti</option>";
 		$ulos .= "<option value='MH63' {$sel['MH63']}>Baltian Paketti</option>";
 		$ulos .= "</optgroup>";
 

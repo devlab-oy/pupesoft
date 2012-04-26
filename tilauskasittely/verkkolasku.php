@@ -51,9 +51,9 @@
 			$kieli = $argv[2];
 		}
 
-		$kukarow['kuka']  = "crond";
+		$kukarow['kuka'] = "crond";
 
-		//Pupeasennuksen root
+		// Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
 
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
@@ -1977,13 +1977,10 @@
 							// Hoidetaan pyöristys sekä valuuttakäsittely
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$lasrow["kasumma"]   = $lasrow["kasumma_valuutassa"];
-								$lasrow["summa"]     = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+								$lasrow["summa"]     = $lasrow["summa_valuutassa"];
 								$lasrow["arvo"]      = $lasrow["arvo_valuutassa"];
 								$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
-							}
-							else {
-								$lasrow["summa"]    = sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);
-							}
+							}							
 
 							// Ulkomaisen ytunnuksen korjaus
 							if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {

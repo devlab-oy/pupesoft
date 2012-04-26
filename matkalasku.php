@@ -1087,25 +1087,12 @@ if ($tee == "TALLENNA") {
 						$result = pupe_query($query);
 						$varirow = mysql_fetch_row($result);
 
-						$filetype = $_FILES['userfile']['type'];
-						$filesize = $_FILES['userfile']['size'];
-						$filename = $_FILES['userfile']['name'];
-
-						if ($filesize > $varirow[1]) {
+						if ($_FILES['userfile']['size'] > $varirow[1]) {
 							$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 						}
 						else {
 							// lis‰t‰‰n kuva
-							$query = "	INSERT into liitetiedostot set
-										yhtio    = '$kukarow[yhtio]',
-										liitos   = 'lasku',
-										liitostunnus = '$tilausnumero',
-										data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
-										selite   = '$kuvaselite',
-										filename = '$filename',
-										filesize = '$filesize',
-										filetype = '$filetype'";
-							$insre = pupe_query($query);
+							$kuva = tallenna_liite("userfile", "lasku", $tilausnumero, $kuvaselite, "", 0, 0, "");
 
 							$kuvaselite = "";
 						}

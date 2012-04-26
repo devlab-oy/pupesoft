@@ -4366,12 +4366,13 @@ if ($tee == '') {
 
 				//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
 				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
-							FROM tilausrivi
-							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
+							FROM tilausrivi use index(yhtio_tyyppi_tuoteno_laskutettuaika)
+							JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi = 'L'
-							and tilausrivi.kpl != 0
+							and tilausrivi.tyyppi  = 'L'
 							and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
+							and tilausrivi.laskutettuaika != '0000-00-00'
+							and tilausrivi.kpl != 0
 							ORDER BY tilausrivi.tunnus desc
 							LIMIT 1";
 				$viimhintares = pupe_query($query);

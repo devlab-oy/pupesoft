@@ -961,6 +961,8 @@
 
 					if ($ylimaaraista > 0) {
 
+						echo "Jouduttiin haaraan ylim‰‰r‰ist‰ > 0 ($ylimaaraista > 0)<br><br>";
+
 						// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 						$fields = "yhtio";
 						$values = "'{$kukarow['yhtio']}'";
@@ -1082,6 +1084,7 @@
 												hyllytaso		= '{$lapsitieto['hyllytaso']}',
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
 												perheid			= '{$lapsitieto['tunnus']}'";
+								echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 								$inskres = pupe_query($lisainsert);
 
 								// p‰ivitet‰‰n is‰
@@ -1091,6 +1094,9 @@
 						}
 					}
 					elseif ($ylimaaraista == 0) {
+
+						echo "Jouduttiin haaraan ylim‰‰r‰ist‰ == 0 ($ylimaaraista == 0)<br><br>";
+
 						// Jos menee tasan tilatut ja tulleet.
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
 						$siistitty 				= implode(",", $lisa_array);
@@ -1116,6 +1122,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						echo "<pre>",str_replace("\t", "", $updatequery),"</pre>";
 						$upd_res = pupe_query($updatequery);
 
 						if ($tilausrivirow['asn_sanomat'] == 'L') {
@@ -1168,6 +1175,7 @@
 												hyllytaso		= '{$lapsitieto['hyllytaso']}',
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
 												perheid			= '{$lapsitieto['tunnus']}'";
+								echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 								$inskres = pupe_query($lisainsert);
 
 								// p‰ivitet‰‰n is‰
@@ -1178,14 +1186,19 @@
 					}
 					elseif ($ylimaaraista < 0) {
 
+						echo "Jouduttiin haaraan ylim‰‰r‰ist‰ < 0 ($ylimaaraista < 0)<br><br>";
+
 						$positiivinen_arvo = abs($ylimaaraista);
 						$vika_rivi = array_pop($split_array);
 						// vika_rivi on se tilausrivi joka splitataan ett‰ m‰‰r‰ t‰sm‰‰
 
 						$split_query	= "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$vika_rivi}'";
+						echo "Splitrivin select:<pre>",str_replace("\t", "", $split_query),"</pre>";
 						$split_result	= pupe_query($split_query);
 						$split_row		= mysql_fetch_assoc($split_result);
 						$erotus			= $split_row["tilkpl"] - $positiivinen_arvo;
+
+						echo "erotus: $erotus ($split_row[tilkpl] - $positiivinen_arvo)<br><br>";
 
 						$kaytetyt_tilausrivit[] = $vika_rivi;
 
@@ -1237,6 +1250,7 @@
 						}
 
 						$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+						echo "<pre>",str_replace("\t", "", $kysely),"</pre>";
 						$uusires = pupe_query($kysely);
 						$tilausrivi_id = mysql_insert_id();
 
@@ -1250,6 +1264,7 @@
 									kommentti = concat(kommentti,' Ennen splittausta {$split_row['tilkpl']} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$upres = pupe_query($query);
 
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
@@ -1276,6 +1291,7 @@
 										tuoteno = '{$split_row['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						echo "<pre>",str_replace("\t", "", $updatequery),"</pre>";
 						$upd_res = pupe_query($updatequery);
 
 						if ($tilausrivirow['asn_sanomat'] == 'L') {
@@ -1328,6 +1344,7 @@
 												hyllytaso		= '{$lapsitieto['hyllytaso']}',
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
 												perheid			= '{$lapsitieto['tunnus']}'";
+								echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 								$inskres = pupe_query($lisainsert);
 
 								// p‰ivitet‰‰n is‰
@@ -1369,6 +1386,7 @@
 							}
 
 							$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
+							echo "<pre>",str_replace("\t", "", $kysely),"</pre>";
 							$uusires = pupe_query($kysely);
 							$tapahtuma_id = mysql_insert_id();
 
@@ -1544,6 +1562,7 @@
 						laatija		 			= '$kukarow[kuka]'";
 			$insertres = pupe_query($query);
 			$keikan_tunnus = mysql_insert_id();
+			echo "<pre>",str_replace("\t", "", $query),"</pre>Keikan tunnus:$keikan_tunnus<br><br>";
 
 			$query  = "UNLOCK TABLE";
 			$result = pupe_query($query);

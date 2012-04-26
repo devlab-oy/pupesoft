@@ -527,16 +527,41 @@
 					continue;
 				}
 
-				$tmp_kaytettavat_tilausrivit = $kaytettavat_tilausrivit;
+				$tilausrivi_nro = "";
 
-				$tilausrivi_nro = array_shift($tmp_kaytettavat_tilausrivit);
+				// katsotaan m‰ts‰‰kˆ ensiksi laskulla olevalla kappalem‰‰r‰ll‰
+				foreach ($kaytettavat_tilausrivit as $riv) {
 
-				$query = "	SELECT *, kpl+varattu AS varattu
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$tilausrivi_nro}'";
-				$tilausrivires = pupe_query($query);
-				$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+					$query = "	SELECT *, kpl+varattu AS varattu
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$riv}'
+								AND kpl+varattu = '{$rtuoteno[$i]['kpl']}'";
+					$tilausrivires = pupe_query($query);
+
+					if (mysql_num_rows($tilausrivires) != 0) {
+						$tilausrivi_nro = $riv;
+						break;
+					}
+				}
+
+				if ($tilausrivi_nro != "") {
+					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+				}
+				else {
+					reset($kaytettavat_tilausrivit);
+
+					$tmp_kaytettavat_tilausrivit = $kaytettavat_tilausrivit;
+
+					$tilausrivi_nro = array_shift($tmp_kaytettavat_tilausrivit);
+
+					$query = "	SELECT *, kpl+varattu AS varattu
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tilausrivi_nro}'";
+					$tilausrivires = pupe_query($query);
+					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+				}
 
 				// jos ei splitata, p‰ivitet‰‰n hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {

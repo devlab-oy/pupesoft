@@ -402,18 +402,18 @@
 
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		if ($laji != "") {
-			$ulos = "<input type='hidden' name='$nimi' value='$laji'>";
-			$tyyppi = 4;
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		if ($laji == "K") {
+			$ulos  = "<td><select name='$nimi'>";
+			$ulos .= "<option value='K'  $sel[K]>".t("Matkalaskukäyttäjä")."</option>";
+			$ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
+			$ulos .= "</select></td>";
 		}
 		else {
-			$sel = array();
-			$sel[$trow[$i]] = "selected";
-
 			$ulos  = "<td><select name='$nimi'>";
 			$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
-//			$ulos .= "<option value='O'  $sel[O] >".t("Online toimittaja")."</option>";
-//			$ulos .= "<option value='S'  $sel[S]>".t("Sisäinen toimittaja")."</option>";
 			$ulos .= "<option value='L'  $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
 			$ulos .= "<option value='K'  $sel[K]>".t("Matkalaskukäyttäjä")."</option>";
 			$ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei käytössä")."</option>";

@@ -1807,9 +1807,6 @@
 			$laskures = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($laskures);
 
-			// $query = "UPDATE lasku SET summa = '{$laskun_summa_eur}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";
-			// $updres = pupe_query($query);
-
 			$tee_kululaskut = "liita";
  			$silent = "SILENT";
  			$keikanalatila = "";

@@ -1173,7 +1173,11 @@
 
 			$query = "	SELECT tilausrivi.*, if(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
 						FROM lasku
-						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus {$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
+						JOIN tilausrivi ON (
+							tilausrivi.yhtio = lasku.yhtio AND 
+							tilausrivi.tyyppi = 'O' AND 
+							(tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
+							{$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('O', 'K')

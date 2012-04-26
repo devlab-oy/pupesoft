@@ -236,7 +236,7 @@
 											selite 		= '".t("Siirräsaldoissa lisättiin tuotepaikka")." $khyllyalue $khyllynro $khyllyvali $khyllytaso',
 											laatija 	= '$kukarow[kuka]',
 											laadittu 	= now()";
-						$result = pupe_query($tapahtumaquery);
+						$tapahtumaresult = pupe_query($tapahtumaquery);
 						
 					}
 					else {

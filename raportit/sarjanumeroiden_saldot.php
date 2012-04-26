@@ -144,6 +144,22 @@
 								muutospvm	= now(),
 								oletus		= '$oletus'";
 					$paikres = pupe_query($query);
+					
+					$tapahtumaquery = "	INSERT into tapahtuma set
+										yhtio 		= '$kukarow[yhtio]',
+										tuoteno 	= '$tuoteno',
+										kpl 		= 0,
+										kplhinta	= 0,
+										hinta 		= 0,
+										laji 		= 'uusipaikka',
+										hyllyalue 	= '$hyllyalue',
+										hyllynro 	= '$hyllynro',
+										hyllyvali 	= '$hyllyvali',
+										hyllytaso 	= '$hyllytaso',
+										selite 		= '".t("Sarjanumeroiden saldoissa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+										laatija 	= '$kukarow[kuka]',
+										laadittu 	= now()";
+					$tapahtumaresult = pupe_query($tapahtumaquery);
 				}
 				elseif (mysql_num_rows($alkuresult) == 1) {
 					$query = "	UPDATE tuotepaikat SET

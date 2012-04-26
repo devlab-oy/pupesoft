@@ -687,7 +687,7 @@
 													selite 		= '".t("Tuotteella ei ole yht‰‰n varastopaikkaa, perustettiin uusi").": Z 99 99 99',
 													laatija 	= '$kukarow[kuka]',
 													laadittu 	= now()";
-								$result = pupe_query($tapahtumaquery);
+								$tapahtumaresult = pupe_query($tapahtumaquery);
 
 							}
 						}

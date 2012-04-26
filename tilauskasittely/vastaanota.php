@@ -239,7 +239,8 @@
 							$query = "	INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 							$ynsre = pupe_query($query);
-
+							$uusipaikka = mysql_insert_id();
+							
 							$tapahtumaquery = "	INSERT into tapahtuma set
 												yhtio 		= '$kukarow[yhtio]',
 												tuoteno 	= '$tilausrivirow[tuoteno]',
@@ -254,9 +255,7 @@
 												selite 		= '".t("Tuotteella ei varastopaikkaa, luotiin uusi paikka ")." $t1[$tun] $t2[$tun] $t3[$tun] $t4[$tun]',
 												laatija 	= '$kukarow[kuka]',
 												laadittu 	= now()";
-							$result = pupe_query($tapahtumaquery);
-
-							$uusipaikka = mysql_insert_id();
+							$tapahtumaresult = pupe_query($tapahtumaquery);
 
 							$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 										from tuotepaikat

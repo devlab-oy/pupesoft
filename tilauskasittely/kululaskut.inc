@@ -6,7 +6,6 @@ $query  = "	SELECT *
 			and yhtio		= '$kukarow[yhtio]'
 			and tila		= 'K'
 			and alatila 	= '$keikanalatila'";
-echo "<pre>",str_replace("\t", "", $query),"</pre>";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -190,12 +189,9 @@ if ($tee_kululaskut == "liita") {
 					liitostunnus = '$oslasrow[liitostunnus]',
 					luontiaika	 = now(),
 					tila         = 'K'";
-		echo "Kululasku:<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
-
-		echo "DEBUG: <font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {

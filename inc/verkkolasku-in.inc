@@ -920,11 +920,9 @@
 									AND laji = 'tec'
 									AND asn_numero = '{$laskun_numero}'
 									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$duplikaattilasku_check_res = pupe_query($query);
 
 						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-							echo "osumia: ",mysql_num_rows($duplikaattilasku_check_res)," onko_duplikaatti: kyllä<br><br>";
 							$onko_duplikaatti = true;
 						}
 					}

@@ -393,7 +393,6 @@
 								FROM tilausrivi 
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
 								AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
-					echo "<pre>",str_replace("\t", "", $query);
 					$result = pupe_query($query);
 					$tilaukset = mysql_fetch_assoc($result);
 
@@ -405,7 +404,6 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
 									AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'"; 
-						echo "<pre>",str_replace("\t", "", $query);
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 0) {
@@ -415,7 +413,6 @@
 										FROM tilausrivi
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus IN ({$kollirow['tilausrivi']})";
-							echo "<pre>",str_replace("\t", "", $query);
 							$isa_chk_res = pupe_query($query);
 							$isa_chk_row = mysql_fetch_assoc($isa_chk_res);
 
@@ -437,7 +434,6 @@
 										WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 										AND tuote.status != 'P'
 										AND tuote.tuoteno = '{$lapsi_tuoteno}'";
-							echo "<pre>",str_replace("\t", "", $query);
 							$lapsiresult = pupe_query($query);
 
 							while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
@@ -474,7 +470,6 @@
 												hyllyvali		= '{$lapsitieto['hyllyvali']}',
 												uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
 												perheid			= '{$isa_chk_row['tunnus']}'";
-								echo "<pre>",str_replace("\t", "", $lisainsert);
 								$inskres = pupe_query($lisainsert);
 
 								$paketin_rivit[] = mysql_insert_id();
@@ -522,15 +517,12 @@
 			}
 		}
 
-		echo "valitse: $valitse laskuttajan_toimittajanumero: $laskuttajan_toimittajanumero<br><pre>",var_dump($rtuoteno),"</pre><br>";
-
 		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND laskunro = '{$lasku}'
 						AND tila = 'H'";
-			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$tunnus_fetch_res = pupe_query($query);
 			$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 
@@ -541,7 +533,6 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						and toimittajanro = '{$laskuttajan_toimittajanumero}'
 						and tyyppi != 'P'";
-			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -552,7 +543,6 @@
 				if ($virheet == 0) {
 
 					$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$kollires = pupe_query($query);
 
 					while ($kollirow = mysql_fetch_assoc($kollires)) {
@@ -851,7 +841,6 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						#AND laji = 'tec'
 						AND tunnus = '{$rivitunnus}'";
-			echo "<pre>$query</pre>";
 			$upd_res = pupe_query($query);
 
 			$hinta 	= '';
@@ -990,7 +979,6 @@
 						{$toim_tuotenolisa}
 						WHERE yhtio = '{$kukarow['yhtio']}' 
 						AND tunnus = '{$_tunn}'";
-			echo "<pre>$query</pre>";
 			$updres = pupe_query($query);
 
 			$tee = 'nayta';
@@ -1191,7 +1179,6 @@
 						AND lasku.alatila != 'X'
 						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
 						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
-			echo "<pre>$query</pre>";
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {

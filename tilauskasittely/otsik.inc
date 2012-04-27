@@ -1709,7 +1709,7 @@
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
-			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
+			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
 			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
 			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
 			tarkista_oikeus("verkkolasku.php"))) {

@@ -322,7 +322,7 @@
 						$charge_description = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeDescription));
 						$charge_code = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeCode));
 
-						if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or 
+						if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
 							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
 							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);

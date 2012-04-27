@@ -897,6 +897,8 @@
 				}
 
 				if (trim($laskun_numero) != '' and trim($trow['tunnus']) != '') {
+
+					// katsotaan onko lasku jo ostoreskontrassa
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio = '{$yhtio}'
@@ -908,7 +910,21 @@
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
-						$onko_duplikaatti = true;
+					}
+
+					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
+					if ($laskun_tyyppi == 'TECCOM-INVOICE') {
+						$query = "	SELECT *
+									FROM asn_sanomat
+									WHERE yhtio = '{$yhtio}'
+									AND laji = 'tec'
+									AND asn_numero = '{$laskun_numero}'
+									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+						$duplikaattilasku_check_res = pupe_query($query);
+
+						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
+							$onko_duplikaatti = true;
+						}
 					}
 				}
 
@@ -1363,10 +1379,15 @@
 								$result = pupe_query($query);
 							}
 						}
-						
+
 						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
-							// Koodaajan kommentti. tilausnumeroon on mennyt kokoajan ihan v‰‰r‰ kentt‰. {$laskun_numero} Pit‰is menn‰ asn-kentt‰‰n
-							
+
+							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
+							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
+							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
+							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
+
 							$insertquery = "INSERT INTO asn_sanomat SET
 											yhtio = '{$yhtio}',
 											laji = 'tec',
@@ -1380,9 +1401,13 @@
 											paketinnumero = '',
 											lahetyslistannro = '',
 											toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}',
+											toim_tuoteno2 = '{$rtuoteno[$i]['tuoteno2']}',
 											kappalemaara = '{$rtuoteno[$i]['kpl']}',
 											hinta = '{$rtuoteno[$i]['hinta']}',
 											lisakulu = '{$rtuoteno[$i]['lisakulu']}',
+											kulu = '{$rtuoteno[$i]['kulu']}',
+											pakkauskulu = '{$laskun_pakkauskulu}',
+											rahtikulu = '{$laskun_rahtikulu}',
 											tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
 											laatija = 'crond',
 											luontiaika = now()";
@@ -1391,6 +1416,8 @@
 						}
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
+
+					echo "<br>";
 
 	 				// Tuli pyˆristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {

@@ -134,7 +134,7 @@
 					}
 					else {
 						$virheet = 0;
-						echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
+						echo "VIRHE 1: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
 					}
 					$paketin_rivit = array();
 					$paketin_tunnukset = array();
@@ -146,6 +146,8 @@
 				// Siirtymävaiheen jälkeen poista lasku.comments tilausnumero ehto !!!!
 
 				// poikkeuskäsittelyä muutamalle toimittajalle.
+
+				$toinen_tuoteno = "";
 
 				if ($row["toimittajanumero"] == "123067") {
 					$orgtuote = $row["toim_tuoteno"];
@@ -316,9 +318,12 @@
 								ORDER BY laadittu asc";
 				}
 
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$checkres = pupe_query($query);
 
 				$tilausrivirow = mysql_fetch_array($checkres);
+
+				echo "row[kappalemaara]: $row[kappalemaara] tilausrivirow varattu: $tilausrivirow[varattu]<br><br>";
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VÄHEMMÄN kuin tilausrivillä, vanhan tilausrivin tunnus jää jäljellä
 				if (mysql_num_rows($checkres) == 0) {
@@ -333,6 +338,7 @@
 								tuoteno = '{$tilausrivirow['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$row['tunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$upd_res = pupe_query($query);
 					$kaytetyt_tilausrivit[] = $tilausrivirow['tunnus'];
 					$paketin_rivit[] = $tilausrivirow["tunnus"];
@@ -649,7 +655,7 @@
 				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 			}
 			elseif ($virheet != 0) {
-				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
+				echo "VIRHE 2: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
 			}
 		}
 	}
@@ -732,6 +738,7 @@
 								tila         			= 'K',
 								luontiaika	 			= now(),
 								laatija		 			= '$kukarow[kuka]'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$insertres = pupe_query($query);
 					$keikan_tunnus = mysql_insert_id();
 
@@ -786,6 +793,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tunnus IN (".implode(",", $paketin_rivit).")";
 				$updateres = pupe_query($query);
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 
 				$query = "	UPDATE asn_sanomat SET
@@ -793,6 +801,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
 				$updateres = pupe_query($query);
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 				// Laitetaan suuntalava siirtovalmiiksi.
 				$suuntalavan_tunnus = $uusi_suuntalavan_tunnus;

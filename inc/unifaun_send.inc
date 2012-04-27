@@ -618,6 +618,11 @@ class Unifaun {
 
 						$uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
 						$uni_add_val->addAttribute('n', 'custno');
+
+						if ($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") {
+							$uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); # Payment reference. Used with add-on COD.
+							$uni_add_val->addAttribute('n', "reference");
+						}
 					}
 
 					if ($this->toitarow['virallinen_selite'] == "P19" and $this->rakir_row["puhelin"] != "") {

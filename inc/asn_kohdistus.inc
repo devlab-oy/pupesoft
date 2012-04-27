@@ -1,9 +1,7 @@
 <?php
 
 	if (!function_exists("asn_kohdistus")) {
-
 		function asn_kohdistus() {
-
 			global $yhtiorow, $kukarow;
 
 			$php_cli = FALSE;
@@ -24,11 +22,12 @@
 			unset($edellinen_asn_numero);
 			unset($edellinen_paketinnumero);
 			unset($edellinen_paketintunniste);
-			$paketin_tunnukset = array();
-			$paketin_rivit = array();
-			$paketin_tuotteet = array();
-			$virheet = 0;
-			$virhe = "";
+
+			$paketin_tunnukset 	= array();
+			$paketin_rivit 		= array();
+			$paketin_tuotteet 	= array();
+			$virheet 			= 0;
+			$virhe 				= "";
 
 			// Haetaan kaikki käsittelemättömät ASN-rivit
 			$query = "	SELECT *
@@ -118,15 +117,12 @@
 								// päivitetään isä
 								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
 								$updateres = pupe_query($updateisa);
-
-
 							}
 						}
 						// unsetataan alkuperäinen paketin_rivit ja korvataan se talteen otetulla.
 						unset($paketin_rivit);
 						$paketin_rivit = array();
 						$paketin_rivit = $talteen_paketin_tiedot;
-
 					}
 
 					if ($virheet == 0) {
@@ -654,9 +650,7 @@
 	}
 
 	if (!function_exists("asn_kohdista_suuntalava")) {
-
 		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,$SSCC='') {
-
 			global $yhtiorow, $kukarow;
 
 			// Haetaan toimittajan tiedot

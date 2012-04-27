@@ -5,11 +5,11 @@
 	if (!$toot = fopen($teccom_editilaus, "w")) die("Filen $teccom_editilaus luonti epaonnistui!");
 
 	$query = "  SELECT tilausrivi.tunnus,
-				tilausrivi.varattu,
 				tilausrivi.yksikko,
+				round(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
 				ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno
 				FROM tilausrivi
-				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+				JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

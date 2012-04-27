@@ -68,6 +68,28 @@
 				$tuotteelta_tilausno	= (int) $element->OrderRef->BuyerOrderNumber;
 				
 				if ($kpl > 0.0 and $tuote != "") {
+
+					$query = "	SELECT tuotteen_toimittajat.tuotekerroin
+								FROM toimi
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+															#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+															AND tuotteen_toimittajat.toim_tuoteno IN ('{$tuote}','{$tuote2}')
+															AND tuotteen_toimittajat.toim_tuoteno != '')
+								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+								AND toimi.toimittajanro = '{$tavarantoimittajanumero}'
+								AND toimi.tyyppi != 'P'
+								AND toimi.asn_sanomat = 'K'";
+					$tuotekerroin_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
+						$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
+
+						if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+							$kpl /= $tuotekerroin_chk_row['tuotekerroin'];
+						}
+					}
+
 					// tämä siksi ettei haluta tallentaa 0 rivejä kantaan.
 					$sqlinsert =  " INSERT INTO asn_sanomat SET
 									yhtio 				= '$kukarow[yhtio]',

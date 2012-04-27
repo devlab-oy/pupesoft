@@ -45,7 +45,7 @@
 			}
 
 			// Nämä muuttujat kuuluisi olla setattuna:
-/*			
+			/*
 			echo "\n\nLASKUNTIEDOT:\n";
 			echo "01: ".$yhtio."\n";
 			echo "02: ".$verkkotunnus_vas."\n";
@@ -482,45 +482,7 @@
 				else {
 					$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
 				}
-				
-				// Tähän myös toi logiikka, K (tarkista), S/L (ei väliä)
-				// TecCom-lasku
-				// if ($trow["asn_sanomat"] == "K" or $trow["asn_sanomat"] == "L") {
-				// 	// TecCom-lasku
-				// 	$tarkq = "	SELECT count(*) lasku 
-				// 				FROM asn_sanomat 
-				// 				WHERE yhtio = '{$yhtio}'
-				// 				AND laji = 'tec'
-				// 				AND asn_numero = '{$laskun_numero}'
-				// 				AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
-				// 	$tarkresult = pupe_query($tarkq);
-				// 	$tarkrivi = mysql_fetch_assoc($tarkresult);
 
-				// 	if ($trow["asn_sanomat"] == "K") {
-				// 		// asn-sanoma
-				// 		$tarkistusquery = "	SELECT count(*) sanomat
-				// 							FROM asn_sanomat 
-				// 							WHERE yhtio = '{$kukarow['yhtio']}' 
-				// 							AND laji = 'asn' 
-				// 							AND toimittajanumero = '{$laskuttajan_toimittajanumero}'
-				// 							AND tilausnumero in ('".str_replace(",", "','", $laskun_tilausviite)."')";
-				// 		$tarkistusres = pupe_query($tarkistusquery);
-				// 		$tarkistusrivi = mysql_fetch_assoc($tarkistusres);
-				// 	}
-
-				// 	if ($trow["asn_sanomat"] == "K" and $tarkrivi["lasku"] > 0 and $tarkistusrivi["sanomat"] == 0) {
-				// 		$return .= "Kannassa on jo lasku mutta ei sanomaa tilauksille ({$laskun_tilausviite})####ASN\n";
-				// 		mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-sanoma ja lasku", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				// 		return ($return);
-				// 	}
-
-				// 	if ($trow["asn_sanomat"] == "L" and $tarkrivi["lasku"] > 0) {
-				// 		$return .= "Kannassa on jo lasku mutta ei mene eteenpäin ({$laskun_tilausviite})####ASN\n";
-				// 		mail($yhtiorow['alert_email'], mb_encode_mimeheader("ASN-laskun eteenpäin menemisen ongelma", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				// 		return ($return);
-				// 	}
-				// }
-				
 				// katotaan pitääks vaihtaa oletus_vientiä
 				if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {
 
@@ -577,13 +539,13 @@
 				$hyvak[4] = $trow['oletus_hyvak4'];
 				$hyvak[5] = $trow['oletus_hyvak5'];
 
-				$oletustili     = $trow['tilino'];
-				$oletuskust     = $trow['kustannuspaikka'];
-				$oletuskohde    = $trow['kohde'];
-				$oletusprojekti = $trow['projekti'];
-				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
-				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
-				$onko_duplikaatti = false;
+				$oletustili     	= $trow['tilino'];
+				$oletuskust     	= $trow['kustannuspaikka'];
+				$oletuskohde    	= $trow['kohde'];
+				$oletusprojekti 	= $trow['projekti'];
+				$selite         	= $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
+				$laskun_numero		= preg_replace("/[^0-9]/", "", $laskun_numero);
+				$onko_duplikaatti 	= FALSE;
 
 				// Onko tämä kauttalaskutusta?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
@@ -916,14 +878,14 @@
 					if ($laskun_tyyppi == 'TECCOM-INVOICE') {
 						$query = "	SELECT *
 									FROM asn_sanomat
-									WHERE yhtio = '{$yhtio}'
-									AND laji = 'tec'
-									AND asn_numero = '{$laskun_numero}'
+									WHERE yhtio 		 = '{$yhtio}'
+									AND laji 			 = 'tec'
+									AND asn_numero 		 = '{$laskun_numero}'
 									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
 						$duplikaattilasku_check_res = pupe_query($query);
 
 						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-							$onko_duplikaatti = true;
+							$onko_duplikaatti = TRUE;
 						}
 					}
 				}
@@ -1001,7 +963,7 @@
 				if ($krp != 0) {
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
-			
+
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -1030,8 +992,8 @@
 							ultilno_maa			= '$trow[ultilno_maa]',
 							viite 				= '$viite',
 							viesti 				= '$viesti',
-							sisviesti1 			= '$laskun_tilausviite',
-							sisviesti2 			= '',
+							sisviesti1 			= '$trow[ohjeitapankille]',
+							sisviesti2 			= '$laskun_tilausviite',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							lapvm 				= '$vpv-$vpk-$vpp',
 							vienti 				= '$trow[oletus_vienti]',
@@ -1221,7 +1183,7 @@
 					$kohde		= $oletuskohde;
 					$projekti	= $oletusprojekti;
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
-										
+
 					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
@@ -1389,35 +1351,34 @@
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
 
 							$insertquery = "INSERT INTO asn_sanomat SET
-											yhtio = '{$yhtio}',
-											laji = 'tec',
-											asn_numero = '{$laskun_numero}',
-											toimittajanumero = '{$laskuttajan_toimittajanumero}',
-											saapumispvm = '{$saapumispvm_chk}',
-											vastaanottaja = '{$ostaja_asiakkaantiedot['nimi']}',
-											tilausnumero = '{$rtuoteno[$i]['ostotilausnro']}',
-											tilausrivi = '',
-											paketintunniste = '',
-											paketinnumero = '',
-											lahetyslistannro = '',
-											toim_tuoteno = '{$rtuoteno[$i]['tuoteno']}',
-											toim_tuoteno2 = '{$rtuoteno[$i]['tuoteno2']}',
-											kappalemaara = '{$rtuoteno[$i]['kpl']}',
-											hinta = '{$rtuoteno[$i]['hinta']}',
-											lisakulu = '{$rtuoteno[$i]['lisakulu']}',
-											kulu = '{$rtuoteno[$i]['kulu']}',
-											pakkauskulu = '{$laskun_pakkauskulu}',
-											rahtikulu = '{$laskun_rahtikulu}',
-											tilausrivinpositio = '{$rtuoteno[$i]['tilaajanrivinro']}',
-											laatija = 'crond',
-											luontiaika = now()";
+											yhtio 				= '{$yhtio}',
+											laji 				= 'tec',
+											asn_numero 			= '{$laskun_numero}',
+											toimittajanumero 	= '{$laskuttajan_toimittajanumero}',
+											saapumispvm 		= '{$saapumispvm_chk}',
+											vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
+											tilausnumero 		= '{$rtuoteno[$i]['ostotilausnro']}',
+											tilausrivi 			= '',
+											paketintunniste 	= '',
+											paketinnumero 		= '',
+											lahetyslistannro 	= '',
+											toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
+											toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
+											kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
+											hinta 				= '{$rtuoteno[$i]['hinta']}',
+											lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
+											kulu 				= '{$rtuoteno[$i]['kulu']}',
+											pakkauskulu 		= '{$laskun_pakkauskulu}',
+											rahtikulu 			= '{$laskun_rahtikulu}',
+											tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
+											laatija 			= 'crond',
+											luontiaika 			= now()";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
 						}
+
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
-
-					echo "<br>";
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
@@ -1449,7 +1410,7 @@
 						 * F => D
 						 * I => G
 						*/
-						if ($laskun_tyyppi == "UNIKKO-INVOICE" and $trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+						if ($laskun_tyyppi == "UNIKKO-INVOICE" and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I')) {
 
 							if ($trow['oletus_vienti'] == 'C') 		$trow['oletus_vienti'] = 'A';
 							elseif ($trow['oletus_vienti'] == 'F') 	$trow['oletus_vienti'] = 'D';
@@ -1462,7 +1423,7 @@
 							$vienti_upd_res = pupe_query($query);
 						}
 
-						if ($laskun_tyyppi != "TECCOM-INVOICE" or !$onko_duplikaatti) {
+						if ($laskun_tyyppi != "TECCOM-INVOICE") {
 							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 						}
 					}
@@ -1545,7 +1506,6 @@
 										maksu_kurssi = 1
 										WHERE tunnus = '$tunnus'";
 							$xresult = pupe_query($query);
-							//echo "Lasku merkittiin suoraan maksetuksi";
 						}
 					}
 					else {
@@ -1555,7 +1515,6 @@
 										tila = 'Q'
 										WHERE tunnus='$tunnus'";
 							$xresult = pupe_query($query);
-							//echo "Lasku merkittiin odottamaan suoritusta";
 						}
 					}
 				}

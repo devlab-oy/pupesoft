@@ -140,7 +140,6 @@
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
 				// Siirtymävaiheen jälkeen poista lasku.comments tilausnumero ehto !!!!
-
 				// poikkeuskäsittelyä muutamalle toimittajalle.
 
 				$toinen_tuoteno = "";
@@ -214,7 +213,8 @@
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
-							AND tilausrivi.otunnus = '$row[tilausnumero]' AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'
+							AND tilausrivi.otunnus LIKE '%$row[tilausnumero]'
+							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'
 							{$tilausrivi_muuttuja}
 							ORDER BY laadittu asc";
 				$kokeillaan = pupe_query($query);
@@ -237,7 +237,8 @@
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
-								AND lasku.comments like '%{$row["tilausnumero"]}%' AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'
+								AND lasku.comments like '%{$row["tilausnumero"]}%'
+								AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu asc";
 					$kokeillaan = pupe_query($query);
@@ -261,7 +262,7 @@
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.uusiotunnus = 0
-								AND tilausrivi.otunnus = '$row[tilausnumero]'
+								AND tilausrivi.otunnus LIKE '%$row[tilausnumero]'
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu asc";
 					$kokeillaan = pupe_query($query);

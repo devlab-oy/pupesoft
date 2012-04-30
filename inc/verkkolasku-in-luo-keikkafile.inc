@@ -5,9 +5,9 @@
 	// Tarvitaan $rtuoteno jossa on array kaikista ostoreskontralaskun tuotteista
 
 	// Haetaan ostoreskontralaskun tiedot
-	$query = "	SELECT * 
-				FROM lasku 
-				WHERE yhtio = '{$kukarow['yhtio']}' 
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$tunnus}'";
 	$osres = pupe_query($query);
 	$osrow = mysql_fetch_array($osres);
@@ -109,8 +109,8 @@
 						FROM tilausrivi
 						join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						where tilausrivi.yhtio = '$kukarow[yhtio]' and
-						tilausrivi.tunnus = '".$rtuoteno[$i]["tilaajanrivinro"]."' and
-						tilausrivi.tyyppi = 'O'";
+						tilausrivi.tunnus = '{$rtuoteno[$i]['tilaajanrivinro']}'
+						and tilausrivi.tyyppi = 'O'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -125,11 +125,11 @@
 
 				// jos rivi löytyi ja sitä ei ole kohdistettu vielä, kohdistetaan keikkaan ja päivitetään kpl
 				if ($rivirow["uusiotunnus"] == 0) {
-					$query = "	UPDATE tilausrivi SET 
-								uusiotunnus = '{$keikantunnus}', 
-								varattu = '{$kpl}', 
-								hinta = '{$hinta}' 
-								WHERE tunnus = '{$rivirow['tunnus']}' 
+					$query = "	UPDATE tilausrivi SET
+								uusiotunnus = '{$keikantunnus}',
+								varattu = '{$kpl}',
+								hinta = '{$hinta}'
+								WHERE tunnus = '{$rivirow['tunnus']}'
 								AND yhtio = '{$kukarow['yhtio']}'";
 					$result = pupe_query($query);
 
@@ -179,7 +179,7 @@
 						JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}' 
+						AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 						AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus != 0
 						ORDER BY laadittu ASC";
@@ -237,7 +237,7 @@
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
-							AND tilausrivi.otunnus = '{$rtuoteno[$i]['ostotilausnro']}'
+							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus != 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -322,7 +322,8 @@
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
-							AND tilausrivi.otunnus = '{$rtuoteno[$i]['ostotilausnro']}' AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
+							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
+							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -378,7 +379,7 @@
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
-							AND tilausrivi.otunnus = '{$rtuoteno[$i]['ostotilausnro']}'
+							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -460,7 +461,7 @@
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
 							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
@@ -481,7 +482,7 @@
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
 							// tilausrivi pitää olla jo kohdistettu
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
@@ -490,7 +491,7 @@
 							$chk_res = pupe_query($query);
 
 							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'tec'
@@ -505,7 +506,7 @@
 						}
 						else {
 							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'tec'
@@ -568,7 +569,7 @@
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
 
 					if ($tilausrivirow['asn_sanomat'] == 'K') {
-						$query = "	SELECT tunnus 
+						$query = "	SELECT tunnus
 									FROM asn_sanomat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND laji = 'asn'
@@ -734,7 +735,7 @@
 					$upres = pupe_query($query);
 
 					if ($tilausrivirow['asn_sanomat'] == 'K') {
-						$query = "	SELECT tunnus 
+						$query = "	SELECT tunnus
 									FROM asn_sanomat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND laji = 'asn'
@@ -820,33 +821,33 @@
 
 					if ($tilausrivirow['uusiotunnus'] == 0) {
 						// löytyi, ei ole keikalla
-						$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-						$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-						$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-						$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-						$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-						$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-						$ostoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$ostoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$ostoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$ostoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$ostoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						$ostoilla[$i]["tunnus"] 			= $tilausrivirow['tunnus']; // tilausrivi tunnus
+						$ostoilla[$i]["hinta"] 				= $rtuoteno[$i]["hinta"];
+						$ostoilla[$i]["kpl"] 				= $rtuoteno[$i]["kpl"];
+						$ostoilla[$i]["laskuntunnus"]		= $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+						$ostoilla[$i]["tilaajanrivinro"]	= $rtuoteno[$i]["tilaajanrivinro"];
+						$ostoilla[$i]["insert_id"] 			= $rtuoteno[$i]["insert_id"];
+						$ostoilla[$i]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$ostoilla[$i]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$ostoilla[$i]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$ostoilla[$i]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$ostoilla[$i]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$ostoilla[$i]['tuoteno'] 			= $tilausrivirow['tuoteno'];
 					}
 					else {
 						// löytyi, on jo keikalla
-						$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
-						$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
-						$keikoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-						$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-						$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-						$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-						$keikoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$keikoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$keikoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$keikoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$keikoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						$keikoilla[$i]["tunnus"] 			= $tilausrivirow['tunnus'];
+						$keikoilla[$i]["uusiotunnus"] 		= $tilausrivirow['uusiotunnus'];
+						$keikoilla[$i]["kpl"] 				= $rtuoteno[$i]["kpl"];
+						$keikoilla[$i]["hinta"] 			= $rtuoteno[$i]["hinta"];
+						$keikoilla[$i]["tilaajanrivinro"] 	= $rtuoteno[$i]["tilaajanrivinro"];
+						$keikoilla[$i]["insert_id"] 		= $rtuoteno[$i]["insert_id"];
+						$keikoilla[$i]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$keikoilla[$i]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$keikoilla[$i]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$keikoilla[$i]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$keikoilla[$i]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$keikoilla[$i]['tuoteno'] 			= $tilausrivirow['tuoteno'];
 					}
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
@@ -943,7 +944,7 @@
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
 
 							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'tec'
@@ -955,7 +956,7 @@
 							if ($kohdistamatta <= 0) break;
 
 							if ($kokeiltiin['asn_sanomat'] == 'K') {
-								$query = "	SELECT tunnus 
+								$query = "	SELECT tunnus
 											FROM asn_sanomat
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND laji = 'asn'
@@ -1037,7 +1038,7 @@
 						$siistitty 				= implode(",", $lisa_array);
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
@@ -1128,7 +1129,7 @@
 						$siistitty 				= implode(",", $lisa_array);
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
@@ -1297,7 +1298,7 @@
 						$siistitty 				= implode(",", $lisa_array);
 
 						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							$query = "	SELECT tunnus 
+							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji = 'asn'
@@ -1374,9 +1375,9 @@
 								$inskres = pupe_query($lisainsert);
 
 								// päivitetään isä
-								$updateisa = "	UPDATE tilausrivi SET 
-												perheid = tunnus 
-												WHERE yhtio = '{$kukarow['yhtio']}' 
+								$updateisa = "	UPDATE tilausrivi SET
+												perheid = tunnus
+												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus = '{$tilausrivirow['tunnus']}'";
 								$updateres = pupe_query($updateisa);
 							}
@@ -1599,8 +1600,8 @@
 			foreach ($ostoilla as $pointteri) {
 
 				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
-							FROM tilausrivi 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1626,13 +1627,13 @@
 						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
 					}
 
-					$update = "	UPDATE tilausrivi SET 
+					$update = "	UPDATE tilausrivi SET
 								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
-								uusiotunnus = '{$keikan_tunnus}' 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+								uusiotunnus = '{$keikan_tunnus}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
@@ -1642,13 +1643,13 @@
 				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
 				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
-				$update = "	UPDATE tilausrivi SET 
-							hinta = '{$pointteri['hinta']}', 
+				$update = "	UPDATE tilausrivi SET
+							hinta = '{$pointteri['hinta']}',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
 							uusiotunnus = '{$keikan_tunnus}',
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
@@ -1658,7 +1659,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
 				echo "<pre>$query</pre>";
-				pupe_query($update);							
+				pupe_query($update);
 			}
 
 			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikan_tunnus}'";
@@ -1684,8 +1685,8 @@
 			foreach ($keikoilla as $pointteri) {
 
 				$query = "	SELECT hinta, otunnus, perheid, tuoteno, uusiotunnus, suuntalava, ale1, ale2, ale3
-							FROM tilausrivi 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1711,13 +1712,13 @@
 						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
 					}
 
-					$update = "	UPDATE tilausrivi SET 
+					$update = "	UPDATE tilausrivi SET
 								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
-								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
@@ -1727,13 +1728,13 @@
 				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
 				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
-				$update = "	UPDATE tilausrivi SET 
-							hinta = '{$pointteri['hinta']}', 
+				$update = "	UPDATE tilausrivi SET
+							hinta = '{$pointteri['hinta']}',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
@@ -1743,7 +1744,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
 				echo "<pre>$query</pre>";
-				pupe_query($update);		
+				pupe_query($update);
 
 				if ($hinta_chk_row['suuntalava'] != 0) {
 					$query = "	UPDATE suuntalavat SET
@@ -1759,8 +1760,8 @@
 			foreach ($ostoilla as $pointteri) {
 
 				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
-							FROM tilausrivi 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				$hinta_chk_res = pupe_query($query);
 				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
@@ -1786,13 +1787,13 @@
 						$lapsen_lisakululisa = " hinta = {$pointteri['lisakulu']} / {$pointteri['kpl']}, ";
 					}
 
-					$update = "	UPDATE tilausrivi SET 
+					$update = "	UPDATE tilausrivi SET
 								{$lapsen_lisakululisa}
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
-								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}' 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
@@ -1803,12 +1804,12 @@
 				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
 
 				$update = "	UPDATE tilausrivi SET
-							hinta = '{$pointteri['hinta']}', 
+							hinta = '{$pointteri['hinta']}',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
 							uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
@@ -1818,7 +1819,7 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['insert_id']}'";
 				echo "<pre>$query</pre>";
-				pupe_query($update);							
+				pupe_query($update);
 			}
 
 			$tee_kululaskut = "liita";

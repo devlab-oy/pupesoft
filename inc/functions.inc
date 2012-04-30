@@ -14473,7 +14473,7 @@ if (!function_exists("tee_keraysera")) {
 									AND lahdot1.liitostunnus = toimitustapa1.tunnus
 									AND (lahdot1.pvm = CURDATE() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.lahdon_viikonpvm = {$viikonpaiva} or lahdot1.vakisin_kerays != '')
-									AND lahdot1.aktiivi = ''
+									AND lahdot1.aktiivi IN ('', 'T')
 									AND (lahdot1.kerailyn_aloitusaika <= CURTIME() or lahdot1.vakisin_kerays != '')
 									AND (lahdot1.tunnus = lasku1.toimitustavan_lahto or lahdot1.vakisin_kerays != ''))
 					WHERE lasku1.yhtio = '{$kukarow['yhtio']}'
@@ -14597,7 +14597,7 @@ if (!function_exists("tee_keraysera")) {
 							FROM lahdot AS lahdot3
 							WHERE lahdot3.yhtio = toimitustapa1.yhtio
 							AND lahdot3.liitostunnus = toimitustapa1.tunnus
-							AND lahdot3.aktiivi = ''
+							AND lahdot3.aktiivi IN ('', 'T')
 							AND ((lahdot3.pvm = CURDATE() AND lahdot3.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot3.kerailyn_aloitusaika <= CURTIME() AND lahdot3.tunnus = lasku1.toimitustavan_lahto) or lahdot3.vakisin_kerays != '')
 							AND (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']})
 							ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60), lahdot3.tunnus
@@ -14611,7 +14611,7 @@ if (!function_exists("tee_keraysera")) {
 							FROM lahdot AS lahdot4
 							WHERE lahdot4.yhtio = toimitustapa1.yhtio
 							AND lahdot4.liitostunnus = toimitustapa1.tunnus
-							AND lahdot4.aktiivi = ''
+							AND lahdot4.aktiivi IN ('', 'T')
 							AND ((lahdot4.pvm = CURDATE() AND lahdot4.lahdon_viikonpvm = '{$viikonpaiva}' AND lahdot4.kerailyn_aloitusaika <= CURTIME() AND lahdot4.tunnus = lasku1.toimitustavan_lahto) or lahdot4.vakisin_kerays != '')
 							AND (TIME_TO_SEC(TIMEDIFF(lahdot4.lahdon_kellonaika, CURTIME())) / 60) <= ((TIME_TO_SEC(TIMEDIFF('{$aikarajaus}', CURTIME())) / 60) + {$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']})
 							ORDER BY (TIME_TO_SEC(TIMEDIFF(lahdot4.lahdon_kellonaika, CURTIME())) / 60), lahdot4.tunnus

@@ -103,8 +103,8 @@
 			$asiakasluokka = "";
 		}
 
-		// Löytyykö vielä toimitustavan_lahdot oletus ja onko oletus/muutos jo voimassa?
-		$query = "	SELECT tunnus
+		// Löytyykö vielä toimitustavan_lahdot oletus ja onko oletus voimassa?
+		$query1 = "	SELECT tunnus
 					FROM toimitustavan_lahdot
 					WHERE yhtio 			 = '{$kukarow['yhtio']}'
 					AND lahdon_viikonpvm 	 = '{$chk_row['lahdon_viikonpvm']}'
@@ -116,12 +116,12 @@
 					AND liitostunnus 		 = '{$chk_row['liitostunnus']}'
 					AND varasto 			 = '{$chk_row['varasto']}'
 					AND aktiivi				!= 'E'
-					AND alkupvm 			 = '0000-00-00'";
-		$chk_res2 = pupe_query($query);
+					AND (alkupvm = '0000-00-00' OR (alkupvm != '0000-00-00' AND alkupvm <= '{$chk_row['pvm']}'))";
+		$chk_res2 = pupe_query($query1);
 
-		// Aina voimassa olevaa oletusta ei löytnyt, löytyykö 'poistettu' joka on vielä lähdön päivänä voimassa?
+		// Voimassa olevaa oletusta ei löytynyt, löytyykö 'poistettu' joka on vielä lähdön päivänä voimassa?
 		if (mysql_num_rows($chk_res2) == 0) {
-			$query = "	SELECT tunnus
+			$query2 = "	SELECT tunnus
 						FROM toimitustavan_lahdot
 						WHERE yhtio 			 = '{$kukarow['yhtio']}'
 						AND lahdon_viikonpvm 	 = '{$chk_row['lahdon_viikonpvm']}'
@@ -135,7 +135,7 @@
 						AND aktiivi				 = 'E'
 						AND alkupvm 			!= '0000-00-00'
 						AND alkupvm 			 > '{$chk_row['pvm']}'";
-			$chk_res2 = pupe_query($query);
+			$chk_res2 = pupe_query($query2);
 		}
 
 		// Onko lähdössä tilauksia?
@@ -149,6 +149,13 @@
 
 		if (mysql_num_rows($chk_res2) == 0 and mysql_num_rows($chk_res3) == 0) {
 			$query = "	DELETE FROM lahdot
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$chk_row['tunnus']}'";
+			$del_res = pupe_query($query);
+		}
+		elseif (mysql_num_rows($chk_res2) == 0 and mysql_num_rows($chk_res3) != 0) {
+			$query = "	UPDATE lahdot
+						SET aktiivi = 'T'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$chk_row['tunnus']}'";
 			$del_res = pupe_query($query);

@@ -98,7 +98,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "alkupvm") {
 		$tyyppi = 1.5;
 	}

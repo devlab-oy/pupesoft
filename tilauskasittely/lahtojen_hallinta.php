@@ -567,7 +567,8 @@
 					$result = pupe_query($query);
 
 					$toimitustapa_varasto = "";
-					$lahetetaanko_unifaun = FALSE;
+					$lahetetaanko_unifaun_era  = FALSE;
+					$lahetetaanko_unifaun_heti = FALSE;
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$sel_ltun[] = $row['tunnus'];
@@ -581,29 +582,35 @@
 						$toimitustapa_res = pupe_query($query);
 						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
+						// Erätulostus
 						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
-							$lahetetaanko_unifaun = $toimitustapa_row["rahtikirja"];
+							$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
 
 							$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
 							$mergeid_arr[$mergeid] = $mergeid;
 						}
+
+						// Hetitulostus
+						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
+							$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
+						}
 					}
 
 					if (count($sel_ltun) > 0) {
-						if ($lahetetaanko_unifaun !== FALSE) {
+						if ($lahetetaanko_unifaun_era !== FALSE) {
 							foreach ($mergeid_arr as $mergeid) {
 
-								if ($lahetetaanko_unifaun == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+								if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 								}
-								elseif ($lahetetaanko_unifaun == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+								elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 								}
 
 								$query = "	SELECT unifaun_nimi
 											FROM kirjoittimet
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$komento}'";
+											AND tunnus  = '{$komento}'";
 								$kires = pupe_query($query);
 								$kirow = mysql_fetch_assoc($kires);
 
@@ -620,25 +627,9 @@
 
 						$tee 		= "tulosta";
 						$nayta_pdf  = 'foo';
+						$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
 
 						require ("rahtikirja-tulostus.php");
-
-						$query = "	SELECT COUNT(tunnus) as tunnus
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-									AND toimitustavan_lahto = '{$lahto}'";
-						$result = pupe_query($query);
-
-						$row = mysql_fetch_assoc($result);
-
-						if ($row['tunnus'] == count($sel_ltun)) {
-							$query = "	UPDATE lahdot
-										SET aktiivi = 'S'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus  = '{$lahto}'";
-							$upd_res = pupe_query($query);
-						}
 
 						$tee = "";
 					}
@@ -654,14 +645,14 @@
 					$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
 								FROM lasku
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'N'
+								AND lasku.tila 	  = 'N'
 								AND lasku.alatila = 'A'
 								AND lasku.toimitustavan_lahto = '{$lahto}')
 								UNION
 								(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
 								FROM lasku
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'L'
+								AND lasku.tila 	  = 'L'
 								AND lasku.alatila IN ('A','C')
 								AND lasku.toimitustavan_lahto = '{$lahto}')";
 					$result = pupe_query($query);

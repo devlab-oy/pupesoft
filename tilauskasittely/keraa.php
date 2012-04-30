@@ -1843,10 +1843,10 @@
 				}
 			}
 
-			$boob    			= '';
-			$header  			= '';
-			$content 			= '';
-			$rivit   			= '';
+			$boob    = '';
+			$header  = '';
+			$content = '';
+			$rivit   = '';
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 				$query = "	SELECT tunnus

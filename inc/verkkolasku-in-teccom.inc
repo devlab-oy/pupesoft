@@ -261,10 +261,6 @@
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount); // summa
 				}
 
-				// jos rivihinta löytyy, niin käytetään sitä, muussa tapauksessa lasketaan
-				// if (isset($tuotetieto->TotalValue->Amount) and trim($tuotetieto->TotalValue->Amount) != "") {
-				// 	$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount)  / $rtuoteno[$i]["kpl"] ;
-				// }
 				if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
 					$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
 				}

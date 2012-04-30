@@ -1350,6 +1350,8 @@
 							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
 
+							$asn_nettohinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
+
 							$insertquery = "INSERT INTO asn_sanomat SET
 											yhtio 				= '{$yhtio}',
 											laji 				= 'tec',
@@ -1365,7 +1367,7 @@
 											toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
 											toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
 											kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
-											hinta 				= '{$rtuoteno[$i]['hinta']}',
+											hinta 				= '{$asn_nettohinta}',
 											lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
 											kulu 				= '{$rtuoteno[$i]['kulu']}',
 											pakkauskulu 		= '{$laskun_pakkauskulu}',

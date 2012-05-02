@@ -11,6 +11,117 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
+echo "<script type='text/javascript' language='javascript'>";
+require_once("inc/jquery.min.js");
+echo "</script>";
+
+echo "	<script type='text/javascript' charset='utf-8'>
+
+			$(document).ready(function() {
+
+				$('.uusitiliointirivi').click(function() {
+					var i = $('.maara').val() - 1;
+					var ii = $('.maara').val();
+
+					var uusi_rivi = $('tr .rivi_'+i).clone();
+
+					$(uusi_rivi).find('input, select, div').each(function() {
+
+						if ($(this).is('select, input')) {
+
+							if ($(this).is('select') && $(this).attr('name').substring(0, 5) !== 'ivero') {
+								$(this).val('0');
+							}
+
+							if ($(this).attr('id') != false && $(this).attr('id') != undefined && $(this).attr('id').substring(0, 4) !== 'haku') {
+								$(this).attr('id', $(this).attr('id').replace(i, ii));
+							}
+
+							if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
+								$(this).attr('class', $(this).attr('class').replace(i, ii));
+							}
+
+							if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
+								$(this).attr('name', $(this).attr('name').replace(i, ii));
+							}
+
+							if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
+								$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
+							}
+						}
+
+						if ($(this).is('div') && $(this).attr('id').substring(0, 4) == 'nimi') {
+							$(this).attr('id', $(this).attr('id').replace(i, ii));
+							
+							$(this).html('');
+						}
+						else if ($(this).is('div')) {
+							var id = $(this).attr('id');
+							var iduusi = id + ii;
+
+							$(this).attr('id', iduusi);
+							$(this).attr('name', iduusi);
+						}
+
+						if ($(this).is('input')) {
+							$(this).val('');
+
+							var id = $(this).attr('id');
+							var iduusi = id + ii;
+
+							$(this).attr('id', iduusi);
+
+							if ($(this).attr('id').substring(0, 4) == 'haku') {
+								console.log($(this).attr('onkeydown'));
+
+								$(this).removeAttr('onkeydown');
+
+								$(this).bind('keydown', function(event) {
+									return livesearch_keyhandler(event, iduusi, 'lasku', 'EISUBMIT');
+								});
+
+								console.log($(this).attr('onkeyup'));
+
+								$(this).removeAttr('onkeyup');
+
+								$(this).bind('keyup', function(event) {
+									if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
+										sndReq('livesearch_'+iduusi, '?livesearch_tee=TILIHAKU&livesearch_form=lasku&livesearch_hakuid='+iduusi+'&livesearch_nimi=itili['+ii+']&livesearch_submit=EISUBMIT&ohje=off&toim=&livesearch_haku='+$(this).val());
+										keyStrokeIndex = -1;
+									}
+								});
+
+								console.log($(this).attr('onblur'));
+
+								$(this).removeAttr('onblur');
+
+								$(this).bind('blur', function(event) {
+									var selectOptions = document.getElementsByName('selectOptions'+iduusi);
+										for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+											if (document.getElementById(selectOptions[iEl].id).className != '') {
+												return false;
+											}
+										}
+
+										document.getElementById('livesearch_'+iduusi).style.visibility = 'hidden';
+								});
+							}
+						}
+					});
+
+					$(uusi_rivi).removeClass().addClass('rivi_'+ii);
+
+					ii++;
+
+					$('.maara').val(ii);
+
+					$('tr .rivi_'+i).after(uusi_rivi);
+					$('tr .rivi_'+i).after('<tr><td colspan=\'4\'><hr></td></tr>');
+				});
+			});
+
+		</script>";
+
 function poistalaskuserverilta($skanlasku) {
 
 	GLOBAL $kukarow, $yhtiorow;
@@ -1401,11 +1512,11 @@ if ($tee == 'P' or $tee == 'E') {
 
 		for ($i=1; $i<$maara; $i++) {
 
-			echo "<tr><td valign='top'>";
+			echo "<tr class='rivi_{$i}'><td valign='top'>";
 
- 			// Tehaan kentta tai naytetaan popup
+ 			// Tehd‰‰n kentt‰ tai naytet‰‰n popup
 			if ($iulos[$i] == '') {
-				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo jquery_autocomplete("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");											
 			}
 			else {
 				echo "$iulos[$i]";
@@ -1421,7 +1532,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 				if (mysql_num_rows($vresult) != 0) {
 					$vrow = mysql_fetch_assoc($vresult);
-					echo "<br>$vrow[nimi]";
+					echo "<br><div id='nimi_$i'>$vrow[nimi]</div>";
 				}
 			}
 
@@ -1512,6 +1623,8 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 		}
 
+		echo "<tr><td colspan='4'><input type='button' class='uusitiliointirivi' value='Uusi rivi' /></td></tr>";
+
 		echo "</table>";
 
 	} // end taso < 2
@@ -1534,7 +1647,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "<br>
 		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
-		<input type = 'hidden' name = 'maara' value = '$maara'>
+		<input type = 'hidden' class='maara' name = 'maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."' tabindex='-1'></form>";
 
 } // end if tee = 'P'

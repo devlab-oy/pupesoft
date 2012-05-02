@@ -11957,8 +11957,7 @@ if (!function_exists("pupe_DataTables")) {
 						if ($(this).is(':checked')) {
 
 							var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
-
-							var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+							var suoratoimitusrivi  = $('#suoratoimitus_'+rivi_ja_otsikko[0]).val() == 'X' ? 'X' : '';
 
 							$.post('{$_SERVER['SCRIPT_NAME']}',
 								{ 	keikan_otunnus: otunnus,
@@ -12379,8 +12378,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
 								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
-
-								var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
+								var suoratoimitusrivi  = $('#suoratoimitus_'+rivi_ja_otsikko[0]).val() == 'X' ? 'X' : '';
 
 								$.post('{$_SERVER['SCRIPT_NAME']}',
 									{ 	keikan_otunnus: otunnus,

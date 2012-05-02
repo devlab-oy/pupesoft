@@ -146,16 +146,15 @@
 		if ($yhtiorow['suuntalavat'] == 'S') {
 
 			$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
-
-			$suoratoimitusrivi = $_POST['suoratoimitusrivi'];
+			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
 			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
 
 				$query = "	SELECT *
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND keikkatunnus != 0
-							AND keikkatunnus IN ({$valittuotunnus}, {$otunnus})
+							AND keikkatunnus > 0
+							AND keikkatunnus = {$otunnus}
 							AND tila = ''
 							AND sscc = '".t("Suoratoimitus")."'";
 				$chk_suuntalava_res = pupe_query($query);

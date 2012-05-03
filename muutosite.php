@@ -350,10 +350,11 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						FROM tiliotedata
 						LEFT JOIN tiliotedata as t1 on (tiliotedata.yhtio=t1.yhtio and tiliotedata.tyyppi = t1.tyyppi and tiliotedata.aineisto = t1.aineisto and t1.tiliointitunnus > 0)
 						WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
-						AND tiliotedata.alku between '$yhtiorow[tilikausi_alku]' and '$yhtiorow[tilikausi_loppu]'
-						and tiliotedata.tyyppi = 1
-						and left(tiliotedata.tieto,3) = 'T50'
-						and SUBSTRING(tiliotedata.tieto, 7, 1) = 1
+						AND tiliotedata.alku >= '$yhtiorow[tilikausi_alku]'
+						AND tiliotedata.alku <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliotedata.tyyppi = 1
+						AND left(tiliotedata.tieto,3) = 'T50'
+						AND SUBSTRING(tiliotedata.tieto, 7, 1) = 1
 						GROUP BY 1,2,3,4";
 		}
 	}
@@ -562,18 +563,17 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						$subq = "	SELECT oletus_rahatili
 									FROM yriti
 									WHERE yhtio = '$kukarow[yhtio]'
-									and tilino = '$trow[tilino]'";
+									and tilino  = '$trow[tilino]'";
 						$subr = pupe_query($subq);
 						$oratil = mysql_fetch_assoc($subr);
 
 						$subquery = "	SELECT sum(summa) as tiliointisumma
 										FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]'
+										WHERE yhtio  = '$kukarow[yhtio]'
 										and ltunnus in ($ltunnukset[ltunnus])
-										and laatija = 'tiliote'
 										and korjattu = ''
-										and tilino != '$oratil[oletus_rahatili]'
-										and tapvm = '$orgpvm'";
+										and tilino  != '$oratil[oletus_rahatili]'
+										and tapvm    = '$orgpvm'";
 						$subres = pupe_query($subquery);
 						$tsumma = mysql_fetch_assoc($subres);
 
@@ -597,12 +597,11 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						if ($ltunnukset["ltunnus"] != "") {
 							$subquery = "	SELECT distinct ltunnus, tapvm
 											FROM tiliointi
-											WHERE yhtio = '$kukarow[yhtio]'
-											and ltunnus in ($ltunnukset[ltunnus])
-											and laatija = 'tiliote'
+											WHERE yhtio   = '$kukarow[yhtio]'
+											and ltunnus  in ($ltunnukset[ltunnus])
 											and korjattu != ''
-											and tilino != '$oratil[oletus_rahatili]'
-											and tapvm = '$orgpvm'";
+											and tilino   != '$oratil[oletus_rahatili]'
+											and tapvm     = '$orgpvm'";
 							$subres = pupe_query($subquery);
 						}
 

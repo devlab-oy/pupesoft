@@ -3,13 +3,15 @@
 	$data = $_GET;
 	error_reporting(E_ALL);
 	ini_set("display_errors", 1);
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 
-	require ("../inc/connect.inc");
-	require ("../inc/functions.inc");
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
 	function rest_virhe_header($viesti) {
+		// Mikäli kutsutaan esimerkiksi "asiakastarkista-funktiota" ja se palauttaa tekstimuodossa virheen, niin $virhe pitää myös utf8-encodata, tai tulee 500-virhettä.
 		// rest_virhe_header(utf8_encode("Tarkistusvirhe:")." ".utf8_encode($virhe[$i]));
-		header("HTTP/1.0 400 Bad ReQuEsT");
+		header("HTTP/1.0 400 Bad Request");
 		echo json_encode($viesti);
 		die();
 	}
@@ -23,25 +25,27 @@
 	}
 
 	// Palauttaa asiakkaan tiedot
-	function rest_palauta_asiakastiedot($tunnus) {
+	function rest_palauta_asiakastiedot($tunnus, $muoto) {
 
 		global $kukarow, $yhtiorow;
-
-		$hae = " AND ytunnus = '{$tunnus}'";
 
 		// Haetaan asiakkaan tiedot
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '{$kukarow["yhtio"]}'
-					{$hae}";
+					AND tunnus = '{$tunnus}'";
 		$tulos = pupe_query($query);
 
 		if (mysql_num_rows($tulos) == 0) {
 			rest_virhe_header(utf8_encode("Asiakastietoja ei löytynyt"));
 		}
+		elseif (mysql_num_rows($tulos) > 1) {
+			rest_virhe_header(utf8_encode("Asiakastietoja haulle löytyi enemmän kuin yksi. Ei voida jatkaa"));
+		}
 		else {
 			return $tulos;
 		}
+		
 	}
 
 	function rest_tilaa($params) {
@@ -49,20 +53,15 @@
 		global $kukarow, $yhtiorow;
 
 		// Hyväksytään seuraavat parametrit
-		$kpl			= isset($params["kpl"])				? trim($params["kpl"]) : "";
-		$tilausnumero	= isset($params["tilausnumero"])	? trim($params["tilausnumero"]) : "";
+		$kpl			= isset($params["kpl"])				? (float) trim($params["kpl"]) : "";
+		$tilausnumero	= isset($params["tilausnumero"])	? mysql_real_escape_string(trim($params["tilausnumero"])) : "";
 		$tuoteno		= isset($params["tuoteno"])			? mysql_real_escape_string(trim($params["tuoteno"])) : "";
-		$ytunnus 		= isset($params["ytunnus"])			? mysql_real_escape_string(trim($params["ytunnus"])) : "";
-		$moduli 		= isset($params["moduli"])			? mysql_real_escape_string(trim($params["moduli"])) : "REST";
-		$tunnus			= isset($params["tunnus"])			? (int) trim($params["tunnus"]): $kukarow["oletus_asiakas"];
-		$tuotekommentti	= isset($params["$tuotekommentti"])	? mysql_real_escape_string(trim($params["$tuotekommentti"])) : "";
-
-		// Määritellään luo_myyntitilausotsikko -funkkari
-		require("../tilauskasittely/luo_myyntitilausotsikko.inc");
-
+		$tunnus			= isset($params["tunnus"])			? (int) trim($params["tunnus"]) : "";
+		$kommentti		= isset($params["kommentti"])		? mysql_real_escape_string(trim($params["kommentti"])) : "";
 		$toim 	 		= "RIVISYOTTO";
-		$kpl 	 		= (float) $kpl;
-		$lisatty_tun	= 0;
+		
+		// Määritellään luo_myyntitilausotsikko -funkkari
+		require("tilauskasittely/luo_myyntitilausotsikko.inc");
 
 		if ($tuoteno == "") {
 			rest_virhe_header(utf8_encode("Tuotenumero puuttuu"));
@@ -72,18 +71,23 @@
 			rest_virhe_header(utf8_encode("Kappalemäärä ei saa olla 0 tai negatiivinen"));
 		}
 
-		if ($ytunnus == "") {
-			rest_virhe_header(utf8_encode("Ytunnus puuttuu !!"));
-		}
-
 		// tähän haaraan ei voida edes teoriassakaan tulla.
 		if ($tunnus == "" or $tunnus == 0) {
 			rest_virhe_header(utf8_encode("Asiakastunnus puuttuu tai käyttäjän oletusasiakasta ei ole määritelty"));
 		}
 	
-		// Tarkistetaan saldo
-		list($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($tuoteno);
-
+		// asiakas tarkistus
+		// Haetaan asiakkaan tiedot
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND tunnus = '{$tunnus}'";
+		$tulos = pupe_query($query);
+		
+		if (mysql_num_rows($tulos) == 0) {
+			rest_virhe_header(utf8_encode("Asiakasta ei löytynyt järjestelmästä"));
+		}
+		
 		// ei löytynyt tilausta tällä tunnisteella, pitää tehä uus!
 		if ($tilausnumero == 0) {
 			// varmistetaan, että käyttäjällä ei ole mitään kesken
@@ -95,28 +99,24 @@
 						AND kuka 	= '{$kukarow["kuka"]}'";
 			$update = pupe_query($query);
 
-			// kukarow oletusasiakas ei ole ihan oikea tapa tehdä tätä, mutta tässä vaiheessa kun on kesken niin sallin itselleni sen.
-			$tilausnumero = luo_myyntitilausotsikko($toim, $tunnus, "", "", "KESKEN", "", "REST");
+			$tilausnumero = luo_myyntitilausotsikko($toim, $tunnus, "", "", $kommentti, "", "");
 		}
 
 		$kukarow["kesken"] = $tilausnumero;
-
-		$lisa = "";
-
-		if ($moduli != "") {
-			$lisa = " and ohjelma_moduli='{$moduli}' ";
-		}
 
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio 		= '{$kukarow["yhtio"]}'
 					AND laatija 		= '{$kukarow["kuka"]}'
-					AND liitostunnus 	= '{$kukarow["oletus_asiakas"]}'
+					AND liitostunnus 	= '{$tunnus}'
 					AND tila 			= 'N'
-					AND viesti 			= 'KESKEN'
-					AND tunnus 			= '{$tilausnumero}'
-					{$lisa}";
+					AND tunnus 			= '{$tilausnumero}'";
 		$kesken = pupe_query($query);
+		
+		if (mysql_num_rows($kesken) == 0) {
+			rest_virhe_header(utf8_encode("Tilausta ei löytynyt järjestelmästä"));
+		}
+		
 		$laskurow = mysql_fetch_assoc($kesken);
 
 		// haetaan tuotteen tiedot
@@ -128,12 +128,18 @@
 
 		if (mysql_num_rows($tuoteres) == 0) {
 			rest_virhe_header(utf8_encode("Tuotetta \"{$tuoteno}\" ei löytynyt järjestelmästä"));
-
 		}
 
-		// tuote löytyi ok, lisätään rivi
+		// tuote löytyi ok
 		$trow = mysql_fetch_assoc($tuoteres);
 
+		// Tarkistetaan saldo
+		list($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($tuoteno);
+		
+		if ($myytavissa < $kpl) {
+			rest_virhe_header(utf8_encode("Virhe. Saldo ei riitä"));
+		}
+		
 		$ytunnus			= $laskurow["ytunnus"];
 		$kpl				= $kpl;
 		$tuoteno			= $trow["tuoteno"];
@@ -149,78 +155,84 @@
 		$korvaavakielto		= "";
 		$jtkielto 			= $laskurow["jtkielto"];
 		$varataan_saldoa	= "EI";
-		$kommentti			= $tuotekommentti;
+		$kommentti			= $kommentti;
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow["myynnin_alekentat"]; $alepostfix++) {
 			${"ale".$alepostfix} = "";
 		}
 
-		// Suorakopio platformista, epäselvä: $ale1 = $liitostuote ? 100 : "";
-
-		if ($myytavissa < $kpl) {
-			rest_virhe_header(utf8_encode("Virhe. Saldo ei riitä"));
-		}
-
-
-		if (@include("../tilauskasittely/lisaarivi.inc"));
-		elseif (@include("lisaarivi.inc"));
-		else exit;
+		require("tilauskasittely/lisaarivi.inc");
 		
-		return $tilausnumero;
+		rest_ok_header($tilausnumero);
 
 	}
 
+	function rest_login($params) {
+		
+		global $kukarow, $yhtiorow; 
 
-	// käyttäjä, salasana, yhtio, tyyppi (customer, order), versionumero
-	$user		= pupesoft_cleanstring($data["user"]);
-	$pass		= pupesoft_cleanstring($data["pass"]);
-	$yhtio		= pupesoft_cleanstring($data["yhtio"]);
-	$tyyppi		= pupesoft_cleanstring($data["tyyppi"]);
-	$toiminto	= pupesoft_cleanstring($data["toiminto"]);
-	$versio		= (float) pupesoft_cleannumber($data["versio"]);
-#	$url		= JOTAIN ?
- 
-	// Tehdään tarkistukset tähän väliin.
-	if ($user == "") 	rest_virhe_header(utf8_encode("Käyttäjätunnus ei voi olla tyhjä"));
-	if ($pass == "") 	rest_virhe_header(utf8_encode("Salasana ei voi olla tyhjä"));
-	if ($yhtio == "") 	rest_virhe_header(utf8_encode("Yhtiö pitää olla valittuna"));
-	if ($tyyppi == "") 	rest_virhe_header(utf8_encode("Tyyppi pitää olla valittuna"));
-//	if (strpos($url,'https://') === FALSE) rest_virhe_header(utf8_encode("URL-osoite on suojaamaton")); // poista kommenttimerkki ennen kommittia, että voi testata
-	if ($versio != 0.1) rest_virhe_header(utf8_encode("Versionumero ei ole sallittu."));
-	if ($ytunnus == "") rest_virhe_header(utf8_encode("Y-tunnus pitää olla syötettynä"));  	// pakollinen kenttä
+		// Hyväksytään seuraavat parametrit
+		$user = isset($params["user"]) ? mysql_real_escape_string(trim($params["user"])) : "";
+		$pass = isset($params["pass"]) ? md5($params["pass"]) : "";
+		$yhtio = isset($params["yhtio"]) ? mysql_real_escape_string(trim($params["yhtio"])) : "";
+		$versio	= (float) pupesoft_cleannumber($params["versio"]);
+
+		// Tehdään tarkistukset tähän väliin.
+		if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header(utf8_encode("Vain https on sallittu."));
+		if ($versio != 0.1) rest_virhe_header(utf8_encode("Versionumero ei ole sallittu."));
+
+		// Vasta virhetarkistuksien jälkeen.
+		// haetaan ensin käyttäjätiedot, sen jälkeen yhtiön kaikki tiedot ja yhtion_parametrit
+
+		$query = "	SELECT kuka.*
+					FROM kuka
+					WHERE kuka.yhtio = '{$yhtio}'
+					AND kuka.kuka = '{$user}'
+					AND kuka.salasana = '{$pass}'
+					AND kuka.kuka !=''
+					AND kuka.salasana !=''";
+		$result = pupe_query($query);
+		
+		if (mysql_num_rows($result) == 0) {
+			rest_virhe_header(utf8_encode("Syötetty käyttäjätunnus tai salasana on virheellinen"));
+		}
+
+		$kukarow = mysql_fetch_assoc($result);
+
+		// Haetaan yhtiörow
+		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+
+	}
 	
-	// Mikäli tulee jokin muu kuin customer tai order, niin heitetään herja
+	$parametrit = array(
+		'user'	=> $data["user"],
+		'pass'  => $data["pass"],
+		'yhtio' => $data["yhtio"],
+		'versio' => $data["versio"],
+	);
+		
+	rest_login($parametrit);
+	
 	if ($tyyppi != "order" and $tyyppi != "customer") rest_virhe_header(utf8_encode("Valittu tyyppi ei ole sallittu"));
-	
+		
 	// Tarkistetaan "tilauspuolen" muuttujat
 	if ($tyyppi == "order") {
-		if ($tuoteno == "")			rest_virhe_header(utf8_encode("Tuotenumero ei saa olla tyhjä"));
-		if ($kpl <= 0)				rest_virhe_header(utf8_encode("Kappalemäärä ei voi olla negatiivinen taikka tyhjä"));
-		if ($tunnus == 0)			rest_virhe_header(utf8_encode("Asiakas pitää olla valittuna"));
-//		if ($tilausnumero == "")	rest_virhe_header(utf8_encode("Tilausnumero katosi"));
-//		if ($tuotekommentti == "")	rest_virhe_header(utf8_encode("Tuotekommentti katosi"));	
 		
-		// tilaukseen liittyvät muuttujat
-		$tuoteno			= utf8_encode(pupesoft_cleanstring($data["tuoteno"]));
-		$kpl				= (float) pupesoft_cleannumber($data["kpl"]);
-		$tunnus				= (int) pupesoft_cleannumber($data["tunnus"]); // Oletan että passataan asiakas.tunnus
-		$tilausnumero		= (int) pupesoft_cleannumber($data["tilausnumero"]); // Olettamus että lisättäessä riviä, niin passataan avointa M-laskun tunnusta.
-		$tuotekommentti		= (isset($data["tuotekommentti"])) ?  	utf8_encode(pupesoft_cleanstring($data["tuotekommentti"])): "";
-		
-		$params["tuoteno"]		= $tuoteno;
-		$params["kpl"]			= $kpl;
-		$params["tilausnumero"] = $tilausnumero;
-		$params["ytunnus"]		= $ytunnus;
-		$params["tunnus"]		= $tunnus;
-		$params["tuotekommentti"] = $tuotekommentti;
+		$parametrit = array(
+			'tuoteno' 		=> $data["tuoteno"], 
+			'kpl'			=> $data["kpl"], 
+			'tunnus'		=> $data["tunnus"],
+			'kommentti'		=> $data["tilauskommentti"],
+			'tilausnumero'	=> $data["tilausnumero"],
+		);
 
-		$tilausnumero = rest_tilaa($params);
-		rest_ok_header($tilausnumero);
-	
+		rest_tilaa($parametrit);
+
 	}
 
 	if ($tyyppi == "customer") {
-	   	
+	   	if ($ytunnus == "") rest_virhe_header(utf8_encode("Y-tunnus pitää olla syötettynä"));  	// pakollinen kenttä
+		
 	   	// if ($ovttunnus == "")		rest_virhe_header(utf8_encode("OVT-tunnus ei voi olla tyhjää"));	// pakollinen kenttä
 		// if ($nimi == "")				rest_virhe_header(utf8_encode("Nimi ei saa olla tyhjä"));
 		// if ($osoite == "")			rest_virhe_header(utf8_encode("Osoite ei saa olla tyhjä"));
@@ -268,7 +280,7 @@
 		// Oletuksia Pupen puolelta, mikäli niitä ei syötetä, niin HardKoodataan ne tähän.
 		$valkoodi			= (isset($data["valkoodi"])) ? 	utf8_encode(pupesoft_cleanstring($data["valkoodi"])) : "EUR";
 		$tila				= (isset($data["tila"])) ? 		utf8_encode(pupesoft_cleanstring($data["tila"])) : "H";
-		$kansalaisuus		= (isset($data["kansalaisuus"])) ? 		utf8_encode(pupesoft_cleanstring($data["kansalaisuus"])) : "FI";
+		$kansalaisuus		= (isset($data["kansalaisuus"])) ? 	utf8_encode(pupesoft_cleanstring($data["kansalaisuus"])) : "FI";
 		$kieli				= (isset($data["kieli"])) ? 		utf8_encode(pupesoft_cleanstring($data["kieli"])) : "FI";
 
 		// toimitusosoite-tiedot
@@ -322,7 +334,7 @@
 		if ($toiminto == "muokkaa") {
 			$paivityslause = "UPDATE asiakas SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
-			$asiakas_result = rest_palauta_asiakastiedot($ytunnus);	
+			$asiakas_result = rest_palauta_asiakastiedot($ytunnus, "ytunnus");	// muuta !!
 
 			$tarkrow = mysql_fetch_assoc($asiakas_result);
 			$atunnus = $tarkrow["tunnus"];
@@ -343,11 +355,9 @@
 
 				unset($virhe);
 
-				require ("../inc/asiakastarkista.inc");
-				if (function_exists(asiakastarkista)) {
-					asiakastarkista($t, $i, $asiakas_result, $atunnus, $virhe, $tarkrow);
-				}
-
+				require ("inc/asiakastarkista.inc");
+				asiakastarkista($t, $i, $asiakas_result, $atunnus, $virhe, $tarkrow);
+				
 				if ($virhe) rest_virhe_header(utf8_encode("Tarkistusvirhe:")." ".utf8_encode($virhe[$i]));
 			}
 
@@ -418,36 +428,5 @@
 			}
 		}
 	}
-
-
-	// Vasta virhetarkistuksien jälkeen.
-	// haetaan ensin käyttäjätiedot, sen jälkeen yhtiön kaikki tiedot ja yhtion_parametrit
-	
-	$query = "	SELECT kuka.*
-				FROM kuka
-				WHERE kuka.yhtio = '{$yhtio}'
-				AND kuka.kuka = '{$user}'
-				AND kuka.salasana = '".md5($pass)."'";
-	$result = pupe_query($query);
-	if (mysql_num_rows($result) == 0) {
-		rest_virhe_header(utf8_encode("Syötetty käyttäjätunnus tai salasana on virheellinen"));
-	}
-	else {
-		$kukarow = mysql_fetch_assoc($result);
-		
-		$query = "	SELECT yhtio.*, yhtion_parametrit.*
-					FROM yhtio
-					JOIN yhtion_parametrit on (yhtion_parametrit.yhtio = yhtio.yhtio)
-					WHERE yhtio.yhtio = '{$yhtio}'";
-		$result = pupe_query($query);
-	
-		if (mysql_num_rows($result) == 0) {
-			rest_virhe_header(utf8_encode("Yhtiön tieto virheellinen, yhtiötä \"{$yhtio}\" ei löydy. Ota yhteyttä ohjelmistontoimittajaan"));
-		}
-		else {
-			$yhtiorow = mysql_fetch_assoc($result);
-		}
-	}
-
 
 ?>

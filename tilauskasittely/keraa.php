@@ -14,20 +14,20 @@
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
-	if (!isset($toim)) 			$toim = '';
-	if (!isset($id)) 			$id = 0;
-	if (!isset($tee)) 			$tee = '';
-	if (!isset($jarj)) 			$jarj = '';
-	if (!isset($etsi)) 			$etsi = '';
-	if (!isset($tuvarasto)) 	$tuvarasto = '';
-	if (!isset($tumaa)) 		$tumaa = '';
-	if (!isset($tutoimtapa)) 	$tutoimtapa = '';
-	if (!isset($tutyyppi))	 	$tutyyppi = '';
-	if (!isset($rahtikirjaan)) 	$rahtikirjaan = '';
-	if (!isset($sorttaus)) 		$sorttaus = '';
-	if (!isset($keraajalist)) 	$keraajalist = '';
-	if (!isset($sel_lahete)) 	$sel_lahete = array();
-	if (!isset($sel_oslapp)) 	$sel_oslapp = array();
+	if (!isset($toim)) 			$toim 			= '';
+	if (!isset($id)) 			$id 			= 0;
+	if (!isset($tee)) 			$tee 			= '';
+	if (!isset($jarj)) 			$jarj 			= '';
+	if (!isset($etsi)) 			$etsi 			= '';
+	if (!isset($tuvarasto)) 	$tuvarasto 		= '';
+	if (!isset($tumaa)) 		$tumaa 			= '';
+	if (!isset($tutoimtapa)) 	$tutoimtapa 	= '';
+	if (!isset($tutyyppi))	 	$tutyyppi 		= '';
+	if (!isset($rahtikirjaan)) 	$rahtikirjaan 	= '';
+	if (!isset($sorttaus)) 		$sorttaus 		= '';
+	if (!isset($keraajalist)) 	$keraajalist 	= '';
+	if (!isset($sel_lahete)) 	$sel_lahete 	= array();
+	if (!isset($sel_oslapp)) 	$sel_oslapp 	= array();
 
 	$keraysvirhe = 0;
 	$virherivi   = 0;
@@ -1320,7 +1320,7 @@
 							lasku.toimitustapa,
 							lasku.jaksotettu
 							FROM lasku
-							LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.nouto=''
+							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 							where lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tunnus in ($tilausnumeroita)
 							and lasku.tila in ($tila)

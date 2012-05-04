@@ -1,6 +1,7 @@
 <?php
 
 $lue_data_output_file = "";
+$lue_data_output_text = "";
 $lue_data_err_file = "";
 $lue_data_virheelliset_rivit = array();
 
@@ -9,6 +10,12 @@ $lue_data_virheelliset_rivit = array();
 ini_set('zlib.output_compression', 0);
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
+
+ini_set("memory_limit", "5G");
+ini_set("post_max_size", "100M");
+ini_set("upload_max_filesize", "100M");
+ini_set("mysql.connect_timeout", 600);
+ini_set("max_execution_time", 18000);
 
 if (php_sapi_name() == 'cli') {
 
@@ -19,8 +26,6 @@ if (php_sapi_name() == 'cli') {
 	$cli = true;
 
 	ini_set("include_path", ".".PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
-	ini_set("mysql.connect_timeout", 600);
-	ini_set("memory_limit", "1G");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -82,19 +87,25 @@ if (php_sapi_name() == 'cli') {
 	}
 }
 else {
-	// Laitetaan max time 5H
-	ini_set("max_execution_time", 18000);
 	require ("inc/parametrit.inc");
 	$cli = false;
 }
 
-// Funktio, jolla tehd‰‰n luedatan output
-function lue_data_echo($string) {
+$query = "SET GLOBAL max_allowed_packet = 83886080";
+mysql_query($query) or die($query);
 
-	global $cli, $lue_data_output_file;
+// Funktio, jolla tehd‰‰n luedatan output
+function lue_data_echo($string, $now = false) {
+
+	global $cli, $lue_data_output_file, $lue_data_output_text;
 
 	if ($cli === FALSE) {
-		echo $string;
+		if ($now === TRUE) {
+			echo $string;
+		}
+		else {
+			$lue_data_output_text .= $string;
+		}
 	}
 	elseif ($lue_data_output_file == "") {
 		echo strip_tags($string)."\n";
@@ -359,6 +370,7 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
+			lue_data_echo($lue_data_output_text, true);
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -616,23 +628,35 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
+			lue_data_echo($lue_data_output_text, true);
 			require ("inc/footer.inc");
 			exit;
 		}
 
 		lue_data_echo("<br><font class='message'>".t("Tiedosto ok, aloitetaan p‰ivitys")." $table_mysql-".t("tauluun")."...<br></font>");
+		lue_data_echo($lue_data_output_text, true);
 
+		$lue_data_output_text = "";
 		$rivilaskuri = 1;
 
 		$puun_alkio_index_plus = 0;
 
 		$max_rivit = count($rivit);
 
+		if (!$cli or $lue_data_output_file != "") {
+			require('inc/ProgressBar.class.php');
+			$bar = new ProgressBar();
+			$bar->initialize($max_rivit);
+		}
+
 		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivill‰ piirret‰‰n progressbar, ellei ole output loggaus p‰‰ll‰
 			if ($cli and $lue_data_output_file == "") {
 				progress_bar($eriviindex, $max_rivit);
+			}
+			elseif (!$cli or $lue_data_output_file != "") {
+				$bar->increase();
 			}
 
 			$hylkaa    = 0;
@@ -659,10 +683,6 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 			$chtoimittaja		= '';
-
-			if ($cli === FALSE and ($rivilaskuri % 500) == 0) {
-				echo "<font class='message'>K‰sitell‰‰n rivi‰: $rivilaskuri</font><br>";
-			}
 
 			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
 				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
@@ -1427,6 +1447,7 @@ if ($kasitellaan_tiedosto) {
 							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2' and $rivi[$r] != "") {
 								$etsitunnus = " SELECT tunnus
 												FROM asiakas
+												USE INDEX (toim_ovttunnus_index)
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND toim_ovttunnus = '$rivi[$r]'
 												AND toim_ovttunnus != ''
@@ -1884,7 +1905,7 @@ if ($kasitellaan_tiedosto) {
 			}
 		}
 
-		lue_data_echo(t("P‰ivitettiin")." $lask ".t("rivi‰")."!<br><br>");
+		lue_data_echo("<br><font class='message'>".t("P‰ivitettiin")." $lask ".t("rivi‰")."!</font><br><br>");
 
 		// Kirjoitetaan LOG fileen lopputagi, jotta tiedet‰‰n ett‰ ajo on valmis
 		if ($lue_data_output_file != "") {
@@ -1932,6 +1953,8 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 }
+
+lue_data_echo("<br>".$lue_data_output_text, true);
 
 if (!$cli) {
 	// Taulut, jota voidaan k‰sitell‰
@@ -2094,5 +2117,3 @@ if (!$cli) {
 }
 
 require ("inc/footer.inc");
-
-?>

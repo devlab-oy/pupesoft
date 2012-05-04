@@ -548,17 +548,24 @@
 				$rows = array();
 
 				if ($yhtio == "REFERENSSI") {
-					$file = fopen("http://api.devlab.fi/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
-					$rivi = fgets($file);
+					$ch  = curl_init();
+					curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+					curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+					curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+					curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+					curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+					$referenssit = curl_exec ($ch);
+					$referenssit = explode("\n", trim($referenssit));
 
-					$lask = 0;
+					// Eka rivi roskikseen
+					array_shift($referenssit);
 
-					while (!feof($file)) {
+					$rows = array();
 
-						$rivi = fgets($file);
+					foreach ($referenssit as $rivi) {
 
 						// luetaan rivi tiedostosta..
-						$rivi	 = explode("\t", trim($rivi));
+						$rivi = explode("\t", trim($rivi));
 
 						if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {
 							$rows[$lask]["sovellus"] 	= $rivi[0];

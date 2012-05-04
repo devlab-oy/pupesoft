@@ -91,9 +91,6 @@ else {
 	$cli = false;
 }
 
-$query = "SET GLOBAL max_allowed_packet = 83886080";
-mysql_query($query) or die($query);
-
 // Funktio, jolla tehd‰‰n luedatan output
 function lue_data_echo($string, $now = false) {
 

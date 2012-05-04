@@ -2,100 +2,99 @@
 
 echo "<font class='head'>".t("Laskuhaku")."</font><hr>";
 
-if (isset($tee) and $summa1 == "" and $pvm == "") {
-	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
-	unset($tee);
-}
-
 if (!isset($tee)) $tee='';
 
 $index = "";
-$ehto = "";
-$jarj = "";
+$ehto  = "";
+$jarj  = "";
 
 // Q = laskuja tilansa mukaan
 if ($tee == 'Q') {
 	$index = " use index (tila_index) ";
-	$ehto = "tila = '$itila' and alatila = '$ialatila'";
-	$jarj = "tapvm";
+	$ehto = " lasku.tila = '$itila' and lasku.alatila = '$ialatila' ";
+	$jarj = " lasku.tapvm ";
 }
 
 // E = erääntyviä laskuja pvm:n mukaan
 if ($tee == 'E') {
-	$ehto = "tila in ('H','Y','M','P','Q') and erpcm='$pvm'";
-	$jarj = "summa";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.erpcm='$pvm' ";
+	$jarj = " lasku.summa ";
 }
 
 // M = maksettavia laskuja pvm:n mukaan
 if ($tee == 'M') {
-	$ehto = "tila in ('H','Y','M','P','Q') and olmapvm='$pvm'";
-	$jarj = "summa";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.olmapvm='$pvm' ";
+	$jarj = " lasku.summa ";
 }
 
 // S = Etsitään summaa laskulta
 if ($tee == 'S') {
 
-	if (strlen($summa2) == 0) {
-		$summa2 = $summa1;
+	if (strlen($summa1) > 0) {
+		$summa1 = (float) str_replace( ",", ".", $summa1);
 	}
 
-	$summa1 = (float) str_replace( ",", ".", $summa1);
-	$summa2 = (float) str_replace( ",", ".", $summa2);
+	if (strlen($summa2) > 0) {
+		$summa2 = (float) str_replace( ",", ".", $summa2);
+	}
 
-	$ehto = "tila in ('H','Y','M','P','Q') and ";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') ";
 	$index = " use index (yhtio_tila_summa)";
+	$jarj  = " lasku.tapvm desc ";
 
-	if ($summa1 == $summa2) {
-		$ehto .= "summa in ($summa1, ".($summa1*-1).") ";
-		$jarj = "tapvm desc";
+	if (strlen($summa1) > 0 and strlen($summa2) == 0) {
+		$ehto .= " and lasku.summa in ($summa1, ".($summa1*-1).") ";
 	}
-	else {
-		$ehto .= "summa >= " . $summa1 . " and summa <= " . $summa2;
-		$jarj = "summa, tapvm";
+	elseif (strlen($summa1) > 0 and strlen($summa2) > 0) {
+		$ehto .= " and lasku.summa >= $summa1 and lasku.summa <= $summa2 ";
+		$jarj = " lasku.summa, lasku.tapvm";
 	}
 }
 
 // N = Etsitään nimeä laskulta
 if ($tee == 'N') {
-	$ehto = "tila in ('H','Y','M','P','Q') and nimi like '%".$summa1."%'";
-	$jarj = "nimi, tapvm desc";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.nimi like '%$summa1%'";
+	$jarj = " lasku.nimi, lasku.tapvm desc";
 }
 
 // V = Etsitään viitettä laskulta
 if ($tee == 'V') {
-	$ehto = "tila in ('H','Y','M','P','Q') and viite like '%$summa1%'";
-	$jarj = "nimi, summa";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viite like '%$summa1%'";
+	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // K = Etsitään kommenttia laskulta
 if ($tee == 'K') {
-	$ehto = "tila in ('H','Y','M','P','Q') and comments like '%$summa1%'";
-	$jarj = "nimi, summa";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.comments like '%$summa1%'";
+	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // W = Etsitään Viestillä laskulta
 if ($tee == 'W') {
-	$ehto = "tila in ('H','Y','M','P','Q') and viesti like '%$summa1%'";
-	$jarj = "nimi, summa";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viesti like '%$summa1%'";
+	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // T = Laskun tunnus
 if ($tee == 'T') {
-	$ehto = "tila in ('H','Y','M','P','Q') and tunnus = '$summa1'";
-	$jarj = "nimi, summa";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.tunnus = '$summa1'";
+	$jarj  = " lasku.nimi, lasku.summa";
+	$index = " use index (PRIMARY) ";
 }
 
 // L = Toimittajan laskunumero
 if ($tee == 'L') {
-	$ehto = "tila in ('H','Y','M','P','Q') and laskunro = '$summa1'";
-	$jarj = "nimi, summa";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.laskunro = '$summa1'";
+	$jarj  = " lasku.nimi, lasku.summa";
+	$index = " use index (yhtio_tila_laskunro) ";
 }
 
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
-	$ehto .= " and tapvm >= '$alkuvv-$alkukk-$alkupp' and tapvm <= '$loppuvv-$loppukk-$loppupp' ";
+	$ehto .= " and lasku.tapvm >= '$alkuvv-$alkukk-$alkupp' and lasku.tapvm <= '$loppuvv-$loppukk-$loppupp' ";
+
+	if ($index == "") $index = " use index (yhtio_tila_tapvm) ";
 }
 
-echo "<br>";
 echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
 echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
 echo "<table>";
@@ -179,11 +178,32 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
-$sel=array();
+$query = "	SELECT tunnus
+			FROM kustannuspaikka
+			WHERE yhtio = '$kukarow[yhtio]'
+			and tyyppi = 'K'
+			and kaytossa != 'E'
+			LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+
+	echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+
+	$monivalintalaatikot = array("KUSTP");
+	$noautosubmit = TRUE;
+	$piirra_otsikot = FALSE;
+
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "</td></tr>";
+}
+
+$sel = array();
 $sel[$tee] = "SELECTED";
 
 echo "<tr>";
-echo "<th>".t("Etsi lasku")."</th>";
+echo "<th>".t("Hakulaji")."</th>";
 echo "<td><select name = 'tee'>";
 echo "<option value = 'S' $sel[S]>".t("Summalla")."</option>";
 echo "<option value = 'N' $sel[N]>".t("Nimellä")."</option>";
@@ -191,9 +211,10 @@ echo "<option value = 'V' $sel[V]>".t("Viitteellä")."</option>";
 echo "<option value = 'W' $sel[W]>".t("Viestillä")."</option>";
 echo "<option value = 'K' $sel[K]>".t("Kommentilla")."</option>";
 echo "<option value = 'L' $sel[L]>".t("Laskunumerolla")."</option>";
-echo "</select></td>";
-echo "<td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
-echo "<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>";
+echo "</select></td></tr>";
+
+echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
+echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
 echo "</table>";
@@ -203,14 +224,30 @@ echo "<hr><br><br>";
 $formi = 'valinta';
 $kentta = 'summa1';
 
+if ($tee != "" and $summa1 == "" and $pvm == "" and (!isset($lisa) or $lisa == "")) {
+	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
+	$tee = "";
+}
+
 if ($tee != '') {
 
 	$alku += 0;
 
-	$query = "	SELECT tapvm, erpcm, concat_ws('<br>', nimi, nimitark) nimi, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, alatila, tunnus, if(laskunro = 0, '', laskunro) laskunro
+	if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+		$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+	}
+	else {
+		$tiliointilisa = '';
+	}
+
+	$query = "	SELECT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
+				lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
+				lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 			  	FROM lasku $index
+				$tiliointilisa
 			  	WHERE $ehto
-				and yhtio = '$kukarow[yhtio]'
+				and lasku.yhtio = '$kukarow[yhtio]'
+				$lisa
 			  	ORDER BY $jarj
 			  	LIMIT $alku, 50";
 	$result = mysql_query($query) or pupe_error($query);

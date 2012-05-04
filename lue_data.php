@@ -3,6 +3,7 @@
 $lue_data_output_file = "";
 $lue_data_err_file = "";
 $lue_data_virheelliset_rivit = array();
+$api_status = TRUE;
 
 // Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 //apache_setenv('no-gzip', 1);
@@ -84,16 +85,22 @@ if (php_sapi_name() == 'cli') {
 else {
 	// Laitetaan max time 5H
 	ini_set("max_execution_time", 18000);
-	require ("inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") !== FALSE) {
+		require("inc/parametrit.inc");
+	}
 	$cli = false;
 }
 
 // Funktio, jolla tehd‰‰n luedatan output
 function lue_data_echo($string) {
 
-	global $cli, $lue_data_output_file;
+	global $cli, $lue_data_output_file, $api_kentat, $api_output;
 
-	if ($cli === FALSE) {
+	if (isset($api_kentat)) {
+		// $api_output .= $string;
+		$api_output .= $string."\n";
+	}
+	elseif ($cli === FALSE) {
 		echo $string;
 	}
 	elseif ($lue_data_output_file == "") {
@@ -130,13 +137,13 @@ if (!$cli and $oikeurow['paivitys'] != '1') {
 }
 
 if (!isset($table)) $table = '';
+
 $kasitellaan_tiedosto = FALSE;
+require ("inc/pakolliset_sarakkeet.inc");
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
 	$kasitellaan_tiedosto = TRUE;
-
-	require ("inc/pakolliset_sarakkeet.inc");
 
 	if ($_FILES['userfile']['size'] == 0) {
 		lue_data_echo("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
@@ -155,13 +162,19 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		$kasitellaan_tiedosto = FALSE;
 	}
 }
+elseif (isset($api_kentat) and count($api_kentat) > 0) {
+	$kasitellaan_tiedosto = TRUE;
+}
 
 if ($kasitellaan_tiedosto) {
 
 	/** K‰sitelt‰v‰n filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
-	if ($ext == "DATAIMPORT") {
+	if (isset($api_kentat) and count($api_kentat) > 0) {
+		$excelrivit = $api_kentat;		
+	}
+	elseif ($ext == "DATAIMPORT") {
 		/** Ladataan CSV file **/
 		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
@@ -443,7 +456,7 @@ if ($kasitellaan_tiedosto) {
 	*/
 
 	$taulunrivit_keys = array_keys($taulunrivit);
-
+	
 	for ($tril = 0; $tril < count($taulunrivit); $tril++) {
 
 		$taulu = $taulunrivit_keys[$tril];
@@ -545,7 +558,7 @@ if ($kasitellaan_tiedosto) {
 					// yhtio ja tunnus kentti‰ ei saa koskaan muokata...
 					if ($column == 'YHTIO' or $column == 'TUNNUS') {
 						lue_data_echo("<font class='error'>".t("Yhtiˆ- ja tunnussaraketta ei saa muuttaa")." $table_mysql-".t("taulussa")."!</font><br>");
-						$vikaa++;
+						$vikaa++;						
 					}
 
 					if (in_array($column, $pakolliset)) {
@@ -574,7 +587,7 @@ if ($kasitellaan_tiedosto) {
 				lue_data_echo("<font class='error'>".t("Tiedostossa on tyhji‰ sarakkeiden otsikoita")."!</font><br>");
 			}
 		}
-
+		
 		// Oli virheellisi‰ sarakkeita tai pakollisia ei lˆytynyt..
 		if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0 or (is_array($wherelliset) and $wheretarkea != count($wherelliset))) {
 
@@ -616,8 +629,17 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
-			require ("inc/footer.inc");
-			exit;
+			
+			if (!isset($api_kentat)) {
+				require ("inc/footer.inc");
+				exit;
+			}
+			else {
+				// Jos tullaan api.php:st‰ ja p‰‰dyt‰‰n virheeseen, t‰ll‰ estet‰‰n ettei menn‰ for-looppiin riville 650
+				// EI voida sanoa EXIT tai DIE koska api.php pit‰‰ menn‰ loppuun.
+				$rivit = array();
+				$api_status = FALSE;
+			}
 		}
 
 		lue_data_echo("<br><font class='message'>".t("Tiedosto ok, aloitetaan p‰ivitys")." $table_mysql-".t("tauluun")."...<br></font>");
@@ -1880,6 +1902,7 @@ if ($kasitellaan_tiedosto) {
 
 			// Meill‰ oli joku virhe
 			if ($tila == 'ohita' or $hylkaa > 0) {
+				$api_status = FALSE;
 				$lue_data_virheelliset_rivit[$rivilaskuri-1] = $excelrivit[$rivilaskuri-1];
 			}
 		}
@@ -1933,7 +1956,7 @@ if ($kasitellaan_tiedosto) {
 	}
 }
 
-if (!$cli) {
+if (!$cli and !isset($api_kentat)) {
 	// Taulut, jota voidaan k‰sitell‰
 	$taulut = array(
 		'abc_parametrit'                  => 'ABC-parametrit',
@@ -2093,6 +2116,6 @@ if (!$cli) {
 		<br>";
 }
 
-require ("inc/footer.inc");
+if (!isset($api_kentat)) require ("inc/footer.inc");
 
 ?>

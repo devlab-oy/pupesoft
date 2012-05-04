@@ -26,6 +26,7 @@
 					FROM oikeu
 					WHERE yhtio in ($yht)
 					and kuka = ''
+					and sovellus != ''
 					$lisa
 					GROUP BY sovellus, nimi, alanimi
 					ORDER BY sovellus, jarjestys, jarjestys2";
@@ -98,14 +99,21 @@
 
 	if (isset($synkronoireferenssi) and count($syncyhtiot) > 0) {
 
-		$file = fopen("http://api.devlab.fi/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
-		$rivi = fgets($file);
-		$lask = 0;
+		$ch  = curl_init();
+		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+		$referenssit = curl_exec ($ch);
+		$referenssit = explode("\n", trim($referenssit));
+
+		// Eka rivi roskikseen
+		array_shift($referenssit);
+
 		$rows = array();
 
-		while (!feof($file)) {
-
-			$rivi = fgets($file);
+		foreach ($referenssit as $rivi) {
 
 			// luetaan rivi tiedostosta..
 			$rivi = explode("\t", trim($rivi));
@@ -126,9 +134,10 @@
 			}
 		}
 
-		foreach($syncyhtiot as $yhtio) {
+		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
+
 		$yht = substr($yht,0,-1);
 
 		if ($sovellus != '') {
@@ -166,7 +175,7 @@
 		$jarj  = 0;
 		$jarj2 = 0;
 
-		foreach($rows as $row) {
+		foreach ($rows as $row) {
 
 			if ($edsovellus != $row["sovellus"]) {
 				$jarj  = 0;
@@ -186,7 +195,7 @@
 				$jarj2 += 10;
 			}
 
-			foreach($syncyhtiot as $yhtio) {
+			foreach ($syncyhtiot as $yhtio) {
 				$query = "	SELECT *
 							FROM oikeu
 							WHERE yhtio 	= '$yhtio'
@@ -196,7 +205,7 @@
 							and alanimi		= '$row[alanimi]'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($result) == 0) {
+				if (mysql_num_rows($result) == 0 and $row["sovellus"] != "") {
 
 					$query = "	INSERT into oikeu
 								SET
@@ -231,7 +240,6 @@
 			$adalan 		= $row["alanimi"];
 		}
 	}
-
 
 	if ($tee == "PAIVITAJARJETYS") {
 		foreach ($jarjestys as $tun => $jarj) {

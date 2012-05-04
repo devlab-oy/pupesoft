@@ -2,16 +2,11 @@
 
 echo "<font class='head'>".t("Laskuhaku")."</font><hr>";
 
-if (isset($tee) and $summa1 == "" and $pvm == "") {
-	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
-	unset($tee);
-}
-
 if (!isset($tee)) $tee='';
 
 $index = "";
-$ehto = "";
-$jarj = "";
+$ehto  = "";
+$jarj  = "";
 
 // Q = laskuja tilansa mukaan
 if ($tee == 'Q') {
@@ -35,28 +30,30 @@ if ($tee == 'M') {
 // S = Etsitään summaa laskulta
 if ($tee == 'S') {
 
-	$summa1 = (float) str_replace( ",", ".", $summa1);
+	if (strlen($summa1) > 0) {
+		$summa1 = (float) str_replace( ",", ".", $summa1);
+	}
 
-	if (strlen($summa2) != 0) {
+	if (strlen($summa2) > 0) {
 		$summa2 = (float) str_replace( ",", ".", $summa2);
 	}
 
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and ";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') ";
 	$index = " use index (yhtio_tila_summa)";
+	$jarj  = " lasku.tapvm desc ";
 
-	if (strlen($summa2) == 0) {
-		$ehto .= " lasku.summa in ($summa1, ".($summa1*-1).") ";
-		$jarj = " lasku.tapvm desc ";
+	if (strlen($summa1) > 0 and strlen($summa2) == 0) {
+		$ehto .= " and lasku.summa in ($summa1, ".($summa1*-1).") ";
 	}
-	else {
-		$ehto .= " lasku.summa >= " . $summa1 . " and lasku.summa <= " . $summa2;
+	elseif (strlen($summa1) > 0 and strlen($summa2) > 0) {
+		$ehto .= " and lasku.summa >= $summa1 and lasku.summa <= $summa2 ";
 		$jarj = " lasku.summa, lasku.tapvm";
 	}
 }
 
 // N = Etsitään nimeä laskulta
 if ($tee == 'N') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.nimi like '%".$summa1."%'";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.nimi like '%$summa1%'";
 	$jarj = " lasku.nimi, lasku.tapvm desc";
 }
 
@@ -80,21 +77,24 @@ if ($tee == 'W') {
 
 // T = Laskun tunnus
 if ($tee == 'T') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.tunnus = '$summa1'";
-	$jarj = " lasku.nimi, lasku.summa";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.tunnus = '$summa1'";
+	$jarj  = " lasku.nimi, lasku.summa";
+	$index = " use index (PRIMARY) ";
 }
 
 // L = Toimittajan laskunumero
 if ($tee == 'L') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.laskunro = '$summa1'";
-	$jarj = " lasku.nimi, lasku.summa";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.laskunro = '$summa1'";
+	$jarj  = " lasku.nimi, lasku.summa";
+	$index = " use index (yhtio_tila_laskunro) ";
 }
 
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
 	$ehto .= " and lasku.tapvm >= '$alkuvv-$alkukk-$alkupp' and lasku.tapvm <= '$loppuvv-$loppukk-$loppupp' ";
+
+	if ($index == "") $index = " use index (yhtio_tila_tapvm) ";
 }
 
-echo "<br>";
 echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
 echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
 echo "<table>";
@@ -223,6 +223,11 @@ echo "<hr><br><br>";
 
 $formi = 'valinta';
 $kentta = 'summa1';
+
+if ($tee != "" and $summa1 == "" and $pvm == "" and (!isset($lisa) or $lisa == "")) {
+	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
+	$tee = "";
+}
 
 if ($tee != '') {
 

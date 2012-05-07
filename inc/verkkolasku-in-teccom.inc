@@ -272,7 +272,7 @@
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
 
-					$node_search = $tuotetieto->xpath("//AllowOrCharge");
+					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
 
 					foreach ($node_search as $node) {
 

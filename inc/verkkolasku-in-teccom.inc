@@ -29,12 +29,25 @@
 	$laskuttajan_ovt				= "";
 	$laskuttajan_nimi				= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Name1);
 	$laskuttajan_toimittajanumero	= utf8_decode($xml->InvoiceHeader->SellerParty->PartyNumber);
+	$laskun_pankkiviite				= "";
+	$laskuttajan_vat				= "";
+	$laskun_asiakastunnus			= "";
+	$laskun_pakkauskulu				= 0;
+	$laskun_rahtikulu				= 0;
 
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
 		$laskuttajan_toimittajanumero = "123067";
+
+		// Tarkistusnumero
+		$viite = $laskun_numero;
+
+		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+		include("inc/generoiviite.inc");
+
+		$laskun_pankkiviite = $viite;
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "LES-7") {
 		$laskuttajan_toimittajanumero = "123080";
@@ -45,11 +58,6 @@
 	elseif ($laskuttajan_toimittajanumero == "112") {
 		$laskuttajan_toimittajanumero = "123442";
 	}
-
-	$laskuttajan_vat		= "";
-	$laskun_asiakastunnus	= "";
-	$laskun_pakkauskulu		= 0;
-	$laskun_rahtikulu		= 0;
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
@@ -80,21 +88,6 @@
 		$rivi = array_unique($rivi); // otetaan uniikit
 		$rivi = array_values($rivi); // poistetaan turhat välit
 		$laskun_tilausviite = implode(",",$rivi);
-	}
-
-	// Jos toimittaja on BOSCH
-	if ($laskuttajan_toimittajanumero == "123067") {
-
-		// Tarkistusnumero
-		$viite = $laskun_numero;
-
-		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
-		include("inc/generoiviite.inc");
-
-		$laskun_pankkiviite = $viite;
-	}
-	else {
-		$laskun_pankkiviite	= "";
 	}
 
 	$laskun_asiakkaan_tilausnumero = "";

@@ -1353,9 +1353,6 @@
 							$asn_nettohinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
-												ale1 				= '{$rtuoteno[$i]['ale1']}',
-												ale2 				= '{$rtuoteno[$i]['ale2']}',
-												ale3 				= '{$rtuoteno[$i]['ale3']}',
 												asn_numero 			= '{$laskun_numero}',
 												hinta 				= '{$asn_nettohinta}',
 												kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
@@ -1364,6 +1361,9 @@
 												laatija 			= 'crond',
 												lahetyslistannro 	= '',
 												laji 				= 'tec',
+												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
+												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
+												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
 												lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
 												luontiaika 			= now(),
 												paketinnumero 		= '',

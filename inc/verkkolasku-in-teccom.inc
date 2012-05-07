@@ -265,11 +265,11 @@
 					$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
 				}
 				else {
-					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ;
+					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 				}
 
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
-				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and (float) trim($tuotetieto->AllowOrCharge->Amount) != 0) {
 					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
 
 					if (strtolower($attribute) == "allow") {
@@ -278,7 +278,7 @@
 								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
 							}
 							else {
-								$rtuoteno[$i]['ale1'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
+								$rtuoteno[$i]['ale1'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 							}
 						}
 						elseif (!isset($rtuoteno[$i]['ale2'])) {
@@ -286,7 +286,7 @@
 								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
 							}
 							else {
-								$rtuoteno[$i]['ale2'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
+								$rtuoteno[$i]['ale2'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 							}
 						}
 						else {
@@ -305,10 +305,10 @@
 							else {
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
-									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100) * 100;
+									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100) * 100;
 								}
 								else {
-									$rtuoteno[$i]['ale3'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['hinta'] * 100;
+									$rtuoteno[$i]['ale3'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 								}
 							}
 						}

@@ -503,9 +503,9 @@
 				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
 				$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
 				$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
-				$rtuoteno[$i]['ale1'] 				= $kollirow['ale1'];
-				$rtuoteno[$i]['ale2'] 				= $kollirow['ale2'];
-				$rtuoteno[$i]['ale3'] 				= $kollirow['ale3'];
+				$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
+				$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
+				$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
 				$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
 				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
 				$rtuoteno[$i]['kauttalaskutus']		= "";

@@ -271,13 +271,14 @@
 
 				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
-					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
 
-					if (strtolower($attribute) == "allow") {
+					$node_search = $tuotetieto->xpath("//AllowOrCharge");
 
-						$node_search = $tuotetieto->xpath("//AllowOrCharge");
+					foreach ($node_search as $node) {
 
-						foreach ($node_search as $node) {
+						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
+
+						if (strtolower($attribute) == "allow") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -324,62 +325,62 @@
 								}
 							}
 						}
-					}
-					elseif (strtolower($attribute) == "charge") {
+						elseif (strtolower($attribute) == "charge") {
 
-						$charge_description = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeDescription));
-						$charge_code = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeCode));
+							$charge_description = strtolower(trim($node->AllowOrChargeDescription));
+							$charge_code = strtolower(trim($node->AllowOrChargeCode));
 
-						if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
-							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
-							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
+							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
+								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
+								($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
 
-							// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
-							$query = "	SELECT tuote.tuoteno, tuote.nimitys
-										FROM toimi
-										JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-											AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-											AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
-											AND tuotteen_toimittajat.toim_tuoteno != '')
-										JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio 
-											AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno 
-											AND tuoteperhe.tyyppi IN ('P','')  
-											AND tuoteperhe.ohita_kerays != '')
-										JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
-										WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-										AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-										AND toimi.tyyppi != 'P'
-										AND toimi.asn_sanomat IN ('K', 'L')";
-							$child_chk_res = pupe_query($query);
+								// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
+								$query = "	SELECT tuote.tuoteno, tuote.nimitys
+											FROM toimi
+											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+												AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+												AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+												AND tuotteen_toimittajat.toim_tuoteno != '')
+											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio 
+												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno 
+												AND tuoteperhe.tyyppi IN ('P','')  
+												AND tuoteperhe.ohita_kerays != '')
+											JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+											WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+											AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+											AND toimi.tyyppi != 'P'
+											AND toimi.asn_sanomat IN ('K', 'L')";
+								$child_chk_res = pupe_query($query);
 
-							if (mysql_num_rows($child_chk_res) > 0) {
+								if (mysql_num_rows($child_chk_res) > 0) {
 
-								$child_chk_row = mysql_fetch_assoc($child_chk_res);
+									$child_chk_row = mysql_fetch_assoc($child_chk_res);
 
-								$x = $i + 1;
+									$x = $i + 1;
 
-								$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
-								$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
-								$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
-								$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
-								$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
-								$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
-								$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
-								$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
-								$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
-								$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+									$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
+									$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
+									$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
+									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
+									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+									$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
+									$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
+									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+								}
+								else {
+									$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $node->Amount);
+								}
+
+							}
+							elseif ($charge_description == 'freight costs') {
+								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 							}
 							else {
-								$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+								if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
+								$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
 							}
-
-						}
-						elseif ($charge_description == 'freight costs') {
-							$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
-						}
-						else {
-							if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
-							$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
 						}
 					}
 				}

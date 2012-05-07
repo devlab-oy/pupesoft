@@ -131,6 +131,7 @@
 					tosite 			 = '{$tositenro}',
 					laatija 		 = '{$kukarow['kuka']}',
 					laadittu 		 = now()";
+		echo "rtuoteno: {$rtuoteno[$i]['tuoteno']}<pre>",str_replace("\t", "", $query),"</pre>";
 	}
 
 	$result = pupe_query($query);

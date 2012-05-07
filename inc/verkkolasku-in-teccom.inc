@@ -281,6 +281,9 @@
 						echo "<pre>",var_dump($node_search),"</pre>";
 
 						foreach ($node_search as $node) {
+
+							echo "<pre>",var_dump($node),"</pre>";
+
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
 								echo "Ale1 ei ole setattu.<br>";

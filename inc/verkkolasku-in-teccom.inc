@@ -363,8 +363,8 @@
 								$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
 								$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
 								$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
-								$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$x]['kpl'];
-								$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'];
+								$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+								$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
 								$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
 								$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
 								$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%

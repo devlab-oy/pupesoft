@@ -288,25 +288,25 @@
 
 								echo "Ale1 ei ole setattu.<br>";
 
-								if (isset($node->AllowOrCharge->Percent)) {
-									$rtuoteno[$i]['ale1'] = round($node->AllowOrCharge->Percent, 2);
-									echo "Prosentti löytyy! {$node->AllowOrCharge->Percent}<br><br>";
+								if (isset($node->Percent)) {
+									$rtuoteno[$i]['ale1'] = round($node->Percent, 2);
+									echo "Prosentti löytyy! {$node->Percent}<br><br>";
 								}
 								else {
-									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
-									$rtuoteno[$i]['ale1'] = round(((float) str_replace(",", ".", $node->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
+									$rtuoteno[$i]['ale1'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
 								}
 							}
 							elseif (!isset($rtuoteno[$i]['ale2'])) {
 								echo "Ale2 ei ole setattu.<br>";
 
-								if (isset($node->AllowOrCharge->Percent)) {
-									$rtuoteno[$i]['ale2'] = round($node->AllowOrCharge->Percent, 2);
-									echo "Prosentti löytyy! {$node->AllowOrCharge->Percent}<br><br>";
+								if (isset($node->Percent)) {
+									$rtuoteno[$i]['ale2'] = round($node->Percent, 2);
+									echo "Prosentti löytyy! {$node->Percent}<br><br>";
 								}
 								else {
-									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
-									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
+									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
 								}
 							}
 							else {
@@ -315,19 +315,19 @@
 
 								if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
 
-								if (isset($node->AllowOrCharge->Percent)) {
+								if (isset($node->Percent)) {
 
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
 
-										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (1 - (float) str_replace(',', '.', {$node->AllowOrCharge->Percent}) / 100) * 100<br><br>";
+										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (1 - (float) str_replace(',', '.', {$node->Percent}) / 100) * 100<br><br>";
 
-										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $node->AllowOrCharge->Percent) / 100) * 100, 2);
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $node->Percent) / 100) * 100, 2);
 									}
 									else {
-										echo "Prosentti löytyy! {$node->AllowOrCharge->Percent}<br><br>";
+										echo "Prosentti löytyy! {$node->Percent}<br><br>";
 
-										$rtuoteno[$i]['ale3'] = round($node->AllowOrCharge->Percent, 2);
+										$rtuoteno[$i]['ale3'] = round($node->Percent, 2);
 									}
 								}
 								else {
@@ -336,12 +336,12 @@
 
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
-										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (((float) str_replace(',', '.', {$node->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100) * 100<br><br>";
-										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100) * 100, 2);
+										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100) * 100<br><br>";
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100) * 100, 2);
 									}
 									else {
-										echo "Ale3 ei ollut setattu. ((float) str_replace(',', '.', {$node->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
-										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+										echo "Ale3 ei ollut setattu. ((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
+										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
 									}
 								}
 							}

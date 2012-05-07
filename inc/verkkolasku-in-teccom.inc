@@ -168,6 +168,7 @@
 	// Käsitellään tuoterivit
 	$tuotetiedot	= $xml->InvoiceDetail;
 	$i				= 0;
+	$x 				= 0;
 	$rtuoteno		= array();
 	$ealvi		 	= array("");
 	$lisavat		= array("");
@@ -332,10 +333,45 @@
 						if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
 							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
 							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
-							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
 
 							// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
+							$query = "	SELECT tuote.tuoteno, tuote.nimitys
+										FROM toimi
+										JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+											AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+											AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+											AND tuotteen_toimittajat.toim_tuoteno != '')
+										JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio 
+											AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno 
+											AND tuoteperhe.tyyppi IN ('P','')  
+											AND tuoteperhe.ohita_kerays != '')
+										JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+										WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+										AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+										AND toimi.tyyppi != 'P'
+										AND toimi.asn_sanomat IN ('K', 'L')";
+							$child_chk_res = pupe_query($query);
 
+							if (mysql_num_rows($child_chk_res) > 0) {
+
+								$child_chk_row = mysql_fetch_assoc($child_chk_res);
+
+								$x = $i + 1;
+
+								$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
+								$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
+								$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
+								$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
+								$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+								$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$x]['kpl'];
+								$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'];
+								$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+								$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+								$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+							}
+							else {
+								$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+							}
 
 						}
 						elseif ($charge_description == 'freight costs') {
@@ -361,7 +397,13 @@
 				unset($rtuoteno[$i]);
 				$i--;
 			}
+
 			$i++;
+
+			if ($x != 0) {
+				$x = 0;
+				$i++;
+			}
 		}
 	}
 

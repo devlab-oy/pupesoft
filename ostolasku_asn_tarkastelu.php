@@ -1243,7 +1243,7 @@
 	if ($tee == 'nayta') {
 
 		if ($valitse == 'asn') {
-			$kolli = mysql_real_escape_string($kolli);
+			list($kolli, $asn_numero, $toimittajanumero) = explode("##", $kolli);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
@@ -1260,6 +1260,8 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi!='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
+						AND asn_sanomat.asn_numero = '{$asn_numero}'
+						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
 						AND asn_sanomat.tilausrivi != ''
 						AND asn_sanomat.laji = 'asn'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
@@ -1725,7 +1727,7 @@
 				echo "<td align='right'>{$row['asn_numero']}</td>";
 				echo "<td>{$row['paketintunniste']}</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {

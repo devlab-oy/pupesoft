@@ -305,8 +305,9 @@
 									echo "Prosentti löytyy! {$node->Percent}<br><br>";
 								}
 								else {
-									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
-									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+									echo "Amount löytyy! ((float) str_replace(',', '.', {$node->Amount}) / {$rtuoteno[$i]["rivihinta"]}) * 100<br><br>";
+
+									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
 								}
 							}
 							else {
@@ -336,12 +337,12 @@
 
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
-										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100) * 100<br><br>";
-										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100) * 100, 2);
+										echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (((float) str_replace(',', '.', {$node->Amount}) / {$rtuoteno[$i]["rivihinta"]}) * 100) * 100<br><br>";
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100) * 100, 2);
 									}
 									else {
-										echo "Ale3 ei ollut setattu. ((float) str_replace(',', '.', {$node->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
-										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+										echo "Ale3 ei ollut setattu. ((float) str_replace(',', '.', {$node->Amount}) / {$rtuoteno[$i]["rivihinta"]}) * 100<br><br>";
+										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
 									}
 								}
 							}

@@ -325,18 +325,18 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 
 			if ($extranet_tilausvahvistus != 1) {
-				//etsit‰‰n lˆytyykˆ rahtisopimusta
-				
-				// K‰ytet‰‰n LƒHETTƒJƒN rahtisopimusta, etsit‰‰n meid‰n oma rahtisopparinumero
 				if ($laskurow["kohdistettu"] == "K") {
-					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+					// K‰ytet‰‰n LƒHETTƒJƒN rahtisopimusta, EI n‰ytet‰ l‰hett‰j‰n sopparinumeroa.
+					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),	 $thispage, $boldi);
 				}
 				else {
+					// K‰ytet‰‰n VASTAANOTTAJAN rahtisopimusta, n‰ytet‰‰n sopparinumero.
 					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
-				}
 
-				$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
+					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
+				}
 			}
 
 			$toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
@@ -1284,7 +1284,7 @@ if (!function_exists('rivi_lahete')) {
 					// Jos l‰hetett‰ tulostetaan ker‰yslistan kanssa yht‰aikaa, niin silloin pistet‰‰n aina toimitettu sarakkeeseen tilattum‰‰r‰
 					$row["varattu"] = $row["tilkpl"];
 					$row["kpl"] 	= "";
-					$row['varattu_viivakoodi'] = 0;					
+					$row['varattu_viivakoodi'] = 0;
 				}
 				else {
 					$row["varattu"] = "";

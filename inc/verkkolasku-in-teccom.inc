@@ -82,13 +82,20 @@
 		$laskun_tilausviite = implode(",",$rivi);
 	}
 
-	// Tarkistusnumero
-	$viite = $laskun_numero;
+	// Jos toimittaja on BOSCH
+	if ($laskuttajan_toimittajanumero == "123067") {
 
-	// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
-	include("inc/generoiviite.inc");
+		// Tarkistusnumero
+		$viite = $laskun_numero;
 
-	$laskun_pankkiviite = $viite;
+		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+		include("inc/generoiviite.inc");
+
+		$laskun_pankkiviite = $viite;
+	}
+	else {
+		$laskun_pankkiviite	= "";
+	}
 
 	$laskun_asiakkaan_tilausnumero = "";
 	$kauttalaskutus = "";

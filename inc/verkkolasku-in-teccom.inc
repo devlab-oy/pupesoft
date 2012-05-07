@@ -369,10 +369,6 @@
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
-								else {
-									$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $node->Amount);
-								}
-
 							}
 							elseif ($charge_description == 'freight costs') {
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);

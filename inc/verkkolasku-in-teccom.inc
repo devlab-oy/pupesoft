@@ -273,41 +273,66 @@
 					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
 
 					if (strtolower($attribute) == "allow") {
+
+						echo "Tuoteno {$rtuoteno[$i]['tuoteno']} alennuksia löytyy!<br>";
+
 						if (!isset($rtuoteno[$i]['ale1'])) {
+
+							echo "Ale1 ei ole setattu.<br>";
+
 							if (isset($tuotetieto->AllowOrCharge->Percent)) {
 								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
+								echo "Prosentti löytyy! {$tuotetieto->AllowOrCharge->Percent}<br><br>";
 							}
 							else {
+								echo "Amount löytyy! ((float) str_replace(',', '.', {$tuotetieto->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
 								$rtuoteno[$i]['ale1'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 							}
 						}
 						elseif (!isset($rtuoteno[$i]['ale2'])) {
+							echo "Ale2 ei ole setattu.<br>";
+
 							if (isset($tuotetieto->AllowOrCharge->Percent)) {
 								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
+								echo "Prosentti löytyy! {$tuotetieto->AllowOrCharge->Percent}<br><br>";
 							}
 							else {
+								echo "Amount löytyy! ((float) str_replace(',', '.', {$tuotetieto->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
 								$rtuoteno[$i]['ale2'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 							}
 						}
 						else {
 
+							echo "Valuttiin Ale3.<br>";
+
 							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
 
 							if (isset($tuotetieto->AllowOrCharge->Percent)) {
+
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
+
+									echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (1 - (float) str_replace(',', '.', {$tuotetieto->AllowOrCharge->Percent}) / 100) * 100<br><br>";
+
 									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Percent) / 100) * 100;
 								}
 								else {
+									echo "Prosentti löytyy! {$tuotetieto->AllowOrCharge->Percent}<br><br>";
+
 									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
 								}
 							}
 							else {
+
+								echo "Prosenttia ei löytynyt.<br>";
+
 								// 100-(1-50/100)*(1-50/100)*100
 								if (isset($rtuoteno[$i]['ale3'])) {
+									echo "Ale3 oli jo setattu. 100 - (1 - {$rtuoteno[$i]['ale3']} / 100) * (((float) str_replace(',', '.', {$tuotetieto->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100) * 100<br><br>";
 									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100) * 100;
 								}
 								else {
+									echo "Ale3 ei ollut setattu. ((float) str_replace(',', '.', {$tuotetieto->AllowOrCharge->Amount}) / ({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]})) * 100<br><br>";
 									$rtuoteno[$i]['ale3'] = ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100;
 								}
 							}
@@ -322,6 +347,10 @@
 							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
 							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
 							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+
+							// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
+
+
 						}
 						elseif ($charge_description == 'freight costs') {
 							$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);

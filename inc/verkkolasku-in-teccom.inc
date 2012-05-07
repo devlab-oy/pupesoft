@@ -47,7 +47,6 @@
 	}
 
 	$laskuttajan_vat		= "";
-	$laskun_pankkiviite 	= "";
 	$laskun_asiakastunnus	= "";
 	$laskun_pakkauskulu		= 0;
 	$laskun_rahtikulu		= 0;
@@ -82,6 +81,14 @@
 		$rivi = array_values($rivi); // poistetaan turhat välit
 		$laskun_tilausviite = implode(",",$rivi);
 	}
+
+	// Tarkistusnumero
+	$viite = $laskun_numero;
+
+	// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+	include("inc/generoiviite.inc");
+
+	$laskun_pankkiviite = $viite;
 
 	$laskun_asiakkaan_tilausnumero = "";
 	$kauttalaskutus = "";

@@ -1184,8 +1184,6 @@
 					$projekti	= $oletusprojekti;
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 
-					echo "<pre>",var_dump($rtuoteno),"</pre>";
-
 					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
@@ -1412,6 +1410,7 @@
 									lukko 			 = '',
 									laatija 		 = 'verkkolas',
 									laadittu 		 = now()";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$result = pupe_query($query);
 					}
 

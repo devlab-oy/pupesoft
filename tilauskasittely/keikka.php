@@ -16,18 +16,82 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 }
 
 if (!function_exists("tsekit")) {
-	function tsekit($row, $kaikkivarastossayhteensa) {
+	function tsekit($row, $kaikkivarastossayhteensa, $toimittajaid) {
 
 		global $kukarow, $yhtiorow;
 
 		$tsekit = array();
 
+		$query_ale_lisa = generoi_alekentta('O');
+
+		// haetaan keikan tiedot
+		$query    = "SELECT * FROM lasku WHERE tunnus = '{$row['tunnus']}' AND yhtio = '{$kukarow['yhtio']}'";
+		$result   = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+
+		// katsotaan onko tälle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
+		$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila = 'K'
+					AND laskunro = '{$laskurow['laskunro']}'
+					AND vanhatunnus <> 0
+					AND vienti IN ('C','F','I','J','K','L')
+					GROUP BY valkoodi, vienti";
+		$result = pupe_query($query);
+
+		// jos on, haetaan liitettyjen laskujen
+		if (mysql_num_rows($result) == 1) {
+			$kulurow = mysql_fetch_assoc($result);
+		}
+		else {
+			$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => ""); // muuten tyhjää
+		}
+
+		// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi, jos ostolaskuilla on alvia!
+		if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+
+			if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
+			else $simualv = 0;
+
+			if ($kulurow["arvo"] > 0 and $simualv == 0) {
+				$alvit = 0;
+			}
+			elseif (in_array($simualv, array(8,12,17,22))) {
+				$alvit = $simualv;
+			}
+			else {
+				$alvit = "if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv)";
+			}
+
+			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+				// tutkitaan ollaanko siellä alv-rekisteröity
+				$alhqur = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND maa = '{$laskurow['maa']}' AND vat_numero != ''";
+				$alhire = pupe_query($alhqur);
+
+				// ollaan alv-rekisteröity
+				if (mysql_num_rows($alhire) == 1) {
+					$alvit = "tuotteen_alv.alv";
+				}
+			}
+		}
+		else {
+			$alvit = 0;
+		}
+
 		// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-		$query  = "	SELECT tilausrivi.*
+		$query  = "	SELECT tilausrivi.*,
+					(tilausrivi.varattu + tilausrivi.kpl) * IF(tuotteen_toimittajat.tuotekerroin <= 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
+					(1 + (IF((SELECT MAX(kaytetty) kaytetty
+						FROM sarjanumeroseuranta
+						WHERE sarjanumeroseuranta.yhtio = tilausrivi.yhtio
+						AND sarjanumeroseuranta.tuoteno = tilausrivi.tuoteno
+						AND ((tilausrivi.varattu + tilausrivi.kpl < 0 AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus) OR (tilausrivi.varattu + tilausrivi.kpl > 0 AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus))) = 'K', 0, {$alvit}) / 100)) rivihinta
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
-					tilausrivi.uusiotunnus = '$row[tunnus]' and
-					tilausrivi.tyyppi = 'O'";
+					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+					AND tilausrivi.uusiotunnus = '{$row['tunnus']}' 
+					AND tilausrivi.tyyppi = 'O'";
 		$tilres = pupe_query($query);
 
 		$kplyhteensa = 0;  	// apumuuttuja
@@ -911,7 +975,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 		while ($row = mysql_fetch_array($result)) {
 
-			list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($row,$kaikkivarastossayhteensa);
+			list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($row,$kaikkivarastossayhteensa,$toimittajaid);
 			$vaihtoomaisuuslaskujayhteensa += $llrow["vosumma"];
 			$kululaskujayhteensa += $llrow["kusumma"];
 
@@ -1077,7 +1141,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
-	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow, $kaikkivarastossayhteensa);
+	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow, $kaikkivarastossayhteensa, $toimittajaid);
 
 	$formalku =  "<td class='back'>";
 	$formalku .= "<form action='$PHP_SELF?indexvas=1' method='post'>";

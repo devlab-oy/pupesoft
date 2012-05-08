@@ -458,16 +458,6 @@
 			// Valitun ker‰‰j‰n tiedot
 			$keraajarow = mysql_fetch_assoc($result);
 
-			// Katotaan onko ker‰‰j‰ll‰ ker‰yser‰ kesken optiscanissa
-			$query = "	SELECT tunnus
-						FROM kerayserat
-						WHERE yhtio 		= '{$kukarow['yhtio']}'
-						AND laatija 		= '{$keraajarow['kuka']}'
-						AND tila    		= 'K'
-						AND ohjelma_moduli	= 'OPTISCAN'";
-			$kerkeskres = pupe_query($query);
-			$kererkeskenoptiscanissa = (mysql_num_rows($kerkeskres) > 0) ? TRUE : FALSE;
-
 			echo "<form method='post'>";
 
 			if ($tee != 'muuta' and $tee != 'muokkaa') {
@@ -514,7 +504,7 @@
 
 			echo "</tr>";
 
-			if (!$kererkeskenoptiscanissa and $tee != 'muuta' and $tee != 'muokkaa') {
+			if ($tee != 'muuta' and $tee != 'muokkaa') {
 				echo "<tr><th>",t("Valitse ker‰yslistan tulostin"),"</th><td>";
 				echo "<select name='kerayslistatulostin'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
@@ -534,9 +524,6 @@
 				echo "</select></td>";
 
 				echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' /></td>";
-			}
-			elseif ($kererkeskenoptiscanissa) {
-				echo "<tr><td colspan='2' class='back'><font class='error'>",t("Ker‰‰j‰ll‰ ker‰yser‰ kesken puheker‰yksess‰"),"</font></td>";
 			}
 
 			echo "</tr></table>";

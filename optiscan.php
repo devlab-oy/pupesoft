@@ -161,10 +161,10 @@
 		// Katsotaan onko käyttäjällä jo keräyserä keräyksessä
 		$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 					FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laatija = '{$kukarow['kuka']}'
-					AND ohjelma_moduli IN ('','OPTISCAN')
-					AND tila    = 'K'";
+					WHERE yhtio 		= '{$kukarow['yhtio']}'
+					AND laatija 		= '{$kukarow['kuka']}'
+					AND ohjelma_moduli 	= 'OPTISCAN'
+					AND tila    		= 'K'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
@@ -299,10 +299,10 @@
 
 					$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 								FROM kerayserat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laatija = '{$kukarow['kuka']}'
-								AND ohjelma_moduli IN ('','OPTISCAN')
-								AND tila = 'K'";
+								WHERE yhtio 		= '{$kukarow['yhtio']}'
+								AND laatija 		= '{$kukarow['kuka']}'
+								AND ohjelma_moduli 	= 'OPTISCAN'
+								AND tila 			= 'K'";
 					$result = pupe_query($query);
 					$row = mysql_fetch_assoc($result);
 

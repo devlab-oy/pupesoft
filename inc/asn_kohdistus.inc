@@ -32,7 +32,7 @@
 			// Haetaan kaikki käsittelemättömät ASN-rivit
 			$query = "	SELECT *
 						FROM asn_sanomat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status = ''
 						AND tilausrivi = ''
 						AND laji = 'asn'
@@ -43,6 +43,7 @@
 
 			// Loopataan tuoterivit läpi
 			while ($row = mysql_fetch_assoc($result)) {
+
 				unset($loysin_lapsen);
 				$loysin_lapsen = FALSE;
 
@@ -75,49 +76,55 @@
 												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali,
 												tilausrivi.tilaajanrivinro
 												FROM tilausrivi
-												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
-												JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-												JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
-												WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+												JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno)
+												JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno AND tuotepaikat.oletus != '')
+												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 												AND tilausrivi.tunnus = '{$tilausrivitunnus}'
 												ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
-
+							echo "<pre>",str_replace("\t", "", $lapsiperhesql),"</pre>";
 							$lapsiresult = pupe_query($lapsiperhesql);
+
 							while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
 								// hae tuotteen ostohinta
-								$laskuselect= "SELECT * FROM lasku WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$lapsitieto["otunnus"]}'";
-								$laskures	= pupe_query($laskuselect);
-								$laskurow	= mysql_fetch_assoc($laskures);
+								$laskuselect	= "	SELECT * 
+													FROM lasku 
+													WHERE yhtio = '{$kukarow['yhtio']}' 
+													AND tunnus = '{$lapsitieto['otunnus']}'";
+								$laskures		= pupe_query($laskuselect);
+								$laskurow		= mysql_fetch_assoc($laskures);
+
 								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
-												yhtio			= '$lapsitieto[yhtio]',
-												tyyppi			= '$lapsitieto[tyyppi]',
-												toimaika		= '$lapsitieto[toimaika]',
-												kerayspvm		= '$lapsitieto[kerayspvm]',
-												otunnus			= '$lapsitieto[otunnus]',
-												tuoteno			= '$lapsitieto[tuoteno]',
-												try				= '$lapsitieto[try]',
-												osasto			= '$lapsitieto[osasto]',
-												nimitys			= '$lapsitieto[nimitys]',
-												yksikko			= '$lapsitieto[yksikko]',
-												tilkpl			= '$lapsitieto[tilkpl]',
-												varattu			= '$lapsitieto[varattu]',
-												hinta			= '$hinta',
+												yhtio			= '{$lapsitieto['yhtio']}',
+												tyyppi			= '{$lapsitieto['tyyppi']}',
+												toimaika		= '{$lapsitieto['toimaika']}',
+												kerayspvm		= '{$lapsitieto['kerayspvm']}',
+												otunnus			= '{$lapsitieto['otunnus']}',
+												tuoteno			= '{$lapsitieto['tuoteno']}',
+												try				= '{$lapsitieto['try']}',
+												osasto			= '{$lapsitieto['osasto']}',
+												nimitys			= '{$lapsitieto['nimitys']}',
+												yksikko			= '{$lapsitieto['yksikko']}',
+												tilkpl			= '{$lapsitieto['tilkpl']}',
+												varattu			= '{$lapsitieto['varattu']}',
+												hinta			= '{$hinta}',
 												laatija			= 'lapset',
-												kommentti		= 'ASN-sanoma: TL:{$lapsitieto["tunnus"]} tuotteelle: {$lapsitieto["isatuoteno"]} lisätään lapsituote: {$lapsitieto["tuoteno"]}',
+												kommentti		= 'ASN-sanoma: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
 												laadittu		=  now(),
-												hyllyalue		= '$lapsitieto[hyllyalue]',
-												hyllynro		= '$lapsitieto[hyllynro]',
-												hyllytaso		= '$lapsitieto[hyllytaso]',
-												hyllyvali		= '$lapsitieto[hyllyvali]',
-												perheid			= '$lapsitieto[tunnus]',
-												tilaajanrivinro = '$lapsitieto[tilaajanrivinro]'";
+												hyllyalue		= '{$lapsitieto['hyllyalue']}',
+												hyllynro		= '{$lapsitieto['hyllynro']}',
+												hyllytaso		= '{$lapsitieto['hyllytaso']}',
+												hyllyvali		= '{$lapsitieto['hyllyvali']}',
+												perheid			= '{$lapsitieto['tunnus']}',
+												tilaajanrivinro = '{$lapsitieto['tilaajanrivinro']}'";
+								echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 								$inskres = pupe_query($lisainsert);
 								$talteen_paketin_tiedot[] = mysql_insert_id();
 
 								// päivitetään isä
-								$updateisa = "UPDATE tilausrivi set perheid=tunnus where yhtio='{$kukarow["yhtio"]}' and tunnus = '{$tilausrivitunnus}'";
+								$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivitunnus}'";
 								$updateres = pupe_query($updateisa);
 							}
 						}
@@ -398,27 +405,27 @@
 					if ($ylimaaraista > 0) {
 						// Tehdään uusi rivi, jossa on ylimääräiset kappaleet
 						$lisaaquery = "	INSERT INTO tilausrivi SET
-									yhtio			= '$tilausrivirow[yhtio]',
-									tyyppi			= '$tilausrivirow[tyyppi]',
-									toimaika		= '$tilausrivirow[toimaika]',
-									kerayspvm		= '$tilausrivirow[kerayspvm]',
-									otunnus			= '$tilausrivirow[otunnus]',
-									tuoteno			= '$tilausrivirow[tuoteno]',
-									try				= '$tilausrivirow[try]',
-									osasto			= '$tilausrivirow[osasto]',
-									nimitys			= '$tilausrivirow[nimitys]',
-									yksikko			= '$tilausrivirow[yksikko]',
-									tilkpl			= '$ylimaaraista',
-									varattu			= '$ylimaaraista',
-									hinta			= '$tilausrivirow[hinta]',
-									laatija			= 'extraa',
-									kommentti		= 'ASN-sanomalla 1: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle',
-									laadittu		=  now(),
-									hyllyalue		= '$tilausrivirow[hyllyalue]',
-									hyllynro		= '$tilausrivirow[hyllynro]',
-									hyllytaso		= '$tilausrivirow[hyllytaso]',
-									hyllyvali		= '$tilausrivirow[hyllyvali]',
-									tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
+										yhtio			= '$tilausrivirow[yhtio]',
+										tyyppi			= '$tilausrivirow[tyyppi]',
+										toimaika		= '$tilausrivirow[toimaika]',
+										kerayspvm		= '$tilausrivirow[kerayspvm]',
+										otunnus			= '$tilausrivirow[otunnus]',
+										tuoteno			= '$tilausrivirow[tuoteno]',
+										try				= '$tilausrivirow[try]',
+										osasto			= '$tilausrivirow[osasto]',
+										nimitys			= '$tilausrivirow[nimitys]',
+										yksikko			= '$tilausrivirow[yksikko]',
+										tilkpl			= '$ylimaaraista',
+										varattu			= '$ylimaaraista',
+										hinta			= '$tilausrivirow[hinta]',
+										laatija			= 'extraa',
+										kommentti		= 'ASN-sanomalla 1: {$row["asn_numero"]} tuli {$row["kappalemaara"]} ja tilaukselta löytyi {$laskuri} Tehtiin tilausrivi {$ylimaaraista} määrälle',
+										laadittu		=  now(),
+										hyllyalue		= '$tilausrivirow[hyllyalue]',
+										hyllynro		= '$tilausrivirow[hyllynro]',
+										hyllytaso		= '$tilausrivirow[hyllytaso]',
+										hyllyvali		= '$tilausrivirow[hyllyvali]',
+										tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
 						$inskres = pupe_query($lisaaquery);
 						$extraa = mysql_insert_id();
 
@@ -596,6 +603,7 @@
 										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 										AND tilausrivi.tunnus = '{$tilausrivitunnus}'
 										ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
+					echo "<pre>",str_replace("\t", "", $lapsiperhesql),"</pre>";
 
 					$lapsiresult = pupe_query($lapsiperhesql);
 					while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
@@ -628,6 +636,7 @@
 										hyllyvali		= '$lapsitieto[hyllyvali]',
 										perheid			= '$lapsitieto[tunnus]',
 										tilaajanrivinro = '$lapsitieto[tilaajanrivinro]'";
+						echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
 						$inskres = pupe_query($lisainsert);
 						$talteen_paketin_tiedot[] = mysql_insert_id();
 

@@ -895,7 +895,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 		echo "<th valign='top'>".t("kohdistus")." /<br>".t("lisätiedot")."</th>";
 		echo "<th valign='top'>".t("paikat")." /<br>".t("sarjanrot")."</th>";
 		echo "<th valign='top'>".t("kohdistettu")." /<br>".t("varastossa")."</th>";
-		echo "<th valign='top'>&nbsp;</th>";
+		echo "<th valign='top'>#</th>";
 		echo "<th valign='top'>".t("ostolaskuja")." /<br>".t("kululaskuja")."</th>";
 		echo "<th valign='top'>".t("toiminto")."</th>";
 		echo "</tr>";
@@ -936,7 +936,12 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
 			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
 
-			if (count($uusiot) > 0) {
+			if (count($uusiot) > 0 and count($uusiot) < 4) {
+				echo "<td valign='top'>";
+				echo implode("<br>", $uusiot);
+				echo "</td>";
+			}
+			elseif (count($uusiot) > 0) {
 				echo "<div id='div_keikka_$row[laskunro]' class='popup' style='width:100px;'>";
 				echo t("Tilaukset").":<br><br>";
 				echo implode("<br>", $uusiot);

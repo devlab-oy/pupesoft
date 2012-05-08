@@ -1206,13 +1206,16 @@ if ($tee == "MUOKKAA") {
 				// Poistetaan muokattava tilausrivi
 				if ($tilausrivi["perheid"] > 0) {
 					$query = "	DELETE from tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and perheid = '$rivitunnus'";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								AND otunnus = '$tilausnumero'
+								AND perheid = '$rivitunnus'";
 					$result = pupe_query($query);
 				}
 				else {
 					$tiliointisumma = $tilausrivi["summa"];
 					$query = "	DELETE from tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivitunnus'";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								AND tunnus = '$rivitunnus'";
 					$result = pupe_query($query);
 				}
 

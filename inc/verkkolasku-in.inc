@@ -1353,9 +1353,6 @@
 							$asn_nettohinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
-												ale1 				= '{$rtuoteno[$i]['ale1']}',
-												ale2 				= '{$rtuoteno[$i]['ale2']}',
-												ale3 				= '{$rtuoteno[$i]['ale3']}',
 												asn_numero 			= '{$laskun_numero}',
 												hinta 				= '{$asn_nettohinta}',
 												kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
@@ -1364,6 +1361,9 @@
 												laatija 			= 'crond',
 												lahetyslistannro 	= '',
 												laji 				= 'tec',
+												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
+												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
+												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
 												lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
 												luontiaika 			= now(),
 												paketinnumero 		= '',
@@ -1391,24 +1391,20 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-						// Pyöristyserot
-						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$yhtio',
-									ltunnus 		 = '$tunnus',
-									tilino 			 = '$yhtiorow[pyoristys]',
-									kustp 			 = 0,
-									kohde 			 = 0,
-									projekti 		 = 0,
-									tapvm 			 = '$tpv-$tpk-$tpp',
-									summa 			 = $omasumma - $totsumma,
-									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
-									valkoodi 		 = '$valkoodi',
-									selite 			 = '$selite',
-									vero 			 = 0,
-									lukko 			 = '',
-									laatija 		 = 'verkkolas',
-									laadittu 		 = now()";
-						$result = pupe_query($query);
+
+						$vero = 0;
+
+						$summa = $omasumma - $totsumma;
+						$summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa;
+
+						$tili = $yhtiorow['pyoristys'];
+
+						// Jos oletusalvi löytyy ja pyöristysero on yli 4 senttiä, tehdään pyöristyksestä myös alv-kirjaus
+						if ($oletusalvi != 0 and round(abs($totsumma - $omasumma), 2) >= 0.05) {
+							$vero = $oletusalvi;
+						}
+
+						require ("inc/teetiliointi.inc");
 					}
 
 					// jos kyseessä on tavaraa

@@ -1051,18 +1051,18 @@
 				}
 
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno
-							FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.tunnus = tt.liitostunnus and toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno {$poikkeus_tuoteno} and toimi.tyyppi !='P')
-							JOIN tuote on (tuote.yhtio = toimi.yhtio and tuote.tuoteno = tt.tuoteno and tuote.status !='P')
-							WHERE tt.yhtio='{$kukarow['yhtio']}'";
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND tt.toim_tuoteno {$poikkeus_tuoteno} AND toimi.tyyppi != 'P')
+							JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
+							WHERE tt.yhtio = '{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
 				$apurivi = mysql_fetch_assoc($result);
 
 				if ($apurivi["tuoteno"] !="") {
-					$tuoteno =  $apurivi['tuoteno'];
+					$tuoteno = $apurivi['tuoteno'];
 				}
 				else {
-					$tuoteno =  $asn_row['toim_tuoteno'];
+					$tuoteno = $asn_row['toim_tuoteno'];
 				}
 
 			}
@@ -1136,13 +1136,18 @@
 			echo "</tr>";
 
 			$toimittaja = (int) $toimittaja;
+			$tilausnro = (int) $tilausnro;
 
-			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}' and tyyppi !='P'";
+			$query = "	SELECT tunnus 
+						FROM toimi 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND toimittajanro = '{$toimittaja}' 
+						AND tyyppi != 'P'";
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = trim($tilausnro) != '' ? " and tilausrivi.otunnus = ".(int) $tilausnro : '';
+			$tilausnrolisa = trim($tilausnro) != '' ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuoteno like '".mysql_real_escape_string($tuoteno_valeilla)."' or tuoteno like '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';

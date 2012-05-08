@@ -879,6 +879,30 @@ if ($tila == 'tee_kohdistus') {
 							and tunnus='$tunnus'
 							and varattu<>'$kpl'";
 				$result = pupe_query($query);
+
+				$jalkitoimitukseen_kpl = $rivi_kpl_alkuperainen[$tunnus] - $kpl;
+
+				// Kopioidaan rivin erotus uudelle tilausriville
+				if ($yhtiorow["saapumisen_jt_kasittely"] == "K" and $jalkitoimitukseen_kpl > 0 and $kpl > 0 and $rivi_kpl_alkuperainen[$tunnus] > 0) {
+					// Jätetään loppurivi JT:seen
+					$parametrit = array (
+						"method" => "POST",
+						"url" => "{$palvelin2}tilauskasittely/keikka.php",
+						"headers" => array ('Accept:text/html'),
+						"cookie" => "pupesoft_session={$_COOKIE['pupesoft_session']}",
+						"posttype" => "array",
+						"data" => array (
+							"keikan_otunnus" => $otunnus,
+							"tunnus" => $tunnus,
+							"ajax_toiminto" => 'rivi_kpl_splittaus',
+							"no_head" => 'yes',
+							"ohje" => 'off',
+							"uuden_rivin_kpl" => $jalkitoimitukseen_kpl,
+						)
+					);
+
+					$return = pupesoft_rest($parametrit);
+				}
 			}
 
 			if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
@@ -1805,7 +1829,9 @@ if ($tila == '') {
 			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='siirrettavat_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
 		}
 		elseif ($rivirow["varattu"] != 0 and !$onkosuoratoimitus) {
-			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
+			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite");
+			echo "<input type='hidden' name='rivi_kpl_alkuperainen[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."'";
+			echo"</$td>";
 		}
 		else {
 			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";

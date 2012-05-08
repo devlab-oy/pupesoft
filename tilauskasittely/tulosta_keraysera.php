@@ -205,7 +205,7 @@
 			$kertukesk = (mysql_num_rows($kerkeskres) > 0) ? TRUE : FALSE;
 
 			if ($keredkesk) {
-				echo "<font class='error'><br>".t("VIRHE: Ker‰syer‰ on kesken ker‰‰j‰ll‰ puheker‰yksess‰")."!</font><br><br>";
+				echo "<font class='error'><br>".t("VIRHE: Ker‰yser‰ on kesken ker‰‰j‰ll‰ puheker‰yksess‰")."!</font><br><br>";
 			}
 			elseif ($kertukesk) {
 				echo "<font class='error'><br>".t("VIRHE: Ker‰‰j‰ll‰ on jo toinen er‰ puheker‰yksess‰")."!</font><br><br>";

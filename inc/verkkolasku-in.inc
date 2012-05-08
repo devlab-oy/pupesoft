@@ -1393,25 +1393,20 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-						// Pyöristyserot
-						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$yhtio',
-									ltunnus 		 = '$tunnus',
-									tilino 			 = '$yhtiorow[pyoristys]',
-									kustp 			 = 0,
-									kohde 			 = 0,
-									projekti 		 = 0,
-									tapvm 			 = '$tpv-$tpk-$tpp',
-									summa 			 = $omasumma - $totsumma,
-									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
-									valkoodi 		 = '$valkoodi',
-									selite 			 = '$selite',
-									vero 			 = 0,
-									lukko 			 = '',
-									laatija 		 = 'verkkolas',
-									laadittu 		 = now()";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
-						$result = pupe_query($query);
+
+						$vero = 0;
+
+						$summa = $omasumma - $totsumma;
+						$summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa;
+
+						$tili = $yhtiorow['pyoristys'];
+
+						// Jos oletusalvi löytyy ja pyöristysero on yli 4 senttiä, tehdään pyöristyksestä myös alv-kirjaus
+						if ($oletusalvi != 0 and round(abs($totsumma - $omasumma), 2) >= 0.05) {
+							$vero = $oletusalvi;
+						}
+
+						require ("inc/teetiliointi.inc");
 					}
 
 					// jos kyseessä on tavaraa

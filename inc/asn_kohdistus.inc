@@ -72,7 +72,8 @@
 												tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 												tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 												tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
-												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+												tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali,
+												tilausrivi.tilaajanrivinro
 												FROM tilausrivi
 												JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 												JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
@@ -110,7 +111,8 @@
 												hyllynro		= '$lapsitieto[hyllynro]',
 												hyllytaso		= '$lapsitieto[hyllytaso]',
 												hyllyvali		= '$lapsitieto[hyllyvali]',
-												perheid			= '$lapsitieto[tunnus]'";
+												perheid			= '$lapsitieto[tunnus]',
+												tilaajanrivinro = '$lapsitieto[tilaajanrivinro]'";
 								$inskres = pupe_query($lisainsert);
 								$talteen_paketin_tiedot[] = mysql_insert_id();
 
@@ -585,7 +587,8 @@
 										tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 										tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 										tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu,
-										tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+										tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali,
+										tilausrivi.tilaajanrivinro
 										FROM tilausrivi
 										JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays !='')
 										JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
@@ -623,7 +626,8 @@
 										hyllynro		= '$lapsitieto[hyllynro]',
 										hyllytaso		= '$lapsitieto[hyllytaso]',
 										hyllyvali		= '$lapsitieto[hyllyvali]',
-										perheid			= '$lapsitieto[tunnus]'";
+										perheid			= '$lapsitieto[tunnus]',
+										tilaajanrivinro = '$lapsitieto[tilaajanrivinro]'";
 						$inskres = pupe_query($lisainsert);
 						$talteen_paketin_tiedot[] = mysql_insert_id();
 

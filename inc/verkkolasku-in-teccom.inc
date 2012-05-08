@@ -29,12 +29,25 @@
 	$laskuttajan_ovt				= "";
 	$laskuttajan_nimi				= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Name1);
 	$laskuttajan_toimittajanumero	= utf8_decode($xml->InvoiceHeader->SellerParty->PartyNumber);
+	$laskun_pankkiviite				= "";
+	$laskuttajan_vat				= "";
+	$laskun_asiakastunnus			= "";
+	$laskun_pakkauskulu				= 0;
+	$laskun_rahtikulu				= 0;
 
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH") {
 		$laskuttajan_toimittajanumero = "123067";
+
+		// Tarkistusnumero
+		$viite = $laskun_numero;
+
+		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+		include("inc/generoiviite.inc");
+
+		$laskun_pankkiviite = $viite;
 	}
 	elseif (strtoupper($laskuttajan_toimittajanumero) == "LES-7") {
 		$laskuttajan_toimittajanumero = "123080";
@@ -45,12 +58,6 @@
 	elseif ($laskuttajan_toimittajanumero == "112") {
 		$laskuttajan_toimittajanumero = "123442";
 	}
-
-	$laskuttajan_vat		= "";
-	$laskun_pankkiviite 	= "";
-	$laskun_asiakastunnus	= "";
-	$laskun_pakkauskulu		= 0;
-	$laskun_rahtikulu		= 0;
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
@@ -168,6 +175,7 @@
 	// Käsitellään tuoterivit
 	$tuotetiedot	= $xml->InvoiceDetail;
 	$i				= 0;
+	$x 				= 0;
 	$rtuoteno		= array();
 	$ealvi		 	= array("");
 	$lisavat		= array("");
@@ -227,7 +235,6 @@
 
 				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
 
-				// $rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->OrderItemRef->BuyerOrderItemRef;
 
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
@@ -253,7 +260,6 @@
 					}
 				}
 
-				// in_array($laskuttajan_toimittajanumero, array("123007","123442","123001"))
 				if (isset($tuotetieto->TotalValue->Amount)) {
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount); // summa
 				}
@@ -265,70 +271,145 @@
 					$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
 				}
 				else {
-					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ;
+					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 				}
 
-				// otetaan talteen "AllowOrCharge" kentät ja tallennetaan ne johonkin
-				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier)) {
-					$attribute = $tuotetieto->AllowOrCharge->AllowOrChargeIdentifier->attributes()->Value;
+				// otetaan talteen "AllowOrCharge" kentät. 
+				// täältä tulevat alennukset ja runko-, rahti- ja muutkulut
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
 
-					if (strtolower($attribute) == "allow") {
-						if (!isset($rtuoteno[$i]['ale1'])) {
-							if (isset($tuotetieto->AllowOrCharge->Percent)) {
-								$rtuoteno[$i]['ale1'] = $tuotetieto->AllowOrCharge->Percent;
-							}
-							else {
-								$rtuoteno[$i]['ale1'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
-							}
-						}
-						elseif (!isset($rtuoteno[$i]['ale2'])) {
-							if (isset($tuotetieto->AllowOrCharge->Percent)) {
-								$rtuoteno[$i]['ale2'] = $tuotetieto->AllowOrCharge->Percent;
-							}
-							else {
-								$rtuoteno[$i]['ale2'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100;
-							}
-						}
-						else {
+					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
 
-							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+					foreach ($node_search as $node) {
 
-							if (isset($tuotetieto->AllowOrCharge->Percent)) {
-								// 100-(1-50/100)*(1-50/100)*100
-								if (isset($rtuoteno[$i]['ale3'])) {
-									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Percent) / 100) * 100;
+						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
+
+						if (strtolower($attribute) == "allow") {
+
+							if (!isset($rtuoteno[$i]['ale1'])) {
+
+								if (isset($node->Percent)) {
+									$rtuoteno[$i]['ale1'] = round($node->Percent, 2);
 								}
 								else {
-									$rtuoteno[$i]['ale3'] = $tuotetieto->AllowOrCharge->Percent;
+									$rtuoteno[$i]['ale1'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+								}
+							}
+							elseif (!isset($rtuoteno[$i]['ale2'])) {
+
+								if (isset($node->Percent)) {
+									$rtuoteno[$i]['ale2'] = round($node->Percent, 2);
+								}
+								else {
+									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
 								}
 							}
 							else {
-								// 100-(1-50/100)*(1-50/100)*100
-								if (isset($rtuoteno[$i]['ale3'])) {
-									$rtuoteno[$i]['ale3'] = 100 - (1 - $rtuoteno[$i]['ale3'] / 100) * ((float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['rivihinta'] * 100) * 100;
+
+								if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+
+								if (isset($node->Percent)) {
+
+									// 100-(1-50/100)*(1-50/100)*100
+									if (isset($rtuoteno[$i]['ale3'])) {
+
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (1 - (float) str_replace(",", ".", $node->Percent) / 100) * 100, 2);
+									}
+									else {
+										$rtuoteno[$i]['ale3'] = round($node->Percent, 2);
+									}
 								}
 								else {
-									$rtuoteno[$i]['ale3'] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount) / $rtuoteno[$i]['hinta'] * 100;
+
+									// 100-(1-50/100)*(1-50/100)*100
+									if (isset($rtuoteno[$i]['ale3'])) {
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100) * 100, 2);
+									}
+									else {
+										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
+									}
 								}
 							}
 						}
-					}
-					elseif (strtolower($attribute) == "charge") {
+						elseif (strtolower($attribute) == "charge") {
 
-						$charge_description = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeDescription));
-						$charge_code = strtolower(trim($tuotetieto->AllowOrCharge->AllowOrChargeCode));
+							$charge_description = strtolower(trim($node->AllowOrChargeDescription));
+							$charge_code = strtolower(trim($node->AllowOrChargeCode));
 
-						if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
-							($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
-							($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
-							$rtuoteno[$i]["lisakulu"] = (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
-						}
-						elseif ($charge_description == 'freight costs') {
-							$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
-						}
-						else {
-							if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
-							$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $tuotetieto->AllowOrCharge->Amount);
+							/*
+							 * Runkotuotteet
+							 * =============
+							 * 
+							 * bx runkoarvo = BOSCH
+							 * zcwr = ZF
+							 * core value = GKN
+							 */
+
+							if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
+								($laskuttajan_toimittajanumero == "123007" and $charge_code == "zcwr") or
+								($laskuttajan_toimittajanumero == "123084" and $charge_description == "core value")) {
+
+								// Jos rivillä tulee runkoveloitus, niin pitää tehdä rungosta oma lapsirivi
+								$query = "	SELECT tuote.tuoteno, tuote.nimitys
+											FROM toimi
+											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+												AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+												AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+												AND tuotteen_toimittajat.toim_tuoteno != '')
+											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio 
+												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno 
+												AND tuoteperhe.tyyppi IN ('P','')  
+												AND tuoteperhe.ohita_kerays != '')
+											JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
+											WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+											AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+											AND toimi.tyyppi != 'P'
+											AND toimi.asn_sanomat IN ('K', 'L')";
+								$child_chk_res = pupe_query($query);
+
+								if (mysql_num_rows($child_chk_res) > 0) {
+
+									$child_chk_row = mysql_fetch_assoc($child_chk_res);
+
+									$x = $i + 1;
+
+									$rtuoteno[$x]['tuoteno'] 			= $child_chk_row['tuoteno'];
+									$rtuoteno[$x]['tuoteno2'] 			= $child_chk_row['tuoteno'];
+									$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
+									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
+									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
+									$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
+									$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
+									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
+								}
+							}
+							elseif ($charge_description == 'freight costs') {
+
+								/*
+								 * Rahtikulu
+								 * =========
+								 * 
+								 * freight costs = BOSCH
+								 */
+
+								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
+							}
+							else {
+
+								/*
+								 * Muut kulut
+								 * ==========
+								 * 
+								 * zpkp = ZF
+								 */
+
+								if ($charge_code != 'zpkp') {
+									if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
+									$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
+								}
+							}
 						}
 					}
 				}
@@ -346,7 +427,13 @@
 				unset($rtuoteno[$i]);
 				$i--;
 			}
+
 			$i++;
+
+			if ($x != 0) {
+				$x = 0;
+				$i++;
+			}
 		}
 	}
 

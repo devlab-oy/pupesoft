@@ -19,9 +19,10 @@
 		$result = pupe_query($query);
 
 		// Haetaan seuraava vapaa keikkaid
-		$query  = "	SELECT max(laskunro)+1
-					from lasku
-					where yhtio='$kukarow[yhtio]' and tila='K'";
+		$query  = "	SELECT MAX(laskunro) + 1
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}' 
+					AND tila = 'K'";
 		$result = pupe_query($query);
 		$row    = mysql_fetch_array($result);
 
@@ -29,37 +30,37 @@
 		$keikkanumeroapu = $id; // talteen
 
 		// Haetaan laskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-		$query = "	SELECT sum(summa) summa
-					from tiliointi
-					where yhtio	= '$kukarow[yhtio]'
-					and ltunnus	= '$osrow[tunnus]'
-					and tilino  = '$yhtiorow[alv]'
-					and korjattu = ''";
+		$query = "	SELECT SUM(summa) summa
+					FROM tiliointi
+					WHERE yhtio	= '{$kukarow['yhtio']}'
+					AND ltunnus	= '{$osrow['tunnus']}'
+					AND tilino  = '{$yhtiorow['alv']}'
+					AND korjattu = ''";
 		$alvires = pupe_query($query);
-		$alvirow = mysql_fetch_array($alvires);
+		$alvirow = mysql_fetch_assoc($alvires);
 
 		// Ostoreskontralaskun veroton arvo
 		$osrow["arvo"] = $osrow["summa"] - $alvirow["summa"];
 
 		// Tehdään itse keikkaotsikko
-		$query = "	INSERT into lasku set
-					yhtio        = '$kukarow[yhtio]',
-					laskunro     = '$id',
-					ytunnus	     = '$trow[ytunnus]',
-					nimi         = '$trow[nimi]',
-					valkoodi     = '$osrow[valkoodi]',
-					vienti       = '$osrow[vienti]',
-					maksu_kurssi = '$osrow[maksu_kurssi]',
-					vienti_kurssi= '$osrow[vienti_kurssi]',
-					toimitusehto = '$trow[toimitusehto]',
-					osoite       = '$trow[osoite]',
-					postitp      = '$trow[postitp]',
-					maa			 = '$trow[maa]',
-					maa_lahetys  = '$trow[maa]',
-					kauppatapahtuman_luonne = '$trow[kauppatapahtuman_luonne]',
-					kuljetusmuoto= '$trow[kuljetusmuoto]',
-					swift        = '$trow[swift]',
-					liitostunnus = '$trow[tunnus]',
+		$query = "	INSERT INTO lasku SET
+					yhtio        = '{$kukarow['yhtio']}',
+					laskunro     = '{$id}',
+					ytunnus	     = '{$trow['ytunnus']}',
+					nimi         = '{$trow['nimi']}',
+					valkoodi     = '{$osrow['valkoodi']}',
+					vienti       = '{$osrow['vienti']}',
+					maksu_kurssi = '{$osrow['maksu_kurssi']}',
+					vienti_kurssi= '{$osrow['vienti_kurssi']}',
+					toimitusehto = '{$trow['toimitusehto']}',
+					osoite       = '{$trow['osoite']}',
+					postitp      = '{$trow['postitp']}',
+					maa			 = '{$trow['maa']}',
+					maa_lahetys  = '{$trow['maa']}',
+					kauppatapahtuman_luonne = '{$trow['kauppatapahtuman_luonne']}',
+					kuljetusmuoto= '{$trow['kuljetusmuoto']}',
+					swift        = '{$trow['swift']}',
+					liitostunnus = '{$trow['tunnus']}',
 					tila         = 'K',
 					luontiaika	 = now(),
 					laatija		 = 'verkkolas'";
@@ -87,7 +88,7 @@
 	$virhe		= "";
 	$virheet 	= 0;
 
-	for ($i=0; $i<count($rtuoteno); $i++) {
+	for ($i = 0; $i < count($rtuoteno); $i++) {
 
 		// tehdään tää vaan jos meillä on rivinumero
 		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE") {
@@ -97,7 +98,7 @@
 			$summa			= (float) $rtuoteno[$i]["rivihinta"];
 
 			if ($kpl != 0) {
-				$hinta = round($summa/$kpl, 2);
+				$hinta = round($summa / $kpl, 2);
 			}
 			else {
 				// jos kappaleet on nolla, oletetaan 1
@@ -107,15 +108,15 @@
 			// etsitään hyvää osumaa!
 			$query = "	SELECT tilausrivi.*, lasku.ketjutus
 						FROM tilausrivi
-						join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-						where tilausrivi.yhtio = '$kukarow[yhtio]' and
-						tilausrivi.tunnus = '{$rtuoteno[$i]['tilaajanrivinro']}'
-						and tilausrivi.tyyppi = 'O'";
+						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+						AND tilausrivi.tunnus = '{$rtuoteno[$i]['tilaajanrivinro']}'
+						AND tilausrivi.tyyppi = 'O'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 
-				$rivirow = mysql_fetch_array ($result);
+				$rivirow = mysql_fetch_array($result);
 				$kohdistettujariveja++;
 
 				// jos ketjutus on yhdelläkin tilauksella 1 niin kyseessä on SUORATOIMITUS
@@ -133,19 +134,19 @@
 								AND yhtio = '{$kukarow['yhtio']}'";
 					$result = pupe_query($query);
 
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+					$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("kohdistettu saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 				}
 				// jos rivi löytyi, mutta se on jo kohdistettu.. lisätään uus samoilla tiedoilla
 				else {
-					$query = "	INSERT into tilausrivi
-								(uusiotunnus, hinta, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-								('$keikantunnus', '$hinta', '$rivirow[tuoteno]', '$rivirow[tilkpl]', '$kpl', '$rivirow[otunnus]', '$kukarow[yhtio]', 'O', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]','$rivirow[tilaajanrivinro]')";
+					$query = "	INSERT INTO tilausrivi
+								(uusiotunnus, hinta, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) VALUES
+								('{$keikantunnus}', '{$hinta}', '{$rivirow['tuoteno']}', '{$rivirow['tilkpl']}', '{$kpl}', '{$rivirow['otunnus']}', '{$kukarow['yhtio']}', 'O', '{$rivirow['hyllyalue']}', '{$rivirow['hyllynro']}', '{$rivirow['hyllyvali']}', '{$rivirow['hyllytaso']}','{$rivirow['tilaajanrivinro']}')";
 					$result = pupe_query($query);
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("lisätty saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+					$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("lisätty saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 				}
 			}
 			else {
-				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa saapumiseen")."! ($keikantunnus/".$rtuoteno[$i]["tilaajanrivinro"].")\n";
+				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
 		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") {
@@ -159,7 +160,6 @@
 			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
 
 			if (isset($rtuoteno[$i]['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
-
 
 			// tiukka 1
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat

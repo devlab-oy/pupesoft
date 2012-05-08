@@ -503,9 +503,9 @@
 				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
 				$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
 				$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
-				$rtuoteno[$i]['ale1'] 				= $kollirow['ale1'];
-				$rtuoteno[$i]['ale2'] 				= $kollirow['ale2'];
-				$rtuoteno[$i]['ale3'] 				= $kollirow['ale3'];
+				$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
+				$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
+				$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
 				$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
 				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
 				$rtuoteno[$i]['kauttalaskutus']		= "";
@@ -1051,18 +1051,18 @@
 				}
 
 				$query = "	SELECT tt.tuoteno ttuoteno, tt.toim_tuoteno, tuote.tuoteno tuoteno
-							FROM tuotteen_toimittajat as tt
-							JOIN toimi on (toimi.tunnus = tt.liitostunnus and toimi.yhtio = tt.yhtio and toimi.toimittajanro='{$asn_row["toimittajanumero"]}' and tt.toim_tuoteno {$poikkeus_tuoteno} and toimi.tyyppi !='P')
-							JOIN tuote on (tuote.yhtio = toimi.yhtio and tuote.tuoteno = tt.tuoteno and tuote.status !='P')
-							WHERE tt.yhtio='{$kukarow['yhtio']}'";
+							FROM tuotteen_toimittajat AS tt
+							JOIN toimi ON (toimi.tunnus = tt.liitostunnus AND toimi.yhtio = tt.yhtio AND toimi.toimittajanro = '{$asn_row['toimittajanumero']}' AND tt.toim_tuoteno {$poikkeus_tuoteno} AND toimi.tyyppi != 'P')
+							JOIN tuote ON (tuote.yhtio = toimi.yhtio AND tuote.tuoteno = tt.tuoteno AND tuote.status != 'P')
+							WHERE tt.yhtio = '{$kukarow['yhtio']}'";
 				$result = pupe_query($query);
 				$apurivi = mysql_fetch_assoc($result);
 
 				if ($apurivi["tuoteno"] !="") {
-					$tuoteno =  $apurivi['tuoteno'];
+					$tuoteno = $apurivi['tuoteno'];
 				}
 				else {
-					$tuoteno =  $asn_row['toim_tuoteno'];
+					$tuoteno = $asn_row['toim_tuoteno'];
 				}
 
 			}
@@ -1136,13 +1136,18 @@
 			echo "</tr>";
 
 			$toimittaja = (int) $toimittaja;
+			$tilausnro = (int) $tilausnro;
 
-			$query = "SELECT tunnus FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$toimittaja}' and tyyppi !='P'";
+			$query = "	SELECT tunnus 
+						FROM toimi 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND toimittajanro = '{$toimittaja}' 
+						AND tyyppi != 'P'";
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = trim($tilausnro) != '' ? " and tilausrivi.otunnus = ".(int) $tilausnro : '';
+			$tilausnrolisa = trim($tilausnro) != '' ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuoteno like '".mysql_real_escape_string($tuoteno_valeilla)."' or tuoteno like '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
@@ -1243,7 +1248,7 @@
 	if ($tee == 'nayta') {
 
 		if ($valitse == 'asn') {
-			$kolli = mysql_real_escape_string($kolli);
+			list($kolli, $asn_numero, $toimittajanumero) = explode("##", $kolli);
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
@@ -1260,6 +1265,8 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi!='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
+						AND asn_sanomat.asn_numero = '{$asn_numero}'
+						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
 						AND asn_sanomat.tilausrivi != ''
 						AND asn_sanomat.laji = 'asn'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
@@ -1725,7 +1732,7 @@
 				echo "<td align='right'>{$row['asn_numero']}</td>";
 				echo "<td>{$row['paketintunniste']}</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {

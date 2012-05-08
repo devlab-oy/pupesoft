@@ -1797,10 +1797,10 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 					}
 
-					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
+					echo "<tr><td colspan='7' class='back'>&nbsp;</td></tr>";
 				}
 
 				echo "<tr>";
@@ -1810,7 +1810,7 @@
 				echo "<td>{$row['swift']}</td>";
 				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				#echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {
@@ -1822,7 +1822,7 @@
 			}
 
 			if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
-				echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 			}
 
 			echo "</table>";

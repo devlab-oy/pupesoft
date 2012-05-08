@@ -115,7 +115,16 @@ if (!function_exists("pupesoft_rest")) {
 		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
-		$data_json = json_encode($parameters["data"]);
+		if (isset($parameters["cookie"])) {
+			curl_setopt($handle, CURLOPT_COOKIE, $parameters["cookie"]);
+		}
+
+		if (isset($parameters["posttype"]) and $parameters["posttype"] == "array") {
+			$post_data = $parameters["data"];
+		}
+		else {
+			$post_data = json_encode($parameters["data"]);
+		}
 
 		switch ($parameters["method"]) {
 			case "GET":
@@ -123,11 +132,11 @@ if (!function_exists("pupesoft_rest")) {
 				break;
 			case "POST":
 				curl_setopt($handle, CURLOPT_POST, true);
-				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
 				break;
 			case "PUT":
 				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
-				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
 				break;
 			case "DELETE":
 				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'DELETE');

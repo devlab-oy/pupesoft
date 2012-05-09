@@ -2,7 +2,7 @@
 
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos = "";
-$luottotilanne_nyt = 0;
+$luottorajavirhe 	= "";
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -28,38 +28,6 @@ $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] == "E" and ($kukarow["extranet"] != "" or $tilausvalmiskutsuja != "TILAUSMYYNTI"))) and $tilausvalmis_asiakas_row['luottoraja'] != 0) {
 
-	$query_alennuksia = generoi_alekentta('M');
-
-	$saatavat_liitostunnukset = "";
-
-	// Jos saatavat on ytunnus tasolla, pit‰‰ hakea avoimet tilaukset kaikilta saman ytunnuksen asiakkailta
-	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-		$saatavat_query = "	SELECT group_concat(tunnus) tunnukset
-							FROM asiakas
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							AND ytunnus = '{$laskurow["ytunnus"]}'";
-		$saatavat_result = pupe_query($saatavat_query);
-		$saatavat_row = mysql_fetch_assoc($saatavat_result);
-		$saatavat_liitostunnukset = $saatavat_row["tunnukset"];
-	}
-
-	if ($saatavat_liitostunnukset == "") {
-		$saatavat_liitostunnukset = $laskurow["liitostunnus"];
-	}
-
-	// haetaan kaikkien avoimien tilausten arvo
-	$sumquery = "	SELECT round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) avoimet_arvo
-					FROM lasku
-					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
-					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
-					)
-					AND lasku.liitostunnus in ($saatavat_liitostunnukset)";
-	$sumresult = pupe_query($sumquery);
-	$avoimetrow = mysql_fetch_assoc($sumresult);
-
 	// Parametrej‰ saatanat.php:lle
 	$sytunnus 	 	 = $laskurow['ytunnus'];
 	$sliitostunnus	 = $laskurow['liitostunnus'];
@@ -82,12 +50,9 @@ if (($yhtiorow["luottorajan_ylitys"] == "K" or ($yhtiorow["luottorajan_ylitys"] 
 
 	$retval = ob_get_contents();
 	ob_end_clean();
-
-	// Lasketaan luottotilanne nyt, $avoimia_yhteensa ja $kaato_yhteensa tulee saatanat.php:st‰
-	$luottotilanne_nyt = $tilausvalmis_asiakas_row["luottoraja"] - $avoimia_yhteensa - $kaato_yhteensa - $avoimetrow["avoimet_arvo"];
 }
 
-if ($luottotilanne_nyt < 0) {
+if ($luottorajavirhe != '') {
 	if ($kutsuja == "EDITILAUS" or $kukarow["extranet"] != "") {
 		$alatila = "F";
 	}

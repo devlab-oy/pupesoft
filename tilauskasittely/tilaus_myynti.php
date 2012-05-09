@@ -215,7 +215,7 @@ if ($tee == 'AKTIVOI') {
 				}
 			}
 			else {
-				echo "<font class='error'>".t("Tilaus katosi")."!!!</font><br>";
+				echo "<font class='error'>".t("Tilaus katosi")."!</font><br>";
 				$tilausnumero = "";
 			}
 		}
@@ -2483,7 +2483,7 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto, laji
+		$query = "	SELECT fakta, luokka, asiakasnro, osasto, laji
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
@@ -3068,6 +3068,7 @@ if ($tee == '') {
 
 		js_popup();
 
+		// Parametrej‰ saatanat.php:lle
 		$sytunnus 	 	 = $laskurow['ytunnus'];
 		$sliitostunnus	 = $laskurow['liitostunnus'];
 		$eiliittymaa 	 = "ON";
@@ -3076,13 +3077,7 @@ if ($tee == '') {
 		$ylivito 		 = "";
 		$trattavirhe 	 = "";
 		$laji 			 = "MA";
-
-		if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
-			$grouppaus = "ytunnus";
-		}
-		else {
-			$grouppaus = "";
-		}
+		$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
 		ob_start();
 		require ("raportit/saatanat.php");
@@ -3095,25 +3090,25 @@ if ($tee == '') {
 
 		if ($luottorajavirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!!!!!</font>";
+			echo "<font class='error'>",t("HUOM: Luottoraja ylittynyt"),"!</font>";
 			echo "<br/>";
 		}
 
 		if ($jvvirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>",t("HUOM: T‰m‰ on j‰lkivaatimusasiakas"),"!!!!!</font>";
+			echo "<font class='error'>",t("HUOM: T‰m‰ on j‰lkivaatimusasiakas"),"!</font>";
 			echo "<br/>";
 		}
 
 		if ($ylivito > 0) {
 			echo "<br/>";
-			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!</font>";
+			echo "<font class='error'>".t("HUOM: Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!</font>";
 			echo "<br/>";
 		}
 
 		if ($trattavirhe != '') {
 			echo "<br/>";
-			echo "<font class='error'>".t("HUOM: Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>";
+			echo "<font class='error'>".t("HUOM: Asiakkaalla on maksamattomia trattoja")."!<br></font>";
 			echo "<br/>";
 		}
 

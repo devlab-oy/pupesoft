@@ -94,6 +94,8 @@
 			// Finvoice verkkolasku
 			fclose($fd);
 
+			echo "Käsitellään verkkolaskua...xml-tag löytyy<br>";
+
 			require("verkkolasku-in.php");
 		}
 		elseif (substr($tietue, 5, 12) == "Tilivaluutan") {

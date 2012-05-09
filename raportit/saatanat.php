@@ -47,13 +47,6 @@
 			$chk = "CHECKED";
 		}
 
-		$sel1 = '';
-		$sel2 = '';
-		$sel3 = '';
-		$sel4 = '';
-		$sel5 = '';
-		$sel6 = '';
-
 		$sel = array();
 		$sel[$grouppaus] = "SELECTED";
 
@@ -62,7 +55,7 @@
 		echo "<option value = 'ytunnus' $sel[ytunnus]>".t("Ytunnus")."</option>";
 		echo "<option value = 'nimi'    $sel[nimi]>".t("Nimi")."</option>";
 		echo "<option value = 'kustannuspaikka'    $sel[kustannuspaikka]>".t("Kustannuspaikka")."</option>";
-		echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan näyttää vain jos summaustaso on Asiakas.")."</td></tr>";
+		echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan näyttää vain jos summaustaso on Asiakas tai Ytunnus").".</td></tr>";
 
 		$query = "	SELECT nimi, tunnus
 	                FROM valuu
@@ -122,11 +115,10 @@
 
 		echo "<th>".t("Näytä vain luottovakuutetut asiakkaat").":</th>";
 		echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
-		echo "<td valign='top' class='back'><input type='submit' value='".t("Näytä")."'></td></tr>";
 		echo "</tr>";
-
 		echo "</table><br>";
-		echo "</form>";
+		echo "<input type='submit' value='".t("Aja raportti")."'>";
+		echo "</form><br><br>";
 	}
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
@@ -320,7 +312,9 @@
 
 				$worksheet->write($excelrivi, $excelsarake, t("Yli")." {$saatavat_array[count($saatavat_array)-1]} ".t("pv"), $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Avoimia"), $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, t("Avoimet")." ".t("laskut"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Avoimet")." ".t("tilaukset"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Kaatotili"), $format_bold);
 				$excelsarake++;
@@ -336,10 +330,10 @@
 
 			if ($eiliittymaa != 'ON') {
 				if ($grouppaus == "kustannuspaikka") {
-					$sarakemaara = count($saatavat_array)+6;
+					$sarakemaara = count($saatavat_array)+7;
 				}
 				else {
-					$sarakemaara = count($saatavat_array)+7;
+					$sarakemaara = count($saatavat_array)+8;
 				}
 
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
@@ -368,11 +362,12 @@
 			echo "<th align='right'>".t("Alle")." {$saatavat_array[0]} ".t("pv")."</th>";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-				echo "<th align='right'>".($saatavat_array[$sa-1]+1)."-".$saatavat_array[$sa]." ".t("pv")."</th>";
+				echo "<th align='right'>".($saatavat_array[$sa-1]+1)."-".$saatavat_array[$sa]."<br>".t("pv")."</th>";
 			}
 
-			echo "<th align='right'>".t("Yli")." ".$saatavat_array[count($saatavat_array)-1]." ".t("pv")."</th>";
-			echo "<th align='right'>".t("Avoimia")."</th>";
+			echo "<th align='right'>".t("Yli")." ".$saatavat_array[count($saatavat_array)-1]."<br>".t("pv")."</th>";
+			echo "<th align='right'>".t("Avoimet")."<br>".t("laskut")."</th>";
+			echo "<th align='right'>".t("Avoimet")."<br>".t("tilaukset")."</th>";
 			echo "<th align='right'>".t("Kaatotili")."</th>";
 			echo "<th align='right'>".t("Yhteensä")."</th>";
 			echo "<th align='right'>".t("Luottoraja")."</th>";
@@ -382,24 +377,29 @@
 			echo "<tbody>";
 
 			$divi = "";
+			$query_alennuksia = generoi_alekentta('M');
 
 			while ($row = mysql_fetch_assoc($result)) {
 
 				$query = "	SELECT luottoraja
 							FROM asiakas
 							WHERE yhtio = '$saatavat_yhtio'
-							and tunnus = '$row[liitostunnus]'";
+							and tunnus in ($row[liitostunnus])";
 				$asresult = pupe_query($query);
 				$asrow = mysql_fetch_assoc($asresult);
 
-				if ($grouppaus == "asiakas") {
+				if ($grouppaus == "asiakas" or $grouppaus == "ytunnus") {
+
 					if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
+						// Suorituksen valuutassa
 						$suorilisa = " sum(summa) summa ";
 					}
 					else {
+						// Yhtiön valuutassa
 						$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
 					}
 
+					// Haetaan kaatotilin summa
 					$query = "	SELECT
 								$suorilisa
 								FROM suoritus
@@ -408,14 +408,41 @@
 								and kohdpvm = '0000-00-00'
 								and asiakas_tunnus in ($row[liitostunnus])
 								$salisa2";
-					$suresult = pupe_query($query);
-					$surow = mysql_fetch_assoc($suresult);
+					$kaatotilires = pupe_query($query);
+					$kaatotilirow = mysql_fetch_assoc($kaatotilires);
+
+					if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
+						// Laskun valuutassa
+						$avtilisa = "(tilausrivi.hinta/if(tilausrivi.vienti_kurssi=0, 1, tilausrivi.vienti_kurssikurssi))";
+					}
+					else {
+						// Yhtiön valuutassa
+						$avtilisa = "tilausrivi.hinta";
+					}
+
+					// Avoimet tilaukset
+					$query = "	SELECT
+								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+								FROM lasku
+								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+								  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
+								  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+								)
+								AND lasku.liitostunnus in ($row[liitostunnus])";
+					$avoimettilauksetres = pupe_query($query);
+					$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 				}
 				else {
-					$surow = array();
+					$kaatotilirow 		 = array();
+					$avoimettilauksetrow = array();
 				}
 
-				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $row["avoimia"] > $asrow["luottoraja"] and $asrow["luottoraja"] != '')) {
+				// Lasketaan luottotilanne nyt
+				$luottotilanne_nyt = round($asrow['luottoraja'] - $row["avoimia"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
+
+				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0)) {
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
@@ -425,7 +452,7 @@
 						}
 					}
 
-					if ($asrow['luottoraja'] > 0 and ($row["avoimia"]-$surow["summa"]) > $asrow['luottoraja']) {
+					if ($asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0) {
 						$luottorajavirhe = 'kyllä';
 					}
 					else {
@@ -510,8 +537,9 @@
 
 					echo "<td valign='top' align='right'>".$row["yli_{$saatavat_array[count($saatavat_array)-1]}"]."</td>";
 					echo "<td valign='top' align='right'>$row[avoimia]</td>";
-					echo "<td valign='top' align='right'>$surow[summa]</td>";
-					echo "<td valign='top' align='right'>".($row["avoimia"]-$surow["summa"])."</td>";
+					echo "<td valign='top' align='right'>$avoimettilauksetrow[tilausavoinsaldo]</td>";
+					echo "<td valign='top' align='right'>$kaatotilirow[summa]</td>";
+					echo "<td valign='top' align='right'>".($row["avoimia"]+$avoimettilauksetrow["tilausavoinsaldo"]-$kaatotilirow["summa"])."</td>";
 					echo "<td valign='top' align='right'>$asrow[luottoraja]</td>";
 					echo "</tr>";
 
@@ -541,9 +569,11 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["avoimia"]);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, $surow["summa"]);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $avoimettilauksetrow["tilausavoinsaldo"]);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, $row["avoimia"]-$surow["summa"]);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $kaatotilirow["summa"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, ($row["avoimia"]+$avoimettilauksetrow["tilausavoinsaldo"]-$kaatotilirow["summa"]));
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $asrow["luottoraja"]);
 
@@ -560,9 +590,10 @@
 
 					$saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
 
-					$kaato_yhteensa 	+= $surow["summa"];
-					$avoimia_yhteensa 	+= $row["avoimia"];
-					$ylivito			+= $row["ylivito"];
+					$kaato_yhteensa 			+= $kaatotilirow["summa"];
+					$avoimia_yhteensa 			+= $row["avoimia"];
+					$ylivito					+= $row["ylivito"];
+					$avoimettilaukset_yhteensa 	+= $avoimettilauksetrow["tilausavoinsaldo"];
 					$rivilask++;
 				}
 			}
@@ -594,9 +625,11 @@
 				$sumlask++;
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$avoimia_yhteensa</td>";
 				$sumlask++;
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$avoimettilaukset_yhteensa</td>";
+				$sumlask++;
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$kaato_yhteensa</td>";
 				$sumlask++;
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".($avoimia_yhteensa-$kaato_yhteensa)."</td>";
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".($avoimia_yhteensa+$avoimettilaukset_yhteensa-$kaato_yhteensa)."</td>";
 				echo "<td valign='top' class='tumma'></td>";
 				echo "</tr>";
 			}

@@ -875,7 +875,7 @@
 									$values .= ", '{$kappaleerotus}'";
 									break;
 								default:
-									$values .= ", '".$tapahtuma_res[$fieldname]."'";
+									$values .= ", '".$tapahtuma_row[$fieldname]."'";
 							}
 						}
 
@@ -1408,7 +1408,7 @@
 										$values .= ", '{$positiivinen_arvo}'";
 										break;
 									default:
-										$values .= ", '".$tapahtuma_res[$fieldname]."'";
+										$values .= ", '".$tapahtuma_row[$fieldname]."'";
 								}
 							}
 

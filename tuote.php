@@ -423,7 +423,7 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td>$tuoterow[tuoteno]";
+			echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
 
 			//haetaan orginaalit
 			if (table_exists("tuotteen_orginaalit")) {
@@ -480,7 +480,7 @@
 
 			echo "</td>";
 
-			echo "<td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
+			echo "<td>$tuoterow[eankoodi]</td><td colspan='2' style='font-weight:bold;'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
 			echo "</tr>";
 
@@ -541,7 +541,7 @@
 				echo "{$tt_rivi["toim_tuoteno"]}<br>";
 			}
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
 			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["nettohinta"])."/".hintapyoristys($tuoterow["myymalahinta"])."</td>";
 			echo "<td valign='top' align='right'>";
 
@@ -549,7 +549,7 @@
 				echo hintapyoristys($tt_rivi["ostohinta"],6,TRUE)." {$tt_rivi["valuutta"]} / {$tt_rivi["alennus"]}%<br>";
 			}
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
@@ -562,7 +562,7 @@
 			}
 
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["vihahin"], 6, TRUE);
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["vihahin"], 6, TRUE);
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
@@ -938,7 +938,7 @@
 
 						echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
 									<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
-									<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+									<td align='right' style='font-weight:bold;'>".sprintf("%.2f", $myytavissa)."</td>
 									</tr>";
 					}
 				}

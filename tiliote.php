@@ -68,7 +68,6 @@
 		$userfile	= $_FILES['userfile']['name'];
 		$filenimi	= $_FILES['userfile']['tmp_name'];
 		$ok			= 1;
-		echo "file uploadattu<br>";
 	}
 	elseif (isset($virhe_file) and file_exists("/tmp/".basename($virhe_file))) {
 		$userfile	= "/tmp/".basename($virhe_file);
@@ -84,8 +83,6 @@
 
 		$fd = fopen($filenimi, "r");
 
-		echo "filenimi: $filenimi<br>";
-
 		if (!($fd)) {
 			echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
 			exit;
@@ -93,13 +90,9 @@
 
 		$tietue = fgets($fd);
 
-		echo "<pre>",var_dump($tietue),"</pre>";
-
 		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml") {
 			// Finvoice verkkolasku
 			fclose($fd);
-
-			echo "Käsitellään verkkolaskua...xml-tag löytyy<br>";
 
 			require("verkkolasku-in.php");
 		}

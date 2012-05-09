@@ -1336,6 +1336,9 @@
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.paketintunniste = '{$kolli}'
 						AND asn_sanomat.tilausrivi = ''
+						AND asn_sanomat.laji = 'asn'
+						AND asn_sanomat.asn_numero = '{$asn_numero}'
+						AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
 						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
 			$result = pupe_query($query);
 

@@ -1034,7 +1034,7 @@
 		$ulos = "<td>";
 
 		if (tarkista_oikeus("luotonhallinta.php")) {
-			$ulos .= "<a href='${palvelin2}myyntires/luotonhallinta.php?tee=1&ytunnus=$trow[ytunnus]&lopetus=$lopetus'>".t("Luotonhallinta")."</a>";
+			$ulos .= "<a target='Luotonhallinta' href='${palvelin2}myyntires/luotonhallinta.php?tee=1&ytunnus=$trow[ytunnus]'>".t("Luotonhallinta")."</a>";
 		}
 		else {
 			$ulos .= t("Luottorajat ovat per ytunnus, käytä Luotonhallinta -sovellusta");

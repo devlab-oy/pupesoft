@@ -1147,7 +1147,7 @@
 			$toimirow = mysql_fetch_assoc($toimires);
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = trim($tilausnro) != '' ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
+			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tuote.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';

@@ -1112,7 +1112,23 @@
 
 		$jatko = 0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
+		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta ei lähetetä")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus lähetetään asiakkaalle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'maksukehotuksen_osoitetiedot') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

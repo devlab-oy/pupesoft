@@ -88,6 +88,7 @@ if (!function_exists("tsekit")) {
 						AND sarjanumeroseuranta.tuoteno = tilausrivi.tuoteno
 						AND ((tilausrivi.varattu + tilausrivi.kpl < 0 AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus) OR (tilausrivi.varattu + tilausrivi.kpl > 0 AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus))) = 'K', 0, {$alvit}) / 100)) rivihinta
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
+					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
 					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$toimittajaid}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
 					AND tilausrivi.uusiotunnus = '{$row['tunnus']}' 

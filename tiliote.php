@@ -68,6 +68,7 @@
 		$userfile	= $_FILES['userfile']['name'];
 		$filenimi	= $_FILES['userfile']['tmp_name'];
 		$ok			= 1;
+		echo "file uploadattu<br>";
 	}
 	elseif (isset($virhe_file) and file_exists("/tmp/".basename($virhe_file))) {
 		$userfile	= "/tmp/".basename($virhe_file);

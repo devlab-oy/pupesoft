@@ -1147,11 +1147,16 @@
 			$toimirow = mysql_fetch_assoc($toimires);
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
-			$tilausnrolisa = trim($tilausnro) != '' ? " and tilausrivi.otunnus LIKE '%{$tilausnro}'" : '';
+			$tilausnrolisa = trim($tilausnro) != '' ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';
 			$tuoteno_valeilla = str_replace(' ','_',$tuoteno);
 			$tuoteno_ilman_valeilla =str_replace(' ','',$tuoteno);
-			$tuotenolisa = trim($tuoteno) != '' ? " and (tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuoteno like '".mysql_real_escape_string($tuoteno_valeilla)."' or tuoteno like '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
-			$kpllisa = trim($kpl) != '' ? " and varattu = ".(float) $kpl : '';
+			$tuotenolisa = trim($tuoteno) != '' ? " and (tuote.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tuote.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
+			$kpllisa = trim($kpl) != '' ? " and tilausrivi.varattu = ".(float) $kpl : '';
+
+			if (trim($kpl) != '' and $valitse != 'asn') {
+				$kpl = (float) $kpl;
+				$kpllisa = " and (tilausrivi.varattu = '{$kpl}' or tilausrivi.kpl = '{$kpl}')";
+			}
 
 			if ($tuotenolisa != "") {
 				$query = "	SELECT status, tuoteno
@@ -1171,18 +1176,23 @@
 				}
 			}
 
+			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
+
 			$query = "	SELECT tilausrivi.*, if(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
 						FROM lasku
 						JOIN tilausrivi ON (
-							tilausrivi.yhtio = lasku.yhtio AND
-							tilausrivi.tyyppi = 'O' AND
-							(tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
-							{$tilaajanrivinrolisa}{$tilausnrolisa}{$tuotenolisa}{$kpllisa})
+							tilausrivi.yhtio = lasku.yhtio 
+							AND tilausrivi.tyyppi = 'O' 
+							AND (tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
+							{$tilaajanrivinrolisa}
+							{$tuotenolisa}
+							{$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('O', 'K')
 						AND lasku.alatila != 'X'
 						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
+						{$tilausnrolisa}
 						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
 			$result = pupe_query($query);
 

@@ -15619,7 +15619,7 @@ if (!function_exists("tee_keraysera")) {
 												$kappalemaara = $kerayspakkauskoko;
 											}
 											else {
-												$kappalemaara = ($kerayspakkauskoko * $ix) - $tuoterow['y_maara'];
+												$kappalemaara = $tuoterow['y_maara'] - ($kerayspakkauskoko * ($ix-1));
 											}
 										}
 										else {

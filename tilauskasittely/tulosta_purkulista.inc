@@ -362,6 +362,9 @@
 			$out .= chr(10).chr(10).chr(13);
 		}
 
+		// Form Feed
+		$out .= chr(12);
+
 		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {

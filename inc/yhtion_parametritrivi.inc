@@ -817,6 +817,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "saapumisen_jt_kasittely") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Ostotilauksen saapuvan m‰‰r‰n ollessa tilattua pienempi, erotukselle ei tehd‰ mit‰‰n")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Ostotilauksen saapuvan m‰‰r‰n ollessa tilattua pienempi, erotus siirret‰‰n uudelle riville")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "naytetaan_katteet_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

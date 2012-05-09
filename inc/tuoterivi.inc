@@ -450,7 +450,7 @@
 		if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
 		if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
 
-		$tpque = "	SELECT tunnus, nimi
+		$tpque = "	SELECT tunnus, nimi, koodi
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
@@ -469,7 +469,7 @@
 			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

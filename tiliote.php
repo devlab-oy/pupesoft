@@ -84,12 +84,16 @@
 
 		$fd = fopen($filenimi, "r");
 
+		echo "filenimi: $filenimi<br>";
+
 		if (!($fd)) {
 			echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
 			exit;
 		}
 
 		$tietue = fgets($fd);
+
+		echo "<pre>",var_dump($tietue),"</pre>";
 
 		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml") {
 			// Finvoice verkkolasku

@@ -1178,7 +1178,13 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
-			$query = "	SELECT tilausrivi.*, if(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
+			$query = "	SELECT DISTINCT tilausrivi.tunnus, 
+						tilausrivi.tuoteno, 
+						tilausrivi.otunnus,
+						tilausrivi.varattu, 
+						tilausrivi.kpl, 
+						tilausrivi.tilaajanrivinro, 
+						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
 						FROM lasku
 						JOIN tilausrivi ON (
 							tilausrivi.yhtio = lasku.yhtio 

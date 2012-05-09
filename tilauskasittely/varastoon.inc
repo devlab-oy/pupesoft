@@ -747,7 +747,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					{$millepakallemeni}
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
-					and (perheid = '$tilrivirow[tunnus]' or tunnus = '$tilrivirow[tunnus]')";
+					and varattu != 0
+					and (tunnus = '$tilrivirow[tunnus]' or perheid = '$tilrivirow[tunnus]')";
 		$varastoon_result = pupe_query($query);
 
 		$rivia++;

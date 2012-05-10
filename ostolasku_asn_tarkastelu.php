@@ -486,7 +486,7 @@
 											FROM asn_sanomat
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND laji = 'asn'
-											AND tilausrivi LIKE '%{$kollirow['tilausrivi']}%'";
+											AND tilausrivi LIKE '%{$isa_chk_row['tunnus']}%'";
 								$info_res = pupe_query($query);
 								$info_row = mysql_fetch_assoc($info_res);
 

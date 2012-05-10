@@ -34,7 +34,7 @@
 			if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
-			elseif (strpos($file, "_invoice") !== false){
+			elseif (strpos($file, "teccominvoice") !== false){
 				require("inc/verkkolasku-in-teccom.inc");
 			}
 			elseif (strpos($file, "ORAO") !== false){

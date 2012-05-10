@@ -995,49 +995,11 @@ if (!function_exists("saldo_myytavissa")) {
 			$myytavissa		= 0;
 		}
 		else {
-			//Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
+
 			if ($yhtio != "") {
-				$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
-							from yhtio
-							where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-				$pres = pupe_query($query);
-				$prow = mysql_fetch_assoc($pres);
-
-				$yhtiot = explode(",", $prow["yhtiot"]);
-
-				if (in_array($yhtio, $yhtiot) and $yhtio != $kukarow["yhtio"]) {
-					// Jos yhtiö on joku konserniyhtiöistä niin tutkitaan suoratoimitus juttuja
-					$query = "	SELECT tyyppi_tieto, liitostunnus, toim_tuoteno
-								from tuotteen_toimittajat, toimi
-								where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-								and tuotteen_toimittajat.tuoteno = '$tuoteno'
-								and toimi.yhtio         = tuotteen_toimittajat.yhtio
-								and toimi.tunnus        = tuotteen_toimittajat.liitostunnus
-								and toimi.tyyppi        = 'S'
-								and toimi.tyyppi_tieto  = '$yhtio'
-								and toimi.edi_palvelin != ''
-								and toimi.edi_kayttaja != ''
-								and toimi.edi_salasana != ''
-								and toimi.edi_polku    != ''
-								and toimi.oletus_vienti in ('C','F','I')";
-					$superjtres  = pupe_query($query);
-
-					if (mysql_num_rows($superjtres) > 0) {
-						$superrow = mysql_fetch_assoc($superjtres);
-
-						$yhtiolisa	= $yhtio;
-						$tuoteno 	= $superrow["toim_tuoteno"];
-					}
-					else {
-						$yhtiolisa	= $yhtio;
-					}
-				}
-				elseif ($yhtio == $kukarow["yhtio"]) {
-					$yhtiolisa = $kukarow["yhtio"];
-				}
-				else {
-					return array(FALSE, FALSE, FALSE, FALSE);
-				}
+				// Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
+				// (TÄMÄ OMINAISUUS DEPRECATED!)
+				$yhtiolisa = $kukarow["yhtio"];
 			}
 			else {
 				$yhtiolisa = $kukarow["yhtio"];
@@ -9490,38 +9452,41 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 }
 
 if (!function_exists("jt_toimita")) {
-	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee, $automaattinen_poiminta = '') {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
 
+		if (!is_array($jtrivit)) $jtrivit = array();
+		if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
+
 		if ($automaattinen_poiminta != '') {
-			$asiakasno 			= $toimittaja;
-			$toimittaja			= "";
-
-			$asiakasid			= $toimittajaid;
-			$toimittajaid		= "";
-
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$tilaus_on_jo		= "KYLLA";
-			$vain_rivit 		= "";
-			$from_varastoon_inc = "";
+			$asiakasno 			  = $toimittaja;
+			$toimittaja			  = "";
+			$asiakasid			  = $toimittajaid;
+			$toimittajaid		  = "";
+			$asiakasmaa 		  = "";
+			$jarj	 			  = "luontiaika";
+			$tuotenumero		  = "";
+			$tilaus				  = "";
+			$toimi				  = "";
+			$suoratoimit		  = "";
+			$tilaus_on_jo		  = "KYLLA";
+			$suoratoimitus_rivit  = array();
+			$suoratoimitus_paikat = array();
+			$from_varastoon_inc   = "";
 		}
 		else {
-			$asiakasno 			= "";
-			$asiakasid			= "";
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$tilaus_on_jo		= "";
-			$vain_rivit 		= $jtrivit;
-			$from_varastoon_inc = "varastoon.inc";
+			$asiakasno 			  = "";
+			$asiakasid			  = "";
+			$asiakasmaa 		  = "";
+			$jarj	 			  = "luontiaika";
+			$tuotenumero		  = "";
+			$tilaus				  = "";
+			$toimi				  = "";
+			$suoratoimit		  = "";
+			$tilaus_on_jo		  = "";
+			$suoratoimitus_rivit  = $jtrivit;
+			$suoratoimitus_paikat = $jtrivit_paikat;
+			$from_varastoon_inc   = "varastoon.inc";
 		}
 
 		require('jtselaus.php');
@@ -12109,7 +12074,6 @@ if (!function_exists("pupe_DataTables")) {
 							// OTETAAN TARVITTAVAT TUNNUKSET JA MUUTTUJAT TALTEEN
 							var tun 					= $(this).attr('id').substring(9);
 							var otunnus 				= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 		= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+tun).val());
 							var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
 							var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
@@ -12130,8 +12094,7 @@ if (!function_exists("pupe_DataTables")) {
 											ajax_toiminto: 'rivi_kpl',
 											kpl: kpl,
 											no_head: 'yes',
-											ohje: 'off',
-											suoratoimitukset: suoratoimitukset },
+											ohje: 'off'},
 										function(return_value) {
 											var data = jQuery.parseJSON(return_value);
 
@@ -12155,8 +12118,7 @@ if (!function_exists("pupe_DataTables")) {
 												ajax_toiminto: 'rivi_kpl_splittaus',
 												no_head: 'yes',
 												ohje: 'off',
-												uuden_rivin_kpl: uuden_rivin_kpl,
-												suoratoimitukset: suoratoimitukset },
+												uuden_rivin_kpl: uuden_rivin_kpl},
 											function(return_value) {
 
 												var data = jQuery.parseJSON(return_value);
@@ -12236,7 +12198,6 @@ if (!function_exists("pupe_DataTables")) {
 							var monesko				= $(this).attr('name').substring(8,9);
 							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 							var ale 				= parseFloat(this.value);
@@ -12250,7 +12211,6 @@ if (!function_exists("pupe_DataTables")) {
 										ale: ale,
 										no_head: 'yes',
 										ohje: 'off',
-										suoratoimitukset: suoratoimitukset,
 										monesko_kentta: monesko},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
@@ -12288,7 +12248,6 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name^=\"rivi_hinta\"]').each(function(){
 							var tun 				= $(this).attr('id').substring(11);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_kpl_value 		= parseFloat($('#rivi_kpl_'+tun).val());
 							var rivi_hinta_alkup	= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
@@ -12307,8 +12266,7 @@ if (!function_exists("pupe_DataTables")) {
 										ajax_toiminto: 'rivi_hinta',
 										hinta: hinta,
 										no_head: 'yes',
-										ohje: 'off',
-										suoratoimitukset: suoratoimitukset },
+										ohje: 'off'},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#rivin_hinta_'+tun).html(data.hinta);

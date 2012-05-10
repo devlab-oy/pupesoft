@@ -19,18 +19,23 @@
 				exit;
 			}
 		}
+	}
 
-		if (!isset($eiliittymaa)) 		$eiliittymaa = "";
-		if (!isset($ylilimiitin)) 		$ylilimiitin = "";
-		if (!isset($sytunnus)) 			$sytunnus = "";
-		if (!isset($sanimi)) 			$sanimi = "";
-		if (!isset($grouppaus)) 		$grouppaus = "";
-		if (!isset($savalkoodi)) 		$savalkoodi = "";
-		if (!isset($yli)) 				$yli = "";
-		if (!isset($valuutassako)) 		$valuutassako = "";
-		if (!isset($laji)) 				$laji = "";
-		if (!isset($luottovakuutettu))	$luottovakuutettu = "";
-		if (!isset($tee)) 				$tee = "";
+	if (!isset($eiliittymaa)) 		$eiliittymaa = "";
+	if (!isset($ylilimiitin)) 		$ylilimiitin = "";
+	if (!isset($sytunnus)) 			$sytunnus = "";
+	if (!isset($sanimi)) 			$sanimi = "";
+	if (!isset($grouppaus)) 		$grouppaus = "";
+	if (!isset($savalkoodi)) 		$savalkoodi = "";
+	if (!isset($yli)) 				$yli = "";
+	if (!isset($valuutassako)) 		$valuutassako = "";
+	if (!isset($laji)) 				$laji = "";
+	if (!isset($luottovakuutettu))	$luottovakuutettu = "";
+	if (!isset($tee)) 				$tee = "";
+	if (!isset($pupe_DataTables)) 	$pupe_DataTables = "";
+	if (!isset($luottolisa)) 		$luottolisa = "";
+
+	if ($eiliittymaa != 'ON') {
 
 		// Livesearch jutut
 		enable_ajax();
@@ -138,7 +143,6 @@
 
 		echo "<tr>";
 
-		$luottolisa = "";
 		$checked = "";
 
 		if ($luottovakuutettu == "K") {
@@ -634,13 +638,18 @@
 					}
 
 					// Lasketaan yhteen
-					$saatavat_yhteensa["alle_$saatavat_array[0]"] += $row["alle_$saatavat_array[0]"];
+					if (!isset($saatavat_yhteensa["alle_$saatavat_array[0]"])) $saatavat_yhteensa["alle_$saatavat_array[0]"] = $row["alle_$saatavat_array[0]"];
+					else $saatavat_yhteensa["alle_$saatavat_array[0]"] += $row["alle_$saatavat_array[0]"];
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-						$saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] += $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
+						if (!isset($saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]])) $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] = $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
+						else $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] += $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
 					}
 
-					$saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+					if (!isset($saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"])) $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] = $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+					else $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+
+
 
 					$kaato_yhteensa 			+= $kaatotilirow["summa"];
 					$avoimia_yhteensa 			+= $row["avoimia"];

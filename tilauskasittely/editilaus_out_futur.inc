@@ -128,7 +128,10 @@
 			while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
 				if ($tilausrivi_row['tilausrivilinkki'] > 0) {
-					$query = "SELECT tyyppi FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivi_row['tilausrivilinkki']}'";
+					$query = "	SELECT tyyppi
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tilausrivi_row['tilausrivilinkki']}'";
 					$suoratoimitus_chk_res = pupe_query($query);
 					$suoratoimitus_chk_row = mysql_fetch_assoc($suoratoimitus_chk_res);
 

@@ -730,12 +730,6 @@
 
 							if ($debug==1) echo t("Lisättiin tuote").": $tuoteno kpl: $lisataanrow_kpl<br>";
 
-							// Suoratoimitukset saliitaan jos ne ovat toivottuja
-							if ($var == "S" and $suoratoimpaikka[$tunnukset] != '') {
-								$lisatyt_rivit1 = $lisatyt_rivit2;
-								unset($lisatyt_rivit2);
-							}
-
 							// Pidetään muistissa kaikki lisätyt rivit
 							if (count($lisatyt_rivit1) > 0) {
 								// Myyntihaara

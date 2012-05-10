@@ -3462,11 +3462,7 @@ if ($tee == '') {
 						WHERE tunnus = '$rivitunnus'";
 			$result = pupe_query($query);
 
-			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
-			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
-				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#!°!#".$tilausrivi["hyllyalue"]."#!°!#".$tilausrivi["hyllynro"]."#!°!#".$tilausrivi["hyllyvali"]."#!°!#".$tilausrivi["hyllytaso"];
-			}
-
+			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, T,U niin laitetaan $paikka-muuttuja kuntoon
 			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "°°°") {
 				$paikka = "°°°".$tilausrivi["toimittajan_tunnus"];
 			}
@@ -3475,7 +3471,7 @@ if ($tee == '') {
 				$paikka = "!!!".$tilausrivi["toimittajan_tunnus"];
 			}
 
-			$tuoteno 	= $tilausrivi['tuoteno'];
+			$tuoteno = $tilausrivi['tuoteno'];
 
 			if (in_array($tilausrivi["var"], array('S','U','T','R', 'J'))) {
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -3597,7 +3593,7 @@ if ($tee == '') {
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";
 				$tila		= "";
-				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "@@@") $paikka = "";
+				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "°°°") $paikka = "";
 			}
 			elseif ($tapa == "MYYVASTAAVA") {
 				// tuoteno, m‰‰r‰, muut nollataan
@@ -6954,7 +6950,7 @@ if ($tee == '') {
 				$tuotenumero	= "";
 				$toimi			= "";
 				$tilaus_on_jo 	= "KYLLA";
-				$superit		= "";
+				$suoratoimit		= "";
 				$varastosta		= array();
 
 				if ($toim == 'SIIRTOLISTA') {

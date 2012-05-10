@@ -27,9 +27,7 @@
 	if(!isset($loput))              $loput = "";
 	if(!isset($maa)) 		 		$maa = "";
 	if(!isset($pkrow))              $pkrow = array();
-	if(!isset($suorana))            $suorana = "";
-	if(!isset($suoravarasto))       $suoravarasto = array();
-	if(!isset($superit))            $superit = "";
+	if(!isset($suoratoimit))        $suoratoimit = "";
 	if(!isset($tee))                $tee = "";
 	if(!isset($tilaus)) 	 		$tilaus = "";
 	if(!isset($tilausnumero))       $tilausnumero = "";
@@ -95,7 +93,7 @@
 			$tilaus			= "";
 			$toimi			= "";
 			$ei_limiittia	= "";
-			$superit		= "";
+			$suoratoimit	= "";
 			$tilaus_on_jo	= "KYLLA";
 
 			if ($tee == "") {
@@ -130,27 +128,7 @@
 
 			$tunnusarray = explode(',', $tunnukset);
 
-			//	Jos suoratoimitukselle annettiin kappalemäärä tehdään laitetaan montako perään
-			if ($suoratoimpaikka[$tunnukset] != "") {
-
-				if ($loput["tunnukset"]=="JATA") {
-
-				}
-				else{
-					$montako = $kpl[$tunnukset];
-				}
-
-				$suoratoimpaikka[$tunnukset] = $suoravarastopaikka[$tunnukset]."&&&".$montako;
-			}
-			elseif (isset($suoratoimpaikka[$tunnukset]) and ($kpl[$tunnukset] > 0 or $loput[$tunnukset] != '')) {
-				echo "<font class='message'>".t("Jos suoratoimitat tuotteita, muista valita myös toimittaja")."!!!</font><br>";
-
-				unset($suoratoimpaikka[$tunnukset]);
-				unset($kpl[$tunnukset]);
-				unset($loput[$tunnukset]);
-			}
-
-			if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] != '' or $suoratoimpaikka[$tunnukset] != "") {
+			if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] != '') {
 
 				// Tutkitaan hintoja ja alennuksia
 				if ($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $toim != "ENNAKKO" and $toim != 'SIIRTOLISTA') {
@@ -536,8 +514,7 @@
 		echo "<input type='hidden' name='toimittaja' value='$toimittaja'>";
 		echo "<input type='hidden' name='toimi' value='$toimi'>";
 		echo "<input type='hidden' name='ei_limiittia' value='$ei_limiittia'>";
-		echo "<input type='hidden' name='superit' value='$superit'>";
-		echo "<input type='hidden' name='suorana' value='$suorana'>";
+		echo "<input type='hidden' name='suoratoimit' value='$suoratoimit'>";
 		echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
 		echo "<input type='hidden' name='tilaus' value='$tilaus'>";
 		echo "<input type='hidden' name='rivinotunnus' value='$rivinotunnus'>";
@@ -614,7 +591,7 @@
 	if ($kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == "" or $tee == "JATKA")) {
 
 		if (isset($muutparametrit)) {
-			list($tuotenumero, $tilaus,$jarj,$toimi,$ei_limiittia,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa,$myyja) = explode('#', $muutparametrit);
+			list($tuotenumero, $tilaus,$jarj,$toimi,$ei_limiittia,$suoratoimit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa,$myyja) = explode('#', $muutparametrit);
 
 			$varastot = explode('##', $tilausnumero);
 
@@ -623,7 +600,7 @@
 			}
 		}
 
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$suoratoimit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -651,7 +628,7 @@
 				$tee = "";
 			}
 		}
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$suoratoimit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#$myyja#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -924,7 +901,7 @@
 				while ($jtrow = mysql_fetch_array($isaresult)) {
 
 					//tutkitaan onko tämä suoratoimitusrivi
-					$onkosuper = "";
+					$onko_suoratoimi = "";
 
 					if ($jtrow["tilausrivilinkki"] > 0) {
 						$query = "	SELECT tunnus
@@ -935,13 +912,13 @@
 						$sjtres = pupe_query($query);
 
 						if (mysql_num_rows($sjtres) > 0) {
-							$onkosuper = "ON";
+							$onko_suoratoimi = "ON";
 						}
 					}
 
-					// ei näytetä suoratoimitusrivejä, ellei $superit ole ruksattu, sillon näytetään pelkästään suoratoimitukset
+					// ei näytetä suoratoimitusrivejä, ellei $suoratoimit ole ruksattu, sillon näytetään pelkästään suoratoimitukset
 					// Jos $vain_rivit muuttuja on setattu niin huomioidaan sekä normit, että suoratoimit
-					if (($onkosuper == "" and $superit == "") or ($onkosuper == "ON" and $superit != "") or $vain_rivit != "") {
+					if (($onko_suoratoimi == "" and $suoratoimit == "") or ($onko_suoratoimi == "ON" and $suoratoimit != "") or $vain_rivit != "") {
 
 						$kokonaismyytavissa = 0;
 
@@ -1064,31 +1041,10 @@
 									$kokonaismyytavissa += $myytavissa;
 								}
 							}
-
-							//jos ei ole automaaginen ja halutaan suoratoimittaa ja omasta varastosta ei löydy yhtään niin katotaan suoratoimitusmahdollisuus
-							if ($automaaginen == '' and $kukarow["extranet"] == '' and $onkosuper == "" and $toim != 'SIIRTOLISTA' and ($suorana != '' or $tilaus_on_jo == 'KYLLA' or count($suoravarasto)>0)) {
-								$suora_tuoteno 	= $jtrow["tuoteno"];
-								$suora_kpl 		= $jtrow["jt"];
-								$paikatlask 	= 0;
-								$paikat 		= '';
-								$mista 			= 'selaus';
-
-								if (count($suoravarasto) > 0) {
-									$varastoista = implode(",",$suoravarasto);
-								}
-								else {
-									$varastoista = "";
-								}
-								require ("suoratoimitusvalinta.inc");
-							}
-							else {
-								$paikatlask = 0;
-								$paikat 	= '';
-							}
 						}
 
-						// Saldoa on tai halutaan nähdä kaikki rivit tai suoratoimituspaikkoja löytyi
-						if ($kokonaismyytavissa > 0 or $toimi == '' or $paikatlask > 0) {
+						// Saldoa on tai halutaan nähdä kaikki rivit
+						if ($kokonaismyytavissa > 0 or $toimi == '') {
 
 							//Tulostetaan otsikot
 							if ($automaaginen == '' and $jt_rivilaskuri == 1) {
@@ -1121,13 +1077,7 @@
 
 								echo "</th>";
 
-								if (count($suoravarasto) > 0 or $suorana != "") {
-									echo "<th valign='top'>".t("Status")."<br>".t("Suoratoimittaja")."<br>".t("Toimaika")."</th>";
-								}
-								else {
-									echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
-								}
-
+								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
 
 								if ($oikeurow['paivitys'] == '1') {
 									if ($kukarow["extranet"] == "") {
@@ -1205,16 +1155,9 @@
 										echo "<input type='hidden' name='toimittaja' value='$toimittaja'>";
 										echo "<input type='hidden' name='toimi' value='$toimi'>";
 										echo "<input type='hidden' name='ei_limiittia' value='$ei_limiittia'>";
-										echo "<input type='hidden' name='superit' value='$superit'>";
-										echo "<input type='hidden' name='suorana' value='$suorana'>";
+										echo "<input type='hidden' name='suoratoimit' value='$suoratoimit'>";
 										echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
 										echo "<input type='hidden' name='tilaus' value='$tilaus'>";
-
-										if (count($suoravarasto) > 0) {
-											foreach($suoravarasto as $key => $value) {
-												echo "<input type='hidden' name='suoravarasto[$key]' value='$value'>";
-											}
-										}
 
 										if (is_array($varastosta)) {
 											foreach ($varastosta as $vara) {
@@ -1408,7 +1351,7 @@
 								}
 
 								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
-									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
+									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
 								}
 								else {
 									echo "<td valign='top' align='right' $class>".($jtrow["jt"]*1)."<br>";
@@ -1630,39 +1573,6 @@
 										$jt_rivilaskuri++;
 									}
 								}
-								// Suoratoimitus
-								elseif ($paikatlask > 0 and $automaaginen == '' and $kukarow['extranet'] == '') {
-
-									$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value=''>".t("Ei toimiteta")."</option>".$paikat."</select>";
-
-									if ($suoratoim_totaali >= $jurow["jt"]) {
-										echo "<td valign='top' $class><font style='color:green;'>".t("Riittää kaikille")."!$varalisa</font></td>";
-
-									}
-									elseif ($suoratoim_totaali >= $jtrow["jt"]) {
-										echo "<td valign='top' $class><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!$varalisa</font></td>";
-									}
-									else {
-										echo "<td valign='top' $class><font style='color:orange;'>".t("Ei riitä koko riville")."!$varalisa</font></td>";
-									}
-
-									echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
-									echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
-
-									if ($jtrow["osatoimitus"] == "") {
-										echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
-										echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
-										echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
-									}
-									else {
-										echo "<td valign='top' align='center' colspan='3' $class>".t("Tilausta ei osatoimiteta")."</td>";
-									}
-
-									echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
-									echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-
-									$jt_rivilaskuri++;
-								}
 								// Ei riitä koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
@@ -1827,7 +1737,7 @@
 									}
 
 									if ($kukarow["extranet"] == "") {
-										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
+										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
 									}
 									else {
 										echo "<td valign='top' align='right' $class>$perherow[jt]<br>";
@@ -2053,47 +1963,9 @@
 				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td>$huomio</tr>";
 		}
 
-		$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, yhtio.nimi
-					from toimi
-					JOIN varastopaikat ON varastopaikat.yhtio=toimi.tyyppi_tieto and varastopaikat.tyyppi=''
-					JOIN yhtio ON yhtio.yhtio=varastopaikat.yhtio
-					where toimi.yhtio = '$kukarow[yhtio]'
-					and toimi.tyyppi        = 'S'
-					and toimi.tyyppi_tieto != ''
-					and toimi.edi_palvelin != ''
-					and toimi.edi_kayttaja != ''
-					and toimi.edi_salasana != ''
-					and toimi.edi_polku    != ''
-					and toimi.oletus_vienti in ('C','F','I')
-					ORDER BY tyyppi_tieto";
-		$superjtres  = pupe_query($query);
-
-		if (mysql_num_rows($superjtres) > 0) {
-
-			//	Piilotetaan tämä jos meillä on jo jotain suoravarastoja valittuna (tämä toiminto depracoituu enivei)
-			$sel = "";
-			if ($suorana != '' and count($suoravarasto)==0) $sel = 'CHECKED';
-			echo "<tr><td class='back'><br></td></tr><tr><td class='back'><font class='message'>".t("Toimita suoratoimituksena varastosta:")."</font></td></tr>";
-			echo "<tr><th>".t("Toimita kaikista varastoista (manuaalivalinta)")."</th><td><input type='checkbox' name='suorana' value='suora' $sel></td></tr>";
-
-			while ($superjtrow=mysql_fetch_array($superjtres)) {
-				if (array_search($superjtrow["tunnus"], (array) $suoravarasto)!== false) {
-					$sel = "checked";
-				}
-				else {
-					$sel = "";
-				}
-
-				echo "<tr><th>$superjtrow[nimi] - $superjtrow[nimitys]</th><td><input type='checkbox' name='suoravarasto[]' value='$superjtrow[tunnus]' $sel></td></tr>";
-			}
-
-		}
-
 		echo "</table>";
 
-
 		echo "<table>";
-
 		echo "<tr><td class='back'><br></td></tr><tr><td class='back'><font class='message'>".t("Valinnat:")." </font></td></tr>";
 
 		$sel=array();
@@ -2290,7 +2162,7 @@
 		if ($toim == "ENNAKKO") {
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify(){
-						msg = '".t("Haluatko todella toimittaa kaikki selkeät ennakkorivit? Eli tiedätkö nyt aivan varmasti mitä olet tekemässä")."?';
+						msg = '".t("Haluatko todella toimittaa kaikki selkeät ennakkorivit?")."?';
 						return confirm(msg);
 					}
 					</SCRIPT>";
@@ -2298,18 +2170,18 @@
 		else {
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify(){
-						msg = '".t("Haluatko todella toimittaa kaikki selkeät JT-Rivit? Eli tiedätkö nyt aivan varmasti mitä olet tekemässä")."?';
+						msg = '".t("Haluatko todella toimittaa kaikki selkeät JT-Rivit?")."?';
 						return confirm(msg);
 					}
 					</SCRIPT>";
 		}
 
 		$sel = '';
-		if ($superit != '') $sel = 'CHECKED';
+		if ($suoratoimit != '') $sel = 'CHECKED';
 
 		echo "	<tr>
 				<th>".t("Näytä vain suoratoimitusrivit")."</th>
-				<td><input type='checkbox' name='superit' $sel></td><td class='back'>".t("Älä toimita suoratoimituksia, ellet ole 100% varma että voit niin tehdä")."!</td>
+				<td><input type='checkbox' name='suoratoimit' $sel></td>
 				</tr>";
 
 		echo "</table>

@@ -372,7 +372,7 @@
 		}
 	}
 
-	// tämän keikan voi viedä saldoille ja laskuttaa koska se on suoratoimitus
+	// tämän keikan voi viedä saldoille ja laskuttaa
 	if ($kohdistettujariveja > 0 and $kauttalaskutus == "kylla") {
 		$otunnus = $keikantunnus;
 
@@ -443,7 +443,7 @@
 			$hinresu = pupe_query($query);
 		}
 
-		$laskuvirhe .= t("Viedään suoratoimitus varastoon").". ($laskurow[laskunro])\n";
+		$laskuvirhe .= t("Viedään kauttalaskutus varastoon").". ($laskurow[laskunro])\n";
 
 		$toiminto = "kalkyyli";
 		$tee = "varastoon";

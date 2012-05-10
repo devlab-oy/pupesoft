@@ -249,7 +249,6 @@
 	$lapsiyhteensa			 = 0;
 	$korvaavan_isaa_myyty	 = 0;
 	$perheid_lisaarivi		 = 0;
-	$suoratoimeikiitos 		 = '';
 	$lop					 = "";
 	$tuoteperhe				 = array(); 				// Tuoteperheiden lapset menev‰t t‰nne
 	$kaikkituotteet			 = array(); 				// t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
@@ -423,30 +422,6 @@
 	elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
 		$var 				= "";
 		$toimittajan_tunnus	= "";
-	}
-
-	// Jos kyseess‰ on suoratoimitus joka tilataan toisesta firmasta suoraan
-	if (substr($paikka,0,3) == "@@@") {
-
-		if (strpos($paikka, "&&&") !== FALSE) {
-			$superpaikka = substr($paikka, 0, strpos($paikka, "&&&"));
-			$loppupaikka = substr($paikka, strpos($paikka, "&&&")+3);
-
-			$lop = "LOP#!°!#".$toimittamatta;
-			$toimittamatta = $loppupaikka;
-		}
-		else {
-			$superpaikka = $paikka;
-		}
-
-		$var 		 = "S";
-		$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-		$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-	}
-	elseif ($var == "S" and substr($paikka,0,3) != "@@@") {
-		$var 		= "";
-		$rivinumero	= "";
-		$suoratoimeikiitos = "ei";
 	}
 
 	$perhelisa = "";
@@ -1701,34 +1676,6 @@
 		$puu_ein 		= array();
 		$puu_var		= array();
 
-		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
-		if ($yhtiorow["suoratoim_automaatio"] != '' and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
-
-			if ($lisaarivi_debug==1) echo "Tehd‰‰n suoratoimitusautomaatio<br>";
-
-			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
-			$suora_kpl		= $toimittamatta;
-
-			require("suoratoimitusvalinta.inc");
-
-			if (count($suoratoim_array) > 0) {
-				if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-					$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-					$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-					$lop = "LOP#!°!#".$toimittamatta;
-					$toimittamatta = $loppupaikka;
-				}
-				else {
-					$superpaikka = $suoratoim_array[0];
-				}
-
-				$var 		 = "S";
-				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-			}
-		}
-
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
 			if ($toimittamatta >= $suoratoimitus_rivikpl) {
@@ -1832,32 +1779,6 @@
 				$trow = mysql_fetch_array($tuoteresult);
 			}
 
-			if ($yhtiorow["suoratoim_automaatio"] != '' and $rivityyppi != 'E' and $var == "X") {
-
-				$var 			= "";
-				$suora_tuoteno 	= $trow["tuoteno"];
-				$suora_kpl		= $kpl;
-
-				require("suoratoimitusvalinta.inc");
-
-				if (count($suoratoim_array) > 0) {
-					if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-						$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-						$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-						$lop = "LOP#!°!#".$toimittamatta;
-						$toimittamatta = $loppupaikka;
-					}
-					else {
-						$superpaikka = $suoratoim_array[0];
-					}
-
-					$var 		 = "S";
-					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-				}
-			}
-
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
@@ -1936,7 +1857,6 @@
 					case 'J' : // J‰lkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
-					case 'S' : // Suoratoimitus-JT
 					case 'T' : // Tilataan toimittajalta
 						// Yhtiˆn parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -2129,15 +2049,6 @@
 				}
 				elseif ($var == "P") {
 					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
-					}
-
-					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
-				}
-				elseif ($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";

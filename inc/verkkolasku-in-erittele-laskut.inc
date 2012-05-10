@@ -134,6 +134,7 @@
 				$path_parts = pathinfo($file);
 
 				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
+				echo "Teccom-haara! attribute type on invoice ({$laskut}/teccominvoice_{$path_parts['basename']})<br>";
 			}
 		}
 

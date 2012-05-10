@@ -98,7 +98,8 @@
 
 			$i = 1;
 
-			echo "bool: ".(int) isset($xml->Invoice->Document->attributes()->Type)." (".$xml->Invoice->Document->attributes()->Type.")<br>";
+			$foo = $xml->Document->attributes()->Type;
+			echo "bool: ".(int) isset($foo)."<br>";
 
 			// Unikon laskuaineisto
 			if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
@@ -133,7 +134,7 @@
 				file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
 				$luotiinlaskuja++;
 			}
-			elseif (isset($xml->Invoice->Document->attributes()->Type) and $xml->Invoice->Document->attributes()->Type == "Invoice") {
+			elseif (isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
 				// Teccom laskuaineisto
 
 				$path_parts = pathinfo($file);

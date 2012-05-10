@@ -280,6 +280,9 @@
 
 					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
 
+					$ale1 = 0;
+					$ale2 = 0;
+
 					foreach ($node_search as $node) {
 
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
@@ -292,7 +295,8 @@
 									$rtuoteno[$i]['ale1'] = round($node->Percent, 2);
 								}
 								else {
-									$rtuoteno[$i]['ale1'] = round(((float) str_replace(",", ".", $node->Amount) / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
+									$ale1 = (float) str_replace(",", ".", $node->Amount);
+									$rtuoteno[$i]['ale1'] = round(($ale1 / ($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"])) * 100, 2);
 								}
 							}
 							elseif (!isset($rtuoteno[$i]['ale2'])) {
@@ -301,7 +305,8 @@
 									$rtuoteno[$i]['ale2'] = round($node->Percent, 2);
 								}
 								else {
-									$rtuoteno[$i]['ale2'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
+									$ale2 = (float) str_replace(",", ".", $node->Amount);
+									$rtuoteno[$i]['ale2'] = round(($ale2 / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1) * 100, 2);
 								}
 							}
 							else {
@@ -323,10 +328,10 @@
 
 									// 100-(1-50/100)*(1-50/100)*100
 									if (isset($rtuoteno[$i]['ale3'])) {
-										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100) * 100, 2);
+										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100) * 100, 2);
 									}
 									else {
-										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / $rtuoteno[$i]["rivihinta"]) * 100, 2);
+										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100, 2);
 									}
 								}
 							}

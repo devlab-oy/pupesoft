@@ -34,19 +34,19 @@ if (!function_exists('jt_toimita_editilaus')) {
 	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
 		global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
-		$automaaginen 			        = "automaaginen";
-		$tee 					        = "JATKA";
-		$oikeurow['paivitys'] 	        = '1';
-		$toimittaja				        = "";
-		$toimittajaid			        = "";
-		$jarj	 				        = "tuoteno";
-		$tuotenumero			        = "";
-		$tilaus					        = "";
-		$toimi					        = "";
-		$suoratoimit				        = "";
-		$tilaus_on_jo			        = "KYLLA";
-		$from_varastoon_inc 	        = "editilaus_in.inc";
-		$ei_tehdastoimitus_tuotteita    = "EI";
+		$automaaginen 			    	= "automaaginen";
+		$tee 					    	= "JATKA";
+		$oikeurow['paivitys'] 	    	= '1';
+		$toimittaja				    	= "";
+		$toimittajaid			    	= "";
+		$jarj	 				    	= "tuoteno";
+		$tuotenumero			    	= "";
+		$tilaus					    	= "";
+		$toimi					    	= "";
+		$suoratoimit					= "";
+		$tilaus_on_jo			    	= "KYLLA";
+		$from_varastoon_inc 	    	= "editilaus_in.inc";
+		$ei_tehdastoimitus_tuotteita	= "EI";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";

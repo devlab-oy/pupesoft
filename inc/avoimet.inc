@@ -15,6 +15,10 @@
 	if (!isset($laji))					$laji = "";
 	if (!isset($muutparametrit))		$muutparametrit = "";
 	if (!isset($naytetaankokommentit))	$naytetaankokommentit = "";
+	if (!isset($savalkoodi))			$savalkoodi = "";
+	if (!isset($maa))					$maa = "";
+	if (!isset($karhuja))				$karhuja = "";
+	if (!isset($luottovakuutettu))		$luottovakuutettu = "";
 
 	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
 
@@ -132,6 +136,28 @@
 			<td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'></td>
 			</tr>";
 
+
+	$query = "	SELECT tunnus
+				FROM kustannuspaikka
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi = 'K'
+				and kaytossa != 'E'
+				LIMIT 1";
+	$result = pupe_query($query);
+
+	if (mysql_num_rows($result) > 0) {
+
+		echo "<tr><th>".t("Kustannuspaikka")."</th><td colspan='3'>";
+
+		$monivalintalaatikot = array("KUSTP");
+		$noautosubmit = TRUE;
+		$piirra_otsikot = FALSE;
+
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		echo "</td></tr>";
+	}
+
 	if ($naytetaankokommentit != "") $komsel = "CHECKED";
 	else $komsel = "";
 
@@ -238,9 +264,9 @@
 	// luottovakuutettu
 	echo "<tr>";
 	echo "<th>".t("Näytä vain luottovakuutetut asiakkaat (Vain Myyntilaskut)")."</th>";
-	if ($luottovakuutettu == "K") {
-		$luottochecked = "CHECKED";
-	}
+
+	$luottochecked = ($luottovakuutettu == "K") ? "CHECKED" : "";
+
 	echo "<td colspan='3'>";
 	echo "<input type='checkbox' name='luottovakuutettu' value='K' $luottochecked>";
 	echo "</td></tr>";
@@ -296,14 +322,21 @@
 
 		if (substr($laji,0,1) == 'O') {
 
-			$lisa = '';
+			$av_lisa = '';
 
 			if ($toimittajaid != '')  {
-				$lisa = " and lasku.liitostunnus='$toimittajaid'";
+				$av_lisa = " and lasku.liitostunnus='$toimittajaid'";
 				$indeksi = " use index (yhtio_tila_liitostunnus_tapvm)";
 			}
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
+			}
+
+			if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+				$tiliointilisa = $lisa;
+			}
+			else {
+				$tiliointilisa = '';
 			}
 
 			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -352,16 +385,15 @@
 				$groupby = "";
 			}
 
-
 			$query .= "	FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tapvm = tiliointi.tapvm and tiliointi.tilino IN ($tili) and tiliointi.korjattu = '')
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tapvm = tiliointi.tapvm and tiliointi.tilino IN ($tili) and tiliointi.korjattu = '' {$tiliointilisa})
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
 						$paivamaaralisa
 						and lasku.tapvm <= '$pvm'
 						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
-						$lisa
+						$av_lisa
 						$valkoodi1
 						$groupby
 						ORDER BY lasku.ytunnus";
@@ -441,7 +473,7 @@
 					$summa2+= $trow['avoinsaldo'];
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."raportit.php?toim=toimittajahaku&tee=A&ytunnus=".tarkistahetu($trow[ytunnus])."&alku=0&laji=M&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."raportit.php?toim=toimittajahaku&tee=A&ytunnus=".tarkistahetu($trow["ytunnus"])."&alku=0&laji=M&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maa]</td>";
 					echo "<td>$trow[maksutieto]";
@@ -548,7 +580,8 @@
 						and korjattu = ''
 						and tapvm	>= '$tilikausirow[tilikausi_alku]'
 						and tapvm	<= '$pvm'
-						and tilino	IN ($tili)";
+						and tilino	IN ($tili)
+					 	{$tiliointilisa}";
 			$result = pupe_query($query);
 			$trow = mysql_fetch_assoc ($result);
 
@@ -563,13 +596,13 @@
 		}
 		elseif (substr($laji,0,1) == 'M') {
 
-			$lisa1 = ""; // lasku rajauksia
-			$lisa2 = ""; // suoritus rajauksia
-			$lisa3 = ""; // asiakas rajauksia
+			$av_lisa1 = ""; // lasku rajauksia
+			$av_lisa2 = ""; // suoritus rajauksia
+			$av_lisa3 = ""; // asiakas rajauksia
 
 			if ($asiakasid != '')  {
-				$lisa1 .= " and lasku.liitostunnus='$asiakasid' ";
-				$lisa2 .= " and asiakas_tunnus='$asiakasid' ";
+				$av_lisa1 .= " and lasku.liitostunnus='$asiakasid' ";
+				$av_lisa2 .= " and asiakas_tunnus='$asiakasid' ";
 				$indeksi = " use index (yhtio_tila_liitostunnus_tapvm)";
 			}
 			else {
@@ -577,12 +610,19 @@
 			}
 
 			if ($maksuehto != '') {
-				$lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
+				$av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
 			}
 
 			$maalisa = '';
 			if (isset($maa) and $maa != '') {
 				$maalisa = " and lasku.maa = '$maa'";
+			}
+
+			if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+				$tiliointilisa = $lisa;
+			}
+			else {
+				$tiliointilisa = '';
 			}
 
 			$tili = 0;
@@ -671,7 +711,7 @@
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
-						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm' {$tiliointilisa})
 						$luottovakuutuslisa
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
@@ -680,7 +720,7 @@
 						and lasku.tapvm 		> '0000-00-00'
 						and lasku.tila			= 'U'
 						and lasku.alatila		= 'X'
-						$lisa1
+						$av_lisa1
 						$valkoodi
 						$maalisa
 						$tunnuslisa
@@ -754,7 +794,7 @@
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow[ytunnus])."&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maa]</td>";
 					echo "<td>$trow[maksutieto]</td>";
@@ -844,13 +884,13 @@
 							suoritus.summa * -1 summa,
 							suoritus.valkoodi
 					  		FROM suoritus
-							JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili))
-					  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $lisa3)
+							JOIN tiliointi ON (suoritus.yhtio = tiliointi.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($tili) {$tiliointilisa})
+					  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $av_lisa3)
 					  		WHERE suoritus.yhtio  = '$kukarow[yhtio]'
 							and (suoritus.kohdpvm = '0000-00-00' or suoritus.kohdpvm > '$pvm')
 							and suoritus.ltunnus  > 0
 							and suoritus.kirjpvm <= '$pvm'
-							$lisa2
+							$av_lisa2
 							$valkoodi2
 					  		ORDER BY asiakas.ytunnus";
 				$result = pupe_query($query);
@@ -860,7 +900,7 @@
 
 						$suoritussummatotal += $trow["suoritussumma"];
 
-						if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow[ytunnus])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
+						if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow["ytunnus"])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow["ytunnus"])."</a></td>";
 						else echo "<td>*".t("ei asiakasta")."*</td>";
 
 						echo "<td>$trow[nimi_maksaja]</td>";
@@ -960,7 +1000,7 @@
 			}
 
 			// ei rajauksia, voidaan näyttää erotus kirjanpitoon
-			if ($lisa1 == "" and $lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
+			if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
 
 		        $query = "	SELECT sum(summa) saldo
 							FROM tiliointi
@@ -968,7 +1008,8 @@
 							and korjattu = ''
 							and tapvm >= '$tilikausirow[tilikausi_alku]'
 							and tapvm <= '$pvm'
-							and tilino in ($tili)";
+							and tilino in ($tili)
+							{$tiliointilisa}";
 				$result = pupe_query($query);
 				$trow = mysql_fetch_assoc ($result);
 

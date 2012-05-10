@@ -27,7 +27,9 @@
 
 			$qu = "	SELECT *
 					FROM dynaaminen_puu
-					WHERE dynaaminen_puu.yhtio = '{$yhtiorow['yhtio']}' AND dynaaminen_puu.laji = '{$toim}' AND dynaaminen_puu.tunnus = '{$nodeid}'";
+					WHERE dynaaminen_puu.yhtio 	= '{$yhtiorow['yhtio']}'
+					AND dynaaminen_puu.laji 	= '{$toim}'
+					AND dynaaminen_puu.tunnus 	= '{$nodeid}'";
 			$re = pupe_query($qu);
 			$numres = mysql_num_rows($re);
 
@@ -185,7 +187,7 @@
 						<legend style='font-weight: bold'>".t("Siirrä valitun tason alatasoksi")."</legend>
 						<ul style='list-style:none; padding: 5px'>
 							<li style='padding: 3px'>
-								<label style='display: inline-block; width: 125px'>".t("Kohdetason tunnus")." <font style='color: red'>*</font></label>
+								<label style='display: inline-block; width: 125px'>".t("Kohdetason tunnus")." <font class='error'>*</font></label>
 								<input size='5' id='kohdetaso' autocomplete='off' />
 							</li>
 						</ul>
@@ -201,7 +203,7 @@
 					<legend style='font-weight: bold' id='nodeboxtitle'></legend>
 					<ul style='list-style:none; padding: 5px'>
 						<li style='padding: 3px'>
-							<label style='display: inline-block; width: 50px'>".t("Nimi")." <font style='color: red'>*</font></label>
+							<label style='display: inline-block; width: 50px'>".t("Nimi")." <font class='error'>*</font></label>
 							<input size='35' id='uusi_nimi' autocomplete='off' />
 						</li>
 						<li style='padding: 3px'>
@@ -387,7 +389,7 @@
 	}
 	// muutoin jatketaan normaalisti
 	else {
-		echo "<div style='border: 1px solid black; width: 500px; background: #ffffff'>";
+		echo "<div class='spec' style='border: 1px solid black; width: 500px;'>";
 		echo "<ul id='eka'>";
 
 		$prevdepth = 0;
@@ -414,7 +416,7 @@
 		}
 
 		echo "</ul></div>
-				<div id='infobox' style='padding: 20px; border: 1px solid black; background: #ffffff; position: fixed; left: 520px; top: 68px;'></div>";
+				<div id='infobox' class='spec' style='padding: 20px; border: 1px solid black; position: fixed; left: 520px; top: 68px;'></div>";
 
 		?>
 		<script language="javascript">

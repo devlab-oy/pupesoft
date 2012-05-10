@@ -95,6 +95,8 @@
 
 			$i = 1;
 
+			echo "bool: ".(int) isset($xml->Invoice->Document->attributes()->Type)."<br>";
+
 			// Unikon laskuaineisto
 			if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
 

@@ -817,7 +817,7 @@
 								toimitusehto 			= '{$toimittajarow['toimitusehto']}',
 								osoite       			= '{$toimittajarow['osoite']}',
 								postitp      			= '{$toimittajarow['postitp']}',
-								maa			 			= '{$toimittajarow['maa™]}',
+								maa			 			= '{$toimittajarow['maa']}',
 								maa_lahetys 			= '{$maa_lahetys}',
 								comments				= '{$edellinen_asn_numero}',
 								kauppatapahtuman_luonne	= '{$toimittajarow['kauppatapahtuman_luonne']}',
@@ -881,12 +881,14 @@
 							suuntalava = '{$uusi_suuntalavan_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN (".implode(",", $paketin_rivit).")";
+				echo "<pre>$query</pre>";
 				$updateres = pupe_query($query);
 
 				$query = "	UPDATE asn_sanomat SET
 							status = 'X'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
+				echo "<pre>$query</pre>";
 				$updateres = pupe_query($query);
 
 				// Laitetaan suuntalava siirtovalmiiksi.

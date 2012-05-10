@@ -331,6 +331,7 @@
 										$rtuoteno[$i]['ale3'] = round(100 - (1 - $rtuoteno[$i]['ale3'] / 100) * (((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100) * 100, 2);
 									}
 									else {
+										echo "round(((float) str_replace(',', '.', {$node->Amount}) / (({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]}) - {$ale1} - {$ale2})) * 100, 2)<br>";
 										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100, 2);
 									}
 								}

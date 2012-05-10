@@ -86,6 +86,7 @@
 				if (is_file($laskut."/".$file)) {
 
 					$nimi = $laskut."/".$file;
+					echo "Dirikasta löytyi file $file<br>";
 					$luotiinlaskuja = erittele_laskut($nimi);
 
 					// Jos tiedostosta luotiin laskuja siirretään se tieltä pois

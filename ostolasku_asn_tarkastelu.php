@@ -512,6 +512,7 @@
 											break;
 										case 'hinta':
 											$values .= ", '{$hinta}'";
+											break;
 										default:
 											$values .= ", '".$info_row[$fieldname]."'";
 									}

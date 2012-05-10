@@ -10,6 +10,7 @@
 				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
+	echo "<pre>",str_replace("\t", "", $query),"</pre>";
 	$rarresult = pupe_query($query);
 	$trow = mysql_fetch_array($rarresult);
 

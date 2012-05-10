@@ -406,13 +406,14 @@ if(!function_exists("tuotetarkista")) {
 					}
 
 					if ($kukarow['yhtio'] == 'artr') {
-						
-						$hyllyalue	= "";
-						$hyllynro = $hyllyvali = $hyllytaso	= 0;
-						
+
+						$hyllyalue		= "";
+						$hyllynro 		= $hyllyvali = $hyllytaso = 0;
+						$tuotepaikka_id = 0;
+
 						if ($tem_status == 'A') {
 							$hyllyalue	= "UUSI";
-							
+
 							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
 							 						yhtio			= '{$kukarow['yhtio']}',
 										 			tuoteno     	= '{$tem_tuoteno}',
@@ -428,6 +429,7 @@ if(!function_exists("tuotetarkista")) {
 													muuttaja		= '{$kukarow['kuka']}'
 													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
+							$tuotepaikka_id = mysql_insert_id();
 						}
 						elseif ($tem_status == 'T') {
 							$hyllyalue	= "T";
@@ -446,24 +448,27 @@ if(!function_exists("tuotetarkista")) {
 													muuttaja		= '{$kukarow['kuka']}'
 													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
+							$tuotepaikka_id = mysql_insert_id();
 						}
-						
-						$tapahtumaquery = "	INSERT into tapahtuma set
-											yhtio 		= '{$kukarow['yhtio']}',
-											tuoteno 	= '{$tem_tuoteno}',
-											kpl 		= 0,
-											kplhinta	= 0,
-											hinta 		= 0,
-											laji 		= 'uusipaikka',
-											hyllyalue   = '{$hyllyalue}',
-											hyllynro    = '{$hyllynro}',
-											hyllyvali   = '{$hyllyvali}',
-											hyllytaso   = '{$hyllytaso}',
-											selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-						$tapahtumaresult = pupe_query($tapahtumaquery);
-						
+
+						// tämä tulee vain jos ollaan insertöity, jos valutaan "ON DUPLICATE KEY UPDATE" puolelle niin mysql_insert_id() palauttaa nollan
+						if ($tuotepaikka_id > 0) {
+							$tapahtumaquery = "	INSERT into tapahtuma set
+												yhtio 		= '{$kukarow['yhtio']}',
+												tuoteno 	= '{$tem_tuoteno}',
+												kpl 		= 0,
+												kplhinta	= 0,
+												hinta 		= 0,
+												laji 		= 'uusipaikka',
+												hyllyalue   = '{$hyllyalue}',
+												hyllynro    = '{$hyllynro}',
+												hyllyvali   = '{$hyllyvali}',
+												hyllytaso   = '{$hyllytaso}',
+												selite 		= '".t("Tuoteylläpidossa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now()";
+							$tapahtumaresult = pupe_query($tapahtumaquery);
+						}
 					}
 				}
 			}

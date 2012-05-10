@@ -319,7 +319,7 @@
 
 	enable_jquery();
 
-	$otsikko = strtolower($toim) == "tuote" ? t("Tuotepuu") : t("Asiakaspuu");
+	$otsikko = strtolower($toim) == "tuote" ? t("Tuote-segmentit") : t("Asiakas-segmentit");
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";
 
@@ -387,7 +387,7 @@
 	}
 	// muutoin jatketaan normaalisti
 	else {
-		echo "<div style='border: 1px solid black; width: 500px; background: #ffffff'>";
+		echo "<div style='border: 1px solid black; width: 500px; background: transparent'>";
 		echo "<ul id='eka'>";
 
 		$prevdepth = 0;
@@ -414,7 +414,7 @@
 		}
 
 		echo "</ul></div>
-				<div id='infobox' style='padding: 20px; border: 1px solid black; background: #ffffff; position: fixed; left: 520px; top: 68px;'></div>";
+				<div id='infobox' style='padding: 20px; border: 1px solid black; background: transparent position: fixed; left: 520px; top: 68px;'></div>";
 
 		?>
 		<script language="javascript">

@@ -306,7 +306,7 @@
 								}
 								else {
 									$ale2 = (float) str_replace(",", ".", $node->Amount);
-									$rtuoteno[$i]['ale2'] = round(($ale2 / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1) * 100, 2);
+									$rtuoteno[$i]['ale2'] = round(($ale2 / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1) * 100), 2);
 								}
 							}
 							else {

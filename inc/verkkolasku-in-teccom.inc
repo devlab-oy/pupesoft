@@ -311,8 +311,6 @@
 							}
 							else {
 
-								if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
-
 								if (isset($node->Percent)) {
 
 									// 100-(1-50/100)*(1-50/100)*100
@@ -332,7 +330,7 @@
 									}
 									else {
 										echo "round(((float) str_replace(',', '.', {$node->Amount}) / (({$rtuoteno[$i]["hinta"]} * {$rtuoteno[$i]["kpl"]}) - {$ale1} - {$ale2})) * 100, 2)<br>";
-										$rtuoteno[$i]['ale3'] = round(((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100, 2);
+										$rtuoteno[$i]['ale3'] = round( ((float) str_replace(",", ".", $node->Amount) / (($rtuoteno[$i]["hinta"] * $rtuoteno[$i]["kpl"]) - $ale1 - $ale2)) * 100, 2);
 									}
 								}
 							}

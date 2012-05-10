@@ -611,15 +611,10 @@
 								$paikkarow = mysql_fetch_array($paikkares);
 
 								$paikka = $paikkarow['paikka'];
-
-								echo "$paikkaquery<br><br>$paikka<br>";
-
 							}
 							else {
 								$paikka = "";
 							}
-
-							echo "PAIKKA: $paikka<br>";
 
 							$perheid = $lisataanrow["perheid"];
 							$perheid2 = $lisataanrow["perheid2"];

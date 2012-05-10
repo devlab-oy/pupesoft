@@ -1778,7 +1778,7 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$varasto = $vtrow['tunnukset'];
 		}
 
-		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, '', "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
+		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, "", "", "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
 
 		$tyhjenna 	= "JOO";
 		$tee 		= "";

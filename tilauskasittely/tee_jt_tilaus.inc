@@ -4,7 +4,7 @@
 	// $tunnusarray array jossa on k‰sitelt‰vien tilausrivien tunnukset arrayssa
 	// $kpl[$tunnukset]   = monta toimitetaan
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
-	// $suoratoimpaikka[$tunnukset] = paikat josta myyd‰‰n suoratoimituksia
+	// $suoratoimpaikat = paikat josta myyd‰‰n suoratoimituksia
 	// $tilaus_on_jo = KYLLA niin lis‰t‰‰n rivit $kukarow[kesken] tilaukselle
 	// $olpaikalta = pakotetaan myym‰‰n oletuspaikalta
 	// $varataan_saldoa = varataanko saldoa
@@ -12,7 +12,7 @@
 	// $varastosta = mist‰ varastosta myyd‰‰n
 
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
 			global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
 
 			$debug = 0;
@@ -523,13 +523,6 @@
 						$isa_kpl		= $isarivirow["jt"];
 					}
 
-					if ($suoratoimpaikka[$tunnukset] != '') {
-						$paikka = $suoratoimpaikka;
-					}
-					else {
-						$paikka = "";
-					}
-
 					if (($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0) or $jt_vakisin === TRUE) {
 
 						$luodut_rivit = array();
@@ -604,6 +597,29 @@
 							else {
 								$var = "";
 							}
+
+							// Toimitetaanko t‰ss‰ suoratoimitus?
+							// $suoratoimpaikat[$tunnus_nyt] --> Suoratoimitusosotrivin varastoonvienti/valmistus ja siit‰ syntyneen tapahtuman tunnus!
+							// T‰st‰ saadaan paikka josta t‰‰ suoratoimitus-jt-rivi nyt toimitetaan
+							if (isset($suoratoimpaikat[$tunnus_nyt]) and $suoratoimpaikat[$tunnus_nyt] > 0) {
+
+								$paikkaquery = "SELECT concat_ws('#!°!#',hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+												FROM tapahtuma
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tunnus = '$suoratoimpaikat[$tunnus_nyt]'";
+								$paikkares = pupe_query($paikkaquery);
+								$paikkarow = mysql_fetch_array($paikkares);
+
+								$paikka = $paikkarow['paikka'];
+
+								echo "$paikkaquery<br><br>$paikka<br>";
+
+							}
+							else {
+								$paikka = "";
+							}
+
+							echo "PAIKKA: $paikka<br>";
 
 							$perheid = $lisataanrow["perheid"];
 							$perheid2 = $lisataanrow["perheid2"];

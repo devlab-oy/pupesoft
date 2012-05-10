@@ -35,7 +35,6 @@
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
 			elseif (strpos($file, "teccominvoice") !== false){
-				echo "filename: $file<br>";
 				require("inc/verkkolasku-in-teccom.inc");
 			}
 			elseif (strpos($file, "ORAO") !== false){

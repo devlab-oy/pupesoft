@@ -405,6 +405,7 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
 									AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
+						echo "<pre>$query</pre>";
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 0) {

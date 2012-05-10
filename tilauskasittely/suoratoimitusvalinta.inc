@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 	//Tarvitsemme parametrinä
 	//$suora_tuoteno jossa on käsiteltävä tuotenumero

@@ -56,14 +56,15 @@
 					ORDER BY lasku.laatija";
 		$result = pupe_query($query);
 
-		$veposti	= "";
-		$meili		= "";
+		$veposti = "";
+		$meili	 = "";
 
 		while ($trow = mysql_fetch_array($result)) {
 
 			if ($trow['eposti'] != $veposti and $veposti != "") {
 				$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
 				$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				$meili = "";
 			}
 
 			// setataan sähköpostimuuttuja

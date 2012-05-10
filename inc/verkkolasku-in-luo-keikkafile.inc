@@ -196,6 +196,9 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
 											AND lasku.mapvm = '0000-00-00')
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -209,7 +212,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
-							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%' AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
+							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -254,6 +257,9 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
 											AND lasku.mapvm = '0000-00-00')
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -267,7 +273,6 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
-							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -339,6 +344,9 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus)
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -351,7 +359,7 @@
 							JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
-							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%' AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
+							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
@@ -395,6 +403,9 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus)
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.otunnus
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -407,7 +418,6 @@
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
-							AND lasku.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);

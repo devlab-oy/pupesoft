@@ -558,12 +558,6 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 
 	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 
-	// katsotaan ollaanko tehty JT-supereita..
-	require("jt_super.inc");
-
-	$jtsuper = jt_super($kukarow["kesken"]);
-	if ($jtsuper != '') echo "$jtsuper<br><br>";
-
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 
@@ -1312,13 +1306,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
-			// katsotaan ollaanko tehty JT-supereita..
-			require("jt_super.inc");
-			$jt_super = jt_super($kukarow["kesken"]);
-
 			if ($kukarow["extranet"] != "") {
-				echo "$jt_super<br><br>";
-
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";
 			}

@@ -243,12 +243,6 @@
 			}
 
 			if ($laskurow["tila"] == "N" and $automaaginen == "") {
-				// katsotaan ollaanko tehty JT-supereita..
-				require ("jt_super.inc");
-				$jt_super = jt_super($laskurow["tunnus"]);
-
-				if ($jt_super != "") echo "$jt_super<br><br>";
-
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";
 			}
@@ -946,7 +940,7 @@
 					}
 
 					// ei n‰ytet‰ suoratoimitusrivej‰, ellei $superit ole ruksattu, sillon n‰ytet‰‰n pelk‰st‰‰n suoratoimitukset
-					// Jos $vain_rivit muuttuja on setattu niin huomioidaan sek‰ normit et‰ suoratoimit
+					// Jos $vain_rivit muuttuja on setattu niin huomioidaan sek‰ normit, ett‰ suoratoimit
 					if (($onkosuper == "" and $superit == "") or ($onkosuper == "ON" and $superit != "") or $vain_rivit != "") {
 
 						$kokonaismyytavissa = 0;

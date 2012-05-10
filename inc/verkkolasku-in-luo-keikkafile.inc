@@ -74,7 +74,6 @@
 	}
 
 	$kohdistettujariveja = 0;
-	$suoratoimitus       = "";
 	$kauttalaskutus		 = "";
 	$kauttalaskutus_saldoton = array();
 	$keikoilla	= array();
@@ -111,11 +110,6 @@
 
 				$rivirow = mysql_fetch_array ($result);
 				$kohdistettujariveja++;
-
-				// jos ketjutus on yhdelläkin tilauksella 1 niin kyseessä on SUORATOIMITUS
-				if ($rivirow["ketjutus"] == "1") {
-					$suoratoimitus = "kylla";
-				}
 
 				// jos rivi löytyi ja sitä ei ole kohdistettu vielä, kohdistetaan keikkaan ja päivitetään kpl
 				if ($rivirow["uusiotunnus"] == 0) {
@@ -257,7 +251,7 @@
 			$checkres = pupe_query($query);
 			$row = mysql_fetch_array($checkres);
 			$kurssi = $row["kurssi"];
-			
+
 			$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
 			$result = pupe_query($query);
 
@@ -379,7 +373,7 @@
 	}
 
 	// tämän keikan voi viedä saldoille ja laskuttaa koska se on suoratoimitus
-	if ($kohdistettujariveja > 0 and ($suoratoimitus == "kylla" or $kauttalaskutus == "kylla")) {
+	if ($kohdistettujariveja > 0 and $kauttalaskutus == "kylla") {
 		$otunnus = $keikantunnus;
 
 		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -458,10 +452,7 @@
 		require ("tilauskasittely/varastoon.inc");
 
 		// laskutetaan suoratoimitetut jtrivit jos niitä oli tällä keikalla...
-		if ($suoratoimitus == "kylla") {
-			require ("tilauskasittely/jt_super_laskuta.inc");
-		}
-		elseif ($kauttalaskutus == "kylla") {
+		if ($kauttalaskutus == "kylla") {
 			$toiminto = "kaikkiok";
 			$tee = "varma";
 

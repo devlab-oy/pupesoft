@@ -1765,13 +1765,6 @@ while ($tietue = fgets($fd)) {
 						$edi_ulos .= "\n";
 					}
 
-					// katsotaan ollaanko tehty JT-supereita..
-					$silent = "SILENT";
-					require("jt_super.inc");
-
-					$edi_ulos .= "\n";
-					$edi_ulos .= jt_super($laskurow["tunnus"]);
-					$edi_ulos .= "\n";
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";

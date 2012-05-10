@@ -254,6 +254,11 @@
 			$tiliointilisa = '';
 		}
 
+		if ($grouppaus != "kustannuspaikka" and $tiliointilisa != "") {
+			$selecti .= ",tiliointi.kustp kustannuspaikka";
+			$grouppauslisa .= ",tiliointi.kustp";
+		}
+
 		// Rapparin sarakkeet voidaan määritellä myös salasanat.php:ssä
 		if (!isset($saatavat_array)) {
 			$saatavat_array = array(0,15,30,60,90,120);
@@ -338,7 +343,8 @@
 					$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 					$excelsarake++;
 				}
-				else {
+
+				if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 					$worksheet->write($excelrivi, $excelsarake, t("Kustannuspaikka"), $format_bold);
 					$excelsarake++;
 				}
@@ -375,6 +381,10 @@
 				}
 				else {
 					$sarakemaara = count($saatavat_array)+8;
+
+					if ($tiliointilisa != "") {
+						$sarakemaara++;
+					}
 				}
 
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
@@ -396,7 +406,8 @@
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
 			}
-			else {
+
+			if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 				echo "<th>".t("Kustannuspaikka")."</th>";
 			}
 
@@ -518,28 +529,6 @@
 						echo "<td valign='top'>";
 						echo "<a name='$row[latunnari]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$row[ytunnus]&asiakasid=$row[litu]&alatila=$asirappari_linkki_alatila&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]'>$row[ytunnus]</a>";
 						echo "</td>";
-					}
-
-					if ($grouppaus == "kustannuspaikka") {
-						$query = "	SELECT nimi, koodi
-									FROM kustannuspaikka
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '{$row['kustannuspaikka']}'";
-						$nimiresult = pupe_query($query);
-
-						if (mysql_num_rows($nimiresult) == 1) {
-							$nimirow = mysql_fetch_assoc($nimiresult);
-
-							echo "<td valign='top'>{$nimirow["nimi"]} {$nimirow["koodi"]}</td>";
-
-							$kustpmuuttuja = "{$nimirow["nimi"]} {$nimirow["koodi"]}";
-						}
-						else {
-							echo "<td valign='top'>",t("Ei Kustannuspaikkaa"),"</td>";
-							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
-						}
-					}
-					else {
 
 						if (substr_count($row['nimi'], '<br>') > 5) {
 
@@ -572,6 +561,25 @@
 						}
 					}
 
+					if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
+						$query = "	SELECT nimi, koodi
+									FROM kustannuspaikka
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '{$row['kustannuspaikka']}'";
+						$nimiresult = pupe_query($query);
+
+						if (mysql_num_rows($nimiresult) == 1) {
+							$nimirow = mysql_fetch_assoc($nimiresult);
+
+							$kustpmuuttuja = (strpos($nimirow["nimi"], $nimirow["koodi"]) === FALSE) ? $nimirow["nimi"]." ".$nimirow["koodi"] : $nimirow["nimi"];
+						}
+						else {
+							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
+						}
+
+						echo "<td valign='top'>{$kustpmuuttuja}</td>";
+					}
+
 					echo "<td valign='top' align='right' nowrap>".$row["alle_$saatavat_array[0]"]."</td>";
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -595,7 +603,8 @@
 							$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
 							$excelsarake++;
 						}
-						else {
+
+						if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 							$worksheet->writeString($excelrivi, $excelsarake, $kustpmuuttuja);
 							$excelsarake++;
 						}
@@ -649,9 +658,15 @@
 				$sumlask = 2;
 
 				echo "<tr>";
+
 				if ($grouppaus == "kustannuspaikka") {
 					$colspan = 1;
 					$sumlask = 1;
+				}
+
+				if ($grouppaus != "kustannuspaikka" and $tiliointilisa != "") {
+					$colspan++;
+					$sumlask++;
 				}
 
 				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteensä").":</td>";

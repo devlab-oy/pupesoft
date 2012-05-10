@@ -1363,13 +1363,16 @@
 
 									if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 
+										// Parametrejä saatanat.php:lle
 										$sytunnus 	 	 = $jtrow['ytunnus'];
 										$sliitostunnus	 = $jtrow['liitostunnus'];
-										$eiliittymaa 	 = 'ON';
-										$luottorajavirhe = '';
-										$jvvirhe 		 = '';
-										$ylivito 		 = '';
-										$trattavirhe 	 = '';
+										$eiliittymaa 	 = "ON";
+										$luottorajavirhe = "";
+										$jvvirhe 		 = "";
+										$ylivito 		 = "";
+										$trattavirhe 	 = "";
+										$laji 			 = "MA";
+										$grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
 										ob_start();
 										require ("raportit/saatanat.php");

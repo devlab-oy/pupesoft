@@ -252,17 +252,7 @@ if (!isset($tee) or $tee == '') {
 		echo "</table><br>";
 	}
 
-	// katsotaan onko käyttäjällä oikeus muutosite.php ja alv_laskelma_uusi.php
-	$queryoik = "	SELECT oikeu.tunnus
-					FROM oikeu
-					JOIN oikeu AS oikeu2 ON (oikeu2.yhtio = oikeu.yhtio AND oikeu2.kuka = oikeu.kuka AND oikeu2.nimi LIKE '%alv_laskelma_uusi.php')
-					WHERE oikeu.nimi LIKE '%muutosite.php'
-					AND oikeu.kuka = '{$kukarow['kuka']}'
-					AND oikeu.yhtio = '{$yhtiorow['yhtio']}'
-					LIMIT 1";
-	$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-	if (mysql_num_rows($res) == 1) {
+	if (tarkista_oikeus("alv_laskelma_uusi.php")) {
 
 		$ulos = '';
 
@@ -270,7 +260,8 @@ if (!isset($tee) or $tee == '') {
 		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
 						FROM tilikaudet
 						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND tilikausi_alku >= '2010-11-01'";
+						AND tilikausi_alku >= '2010-11-01'
+						AND tilikausi_alku >= date_sub('{$yhtiorow['tilikausi_alku']}', interval 1 month)";
 		$min_result = pupe_query($min_query);
 		$min_row = mysql_fetch_assoc($min_result);
 

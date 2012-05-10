@@ -118,13 +118,7 @@
 			// ALVimuutoksen takia: eli päässätään rivin alvi jos sitä muokataan niin se ei automaattisesti vaihdu oletukseksi
 			echo "<input type='hidden' name='alv' value = '$alv'>";
 
-			echo "<tr>$jarjlisa";
-
 			$nrospanni = 6;
-
-			if ($yhtiorow['rivinumero_syotto'] != '') {
-				$nrospanni--;
-			}
 
 			if ($kukarow['hinnat'] != 0) {
 				$nrospanni--;
@@ -136,15 +130,13 @@
 				$nrospanni++;
 			}
 
-			echo "<th align='left' colspan='".floor($nrospanni/2)."'>".t("Keräysaika")."</th>";
-			echo "<th align='left' colspan='".ceil($nrospanni/2)."'>".t("Toimitusaika")."</th>";
-
-			if ($yhtiorow['rivinumero_syotto'] != '') {
-				echo "<th align='left'>".t("Rivinro")."</th>";
+			// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+			if ($yhtiorow["splittauskielto"] == "K") {
+				echo "<tr>$jarjlisa";
+				echo "<th align='left' colspan='".floor($nrospanni/2)."'>".t("Keräysaika")."</th>";
+				echo "<th align='left' colspan='".ceil($nrospanni/2)."'>".t("Toimitusaika")."</th>";
+				echo "</tr>";
 			}
-
-			echo "</tr>";
-			echo "<tr>$jarjlisa";
 
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
 				$toimaika = $laskurow["toimaika"];
@@ -176,19 +168,40 @@
 				$keraysppa = substr($kerayspvm, 8, 2);
 			}
 
-			echo "<td valign='top' colspan='".floor($nrospanni/2)."'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-			echo "<td valign='top' colspan='".ceil($nrospanni/2)."'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+			if ($yhtiorow["splittauskielto"] == "K") {
+				echo "<tr>$jarjlisa";
+				echo "<td valign='top' colspan='".floor($nrospanni/2)."'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
+				echo "<td valign='top' colspan='".ceil($nrospanni/2)."'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+				echo "</tr>";
+			}
+			else {
+				echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
+				echo "<input type='hidden' name='kerayskka' value='$kerayskka'>";
+				echo "<input type='hidden' name='keraysvva' value='$keraysvva'>";
+				echo "<input type='hidden' name='toimppa' value='$toimppa'>";
+				echo "<input type='hidden' name='toimkka' value='$toimkka'>";
+				echo "<input type='hidden' name='toimvva' value='$toimvva'>";
+			}
+
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				$nrospanni--;
+			}
+
+			echo "<tr>$jarjlisa<th colspan='$nrospanni' align='left'>".t("Rivikommentti").":</th>";
+
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				echo "<th align='left'>".t("Rivinro")."</th>";
+			}
+			echo "</tr>";
+
+			echo "<tr>$jarjlisa<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='70' rows='2' wrap='soft'>$kommentti</textarea></td>";
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
+				$nrospanni++;
 			}
-
-			echo "</tr><tr>$jarjlisa";
-		}
-
-		if ($rivitunnus != '') {
-			echo "<tr>$jarjlisa<th colspan='$nrospanni' align='left'>".t("Rivikommentti").":</th></tr>";
-			echo "<tr>$jarjlisa<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
+			echo "</tr>";
 		}
 
 		if ($rivitunnus != '') {
@@ -362,7 +375,6 @@
 			echo "<td valign='top'></td>";
 		}
 
-
 		echo "<td valign='top' class='back'>";
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
@@ -373,29 +385,36 @@
 			echo "<th></th>";
 		}
 
-		if ($toim != "YLLAPITO") {
-			echo "<th align='left'>".t("Keräysaika")."</th>";
-			echo "<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
-		}
-		else {
-			echo "<th align='left'>".t("Poikkeava Alkupäivä")."</th>";
-			echo "<th align='left' colspan='2'>".t("Poikkeava Loppupäivä")."</th>";
-		}
+		$nrospanni = 6;
+		$nrospanni_vah = 0;
 
 		if ($kukarow['hinnat'] == 0) {
-			$nrospanni = 4;
-		}
-		else {
-			$nrospanni = 3;
+			$nrospanni++;
 		}
 
 		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			$nrospanni++;
 		}
 
+		if ($yhtiorow['rivinumero_syotto'] != '') {
+			$nrospanni++;
+			$nrospanni_vah++;
+		}
+
 		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
-		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
+		if ($toim == "YLLAPITO") {
+			echo "<th align='left'>".t("Poikkeava Alkupäivä")."</th>";
+			echo "<th align='left' colspan='2'>".t("Poikkeava Loppupäivä")."</th>";
+			$nrospanni_vah += 3;
+		}
+		elseif ($yhtiorow["splittauskielto"] == "K") {
+			echo "<th align='left'>".t("Keräysaika")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
+			$nrospanni_vah += 3;
+		}
+
+		echo "<th colspan='".($nrospanni-$nrospanni_vah)."' align='left'>".t("Rivikommentti")."</th>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<th align='left'>".t("Rivinro")."</th>";
@@ -464,30 +483,35 @@
 			}
 		}
 
-		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-		echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
-		echo "<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
+		// Jos Ylläpitosopimus tai "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+		if ($toim == "YLLAPITO" or $yhtiorow["splittauskielto"] == "K") {
+			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
+			echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			$kommentit_columns = 50;
+		}
+		else {
+			echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
+			echo "<input type='hidden' name='kerayskka' value='$kerayskka'>";
+			echo "<input type='hidden' name='keraysvva' value='$keraysvva'>";
+			echo "<input type='hidden' name='toimppa' value='$toimppa'>";
+			echo "<input type='hidden' name='toimkka' value='$toimkka'>";
+			echo "<input type='hidden' name='toimvva' value='$toimvva'>";
+			$kommentit_columns = 99;
+		}
+
+		echo "<td valign='top' colspan='".($nrospanni-$nrospanni_vah)."'><textarea name='kommentti' cols='$kommentit_columns' rows='2' wrap='soft'>$kommentti</textarea></td>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
 		}
 
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
-
-			$nrospanni2 = 7;
-
-			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-
-			if ($yhtiorow['rivinumero_syotto'] != '') {
-				$nrospanni2++;
-			}
-
 			echo "</tr>
 				<tr>$jarjlisa
-					<th colspan='{$nrospanni2}' align='left'>".t("Tuotteen nimitys")."</th>
+					<th colspan='{$nrospanni}' align='left'>".t("Tuotteen nimitys")."</th>
 					</tr>
 				<tr>$jarjlisa
-					<td valign='top' colspan='{$nrospanni2}'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
+					<td valign='top' colspan='{$nrospanni}'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
 		}
 
 		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'>";
@@ -577,9 +601,13 @@
 			echo "<th></th>";
 		}
 
-		echo "	<th align='left'>".t("Keräysaika")."</th>
-				<th align='left'>".t("Toimitusaika")."</th>
-				</tr>";
+		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+		if ($yhtiorow["splittauskielto"] == "K") {
+			echo "	<th align='left'>".t("Keräysaika")."</th>
+					<th align='left'>".t("Toimitusaika")."</th>";
+		}
+
+		echo "</tr>";
 		echo "<tr>$jarjlisa";
 
 		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
@@ -616,9 +644,21 @@
 			$keraysppa = substr($kerayspvm, 8, 2);
 		}
 
-		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-		echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
+		// Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+		if ($yhtiorow["splittauskielto"] == "K") {
+			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
+			echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+		}
+		else {
+			echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
+			echo "<input type='hidden' name='kerayskka' value='$kerayskka'>";
+			echo "<input type='hidden' name='keraysvva' value='$keraysvva'>";
+			echo "<input type='hidden' name='toimppa' value='$toimppa'>";
+			echo "<input type='hidden' name='toimkka' value='$toimkka'>";
+			echo "<input type='hidden' name='toimvva' value='$toimvva'>";
+		}
 
+		echo "</tr>";
 		echo "<tr>$jarjlisa";
 
 		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {

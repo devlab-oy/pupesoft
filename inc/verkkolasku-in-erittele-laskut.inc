@@ -91,6 +91,7 @@
 
 		$xml = @simplexml_load_file($file);
 
+		echo "xml bool: ".(int) isset($xml)."<br>";
 		echo "<pre>",var_dump($xml),"</pre>";
 
 		if ($xml !== FALSE) {

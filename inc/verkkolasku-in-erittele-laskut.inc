@@ -91,6 +91,8 @@
 
 		$xml = @simplexml_load_file($file);
 
+		echo "<pre>",var_dump($xml),"</pre>";
+
 		if ($xml !== FALSE) {
 
 			$i = 1;

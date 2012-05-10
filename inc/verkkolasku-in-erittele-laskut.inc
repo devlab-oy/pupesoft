@@ -91,15 +91,9 @@
 
 		$xml = @simplexml_load_file($file);
 
-		echo "xml bool: ".(int) isset($xml)."<br>";
-		echo "<pre>",var_dump($xml),"</pre>";
-
 		if ($xml !== FALSE) {
 
 			$i = 1;
-
-			$foo = $xml->Document->attributes()->Type;
-			echo "bool: ".(int) isset($foo)."<br>";
 
 			// Unikon laskuaineisto
 			if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
@@ -140,7 +134,6 @@
 				$path_parts = pathinfo($file);
 
 				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
-				echo "Teccom-haara! attribute type on invoice ({$laskut}/teccominvoice_{$path_parts['basename']})<br>";
 			}
 		}
 

@@ -472,7 +472,8 @@
 												perheid			= '{$isa_chk_row['tunnus']}'";
 								$inskres = pupe_query($lisainsert);
 
-								$paketin_rivit[] = mysql_insert_id();
+								$id = mysql_insert_id();
+								$paketin_rivit[] = $id;
 
 								// p‰ivitet‰‰n is‰
 								$updateisa = "	UPDATE tilausrivi SET
@@ -480,6 +481,44 @@
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus = '{$isa_chk_row['tunnus']}'";
 								$updateres = pupe_query($updateisa);
+
+								$query = "	SELECT *
+											FROM asn_sanomat
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND laji = 'asn'
+											AND tilausrivi LIKE '%{$kollirow['tilausrivi']}%'";
+								$info_res = pupe_query($query);
+								$info_row = mysql_fetch_assoc($info_res);
+
+								// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+								$fields = "yhtio";
+								$values = "'{$kukarow['yhtio']}'";
+
+								// Ei monisteta tunnusta
+								for ($ii = 1; $ii < mysql_num_fields($info_res) - 1; $ii++) {
+
+									$fieldname = mysql_field_name($info_res,$ii);
+
+									$fields .= ", ".$fieldname;
+
+									switch ($fieldname) {
+										case 'tilausrivi':
+											$values .= ", '{$id}'";
+											break;
+										case 'tuoteno':
+										case 'toim_tuoteno':
+										case 'toim_tuoteno2':
+											$values .= ", '{$lapsitieto['tuoteno']}'";
+											break;
+										case 'hinta':
+											$values .= ", '{$hinta}'";
+										default:
+											$values .= ", '".$info_row[$fieldname]."'";
+									}
+								}
+
+								$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
+								$uusires = pupe_query($kysely);
 							}
 
 							$paketin_rivit[] = $isa_chk_row["tunnus"];

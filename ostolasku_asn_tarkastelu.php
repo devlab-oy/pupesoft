@@ -393,6 +393,7 @@
 								FROM tilausrivi
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
+					echo "<pre>$query</pre>";
 					$result = pupe_query($query);
 					$tilaukset = mysql_fetch_assoc($result);
 

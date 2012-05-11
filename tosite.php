@@ -83,10 +83,6 @@
 
 	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus))."#!#".urlencode(serialize($ed_iliitos));
 
-	echo "<script type='text/javascript' language='javascript'>";
-	require_once("inc/jquery.min.js");
-	echo "</script>";
-
 	echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 		$(document).ready(function(){

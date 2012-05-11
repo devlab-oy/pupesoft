@@ -1,7 +1,14 @@
 <?php
 
-// otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
+if (substr(dirname(__FILE__), -3) == "inc") {
+	// otetaan includepath aina rootista
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
+}
+else {
+	// otetaan includepath aina rootista
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
+}
+
 error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
@@ -544,10 +551,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			echo "<html>\n";
 			echo "<head>\n";
-			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>\n";
-			echo "<META Http-Equiv='Pragma' Content='no-cache'>\n";
-			echo "<META Http-Equiv='Expires' Content='-1'>\n";
-			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>\n";
+			echo "<meta http-equiv='cache-control' content='no-cache'>\n";
+			echo "<meta http-equiv='pragma' content='no-cache'>\n";
+			echo "<meta http-equiv='expires' content='-1'>\n";
+			echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 
 			if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
 				echo "<style type='text/css'>\n";
@@ -560,6 +567,37 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 					echo "</style>\n";
 				}
 			}
+
+			if (substr(dirname(__FILE__), -3) == "inc") {
+				echo "<script language='javascript' src='{$palvelin2}inc/jquery.min.js'></script>";
+			}
+			else {
+				echo "<script language='javascript' src='{$palvelin2}jquery.min.js'></script>";
+			}
+
+			if (isset($pupe_DataTables)) {
+				echo "<script language='javascript' src='{$palvelin2}DataTables/media/js/jquery.dataTables.min.js'></script>";
+			}
+
+			// Salitaan VAIN YKSI submitti per sivu! Bye bye tuplaklikkaajat...
+			echo "<script language='javascript' type='text/javascript'>
+				var submitattu = false;
+
+				$(document).ready(function(){
+					$('form').submit(function(){
+
+						if (!submitattu) {
+							$(this).children('[type=\"submit\"]').each(function() {
+								$(this).css('width', $(this).outerWidth()).val('Ladataan...');
+							});
+
+							submitattu = true;
+						}
+						else {
+							return false;
+						}
+					});
+				});</script>";
 
 			echo "<title>\n$yhtiorow[nimi]</title>\n";
 			echo "</head>\n";

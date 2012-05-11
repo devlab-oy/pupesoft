@@ -5,10 +5,6 @@
 
 	require ("../inc/parametrit.inc");
 
-	echo "<script type='text/javascript' language='javascript'>";
-	require_once("inc/jquery.min.js");
-	echo "</script>";
-
 	gauge();
 
 	echo "	<script type='text/javascript' charset='utf-8'>

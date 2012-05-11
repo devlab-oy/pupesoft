@@ -103,10 +103,6 @@
 
 		enable_ajax();
 
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		echo "</script>";
-
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$('.tilaa').live('click', function(){
@@ -238,7 +234,7 @@
 							$toim_bck		= $toim;
 							if ($toim == "KAIKKILISTAT") {
 								if ($laskurow["tilaustyyppi"] == "M") $toim = "MYYNTITILI";
-								else $toim = "SIIRTOLISTA";	
+								else $toim = "SIIRTOLISTA";
 							}
 
 							require("tilaus-valmis-siirtolista.inc");

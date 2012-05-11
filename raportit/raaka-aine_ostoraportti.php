@@ -2,9 +2,6 @@
 
 	require("../inc/parametrit.inc");
 
-	// Otetaan jQuery mukaan
-	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
-
 	// Salitaan vain numeroita ja piste/pilkku input kentissä
 	echo '<script language="javascript">
 	$(document).ready(function() {

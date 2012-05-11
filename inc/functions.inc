@@ -15583,3 +15583,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 		}
 	}
 }
+
+// pupesoft_sahkoposti -funktio
+if (@include("inc/sahkoposti.inc"));
+else (@include("sahkoposti.inc"));

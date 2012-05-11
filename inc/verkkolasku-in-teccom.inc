@@ -419,6 +419,9 @@
 						}
 					}
 				}
+				else {
+					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
+				}
 
 				if (isset($tuotetieto->DesAdvRef->DocumentNumber)) {
 					$rtuoteno[$i]["documentnumber"] = $tuotetieto->DesAdvRef->DocumentNumber;

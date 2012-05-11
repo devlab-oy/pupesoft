@@ -295,10 +295,6 @@
 
 		enable_ajax();
 
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		echo "</script>";
-
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$('.tilaa').live('click', function(){

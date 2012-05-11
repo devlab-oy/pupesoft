@@ -6692,27 +6692,9 @@ function toimehtoTarkenne(toimehto) {
 	}
 }
 
-if (!function_exists("enable_jquery")) {
-	function enable_jquery() {
-
-		echo "<script type='text/javascript' language='javascript'>";
-
-		if (file_exists("inc/jquery.min.js")) {
-			require_once("inc/jquery.min.js");
-		}
-		else {
-			require_once("jquery.min.js");
-		}
-
-		echo "</script>";
-	}
-}
-
 if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
-
-	enable_jquery();
 
 	echo "<script type='text/javascript' language='javascript'>";
 
@@ -11554,11 +11536,6 @@ if (!function_exists("laskutuspaiva")) {
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
 		global $yhtiorow;
-
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		require_once("DataTables/media/js/jquery.dataTables.min.js");
-		echo "</script>";
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);

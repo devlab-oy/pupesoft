@@ -319,8 +319,6 @@
 		exit;
 	}
 
-	enable_jquery();
-
 	$otsikko = strtolower($toim) == "tuote" ? t("Tuotepuu") : t("Asiakaspuu");
 
 	echo "<font class='head'>{$otsikko}</font><hr /><br />";

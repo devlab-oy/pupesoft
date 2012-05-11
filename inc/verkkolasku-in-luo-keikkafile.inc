@@ -162,8 +162,10 @@
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-										AND lasku.tunnus = tilausrivi.uusiotunnus
+										AND lasku.tunnus = tilausrivi.otunnus
 										AND lasku.mapvm = '0000-00-00')
+						JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+										AND lasku2.tunnus = tilausrivi.uusiotunnus)
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
@@ -223,8 +225,10 @@
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.uusiotunnus
+											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.mapvm = '0000-00-00')
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.uusiotunnus)
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -283,8 +287,10 @@
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.uusiotunnus
+											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.mapvm = '0000-00-00')
+							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
+											AND lasku2.tunnus = tilausrivi.uusiotunnus)
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'

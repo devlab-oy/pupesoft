@@ -1691,10 +1691,11 @@
 					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus
 								FROM lasku
 								JOIN tilausrivi ON (
-									tilausrivi.yhtio = lasku.yhtio AND
-									tilausrivi.otunnus = lasku.tunnus AND
-									tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}' AND
-									tilausrivi.tuoteno = '{$row['toim_tuoteno']}'
+									tilausrivi.yhtio = lasku.yhtio
+									AND tilausrivi.otunnus = lasku.tunnus
+									AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
+									AND tilausrivi.tuoteno = '{$row['toim_tuoteno']}'
+									AND tilausrivi.varattu + tilausrivi.kpl = '{$row['kappalemaara']}'
 								)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
@@ -1707,7 +1708,7 @@
 						echo "<font color='orange'>Ostotilausriviä ei löydy</font>";
 					}
 					elseif ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
-						echo "<font color='orange'>Kpl ongelma<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
+						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br>$query<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
 					}
 
 					if ($kpl_row["otunnus"] != 0 and ($row['tilausnumero'] != $kpl_row["otunnus"])) {

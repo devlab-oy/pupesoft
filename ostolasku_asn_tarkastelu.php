@@ -1711,7 +1711,7 @@
 						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br>$query<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
 					}
 
-					if ($kpl_row["otunnus"] != 0 and ($row['tilausnumero'] != $kpl_row["otunnus"])) {
+					if ($kpl_row["otunnus"] != 0 and (strpos($kpl_row["otunnus"], $row['tilausnumero']) === FALSE)) {
 						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei t‰sm‰‰<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font>";
 					}
 				}

@@ -1694,7 +1694,7 @@
 									tilausrivi.yhtio = lasku.yhtio
 									AND tilausrivi.otunnus = lasku.tunnus
 									AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
-									AND tilausrivi.tuoteno = '{$row['toim_tuoteno']}'
+									AND tilausrivi.tuoteno = '{$row['tuoteno']}'
 									AND tilausrivi.varattu + tilausrivi.kpl = '{$row['kappalemaara']}'
 								)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'

@@ -75,7 +75,7 @@
 			echo "<th>".t("Aika viimeisimmästä tapahtumasta")."</th>";
 			echo "<th>".t("Epäkurattitaso")."</th>";
 
-			if (isset($tee) and $ajo_tee == "EPAKURANTOI") {
+			if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<th></th>";
 			}
 
@@ -93,6 +93,11 @@
 				echo "Tuotteen $epakurantti_row[tuoteno], laitetaan $tee epakurantiksi. Varastonmuutos $varaston_muutos $yhtiorow[valkoodi].\n";
 			}
 			else {
+
+				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
+					ob_start();
+				}
+
 				// Haetaan tuotteen viimeisin tulo
 				$query  = "	SELECT laadittu
 							FROM tapahtuma
@@ -142,7 +147,7 @@
 				// jos yli 30 kuukautta --> 100% epäkurantiksi
 				if ($tulo > 913 and $lasku > 913 and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
 
-					if ($php_cli or (isset($tee) and $ajo_tee == "EPAKURANTOI")) {
+					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "paalle";
 						require ("epakurantti.inc");
 
@@ -154,7 +159,7 @@
 				// jos yli 24 kuukautta --> 50% epäkurantiksi
 				elseif ($tulo > 730 and $lasku > 730 and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
 
-					if ($php_cli or (isset($tee) and $ajo_tee == "EPAKURANTOI")) {
+					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "puolipaalle";
 						require ("epakurantti.inc");
 
@@ -166,7 +171,7 @@
 				// jos yli 18 kuukautta --> 25% epäkurantiksi
 				elseif ($tulo > 547 and $lasku > 547 and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
 
-					if ($php_cli or (isset($tee) and $ajo_tee == "EPAKURANTOI")) {
+					if ($php_cli or (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI")) {
 						$tee = "25paalle";
 						require ("epakurantti.inc");
 
@@ -175,6 +180,9 @@
 
 					$mikataso = 25;
 				}
+
+				$viesti = ob_get_contents();
+				ob_end_clean();
 
 				if ($mikataso > 0) {
 					echo "<tr>";
@@ -192,8 +200,8 @@
 
 					echo "<td>{$mikataso}%</td>";
 
-					if (isset($tee) and $ajo_tee == "EPAKURANTOI") {
-						echo "<td><font class='error'>".t("Päivitetty")."!</font></td>";
+					if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
+						echo "<td>$viesti</td>";
 					}
 
 					echo "</tr>";

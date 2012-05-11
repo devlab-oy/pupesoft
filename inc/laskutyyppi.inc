@@ -273,6 +273,9 @@
 				case "B":
 					$alatila = "";
 					break;
+				case "X":
+					$alatila = "Valmis";
+					break;
 			}
 			break;
 		case "D":

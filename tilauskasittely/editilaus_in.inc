@@ -34,19 +34,19 @@ if (!function_exists('jt_toimita_editilaus')) {
 	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
 		global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
-		$automaaginen 			        = "automaaginen";
-		$tee 					        = "JATKA";
-		$oikeurow['paivitys'] 	        = '1';
-		$toimittaja				        = "";
-		$toimittajaid			        = "";
-		$jarj	 				        = "tuoteno";
-		$tuotenumero			        = "";
-		$tilaus					        = "";
-		$toimi					        = "";
-		$superit				        = "";
-		$tilaus_on_jo			        = "KYLLA";
-		$from_varastoon_inc 	        = "editilaus_in.inc";
-		$ei_tehdastoimitus_tuotteita    = "EI";
+		$automaaginen 			    	= "automaaginen";
+		$tee 					    	= "JATKA";
+		$oikeurow['paivitys'] 	    	= '1';
+		$toimittaja				    	= "";
+		$toimittajaid			    	= "";
+		$jarj	 				    	= "tuoteno";
+		$tuotenumero			    	= "";
+		$tilaus					    	= "";
+		$toimi					    	= "";
+		$suoratoimit					= "";
+		$tilaus_on_jo			    	= "KYLLA";
+		$from_varastoon_inc 	    	= "editilaus_in.inc";
+		$ei_tehdastoimitus_tuotteita	= "EI";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
@@ -137,8 +137,6 @@ $tuoteno         	= "";
 $olinsapi        	= "";
 $olinvarasto     	= "";
 $edi_nimitys     	= "";
-$edi_sarjanumero 	= "";
-$edi_hinta       	= "";
 $sallitaanjt	 	= "";
 $editilaus_hinta	= "";
 $editilaus_alennus	= "";
@@ -388,7 +386,6 @@ while ($tietue = fgets($fd)) {
 			// Pupesoft tilaustyyppi
 			if ($tieto == '1') {
 				$edi_ulos .= t("Laskua ei saa ketjuttaa")."!\n";
-				// tyyppi yks on pupesoft <-> pupesoft suoratoimitustilaus, silloin ei ketjuteta laskua ikinä
 				$ketjutus = "o";
 			}
 			else {
@@ -1426,13 +1423,6 @@ while ($tietue = fgets($fd)) {
 			// asiakkaan antama nimitys tuotteelle
 			$type = explode("@", $tieto);
 			$edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
-//			$edi_sarjanumero = $type[5]; // rivin viidennessä segmentissä tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
-			break;
-
-		case 'OLINCONIV' :
-			// asiakkaan antama hinta tuotteelle
-			$type = explode("@", $tieto);
-//			$edi_hinta = abs(trim($type[0]));
 			break;
 
 		case 'OLIN21_QT' :
@@ -1578,11 +1568,6 @@ while ($tietue = fgets($fd)) {
 						$kommentti = "$olinsapi#$edi_nimitys";
 					}
 
-					// jos meillä on sarjanumero ja hinta tiedossa niin uskalletaan luottaa asiakkaan antamaan hintaan
-					if ($edi_sarjanumero != "" and $edi_hinta != "") {
-						$hinta = $edi_hinta;
-					}
-
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
 					if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
 						$hinta = $editilaus_hinta;
@@ -1666,29 +1651,6 @@ while ($tietue = fgets($fd)) {
 
 					require ("lisaarivi.inc");
 
-					// jos meillä on tiedossa tuotteen sarjanumero, lisätään se
-					if ($edi_sarjanumero != "") {
-						// etsitään sarjanumero
-						$sarjaquery = "SELECT * from sarjanumeroseuranta where tunnus='$edi_sarjanumero'";
-						$sarjaresult = pupe_query($sarjaquery);
-
-						if (mysql_num_rows($sarjaresult) == 1) {
-
-							$sarjarow = mysql_fetch_array($sarjaresult);
-
-							// liitetään tämä myyntirivi siihen kiinni (lisäärivi palauttaa $lisatty_tun)
-							$query = "	INSERT INTO sarjanumeroseuranta SET
-										yhtio				= '$kukarow[yhtio]',
-										tuoteno				= '$sarjarow[tuoteno]',
-										lisatieto			= 'Suoratoimitustilaus $arow[nimi] --> $tnimi',
-										sarjanumero			= '$sarjarow[sarjanumero]',
-										lisatieto			= '$sarjarow[lisatieto]',
-										kaytetty			= '$sarjarow[kaytetty]',
-										myyntirivitunnus 	= '$lisatty_tun'";
-							$sres = pupe_query($query);
-						}
-					}
-
 					$edi_ulos .= "\n";
 
 				} // end jos tuote on löydetty oikein
@@ -1725,8 +1687,6 @@ while ($tietue = fgets($fd)) {
 			$olinsapi        	= "";
 			$olinvarasto     	= "";
 			$edi_nimitys     	= "";
-			$edi_sarjanumero 	= "";
-			$edi_hinta       	= "";
 			$sallitaanjt	 	= "";
 			$editilaus_hinta	= "";
 			$editilaus_alennus	= "";
@@ -1792,13 +1752,6 @@ while ($tietue = fgets($fd)) {
 						$edi_ulos .= "\n";
 					}
 
-					// katsotaan ollaanko tehty JT-supereita..
-					$silent = "SILENT";
-					require("jt_super.inc");
-
-					$edi_ulos .= "\n";
-					$edi_ulos .= jt_super($laskurow["tunnus"]);
-					$edi_ulos .= "\n";
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";

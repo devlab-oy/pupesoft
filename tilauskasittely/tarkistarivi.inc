@@ -161,7 +161,6 @@
 		// P - Puute
 		// J - Jt
 		// H - Väkisinhyväksytty
-		// S - Suoratoimitus pupesoft toimittajalta suoraan asiakkaalle
 		// T - Tilataan joltain toimittajalta omaan varastoon
 		// U - Tilataan joltain toimittajalta suoraan asiakkaalle
 		// V - Tehdaslisävarusterivi
@@ -420,16 +419,7 @@
 						ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		}
 
-		$omavarastores = pupe_query($query);
-
-		//Tutkitaan voidaanko tätä rivi suoratoimittaa mistään varastosta
-		if ($trow["sarjanumeroseuranta"] == "" and $kpl_st > 0) {
-			$suora_tuoteno 	= $row["tuoteno"];
-			$suora_kpl 		= $kpl_st;
-
-			require("suoratoimitusvalinta.inc");
-		}
-
+		$omavarastores  = pupe_query($query);
 		$varastot_array = array();
 
 		if ($kukarow["varasto"] != "") {
@@ -727,51 +717,6 @@
 
 		$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 	}
-
-	/*
-	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
-
-		// Suoratoimitushäkki
-		$query = "	SELECT sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja
-					from tilausrivi
-					where yhtio = '$kukarow[yhtio]'
-					and otunnus = '$row[otunnus]'
-					and perheid = '$row[tunnus]'
-					and tunnus != '$row[tunnus]'";
-		$maksuehtoresult = pupe_query($query);
-		$maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
-
-		if ($maksuehtorow["suoria"] == $maksuehtorow["lapsia"] and $maksuehtorow["toimittajia"] == 1) {
-			$query = "	update tilausrivi set
-						var			= '',
-						varattu 	= '$kpl_st',
-						jt 			= 0
-						where yhtio = '$kukarow[yhtio]'
-						and tunnus 	= '$row[tunnus]'";
-			$updres = pupe_query($query);
-
-			$row["var"] = "";
-		}
-
-		$sel1 = $sel2 = "";
-
-		if ($row["var"] == "P") {
-			$sel1 = "SELECTED";
-		}
-		elseif ($row["var"] == "J") {
-			$sel2 = "SELECTED";
-		}
-		else {
-			$sel3 = "SELECTED";
-		}
-
-		$paikat  = "<option value=''  $sel1>".t("Oletus")."</option>";
-		$paikat .= "<option value='P'  $sel1>".t("Jätä puutteeksi")."</option>";
-		$paikat .= "<option value='J' $sel2>".t("Jälkitoimitus")."</option>";
-		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
-		$paikat = "<select name='var' onchange='submit();'>".$paikat."</select>";
-	}
-	*/
 
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {

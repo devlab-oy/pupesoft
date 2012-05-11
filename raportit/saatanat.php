@@ -1,6 +1,6 @@
 <?php
 
-	if ($eiliittymaa != 'ON') {
+	if (!isset($eiliittymaa) or $eiliittymaa != 'ON') {
 		if (isset($_POST["supertee"])) {
 			if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -19,6 +19,23 @@
 				exit;
 			}
 		}
+	}
+
+	if (!isset($eiliittymaa)) 		$eiliittymaa = "";
+	if (!isset($ylilimiitin)) 		$ylilimiitin = "";
+	if (!isset($sytunnus)) 			$sytunnus = "";
+	if (!isset($sanimi)) 			$sanimi = "";
+	if (!isset($grouppaus)) 		$grouppaus = "";
+	if (!isset($savalkoodi)) 		$savalkoodi = "";
+	if (!isset($yli)) 				$yli = "";
+	if (!isset($valuutassako)) 		$valuutassako = "";
+	if (!isset($laji)) 				$laji = "";
+	if (!isset($luottovakuutettu))	$luottovakuutettu = "";
+	if (!isset($tee)) 				$tee = "";
+	if (!isset($pupe_DataTables)) 	$pupe_DataTables = "";
+	if (!isset($luottolisa)) 		$luottolisa = "";
+
+	if ($eiliittymaa != 'ON') {
 
 		// Livesearch jutut
 		enable_ajax();
@@ -41,10 +58,25 @@
 		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 		echo "<tr><th>".t("Anna päivämäärä, muodossa pp-kk-vvvv:")."</th><td><input type = 'text' name = 'sappl' value='$sappl' size=2><input type = 'text' name = 'sakkl' value='$sakkl' size=2><input type = 'text' name = 'savvl' value='$savvl' size=4></td></tr>";
 
-		$chk = '';
+		$query = "	SELECT tunnus
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'K'
+					and kaytossa != 'E'
+					LIMIT 1";
+		$result = pupe_query($query);
 
-		if ($ylilimiitin != '') {
-			$chk = "CHECKED";
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+
+			$monivalintalaatikot = array("KUSTP");
+			$noautosubmit = TRUE;
+			$piirra_otsikot = FALSE;
+
+			require ("tilauskasittely/monivalintalaatikot.inc");
+
+			echo "</td></tr>";
 		}
 
 		$sel = array();
@@ -101,11 +133,16 @@
 				</select></td>";
 		echo "</tr>";
 
+		$chk = '';
+
+		if ($ylilimiitin != '') {
+			$chk = "CHECKED";
+		}
+
 		echo "<tr><th>".t("Näytä vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
 
 		echo "<tr>";
 
-		$luottolisa = "";
 		$checked = "";
 
 		if ($luottovakuutettu == "K") {
@@ -214,6 +251,18 @@
 			$salisa2 = " and suoritus.valkoodi='$savalkoodi' ";
 		}
 
+		if ($eiliittymaa != 'ON' and isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+			$tiliointilisa = $lisa;
+		}
+		else {
+			$tiliointilisa = '';
+		}
+
+		if ($grouppaus != "kustannuspaikka" and $tiliointilisa != "") {
+			$selecti .= ",tiliointi.kustp kustannuspaikka";
+			$grouppauslisa .= ",tiliointi.kustp";
+		}
+
 		// Rapparin sarakkeet voidaan määritellä myös salasanat.php:ssä
 		if (!isset($saatavat_array)) {
 			$saatavat_array = array(0,15,30,60,90,120);
@@ -248,7 +297,7 @@
 					min(lasku.liitostunnus) litu,
 					min(lasku.tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
-					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
+					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
 					{$luottolisa}
 					WHERE lasku.yhtio = '{$saatavat_yhtio}'
 					and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
@@ -263,11 +312,12 @@
 					ORDER BY 1,2,3";
 		$result = pupe_query($query);
 
-		$saatavat_yhteensa 	= array();
-		$avoimia_yhteensa 	= 0;
-		$kaato_yhteensa		= 0;
-		$ylivito			= 0;
-		$rivilask 			= 0;
+		$saatavat_yhteensa 			= array();
+		$avoimia_yhteensa 			= 0;
+		$kaato_yhteensa				= 0;
+		$ylivito					= 0;
+		$rivilask 					= 0;
+		$avoimettilaukset_yhteensa 	= 0;
 
 		if (mysql_num_rows($result) > 0) {
 
@@ -297,7 +347,8 @@
 					$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 					$excelsarake++;
 				}
-				else {
+
+				if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 					$worksheet->write($excelrivi, $excelsarake, t("Kustannuspaikka"), $format_bold);
 					$excelsarake++;
 				}
@@ -334,6 +385,10 @@
 				}
 				else {
 					$sarakemaara = count($saatavat_array)+8;
+
+					if ($tiliointilisa != "") {
+						$sarakemaara++;
+					}
 				}
 
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
@@ -355,7 +410,8 @@
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
 			}
-			else {
+
+			if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 				echo "<th>".t("Kustannuspaikka")."</th>";
 			}
 
@@ -381,14 +437,14 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
-				$query = "	SELECT luottoraja
-							FROM asiakas
-							WHERE yhtio = '$saatavat_yhtio'
-							and tunnus in ($row[liitostunnus])";
-				$asresult = pupe_query($query);
-				$asrow = mysql_fetch_assoc($asresult);
+				if (isset($row["liitostunnus"]) and $row["liitostunnus"] != "") {
 
-				if ($grouppaus == "asiakas" or $grouppaus == "ytunnus") {
+					$query = "	SELECT luottoraja
+								FROM asiakas
+								WHERE yhtio = '$saatavat_yhtio'
+								and tunnus in ($row[liitostunnus])";
+					$asresult = pupe_query($query);
+					$asrow = mysql_fetch_assoc($asresult);
 
 					if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 						// Suorituksen valuutassa
@@ -433,26 +489,28 @@
 								AND lasku.liitostunnus in ($row[liitostunnus])";
 					$avoimettilauksetres = pupe_query($query);
 					$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
+
+					// Lasketaan luottotilanne nyt
+					$luottotilanne_nyt = round($asrow['luottoraja'] - $row["avoimia"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 				}
 				else {
+					$asrow				 = array();
 					$kaatotilirow 		 = array();
 					$avoimettilauksetrow = array();
+					$luottotilanne_nyt   = 0;
 				}
-
-				// Lasketaan luottotilanne nyt
-				$luottotilanne_nyt = round($asrow['luottoraja'] - $row["avoimia"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
 				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0)) {
 
-					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
+					if (isset($row["toim_nimi"]) and $row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
 					if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio']) {
-						if (trim($laskurow['liitostunnus']) != '') {
+						if (isset($laskurow['liitostunnus']) and trim($laskurow['liitostunnus']) != '') {
 							$row['litu'] = $laskurow['liitostunnus'];
 						}
 					}
 
-					if ($asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0) {
+					if (isset($asrow["luottoraja"]) and $asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0) {
 						$luottorajavirhe = 'kyllä';
 					}
 					else {
@@ -460,7 +518,7 @@
 					}
 
 					// Ei näytetä nollia ruudulla
-					if ($asrow['luottoraja'] == 0) $asrow['luottoraja'] = '';
+					if (isset($asrow["luottoraja"]) and $asrow['luottoraja'] == 0) $asrow['luottoraja'] = '';
 					if ($row["alle_{$saatavat_array[0]}"] == 0) $row["alle_{$saatavat_array[0]}"] = "";
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -475,28 +533,6 @@
 						echo "<td valign='top'>";
 						echo "<a name='$row[latunnari]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$row[ytunnus]&asiakasid=$row[litu]&alatila=$asirappari_linkki_alatila&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]'>$row[ytunnus]</a>";
 						echo "</td>";
-					}
-
-					if ($grouppaus == "kustannuspaikka") {
-						$query = "	SELECT nimi, koodi
-									FROM kustannuspaikka
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '{$row['kustannuspaikka']}'";
-						$nimiresult = pupe_query($query);
-
-						if (mysql_num_rows($nimiresult) == 1) {
-							$nimirow = mysql_fetch_assoc($nimiresult);
-
-							echo "<td valign='top'>{$nimirow["nimi"]} {$nimirow["koodi"]}</td>";
-
-							$kustpmuuttuja = "{$nimirow["nimi"]} {$nimirow["koodi"]}";
-						}
-						else {
-							echo "<td valign='top'>",t("Ei Kustannuspaikkaa"),"</td>";
-							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
-						}
-					}
-					else {
 
 						if (substr_count($row['nimi'], '<br>') > 5) {
 
@@ -529,10 +565,29 @@
 						}
 					}
 
-					echo "<td valign='top' align='right'>".$row["alle_$saatavat_array[0]"]."</td>";
+					if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
+						$query = "	SELECT nimi, koodi
+									FROM kustannuspaikka
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '{$row['kustannuspaikka']}'";
+						$nimiresult = pupe_query($query);
+
+						if (mysql_num_rows($nimiresult) == 1) {
+							$nimirow = mysql_fetch_assoc($nimiresult);
+
+							$kustpmuuttuja = (strpos($nimirow["nimi"], $nimirow["koodi"]) === FALSE) ? $nimirow["nimi"]." ".$nimirow["koodi"] : $nimirow["nimi"];
+						}
+						else {
+							$kustpmuuttuja = t("Ei Kustannuspaikkaa");
+						}
+
+						echo "<td valign='top'>{$kustpmuuttuja}</td>";
+					}
+
+					echo "<td valign='top' align='right' nowrap>".$row["alle_$saatavat_array[0]"]."</td>";
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-						echo "<td valign='top' align='right'>".$row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]]."</td>";
+						echo "<td valign='top' align='right' nowrap>".$row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]]."</td>";
 					}
 
 					echo "<td valign='top' align='right'>".$row["yli_{$saatavat_array[count($saatavat_array)-1]}"]."</td>";
@@ -552,7 +607,8 @@
 							$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
 							$excelsarake++;
 						}
-						else {
+
+						if ($grouppaus == "kustannuspaikka" or $tiliointilisa != "") {
 							$worksheet->writeString($excelrivi, $excelsarake, $kustpmuuttuja);
 							$excelsarake++;
 						}
@@ -582,13 +638,18 @@
 					}
 
 					// Lasketaan yhteen
-					$saatavat_yhteensa["alle_$saatavat_array[0]"] += $row["alle_$saatavat_array[0]"];
+					if (!isset($saatavat_yhteensa["alle_$saatavat_array[0]"])) $saatavat_yhteensa["alle_$saatavat_array[0]"] = $row["alle_$saatavat_array[0]"];
+					else $saatavat_yhteensa["alle_$saatavat_array[0]"] += $row["alle_$saatavat_array[0]"];
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-						$saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] += $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
+						if (!isset($saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]])) $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] = $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
+						else $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] += $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
 					}
 
-					$saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+					if (!isset($saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"])) $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] = $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+					else $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+
+
 
 					$kaato_yhteensa 			+= $kaatotilirow["summa"];
 					$avoimia_yhteensa 			+= $row["avoimia"];
@@ -606,30 +667,36 @@
 				$sumlask = 2;
 
 				echo "<tr>";
+
 				if ($grouppaus == "kustannuspaikka") {
 					$colspan = 1;
 					$sumlask = 1;
 				}
 
-				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteensä").":</td>";
-
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."</td>";
-				$sumlask++;
-
-				for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-					echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]]."</td>";
+				if ($grouppaus != "kustannuspaikka" and $tiliointilisa != "") {
+					$colspan++;
 					$sumlask++;
 				}
 
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"]."</td>";
+				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteensä").":</td>";
+
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."</td>";
 				$sumlask++;
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$avoimia_yhteensa</td>";
+
+				for ($sa = 1; $sa < count($saatavat_array); $sa++) {
+					echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".$saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]]."</td>";
+					$sumlask++;
+				}
+
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".$saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"]."</td>";
 				$sumlask++;
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$avoimettilaukset_yhteensa</td>";
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>$avoimia_yhteensa</td>";
 				$sumlask++;
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>$kaato_yhteensa</td>";
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>$avoimettilaukset_yhteensa</td>";
 				$sumlask++;
-				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".($avoimia_yhteensa+$avoimettilaukset_yhteensa-$kaato_yhteensa)."</td>";
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>$kaato_yhteensa</td>";
+				$sumlask++;
+				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right' nowrap>".($avoimia_yhteensa+$avoimettilaukset_yhteensa-$kaato_yhteensa)."</td>";
 				echo "<td valign='top' class='tumma'></td>";
 				echo "</tr>";
 			}

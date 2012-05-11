@@ -372,20 +372,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "automaatti_toimitus") {
-
-		$selo = $sels = "";
-		if ($trow[$i] == 'S') $sels = "selected";
-		else $selo = "selected";
-
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>".t("Ei automaattitoimitusta")."</option>";
-		$ulos .= "<option value='S' $sels>".t("Suoratoimitukset toimitetaan automaattisesti")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "laskun_erittely") {
 
 		$selo = $sels = "";

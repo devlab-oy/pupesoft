@@ -1707,7 +1707,7 @@
 						echo "<font color='orange'>Ostotilausriviä ei löydy</font>";
 					}
 					elseif ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
-						echo "<font color='orange'>Kpl ongelma<br>tilauksella {$kpl_row["tilkpl"]} <br>sanomassa {$row["kappalemaara"]}</font>";
+						echo "<font color='orange'>Kpl ongelma<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
 					}
 
 					if ($kpl_row["otunnus"] != 0 and ($row['tilausnumero'] != $kpl_row["otunnus"])) {

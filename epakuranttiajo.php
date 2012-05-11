@@ -7,7 +7,7 @@
 
 		echo "<font class='head'>".t("Epäkuranttiajo")."</font><hr>";
 
-		echo "<br><form id='valinta' name = 'valinta' method='post'>";
+		echo "<br><form method='post'>";
 		echo "<input type = 'hidden' name = 'ajo_tee' value = 'NAYTA'>";
 		echo "<input type = 'submit' value = '".t("Näytä epäkurantoitavat tuotteet")."'>";
 		echo "</form><br>";
@@ -21,7 +21,7 @@
 		}
 
 		// Otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
@@ -181,8 +181,10 @@
 					$mikataso = 25;
 				}
 
-				$viesti = ob_get_contents();
-				ob_end_clean();
+				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
+					$viesti = ob_get_contents();
+					ob_end_clean();
+				}
 
 				if ($mikataso > 0) {
 					echo "<tr>";

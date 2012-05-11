@@ -47,6 +47,7 @@
 		// Tehd‰‰n kaikki tapahtumat samalle tositteelle!
 		$tapahtumat_samalle_tositteelle = "kylla";
 		$laskuid = 0;
+		$epa_tuotemaara = 0;
 
 		// Haetaan kaikki saldolliset tuotteet
 		$query  = "	SELECT tuote.tuoteno,
@@ -196,11 +197,13 @@
 					}
 
 					echo "</tr>";
+
+					$epa_tuotemaara++;
 				}
 			}
 		}
 
-		if (!$php_cli) {
+		if (!$php_cli and $epa_tuotemaara > 0) {
 			echo "</table>";
 
 			echo "<br><form name = 'valinta' method='post'>";

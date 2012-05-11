@@ -157,6 +157,9 @@
 			// S = tulee vain sanoma   <--- ei tehdä mitään
 			// L = tulee vain lasku
 
+			// ei käsitellä erolistalle siirrettyjä rivejä.
+			if ($rtuoteno[$i]['status'] == 'E') continue;
+
 			$toim_tuotenolisa = "'{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}'";
 
 			if (isset($rtuoteno[$i]['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";

@@ -228,6 +228,8 @@
 
 			if ($rtuoteno[$i]["tuoteno"] != "") {
 
+				$rtuoteno[$i]['status'] = '';
+
 				// Tallennetaan riville jos tämä on kauttalaskutusta
 				if ($kauttalaskutus == "KAUTTALASKUTUS") {
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
@@ -384,6 +386,7 @@
 									$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
 									$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
 									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
+									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}

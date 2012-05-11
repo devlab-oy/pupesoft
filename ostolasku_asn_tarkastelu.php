@@ -50,6 +50,20 @@
 						$('#kolliformi').submit();
 					});
 
+					$('.erobutton_osto').click(function(){
+						var rivitunniste = $(this).attr('id');
+						$('#lasku').val(rivitunniste);
+
+						$('#tee').val('erolistalle');
+
+						var lopetus = $('#lopetus').val();
+						lopetukset = lopetus.split('/SPLIT/');
+
+						$('#lopetus').val(lopetukset[0]);
+
+						$('#kolliformi').submit();
+					});
+
 					$('.vahvistabutton').click(function(){
 						$('#tee').val('vahvistakolli');
 						$('#kolliformi').attr('action', '?').submit();
@@ -85,6 +99,26 @@
 	if (!isset($valitse)) $valitse = '';
 	if (!isset($asn_rivi)) $asn_rivi = '';
 	if (isset($muut_siirrettavat) and trim($muut_siirrettavat) != "") list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl, $valitse) = explode("!¡!", $muut_siirrettavat);
+
+	if ($tee == 'erolistalle') {
+
+		if (isset($lasku) and strpos($lasku, '##') !== false) {
+			list($lasku, $tuoteno, $tilaajanrivinro, $toimittaja, $kpl, $rivitunnus, $tilausnumero, $toim_tuoteno) = explode('##', $lasku);
+		}
+
+		if (isset($rivitunnus) and trim($rivitunnus) != '') {
+
+			$rivitunnus = (int) $rivitunnus;
+
+			$query = "	UPDATE asn_sanomat SET
+						status = 'E'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$rivitunnus}'";
+			$res = pupe_query($query);
+		}
+
+		$tee = 'nayta';
+	}
 
 	if ($tee == 'hintavertailu') {
 
@@ -350,7 +384,11 @@
 		$rtuoteno			= array();
 		$laskuttajan_toimittajanumero = "";
 
-		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+		$query = "	SELECT * 
+					FROM asn_sanomat 
+					WHERE yhtio = '{$kukarow['yhtio']}' 
+					AND status != 'E'
+					{$wherelisa}";
 		$kollires = pupe_query($query);
 
 		$i = 0;
@@ -548,6 +586,7 @@
 				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
 				$rtuoteno[$i]['kauttalaskutus']		= "";
 				$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
+				$rtuoteno[$i]['status']				= $kollirow['status'];
 
 				$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
 
@@ -1535,8 +1574,9 @@
 		}
 		else {
 
-			echo "<form method='post' action='?valitse={$valitse}&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' id='kolliformi'>";
+			echo "<form method='post' action='?valitse={$valitse}' id='kolliformi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='etsi' />";
+			echo "<input type='hidden' id='lopetus' name='lopetus' value='{$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta//lasku={$lasku}//valitse={$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='{$lasku}' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<table>";
@@ -1634,7 +1674,10 @@
 
 				echo "<td>";
 
-				if ($row['tilausrivi'] != '') {
+				if ($row['status'] == 'E') {
+					echo "<font class='message'>",t("Erolistalla"),"</font>";
+				}
+				elseif ($row['tilausrivi'] != '') {
 					echo "<font class='ok'>Ok</font>";
 					$ok++;
 
@@ -1678,7 +1721,12 @@
 				echo "</td>";
 
 				echo "<td class='back'>";
-				if ($row['tilausrivi'] == '') echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
+
+				if ($row['tilausrivi'] == '' and $row['status'] != 'E') {
+					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
+					echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Erolistalle"),"' />";
+				}
+
 				echo "</td>";
 				echo "</tr>";
 			}
@@ -1826,7 +1874,7 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'tec'
-						AND asn_sanomat.status != 'X'
+						AND asn_sanomat.status NOT IN ('X', 'E')
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 						ORDER BY toimi.nimi, toimi.ytunnus";
 			$result = pupe_query($query);

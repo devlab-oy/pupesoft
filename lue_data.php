@@ -1707,6 +1707,87 @@ if ($kasitellaan_tiedosto) {
 				if ($rivi[$postoiminto] == 'LISAA' and $table_mysql == 'tuote' and stripos($query, ", alv = ") === FALSE) {
 					$query .= ", alv = '$oletus_alvprossa' ";
 				}
+				
+				// Jos on asiakas-taulu, niin populoidaan kaikkien dropdown-menujen arvot, mikäli niitä ei ole annettu.
+				if ($table_mysql == 'asiakas' and $rivi[$postoiminto] == 'LISAA') {
+					if (stripos($query, ", maksuehto = ") === FALSE) {
+						$select_query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND kaytossa='' ORDER BY jarjestys, teksti limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+						
+						$query .= ", maksuehto = '{$select_row["tunnus"]}' ";
+					}
+					
+					if (stripos($query, ", toimitustapa = ") === FALSE) {
+						$select_query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY jarjestys, selite limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+						
+						$query .= ", toimitustapa = '{$select_row["selite"]}' ";
+					}
+					
+					if (stripos($query, ", valkoodi = ") === FALSE) {
+						$select_query = "SELECT * FROM valuu WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY jarjestys limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+						
+						$query .= ", valkoodi = '{$select_row["selite"]}' ";
+					}
+					
+					if (stripos($query, ", kerayspoikkeama = ") === FALSE) {
+						$query .= ", kerayspoikkeama = '0' ";
+					}
+					
+					if (stripos($query, ", laskutusvkopv = ") === FALSE) {
+						$query .= ", laskutusvkopv = '0' ";
+					}
+					
+					if (stripos($query, ", laskutyyppi = ") === FALSE) {
+						$query .= ", laskutyyppi = '-9' ";
+					}
+					
+					if (stripos($query, ", maa = ") === FALSE) {
+						$query .= ", maa = 'FI' ";
+					}
+					
+					if (stripos($query, ", kansalaisuus = ") === FALSE) {
+						$query .= ", kansalaisuus = 'FI' ";
+					}
+					
+					if (stripos($query, ", laskutusmaa = ") === FALSE) {
+						$query .= ", laskutusmaa = 'FI' ";
+					}
+					
+					if (stripos($query, ", toim_maa = ") === FALSE) {
+						$query .= ", toim_maa = 'FI' ";
+					}
+					
+					if (stripos($query, ", kolm_maa = ") === FALSE) {
+						$query .= ", kolm_maa = 'FI' ";
+					}
+					
+					if (stripos($query, ", kieli = ") === FALSE) {
+						$query .= ", kieli = 'FI' ";
+					}
+					
+					if (stripos($query, ", chn = ") === FALSE) {
+						$query .= ", chn = '100' ";
+					}
+					
+					if (stripos($query, ", alv = ") === FALSE) {
+						
+						//yhtiön oletusalvi!
+						$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
+						$wtres  = pupe_query($wquery);
+						$wtrow  = mysql_fetch_array($wtres);
+						
+						$query .= ", alv = '{$wtrow["selite"]}' ";
+					}
+					
+					
+					
+				}
+				
 
 				if ($rivi[$postoiminto] == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {

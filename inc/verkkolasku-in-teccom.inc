@@ -159,6 +159,10 @@
 		$ostaja_asiakkaantiedot["postitp"] = trim(utf8_decode($xml->InvoiceHeader->InvoiceOrg->InvoiceParty->Address->City));
 	}
 
+	if (isset($xml->InvoiceHeader->Currency)) {
+		$laskuttajan_valkoodi = $xml->InvoiceHeader->Currency;
+	}
+
 	// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
 	if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
 		// Varmistetaan, että tunnus on ovtunnus muodossa

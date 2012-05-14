@@ -17285,11 +17285,11 @@ if (!function_exists("erolista")) {
 
 		if ($valitse != 'asn') {
 			$pdf->draw_text(360, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
+			$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 
 			$pdf->draw_text(430, $kala, t("Til", $kieli), $thispage, $boldi);
 			$pdf->draw_text(430, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
 
-			$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 			$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 			$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
 			$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
@@ -17334,11 +17334,11 @@ if (!function_exists("erolista")) {
 
 				if ($valitse != 'asn') {
 					$pdf->draw_text(360, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
+					$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 
 					$pdf->draw_text(430, $kala, t("Til", $kieli), $thispage, $boldi);
 					$pdf->draw_text(430, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
 
-					$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 					$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 					$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
 					$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
@@ -17362,7 +17362,7 @@ if (!function_exists("erolista")) {
 						GROUP BY 1,2,3,4,5,6";
 			$rivires = pupe_query($query);
 
-				while ($rivirow = mysql_fetch_assoc($rivires)) {
+			while ($rivirow = mysql_fetch_assoc($rivires)) {
 
 				$hintaero = round($row['hinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
 				$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta'], $yhtiorow['hintapyoristys']);
@@ -17379,8 +17379,8 @@ if (!function_exists("erolista")) {
 
 				if ($valitse != 'asn') {
 					$pdf->draw_text(360, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
-					$pdf->draw_text(430, $kala, round($rivirow['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 					$pdf->draw_text(500, $kala, $hintaero, $thispage, $norm);
+					$pdf->draw_text(430, $kala, round($rivirow['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 					$pdf->draw_text(570, $kala, $rivihintaero, $thispage, $norm);
 					$pdf->draw_text(640, $kala, $rivirow['ale1'], $thispage, $norm);
 					$pdf->draw_text(690, $kala, $rivirow['ale2'], $thispage, $norm);

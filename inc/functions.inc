@@ -17228,6 +17228,8 @@ if (!function_exists("erolista")) {
 
 		$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
 
+		$lasku = str_replace(",", ", ", $lasku);
+
 		$query = "	SELECT * 
 					FROM asn_sanomat 
 					WHERE yhtio = '{$kukarow['yhtio']}' 
@@ -17249,6 +17251,10 @@ if (!function_exists("erolista")) {
 		$kala -= 40;
 
 		$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
+
+		$kala -= ($rivinkorkeus * 2);
+
+		$pdf->draw_text(50, $kala, t("Laskut", $kieli).": {$lasku}", $thispage, $boldi);
 
 		mysql_data_seek($result, 0);
 

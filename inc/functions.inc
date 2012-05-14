@@ -17258,29 +17258,34 @@ if (!function_exists("erolista")) {
 
 		$kala -= $rivinkorkeus;
 
-		$pdf->draw_text(50, $kala, t("Laskut", $kieli).": {$lasku}", $thispage, $boldi);
+		$kumpi = $valitse == 'asn' ? 'ASN' : "Lasku ";
+
+		$pdf->draw_text(50, $kala, t($kumpi, $kieli).": {$lasku}", $thispage, $boldi);
 
 		mysql_data_seek($result, 0);
 
 		$kala -= ($rivinkorkeus * 2);
 
-		$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 750, $thispage, $rectparam);
-
-		//$kala -= $rivinkorkeus;
-
-		$kumpi = $valitse == 'asn' ? 'Asn' : "Lasku ";
+		if ($valitse == 'asn') {
+			$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 300, $thispage, $rectparam);
+		}
+		else {
+			$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 750, $thispage, $rectparam);
+		}
 
 		$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
 		$pdf->draw_text(150, $kala, t("Til Kpl", $kieli), $thispage, $boldi);
 
 		$pdf->draw_text(200, $kala, t($kumpi, $kieli), $thispage, $boldi);
 		$pdf->draw_text(200, $kala - $rivinkorkeus, t("Kpl", $kieli), $thispage, $boldi);
-
 		$pdf->draw_text(250, $kala, t("Kplero", $kieli), $thispage, $boldi);
-		$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
-		$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
-		$pdf->draw_text(475, $kala, t("Hintaero", $kieli), $thispage, $boldi);
-		$pdf->draw_text(550, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+
+		if ($valitse != 'asn') {
+			$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
+			$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
+			$pdf->draw_text(475, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+			$pdf->draw_text(550, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+		}
 
 		$kala -= 35;
 
@@ -17304,21 +17309,28 @@ if (!function_exists("erolista")) {
 
 				$kala -= ($rivinkorkeus * 2);
 
-				$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
+				if ($valitse == 'asn') {
+					$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 300, $thispage, $rectparam);
+				}
+				else {
+					$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 7, 750, $thispage, $rectparam);
+				}
 
 				$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
 				$pdf->draw_text(150, $kala, t("Til Kpl", $kieli), $thispage, $boldi);
 
 				$pdf->draw_text(200, $kala, t($kumpi, $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala - $rivinkorkeus, t("Kpl", $kieli), $thispage, $boldi);
-
 				$pdf->draw_text(250, $kala, t("Kplero", $kieli), $thispage, $boldi);
-				$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
-				$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
-				$pdf->draw_text(475, $kala, t("Hintaero", $kieli), $thispage, $boldi);
-				$pdf->draw_text(550, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 
-				$kala -= 25;
+				if ($valitse != 'asn') {
+					$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
+					$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
+					$pdf->draw_text(475, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+					$pdf->draw_text(550, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+				}
+
+				$kala -= 35;
 			}
 
 			$query = "	SELECT tuoteno,
@@ -17345,16 +17357,24 @@ if (!function_exists("erolista")) {
 			$pdf->draw_text(150, $kala, $rivirow['kpl'], $thispage, $norm);
 			$pdf->draw_text(200, $kala, $row['kappalemaara'], $thispage, $norm);
 			$pdf->draw_text(250, $kala, $kplero, $thispage, $norm);
-			$pdf->draw_text(310, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
-			$pdf->draw_text(390, $kala, round($rivirow['hinta'] * $rivirow['kpl'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
-			$pdf->draw_text(475, $kala, $hintaero, $thispage, $norm);
-			$pdf->draw_text(550, $kala, $rivihintaero, $thispage, $norm);
+
+			if ($valitse != 'asn') {
+				$pdf->draw_text(310, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+				$pdf->draw_text(390, $kala, round($rivirow['hinta'] * $rivirow['kpl'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+				$pdf->draw_text(475, $kala, $hintaero, $thispage, $norm);
+				$pdf->draw_text(550, $kala, $rivihintaero, $thispage, $norm);
+			}
 
 			$kala -= $rivinkorkeus;
 
 			$pdf->draw_text(50, $kala, $rivirow['nimitys'], $thispage, $norm);
 
-			$pdf->draw_rectangle($kala - 7, 40, $kala - 7, 580, $thispage, $rectparam);
+			if ($valitse == 'asn') {
+				$pdf->draw_rectangle($kala - 7, 40, $kala - 7, 300, $thispage, $rectparam);
+			}
+			else {
+				$pdf->draw_rectangle($kala - 7, 40, $kala - 7, 750, $thispage, $rectparam);
+			}
 
 			$kala -= ($rivinkorkeus + 5);
 		}

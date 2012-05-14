@@ -92,16 +92,20 @@ else {
 }
 
 // Funktio, jolla tehd‰‰n luedatan output
-function lue_data_echo($string) {
+function lue_data_echo($string, $now = false) {
 
-	global $cli, $lue_data_output_file, $api_kentat, $api_output;
+	global $cli, $lue_data_output_file, $lue_data_output_text, $api_kentat, $api_output;
 
 	if (isset($api_kentat)) {
-		// $api_output .= $string;
 		$api_output .= $string."\n";
 	}
 	elseif ($cli === FALSE) {
-		echo $string;
+		if ($now === TRUE) {
+			echo $string;
+		}
+		else {
+			$lue_data_output_text .= $string;
+		}
 	}
 	elseif ($lue_data_output_file == "") {
 		echo strip_tags($string)."\n";
@@ -2051,6 +2055,8 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 }
+
+lue_data_echo("<br>".$lue_data_output_text, true);
 
 if (!$cli and !isset($api_kentat)) {
 	// Taulut, jota voidaan k‰sitell‰

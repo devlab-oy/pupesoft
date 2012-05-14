@@ -17313,6 +17313,8 @@ if (!function_exists("erolista")) {
 			$rivihintaero = round(($row['hinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']);
 			$kplero = round($row['kappalemaara'] - $rivirow['kpl'], 0);
 
+			$kplero = $kplero == 0 ? '' : $kplero;
+
 			if ($hintaero == 0 and $rivihintaero == 0) continue;
 
 			$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);

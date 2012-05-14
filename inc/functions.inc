@@ -17348,13 +17348,15 @@ if (!function_exists("erolista")) {
 			$query = "	SELECT tuoteno,
 						nimitys,
 						hinta,
-						rivihinta,
-						IF(ale1 = 0, '', ale1) ale1, IF(ale2 = 0, '', ale2) ale2, IF(ale3 = 0, '', ale3) ale3,
+						IF(ale1 = 0, '', ale1) ale1, 
+						IF(ale2 = 0, '', ale2) ale2, 
+						IF(ale3 = 0, '', ale3) ale3,
+						SUM(rivihinta) AS rivihinta,
 						SUM(varattu + kpl) AS kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus IN ({$row['tilausrivi']})
-						GROUP BY 1,2,3,4,5,6,7";
+						GROUP BY 1,2,3,4,5,6";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 

@@ -17185,9 +17185,6 @@ if (!function_exists("erolista")) {
 
 		global $kukarow;
 
-		echo "lasku: $lasku<br>";
-		echo "komento: $komento<br>";
-
 		if (!is_array($komento) and trim($komento) == '') {
 
 			$toiminto = 'erolista';
@@ -17197,8 +17194,6 @@ if (!function_exists("erolista")) {
 			require("inc/valitse_tulostin.inc");
 			exit;
 		}
-
-		exit;
 
 		if (@include_once("pdflib/phppdflib.class.php"));
 		else include_once("phppdflib.class.php");

@@ -17190,13 +17190,16 @@ if (!function_exists("erolista")) {
 			$otunnus = $lasku;
 			$tila = $valitse;
 
-			$tulostimet[0] = t("Hintapoikkeavuus");
+			$tulostimet[0] = t("Erolista");
 
 			require("inc/valitse_tulostin.inc");
 		}
 
 		$valitse = $tila;
 		$lasku = $otunnus;
+
+		echo "lasku: $lasku<br>";
+		exit;
 
 		if (@include_once("pdflib/phppdflib.class.php"));
 		else include_once("phppdflib.class.php");

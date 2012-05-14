@@ -17193,6 +17193,8 @@ if (!function_exists("erolista")) {
 			$tulostimet[0] = t("Erolista");
 
 			require("inc/valitse_tulostin.inc");
+			require("inc/footer.inc");
+			exit;
 		}
 
 		$valitse = $tila;

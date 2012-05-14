@@ -17228,7 +17228,7 @@ if (!function_exists("erolista")) {
 		// $kala = 815;
 		$kala = 570;
 
-		$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
+		$pdf->draw_text(310, $kala, t("Erolista", $kieli), $thispage, $iso);
 
 		$lasku = str_replace(",", ", ", $lasku);
 
@@ -17282,10 +17282,15 @@ if (!function_exists("erolista")) {
 				// $kala = 815;
 				$kala = 570;
 
-				$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
+				$pdf->draw_text(310, $kala, t("Erolista", $kieli), $thispage, $iso);
 
 				$kala -= 40;
+
 				$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
+
+				$kala -= $rivinkorkeus;
+
+				$pdf->draw_text(50, $kala, t("Laskut", $kieli).": {$lasku}", $thispage, $boldi);
 
 				$kala -= ($rivinkorkeus * 2);
 
@@ -17342,7 +17347,7 @@ if (!function_exists("erolista")) {
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdffilenimi = "/tmp/".t("Hintavertailu")."-".md5(uniqid(mt_rand(), true)).".pdf";
+		$pdffilenimi = "/tmp/".t("Erolista")."-".md5(uniqid(mt_rand(), true)).".pdf";
 
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
@@ -17363,18 +17368,18 @@ if (!function_exists("erolista")) {
 				$liite = $pdffilenimi;
 				$content_body = "";
 
-				echo t("Hintapoikkeavuus-raportti tulostuu")."...<br>";
+				echo t("Erolista-raportti tulostuu")."...<br>";
 
-				$kutsu = t("Hintapoikkeavuus-raportti", $kieli).' '.$toimittajan_nimi;
+				$kutsu = t("Erolista-raportti", $kieli).' '.$toimittajan_nimi;
 
 				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-					$kutsu .= " ".t("Hintapoikkeavuus-raportti", $kieli).' '.$toimittajan_nimi;
+					$kutsu .= " ".t("Erolista-raportti", $kieli).' '.$toimittajan_nimi;
 				}
 
 				include("inc/sahkoposti.inc");
 			}
 			elseif ($komento != '' and $komento != 'edi') {
-				echo t("Hintapoikkeavuus-raportti tulostuu")."...<br>";
+				echo t("Erolista-raportti tulostuu")."...<br>";
 				$line = exec("{$komento} {$pdffilenimi}", $output, $returnvalue);
 			}
 		}

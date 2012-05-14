@@ -1131,7 +1131,8 @@
 						tilausrivi.varattu, 
 						tilausrivi.kpl, 
 						tilausrivi.tilaajanrivinro, 
-						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus
+						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus,
+						IF(lasku.tila = 'O', lasku.laskunro, 0) AS onko_lasku
 						FROM lasku
 						JOIN tilausrivi ON (
 							tilausrivi.yhtio = lasku.yhtio 
@@ -1142,10 +1143,11 @@
 							{$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tila IN ('O', 'K')
-						{$alatilalisa}
+						AND (lasku.tila = 'O' OR (lasku.tila = 'K' AND lasku.alatila != 'X'))
 						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
+						{$alatilalisa}
 						{$tilausnrolisa}
+						HAVING onko_lasku = 0
 						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
 			$result = pupe_query($query);
 

@@ -17189,6 +17189,7 @@ if (!function_exists("erolista")) {
 
 			$otunnus = $lasku;
 			$tila = $valitse;
+			$toiminto = 'erolista';
 
 			$tulostimet[0] = t("Erolista");
 

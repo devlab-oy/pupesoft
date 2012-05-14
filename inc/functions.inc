@@ -17312,9 +17312,15 @@ if (!function_exists("erolista")) {
 			$pdf->draw_text(500, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
 
 			$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
-			$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
-			$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
-			$pdf->draw_text(740, $kala, t("Ale3", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(640, $kala, t("L.Ale1", $kieli), $thispage, $boldi);
+			$pdf->draw_text(640, $kala - $rivinkorkeus, t("T.Ale1", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
+			$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
+
+			$pdf->draw_text(740, $kala - $rivinkorkeus, t("L.Ale3", $kieli), $thispage, $boldi);
+			$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
 		}
 
 		$kala -= 35;
@@ -17361,9 +17367,15 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(500, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
 
 					$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
-					$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
-					$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
-					$pdf->draw_text(740, $kala, t("Ale3", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(640, $kala, t("L.Ale1", $kieli), $thispage, $boldi);
+					$pdf->draw_text(640, $kala - $rivinkorkeus, t("T.Ale1", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
+					$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
+
+					$pdf->draw_text(740, $kala - $rivinkorkeus, t("L.Ale3", $kieli), $thispage, $boldi);
+					$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
 				}
 
 				$kala -= 35;
@@ -17405,9 +17417,15 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(430, $kala, $hintaero, $thispage, $norm);
 					$pdf->draw_text(500, $kala, round($row['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 					$pdf->draw_text(570, $kala, $rivihintaero, $thispage, $norm);
-					$pdf->draw_text(640, $kala, $rivirow['ale1'], $thispage, $norm);
-					$pdf->draw_text(690, $kala, $rivirow['ale2'], $thispage, $norm);
-					$pdf->draw_text(740, $kala, $rivirow['ale3'], $thispage, $norm);
+
+					$pdf->draw_text(640, $kala, $row['laskun_ale1'], $thispage, $norm);
+					$pdf->draw_text(640, $kala - $rivinkorkeus, $rivirow['ale1'], $thispage, $norm);
+
+					$pdf->draw_text(690, $kala, $row['laskun_ale2'], $thispage, $norm);
+					$pdf->draw_text(690, $kala - $rivinkorkeus, $rivirow['ale2'], $thispage, $norm);
+
+					$pdf->draw_text(740, $kala, $row['laskun_ale3'], $thispage, $norm);
+					$pdf->draw_text(740, $kala - $rivinkorkeus, $rivirow['ale3'], $thispage, $norm);
 				}
 
 				$kala -= $rivinkorkeus;

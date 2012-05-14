@@ -17319,7 +17319,7 @@ if (!function_exists("erolista")) {
 			$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
 			$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
 
-			$pdf->draw_text(740, $kala - $rivinkorkeus, t("L.Ale3", $kieli), $thispage, $boldi);
+			$pdf->draw_text(740, $kala, t("L.Ale3", $kieli), $thispage, $boldi);
 			$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
 		}
 
@@ -17374,7 +17374,7 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(690, $kala, t("L.Ale2", $kieli), $thispage, $boldi);
 					$pdf->draw_text(690, $kala - $rivinkorkeus, t("T.Ale2", $kieli), $thispage, $boldi);
 
-					$pdf->draw_text(740, $kala - $rivinkorkeus, t("L.Ale3", $kieli), $thispage, $boldi);
+					$pdf->draw_text(740, $kala, t("L.Ale3", $kieli), $thispage, $boldi);
 					$pdf->draw_text(740, $kala - $rivinkorkeus, t("T.Ale3", $kieli), $thispage, $boldi);
 				}
 

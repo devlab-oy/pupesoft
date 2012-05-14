@@ -17364,7 +17364,7 @@ if (!function_exists("erolista")) {
 			$rivirow = mysql_fetch_assoc($rivires);
 
 			$hintaero = round($row['hinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
-			$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta']), $yhtiorow['hintapyoristys']);
+			$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta'], $yhtiorow['hintapyoristys']);
 			$kplero = round($row['kappalemaara'] - $rivirow['kpl'], 0);
 
 			$kplero = $kplero == 0 ? '' : $kplero;

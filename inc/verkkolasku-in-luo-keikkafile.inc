@@ -82,8 +82,9 @@
 	$kohdistettujariveja = 0;
 	$kauttalaskutus		 = "";
 	$kauttalaskutus_saldoton = array();
-	$keikoilla	= array();
-	$ostoilla	= array();
+	$keikoilla	= (isset($tullaan_virhetarkistuksesta) and isset($keikoilla)) ? $keikoilla : array();
+	$ostoilla	= (isset($tullaan_virhetarkistuksesta) and isset($ostoilla)) ? $ostoilla : array();
+	$tullaan_virhetarkistuksesta = isset($tullaan_virhetarkistuksesta) ? $tullaan_virhetarkistuksesta : false;
 	$virhe		= "";
 	$virheet 	= 0;
 
@@ -143,7 +144,7 @@
 				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
-		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") {
+		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and !$tullaan_virhetarkistuksesta) {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on

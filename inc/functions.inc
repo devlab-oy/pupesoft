@@ -17343,7 +17343,7 @@ if (!function_exists("erolista")) {
 						nimitys,
 						hinta,
 						rivihinta,
-						ale1, ale2, ale3,
+						IF(ale1 = 0, '', ale1) ale1, IF(ale2 = 0, '', ale2) ale2, IF(ale3 = 0, '', ale3) ale3,
 						SUM(varattu + kpl) AS kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'

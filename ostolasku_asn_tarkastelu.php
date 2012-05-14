@@ -2,8 +2,6 @@
 
 	require("inc/parametrit.inc");
 
-	enable_jquery();
-
 	echo "	<script type='text/javascript'>
 				$(document).ready(function() {
 					$('.kollibutton').click(function(){

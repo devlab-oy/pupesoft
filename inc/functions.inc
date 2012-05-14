@@ -17301,11 +17301,12 @@ if (!function_exists("erolista")) {
 
 			$query = "	SELECT tuoteno,
 						nimitys,
-						varattu + kpl AS kpl,
-						hinta
+						hinta,
+						SUM(varattu + kpl) AS kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus IN ({$row['tilausrivi']})";
+						AND tunnus IN ({$row['tilausrivi']})
+						GROUP BY 1,2,3";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 

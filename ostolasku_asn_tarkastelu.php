@@ -1100,7 +1100,7 @@
 
 			if (trim($kpl) != '' and $valitse != 'asn') {
 				$kpl = (float) $kpl;
-				$kpllisa = " and (tilausrivi.varattu = '{$kpl}' or tilausrivi.kpl = '{$kpl}')";
+				$kpllisa = " and (tilausrivi.varattu + tilausrivi.kpl = '{$kpl}')";
 			}
 
 			if ($tuotenolisa != "") {

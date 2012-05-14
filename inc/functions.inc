@@ -17424,13 +17424,13 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(500, $kala, round($row['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 					$pdf->draw_text(570, $kala, $rivihintaero, $thispage, $norm);
 
-					$pdf->draw_text(640, $kala, $row['laskun_ale1'], $thispage, $norm);
+					$pdf->draw_text(640, $kala, $row['ale1'], $thispage, $norm);
 					$pdf->draw_text(640, $kala - $rivinkorkeus, $rivirow['ale1'], $thispage, $norm);
 
-					$pdf->draw_text(690, $kala, $row['laskun_ale2'], $thispage, $norm);
+					$pdf->draw_text(690, $kala, $row['ale2'], $thispage, $norm);
 					$pdf->draw_text(690, $kala - $rivinkorkeus, $rivirow['ale2'], $thispage, $norm);
 
-					$pdf->draw_text(740, $kala, $row['laskun_ale3'], $thispage, $norm);
+					$pdf->draw_text(740, $kala, $row['ale3'], $thispage, $norm);
 					$pdf->draw_text(740, $kala - $rivinkorkeus, $rivirow['ale3'], $thispage, $norm);
 				}
 

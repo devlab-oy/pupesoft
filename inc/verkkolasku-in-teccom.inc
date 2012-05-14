@@ -273,16 +273,15 @@
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount); // summa
 				}
 
-				if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
-					$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
-				}
-				else {
-					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
-				}
+				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 
 				// otetaan talteen "AllowOrCharge" kentät. 
 				// täältä tulevat alennukset ja runko-, rahti- ja muutkulut
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
+
+					if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
+						$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
+					}
 
 					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
 
@@ -422,9 +421,6 @@
 							}
 						}
 					}
-				}
-				else {
-					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 				}
 
 				if (isset($tuotetieto->DesAdvRef->DocumentNumber)) {

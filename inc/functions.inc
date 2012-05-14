@@ -17262,13 +17262,16 @@ if (!function_exists("erolista")) {
 
 		$kala -= ($rivinkorkeus * 2);
 
-		$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
+		$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus, 700, $thispage, $rectparam);
 
 		$kumpi = $valitse == 'asn' ? 'Asn' : "Lasku ";
 
 		$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
 		$pdf->draw_text(150, $kala, t("Til Kpl", $kieli), $thispage, $boldi);
-		$pdf->draw_text(200, $kala, $kumpi.' '.t("Kpl", $kieli), $thispage, $boldi);
+
+		$pdf->draw_text(200, $kala, t($kumpi, $kieli), $thispage, $boldi);
+		$pdf->draw_text(200, $kala - $rivinkorkeus, t("Kpl", $kieli), $thispage, $boldi);
+
 		$pdf->draw_text(250, $kala, t("Kplero", $kieli), $thispage, $boldi);
 		$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
 		$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
@@ -17301,7 +17304,10 @@ if (!function_exists("erolista")) {
 
 				$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
 				$pdf->draw_text(150, $kala, t("Til Kpl", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala, $kumpi.' '.t("Kpl", $kieli), $thispage, $boldi);
+
+				$pdf->draw_text(200, $kala, t($kumpi, $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala - $rivinkorkeus, t("Kpl", $kieli), $thispage, $boldi);
+
 				$pdf->draw_text(250, $kala, t("Kplero", $kieli), $thispage, $boldi);
 				$pdf->draw_text(310, $kala, t("Til Hinta", $kieli), $thispage, $boldi);
 				$pdf->draw_text(390, $kala, t("Rivihinta", $kieli), $thispage, $boldi);

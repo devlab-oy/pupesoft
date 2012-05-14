@@ -17271,6 +17271,22 @@ if (!function_exists("erolista")) {
 
 		$pdf->draw_text(50, $kala, t($kumpi, $kieli).": {$lasku}", $thispage, $boldi);
 
+		if ($otunnus != '') {
+			$otunnus = (int) $otunnus;
+
+			$query = "	SELECT laskunro
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tila = 'K'
+						AND tunnus = '{$otunnus}'";
+			$laskunro_res = pupe_query($query);
+			$laskunro_row = mysql_fetch_assoc($laskunro_res);
+
+			$kala -= $rivinkorkeus;
+
+			$pdf->draw_text(50, $kala, t("Saapuminen", $kieli).": {$laskunro_row['laskunro']}", $thispage, $boldi);
+		}
+
 		mysql_data_seek($result, 0);
 
 		$kala -= ($rivinkorkeus * 2);

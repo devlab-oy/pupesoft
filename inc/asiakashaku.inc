@@ -362,10 +362,10 @@ elseif ($asiakasnro != '') {
 }
 
 if ($monta == 0) {
-	if ($ytunnus) {
+	if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
 		echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
 	}
-	elseif ($asiakasnro) {
+	elseif ($asiakasnro and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
 
@@ -434,7 +434,9 @@ if ($monta == 0) {
 		echo "</form>";
 	}
 
-	echo "<br><br>";
+	if (strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
+		echo "<br><br>";
+	}
 
 	$ytunnus = "";
 	$asiakasnro = "";
@@ -718,5 +720,3 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 		echo "</table><br>";
 	}
 }
-
-?>

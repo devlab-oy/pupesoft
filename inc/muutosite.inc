@@ -221,9 +221,29 @@
 		// Jaaha tarkastamme viestin!
 		if ($tila == 'MVIESTI') {
 			$viesti = trim($viesti);
+			$viite = trim($viite);
 
-			if ($viesti == "") {
-				echo "<font class='error'>".t("Viesti ei saa olla tyhj‰")."</font><br>";
+
+			if (strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
+				echo "<br><font class='error'>".t("Viite on v‰‰rin")."!</font><br><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
+			if (strlen($viite) > 0 and substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
+				echo "<br><font class='error'>".t("RF-Viite on v‰‰rin")."!</font><br><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
+			if (strlen($viite) > 0 and strlen($viesti) > 0) {
+				echo "<br><font class='error'>".t("Viitett‰ ja viesti‰ ei voi antaa yhtaikaa")."!</font><br><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
+			if (strlen($viite) == 0 and $viesti == "") {
+				echo "<br><font class='error'>".t("Viesti ei saa olla tyhj‰")."!</font><br><br>";
 				$tee  = 'E';
 				$tila = '';
 			}
@@ -233,7 +253,7 @@
 		if ($tila == 'MVIESTI') {
 			//P‰ivitet‰‰n lasku
 			$query = "	UPDATE lasku
-						set viesti='$viesti'
+						set viesti='$viesti', viite='$viite'
 						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
@@ -1520,6 +1540,11 @@
 					<tr>
 					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
+					<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+					</tr>
+					<tr>
+					<th>".t('laskun viite')."</th>
+					<td><input type = 'text' name = 'viite' size='40' value = '$trow[viite]'></td>
 					<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";

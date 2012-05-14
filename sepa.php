@@ -341,7 +341,7 @@
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
 
-			if ($laskurow["viite"] > 0) {
+			if (strlen(trim($laskurow["viite"])) > 0) {
 				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
 //					$RfrdDocInf = $Strd->addChild('RfrdDocInf', '');											// ReferredDocumentInformation
 //						$RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
@@ -356,7 +356,7 @@
 						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
 //					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
 			}
-			else {
+			elseif ($laskurow['viesti'] != "") {
 				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 			}
 
@@ -406,7 +406,7 @@
 
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
 
-					if ($nettorow["viite"] > 0) {
+					if (strlen(trim($nettorow["viite"])) > 0) {
 						$CdtrRefInf = $Strd->addChild('CdtrRefInf', '');						   					// CreditorReferenceInformation
 							$CdtrRefTp = $CdtrRefInf->addChild('CdtrRefTp', '');				   					// CreditorReferenceType
 								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');						   					// Code (SCOR = Structured Communication Reference)

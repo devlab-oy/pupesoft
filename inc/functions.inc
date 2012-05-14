@@ -17247,6 +17247,11 @@ if (!function_exists("erolista")) {
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
+		if ($valitse != 'asn' and $row['tilausrivi'] == '') {
+			echo "<font class='error'>",t("Ei laskua"),"</font><br />";
+			return false;
+		}
+
 		$query = "	SELECT nimi, nimitark 
 					FROM toimi 
 					WHERE yhtio = '{$kukarow['yhtio']}' 

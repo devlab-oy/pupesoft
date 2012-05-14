@@ -17264,7 +17264,7 @@ if (!function_exists("erolista")) {
 
 		$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 5, 700, $thispage, $rectparam);
 
-		$kala -= $rivinkorkeus - 10;
+		$kala -= $rivinkorkeus;
 
 		$kumpi = $valitse == 'asn' ? 'Asn' : "Lasku ";
 
@@ -17280,7 +17280,7 @@ if (!function_exists("erolista")) {
 		$pdf->draw_text(475, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 		$pdf->draw_text(550, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 
-		$kala -= 25;
+		$kala -= 35;
 
 		while ($row = mysql_fetch_assoc($result)) {
 

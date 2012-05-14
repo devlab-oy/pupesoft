@@ -17236,7 +17236,8 @@ if (!function_exists("erolista")) {
 
 		$rivihintalisa = $valitse != 'asn' ? ", round(kappalemaara * hinta * (1 - lasku_ale1 / 100) * (1 - lasku_ale2 / 100) * (1 - lasku_ale3 / 100),'{$yhtiorow['hintapyoristys']}') rivihinta" : "";
 
-		$query = "	SELECT *
+		$query = "	SELECT *,
+					(hinta * kappalemaara) AS hinta
 					{$rivihintalisa}
 					FROM asn_sanomat 
 					WHERE yhtio = '{$kukarow['yhtio']}' 

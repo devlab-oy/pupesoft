@@ -464,6 +464,36 @@ if ($toiminto == "tulosta") {
 	}
 }
 
+if ($toiminto == 'erolista') {
+
+	// Haetaan itse saapuminen
+	$query    = "	SELECT *
+					FROM lasku
+					WHERE tunnus = '{$otunnus}'
+					AND yhtio = '{$kukarow['yhtio']}'";
+	$result   = pupe_query($query);
+	$laskurow = mysql_fetch_assoc($result);
+
+	// katotaan liitetyt laskut
+	$query = "	SELECT GROUP_CONCAT(DISTINCT vanhatunnus SEPARATOR ',') volaskutunn
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tila = 'K'
+				AND vienti IN ('C','F','I','J','K','L')
+				AND vanhatunnus <> 0
+				AND laskunro = '{$laskurow['laskunro']}'
+				HAVING volaskutunn IS NOT NULL";
+	$llres = pupe_query($query);
+	$llrow = mysql_fetch_assoc($llres);
+
+	if ($llrow['volaskutunn'] != '') {
+
+		$komento = isset($komento) ? $komento : '';
+
+		erolista($llrow['volaskutunn'], 'ostolasku', $komento);
+	}
+}
+
 // syˆtet‰‰n keikan lis‰tietoja
 if ($toiminto == "lisatiedot") {
 	require ("ostotilauksen_lisatiedot.inc");
@@ -1178,6 +1208,12 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$nappikeikka .= "<input type='hidden' name='toiminto' value='lisatiedot'>";
 	$nappikeikka .= "<input type='submit' value='".t("Lis‰tiedot")."'>";
 	$nappikeikka .= "$formloppu";
+
+	$nappikeikka .= "$formalku";
+	$nappikeikka .= "<input type='hidden' name='toiminto' value='erolista'>";
+	$nappikeikka .= "<input type='submit' value='".t("Erolista")."'>";
+	$nappikeikka .= "$formloppu";
+
 
 	// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
 	if ($kplyhteensa == 0 and $llrow["num"] == 0) {

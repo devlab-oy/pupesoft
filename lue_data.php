@@ -1801,7 +1801,6 @@ if ($kasitellaan_tiedosto) {
 						
 						$query .= ", asiakasnro = '$vapaa_asiakasnro' ";
 					}
-				//	rest_ok_header($query);
 					
 				}
 				

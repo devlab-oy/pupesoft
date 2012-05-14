@@ -17262,9 +17262,9 @@ if (!function_exists("erolista")) {
 
 		$kala -= ($rivinkorkeus * 2);
 
-		$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 5, 700, $thispage, $rectparam);
+		$pdf->draw_rectangle($kala + 10, 40, $kala - $rivinkorkeus - 10, 750, $thispage, $rectparam);
 
-		$kala -= $rivinkorkeus;
+		//$kala -= $rivinkorkeus;
 
 		$kumpi = $valitse == 'asn' ? 'Asn' : "Lasku ";
 

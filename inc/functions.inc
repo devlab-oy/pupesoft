@@ -17183,7 +17183,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 if (!function_exists("erolista")) {
 	function erolista($lasku, $valitse, $komento = '', $otunnus = '') {
 
-		global $kukarow;
+		global $kukarow, $yhtiorow;
 
 		if (!is_array($komento) and trim($komento) == '') {
 

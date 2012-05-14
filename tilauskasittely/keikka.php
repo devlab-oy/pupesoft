@@ -475,13 +475,14 @@ if ($toiminto == 'erolista') {
 	$laskurow = mysql_fetch_assoc($result);
 
 	// katotaan liitetyt laskut
-	$query = "	SELECT GROUP_CONCAT(DISTINCT vanhatunnus SEPARATOR ',') volaskutunn
+	$query = "	SELECT GROUP_CONCAT(DISTINCT ostores_lasku.laskunro SEPARATOR ',') volaskutunn
 				FROM lasku
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tila = 'K'
-				AND vienti IN ('C','F','I','J','K','L')
-				AND vanhatunnus <> 0
-				AND laskunro = '{$laskurow['laskunro']}'
+				JOIN lasku ostores_lasku on (ostores_lasku.yhtio = lasku.yhtio and ostores_lasku.tunnus = lasku.vanhatunnus)
+				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+				AND lasku.tila = 'K'
+				AND lasku.vienti IN ('C','F','I','J','K','L')
+				AND lasku.vanhatunnus <> 0
+				AND lasku.laskunro = '{$laskurow['laskunro']}'
 				HAVING volaskutunn IS NOT NULL";
 	$llres = pupe_query($query);
 	$llrow = mysql_fetch_assoc($llres);
@@ -1110,6 +1111,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 				echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
 				echo "<option value='kululaskut'>"       .t("Saapumisen laskut")."</option>";
 				echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
+				echo "<option value='erolista'>"       	 .t("Erolista")."</option>";
 				echo "<option value='yhdista'>"          .t("Yhdist‰ saapumisia")."</option>";
 
 				// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty

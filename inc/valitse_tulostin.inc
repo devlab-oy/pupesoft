@@ -389,7 +389,7 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") === FALSE) {
 		//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
-		require("footer.inc");
+		require("inc/footer.inc");
 		exit;
 	}
 ?>

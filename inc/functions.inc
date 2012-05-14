@@ -17185,6 +17185,9 @@ if (!function_exists("erolista")) {
 
 		global $kukarow;
 
+		echo "lasku: $lasku<br>";
+		echo "komento: $komento<br>";
+
 		if (trim($komento) == '') {
 
 			$toiminto = 'erolista';
@@ -17192,11 +17195,9 @@ if (!function_exists("erolista")) {
 			$tulostimet[0] = t("Erolista");
 
 			require("inc/valitse_tulostin.inc");
-			require("inc/footer.inc");
 			exit;
 		}
 
-		echo "lasku: $lasku<br>";
 		exit;
 
 		if (@include_once("pdflib/phppdflib.class.php"));

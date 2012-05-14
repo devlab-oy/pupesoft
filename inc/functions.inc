@@ -17252,7 +17252,7 @@ if (!function_exists("erolista")) {
 			return false;
 		}
 
-		$query = "	SELECT nimi, nimitark 
+		$query = "	SELECT nimi, nimitark, oletus_kulupros
 					FROM toimi 
 					WHERE yhtio = '{$kukarow['yhtio']}' 
 					AND toimittajanro = '{$row['toimittajanumero']}'";
@@ -17370,13 +17370,15 @@ if (!function_exists("erolista")) {
 				$kala -= 35;
 			}
 
+			$kuluproslisa = $toimirow['oletus_kulupros'] != 0 ? " * ((100 - {$toimirow['oletus_kulupros']}) / 100) " : "";
+
 			$query = "	SELECT tuoteno,
 						nimitys,
 						IF(ale1 = 0, '', ale1) ale1, 
 						IF(ale2 = 0, '', ale2) ale2, 
 						IF(ale3 = 0, '', ale3) ale3,
 						SUM(hinta) AS hinta,
-						SUM(rivihinta) AS rivihinta,
+						SUM(rivihinta {$kuluproslisa}) AS rivihinta,
 						SUM(varattu + kpl) AS kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'

@@ -1727,11 +1727,7 @@ if ($kasitellaan_tiedosto) {
 					}
 					
 					if (stripos($query, ", valkoodi = ") === FALSE) {
-						$select_query = "SELECT * FROM valuu WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY jarjestys limit 1";
-						$select_result = pupe_query($select_query);
-						$select_row = mysql_fetch_assoc($select_result);
-						
-						$query .= ", valkoodi = '{$select_row["selite"]}' ";
+						$query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
 					}
 					
 					if (stripos($query, ", kerayspoikkeama = ") === FALSE) {
@@ -1747,27 +1743,27 @@ if ($kasitellaan_tiedosto) {
 					}
 					
 					if (stripos($query, ", maa = ") === FALSE) {
-						$query .= ", maa = 'FI' ";
+						$query .= ", maa = '{$yhtiorow["maa"]}' ";
 					}
 					
 					if (stripos($query, ", kansalaisuus = ") === FALSE) {
-						$query .= ", kansalaisuus = 'FI' ";
+						$query .= ", kansalaisuus = '{$yhtiorow["kieli"]}' ";
 					}
 					
-					if (stripos($query, ", laskutusmaa = ") === FALSE) {
-						$query .= ", laskutusmaa = 'FI' ";
+					if (stripos($query, ", laskutus_maa = ") === FALSE) {
+						$query .= ", laskutus_maa = '{$yhtiorow["maa"]}' ";
 					}
 					
 					if (stripos($query, ", toim_maa = ") === FALSE) {
-						$query .= ", toim_maa = 'FI' ";
+						$query .= ", toim_maa = '{$yhtiorow["maa"]}' ";
 					}
 					
 					if (stripos($query, ", kolm_maa = ") === FALSE) {
-						$query .= ", kolm_maa = 'FI' ";
+						$query .= ", kolm_maa = '{$yhtiorow["maa"]}' ";
 					}
 					
 					if (stripos($query, ", kieli = ") === FALSE) {
-						$query .= ", kieli = 'FI' ";
+						$query .= ", kieli = '{$yhtiorow["kieli"]}' ";
 					}
 					
 					if (stripos($query, ", chn = ") === FALSE) {
@@ -1775,7 +1771,6 @@ if ($kasitellaan_tiedosto) {
 					}
 					
 					if (stripos($query, ", alv = ") === FALSE) {
-						
 						//yhtiön oletusalvi!
 						$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
 						$wtres  = pupe_query($wquery);
@@ -1784,11 +1779,32 @@ if ($kasitellaan_tiedosto) {
 						$query .= ", alv = '{$wtrow["selite"]}' ";
 					}
 					
-					
+					if (stripos($query, ", asiakasnro = ") === FALSE and $yhtiorow["automaattinen_asiakasnumerointi"] != "") {
+						
+						if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+							$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+						}
+						else {
+							$apu_asiakasnumero = 0;
+						}
+												
+						$select_query = "	SELECT MAX(asiakasnro+0) asiakasnro
+											FROM asiakas USE INDEX (asno_index)
+											WHERE yhtio = '{$kukarow["yhtio"]}' 
+											AND asiakasnro+0 >= $apu_asiakasnumero";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						if ($select_row['asiakasnro'] != '') {
+							$vapaa_asiakasnro = $select_row['asiakasnro'] + 1;
+						}
+						
+						$query .= ", asiakasnro = '$vapaa_asiakasnro' ";
+					}
+				//	rest_ok_header($query);
 					
 				}
 				
-
 				if ($rivi[$postoiminto] == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
@@ -1957,7 +1973,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						$tpupque = "";
-
+						
 						// Itse lue_datan päivitysquery
 						$iresult = pupe_query($query);
 

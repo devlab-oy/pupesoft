@@ -17188,7 +17188,7 @@ if (!function_exists("erolista")) {
 		echo "lasku: $lasku<br>";
 		echo "komento: $komento<br>";
 
-		if (trim($komento) == '') {
+		if (!is_array($komento) and trim($komento) == '') {
 
 			$toiminto = 'erolista';
 

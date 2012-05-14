@@ -17181,14 +17181,12 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 }
 
 if (!function_exists("erolista")) {
-	function erolista($lasku, $valitse, $komento = '') {
+	function erolista($lasku, $valitse, $komento = '', $otunnus = '') {
 
 		global $kukarow;
 
 		if (trim($komento) == '') {
 
-			$otunnus = $lasku;
-			$tila = $valitse;
 			$toiminto = 'erolista';
 
 			$tulostimet[0] = t("Erolista");
@@ -17197,9 +17195,6 @@ if (!function_exists("erolista")) {
 			require("inc/footer.inc");
 			exit;
 		}
-
-		$valitse = $tila;
-		$lasku = $otunnus;
 
 		echo "lasku: $lasku<br>";
 		exit;

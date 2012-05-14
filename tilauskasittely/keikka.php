@@ -490,7 +490,7 @@ if ($toiminto == 'erolista') {
 
 		$komento = isset($komento) ? $komento : '';
 
-		erolista($llrow['volaskutunn'], 'ostolasku', $komento);
+		erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
 	}
 }
 

@@ -17234,7 +17234,7 @@ if (!function_exists("erolista")) {
 
 		$lajilisa = $valitse == 'asn' ? 'asn' : 'tec';
 
-		$rivihintalisa = $valitse != 'asn' ? ", round(kappalemaara * hinta * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100),'{$yhtiorow['hintapyoristys']}') rivihinta" : "";
+		$rivihintalisa = $valitse != 'asn' ? ", round(kappalemaara * hinta * (1 - lasku_ale1 / 100) * (1 - lasku_ale2 / 100) * (1 - lasku_ale3 / 100),'{$yhtiorow['hintapyoristys']}') rivihinta" : "";
 
 		$query = "	SELECT *
 					{$rivihintalisa}

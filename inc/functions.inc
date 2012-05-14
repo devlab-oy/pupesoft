@@ -17222,9 +17222,11 @@ if (!function_exists("erolista")) {
 		$pdf->set_default('margin-left', 	0);
 		$pdf->set_default('margin-right', 	0);
 
-		$thispage = $pdf->new_page("a4");
+		// a4 poikittainen
+		$thispage = $pdf->new_page("842x595");
 
-		$kala = 815;
+		// $kala = 815;
+		$kala = 570;
 
 		$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
 
@@ -17277,7 +17279,8 @@ if (!function_exists("erolista")) {
 			if ($kala <= 150) {
 				$thispage = $pdf->new_page("a4");
 
-				$kala = 815;
+				// $kala = 815;
+				$kala = 570;
 
 				$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
 
@@ -17302,11 +17305,12 @@ if (!function_exists("erolista")) {
 			$query = "	SELECT tuoteno,
 						nimitys,
 						hinta,
+						rivihinta,
 						SUM(varattu + kpl) AS kpl
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus IN ({$row['tilausrivi']})
-						GROUP BY 1,2,3";
+						GROUP BY 1,2,3,4";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 

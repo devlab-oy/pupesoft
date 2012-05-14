@@ -1123,6 +1123,8 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
+			$alatilalisa = $valitse == 'asn' ? " AND lasku.alatila != 'X' " : "";
+
 			$query = "	SELECT DISTINCT tilausrivi.tunnus, 
 						tilausrivi.tuoteno, 
 						tilausrivi.otunnus,
@@ -1141,7 +1143,7 @@
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tila IN ('O', 'K')
-						AND lasku.alatila != 'X'
+						{$alatilalisa}
 						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
 						{$tilausnrolisa}
 						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";

@@ -17263,7 +17263,8 @@ if (!function_exists("erolista")) {
 		$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
 
 		$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
-		$pdf->draw_text(200, $kala, t("Kpl", $kieli), $thispage, $boldi);
+		$pdf->draw_text(150, $kala, t("Kpl", $kieli), $thispage, $boldi);
+		$pdf->draw_text(200, $kala, t("Kplero", $kieli), $thispage, $boldi);
 		$pdf->draw_text(260, $kala, t("Hinta", $kieli), $thispage, $boldi);
 		$pdf->draw_text(340, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
 		$pdf->draw_text(425, $kala, t("Hintaero", $kieli), $thispage, $boldi);
@@ -17304,7 +17305,7 @@ if (!function_exists("erolista")) {
 						hinta
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$row['tilausrivi']}'";
+						AND tunnus IN ({$row['tilausrivi']})";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);
 

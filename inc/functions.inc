@@ -17286,8 +17286,8 @@ if (!function_exists("erolista")) {
 			$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 			$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 			$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
-			$pdf->draw_text(710, $kala, t("Ale2", $kieli), $thispage, $boldi);
-			$pdf->draw_text(780, $kala, t("Ale3", $kieli), $thispage, $boldi);
+			$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
+			$pdf->draw_text(740, $kala, t("Ale3", $kieli), $thispage, $boldi);
 		}
 
 		$kala -= 35;
@@ -17332,8 +17332,8 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(500, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 					$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 					$pdf->draw_text(640, $kala, t("Ale1", $kieli), $thispage, $boldi);
-					$pdf->draw_text(710, $kala, t("Ale2", $kieli), $thispage, $boldi);
-					$pdf->draw_text(780, $kala, t("Ale3", $kieli), $thispage, $boldi);
+					$pdf->draw_text(690, $kala, t("Ale2", $kieli), $thispage, $boldi);
+					$pdf->draw_text(740, $kala, t("Ale3", $kieli), $thispage, $boldi);
 				}
 
 				$kala -= 35;
@@ -17371,8 +17371,8 @@ if (!function_exists("erolista")) {
 				$pdf->draw_text(500, $kala, $hintaero, $thispage, $norm);
 				$pdf->draw_text(570, $kala, $rivihintaero, $thispage, $norm);
 				$pdf->draw_text(640, $kala, $rivirow['ale1'], $thispage, $norm);
-				$pdf->draw_text(710, $kala, $rivirow['ale2'], $thispage, $norm);
-				$pdf->draw_text(780, $kala, $rivirow['ale3'], $thispage, $norm);
+				$pdf->draw_text(690, $kala, $rivirow['ale2'], $thispage, $norm);
+				$pdf->draw_text(740, $kala, $rivirow['ale3'], $thispage, $norm);
 			}
 
 			$kala -= $rivinkorkeus;

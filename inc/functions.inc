@@ -17252,7 +17252,7 @@ if (!function_exists("erolista")) {
 
 		$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
 
-		$kala -= ($rivinkorkeus * 2);
+		$kala -= $rivinkorkeus;
 
 		$pdf->draw_text(50, $kala, t("Laskut", $kieli).": {$lasku}", $thispage, $boldi);
 
@@ -17288,7 +17288,8 @@ if (!function_exists("erolista")) {
 				$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
 
 				$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala, t("Kpl", $kieli), $thispage, $boldi);
+				$pdf->draw_text(150, $kala, t("Kpl", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala, t("Kplero", $kieli), $thispage, $boldi);
 				$pdf->draw_text(260, $kala, t("Hinta", $kieli), $thispage, $boldi);
 				$pdf->draw_text(340, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
 				$pdf->draw_text(425, $kala, t("Hintaero", $kieli), $thispage, $boldi);
@@ -17309,11 +17310,13 @@ if (!function_exists("erolista")) {
 
 			$hintaero = round($row['hinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
 			$rivihintaero = round(($row['hinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']);
+			$kplero = round($row['kappalemaara'] - $rivirow['kpl'], 0);
 
 			if ($hintaero == 0 and $rivihintaero == 0) continue;
 
 			$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
-			$pdf->draw_text(200, $kala, $rivirow['kpl'], $thispage, $norm);
+			$pdf->draw_text(150, $kala, $rivirow['kpl'], $thispage, $norm);
+			$pdf->draw_text(200, $kala, $kplero, $thispage, $norm);
 			$pdf->draw_text(260, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 			$pdf->draw_text(340, $kala, round($rivirow['hinta'] * $rivirow['kpl'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 			$pdf->draw_text(425, $kala, $hintaero, $thispage, $norm);

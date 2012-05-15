@@ -489,6 +489,8 @@ if ($toiminto == 'erolista') {
 
 	if ($llrow['volaskutunn'] != '') {
 
+		echo "ytunnus: $ytunnus toimittajaid: $toimittajaid<br>";
+
 		$komento = isset($komento) ? $komento : '';
 
 		$return_bool = erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);

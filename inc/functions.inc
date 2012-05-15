@@ -17330,7 +17330,7 @@ if (!function_exists("erolista")) {
 		while ($row = mysql_fetch_assoc($result)) {
 
 			if ($kala <= 150) {
-				$thispage = $pdf->new_page("a4");
+				$thispage = $pdf->new_page("842x595");
 
 				// $kala = 815;
 				$kala = 570;

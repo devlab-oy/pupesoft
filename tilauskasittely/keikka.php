@@ -493,6 +493,8 @@ if ($toiminto == 'erolista') {
 
 		erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
 	}
+
+	$toiminto = "";
 }
 
 // syötetään keikan lisätietoja

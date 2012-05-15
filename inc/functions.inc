@@ -17474,7 +17474,7 @@ if (!function_exists("erolista")) {
 				$liite = $pdffilenimi;
 				$content_body = "";
 
-				echo t("Erolista-raportti tulostuu")."...<br>";
+				echo t("Erolista-raportti tulostuu"),"...<br /><br />";
 
 				$kutsu = t("Erolista-raportti", $kieli).' '.$toimittajan_nimi;
 
@@ -17485,7 +17485,7 @@ if (!function_exists("erolista")) {
 				include("inc/sahkoposti.inc");
 			}
 			elseif ($komento != '' and $komento != 'edi') {
-				echo t("Erolista-raportti tulostuu")."...<br>";
+				echo t("Erolista-raportti tulostuu"),"...<br /><br />";
 				$line = exec("{$komento} {$pdffilenimi}", $output, $returnvalue);
 			}
 		}

@@ -487,7 +487,7 @@
 
 				if ($virheet == 0) {
 
-					$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
+					$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status != 'E' {$wherelisa}";
 					$kollires = pupe_query($query);
 
 					while ($kollirow = mysql_fetch_assoc($kollires)) {

@@ -1153,19 +1153,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
-		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
-		// jos ollaan viety koko lava purkamatta varastoon niin silloin s‰ilytet‰‰n tilausrivin linkki suuntalavalle
-		$suuntalavalisa = "";
-
-		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
-			$suuntalavalisa = ", tilausrivi.suuntalava = 0 ";
-		}
-
 		// p‰ivitet‰‰n suuntalava puretuksi
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
 		 			SET suuntalavat.tila = 'P'
-					{$suuntalavalisa}
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 					AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
 					AND tilausrivi.netto 		= ''
@@ -1189,6 +1180,23 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 					AND tilausrivi.tyyppi	 	= 'O'
 					AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
 		$netto_suuntalava_result = pupe_query($query);
+
+		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
+		// jos ollaan viety koko lava purkamatta varastoon niin silloin s‰ilytet‰‰n tilausrivin linkki suuntalavalle
+		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
+
+			// p‰ivitet‰‰n suuntalava puretuksi
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+			 			SET tilausrivi.suuntalava = 0
+						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+						AND tilausrivi.netto 		= ''
+						AND tilausrivi.kpl 		   != 0
+						AND tilausrivi.tyyppi 		= 'O'
+						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
+			$netto_suuntalava_result = pupe_query($query);
+		}
 	}
 
 	//	Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..

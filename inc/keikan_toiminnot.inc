@@ -220,8 +220,10 @@
 			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 		}
 
+		// poistetaan myös netto = X, jos räplätään ruksia
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
-					uusiotunnus = '{$otunnus}'
+					uusiotunnus = '{$otunnus}',
+					netto = ''
 					$updatelisa
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus IN ('{$valittuotunnus}','{$otunnus}')

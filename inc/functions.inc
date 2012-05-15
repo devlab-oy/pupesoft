@@ -9419,7 +9419,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 }
 
 if (!function_exists("jt_toimita")) {
-	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '') {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
 
 		if (!is_array($jtrivit)) $jtrivit = array();
@@ -9432,7 +9432,6 @@ if (!function_exists("jt_toimita")) {
 			$toimittajaid		  = "";
 			$asiakasmaa 		  = "";
 			$jarj	 			  = "luontiaika";
-			$tuotenumero		  = "";
 			$tilaus				  = "";
 			$toimi				  = "";
 			$suoratoimit		  = "";
@@ -9446,7 +9445,6 @@ if (!function_exists("jt_toimita")) {
 			$asiakasid			  = "";
 			$asiakasmaa 		  = "";
 			$jarj	 			  = "luontiaika";
-			$tuotenumero		  = "";
 			$tilaus				  = "";
 			$toimi				  = "";
 			$suoratoimit		  = "";

@@ -471,6 +471,7 @@ if ($kasitellaan_tiedosto) {
 		$indeksi_where	= array();
 		$trows			= array();
 		$tlength		= array();
+		$tdecimal		= array();
 		$apu_sarakkeet	= array();
 		$rivimaara 		= count($rivit);
 		$dynaamiset_rivit = array();
@@ -498,6 +499,8 @@ if ($kasitellaan_tiedosto) {
 			$tlengthpit = preg_replace("/[^0-9,]/", "", $row[1]);
 
 			if (strpos($tlengthpit, ",") !== FALSE) {
+				// Otetaan desimaalien määrä talteen
+				$tdecimal[$table_mysql.".".strtoupper($row[0])] = (int) substr($tlengthpit, strpos($tlengthpit, ",")+1);
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 			}
 
@@ -1202,8 +1205,20 @@ if ($kasitellaan_tiedosto) {
 						$rivi[$r] = trim(addslashes($rivi[$r]));
 
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
+
 							//korvataan decimal kenttien pilkut pisteillä...
 							$rivi[$r] = str_replace(",", ".", $rivi[$r]);
+
+							$desimaali_talteen = (float) $rivi[$r];
+
+							// Jos MySQL kentässä on desimaaleja, pyöristetään luku sallittuun tarkkuuteen
+							if ($tdecimal[$table_mysql.".".$otsikko] > 0) {
+								$rivi[$r] = round($rivi[$r], $tdecimal[$table_mysql.".".$otsikko]);
+							}
+
+							if ($desimaali_talteen != $rivi[$r]) {
+								lue_data_echo(t("Huomio rivillä").": $rivilaskuri <font class='message'>".t("Luku pyöristettiin sallittuun tarkkuuteen")." $desimaali_talteen &raquo; $rivi[$r]</font><br>");
+							}
 						}
 
 						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($rivi[$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {

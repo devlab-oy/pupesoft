@@ -326,6 +326,7 @@ class Unifaun {
 					// Jos sopparinumero puuttuu
 					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 						if ($this->toitarow['virallinen_selite'] == "KKSTD" or
+							$this->toitarow['virallinen_selite'] == "TPSTD" or
 							$this->toitarow['virallinen_selite'] == "IT09" or
 							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
 						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234;
@@ -342,6 +343,7 @@ class Unifaun {
 					#IT09 		--> OPAY
 					#IT14 		--> OPAY
 					#KKSTD 		--> OPAY tai RPAY, 6 numeroa
+					#TPSTD 		--> RPAY, 6 numeroa
 					#KLGRP 		--> OPAY tai RPAY, min 4 max 8
 					#MH10 		--> RPAY, numeric minlength(8)
 					#MH20 		--> N/A
@@ -354,10 +356,10 @@ class Unifaun {
 						'FREEG',
 						'H48',
 						'KKSTD',
+						'TPSTD',
 						'KLGRP',
 						'MH10',
 						'MH30',
-						#'TPSTD',
 					);
 
 					$allowed_opay = array(

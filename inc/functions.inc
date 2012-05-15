@@ -17192,8 +17192,7 @@ if (!function_exists("erolista")) {
 			$tulostimet[0] = t("Erolista");
 
 			require("inc/valitse_tulostin.inc");
-
-			return false;
+			exit;
 		}
 
 		if (@include_once("pdflib/phppdflib.class.php"));

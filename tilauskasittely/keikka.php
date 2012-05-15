@@ -493,7 +493,7 @@ if ($toiminto == 'erolista') {
 
 		$return_bool = erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
 
-		$toiminto = $return_bool ? "" : $toiminto;
+		$toiminto = $return_bool === TRUE ? "" : $toiminto;
 	}
 }
 

@@ -1399,7 +1399,7 @@ if (!function_exists('rivi_lahete')) {
 				$returntest = rivi_hae_hinnat_lahete($returntest);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
-				$returntest = rivi_custom_lahete($returntest);
+				// $returntest = rivi_custom_lahete($returntest);
 			}
 			else {
 				$returntest = rivi_ei_ale_ei_hinta_lahete($returntest);
@@ -1827,10 +1827,30 @@ if (!function_exists('rivi_custom_lahete')) {
 		$pdf->draw_text(150, $kala, $ff_string, $thispage, $ff_font);
 
 		$kala = $kala - $rivinkorkeus;
-
+		$koms = "";
+		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 150, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+			$koms = $row["kommentti"];
+			$koms = explode("\n",$koms);
+			
+			for ($i=0; $i <=count($koms) ; $i++) { 
+				
+					$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 150, 60, 550, $koms[$i],	$page[$sivu], $norm);
+					$kala = $pohja - $rivinkorkeus;
+				
+				if ($kala <= 90) {
+					$sivu++;
+					// // Luodaan palautettavat
+					$return = compact(array_keys($params));
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+						
+					// Luodaan muuttujat
+					extract($params);
+					$page[$sivu] = $thispage;
+				} 
+			}
+			
 		}
 
 		// Luodaan palautettavat

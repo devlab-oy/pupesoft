@@ -491,10 +491,10 @@ if ($toiminto == 'erolista') {
 
 		$komento = isset($komento) ? $komento : '';
 
-		erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
-	}
+		$return_bool = erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
 
-	$toiminto = "";
+		$toiminto = $return_bool ? "" : $toiminto;
+	}
 }
 
 // syötetään keikan lisätietoja

@@ -17192,7 +17192,8 @@ if (!function_exists("erolista")) {
 			$tulostimet[0] = t("Erolista");
 
 			require("inc/valitse_tulostin.inc");
-			exit;
+
+			return false;
 		}
 
 		if (@include_once("pdflib/phppdflib.class.php"));
@@ -17492,5 +17493,7 @@ if (!function_exists("erolista")) {
 
 		// poistetaan tmp file samantien kuleksimasta...
 		system("rm -f {$pdffilenimi}");
+
+		return true;
 	}
 }

@@ -11665,8 +11665,7 @@ if (!function_exists("pupe_DataTables")) {
 			function fnCreateSelect( aData ) 
 			{
 			    var r='<select><option value=\"\"></option>', i, iLen=aData.length;
-			    // for ( i=0 ; i<iLen ; i++ )
-			    for ( i=11 ; i<12 ; i++ )
+			    for ( i=0 ; i<iLen ; i++ )
 			    {
 			        r += '<option value=\"'+aData[i]+'\">'+aData[i]+'</option>';
 			    }
@@ -11973,7 +11972,7 @@ if (!function_exists("pupe_DataTables")) {
 				    //     } );
 				    // } );
 
-			        $('#suuntalava_26525313').after(function() {
+			        $('#suuntalava_26525313').after(function(i) {
 			        	this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i) );
 				        $('select', this).change( function () {
 				            datatablesit[0].fnFilter( $(this).val(), i );

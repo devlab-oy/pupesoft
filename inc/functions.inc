@@ -115,6 +115,11 @@ if (!function_exists("pupesoft_rest")) {
 		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
+		if (isset($parameters["auth_user"]) and isset($parameters["auth_pass"])) {
+			curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($handle, CURLOPT_USERPWD, "{$parameters["auth_user"]}:{$parameters["auth_pass"]}");
+		}
+
 		if (isset($parameters["cookie"])) {
 			curl_setopt($handle, CURLOPT_COOKIE, $parameters["cookie"]);
 		}

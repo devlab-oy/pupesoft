@@ -1455,8 +1455,8 @@ if ($kasitellaan_tiedosto) {
 								$chasiakas = $rivi[$r];
 							}
 
-							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pit‰‰ olla setattu)
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '2' and $rivi[$r] != "") {
+							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta != '1' and $rivi[$r] != "") {
 								$etsitunnus = " SELECT tunnus
 												FROM asiakas
 												USE INDEX (toim_ovttunnus_index)
@@ -1469,7 +1469,12 @@ if ($kasitellaan_tiedosto) {
 
 								if (mysql_num_rows($etsiresult) == 1) {
 									$etsirow = mysql_fetch_assoc($etsiresult);
+
+									// Vaihdetaan asiakas sarakkeeseen tunnus sek‰ ytunnus tulee nollata (koska ei saa olla molempia)
 									$chasiakas = $etsirow['tunnus'];
+									$chytunnus = "";
+									$rivi[$r] = $etsirow['tunnus'];
+									$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])] = "";
 								}
 								else {
 									$chasiakas = -1;

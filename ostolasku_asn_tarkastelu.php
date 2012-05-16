@@ -1083,10 +1083,10 @@
 			$toimittaja = (int) $toimittaja;
 			$tilausnro = (int) $tilausnro;
 
-			$query = "	SELECT tunnus 
-						FROM toimi 
-						WHERE yhtio = '{$kukarow['yhtio']}' 
-						AND toimittajanro = '{$toimittaja}' 
+			$query = "	SELECT tunnus
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toimittajanro = '{$toimittaja}'
 						AND tyyppi != 'P'";
 			$toimires = pupe_query($query);
 			$toimirow = mysql_fetch_assoc($toimires);

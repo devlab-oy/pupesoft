@@ -782,8 +782,6 @@
 		}
 	}
 
-	enable_jquery();
-
 	echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
 

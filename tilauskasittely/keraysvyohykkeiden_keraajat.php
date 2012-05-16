@@ -16,8 +16,6 @@
 		exit;
 	}
 
-	enable_jquery();
-
 	echo "	<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
 	echo "	<script type='text/javascript' language='JavaScript'>
 				<!--

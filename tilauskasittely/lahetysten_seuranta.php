@@ -2,8 +2,6 @@
 
 	require("../inc/parametrit.inc");
 
-	enable_jquery();
-
 	echo "	<script type='text/javascript' language='JavaScript'>
 
 				$(document).ready(function() {

@@ -11974,10 +11974,14 @@ if (!function_exists("pupe_DataTables")) {
 
 			        // $('input[name=\"search_varastopaikka\"]').after(function(i) {
 				    $('thead td:nth-child(4)').append(function(i) {
-			        	this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i, 3) );
-				        $('select', this).change( function () {
-				            datatablesit[0].fnFilter( $(this).val(), i );
-				        } );
+
+				    	this.innerHTML('foo');
+
+			        	// this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i, 3) );
+
+				        // $('select', this).change( function () {
+				        //     datatablesit[0].fnFilter( $(this).val(), i );
+				        // } );
 				    } );
 
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI

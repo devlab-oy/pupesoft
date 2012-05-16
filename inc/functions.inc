@@ -11972,7 +11972,8 @@ if (!function_exists("pupe_DataTables")) {
 				    //     } );
 				    // } );
 
-			        $('input[name=\"search_varastopaikka\"]').after(function(i) {
+			        // $('input[name=\"search_varastopaikka\"]').after(function(i) {
+				    $('thead td:last').append(function(i) {
 			        	this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i) );
 				        $('select', this).change( function () {
 				            datatablesit[0].fnFilter( $(this).val(), i );

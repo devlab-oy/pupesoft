@@ -12480,7 +12480,6 @@ if (!function_exists("pupe_DataTables")) {
 					var prioriteetti = $('select.prioriteetti_sort option:selected');
 					var haku_arvo = prioriteetti.val();
 
-					console.log(prioriteetti.val());
 					datatablesit[0].fnFilter(haku_arvo, 1);
 				} );
 
@@ -12495,6 +12494,14 @@ if (!function_exists("pupe_DataTables")) {
 
 					datatablesit[0].fnFilter(haku_arvo, 8, true, false);
 				} );
+
+				// Suuntalavan rajausta dropdownilla
+				$('select.suuntalava_sort').change(function() {
+					var haku_arvo = $(this, 'option:selected').val();
+
+					datatablesit[0].fnFilter(haku_arvo, 13, true, false);
+				} );
+				
 			} );
 		</script>";
 	}

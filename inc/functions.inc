@@ -11977,7 +11977,7 @@ if (!function_exists("pupe_DataTables")) {
 			        // $('input[name=\"search_varastopaikka\"]').after(function(i) {
 				    $('thead td:nth-child(12)').append(function(i) {
 
-				    	console.log(datatablesit[0].fnGetColumnData(i));
+				    	console.log(datatablesit[0].fnGetColumnData(i, 12));
 
 			        	// this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i, 3) );
 

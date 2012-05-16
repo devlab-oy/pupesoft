@@ -11649,6 +11649,8 @@ if (!function_exists("pupe_DataTables")) {
 			        var aData = this.fnGetData(iRow);
 			        var sValue = aData[iColumn];
 
+			        console.log(iColumn, aData[iColumn]);
+			         
 			        // ignore empty values?
 			        if (bIgnoreEmpty == true && sValue.length == 0) continue;
 			 
@@ -11973,7 +11975,7 @@ if (!function_exists("pupe_DataTables")) {
 				    // } );
 
 			        // $('input[name=\"search_varastopaikka\"]').after(function(i) {
-				    $('thead td:nth-child(4)').append(function(i) {
+				    $('thead td:nth-child(12)').append(function(i) {
 
 				    	console.log(datatablesit[0].fnGetColumnData(i));
 

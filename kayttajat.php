@@ -480,6 +480,7 @@
 
 				$query = "	UPDATE kuka
 							SET salasana = '{$password}',
+							api_key		 = md5(concat(yhtio, kuka, '{$password}')),
 							muuttaja	 = '{$kukarow['kuka']}',
 							muutospvm	 = now()
 							WHERE kuka = '{$kuka}'";

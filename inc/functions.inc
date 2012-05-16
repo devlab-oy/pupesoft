@@ -11973,13 +11973,11 @@ if (!function_exists("pupe_DataTables")) {
 				    //     } );
 				    // } );
 
-				    $('thead td').each( function ( i ) {
-				        this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i) );
+			        $('#suuntalava_26525313').after(function() {
+			        	this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i) );
 				        $('select', this).change( function () {
 				            datatablesit[0].fnFilter( $(this).val(), i );
 				        } );
-
-						return;
 				    } );
 
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI

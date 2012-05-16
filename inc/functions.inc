@@ -11951,7 +11951,7 @@ if (!function_exists("pupe_DataTables")) {
 					    }
 					     
 					    return asResultData;
-					}}(jQuery));
+					}(jQuery));
 
 					function fnCreateSelect( aData ) 
 					{

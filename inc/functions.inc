@@ -11665,7 +11665,8 @@ if (!function_exists("pupe_DataTables")) {
 			function fnCreateSelect( aData ) 
 			{
 			    var r='<select><option value=\"\"></option>', i, iLen=aData.length;
-			    for ( i=0 ; i<iLen ; i++ )
+			    // for ( i=0 ; i<iLen ; i++ )
+			    for ( i=11 ; i<12 ; i++ )
 			    {
 			        r += '<option value=\"'+aData[i]+'\">'+aData[i]+'</option>';
 			    }

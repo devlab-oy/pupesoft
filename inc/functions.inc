@@ -11972,7 +11972,7 @@ if (!function_exists("pupe_DataTables")) {
 				    //     } );
 				    // } );
 
-			        $('#suuntalava_26525313').after(function(i) {
+			        $('input[name=\"search_varastopaikka\"]').after(function(i) {
 			        	this.innerHTML = fnCreateSelect( datatablesit[0].fnGetColumnData(i) );
 				        $('select', this).change( function () {
 				            datatablesit[0].fnFilter( $(this).val(), i );

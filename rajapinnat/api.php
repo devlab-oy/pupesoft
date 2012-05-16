@@ -1,5 +1,6 @@
 <?php
-
+	header('Content-Type: application/json');
+	
 	$data = $_GET;
 	error_reporting(E_ALL);
 	ini_set("display_errors", 1);
@@ -12,7 +13,7 @@
 		// Mikäli kutsutaan esimerkiksi "asiakastarkista-funktiota" ja se palauttaa tekstimuodossa virheen, niin $virhe pitää myös utf8-encodata, tai tulee "500"-virhettä.
 		$viesti = utf8_encode($viesti);
 		header("HTTP/1.0 400 Bad Request");
-		echo json_encode($viesti);
+		echo json_encode(array("status" => $viesti));
 		die();
 	}
 
@@ -21,7 +22,7 @@
 		// rest_ok_header("Päivitit asiakkaan: $muuttuja");
 		$viesti = utf8_encode($viesti);
 		header("HTTP/1.0 200 OK");
-		echo json_encode($viesti);
+		echo json_encode(array("statuscode" => "OK", "status" => $viesti));
 		die();
 	}
 
@@ -155,7 +156,7 @@
 		$versio	= (float) pupesoft_cleannumber($params["versio"]);
 
 		// Tehdään tarkistukset tähän väliin.
-	//	if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header("Vain https on sallittu.");
+		#if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header("Vain https on sallittu.");
 		if ($versio != 0.1) rest_virhe_header("Versionumero ei ole sallittu.");
 
 		// Vasta virhetarkistuksien jälkeen.
@@ -198,7 +199,7 @@
 		$parametrit = array(
 			'tuoteno' 		=> $data["tuoteno"],
 			'kpl'			=> $data["kpl"],
-			'tunnus'		=> $data["tunnus"],
+			'tunnus'		=> $data["asiakastunnus"],
 			'kommentti'		=> $data["tilauskommentti"],
 			'tilausnumero'	=> $data["tilausnumero"],
 		);
@@ -218,13 +219,17 @@
 			}
 		}
 
+		if(count($api_kentat) == 0) {
+			rest_virhe_header("Data puuttuu");
+		}
+
 		// Vikaksi sarakkeeksi toiminto
 		$api_kentat[0][] = "TOIMINTO";
 		$api_kentat[1][] = $toiminto;
 
 		require("lue_data.php");
 
-		$api_output = strip_tags($api_output);
+		$api_output = utf8_encode(strip_tags($api_output));
 
 		if ($api_status === FALSE) {
 			rest_virhe_header($api_output);

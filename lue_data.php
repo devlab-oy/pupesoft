@@ -4,6 +4,7 @@ $lue_data_output_file = "";
 $lue_data_output_text = "";
 $lue_data_err_file = "";
 $lue_data_virheelliset_rivit = array();
+$api_output = "";
 $api_status = TRUE;
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.

@@ -11662,6 +11662,16 @@ if (!function_exists("pupe_DataTables")) {
 			    return asResultData;
 			}}(jQuery));
 
+			function fnCreateSelect( aData ) 
+			{
+			    var r='<select><option value=''></option>', i, iLen=aData.length;
+			    for ( i=0 ; i<iLen ; i++ )
+			    {
+			        r += '<option value=\"'+aData[i]+'\">'+aData[i]+'</option>';
+			    }
+			    return r+'</select>';
+			}
+
 			$(document).ready(function() {
 
 				var datatablesit = [];
@@ -11953,16 +11963,6 @@ if (!function_exists("pupe_DataTables")) {
 					        $('#submit_tallenna').trigger('click');
 					    }
 					});
-
-					function fnCreateSelect( aData ) 
-					{
-					    var r='<select><option value=''></option>', i, iLen=aData.length;
-					    for ( i=0 ; i<iLen ; i++ )
-					    {
-					        r += '<option value=\"'+aData[i]+'\">'+aData[i]+'</option>';
-					    }
-					    return r+'</select>';
-					}
 
 				    /* Add a select menu for each TH element in the table footer */
 				    $('thead td').each( function ( i ) {

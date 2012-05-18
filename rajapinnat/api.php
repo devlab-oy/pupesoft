@@ -156,7 +156,7 @@
 		$versio	= (float) pupesoft_cleannumber($params["versio"]);
 
 		// Tehd‰‰n tarkistukset t‰h‰n v‰liin.
-		#if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header("Vain https on sallittu.");
+		if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header("Vain https on sallittu.");
 		if ($versio != 0.1) rest_virhe_header("Versionumero ei ole sallittu.");
 
 		// Vasta virhetarkistuksien j‰lkeen.

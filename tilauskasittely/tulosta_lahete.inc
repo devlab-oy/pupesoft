@@ -1631,8 +1631,35 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -1766,8 +1793,35 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
 		}
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -1829,8 +1883,35 @@ if (!function_exists('rivi_custom_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 150, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(150, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 90) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		// Luodaan palautettavat
@@ -1888,8 +1969,35 @@ if (!function_exists('rivi_brutto_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -1918,7 +2026,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
 		extract($params);
 
 		$lisarivi = 0;
-		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
+		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
 		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
@@ -1955,8 +2063,34 @@ if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
 			$lisarivi++;
 		}
 
@@ -2045,8 +2179,35 @@ if (!function_exists('rivi_eialeja_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2136,8 +2297,35 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2253,8 +2441,35 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		// Luodaan palautettavat
@@ -2353,8 +2568,35 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		}
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+10, 45, 60, 400, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($kala > $alakala) $kala = $alakala;
@@ -2405,8 +2647,35 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
 		$kala = $pohja - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		// tutkitaan onko tuotteelle kommentti
@@ -2502,11 +2771,39 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 		}
 
 		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 400, $row["nimitys"],	$thispage, $norm);
+
 		$kala = $pohja - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 400, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
 		}
 
 		if ($kala > $alakala) $kala = $alakala;

@@ -369,7 +369,10 @@ class Unifaun {
 				}
 
 				if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
-					$uni_rcv_val = $uni_receiver->addChild('val', $this->asiakasrow['tunnus']); # HIT InNight mandatory.
+					// HITin id4user -kentän arvo määritetään asiakas/toimitusosoitekohtaiseksi
+					$id4user = md5($this->postirow["liitostunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+
+					$uni_rcv_val = $uni_receiver->addChild('val', $id4user); # HIT InNight mandatory.
 					$uni_rcv_val->addAttribute('n', "id4user");
 				}
 

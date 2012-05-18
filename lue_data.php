@@ -4,6 +4,8 @@ $lue_data_output_file = "";
 $lue_data_output_text = "";
 $lue_data_err_file = "";
 $lue_data_virheelliset_rivit = array();
+$api_output = "";
+$api_status = TRUE;
 
 // Enabloidaan, ett‰ Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 //apache_setenv('no-gzip', 1);
@@ -87,16 +89,24 @@ if (php_sapi_name() == 'cli') {
 	}
 }
 else {
-	require ("inc/parametrit.inc");
+	// Laitetaan max time 5H
+	ini_set("max_execution_time", 18000);
+	if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") !== FALSE) {
+		require ("inc/parametrit.inc");
+	}
 	$cli = false;
 }
+
 
 // Funktio, jolla tehd‰‰n luedatan output
 function lue_data_echo($string, $now = false) {
 
-	global $cli, $lue_data_output_file, $lue_data_output_text;
+	global $cli, $lue_data_output_file, $lue_data_output_text, $api_kentat, $api_output;
 
-	if ($cli === FALSE) {
+	if (isset($api_kentat)) {
+		$api_output .= $string."\n";
+	}
+	elseif ($cli === FALSE) {
 		if ($now === TRUE) {
 			echo $string;
 		}
@@ -138,13 +148,13 @@ if (!$cli and $oikeurow['paivitys'] != '1') {
 }
 
 if (!isset($table)) $table = '';
+
 $kasitellaan_tiedosto = FALSE;
+require ("inc/pakolliset_sarakkeet.inc");
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
 	$kasitellaan_tiedosto = TRUE;
-
-	require ("inc/pakolliset_sarakkeet.inc");
 
 	if ($_FILES['userfile']['size'] == 0) {
 		lue_data_echo("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
@@ -163,13 +173,19 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		$kasitellaan_tiedosto = FALSE;
 	}
 }
+elseif (isset($api_kentat) and count($api_kentat) > 0) {
+	$kasitellaan_tiedosto = TRUE;
+}
 
 if ($kasitellaan_tiedosto) {
 
 	/** K‰sitelt‰v‰n filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
-	if ($ext == "DATAIMPORT") {
+	if (isset($api_kentat) and count($api_kentat) > 0) {
+		$excelrivit = $api_kentat;
+	}
+	elseif ($ext == "DATAIMPORT") {
 		/** Ladataan CSV file **/
 		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
@@ -628,9 +644,17 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
-			lue_data_echo($lue_data_output_text, true);
-			require ("inc/footer.inc");
-			exit;
+
+			if (!isset($api_kentat)) {
+				require ("inc/footer.inc");
+				exit;
+			}
+			else {
+				// Jos tullaan api.php:st‰ ja p‰‰dyt‰‰n virheeseen, t‰ll‰ estet‰‰n ettei menn‰ for-looppiin riville 650
+				// EI voida sanoa EXIT tai DIE koska api.php pit‰‰ menn‰ loppuun.
+				$rivit = array();
+				$api_status = FALSE;
+			}
 		}
 
 		lue_data_echo("<br><font class='message'>".t("Tiedosto ok, aloitetaan p‰ivitys")." $table_mysql-".t("tauluun")."...<br></font>");
@@ -643,7 +667,8 @@ if ($kasitellaan_tiedosto) {
 
 		$max_rivit = count($rivit);
 
-		if (!$cli or $lue_data_output_file != "") {
+		// REST-api ei salli etenemispalkkia
+		if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
 			require('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$bar->initialize($max_rivit);
@@ -652,13 +677,15 @@ if ($kasitellaan_tiedosto) {
 		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivill‰ piirret‰‰n progressbar, ellei ole output loggaus p‰‰ll‰
-			if ($cli and $lue_data_output_file == "") {
-				progress_bar($eriviindex, $max_rivit);
+			// REST-api skippaa
+			if (!isset($api_kentat)) {
+				if ($cli and $lue_data_output_file == "") {
+					progress_bar($eriviindex, $max_rivit);
+				}
+				elseif (!$cli or $lue_data_output_file != "") {
+					$bar->increase();
+				}
 			}
-			elseif (!$cli or $lue_data_output_file != "") {
-				$bar->increase();
-			}
-
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
@@ -1724,6 +1751,102 @@ if ($kasitellaan_tiedosto) {
 					$query .= ", alv = '$oletus_alvprossa' ";
 				}
 
+				// Jos on asiakas-taulu, niin populoidaan kaikkien dropdown-menujen arvot, mik‰li niit‰ ei ole annettu.
+				if ($table_mysql == 'asiakas' and $rivi[$postoiminto] == 'LISAA') {
+					if (stripos($query, ", maksuehto = ") === FALSE) {
+						$select_query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND kaytossa='' ORDER BY jarjestys, teksti limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						$query .= ", maksuehto = '{$select_row["tunnus"]}' ";
+					}
+
+					if (stripos($query, ", toimitustapa = ") === FALSE) {
+						$select_query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY jarjestys, selite limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						$query .= ", toimitustapa = '{$select_row["selite"]}' ";
+					}
+
+					if (stripos($query, ", valkoodi = ") === FALSE) {
+						$query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
+					}
+
+					if (stripos($query, ", kerayspoikkeama = ") === FALSE) {
+						$query .= ", kerayspoikkeama = '0' ";
+					}
+
+					if (stripos($query, ", laskutusvkopv = ") === FALSE) {
+						$query .= ", laskutusvkopv = '0' ";
+					}
+
+					if (stripos($query, ", laskutyyppi = ") === FALSE) {
+						$query .= ", laskutyyppi = '-9' ";
+					}
+
+					if (stripos($query, ", maa = ") === FALSE) {
+						$query .= ", maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kansalaisuus = ") === FALSE) {
+						$query .= ", kansalaisuus = '{$yhtiorow["kieli"]}' ";
+					}
+
+					if (stripos($query, ", laskutus_maa = ") === FALSE) {
+						$query .= ", laskutus_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", toim_maa = ") === FALSE) {
+						$query .= ", toim_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kolm_maa = ") === FALSE) {
+						$query .= ", kolm_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kieli = ") === FALSE) {
+						$query .= ", kieli = '{$yhtiorow["kieli"]}' ";
+					}
+
+					if (stripos($query, ", chn = ") === FALSE) {
+						$query .= ", chn = '100' ";
+					}
+
+					if (stripos($query, ", alv = ") === FALSE) {
+						//yhtiˆn oletusalvi!
+						$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
+						$wtres  = pupe_query($wquery);
+						$wtrow  = mysql_fetch_array($wtres);
+
+						$query .= ", alv = '{$wtrow["selite"]}' ";
+					}
+
+					if (stripos($query, ", asiakasnro = ") === FALSE and $yhtiorow["automaattinen_asiakasnumerointi"] != "") {
+
+						if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+							$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+						}
+						else {
+							$apu_asiakasnumero = 0;
+						}
+
+						$select_query = "	SELECT MAX(asiakasnro+0) asiakasnro
+											FROM asiakas USE INDEX (asno_index)
+											WHERE yhtio = '{$kukarow["yhtio"]}'
+											AND asiakasnro+0 >= $apu_asiakasnumero";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						if ($select_row['asiakasnro'] != '') {
+							$vapaa_asiakasnro = $select_row['asiakasnro'] + 1;
+						}
+
+						$query .= ", asiakasnro = '$vapaa_asiakasnro' ";
+					}
+
+				}
+
 				if ($rivi[$postoiminto] == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
@@ -1918,6 +2041,7 @@ if ($kasitellaan_tiedosto) {
 
 			// Meill‰ oli joku virhe
 			if ($tila == 'ohita' or $hylkaa > 0) {
+				$api_status = FALSE;
 				$lue_data_virheelliset_rivit[$rivilaskuri-1] = $excelrivit[$rivilaskuri-1];
 			}
 		}
@@ -1973,7 +2097,7 @@ if ($kasitellaan_tiedosto) {
 
 lue_data_echo("<br>".$lue_data_output_text, true);
 
-if (!$cli) {
+if (!$cli and !isset($api_kentat)) {
 	// Taulut, jota voidaan k‰sitell‰
 	$taulut = array(
 		'abc_parametrit'                  => 'ABC-parametrit',
@@ -2133,4 +2257,6 @@ if (!$cli) {
 		<br>";
 }
 
-require ("inc/footer.inc");
+if (!isset($api_kentat)) require ("inc/footer.inc");
+
+?>

@@ -66,7 +66,8 @@ if(!function_exists("yrititarkista")) {
 			$query = "	SELECT yhtio
 						FROM yriti
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tilino = '$t[$i]'";
+						and tilino  = '$t[$i]'
+						and tunnus != '$tunnus'";
 			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {

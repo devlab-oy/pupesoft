@@ -3113,6 +3113,13 @@ if (!function_exists('print_pdf_lahete')) {
 					$liite = $pdffilenimi;
 					$content_body = "";
 
+					if (substr($komento,0,12) == 'asiakasemail') {
+						$sahkoposti_to = substr($komento, 12);
+					}
+					else {
+						$sahkoposti_to = $kukarow["eposti"];
+					}
+
 					if ($tyyppi == "TILAUSVAHVISTUS") {
 
 						if (php_sapi_name() != 'cli') {
@@ -3172,9 +3179,23 @@ if (!function_exists('print_pdf_lahete')) {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
-					if (@include("../inc/sahkoposti.inc"));
-					elseif (@include("inc/sahkoposti.inc"));
-					else include("sahkoposti.inc");
+					$kutsu = "{$yhtiorow["nimi"]} - $kutsu";
+
+					// Sähköpostin lähetykseen parametrit
+					$parametri = array( "to" 			=> $sahkoposti_to,
+										"cc" 			=> "",
+										"subject"		=> $kutsu,
+										"ctype"			=> "text",
+										"body"			=> $content_body,
+										"attachements"	=> array(0 	=> array(
+																	"filename"		=> $liite,
+																	"newfilename"	=> "",
+																	"ctype"			=> "pdf"),
+										)
+									);
+
+					pupesoft_sahkoposti($parametri);
+
 				}
 				elseif ($komento != '' and $komento != 'edi') {
 					echo t("Lähete tulostuu")."...<br>";

@@ -220,13 +220,11 @@
 				echo "<td>$trow[laskunro]</td>";
 				echo "<td align='right'>$trow[laskusumma]</td>";
 				echo "<td>$trow[laskuvalkoodi]</td>";
-
 				echo "<td>";
 
 				foreach (explode(",", $trow["tapvm"]) as $a) {
-					echo tv1dateconv($a)."<br>";
+					echo $a."<br>";
 				}
-
 				echo "</td>";
 
 				echo "<td align='right'>";

@@ -11,24 +11,6 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
-function poistalaskuserverilta($skanlasku) {
-
-	GLOBAL $kukarow, $yhtiorow;
-	$path_parts = pathinfo($skanlasku);
-	$ctype = $path_parts['extension'];
-
-	$liite 	= $skanlasku;
-	$komento = 'email';
-	$kutsu	=	t("Poistettu lasku");
-	$content_body = t("Liitteenä Pupesoftista poistettu skannattulasku");
-	$liite = "skannaus/".$liite;
-
-	if ($skanlasku !='') {
-		include("inc/sahkoposti.inc");
-	}
-	return $boob;
-}
-
 function listdir($start_dir = '.') {
 
 	$files = array();
@@ -63,6 +45,10 @@ function listdir($start_dir = '.') {
 function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
 
 	$dir = $yhtiorow['skannatut_laskut_polku'];
+
+	if (!is_dir($dir) or !is_writable($dir)) {
+		return false;
+	}
 
 	// käydään läpi ensin käsiteltävät kuvat
 	$files = listdir($dir);
@@ -130,15 +116,32 @@ echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'poistalasku') {
 
-	$boob = poistalaskuserverilta($skannattu_lasku);
-	$tee = '';
+	// Lähetetään lasku sähköpostilla
+	$poistettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
+	$path_parts = pathinfo($poistettava_lasku);
+
+	// Sähköpostin lähetykseen parametrit
+	$parametri = array( "to" 			=> $kukarow["eposti"],
+						"cc" 			=> "",
+						"subject"		=> t("Poistettu lasku"),
+						"ctype"			=> "text",
+						"body"			=> t("Liitteenä Pupesoftista poistettu skannattu lasku."),
+						"attachements"	=> array(0 	=> array(
+													"filename"		=> $poistettava_lasku,
+													"newfilename"	=> "",
+													"ctype"			=> $path_parts['extension']),
+						)
+					);
+	$boob = pupesoft_sahkoposti($parametri);
 
 	if ($boob === FALSE) {
-		echo t("VIRHE: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
+		echo t("VIRHE: Sähköpostin lähetys epäonnistui. Ei poisteta skannattua laskua");
 	}
 	else {
-		unlink($skannatut_laskut_polku.$skannattu_lasku);
+		// Poistetaan tiedosto
+		unlink($poistettava_lasku);
 
+		// Haetaan seuraava lasku
 		$silent = 'ei näytetä käyttöliittymää';
 		$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);
 
@@ -168,6 +171,8 @@ if ($tee == 'poistalasku') {
 			echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
 		}
 	}
+	
+	$tee = "";
 }
 
 if ($tee == 'VIIVA') {
@@ -531,7 +536,7 @@ if ($tee == 'I') {
 	}
 
 	if ($luouusikeikka == "LUO" and $vienti != "C" and $vienti != "J" and $vienti != "F" and $vienti != "K" and $vienti != "I" and $vienti != "L") {
-		$errormsg .= "<font class='error'>".t("Keikkaa ei voi perustaa kululaskulle")."</font><br>";
+		$errormsg .= "<font class='error'>".t("Saapumista ei voi perustaa kululaskulle")."</font><br>";
 		$tee = 'E';
 	}
 
@@ -1335,7 +1340,7 @@ if ($tee == 'P' or $tee == 'E') {
 	}
 
 	echo "<hr><table>";
-	echo "<tr><td>".t("Luo uusi keikka laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke tabindex='-1'></td>";
+	echo "<tr><td>".t("Luo uusi saapuminen laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke tabindex='-1'></td>";
 	echo "<td>".t("Kopio lasku")."</td><td><input type='input' name='kopioi' value='$kopioi' size='3' maxlength='2' tabindex='-1'></td><td>".t("kertaa")."</td></tr>";
 	echo "</table>";
 	echo "</td>";

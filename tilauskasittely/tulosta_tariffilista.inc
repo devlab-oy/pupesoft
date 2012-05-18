@@ -30,7 +30,7 @@
 			$pdf->draw_text(30, 545, t("Sivu"), $firstpage, $pieni);
 			$pdf->draw_text(30, 535, $sivu, $firstpage, $p);
 
-			$pdf->draw_text(50,  545, t("Keikkanumero"),		$firstpage, $pieni);
+			$pdf->draw_text(50,  545, t("Saapumisnumero"),		$firstpage, $pieni);
 			$pdf->draw_text(50,  535, $laskurow["laskunro"],	$firstpage, $p);
 
 			$pdf->draw_text(110, 545, t("Ajoaika"), 			$firstpage, $pieni);

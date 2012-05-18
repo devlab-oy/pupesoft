@@ -1193,7 +1193,7 @@
 
 				if (mysql_num_rows($keikkares) > 0) {
 					$keikkarow2 = mysql_fetch_assoc($keikkares);
-					$echoostuns = t("Keikka").": ".$keikkarow2["laskunro"];
+					$echoostuns = t("Saapuminen").": ".$keikkarow2["laskunro"];
 				}
 			}
 			else {
@@ -1528,7 +1528,7 @@
 			<input type='hidden' name='toiminto' value='kohdista'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 			<input type='hidden' name='otunnus' value='$otunnus'>
-			<input type='submit' value='".t("Takaisin keikkaan")."'>
+			<input type='submit' value='".t("Takaisin saapumiseen")."'>
 			</form>";
 	}
 

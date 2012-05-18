@@ -103,6 +103,22 @@
 		$result = pupe_query($query);
 	}
 
+	// Jos ei saada poimia kun yhden pankin maksuja aineistoon
+	if ($tee == 'H' and $yhtiorow['pankkitiedostot'] == 'F') {
+		$query = "	SELECT lasku.tunnus
+					FROM lasku
+					WHERE lasku.yhtio 		= '{$kukarow["yhtio"]}'
+					and lasku.maksu_tili 	!= '{$oltilrow["oletustili"]}'
+					and lasku.tila	 		= 'P'
+					and lasku.maksaja 		= '{$kukarow["kuka"]}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+			echo "<font class='error'>".t("Sinulla on maksuja poimittuna jo toisesta pankista. Siirr‰ maksuaineisto pankkiin ennenkuin lis‰‰t toisen pankin maksuja aineistoon").".</font><br><br>";
+			$tee = "V";
+		}
+	}
+
 	// Lasku merkit‰‰n maksettavaksi ja v‰hennet‰‰n limiitti‰ tai tehd‰‰n vain tarkistukset p‰itt‰invientiin.
 	if ($tee == 'H' or $tee == 'G') {
 
@@ -1321,15 +1337,15 @@
 
 				// er‰p‰iv‰ punasella jos se on er‰‰ntynyt
 				if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
-					echo "<font class='error'>".tv1dateconv($trow['erpcm'])."</font>";
+					echo "<font class='error'>{$trow['erpcm']}</font>";
 				}
 				else {
-					echo tv1dateconv($trow['erpcm']);
+					echo $trow['erpcm'];
 				}
 
 				if ($trow['kapvm'] != '0000-00-00') {
 					echo "<td valign='top' align='right' nowrap>";
-					echo tv1dateconv($trow['kapvm'])."<br>";
+					echo $trow['kapvm']."<br>";
 					echo "$trow[ykasumma] $yhtiorow[valkoodi]<br>";
 					if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 						echo "$trow[summa] $trow[valkoodi]";

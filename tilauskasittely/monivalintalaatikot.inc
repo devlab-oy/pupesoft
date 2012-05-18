@@ -19,6 +19,10 @@
 		$autosubmit = "";
 	}
 
+	if (!isset($piirra_otsikot)) {
+		$piirra_otsikot = TRUE;
+	}
+
 	// N‰ytet‰‰nkˆ osaston ja tuoteryhm‰n selitteet
 	if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == "K") {
 		$orderlisa = "ORDER BY avainsana.selitetark";
@@ -644,19 +648,23 @@
 				}
 
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-				echo "<tr><th>";
 
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "<label>";
+				if ($piirra_otsikot) {
+					echo "<tr><th>";
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "<label>";
+					}
+
+					echo t("Osasto");
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "</label>";
+					}
+
+					echo "</th></tr>";
 				}
 
-				echo t("Osasto");
-
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "</label>";
-				}
-
-				echo "</th></tr>";
 				echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' $multiple_lisa $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
@@ -757,19 +765,24 @@
 					$multiple_lisa = "";
 				}
 
-				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "<label>";
+				if ($piirra_otsikot) {
+					echo "<tr><th>";
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "<label>";
+					}
+
+					echo t("Tuoteryhm‰");
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "</label>";
+					}
+
+					echo "</th></tr>";
 				}
 
-				echo t("Tuoteryhm‰");
-
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "</label>";
-				}
-
-				echo "</th></tr>";
 				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' $multiple_lisa $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
@@ -872,19 +885,25 @@
 			}
 
 			if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
-				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
 
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "<label>";
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+
+				if ($piirra_otsikot) {
+					echo "<tr><th>";
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "<label>";
+					}
+
+					echo t("Tuotemerkki");
+
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+						echo "</label>";
+					}
+
+					echo "</th></tr>";
 				}
 
-				echo t("Tuotemerkki");
-
-				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-					echo "</label>";
-				}
-
-				echo "</th></tr>";
 				echo "<tr><td nowrap style='padding:0px'>";
 
 				$multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
@@ -994,19 +1013,24 @@
 
 					if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
+						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
-						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-							echo "<label>";
+						if ($piirra_otsikot) {
+							echo "<tr><th>";
+
+							if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+								echo "<label>";
+							}
+
+							echo t("Malli");
+
+							if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+								echo "</label>";
+							}
+
+							echo "</th></tr>";
 						}
 
-						echo t("Malli");
-
-						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-							echo "</label>";
-						}
-
-						echo "</th></tr>";
 						echo "<tr><td nowrap style='padding:0px'>";
 
 						$multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
@@ -1116,19 +1140,22 @@
 
 					if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-						echo "<tr><th>";
 
-						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-							echo "<label>";
+						if ($piirra_otsikot) {
+							echo "<tr><th>";
+
+							if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+								echo "<label>";
+							}
+
+							echo t("Mallitarkenne");
+
+							if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+								echo "</label>";
+							}
+
+							echo "</th></tr>";
 						}
-
-						echo t("Mallitarkenne");
-
-						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-							echo "</label>";
-						}
-
-						echo "</th></tr>";
 
 						echo "<tr><td nowrap style='padding:0px'>";
 
@@ -1256,7 +1283,12 @@
 							echo "</table></div>";
 						}
 
-						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>$mul_otsik {$looppirow['syvyys']}</th></tr>";
+						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+
+						if ($piirra_otsikot) {
+							echo "<tr><th>$mul_otsik {$looppirow['syvyys']}</th></tr>";
+						}
+
 						echo "<tr><td nowrap style='padding:0px'>";
 						echo "<select name='mul_{$tree}{$looppirow['syvyys']}[]' ";
 
@@ -1407,19 +1439,24 @@
 
 				if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-					echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
+					echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 
-					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-						echo "<label>";
+					if ($piirra_otsikot) {
+						echo "<tr><th>";
+
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+							echo "<label>";
+						}
+
+						echo t_avainsana("PARAMETRI", "", " and avainsana.selite='$parametri'", "", "", "selitetark");
+
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+							echo "</label>";
+						}
+
+						echo "</th></tr>";
 					}
 
-					echo t_avainsana("PARAMETRI", "", " and avainsana.selite='$parametri'", "", "", "selitetark");
-
-					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-						echo "</label>";
-					}
-
-					echo "</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
 					echo "<select name='mul_{$parametri}[]' ";
 
@@ -1464,7 +1501,11 @@
 
 		if ($monivalintalaatikko == "laskumyyja") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Myyj‰"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Myyj‰"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			// tehd‰‰n query
@@ -1508,7 +1549,11 @@
 
 		if ($monivalintalaatikko == "asiakastila") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Asiakastila"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Asiakastila"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			$sresult = t_avainsana("ASIAKASTILA");
@@ -1546,7 +1591,11 @@
 
 		if ($monivalintalaatikko == "tuotemyyja") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Tuotemyyj‰"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Tuotemyyj‰"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			// tehd‰‰n query
@@ -1590,7 +1639,11 @@
 
 		if ($monivalintalaatikko == "asiakasmyyja") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Asiakasmyyj‰"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Asiakasmyyj‰"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			// tehd‰‰n query
@@ -1634,7 +1687,11 @@
 
 		if ($monivalintalaatikko == "tuoteostaja") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Tuoteostaja"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Tuoteostaja"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			$query = "	SELECT distinct myyja, nimi
@@ -1677,7 +1734,11 @@
 
 		if ($monivalintalaatikko == "asiakasosasto") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Asiakasosasto"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Asiakasosasto"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			$sresult = t_avainsana("ASIAKASOSASTO");
@@ -1715,7 +1776,11 @@
 
 		if ($monivalintalaatikko == "asiakasryhma") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Asiakasryhm‰"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Asiakasryhm‰"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			$sresult = t_avainsana("ASIAKASRYHMA");
@@ -1753,7 +1818,11 @@
 
 		if ($monivalintalaatikko == "asiakaspiiri") {
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-			echo "<tr><th>",t("Asiakaspiiri"),"</th></tr>";
+
+			if ($piirra_otsikot) {
+				echo "<tr><th>",t("Asiakaspiiri"),"</th></tr>";
+			}
+
 			echo "<tr>";
 
 			$sresult = t_avainsana("PIIRI");
@@ -1857,7 +1926,11 @@
 
 			if (mysql_num_rows($sresult) > 0) {
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-				echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
+
+				if ($piirra_otsikot) {
+					echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
+				}
+
 				echo "<tr>";
 
 				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
@@ -1894,7 +1967,11 @@
 
 			if (mysql_num_rows($sresult) > 0) {
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-				echo "<tr><th>",t("Kohde"),"</th></tr>";
+
+				if ($piirra_otsikot) {
+					echo "<tr><th>",t("Kohde"),"</th></tr>";
+				}
+
 				echo "<tr>";
 
 				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' $tunnukset_save $autosubmit>";
@@ -1941,7 +2018,11 @@
 
 			if (mysql_num_rows($sresult) > 0) {
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-				echo "<tr><th>",t("Projekti"),"</th></tr>";
+
+				if ($piirra_otsikot) {
+					echo "<tr><th>",t("Projekti"),"</th></tr>";
+				}
+
 				echo "<tr>";
 
 				echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";

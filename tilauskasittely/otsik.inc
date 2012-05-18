@@ -1708,7 +1708,11 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
-			if ($toim != "MYYNTITILI") {
+			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
+			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
+			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
+			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
+			tarkista_oikeus("verkkolasku.php"))) {
 				echo "<td>".t("Laskuta heti")." (".t("sis‰inen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			}
 			else {

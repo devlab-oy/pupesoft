@@ -121,7 +121,7 @@
 		}
 
 		if (strlen($order) > 0) {
-			$jarjestys = $order." ".$sort;
+			$jarjestys = "abc_aputaulu.".$order." ".$sort;
 		}
 		else {
 			$jarjestys = "abc_aputaulu.luokka, $abcwhat desc";

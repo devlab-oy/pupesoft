@@ -80,13 +80,11 @@ else {
 
 		// Tehd‰‰n NAMEFMT komento, jos kyseess‰ on iSeries/AS400 palvelin
 		if (isset($ftptype) and $ftptype == "AS400") {
-			$quote = ftp_raw($conn_id, "quote SITE NAMEFMT 1");
+			$quote = ftp_site($conn_id, "NAMEFMT 1");
 		}
 
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
 		$ftpfile_tmp = $filenimi.".TMP";
-
-		# ftp_chdir voisi olla hyv‰
 
 		// Kokeillaan passiivista siirtoa
 		ftp_pasv($conn_id, TRUE);
@@ -100,20 +98,28 @@ else {
 
 		// Otetaan .TMP p‰‰te veks ku siirto on valmis
 		if ($upload === TRUE) {
-			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
-            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+			$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
 
-			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
-				$rename1 = FALSE;
+			// Jos rename ep‰onnistuu, koitetaan poistaa .TMP tiedosto
+			if ($rename1 === FALSE) {
+				$rename1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+
+				if ($rename1 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
+				}
 			}
 		}
 
 		// Pit‰‰kˆ faili viel‰ nimet‰ kokonaan uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+			$rename2 = ftp_rename($conn_id, "{$ftppath}{$filenimi}", "{$ftppath}{$renameftpfile}");
 
-			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
+			// Jos rename ep‰onnistuu, koitetaan poistaa turha v‰litiedosto
+			if ($rename2 === FALSE) {
+				$rename2 = ftp_delete($conn_id, "{$ftppath}{$filenimi}");
+				if ($rename2 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$filenimi}");
+				}
 				$rename2 = FALSE;
 			}
 		}

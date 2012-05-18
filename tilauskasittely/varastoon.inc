@@ -3,7 +3,7 @@
 // tarvitaan $laskurow array, jossa on meidän keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-if ($toiminto == "kalkyyli" and $tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($toiminto == "kalkyyli" and $tee == "" and $kauttalaskutus == '') {
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
 
@@ -40,7 +40,7 @@ if ($toiminto == "kalkyyli" and $tee == "" and $suoratoimitus == '' and $kauttal
 $varastoon_msg  		  = "";
 $jalkilaskenta_debug_text = "";
 
-if ($tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($tee == "" and $kauttalaskutus == '') {
 	$varastoon_msg .= "<form action='$PHP_SELF' name='riviformi' method='post'>";
 	$varastoon_msg .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
@@ -55,7 +55,7 @@ if ($tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	$varastoon_msg .= "<input type='hidden' name='otunnus' value='$otunnus'>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 
 	// Tarkastetaan onko taricit käytössä
 	$tv_kaytossa = FALSE;
@@ -191,7 +191,7 @@ else {
 if ($laskurow["vienti_kurssi"] == 0) {
 	echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 
-	if ($suoratoimitus == '' and $kauttalaskutus == '') {
+	if ($kauttalaskutus == '') {
 		exit;
 	}
 }
@@ -244,16 +244,17 @@ else {
 	}
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br>";
-	echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
+	echo "<font class='message'>".t("Saapuminen")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 	echo "<font class='message'>".t("Rahdin määrä yhteensä").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
-$summa		 = 0;
-$jtrivit	 = '';
-$jtvarastot	 = array();
-$rivia 		 = 0;
+$summa		 	 = 0;
+$jtrivit	 	 = array();
+$jtrivit_paikat	 = array();
+$jtvarastot	 	 = array();
+$rivia 		 	 = 0;
 $korjattavat_valmistukset 	  = array();
 $korjattavat_valmistukset_ind = 0;
 $suoralisa 	= "";
@@ -275,14 +276,14 @@ $tilikausi_alku  = (int) date('Ymd',mktime(0,0,0, $tkakk, $tkapp, $tkavv));
 $tilikausi_loppu = (int) date('Ymd',mktime(0,0,0, $tklkk, $tklpp, $tklvv));
 
 // jos kyseessä on ihan virallinen varastonarvonlaskenta, tehdään näin
-if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '') {
 	echo "<font class='message'>".t("Suoritetaan jälkilaskentaa %s tuotteelle", "", mysql_num_rows($presult)).":<br></font>";
 }
-elseif ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<font class='message'>".t("Viedään varastoon %s tuotetta", "", mysql_num_rows($presult)).":<br></font>";
 }
 
-if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	require_once ('inc/ProgressBar.class.php');
 
 	$bar = new ProgressBar();
@@ -294,7 +295,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	$hankintakulut = "";
 
-	if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+	if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 		$bar->increase(); //calls the bar with every processed element
 	}
 
@@ -517,7 +518,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		// muuten tässä ollaan sitten viemässä kamaa ihan oikeesti saldoille.. tehdään siihen liittyvät hommat.
 		$uusikehahin = "";
 
-		if ($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"]>0) {
+		if ($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"] > 0) {
 			$lisavartlisa = " ".t("Saldo on varattu.");
 		}
 		else {
@@ -756,17 +757,19 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		//	Kohdistetaan vain oikeille asiakkaille näissä caseissa
 		if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
 			//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-		   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, group_concat(tilausrivi.tunnus)), 0) jtrivit
+		   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
 		   				FROM tilausrivin_lisatiedot
 		   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 		   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
 		   				AND tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
 						$suoralisa";
 			$varastoon_result = pupe_query($query);
-			$varastoon_row = mysql_fetch_assoc($varastoon_result);
 
-			if ($varastoon_row["jtrivit"] != "") {
-				$jtrivit .= "$varastoon_row[jtrivit],";
+			while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+				// Mitkä suoratoimitukset tuloutettiin tällä keikalla
+				$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
+				// Katotaan mille paikalle nää meni, jotta suoratoimitus voidaan laukasta tältä paikalta
+				$jtrivit_paikat[$varastoon_row["jtrivi"]] = $tapahtumaid;
 			}
 		}
 	}
@@ -912,7 +915,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br><br>";
 	echo $varastoon_msg;
 	echo $jalkilaskenta_debug_text;
@@ -1020,7 +1023,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Keikkaan ei ole liitetty yhtään vaihto-omaisuuslaskua!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yhtään vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 
@@ -1055,7 +1058,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	echo "</td></tr>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 	echo "<tr>";
 }
 
@@ -1079,11 +1082,11 @@ if ($tee == "") {
 
 	echo "<td class='tumma' colspan='2'><input type='submit' value='".t("Päivitä")."'></td>";
 }
-elseif ($suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($kauttalaskutus == '') {
 	echo "<td class='tumma' colspan='2'></td>";
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	if ($tv_kaytossa) $cspani = 8;
 	else $cspani = 7;
 
@@ -1095,11 +1098,11 @@ if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '')
 if ($tv_kaytossa and $tee == "") {
 	echo "<th><input type='submit' value='".t("Päivitä")."'></th>";
 }
-elseif ($tv_kaytossa and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($tv_kaytossa and $kauttalaskutus == '') {
 	echo "<th></th>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 	echo "</tr>";
 	echo "</table></form><br>";
 }
@@ -1125,12 +1128,12 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 	echo "</table>";
 }
 
-if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
-	echo "<br><font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
+if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '') {
+	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
 }
-elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '') {
 	if ($mobiili_keikka != "yes") {
-		echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("riviä").".</font><br><br>";
+		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("riviä").".</font><br><br>";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -1185,29 +1188,28 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 			}
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','S','V')) and trim($jtrivit) != "") {
-			$jtrivit = substr($jtrivit, 0, -1);
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','S','V')) and count($jtrivit) > 0) {
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA");
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J'))) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "tosi_automaaginen", "JATKA");
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA");
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
 		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','J','S','V'))) or $yhtiorow["automaattinen_jt_toimitus"] == 'J') {
-			jt_toimita("", "", "", "", "dummy", "TOIMITA");
+			jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
 		}
 	}
 }
 
-if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br><hr>";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";

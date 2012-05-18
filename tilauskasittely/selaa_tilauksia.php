@@ -346,7 +346,7 @@
 		echo "<td><input type='text' name='haku' value='$haku'></td>";
 		if ($toim == "KEIKKA") {
 			echo "</tr>";
-			echo "<tr><th>".t("Hae keikkanumerolla").":</th>";
+			echo "<tr><th>".t("Hae saapumisnumerolla").":</th>";
 			echo "<td><input type='text' name='keikkanrohaku' value='$keikkanrohaku'></td>";
 			echo "</tr><tr>";
 			echo "<th>".t("Hae tilausnumerolla").":</th>";

@@ -326,7 +326,7 @@
 			elseif (mysql_field_name($result, $i) != "ultilno_maa" and $trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
 				$sel = "selected";
 			}
-			
+
 			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
 		}
 
@@ -372,20 +372,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "automaatti_toimitus") {
-
-		$selo = $sels = "";
-		if ($trow[$i] == 'S') $sels = "selected";
-		else $selo = "selected";
-
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $selo>".t("Ei automaattitoimitusta")."</option>";
-		$ulos .= "<option value='S' $sels>".t("Suoratoimitukset toimitetaan automaattisesti")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "laskun_erittely") {
 
 		$selo = $sels = "";
@@ -402,20 +388,20 @@
 
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		if ($laji != "") {
-			$ulos = "<input type='hidden' name='$nimi' value='$laji'>";
-			$tyyppi = 4;
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		if ($laji == "K") {
+			$ulos  = "<td><select name='$nimi'>";
+			$ulos .= "<option value='K'  $sel[K]>".t("Matkalaskukäyttäjä")."</option>";
+			$ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
+			$ulos .= "</select></td>";
 		}
 		else {
-			$sel = array();
-			$sel[$trow[$i]] = "selected";
-
 			$ulos  = "<td><select name='$nimi'>";
 			$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
-//			$ulos .= "<option value='O'  $sel[O] >".t("Online toimittaja")."</option>";
-//			$ulos .= "<option value='S'  $sel[S]>".t("Sisäinen toimittaja")."</option>";
 			$ulos .= "<option value='L'  $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
-			$ulos .= "<option value='K'  $sel[K]>".t("Käyttäjä")."</option>";
+			$ulos .= "<option value='K'  $sel[K]>".t("Matkalaskukäyttäjä")."</option>";
 			$ulos .= "<option value='P'  $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
 			$ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei käytössä (Poistetaan myös kaikki Tuotteen toimittajatiedot)")."</option>";
 			$ulos .= "</select></td>";
@@ -461,16 +447,16 @@
 			$jatko = 0;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "verovelvollinen") {
 
 		$sel = "";
 		if ($trow[$i] != "") $sel = "selected";
-		
+
 		$query = "SELECT nimi FROM maat WHERE koodi='{$yhtiorow["maa"]}' limit 1";
 		$maare = pupe_query($query);
 		$maaro = mysql_fetch_assoc($maare);
-		
+
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittaja ei ole verovelvollinen maassa").": $maaro[nimi]</option>";

@@ -1,9 +1,9 @@
 <?php
 	header('Content-Type: application/json');
-	
+
 	$data = $_GET;
-	error_reporting(E_ALL);
-	ini_set("display_errors", 1);
+	error_reporting(E_ALL ^E_NOTICE);
+	ini_set("display_errors", 0);
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 
 	require ("inc/connect.inc");
@@ -34,8 +34,8 @@
 		$kpl			= isset($params["kpl"])				? (float) trim($params["kpl"]) : "";
 		$tilausnumero	= isset($params["tilausnumero"])	? mysql_real_escape_string(trim($params["tilausnumero"])) : 0;
 		$tuoteno		= isset($params["tuoteno"])			? mysql_real_escape_string(trim($params["tuoteno"])) : "";
-		$tunnus			= isset($params["tunnus"])			? (int) trim($params["tunnus"]) : "";
-		$kommentti		= isset($params["kommentti"])		? mysql_real_escape_string(trim($params["kommentti"])) : "";
+		$tunnus			= isset($params["asiakastunnus"])			? (int) trim($params["asiakastunnus"]) : "";
+		$kommentti		= isset($params["tilauskommentti"])		? mysql_real_escape_string(trim($params["tilauskommentti"])) : "";
 		$toim 	 		= "RIVISYOTTO";
 
 		// Määritellään luo_myyntitilausotsikko -funkkari
@@ -153,7 +153,7 @@
 		$user = isset($params["user"]) ? mysql_real_escape_string(trim($params["user"])) : "";
 		$pass = isset($params["pass"]) ? md5($params["pass"]) : "";
 		$yhtio = isset($params["yhtio"]) ? mysql_real_escape_string(trim($params["yhtio"])) : "";
-		$versio	= (float) pupesoft_cleannumber($params["versio"]);
+		$versio	= isset($params["versio"]) ? (float) pupesoft_cleannumber($params["versio"]) : 0;
 
 		// Tehdään tarkistukset tähän väliin.
 		if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on')  rest_virhe_header("Vain https on sallittu.");
@@ -181,30 +181,15 @@
 		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 	}
 
-	// luodaan ensimmäinen lukujoukko sisäänkirjautumista varten
-	$parametrit = array(
-		'user'	=> $data["user"],
-		'pass'  => $data["pass"],
-		'yhtio' => $data["yhtio"],
-		'versio' => $data["versio"],
-	);
-
-	rest_login($parametrit);
+	// Kirjataan käyttäjä sisään
+	rest_login($data);
 
 	$tyyppi = isset($data["tyyppi"]) ? pupesoft_cleanstring($data["tyyppi"]) : "";
 
 	// Tarkistetaan "tilauspuolen" muuttujat
 	if ($tyyppi == "order") {
 
-		$parametrit = array(
-			'tuoteno' 		=> $data["tuoteno"],
-			'kpl'			=> $data["kpl"],
-			'tunnus'		=> $data["asiakastunnus"],
-			'kommentti'		=> $data["tilauskommentti"],
-			'tilausnumero'	=> $data["tilausnumero"],
-		);
-
-		rest_tilaa($parametrit);
+		rest_tilaa($data);
 	}
 	elseif ($tyyppi == "customer") {
 		$toiminto = isset($data["toiminto"]) ? strtoupper(pupesoft_cleanstring($data["toiminto"])) : "";

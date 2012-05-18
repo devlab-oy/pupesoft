@@ -212,7 +212,7 @@
 			$x = days_in_month($month, $year);
 			$u = 1;
 
-			for($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
+			for($r = $y; $r < count($DAY_ARRAY); $r++) {
 				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
 				if ($r == 6) {
@@ -328,7 +328,7 @@
 			$x = days_in_month($month, $year);
 			$u = 1;
 
-			for ($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
+			for ($r = $y; $r < count($DAY_ARRAY); $r++) {
 				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
 				if ($r == 6) {
@@ -566,7 +566,7 @@
 			$x = days_in_month($month, $year);
 			$u = 1;
 
-			for($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
+			for($r = $y; $r < count($DAY_ARRAY); $r++) {
 				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
 				if ($r == 6) {

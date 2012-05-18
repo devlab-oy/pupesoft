@@ -144,14 +144,14 @@
 		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 
-		if (sizeof($summat) > 1) {
+		if (count($summat) > 1) {
 			$oikpos = $pdf->strlen("----------------", $norm);
 			$pdf->draw_text(480-$oikpos, $kala, "----------------",	$firstpage, $norm);
 			$kala = $kala - 13;
 		}
 
 		foreach ($summat as $valuutta => $summa) {
-			if (sizeof($summat) == 1) {
+			if (count($summat) == 1) {
 				$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
 				$pdf->draw_text(464, 92,  sprintf('%.2f', $summa),	$firstpage, $norm);
 				$pdf->draw_text(550, 92,  $valuutta,			$firstpage, $norm);

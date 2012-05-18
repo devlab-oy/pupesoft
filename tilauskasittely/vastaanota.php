@@ -23,7 +23,7 @@
 
 				$bpaikka = explode(' ', $alkurow["kommentti"]);
 
-				$ka = sizeof($bpaikka)-1;
+				$ka = count($bpaikka)-1;
 
 				$ok = 1;
 
@@ -240,7 +240,7 @@
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 							$ynsre = pupe_query($query);
 							$uusipaikka = mysql_insert_id();
-							
+
 							$tapahtumaquery = "	INSERT into tapahtuma set
 												yhtio 		= '$kukarow[yhtio]',
 												tuoteno 	= '$tilausrivirow[tuoteno]',
@@ -915,7 +915,7 @@
 					tilausrivi.hyllyalue,
 					tilausrivi.hyllynro,
 					tilausrivi.hyllyvali,
-					tilausrivi.hyllytaso,				
+					tilausrivi.hyllytaso,
 					tuote.ei_saldoa,
 					concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'), lpad(upper(tilausrivi.hyllyvali), 5, '0'), lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -1011,7 +1011,7 @@
 							AND tunnus = '$asiakkaan_tunnus'";
 				$asiakasresult = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasresult);
-				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";				
+				echo "<td>{$asiakasrow["asiakkaan_nimi"]}</td>";
 			}
 			else  {
 				echo "<td>$rivirow[paikka]</td>";

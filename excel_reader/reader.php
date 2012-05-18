@@ -374,7 +374,7 @@ class Spreadsheet_Excel_Reader
 //exit;
         $this->_parse();
 
-        return sizeof($this->sheets) > 0;
+        return count($this->sheets) > 0;
     */
 
         $res = $this->_ole->read($sFileName);

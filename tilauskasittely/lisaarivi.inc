@@ -249,7 +249,6 @@
 	$lapsiyhteensa			 = 0;
 	$korvaavan_isaa_myyty	 = 0;
 	$perheid_lisaarivi		 = 0;
-	$suoratoimeikiitos 		 = '';
 	$lop					 = "";
 	$tuoteperhe				 = array(); 				// Tuoteperheiden lapset menev‰t t‰nne
 	$kaikkituotteet			 = array(); 				// t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
@@ -423,30 +422,6 @@
 	elseif ($var == "R" and substr($paikka,0,3) != "°°V" and substr($paikka,0,3) != "°°V") {
 		$var 				= "";
 		$toimittajan_tunnus	= "";
-	}
-
-	// Jos kyseess‰ on suoratoimitus joka tilataan toisesta firmasta suoraan
-	if (substr($paikka,0,3) == "@@@") {
-
-		if (strpos($paikka, "&&&") !== FALSE) {
-			$superpaikka = substr($paikka, 0, strpos($paikka, "&&&"));
-			$loppupaikka = substr($paikka, strpos($paikka, "&&&")+3);
-
-			$lop = "LOP#!°!#".$toimittamatta;
-			$toimittamatta = $loppupaikka;
-		}
-		else {
-			$superpaikka = $paikka;
-		}
-
-		$var 		 = "S";
-		$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-		$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-	}
-	elseif ($var == "S" and substr($paikka,0,3) != "@@@") {
-		$var 		= "";
-		$rivinumero	= "";
-		$suoratoimeikiitos = "ei";
 	}
 
 	$perhelisa = "";
@@ -967,7 +942,7 @@
 
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
+							if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 
 							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 							$myy_tuoteno[$i]   = strtoupper($tuoteno);
@@ -1294,7 +1269,7 @@
 									}
 
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
+									if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
 										$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 									}
 
@@ -1306,7 +1281,7 @@
 
 								if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
+									if (stripos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
 										$kommentti .= " ".t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
 									}
 								}
@@ -1382,17 +1357,9 @@
 								// Onko tuotteella staattinen tilausrivikommentti
 								if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
-										$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
-									}
-								}
-
-								if ($rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
-									if (trim($kommentti) != "")	$kommentti .= "\n";
-
-									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("Poistuva tuote")) === FALSE) {
-										$kommentti .= t("Poistuva tuote");
+									if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
+										if (trim($kommentti) != "")	$kommentti = "\n".$kommentti;
+										$kommentti = trim($trow["tilausrivi_kommentti"].$kommentti);
 									}
 								}
 
@@ -1590,7 +1557,7 @@
 									$myy_sarjatunnus = "";
 								}
 
-								if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $myy_era[$indeksi] != "") {
+								if ($rivityyppi != "T" and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $myy_era[$indeksi] != "") {
 
 									if ($varattu > 0) {
 										$tunken = "myyntirivitunnus";
@@ -1709,34 +1676,6 @@
 		$puu_ein 		= array();
 		$puu_var		= array();
 
-		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
-		if ($yhtiorow["suoratoim_automaatio"] != '' and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
-
-			if ($lisaarivi_debug==1) echo "Tehd‰‰n suoratoimitusautomaatio<br>";
-
-			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
-			$suora_kpl		= $toimittamatta;
-
-			require("suoratoimitusvalinta.inc");
-
-			if (count($suoratoim_array) > 0) {
-				if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-					$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-					$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-					$lop = "LOP#!°!#".$toimittamatta;
-					$toimittamatta = $loppupaikka;
-				}
-				else {
-					$superpaikka = $suoratoim_array[0];
-				}
-
-				$var 		 = "S";
-				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-			}
-		}
-
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
 			if ($toimittamatta >= $suoratoimitus_rivikpl) {
@@ -1840,32 +1779,6 @@
 				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
-			if ($yhtiorow["suoratoim_automaatio"] != '' and $rivityyppi != 'E' and $var == "X") {
-
-				$var 			= "";
-				$suora_tuoteno 	= $trow["tuoteno"];
-				$suora_kpl		= $kpl;
-
-				require("suoratoimitusvalinta.inc");
-
-				if (count($suoratoim_array) > 0) {
-					if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-						$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-						$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-						$lop = "LOP#!°!#".$toimittamatta;
-						$toimittamatta = $loppupaikka;
-					}
-					else {
-						$superpaikka = $suoratoim_array[0];
-					}
-
-					$var 		 = "S";
-					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-				}
-			}
-
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
@@ -1944,7 +1857,6 @@
 					case 'J' : // J‰lkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
-					case 'S' : // Suoratoimitus-JT
 					case 'T' : // Tilataan toimittajalta
 						// Yhtiˆn parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -2021,7 +1933,7 @@
 					$puurivires = t_avainsana("PUUTEKOMM");
 
 					if ($kutsuja == "EDITILAUS" and $trow['status'] == 'T') {
-						if (strpos($kommentti, t("Tilaustuote.")) === FALSE) {
+						if (stripos($kommentti, t("Tilaustuote.")) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".t("Tilaustuote.");
 						}
@@ -2030,13 +1942,13 @@
 
 						$puurivirow = mysql_fetch_assoc($puurivires);
 
-						if (strpos($kommentti, $puurivirow["selite"]) === FALSE) {
+						if (stripos($kommentti, $puurivirow["selite"]) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".$puurivirow["selite"];
 						}
 					}
 					elseif ($kutsuja == "EDITILAUS") {
-						if (strpos($kommentti, t("Tuote Loppu.")) === FALSE) {
+						if (stripos($kommentti, t("Tuote Loppu.")) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".t("Tuote Loppu.");
 						}
@@ -2144,15 +2056,6 @@
 
 					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
-				elseif ($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
-					}
-
-					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
-				}
 
 				if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
 			}
@@ -2184,7 +2087,7 @@
 
 			if (!is_array($korkieltokommi) and $korkieltokommi != '') {
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, $korkieltokommi) === FALSE) {
+				if (stripos($kommentti, $korkieltokommi) === FALSE) {
 					$kommentti .= " ".$korkieltokommi;
 				}
 			}
@@ -2200,18 +2103,19 @@
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
 
+			// Onko tuotteella staattinen tilausrivikommentti
 			if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
-					$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
+				if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
+					if (trim($kommentti) != "")	$kommentti = "\n".$kommentti;
+					$kommentti = trim($trow["tilausrivi_kommentti"].$kommentti);
 				}
 			}
 
 			if ($rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
-				if (trim($kommentti) != "")	$kommentti .= "\n";
-
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, t("Poistunut tuote")) === FALSE) {
+				if (stripos($kommentti, t("Poistunut tuote")) === FALSE) {
+					if (trim($kommentti) != "")	$kommentti .= "\n";
 					$kommentti .= t("Poistunut tuote");
 				}
 			}

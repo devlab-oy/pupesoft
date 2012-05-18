@@ -40,7 +40,7 @@
 			tulosta_logo_pdf($pdf, $firstpage, $laskurow);
 
 			$pdf->draw_rectangle(785, 310, 765, 580, $firstpage, $rectparam);
- 			$pdf->draw_text(315, 778, t("Keikka", $kieli), $firstpage, $pieni);
+ 			$pdf->draw_text(315, 778, t("Saapuminen", $kieli), $firstpage, $pieni);
  			$pdf->draw_text(315, 768, $laskurow['laskunro'], $firstpage, $norm);
 
 			$pdf->draw_rectangle(785, 445, 765, 445, $firstpage, $rectparam);

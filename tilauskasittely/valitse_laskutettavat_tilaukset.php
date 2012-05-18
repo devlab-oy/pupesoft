@@ -193,7 +193,7 @@
 	if ($tee == 'TOIMITA') {
 
 		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
-		if (sizeof($tunnus) != 0) {
+		if (count($tunnus) != 0) {
 
 			$laskutettavat = "";
 
@@ -849,7 +849,7 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirrow["tunnus"] == $kukarow["kirjoitin"]) {
+				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and ($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirrow["tunnus"] == $kukarow["kirjoitin"]) {
 					$sel = "SELECTED";
 				}
 

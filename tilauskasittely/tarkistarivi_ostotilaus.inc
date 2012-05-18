@@ -45,15 +45,14 @@
 	}
 
 	if ($yhtiorow['ostoera_pyoristys'] == 'K' and isset($ostoerahuom) and is_array($ostoerahuom) and in_array($prow['tunnus'], $ostoerahuom) and $kpl_st != $org_kpl) {
-		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";	
+		$varaosavirhe .= "<font class='message'>".t("HUOM: Rivin määrä on pyöristetty täyteen ostoerään!")."<br></font>";
 	}
 
-	
 	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
-		$varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
-		$riviok++;
-		$tilausok++;
-		$saako_hyvaksya++;
+		// $varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
+		// $riviok++;
+		// $tilausok++;
+		// $saako_hyvaksya++;
 	}
 
 	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
@@ -203,63 +202,5 @@
 								</form>";
 		}
 
-	}
-
-	if ($toiminto != "kohdista") {
-		// katsotaan onko tämä sisäinen toimittaja ja että toimittajan tiedoissa on varmasti kaikki EDI mokkulat päällä ja oletusvienti on jotain vaihto-omaisuutta
-		$query = "	SELECT tyyppi_tieto, liitostunnus
-					from tuotteen_toimittajat, toimi
-					where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-					and tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
-					and toimi.tunnus 		= '$laskurow[liitostunnus]'
-					and toimi.yhtio         = tuotteen_toimittajat.yhtio
-					and toimi.tunnus        = tuotteen_toimittajat.liitostunnus
-					and toimi.tyyppi        = 'S'
-					and toimi.tyyppi_tieto != ''
-					and toimi.edi_palvelin != ''
-					and toimi.edi_kayttaja != ''
-					and toimi.edi_salasana != ''
-					and toimi.edi_polku    != ''
-					and toimi.oletus_vienti in ('C','F','I')";
-		$kres  = pupe_query($query);
-
-		if (mysql_num_rows($kres) > 0) {
-			$superrow = mysql_fetch_array($kres);
-
-			$query = "	SELECT yhtio.yhtio, yhtio.tunnus,sum(saldo) saldo
-						FROM tuotepaikat
-						JOIN yhtio on yhtio.yhtio=tuotepaikat.yhtio
-						JOIN varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-						AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						AND varastopaikat.tyyppi = ''
-						WHERE tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
-						AND tuoteno = '$trow[tuoteno]'
-						GROUP BY 1,2";
-			$kres2  = pupe_query($query);
-
-			$krow  = mysql_fetch_array($kres2);
-
-			// katotaan ennakkopoistot toimittavalta yritykseltä
-			$query = "	SELECT
-						ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
-						ifnull(sum(if(tilausrivi.keratty ='', tilausrivi.varattu, 0)),0) ennpois
-						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-						JOIN varastopaikat on tilausrivi.yhtio = varastopaikat.yhtio
-						AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-						AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-						AND varastopaikat.tyyppi = ''
-						WHERE tilausrivi.yhtio = '$krow[yhtio]'
-						AND tilausrivi.tyyppi in ('L','G','V')
-						AND tilausrivi.tuoteno = '$trow[tuoteno]'
-						AND tilausrivi.varattu <> 0";
-			$krtre = pupe_query($query);
-			$krtur = mysql_fetch_array($krtre);
-
-			// katotaan tuotteen saldo
-			$loytyymaara = sprintf("%.02f",$krow["saldo"] - $krtur["keratty"] - $krtur["ennpois"]);
-
-			$varaosavirhe .= t("Toimittajalta tilattavissa")." $loytyymaara ".t("kappaletta tuotetta")." $trow[tuoteno]<br>";
-		}
 	}
 ?>

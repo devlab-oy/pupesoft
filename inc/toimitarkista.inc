@@ -134,22 +134,29 @@ if(!function_exists("toimitarkista")) {
 
 			if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
-				$hetu = $ytunnus; // hetu talteen
-				require ("tarkistaytunnus.inc");
 
-				if ($ok == 0) {
+				if (strlen($ytunnus) == 11) {
+					$hetu = $ytunnus;
 
 					// katotaan oliko kyseessä hetu
 					require ("tarkistahetu.inc");
 
 					// ei ollu oikee hetukaan
 					if ($hetuok == 1) {
-						$virhe[$i] = t("Virheellinen ytunnus/hetu!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
+						$virhe[$i] = t("Virheellinen henkilötunnus!");
 						$errori = 1;
 					}
+
 				}
 				else {
-					$t[$i] = $ytunnus;
+					require ("tarkistaytunnus.inc");
+
+					if ($ok == 0) {
+						$virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
+					}
+					else {
+						$t[$i] = $ytunnus;
+					}
 				}
 			}
 			else { // ulkomaalainen saa olla mitä se haluaa

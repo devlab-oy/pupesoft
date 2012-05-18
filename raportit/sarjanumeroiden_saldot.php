@@ -30,7 +30,7 @@
 					and tuote.yhtio			= tuotepaikat.yhtio
 					and tuote.tuoteno		= tuotepaikat.tuoteno
 					and tuote.sarjanumeroseuranta != ''";
-		$paikres = mysql_query($query) or pupe_error($query);
+		$paikres = pupe_query($query);
 
 		// päivitetään eka virheelliset varastopaikat
 		foreach($paikat as $tuote => $kpl) {
@@ -46,7 +46,7 @@
 						and hyllynro	= '$hyllynro'
 						and hyllyvali	= '$hyllyvali'
 						and hyllytaso	= '$hyllytaso'";
-			$alkuresult = mysql_query($query) or pupe_error($query);
+			$alkuresult = pupe_query($query);
 			$alkurow = mysql_fetch_array($alkuresult);
 
 			// katotaan onko paikka OK
@@ -62,7 +62,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							ORDER BY alkuhyllyalue, alkuhyllynro
 							LIMIT 1";
-				$ekavarres = mysql_query($query) or pupe_error($query);
+				$ekavarres = pupe_query($query);
 				$ekavarrow = mysql_fetch_array($ekavarres);
 
 				$hyllyalue = $ekavarrow["alkuhyllyalue"];
@@ -76,7 +76,7 @@
 							hyllyvali = '$hyllyvali'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$sarjanumerotunnus'";
-				$ekavarres = mysql_query($query) or pupe_error($query);
+				$ekavarres = pupe_query($query);
 
 				echo "$hyllyalue-$hyllynro-$hyllyvali-$hyllytaso";
 			}
@@ -99,7 +99,7 @@
 						and hyllynro	= '$hyllynro'
 						and hyllyvali	= '$hyllyvali'
 						and hyllytaso	= '$hyllytaso'";
-			$alkuresult = mysql_query($query) or pupe_error($query);
+			$alkuresult = pupe_query($query);
 			$alkurow = mysql_fetch_array($alkuresult);
 
 			// katotaan onko paikka OK (pitäs olla kyllä kaikki OK!)
@@ -120,7 +120,7 @@
 								WHERE tuoteno	= '$tuoteno'
 								and yhtio		= '$kukarow[yhtio]'
 								and oletus		!= ''";
-					$paikres = mysql_query($query) or pupe_error($query);
+					$paikres = pupe_query($query);
 
 					if (mysql_num_rows($paikres) == 0) {
 						$oletus = 'X';
@@ -143,7 +143,23 @@
 								muuttaja	= '$kukarow[kuka]',
 								muutospvm	= now(),
 								oletus		= '$oletus'";
-					$paikres = mysql_query($query) or pupe_error($query);
+					$paikres = pupe_query($query);
+					
+					$tapahtumaquery = "	INSERT into tapahtuma set
+										yhtio 		= '$kukarow[yhtio]',
+										tuoteno 	= '$tuoteno',
+										kpl 		= 0,
+										kplhinta	= 0,
+										hinta 		= 0,
+										laji 		= 'uusipaikka',
+										hyllyalue 	= '$hyllyalue',
+										hyllynro 	= '$hyllynro',
+										hyllyvali 	= '$hyllyvali',
+										hyllytaso 	= '$hyllytaso',
+										selite 		= '".t("Sarjanumeroiden saldoissa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+										laatija 	= '$kukarow[kuka]',
+										laadittu 	= now()";
+					$tapahtumaresult = pupe_query($tapahtumaquery);
 				}
 				elseif (mysql_num_rows($alkuresult) == 1) {
 					$query = "	UPDATE tuotepaikat SET
@@ -157,7 +173,7 @@
 								and hyllynro	= '$hyllynro'
 								and hyllyvali	= '$hyllyvali'
 								and hyllytaso	= '$hyllytaso'";
-					$alkuresult = mysql_query($query) or pupe_error($query);
+					$alkuresult = pupe_query($query);
 				}
 				else {
 					echo "Tuotteella on useampi SAMA tuotepaikka!?!?! unpossible.";
@@ -179,7 +195,7 @@
 					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()
 					WHERE yhtio		= '$kukarow[yhtio]'";
-		$paikres = mysql_query($query) or pupe_error($query);
+		$paikres = pupe_query($query);
 
 		foreach($lisavarusteet as $tuote => $kpl) {
 
@@ -193,7 +209,7 @@
 						and hyllynro	= '$hyllynro'
 						and hyllyvali	= '$hyllyvali'
 						and hyllytaso	= '$hyllytaso'";
-			$alkuresult = mysql_query($query) or pupe_error($query);
+			$alkuresult = pupe_query($query);
 			$alkurow = mysql_fetch_array($alkuresult);
 
 			// katotaan onko paikka OK
@@ -216,7 +232,7 @@
 								WHERE tuoteno	= '$tuoteno'
 								and yhtio		= '$kukarow[yhtio]'
 								and oletus		!= ''";
-					$paikres = mysql_query($query) or pupe_error($query);
+					$paikres = pupe_query($query);
 
 					if (mysql_num_rows($paikres) == 0) {
 						$oletus = 'X';
@@ -239,7 +255,24 @@
 								muuttaja	= '$kukarow[kuka]',
 								muutospvm	= now(),
 								oletus		= '$oletus'";
-					$paikres = mysql_query($query) or pupe_error($query);
+					$paikres = pupe_query($query);
+					
+					$tapahtumaquery = "	INSERT into tapahtuma set
+										yhtio 		= '$kukarow[yhtio]',
+										tuoteno 	= '$tuoteno',
+										kpl 		= 0,
+										kplhinta	= 0,
+										hinta 		= 0,
+										laji 		= 'uusipaikka',
+										hyllyalue 	= '$hyllyalue',
+										hyllynro 	= '$hyllynro',
+										hyllyvali 	= '$hyllyvali',
+										hyllytaso 	= '$hyllytaso',
+										selite 		= '".t("Sarjanumeroiden saldoissa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
+										laatija 	= '$kukarow[kuka]',
+										laadittu 	= now()";
+					$result = pupe_query($tapahtumaquery);
+					
 				}
 				elseif (mysql_num_rows($alkuresult) == 1) {
 					$query = "	UPDATE tuotepaikat SET
@@ -253,7 +286,7 @@
 								and hyllynro	= '$hyllynro'
 								and hyllyvali	= '$hyllyvali'
 								and hyllytaso	= '$hyllytaso'";
-					$alkuresult = mysql_query($query) or pupe_error($query);
+					$alkuresult = pupe_query($query);
 				}
 				else {
 					echo "Tuotteella on useampi SAMA tuotepaikka!?!?! wtf?";
@@ -309,7 +342,7 @@
 					AND (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 					AND tilausrivi_osto.laskutettuaika != '0000-00-00'
 					ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
-		$sarjares = mysql_query($query) or pupe_error($query);
+		$sarjares = pupe_query($query);
 
 		while ($sarjarow = mysql_fetch_array($sarjares)) {
 
@@ -325,7 +358,7 @@
 							and tilausrivi.perheid2 	= '$sarjarow[osto_perheid2]'
 							and tilausrivi.tunnus	   != tilausrivi.perheid2
 							order by tilausrivi.tunnus";
-				$tilrivires = mysql_query($query) or pupe_error($query);
+				$tilrivires = pupe_query($query);
 
 				while ($tilrivirow2 = mysql_fetch_array($tilrivires)) {
 					$key = $tilrivirow2["tuoteno"]."#!#".$sarjarow["hyllyalue"]."#!#".$sarjarow["hyllynro"]."#!#".$sarjarow["hyllyvali"]."#!#".$sarjarow["hyllytaso"];

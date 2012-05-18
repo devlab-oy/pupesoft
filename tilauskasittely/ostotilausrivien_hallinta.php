@@ -198,7 +198,7 @@
 					ORDER BY 1";
 		$result = pupe_query($query);
 
-		echo "<tr><th>",t("Näytä Keikka"),"</th>";
+		echo "<tr><th>",t("Näytä Saapuminen"),"</th>";
 		echo "<td><select name='keikka' onchange='submit();'>";
 		echo "<option value=''>",t("Näytä kaikki"),"</option>";
 

@@ -103,10 +103,6 @@
 
 		enable_ajax();
 
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		echo "</script>";
-
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$('.tilaa').live('click', function(){
@@ -238,7 +234,7 @@
 							$toim_bck		= $toim;
 							if ($toim == "KAIKKILISTAT") {
 								if ($laskurow["tilaustyyppi"] == "M") $toim = "MYYNTITILI";
-								else $toim = "SIIRTOLISTA";	
+								else $toim = "SIIRTOLISTA";
 							}
 
 							require("tilaus-valmis-siirtolista.inc");
@@ -1160,7 +1156,7 @@
 							WHERE
 							$logistiikka_yhtiolisa
 							GROUP BY komento
-							ORDER BY kirjoitin";
+							ORDER BY jarjestys, kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);
 
 				echo "<tr><td><select name='valittu_tulostin'>";
@@ -1170,6 +1166,11 @@
 
 					//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
 					if ($kirrow['tunnus'] == $kukarow['kirjoitin']) {
+						$sel = "SELECTED";
+					}
+
+					// Varaston oletus keräyslistatulostin (tai tarkalleen listan vikan keräyslistan varaston oletustulostin, mutta yleensä listaaan aina per varasto)
+					if ($kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
 						$sel = "SELECTED";
 					}
 

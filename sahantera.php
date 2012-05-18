@@ -39,7 +39,7 @@
 	$kires = mysql_query($query) or pupe_error($query);
 
 	while ($kirow = mysql_fetch_array($kires)) {
-		if ($kirow['tunnus'] == $kirjoitin) $select = 'SELECTED';
+		if ($kirow['tunnus'] == $kirjoitin or $kirow['kirjoitin'] == "Lexmark tarratulostin") $select = 'SELECTED';
 		else $select = '';
 		echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
 	}

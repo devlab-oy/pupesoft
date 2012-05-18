@@ -79,17 +79,17 @@
 						echo "<input type='hidden' name='tee' value = 'liita'>";
 						echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
-						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
+						echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
 
 						while($row = mysql_fetch_assoc($result)) {
 							echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td><td>";
 							echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
 							echo "</td></tr>";
 						}
-						echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liitä keikkoihin")."'></td></tr></table></form>";
+						echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liitä saapumisiin")."'></td></tr></table></form>";
 					}
 					else {
-						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th></tr>";
+						echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th></tr>";
 						while($row = mysql_fetch_assoc($result)) {
 
 							$query = "	SELECT sum(summa) summa
@@ -110,7 +110,7 @@
 									<input type='hidden' name='tunnus' value = '$tunnus'>
 									<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
 									<input type='hidden' name='liita[".$row["otunnus"]."][liitasumma]' value='' size='10'>
-									<input type='submit' value='".t("Liitä keikkaan")."'>
+									<input type='submit' value='".t("Liitä saapumiseen")."'>
 									</form>";
 							echo "</td></tr>";
 						}
@@ -207,7 +207,7 @@
 
 			// Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä
 			if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
-				if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) $kukarow['taso'] = 1;
+				if ($kukarow['taso'] != 1) $kukarow['taso'] = 1;
 			}
 		}
 	}
@@ -1127,9 +1127,9 @@
 
 			$query = "	SELECT kuka, nimi
 			          	FROM kuka
-			          	WHERE yhtio = '$kukarow[yhtio]'
-						and hyvaksyja = 'o'
-						and kuka = '$eka_hyvaksyja'
+			          	WHERE yhtio 	= '$kukarow[yhtio]'
+						and hyvaksyja 	= 'o'
+						and kuka 		= '{$laskurow['hyvak1']}'
 			          	ORDER BY nimi";
 			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_assoc($vresult);
@@ -1252,7 +1252,7 @@
 			enable_ajax();
 
 			echo "<br><table>";
-			echo "<tr><th>".t("Laskusta käytetty keikoilla")."</th><th>".t("Summa")."</th></tr>";
+			echo "<tr><th>".t("Laskusta käytetty saapumisilla")."</th><th>".t("Summa")."</th></tr>";
 
 			$query = "	SELECT sum(summa) summa
 						from tiliointi
@@ -1320,7 +1320,7 @@
 					$toimilisa = "";
 				}
 
-				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liitä keikkaan")."</a>";
+				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liitä saapumiseen")."</a>";
 			}
 			else {
 				$lisa = "";

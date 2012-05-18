@@ -50,7 +50,7 @@
 
 			$nimitieto=strtoupper($nimitieto);
 
-			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA")) {
+			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY")) {
 				$query = "	SELECT tilino
 							FROM tili
 							WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";

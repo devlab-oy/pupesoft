@@ -51,9 +51,9 @@
 			$kieli = $argv[2];
 		}
 
-		$kukarow['kuka']  = "crond";
+		$kukarow['kuka'] = "crond";
 
-		//Pupeasennuksen root
+		// Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
 
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
@@ -76,16 +76,25 @@
 				}
 			}
 
-			$laskkk = "";
-			$laskpp = "";
-			$laskvv = "";
+			$laskkk   = "";
+			$laskpp   = "";
+			$laskvv   = "";
+			$eilinen  = "";
 			$eiketjut = "";
 
-			// jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
+			// jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle, ohitetaan laskutusviikonp‰iv‰t
 			if ($argv[3] == "eilinen") {
-				$laskkk = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-				$laskpp = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-				$laskvv = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+			}
+
+			// jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus p‰iv‰lle
+			if ($argv[3] == "eilinen_eikaikki") {
+				$laskkk  = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$laskpp  = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$laskvv  = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+				$eilinen = "eilinen_eikaikki";
 			}
 
 			// jos komentorivin kolmas arg on "eiketjut"
@@ -183,7 +192,9 @@
 							$poikkeava_pvm = $syotetty;
 
 							//ohitetaan myˆs laskutusviikonp‰iv‰t jos poikkeava p‰iv‰m‰‰r‰ on syˆtetty
-							$laskutakaikki = "ON";
+							if (!isset($eilinen) or $eilinen != "eilinen_eikaikki") {
+								$laskutakaikki = "ON";
+							}
 
 							$tee = "LASKUTA";
 						}
@@ -349,7 +360,14 @@
 			if (!isset($laskutakaikki) or $laskutakaikki == "") {
 
 				// Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
-				$today = date("w") + 1;
+				if (isset($eilinen) and $eilinen == "eilinen_eikaikki") {
+					$today = date("w", mktime(0,0,0,$laskkk,$laskpp,$laskvv)) +1;
+					$vkopva_curdate = "'$laskvv-$laskkk-$laskpp'";
+				}
+				else {
+					$today = date("w") + 1;
+					$vkopva_curdate = "curdate()";
+				}
 
 				// Kuukauden eka p‰iv‰
 				$eka_pv = laskutuspaiva("eka");
@@ -362,11 +380,11 @@
 
 				$lasklisa .= " and (lasku.laskutusvkopv = 0 or
 								   (lasku.laskutusvkopv = $today) or
-								   (lasku.laskutusvkopv = -1 and curdate() = '$vika_pv') or
-								   (lasku.laskutusvkopv = -2 and curdate() = '$eka_pv') or
-								   (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
-								   (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
-								   (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))) ";
+								   (lasku.laskutusvkopv = -1 and {$vkopva_curdate} = '$vika_pv') or
+								   (lasku.laskutusvkopv = -2 and {$vkopva_curdate} = '$eka_pv') or
+								   (lasku.laskutusvkopv = -3 and {$vkopva_curdate} = '$keski_pv') or
+								   (lasku.laskutusvkopv = -4 and {$vkopva_curdate} in ('$keski_pv','$vika_pv')) or
+								   (lasku.laskutusvkopv = -5 and {$vkopva_curdate} in ('$eka_pv','$keski_pv'))) ";
 			}
 
 			// katotaan halutaanko laskuttaa vaan laskut joita *EI SAA* ketjuttaa
@@ -1958,12 +1976,9 @@
 							// Hoidetaan pyˆristys sek‰ valuuttak‰sittely
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$lasrow["kasumma"]   = $lasrow["kasumma_valuutassa"];
-								$lasrow["summa"]     = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+								$lasrow["summa"]     = $lasrow["summa_valuutassa"];
 								$lasrow["arvo"]      = $lasrow["arvo_valuutassa"];
 								$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
-							}
-							else {
-								$lasrow["summa"]    = sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);
 							}
 
 							// Ulkomaisen ytunnuksen korjaus
@@ -2493,7 +2508,7 @@
 			$locre = pupe_query($query);
 
 			// jos laskutettiin jotain
-			if ($lask > 0) {
+			if (isset($lask) and $lask > 0) {
 
 				if ($silent == "" or $silent == "VIENTI") {
 					$tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
@@ -2916,7 +2931,7 @@
 			}
 
 			// l‰hetet‰‰n meili vaan jos on jotain laskutettavaa ja ollaan tultu komentorivilt‰
-			if ($lask > 0 and $php_cli) {
+			if (isset($lask) and $lask > 0 and $php_cli) {
 
 				//echotaan ruudulle ja l‰hetet‰‰n meili yhtiorow[admin]:lle
 				$bound = uniqid(time()."_") ;

@@ -423,7 +423,8 @@
 										(tila IN ('A','0'))
 									)
 								and liitostunnus = '$otsikrow[tunnus]'
-								and tapvm = '0000-00-00'";
+								and tapvm = '0000-00-00'
+								and chn != 999";
 					$laskuores = pupe_query($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -613,10 +614,10 @@
 						}
 
 						if ($otsikrow["oletus_erapvm"] > 0) $oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
-						else $oletus_erapvm = 0;
+						else $oletus_erapvm = $laskuorow["erpcm"];
 
 						if ($otsikrow["oletus_kapvm"] > 0) $oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
-						else $oletus_kapvm = 0;
+						else $oletus_kapvm = $laskuorow["kapvm"];
 
 						$otsikrow["oletus_kasumma"] = round($laskuorow["summa"] * $otsikrow['oletus_kapro'] / 100, 2);
 
@@ -679,6 +680,23 @@
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
 						}
 
+						// Matkalasku
+						if ($laskuorow["tilaustyyppi"] == "M") {
+							$query = "	SELECT nimi
+										FROM kuka
+										WHERE yhtio = '$kukarow[yhtio]'
+										and kuka = '$otsikrow[nimi]'";
+							$kukores = pupe_query($query);
+							$kukorow = mysql_fetch_assoc($kukores);
+
+							$otsikrow_nimi = $kukorow["nimi"];
+							$otsikrow_nimitark = t("Matkalasku");
+						}
+						else {
+							$otsikrow_nimi = $otsikrow["nimi"];
+							$otsikrow_nimitark = $otsikrow["nimitark"];
+						}
+
 						$query = "	UPDATE lasku
 									SET erpcm 			= '$oletus_erapvm',
 									kapvm 				= '$oletus_kapvm',
@@ -697,8 +715,8 @@
 									hyvaksyja_nyt 		= '$laskuorow[hyvaksyja_nyt]',
 									ytunnus 			= '$otsikrow[ytunnus]',
 									tilinumero 			= '$otsikrow[tilinumero]',
-									nimi 				= '$otsikrow[nimi]',
-									nimitark 			= '$otsikrow[nimitark]',
+									nimi 				= '$otsikrow_nimi',
+									nimitark 			= '$otsikrow_nimitark',
 									osoite 				= '$otsikrow[osoite]',
 									osoitetark 			= '$otsikrow[osoitetark]',
 									postino 			= '$otsikrow[postino]',

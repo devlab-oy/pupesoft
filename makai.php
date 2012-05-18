@@ -352,7 +352,7 @@
 					echo "<tr><th>".t("Tapahtumia")."</td><td>$makskpl ".t("kpl")."</td></tr>";
 
 					// Jokainen pankki ja p‰iv‰ omaan tiedostoon
-					if ($yhtiorow['pankkitiedostot'] != '') {
+					if ($yhtiorow['pankkitiedostot'] == 'E') {
 						if (is_resource($toot)) {
 							fclose($toot);
 
@@ -400,7 +400,7 @@
 		}
 
 		// Pankit ja p‰iv‰t yhdistet‰‰n
-		if ($yhtiorow['pankkitiedostot'] == '') {
+		if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
 			if (is_resource($toot)) {
 				fclose($toot);
 
@@ -827,7 +827,7 @@
 					unset($edmaksu_tili);
 
 					// Jokainen pankki ja p‰iv‰ omaan tiedostoon
-					if ($yhtiorow['pankkitiedostot'] != '') {
+					if ($yhtiorow['pankkitiedostot'] == 'E') {
 						if (is_resource($toot)) {
 							fclose($toot);
 
@@ -865,7 +865,7 @@
 			echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
 
 			// Pankit ja p‰iv‰t yhdistet‰‰n
-			if ($yhtiorow['pankkitiedostot'] == '') {
+			if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
 				if (is_resource($toot)) {
 					fclose($toot);
 

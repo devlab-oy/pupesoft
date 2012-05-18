@@ -1320,12 +1320,12 @@ if (!function_exists('loppu')) {
 				$pdf_lasku->draw_text(490, 92+$vientikala + $barcode_korkeus,  sprintf('%.2f', $summa),			$thispage, $boldi);
 			}
 			elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $thispage, $boldi);
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
 			}
 			else {
-				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $boldi);
-				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $thispage, $boldi);
+				$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
+				$pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]), $thispage, $boldi);
 			}
 
 			$pdf_lasku->draw_text(550, 92+$vientikala+$barcode_korkeus,  $laskurow["valkoodi"],				$thispage, $boldi);
@@ -1724,7 +1724,7 @@ if (!function_exists('alvierittely')) {
 			$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 									$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$summa_valuutassa = $kassa_ale != '' ? $laskurow["summa_valuutassa"] * (1-$kassa_ale/100) : $laskurow["summa_valuutassa"];
+			$summa_valuutassa = $kassa_ale != '' ? ($laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"]) * (1-$kassa_ale/100) : $laskurow["summa_valuutassa"]+$laskurow["pyoristys_valuutassa"];
 
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summa_valuutassa), $norm);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa_valuutassa),				$thispage, $norm);
@@ -1748,7 +1748,7 @@ if (!function_exists('alvierittely')) {
 			}
 		}
 		else {
-			$summa = $kassa_ale != '' ? $laskurow["summa"] * (1-$kassa_ale/100) : $laskurow["summa"];
+			$summa = $kassa_ale != '' ? ($laskurow["summa"]+$laskurow["pyoristys"]) * (1-$kassa_ale/100) : $laskurow["summa"]+$laskurow["pyoristys"];
 
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summa), $norm);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $norm);

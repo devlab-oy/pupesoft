@@ -15,7 +15,8 @@
 			$query = "	SELECT toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp
 						FROM toimi
 						LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
-						WHERE toimi.tunnus = '$tunnus' and toimi.yhtio = '$kukarow[yhtio]'";
+						WHERE toimi.tunnus = '$tunnus'
+						and toimi.yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -62,19 +63,19 @@
 			echo "<br>";
 
 
-			$lisa='';
+			$th_lisa='';
 
 			if (!isset($kausi)) $kausi='';
 
 			if ($kausi=='') {
 				$alku = substr($yhtiorow["tilikausi_alku"],04) - 2;
-				$lisa = "and tapvm >= '$alku' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
-				$kentta = "left(tapvm,4)";
+				$th_lisa = "and lasku.tapvm >= '$alku' and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				$kentta = "left(lasku.tapvm,4)";
 			}
 
 			if (strlen($kausi) == 4) {
-				$lisa = "and tapvm >= '$kausi-01-01' and tapvm <= '$kausi-12-31'";
-				$kentta = "left(tapvm,7)";
+				$th_lisa = "and lasku.tapvm >= '$kausi-01-01' and lasku.tapvm <= '$kausi-12-31'";
+				$kentta = "left(lasku.tapvm,7)";
 			}
 
 			if (strlen($kausi) == 7) {
@@ -89,14 +90,16 @@
 
 				$seuraava = $vv . "-" . $kk;
 
-				$lisa = "and tapvm >= '$kausi-01' and tapvm < '$seuraava-01'";
-				$kentta = "tapvm";
+				$th_lisa = "and lasku.tapvm >= '$kausi-01' and lasku.tapvm < '$seuraava-01'";
+				$kentta = "lasku.tapvm";
 			}
 
-			$query = "	SELECT $kentta ajalta, sum(summa) ostot, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) $yhtiorow[valkoodi]
+			$query = "	SELECT $kentta ajalta, sum(lasku.summa) ostot, round(sum(lasku.summa*if(lasku.maksu_kurssi=0,lasku.vienti_kurssi,lasku.maksu_kurssi)),2) $yhtiorow[valkoodi]
 					  	FROM lasku
-					  	WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
-					  	and tila in ('H', 'M', 'P', 'Q', 'Y')
+					  	WHERE lasku.yhtio='$kukarow[yhtio]'
+						and lasku.liitostunnus = '$tunnus'
+						$th_lisa
+					  	and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
 					  	GROUP BY 1";
 			$result = pupe_query($query);
 
@@ -138,7 +141,7 @@
 							and toimi.yhtio 		= '$kukarow[yhtio]'
 							ORDER by toimi.nimi";
 
-				$toimiliilisa = " and ytunnus = '$ytunnus' ";
+				$toimiliilisa = " and lasku.ytunnus = '$ytunnus' ";
 			}
 			else {
 				//Jos käytetään $tunnusta niin käytetään liitostunnusta
@@ -148,7 +151,7 @@
 							WHERE toimi.tunnus 	= '$tunnus'
 							and toimi.yhtio 	= '$kukarow[yhtio]'";
 
-				$toimiliilisa = " and liitostunnus = '$tunnus' ";
+				$toimiliilisa = " and lasku.liitostunnus = '$tunnus' ";
 			}
 
 			$result = pupe_query($query);
@@ -209,25 +212,44 @@
 				echo "<input type='text' name='kk2' value='$kk2' size='4'>";
 				echo "<input type='text' name='vv2' value='$vv2' size='4'>";
 				echo "</td>";
-				echo "<td class='back'><input type='Submit' value='".t("Näytä")."'></td>";
-				echo "</tr>";
-				echo "</form>";
+
+				$query = "	SELECT tunnus
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'K'
+							and kaytossa != 'E'
+							LIMIT 1";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) > 0) {
+
+					echo "</tr><tr><th>".t("Kustannuspaikka")."</th><td>";
+
+					$monivalintalaatikot = array("KUSTP");
+					$noautosubmit = TRUE;
+					$piirra_otsikot = FALSE;
+
+					require ("tilauskasittely/monivalintalaatikot.inc");
+
+					echo "</td>";
+				}
+
+				echo "<td class='back' style='vertical-align:bottom;'><input type='Submit' value='".t("Näytä")."'></td></tr>";
 				echo "</table>";
+				echo "</form>";
 
-				echo "<br>";
+				echo "<br><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("Näytä kaikki laskut")."</a><br><br>";
 
-				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("Näytä kaikki laskut")."</a><br><br>";
-
-				$lisa = '';
+				$th_lisa = '';
 
 				if ($laji=='M'){
-					$lisa = " and tila < 'S'";
+					$th_lisa = " and lasku.tila < 'S'";
 				}
 				elseif ($laji != 'K') {
-					$lisa = " and tila = '$laji'";
+					$th_lisa = " and lasku.tila = '$laji'";
 				}
 
-				if ($laji == 'o') $lisa = " and tapvm = '$kausi'";
+				if ($laji == 'o') $th_lisa = " and lasku.tapvm = '$kausi'";
 
 				$alku += 0;
 
@@ -251,17 +273,26 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti,
-							concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus,
-							if(laskunro = 0, '', laskunro) laskunro,
+				if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+					$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus) ";
+					$th_lisa .= $lisa;
+				}
+				else {
+					$tiliointilisa = '';
+				}
+
+				$query = "	SELECT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
+							concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
+							if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
 							round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
 						  	FROM lasku
-						  	WHERE yhtio = '$kukarow[yhtio]'
+							{$tiliointilisa}
+						  	WHERE lasku.yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
-							$lisa
+							$th_lisa
 							$aikalisa
-						  	and tila in ('H', 'M', 'P', 'Q', 'Y')
-						  	ORDER BY tapvm desc
+						  	and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
+						  	ORDER BY lasku.tapvm desc
 							$limlis";
 				$result = pupe_query($query);
 				$seraavako = mysql_num_rows($result);
@@ -281,7 +312,7 @@
 						<th>".t("Valuutta")."</th>
 						<th>".t("Laskunro")."</th>
 						<th>".t("Viite/Viesti")."</th>
-						<th>".t("Keikka")."</th>
+						<th>".t("Saapuminen")."</th>
 						<th>".t("EBID")."</th>
 						<th>".t("Tila/Vienti")."</th>
 						</tr>
@@ -305,10 +336,10 @@
 					echo "<tr class='aktiivi'>";
 
 					if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
-						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</td>";
+						echo "<td valign='top'>{$trow["tapvm"]}<br>{$trow["erpcm"]}</td>";
 					}
 					else {
-						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//laji=$laji//tunnus=$tunnus'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
+						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//laji=$laji//tunnus=$tunnus'>{$trow["tapvm"]}</a><br>{$trow["erpcm"]}</td>";
 					}
 
 					echo "<td valign='top' align='right'>$trow[summa]</td>";
@@ -399,31 +430,31 @@
 		}
 	}
 
-	$lisat = '';
+	$th_lisat = '';
 
 	if ($tee == 'S') { // S = selaussanahaku
-		$lisat = "and toimi.selaus like '%" . $nimi . "%'";
+		$th_lisat = "and toimi.selaus like '%$nimi%'";
 	}
 
 	if ($tee == 'N') { // N = nimihaku
-		$lisat = "and (toimi.nimi like '%$nimi%' or kuka.nimi like '%$nimi%')";
+		$th_lisat = "and (toimi.nimi like '%$nimi%' or kuka.nimi like '%$nimi%')";
 	}
 
 	if ($tee == 'Y') { // Y = yritystunnushaku
-		$lisat = "and toimi.ytunnus = '$nimi'";
+		$th_lisat = "and toimi.ytunnus = '$nimi'";
 	}
 
 	if ($tee == 'T') { // T = toimittajanro
-		$lisat = "and toimi.toimittajanro = '$nimi'";
+		$th_lisat = "and toimi.toimittajanro = '$nimi'";
 	}
 
-	if ($lisat != '') {
+	if ($th_lisat != '') {
 		$query = "	SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', if(toimi.tyyppi='K' and kuka.nimi is not null, kuka.nimi, toimi.nimi), toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
 					FROM toimi
 					LEFT JOIN kuka ON (kuka.yhtio = toimi.yhtio and kuka.kuka = toimi.nimi and toimi.tyyppi='K')
 					LEFT JOIN lasku ON toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus and tila in ('H','M')
 					WHERE toimi.yhtio = '$kukarow[yhtio]'
-					$lisat
+					$th_lisat
 					GROUP BY toimi.tunnus
 					ORDER BY toimi.selaus, toimi.nimi";
 		$result = pupe_query($query);

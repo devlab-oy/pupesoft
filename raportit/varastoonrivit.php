@@ -42,7 +42,7 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Keikka")."</th>";
+			echo "<th>".t("Saapuminen")."</th>";
 			echo "<th>".t("Yksiköt")."</th>";
 			echo "<th>".t("Rivit")."</th>";
 			echo "<th nowrap>".t("Viety varastoon")."</th>";
@@ -69,7 +69,7 @@
 					echo "<table>";
 					echo "<tr>";
 					echo "<th>".t("Nimi")."</th>";
-					echo "<th>".t("Keikka")."</th>";
+					echo "<th>".t("Saapuminen")."</th>";
 					echo "<th>".t("Yksiköt")."</th>";
 					echo "<th>".t("Rivit")."</th>";
 					echo "<th nowrap>".t("Viety varastoon")."</th>";

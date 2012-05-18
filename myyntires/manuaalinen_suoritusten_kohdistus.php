@@ -695,7 +695,8 @@ if ($tila == 'tee_kohdistus') {
 						yhtio_ovttunnus,
 						yhtio_kotipaikka,
 						yhtio_toimipaikka
-						FROM lasku WHERE tunnus IN ($laskutunnukset)
+						FROM lasku 
+						WHERE tunnus IN ($laskutunnukset)
 						and yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
 			$result = pupe_query($query);
@@ -735,7 +736,8 @@ if ($tila == 'tee_kohdistus') {
 						yhtio_ovttunnus,
 						yhtio_kotipaikka,
 						yhtio_toimipaikka
-						FROM lasku WHERE tunnus IN ($laskutunnuksetkale)
+						FROM lasku 
+						WHERE tunnus IN ($laskutunnuksetkale)
 						AND yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
 			$result = pupe_query($query);

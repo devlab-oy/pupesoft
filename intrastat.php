@@ -114,7 +114,7 @@
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
-						'Keikka' as tapa,
+						'Saapuminen' as tapa,
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
@@ -353,7 +353,7 @@
 			if ($row["perheid2set"] != "0" and $lisavar == "S") {
 				$query  = "	SELECT ";
 
-				if ($row["tapa"] != "Keikka") {
+				if ($row["tapa"] != "Saapuminen") {
 					$query .= "	if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
 								(SELECT if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
 								/ lasku.summa) * lasku.bruttopaino), 0) > 0.5,
@@ -857,7 +857,7 @@
 			<td>
 			<select name='tapahtumalaji'>
 			<option value='kaikki' 		$sel5[kaikki]>".t("Kaikki")."</option>
-			<option value='keikka' 		$sel5[keikka]>".t("Keikka")."</option>
+			<option value='keikka' 		$sel5[keikka]>".t("Saapuminen")."</option>
 			<option value='lasku'		$sel5[lasku]>".t("Lasku")."</option>
 			<option value='siirtolista' $sel5[siirtolista]>".t("Siirtolista")."</option>
 			</select>

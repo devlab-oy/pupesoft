@@ -66,6 +66,20 @@
 			rest_virhe_header("Asiakasta ei löytynyt järjestelmästä");
 		}
 
+		// haetaan tuotteen tiedot
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteno = '$tuoteno'";
+		$tuoteres = pupe_query($query);
+
+		if (mysql_num_rows($tuoteres) == 0) {
+			rest_virhe_header("Tuotetta \"{$tuoteno}\" ei löytynyt järjestelmästä");
+		}
+
+		// tuote löytyi ok
+		$trow = mysql_fetch_assoc($tuoteres);
+
 		// ei löytynyt tilausta tällä tunnisteella, pitää tehä uus!
 		if ($tilausnumero == 0) {
 			// varmistetaan, että käyttäjällä ei ole mitään kesken
@@ -97,20 +111,6 @@
 		}
 
 		$laskurow = mysql_fetch_assoc($kesken);
-
-		// haetaan tuotteen tiedot
-		$query = "	SELECT *
-					FROM tuote
-					WHERE yhtio = '{$kukarow["yhtio"]}'
-					AND tuoteno = '$tuoteno'";
-		$tuoteres = pupe_query($query);
-
-		if (mysql_num_rows($tuoteres) == 0) {
-			rest_virhe_header("Tuotetta \"{$tuoteno}\" ei löytynyt järjestelmästä");
-		}
-
-		// tuote löytyi ok
-		$trow = mysql_fetch_assoc($tuoteres);
 
 		// Tarkistetaan saldo
 		list($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($tuoteno);

@@ -72,7 +72,7 @@ if (!function_exists('finvoice_otsik')) {
 			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
 				$receiverintermediator = "003723327487";
 			}
-			
+
 			if ($yhtiorow["verkkolasku_lah"] == "maventa" and $receiverintermediator == "") {
 				$receiverintermediator = "003721291126";
 			}

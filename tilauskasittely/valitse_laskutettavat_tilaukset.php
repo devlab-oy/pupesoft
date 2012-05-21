@@ -193,7 +193,7 @@
 	if ($tee == 'TOIMITA') {
 
 		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
-		if (sizeof($tunnus) != 0) {
+		if (count($tunnus) != 0) {
 
 			$laskutettavat = "";
 

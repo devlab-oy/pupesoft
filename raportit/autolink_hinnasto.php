@@ -30,7 +30,7 @@
 		if ($osasto != '') {
 			$osastot = explode(" ",$osasto);
 
-			for($i = 0; $i < sizeof($osastot); $i++) {
+			for($i = 0; $i < count($osastot); $i++) {
 				$osastot[$i] = trim($osastot[$i]);
 
 				if ($osastot[$i] != '') {
@@ -54,7 +54,7 @@
 		if ($try != '') {
 			$tryt = explode(" ",$try);
 
-			for($i = 0; $i < sizeof($tryt); $i++) {
+			for($i = 0; $i < count($tryt); $i++) {
 				$tryt[$i] = trim($tryt[$i]);
 
 				if ($tryt[$i] != '') {

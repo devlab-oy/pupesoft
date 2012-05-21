@@ -1,4 +1,8 @@
 <?php
+
+	### !!! HUOMHUOM !!! ###
+	### Tämä ominaisuus on deprikoitu, käytä functions.inc:ssä määriteltyä pupesoft_sahkoposti -funktiota sähköpostin lähettämiseen!! ###
+
 	// Tämä ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitetään
 	// Jos liite halutaan nimetä uudestaan annetaan uusi nimi $liitenimi muuttujassa
 	// Ja $kutsu jossa on tiedoston kuvaus
@@ -130,7 +134,7 @@
 			$content .= "Content-Transfer-Encoding: base64\n" ;
 			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key].".pdf\"\n\n";
 		}
-			
+
 		$handle  = fopen($liite[$key], "r");
 		$sisalto = fread($handle, filesize($liite[$key]));
 		fclose($handle);

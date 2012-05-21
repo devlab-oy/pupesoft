@@ -278,7 +278,7 @@ if ($tee == "SYOTTO") {
 	}
 
 	// takasin jonnekin
-	if ($jatko != t("Tallenna suoritus")) {
+	if (isset($s_tallenna_kohdista)) {
 		echo "<br>";
 		$oikeus = 1;
 		$tila = "kohdistaminen";
@@ -577,8 +577,8 @@ if ($ytunnus != '' and $tee == "") {
 	</tr>
 	</table>
 	<br>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
+	<input type='submit' name='s_tallenna_kohdista' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
+	<input type='submit' name='s_tallenna' value='".t("Tallenna suoritus")."'>
 	</form>";
 
 	$formi = "formi";

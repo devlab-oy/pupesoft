@@ -2146,6 +2146,11 @@ if (!function_exists("tulosta_lasku")) {
 		// Vikan sivun loppulaatikko
 		loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $page_lasku[$sivu], $masrow, $sivu, $summa, $arvo, $page_lasku, $vientikala, $laskutyyppi, 1);
 
+		// Palautetaan PDF sellaisenaan
+		if ($tee == 'VERKKOLASKU_MAVENTA') {
+			return $pdf_lasku->generate();
+		}
+
 		// keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));

@@ -12518,7 +12518,7 @@ if (!function_exists('hae_suuntalava')) {
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio
 										AND suuntalavat.keraysvyohyke = tuote.keraysvyohyke
-										AND suuntalavat.keikkatunnus IN (0, {$otunnus})
+										AND suuntalavat.keikkatunnus LIKE '%{$otunnus}%'
 										AND suuntalavat.tila = ''
 										AND (concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0'),lpad(upper(alkuhyllyvali),  5, '0'),lpad(upper(alkuhyllytaso),  5, '0')) <= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or alkuhyllyalue = '')
 										AND (concat(rpad(upper(loppuhyllyalue),  5, '0'),lpad(upper(loppuhyllynro),  5, '0'),lpad(upper(loppuhyllyvali),  5, '0'),lpad(upper(loppuhyllytaso),  5, '0')) >= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or loppuhyllyalue = ''))

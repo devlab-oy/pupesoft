@@ -143,8 +143,8 @@
 				$query = "	SELECT *
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND keikkatunnus > 0
-							AND keikkatunnus = {$otunnus}
+							AND keikkatunnus != 0
+							AND keikkatunnus LIKE '%{$otunnus}%'
 							AND tila = ''
 							AND sscc = '".t("Suoratoimitus")."'";
 				$chk_suuntalava_res = pupe_query($query);
@@ -250,7 +250,7 @@
 			if ($suuntalavan_tunnus > 0) {
 				$data['suuntalava'] = $suuntalavan_tunnus;
 
-				$query = "	SELECT sscc
+				$query = "	SELECT sscc, keikkatunnus
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
@@ -258,6 +258,15 @@
 				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
+
+				if (strpos($sscc_fetch_row['keikkatunnus'], trim($otunnus)) === FALSE) {
+
+					$query = "	UPDATE suuntalavat SET
+								keikkatunnus = '{$sscc_fetch_row['keikkatunnus']},{$otunnus}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$suuntalavan_tunnus}'";
+					$upd_res = pupe_query($query);
+				}
 			}
 			else {
 				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti

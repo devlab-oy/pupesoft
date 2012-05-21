@@ -1764,7 +1764,7 @@
 					$query = "	UPDATE suuntalavat SET
 								keikkatunnus = '{$keikoilla[0]['uusiotunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND keikkatunnus = '{$hinta_chk_row['uusiotunnus']}'
+								AND keikkatunnus LIKE '%{$hinta_chk_row['uusiotunnus']}%'
 								AND tunnus = '{$hinta_chk_row['suuntalava']}'";
 					echo "<pre>$query</pre>";
 					$suuntalava_upd_res = pupe_query($query);

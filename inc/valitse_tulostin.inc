@@ -270,7 +270,7 @@
 						FROM suuntalavat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tila 	= 'S'
-						AND keikkatunnus = '{$otunnus}'
+						AND keikkatunnus LIKE '%{$otunnus}%'
 						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 

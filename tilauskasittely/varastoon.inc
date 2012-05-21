@@ -73,6 +73,7 @@ if ($kauttalaskutus == '') {
 						<th valign='top'>".t("Varastoonvientip‰iv‰")."</th>";
 
 	if ($toiminto == "kalkyyli" and ($tee == '' or $tee == 'varastoon') and $yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+		$varastoon_msg .= "<th valign='top'>".t("Saapuminen")."</th>";
 		$varastoon_msg .= "<th valign='top'>".t("Suuntalava")."</th>";
 	}
 
@@ -117,9 +118,20 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+
+		$query = "	SELECT keikkatunnus
+					FROM suuntalavat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
 	}
 
@@ -129,8 +141,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-				$suuntalavajoin
-				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+				{$suuntalavajoin}
+				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
@@ -139,9 +151,20 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
 
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+
+		$query = "	SELECT keikkatunnus
+					FROM suuntalavat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
 	}
 
@@ -150,8 +173,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-				$suuntalavajoin
-				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+				{$suuntalavajoin}
+				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
@@ -811,6 +834,13 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+
+			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['uusiotunnus']}'";
+			$saapuminen_chk_res = pupe_query($query);
+			$saapuminen_chk_row = mysql_fetch_assoc($saapuminen_chk_res);
+
+			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
+
 			$query = "	SELECT sscc
 						FROM suuntalavat
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -833,6 +863,13 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$varastoon_msg .= "<td valign='top' nowrap>".tv1dateconv("$vpvva-$vpkka-$vpppa")."</td>";
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+
+			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['uusiotunnus']}'";
+			$saapuminen_chk_res = pupe_query($query);
+			$saapuminen_chk_row = mysql_fetch_assoc($saapuminen_chk_res);
+
+			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
+
 			$query = "	SELECT sscc
 						FROM suuntalavat
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1041,7 +1078,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 		$cspani++;
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani++;
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani += 2;
 
 	echo "<tr><td align='center' class='tumma'><input type='checkbox' name='var' onclick='toggleAll(this);'></td>";
 
@@ -1105,7 +1142,7 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 		$cspani++;
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani++;
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani += 2;
 
 	echo "<td colspan='$cspani' class='back' align='right'>".t("Yhteens‰").":</th><td align='right'>".sprintf("%.2f", $summa)."</td>";
 }
@@ -1153,12 +1190,19 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
+		$query = "	SELECT keikkatunnus
+					FROM suuntalavat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
 		// p‰ivitet‰‰n suuntalava puretuksi
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
 		 			SET suuntalavat.tila = 'P'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
 					AND tilausrivi.netto 		= ''
 					AND tilausrivi.kpl 		   != 0
 					AND tilausrivi.tyyppi 		= 'O'
@@ -1173,7 +1217,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		 			SET tilausrivi.netto = '',
 					suuntalavat.tila 	 = 'S'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
 					AND tilausrivi.netto 		= 'X'
 					AND tilausrivi.kpl 			= 0
 					AND tilausrivi.varattu 	   != 0
@@ -1190,7 +1234,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
 			 			SET tilausrivi.suuntalava = 0
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-						AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
 						AND tilausrivi.netto 		= ''
 						AND tilausrivi.kpl 		   != 0
 						AND tilausrivi.tyyppi 		= 'O'

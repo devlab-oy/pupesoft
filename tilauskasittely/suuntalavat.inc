@@ -216,16 +216,15 @@
 			$paino = str_replace(",", ".", $paino);
 			$korkeus = str_replace(",", ".", $korkeus);
 
-			if ($kaytettavyys == 'Y') {
-				$keikkatunnus = $otunnus;
-			}
-			else {
-				$keikkatunnus = 0;
-			}
+			$keikkatunnus = $otunnus;
 
 			if (trim($suuntalavan_tunnus) != '') {
 
-				$query = "SELECT keraysvyohyke FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+				$query = "	SELECT keraysvyohyke, 
+							keikkatunnus 
+							FROM suuntalavat 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND tunnus = '{$suuntalavan_tunnus}'";
 				$keraysvyohyke_chk_res = pupe_query($query);
 				$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
 
@@ -255,9 +254,11 @@
 					}
 				}
 
+				$keikkatunnuslisa = strpos($keraysvyohyke_chk_row['keikkatunnus'], $keikkatunnus) !== FALSE ? $keikkatunnus : "{$keraysvyohyke_chk_row['keikkatunnus']},{$keikkatunnus}";
+
 				$query = "	UPDATE suuntalavat SET
 							sscc 				= '{$sscc}',
-							keikkatunnus 		= '{$keikkatunnus}',
+							keikkatunnus 		= '{$keikkatunnuslisa}',
 							alkuhyllyalue 		= '{$alkuhyllyalue}',
 							alkuhyllynro 		= '{$alkuhyllynro}',
 							alkuhyllyvali 		= '{$alkuhyllyvali}',
@@ -545,13 +546,13 @@
 		echo "</select>{$virheviesti['keraysvyohyke']}</td></tr>";
 
 		$sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
-		// $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
+		$sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
 		echo "<tr><th>",t("Käytettävyys"),"</th>";
 		echo "<td><select name='kaytettavyys'>";
 		// echo "<option value=''>",t("Valitse"),"</option>";
 		echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
-		// echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
+		echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
 		echo "</select>{$virheviesti['kaytettavyys']}</td></tr>";
 
 		echo "<tr><th>",t("Terminaalialue"),"</th>";
@@ -688,7 +689,7 @@
 		echo "<th>",t("Varastopaikkaväli"),"</th>";
 		echo "<th>",t("Tyyppi"),"</th>";
 		echo "<th>",t("Keräysvyohyke"),"</th>";
-		#echo "<th>",t("Käytettavyys"),"</th>";
+		echo "<th>",t("Käytettavyys"),"</th>";
 		echo "<th>",t("Terminaalialue"),"</th>";
 		echo "<th>",t("Korkeus"),"</th>";
 		echo "<th>",t("Paino"),"</th>";
@@ -698,7 +699,7 @@
 					FROM suuntalavat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila != 'P'
-					AND ((kaytettavyys = 'Y' AND keikkatunnus = '{$otunnus}') OR (kaytettavyys = 'L'))
+					AND ((kaytettavyys = 'Y' AND keikkatunnus LIKE '%{$otunnus}%') OR kaytettavyys = 'L')
 					ORDER BY sorttaus";
 		$suuntalavat_result = pupe_query($query);
 
@@ -740,7 +741,7 @@
 			echo $keraysvyohyke_row['nimitys'];
 
 			echo "</td>";
-			#echo "<td>{$suuntalavat_row['kaytettavyys']}</td>";
+			echo "<td>{$suuntalavat_row['kaytettavyys']}</td>";
 			echo "<td>{$suuntalavat_row['terminaalialue']}</td>";
 			echo "<td>{$suuntalavat_row['korkeus']}</td>";
 			echo "<td>{$suuntalavat_row['paino']}</td>";

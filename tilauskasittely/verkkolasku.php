@@ -2636,15 +2636,17 @@
 					// Tuotanto
 					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-					// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+					// Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
 					$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
 					$maventa_laskumaara = count($maventa_laskuarray);
 
 					if ($maventa_laskumaara > 0) {
+						require_once("tilauskasittely/tulosta_lasku.inc");
+
 						for ($a = 1; $a < $maventa_laskumaara; $a++) {
 							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
+							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], $kieli);
 
 							$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
 						}

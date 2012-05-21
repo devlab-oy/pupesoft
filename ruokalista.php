@@ -180,7 +180,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Maanantai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta01' cols='40' rows='7'>";
 			
-	for($b=0; $b<sizeof(${$viikko}[1]); $b++) {
+	for($b=0; $b<count(${$viikko}[1]); $b++) {
 		echo ${$viikko}[1][$b]."\n";
 	}
 			
@@ -191,7 +191,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Tiistai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta02' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[2]); $b++) {
+	for($b=0; $b<count(${$viikko}[2]); $b++) {
 		echo ${$viikko}[2][$b]."\n";
 	}
 	
@@ -202,7 +202,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Keskiviikko")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta03' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[3]); $b++) {
+	for($b=0; $b<count(${$viikko}[3]); $b++) {
 		echo ${$viikko}[3][$b]."\n";
 	}
 	
@@ -212,7 +212,7 @@ if ($tee == "AMERIKA") {
 		<tr>
 			<th>".t("Torstai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta04' cols='40' rows='7'>";
-	for($b=0; $b<sizeof(${$viikko}[4]); $b++) {
+	for($b=0; $b<count(${$viikko}[4]); $b++) {
 		echo ${$viikko}[4][$b]."\n";
 	}
 	echo "	</textarea></td>
@@ -222,7 +222,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Perjantai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta05' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[5]); $b++) {
+	for($b=0; $b<count(${$viikko}[5]); $b++) {
 		echo ${$viikko}[5][$b]."\n";
 	}
 	

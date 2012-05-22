@@ -3440,15 +3440,18 @@ if (!function_exists('print_pdf_lahete')) {
 					elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 						echo t("Ylläpitosopimus tulostuu")."...<br>";
 
-						$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tilaus"]);
+						$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
 					}
 					else {
 						if (!isset($ei_echoa) or trim($ei_echoa) == '') {
 							echo t("Lähete tulostuu")."...<br>";
 						}
 
-						$kutsu = t("Lähete %s", $kieli, $laskurow["tilaus"]);
+						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 					}
+
+
+					$newfilename = str_replace(" ", "_", $kutsu);
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3464,7 +3467,7 @@ if (!function_exists('print_pdf_lahete')) {
 										"body"			=> $content_body,
 										"attachements"	=> array(0 	=> array(
 																	"filename"		=> $liite,
-																	"newfilename"	=> "",
+																	"newfilename"	=> $newfilename,
 																	"ctype"			=> "pdf"),
 										)
 									);

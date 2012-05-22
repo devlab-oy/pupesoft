@@ -212,9 +212,9 @@
 		$rtuoteno			= array();
 		$laskuttajan_toimittajanumero = "";
 
-		$query = "	SELECT * 
-					FROM asn_sanomat 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
+		$query = "	SELECT *
+					FROM asn_sanomat
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND status != 'E'
 					{$wherelisa}";
 		$kollires = pupe_query($query);
@@ -1125,18 +1125,18 @@
 
 			$alatilalisa = $valitse == 'asn' ? " AND lasku.alatila != 'X' " : "";
 
-			$query = "	SELECT DISTINCT tilausrivi.tunnus, 
-						tilausrivi.tuoteno, 
+			$query = "	SELECT DISTINCT tilausrivi.tunnus,
+						tilausrivi.tuoteno,
 						tilausrivi.otunnus,
-						tilausrivi.varattu, 
-						tilausrivi.kpl, 
-						tilausrivi.tilaajanrivinro, 
+						tilausrivi.varattu,
+						tilausrivi.kpl,
+						tilausrivi.tilaajanrivinro,
 						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus,
 						IF(lasku.tila = 'O', lasku.laskunro, 0) AS onko_lasku
 						FROM lasku
 						JOIN tilausrivi ON (
-							tilausrivi.yhtio = lasku.yhtio 
-							AND tilausrivi.tyyppi = 'O' 
+							tilausrivi.yhtio = lasku.yhtio
+							AND tilausrivi.tyyppi = 'O'
 							AND (tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
 							{$tilaajanrivinrolisa}
 							{$tuotenolisa}
@@ -1788,7 +1788,7 @@
 				echo "<td>{$row['swift']}</td>";
 				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
+				#echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {

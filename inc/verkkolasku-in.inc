@@ -411,7 +411,7 @@
 				// 6 etsit‰‰n toimittaja vat-numerolla ilman FI-etuliitett‰
 				$query  = "	SELECT *
 							FROM toimi
-							WHERE ytunnus in ('$intvat', '$intvat2')
+							WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";

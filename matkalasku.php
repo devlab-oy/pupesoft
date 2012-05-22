@@ -330,7 +330,7 @@ if ($tee != "") {
 						if (($ylitunnit > 10 and $paivat == 0) or ($ylitunnit > 6 and $paivat > 0)) {
 							$paivat++;
 						}
-						elseif (($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) {
+						elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) and $trow["vienti"] == "FI") {
 
 							//	Tarkastetaan että päivärahalle on puolipäiväraha
 							$query = "	SELECT *

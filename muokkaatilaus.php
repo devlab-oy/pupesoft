@@ -1736,6 +1736,10 @@
 							$laskutyyppi = "Myyntitili";
 						}
 
+						if ($row["tila"] == "G" and $row["tilaustyyppi"] == "M" and $row["alatila"] == "V") {
+							$alatila = "Toimitettu asiakkaalle";
+						}
+
 						if (isset($row["varastokpl"]) and $row["varastokpl"] > 0) {
 							$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
 						}

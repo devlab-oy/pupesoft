@@ -704,7 +704,8 @@
 			$miinus = 3;
 		}
 		elseif ($toim == "MYYNTITILI") {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -725,10 +726,11 @@
 				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "MYYNTITILISUPER") {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -750,10 +752,11 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "MYYNTITILITOIMITA") {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -775,7 +778,7 @@
 				 $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "JTTOIMITA") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
@@ -1720,14 +1723,21 @@
 						elseif ($row["tila"] == "V" and  $row["tilaustyyppi"] == "W") {
 							$tarkenne = " (".t("Varastoon").") ";
 						}
-						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
+						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
 							$tarkenne = " (".t("Reklamaatio").") ";
 						}
-						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
+						elseif (($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
 							$laskutyyppi = "Työmääräys";
 						}
-						elseif($row["tila"] == "N" and $row["tilaustyyppi"] == "E") {
+						elseif ($row["tila"] == "N" and $row["tilaustyyppi"] == "E") {
 							$laskutyyppi = "Ennakkotilaus kesken";
+						}
+						elseif ($row["tila"] == "G" and $row["tilaustyyppi"] == "M") {
+							$laskutyyppi = "Myyntitili";
+						}
+
+						if ($row["tila"] == "G" and $row["tilaustyyppi"] == "M" and $row["alatila"] == "V") {
+							$alatila = "Toimitettu asiakkaalle";
 						}
 
 						if (isset($row["varastokpl"]) and $row["varastokpl"] > 0) {

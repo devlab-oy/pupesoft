@@ -300,6 +300,16 @@
 
 			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
 			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
+
+			// Hylätään viite jos se on nollaa
+			if (is_numeric($viite) and (int) $viite == 0) {
+				$viite = "";
+
+				// Setataan viesti
+				if (trim($laskun_numero) != "") $viesti = $laskun_numero;
+				else $viesti = "Lasku: $summa $valkoodi";
+			}
+
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 

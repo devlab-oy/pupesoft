@@ -3472,6 +3472,9 @@ if (!function_exists('print_pdf_lahete')) {
 						$content_body .= $yhtiorow["nimi"]."\n";
 					}
 
+
+					$newfilename = str_replace(" ", "_", $kutsu);
+
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
@@ -3486,7 +3489,7 @@ if (!function_exists('print_pdf_lahete')) {
 										"body"			=> $content_body,
 										"attachements"	=> array(0 	=> array(
 																	"filename"		=> $liite,
-																	"newfilename"	=> "",
+																	"newfilename"	=> $newfilename,
 																	"ctype"			=> "pdf"),
 										)
 									);

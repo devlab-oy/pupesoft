@@ -586,6 +586,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$(document).ready(function(){
 					$('form').submit(function(){
 
+						// Erikseen speksattu, etta saa submitata useita kertoja
+						if ($(this).attr('class') == 'multisubmit') {
+							return true;
+						}
+
 						if (!submitattu) {
 							$(this).children('[type=\"submit\"]').each(function() {
 								$(this).css('width', $(this).outerWidth()).val('Ladataan...');

@@ -3,7 +3,10 @@
 	require ("../inc/parametrit.inc");
 
 	if ($toim == "MYYNTITILI") {
-		echo "<font class='head'>".t("Toimita myyntitili").":</font><hr>";
+		echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
+	}
+	elseif ($toim == "MYYNTITILIVASTAANOTA") {
+		echo "<font class='head'>".t("Vastaanota myyntitili asiakkaalta").":</font><hr>";
 	}
 	else {
 		echo "<font class='head'>".t("Vastaanota siirtolista").":</font><hr>";
@@ -19,7 +22,7 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$alkuresult = pupe_query($query);
 
-			while($alkurow = mysql_fetch_array($alkuresult)) {
+			while ($alkurow = mysql_fetch_assoc($alkuresult)) {
 
 				$bpaikka = explode(' ', $alkurow["kommentti"]);
 
@@ -103,7 +106,6 @@
 
 			while (!feof($file)) {
 
-
 				$tuoteno  	= '';
 				$varattu  	= '';
 				$teksti   	= '';
@@ -139,7 +141,7 @@
 
 
 					if (mysql_num_rows($alkuresult) == 1) {
-						$alkurow = mysql_fetch_array($alkuresult);
+						$alkurow = mysql_fetch_assoc($alkuresult);
 
 						$bpaikka = explode('#', $bvarasto);
 
@@ -153,7 +155,7 @@
 				}
 
 				$rivi = fgets($file, 4096);
-			} // end while eof
+			}
 		}
 	}
 
@@ -179,7 +181,7 @@
 						and tilausrivi.tyyppi='G'
 						and tilausrivi.toimitettu=''";
 			$result = pupe_query($query);
-			$tilausrivirow = mysql_fetch_array($result);
+			$tilausrivirow = mysql_fetch_assoc($result);
 
 			if (mysql_num_rows($result) != 1) {
 				echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
@@ -263,7 +265,7 @@
 										and tunnus 	= '$uusipaikka'
 										and tuoteno	= '$tilausrivirow[tuoteno]'";
 							$result = pupe_query($query);
-							$paikkarow = mysql_fetch_array($result);
+							$paikkarow = mysql_fetch_assoc($result);
 
 							if ($toim == "MYYNTITILI") {
 								echo "<font class='message'>".t("Tuote")." $tilausrivirow[tuoteno] ".t("siirretty myyntitiliin").".</font><br>";
@@ -289,7 +291,7 @@
 					}
 				}
 				else {
-					$paikkarow = mysql_fetch_array($result);
+					$paikkarow = mysql_fetch_assoc($result);
 
 					if ($paikkarow["inventointilista_aika"] > 0) {
 						echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
@@ -322,7 +324,7 @@
 						and hyllytaso	= '$tilausrivirow[hyllytaso]'
 						and tuoteno		= '$tilausrivirow[tuoteno]'";
 			$presult = pupe_query($query);
-			$prow = mysql_fetch_array($presult);
+			$prow = mysql_fetch_assoc($presult);
 
 			if ($prow["inventointilista_aika"] > 0) {
 				echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
@@ -369,7 +371,7 @@
 
 			}
 			else {
-				$tilausrivirow = mysql_fetch_array($result);
+				$tilausrivirow = mysql_fetch_assoc($result);
 
 				$tuoteno = $tilausrivirow["tuoteno"];
 				$asaldo  = $tilausrivirow["varattu"];
@@ -394,7 +396,7 @@
 						exit;
 					}
 					else {
-						$prow = mysql_fetch_array($presult);
+						$prow = mysql_fetch_assoc($presult);
 
 						$mista = $prow["tunnus"];
 					}
@@ -414,7 +416,7 @@
 						echo "<font style='error'>".t("VIRHE: Vastaanottavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
 					}
 					else {
-						$prow = mysql_fetch_array($presult);
+						$prow = mysql_fetch_assoc($presult);
 
 						$minne = $prow["tunnus"];
 						$uusiol = $prow["tunnus"];
@@ -430,7 +432,7 @@
 
 						$sarjano_array = array();
 
-						while ($sarjarow = mysql_fetch_array($sarjares)) {
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 							if ($tilausrivirow["sarjanumeroseuranta"] == "E" or $tilausrivirow["sarjanumeroseuranta"] == "F" or $tilausrivirow["sarjanumeroseuranta"] == "G") {
 								// eränumeroseurannassa pitää etsiä ostotunnuksella erä josta kappaleeet otetaan
 
@@ -453,7 +455,7 @@
 
 								// jos löytyy ostettuja eriä myytäväks niin mennään tänne
 								if (mysql_num_rows($erajaljella_res) == 1) {
-									$erajaljella_row = mysql_fetch_array($erajaljella_res);
+									$erajaljella_row = mysql_fetch_assoc($erajaljella_res);
 
 
 
@@ -476,7 +478,7 @@
 					if ($eancheck[$tun]!='' and $kirjoitin!='') {
 						$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
 						$komres = pupe_query($query);
-						$komrow = mysql_fetch_array($komres);
+						$komrow = mysql_fetch_assoc($komres);
 						$komento = $komrow['komento'];
 
 						for($a = 0; $a < $tkpl; $a++) {
@@ -555,7 +557,7 @@
 			//päivitetään otsikko vastaanotetuksi ja tapvmmään päivä
 			$query  = "select sum(rivihinta) rivihinta from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$id' and tyyppi='G'";
 			$result = pupe_query($query);
-			$apusummarow = mysql_fetch_array($result);
+			$apusummarow = mysql_fetch_assoc($result);
 
 			$query = "	UPDATE lasku
 						SET alatila							= 'V',
@@ -576,11 +578,11 @@
 
 		$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$result = pupe_query($query);
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
 		$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
 		$komres = pupe_query($query);
-		$komrow = mysql_fetch_array($komres);
+		$komrow = mysql_fetch_assoc($komres);
 		$komento["Vastaanotetut"] = $komrow['komento'];
 
 		$otunnus = $laskurow["tunnus"];
@@ -609,7 +611,7 @@
 		echo "<tr>";
 		echo "<th>";
 
-		if ($toim == "MYYNTITILI") {
+		if ($toim == "MYYNTITILI" or $toim == "MYYNTITILIVASTAANOTA") {
 			echo t("Etsi myyntitili");
 		}
 		else {
@@ -630,7 +632,7 @@
 					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 
-		while ($varow = mysql_fetch_array($vares)) {
+		while ($varow = mysql_fetch_assoc($vares)) {
 			$sel='';
 			if ($varow['tunnus'] == $varasto) $sel = 'selected';
 
@@ -653,7 +655,7 @@
 
 		echo "<option value=''>" . t('Kaikki maat') . "</option>";
 
-		while ($maarow = mysql_fetch_array($vresult)) {
+		while ($maarow = mysql_fetch_assoc($vresult)) {
 			$sel = ($maarow['koodi'] == $_POST['maa']) ? 'selected' : '';
 
 			echo "<option value='{$maarow['koodi']}' $sel>{$maarow['nimi']}</option>";
@@ -665,9 +667,10 @@
 		if (is_string($etsi))  $haku = " and nimi LIKE '%$etsi%' ";
 		if (is_numeric($etsi)) $haku = " and tunnus='$etsi' ";
 
-		$myytili = "";
+		$myytili = " and tilaustyyppi != 'M' ";
+
 		if ($toim == "MYYNTITILI") {
-			$myytili = " and tilaustyyppi='M' ";
+			$myytili = " and tilaustyyppi = 'M' ";
 		}
 
 		$varasto = '';
@@ -680,21 +683,22 @@
 			$varasto = " AND varastopaikat.maa='" . mysql_real_escape_string($_POST['maa']) . "'";
 		}
 
-		$query = "	SELECT otunnus
+		$query = "	SELECT tilausrivi.otunnus
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio = tilausrivi.yhtio
 						and lasku.tunnus = tilausrivi.otunnus
 						and lasku.tila = 'G'
 						and lasku.alatila in ('C','B','D')
+						$myytili
 					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
-					and toimitettu = ''
-					and keratty != ''
+					and tilausrivi.toimitettu = ''
+					and tilausrivi.keratty != ''
 					$varasto
-					GROUP BY otunnus";
+					GROUP BY tilausrivi.otunnus";
 		$tilre = pupe_query($query);
 
-		while ($tilrow = mysql_fetch_array($tilre)) {
+		while ($tilrow = mysql_fetch_assoc($tilre)) {
 
 			if ($toim == "MYYNTITILI") {
 				$qnimi1 = 'Myyntitili';
@@ -708,7 +712,7 @@
 			// etsitään sopivia tilauksia
 			$query = "	SELECT tunnus '$qnimi1', nimi '$qnimi2', date_format(luontiaika, '%Y-%m-%d') Laadittu, Laatija
 						FROM lasku
-						WHERE tunnus = '$tilrow[0]'
+						WHERE tunnus = '$tilrow[otunnus]'
 						and tila = 'G'
 						$haku
 						$myytili
@@ -720,7 +724,7 @@
 			//piirretään taulukko...
 			if (mysql_num_rows($result) != 0) {
 
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_row($result)) {
 					// piirretään vaan kerran taulukko-otsikot
 					if ($boob == '') {
 						$boob = 'kala';
@@ -747,7 +751,6 @@
 					else {
 						echo "<input type='submit' name='tila' value='".t("Vastaanota")."'></td></tr></form>";
 					}
-
 				}
 			}
 		}
@@ -759,6 +762,9 @@
 			if ($toim == "MYYNTITILI") {
 				echo "<font class='message'>".t("Yhtään toimitettavaa myyntitiliä ei löytynyt")."...</font>";
 			}
+			elseif ($toim == "MYYNTITILIVASTAANOTA") {
+				echo "<font class='message'>".t("Yhtään vastaanotettavaa myyntitiliä ei löytynyt")."...</font>";
+			}
 			else {
 				echo "<font class='message'>".t("Yhtään vastaanotettavaa siirtolistaa ei löytynyt")."...</font>";
 			}
@@ -769,6 +775,10 @@
 		if ($toim == "MYYNTITILI") {
 			$qnimi1 = 'Myyntitili';
 			$qnimi2 = 'Vastaanottaja';
+		}
+		elseif ($toim == "MYYNTITILIVASTAANOTA") {
+			$qnimi1 = 'Myyntitili';
+			$qnimi2 = 'Vastaanottava varasto';
 		}
 		else {
 			$qnimi1 = 'Siirtolista';
@@ -790,7 +800,7 @@
 					and yhtio = '$kukarow[yhtio]'
 					and alatila in ('B','C','D')";
 		$result = pupe_query($query);
-		$row = mysql_fetch_array($result);
+		$row = mysql_fetch_row($result);
 
 		echo "<table>";
 
@@ -874,7 +884,7 @@
 						and alkuhyllyalue = '!!M'
 						and loppuhyllyalue = '!!M'";
 			$tresult = pupe_query($query);
-			$mrow = mysql_fetch_array($tresult);
+			$mrow = mysql_fetch_assoc($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
 		}
 
@@ -901,7 +911,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$row[clearing]'";
 		$vares = pupe_query($query);
-		$varow = mysql_fetch_array($vares);
+		$varow = mysql_fetch_assoc($vares);
 
 		$lisa = " and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
 		$lisa .= " and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
@@ -952,7 +962,7 @@
 			echo "<th>".t("Tarrat")."</th></tr>";
 		}
 
-		while ($rivirow = mysql_fetch_array ($result)) {
+		while ($rivirow = mysql_fetch_assoc($result)) {
 
 			if ($rivirow["ei_saldoa"] == "") {
 				$query = "	SELECT tuotepaikat.hyllyalue t1, tuotepaikat.hyllynro t2, tuotepaikat.hyllyvali t3, tuotepaikat.hyllytaso t4,
@@ -963,7 +973,7 @@
 							$lisa
 							ORDER BY sorttauskentta";
 				$presult = pupe_query($query);
-				$privirow = mysql_fetch_array ($presult);
+				$privirow = mysql_fetch_assoc ($presult);
 			}
 			else {
 				$privirow = array();
@@ -1057,7 +1067,7 @@
 					if (mysql_num_rows($vares) > 1) {
 						echo "<td><select name='rivivarasto[$rivirow[tunnus]]'><option value='x'>Ei muutosta";
 
-						while ($varow = mysql_fetch_array($vares)) {
+						while ($varow = mysql_fetch_assoc($vares)) {
 							$sel='';
 	//						if ($varow['tunnus'] == $varasto) $sel = 'selected';
 							echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
@@ -1069,7 +1079,7 @@
 						echo "<input type='hidden' name='rivivarasto[$rivirow[tunnus]]' value=''>";
 
 						if (mysql_num_rows($vares) == 1) {
-							$varow = mysql_fetch_array($vares);
+							$varow = mysql_fetch_assoc($vares);
 
 							echo "<td>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</td>";
 						}
@@ -1087,7 +1097,7 @@
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]'";
 				$eanres = pupe_query($query);
-				$eanrow = mysql_fetch_array($eanres);
+				$eanrow = mysql_fetch_assoc($eanres);
 				$eankoodi = $eanrow['eankoodi'];
 
 				if ($eankoodi== 0) {
@@ -1121,12 +1131,14 @@
 		if ($toim != "MYYNTITILI") {
 			echo "<table><tr><td>";
 			echo t("Kirjoitin johon tuotetarrat tulostetaan")."<br>";
-			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]'";
+
+			$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]'";
 			$kires = pupe_query($query);
+
 			echo "<select name='kirjoitin'>";
 			echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";
 
-			while ($kirow=mysql_fetch_array($kires)) {
+			while ($kirow = mysql_fetch_assoc($kires)) {
 				if ($kirow['tunnus']==$kirjoitin) $select='SELECTED';
 				else $select = '';
 
@@ -1141,7 +1153,7 @@
 			echo "<select name='listaus'>";
 			echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";
 
-			while ($kirow=mysql_fetch_array($kires)) {
+			while ($kirow=mysql_fetch_assoc($kires)) {
 				if ($kirow['tunnus']==$listaus) $select='SELECTED';
 				else $select = '';
 
@@ -1158,6 +1170,9 @@
 
 		if ($toim == "MYYNTITILI") {
 			echo "<input type='submit' name='Laheta' value='".t("Toimita myyntitili")."'>";
+		}
+		elseif ($toim == "MYYNTITILIVASTAANOTA") {
+			echo "<input type='submit' name='Laheta' value='".t("Vastaanota myyntitili")."'>";
 		}
 		else {
 			echo "<input type='submit' name='Laheta' value='".t("Vastaanota siirtolista")."'>";

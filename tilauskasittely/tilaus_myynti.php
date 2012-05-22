@@ -2488,20 +2488,37 @@ if ($tee == '') {
 		if ($toim == "VALMISTAVARASTOON") {
 			echo "<th align='left'>".t("Varastot").":</th>";
 			echo "<td>$laskurow[ytunnus] $laskurow[nimi]</td>";
-			echo "<th align='left'>&nbsp;</th>";
-			echo "<td>&nbsp;</td>";
+			echo "<th>".t("Toimituspäivä").":</td>";
+			echo "<td>";
+			echo tv1dateconv($laskurow["toimaika"]);
+			echo "</td>";
 		}
 		else {
-			echo "<th>".t("Ytunnus").":</th><td>";
+
+			echo "<th>".t("Ytunnus");
+
+			if ($faktarow["asiakasnro"] != "") {
+				echo " / ".t("Asiakasnro");
+			}
+
+			echo ":</th><td>";
 
 			if ($laskurow["liitostunnus"] == 0) {
-				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'></td>";
+				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
 			}
 			else {
-				echo "$laskurow[ytunnus] </td>";
+				echo "$laskurow[ytunnus]";
+
+				if ($faktarow["asiakasnro"] != "") {
+					echo " / $faktarow[asiakasnro]";
+				}
 			}
 
-			echo "<th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
+			echo "</td>";
+			echo "<th>".t("Toimituspäivä").":</td>";
+			echo "<td>";
+			echo tv1dateconv($laskurow["toimaika"]);
+			echo "</td>";
 			echo "</tr>";
 
 			echo "<tr>$jarjlisa";

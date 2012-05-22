@@ -109,7 +109,7 @@
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
-					elseif (strpos($file, "_invoice") !== false){
+					elseif (strpos($file, "teccominvoice") !== false){
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
 					}

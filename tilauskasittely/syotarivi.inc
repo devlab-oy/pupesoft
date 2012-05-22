@@ -496,7 +496,7 @@
 			echo "<input type='hidden' name='toimppa' value='$toimppa'>";
 			echo "<input type='hidden' name='toimkka' value='$toimkka'>";
 			echo "<input type='hidden' name='toimvva' value='$toimvva'>";
-			$kommentit_columns = 99;
+			$kommentit_columns = 75;
 		}
 
 		echo "<td valign='top' colspan='".($nrospanni-$nrospanni_vah)."'><textarea name='kommentti' cols='$kommentit_columns' rows='2' wrap='soft'>$kommentti</textarea></td>";

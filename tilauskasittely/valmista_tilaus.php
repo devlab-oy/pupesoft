@@ -909,7 +909,7 @@
 			echo "<th>".t("Valmistetaan")."</th>";
 			echo "<th>".t("Valmistettu")."</th>";
 			echo "<th>".t("Kommentti")."</th>";
-			echo "<th>".t("Toimaka")."</th>";
+			echo "<th>".t("Toimaika")."</th>";
 			echo "<th>".t("Keräysaika")."</th>";
 
 			if ($toim != 'KORJAA' and $toim != 'TUTKAA') {

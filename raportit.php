@@ -58,13 +58,13 @@ if ($excel == "YES") {
 
 require ("inc/".$toim.".inc");
 
-if (isset($workbook) and $excelrivi>0) {
+if (isset($workbook) and $excelrivi > 0) {
 	// We need to explicitly close the workbook
 	$workbook->close();
 
 	echo "<br><br><table>";
 	echo "<tr><th>".t("Tallenna Excel").":</th>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post' class='multisubmit'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 	echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($toim)).".xls'>";

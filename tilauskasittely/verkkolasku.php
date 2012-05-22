@@ -2556,7 +2556,7 @@
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					$silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2606,15 +2606,17 @@
 					// Tuotanto
 					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-					// Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
+					// Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
 					$maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
 					$maventa_laskumaara = count($maventa_laskuarray);
 
 					if ($maventa_laskumaara > 0) {
+						require_once("tilauskasittely/tulosta_lasku.inc");
+
 						for ($a = 1; $a < $maventa_laskumaara; $a++) {
 							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
+							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], $kieli);
 
 							$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
 						}
@@ -2661,7 +2663,7 @@
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					$silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2720,7 +2722,7 @@
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					$silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2769,7 +2771,7 @@
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					$silari = mail($yhtiorow["talhal_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2951,7 +2953,7 @@
 				$content .= "\n";
 				$content .= "--$bound--\n";
 
-				mail($yhtiorow["alert_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow["talhal_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 		}
 

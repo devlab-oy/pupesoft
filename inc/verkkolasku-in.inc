@@ -241,10 +241,10 @@
 			}
 
 			if (!isset($yhtiorow) and $luolasku === TRUE) {
-				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "	SELECT distinct yhtio nimi, alert_email, postittaja_email
+				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin talhal-meileihin!
+				$query = "	SELECT distinct yhtio nimi, talhal_email, postittaja_email
 							FROM yhtion_parametrit
-							WHERE alert_email != ''
+							WHERE talhal_email != ''
 							AND postittaja_email != ''";
 				$result = pupe_query($query);
 
@@ -257,7 +257,7 @@
 				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
 				while ($yhtiorow = mysql_fetch_assoc($result)) {
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				}
 
 				return ($return);
@@ -300,6 +300,16 @@
 
 			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
 			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
+
+			// Hylätään viite jos se on nollaa
+			if (is_numeric($viite) and (int) $viite == 0) {
+				$viite = "";
+
+				// Setataan viesti
+				if (trim($laskun_numero) != "") $viesti = $laskun_numero;
+				else $viesti = "Lasku: $summa $valkoodi";
+			}
+
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 
@@ -475,7 +485,7 @@
 
 					$return .= "Laskun kuva: $url\n";
 
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 					return ($return);
 				}
@@ -771,7 +781,7 @@
 
 					if (mysql_num_rows($avainresult) != 1) {
 						$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 					else {
@@ -805,7 +815,7 @@
 
 				if (!checkdate($erk, $erp, $erv)) {
 					$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
@@ -847,12 +857,12 @@
 				if ($krk > 0 and $krp > 0 and $krv > 0 and $kassaale != 0) {
 					if (!checkdate($krk, $krp, $krv)) {
 						$return .= "Virheellinen kassaeräpvm '$krv-$krk-$krp' kassaale '$kassaale'\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 					elseif ($kassaale == 0) {
 						$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 				}
@@ -876,26 +886,26 @@
 
 				if ($summa == 0) {
 					$return .= "Laskulta puuttuu summa!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
 				// Normaali viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 					$return .= "Viite '$viite' on väärin!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 				// RF-viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and  substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
 					$return .= "RF-Viite '$viite' on väärin!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
 				if (isset($viite) and strlen($viite) > 0 and isset($viesti) and strlen($viesti) > 0) {
 					$return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
@@ -904,7 +914,7 @@
 
 				if (mysql_num_rows($result) != 1) {
 					$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
@@ -1689,9 +1699,9 @@
 				// päästiin onnillisesti loppuun
 		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 
-				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				$tulos = mail($yhtiorow['talhal_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>\n";
+				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[talhal_email]<br>\n";
 				return 0;
 			}
 			else {

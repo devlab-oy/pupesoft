@@ -77,10 +77,12 @@
 		$maventa_laskumaara = count($maventa_laskuarray);
 
 		if ($maventa_laskumaara > 0) {
+			require_once("tilauskasittely/tulosta_lasku.inc");
+
 			for ($a = 1; $a < $maventa_laskumaara; $a++) {
 				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], "");
 
 				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
 			}
@@ -979,13 +981,14 @@
 				echo "</table><br><br>";
 
 				if ($virhe == 0) {
-					echo "<table>";
-					echo "<tr><th>".t("Lähetä aineisto uudestaan MAVENTA:lle").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='tee' value='maventa_siirto'>";
 					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-					echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
+					echo "<table>";
+					echo "<tr><th>".t("Lähetä aineisto uudestaan MAVENTA:lle").":</th>";
+					echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr>";
 					echo "</table>";
+					echo "</form>";
 				}
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {

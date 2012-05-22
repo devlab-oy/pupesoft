@@ -92,7 +92,7 @@
 							FROM oikeu
 							WHERE yhtio		= '$kukarow[yhtio]'
 							AND kuka		= '$profiili'
-							AND sovellus	= '$sov'							
+							AND sovellus	= '$sov'
 							AND nimi		= '$nimi'
 							AND alanimi		= '$alanimi'
 							AND profiili	= '$profiili'";
@@ -103,7 +103,7 @@
 								SET paivitys 	= '1'
 								WHERE yhtio		= '$kukarow[yhtio]'
 								AND kuka		= '$profiili'
-								AND sovellus	= '$sov'								
+								AND sovellus	= '$sov'
 								AND nimi		= '$nimi'
 								AND alanimi		= '$alanimi'
 								AND profiili	= '$profiili'";
@@ -147,8 +147,8 @@
 					foreach ($profiilit as $prof) {
 						$query = "	SELECT *
 									FROM oikeu
-									WHERE yhtio	 = '$kukarow[yhtio]' 
-									AND kuka	 = '$prof' 
+									WHERE yhtio	 = '$kukarow[yhtio]'
+									AND kuka	 = '$prof'
 									AND profiili = '$prof'";
 						$pres = pupe_query($query);
 
@@ -177,6 +177,17 @@
 											hidden		= '$trow[hidden]',
 											yhtio		= '$kukarow[yhtio]'";
 								$rresult = pupe_query($query);
+							}
+							elseif ($trow["paivitys"] == 1) {
+								// Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
+								$query = "	UPDATE oikeu SET
+											paivitys = 1
+											WHERE yhtio		= '$kukarow[yhtio]'
+											AND kuka		= '$krow[kuka]'
+											AND sovellus	= '$trow[sovellus]'
+											AND nimi		= '$trow[nimi]'
+											AND alanimi 	= '$trow[alanimi]'";
+								$tarkesult = pupe_query($query);
 							}
 						}
 					}

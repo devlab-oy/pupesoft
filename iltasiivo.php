@@ -185,8 +185,8 @@
 		}
 
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Arkistoitiin $laskuri ostotilausta.\n";
-		
-		
+
+
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 		$lask = 0;
 		$lask2 = 0;
@@ -348,6 +348,7 @@
 					and o2.tunnus is null";
 		$result = mysql_query($query) or pupe_error($query);
 
+		/*
 		// Merkataan myyntitilit valmiiksi, jos niillä ei ole yhtään käsittelemättömiä rivejä
 		$query = "	SELECT lasku.tunnus, sum(tilausrivi.kpl) kpl
 					FROM lasku
@@ -361,7 +362,7 @@
 					GROUP BY lasku.tunnus
 					HAVING kpl = 0";
 		$result = pupe_query($query);
-		
+
 		$myyntitili = 0;
 		while ($laskurow = mysql_fetch_assoc($result)) {
 			$query = "	UPDATE lasku
@@ -371,15 +372,16 @@
 			$update_result = pupe_query($query);
 			$myyntitili++;
 		}
-		
+
 		if ($myyntitili > 0) {
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin $myyntitili myyntitiliä valmiiksi.\n";
 		}
+		*/
 
-		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla		
+		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
 					FROM tuotepaikat
-					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}' 
+					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotepaikat.hyllyalue = '!!M'
 					AND tuotepaikat.oletus = ''
 					AND tuotepaikat.saldo = 0";
@@ -396,7 +398,7 @@
 			require("muuvarastopaikka.php");
 			$myyntitili++;
 		}
-					
+
 		if ($myyntitili > 0) {
 			$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $myyntitili tyhjää myyntitilin varastopaikkaa.\n";
 		}
@@ -414,7 +416,7 @@
 
 				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
-		}				
+		}
 	}
 
 	if (!$php_cli) {

@@ -15739,3 +15739,57 @@ if (!function_exists("pupesoft_sahkoposti")) {
 		return $boob;
 	}
 }
+
+if (!function_exists("ostolaskun_kulujen_tiliointi")) {
+	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = '', $osto_kulu = '', $osto_rivi_kulu = '') {
+
+		global $kukarow, $yhtiorow;
+
+		## TARVITAAN SEURAAVAT MUUTTUJAT:
+		# $tunnus
+		# $laskun_summa
+		# $tiliointirivin_summa
+		# $osto_rahti
+		# $osto_kulu
+		# $osto_rivi_kulu
+		## PALAUTETAAN TILIÖINTIRIVIN MUUTETTU ARVO
+
+		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
+
+			$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
+			$vero = 0;
+
+			if ($ix == 1 and trim($osto_rahti) != '') {
+				$tili 			= $yhtiorow['osto_rahti'];
+				$osto_rahti 	= str_replace(",", ".", $osto_rahti);
+				$summa 			= $osto_rahti * $til_sum_ratio;
+				$bool			= true;
+			}
+			elseif ($ix == 2 and trim($osto_kulu) != '') {
+				$tili 			= $yhtiorow['osto_kulu'];
+				$osto_kulu 		= str_replace(",", ".", $osto_kulu);
+				$summa 			= $osto_kulu * $til_sum_ratio;
+				$bool			= true;
+			}
+			elseif ($ix == 3 and trim($osto_rivi_kulu) != '') {
+				$tili 			= $yhtiorow['osto_rivi_kulu'];
+				$osto_rivi_kulu = str_replace(",", ".", $osto_rivi_kulu);
+				$summa 			= $osto_rivi_kulu * $til_sum_ratio;
+				$bool			= true;
+			}
+			else {
+				$bool = false;
+			}
+
+			if ($bool) {
+				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+
+				require ("inc/teetiliointi.inc");
+			}
+		}
+
+		return $tiliointirivin_summa;
+	}
+}

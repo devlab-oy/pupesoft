@@ -3177,4 +3177,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(explode(",", $trow[$i]), " checked") + array_fill(1, 3, '');
+
+		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ vaihto-omaisuuslaskun kulutilej‰")."</option>";
+		$ulos .= "<option value = '1' {$sel[1]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit tili‰")."</option>";
+		$ulos .= "<option value = '2' {$sel[2]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit ja -kulut tilej‰")."</option>";
+		$ulos .= "<option value = '3' {$sel[3]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit, -kulut ja -tuoterivikohtaiset kulut tilej‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

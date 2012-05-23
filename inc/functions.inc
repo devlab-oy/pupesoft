@@ -15741,7 +15741,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 }
 
 if (!function_exists("ostolaskun_kulujen_tiliointi")) {
-	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0) {
+	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0, $ylikirjataan = false) {
 
 		global $kukarow, $yhtiorow;
 
@@ -15758,10 +15758,13 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		$osto_kulu = (float) $osto_kulu;
 		$osto_rivi_kulu = (float) $osto_rivi_kulu;
 
+		$sign = $ylikirjataan ? -1 : 1;
+
+		$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
+		$vero = 0;
+
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
-			$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
-			$vero = 0;
 
 			if ($ix == 1 and trim($osto_rahti) != 0) {
 				$tili 			= $yhtiorow['osto_rahti'];
@@ -15786,7 +15789,9 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 			}
 
 			if ($bool) {
+
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$summa *= $sign;
 
 				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
 

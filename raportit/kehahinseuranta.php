@@ -85,7 +85,7 @@
 
 
 	//Käyttöliittymä
-	echo "<table><form name='piiri' method='post' action='$PHP_SELF'>";
+	echo "<table><form name='piiri' method='post'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));

@@ -715,7 +715,7 @@
 	// näytetään käyttöliittymä..
 	$abcnimi = $ryhmanimet[$abcrajaus];
 
-	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "	<form method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>
 			<table>";
 
@@ -976,7 +976,7 @@
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio in ($yhtiot)
-				ORDER BY yhtio, nimitys";
+				ORDER BY yhtio, tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 
 	$vlask = 0;

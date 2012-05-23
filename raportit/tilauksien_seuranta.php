@@ -110,7 +110,7 @@ if($tee=="") {
 		while($row=mysql_fetch_array($result)) {
 			echo "	<tr class='aktiivi'>";
 
-			echo "<td><form action = '$PHP_SELF' method = 'post'>
+			echo "<td><form method = 'post'>
 								<input type='hidden' name='tee' value='KORJAA'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$row[tunnus]'>
@@ -173,7 +173,7 @@ if($tee=="") {
 
 if($tee=="" or $tee=="LASKE") {
 	echo "<br><table>";
-	echo "<form action = '$PHP_SELF' method = 'post'>
+	echo "<form method = 'post'>
 			<input type='hidden' name='tee' value='LASKE'>
 			<input type='hidden' name='toim' value='$toim'>
 			<tr><th colspan='3'>".t("Näytä Myynti")."</th></tr>

@@ -333,7 +333,7 @@
 	}
 
 	if ($tee == "paiva" or $tee == "kk") {
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='pp' value='$pp'>";
@@ -435,7 +435,7 @@
 
 			// jos ollaan muussa tilassa ku tilausn‰kym‰ss‰ tehd‰‰ n‰yt‰ nappi
 			if ($tee != "tilaus") {
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tee' value='$teemita'>";
 				echo "<input type='hidden' name='pp' value='$pp'>";
 				echo "<input type='hidden' name='kk' value='$kk'>";

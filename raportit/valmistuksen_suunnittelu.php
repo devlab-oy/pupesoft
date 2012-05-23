@@ -672,7 +672,7 @@
 			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $apusort_jarj2, SORT_ASC, $valmistettavat_tuotteet);
 
 			// Kootaan raportti
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='kohde_varasto' value='$kohde_varasto'>";
 			echo "<input type='hidden' name='lahde_varasto' value='$lahde_varasto'>";
 			echo "<input type='hidden' name='valmistus_ajankohta' value='$nykyinen_loppu'>";
@@ -846,13 +846,13 @@
 	// Näytetään käyttöliittymä
 	if (!isset($tee) or $tee == "") {
 
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<table>";
 
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
-					order by tyyppi, nimitys";
+					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 
 		echo "<tr><th>".t("Valmisteiden kohdevarasto")."</th>";

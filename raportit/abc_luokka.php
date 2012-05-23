@@ -29,7 +29,7 @@
 	}
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='LUOKKA'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -244,7 +244,7 @@
 			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=total&status=$status&sort=desc$ulisa2'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
 		}
 
-		echo "<form action='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&status=$status' method='post'>";
+		echo "<form action='?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&status=$status' method='post'>";
 		echo "<tr>";
 		echo "<th><input type='text' name='haku[luokka]' value='$haku[luokka]' size='5'></th>";
 		echo "<th><input type='text' name='haku[tuoteno]' value='$haku[tuoteno]' size='5'></th>";

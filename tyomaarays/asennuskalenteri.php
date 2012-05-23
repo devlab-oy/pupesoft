@@ -477,7 +477,7 @@
 		echo "<th>".t("Kuukausi").":</th>";
 		echo "<td><a href='$PHP_SELF?toim=$toim&day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus&lopetus=$lopetus'> << </a></td>";
 		echo "<td>
-				<form method='POST' action='$PHP_SELF'>
+				<form method='POST'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='liitostunnus'  value='$liitostunnus'>
 				<input type='hidden' name='tyotunnus'  value='$tyotunnus'>

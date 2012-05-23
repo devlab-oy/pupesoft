@@ -361,7 +361,7 @@
 							}
 
 							echo "<tr><th>".t("Tallenna aineisto")."</th>";
-							echo "<form method='post' action='$PHP_SELF'>";
+							echo "<form method='post' class='multisubmit'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 							echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -410,7 +410,7 @@
 
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th>".t("Tallenna aineisto")."</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 				echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -837,7 +837,7 @@
 
 							echo "<tr><td class='back'><br></td></tr>";
 							echo "<tr><th>".t("Tallenna aineisto")."</th>";
-							echo "<form method='post' action='$PHP_SELF'>";
+							echo "<form method='post' class='multisubmit'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 							echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -875,7 +875,7 @@
 
 					echo "<tr><td class='back'><br></td></tr>";
 					echo "<tr><th>".t("Tallenna aineisto")."</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 					echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";

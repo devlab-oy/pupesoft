@@ -39,7 +39,7 @@
 
 		echo t("Tilausrivit, Tuote ja Tapahtumat").":<br>";
 		echo "<table>";
-		echo "<form action='$PHP_SELF' method=POST'>";
+		echo "<form method=POST'>";
 		echo "<input type='hidden' name='id'  value='$laskurow[tunnus]'>";
 
 		while ($rivirow = mysql_fetch_array($res)) {
@@ -439,7 +439,7 @@
 	if ($id == '') {
 		echo "<br><table>";
 		echo "<tr>";
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<th>".t("Syöta valmistuksen numero")."</th>";
 		echo "<td><input type='text' size='30' name='id'></td>";
 		echo "<td><input type='submit' value='".t("Jatka")."'></td></form></tr>";

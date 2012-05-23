@@ -1485,7 +1485,7 @@
 
 					echo "<br><table>";
 					echo "<tr><th>".t("Tallenna pdf").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
 					// poistetaan välilyönti
@@ -1504,7 +1504,7 @@
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna excel-tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
 				// poistetaan välilyönti

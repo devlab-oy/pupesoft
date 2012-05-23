@@ -115,7 +115,7 @@ if (mysql_num_rows($result) > 1) {
 		$sovellus = $gorow["sovellus"];
 	}
 
-	echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
+	echo "	<form name='vaihdaSovellus' method='POST'>
 			<select name='sovellus' onchange='submit()' ".js_alasvetoMaxWidth("sovellus", 140)." >"; // top right bottom left
 
 	$sovellukset = array();

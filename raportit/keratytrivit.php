@@ -294,7 +294,7 @@
 	}
 
 	//Käyttöliittymä
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -319,7 +319,10 @@
 		</tr>";
 
 
-	$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$query  = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"

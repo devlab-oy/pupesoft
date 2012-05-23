@@ -182,7 +182,7 @@ if ($tee == "SYOTA") {
 		}
 	}
 
-	echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>
+	echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
@@ -483,7 +483,7 @@ if ($tee == "PRINTTAA") {
 if ($tee == '') {
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
-		echo "<form method='post' action='$PHP_SELF'>
+		echo "<form method='post'>
 			<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='SYOTA'>";
 		echo "<input type='submit' value='".t("Lisää uusi uutinen")."'>";
@@ -657,7 +657,7 @@ if ($tee == '') {
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
 				if (($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") and ($uutinen["kuittaus"] == "")) {
-					echo "<br><br><form method='post' action='$PHP_SELF'>
+					echo "<br><br><form method='post'>
 						<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='tee' value='SYOTA'>";
 					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
@@ -665,7 +665,7 @@ if ($tee == '') {
 					echo "</form> ";
 
 					if ($uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
-						echo " <form method='post' action='$PHP_SELF'><input type='hidden' name='toim' value='$toim'>";
+						echo " <form method='post'><input type='hidden' name='toim' value='$toim'>";
 						echo "<input type='hidden' name='tee' value='POISTA'>";
 						echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
 						echo "<input type='submit' value='".t("Poista")."'>";
@@ -673,13 +673,13 @@ if ($tee == '') {
 					}
 				}
 				elseif ($toim != "VIIKKOPALAVERI" and $toim != "ASIAKASPALVELU" and $toim != "RYJO" and $uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
-					echo "<br><br><form method='post' action='$PHP_SELF'>
+					echo "<br><br><form method='post'>
 						<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='tee' value='SYOTA'>";
 					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
 					echo "<input type='submit' value='".t("Muokkaa")."'>";
 					echo "</form> ";
-					echo " <form method='post' action='$PHP_SELF'>
+					echo " <form method='post'>
 						<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='tee' value='POISTA'>";
 					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";

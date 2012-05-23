@@ -12,7 +12,7 @@ if (!$vva) {
 }
 
 echo "<table>";
-echo "<form name='hyvityskpl' action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name='hyvityskpl' method='post' autocomplete='off'>";
 echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th><td><input type='text' name='vva' value='$vva' size='5'></td><td class='back'><input type='submit' name='submit' value='Hae'></td></tr>";
 echo "</form>";
 echo "</table>";

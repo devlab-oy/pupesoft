@@ -287,7 +287,7 @@
 			}
 			echo "</table><br>";
 
-			echo "	<form action = '$php_self' method='post'>
+			echo "	<form method='post'>
 					<input type='hidden' name = 'toim' value='$toim'>
 					<input type='hidden' name = 'tee' value='T'>
 					<input type='Submit' value='".t('Kohdista nämä tapahtumat päittäin')."'>
@@ -326,7 +326,7 @@
 			}
 			echo "</table><br>";
 
-			echo "	<form action = '$php_self' method='post'>
+			echo "	<form method='post'>
 					<input type='hidden' name = 'toim' value='$toim'>
 					<input type='hidden' name = 'tee' value='N'>
 					<input type='Submit' value='".t('Poista nämä nollatapahtumat')."'>

@@ -306,7 +306,7 @@ if ($tee == "aja") {
 if ($tee == "") {
 	echo "<font class='head'>".t("Tuotetietojen siirto verkkokauppaan")."</font><hr>";
 
-	echo "<table><form name='uliuli' method='post' action='$PHP_SELF'>";
+	echo "<table><form name='uliuli' method='post'>";
 	echo "<input type='hidden' name='tee' value='aja'>";
 	echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirrä tiedot")."'></td></tr>";
 	echo "</table>";

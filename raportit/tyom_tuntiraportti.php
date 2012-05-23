@@ -352,7 +352,7 @@
 
 	echo "<font class='head'>",t("Tunti- ja kuluraportointi"),":</font><hr>";
 
-	echo "	<form method='post' action='$PHP_SELF'>
+	echo "	<form method='post'>
 			<input type='hidden' name='tee' value='raportoi'>
 			<table>
 			<tr>

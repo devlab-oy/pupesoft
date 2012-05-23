@@ -290,7 +290,7 @@
 	}
 
 	if ($ytunnus != '') {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+		echo "<form method='post' autocomplete='off'>
 				<input type='hidden' name='ytunnus' value='$ytunnus'>
 				<input type='hidden' name='asiakasid' value='$asiakasid'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -670,7 +670,7 @@
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";
 
 				echo "<td class='back' valign='top'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
@@ -722,7 +722,7 @@
 	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<br><table>";
@@ -750,7 +750,7 @@
 	}
 	else {
 		echo "<br>";
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
 		echo "</form>";

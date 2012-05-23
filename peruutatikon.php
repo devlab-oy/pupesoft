@@ -54,7 +54,7 @@ if (isset($kausi)) {
 		}
 
 		echo "</table><br><br>
-			<form name = 'valinta' action = '$PHP_SELF' method='post'>
+			<form name = 'valinta' method='post'>
 			<input type = 'hidden' name='ok' value = '1'>
 			<input type = 'hidden' name='kausi' value = '$kausi'>
 			<input type = 'submit' value = '".t("Peruuta kausi $kausi")."'>
@@ -127,7 +127,7 @@ if (!isset($kausi)) {
 	if (is_array($row41) and $row41['kausi'] > $suurin) $suurin = $row41['kausi'];
 
 	echo "<br><font class='message'>".t("Ehdotan peruutettavaksi kautta")." $suurin. ".t("Se on siirretty viimeksi").".</font><br><br>";
-	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "<form name = 'valinta' method='post'>
 		<table>
 		<tr><th>".t("Anna peruutettava kausi")."</th><td><input type = 'text' name = 'kausi' size=8 value ='$suurin'></td>
 		<td class='back'><input type = 'submit' value = '".t("Peruuta valittu kausi")."'></td></tr>

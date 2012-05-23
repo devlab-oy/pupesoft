@@ -5,7 +5,7 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ, asiakas READ";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ, varaston_hyllypaikat READ, asiakas READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
@@ -756,49 +756,88 @@
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 
-				$query = "	SELECT oletus
-							FROM tuotepaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tuoteno'
-							and oletus != ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$kaikki_ok = true;
 
-				if (mysql_num_rows($result) > 0) {
-					$oletus = "";
+				if ($yhtiorow['kerayserat'] == 'K') {
+
+					$ahyllyalue = strtoupper($ahyllyalue);
+					$ahyllynro = strtoupper($ahyllynro);
+					$ahyllyvali = strtoupper($ahyllyvali);
+					$ahyllytaso = strtoupper($ahyllytaso);
+
+					if (!isset($select_varasto) or trim($select_varasto) == "") {
+						$kaikki_ok = false;
+					}
+					else {
+
+						$select_varasto = (int) $select_varasto;
+
+						$query = "	SELECT tunnus
+									FROM varaston_hyllypaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND hyllyalue = '{$ahyllyalue}'
+									AND hyllynro = '{$ahyllynro}'
+									AND hyllyvali = '{$ahyllyvali}'
+									AND hyllytaso = '{$ahyllytaso}'
+									AND varasto = '{$select_varasto}'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) == 0) {
+							$kaikki_ok = false;
+						}
+					}
+				}
+
+				if ($kaikki_ok) {
+					echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+
+					$query = "	SELECT oletus
+								FROM tuotepaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$tuoteno'
+								and oletus != ''";
+					$result = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($result) > 0) {
+						$oletus = "";
+					}
+					else {
+						$oletus = "X";
+					}
+
+
+					$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
+							  VALUES (
+								'$kukarow[yhtio]',
+								'$ahyllyalue',
+								'$ahyllynro',
+								'$ahyllyvali',
+								'$ahyllytaso',
+								'$oletus',
+								'$tuoteno',
+								'$kukarow[kuka]',
+								now())";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tuoteno',
+								kpl 		= '0',
+								kplhinta	= '0',
+								hinta 		= '0',
+								laji 		= 'uusipaikka',
+								hyllyalue	= '$ahyllyalue',
+								hyllynro 	= '$ahyllynro',
+								hyllyvali	= '$ahyllyvali',
+								hyllytaso	= '$ahyllytaso',
+								selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					$oletus = "X";
+					echo "<font class='error'>",("Uusi varastopaikka ei löydy tai ei kuulu mihinkään varastoon"),": {$tuoteno} ({$ahyllyalue}, {$ahyllynro}, {$ahyllyvali}, {$ahyllytaso})</font><br />";
 				}
-
-
-				$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
-						  VALUES (
-							'$kukarow[yhtio]',
-							'$ahyllyalue',
-							'$ahyllynro',
-							'$ahyllyvali',
-							'$ahyllytaso',
-							'$oletus',
-							'$tuoteno',
-							'$kukarow[kuka]',
-							now())";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$query = "	INSERT into tapahtuma set
-							yhtio 		= '$kukarow[yhtio]',
-							tuoteno 	= '$tuoteno',
-							kpl 		= '0',
-							kplhinta	= '0',
-							hinta 		= '0',
-							laji 		= 'uusipaikka',
-							hyllyalue	= '$ahyllyalue',
-							hyllynro 	= '$ahyllynro',
-							hyllyvali	= '$ahyllyvali',
-							hyllytaso	= '$ahyllytaso',
-							selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
-				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
 				echo "<font class='error'>".("Uusi varastopaikka ei kuulu mihinkään varastoon").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
@@ -821,7 +860,7 @@
 
 		if ($ulos != "") {
 			$formi  = 'hakua';
-   			echo "<form action = '$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+   			echo "<form method='post' name='$formi' autocomplete='off'>";
    			echo "<input type='hidden' name='tee' value='Q'>";
    			echo "<input type='hidden' name='tulostakappale' value='$tulostakappale'>";
    			echo "<input type='hidden' name='kirjoitin' value='$kirjoitin'>";
@@ -851,7 +890,7 @@
 		echo "<table><tr>";
 
 		//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -862,7 +901,7 @@
 		echo "</td>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='S'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -876,7 +915,7 @@
 		echo "<table>";
 		echo "<tr>";
 
-		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>
 				<input type = 'hidden' name = 'tee' value ='N'>
 				<tr>
@@ -1054,7 +1093,7 @@
 				</tr></table></form><br>";
 
 		// Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)
-		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tee' value ='MUUTA'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
@@ -1111,7 +1150,7 @@
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
 
-		echo "<table><form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<table><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='UUSIPAIKKA'>
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lisää uusi varastopaikka")."</th></tr>
@@ -1119,19 +1158,42 @@
 				".t("Alue")." <input type = 'text' name = 'ahyllyalue' size = '5' maxlength='5' value = '$ahyllyalue'>
 				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
 				".t("Väli")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
-				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>
-				</td></tr>
+				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";
+
+		if ($yhtiorow['kerayserat'] == 'K') {
+
+			echo "&nbsp;<select name='select_varasto'>";
+
+			echo "<option value=''>",t("Valitse varasto"),"</option>";
+
+			$query = "	SELECT tunnus, nimitys
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY tyyppi, nimitys";
+			$varastores = pupe_query($query);
+
+			while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+				$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : ($kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "");
+
+				echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
+			}
+
+			echo "</select>";
+		}
+
+		echo "	</td></tr>
 				<tr><td><input type = 'submit' value = '".t("Lisää")."'></td></tr>
 				</table></form>";
 
-		echo "<br><hr><form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<br><hr><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value=''>
 				<input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
 	}
 
 	if ($tee == '') {
 		// Tällä ollaan, jos olemme vasta valitsemassa tuotetta
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>
 				<tr><th>".t("Anna tuotenumero")."</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210)."</td></tr>

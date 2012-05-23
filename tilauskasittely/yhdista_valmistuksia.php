@@ -291,7 +291,7 @@
 
 		$vanhaid = "KALA";
 
-		echo "	<form method='post' id = 'formi' action='$PHP_SELF' autocomplete='off'>";
+		echo "	<form method='post' id = 'formi' autocomplete='off'>";
 		echo "	<input type='hidden' name='tee' value='YHDISTA'>
 				<input type='hidden' name='toim'  value='$toim'>";
 
@@ -390,7 +390,7 @@
 		$kentta	= "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<br><form action='$PHP_SELF' name='find' method='post'>";
+		echo "<br><form name='find' method='post'>";
 		echo "<input type='hidden' name='toim'  value='$toim'>";
 
 		echo "<table>";
@@ -540,7 +540,7 @@
 
 				if ($haku != "") {
 					echo "	<td class = 'back'>
-								<form method='post' action='$PHP_SELF'><td class='back'>
+								<form method='post'><td class='back'>
 								<input type='hidden' name='tee' value='VALITSE'>
 								<input type='hidden' name='valmistettavat' value='$tilrow[valmistettavat]'>
 								<input type='submit' value='".t("Valitse")."'>

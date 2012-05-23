@@ -1293,7 +1293,7 @@ if ($tila == 'suorituksenvalinta') {
 
 		echo "</tr>";
 
-		echo "<form action = '$PHP_SELF?tila=kohdistaminen' method = 'post'>";
+		echo "<form action = '?tila=kohdistaminen' method = 'post'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
 		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
@@ -1432,7 +1432,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$sel5 = "selected";
 	}
 
-	echo "<form action = '$PHP_SELF' method = 'post'>";
+	echo "<form method = 'post'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tunnus' value='$suoritus[tunnus]'>";
 	echo "<input type='hidden' name='tila' value='vaihdasuorituksentili'>";
@@ -1541,7 +1541,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 				ORDER BY $jarjestys";
 	$result = pupe_query($query);
 
-	echo "<form action = '$PHP_SELF?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
+	echo "<form action = '?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<table><tr><th colspan='2'></th>";
 
@@ -1559,7 +1559,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 	echo"</form>";
 
-	echo "<form action = '$PHP_SELF?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)'>";
+	echo "<form action = '?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 	$laskucount=0;
@@ -1805,7 +1805,7 @@ elseif ($tila == 'kohdistaminen') {
 if ($tila == '') {
 	echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen")."</font><hr>";
 
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<input type='hidden' name='tila' value=''>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
@@ -1952,7 +1952,7 @@ if ($tila == '') {
 				<td valign='top'>$asiakas[viitteita]</td>
 				<td valign='top'>$lasku[maara]</td>";
 
-		echo "<form action='$PHP_SELF' method='POST'>";
+		echo "<form method='POST'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tila' value='suorituksenvalinta'>";
 		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas[tunnus]'>";

@@ -119,7 +119,7 @@
 	if ($tee == "") {
 
 		echo "<br><br>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='PAIVITA'>";
 
 		echo t("Syötä päivämäärä josta korjataan").":<br>";

@@ -108,7 +108,7 @@ if ($tee == "") {
 	if ($llrow["vosumma_valuutassa"] == "") $llrow["vosumma_valuutassa"] = "0.00";
 
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
-	echo "<table>";
+	echo "<br><table>";
 	echo "<tr>";
 	echo "<th>".t("saapuminen")."</th>";
 	echo "<th>".t("ytunnus")."</th>";
@@ -131,7 +131,7 @@ if ($tee == "") {
 	echo "</table><br>";
 
 	echo "<table>";
-	echo "<form action = '$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "	<input type='hidden' name='toiminto' value='lisatiedot'>
 			<input type='hidden' name='otunnus' value='$otunnus'>

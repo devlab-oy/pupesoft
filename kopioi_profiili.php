@@ -127,7 +127,7 @@
 					and yhtio in ($sovyhtiot)";
 		$kukar = mysql_query($query) or pupe_error($query);
 
-		echo "<br><form action='$PHP_SELF' method='post'>";
+		echo "<br><form method='post'>";
 		echo "<input type='hidden' name='tila' value='copy'>";
 
 		echo "<font class='message'>".t("Kopioitava profiili").":</font>";

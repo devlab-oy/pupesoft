@@ -1289,7 +1289,7 @@
 		echo "<hr>";
 
 		echo "<form method='post'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='toim' value='$toim' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi_$toim.xls'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

@@ -146,7 +146,7 @@
 	if ($tee == 'mikrotila') {
 		echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
 
-		echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 				<input type='hidden' name='toim' 				value = '$toim'>
 				<input type='hidden' name='lopetus' 			value = '$lopetus'>
 				<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

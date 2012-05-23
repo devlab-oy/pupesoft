@@ -596,7 +596,7 @@
 			echo "<div>";
 		}
 
-		echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
+		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		if (!isset($tultiin)) {
@@ -1710,7 +1710,8 @@
 											FROM varastopaikat
 											WHERE yhtio = '$kukarow[yhtio]'
 											AND maa 	= '{$oleasrow["varastomaa"]}'
-											AND nouto 	= '1'";
+											AND nouto 	= '1'
+											ORDER BY tyyppi, nimitys";
 								$noutovarres = pupe_query($query);
 							}
 							else {

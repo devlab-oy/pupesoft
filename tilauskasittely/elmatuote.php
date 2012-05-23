@@ -233,7 +233,7 @@ if ($aja=='run') {
 
 }
 else {
-	echo "<br><form action='$PHP_SELF' method='post'>";
+	echo "<br><form method='post'>";
 	echo "<input type='hidden' name='aja' value='run'>";
 	echo "<input type='submit' value='Aja Elmatuote!'>";
 	echo "</form>";

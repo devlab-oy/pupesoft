@@ -206,7 +206,7 @@
 		echo "<font class='message'>Asiakkaille, joilla on sähköposti lähetetään viesti automaattisesti.<br>";
 		echo "Muut ostoseurannat tulostetaan valitsemaasi tulostimeen.</font><br><br>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type ='hidden' name='muutparametrit' value='$muutparametrit'>";
@@ -219,6 +219,7 @@
 		$query = "	SELECT *
 					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]'
+					AND komento != 'EDI'
 					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 

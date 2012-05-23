@@ -311,7 +311,7 @@
 					AND suoritus.tunnus  = $tunnus";
 		$result = pupe_query($query);
 
-		echo "	<form action = '$PHP_SELF' method='post'>
+		echo "	<form method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
 				<input type = 'hidden' name='tila' value='komm'>";
 
@@ -396,7 +396,7 @@
 					ORDER BY nimi";
 		$result = pupe_query($query);
 
-		echo "<form action = '$PHP_SELF?tunnus=$tunnus&tila=$tila' method = 'post'>";
+		echo "<form action = '?tunnus=$tunnus&tila=$tila' method = 'post'>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -418,7 +418,7 @@
 
 			while ($trow = mysql_fetch_assoc ($result)) {
 
-				echo "<form action='$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type='hidden' name='tila' value='kohdista'>
 						<input type='hidden' name='atunnus' value='$trow[tunnus]'>
 						<input type='hidden' name='tunnus' value='$tunnus'>";
@@ -491,7 +491,7 @@
 
 		echo "<font class='head'>".t("Kohdistamattomien suorituksien selaus")."</font><hr>";
 
-		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
+		echo "<form action = '?tila=$tila' method = 'post'>";
 
 		$query = "	SELECT distinct suoritus.tilino, yriti.nimi, yriti.valkoodi
 					FROM suoritus
@@ -644,7 +644,7 @@
 
 			// tehd‰‰n nappi kuitin tulostukseen
 			echo "<td valign='top' class='back'>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tila' value='tulostakuitti'>";
 			echo "<input type='hidden' name='asiakas_tunnus' value='$maksurow[asiakas_tunnus]'>";
 			echo "<input type='hidden' name='summa' value='$maksurow[summa]'>";
@@ -664,7 +664,7 @@
 						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
 
 						foreach ($siirrasuoritustilille[$kukarow["yhtio"]] as $siirtotili) {
-							echo "<form method='post' action='$PHP_SELF?$ulisa'>";
+							echo "<form method='post' action='?$ulisa'>";
 							echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
 							echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
 							echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
@@ -673,14 +673,14 @@
 						}
 					}
 
-					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
+					echo "<form method='post' action='?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 					echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
 					echo "</form>";
 				}
 				else {
-					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
+					echo "<form method='post' action='?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='poistasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 					echo "<input type='submit' value='".t("Poista suoritus")."' onClick='return verify2();'>";
@@ -702,7 +702,7 @@
 			echo "<br>";
 
 			foreach ($siirrasuoritustilille[$kukarow["yhtio"]] as $siirtotili) {
-				echo "<form method='post' action='$PHP_SELF?$ulisa'>";
+				echo "<form method='post' action='?$ulisa'>";
 				echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
 				echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
 				echo "<input type='hidden' name='suoritustunnukset_kaikki' value='".implode(",", $suoritustunnukset_kaikki)."'>";

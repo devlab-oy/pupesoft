@@ -179,7 +179,7 @@ if ((int) $laskuno != 0) {
 	else {
 		$laskurow = mysql_fetch_assoc($result);
 
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
 
 		echo "<table>
@@ -215,7 +215,7 @@ if ((int) $laskuno != 0) {
 
 
 if ($laskuno == 0) {
-	echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='eikat' method='post' autocomplete='off'>";
 	echo "<table><tr>";
 	echo "<th>".t("Syötä laskunumero")."</th>";
 	echo "<td><input type='text' name='laskuno'></td>";

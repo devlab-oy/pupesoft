@@ -78,7 +78,7 @@
 
 	//Käyttöliittymä
 	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	if (!isset($kk))
 		$kk = date("m");
@@ -96,7 +96,8 @@
 	//valitaan varasto
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vtresult = mysql_query($query) or pupe_error($query);
 
 	while ($vrow = mysql_fetch_array($vtresult)) {

@@ -91,7 +91,7 @@ if ($tee == 'update') {
 
 // poistetaan varastopaikat
 if ($tee == 'poista') {
-	$query = "delete from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query = "DELETE from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$tee = ''; // n‰ytet‰‰n printterit
@@ -99,7 +99,7 @@ if ($tee == 'poista') {
 
 // tehd‰‰n uusi varastopaikat
 if ($tee == 'uusi') {
-	$query = "insert into varastopaikat (yhtio, alkuhyllyalue, alkuhyllynro, loppuhyllyalue, loppuhyllynro) values ('$kukarow[yhtio]','     ','     ','     ','     ')";
+	$query = "INSERT into varastopaikat (yhtio, alkuhyllyalue, alkuhyllynro, loppuhyllyalue, loppuhyllynro) values ('$kukarow[yhtio]','     ','     ','     ','     ')";
 	$result = mysql_query($query) or pupe_error($query);
 	$tunnus = mysql_insert_id($link);
 
@@ -108,11 +108,14 @@ if ($tee == 'uusi') {
 
 // n‰ytet‰‰n muokkausruutu
 if ($tee == 'edit') {
-	$query  = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' order by alkuhyllyalue, alkuhyllynro";
+	$query  = "	SELECT *
+				from varastopaikat
+				where yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 
-	echo "<form method='post' action='$PHP_SELF'>
+	echo "<form method='post'>
 	<input type='hidden' name='tee' value='update'>
 	<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 
@@ -153,7 +156,11 @@ if ($tee == 'edit') {
 
 			echo "</th><td>";
 
-			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]'";
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio='$kukarow[yhtio]'
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='".mysql_field_name($result,$i)."'>";
@@ -228,11 +235,10 @@ if ($tee == 'edit') {
 // n‰ytet‰‰n kaikki yhtion varastopaikat...
 if ($tee == '') {
 
-	$query  = "	SELECT varastopaikat.*, 
-				concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) sorttaus 
-				FROM varastopaikat 
-				WHERE yhtio = '$kukarow[yhtio]' 
-				ORDER by sorttaus";
+	$query  = "	SELECT varastopaikat.*
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<table><tr>";
@@ -253,7 +259,7 @@ if ($tee == '') {
 		echo "<td>$row[tyyppi]</td>";
 		echo "<td>$row[nimitys]</td>";
 
-		echo "<form method='post' action='$PHP_SELF'>
+		echo "<form method='post'>
 		<input type='hidden' name='tee' value='edit'>
 		<input type='hidden' name='tunnus' value='$row[tunnus]'>
 		<td><input type='submit' value='".t("Muokkaa")."'></td></form>";
@@ -265,7 +271,7 @@ if ($tee == '') {
 					}
 			</SCRIPT>";
 
-		echo "<form method='post' action='$PHP_SELF' onSubmit = 'return verify()'>
+		echo "<form method='post' onSubmit = 'return verify()'>
 		<input type='hidden' name='tee' value='poista'>
 		<input type='hidden' name='tunnus' value='$row[tunnus]'>
 		<td><input type='submit' value='".t("Poista")."'></td></form>";
@@ -275,7 +281,7 @@ if ($tee == '') {
 
 	echo "</table><br>";
 
-	echo "<form method='post' action='$PHP_SELF'>
+	echo "<form method='post'>
 	<input type='hidden' name='tee' value='uusi'>
 	<input type='submit' value='".t("Tee uusi varastoalue")."'>
 	</form>";

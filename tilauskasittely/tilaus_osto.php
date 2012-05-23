@@ -1016,7 +1016,6 @@
 										AND tuote.tuoteno = '{$prow["tuoteno"]}'";
 							$ttresult = pupe_query($query);
 							$ttrow = mysql_fetch_assoc($ttresult);
-
 						}
 
 						echo "</td>";

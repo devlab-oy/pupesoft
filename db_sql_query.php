@@ -213,7 +213,7 @@ $order";
 
 						echo "<table>";
 						echo "<tr><th>".t("Tallenna tulos")." (".t("Rivit")." $alkrivi-$loprivi):</th>";
-						echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+						echo "<form method='post' class='multisubmit'>";
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 						echo "<input type='hidden' name='kaunisnimi' value='SQLhaku_".$table."_".$filelask.".xls'>";
 						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -312,7 +312,7 @@ $order";
 				}
 			}
 
-			echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form name='sql' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='table' value='$table'>";
 			echo "<input type='hidden' name='rtee' value='AJA'>";
 			echo "<input type='hidden' name='edkysely' value='$kysely'>";

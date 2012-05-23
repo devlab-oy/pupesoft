@@ -500,7 +500,7 @@
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
+		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -2504,7 +2504,7 @@
 			echo "</form>";
 
 			if ($tilausnumero != "") {
-				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<form method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='OTSIK'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";

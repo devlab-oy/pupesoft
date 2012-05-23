@@ -237,7 +237,7 @@
 			file_put_contents("/tmp/".$filename, $txttieto);
 
 			echo "<br>";
-			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$filename'>";
@@ -267,7 +267,7 @@
 		if ($tilino != "") $querylisa .= " and tiliotedata.tilino = '$tilino' ";
 		if ($tyyppi != "") $querylisa .= " and tyyppi = '$tyyppi' ";
 
-		echo "<form name = 'valikko' action = '$PHP_SELF' method='post'><table>
+		echo "<form name = 'valikko' method='post'><table>
 			  <tr>
 			  <th>".t("Tapahtumapvm")."</th>
 			  <td>
@@ -343,7 +343,7 @@
 
 			$edalku = $row["alku"];
 
-			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
+			echo "	<form name = 'valikko' method='post'>
 					<input type='hidden' name='tee' value='T'>
 					<input type='hidden' name='lopetus' value='${palvelin2}tilioteselailu.php////tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi'>
 					<input type='hidden' name='pvm' value='$row[alku]'>

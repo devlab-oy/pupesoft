@@ -33,7 +33,7 @@
 	}
 
 	// käyttis
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 
 	echo "<table>";
@@ -289,7 +289,7 @@
 				$workbook->close();
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna excel").":</th>";
-				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Varastotilasto.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

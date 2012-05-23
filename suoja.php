@@ -99,7 +99,7 @@
 	echo "<font class='message'>".t("Käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ($yhtiorow[nimi])</font><hr>";
 
 	echo "<table>
-			<form action='$PHP_SELF' method='post'>
+			<form method='post'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='sovellus' value='$sovellus'>
 
@@ -155,7 +155,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 1) {
-		echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
+		echo "	<form name='vaihdaSovellus' method='POST'>
 				<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
 				<input type='hidden' name='toim' value='$toim'>
 				<tr><th>".t("Valitse sovellus").":</th><td>
@@ -209,7 +209,7 @@
 		//-->
 		</script>";
 
-	echo "<form action='$PHP_SELF' name='suojax' method='post'>
+	echo "<form name='suojax' method='post'>
 			<input type='hidden' name='update' value='totta'>
 			<input type='hidden' name='sovellus' value='$sovellus'>
 			<input type='hidden' name='toim' value='$toim'>

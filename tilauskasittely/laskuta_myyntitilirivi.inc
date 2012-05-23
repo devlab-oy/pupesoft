@@ -20,7 +20,7 @@
 
 		$paikat = "<select Style='{font-size: 8pt; padding:0;}' name='myyntitilirivit' onchange='submit();'>".$paikat."</select>";
 
-		echo "	<form action='$PHP_SELF' method='post'>
+		echo "	<form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 				<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>

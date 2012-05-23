@@ -62,7 +62,7 @@
 		if (!isset($vvl)) $vvl = date("Y");
 		if (!isset($ppl)) $ppl = date("d");
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<table>";
 		echo "<tr>
 			<th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
@@ -241,7 +241,7 @@
 					    $sel1 = "SELECTED";
 					}
 				
-					echo "<td><form action='$PHP_SELF?tee=OSTOVAIHYVITYS&rivitunnus=$vrow[ostotunnus]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&jarjestys_1=$jarjestys_1&jarjestys_2=$jarjestys_2&jarjestys_3=$jarjestys_3&jarjestys_4=$jarjestys_4&jarjestys_5=$jarjestys_5&jarjestys_6=$jarjestys_6&jarjestys_7=$jarjestys_7#$vrow[ostotunnus]' method='post'>
+					echo "<td><form action = '?tee=OSTOVAIHYVITYS&rivitunnus=$vrow[ostotunnus]&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&jarjestys_1=$jarjestys_1&jarjestys_2=$jarjestys_2&jarjestys_3=$jarjestys_3&jarjestys_4=$jarjestys_4&jarjestys_5=$jarjestys_5&jarjestys_6=$jarjestys_6&jarjestys_7=$jarjestys_7#$vrow[ostotunnus]' method='post'>
 						<input type='hidden' name='myyntitilaus_haku'        value='$myyntitilaus_haku'>
 						<input type='hidden' name='tuoteno_haku'             value='$tuoteno_haku'>
 						<input type='hidden' name='nimitys_haku'             value='$nimitys_haku'>

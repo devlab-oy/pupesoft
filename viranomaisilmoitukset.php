@@ -47,7 +47,7 @@ if ($tee == "VSRALVYV") {
 	if ($kausia > 10) $kausia = 10;
 
 	echo "<td>";
-	echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+	echo "<form enctype='multipart/form-data' method='post'>
 			<input type='hidden' name='tee' value='$tee'>
 			<input type='hidden' name='tyyppi' value='kausi'>
 			<select name='kohdekausi' onchange='submit();'>
@@ -84,7 +84,7 @@ if ($tee == "VSRALVYV") {
 	$vuosi = date("Y");
 
 	echo "<td>";
-	echo "	<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+	echo "	<form enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='tee' value='$tee'>
 				<input type='hidden' name='tyyppi' value='kuukausi'>
 				<select name='kohdekuukausi' onchange='submit();'>
@@ -339,7 +339,7 @@ if ($tee == "VSRALVYV") {
 
 					$ulos .= "</select>";
 
-					echo "<tr><form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+					echo "<tr><form enctype='multipart/form-data' method='post'>
 								<input type='hidden' name='tee' value='$tee'>
 								<input type='hidden' name='ytunnus' value='$row[ytunnus]'>
 								<input type='hidden' name='kohdekausi' value='$kohdekausi'>
@@ -460,7 +460,7 @@ if ($tee == "VSRALVYV") {
 				if (fwrite($fh, $file) === FALSE) die("Kirjoitus epäonnistui $filenimi");
 				fclose($fh);
 
-				echo "<br><form enctype='multipart/form-data' action='$PHP_SELF' method='post' class='multisubmit'>
+				echo "<br><form enctype='multipart/form-data' method='post' class='multisubmit'>
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='kausi' value='$kausi'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>

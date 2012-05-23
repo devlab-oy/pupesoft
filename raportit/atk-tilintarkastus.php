@@ -189,7 +189,7 @@
 
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
-		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Tilintarkastus-$kukarow[yhtio].zip'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='Tilintarkastus-$kukarow[yhtio].zip'>";
@@ -198,7 +198,7 @@
 
 	}
 
-	echo "<form name='vero' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='vero' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='raportti'>";
 
 	echo "<table>";

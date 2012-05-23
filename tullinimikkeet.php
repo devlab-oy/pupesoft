@@ -1112,7 +1112,7 @@ if ($tee == "synkronoi") {
 }
 
 
-echo "<br><form action = '$PHP_SELF' method='post' autocomplete='off'>";
+echo "<br><form method='post' autocomplete='off'>";
 echo t("Listaa ja muokkaa tuotteiden tullinimikkeitä").":<br><br>";
 echo "<table>";
 echo "<tr>";
@@ -1125,7 +1125,7 @@ echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 echo "</tr></table>";
 echo "</form><br><br>";
 
-echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form method='post' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='synkronoi'>";
 echo t("Päivitä järjestelmän tullinimiketietokanta").":<br><br>";
 echo "<table>";
@@ -1154,7 +1154,7 @@ if ($tullinimike1 != "") {
 
 		echo sprintf("<font class='message'>Haulla löytyi %s tuotetta.</font><br><br>", mysql_num_rows($resul));
 
-		echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tullinimike1' value='$tullinimike1'>";
 		echo "<input type='hidden' name='tullinimike2' value='$tullinimike2'>";
 		echo "<input type='hidden' name='tee' value='muuta'>";

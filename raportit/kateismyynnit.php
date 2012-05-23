@@ -1088,7 +1088,7 @@
 			if (isset($tasmays) and $tasmays != '') {
 				echo "<table><tr><td>";
 				echo "<font class='head'>".t("Täsmäys").":</font><br>";
-				echo "<form method='post' action='$PHP_SELF' id='tasmaytysform' onSubmit='return verify();'>";
+				echo "<form method='post' id='tasmaytysform' onSubmit='return verify();'>";
 				echo "<input type='hidden' name='tee' value='tiliointi'>";
 				echo "<table width='100%'>";
 				echo "<tr>";
@@ -1958,7 +1958,7 @@
 
 	// Käyttöliittymä
 	echo "<br>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 
 	if (!isset($kka)) $kka = date("m");

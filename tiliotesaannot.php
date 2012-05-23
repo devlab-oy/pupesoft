@@ -215,7 +215,7 @@
 				}
 			}
 			echo "<td align='center'>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='lopetus' value = '$lopetus'>
 					<input type='hidden' name='pankkitili' value = '$pankkitili'>
 					<input type='hidden' name='tunnus' value = '$tiliointirow[0]'>
@@ -275,7 +275,7 @@
 			if (substr($erittely,0,1)=='o') $erittely='checked'; else $erittely='';
 
 			echo "<tr>
-					<td><form action = '$PHP_SELF' method='post'>
+					<td><form method='post'>
 						<input type='hidden' name='lopetus' value = '$lopetus'>
 						<input type='hidden' name='tee' value = 'U'>
 						<input type='hidden' name='pankkitili' value = '$pankkitili'>
@@ -295,7 +295,7 @@
 		}
 		else {
 			echo "<tr>
-					<td><form action = '$PHP_SELF' method='post'>
+					<td><form method='post'>
 						<input type='hidden' name='lopetus' value = '$lopetus'>
 						<input type='hidden' name='tee' value = 'U'>
 						<input type='hidden' name='pankkitili' value = '$pankkitili'>
@@ -315,7 +315,7 @@
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<form name = 'valinta' method='post'>
 				<input type='hidden' name='lopetus' value = '$lopetus'>
 				<table>
 				<td>

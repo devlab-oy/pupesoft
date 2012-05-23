@@ -29,7 +29,7 @@
 	}
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='aja' value='AJA'>";
 	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -346,7 +346,7 @@
 
 			echo "<br><br><table>";
 			echo "<tr><th>".t("Tallenna Excel").":</th>";
-			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='ABC_listaus.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

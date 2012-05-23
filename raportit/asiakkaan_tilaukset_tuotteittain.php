@@ -60,7 +60,7 @@
 
 
 	//Etsi-kenttä
-	echo "<br><table><form action = '$PHP_SELF' method='post'>
+	echo "<br><table><form method='post'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='tee' value='ETSI'>";
 
@@ -530,7 +530,7 @@
 					}
 				}
 
-				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
+				echo "<form method='post'><td class='back' valign='top'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tunnus' value='$row[tilaus]'>
@@ -632,7 +632,7 @@
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
 				if($toim == "MYYNTI") {

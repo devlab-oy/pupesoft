@@ -1814,7 +1814,7 @@
 		$kentta	= "etsi";
 
 		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
@@ -2075,7 +2075,7 @@
 				$riveja_yht += $row['riveja'];
 
 				echo "<td valign='top'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='id' value='$row[tunnus]'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
@@ -2253,7 +2253,7 @@
 		$riveja = mysql_num_rows($result);
 
 		if ($riveja > 0) {
-			echo "<form name = 'rivit' method='post' action='$PHP_SELF' autocomplete='off'>";
+			echo "<form name = 'rivit' method='post' autocomplete='off'>";
 			echo "	<input type='hidden' name='tee' value='P'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='id'  value='$id'>";

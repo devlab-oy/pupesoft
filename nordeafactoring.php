@@ -41,7 +41,7 @@
 	if ($tee == '') {
 		//Käyttöliittymä
 		echo "<br>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "Luo uusi siirtotiedosto<br>";
 		echo "<table>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -119,7 +119,7 @@
 
 		//Käyttöliittymä
 		echo "<br>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "Uudelleenluo siirtotiedosto<br>";
 		echo "<table>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -677,7 +677,7 @@
 				echo "<br><br>";
 				echo "<table>";
 				echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
-				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
 				if($toim == "OKO") {

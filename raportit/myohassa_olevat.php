@@ -29,7 +29,7 @@
 		$myovv = date("Y");
 	}
 
-	echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name=asiakas method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value = 'HAE'>";
 	echo "<table><tr>";
 	echo "<th>".t("Anna toimituspäivä")."</th>";
@@ -534,7 +534,7 @@
 
 			echo "<br><table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Myohassa_olevat.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

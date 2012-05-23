@@ -52,7 +52,7 @@
 		$tee = "";
 	}
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 
 	echo "<table>";
 	echo "<tr>";

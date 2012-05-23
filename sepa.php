@@ -776,7 +776,7 @@
 		}
 
 		echo "<tr><th>".t("Tallenna aineisto")."</th>";
-		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 

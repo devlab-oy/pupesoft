@@ -13,7 +13,7 @@ if (!$vva) {
 }
 
 echo "<table>";
-echo "<form name='stemmuutus' action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name='stemmuutus' method='post' autocomplete='off'>";
 
 $query = "	SELECT factoringyhtio
 			FROM factoring

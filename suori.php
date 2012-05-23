@@ -455,7 +455,7 @@
 
 		echo "<table><tr>";
 		echo "<td class='back'>
-				<form action = '$PHP_SELF' method='post'>
+				<form method='post'>
 		        <input type='hidden' name='kurssi' value='$kurssi'>
 				<input type='hidden' name='tee' value='W'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -601,7 +601,7 @@
 			}
 			echo "</td>";
 
-			echo "<td valign='top'><form action = '$PHP_SELF' method='post'>
+			echo "<td valign='top'><form method='post'>
 					<input type='hidden' name='tee' value='V'>
 					<input type='hidden' name='lopetus' value='$lopetus'>";
 
@@ -665,7 +665,7 @@
 					echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
 				}
 
-				echo "<form action = '$PHP_SELF?tee=W' method='post'><td>
+				echo "<form action = '?tee=W' method='post'><td>
 						<input type='text' name='map' maxlength='2' size=3 value='$map'>
 						<input type='text' name='mak' maxlength='2' size=3 value='$mak'>
 						<input type='text' name='mav' maxlength='4' size=5 value='$mav'></td>";

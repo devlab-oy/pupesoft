@@ -89,7 +89,7 @@ $etuajassa_summa = 0;
 $myohassa_summa = 0;
 
 echo "<table>";
-echo "<form name='laatu' action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name='laatu' method='post' autocomplete='off'>";
 echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th>
 		<td><input type='text' name='vva' value='$vva' size='5'></td></tr>
 		<tr><th>",t("Valitse tuoteryhmä"),"</th>";

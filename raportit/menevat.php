@@ -24,7 +24,7 @@
 	echo "<font class='head'>".t("Maksettavat laskut")." - $yhtiorow[nimi]</font><hr>";
 
 	echo "<table>";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='NAYTA'>";
 	echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
 	echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
@@ -306,7 +306,7 @@
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Maksettavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

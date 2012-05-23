@@ -55,7 +55,7 @@
 		if (!$php_cli) {
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Tietokantakuvaus.sql'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$tmpfilenimi'>";

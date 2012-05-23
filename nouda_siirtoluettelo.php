@@ -20,7 +20,7 @@
 			$selNOR = "SELECTED";
 		}
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<select name='factoringyhtio' onchange='submit();'>";
 		echo "<option value='Nordeasii' $selNOR>Näytä Nordea Factoring siirtotiedostot</option>";
 		echo "<option value='OKOsiirto' $selOKO>Näytä OKO Saatavarahoitus siirtotiedosto</option>";
@@ -28,7 +28,7 @@
 		echo "<input type='submit' value='Näytä'>";
 		echo "</form><br><br>";
 
-		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='factoringyhtio' value='$factoringyhtio'>";
 		echo "<select name='filenimi' multiple='FALSE' size='20'>";

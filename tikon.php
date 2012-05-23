@@ -20,7 +20,7 @@
 	if ($kausi == "") {
 
 		//Näytetään käyttöliittymä
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>";
+		echo "<form name = 'valinta' method='post'>";
 
 		echo "<table>";
 		echo "<tr>";

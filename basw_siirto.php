@@ -19,7 +19,7 @@
 
 	echo "<br>\n";
 
-	echo "<form name='tosite' action='$PHP_SELF' method='post' autocomplete='off'>\n";
+	echo "<form name='tosite' method='post' autocomplete='off'>\n";
 	echo "<input type='hidden' name='tee' value='TEEAINEISTO'>\n";
 	echo "<table>";
 
@@ -106,7 +106,7 @@
 		fclose($toot);
 
 		echo "<br><br>".t("Tallenna aineisto").": ";
-		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$tiedostonimi'>";

@@ -131,7 +131,7 @@
 	$res = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";
-	echo "<form method='POST' action='$PHP_SELF'>";
+	echo "<form method='POST'>";
 	echo "<input type='hidden' name='tee' value='CLEAN'>";
 	echo "<tr><td colspan='8' class='back'>Keskenolevat tilaukset joilla on rivejä (".mysql_num_rows($res)."kpl):</td></tr>";
 

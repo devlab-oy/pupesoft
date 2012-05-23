@@ -1,5 +1,7 @@
 <?php
 
+	ini_set('zlib.output_compression', 1);
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";

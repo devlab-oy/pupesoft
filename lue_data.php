@@ -646,6 +646,7 @@ if ($kasitellaan_tiedosto) {
 			}
 
 			if (!isset($api_kentat)) {
+				lue_data_echo($lue_data_output_text, true);				
 				require ("inc/footer.inc");
 				exit;
 			}

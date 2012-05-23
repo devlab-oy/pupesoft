@@ -75,7 +75,7 @@
 		require("seb_factoring.inc");			
 	}
 	elseif ($factlask > 1) {
-		echo "	<form action='$PHP_SELF' name='find' method='post'>
+		echo "	<form name='find' method='post'>
 				<input type='hidden' name='tee' value='LAHETA'>
 				<input type='Submit' value='".t("Lähetä aineisto")."'></form>";
 	}

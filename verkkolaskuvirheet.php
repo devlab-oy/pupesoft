@@ -56,6 +56,7 @@
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
 
+
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 	js_openFormInNewWindow();
 
@@ -108,7 +109,7 @@
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
-					elseif (strpos($file, "_invoice") !== false){
+					elseif (strpos($file, "teccominvoice") !== false){
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
 					}
@@ -134,6 +135,16 @@
 						$laskuttajan_maa 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3207')));
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
+					}
+					elseif ($kumpivoice == "TECCOM") {
+						$laskuttajan_osoite 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Street1);
+						$laskuttajan_postitp 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
+						$laskuttajan_postino 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
+						$laskuttajan_maa 		= utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
+ 						$laskuttajan_tilino		= $lasku_toimittaja["ultilno"];
+						$laskuttajan_ovt		= $lasku_toimittaja["ovt_tunnus"];
+						$laskuttajan_vat		= $lasku_toimittaja["ytunnus"];
+						
 					}
 					elseif ($kumpivoice = "FINVOICE") {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);
@@ -197,13 +208,13 @@
 								<input type='submit' value = '".t("Perusta toimittaja")."'></form><br>";
 					}
 					else {
-						echo "<form action='$PHP_SELF' method='post'>
+						echo "<form method='post'>
 								<input type='hidden' name = 'tiedosto' value ='$file'>
 								<input type='hidden' name = 'tapa' value ='U'>
 								<input type='submit' value = '".t("Käsittele uudestaan")."'></form><br>";
 					}
 
-					echo "<form action='$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type='hidden' name = 'tiedosto' value ='$file'>
 							<input type='hidden' name = 'tapa' value ='P'>
 							<input type='submit' value = '".t("Hylkää")."'></form>";
@@ -240,7 +251,7 @@
 							if ($liitteet != "") {
 								foreach ($liitefilet as $liitefile) {
 									if (strtoupper(substr($liitefile, -4)) == ".PDF") {
-										echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' action='$PHP_SELF' method='post'>
+										echo "<form id='form_1_$valitutlaskut' name='form_1_$valitutlaskut' method='post'>
 											<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 											<input type='hidden' name = 'pdf' value ='".urlencode(file_get_contents($liitefile))."'>
 											<input type='submit' value = '".t("Näytä Pdf")."' onClick=\"js_openFormInNewWindow('form_1_$valitutlaskut', 'form_1_$valitutlaskut'); return false;\"></form>";
@@ -249,7 +260,7 @@
 							}
 						}
 
-						echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' action='$PHP_SELF' method='post'>
+						echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' method='post'>
 							<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 							<input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
 							<input type='submit' value = '".t("Näytä Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";

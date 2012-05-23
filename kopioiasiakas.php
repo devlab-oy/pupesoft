@@ -67,7 +67,7 @@
 
 	if ($tee == "edit") {
 
-		echo "<form action = '$PHP_SELF' method = 'post' id='mainform'>";
+		echo "<form method = 'post' id='mainform'>";
 		echo "<input type = 'hidden' name = 'tee' value ='write'>";
 		echo "<input type = 'hidden' name = 'id' value ='$id'>";
 

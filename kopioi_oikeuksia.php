@@ -28,7 +28,7 @@
 			$toyhtio	= '';
 		}
 
-		echo "<br><form action='$PHP_SELF' method='post'>";
+		echo "<br><form method='post'>";
 		echo "<input type='hidden' name='tila' value='copy'>";
 
 		echo "<font class='message'>".t("Keneltä kopioidaan").":</font>";

@@ -447,13 +447,13 @@
 			echo "<td>{$file["orig_file"]}</td>";
 			echo "<td>{$file["taulu"]}</td>";
 			echo "<td>{$file["aika"]}</td>";
-			echo "<td><form method='post'>";
+			echo "<td><form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='{$file["lognimi"]}'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
 			echo "<input type='submit' value='".t("Tallenna")."'>";
 			echo "</form></td>";
-			echo "<td><form method='post'>";
+			echo "<td><form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='{$file["errnimi"]}'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["errfilename"]}'>";

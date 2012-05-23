@@ -75,13 +75,14 @@
 
 	//Käyttöliittymä
 	echo "<br>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	echo "<table>";
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vtresult = mysql_query($query) or pupe_error($query);
 
 	while ($vrow = mysql_fetch_array($vtresult)) {

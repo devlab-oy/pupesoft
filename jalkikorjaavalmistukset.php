@@ -65,7 +65,7 @@
 	}
 
 	if ($tee == "") {
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='JALKILASKE'>";
 		echo "<table>";
 		echo "<tr>

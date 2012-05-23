@@ -565,7 +565,7 @@
 					WHERE yhtio != '$yhtio'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='ulkonako'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -589,7 +589,7 @@
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='perusta'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -613,7 +613,7 @@
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='menut'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -638,7 +638,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name = 'tila' value='profiilit'>
 					<input type='hidden' name = 'yhtio' value='$yhtio'>
 					<input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
@@ -666,7 +666,7 @@
 				$nimi = $kukarow['nimi'];
 		}
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='kayttaja'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
@@ -690,7 +690,7 @@
 		$query = "SELECT distinct tili.yhtio, yhtio.nimi FROM tili, yhtio WHERE tili.yhtio=yhtio.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='tili'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -714,7 +714,7 @@
 		$query = "SELECT yhtio, nimi FROM yhtio WHERE yhtio != '$yhtio'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='avainsana'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -793,7 +793,7 @@
 		$query = "SELECT distinct kirjoittimet.yhtio, yhtio.nimi FROM kirjoittimet, yhtio WHERE kirjoittimet.yhtio=yhtio.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='kirjoitin'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -817,7 +817,7 @@
 		$query = "SELECT distinct maksuehto.yhtio, yhtio.nimi FROM maksuehto, yhtio WHERE maksuehto.yhtio=yhtio.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='maksuehto'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -841,7 +841,7 @@
 		$query = "SELECT distinct toimitustapa.yhtio, yhtio.nimi FROM toimitustapa, yhtio WHERE toimitustapa.yhtio=yhtio.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='toimitustapa'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -862,7 +862,7 @@
 
 	if ($tila == 'toimitustapa') {
 		//varasto
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='varasto'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
 				<table>
@@ -875,7 +875,7 @@
 	if (!isset($tila)) {
 		if (!isset($valuutta)) $valuutta = 'EUR';
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name = 'tila' value='parametrit'>
 				<table>
 				<tr><th>".t("Anna uuden yrityksen tunnus")."</th><td><input type='text' name = 'yhtio' value='$yhtio' size='10' maxlength='5'></td></tr>

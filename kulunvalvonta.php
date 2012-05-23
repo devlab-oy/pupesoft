@@ -355,7 +355,7 @@
 								"Marraskuu"		=> 11,
 								"Joulukuu"		=> 12);
 
-		echo "<form action='$PHP_SELF?toim=$toim' method='post' name='valitsepalkkakausi'>
+		echo "<form action='?toim=$toim' method='post' name='valitsepalkkakausi'>
 				<table>
 				<tr>
 					<th>".t("Valitse palkkakausi")."</th>
@@ -599,7 +599,7 @@
 			if ($virhe === FALSE) {
 
 				//tiedosto on nyt kasassa ja tulostettu ruudulle, nyt annetaan käyttäjän klikata vientinappulaa, jonka jälkeen lähetetään tiedosto liitetiedostona tilitoimiston sähköpostiin
-				echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='vientitilitoimistoon'>";
+				echo "	<form action='?toim=$toim' method='post' name='vientitilitoimistoon'>";
 
 				if ($vietyjo === TRUE) {
 					echo "	<input type='submit' value='Vie uudelleen tilitoimistoon' onclick=\"return confirm('Tiedot on jo lähetetty palkanlaskentaan, oletko varma että tahdot lähettää ne uudestaan? ');\"> ";
@@ -1144,7 +1144,7 @@
 			mysql_data_seek($result, 0);
 		}
 
-		echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='eritellyita'>
+		echo "	<form action='?toim=$toim' method='post' name='eritellyita'>
 				<table>
 					<tr><th>".t("Näytä")."</th><th>".t("Käyttäjä")."</th></tr>
 					<tr>
@@ -1188,7 +1188,7 @@
 							echo "<td align='center'><font class='message'>OK</font></td>";
 						}
 						echo "	<td class='back'>
-									<form action='$PHP_SELF?toim=$toim' method='post' name='eritellyita_taulukko'>
+									<form action='?toim=$toim' method='post' name='eritellyita_taulukko'>
 									<input type='hidden' name='viivakoodi' value='$erittelyita[avain]'>
 									<input type='hidden' name='tee' value='kirjaus'>
 									<input type='hidden' name='rajaus' value='$rajaus'>
@@ -1226,7 +1226,7 @@
 				<th>" . t("Päivä")."</th><th>" . t("Kuukausi")."</th><th>" . t("Vuosi")."</th><th>" . t("Tunti")."</th><th>" . t("Minuutti")."</th>
 			</tr>
 			<tr align='center'>
-				<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' name='myyntimies' method='post' >
+				<form action='?oletus_erittely=$oletus_erittely' name='myyntimies' method='post' >
 				<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tee' value='kirjaa'>
@@ -1286,7 +1286,7 @@
 					if ($kirjautumisetrow["tunnus"] == $muokkaa) {
 						echo "
 							<tr>
-								<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='tallenna'>
+								<form action='?oletus_erittely=$oletus_erittely' method='post' name='tallenna'>
 								<td NOWRAP>
 									<input type='text' name='myyntisisaan_paiva' value='".date("d", $kirjautumisetrow["sisaan"])."' size='2'>
 									<input type='text' name='myyntisisaan_kuukausi' value='".date("m", $kirjautumisetrow["sisaan"])."' size='2'>
@@ -1372,7 +1372,7 @@
 
 								echo "
 								<td class='back'>
-									<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
+									<form action='?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
 										<input type='hidden' name='muokkaa' value='$kirjautumisetrow[tunnus]'>
 										<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 										<input type='hidden' name='toim' value='$toim'>
@@ -1383,7 +1383,7 @@
 								</td>
 
 								<td class='back'>
-									<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
+									<form action='?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
 										<input type='hidden' name='ktunnus' value='$kirjautumisetrow[tunnus]'>
 										<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 										<input type='hidden' name='toim' value='$toim'>
@@ -1394,7 +1394,7 @@
 								</td>
 
 								<td class='back'>
-									<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
+									<form action='?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
 										<input type='hidden' name='tunnus' value='$kirjautumisetrow[tunnus]'>
 										<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 										<input type='hidden' name='toim' value='$toim'>
@@ -1408,7 +1408,7 @@
 							if (tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], date("Y-m-d H:i:s", $kirjautumisetrow["sisaan"]))) {
 								echo "
 								<td class='back'>
-									<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
+									<form action='?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
 										<input type='hidden' name='ktunnus' value='$kirjautumisetrow[tunnus]'>
 										<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 										<input type='hidden' name='toim' value='$toim'>
@@ -1443,7 +1443,7 @@
 
 			//tulostetaan valintalista
 			echo "
-				<form action='$PHP_SELF?toim=$toim' method='post' name='hyvaksymiset_aika'>
+				<form action='?toim=$toim' method='post' name='hyvaksymiset_aika'>
 					<select name='listausaika' onChange='this.form.submit();'";
 			foreach($listausajatarr as $selite => $aika) {
 				if ($listausaika == $aika) {
@@ -1578,7 +1578,7 @@
 				// tehdään käyttöliittymänapit
 				echo "<br><br><font class='head'>".t("Valitse kirjaus")."</font><hr><br>";
 
-				echo "<form name='napit' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>";
+				echo "<form name='napit' action='?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='viivakoodi' value='$viivakoodi'>";
 
@@ -1697,7 +1697,7 @@
 
 					echo "
 					<tr>
-						<form name='tallenna' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post'>
+						<form name='tallenna' action='?oletus_erittely=$oletus_erittely' method='post'>
 						  <td>
 							  <select name='otunnus'>
 							  <option value=''>".t("Valitse projekti jos mahdollista")."</option>";
@@ -1783,7 +1783,7 @@
 					}
 						echo "
 						<td class='back'>
-							<form name='muokkaa' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post'>
+							<form name='muokkaa' action='?oletus_erittely=$oletus_erittely' method='post'>
 								<input type='submit' value='muokkaa'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tee' value='erittele'>
@@ -1793,7 +1793,7 @@
 							</form>
 						</td>
 						<td class='back'>
-							<form name='poista' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post'>
+							<form name='poista' action='?oletus_erittely=$oletus_erittely' method='post'>
 								<input type='hidden' name='tee' value='poista_erittely'>
 								<input type='hidden' name='tunnus' value='$eritellyt[tunnus]'>
 								<input type='hidden' name='toim' value='$toim'>
@@ -1819,7 +1819,7 @@
 				echo "<tr><td colspan='5' class='back'><br><font class='message'>".t("Lisää uusi")."</font></td></tr>
 						<tr>
 						<td>
-				  			<form name='erittely' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>
+				  			<form name='erittely' action='?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>
 				  			<select name='otunnus'>
 				  		  	<option value=''>".t("Valitse")."</option>";
 
@@ -1886,7 +1886,7 @@
 
 			if ($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
 				if ($toim == "HYVAKSYNTA") {
-					echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='tarkistajaform'>
+					echo "	<form action='?toim=$toim' method='post' name='tarkistajaform'>
 								<input type='hidden' name='viivakoodi' value='$viivakoodi'>
 								<input type='submit' value='".t("Palaa tuntikirjauksiin")."'>
 								<input type='hidden' name='tee' value='kirjaus'>
@@ -1913,7 +1913,7 @@
 			echo "<br>";
 			echo "<font class='head'>".t("Laita kortti lukijaan")."</font><br>";
 			echo "<br>";
-			echo "<form name='lukija' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>
+			echo "<form name='lukija' action='?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tee' value='kirjaus'>
 					<input size='50' type='password' name='viivakoodi' value=''>";

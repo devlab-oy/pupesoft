@@ -33,19 +33,19 @@ if ($tee == 'LISAA') {
 
 if ($tee == "AMERIKA") {
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko1'>";
 	echo "<input type='submit' value='".t("Valitse viikko 1")."'></td>";
 	echo "</form>";
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko2'>";
 	echo "<input type='submit' value='".t("Valitse viikko 2")."'></td>";
 	echo "</form>";
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko3'>";
 	echo "<input type='submit' value='".t("Valitse viikko 3")."'></td>";
@@ -149,7 +149,7 @@ if ($tee == "AMERIKA") {
 		}
 	}
 
-	echo "<form action='$PHP_SELF' method='post'>
+	echo "<form method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<table>";
 	
@@ -260,7 +260,7 @@ if ($tee == "SYOTA") {
 		}
 	}
 		
-	echo "<form action='$PHP_SELF' method='post'>
+	echo "<form method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<table>";
 		
@@ -333,12 +333,12 @@ if ($tee == "POISTA") {
 
 if ($tee == '') {
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='SYOTA'>";
 	echo "<input type='submit' value='".t("Lisää uusi ruokalista")."'></td>";
 	echo "</form>";
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='submit' value='".t("Lisää uusi Luonasamerika-ruokalista")."'></td>";
 	echo "</form>";
@@ -374,7 +374,7 @@ if ($tee == '') {
 			
 			// napit begin
 			echo "<table><tr><td class='back'>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='SYOTA'>";
 			echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
 			echo "<input type='submit' value='".t("Muokkaa")."'>";

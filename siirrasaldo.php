@@ -324,7 +324,7 @@
 				</table>
 				<br>";
 
-		echo "<form name = 'valinta' action = '$PHP_SELF' enctype='multipart/form-data' method='post'>
+		echo "<form name = 'valinta' enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>";
 
@@ -340,7 +340,10 @@
 				echo "<tr><td>".t("Lähdevarasto").":</td>";
 				echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+				$query  = "	SELECT tunnus, nimitys
+							FROM varastopaikat
+							WHERE yhtio='$kukarow[yhtio]'
+							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))
@@ -356,7 +359,10 @@
 				echo "<tr><td>".t("Kohdevarasto").":</td>";
 				echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+				$query  = "	SELECT tunnus, nimitys
+							FROM varastopaikat
+							WHERE yhtio='$kukarow[yhtio]'
+							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))

@@ -228,7 +228,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]' and (tunnus = '$kopioitavavarasto' or tunnus = '$kohdevarasto')
-				ORDER BY nimitys";
+				ORDER BY tyyppi, nimitys";
 	$result = pupe_query($query);
 
 	echo "<tr><th>".t("Varastosta varastoon")."</th><td>";
@@ -291,7 +291,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				$jarjestys";
 	$res = pupe_query($query);
 
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "<form method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
 	echo "\n<table>";
 
@@ -449,7 +449,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 // näytetään käyttöliittymä..
 if ($tee == "" or !isset($ehdotusnappi)) {
 
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "<form method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='selaa'>";
 
 	echo "<table>\n";
@@ -483,9 +483,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
-				ORDER BY nimitys";
+				ORDER BY tyyppi, nimitys";
 	$vtresult = pupe_query($query);
-
 
 	echo "<tr><th>Kopioitava varasto</th>\n";
 	echo "<td><select name='kopioitavavarasto'>\n";

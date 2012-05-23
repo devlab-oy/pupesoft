@@ -45,7 +45,7 @@
 			$chk1 = "CHECKED";
 		}
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='matee' value='kaikki'>";
 
 		echo "<table style='display:inline;padding-right:4px;'>";
@@ -272,7 +272,7 @@
 
 				echo "<br><br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Myyntiasiakkaittain.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

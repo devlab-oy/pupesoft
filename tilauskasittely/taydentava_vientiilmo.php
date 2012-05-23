@@ -721,7 +721,7 @@
 
 		//syötetään ajanjakso
 		echo "<table>";
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>
 				<input type='hidden' name='toim' value='$toim'>";
 

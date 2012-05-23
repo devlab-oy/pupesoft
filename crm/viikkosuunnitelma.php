@@ -72,7 +72,7 @@ if ($kausi == "") {
 if ($tee == '') {
 
 	echo "<table>";
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<tr><th colspan='3'>".t("Valitse viikko").":</th><th colspan='2'>".t("Näytä").":</th></tr>";
 
 	$edviikko = substr($kausi,4,2)-1;

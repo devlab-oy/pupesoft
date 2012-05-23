@@ -487,7 +487,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	echo t("Päivitettiin")," $lask ",t("riviä"),"!";
 }
 else {
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 			<table border='0'>
 			<tr>
 				<th>",t("Valitse tietokannan taulu"),":</th>

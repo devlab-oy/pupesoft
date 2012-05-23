@@ -29,7 +29,7 @@
 	}
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='OSASTOTRY'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -257,7 +257,7 @@
 
 		echo "</tr>";
 
-		echo "<form action='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&status=$status' method='post'>";
+		echo "<form action='?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&status=$status' method='post'>";
 		echo "<tr>";
 		echo "<th><input type='text' name='haku[$valinta]' value='$haku[$valinta]' size='5'></th>";
 		echo "<th><input type='text' name='haku[luokka]' value='$haku[luokka]' size='5'></th>";

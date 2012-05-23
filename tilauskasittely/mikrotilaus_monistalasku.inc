@@ -80,7 +80,7 @@ if ($tee == "file") {
 if ($tee == 'mikrotila') {
 	echo "<font class='head'>".t("Lue monistettavia laskuja tiedostosta")."</font><hr>";
 
-	echo "	<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "	<form method='post' name='sendfile' enctype='multipart/form-data'>
 			<input type='hidden' name='tee' value='file'>
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 			<table border='0' cellpadding='3' cellspacing='2'>

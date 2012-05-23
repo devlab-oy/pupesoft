@@ -374,7 +374,7 @@
 						}
 
 						//Haetaan erikseen toimitettavat tuotteet
-						if ($laskurow["vanhatunnus"] != 0) {
+						if ($yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
 							$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 										FROM lasku use index (yhtio_vanhatunnus)
 										WHERE yhtio		= '$kukarow[yhtio]'
@@ -481,7 +481,7 @@
 		$boob 	= "";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
+		echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
 		$haku = '';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
@@ -555,7 +555,7 @@
 						}
 					}
 
-					echo "<form method='post' action='$PHP_SELF'><td class='back'>
+					echo "<form method='post'><td class='back'>
 						  <input type='hidden' name='id' value='$row[tilaus]'>
 						  <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						  <input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
@@ -671,7 +671,7 @@
 		$tores = pupe_query($query);
 		$toita = mysql_fetch_array($tores);
 
-		echo "<form name = 'rivit' method='post' action='$PHP_SELF'>
+		echo "<form name = 'rivit' method='post'>
 				<input type='hidden' name='otunnus' value='$id'>
 				<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 				<input type='hidden' name='tee' value='P'>";

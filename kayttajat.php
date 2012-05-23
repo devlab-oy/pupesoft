@@ -199,9 +199,9 @@
 				unset($submit_button);
 			}
 			else {
-				$query = "	SELECT tunnus 
-							FROM kuka 
-							WHERE yhtio = '{$kukarow["yhtio"]}' 
+				$query = "	SELECT tunnus
+							FROM kuka
+							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND myyja = $myyja
 							AND kuka != '{$kuka}'";
 				$resmyyja = pupe_query($query);
@@ -288,8 +288,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
 					$keraysvyohyke = '';
 				}
@@ -298,6 +298,8 @@
 					$keraysvyohyke = implode(",", $keraysvyohyke);
 				}
 			}
+
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
 
@@ -343,6 +345,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
 						yhtio 							= '{$yhtio}'";
@@ -491,8 +494,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
 					$keraysvyohyke = '';
 				}
@@ -501,6 +504,9 @@
 					$keraysvyohyke = implode(",", $keraysvyohyke);
 				}
 			}
+
+
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$query = "	UPDATE kuka
 						SET nimi 						= '{$firname}',
@@ -542,6 +548,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						muuttaja						= '{$kukarow['kuka']}',
 						muutospvm						= now()
 						WHERE kuka	= '{$kuka}'
@@ -645,7 +652,7 @@
 				}
 			}
 
-			echo "<form action='{$PHP_SELF}' method='post' autocomplete='off'>";
+			echo "<form  method='post' autocomplete='off'>";
 
 			if ($toim == 'extranet') {
 				echo "<table>";
@@ -781,12 +788,19 @@
 
 						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 
-							$checked = in_array($keraysvyohyke_row['tunnus'], explode(",", $krow['keraysvyohyke'])) ? ' checked' : '';
+							$chk = strpos($krow['keraysvyohyke'], $keraysvyohyke_row['tunnus']) !== false ? ' checked' : '';
 
-							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$checked}>{$keraysvyohyke_row['nimitys']}<br />";
+							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} />&nbsp;{$keraysvyohyke_row['nimitys']}<br />";
 						}
 
 						echo "</td></tr>";
+					}
+
+					if ($yhtiorow['kerayserat'] == 'K') {
+
+						$max_keraysera_alustat = (int) $krow['max_keraysera_alustat'] > 0 ? (int) $krow['max_keraysera_alustat'] : 0;
+
+						echo "<tr><th align='left'>",t("Max keräysvyöhyke alustat"),"</th><td><input type='text' name='max_keraysera_alustat' value='{$max_keraysera_alustat}' /></td></tr>";
 					}
 
 				}
@@ -949,7 +963,11 @@
 					echo "<tr><th align='left'>",t("Henkilökohtainen tulostin:"),"</td>";
 					echo "<td><select name='kirjoitin'><option value=''>",t("Ei oletuskirjoitinta"),"</option>";
 
-					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}'";
+					$query  = "	SELECT tunnus, kirjoitin
+								FROM kirjoittimet
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND komento != 'EDI'
+								ORDER BY kirjoitin";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
@@ -1378,28 +1396,28 @@
 
 				echo "<table><tr><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form  method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delkesken'>
 					<input type='submit' value='* ",t("Vapauta käyttäjän")," {$selkukarow['nimi']} ",t("keskenoleva tilaus")," *'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form  method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delpsw'>
 					<input type='submit' value='** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("salasana")," **'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form  method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deloikeu'>
 					<input type='submit' value='*** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("käyttöoikeudet")," ***'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form  method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deluser'>
 					<input type='submit' value='**** ",t("Poista käyttäjä")," {$selkukarow['nimi']} ****'>
@@ -1413,14 +1431,14 @@
 
 		echo "<br>";
 		echo "<table>";
-		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<form  method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
 
 		echo "<tr><th>",t("Hae")," {$toim} ",t("käyttäjä"),":</th>";
 		echo "<td>",livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300),"</td>";
 		echo "<td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
 
-		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<form  method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
 		echo "<tr><th>",t("Valitse")," {$toim} ",t("käyttäjä"),":</th>";
 		echo "<td><select name='selkuka'>";
 
@@ -1457,12 +1475,12 @@
 
 		echo "</optgroup></select></td><td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
-		echo "<form action='{$PHP_SELF}' method='post'>
+		echo "<form  method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='UUSI'>";
 		echo "<tr><th>",t("Perusta uusi käyttäjä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";
 
-		echo "<form action='{$PHP_SELF}' method='post'>
+		echo "<form  method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
 		echo "<tr><th>",t("Kopioi käyttäjä toisesta yrityksestä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";

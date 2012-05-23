@@ -6,7 +6,7 @@
 	
 	echo "Muokkaa huoltoa:";
 	echo "<table>";
-	echo "<form action = '$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	
 	echo "<tr><th>Valitse malli:</th>";
 	echo "<td><select name='malli'><option value='menu'>Valitse malli </option>";
@@ -41,7 +41,7 @@
 	if($tee == ''){
 		echo "	<br><br><br>Tai perusta uusi m‰‰r‰aikaishuolto:
 				
-				<form action = '$PHP_SELF' method='post'>
+				<form method='post'>
 				<input type='hidden' name='tee' value = 'U'>
 				<table>				
 				<tr>				
@@ -151,7 +151,7 @@
 			$result = mysql_query ($query) or pupe_error($query);
 		}
 		
-		echo "	<tr><form action = '$PHP_SELF' method='post'>     
+		echo "	<tr><form method='post'>     
 				<input type='hidden' name='tee' value = 'UV'>
 				<input type='hidden' name='malli' value = '$malli'>
 				<input type='hidden' name='huolto' value = '$huolto'>
@@ -183,7 +183,7 @@
 					<td>$row[tuoteno]</td>
 					<td>$row[maara]</td>
 					<td>
-					<form action = '$PHP_SELF' method='post'>     
+					<form method='post'>     
 					<input type='hidden' name='malli' value = '$malli'>
 					<input type='hidden' name='huolto' value = '$huolto'>
 					<input type='hidden' name='rtunnus' value = '$row[tunnus]'>
@@ -194,7 +194,7 @@
 					</form></td></tr>";
 		} 		
 		echo "	</table>";
-		echo "	<br><br><table><form action = '$PHP_SELF' method='post'>
+		echo "	<br><br><table><form method='post'>
 				<input type='hidden' name='tee' value = 'poista'>
 				<input type='hidden' name='malli' value = '$malli'>
 				<input type='hidden' name='huolto' value = '$huolto'>

@@ -18,7 +18,7 @@
 
 	echo "<br>\n";
 
-	echo "<form name='tosite' action='$PHP_SELF' method='post' autocomplete='off'>\n";
+	echo "<form name='tosite' method='post' autocomplete='off'>\n";
 	echo "<input type='hidden' name='tee' value='TARKISTA'>\n";
 	echo "<table>";
 

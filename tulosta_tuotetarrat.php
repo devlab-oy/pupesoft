@@ -79,7 +79,7 @@
 
 	if ($ulos != "") {
 			$formi = 'hakua';
-			echo "<form action = '$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+			echo "<form method='post' name='$formi' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tulostakappale' value='$tulostakappale'>";
 			echo "<input type='hidden' name='kirjoitin' value='$kirjoitin'>";
@@ -201,7 +201,7 @@
 		$formi  = 'formi';
 		$kentta = 'tuoteno';
 
-		echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+		echo "<form method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='Z'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -275,7 +275,7 @@
 			$sel = "CHECKED";
 		}
 
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='H'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<br>";

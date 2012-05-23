@@ -474,7 +474,7 @@
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// N‰ytet‰‰n muuten vaan sopivia tilauksia
 			echo "<br><br>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
@@ -552,7 +552,7 @@
 				}
 			</script>";
 
-		echo "<br><form action='$PHP_SELF' method='post'>
+		echo "<br><form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='limit' value='$limit'>
 				".t("N‰yt‰ vain laskutustiedot")." <input type='radio' name='asiakastiedot' value='NORMI' onclick='submit();' $assel1>
@@ -1956,7 +1956,7 @@
 				if (mysql_num_rows($result) == 50) {
 					// N‰ytet‰‰n muuten vaan sopivia tilauksia
 					echo "<br>
-							<form action='$PHP_SELF' method='post'>
+							<form method='post'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='etsi' value='$etsi'>
 							<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
@@ -1973,7 +1973,7 @@
 					// We need to explicitly close the workbook
 					$workbook->close();
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

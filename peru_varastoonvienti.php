@@ -326,7 +326,7 @@
 	if ($id == '') {
 		echo "<br><table>";
 		echo "<tr>";
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<th>".t("Syöta saapumisen numero")."</th>";
 		echo "<td><input type='text' size='30' name='id'></td>";
 		echo "<td><input type='submit' value='".t("Jatka")."'></td></form></tr>";

@@ -243,7 +243,7 @@ echo "</table>";
 echo "<table width='250'>
 		<tr>
 		<td align='center' colspan='8' class='back'>
-		<form action='$PHP_SELF?day=$day&year=$year&toim=$toim' method='post'>
+		<form action='?day=$day&year=$year&toim=$toim' method='post'>
 		<select name='month' Onchange='submit();'>";
 
 	$i=1;

@@ -33,7 +33,7 @@
 			$sqlhaku = substr($sqlhaku,0,6)." ".substr($sqlhaku,6);
 		}
 
-		echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form name='sql' method='post' autocomplete='off'>";
 		echo "<table>";
 		echo "<tr><th>".t("Syötä SQL kysely")."</th></tr>";
 		echo "<tr><td><textarea cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
@@ -98,7 +98,7 @@
 
 					echo "<table>";
 					echo "<tr><th>".t("Tallenna tulos").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

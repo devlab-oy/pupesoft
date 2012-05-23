@@ -38,7 +38,7 @@
 
 $result = mysql_query($query) or pupe_error($query);
 
- 	echo "<form action='$PHP_SELF?tila=$tila' method='post'>";
+ 	echo "<form action='?tila=$tila' method='post'>";
 
         echo "<table><tr>";
 

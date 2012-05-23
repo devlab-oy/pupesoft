@@ -46,7 +46,7 @@ if ($tee == "etsi") {
 
 		$row = mysql_fetch_array($res);
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='avaa'>";
 		echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 		echo "<input type='hidden' name='keikka' value='$row[laskunro]'>";
@@ -78,7 +78,7 @@ if ($tee == "etsi") {
 	}
 }
 
-echo "<form action='$PHP_SELF' method='post'>";
+echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='etsi'>";
 
 echo "<table>";

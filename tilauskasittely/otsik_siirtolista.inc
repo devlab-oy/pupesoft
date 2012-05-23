@@ -98,10 +98,10 @@
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					order by tyyppi, nimitys";
+					ORDER BY tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -417,7 +417,7 @@
 		$aquery = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus='$clearing'";
+					and tunnus = '$clearing'";
 		$vtresult = mysql_query($aquery) or pupe_error($aquery);
 		$vtrow = mysql_fetch_array($vtresult);
 

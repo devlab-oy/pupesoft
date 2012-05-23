@@ -193,7 +193,7 @@
 		$ek_vv = date("Y",mktime(0,0,0,$kuu,0,$year));
 		$ek_kk = date("n",mktime(0,0,0,$kuu,0,$year));
 
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tee' value = 'X'>
 				<table>
 				<tr>

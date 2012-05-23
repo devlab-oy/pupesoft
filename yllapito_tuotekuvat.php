@@ -720,7 +720,7 @@
 					if ($mul_exl != 'tallennetaan') {
 						echo "onSubmit='return verify();'";
 					}
-				echo ">";
+				echo " class='multisubmit'>";
 				echo "<table cellpadding='2' cellspacing='2'>";
 
 					echo "<tr>";
@@ -878,32 +878,33 @@
 					}
 
 					echo "<tr>";
-						echo "<td valign='top' align='left' colspan='",$colspan,"' class='back'>";
-							echo t('Löytyi yhteensä')," ",mysql_num_rows($result)," ",t('riviä');
+					echo "<td valign='top' align='left' colspan='",$colspan,"' class='back'>";
+					echo t('Löytyi yhteensä')," ",mysql_num_rows($result)," ",t('riviä');
+					echo "</td>";
+
+					echo "<td valign='top' align='left' class='back'>";
+
+					if (isset($workbook) and $mul_exl == 'tallennetaan') {
+						// We need to explicitly close the workbook
+						$workbook->close();
+
+						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+						echo "<input type='hidden' name='kaunisnimi' value='Tuotekuvat.xls'>";
+						echo "<input type='hidden' name='tmpfilenimi' value='",$excelnimi,"'>";
+						echo "<input type='submit' value='",t("Tallenna tulos"),"'>";
+					}
+					else {
+						echo "&nbsp;";
+					}
+
+					echo "</td>";
+
+					if ($mul_exl != 'tallennetaan') {
+						echo "<td valign='top' align='center' colspan='1' class='back'>";
+						echo "<input type='submit' value='",t('Poista'),"'>";
 						echo "</td>";
+					}
 
-						echo "<td valign='top' align='left' class='back'>";
-
-						if (isset($workbook) and $mul_exl == 'tallennetaan') {
-							// We need to explicitly close the workbook
-							$workbook->close();
-
-							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-							echo "<input type='hidden' name='kaunisnimi' value='Tuotekuvat.xls'>";
-							echo "<input type='hidden' name='tmpfilenimi' value='",$excelnimi,"'>";
-							echo "<input type='submit' value='",t("Tallenna tulos"),"'>";
-						}
-						else {
-							echo "&nbsp;";
-						}
-
-						echo "</td>";
-
-						if ($mul_exl != 'tallennetaan') {
-							echo "<td valign='top' align='center' colspan='1' class='back'>";
-								echo "<input type='submit' value='",t('Poista'),"'>";
-							echo "</td>";
-						}
 					echo "</tr>";
 
 					if ($mul_siv == '' and $mul_exl == '') {

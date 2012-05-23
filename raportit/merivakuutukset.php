@@ -98,7 +98,7 @@
 
 	//Käyttöliittymä
 	echo "<br><br><br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	// ehdotetaan 7 päivää taaksepäin
 	if (!isset($kka))

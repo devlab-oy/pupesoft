@@ -775,7 +775,7 @@
 				// We need to explicitly close the workbook
 				$workbook->close();
 
-				echo "<br><br><form method='post' action='$PHP_SELF'>";
+				echo "<br><br><form method='post' action='$PHP_SELF' class='multisubmit'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

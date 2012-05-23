@@ -2171,7 +2171,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -2188,7 +2188,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.txt'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
@@ -2197,7 +2197,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.csv'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";

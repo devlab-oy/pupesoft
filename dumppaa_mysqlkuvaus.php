@@ -48,14 +48,14 @@
 		foreach ($ulos as $print) {
 			// poistetaan mysql-sarakkeen kommentti koska se kaataa sqlupdate-ohjelman
 			$print = preg_replace("/ COMMENT '[^']*',/", ",", $print);
-			
+
 			fputs($toot, $print."\n");
 		}
 
 		if (!$php_cli) {
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Tietokantakuvaus.sql'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$tmpfilenimi'>";

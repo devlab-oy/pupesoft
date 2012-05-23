@@ -12,7 +12,7 @@
 
 	$tee = isset($tee) ? trim($tee) : "";
 	$tositetyyppi_mukaan = isset($tositetyyppi_mukaan) ? trim($tositetyyppi_mukaan) : "";
-	
+
 	if ($tee == "lataa_tiedosto") {
 		readfile("/tmp/$tmpfilenimi");
 		unlink("/tmp/$tmpfilenimi");
@@ -186,10 +186,10 @@
 		unlink($file1);
 		unlink($file2);
 		unlink($file3);
-		
+
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Tilintarkastus-$kukarow[yhtio].zip'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='Tilintarkastus-$kukarow[yhtio].zip'>";

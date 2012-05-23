@@ -342,7 +342,7 @@
 
 				echo "<br><br><table>";
 				echo "<tr><th>".t("Tallenna hinnasto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 				echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

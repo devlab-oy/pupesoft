@@ -515,7 +515,7 @@ else {
 
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Epakuranttiraportti.xls'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

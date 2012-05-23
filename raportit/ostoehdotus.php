@@ -710,7 +710,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	// kirjotetaan file levylle
 	file_put_contents("/tmp/$txtnimi", $file);
 
-	echo "<br><br><form method='post' action='$PHP_SELF'>";
+	echo "<br><br><form method='post' action='$PHP_SELF' class='multisubmit'>";
 	echo "<table>";
 	echo "<tr><th>".t("Tallenna tulos")."</th>";
 	echo "<td>";

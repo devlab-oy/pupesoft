@@ -1973,7 +1973,7 @@
 					// We need to explicitly close the workbook
 					$workbook->close();
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

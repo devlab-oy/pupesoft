@@ -237,7 +237,7 @@
 			file_put_contents("/tmp/".$filename, $txttieto);
 
 			echo "<br>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$filename'>";

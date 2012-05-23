@@ -147,7 +147,7 @@
 						$q_yhtio
 						lasku.piiri,
 						tilausrivi.osasto,
-						tilausrivi.try,						
+						tilausrivi.try,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0)), 2) kate_aikavalilla,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) summaVA,
@@ -164,7 +164,7 @@
 			$q_loppu = "$vvl-$kkl-$ppl";
 		}
 		elseif ($rappari == "PIMY") {
-			// Piirimynnit			
+			// Piirimynnit
 			$vvaa = $vva - 1;
 			$vvll = $vvl - 1;
 
@@ -174,7 +174,7 @@
 
 			$query = "	SELECT
 						$q_yhtio
-						lasku.piiri,						
+						lasku.piiri,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntinyt,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntied,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)),2) katenyt,
@@ -232,10 +232,10 @@
 					and	lasku.tapvm 	<= '$q_loppu'
 					$q_lisa";
 		$eresult = pupe_query($query);
-			
+
 		$rivimaara   = mysql_num_rows($eresult);
 		$rivilimitti = 1000;
-		
+
 		echo "<table><tr>
 			<th>",t("Valittu aikaväli"),"</th>
 			<td>{$ppa}</td>
@@ -260,10 +260,10 @@
 				echo "<th>".t("Yhtiö")."</th>";
 			}
 
-			if ($rappari == "PITIBU") {				
+			if ($rappari == "PITIBU") {
 				echo "<th>".t("Piiri")."</th>";
 				echo "<th>".t("Osasto")."</th>";
-				echo "<th>".t("Tuoteryhmä")."</th>";				
+				echo "<th>".t("Tuoteryhmä")."</th>";
 				echo "<th>".t("Myynti")."<br>$toissavuosi</th>";
 				echo "<th>".t("Kate")."<br>$toissavuosi</th>";
 				echo "<th>".t("Myynti")."<br>$edellisvuosi</th>";
@@ -312,7 +312,7 @@
 			if ($rappari == "PITIBU") {
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Piiri"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));				
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $toissavuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $toissavuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $edellisvuosi");
@@ -413,7 +413,7 @@
 				if ($rivimaara <= $rivilimitti) {
 					echo "<td>$row[piiri]</td>";
 					echo "<td>$row[osasto]</td>";
-					echo "<td>$row[try] </td>";					
+					echo "<td>$row[try] </td>";
 					echo "<td align='right'>$row[toissavuodenmyynti]</td>";
 					echo "<td align='right'>$row[toissavuodenkate]</td>";
 					echo "<td align='right'>$row[edvuodenmyynti]</td>";
@@ -558,7 +558,7 @@
 		if ($rivimaara <= $rivilimitti) {
 			echo "</table>";
 		}
-		
+
 		echo "<br>";
 
 		if (isset($workbook)) {
@@ -567,7 +567,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna excel").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Piiritilasto.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

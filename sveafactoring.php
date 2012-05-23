@@ -606,7 +606,7 @@
 				echo "<br><br>";
 				echo "<table>";
 				echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' action='$PHP_SELF' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
 				if($toim == "SVEA") {

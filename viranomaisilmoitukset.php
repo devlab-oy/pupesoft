@@ -460,7 +460,7 @@ if ($tee == "VSRALVYV") {
 				if (fwrite($fh, $file) === FALSE) die("Kirjoitus epäonnistui $filenimi");
 				fclose($fh);
 
-				echo "<br><form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+				echo "<br><form enctype='multipart/form-data' action='$PHP_SELF' method='post' class='multisubmit'>
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='kausi' value='$kausi'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>

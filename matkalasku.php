@@ -93,6 +93,7 @@ if ($tee == "UUSI") {
 						FROM lasku
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tila IN ('H','Y','M','P','Q')
+						and alatila IN('', 'H')
 						and tilaustyyppi = 'M'";
 			$result = pupe_query($query);
 			$row    = mysql_fetch_assoc($result);

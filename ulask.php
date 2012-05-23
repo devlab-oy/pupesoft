@@ -1779,6 +1779,14 @@ if ($tee == 'I') {
 		$viesti = $toimittajan_laskunumero." ".$viesti;
 	}
 
+	if (!isset($osto_rahti)) $osto_rahti = 0;
+	if (!isset($osto_kulu)) $osto_kulu = 0;
+	if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
+
+	$osto_rahti = (float) $osto_rahti;
+	$osto_kulu = (float) $osto_kulu;
+	$osto_rivi_kulu = (float) $osto_rivi_kulu;
+
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
 				yhtio 				= '$kukarow[yhtio]',
@@ -1828,7 +1836,10 @@ if ($tee == 'I') {
 				comments 			= '$komm',
 				laskunro 			= '$toimittajan_laskunumero',
 				sisviesti1 			= '$ohjeitapankille',
-				alv_tili 			= '$tilino_alv'";
+				alv_tili 			= '$tilino_alv',
+				osto_rahti			= '{$osto_rahti}',
+				osto_kulu			= '{$osto_kulu}',
+				osto_rivi_kulu		= '{$osto_rivi_kulu}'";
 	$result = pupe_query($query);
 	$tunnus = mysql_insert_id ($link);
 
@@ -2022,11 +2033,6 @@ if ($tee == 'I') {
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp_ins, $kohde_ins, $projekti_ins);
 
 				if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
-
-					if (!isset($osto_rahti)) $osto_rahti = '';
-					if (!isset($osto_kulu)) $osto_kulu = '';
-					if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = '';
-
 					$isumma[$i] = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 				}
 

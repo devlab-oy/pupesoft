@@ -62,7 +62,7 @@
 						ORDER BY laadittu DESC";
 			$res = pupe_query($query);
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='KORJAA'>";
 
 			echo "<table>";
@@ -127,7 +127,7 @@
 		$kentta = "tuoteno";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo t("Etsi tuotenumero").": ";
 		echo "<input type='hidden' name='tee' value='VALITSE'>";
 		echo "<input type='text' name='tuoteno'>";

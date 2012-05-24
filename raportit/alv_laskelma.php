@@ -238,7 +238,7 @@
 				$filenimi = "VSRALVKK-$kukarow[yhtio]-".date("dmy-His").".txt";
 				file_put_contents("dataout/".$filenimi, $file);
 
-				echo "	<form method='post'>
+				echo "	<form method='post' class='multisubmit'>
 							<input type='hidden' name='tee' value='lataa_tiedosto'>
 							<input type='hidden' name='lataa_tiedosto' value='1'>
 							<input type='hidden' name='kaunisnimi' value='".t("arvonlisaveroilmoitus")."-$ilmoituskausi.txt'>

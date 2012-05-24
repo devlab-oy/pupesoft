@@ -324,7 +324,7 @@
 				</table>
 				<br>";
 
-		echo "<form name = 'valinta' action = '$PHP_SELF' enctype='multipart/form-data' method='post'>
+		echo "<form name = 'valinta' enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>";
 

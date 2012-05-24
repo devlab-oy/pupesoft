@@ -107,7 +107,7 @@ if ($tee == "TEE") {
 }
 
 echo "	<br><br>
-		<form method='post' action='$PHP_SELF'>
+		<form method='post'>
 		<input type='hidden' name='tee' value='TEE'>
 		<input type='submit' value='".t("Hae uusimmat mysqlaliakset")."'>
 		</form>";

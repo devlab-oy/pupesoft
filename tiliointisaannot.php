@@ -52,7 +52,7 @@
 			echo "<th></th></tr>";
 
 			while ($trow = mysql_fetch_assoc($result)) {
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
@@ -331,7 +331,7 @@
 		$sel[$tyyppi] = "SELECTED";
 
 		echo "<font class='head'>".t("Säännöt")."</font><hr>
-				<form action = '$PHP_SELF' method='post'>
+				<form method='post'>
 				<input type='hidden' name='tunnus' value='$tunnus'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tila' value='$tila'>";
@@ -515,7 +515,7 @@
 			}
 
 			echo "<td class='back'>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
 					<input type='hidden' name='rtunnus' value = '$tiliointirow[tunnus]'>
 					<input type='hidden' name='tee' value = 'P'>
@@ -567,7 +567,7 @@
 		$ulos .= "</select><br>";
 
 		echo "<tr>
-				<form action = '$PHP_SELF' method='post'>
+				<form method='post'>
 				<input type='hidden' name='tee' value = 'U'>
 				<input type='hidden' name='tunnus' value = '$tunnus'>
 				<input type='hidden' name='tyyppi' value = '$tyyppi'>
@@ -729,7 +729,7 @@
 	}
 	else {
 		// Tällä ollaan, jos olemme vasta valitsemassa toimittajaa
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<form name = 'valinta' method='post'>
 				<table>
 				<td>".t("Valitse toimittaja")."</td>
 				<td><input type = 'text' name = 'nimi'></td>

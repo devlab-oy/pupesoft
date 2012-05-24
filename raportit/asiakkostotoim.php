@@ -132,7 +132,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
 
 //Käyttäliittymä
 	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));

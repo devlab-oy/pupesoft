@@ -549,7 +549,7 @@ else {
 
 		$workbook->close();
 
-		echo "<form method='post'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi.xls'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

@@ -129,7 +129,7 @@ if ($tee == '') {
 			}
 
 			if ($trow['suorituspvm'] != 'Ei sopivaa suoritusta') {
-				echo "<td><form name = 'valinta' action = '$PHP_SELF' method='post'>
+				echo "<td><form name = 'valinta' method='post'>
 					<input type = 'hidden' name = 'tee' value = 'V'>
 					<input type = 'hidden' name = 'tunnus' value = '$trow[tunnus]'>
 					<input type = 'hidden' name = 'stunnus' value = '$trow[stunnus]'>

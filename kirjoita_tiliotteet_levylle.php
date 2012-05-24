@@ -289,7 +289,7 @@
 		echo "Done!";
 	}
 
-	echo "<br><br><form action = '$PHP_SELF' method='post' name='formi'>
+	echo "<br><br><form method='post' name='formi'>
 			Siirrä tiliotteet kaudelta
 			<input type='hidden' name='tunnus' value='$trow[ytunnus]'>
 			<input type='hidden' name='tee' value='all'>

@@ -98,7 +98,7 @@
 		}
 	}
 
-	echo "<table><tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>";
+	echo "<table><tr><form method='post'><input type='hidden' name='tee' value='etsi'>";
 	echo "<th colspan='4'>".t("Hae työmääräykset väliltä").":</th>";
 
 	if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -121,19 +121,19 @@
 	echo "<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 
 
-	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
+	echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
 		<th>".t("Asiakkaan nimi").":</th><td colspan='3'><input type='text' name='nimi' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
-	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
+	echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
 		<th>".t("Rekno").":</th><td colspan='3'><input type='text' name='rekno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
-	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
+	echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
 		<th>".t("Työmääräysno").":</th><td colspan='3'><input type='text' name='eid' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
-	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
+	echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
 		<th>".t("Asiakasnumero").":</th><td colspan='3'><input type='text' name='asno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
-	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
+	echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
 		<th>".t("Sarjanumero").":</th><td colspan='3'><input type='text' name='valmno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "</table>";

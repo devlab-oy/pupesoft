@@ -928,7 +928,7 @@ if ($tee == 'P' or $tee == 'E') {
 			$fakta = "<br><br><font class='message'>$trow[fakta]</font>";
 		}
 
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
@@ -1016,7 +1016,7 @@ if ($tee == 'P' or $tee == 'E') {
 	else {
 
  		// jaaha, ei ollut toimittajaa, joten pyydetään syöttämään tiedot
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='oma' value='1'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
@@ -2284,7 +2284,7 @@ if (strlen($tee) == 0) {
 
 	echo "<br><table>";
 
-	echo "<tr><th nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>$hiddenit".t("Perusta lasku viivakoodilukijalla")."</th>";
+	echo "<tr><th nowrap><form name = 'viivat' action = '?tee=VIIVA' method='post'>$hiddenit".t("Perusta lasku viivakoodilukijalla")."</th>";
 	echo "<td><input type = 'text' name = 'nimi' size='8'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -2297,7 +2297,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><th nowrap><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</th>";
+	echo "<tr><th nowrap><form action = '?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</th>";
 	echo "<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -2310,7 +2310,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<th nowrap><form action = '$PHP_SELF?tee=P' method='post'>$hiddenit".t("Perusta lasku ilman toimittajatietoja")."</th>";
+	echo "<th nowrap><form action = '?tee=P' method='post'>$hiddenit".t("Perusta lasku ilman toimittajatietoja")."</th>";
 
 	echo "<td>
 		<select name='tyyppi'>
@@ -2339,7 +2339,7 @@ if (strlen($tee) == 0) {
 
 			$row = mysql_fetch_assoc($result);
 
-			echo "<th><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
+			echo "<th><form action = '?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
 
 			echo "<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>

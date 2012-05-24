@@ -42,7 +42,7 @@
 
 		echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi]</font><hr>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='NAYTA'>";
 
 		if (!isset($sakkl)) $sakkl = date("m");
@@ -775,7 +775,7 @@
 				// We need to explicitly close the workbook
 				$workbook->close();
 
-				echo "<br><br><form method='post' action='$PHP_SELF'>";
+				echo "<br><br><form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

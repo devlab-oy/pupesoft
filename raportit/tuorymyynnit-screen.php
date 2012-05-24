@@ -10,7 +10,7 @@ echo "<font class='head'>".t("Tuoteryhmien myynnit")."</font><hr>";
 if (!isset($vv)) $vv = date("Y");
 if (!isset($kk)) $kk = date("m");
 
-echo "<form name='tuomy' action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name='tuomy' method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Anna vuosi ja kuukausi")."</th>";
 echo "<td><input type='text' size='10' name='vv' value='$vv'><input type='text' size='10' name='kk' value='$kk'></td>";

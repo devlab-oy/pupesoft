@@ -277,7 +277,7 @@ if ($tee == "FILE") {
 
 if ($tee == 'VALITSE_TIEDOSTO') {
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 			<input type='hidden' name='tee' value='FILE'>
 			<input type='hidden' name='vaiht' value='$vaiht'>
 			<input type='hidden' name='kausi' value='$kausi'>

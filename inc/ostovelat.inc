@@ -2,7 +2,7 @@
 
 echo "<font class='head'>".t("Sidottup‰‰oma")."</font><hr>";
 
-echo "<form action='$PHP_SELF' method='post'><input type='hidden' name='toim' value='ostovelat'>";
+echo "<form method='post'><input type='hidden' name='toim' value='ostovelat'>";
 echo "<table><tr><th></th><th></th>";
 
 if (isset($tkausi)) {

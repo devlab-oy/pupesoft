@@ -1162,7 +1162,7 @@ if ($tee == "") {
 	enable_ajax();
 
 	if ($kukarow["kuka"] == "www") {
-		$login_screen = "<form name='login' id= 'loginform' action='' method='post'>
+		$login_screen = "<form name='login' id= 'loginform' method='post'>
 						<input type='hidden' name='tee' value='login'>
 						<input type='hidden' id = 'location' name='location' value='$palvelin2'>
 						<font class='login'>".t("Käyttäjätunnus",$browkieli).":</font>

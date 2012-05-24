@@ -1137,6 +1137,16 @@
 				$varastotili = $yhtiorow['matkalla_olevat'];
 				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
+				$tiliointirow_summa = $tiliointirow['summa'];
+
+				if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0 and ($trow['osto_rivi_kulu'] != 0 or $trow['osto_rahti'] != 0 or $trow['osto_kulu'] != 0)) {
+					$tiliointirow_summa *= -1;
+				}
+				elseif (($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) and ($trow['osto_rahti'] != 0 or $trow['osto_kulu'] != 0 or $trow['osto_rivi_kulu'] != 0)) {
+					$ylikirjattu_summa = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $trow['osto_rahti'], $trow['osto_kulu'], $trow['osto_rivi_kulu'], true, false);
+					$tiliointirow_summa = $ylikirjattu_summa;
+				}
+
 				$query = "	INSERT into tiliointi set
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
@@ -1145,7 +1155,7 @@
 							kohde 				= '$tiliointirow[kohde]',
 							projekti 			= '$tiliointirow[projekti]',
 							tapvm 				= '$trow[tapvm]',
-							summa 				= $tiliointirow[summa] * -1,
+							summa 				= $tiliointirow_summa * -1,
 							summa_valuutassa	= $tiliointirow[summa_valuutassa] * -1,
 							vero 				= 0,
 							lukko 				= '',
@@ -1164,7 +1174,7 @@
 							kohde 				= '$tiliointirow[kohde]',
 							projekti 			= '$tiliointirow[projekti]',
 							tapvm 				= '$trow[tapvm]',
-							summa 				= $tiliointirow[summa],
+							summa 				= $tiliointirow_summa,
 							summa_valuutassa	= $tiliointirow[summa_valuutassa],
 							vero 				= 0,
 							lukko 				= '',
@@ -1174,12 +1184,16 @@
 				$xresult = pupe_query($query);
 
 				// alkuperäiset oli nollaa
-				if ($trow['osto_rahti'] == 0 and $trow['osto_kulu'] == 0 and $trow['osto_rivi_kulu'] == 0) {
+				if ($osto_rahti == 0 and $trow['osto_rahti'] == 0 and $osto_kulu == 0 and $trow['osto_kulu'] == 0 and $osto_rivi_kulu == 0 and $trow['osto_rivi_kulu'] == 0) {
 					$tiliointirow['summa'] = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 				}
 				else {
-					$kala = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $trow['osto_rahti'], $trow['osto_kulu'], $trow['osto_rivi_kulu'], true);
+					$ylikirjattu_summa = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $trow['osto_rahti'], $trow['osto_kulu'], $trow['osto_rivi_kulu'], true);
 					$tiliointirow['summa'] = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+					if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0) {
+						$tiliointirow['summa'] = $ylikirjattu_summa * -1;
+					}
 				}
 
 				$query = "	INSERT into tiliointi set

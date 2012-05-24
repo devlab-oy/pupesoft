@@ -15741,7 +15741,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 }
 
 if (!function_exists("ostolaskun_kulujen_tiliointi")) {
-	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0, $ylikirjataan = false) {
+	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0, $ylikirjataan = false, $kirjataanko = true) {
 
 		global $kukarow, $yhtiorow;
 
@@ -15764,7 +15764,6 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		$vero = 0;
 
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
-
 
 			if ($ix == 1 and trim($osto_rahti) != 0) {
 				$tili 			= $yhtiorow['osto_rahti'];
@@ -15793,9 +15792,11 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
 				$summa *= $sign;
 
-				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				if ($kirjataanko) {
+					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
 
-				require ("inc/teetiliointi.inc");
+					require ("inc/teetiliointi.inc");
+				}
 			}
 		}
 

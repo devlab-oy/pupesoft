@@ -1957,8 +1957,22 @@ if ($tee == 'I') {
 		exit;
 	}
 
+	$laskun_kulut = array(
+		'osto_kulu' => 0,
+		'osto_rahti' => 0,
+		'osto_rivi_kulu' => 0
+	);
+
 	for ($i = 1; $i < $maara; $i++) {
 		if (strlen($itili[$i]) > 0) {
+
+			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
+				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+				foreach($_arr as $_k => $_v) {
+					$laskun_kulut[$_k] += $_v;
+				}
+			}
 
 			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
 			$ikohde_ins 	= $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
@@ -2026,15 +2040,8 @@ if ($tee == 'I') {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 				}
 
-				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
-
 				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp_ins, $kohde_ins, $projekti_ins);
-
-				if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
-					$isumma[$i] = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
-				}
 
 				// Varasto
 				$query = "	INSERT INTO tiliointi SET
@@ -2054,6 +2061,9 @@ if ($tee == 'I') {
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$result = pupe_query($query);
+
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				// Varastonmuutos
 				$query = "	INSERT INTO tiliointi SET
@@ -2076,6 +2086,23 @@ if ($tee == 'I') {
 			}
 		}
 	}
+
+	if ($laskun_kulut['osto_kulu'] != 0 or $laskun_kulut['osto_rahti'] != 0 or $laskun_kulut['osto_rivi_kulu'] != 0) {
+
+		foreach ($laskun_kulut as $key => $value) {
+
+			if ($value == 0) continue;
+
+			$vero = 0;
+			$tili = $yhtiorow[$key];
+			$summa = $value;
+
+			list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+
+			require ("inc/teetiliointi.inc");
+		}
+	}
+
 
 	// Jos meillä on suoraveloitus
 	if ($osuoraveloitus != '') {

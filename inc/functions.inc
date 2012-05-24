@@ -15761,45 +15761,32 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		$sign = $ylikirjataan ? -1 : 1;
 
 		$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
-		$vero = 0;
+
+		$return_array = array(
+			'osto_rahti' => 0,
+			'osto_kulu' => 0,
+			'osto_rivi_kulu' => 0
+		);
 
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
 			if ($ix == 1 and trim($osto_rahti) != 0) {
-				$tili 			= $yhtiorow['osto_rahti'];
-				$osto_rahti 	= str_replace(",", ".", $osto_rahti);
-				$summa 			= $osto_rahti * $til_sum_ratio;
-				$bool			= true;
+				$summa 			= str_replace(",", ".", $osto_rahti) * $til_sum_ratio;
+				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$return_array['osto_rahti'] += ($summa * $sign);
 			}
 			elseif ($ix == 2 and trim($osto_kulu) != 0) {
-				$tili 			= $yhtiorow['osto_kulu'];
-				$osto_kulu 		= str_replace(",", ".", $osto_kulu);
-				$summa 			= $osto_kulu * $til_sum_ratio;
-				$bool			= true;
+				$summa 			= str_replace(",", ".", $osto_kulu) * $til_sum_ratio;
+				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				$return_array['osto_kulu'] += ($summa * $sign);
 			}
 			elseif ($ix == 3 and trim($osto_rivi_kulu) != 0) {
-				$tili 			= $yhtiorow['osto_rivi_kulu'];
-				$osto_rivi_kulu = str_replace(",", ".", $osto_rivi_kulu);
-				$summa 			= $osto_rivi_kulu * $til_sum_ratio;
-				$bool			= true;
-			}
-			else {
-				$bool = false;
-			}
-
-			if ($bool) {
-
+				$summa 			= str_replace(",", ".", $osto_rivi_kulu) * $til_sum_ratio;
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
-				$summa *= $sign;
-
-				if ($kirjataanko) {
-					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
-
-					require ("inc/teetiliointi.inc");
-				}
+				$return_array['osto_rivi_kulu'] += ($summa * $sign);
 			}
 		}
 
-		return $tiliointirivin_summa;
+		return array($tiliointirivin_summa, $return_array);
 	}
 }

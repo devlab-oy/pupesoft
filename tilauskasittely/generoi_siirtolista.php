@@ -13,7 +13,7 @@
 	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 	// Tällä ollaan, jos olemme syöttämässä tiedostoa ja muuta
-	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "<form name = 'valinta' method='post'>
 			<input type='hidden' name='tee' value='M'>
 			<table>";
 

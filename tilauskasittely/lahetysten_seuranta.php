@@ -54,7 +54,7 @@
 	if (!isset($vvloppu)) $vvloppu = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($tee)) $tee = "";
 
-	echo "<form method='post' action=''>";
+	echo "<form method='post'>";
 	echo "<table>";
 	echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='asiakas' value='{$asiakas}' />&nbsp;</td>";
 	echo "<th>",t("Paikkakunta"),"</th><td><input type='text' name='paikkakunta' value='{$paikkakunta}' /></td></tr>";

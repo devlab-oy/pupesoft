@@ -8,7 +8,7 @@
 	echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
 
 	echo "<br>";
-	echo "<table><form method='post' action=''>";
+	echo "<table><form method='post'>";
 	echo "<input type='hidden' name='tee' value='nayta'>";
 	echo "<tr><th>Tilausnumero:</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
 	echo "<tr><th>Laskunumero:</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
@@ -48,7 +48,7 @@
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table></form><br><br>";
 
 
-	echo "<table><form method='post' action=''>";
+	echo "<table><form method='post'>";
 	echo "<input type='hidden' name='tee' value='rahtisopparitilanne'>";
 	echo "<td class='back'><input type='submit' value='".t("Näytä asiakkaat/toimitustavat joilta puuttuu rahtisopimus")."'></td></tr></table></form><br><br>";
 

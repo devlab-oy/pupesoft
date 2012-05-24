@@ -60,7 +60,7 @@
 					$valittu_lahto = trim($valittu_lahto);
 				}
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='vaihda_prio' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 				echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
@@ -345,7 +345,7 @@
 
 				echo "<br><font class='head'>",t("Nykyinen lähtö"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br /><br>";
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='siirra_lahtoon' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' value='{$valittu_lahto}' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
@@ -503,7 +503,7 @@
 				$lahto_res = pupe_query($query);
 				$lahto_row = mysql_fetch_assoc($lahto_res);
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='muokkaa_lahto' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -683,7 +683,7 @@
 				}
 			}
 			else {
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tulosta_rahtikirjat' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -1657,7 +1657,7 @@
 	if (!isset($tee)) $tee = "";
 
 	if ($tee == "") {
-		echo "<br><form method='post' id='varastoformi' action=''>";
+		echo "<br><form method='post' id='varastoformi'>";
 		echo "<table>";
 
 		echo "<tr><th>",t("Valitse varasto"),"</th><td class='back' style='vertical-align:middle;'>&nbsp;";
@@ -1732,7 +1732,7 @@
 
 		$ei_lapsia_lisa = count($ohita_kerays_lapset) > 0 ? "AND tilausrivi.tunnus NOT IN (".implode(",", $ohita_kerays_lapset).")" : "";
 
-		echo "<form method='post' id='napitformi' action=''>";
+		echo "<form method='post' id='napitformi'>";
 		echo "<table>";
 		echo "<tr>";
 		echo "<td class='back'>";
@@ -1818,7 +1818,7 @@
 
 			echo "<br />";
 
-			echo "<form method='post' action=''>";
+			echo "<form method='post'>";
 			echo "<table>";
 
 			echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
@@ -1988,7 +1988,7 @@
 				echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
 
 				echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'>";
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tee' value='lahto' />";
 				echo "<input type='hidden' name='ei_lapsia_lisa' value='{$ei_lapsia_lisa}' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";

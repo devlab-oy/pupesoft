@@ -1095,7 +1095,7 @@
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>
-							<form method='post' action='$PHP_SELF' autocomplete='off'>
+							<form method='post' autocomplete='off'>
 							<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 							<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>

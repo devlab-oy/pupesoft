@@ -256,7 +256,7 @@ if ($tee == 'TRATTAA')  {
 	echo "</tr>";
 	echo "</table><br>";
 
-	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='lahetaformi' method='post'>";
 	echo "<table><tr>";
 	echo "<th>".t("Laskunpvm")."</th>";
 	echo "<th>".t("Laskunro")."</th>";
@@ -325,7 +325,7 @@ if ($tee == 'TRATTAA')  {
 	echo "<td class='back'><input name='$kentta' type='submit' value='".t("Lähetä")."'></td></form>";
 
 
-	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='ohitaformi' method='post'>";
 	echo "<input type='hidden' name='tee' value='OHITA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 
@@ -340,7 +340,7 @@ if ($tee == 'TRATTAA')  {
 
 if ($tee == "") {
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='ALOITATRATTAAMINEN'>";
 	echo t("Syötä ytunnus jos haluat tratata tiettyä asiakasta").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa trattaamisen ensimmäisestä asiakkaasta").".<br><br>";
 	echo "<table>";

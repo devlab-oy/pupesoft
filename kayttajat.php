@@ -652,7 +652,7 @@
 				}
 			}
 
-			echo "<form action='{$PHP_SELF}' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 
 			if ($toim == 'extranet') {
 				echo "<table>";
@@ -1396,28 +1396,28 @@
 
 				echo "<table><tr><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delkesken'>
 					<input type='submit' value='* ",t("Vapauta käyttäjän")," {$selkukarow['nimi']} ",t("keskenoleva tilaus")," *'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delpsw'>
 					<input type='submit' value='** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("salasana")," **'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deloikeu'>
 					<input type='submit' value='*** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("käyttöoikeudet")," ***'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='{$PHP_SELF}' method='post'>
+				echo "<form method='post'>
 					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deluser'>
 					<input type='submit' value='**** ",t("Poista käyttäjä")," {$selkukarow['nimi']} ****'>
@@ -1431,14 +1431,14 @@
 
 		echo "<br>";
 		echo "<table>";
-		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<form method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
 
 		echo "<tr><th>",t("Hae")," {$toim} ",t("käyttäjä"),":</th>";
 		echo "<td>",livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300),"</td>";
 		echo "<td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
 
-		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<form method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
 		echo "<tr><th>",t("Valitse")," {$toim} ",t("käyttäjä"),":</th>";
 		echo "<td><select name='selkuka'>";
 
@@ -1475,12 +1475,12 @@
 
 		echo "</optgroup></select></td><td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
-		echo "<form action='{$PHP_SELF}' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='UUSI'>";
 		echo "<tr><th>",t("Perusta uusi käyttäjä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";
 
-		echo "<form action='{$PHP_SELF}' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
 		echo "<tr><th>",t("Kopioi käyttäjä toisesta yrityksestä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";

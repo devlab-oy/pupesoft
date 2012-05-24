@@ -66,7 +66,7 @@
 
 	if ($tee == '') {
 
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>";
+		echo "<form name = 'valinta' method='post'>";
 		echo "<input type = 'hidden' name = 'tee' value = 'X'>";
 
 		echo "<table>";

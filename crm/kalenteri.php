@@ -281,7 +281,7 @@ if($tee == "SYOTA") {
 	$lisayskello = $kello;
 
 	$lisays =  "
-		<td colspan='10'><form action='$PHP_SELF' method='POST'>
+		<td colspan='10'><form method='POST'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='valitut' value='$valitut'>
@@ -409,7 +409,7 @@ if($tee == "SYOTA") {
 		  		</tr>";
 
 	$lisays .= "<tr><td><input type='submit' value='".t("Lisää")."'></td></form>
-				<form action='$PHP_SELF' method='POST'>
+				<form method='POST'>
 				<input type='hidden' name='tee' value='POISTA'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='valitut' value='$valitut'>
@@ -486,7 +486,7 @@ echo "<td class='back' valign='top' rowspan='3' align='left'>";
 
 echo "<table width='100%'>
 		<tr><td class='back' align='center' colspan='8'>
-		<form action='$PHP_SELF?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
+		<form action = '?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tyomaarays' value='$tyomaarays'>
@@ -580,7 +580,7 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 
 	//konsernivalinta
 	if ($yhtiorow["konserni"] != "") {
-		echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
+		echo "<form action = '?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tyomaarays' value='$tyomaarays'>";
@@ -595,7 +595,7 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 		$checked = 'checked';
 	}
 
-	echo "<form action='$PHP_SELF?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
+	echo "<form action = '?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='tyojono' value='$tyojono'>
 			<input type='hidden' name='toim' value='$toim'>";

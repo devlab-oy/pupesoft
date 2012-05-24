@@ -111,7 +111,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
 
 
 	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 
 	// luetaan eka rivi tiedostosta..
 	$headers = array();
@@ -302,7 +302,7 @@ if ($tee == "synkronoi") {
 }
 
 if ($tee == '') {
-	echo "<br><form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>";
+	echo "<br><form method='post' name='sendfile' enctype='multipart/form-data'>";
 
 	echo t("Lue ulkomaanpäivärahat tiedostosta").":<br><br>";
 	echo "<table>";
@@ -319,7 +319,7 @@ if ($tee == '') {
 	echo "</form><br><br>";
 
 	echo t("Poista vanhat päivärahat").":<br><br>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 	echo "<tr><th>".t("Poista edellisten vuosien päivärahat käytöstä")."</th>";
 	echo "<td><input type='submit' value='".t("Poista")."'></td>";
@@ -328,7 +328,7 @@ if ($tee == '') {
 	echo "</form><br><br>";
 
 	echo t("Päivitä järjestelmän päivärahat").":<br><br>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 	echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Kotimaanpäivärahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "kotimaantilinumero", 170, $kotimaantilinumero, "EISUBMIT")."</td></tr>";
 	echo "<tr><th>".t("Tili (Kirjanpito)")." ".t("Ulkomaanpäivärahat")."</th><td width='200' valign='top'>".livesearch_kentta("sendfile", "TILIHAKU", "ulkomaantilinumero", 170, $ulkomaantilinumero, "EISUBMIT")."</td></tr>";

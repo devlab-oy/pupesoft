@@ -131,7 +131,7 @@ if ($tee == "") {
 	echo "</table><br>";
 
 	echo "<table>";
-	echo "<form action = '$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "	<input type='hidden' name='toiminto' value='lisatiedot'>
 			<input type='hidden' name='otunnus' value='$otunnus'>

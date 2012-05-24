@@ -18,7 +18,7 @@
 
 	if (!isset($rekuesti)) $rekuesti = "";
 
-	echo "<form action = '$PHP_SELF' method = 'post'>
+	echo "<form method = 'post'>
 			<input type='hidden' name='tee' value='listaa'>";
 
 	echo "<table>";

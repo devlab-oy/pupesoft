@@ -220,10 +220,10 @@
 
 			if (trim($suuntalavan_tunnus) != '') {
 
-				$query = "	SELECT keraysvyohyke, 
-							keikkatunnus 
-							FROM suuntalavat 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+				$query = "	SELECT keraysvyohyke,
+							keikkatunnus
+							FROM suuntalavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
 				$keraysvyohyke_chk_res = pupe_query($query);
 				$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
@@ -416,7 +416,7 @@
 			if (mysql_num_rows($loput_res) > 0) {
 				echo "<font class='ok'>",t("Suuntalava mahtuu hyllypaikalle"),"</font>&nbsp;&nbsp;";
 
-				echo "<form action='' method='post'>";
+				echo "<form method='post'>";
 				echo "<select name='suuntalavan_hyllypaikka'>";
 
 				while ($loput_row = mysql_fetch_assoc($loput_res)) {
@@ -442,7 +442,7 @@
 			}
 		}
 
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -459,7 +459,7 @@
 		echo "<input type='submit' value='",t("Vie koko suuntalava varastoon"),"' />";
 		echo "</form><br /><br />";
 
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -473,7 +473,7 @@
 
 	if ($tee == 'uusi') {
 
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -611,7 +611,7 @@
 		$voidaanko_poistaa_row = mysql_fetch_assoc($voidaanko_poistaa_result);
 
 		if (trim($voidaanko_poistaa_row['tunnukset']) == '') {
-			echo "<form action='' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 			echo "<input type='hidden' name='tee' value='poista'>";
 			echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -624,7 +624,7 @@
 
 		echo "<br />";
 
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 		echo "<input type='hidden' name='tee' value=''>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -636,7 +636,7 @@
 
 		if ($toiminto != "") {
 			echo "<hr>";
-			echo "<form action='' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
@@ -661,7 +661,9 @@
 				</tr>";
 		echo "</table><br>";
 
-		echo "<form action='' method='post'>";
+		echo "<br />";
+
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -671,7 +673,7 @@
 		echo "<input type='submit' value='",t("Uusi suuntalava"),"' />";
 		echo "</form>";
 
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='tulosta_sscc'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -752,7 +754,7 @@
 				if ($suuntalavat_row['tila'] == 'S') {
 					echo "<font class='ok'>",t("Siirtovalmis"),"!</font><br />";
 
-					echo "<form action='' method='post'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='toiminto' value='tulosta'>";
 					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 					echo "<input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>";
@@ -765,7 +767,7 @@
 					echo "<input type='submit' value='",t("Tulosta purkulista"),"' />";
 					echo "</form>";
 
-					echo "<br /><form action='' method='post'>";
+					echo "<br /><form method='post'>";
 					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 					echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
 					echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -775,7 +777,7 @@
 					echo "<input type='submit' value='",t("Vie varastoon"),"' />";
 					echo "</form>";
 
-					echo "<br /><form action='' method='post'>";
+					echo "<br /><form method='post'>";
 					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 					echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 					echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -797,7 +799,7 @@
 
 
 					if (trim($onko_viety_varastoon_row['tunnukset']) == '' and trim($onko_viety_varastoon_row['tunnukset']) != null) {
-						echo "<br /><form action='' method='post'>";
+						echo "<br /><form method='post'>";
 						echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 						echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 						echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -808,7 +810,7 @@
 						echo "</form>";
 					}
 					else {
-						echo "<br /><form action='' method='post'>";
+						echo "<br /><form method='post'>";
 						echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 						echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 						echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
@@ -834,7 +836,7 @@
 				}
 			}
 			else {
-				echo "<form action='' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 				echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 				echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";

@@ -1091,7 +1091,7 @@
 			if (isset($tasmays) and $tasmays != '') {
 				echo "<table><tr><td>";
 				echo "<font class='head'>".t("Täsmäys").":</font><br>";
-				echo "<form method='post' action='$PHP_SELF' id='tasmaytysform' onSubmit='return verify();'>";
+				echo "<form method='post' id='tasmaytysform' onSubmit='return verify();'>";
 				echo "<input type='hidden' name='tee' value='tiliointi'>";
 				echo "<table width='100%'>";
 				echo "<tr>";
@@ -1677,7 +1677,7 @@
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						echo "</table><table width='100%'>";
-						echo "<tr><td colspan='7' class='tumma'>KALA3: $edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
+						echo "<tr><td colspan='7' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
 						echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td></tr>";
 						$i++;
 
@@ -1771,7 +1771,7 @@
 
 				if ($edkassa != '') {
 					echo "</table><table width='100%'>";
-					echo "<tr><td colspan='6' class='tumma'>KALA3: $edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></th>";
+					echo "<tr><td colspan='6' class='tumma'>$edtyyppi ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></th>";
 					echo "<td align='right' class='tumma' style='width:100px'><b><div id='erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td></tr>";
 
 					echo "<tr><th colspan='6'>$edkassanimi yhteensä:</th>";
@@ -1964,7 +1964,7 @@
 
 	// Käyttöliittymä
 	echo "<br>";
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 
 	if (!isset($kka)) $kka = date("m");

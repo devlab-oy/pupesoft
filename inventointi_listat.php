@@ -4,7 +4,7 @@
 
 	echo "<font class='head'>",t("Tulosta inventointilista"),"</font><hr>";
 
-	echo "<form name='inve' action='' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 
@@ -491,10 +491,10 @@
 
 			$joinlisa = " JOIN varaston_hyllypaikat ON (
 							{$ressulisa}
-							varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
-							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
-							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 
-							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso 
+							varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
+							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue
+							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro
+							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso
 							AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali) ";
 		}
 
@@ -999,7 +999,7 @@
 				system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
 
 				if ($komento["Inventointi"] == 'email') {
-					
+
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";

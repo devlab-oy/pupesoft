@@ -353,7 +353,7 @@
 					echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
 				}
 
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='toim' 			value='$toim'>";
 				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -668,7 +668,7 @@
 		$kentta	= "etsi";
 
 		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 
@@ -999,7 +999,7 @@
 						echo "<$ero valign='top'></$ero>";
 					}
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -1029,7 +1029,7 @@
 
 					require("varaston_tulostusalue.inc");
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 
 					if ($yhtiorow["pakkaamolokerot"] != "") {
 
@@ -1089,7 +1089,7 @@
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
 					echo "<$ero valign='top'><input type='submit' 	value='".t("Tulosta")."'></form></$ero>";
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -1130,7 +1130,7 @@
 
 			if ($oikeurow['paivitys'] == 1) {
 				echo "<table>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 
 				if ($toim == 'SIIRTOLISTA') {
 					echo "<tr><th colspan='2'>".t("Tulosta kaikki siirtolistat")."</th></tr>";

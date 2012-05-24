@@ -711,7 +711,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	// kirjotetaan file levylle
 	file_put_contents("/tmp/$txtnimi", $file);
 
-	echo "<br><br><form method='post' action='$PHP_SELF'>";
+	echo "<br><br><form method='post' class='multisubmit'>";
 	echo "<table>";
 	echo "<tr><th>".t("Tallenna tulos")."</th>";
 	echo "<td>";
@@ -732,7 +732,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	$abcnimi = $ryhmanimet[$abcrajaus];
 
-	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "	<form method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>
 
 			<table>";

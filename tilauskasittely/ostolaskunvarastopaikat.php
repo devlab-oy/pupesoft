@@ -19,7 +19,7 @@
 		if ($tila == 'Y') $selecty=" selected ";
 
 		if ($tila=='' or $tila=='N' or $tila=='Y') {
-			echo "<br><form name='valinta' action='$PHP_SELF' method='post'>
+			echo "<br><form name='valinta' method='post'>
 					<td>".t("Etsi toimittaja").": </td>
 					<td><input type = 'text' name = 'nimi' value='$nimi'></td>
 					<td><select name='tila'>
@@ -73,7 +73,7 @@
 				</tr>";
 
 			while ($trow = mysql_fetch_array ($result)) {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<tr>";
 				echo "<input type='hidden' name='otunnus' value='$trow[tunnus]'>";
 				echo "<input type='hidden' name='tee' value=''>";

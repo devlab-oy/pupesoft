@@ -115,7 +115,7 @@
 		}
 	}
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tila' value='massaus'>";
 
 	echo "<font class='message'>".t("Kuka korvataan ").":</font>";

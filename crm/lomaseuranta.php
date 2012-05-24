@@ -21,7 +21,7 @@
 	echo "<th>".t("Valitse käyttäjä").":</th>";
 
 
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
 	$query  = "SELECT distinct kuka, nimi FROM kuka WHERE $lisa2 and extranet=''";

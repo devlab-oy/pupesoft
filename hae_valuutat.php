@@ -48,7 +48,7 @@
 		echo "</table>";
 
 		if ($yhtiorow["valkoodi"] == "EUR") {
-			echo "<br><form method='post' action='$PHP_SELF'>
+			echo "<br><form method='post'>
 					<input type='hidden' name='tee' value='PAIVITA'>
 					<input type='submit' value='".t("Päivitä kurssit")."'>
 					</form>";

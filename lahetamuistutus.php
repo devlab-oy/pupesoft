@@ -57,7 +57,7 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
 
 		echo "	<br><br>
-				<form method='post' action='$PHP_SELF'>
+				<form method='post'>
 				<input type='hidden' name='tee' value='LAHETA'>
 				<input type='submit' value='".t("Lähetä muistutukset hyväksynnässä olevista ostolaskuista")."'>
 				</form>";

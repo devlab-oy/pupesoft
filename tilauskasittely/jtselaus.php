@@ -402,7 +402,7 @@
 		$stresult = pupe_query($query);
 
 		if (mysql_num_rows($stresult) > 0) {
-			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
+			echo "	<form name='valinta' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='maa' value='$maa'>
 					<input type='hidden' name='myyja' value='{$myyja}' />
@@ -506,7 +506,7 @@
 
 		echo t("Muuta riviä").":<br>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='LISAARIVI'>";
 		echo "<input type='hidden' name='jarj' value='$jarj'>";
@@ -1139,7 +1139,7 @@
 										</script>";
 
 
-									echo "<form action='$PHP_SELF' method='post'>";
+									echo "<form method='post'>";
 									echo "<input type='hidden' name='maa' value='$maa'>";
 									echo "<input type='hidden' name='myyja' value='{$myyja}' />";
 
@@ -1948,7 +1948,7 @@
 					ORDER BY tyyppi, nimitys";
 		$vtresult = pupe_query($query);
 
-		echo "	<form name='valinta' action='$PHP_SELF' method='post'>
+		echo "	<form name='valinta' method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<table>";
 

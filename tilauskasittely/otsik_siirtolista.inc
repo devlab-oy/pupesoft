@@ -101,7 +101,7 @@
 					ORDER BY tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";

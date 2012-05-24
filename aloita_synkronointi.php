@@ -119,7 +119,7 @@ if ($tee == "SYNK") {
 if ($tee == "") {
 	$synkattavat = explode(',', $yhtiorow["synkronoi"]);
 
-	 echo "<form method='post' action='$PHP_SELF'>
+	 echo "<form method='post'>
 			<input type='hidden' name='tee' value='SYNK'>";
 
 	echo "<select name='table'>";

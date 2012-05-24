@@ -2173,7 +2173,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='H‰lytysraportti.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -2190,7 +2190,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='H‰lytysraportti.txt'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
@@ -2199,7 +2199,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='H‰lytysraportti.csv'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
@@ -2279,7 +2279,7 @@
 
 		if ($tee == "") {
 
-			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+			echo "	<form method='post' autocomplete='off'>
 					<br>".t("Valitse v‰hint‰‰n yksi seuraavista:")."
 					<table>
 					<tr><th>".t("Osasto")."</th><td>";
@@ -2477,7 +2477,7 @@
 
 			$abcnimi = $ryhmanimet[$abcrajaus];
 
-			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+			echo "	<form method='post' autocomplete='off'>
 					<input type='hidden' name='tee' value='RAPORTOI'>
 					<input type='hidden' name='osasto' value='$osasto'>
 					<input type='hidden' name='tuoryh' value='$tuoryh'>

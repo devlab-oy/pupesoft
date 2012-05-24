@@ -276,7 +276,7 @@ if (!$asiakasid) {
 	   echo "<br><br>";
 	}
 
-	echo "<table><form action='' method='POST' name='haku'>
+	echo "<table><form method='POST' name='haku'>
 	    	<tr><th>".t('Hae asiakas')."</th><td><input type='text' name='ytunnus' value=''></td>
 	        <td class='back'><input type='submit' value=".t('Etsi')."></td>
 	    	</tr></form></table>";
@@ -353,7 +353,7 @@ if ($asiakasid) {
 		$asiakasrow['toim_nimi']    = $tnimi;
 	}
 
-    echo "<form action='' method='post' name='rahtikirja'><table>";
+    echo "<form method='post' name='rahtikirja'><table>";
 	echo "<tr>
 			<th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
 	echo "<tr>

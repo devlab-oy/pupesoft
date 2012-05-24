@@ -144,7 +144,7 @@
 	echo "<table>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<form method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -156,7 +156,7 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
+	echo "<form method='post' name='formi2' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -178,7 +178,7 @@
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 	if ($ulos == '' and $tee == 'Z') {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
@@ -190,7 +190,7 @@
 		echo "</td>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tyyppi' value=''>";
@@ -1967,7 +1967,7 @@
 	}
 
 	if ($ulos != "") {
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='Z'>";

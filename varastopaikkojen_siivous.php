@@ -345,7 +345,7 @@
 			echo "<tr><th>".t("Tuoteno")."</th>";
 			echo "<th>".t("Oletuspaikkojen määrä")."</th></tr>";
 
-			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEANOLETUKSET'>";
 
 			$saldolliset = array();
@@ -385,7 +385,7 @@
 			echo "<th>".t("Varastopaikka")."</th>";
 			echo "<th>".t("Duplikaattien määrä")."</th></tr>";
 
-			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEANRIKKINAISET'>";
 
 			$saldolliset = array();
@@ -425,7 +425,7 @@
 			echo "<th>".t("Saldo")."</th>";
 			echo "<th>".t("Varastopaikka")."</th></tr>";
 
-			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEANTUNTEMATTOMAT'>";
 
 			while ($lrow = mysql_fetch_array($result)) {
@@ -474,7 +474,7 @@
 			echo "<th>".t("Saldo")."</th>";
 			echo "<th>".t("Varastopaikka")."</th></tr>";
 
-			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEANTUOTTEETTOMAT'>";
 
 			while ($lrow = mysql_fetch_array($result)) {
@@ -591,7 +591,7 @@
 				</script>";
 
 
-			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<form method='POST'>";
 			echo "<input type='hidden' name='tee' value='CLEAN'>";
 
 			$saldolliset = array();
@@ -658,7 +658,7 @@
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "<th>".t("Varastopaikka")."</th></tr>";
 
-		echo "<form method='POST' action='$PHP_SELF'>";
+		echo "<form method='POST'>";
 		echo "<input type='hidden' name='tee' value='CLEANRIVIT'>";
 
  		while ($tilrivirow = mysql_fetch_array($tilrivires)) {
@@ -736,7 +736,7 @@
 			echo "</tr>";
 		}
 
-		echo "<form method='POST' action='$PHP_SELF'>";
+		echo "<form method='POST'>";
 		echo "<input type='hidden' name='tee' value='CLEANTAPAHTUMAT'>";
 
  		while ($tapahtumarow = mysql_fetch_array($tapahtumares)) {
@@ -772,7 +772,7 @@
 	if ($tee == "") {
 		//Käyttöliittymä
 
-		echo "<table><form name='piiri' method='post' action='$PHP_SELF'>";
+		echo "<table><form name='piiri' method='post'>";
 		echo "<input type='hidden' name='tee' value='LISTAA'>";
 
 		echo "<tr><th>".t("Alkuvarastopaikka:")."</th>
@@ -855,42 +855,42 @@
 		echo "</select></td><td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAARIKKINAISET'>";
 		echo "<tr><th>".t("Listaa tuotteet joilla on virheellisiä varastopaikkoja")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAAOLETUKSET'>";
 		echo "<tr><th>".t("Listaa tuotteet joilla on virheellisiä oletuspaikkoja")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAATUNTEMATTOMAT'>";
 		echo "<tr><th>".t("Listaa tuotteet joiden varastopaikka ei kuulu mihinkään varastoon")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAATUOTTEETTOMAT'>";
 		echo "<tr><th>".t("Listaa tuotepaikat joiden tuotetta ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
 		echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
 		echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei löydy")."</th><td></td>";

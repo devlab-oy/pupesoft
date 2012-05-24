@@ -73,7 +73,7 @@
 
 	if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
-		echo "<table><form action='' name='laskuri' method='post'>";
+		echo "<table><form name='laskuri' method='post'>";
 
 		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
 		if (count($tunnus) > 0) {
@@ -399,7 +399,7 @@
 			$tanaankk = date("m")-1;
 			$tanaanvv = date("Y");
 
-			echo "<form method='post' action='$PHP_SELF' name='lasku' onSubmit = 'return verify()'>";
+			echo "<form method='post' name='lasku' onSubmit = 'return verify()'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='TOIMITA'>";
 			echo "<table>";
@@ -1028,7 +1028,7 @@
 		$kentta	= "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value=''>";
 		echo "<table>";

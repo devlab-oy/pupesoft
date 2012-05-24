@@ -93,7 +93,7 @@
 			$valkoodi = $yhtiorow["valkoodi"];
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+		echo "<form method='post' autocomplete='off'>
 				<input type='hidden' name='toim' 				value = '$toim'>
 				<input type='hidden' name='lopetus' 			value = '$lopetus'>
 				<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -342,7 +342,7 @@
 			echo "&nbsp;&nbsp;";
 
 			echo "<td class='back'>
-					<form method='post' action='$PHP_SELF' autocomplete='off'>
+					<form method='post' autocomplete='off'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

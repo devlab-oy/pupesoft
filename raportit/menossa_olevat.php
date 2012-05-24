@@ -186,7 +186,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 
 		echo "<br><table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Menossa_olevat.xls'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -207,7 +207,7 @@ if ($vain_excel_kaikki != '') {
 	$vain_excelchk_kaikki = "CHECKED";
 }
 
-echo "<br><form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Anna ytunnus tai osa nimestä")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td></tr>";
@@ -217,7 +217,7 @@ echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 echo "</tr>";
 echo "</form>";
 echo "<tr><td class='back'><br><br></td></tr>";
-echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name=asiakas method='post' autocomplete='off'>";
 echo "<tr>";
 echo "<th colspan='2'>".t("Listaa kaikki menossa olevat")."</th></tr>";
 echo "<tr><th>".t("Raportti Exceliin")."</th>";

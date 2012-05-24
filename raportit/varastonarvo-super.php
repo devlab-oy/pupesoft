@@ -63,7 +63,7 @@
 		echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
 
 		// piirrell‰‰n formi
-		echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
+		echo "<form name='formi' method='post' autocomplete='OFF'>";
 		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
 
 		$noautosubmit = TRUE;
@@ -1229,7 +1229,7 @@
 		$workbook->close();
 
 		if (!$php_cli) {
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

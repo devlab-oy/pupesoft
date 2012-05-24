@@ -284,7 +284,7 @@
 					($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('','A','J','C'))) or
 					($tila_row["tila"] == "C" and in_array($tila_row["alatila"], array('','A','B','C')))) {
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
 				echo "<input type='hidden' name='tee' value='vaihda' />";
 				echo "<input type='hidden' name='tunnus' value='{$tila_row['tunnus']}' />";
@@ -340,7 +340,7 @@
 
 			require ("raportit/naytatilaus.inc");
 
-			echo "<form method='post' action=''>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
 			echo "<td class='back'><input type='submit' value='",t("Peruuta"),"'></td>";
 			echo "</form>";
@@ -354,7 +354,7 @@
 	}
 
 	if ($tee == "") {
-		echo "<form method='post' action=''>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='valitse'>";
 		echo "<table>";
 		echo "<tr>";

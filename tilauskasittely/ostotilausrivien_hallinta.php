@@ -17,7 +17,7 @@
 	if ($ytunnus == "") {
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 		echo "<br><table>";
-		echo "<form action = '' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<tr><th>",t("Toimittaja"),":</th><td><input type='text' size='10' name='ytunnus' value='{$ytunnus}'></td></tr>";
 		echo "<tr><th>",t("N‰yt‰"),":</th>";
 
@@ -37,7 +37,7 @@
 		echo "<br><br>";
 
 		echo "<table>";
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='nayta_rivit' value='vahvistamattomat'>";
 		echo "<tr><td class='back'><input type='submit' value='",t("N‰yt‰ kaikkien toimittajien vahvistamattomat rivit"),"'></td></tr>";
 		echo "</form>";
@@ -168,7 +168,7 @@
 		echo "</table><br>";
 
 		echo "	<table>
-				<form action='' method='post'>
+				<form method='post'>
 				<input type='hidden' name='ytunnus' value = '{$ytunnus}'>
 				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>";
 
@@ -228,7 +228,7 @@
 		echo "</form></td></tr></table><br>";
 
 		echo "	<table>
-				<form action='' method='post'>
+				<form method='post'>
 				<input type='hidden' name='ytunnus' value = '{$ytunnus}'>
 				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
 				<input type='hidden' name='otunnus' value = '{$otunnus}'>
@@ -246,7 +246,7 @@
 				<td><input type='Submit' value='",t("P‰ivit‰"),"'></form></td></tr></table><br>";
 
 		echo "	<table>
-				<form action='' method='post'>
+				<form method='post'>
 				<input type='hidden' name='ytunnus' value = '{$ytunnus}'>
 				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
 				<input type='hidden' name='otunnus' value = '{$otunnus}'>
@@ -337,7 +337,7 @@
 				//-->
 				</script>";
 
-		echo "	<form action='' method='post'>
+		echo "	<form method='post'>
 				<input type='hidden' name='ytunnus' value = '{$ytunnus}'>
 				<input type='hidden' name='toimittajaid' value = '{$toimittajaid}'>
 				<input type='hidden' name='otunnus' value = '{$otunnus}'>

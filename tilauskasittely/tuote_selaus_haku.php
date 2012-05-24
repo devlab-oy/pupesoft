@@ -596,7 +596,7 @@
 			echo "<div>";
 		}
 
-		echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
+		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		if (!isset($tultiin)) {

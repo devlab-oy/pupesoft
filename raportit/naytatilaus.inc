@@ -1987,7 +1987,7 @@
 
 					echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
-					echo "<form method='post' action='$PHP_SELF'><td class='back'>
+					echo "<form method='post'><td class='back'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>

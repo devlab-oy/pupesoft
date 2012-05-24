@@ -78,7 +78,7 @@
 
 	//Käyttöliittymä
 	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	if (!isset($kk))
 		$kk = date("m");

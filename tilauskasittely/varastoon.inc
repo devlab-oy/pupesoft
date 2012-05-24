@@ -41,7 +41,7 @@ $varastoon_msg  		  = "";
 $jalkilaskenta_debug_text = "";
 
 if ($tee == "" and $kauttalaskutus == '') {
-	$varastoon_msg .= "<form action='$PHP_SELF' name='riviformi' method='post'>";
+	$varastoon_msg .= "<form name='riviformi' method='post'>";
 	$varastoon_msg .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
 	if ($toiminto == "kaikkiok") {
@@ -1283,13 +1283,13 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 
 if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br><hr>";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value=''>";
 	echo "<input type='hidden' name='ytunnus' value=''>";

@@ -610,7 +610,7 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 	}
 
 	if ($varastoerror != 0) {
-		echo "<br><form action='$PHP_SELF' method='post'>";
+		echo "<br><form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
@@ -689,7 +689,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
-	echo "<form name='toimi' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='toimi' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
 	echo "<table>";
@@ -847,7 +847,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			if ($row["varastossaarvo"] == 0) $row["varastossaarvo"] = "";
 
 			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
-			echo "<td><form action='$PHP_SELF' method='post'>";
+			echo "<td><form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</form></td>";
@@ -924,7 +924,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 	echo "<td>$toimittajarow[postitp]</td>";
 
 	echo "<td class='back' rowspan='4' style='vertical-align:bottom;'>";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -976,7 +976,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa saapumista! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";
 
 			echo "<td class='back'>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 			echo "<input type='hidden' name='naytakaikki' value='YES'>";
@@ -1100,7 +1100,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			else {
 
 				echo "<td align='right'>";
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='toimittajaid' 	value='$toimittajaid'>";
 				echo "<input type='hidden' name='otunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='ytunnus' 		value='$ytunnus'>";
@@ -1185,7 +1185,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow, $kaikkivarastossayhteensa, $toimittajaid);
 
 	$formalku =  "<td class='back'>";
-	$formalku .= "<form action='$PHP_SELF?indexvas=1' method='post'>";
+	$formalku .= "<form action = '?indexvas=1' method='post'>";
 	$formalku .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	$formalku .= "<input type='hidden' name='otunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='ytunnus' value='$ytunnus'>";

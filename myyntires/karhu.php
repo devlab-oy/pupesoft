@@ -303,7 +303,7 @@ if ($tee == 'KARHUA')  {
 				order by sorttaus, jarjestys";
 	$res = mysql_query($query) or pupe_error();
 
-	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='lahetaformi' method='post'>";
 	echo "<select name='karhuviesti'>";
 
 	$sel1 = $sel2 = $sel3 = '';
@@ -483,7 +483,7 @@ if ($tee == 'KARHUA')  {
 
 	echo "</td></form>";
 
-	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='ohitaformi' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
@@ -501,7 +501,7 @@ if ($tee == 'KARHUA')  {
 
 if ($tee == "") {
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='ALOITAKARHUAMINEN'>";
 	echo t("Syötä ytunnus jos haluat karhuta tiettyä asiakasta").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa karhuamisen ensimmäisestä asiakkaasta").".<br><br>";
 

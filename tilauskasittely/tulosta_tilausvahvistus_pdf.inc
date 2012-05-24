@@ -1,7 +1,7 @@
 <?php
 
 	//hatetaan asiakkaan lähetetyyppi
-	$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+	$query = "  SELECT lahetetyyppi, lahetteen_jarjestys, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 				FROM asiakas
 				WHERE tunnus = '$laskurow[liitostunnus]'
 				and yhtio = '$kukarow[yhtio]'";
@@ -81,7 +81,7 @@
 	}
 
 	// katotaan miten halutaan sortattavan
-	$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+	$sorttauskentta = generoi_sorttauskentta($asrow["lahetteen_jarjestys"] != "" ? $asrow["lahetteen_jarjestys"] : $yhtiorow["lahetteen_jarjestys"]);
 
 	if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 	else $pjat_sortlisa = "";

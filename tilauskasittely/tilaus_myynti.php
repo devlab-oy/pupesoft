@@ -6769,7 +6769,7 @@ if ($tee == '') {
 					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
 								<td colspan='2' nowrap>
-								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti'>
+								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
 								<input type='hidden' name='otunnus' value='$tilausnumero'>
 								<input type='hidden' name='projektilla' value='$projektilla'>
 								<input type='hidden' name='tee' value='TULOSTA'>

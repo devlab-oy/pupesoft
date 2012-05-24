@@ -41,7 +41,7 @@
 
 		echo "<font class='head'>",t("Sähköinen markkinointi"),"</font><hr>";
 		echo "<table>";
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 
 		echo "<tr>";
 		echo "<th colspan='2'>",t("Asiakastiedot"),"</th>";

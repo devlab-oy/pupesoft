@@ -317,7 +317,7 @@
 	// Selectoidaan aktiivi
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys(array_keys($taulut), '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";

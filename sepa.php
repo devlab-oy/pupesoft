@@ -532,7 +532,7 @@
 		}
 
 		if (mysql_num_rows($result) > 0 and $virheita == 0) {
-			echo "<form name = 'valinta' method='post' action = ''>";
+			echo "<form name = 'valinta' method='post'>";
 			echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITA'>";
 			echo "<input type = 'submit' value = '".t("Tee maksuaineistot")."'>";
 			echo "</form>";

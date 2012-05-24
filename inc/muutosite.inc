@@ -1426,7 +1426,7 @@
 				$alv_tili = $trow["alv_tili"];
 			}
 
-			echo "<form action = '' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";

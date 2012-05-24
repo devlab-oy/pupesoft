@@ -32,7 +32,7 @@
 		$maksuehtores = pupe_query($query_maksuehto);
 		$maksuehtorow = mysql_fetch_array($maksuehtores);
 
-		echo "<table><form action='' name='laskuri' method='post'>";
+		echo "<table><form name='laskuri' method='post'>";
 
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='hidden' name='tee' value='P'>";

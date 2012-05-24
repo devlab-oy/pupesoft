@@ -916,7 +916,7 @@ if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOM
 			echo "<table><tr><th>".t("Maksutapa").":</th>";
 
 			while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
-				echo "<form action='' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 				echo "<input type='hidden' name='mista' value='$mista'>";
@@ -931,7 +931,7 @@ if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOM
 				echo "</form>";
 			}
 
-			echo "<form action='' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 			echo "<input type='hidden' name='mista' value='$mista'>";
@@ -944,7 +944,7 @@ if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOM
 			echo "<td><input type='submit' value='".t("Useita maksutapoja")."'></td>";
 			echo "</form>";
 
-			echo "<form action='' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 			echo "<input type='hidden' name='mista' value='$mista'>";
@@ -978,7 +978,7 @@ if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOM
 
 		$maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
-		echo "<table><form action='' name='laskuri' method='post'>";
+		echo "<table><form name='laskuri' method='post'>";
 
 		echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";

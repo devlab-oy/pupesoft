@@ -73,7 +73,7 @@
 
 	if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
-		echo "<table><form action='' name='laskuri' method='post'>";
+		echo "<table><form name='laskuri' method='post'>";
 
 		//käydään kaikki ruksatut tilaukset läpi
 		if (count($tunnus) > 0) {

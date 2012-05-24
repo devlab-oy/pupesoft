@@ -1993,7 +1993,7 @@
 			}
 
 			echo "<table>";
-			echo "<form action='' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "	<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>

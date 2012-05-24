@@ -1539,7 +1539,7 @@
 
 			// jos limiitti riittää niin annetaan mahdollisuus poimia kaikki
 			if ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti_koti'] >= $summa) {
-				echo "<br><form action = '$PHP_SELF' method='post'>
+				echo "<br><form method='post'>
 					<input type='hidden' name = 'tili' value='$tili'>
 					<input type='hidden' name = 'tee' value='NV'>
 					<input type='hidden' name = 'kaikki' value='$kaikki'>

@@ -26,7 +26,7 @@
 		if ($tee == "SYOTARIVI") {
 			echo t("Tee uusi rivi").":<br>";
 
-			echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
+			echo "	<form method='post' autocomplete='off'>";
 			echo "	<input type='hidden' name='tee' value='LISAARIVI'>
 					<input type='hidden' name='valmistettavat' value='$valmistettavat'>
 					<input type='hidden' name='toim'  value='$toim'>
@@ -925,7 +925,7 @@
 
 			js_popup();
 
-			echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
+			echo "	<form method='post' autocomplete='off'>";
 			echo "	<input type='hidden' name='tee' value='TEEVALMISTUS'>
 					<input type='hidden' name='valmistettavat' value='$valmistettavat'>
 					<input type='hidden' name='toim'  value='$toim'>";
@@ -1319,7 +1319,7 @@
 			echo "</form>";
 			echo "</table><br><br>";
 
-			echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
+			echo "	<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toim'  value='$toim'>";
 
 			if ($toim != 'KORJAA') {
@@ -1339,7 +1339,7 @@
 			$kentta="etsi";
 
 			// tehd‰‰n etsi valinta
-			echo "<br><form action='$PHP_SELF' name='find' method='post'>";
+			echo "<br><form name='find' method='post'>";
 			echo "<input type='hidden' name='toim'  value='$toim'>";
 
 			if ($toim == "TUOTE") {
@@ -1472,7 +1472,7 @@
 						echo "<td valign='top'>$tilrow[viesti]</td>";
 					}
 
-					echo "	<form method='post' action='$PHP_SELF'><td class='back'>
+					echo "	<form method='post'><td class='back'>
 							<input type='hidden' name='tee' value='VALMISTA'>
 							<input type='hidden' name='tulin' value='VALINNASTA'>
 							<input type='hidden' name='toim'  value='$toim'>

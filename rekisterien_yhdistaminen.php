@@ -122,7 +122,7 @@ if ($tee == "") {
 				ORDER BY tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
-	echo "<form action='$PHP_SELF?ohje=off' method='post' name='yhdistakohteet'>";
+	echo "<form action = '?ohje=off' method='post' name='yhdistakohteet'>";
 	echo "<table><tr><th>".t("Valitse siirrett‰v‰ kohde")."</th><th>".t("Valitse kohde johon siirret‰‰n")."</th></tr>";
 	echo "<tr><td><select name='vanhatunnus'>";
 	while ($kohde = mysql_fetch_array($result)) {
@@ -148,7 +148,7 @@ if ($tee == "") {
 				ORDER BY tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
-	echo "<form action='$PHP_SELF?ohje=off' method='post' name='yhdistapositiot'>";
+	echo "<form action = '?ohje=off' method='post' name='yhdistapositiot'>";
 	echo "<table><tr><th>".t("Valitse siirrett‰v‰ positio")."</th><th>".t("Valitse positio johon siirret‰‰n")."</th></tr>";
 	echo "<tr><td><select name='vanhatunnus'>";
 	while ($kohde = mysql_fetch_array($result)) {

@@ -62,7 +62,7 @@ if (isset($tapa) and $tapa == 'paalle') {
 			unset($tilino);
 		}
 		else {
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input name='tilino' type='hidden' value='$tilino'>";
 			echo "<input name='tapa'   type='hidden' value='$tapa'>";
 			echo "<table>
@@ -147,7 +147,7 @@ if (isset($tapa) and $tapa == 'pois') {
 			unset($tilino);
 		}
 		else {
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input name='tilino' type='hidden' value='$yhtiorow[factoringsaamiset]'>";
 			echo "<input name='tapa'   type='hidden' value='$tapa'>";
 			echo "<table>
@@ -237,7 +237,7 @@ if (isset($tapa) and $tapa == 'pois') {
 }
 
 if (!isset($tapa)) {
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<table>";
 		echo "<tr><th>".t("Suorituksia siirret‰‰n korkoihin")."</th>";
 		echo "<td><input type='radio' name='tapa' value='paalle' checked></td></tr>";
@@ -250,7 +250,7 @@ if (!isset($tapa)) {
 else {
 	if (!isset($viite)) {
 		if ($tapa == 'paalle') {
-			echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form name='eikat' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tapa' value='$tapa'><table>";
 			echo "<tr><th>".t("Anna viitteen alku suorituuksista, jotka haluat k‰sitelt‰viksi")."</th>";
 			echo "<td><input type='text' name='viite' value = '50009'></td></tr>";
@@ -261,7 +261,7 @@ else {
 			echo "</form>";
 		}
 		else {
-			echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form name='eikat' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tapa' value='$tapa'><table>";
 			echo "<tr><th>".t("Anna viitteen alku korkovienneist‰, jotka haluat k‰sitelt‰viksi")."</th>";
 			echo "<td><input type='text' name='viite'></td></tr>";

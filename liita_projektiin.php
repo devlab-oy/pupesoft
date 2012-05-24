@@ -79,7 +79,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
 
 						
 				echo "	<tr>
-							<form action='$PHP_SELF' method='post' name='projekti' autocomplete='off'>
+							<form method='post' name='projekti' autocomplete='off'>
 							<input type='hidden' name='tee' value='LIITA'>
 							<input type='hidden' name='tunnusnippu' value='$tunnusnippu'>
 							<input type='hidden' name='tunnus' value='$tunnus'>
@@ -126,7 +126,7 @@ if($tee == "HAE") {
 						<th>".t("Anna tilausnumero jonka haluat liitt‰‰")."</th>
 					</tr>
 					<tr>
-						<form action='$PHP_SELF' method='post' name='projekti' autocomplete='off'>
+						<form method='post' name='projekti' autocomplete='off'>
 						<input type='hidden' name='tee' value='KORJAA'>
 						<input type='hidden' name='tunnusnippu' value='$tunnusnippu'>
 						<td><input type='text' name='tunnus' size='15' maxlength='14' value='$tunnus'></td>
@@ -155,7 +155,7 @@ if($tee == "") {
 				<th>".t("Anna projekti/tilausnumero")."<br>".t("johon haluat liitt‰‰ tilauksen")."</th>
 			</tr>
 			<tr>
-				<form action='$PHP_SELF' method='post' name='projekti' autocomplete='off'>
+				<form method='post' name='projekti' autocomplete='off'>
 				<input type='hidden' name='tee' value='HAE'>
 				<td><input type='text' name='tunnusnippu' size='15' maxlength='14' value='$tunnusnippu'></td>
 				<td class='back'><input type='Submit' value='".t("Jatka")."'></td>

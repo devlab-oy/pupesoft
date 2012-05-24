@@ -107,7 +107,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
 	if ($ytunnus != 'TULKAIKKI' and $vahvistus == 0 and $vahvistus != '') {
 
-		echo "<br><form name=asiakas action='' method='post' autocomplete='off'>";
+		echo "<br><form name=asiakas method='post' autocomplete='off'>";
 		echo "<td><input type='hidden' name='otunnus' value='{$lastunnus}'></td>";
 		echo "<td><input type='hidden' name='komento' value='email'></td>";
 		echo "<td><input type='hidden' name='tee' value='TULOSTA'></td>";
@@ -124,7 +124,7 @@ if ($tee == 'TULOSTA') {
 }
 
 
-echo "<br><form name=asiakas action='' method='post' autocomplete='off'>";
+echo "<br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>",t("Anna ytunnus tai osa nimestä"),"</th>";
 echo "<td><input type='text' name='ytunnus' value='{$ytunnus}'></td>";
@@ -149,7 +149,7 @@ echo "</tr>";
 echo "</form>";
 
 echo "<tr><td class='back'><br /><br /></td></tr>";
-echo "<form name=asiakas action='' method='post' autocomplete='off'>";
+echo "<form name=asiakas method='post' autocomplete='off'>";
 echo "<tr>";
 echo "<th>",t("Listaa kaikki tulossa olevat"),"</th>";
 echo "<td><input type='hidden' name='ytunnus' value='TULKAIKKI'></td>";

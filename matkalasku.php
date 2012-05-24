@@ -1335,7 +1335,7 @@ if ($tee == "MUOKKAA") {
 
 		if ($rivitunnus == "") {
 			// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
-			echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
+			echo "	<form name='tilaus' method='post' autocomplete='off' enctype='multipart/form-data'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='TALLENNA'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -1490,7 +1490,7 @@ if ($tee == "MUOKKAA") {
 				}
 
 				if ($valinta != "") {
-					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+					echo "<form method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1529,7 +1529,7 @@ if ($tee == "MUOKKAA") {
 		}
 
 		echo "<br><font class='message'>".t("Lis‰‰")." $trow[nimitys]</font><hr>$errori";
-		echo "<form id='lisaarivi' action = '$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form id='lisaarivi' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1910,7 +1910,7 @@ if ($tee == "MUOKKAA") {
 			if (mysql_num_rows($keikres) == 0 and $row["perhe"] != $edperhe and $row["tuoteno"] != "" and !$muokkauslukko) {
 
 				echo "<td class='back'>";
-				echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+				echo "<form method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='$tee'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1924,7 +1924,7 @@ if ($tee == "MUOKKAA") {
 
 				if ($laskurow["tilaustyyppi"] == "M") {
 					echo "<td class='back'>";
-					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+					echo "<form method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1939,7 +1939,7 @@ if ($tee == "MUOKKAA") {
 /*
 				if ($row["perheid2"] == $row["tunnus"]) {
 					echo "<td class='back'>";
-					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+					echo "<form method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2023,7 +2023,7 @@ if ($tee == "MUOKKAA") {
 		/*
 		if (mysql_num_rows($keikres) == 0) {
 			echo "	<td class='back' align='left' colspan='3'>
-						<form name='palaa' action='$PHP_SELF' method='post'>
+						<form name='palaa' method='post'>
 						<input type = 'hidden' name='tee' value = 'TUO_KALENTERISTA'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
@@ -2037,7 +2037,7 @@ if ($tee == "MUOKKAA") {
 	}
 
 	if ($lopetus == "") {
-		echo "	<form name='palaa' action='$PHP_SELF' method='post'>
+		echo "	<form name='palaa' method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tee' value='VALMIS'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -2048,7 +2048,7 @@ if ($tee == "MUOKKAA") {
 
 	/*
 	if (mysql_num_rows($keikres) == 0 and $toim == "SUPER") {
-		echo "<br><br><form action = '$PHP_SELF' method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat k‰sitell‰ kululaskun uudestaan.\\n\\nLaskun uudelleenk‰sittely poistaa kaikki erittelyrivit ja tiliˆinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
+		echo "<br><br><form method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, ett‰ haluat k‰sitell‰ kululaskun uudestaan.\\n\\nLaskun uudelleenk‰sittely poistaa kaikki erittelyrivit ja tiliˆinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
 		echo "<input type='hidden' name='tee' value='UUDELLEENKASITTELE'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2068,7 +2068,7 @@ if ($tee == "") {
 
 	echo "<br><br><font class='message'>".t("Perusta uusi matkalasku")."</font><hr>";
 
-	echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='UUSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2115,7 +2115,7 @@ if ($tee == "") {
 
 	echo "<br><br><font class='message'>".t("Perusta uusi matkalasku ja liit‰ asiakas laskuun")."</font><hr>";
 
-	echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='UUSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2196,7 +2196,7 @@ if ($tee == "") {
 			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2240,14 +2240,14 @@ if ($tee == "") {
 			echo "<td>$row[laskutus_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
-			echo "<td class='back'><form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<td class='back'><form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 			echo "<input type='Submit' value='".t("Muokkaa")."'>";
 			echo "</form></td>";
-			echo "<td class='back'><form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<td class='back'><form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='POISTA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2284,7 +2284,7 @@ if ($tee == "") {
 			//tehd‰‰n selv‰kielinen tila/alatila
 			require ("inc/laskutyyppi.inc");
 
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='MUOKKAA'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";

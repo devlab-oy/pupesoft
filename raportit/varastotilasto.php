@@ -20,7 +20,7 @@
 	echo "<font class=head>".t("Varastotilasto")." $vvl</font><hr>";
 
 	if ($ytunnus != '') {
-		$toimittajaid = "";		
+		$toimittajaid = "";
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		if ($toimittajaid == "") {
@@ -33,7 +33,7 @@
 	}
 
 	// käyttis
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 
 	echo "<table>";
@@ -182,11 +182,11 @@
 							AND varattu > 0";
 				$ostoresult = pupe_query($query);
 				$ostorivi = mysql_fetch_assoc($ostoresult);
-				
+
 				$jalkitoimituksessa = 0;
-				
+
 				// Jos jälkitoimitukset eivät varaa saldoa, pitää ne ottaa mukaan
-				if ($yhtiorow["varaako_jt_saldoa"] == "") { 
+				if ($yhtiorow["varaako_jt_saldoa"] == "") {
 					$query = "	SELECT ifnull(round(sum(jt)), 0) jt
 								FROM tilausrivi
 								WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -289,7 +289,7 @@
 				$workbook->close();
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna excel").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Varastotilasto.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -304,7 +304,7 @@
 				echo "<br>", $varastotilasto_table;
 			}
 		}
-		
+
 		if ($total_rows == 0 or $current_row == 0) {
 			echo "<font class='message'>", t("Yhtään soveltuvaa tuotetta ei löytynyt"), ".</font>";
 		}

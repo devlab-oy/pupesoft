@@ -284,7 +284,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -399,7 +399,7 @@
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='asmemo_viesti' value='$asmemo_viesti'>
 			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
 			<input type='hidden' name='raportti' value='$raportti'>
@@ -472,7 +472,7 @@
 		echo "<td class='back' valign='bottom'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
 		echo "</form>";
 
-		echo "<form action = '$PHP_SELF?limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku$ulisa' method = 'post'>
+		echo "<form action = '?limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku$ulisa' method = 'post'>
 				<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
 				<input type='hidden' name='tee' value='TULOSTA'>";
 

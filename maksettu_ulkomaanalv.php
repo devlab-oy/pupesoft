@@ -172,7 +172,7 @@ if ($tee == '') {
 	if ($tyyppi == "") $tyyppi = "4";
 	$sel[$tyyppi] = "SELECTED";
 
-	echo "<form action = '$PHP_SELF' method='post'>
+	echo "<form method='post'>
 			<input type = 'hidden' name = 'tee' value = 'aja'>
 
 			<table>

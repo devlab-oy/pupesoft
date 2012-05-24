@@ -6,7 +6,7 @@ $sanakirja_kielet = array("en", "se", "de", "dk", "ee");
 
 echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 
-echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Valitse k‰‰nnett‰v‰t kielet")."</th>";
 echo "<td><table>";

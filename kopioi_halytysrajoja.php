@@ -291,7 +291,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				$jarjestys";
 	$res = pupe_query($query);
 
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "<form method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
 	echo "\n<table>";
 
@@ -449,7 +449,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 // näytetään käyttöliittymä..
 if ($tee == "" or !isset($ehdotusnappi)) {
 
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "<form method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='selaa'>";
 
 	echo "<table>\n";

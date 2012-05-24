@@ -62,7 +62,7 @@
 
 	if ($tee == 'mikrotila') {
 
-		echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>";
+		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='id' value='$id'>";
 		echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 		echo "<input type='hidden' name='tee' value='failista'>";
@@ -622,7 +622,7 @@
 		$kentta = "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<table>";
@@ -759,7 +759,7 @@
 					for ($y=0; $y<mysql_num_fields($result); $y++)
 						echo "<td>$row[$y]</td>";
 
-					echo "<form method='post' action='$PHP_SELF'><td class='back'>
+					echo "<form method='post'><td class='back'>
 						  <input type='hidden' name='id' value='$row[0]'>
 						   <input type='hidden' name='toim' value='$toim'>";
 
@@ -869,7 +869,7 @@
 		}
 
 		if ($toim == "") {
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='id' value='$id'>";
 			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 			echo "<input type='hidden' name='tee' value='mikrotila'>";
@@ -878,7 +878,7 @@
 			echo "</td>";
 			echo "</form>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='id' value='$id'>";
 			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 			echo "<input type='hidden' name='tee' value='kommentista'>";
@@ -889,7 +889,7 @@
 		}
 
 		//hakukent‰t
-		echo "<form action='$PHP_SELF' method='post' name='siirtolistaformi'>";
+		echo "<form method='post' name='siirtolistaformi'>";
 		echo "<input type='hidden' name='id' value='$id'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 

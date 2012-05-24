@@ -4,7 +4,7 @@
 
 	echo "<font class='head'>".t("Tulosta inventointilista")."</font><hr>";
 
-	echo "<form name='inve' action='$PHP_SELF' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 

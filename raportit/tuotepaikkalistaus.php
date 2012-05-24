@@ -140,7 +140,7 @@
 
 	if (!isset($tee) or $tee == "") {
 		echo "<table>";
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 		echo "<tr><th>".t("Alkuhylly")." (".t("alue-nro-väli-taso")."):</th>";

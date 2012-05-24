@@ -24,7 +24,7 @@
 	if ($pp1 == "00" or $kk1 == "00" or $vv1 == "0000") $tee = $pp1 = $kk1 = $vv1 = "";
 
 	// piirrellään formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Syötä alku pp-kk-vvvv").":</th>";

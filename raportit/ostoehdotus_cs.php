@@ -715,7 +715,7 @@
 	// näytetään käyttöliittymä..
 	$abcnimi = $ryhmanimet[$abcrajaus];
 
-	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "	<form method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>
 			<table>";
 

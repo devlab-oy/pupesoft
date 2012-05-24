@@ -134,15 +134,16 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 		}
 		if ($tee == 'XKAIKKI') {
 			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, myös myynti ja tasetilit
-			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
-						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						AND tili.yhtio = '$kukarow[yhtio]'
-						AND tiliointi.tilino = tili.tilino
+			$query = "	SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, 'n/a', 'n/a', 'n/a', tiliointi.selite
+						FROM tiliointi use index (yhtio_tilino_tapvm)
+						JOIN tili use index (tili_index) ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
+						WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
 						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
-						AND tiliointi.kustp = 0";
+						AND tiliointi.tilino not in ('{$yhtiorow["alv"]}', '{$yhtiorow["pyoristys"]}')
+						AND tiliointi.tapvm >= '{$yhtiorow["tilikausi_alku"]}'
+						AND tiliointi.tapvm <= '{$yhtiorow["tilikausi_loppu"]}'
+						AND tiliointi.kustp = 0
+						ORDER BY tiliointi.ltunnus";
 		}
 		if ($tee == 'W') {
 			$query = "	(SELECT lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,

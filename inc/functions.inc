@@ -15741,7 +15741,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
 }
 
 if (!function_exists("ostolaskun_kulujen_tiliointi")) {
-	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0, $ylikirjataan = false, $kirjataanko = true) {
+	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0) {
 
 		global $kukarow, $yhtiorow;
 
@@ -15758,8 +15758,6 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 		$osto_kulu = (float) $osto_kulu;
 		$osto_rivi_kulu = (float) $osto_rivi_kulu;
 
-		$sign = $ylikirjataan ? -1 : 1;
-
 		$til_sum_ratio = $tiliointirivin_summa / $laskun_summa;
 
 		$return_array = array(
@@ -15773,20 +15771,52 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 			if ($ix == 1 and trim($osto_rahti) != 0) {
 				$summa 			= str_replace(",", ".", $osto_rahti) * $til_sum_ratio;
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
-				$return_array['osto_rahti'] += ($summa * $sign);
+				$return_array['osto_rahti'] += $summa;
 			}
 			elseif ($ix == 2 and trim($osto_kulu) != 0) {
 				$summa 			= str_replace(",", ".", $osto_kulu) * $til_sum_ratio;
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
-				$return_array['osto_kulu'] += ($summa * $sign);
+				$return_array['osto_kulu'] += $summa;
 			}
 			elseif ($ix == 3 and trim($osto_rivi_kulu) != 0) {
 				$summa 			= str_replace(",", ".", $osto_rivi_kulu) * $til_sum_ratio;
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
-				$return_array['osto_rivi_kulu'] += ($summa * $sign);
+				$return_array['osto_rivi_kulu'] += $summa;
 			}
 		}
 
 		return array($tiliointirivin_summa, $return_array);
+	}
+}
+
+if (!function_exists("etsi_kuuluvat_tilioinnit")) {
+	function etsi_kuuluvat_tilioinnit($tunnus) {
+		global $kukarow;
+
+		$summa = 0;
+
+		// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
+		$query = "	SELECT sum(summa) summa
+					FROM tiliointi
+					WHERE aputunnus = '{$tunnus}'
+					AND yhtio 		= '{$kukarow['yhtio']}'
+					AND korjattu 	= ''
+					GROUP BY aputunnus";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+			$summarow = mysql_fetch_assoc($result);
+			$summa += $summarow["summa"];
+
+			$query = "	UPDATE tiliointi SET
+						korjattu = '{$kukarow['kuka']}',
+						korjausaika = now()
+						WHERE aputunnus = '{$tunnus}'
+						and yhtio 		= '{$kukarow['yhtio']}'
+						and korjattu 	= ''";
+			$result = pupe_query($query);
+		}
+
+		return $summa;
 	}
 }

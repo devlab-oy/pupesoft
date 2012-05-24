@@ -667,7 +667,7 @@
 		$kentta	= "etsi";
 
 		echo "<table>";
-		echo "<form name='find' method='post'>";
+		echo "<form name='find' method='POST' action='lahetteen_tulostusjono.php'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 

@@ -93,6 +93,7 @@ if ($tee == "UUSI") {
 						FROM lasku
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tila IN ('H','Y','M','P','Q')
+						and alatila IN ('','M','H')
 						and tilaustyyppi = 'M'";
 			$result = pupe_query($query);
 			$row    = mysql_fetch_assoc($result);
@@ -1206,7 +1207,7 @@ if ($tee == "MUOKKAA") {
 				// Poistetaan muokattava tilausrivi
 				if ($tilausrivi["perheid"] > 0) {
 					$query = "	DELETE from tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$tilausnumero'
 								AND perheid = '$rivitunnus'";
 					$result = pupe_query($query);
@@ -1214,7 +1215,7 @@ if ($tee == "MUOKKAA") {
 				else {
 					$tiliointisumma = $tilausrivi["summa"];
 					$query = "	DELETE from tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$rivitunnus'";
 					$result = pupe_query($query);
 				}

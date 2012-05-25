@@ -3180,7 +3180,7 @@
 	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array_fill_keys(explode(",", $trow[$i]), " checked") + array_fill(1, 3, '');
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array_fill(1, 3, '');
 
 		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ vaihto-omaisuuslaskun kulutilej‰")."</option>";
 		$ulos .= "<option value = '1' {$sel[1]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit tili‰")."</option>";

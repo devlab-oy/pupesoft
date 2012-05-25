@@ -170,6 +170,11 @@ if ($tee_kululaskut == "liita") {
 
 	//lis‰t‰‰n lasku
 	if ($verotonsumma != 0 and $verosumma != 0) {
+
+		$osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : (float) $osto_kulu;
+		$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : (float) $osto_rahti;
+		$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : (float) $osto_rivi_kulu;
+
 		// meill‰ on laskurow haettuna ylh‰‰ll‰, tehd‰‰n liitosotsikko
 		$query = "	INSERT into lasku set
 					yhtio        = '$kukarow[yhtio]',
@@ -187,6 +192,9 @@ if ($tee_kululaskut == "liita") {
 					summa        = '$verosumma',
 					vienti       = '$oslasrow[vienti]',
 					liitostunnus = '$oslasrow[liitostunnus]',
+					osto_kulu	 = '{$osto_kulu}',
+					osto_rahti   = '{$osto_rahti}',
+					osto_rivi_kulu = '{$osto_rivi_kulu}',
 					luontiaika	 = now(),
 					tila         = 'K'";
 		$result = pupe_query($query);
@@ -378,8 +386,17 @@ if ($silent == "") {
 					<th>".t("Valuutta")."</th>
 					<th>".t("Viite")."</th>
 					<th>".t("Kuva")."</th>
-					<th>".t("Vienti")."</th>
-					</tr>";
+					<th>".t("Vienti")."</th>";
+
+			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("kulut"),"</th>";
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("rahdit"),"</th>";
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("rivikohtaiset kulut"),"</th>";
+			}
+
+			echo "</tr>";
+
+			mysql_data_seek($result, 0);
 
 			while($llrow = mysql_fetch_array($result)) {
 
@@ -422,6 +439,10 @@ if ($silent == "") {
 				if ($llrow["vienti"] == 'L') $vienti_teksti = t("ei-EU raaka-aine");
 
 				echo "<td valign='top'>$vienti_teksti</td>";
+
+				echo "<td valign='top'>{$llrow['osto_kulu']}</td>";
+				echo "<td valign='top'>{$llrow['osto_rahti']}</td>";
+				echo "<td valign='top'>{$llrow['osto_rivi_kulu']}</td>";
 
 				echo "<td valign='top' class='back'>
 						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
@@ -646,8 +667,15 @@ if ($silent == "") {
 					<th>".t("Kuva")."</th>
 					<th>".t("Vienti")."</th>
 					<th>".t("Liitett‰viss‰")."</th>
-					<th>".t("Summa")."</th>
-					</tr>";
+					<th>".t("Summa")."</th>";
+
+			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("kulut"),"</th>";
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("rahdit"),"</th>";
+				echo "<th>",t("Vaihto-omaisuuslaskun"),"<br />",t("rivikohtaiset kulut"),"</th>";
+			}
+
+			echo "</tr>";
 
 			while ($llrow = mysql_fetch_array($result)) {
 
@@ -784,6 +812,19 @@ if ($silent == "") {
 							echo "<td valign='top'></td>";
 						}
 
+						if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
+
+							if ($llrow['vienti'] == 'C' or $llrow['vienti'] == 'F' or $llrow['vienti'] == 'I') {
+								echo "	<td valign='top'><input type='text' name='osto_kulu' value='{$llrow['osto_kulu']}' /></td>
+										<td valign='top'><input type='text' name='osto_rahti' value='{$llrow['osto_rahti']}' /></td>
+										<td valign='top'><input type='text' name='osto_rivi_kulu' value='{$llrow['osto_rivi_kulu']}' /></td>";
+							}
+							else {
+								echo "	<td valign='top'></td>
+										<td valign='top'></td>
+										<td valign='top'></td>";
+							}
+						}
 
 						echo "<td class='back' valign='top'>
 								<input type='hidden' name='keikanalatila' value='$keikanalatila'>

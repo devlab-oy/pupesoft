@@ -2033,7 +2033,6 @@ if ($tee == 'I') {
 					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
-
 				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
 				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {

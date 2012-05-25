@@ -1237,14 +1237,32 @@
 								AND yhtio = '{$kukarow['yhtio']}'";
 					$result = pupe_query($query);
 
-					if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0) {
+					$summa_kulu = 0;
+
+					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0) {
+
+						$tilinolisa = "";
+
+						if ($osto_rahti == 0) $tilinolisa = "'{$yhtiorow['osto_rahti']}'";
+
+						if ($osto_kulu == 0) {
+							if ($tilinolisa != "") $tilinolisa .= ",'{$yhtiorow['osto_kulu']}'";
+							else $tilinolisa = "'{$yhtiorow['osto_kulu']}'";
+						}
+
+						if ($osto_rivi_kulu == 0) {
+							if ($tilinolisa != "") $tilinolisa .= ",'{$yhtiorow['osto_rivi_kulu']}'";
+							else $tilinolisa = "'{$yhtiorow['osto_rivi_kulu']}'";
+						}
+
+						$tilinolisa = "'{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}'";
 
 						$query = "	SELECT tilino, sum(summa) as summa
 									FROM tiliointi
-									WHERE ltunnus = '$tunnus'
-									AND	yhtio = '$kukarow[yhtio]'
+									WHERE ltunnus = '{$tunnus}'
+									AND	yhtio = '{$kukarow['yhtio']}'
 									AND	korjattu = ''
-									AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+									AND tilino IN ({$tilinolisa})
 									GROUP BY 1";
 						$sum_result = pupe_query($query);
 
@@ -1258,13 +1276,23 @@
 							if ($sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] += $sum_row['summa'];
 						}
 
-						$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
+						if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0) {
+							$tiliointirow_summa = $trow['summa'];
+							$summa_kulu = 0;
+						}
+						else {
+							$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
+						}
 					}
-					else {
+
+					if ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) {
 						list($tiliointirow_summa, $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $trow['summa'], $tiliointirow['summa'], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
-						// $tiliointirow['summa'] = $tiliointirow_summa;
 						$tiliointirow_summa += $summa_kuuluva;
+					}
+
+					if ($summa_kulu != 0) {
+						$tiliointirow_summa += $summa_kulu;
 					}
 
 					$vero = $tiliointirow['vero'];

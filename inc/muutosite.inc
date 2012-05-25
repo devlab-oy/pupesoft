@@ -1190,8 +1190,6 @@
 			$varastotili = $yhtiorow['matkalla_olevat'];
 			$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-			$nollataanko = false;
-
 			while ($tiliointirow = mysql_fetch_assoc($result)) {
 
 				if (($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) or ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0)) {
@@ -1321,18 +1319,7 @@
 				$xresult = pupe_query($query);
 			}
 
-			if ($nollataanko or $laskun_kulut['osto_kulu'] != 0 or $laskun_kulut['osto_rahti'] != 0 or $laskun_kulut['osto_rivi_kulu'] != 0 or $laskun_kulut_ylikirjaus['osto_kulu'] != 0 or $laskun_kulut_ylikirjaus['osto_rahti'] != 0 or $laskun_kulut_ylikirjaus['osto_rivi_kulu'] != 0) {
-
-				if ($nollataanko) {
-					$query = "	UPDATE tiliointi
-								SET korjattu = '$kukarow[kuka]',
-								korjausaika = now()
-								WHERE ltunnus = '$tunnus'
-								AND	yhtio = '$kukarow[yhtio]'
-								AND	korjattu = ''
-								AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
-					$result = pupe_query($query);
-				}
+			if ($laskun_kulut['osto_kulu'] != 0 or $laskun_kulut['osto_rahti'] != 0 or $laskun_kulut['osto_rivi_kulu'] != 0 or $laskun_kulut_ylikirjaus['osto_kulu'] != 0 or $laskun_kulut_ylikirjaus['osto_rahti'] != 0 or $laskun_kulut_ylikirjaus['osto_rivi_kulu'] != 0) {
 
 				foreach ($laskun_kulut_ylikirjaus as $key => $value) {
 

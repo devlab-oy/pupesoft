@@ -300,7 +300,7 @@
 			fputs($fh, $sisalto);
 			fclose($fh);
 
-			$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=$sarakkeet -R --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
+			$line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=$sarakkeet --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
 
 			// itse print komento...
 			if ($komento["Tarrat"] == 'email') {

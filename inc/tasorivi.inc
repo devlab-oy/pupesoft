@@ -23,4 +23,14 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "kumulatiivinen") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Kyllä")." ".t("Tulosseurannassa tämä taso lasketaan tilikauden alusta")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

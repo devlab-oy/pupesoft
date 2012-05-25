@@ -33,6 +33,24 @@
 		echo "<font class='error'>".t("Virheelliset kaudet!")." $alku_pvm > $loppu_pvm</font><br><br>";
 		$tee = "";
 	}
+	else {
+		// Haetaan ko. ajan tilikausi
+		$query = "	SELECT tilikausi_alku
+					FROM tilikaudet
+					WHERE tilikaudet.yhtio = '{$kukarow['yhtio']}'
+					AND tilikausi_alku <= '$alku_pvm'
+					AND tilikausi_loppu >= '$loppu_pvm'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class='error'>".t("Valitulle ajanjaksolle ei löydy tilikautta!")." $alku_pvm - $loppu_pvm</font><br><br>";
+			$tee = "";
+		}
+		else {
+			$row = mysql_fetch_assoc($result);
+			$tilikausi_alku = $row["tilikausi_alku"];
+		}
+	}
 
 	// Käyttöliittymä
 	echo "<form method='post' autocomplete='off'>";

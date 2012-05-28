@@ -28,20 +28,27 @@
 		if ($php_cli) {
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+			error_reporting(E_ALL);
 			ini_set("display_errors", 0);
 
 			// otetaan tietokanta connect
 			require("inc/connect.inc");
 			require("inc/functions.inc");
+
+			$pupe_root_polku = dirname(__FILE__);
 		}
 
 		// jos verkkolaskun lähetys on feilannut niin koitetaan lähettää verkkolasku-tiedosto uudelleen
-		if ($handle = opendir("dataout/pupevoice_error")) {
 
+		// PUPEVOICE
+		$kansio = "{$pupe_root_polku}/dataout/pupevoice_error/";
+
+		if ($handle = opendir($kansio)) {
 			while (($lasku = readdir($handle)) !== FALSE) {
-				if (is_file($lasku)) {
-					$kukarow['yhtio'] = $yhtio_dir;
+
+				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+
+					$kukarow['yhtio'] = $yhtio[1];
 					$kukarow['kuka']  = 'cron';
 					$kukarow['kieli'] = 'fi';
 
@@ -51,7 +58,8 @@
 					$ftpuser = $yhtiorow['verkkotunnus_lah'];
 					$ftppass = $yhtiorow['verkkosala_lah'];
 					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
-					$ftpfile = $pupe_root_polku."/dataout/".basename($filenimi);
+					$ftpfile = $kansio.$lasku;
+					$ftpsucc = "{$pupe_root_polku}/dataout/";
 
 					$tulos_ulos = "";
 
@@ -62,56 +70,90 @@
 			closedir($handle);
 		}
 
+		// IPOST FINVOICE
+		$kansio = "{$pupe_root_polku}/dataout/ipost_error/";
 
+		if ($handle = opendir($kansio)) {
+			while (($lasku = readdir($handle)) !== FALSE) {
+				if (preg_match("/TRANSFER_IPOST\-(.*?)\-2/", $lasku, $yhtio)) {
 
-		ipost_error
-		elmaedi_error
-		sisainenfinvoice_error
+					$kukarow['yhtio'] = $yhtio[1];
+					$kukarow['kuka']  = 'cron';
+					$kukarow['kieli'] = 'fi';
 
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
+					$ftphost 		= "ftp.itella.net";
+					$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
+					$ftppass 		= $yhtiorow['verkkosala_lah'];
+					$ftppath 		= "out/finvoice/data/";
+					$ftpfile 		= $kansio.$lasku;
+					$renameftpfile 	= str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", $lasku);
+					$ftpsucc 		= "{$pupe_root_polku}/dataout/";
 
+					$tulos_ulos = "";
 
+					require("inc/ftp-send.inc");
+				}
+			}
 
-
-
-
-
-
-
-
-		if (is_file($verkkolasku_sscc."/".$file)) {
-			$kerayseran_numero = preg_replace("/[^0-9]/", "", $file);
-
-			require("inc/verkkolasku_send.inc");
+			closedir($handle);
 		}
 
+		// ELMAEDI
+		$kansio = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
+		if ($handle = opendir($kansio)) {
+			while (($lasku = readdir($handle)) !== FALSE) {
 
-		// koitetaan uudelleen lähettää verkkolasku-tiedosto, jos FTP-siirto on feilannut aikaisemmin
-		if ($verkkolasku_host != "" and $verkkolasku_user != "" and $verkkolasku_pass != "" and $verkkolasku_path != "" and $verkkolasku_fail != "") {
-			$ftphost = $verkkolasku_host;
-			$ftpuser = $verkkolasku_user;
-			$ftppass = $verkkolasku_pass;
-			$ftppath = $verkkolasku_path;
-			$ftpport = $verkkolasku_port;
-		    $ftpfail = $verkkolasku_fail;
-			$ftpsucc = $verkkolasku_succ;
-			$ftpfile = $verkkolaskunimi;
+				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
-			if ($handle = opendir($ftpfail)) {
+					$kukarow['yhtio'] = $yhtio[1];
+					$kukarow['kuka']  = 'cron';
+					$kukarow['kieli'] = 'fi';
 
-				while (($file = readdir($handle)) !== FALSE) {
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-					if (is_file($ftpfail."/".$file)) {
-						$ftpfile = realpath($ftpfail."/".$file);
+					$ftphost = $edi_ftphost;
+					$ftpuser = $edi_ftpuser;
+					$ftppass = $edi_ftppass;
+					$ftppath = $edi_ftppath;
+					$ftpfile = $kansio.$lasku;
+					$ftpsucc = "{$pupe_root_polku}/dataout/";
 
-						require ("inc/ftp-send.inc");
+					$tulos_ulos = "";
 
-						// Jos siirto meni ok, niin remmataan faili
-						if ($palautus == 0) {
-							@unlink($ftpfail."/".$file);
-						}
-					}
+					require("inc/ftp-send.inc");
+				}
+			}
+
+			closedir($handle);
+		}
+
+		// PUPESOFT-FINVOICE
+		$kansio = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
+
+		if ($handle = opendir($kansio)) {
+			while (($lasku = readdir($handle)) !== FALSE) {
+
+				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+
+					$kukarow['yhtio'] = $yhtio[1];
+					$kukarow['kuka']  = 'cron';
+					$kukarow['kieli'] = 'fi';
+
+					$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+					$ftphost = $sisainenfoinvoice_ftphost;
+					$ftpuser = $sisainenfoinvoice_ftpuser;
+					$ftppass = $sisainenfoinvoice_ftppass;
+					$ftppath = $sisainenfoinvoice_ftppath;
+					$ftpfile = $kansio.$lasku;
+					$ftpsucc = "{$pupe_root_polku}/dataout/";
+
+					$tulos_ulos = "";
+
+					require("inc/ftp-send.inc");
 				}
 			}
 
@@ -120,6 +162,5 @@
 
 		unlink("/tmp/##verkkolasku-resend.lock");
 	}
-
 
 ?>

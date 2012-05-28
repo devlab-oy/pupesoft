@@ -337,7 +337,7 @@ if ($kasitellaan_tiedosto) {
 			$table_tarkenne = substr($taulu, 11);
 		}
 
-		list(, , , , $joinattava, ) = pakolliset_sarakkeet($taulu);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattava, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($taulu);
 
 		// Laitetaan aina kaikkiin tauluihin
 		$joinattava["TOIMINTO"] = $table;
@@ -554,7 +554,7 @@ if ($kasitellaan_tiedosto) {
 		}
 
 		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, , $saakopoistaa) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sis‰lt‰‰ kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sis‰lt‰‰ kaikki sarakkeet saadusta tiedostosta
@@ -646,7 +646,7 @@ if ($kasitellaan_tiedosto) {
 			}
 
 			if (!isset($api_kentat)) {
-				lue_data_echo($lue_data_output_text, true);				
+				lue_data_echo($lue_data_output_text, true);
 				require ("inc/footer.inc");
 				exit;
 			}
@@ -1947,29 +1947,6 @@ if ($kasitellaan_tiedosto) {
 
 						if (function_exists($funktio)) {
 							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
-						}
-
-						if ($tassafailissa) {
-
-							$tarkista_sarake = mysql_field_name($result, $i);
-
-							// Oletusaliakset
-							$query = "	SELECT selitetark_3
-										FROM avainsana
-										WHERE yhtio = '$kukarow[yhtio]'
-										and laji = 'MYSQLALIAS'
-										and selite = '$table_mysql.$tarkista_sarake'
-										and selitetark_2 = ''";
-							$al_res = pupe_query($query);
-							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
-
-							if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
-								if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
-								     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
-									$virhe[$i] .= t("Tieto on pakollinen")."!";
-									$errori = 1;
-								}
-							}
 						}
 
 						// Ignoorataan virhe jos se ei koske t‰ss‰ failissa olutta saraketta

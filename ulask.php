@@ -2102,7 +2102,6 @@ if ($tee == 'I') {
 		}
 	}
 
-
 	// Jos meillä on suoraveloitus
 	if ($osuoraveloitus != '') {
 

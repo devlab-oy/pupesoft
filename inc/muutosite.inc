@@ -1267,7 +1267,7 @@
 
 					$summa_kulu = 0;
 
-					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0) {
+					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0 or (($osto_rahti != 0 and $osto_rahti < $trow['osto_rahti']) or ($osto_kulu != 0 and $osto_kulu < $trow['osto_kulu']) or ($osto_rivi_kulu != 0 and $osto_rivi_kulu < $trow['osto_rivi_kulu']))) {
 
 						$query = "	SELECT tilino, sum(summa) as summa
 									FROM tiliointi

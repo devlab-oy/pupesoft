@@ -199,6 +199,22 @@ if ($tee_kululaskut == "liita") {
 					tila         = 'K'";
 		$result = pupe_query($query);
 
+		if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($oslasrow['vienti'] == 'C' or $oslasrow['vienti'] == 'F' or $oslasrow['vienti'] == 'I') and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
+
+			$tmp_tunnus = $tunnus;
+			$tmp_laskurow = $laskurow;
+			$tmp_tee = $tee;
+
+			$tunnus = $laskutunnus;
+			$tila = 'ostolasku_kulut';
+
+			require('inc/muutosite.inc');
+
+			$tunnus = $tmp_tunnus;
+			$laskurow = $tmp_laskurow;
+			$tee = $tmp_tee;
+		}
+
 		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
@@ -239,6 +255,23 @@ if ($tee_kululaskut == "poista") {
 
 		// jos poistettiin vaihto-omaisuuslasku niin laitetaan oletukset takasin
 		if ($poistavienti == "C" or $poistavienti == "F" or $poistavienti == "I" or $poistavienti == "J" or $poistavienti == "K" or $poistavienti == "L") {
+
+			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($poistavienti == 'C' or $poistavienti == 'F' or $poistavienti == 'I')) {
+
+				$tmp_tunnus = $tunnus;
+				$tmp_laskurow = $laskurow;
+				$tmp_tee = $tee;
+
+				$tila = 'ostolasku_kulut';
+
+				$osto_rahti = $osto_kulu = $osto_rivi_kulu = 0;
+
+				require('inc/muutosite.inc');
+
+				$tunnus = $tmp_tunnus;
+				$laskurow = $tmp_laskurow;
+				$tee = $tmp_tee;
+			}
 
 			//jos keikalta poistettiin vaihto-omaisuuslasku niin merkataan se ei kohdistetuksi
 			$query = "	UPDATE lasku set
@@ -440,9 +473,11 @@ if ($silent == "") {
 
 				echo "<td valign='top'>$vienti_teksti</td>";
 
-				echo "<td valign='top'>{$llrow['osto_kulu']}</td>";
-				echo "<td valign='top'>{$llrow['osto_rahti']}</td>";
-				echo "<td valign='top'>{$llrow['osto_rivi_kulu']}</td>";
+				if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
+					echo "<td valign='top'>{$llrow['osto_kulu']}</td>";
+					echo "<td valign='top'>{$llrow['osto_rahti']}</td>";
+					echo "<td valign='top'>{$llrow['osto_rivi_kulu']}</td>";
+				}
 
 				echo "<td valign='top' class='back'>
 						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>

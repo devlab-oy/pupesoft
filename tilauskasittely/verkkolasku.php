@@ -2528,6 +2528,13 @@
 					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
 					$ftpfile = realpath($nimixml);
 
+					// FTP-faildir
+					if (!is_dir("{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/")) {
+						mkdir("{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
+					}
+
+					$ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/";
+
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
 
@@ -2635,6 +2642,13 @@
 					$ftpfile = realpath($nimifinvoice);
 					$renameftpfile = $nimifinvoice_delivered;
 
+					// FTP-faildir
+					if (!is_dir("{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/")) {
+						mkdir("{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
+					}
+
+					$ftpfail = "{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/";
+
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
 
@@ -2694,6 +2708,13 @@
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
 
+					// FTP-faildir
+					if (!is_dir("{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/")) {
+						mkdir("{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
+					}
+
+					$ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/";
+
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
 
@@ -2742,6 +2763,13 @@
 					$ftppass = $sisainenfoinvoice_ftppass;
 					$ftppath = $sisainenfoinvoice_ftppath;
 					$ftpfile = realpath($nimisisainenfinvoice);
+
+					// FTP-faildir
+					if (!is_dir("{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/")) {
+						mkdir("{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
+					}
+
+					$ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;

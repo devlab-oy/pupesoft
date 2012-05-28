@@ -1278,8 +1278,6 @@
 									GROUP BY 1";
 						$sum_result = pupe_query($query);
 
-						$summa_kulu = 0;
-
 						while ($sum_row = mysql_fetch_assoc($sum_result)) {
 							$summa_kulu += $sum_row['summa'];
 

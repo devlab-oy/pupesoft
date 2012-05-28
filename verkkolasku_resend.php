@@ -45,7 +45,6 @@
 
 		if ($handle = opendir($kansio)) {
 			while (($lasku = readdir($handle)) !== FALSE) {
-
 				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 					$kukarow['yhtio'] = $yhtio[1];
@@ -105,7 +104,6 @@
 
 		if ($handle = opendir($kansio)) {
 			while (($lasku = readdir($handle)) !== FALSE) {
-
 				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 					$kukarow['yhtio'] = $yhtio[1];
@@ -135,7 +133,6 @@
 
 		if ($handle = opendir($kansio)) {
 			while (($lasku = readdir($handle)) !== FALSE) {
-
 				if (preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
 
 					$kukarow['yhtio'] = $yhtio[1];

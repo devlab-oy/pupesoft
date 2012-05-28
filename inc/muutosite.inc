@@ -758,25 +758,24 @@
 					WHERE ltunnus = '$tunnus'
 					AND	yhtio = '$kukarow[yhtio]'
 					AND	korjattu = ''
-					AND tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
+					AND tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
 		$result = pupe_query($query);
 
 		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus}'";
 		$apures = pupe_query($query);
 		$apurow = mysql_fetch_assoc($apures);
 
-		// jos laskun tyyppi ei ole vaihto-omaisuus, nollataan kulut
-		$updatelisa = ($vienti != 'C' and $vienti != 'F' and $vienti != 'I') ? " , osto_rahti = 0, osto_kulu = 0, osto_rivi_kulu = 0 " : "";
-
-		$query = "	UPDATE lasku
-					SET vienti = '$vienti'
-					{$updatelisa}
-					WHERE tunnus = '$tunnus'
-					AND yhtio = '$kukarow[yhtio]'";
-		$result = pupe_query($query);
-
 		// Tehdään varastotiliöinnit
 		if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
+
+			$query = "	UPDATE tiliointi
+						SET korjattu = '$kukarow[kuka]',
+						korjausaika = now()
+						WHERE ltunnus = '$tunnus'
+						AND	yhtio = '$kukarow[yhtio]'
+						AND	korjattu = ''
+						AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
+			$result = pupe_query($query);
 
 			// Haetaan kulutiliöinti
 			$query = "	SELECT *
@@ -839,29 +838,37 @@
 		}
 		else {
 
-			$query = "	UPDATE tiliointi
-						SET korjattu = '$kukarow[kuka]',
-						korjausaika = now()
-						WHERE ltunnus = '$tunnus'
-						AND	yhtio = '$kukarow[yhtio]'
-						AND	korjattu = ''
-						AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
-			$result = pupe_query($query);
-
 			// Haetaan kulutiliöinti
-			$query = "	SELECT *
+			$query = "	SELECT tunnus, summa, vero, tilino
 						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
 						AND ltunnus		= '$tunnus'
 						AND tapvm		= '$trow[tapvm]'
-						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
 						AND korjattu	= ''";
-			$result = pupe_query($query);
+			$result_x = pupe_query($query);
 
-			while ($tiliointirow = mysql_fetch_assoc($result)) {
+			$lkm = mysql_num_rows($result_x);
+
+			while ($tiliointirow = mysql_fetch_assoc($result_x)) {
 
 				if ($apurow['osto_rahti'] != 0 or $apurow['osto_kulu'] != 0 or $apurow['osto_rivi_kulu'] != 0) {
 					$summa_kuuluva = etsi_kuuluvat_tilioinnit($tiliointirow['tunnus']);
+
+					$query = "	SELECT sum(summa) as summa
+								FROM tiliointi
+								WHERE ltunnus = '{$tunnus}'
+								AND	yhtio = '{$kukarow['yhtio']}'
+								AND	korjattu = ''
+								AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
+					$sum_result = pupe_query($query);
+					$sum_row = mysql_fetch_assoc($sum_result);
+
+					$summa_kulu = $sum_row['summa'];
+
+					$summa_kulu = $summa_kulu != 0 ? $summa_kulu / $lkm : 0;
+
+					$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
 
 					$query = "	UPDATE tiliointi SET
 								korjattu = '{$kukarow['kuka']}',
@@ -872,14 +879,33 @@
 
 					$vero = $tiliointirow['vero'];
 					$tili = $tiliointirow['tilino'];
-					$summa = $apurow['summa'];
+					$summa = $tiliointirow_summa;
 
 					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
 
-					require ("inc/teetiliointi.inc");
+					require("inc/teetiliointi.inc");
 				}
 			}
+
+			$query = "	UPDATE tiliointi
+						SET korjattu = '$kukarow[kuka]',
+						korjausaika = now()
+						WHERE ltunnus = '$tunnus'
+						AND	yhtio = '$kukarow[yhtio]'
+						AND	korjattu = ''
+						AND tilino in ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')";
+			$result = pupe_query($query);
 		}
+
+		// jos laskun tyyppi ei ole vaihto-omaisuus, nollataan kulut
+		$updatelisa = ($vienti != 'C' and $vienti != 'F' and $vienti != 'I') ? " , osto_rahti = 0, osto_kulu = 0, osto_rivi_kulu = 0 " : "";
+
+		$query = "	UPDATE lasku
+					SET vienti = '{$vienti}'
+					{$updatelisa}
+					WHERE tunnus = '{$tunnus}'
+					AND yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
 		$tee = 'E';
 		$tila = 'X';
@@ -1185,12 +1211,14 @@
 						AND tapvm		= '$trow[tapvm]'
 						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
 						AND korjattu	= ''";
-			$result = pupe_query($query);
+			$result_tiliointi = pupe_query($query);
 
 			$varastotili = $yhtiorow['matkalla_olevat'];
 			$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-			while ($tiliointirow = mysql_fetch_assoc($result)) {
+			$lkm = mysql_num_rows($result_tiliointi);
+
+			while ($tiliointirow = mysql_fetch_assoc($result_tiliointi)) {
 
 				if (($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) or ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0)) {
 
@@ -1241,28 +1269,12 @@
 
 					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0) {
 
-						$tilinolisa = "";
-
-						if ($osto_rahti == 0) $tilinolisa = "'{$yhtiorow['osto_rahti']}'";
-
-						if ($osto_kulu == 0) {
-							if ($tilinolisa != "") $tilinolisa .= ",'{$yhtiorow['osto_kulu']}'";
-							else $tilinolisa = "'{$yhtiorow['osto_kulu']}'";
-						}
-
-						if ($osto_rivi_kulu == 0) {
-							if ($tilinolisa != "") $tilinolisa .= ",'{$yhtiorow['osto_rivi_kulu']}'";
-							else $tilinolisa = "'{$yhtiorow['osto_rivi_kulu']}'";
-						}
-
-						$tilinolisa = "'{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}'";
-
 						$query = "	SELECT tilino, sum(summa) as summa
 									FROM tiliointi
 									WHERE ltunnus = '{$tunnus}'
 									AND	yhtio = '{$kukarow['yhtio']}'
 									AND	korjattu = ''
-									AND tilino IN ({$tilinolisa})
+									AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
 									GROUP BY 1";
 						$sum_result = pupe_query($query);
 
@@ -1271,16 +1283,19 @@
 						while ($sum_row = mysql_fetch_assoc($sum_result)) {
 							$summa_kulu += $sum_row['summa'];
 
-							if ($sum_row['tilino'] == $yhtiorow['osto_rahti']) $laskun_kulut_ylikirjaus['osto_rahti'] += $sum_row['summa'];
-							if ($sum_row['tilino'] == $yhtiorow['osto_kulu']) $laskun_kulut_ylikirjaus['osto_kulu'] += $sum_row['summa'];
-							if ($sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] += $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_rahti'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rahti']) $laskun_kulut_ylikirjaus['osto_rahti'] += $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_kulu']) $laskun_kulut_ylikirjaus['osto_kulu'] += $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_rivi_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] += $sum_row['summa'];
 						}
 
 						if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0) {
-							$tiliointirow_summa = $trow['summa'];
+							$tiliointirow_summa = $trow['summa'] / $lkm;
 							$summa_kulu = 0;
 						}
 						else {
+
+							$summa_kulu = $summa_kulu != 0 ? $summa_kulu / $lkm : 0;
+
 							$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
 						}
 					}

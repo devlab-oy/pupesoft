@@ -1213,7 +1213,7 @@
 				echo "	<tr>
 						<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
 						<td colspan='2' nowrap>
-						<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto'>
+						<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto' class='multisubmit'>
 						<input type='hidden' name='otunnus' 		value = '$tilausnumero'>
 						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>

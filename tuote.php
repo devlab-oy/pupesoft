@@ -12,14 +12,6 @@
 	if (!isset($tilalehinta))  	 $tilalehinta = "";
 	if (!isset($historia))  	 $historia = "";
 
-	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
-	else $tkysy_lopetus = "";
-
-	if ($lopetus != "") {
-		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-	}
-
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -39,13 +31,6 @@
 
 	// Enaboidaan ajax kikkare
 	enable_ajax();
-
-	if ($tee == 'NAYTATILAUS') {
-		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-		require ("raportit/naytatilaus.inc");
-		echo "<br><br><br>";
-		$tee = "Z";
-	}
 
 	if ($tee == 'N' or $tee == 'E') {
 
@@ -77,6 +62,21 @@
 			$tuoteno = '';
 			$tee='Y';
 		}
+	}
+
+	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
+	else $tkysy_lopetus = "";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+	}
+
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+		echo "<br><br><br>";
+		$tee = "Z";
 	}
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";

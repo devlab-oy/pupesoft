@@ -461,7 +461,6 @@
 				$kirrow  = mysql_fetch_assoc($kirres);
 				$komento = $kirrow['komento'];
 
-				//--no-header
 				$line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --columns=1 --margin=1 --borders=0 $filenimi");
 
 				if ($komento == "email" and $kukarow["eposti"] != '') {

@@ -2,10 +2,12 @@
 
 	require ("../inc/parametrit.inc");
 
-	if (!isset($tee)) 	$tee = "";
-	if (!isset($etsi)) 	$etsi = "";
-	if (!isset($id)) 	$id = "";
-	if (!isset($boob)) 	$boob = "";
+	if (!isset($tee)) 			$tee = "";
+	if (!isset($etsi)) 			$etsi = "";
+	if (!isset($id)) 			$id = "";
+	if (!isset($boob)) 			$boob = "";
+	if (!isset($maa)) 			$maa = "";
+	if (!isset($varastorajaus))	$varastorajaus = "";
 
 	if ($toim == "MYYNTITILI") {
 		echo "<font class='head'>".t("Toimita myyntitili asiakkaalle").":</font><hr>";
@@ -64,6 +66,8 @@
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='id' value='$id'>";
+		echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+		echo "<input type='hidden' name='maa' value='$maa'>";
 		echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 		echo "<input type='hidden' name='tee' value='failista'>";
 
@@ -604,12 +608,10 @@
 		}
 
 		$id 	 = 0;
-		$maa	 = "";
 		$varasto = "";
 	}
 	elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
 		$id 	 = 0;
-		$maa	 = "";
 		$varasto = "";
 	}
 
@@ -641,7 +643,7 @@
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>".t("Varasto")."</th>";
-		echo "<td><select name='varasto'>";
+		echo "<td><select name='varastorajaus'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
 
 		$query  = "	SELECT tunnus, nimitys, maa
@@ -652,7 +654,7 @@
 
 		while ($varow = mysql_fetch_assoc($vares)) {
 			$sel='';
-			if (isset($varasto) and $varow['tunnus'] == $varasto) $sel = 'selected';
+			if (isset($varastorajaus) and $varow['tunnus'] == $varastorajaus) $sel = 'selected';
 
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
@@ -671,7 +673,7 @@
 		$vresult = pupe_query($query);
 		echo "<tr><th>" . t('Maa') . "</th><td><select name='maa'>";
 
-		echo "<option value=''>" . t('Kaikki maat') . "</option>";
+		echo "<option value=''>".t('Kaikki maat')."</option>";
 
 		while ($maarow = mysql_fetch_assoc($vresult)) {
 			$sel = (isset($maa) and $maarow['koodi'] == $maa) ? 'selected' : '';
@@ -692,13 +694,13 @@
 		}
 
 		$varasto = '';
-		if (isset($varasto) and !empty($varasto)) {
-			$varasto = ' AND lasku.clearing = '.(int) $varasto;
+
+		if (isset($varastorajaus) and !empty($varastorajaus)) {
+			$varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
 		}
 
-		$maa = '';
 		if (isset($maa) and !empty($maa)) {
-			$varasto = " AND varastopaikat.maa = '".mysql_real_escape_string($maa)."'";
+			$varasto .= " AND varastopaikat.maa = '".mysql_real_escape_string($maa)."'";
 		}
 
 		$query = "	SELECT tilausrivi.otunnus
@@ -760,8 +762,10 @@
 						echo "<td>$row[$y]</td>";
 
 					echo "<form method='post'><td class='back'>
-						  <input type='hidden' name='id' value='$row[0]'>
-						   <input type='hidden' name='toim' value='$toim'>";
+						  	<input type='hidden' name='id' value='$row[0]'>
+							<input type='hidden' name='varastorajaus' value='$varastorajaus'>
+							<input type='hidden' name='maa' value='$maa'>
+						  	<input type='hidden' name='toim' value='$toim'>";
 
 					if ($toim == "MYYNTITILI") {
 						echo "<input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
@@ -871,6 +875,8 @@
 		if ($toim == "") {
 			echo "<form method='post'>";
 			echo "<input type='hidden' name='id' value='$id'>";
+			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+			echo "<input type='hidden' name='maa' value='$maa'>";
 			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 			echo "<input type='hidden' name='tee' value='mikrotila'>";
 			echo "<td>";
@@ -880,6 +886,8 @@
 
 			echo "<form method='post'>";
 			echo "<input type='hidden' name='id' value='$id'>";
+			echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+			echo "<input type='hidden' name='maa' value='$maa'>";
 			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
 			echo "<input type='hidden' name='tee' value='kommentista'>";
 			echo "<td>";
@@ -891,7 +899,10 @@
 		//hakukentät
 		echo "<form method='post' name='siirtolistaformi'>";
 		echo "<input type='hidden' name='id' value='$id'>";
+		echo "<input type='hidden' name='varastorajaus' value='$varastorajaus'>";
+		echo "<input type='hidden' name='maa' value='$maa'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='tee' value='paikat'>";
 
 		if ($toim == "") {
 			echo "<input type='hidden' name='varasto' value='$row[clearing]'>";
@@ -906,8 +917,6 @@
 			$mrow = mysql_fetch_assoc($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
 		}
-
-		echo "<input type='hidden' name='tee' value='paikat'>";
 
 		if ($toim == "") {
 			echo "<td>";

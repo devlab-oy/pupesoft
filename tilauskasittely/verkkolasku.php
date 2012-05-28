@@ -253,9 +253,7 @@
 
 			//  Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
-				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST".$nimiipost;
-				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
+				$nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
 				$nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
@@ -2527,6 +2525,7 @@
 					$ftppass = $yhtiorow['verkkosala_lah'];
 					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
 					$ftpfile = realpath($nimixml);
+					$ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2545,8 +2544,7 @@
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
-					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
-					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= "\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
 					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
@@ -2628,12 +2626,13 @@
 					}
 
 					//siirretaan laskutiedosto operaattorille
-					$ftphost = "ftp.itella.net";
-					$ftpuser = $yhtiorow['verkkotunnus_lah'];
-					$ftppass = $yhtiorow['verkkosala_lah'];
-					$ftppath = "out/finvoice/data/";
-					$ftpfile = realpath($nimifinvoice);
-					$renameftpfile = $nimifinvoice_delivered;
+					$ftphost 		= "ftp.itella.net";
+					$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
+					$ftppass 		= $yhtiorow['verkkosala_lah'];
+					$ftppath 		= "out/finvoice/data/";
+					$ftpfile 		= realpath($nimifinvoice);
+					$renameftpfile 	= str_replace("TRANSFER_IPOST", "DELIVERED_IPOST", basename($nimifinvoice));
+					$ftpfail 		= "{$pupe_root_polku}/dataout/ipost_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2652,8 +2651,7 @@
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
-					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
-					$verkkolasmail .= "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\n\n";
+					$verkkolasmail .= "\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
 					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
@@ -2693,6 +2691,7 @@
 					$ftppass = $edi_ftppass;
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
+					$ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2711,8 +2710,7 @@
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
-					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
-					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= "\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
 					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
@@ -2742,6 +2740,7 @@
 					$ftppass = $sisainenfoinvoice_ftppass;
 					$ftppath = $sisainenfoinvoice_ftppath;
 					$ftpfile = realpath($nimisisainenfinvoice);
+					$ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2760,8 +2759,7 @@
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
-					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
-					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= "\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
 					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;

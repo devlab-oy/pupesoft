@@ -2527,13 +2527,7 @@
 					$ftppass = $yhtiorow['verkkosala_lah'];
 					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
 					$ftpfile = realpath($nimixml);
-
-					// FTP-faildir
-					if (!is_dir("{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/")) {
-						mkdir("{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
-					}
-
-					$ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/{$yhtiorow['yhtio']}/";
+					$ftpfail = "{$pupe_root_polku}/dataout/pupevoice_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2635,19 +2629,13 @@
 					}
 
 					//siirretaan laskutiedosto operaattorille
-					$ftphost = "ftp.itella.net";
-					$ftpuser = $yhtiorow['verkkotunnus_lah'];
-					$ftppass = $yhtiorow['verkkosala_lah'];
-					$ftppath = "out/finvoice/data/";
-					$ftpfile = realpath($nimifinvoice);
-					$renameftpfile = $nimifinvoice_delivered;
-
-					// FTP-faildir
-					if (!is_dir("{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/")) {
-						mkdir("{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
-					}
-
-					$ftpfail = "{$pupe_root_polku}/dataout/ipost_error/{$yhtiorow['yhtio']}/";
+					$ftphost 		= "ftp.itella.net";
+					$ftpuser 		= $yhtiorow['verkkotunnus_lah'];
+					$ftppass 		= $yhtiorow['verkkosala_lah'];
+					$ftppath 		= "out/finvoice/data/";
+					$ftpfile 		= realpath($nimifinvoice);
+					$renameftpfile 	= $nimifinvoice_delivered;
+					$ftpfail 		= "{$pupe_root_polku}/dataout/ipost_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2707,13 +2695,7 @@
 					$ftppass = $edi_ftppass;
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
-
-					// FTP-faildir
-					if (!is_dir("{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/")) {
-						mkdir("{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
-					}
-
-					$ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/{$yhtiorow['yhtio']}/";
+					$ftpfail = "{$pupe_root_polku}/dataout/elmaedi_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;
@@ -2763,13 +2745,7 @@
 					$ftppass = $sisainenfoinvoice_ftppass;
 					$ftppath = $sisainenfoinvoice_ftppath;
 					$ftpfile = realpath($nimisisainenfinvoice);
-
-					// FTP-faildir
-					if (!is_dir("{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/")) {
-						mkdir("{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/", 0777, TRUE);
-					}
-
-					$ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/{$yhtiorow['yhtio']}/";
+					$ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
 
 					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
 					$bound = uniqid(time()."_") ;

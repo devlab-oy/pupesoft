@@ -743,7 +743,7 @@
 					echo "<tr><th align='left'>",t("Hyväksyjän maksimisumma"),":</th>";
 					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='{$krow['hyvaksyja_maksimisumma']}'></td></tr>";
 
-					echo "<tr><th align='left'>",t("Tuuraaja"),":</th><td>";
+					echo "<tr><th align='left'>",t("Sijainen laskujen hyväksynnässä"),":</th><td>";
 
 					// Haetaan mahdolliset tuuraajat
 					$query = "	SELECT kuka, nimi
@@ -755,7 +755,7 @@
 					$hyvaksyja_result = pupe_query($query);
 
 					echo "<select name = 'tuuraaja'>";
-					echo "<option value=''>",t("Ei tuuraajaa"),"</option>";
+					echo "<option value=''>",t("Ei sijaista"),"</option>";
 
 					while ($hyvaksyja_row = mysql_fetch_assoc($hyvaksyja_result)) {
 						$sel = ($krow["tuuraaja"] == $hyvaksyja_row['kuka']) ? ' selected' : '';

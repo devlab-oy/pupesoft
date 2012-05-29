@@ -358,21 +358,20 @@ if (!function_exists("pakolliset_sarakkeet")) {
 		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
-
-			$sarake = "";
+			// Selitteessä on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
 			if (strpos($row["selite"], ".") !== FALSE) {
 				list($taulu, $sarake) = explode(".", $row["selite"]);
 				$sarake = strtoupper(trim($sarake));
-			}
 
-			// Pakollisuus
-			if ($row["selitetark_3"] == "PAKOLLINEN") {
-				$pakolliset[] = $sarake;
-			}
+				// Pakollisuus
+				if ($row["selitetark_3"] == "PAKOLLINEN") {
+					$pakolliset[] = $sarake;
+				}
 
-			// Oletusarvo
-			if ($row["selitetark_4"] != "") {
-				$oletukset[$sarake] = $row["selitetark_4"];
+				// Oletusarvo
+				if ($row["selitetark_4"] != "") {
+					$oletukset[$sarake] = $row["selitetark_4"];
+				}
 			}
 		}
 

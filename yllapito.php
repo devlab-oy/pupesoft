@@ -1418,14 +1418,6 @@
 
 			$maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
 
-			// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
-			if (mysql_field_name($result, $i) == "laatija" or
-				mysql_field_name($result, $i) == "muutospvm" or
-				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
-				$tyyppi = 2;
-			}
-
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
 
@@ -1490,6 +1482,14 @@
 			}
 
 			require ("inc/$toim"."rivi.inc");
+
+			// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
+			if (mysql_field_name($result, $i) == "laatija" or
+				mysql_field_name($result, $i) == "muutospvm" or
+				mysql_field_name($result, $i) == "muuttaja" or
+				mysql_field_name($result, $i) == "luontiaika") {
+				$tyyppi = 2;
+			}
 
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti

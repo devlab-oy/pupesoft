@@ -546,27 +546,32 @@
 				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
 				$erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
 
-				if (count($erat['tilaukset']) > 0) {
+				if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 
 					// Tallennetaan ker‰yser‰
 					require('inc/tallenna_keraysera.inc');
 
-					$otunnukset = implode(",", $erat['tilaukset']);
+					// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+					if (count($lisatyt_tilaukset) > 0) {
 
-					$query = "	SELECT *
-								FROM lasku
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus IN ($otunnukset)";
-					$res = pupe_query($query);
-					$laskurow = mysql_fetch_assoc($res);
+						$otunnukset = implode(",", $lisatyt_tilaukset);
+						$kerayslistatunnus = array_shift($lisatyt_tilaukset);
 
-					$tilausnumeroita  	  = $otunnukset;
-					$valittu_tulostin 	  = $kerayslistatulostin;
-					$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-					$laskuja 			  = count($erat['tilaukset']);
-					$lukotetaan 		  = FALSE;
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus IN ($otunnukset)";
+						$res = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($res);
 
-					require("tilauskasittely/tilaus-valmis-tulostus.inc");
+						$tilausnumeroita  	  = $otunnukset;
+						$valittu_tulostin 	  = $kerayslistatulostin;
+						$keraysvyohyke		  = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+						$laskuja 			  = count($erat['tilaukset']);
+						$lukotetaan 		  = FALSE;
+
+						require("tilauskasittely/tilaus-valmis-tulostus.inc");
+					}
 				}
 				else {
 					echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";

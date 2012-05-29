@@ -193,36 +193,39 @@
 				// HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
 				$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto']);
 
-				if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
-					$otunnukset = implode(",", $erat['tilaukset']);
-
+				if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 					// Tallennetaan miss‰ t‰‰ er‰ on tehty
 					$ohjelma_moduli = "OPTISCAN";
 
 					require('inc/tallenna_keraysera.inc');
 
-					$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
+					// N‰m‰ tilaukset tallennettin ker‰yser‰‰n
+					if (count($lisatyt_tilaukset) > 0) {
 
-					// tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
-					$query = "	UPDATE lasku SET
-								tila 	  = 'L',
-								lahetepvm = now(),
-								kerayslista = '{$kerayslistatunnus}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus in ({$otunnukset})";
-					$upd_res = pupe_query($query);
+						$otunnukset = implode(",", $lisatyt_tilaukset);
+						$kerayslistatunnus = array_shift($lisatyt_tilaukset);
 
-					// Haetaan ker‰tt‰v‰t rivit
-					$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
-								FROM kerayserat
-								WHERE yhtio 		= '{$kukarow['yhtio']}'
-								AND laatija 		= '{$kukarow['kuka']}'
-								AND ohjelma_moduli 	= 'OPTISCAN'
-								AND tila    		= 'K'
-								AND nro 			= '$kerayseran_numero'
-								AND keratty 		= ''";
-					$result = pupe_query($query);
-					$kerattavat_rivit_row = mysql_fetch_assoc($result);
+						// tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
+						$query = "	UPDATE lasku SET
+									tila 	  = 'L',
+									lahetepvm = now(),
+									kerayslista = '{$kerayslistatunnus}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus in ({$otunnukset})";
+						$upd_res = pupe_query($query);
+
+						// Haetaan ker‰tt‰v‰t rivit
+						$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+									FROM kerayserat
+									WHERE yhtio 		= '{$kukarow['yhtio']}'
+									AND laatija 		= '{$kukarow['kuka']}'
+									AND ohjelma_moduli 	= 'OPTISCAN'
+									AND tila    		= 'K'
+									AND nro 			= '$kerayseran_numero'
+									AND keratty 		= ''";
+						$result = pupe_query($query);
+						$kerattavat_rivit_row = mysql_fetch_assoc($result);
+					}
 				}
 
 				// poistetaan lukko

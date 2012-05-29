@@ -70,7 +70,7 @@
 					}
 
 					foreach ($pakkaus as $tilriv => $kpl) {
-						// varmistetaan, etä ei keräytetä nollakappaleita
+						// varmistetaan, että ei keräytetä nollakappaleita
 						if ((float) $kpl != 0) {
 							$pakkaus_kirjaimet[$tilriv][$pakkaus_kirjain] = $kpl;
 							$rivit += 1;
@@ -134,8 +134,10 @@
 			$era_res = pupe_query($query);
 
 			$lisatyt_tilausrivit = array();
+			$lisatyt_tilaukset = array();
 
 			while ($era_row = mysql_fetch_assoc($era_res)) {
+				$lisatyt_tilaukset[$era_row['otunnus']] = $era_row['otunnus'];
 				$lisatyt_tilausrivit[$era_row['otunnus']][$era_row['tunnus']] = $era_row['kerkpl'];
 			}
 

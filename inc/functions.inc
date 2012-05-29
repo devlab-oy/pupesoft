@@ -12509,7 +12509,7 @@ if (!function_exists("pupe_DataTables")) {
 
 					datatablesit[0].fnFilter(haku_arvo, 13, true, false);
 				} );
-				
+
 			} );
 		</script>";
 	}
@@ -15329,7 +15329,6 @@ if (!function_exists("tee_keraysera")) {
 
 			$ed_tuote = '';
 
-			// while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
 			foreach ($inner_main_array as $inner_key => &$tuoterow) {
 
 				if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
@@ -15499,7 +15498,6 @@ if (!function_exists("tee_keraysera")) {
 						break 2;
 					}
 
-					$param = $eran_koko_chk;
 					$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
 
 					$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] = 0;
@@ -15821,19 +15819,25 @@ if (!function_exists("tee_keraysera")) {
 					$xxx = 1;
 
 					for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
-						if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1240): $i. tuote \n";
+						if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1240): $i. tuote <br>\n";
 
 						if ($tuoterow['myynti_era'] > 1 and ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko']) or $pakkaukset[$kaytettava_pakkaus]['paino'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + $tuoterow['y_paino']))) {
+
 							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1250): Tuotteen myyntier‰ ylitetty ($tuoterow[myynti_era])!!! Splitataan tilaus.<br>\n";
 
-							$i = floor($i / $tuoterow['myynti_era']) * $tuoterow['myynti_era'];
+							$myyeramaara = floor($i / $tuoterow['myynti_era']) * $tuoterow['myynti_era'];
 
-							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1260): splitattava m‰‰r‰ on $i (floor($i / $tuoterow[myynti_era]) * $tuoterow[myynti_era]<br>\n";
+							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1260): splitattava m‰‰r‰ on $myyeramaara = floor($i / $tuoterow[myynti_era]) * $tuoterow[myynti_era]<br>\n";
 
-							$kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $i;
-
-							$era_valmis = true;
-							break 3;
+							if ($myyeramaara > 0) {
+								$kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $myyeramaara;
+								break;
+							}
+							else {
+								// Yht‰‰n er‰‰ ei mahtunut....
+								$ii--;
+								break;
+							}
 						}
 
 						if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko'])
@@ -15978,8 +15982,7 @@ if (!function_exists("tee_keraysera")) {
 							// v‰hennet‰‰n aina simuloitua kokoa pakkauksen k‰ytetyll‰ tilavuudella
 							$eran_koko_chk -= $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'];
 
-							$param = $eran_koko_chk;
-							$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $param, '', 0, 0, $eran_koko_pintaala);
+							$kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko_chk, '', 0, 0, $eran_koko_pintaala);
 
 							if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1460): Kƒytett‰v‰ pakkaus: $kaytettava_pakkaus<br>\n";
 
@@ -17253,9 +17256,9 @@ if (!function_exists("erolista")) {
 
 		$query = "	SELECT *
 					{$rivihintalisa}
-					FROM asn_sanomat 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
-					AND asn_numero IN ({$lasku}) 
+					FROM asn_sanomat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND asn_numero IN ({$lasku})
 					AND laji = '{$lajilisa}'
 					ORDER BY asn_numero";
 		$result = pupe_query($query);
@@ -17267,8 +17270,8 @@ if (!function_exists("erolista")) {
 		}
 
 		$query = "	SELECT nimi, nimitark, oletus_kulupros
-					FROM toimi 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND toimittajanro = '{$row['toimittajanumero']}'";
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_assoc($toimires);
@@ -17404,8 +17407,8 @@ if (!function_exists("erolista")) {
 
 			$query = "	SELECT tuoteno,
 						nimitys,
-						IF(ale1 = 0, '', ale1) ale1, 
-						IF(ale2 = 0, '', ale2) ale2, 
+						IF(ale1 = 0, '', ale1) ale1,
+						IF(ale2 = 0, '', ale2) ale2,
 						IF(ale3 = 0, '', ale3) ale3,
 						SUM(hinta) AS hinta,
 						SUM(rivihinta {$kuluproslisa}) AS rivihinta,

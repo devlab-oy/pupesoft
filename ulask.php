@@ -171,7 +171,7 @@ if ($tee == 'poistalasku') {
 			echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
 		}
 	}
-	
+
 	$tee = "";
 }
 
@@ -900,15 +900,22 @@ if ($tee == 'P' or $tee == 'E') {
 
 		// Oletusarvot toimittajalta, jos ekaaa kertaa t‰‰ll‰
 		if ($tee == 'P') {
+
+			// Katsotaan onko meill‰ "tuuraajia" hyv‰ksynn‰ss‰
+			for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
+				$query = "	SELECT if (kuka.tuuraaja != '', kuka.tuuraaja, kuka.kuka) kuka
+							FROM kuka
+							WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+							AND kuka.kuka = '{$trow['oletus_hyvak'.$tuuraaja_i]}'";
+				$result = pupe_query($query);
+				$hyvak_row = mysql_fetch_assoc($result);
+				$hyvak[$tuuraaja_i] = $hyvak_row['kuka'];
+			}
+
 			$valkoodi 			= $trow['oletus_valkoodi'];
 			$kar      			= $trow['oletus_kapvm'];
 			$kapro    			= $trow['oletus_kapro'];
 			if ($tee2 != 'V') 	$err = $trow['oletus_erapvm']; // Viivakoodilla on aina erapvm ja sit‰ k‰ytet‰‰n
-			$hyvak[1]   		= $trow['oletus_hyvak1'];
-			$hyvak[2]   		= $trow['oletus_hyvak2'];
-			$hyvak[3]   		= $trow['oletus_hyvak3'];
-			$hyvak[4]   		= $trow['oletus_hyvak4'];
-			$hyvak[5]   		= $trow['oletus_hyvak5'];
 			$oltil      		= $trow['tilino'];
 			$olkustp    		= $trow['kustannuspaikka'];
 			$olkohde    		= $trow['kohde'];

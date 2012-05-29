@@ -1418,8 +1418,6 @@
 
 			$maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
 
-			require ("inc/$toim"."rivi.inc");
-
 			// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
 			if (mysql_field_name($result, $i) == "laatija" or
 				mysql_field_name($result, $i) == "muutospvm" or
@@ -1448,6 +1446,9 @@
 				else {
 					$otsikko = t(mysql_field_name($result, $i));
 				}
+
+				// jos ollaan tekem‰ss‰ uutta tietuetta ja meill‰ on mysql-aliaksista oletusarvo
+				if ($tunnus == "" and $trow[$i] == "") $trow[$i] = $al_row["selitetark_4"];
 			}
 			else {
 				switch (mysql_field_name($result,$i)) {
@@ -1487,6 +1488,8 @@
  					$tyyppi = 0;
  				}
 			}
+
+			require ("inc/$toim"."rivi.inc");
 
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti

@@ -751,6 +751,20 @@ if ($kasitellaan_tiedosto) {
 				$indeksi = array_unique($indeksi);
 			}
 
+			// Lis‰t‰‰n taulun oletusarvot, jos ollaan lis‰‰m‰ss‰ uutta tietuetta
+			if ($rivi[$postoiminto] == "LISAA") {
+				foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+					// Etsit‰‰n taulunotsikot arrayst‰ KEY, jonka arvo on oletuskentt‰
+					$oletus_positio = array_keys($taulunotsikot[$taulu], $oletus_kentta, true);
+
+					// Kentt‰ lˆytyy taulukosta, laitetaan siihen oletusarvo
+					// Jos kentt‰‰ EI L÷YDY, niin lis‰t‰‰n se muiden oletusten kanssa alempana
+					if (count($oletus_positio) == 1) {
+						$rivi[$oletus_positio[0]] = $oletus_arvo;
+					}
+				}
+			}
+
 			$avkmuuttuja = FALSE;
 
 			foreach ($indeksi as $j) {
@@ -1745,6 +1759,16 @@ if ($kasitellaan_tiedosto) {
 
 				if (substr($taulu, 0, 11) == 'puun_alkio_' and $rivi[$postoiminto] != 'POISTA') {
 					$query .= " , laji = '{$table_tarkenne}' ";
+				}
+
+				// Ollaan lis‰‰m‰ss‰ tuotetta, katsotaan ett‰ on kaikki oletukset MySQL aliaksista
+				// Taulun oletusarvot, jos ollaan lis‰‰m‰ss‰ uutta tietuetta
+				if ($rivi[$postoiminto] == "LISAA") {
+					foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+						if (stripos($query, ", $oletus_kentta = ") === FALSE) {
+							$query .= ", $oletus_kentta = '$oletus_arvo' ";
+						}
+					}
 				}
 
 				// lis‰t‰‰n tuote, mutta ei olla speksattu alvia ollenkaan...

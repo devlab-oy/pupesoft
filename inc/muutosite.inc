@@ -1375,7 +1375,6 @@
 					require ("inc/teetiliointi.inc");
 				}
 
-
 				foreach ($laskun_kulut as $key => $value) {
 
 					if ($value == 0) continue;

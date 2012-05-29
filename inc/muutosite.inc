@@ -1286,15 +1286,13 @@
 							if ($laskun_kulut_ylikirjaus['osto_rivi_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] += $sum_row['summa'];
 						}
 
+						$summa_kulu = $summa_kulu != 0 ? $summa_kulu / $lkm : 0;
+
+						$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
+
 						if ($osto_rahti == 0 and $osto_kulu == 0 and $osto_rivi_kulu == 0) {
-							$tiliointirow_summa = $trow['summa'] / $lkm;
+							// $tiliointirow_summa = $trow['summa'] / $lkm;
 							$summa_kulu = 0;
-						}
-						else {
-
-							$summa_kulu = $summa_kulu != 0 ? $summa_kulu / $lkm : 0;
-
-							$tiliointirow_summa = $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu;
 						}
 					}
 
@@ -1708,16 +1706,22 @@
 
 				switch($i) {
 					case '1':
-						echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
-						echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' /></td>";
+						if ($yhtiorow['osto_rahti'] != '') {
+							echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
+							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' /></td>";
+						}
 						break;
 					case '2':
-						echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
-						echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' /></td>";
+						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '') {
+							echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
+							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' /></td>";
+						}
 						break;
 					case '3':
-						echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
-						echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' /></td>";
+						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '' and $yhtiorow['osto_rivi_kulu'] != '') {
+							echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
+							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' /></td>";
+						}
 						break;
 				}
 

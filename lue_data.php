@@ -757,9 +757,9 @@ if ($kasitellaan_tiedosto) {
 					// Etsitään taulunotsikot arraystä KEY, jonka arvo on oletuskenttä
 					$oletus_positio = array_keys($taulunotsikot[$taulu], $oletus_kentta, true);
 
-					// Kenttä löytyy taulukosta, laitetaan siihen oletusarvo
+					// Kenttä löytyy taulukosta ja se on tyhjä, laitetaan siihen oletusarvo
 					// Jos kenttää EI LÖYDY, niin lisätään se muiden oletusten kanssa alempana
-					if (count($oletus_positio) == 1) {
+					if (count($oletus_positio) == 1 and $rivi[$oletus_positio[0]] == "") {
 						$rivi[$oletus_positio[0]] = $oletus_arvo;
 					}
 				}
@@ -1761,7 +1761,7 @@ if ($kasitellaan_tiedosto) {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
-				// Ollaan lisäämässä tuotetta, katsotaan että on kaikki oletukset MySQL aliaksista
+				// Ollaan lisäämässä tietuetta, katsotaan että on kaikki oletukset MySQL aliaksista
 				// Taulun oletusarvot, jos ollaan lisäämässä uutta tietuetta
 				if ($rivi[$postoiminto] == "LISAA") {
 					foreach ($oletukset as $oletus_kentta => $oletus_arvo) {

@@ -202,9 +202,6 @@
 
 	require('pdflib/phppdflib.class.php');
 
-	//echo "<font class='message'>Tiliote tulostuu...</font>";
-	flush();
-
 	//PDF parametrit
 	$pdf = new pdffile;
 	$pdf->set_default('margin-top', 	0);
@@ -320,6 +317,47 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	echo file_get_contents($pdffilenimi);
+	if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+		$liite = $pdffilenimi;
+		$content_body = "";
 
+		if (substr($komento,0,12) == 'asiakasemail') {
+			$sahkoposti_to = substr($komento, 12);
+		}
+		else {
+			$sahkoposti_to = $kukarow["eposti"];
+		}
+
+		echo t("Tiliote tulostuu")."...<br><br>";
+
+		$kutsu = t("Tiliote", $kieli);
+		$newfilename = $kutsu;
+
+		if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+			$kutsu .= ", ".trim($asiakastiedot["nimi"]);
+		}
+
+		// Sähköpostin lähetykseen parametrit
+		$parametri = array( "to" 			=> $sahkoposti_to,
+							"cc" 			=> "",
+							"subject"		=> $kutsu,
+							"ctype"			=> "text",
+							"body"			=> $content_body,
+							"attachements"	=> array(0 	=> array(
+														"filename"		=> $liite,
+														"newfilename"	=> $newfilename,
+														"ctype"			=> "pdf"),
+							)
+						);
+
+		pupesoft_sahkoposti($parametri);
+
+	}
+	elseif ($komento != '' and $komento != 'edi') {
+		echo t("Tiliote tulostuu")."...<br><br>";
+		$line = exec("$komento $pdffilenimi", $output, $returnvalue);
+	}
+	else {
+		echo file_get_contents($pdffilenimi);
+	}
 ?>

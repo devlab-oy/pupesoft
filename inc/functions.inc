@@ -6541,6 +6541,15 @@ if (!function_exists("js_openFormInNewWindow")) {
 
 					formi.submit();
 				}
+				else if (name == "samewindowandfile") {
+					thistee = formi.elements["tee"].value;
+					formi.elements["tee"].value = "TULOSTATILAUS";
+
+					formi.target='';
+					formi.submit();
+
+					formi.elements["tee"].value = thistee;
+				}
 				else {
 					thistee = formi.elements["tee"].value;
 					formi.elements["tee"].value = "NAYTATILAUS";

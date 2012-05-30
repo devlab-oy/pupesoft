@@ -555,7 +555,7 @@
 					if (count($lisatyt_tilaukset) > 0) {
 
 						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = array_shift($lisatyt_tilaukset);
+						$kerayslistatunnus = $lisatyt_tilaukset[0];
 
 						$query = "	SELECT *
 									FROM lasku
@@ -581,7 +581,7 @@
 		 		$query = "UNLOCK TABLES";
 				$result = pupe_query($query);
 
-				if (count($erat['tilaukset']) > 0) {
+				if (count($lisatyt_tilaukset) > 0) {
 
 					// Tulostetaan kollilappu
 					require('inc/tulosta_reittietiketti.inc');

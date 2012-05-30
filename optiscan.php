@@ -203,7 +203,7 @@
 					if (count($lisatyt_tilaukset) > 0) {
 
 						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = array_shift($lisatyt_tilaukset);
+						$kerayslistatunnus = $lisatyt_tilaukset[0];
 
 						// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
 						$query = "	UPDATE lasku SET

@@ -1148,7 +1148,7 @@
 	// t‰‰ll‰ tarkistetaan ostolaskun kulut
 	if ($tila == 'ostolasku_kulut') {
 
-		if ($trow['tapvm'] < $yhtiorow['tilikausi_alku']) {
+		if ($trow['tapvm'] < $yhtiorow['tilikausi_alku'] and $kukarow['taso'] != 3) {
 			echo "<font class='error'>",t("Tapahtuma ei ole kuluvalla tilikaudella")," {$trow['tapvm']}</font><br>";
 			$tee = 'M';
 			$tila = '';
@@ -1203,12 +1203,22 @@
 				'osto_rivi_kulu' => 0
 			);
 
+			$suljettu_tilikausi = false;
+			$trow_tapvm = $trow['tapvm'];
+			$tapvmlisa = "AND tapvm	= '{$trow['tapvm']}'";
+
+			if ($trow['tapvm'] < $yhtiorow['tilikausi_alku']) {
+				$suljettu_tilikausi = true;
+				$trow['tapvm'] = date('Y-m-d');
+				$tapvmlisa = "";
+			}
+
 			// Haetaan kulutiliˆinti
 			$query = "	SELECT *
 						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
 						AND ltunnus		= '$tunnus'
-						AND tapvm		= '$trow[tapvm]'
+						{$tapvmlisa}
 						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
 						AND korjattu	= ''";
 			$result_tiliointi = pupe_query($query);
@@ -1690,7 +1700,7 @@
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') 
 			and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) 
-			and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'] 
+			and (($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) or ($trow['tapvm'] < $yhtiorow['tilikausi_alku'] and $kukarow['taso'] == 3))
 			and ($trow['vienti'] == 'C' or $trow['vienti'] == 'F' or $trow['vienti'] == 'I')
 			and $yhtiorow['ostolaskun_kulutilit'] != '' 
 			and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {

@@ -325,6 +325,7 @@ class Unifaun {
 
 					// Jos sopparinumero puuttuu
 					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
+
 						if ($this->toitarow['virallinen_selite'] == "KKSTD" or
 							$this->toitarow['virallinen_selite'] == "TPSTD" or
 							$this->toitarow['virallinen_selite'] == "IT09" or
@@ -332,6 +333,14 @@ class Unifaun {
 						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234;
 						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
 						else $rahtisopimusnro = 123;
+					}
+
+					// Jos sopparinumero on, mutta se on virheellinen
+					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
+
+						if (($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") and strlen($rahtisopimusnro) != 6) {
+							$rahtisopimusnro = 999999;
+						}
 					}
 
 					$uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number

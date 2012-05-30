@@ -646,7 +646,7 @@
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
 						echo "	<td class='back'>
-								<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
+								<form method='post' onSubmit='return verify(\"$msg\");'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 								<input type='hidden' name='tee' value='loppulaskuta'>
@@ -661,7 +661,7 @@
 
 					echo "<td class='back'>";
 
-					echo "<form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
+					echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta'>
@@ -671,7 +671,7 @@
 					// muuten tämä on vain ennakkolaskutusta
 					$msg = t("Oletko varma, että haluat tehdä kaikki ennakkolaskut tilaukselle").": $row[jaksotettu]";
 
-					echo "<form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
+					echo "<form method='post' name='case' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta_kaikki'>

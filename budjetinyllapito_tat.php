@@ -1288,7 +1288,7 @@
 
 		echo "<hr>";
 
-		echo "<form method='post'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi_$toim.xls'>";

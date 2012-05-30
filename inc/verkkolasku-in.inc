@@ -563,7 +563,7 @@
 							and tyyppi 		= 'k'
 							and yhtio 		= '$yhtio'
 							and tilino 		= 0
-							and kuvaus 		= '$kauttalaskutus'";
+							and kuvaus 		= '".mysql_real_escape_string($kauttalaskutus)."'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
@@ -598,16 +598,16 @@
 								and tyyppi		= 'o'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
-									and mintuote = '$toim_asiakkaantiedot[postino]'
-									and maxtuote = '$toim_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -644,16 +644,16 @@
 								and tyyppi		= 'b'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
-									and mintuote = '$ostaja_asiakkaantiedot[postino]'
-									and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -690,7 +690,7 @@
 									and tyyppi 		= 'a'
 									and yhtio 		= '$yhtio'
 									and tilino 		= 0
-									and kuvaus 		= '$laskun_asiakastunnus'";
+									and kuvaus 		= '".mysql_real_escape_string($laskun_asiakastunnus)."'";
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) != 0) {
@@ -1178,8 +1178,8 @@
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
-							$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
-							$tuote  = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"]));  // Poistaa SQL-virheen mahdollisuuden
+							$selite = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"]));
+							$tuote  = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"]));
 
 							$query = "	SELECT tilino, kustp
 										FROM tiliointisaanto

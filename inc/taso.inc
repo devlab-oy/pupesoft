@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Tilikartan rakenne';
-	$kentat = 'tunnus, taso, tyyppi, summattava_taso, nimi';
-	$jarjestys = 'taso, tyyppi, summattava_taso';
+	$kentat = 'tunnus, taso, tyyppi, nimi, summattava_taso, kumulatiivinen, oletusarvo, kerroin, jakaja';
+	$jarjestys = 'taso, tyyppi, nimi';
 ?>

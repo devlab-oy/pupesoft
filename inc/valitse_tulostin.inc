@@ -1,7 +1,7 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-	echo "<form method='post' action='$PHP_SELF?$ulisa'>
+	echo "<form method='post' action = '?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tila' value='$tila'>

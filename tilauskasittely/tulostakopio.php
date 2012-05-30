@@ -274,7 +274,7 @@
 		js_popup(-100);
 
 		//syötetään tilausnumero
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
+		echo "<form method='post' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tee' value='ETSILASKU'>";
@@ -892,7 +892,7 @@
 						//-->
 						</script>";
 
-				echo "	<form method='post' action='$PHP_SELF'>
+				echo "	<form method='post'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='toim' value='$toim'>
@@ -930,7 +930,7 @@
 			if ($tila == 'monta') {
 				echo "<th valign='top'>".t("Tulosta")."</th>";
 
-				echo "  <form method='post' name='tulosta' action='$PHP_SELF' autocomplete='off'>
+				echo "  <form method='post' name='tulosta' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='mista' value='tulostakopio'>
@@ -1008,7 +1008,7 @@
 					echo "<td class='back' valign='top'>";
 
 					if ($kukarow["extranet"] == "") {
-						echo "	<form method='post' action='$PHP_SELF'>
+						echo "	<form method='post'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
 								<input type='hidden' name='tee' value='NAYTAHTML'>
 								<input type='hidden' name='toim' value='$toim'>
@@ -1030,7 +1030,7 @@
 								<br>";
 					}
 
-					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='$PHP_SELF' autocomplete='off'>
+					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' autocomplete='off'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>
 							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
@@ -1041,7 +1041,7 @@
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>
-							<form method='post' action='$PHP_SELF' autocomplete='off'>
+							<form method='post' autocomplete='off'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>
 							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 							<input type='hidden' name='lopetus' value='$lopetus'>

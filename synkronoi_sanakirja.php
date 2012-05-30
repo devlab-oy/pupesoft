@@ -183,7 +183,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 			echo "</table><br><br>";
 
 
-			echo "	<form method='post' action='$PHP_SELF'>
+			echo "	<form method='post'>
 					<input type='hidden' name='tee' value='UPDATE'>
 					<input type='submit' value='".t("Synkronoi")."'>
 
@@ -193,7 +193,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 }
 else {
 	echo "	<br><br>
-			<form method='post' action='$PHP_SELF'>
+			<form method='post'>
 			<input type='hidden' name='tee' value='TEE'>
 			<input type='submit' value='".t("Vertaa sanakirjoja")."'>
 			</form>";

@@ -137,6 +137,11 @@ class ProgressBar {
 		$backgroundLength = $this->rest+($stepLength*$this->numSteps);
 		$this->backgroundBar = sprintf($this->stepElement,$backgroundLength);
 
+		// Set parametres
+		$this->started = false;
+		$this->finished = false;
+		$this->firstStep = "";
+		
 		//stop buffering
     	ob_end_flush();
     	//start buffering

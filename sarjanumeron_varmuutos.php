@@ -204,7 +204,7 @@
 
 		if ($tee == 'INVENTOI') {
 
-			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form name='inve' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 			echo "<table>";
@@ -272,7 +272,7 @@
 		$formi  = "inve";
 		$kentta = "tuoteno";
 
-		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form name='inve' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
 		echo "<br><table>";
 		echo "<tr><th>".t("Tuotenumero:")."</th><td><input type='text' size='25' name='tuoteno'></td><td class='back'><input type='submit' name='valmis' value='".t("Jatka")."'></td></tr>";

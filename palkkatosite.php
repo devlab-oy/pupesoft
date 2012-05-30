@@ -269,7 +269,7 @@
 	}
 
 	echo "<font class='head'>".t("Palkka- ja matkalaskuaineiston sis‰‰nluku")."</font><hr>";
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 			<table>
 			<tr><th>".t("Valitse tiedostomuoto")."</th><td>
 			<select name = 'tiedostomuoto'>

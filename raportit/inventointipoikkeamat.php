@@ -24,7 +24,7 @@
 		$ppl = date("d");
 
 	// piirrell‰‰n formi
-	echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='inve' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Y'>
 			<input type='hidden' name='toim' value='$toim'>";
 
@@ -415,7 +415,7 @@
 
 					if ($toim == "SUPER") {
 						echo "<tr><td>".t("Korjaa inventointi").": </td><td colspan='4'>";
-						echo "<form action='$PHP_SELF?$ulisa' method='post' autocomplete='off'>";
+						echo "<form action = '?$ulisa' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='tila'			value='$tila'>";
 						echo "<input type='hidden' name='toim' 			value='$toim'>";
 						echo "<input type='hidden' name='ppa' 			value='$ppa'>";
@@ -441,7 +441,7 @@
 
 					if ($toim == "SUPER" and $tuoterow["sarjanumeroseuranta"] == "S" and mysql_num_rows($sarjares) == abs($tuoterow["kpl"])) {
 						echo "<tr><td>".t("Peru inventointi").": </td><td colspan='4'>";
-						echo "<form action='$PHP_SELF?$ulisa' method='post' autocomplete='off'>";
+						echo "<form action = '?$ulisa' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='tila'			value='$tila'>";
 						echo "<input type='hidden' name='toim' 			value='$toim'>";
 						echo "<input type='hidden' name='ppa' 			value='$ppa'>";

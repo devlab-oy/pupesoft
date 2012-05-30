@@ -63,7 +63,7 @@ if ($tee == 'laheta') {
 if ($tee == '') {
 
 	echo "<br><table>
-			<form action='$PHP_SELF' method='post'>";
+			<form method='post'>";
 
 	$asosresult = t_avainsana("ASIAKASOSASTO");
 

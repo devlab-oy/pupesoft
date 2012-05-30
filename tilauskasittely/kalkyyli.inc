@@ -77,7 +77,7 @@ if ($vietiinko_koko_suuntalava == 'joo' or ($sarjanrook == 1 and $varok == 1)) {
 
 		require("varastoon.inc");
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
 		echo "<input type='hidden' name='tee' value='varastoon'>";
@@ -102,7 +102,7 @@ if ($vietiinko_koko_suuntalava == 'joo' or ($sarjanrook == 1 and $varok == 1)) {
 		echo "<input type='submit' value='".t("Hyvältä näyttää, vie varastoon!")."'>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";

@@ -20,7 +20,7 @@
 	if ($kausi == "") {
 
 		//Näytetään käyttöliittymä
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>";
+		echo "<form name = 'valinta' method='post'>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -461,7 +461,7 @@
 	$txtfile = "TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
 
 	if (filesize("dataout/".$nimi) > 0) {
-		echo "<br><form>";
+		echo "<br><form class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='filenimi' value='$nimi'>";
 		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";

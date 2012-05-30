@@ -50,7 +50,7 @@
 	}
 	else {
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>",t("Toimitustapa"),":</th>";

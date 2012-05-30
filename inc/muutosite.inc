@@ -1419,7 +1419,7 @@
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 				$pvm = erottele($trow['tapvm']);
 
-				echo "	<form action = '$PHP_SELF' method='post'>
+				echo "	<form method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee'  value='M'>
@@ -1476,7 +1476,7 @@
 				$lapvm = erottele($trow['lapvm']);
 
 				if ($yhtiorow['ostolaskujen_paivays'] == "1"){
-					echo "<form action = '$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type = 'hidden' name='lopetus' value='$lopetus'>
 							<input type = 'hidden' name='tila' value='vaihda_lapvm'>
 							<input type = 'hidden' name='tee' value='M'>
@@ -1490,7 +1490,7 @@
 					echo "</form>";
 				}
 
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee' value='M'>
@@ -1512,7 +1512,7 @@
 				if ($trow['tila'] != 'L' and $trow['tila'] != 'U' and mysql_num_rows($keikres) == 0) {
 
 					if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-						echo "<form action = '$PHP_SELF' method='post'>
+						echo "<form method='post'>
 							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 							<input type = 'hidden' name='tila' value='Q'>
 							<input type = 'hidden' name='tee' value='M'>
@@ -1530,7 +1530,7 @@
 
 					$pvm = erottele($trow['kapvm']);
 
-					echo "<form action = '$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 							<input type = 'hidden' name='tila' value='C'>
 							<input type = 'hidden' name='tee' value='M'>
@@ -1551,7 +1551,7 @@
 			if (($trow['tila'] < 'N') or ($trow['tila'] == 'U' and $trow['mapvm']=='0000-00-00')) {
 				$pvm = erottele($trow['erpcm']);
 
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='R'>
 						<input type = 'hidden' name='tee' value='M'>
@@ -1568,7 +1568,7 @@
 				if (($trow['kapvm'] != '0000-00-00') and ($trow['tila'] == 'U')) {
 					$pvm = erottele($trow['kapvm']);
 
-					echo "<form action = '$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 							<input type = 'hidden' name='tila' value='B'>
 							<input type = 'hidden' name='tee' value='M'>
@@ -1586,7 +1586,7 @@
 				// voidaan vaihtaa myyntilaskun mapvm jos se ei ole vielä maksettu
 				if ($trow['tila'] == 'U' and $trow['mapvm'] == '0000-00-00') {
 
-					echo "<form action = '$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 							<input type = 'hidden' name='tila' value='maksuehto'>
 							<input type = 'hidden' name='tee' value='M'>
@@ -1622,7 +1622,7 @@
 		if ((($trow['tila'] == 'Y') or ($trow['tila'] == 'U')) and ($trow['mapvm'] != '0000-00-00')) {
 			if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
 				$pvm=erottele($trow['mapvm']);
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tila' value='S'>
 					<input type = 'hidden' name='tee' value='M'>
@@ -1666,7 +1666,7 @@
 			if ($trow['vienti']=='K') $vientik = 'selected';
 			if ($trow['vienti']=='L') $vientil = 'selected';
 
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tila' value='W'>
 					<input type = 'hidden' name='tee' value='M'>
@@ -1745,7 +1745,7 @@
 		}
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
-			echo "<form action = '$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type = 'hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type = 'hidden' name='tila' value='vaihdalaskunumero'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
@@ -1759,7 +1759,7 @@
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tila' value='jako'>
 					<input type = 'hidden' name='tee' value='M'>
@@ -1774,7 +1774,7 @@
 
 		// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
 		if ($trow['suoraveloitus'] != "" and $trow["maksu_tili"] == "" and in_array($trow['tila'], array('Q','M','H'))) {
-			echo "	<form action = '$PHP_SELF' method='post'>
+			echo "	<form method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='A'>
@@ -1803,7 +1803,7 @@
 				$alv_tili = $trow["alv_tili"];
 			}
 
-			echo "<form action = '' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type = 'hidden' name='tee' value='M'>";
@@ -1828,7 +1828,7 @@
 			echo "</form>";
 		}
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tila' value='K'>
 				<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1843,7 +1843,7 @@
 		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $keikrow["alatila"] != "X") {
 
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='T'>
 						<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1865,7 +1865,7 @@
 						</form>";
 			}
 			else {
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tila' value='TU'>
 						<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1909,7 +1909,7 @@
 		}
 
 		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MVIESTI'>
 					<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1928,7 +1928,7 @@
 		}
 
 		if ($trow["tila"] == "Q" and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MAKSATUKSEEN'>
 					<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1942,7 +1942,7 @@
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type = 'hidden' name='tila' value='nollaahyvak'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1973,7 +1973,7 @@
 					$selviikorko = "SELECTED";
 				}
 
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type = 'hidden' name='tila' value='viikorkomuuta'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='lopetus' value='$lopetus'>
@@ -1999,7 +1999,7 @@
 			$konversio_check_row = mysql_fetch_assoc($konversio_check_res);
 
 			if ($konversio_check_row["kpl"] == 0) {
-				echo "	<form action = '$PHP_SELF' method='post'>
+				echo "	<form method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='konversio_avaa'>
 						<input type = 'hidden' name='tee' value='M'>

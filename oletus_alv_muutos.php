@@ -5,7 +5,7 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t("Alv-oletuksen vaihto")."</font><hr>";
 
 if ($tee == "") {
-	echo "<br><form action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<br><form method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='LASKE'>";
 	echo "<select name='suunta'>";
 	if ($yhtiorow["alv_kasittely"] == "o") echo "<option value='LISAA'>".t("Vaihda verottomat hinnat verollisiksi")."</option>";

@@ -300,7 +300,7 @@
 				exit;
 			}
 
-			echo "<form name = 'tosite' action = '$PHP_SELF' method='post'>";
+			echo "<form name = 'tosite' method='post'>";
 			echo "<font class='message'>" . t("Valitse vastaanottava yritys") . " </font> ";
 			echo "<select name='vastaanottaja'>";
 
@@ -320,7 +320,7 @@
 				$vmaara = 1;
 			}
 
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='vastaanottaja' value='$vastaanottaja'>
 					<input type='hidden' name='tpp' maxlength='2' size=2 value='$tpp'>
 					<input type='hidden' name='tpk' maxlength='2' size=2 value='$tpk'>
@@ -353,7 +353,7 @@
 
 			echo "<font class='message'>Syötä tositteen otsikkotiedot:</font>";
 
-			echo "<form name = 'tosite' action = '$PHP_SELF' method='post' enctype='multipart/form-data'>
+			echo "<form name = 'tosite' method='post' enctype='multipart/form-data'>
 					<input type='hidden' name='tee' value='I'>
 					<input type='hidden' name='omaara' value='$omaara'>
 					<input type='hidden' name='vmaara' value='$vmaara'>

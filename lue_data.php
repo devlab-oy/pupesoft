@@ -337,7 +337,7 @@ if ($kasitellaan_tiedosto) {
 			$table_tarkenne = substr($taulu, 11);
 		}
 
-		list(, , , , $joinattava, ) = pakolliset_sarakkeet($taulu);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattava, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($taulu);
 
 		// Laitetaan aina kaikkiin tauluihin
 		$joinattava["TOIMINTO"] = $table;
@@ -554,7 +554,7 @@ if ($kasitellaan_tiedosto) {
 		}
 
 		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, , $saakopoistaa) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sis‰lt‰‰ kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sis‰lt‰‰ kaikki sarakkeet saadusta tiedostosta
@@ -646,6 +646,7 @@ if ($kasitellaan_tiedosto) {
 			}
 
 			if (!isset($api_kentat)) {
+				lue_data_echo($lue_data_output_text, true);
 				require ("inc/footer.inc");
 				exit;
 			}
@@ -748,6 +749,20 @@ if ($kasitellaan_tiedosto) {
 			if (is_array($wherelliset)) {
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
+			}
+
+			// Lis‰t‰‰n taulun oletusarvot, jos ollaan lis‰‰m‰ss‰ uutta tietuetta
+			if ($rivi[$postoiminto] == "LISAA") {
+				foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+					// Etsit‰‰n taulunotsikot arrayst‰ KEY, jonka arvo on oletuskentt‰
+					$oletus_positio = array_keys($taulunotsikot[$taulu], $oletus_kentta, true);
+
+					// Kentt‰ lˆytyy taulukosta ja se on tyhj‰, laitetaan siihen oletusarvo
+					// Jos kentt‰‰ EI L÷YDY, niin lis‰t‰‰n se muiden oletusten kanssa alempana
+					if (count($oletus_positio) == 1 and $rivi[$oletus_positio[0]] == "") {
+						$rivi[$oletus_positio[0]] = $oletus_arvo;
+					}
+				}
 			}
 
 			$avkmuuttuja = FALSE;
@@ -1746,6 +1761,16 @@ if ($kasitellaan_tiedosto) {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
+				// Ollaan lis‰‰m‰ss‰ tietuetta, katsotaan ett‰ on kaikki oletukset MySQL aliaksista
+				// Taulun oletusarvot, jos ollaan lis‰‰m‰ss‰ uutta tietuetta
+				if ($rivi[$postoiminto] == "LISAA") {
+					foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+						if (stripos($query, ", $oletus_kentta = ") === FALSE) {
+							$query .= ", $oletus_kentta = '$oletus_arvo' ";
+						}
+					}
+				}
+
 				// lis‰t‰‰n tuote, mutta ei olla speksattu alvia ollenkaan...
 				if ($rivi[$postoiminto] == 'LISAA' and $table_mysql == 'tuote' and stripos($query, ", alv = ") === FALSE) {
 					$query .= ", alv = '$oletus_alvprossa' ";
@@ -1946,29 +1971,6 @@ if ($kasitellaan_tiedosto) {
 
 						if (function_exists($funktio)) {
 							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
-						}
-
-						if ($tassafailissa) {
-
-							$tarkista_sarake = mysql_field_name($result, $i);
-
-							// Oletusaliakset
-							$query = "	SELECT selitetark_3
-										FROM avainsana
-										WHERE yhtio = '$kukarow[yhtio]'
-										and laji = 'MYSQLALIAS'
-										and selite = '$table_mysql.$tarkista_sarake'
-										and selitetark_2 = ''";
-							$al_res = pupe_query($query);
-							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
-
-							if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
-								if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
-								     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
-									$virhe[$i] .= t("Tieto on pakollinen")."!";
-									$errori = 1;
-								}
-							}
 						}
 
 						// Ignoorataan virhe jos se ei koske t‰ss‰ failissa olutta saraketta
@@ -2180,7 +2182,7 @@ if (!$cli and !isset($api_kentat)) {
 	// Selectoidaan aktiivi
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($taulut, '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";

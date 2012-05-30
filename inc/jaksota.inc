@@ -44,7 +44,7 @@
 
 		echo "<font class='message'>".t("Valitse jaksotuksen päivät").":</font><br><br>";
 
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'isa' value = '$isa'>";
 		echo "<input type = 'hidden' name = 'tee' value = 'J'>";

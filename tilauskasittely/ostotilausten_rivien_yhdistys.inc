@@ -85,7 +85,7 @@ if ($tee == "") {
 
 		echo "<font class='head'>".t("Toimittajan saapumiset")."</font><hr>";
 
-		echo "<form action='$PHP_SELF' name='formi' method='post'>";
+		echo "<form name='formi' method='post'>";
 		echo "<input type='hidden' name='toiminto' value='yhdista'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='hidden' name='tee' value='teeyhdistys'>";
@@ -189,7 +189,7 @@ if ($tee == "") {
 
 		if ($toiminto != "") {
 			echo "<hr>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";

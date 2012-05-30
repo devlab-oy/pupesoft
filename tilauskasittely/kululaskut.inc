@@ -480,7 +480,7 @@ if ($silent == "") {
 				}
 
 				echo "<td valign='top' class='back'>
-						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
+						<form name='haku' method='post' autocomplete='off'>
 						<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -511,7 +511,7 @@ if ($silent == "") {
 
 					if ($mlrivirow["mrivi"] > 0 and $mlrivirow["mrivi"] != $mlrivirow["trivi"]) {
 						echo "<td valign='top' class='back'>
-								<form method='POST' action='$PHP_SELF'>
+								<form method='POST'>
 								<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
 								<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -535,7 +535,7 @@ if ($silent == "") {
 			echo "<hr>";
 		}
 
-		echo "<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
+		echo "<form name='haku' method='post' autocomplete='off'>
 				<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -838,7 +838,7 @@ if ($silent == "") {
 
 					if ($voikolisata == "OK") {
 
-						echo "<form name='haku' action='$PHP_SELF' method='post'>";
+						echo "<form name='haku' method='post'>";
 
 						if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
 							echo "<td valign='top'><input type='text' name='liitasumma' size='8'></td>";
@@ -903,7 +903,7 @@ if ($silent == "") {
 	if ($toiminto != "" and $lopetus == '') {
 
 		echo "<hr>";
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";

@@ -106,7 +106,7 @@
 
 	echo "<font class='head'>",t("Myyntitilasto"),"</font><hr>";
 
-	echo "<form method='post' action=''>";
+	echo "<form method='post'>";
 	echo "<table><tr>";
 	echo "<td class='back'><div id='chart_div'></div></td>";
 	echo "</tr><tr>";

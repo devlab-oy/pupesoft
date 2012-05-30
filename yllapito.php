@@ -1418,16 +1418,6 @@
 
 			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
 
-			require ("inc/$toim"."rivi.inc");
-
-			// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
-			if (mysql_field_name($result, $i) == "laatija" or
-				mysql_field_name($result, $i) == "muutospvm" or
-				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
-				$tyyppi = 2;
-			}
-
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
 
@@ -1448,6 +1438,9 @@
 				else {
 					$otsikko = t(mysql_field_name($result, $i));
 				}
+
+				// jos ollaan tekemässä uutta tietuetta ja meillä on mysql-aliaksista oletusarvo
+				if ($tunnus == "" and $trow[$i] == "") $trow[$i] = $al_row["selitetark_4"];
 			}
 			else {
 				switch (mysql_field_name($result,$i)) {
@@ -1486,6 +1479,16 @@
  					$ulos = "";
  					$tyyppi = 0;
  				}
+			}
+
+			require ("inc/$toim"."rivi.inc");
+
+			// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
+			if (mysql_field_name($result, $i) == "laatija" or
+				mysql_field_name($result, $i) == "muutospvm" or
+				mysql_field_name($result, $i) == "muuttaja" or
+				mysql_field_name($result, $i) == "luontiaika") {
+				$tyyppi = 2;
 			}
 
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan

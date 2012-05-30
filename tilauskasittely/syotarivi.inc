@@ -696,7 +696,7 @@
 	}
 	elseif (!$variaaritorivi and $miniliittyma == "JOO") {
 
-		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
+		echo "	<form name='rivi' action = '?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>
 				<input type='hidden' name='toim' value = '$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>

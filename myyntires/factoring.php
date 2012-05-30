@@ -181,7 +181,7 @@ if (isset($laskuno)) {
 	else {
 		$laskurow = mysql_fetch_assoc($result);
 
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 		echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
 		echo "<input name='laji' type='hidden' value='$laji'>";
 		echo "<table>
@@ -226,7 +226,7 @@ if (isset($laskuno)) {
 
 
 if (!isset($laskuno)) {
-	echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='eikat' method='post' autocomplete='off'>";
 	echo "<table><tr>";
 	echo "<td><input type='radio' name='laji' value='paalle' checked> ".t("Lis‰‰ factoring")."</td>";
 	echo "<td><input type='radio' name='laji' value='pois'> ".t("Poista factoring")."</td></tr>";

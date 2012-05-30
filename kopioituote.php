@@ -313,7 +313,7 @@
 		echo "<tr><td>$tu</td>";
 
 		echo "<tr><th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th></tr>";
-		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+		echo "<tr><form method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='PERUSTA'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td><input type='text' name='uustuoteno' size='22' maxlength='30' value=''></td>";
@@ -323,7 +323,7 @@
 	}
 
 	if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='AVALITTU'>";
 			echo "<table><tr>";
 			echo "<th>".t("Valitse listasta").":</th></tr>";
@@ -343,7 +343,7 @@
 		echo "<table><tr>";
 		echo "<th>".t("Anna tuotenumero josta")."<br>".t("haluat kopioda tiedot")."</th>";
 
-		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+		echo "<tr><form method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='HAKU'>";
 		echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 210)."</td>";
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";

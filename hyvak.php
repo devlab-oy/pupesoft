@@ -110,6 +110,9 @@
 									<input type='hidden' name='tunnus' value = '$tunnus'>
 									<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
 									<input type='hidden' name='liita[".$row["otunnus"]."][liitasumma]' value='' size='10'>
+									<input type='hidden' name='osto_kulu' value='{$laskurow['osto_kulu']}' />
+									<input type='hidden' name='osto_rahti' value='{$laskurow['osto_rahti']}' />
+									<input type='hidden' name='osto_rivi_kulu' value='{$laskurow['osto_rivi_kulu']}' />
 									<input type='submit' value='".t("Liitä saapumiseen")."'>
 									</form>";
 							echo "</td></tr>";

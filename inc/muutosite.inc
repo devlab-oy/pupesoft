@@ -3,50 +3,54 @@
 	if (!isset($tila)) $tila = "";
 	if (!isset($komm)) $komm = "";
 
-	function erottele($pvm) {
-		$paluu['pp'] = substr($pvm,-2);
-		$paluu['kk'] = substr($pvm,5,2);
-		$paluu['vv'] = substr($pvm,0,4);
-		return $paluu;
+	if (!function_exists("erottele")) {
+		function erottele($pvm) {
+			$paluu['pp'] = substr($pvm,-2);
+			$paluu['kk'] = substr($pvm,5,2);
+			$paluu['vv'] = substr($pvm,0,4);
+			return $paluu;
+		}
 	}
 
-	function kopioitiliointi($tunnus, $viivaaja) {
-		//Tehdään kopio tiliöinnistä $tunnus
-		//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
-		global $kukarow;
+	if (!function_exists("kopioitiliointi")) {
+		function kopioitiliointi($tunnus, $viivaaja) {
+			//Tehdään kopio tiliöinnistä $tunnus
+			//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
+			global $kukarow;
 
-		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-		$result = pupe_query($query);
+			$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+			$result = pupe_query($query);
 
-		if (mysql_num_rows($result) != 1) {
-			echo "Tiliöintirivi kateissa. Systeemivirhe!";
-			exit;
-		}
+			if (mysql_num_rows($result) != 1) {
+				echo "Tiliöintirivi kateissa. Systeemivirhe!";
+				exit;
+			}
 
-		$tiliointirow = mysql_fetch_assoc($result);
-		$query = "INSERT into tiliointi set ";
+			$tiliointirow = mysql_fetch_assoc($result);
+			$query = "INSERT into tiliointi set ";
 
-		for ($i = 0; $i < mysql_num_fields($result); $i++) {
-			if (mysql_field_name($result, $i) != 'tunnus') {
-				if ($viivaaja != '') {
-					if (mysql_field_name($result, $i) == 'korjattu') {
-						$query .= "korjattu ='".$viivaaja."',";
-					}
-					elseif (mysql_field_name($result, $i) == 'korjausaika') {
-						$query .= "korjausaika = now(),";
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+				if (mysql_field_name($result, $i) != 'tunnus') {
+					if ($viivaaja != '') {
+						if (mysql_field_name($result, $i) == 'korjattu') {
+							$query .= "korjattu ='".$viivaaja."',";
+						}
+						elseif (mysql_field_name($result, $i) == 'korjausaika') {
+							$query .= "korjausaika = now(),";
+						}
+						else {
+							$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
+						}
 					}
 					else {
 						$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
 					}
 				}
-				else {
-					$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
-				}
 			}
-		}
 
-		$query = substr($query, 0, -1);
-		$result = pupe_query($query);
+			$query = substr($query, 0, -1);
+			$result = pupe_query($query);
+		}
 	}
 
 	$query = "	SELECT *

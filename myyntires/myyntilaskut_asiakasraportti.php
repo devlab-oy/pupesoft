@@ -3,15 +3,32 @@
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
+	if (isset($_REQUEST['tee']) and $_REQUEST['tee'] == 'NAYTATILAUS') {
 		$nayta_pdf = 1;
 	}
 
 	require ("../inc/parametrit.inc");
 
-	if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
+	if (isset($_REQUEST['tee']) and ($_REQUEST['tee'] == 'NAYTATILAUS' or $_REQUEST['tee'] == 'TULOSTATILAUS')) {
+
+		if ($_REQUEST['tee'] == 'TULOSTATILAUS') {
+			$query   = "	SELECT *
+							from kirjoittimet
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$valittu_tulostin'";
+			$kirres  = pupe_query($query);
+			$kirrow  = mysql_fetch_assoc($kirres);
+			$komento = $kirrow['komento'];
+		}
+
 		require('paperitiliote.php');
-		exit;
+
+		if ($_REQUEST['tee'] == 'TULOSTATILAUS') {
+			$tee = "";
+		}
+		else {
+			exit;
+		}
 	}
 
 	if ($tee == "") {
@@ -270,34 +287,34 @@
 				echo "<tr>
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</th>
 					<td colspan='2'></td></tr>";
-					
+
 				echo "<tr>
 					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
-					
-					
+
+
 				$as_tunnus = explode(",", $tunnukset);
-				
+
 				foreach ($as_tunnus as $astun) {
 					$query  = "	SELECT kentta01
 						        FROM kalenteri
 						        WHERE yhtio = '$kukarow[yhtio]'
-						        AND tyyppi  = 'Myyntireskontraviesti' 
+						        AND tyyppi  = 'Myyntireskontraviesti'
 						        AND liitostunnus = '$astun'
 						        AND yhtio   = '$kukarow[yhtio]'
-								ORDER BY tunnus desc 
+								ORDER BY tunnus desc
 								LIMIT 1";
 					$amres = pupe_query($query);
-				
+
 					if (mysql_num_rows($amres) > 0) {
 						$amrow = mysql_fetch_assoc($amres);
-                
+
 						echo "<tr>
 							<th>".t("Reskontraviesti")."</th><td colspan='2'>$amrow[kentta01]</td>
 							</tr>";
 					}
 				}
-				
+
 				echo "<tr><td colspan='3' class='back'><br></td></tr>";
 
 				if (!isset($vv)) $vv = date("Y");
@@ -306,17 +323,42 @@
 
 				echo "<tr><th>".t("Tiliote p‰iv‰lle").":</th>
 						<td colspan='2'>
-						<form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
-						<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
-						<input type='hidden' name = 'tiliote' value = '1'>
-						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
-						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
+						<form action='myyntilaskut_asiakasraportti.php' id='tulosta_tiliote' name='tulosta_tiliote' method='post' class='multisubmit'>
 						<input type='hidden' name = 'alatila' value = '$alatila'>
+						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
+						<input type='hidden' name = 'tee' value = 'TILIOTE'>
+						<input type='hidden' name = 'tila' value = 'tee_raportti'>
+						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type = 'text' name = 'pp' value='$pp' size=2>
 						<input type = 'text' name = 'kk' value='$kk' size=2>
 						<input type = 'text' name = 'vv' value='$vv' size=4>
-						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\"></form>
-						</td></tr>";
+						<input type = 'submit' value='",t("N‰yt‰ tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', 'tulosta_tiliote'); return false;\">";
+
+				$query = "	SELECT *
+							FROM kirjoittimet
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND komento != 'EDI'
+							ORDER BY kirjoitin";
+				$kirre = mysql_query($query) or pupe_error($query);
+
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;<select name='valittu_tulostin'>";
+
+				echo "<option value=''>".t("Valitse tulostin")."</option>";
+
+				while ($kirrow = mysql_fetch_assoc($kirre)) {
+					if ($kirrow["tunnus"] == $kukarow["kirjoitin"]) {
+						$sel = "SELECTED";
+					}
+					else {
+						$sel = "";
+					}
+
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+
+				echo "</select>";
+				echo "<input type='submit' name='tulostatiliote' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', 'samewindowandfile'); return false;\">
+						</form></td></tr>";
 
 				echo "</table>";
 

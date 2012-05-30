@@ -1334,6 +1334,13 @@ if ($tee == 'P' or $tee == 'E') {
 
 	if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I')) {
 
+		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
+			$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = alv_oletus();
+		}
+		else {
+			$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = 0;
+		}
+
 		for ($i = 1; $i <= $yhtiorow['ostolaskun_kulutilit']; $i++) {
 			echo "<tr class='ostolaskun_kulutilit'>";
 
@@ -1342,19 +1349,22 @@ if ($tee == 'P' or $tee == 'E') {
 					if (!isset($osto_rahti)) $osto_rahti = '';
 
 					echo "<td>",t("Vaihto-omaisuuslaskun rahdit"),"</td>";
-					echo "<td><input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' /></td>";
+					echo "<td><input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
+					echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
 					break;
 				case '2':
 					if (!isset($osto_kulu)) $osto_kulu = '';
 
 					echo "<td>",t("Vaihto-omaisuuslaskun kulut"),"</td>";
-					echo "<td><input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' /></td>";
+					echo "<td><input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
+					echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
 					break;
 				case '3':
 					if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = '';
 
 					echo "<td>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</td>";
-					echo "<td><input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' /></td>";
+					echo "<td><input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
+					echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
 					break;
 			}
 
@@ -1964,20 +1974,20 @@ if ($tee == 'I') {
 		exit;
 	}
 
-	$laskun_kulut = array(
-		'osto_kulu' => 0,
-		'osto_rahti' => 0,
-		'osto_rivi_kulu' => 0
-	);
+	$laskun_kulut = array();
 
 	for ($i = 1; $i < $maara; $i++) {
 		if (strlen($itili[$i]) > 0) {
 
 			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
-				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i]+$ialv[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+				$isumma[$i] -= $ialv[$i];
 
 				foreach($_arr as $_k => $_v) {
-					$laskun_kulut[$_k] += $_v;
+					if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
+
+					$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 				}
 			}
 
@@ -2093,19 +2103,20 @@ if ($tee == 'I') {
 		}
 	}
 
-	if ($laskun_kulut['osto_kulu'] != 0 or $laskun_kulut['osto_rahti'] != 0 or $laskun_kulut['osto_rivi_kulu'] != 0) {
+	if (count($laskun_kulut) > 0) {
 
-		foreach ($laskun_kulut as $key => $value) {
+		foreach ($laskun_kulut as $vero => $_array) {
+			foreach ($_array as $key => $value) {
 
-			if ($value == 0) continue;
+				if ($value == 0) continue;
 
-			$vero = 0;
-			$tili = $yhtiorow[$key];
-			$summa = $value;
+				$tili = $yhtiorow[$key];
+				$summa = $value;
 
-			list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
 
-			require ("inc/teetiliointi.inc");
+				require ("inc/teetiliointi.inc");
+			}
 		}
 	}
 

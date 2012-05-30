@@ -25,6 +25,7 @@
 
 	$tapvmlisa = "'{$laskurow['tapvm']}'";
 
+	// jos tiliöinti on suljetulla tilikaudella, laitetaan uusi tiliöinti kuluvalle tilikaudelle eli tälle päivälle
 	if (isset($suljettu_tilikausi) and $suljettu_tilikausi) {
 		$tapvmlisa = "now()";
 	}

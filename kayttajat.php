@@ -317,6 +317,7 @@
 						salasana						= '{$salasana}',
 						keraajanro 						= '{$keraajanro}',
 						myyja 							= '{$myyja}',
+						tuuraaja						= '{$tuuraaja}',
 						varasto 						= '{$varasto}',
 						oletus_varasto					= '{$oletus_varasto}',
 						oletus_pakkaamo					= '{$oletus_pakkaamo}',
@@ -519,6 +520,7 @@
 						saatavat						= '{$saatavat}',
 						keraajanro 						= '{$keraajanro}',
 						myyja 							= '{$myyja}',
+						tuuraaja						= '{$tuuraaja}',
 						osasto							= '{$osasto}',
 						varasto 						= '{$varasto}',
 						oletus_varasto 					= '{$oletus_varasto}',
@@ -747,6 +749,28 @@
 
 					echo "<tr><th align='left'>",t("Hyväksyjän maksimisumma"),":</th>";
 					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='{$krow['hyvaksyja_maksimisumma']}'></td></tr>";
+
+					echo "<tr><th align='left'>",t("Sijainen laskujen hyväksynnässä"),":</th><td>";
+
+					// Haetaan mahdolliset tuuraajat
+					$query = "	SELECT kuka, nimi
+								FROM kuka
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND hyvaksyja != ''
+								AND extranet = ''
+								ORDER BY nimi";
+					$hyvaksyja_result = pupe_query($query);
+
+					echo "<select name = 'tuuraaja'>";
+					echo "<option value=''>",t("Ei sijaista"),"</option>";
+
+					while ($hyvaksyja_row = mysql_fetch_assoc($hyvaksyja_result)) {
+						$sel = ($krow["tuuraaja"] == $hyvaksyja_row['kuka']) ? ' selected' : '';
+						echo "<option value='{$hyvaksyja_row['kuka']}'{$sel}>{$hyvaksyja_row['nimi']}</option>";
+					}
+
+					echo "</select>";
+					echo "</td></tr>";
 
 					echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
 

@@ -180,7 +180,7 @@ else {
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
 
-		$rivi  = "$PHP_SELF\n";
+		$rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
 		$rivi .= "\n";
 		$rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
 		$rivi .= "\n";
@@ -202,7 +202,7 @@ else {
 		}
 	}
 	elseif ($palautus_pyynto != "") {
-		$rivi  = "$PHP_SELF\n";
+		$rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
 		$rivi .= "\n";

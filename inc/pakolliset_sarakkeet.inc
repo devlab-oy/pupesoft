@@ -3,13 +3,13 @@
 /*
 	Ylläpidetään taulujen pakollisia saraketietoja
 
-	list($pakolliset, $kielletyt, $wherelliset)=pakolliset_sarakkeet($table);
+	list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 */
 
 // määritellään pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
 	function pakolliset_sarakkeet($table, $otsikot = "") {
-		global $yhtiorow, $table_tarkenne;
+		global $kukarow, $yhtiorow, $table_tarkenne;
 
 		$pakolliset		= array();
 		$kielletyt		= array();
@@ -17,6 +17,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 		$eiyhtiota		= "";
 		$joinattavat	= array();
 		$saakopoistaa	= FALSE;
+		$oletukset		= array();
 
 		switch ($table) {
 			case "tuote" :
@@ -360,8 +361,33 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array();
 		}
 
-		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa);
+		// Haetaan kenttien pakollisuudet sekä oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
+		$query = "	SELECT selite, selitetark_3, selitetark_4
+					FROM avainsana use index (yhtio_laji_selite)
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = 'MYSQLALIAS'
+					AND selite LIKE '$table.%'
+					AND selitetark_2 = ''";
+		$result = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($result)) {
+			// Selitteessä on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
+			if (strpos($row["selite"], ".") !== FALSE) {
+				list($taulu, $sarake) = explode(".", $row["selite"]);
+				$sarake = strtoupper(trim($sarake));
+
+				// Pakollisuus
+				if ($row["selitetark_3"] == "PAKOLLINEN") {
+					$pakolliset[] = $sarake;
+				}
+
+				// Oletusarvo
+				if ($row["selitetark_4"] != "") {
+					$oletukset[$sarake] = $row["selitetark_4"];
+				}
+			}
+		}
+
+		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset);
 	}
 }
-
-?>

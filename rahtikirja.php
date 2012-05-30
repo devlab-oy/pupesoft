@@ -2533,6 +2533,10 @@
 
 			if ($yhtiorow['rahti_ja_kasittelykulut_kasin'] != '') {
 
+				if ($otsik["rahtivapaa"] != "") {
+					echo "<br><font class='error'>".t("HUOM")."! ".t("Tilaus on merkattu rahtivapaaksi")."!</font><br>";
+				}
+
 				$query_ale_lisa = generoi_alekentta('M');
 
 				echo "<br><table>";

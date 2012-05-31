@@ -1203,6 +1203,15 @@
 					AND tunnus = '{$tunnus}'";
 		$upd_res = pupe_query($query);
 
+		$query = "	UPDATE lasku SET
+					osto_rahti = '{$osto_rahti}',
+					osto_kulu = '{$osto_kulu}',
+					osto_rivi_kulu = '{$osto_rivi_kulu}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila = 'K'
+					AND vanhatunnus = '{$tunnus}'";
+		$upd_res = pupe_query($query);
+
 		// muutettu alkuperäisiä arvoja
 		if ($trow['osto_rahti'] != $osto_rahti or $trow['osto_kulu'] != $osto_kulu or $trow['osto_rivi_kulu'] != $osto_rivi_kulu) {
 

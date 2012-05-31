@@ -852,38 +852,12 @@ if ($silent == "") {
 
 							if ($llrow['vienti'] == 'C' or $llrow['vienti'] == 'F' or $llrow['vienti'] == 'I') {
 
-								if (strtoupper($llrow['maa']) == strtoupper($yhtiorow['maa'])) {
-									$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = alv_oletus();
-								}
-								else {
-									$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = 0;
-								}
-
-								$query = "	SELECT tilino, vero
-											FROM tiliointi
-											WHERE ltunnus = '{$llrow['tunnus']}'
-											AND	yhtio = '{$kukarow['yhtio']}'
-											AND	korjattu = ''
-											AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
-											AND vero != 0";
-								$vero_chk_result = pupe_query($query);
-
-								if (mysql_num_rows($vero_chk_result) > 0) {
-
-									while ($vero_chk_row = mysql_fetch_assoc($vero_chk_result)) {
-										if ($vero_chk_row['tilino'] == $yhtiorow['osto_rahti']) $osto_rahti_alv = $vero_chk_row['vero'];
-										elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_kulu']) $osto_kulu_alv = $vero_chk_row['vero'];
-										elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $osto_rivi_kulu_alv = $vero_chk_row['vero'];
-									}
-
-								}
-
 								echo "<td valign='top'><input type='text' name='osto_kulu' value='{$llrow['osto_kulu']}' />";
-								echo "<br />",t("Alv"),": ".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
+								echo "<br />",t("Alv"),": ".alv_popup('osto_kulu_alv', $llrow['osto_kulu_alv'])."</td>";
 								echo "<td valign='top'><input type='text' name='osto_rahti' value='{$llrow['osto_rahti']}' />";
-								echo "<br />",t("Alv"),": ".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
+								echo "<br />",t("Alv"),": ".alv_popup('osto_rahti_alv', $llrow['osto_rahti_alv'])."</td>";
 								echo "<td valign='top'><input type='text' name='osto_rivi_kulu' value='{$llrow['osto_rivi_kulu']}' />";
-								echo "<br />",t("Alv"),": ".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
+								echo "<br />",t("Alv"),": ".alv_popup('osto_rivi_kulu_alv', $llrow['osto_rivi_kulu_alv'])."</td>";
 							}
 							else {
 								echo "	<td valign='top'></td>

@@ -1219,7 +1219,7 @@
 				'osto_rivi_kulu' => 0
 			);
 
-			$laskun_kulut_ylikirjaus[$_vero] = array(
+			$laskun_kulut_ylikirjaus = array(
 				'osto_kulu' => 0,
 				'osto_rahti' => 0,
 				'osto_rivi_kulu' => 0
@@ -1302,13 +1302,13 @@
 
 					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0 or (($osto_rahti != 0 and $osto_rahti != $trow['osto_rahti']) or ($osto_kulu != 0 and $osto_kulu != $trow['osto_kulu']) or ($osto_rivi_kulu != 0 and $osto_rivi_kulu != $trow['osto_rivi_kulu']))) {
 
-						$query = "	SELECT tilino, vero, sum(summa) summa, group_concat(tunnus) tunnukset
+						$query = "	SELECT tilino, sum(summa) summa, group_concat(tunnus) tunnukset
 									FROM tiliointi
 									WHERE ltunnus = '{$tunnus}'
 									AND	yhtio = '{$kukarow['yhtio']}'
 									AND	korjattu = ''
 									AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
-									GROUP BY 1,2";
+									GROUP BY 1";
 						$sum_result = pupe_query($query);
 
 						while ($sum_row = mysql_fetch_assoc($sum_result)) {
@@ -1327,13 +1327,13 @@
 								$result = pupe_query($query);
 							}
 
-							if (!isset($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rahti'])) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rahti'] = 0;
-							if (!isset($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_kulu'])) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_kulu'] = 0;
-							if (!isset($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rivi_kulu'])) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rivi_kulu'] = 0;
+							if (!isset($laskun_kulut_ylikirjaus['osto_rahti'])) $laskun_kulut_ylikirjaus['osto_rahti'] = 0;
+							if (!isset($laskun_kulut_ylikirjaus['osto_kulu'])) $laskun_kulut_ylikirjaus['osto_kulu'] = 0;
+							if (!isset($laskun_kulut_ylikirjaus['osto_rivi_kulu'])) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] = 0;
 
-							if ($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rahti'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rahti']) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rahti'] += $sum_row['summa'];
-							if ($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_kulu']) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_kulu'] += $sum_row['summa'];
-							if ($laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rivi_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus[$sum_row['vero']]['osto_rivi_kulu'] += $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_rahti'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rahti']) $laskun_kulut_ylikirjaus['osto_rahti'] = $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_kulu']) $laskun_kulut_ylikirjaus['osto_kulu'] = $sum_row['summa'];
+							if ($laskun_kulut_ylikirjaus['osto_rivi_kulu'] == 0 and $sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'] = $sum_row['summa'];
 						}
 
 						$summa_kulu = $summa_kulu != 0 ? $summa_kulu / $lkm : 0;
@@ -1407,19 +1407,17 @@
 				$xresult = pupe_query($query);
 			}
 
-			foreach ($laskun_kulut_ylikirjaus as $_ylikirj_vero => $_ylikirj_arr) {
-				foreach ($_ylikirj_arr as $key => $value) {
+			foreach ($laskun_kulut_ylikirjaus as $key => $value) {
 
-					if ($value == 0) continue;
+				if ($value == 0) continue;
 
-					$vero = 0;
-					$tili = $yhtiorow[$key];
-					$summa = -$value;
+				$vero = 0;
+				$tili = $yhtiorow[$key];
+				$summa = -$value;
 
-					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
 
-					require ("inc/teetiliointi.inc");
-				}
+				require ("inc/teetiliointi.inc");
 			}
 
 			foreach ($laskun_kulut as $_kirj_vero => $_kirj_arr) {

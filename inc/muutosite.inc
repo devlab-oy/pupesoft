@@ -1195,10 +1195,17 @@
 		$osto_kulu = (float) $osto_kulu;
 		$osto_rivi_kulu = (float) $osto_rivi_kulu;
 
+		$osto_rahti_alv = (float) $osto_rahti_alv;
+		$osto_kulu_alv = (float) $osto_kulu_alv;
+		$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
+
 		$query = "	UPDATE lasku SET
 					osto_rahti = '{$osto_rahti}',
 					osto_kulu = '{$osto_kulu}',
-					osto_rivi_kulu = '{$osto_rivi_kulu}'
+					osto_rivi_kulu = '{$osto_rivi_kulu}',
+					osto_rahti_alv = '{$osto_rahti_alv}',
+					osto_kulu_alv = '{$osto_kulu_alv}',
+					osto_rivi_kulu_alv = '{$osto_rivi_kulu_alv}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tunnus}'";
 		$upd_res = pupe_query($query);
@@ -1206,14 +1213,17 @@
 		$query = "	UPDATE lasku SET
 					osto_rahti = '{$osto_rahti}',
 					osto_kulu = '{$osto_kulu}',
-					osto_rivi_kulu = '{$osto_rivi_kulu}'
+					osto_rivi_kulu = '{$osto_rivi_kulu}',
+					osto_rahti_alv = '{$osto_rahti_alv}',
+					osto_kulu_alv = '{$osto_kulu_alv}',
+					osto_rivi_kulu_alv = '{$osto_rivi_kulu_alv}'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'
 					AND vanhatunnus = '{$tunnus}'";
 		$upd_res = pupe_query($query);
 
 		// muutettu alkuperäisiä arvoja
-		if ($trow['osto_rahti'] != $osto_rahti or $trow['osto_kulu'] != $osto_kulu or $trow['osto_rivi_kulu'] != $osto_rivi_kulu) {
+		if ($trow['osto_rahti'] != $osto_rahti or $trow['osto_kulu'] != $osto_kulu or $trow['osto_rivi_kulu'] != $osto_rivi_kulu or $osto_rahti_alv != $trow['osto_rahti_alv'] or $osto_kulu_alv != $trow['osto_kulu_alv'] or $osto_rivi_kulu_alv != $trow['osto_rivi_kulu_alv']) {
 
 			$laskun_kulut = array(
 				'osto_kulu' => 0,
@@ -1302,7 +1312,9 @@
 					$summa_kulu = 0;
 					$summa_kuuluva_kulu_alv_total = 0;
 
-					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0 or (($osto_rahti != 0 and $osto_rahti != $trow['osto_rahti']) or ($osto_kulu != 0 and $osto_kulu != $trow['osto_kulu']) or ($osto_rivi_kulu != 0 and $osto_rivi_kulu != $trow['osto_rivi_kulu']))) {
+					if ($osto_rahti == 0 or $osto_kulu == 0 or $osto_rivi_kulu == 0 or 
+						(($osto_rahti != 0 and $osto_rahti != $trow['osto_rahti']) or ($osto_kulu != 0 and $osto_kulu != $trow['osto_kulu']) or ($osto_rivi_kulu != 0 and $osto_rivi_kulu != $trow['osto_rivi_kulu'])) or
+						($osto_rahti_alv != $trow['osto_rahti_alv'] or $osto_kulu_alv != $trow['osto_kulu_alv'] or $osto_rivi_kulu_alv != $trow['osto_rivi_kulu_alv'])) {
 
 						$query = "	SELECT tilino, sum(summa) summa, group_concat(tunnus) tunnukset
 									FROM tiliointi
@@ -1426,9 +1438,7 @@
 
 				if ($value == 0) continue;
 
-				if ($key == 'osto_rahti') $vero = (float) $osto_rahti_alv;
-				elseif ($key == 'osto_kulu') $vero = (float) $osto_kulu_alv;
-				else $vero = (float) $osto_rivi_kulu_alv;
+				$vero = ${"{$key}_alv"};
 
 				$tili = $yhtiorow[$key];
 				$summa = $value;
@@ -1752,32 +1762,6 @@
 			echo "<input type='hidden' name='tee' value='M' />";
 			echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
 
-			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = alv_oletus();
-			}
-			else {
-				$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = 0;
-			}
-
-			$query = "	SELECT tilino, vero
-						FROM tiliointi
-						WHERE ltunnus = '{$tunnus}'
-						AND	yhtio = '{$kukarow['yhtio']}'
-						AND	korjattu = ''
-						AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
-						AND vero != 0";
-			$vero_chk_result = pupe_query($query);
-
-			if (mysql_num_rows($vero_chk_result) > 0) {
-
-				while ($vero_chk_row = mysql_fetch_assoc($vero_chk_result)) {
-					if ($vero_chk_row['tilino'] == $yhtiorow['osto_rahti']) $osto_rahti_alv = $vero_chk_row['vero'];
-					elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_kulu']) $osto_kulu_alv = $vero_chk_row['vero'];
-					elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $osto_rivi_kulu_alv = $vero_chk_row['vero'];
-				}
-
-			}
-
 			for ($i = 1; $i <= $yhtiorow['ostolaskun_kulutilit']; $i++) {
 				echo "<tr>";
 
@@ -1786,21 +1770,21 @@
 						if ($yhtiorow['osto_rahti'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
 							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
-							echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
+							echo "&nbsp;".alv_popup('osto_rahti_alv', $trow['osto_rahti_alv'])."</td>";
 						}
 						break;
 					case '2':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
 							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
-							echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
+							echo "&nbsp;".alv_popup('osto_kulu_alv', $trow['osto_kulu_alv'])."</td>";
 						}
 						break;
 					case '3':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '' and $yhtiorow['osto_rivi_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
 							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
-							echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
+							echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $trow['osto_rivi_kulu_alv'])."</td>";
 						}
 						break;
 				}

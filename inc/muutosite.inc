@@ -1206,14 +1206,7 @@
 		// muutettu alkuperäisiä arvoja
 		if ($trow['osto_rahti'] != $osto_rahti or $trow['osto_kulu'] != $osto_kulu or $trow['osto_rivi_kulu'] != $osto_rivi_kulu) {
 
-			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				$_vero = alv_oletus();
-			}
-			else {
-				$_vero = 0;
-			}
-
-			$laskun_kulut[$_vero] = array(
+			$laskun_kulut = array(
 				'osto_kulu' => 0,
 				'osto_rahti' => 0,
 				'osto_rivi_kulu' => 0
@@ -1367,7 +1360,7 @@
 
 					if ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) {
 						foreach($_arr as $_k => $_v) {
-							$laskun_kulut[$tiliointirow['vero']][$_k] += $_v;
+							$laskun_kulut[$_k] += $_v;
 						}
 					}
 				}
@@ -1420,19 +1413,20 @@
 				require ("inc/teetiliointi.inc");
 			}
 
-			foreach ($laskun_kulut as $_kirj_vero => $_kirj_arr) {
-				foreach ($_kirj_arr as $key => $value) {
+			foreach ($laskun_kulut as $key => $value) {
 
-					if ($value == 0) continue;
+				if ($value == 0) continue;
 
-					$vero = $_kirj_vero;
-					$tili = $yhtiorow[$key];
-					$summa = $value;
+				if ($key == 'osto_rahti') $vero = (float) $osto_rahti_alv;
+				elseif ($key == 'osto_kulu') $vero = (float) $osto_kulu_alv;
+				else $vero = (float) $osto_rivi_kulu_alv;
 
-					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				$tili = $yhtiorow[$key];
+				$summa = $value;
 
-					require ("inc/teetiliointi.inc");
-				}
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+
+				require ("inc/teetiliointi.inc");
 			}
 		}
 	}
@@ -1749,6 +1743,32 @@
 			echo "<input type='hidden' name='tee' value='M' />";
 			echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
 
+			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
+				$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = alv_oletus();
+			}
+			else {
+				$osto_rahti_alv = $osto_kulu_alv = $osto_rivi_kulu_alv = 0;
+			}
+
+			$query = "	SELECT tilino, vero
+						FROM tiliointi
+						WHERE ltunnus = '{$tunnus}'
+						AND	yhtio = '{$kukarow['yhtio']}'
+						AND	korjattu = ''
+						AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+						AND vero != 0";
+			$vero_chk_result = pupe_query($query);
+
+			if (mysql_num_rows($vero_chk_result) > 0) {
+
+				while ($vero_chk_row = mysql_fetch_assoc($vero_chk_result)) {
+					if ($vero_chk_row['tilino'] == $yhtiorow['osto_rahti']) $osto_rahti_alv = $vero_chk_row['vero'];
+					elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_kulu']) $osto_kulu_alv = $vero_chk_row['vero'];
+					elseif ($vero_chk_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $osto_rivi_kulu_alv = $vero_chk_row['vero'];
+				}
+
+			}
+
 			for ($i = 1; $i <= $yhtiorow['ostolaskun_kulutilit']; $i++) {
 				echo "<tr>";
 
@@ -1756,19 +1776,22 @@
 					case '1':
 						if ($yhtiorow['osto_rahti'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
-							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' /></td>";
+							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
+							echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
 						}
 						break;
 					case '2':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
-							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' /></td>";
+							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
+							echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
 						}
 						break;
 					case '3':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '' and $yhtiorow['osto_rivi_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
-							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' /></td>";
+							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
+							echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
 						}
 						break;
 				}

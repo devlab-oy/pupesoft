@@ -217,6 +217,7 @@
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th></th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_eive,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";

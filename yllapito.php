@@ -1440,7 +1440,9 @@
 				}
 
 				// jos ollaan tekemässä uutta tietuetta ja meillä on mysql-aliaksista oletusarvo
-				if ($tunnus == "" and $trow[$i] == "") $trow[$i] = $al_row["selitetark_4"];
+				if ($tunnus == "" and $trow[$i] == "" and $al_row["selitetark_4"] != "") {
+					$trow[$i] = $al_row["selitetark_4"];
+				}
 			}
 			else {
 				switch (mysql_field_name($result,$i)) {

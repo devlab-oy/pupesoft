@@ -139,6 +139,13 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
     }
 
     for($i = 0; $i < count($alkuryhma); $i++) {
+        if ($tyyppi == 'ytunnus') {
+            $query_lisa = "ytunnus = '$ytunnus'";
+            }
+        else {
+            $query_lisa = "asiakas = '$asiakasid'";
+        }  
+        
         # Jos poistettava, loopataan ryhmäväli ja poistetaan.
         if($poista[$i] != "") {
 
@@ -177,28 +184,21 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
                 break;
             }
 
-            foreach($ryhmat as $ryhma) {          
-                if ($tyyppi == 'ytunnus') {
-                    $query_lisa = "ytunnus = '$ytunnus'";
-                }
-                else {
-                    $query_lisa = "asiakas = '$asiakasid'";
-                }            
-                
+            foreach($ryhmat as $ryhma) {                 
                 $query = "INSERT INTO asiakasalennus SET
-                yhtio = '{$kukarow['yhtio']}',
-                ryhma = '$ryhma',
-                $query_lisa,
-                alennus = '{$alennus[$i]}',
-                alennuslaji = '{$alennuslaji[$i]}',
-                minkpl = '{$minkpl[$i]}',
-                monikerta = '{$monikerta[$i]}',
-                alkupvm = '{$alkupvm[$i]}',
-                loppupvm = '{$loppupvm[$i]}',
-                laatija = '{$kukarow['kuka']}',
-                luontiaika = now(),
-                muutospvm = now(),
-                muuttaja = '{$kukarow['kuka']}'";
+                    yhtio = '{$kukarow['yhtio']}',
+                    ryhma = '$ryhma',
+                    $query_lisa,
+                    alennus = '{$alennus[$i]}',
+                    alennuslaji = '{$alennuslaji[$i]}',
+                    minkpl = '{$minkpl[$i]}',
+                    monikerta = '{$monikerta[$i]}',
+                    alkupvm = '{$alkupvm[$i]}',
+                    loppupvm = '{$loppupvm[$i]}',
+                    laatija = '{$kukarow['kuka']}',
+                    luontiaika = now(),
+                    muutospvm = now(),
+                    muuttaja = '{$kukarow['kuka']}'";
 
                 $lisaa_result = pupe_query($query);
             }

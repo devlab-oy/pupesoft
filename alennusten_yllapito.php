@@ -45,14 +45,14 @@ if ($asiakasid != "") {
         <td>$asiakas[ytunnus]</td>
         </tr>
     </table>";
-    
+
     echo "<form method='post' name='asiakasalennus'>";
     echo "<select name='tyyppi'onchange='submit()'>";
-    
+
     $sel = ($tyyppi == "tunnus") ? "selected" : "";
     echo "<option value='ytunnus'>Asiakasalennukset tallennetaan asiakkaan ytunnuksen mukaan</option>";
     echo "<option value='tunnus' $sel>Asiakasalennukset tallennetaan vain valitulle asiakkalle</option>";
-    
+
     echo "</select>";
     echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
     echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -61,7 +61,7 @@ if ($asiakasid != "") {
     if ($tee == "") $tee = "alennustaulukko";
 }
 
-# Uusi lomakkeen kenttien tarkistus 
+# Uusi lomakkeen kenttien tarkistus
 if ($tee == 'uusi') {
     list($yyyy, $mm, $dd) = explode('-', $uusi_alkupvm);
     if ($uusi_alkupvm!= "" and $uusi_alkupvm != "0000-00-00" and !checkdate($mm, $dd, $yyyy)) {
@@ -75,19 +75,19 @@ if ($tee == 'uusi') {
     }
     if(empty($uusi_alkuryhma) or empty($uusi_loppuryhma)) {
         echo "<font class='error'>Alkuryhm‰ tai loppuryhm‰ puuttuu</font><br/>";
-        $tee = "alennustaulukko";   
+        $tee = "alennustaulukko";
     }
     if (!is_numeric($uusi_alennus) and $uusi_alennus != "") {
         echo "<font class='error'>Alennuksen t‰ytyy olla numero.</font><br/>";
-        $tee = "alennustaulukko";  
+        $tee = "alennustaulukko";
     }
     if ($uusi_alennus < 0 or $uusi_alennus > 100) {
         echo "<font class='error'>Alennuksen t‰ytyy olla v‰lill‰ 0-100.</font><br/>";
-        $tee = "alennustaulukko"; 
+        $tee = "alennustaulukko";
     }
     if (!is_numeric($uusi_minkpl) and $uusi_minkpl != "") {
         echo "<font class='error'>Minkpl t‰ytyy olla numero.</font><br/>";
-        $tee = "alennustaulukko";  
+        $tee = "alennustaulukko";
     }
 }
 
@@ -114,7 +114,7 @@ if ($tee == 'lisaa') {
         }
         if ($alennus[$i] < 0 or $alennus[$i] > 100) {
             echo "<font class='error'>Alennuksen t‰ytyy olla v‰lill‰ 0-100.</font><br/>";
-            $tee = "alennustaulukko"; 
+            $tee = "alennustaulukko";
         }
         if (!is_numeric($minkpl[$i]) and $minkpl[$i] != "") {
             echo "<font class='error'>Minkpl t‰ytyy olla numero.</font><br/>";
@@ -126,7 +126,7 @@ if ($tee == 'lisaa') {
 # P‰ivitet‰‰n ryhm‰t
 if ($tee == 'lisaa' or $tee == 'uusi') {
 
-    if($tee == 'uusi') {
+    if ($tee == 'uusi') {
         # Kysely toimii arraylla, joten uusi_muuttujat muutetaan
         $alkuryhma[] = $uusi_alkuryhma;
         $loppuryhma[] = $uusi_loppuryhma;
@@ -138,19 +138,20 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         $loppupvm[] = $uusi_loppupvm;
     }
 
-    for($i = 0; $i < count($alkuryhma); $i++) {
+    for ($i = 0; $i < count($alkuryhma); $i++) {
+
         if ($tyyppi == 'ytunnus') {
-            $query_lisa = "ytunnus = '$ytunnus'";
-            }
+			$query_lisa = "ytunnus = '$ytunnus'";
+		}
         else {
-            $query_lisa = "asiakas = '$asiakasid'";
-        }  
-        
+			$query_lisa = "asiakas = '$asiakasid'";
+        }
+
         # Jos poistettava, loopataan ryhm‰v‰li ja poistetaan.
-        if($poista[$i] != "") {
+        if ($poista[$i] != "") {
 
             $poistettavat_ryhma = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
-           
+
             foreach($poistettavat_ryhma as $poistettava_ryhma) {
                 if ($alkupvm[$i] == "") {
                     $alkupvm[$i] = "0000-00-00";
@@ -158,17 +159,16 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
                 if ($loppupvm[$i] == "") {
                     $loppupvm[$i] = "0000-00-00";
                 }
-                $poista_query = "DELETE FROM asiakasalennus
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND $query_lisa
-                    AND ryhma = '$poistettava_ryhma' 
-                    AND alennus = '{$alennus[$i]}' 
-                    AND alennuslaji = '{$alennuslaji[$i]}'
-                    AND minkpl = '{$minkpl[$i]}'
-                    AND monikerta = '{$monikerta[$i]}'
-                    AND alkupvm = '{$alkupvm[$i]}'
-                    AND loppupvm = '{$loppupvm[$i]}'";
-                    
+                $poista_query = "	DELETE FROM asiakasalennus
+									WHERE yhtio		= '{$kukarow['yhtio']}'
+									AND $query_lisa
+									AND ryhma		= '$poistettava_ryhma'
+									AND alennus		= '{$alennus[$i]}'
+									AND alennuslaji	= '{$alennuslaji[$i]}'
+									AND minkpl		= '{$minkpl[$i]}'
+									AND monikerta	= '{$monikerta[$i]}'
+									AND alkupvm		= '{$alkupvm[$i]}'
+									AND loppupvm	= '{$loppupvm[$i]}'";
                 $poista_result = pupe_query($poista_query);
                 $poista[$i] = NULL;
             }
@@ -177,33 +177,33 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         else {
             # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
             $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
-            
-            if(count($ryhmat) == 0) {
+
+            if (count($ryhmat) == 0) {
                 echo "<font class='error'>Yht‰‰n ryhm‰‰ ei lˆytynyt v‰lilt‰ $alkuryhma[$i] - $loppuryhma[$i].</font>";
                 $tee = "alennustaulukko";
                 break;
             }
 
-            foreach($ryhmat as $ryhma) {                 
-                $query = "INSERT INTO asiakasalennus SET
-                    yhtio = '{$kukarow['yhtio']}',
-                    ryhma = '$ryhma',
-                    $query_lisa,
-                    alennus = '{$alennus[$i]}',
-                    alennuslaji = '{$alennuslaji[$i]}',
-                    minkpl = '{$minkpl[$i]}',
-                    monikerta = '{$monikerta[$i]}',
-                    alkupvm = '{$alkupvm[$i]}',
-                    loppupvm = '{$loppupvm[$i]}',
-                    laatija = '{$kukarow['kuka']}',
-                    luontiaika = now(),
-                    muutospvm = now(),
-                    muuttaja = '{$kukarow['kuka']}'";
-
+            foreach ($ryhmat as $ryhma) {
+                $query = "	INSERT INTO asiakasalennus SET
+							yhtio		= '{$kukarow['yhtio']}',
+							ryhma		= '$ryhma',
+							$query_lisa,
+							alennus		= '{$alennus[$i]}',
+							alennuslaji	= '{$alennuslaji[$i]}',
+							minkpl		= '{$minkpl[$i]}',
+							monikerta	= '{$monikerta[$i]}',
+							alkupvm		= '{$alkupvm[$i]}',
+							loppupvm	= '{$loppupvm[$i]}',
+							laatija		= '{$kukarow['kuka']}',
+							luontiaika	= now(),
+							muutospvm	= now(),
+							muuttaja	= '{$kukarow['kuka']}'";
                 $lisaa_result = pupe_query($query);
             }
         }
     }
+
     // Nollataan POST muuttujat, jotta formit tulostuu oikein
     $alkuryhma = NULL;
     $loppuryhma = NULL;
@@ -249,7 +249,7 @@ if ($tee == "alennustaulukko") {
         $query_lisa = "AND asiakasalennus.asiakas = '$asiakasid'";
     }
 
-    $query = "SELECT asiakasalennus.asiakas, 
+    $query = "SELECT asiakasalennus.asiakas,
                     perusalennus.ryhma,
                     asiakasalennus.alennuslaji,
                     asiakasalennus.minkpl,
@@ -257,13 +257,13 @@ if ($tee == "alennustaulukko") {
                     asiakasalennus.alkupvm,
                     asiakasalennus.loppupvm,
                     ifnull(asiakasalennus.alennus, perusalennus.alennus) alennus
-            FROM perusalennus 
+            FROM perusalennus
             LEFT JOIN asiakasalennus ON (perusalennus.ryhma = asiakasalennus.ryhma
                 AND perusalennus.yhtio = asiakasalennus.yhtio
                 $query_lisa
-                AND ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31', asiakasalennus.loppupvm) >= current_date) 
-                    OR (asiakasalennus.alkupvm = '0000-00-00' and asiakasalennus.loppupvm = '0000-00-00'))) 
-            WHERE perusalennus.yhtio='$kukarow[yhtio]' 
+                AND ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31', asiakasalennus.loppupvm) >= current_date)
+                    OR (asiakasalennus.alkupvm = '0000-00-00' and asiakasalennus.loppupvm = '0000-00-00')))
+            WHERE perusalennus.yhtio='$kukarow[yhtio]'
             ORDER BY perusalennus.ryhma";
 
     $result = pupe_query($query);
@@ -276,17 +276,17 @@ if ($tee == "alennustaulukko") {
     $i = 0;
     do {
         $row = mysql_fetch_array($result);
-        
+
         if ($ensimmainen_ryhma == "") {
             $ensimmainen_ryhma = $row['ryhma'];
         }
         // Alennustaulukon rivit
-        if ($edellinen_rivi != "" and ($edellinen_rivi['alennus'] != $row['alennus'] 
-            or $edellinen_rivi['alennuslaji'] != $row['alennuslaji'] 
+        if ($edellinen_rivi != "" and ($edellinen_rivi['alennus'] != $row['alennus']
+            or $edellinen_rivi['alennuslaji'] != $row['alennuslaji']
             or $edellinen_rivi['minkpl'] != $row['minkpl']
             or $edellinen_rivi['monikerta'] != $row['monikerta'])) {
-                    
-            // Kenttien tarkistus   
+
+            // Kenttien tarkistus
             if ($alennus[$i] != "") {
                 $edellinen_rivi['alennus'] = ($edellinen_rivi['alennus'] == $alennus[$i]) ? $edellinen_rivi['alennus'] : $alennus[$i];
             }
@@ -302,7 +302,7 @@ if ($tee == "alennustaulukko") {
             }
             if ($alkupvm[$i] != "" or $loppupvm[$i] != "") {
                 $edellinen_rivi['alkupvm'] = ($edellinen_rivi['alkupvm'] == $alkupvm[$i]) ? $edellinen_rivi['alkupvm'] : $alkupvm[$i];
-                $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == $loppupvm[$i]) ? $edellinen_rivi['loppupvm'] : $loppupvm[$i]; 
+                $edellinen_rivi['loppupvm'] = ($edellinen_rivi['loppupvm'] == $loppupvm[$i]) ? $edellinen_rivi['loppupvm'] : $loppupvm[$i];
             }
             # Jos p‰iv‰m‰‰r‰ on 0000-00-00
             $edellinen_rivi['alkupvm'] = ($edellinen_rivi['alkupvm'] == '0000-00-00') ? "" : $edellinen_rivi['alkupvm'];
@@ -321,10 +321,10 @@ if ($tee == "alennustaulukko") {
                 $ulos .= "<option value = '$alepostfix' {$sel[$alepostfix]}>".t("Alennus")." $alepostfix</option>";
             }
             echo $ulos .= "</select></td>\n";
-            
+
             echo "<td><input type='text' name='minkpl[$i]' value=".$edellinen_rivi['minkpl']."></td>";
             echo "<td><select name='monikerta[$i]' value=".$edellinen_rivi['monikerta'].">";
-            
+
             // Monikerta dropdown
             if(empty($edellinen_rivi['monikerta'])) {
                 echo "<option value='' selected>Ei</option>";
@@ -334,8 +334,8 @@ if ($tee == "alennustaulukko") {
                 echo "<option value='' >Ei</option>";
                 echo "<option value='K' selected>Kyll‰</option>";
             }
-            echo "</td>";         
-            
+            echo "</td>";
+
             echo "<td><input type='text' name='alkupvm[$i]' value=".$edellinen_rivi['alkupvm']."></td>";
             echo "<td><input type='text' name='loppupvm[$i]' value=".$edellinen_rivi['loppupvm']."></td>";
 
@@ -389,7 +389,7 @@ if ($tee == "alennustaulukko") {
     echo "<td><select name='uusi_monikerta'>
                 <option value=''>Ei</option>
                 <option value='K' $sel>Kyll‰</option>
-        </td>        
+        </td>
         <td><input type='text' name='uusi_alkupvm' value=$uusi_alkupvm></td>
         <td><input type='text' name='uusi_loppupvm' value=$uusi_loppupvm></td>
         </tr>
@@ -404,16 +404,16 @@ if ($tee == "alennustaulukko") {
 
 # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
 function hae_ryhmat($alkuryhma, $loppuryhma, $yhtio) {
-    $ryhmat_query = "SELECT ryhma FROM perusalennus 
-        WHERE yhtio='$yhtio' 
-        AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";
-    
+    $ryhmat_query = "	SELECT ryhma
+						FROM perusalennus
+						WHERE yhtio = '$yhtio'
+						AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";
     $ryhmat_result = pupe_query($ryhmat_query);
-    
+
     while($row = mysql_fetch_array($ryhmat_result)) {
         $ryhmat[] = $row['ryhma'];
     }
-    
+
     return $ryhmat;
 }
 include("inc/footer.inc");

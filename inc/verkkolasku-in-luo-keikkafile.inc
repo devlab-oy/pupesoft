@@ -1787,7 +1787,7 @@
 
 			foreach ($ostoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
+				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3, suuntalava
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1848,6 +1848,30 @@
 							AND tunnus = '{$pointteri['insert_id']}'";
 				echo "<pre>$query</pre>";
 				pupe_query($update);
+
+				if ($hinta_chk_row['suuntalava'] != 0) {
+
+					$query = "	SELECT tunnus
+								FROM suuntalavat_saapuminen
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+								AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+					$suuntalavat_saapuminen_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($suuntalavat_saapuminen_chk_res) == 0) {
+
+						$query = "	INSERT INTO suuntalavat_saapuminen SET
+									yhtio = '{$kukarow['yhtio']}',
+									suuntalava = '{$hinta_chk_row['suuntalava']}',
+									saapuminen = '{$keikoilla[0]['uusiotunnus']}',
+									laatija = '{$kukarow['kuka']}',
+									luontiaika = now(),
+									muutospvm = now(),
+									muuttaja = '{$kukarow['kuka']}'";
+						$suuntalava_upd_res = pupe_query($query);
+						echo "<pre>$query</pre>";
+					}
+				}
 			}
 
 			$tee_kululaskut = "liita";

@@ -1782,6 +1782,43 @@
 						$suuntalava_upd_res = pupe_query($query);
 						echo "<pre>$query</pre>";
 					}
+
+					$query = "	SELECT GROUP_CONCAT(saapuminen) as saapumiset
+								FROM suuntalavat_saapuminen
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+								AND saapuminen != '{$keikoilla[0]['uusiotunnus']}'";
+					$suuntalavat_saapuminen_chk_res = pupe_query($query);
+					$suuntalavat_saapuminen_chk_row = mysql_fetch_assoc($suuntalavat_saapuminen_chk_res);
+
+					if ($suuntalavat_saapuminen_chk_row['saapumiset'] != '') {
+
+						$query = "	SELECT uusiotunnus, GROUP_CONCAT(tunnus) as tunnukset
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+									AND uusiotunnus IN ({$suuntalavat_saapuminen_chk_row['saapumiset']})
+									GROUP BY 1";
+						$tilriv_tunnukset_res = pupe_query($query);
+
+						while ($tilriv_tunnukset_row = mysql_fetch_assoc($tilriv_tunnukset_res)) {
+
+							if ($tilriv_tunnukset_row['tunnukset'] != '') {
+								$query = "	UPDATE suuntalava SET
+											kaytettavyys = 'L'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$hinta_chk_row['suuntalava']}'";
+								$upd_kaytettavyys_res = pupe_query($query);
+							}
+							else {
+								$query = "	DELETE FROM suuntalavat_saapuminen
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+											AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+								$del_res = pupe_query($query);
+							}
+						}
+					}
 				}
 			}
 
@@ -1870,6 +1907,43 @@
 									muuttaja = '{$kukarow['kuka']}'";
 						$suuntalava_upd_res = pupe_query($query);
 						echo "<pre>$query</pre>";
+					}
+
+					$query = "	SELECT GROUP_CONCAT(saapuminen) as saapumiset
+								FROM suuntalavat_saapuminen
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+								AND saapuminen != '{$keikoilla[0]['uusiotunnus']}'";
+					$suuntalavat_saapuminen_chk_res = pupe_query($query);
+					$suuntalavat_saapuminen_chk_row = mysql_fetch_assoc($suuntalavat_saapuminen_chk_res);
+
+					if ($suuntalavat_saapuminen_chk_row['saapumiset'] != '') {
+
+						$query = "	SELECT uusiotunnus, GROUP_CONCAT(tunnus) as tunnukset
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+									AND uusiotunnus IN ({$suuntalavat_saapuminen_chk_row['saapumiset']})
+									GROUP BY 1";
+						$tilriv_tunnukset_res = pupe_query($query);
+
+						while ($tilriv_tunnukset_row = mysql_fetch_assoc($tilriv_tunnukset_res)) {
+
+							if ($tilriv_tunnukset_row['tunnukset'] != '') {
+								$query = "	UPDATE suuntalava SET
+											kaytettavyys = 'L'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$hinta_chk_row['suuntalava']}'";
+								$upd_kaytettavyys_res = pupe_query($query);
+							}
+							else {
+								$query = "	DELETE FROM suuntalavat_saapuminen
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+											AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+								$del_res = pupe_query($query);
+							}
+						}
 					}
 				}
 			}

@@ -248,38 +248,31 @@
 		// Tuotteet päivitetään kohdistuksissa automaattisesti oikeille suuntalavoille, mikäli sellainen on jo perustettu (suuntalavan määriteltyjen varastopaikkojen sekä keräysvyöhykkeen mukaan)
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
 			if ($suuntalavan_tunnus > 0) {
+
+				$otunnus = trim($otunnus);
+
 				$data['suuntalava'] = $suuntalavan_tunnus;
 
-				$query = "	SELECT sscc, keikkatunnus
+				$query = "	SELECT suuntalavat.sscc, suuntalavat_saapuminen.saapuminen
 							FROM suuntalavat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$suuntalavan_tunnus}'";
+							LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+							AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
 				$sscc_fetch_res = pupe_query($query);
 				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
 
-				if (strpos($sscc_fetch_row['keikkatunnus'], trim($otunnus)) === FALSE) {
-
-					# tarkistetaan onko suuntalava ja saapuminen jo linkattu
-					$query = "	SELECT tunnus 
-								FROM suuntalavat_saapuminen
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND suuntalava = '{$suuntalavan_tunnus}'
-								AND saapuminen = '{$otunnus}'";
-					$suuntalava_saapuminen_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($suuntalava_saapuminen_chk_res) == 0) {
-						$query = "	INSERT INTO suuntalavat_saapuminen SET
-									yhtio = '{$kukarow['yhtio']}',
-									suuntalava = '{$suuntalavan_tunnus}',
-									saapuminen = '{$otunnus}',
-									laatija = '{$kukarow['kuka']}',
-									luontiaika = now(),
-									muutospvm = now(),
-									muuttaja = '{$kukarow['kuka']}'";
-						$insert_res = pupe_query($query);
-					}
+				if ($sscc_fetch_row['saapuminen'] == '' or $sscc_fetch_row['saapuminen'] == 0) {
+					$query = "	INSERT INTO suuntalavat_saapuminen SET
+								yhtio = '{$kukarow['yhtio']}',
+								suuntalava = '{$suuntalavan_tunnus}',
+								saapuminen = '{$otunnus}',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					$insert_res = pupe_query($query);
 				}
 			}
 			else {

@@ -1692,6 +1692,84 @@
 
 			echo "Debug: kululaskut haara, count(keikoilla) > 0 and virheet == 0<br><br>";
 
+			// tarkistetaan onko keikalla ylim‰‰r‰isi‰ rivej‰ mit‰ ei ole laskulla
+			// jos on, tehd‰‰n uusi keikka laskun rivej‰ varten
+			$query = "	SELECT tunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'";
+			$tunnus_fetch_res = pupe_query($query);
+
+			$tunnus_chk_array = array();
+
+			while ($tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res)) {
+				$tunnus_chk_array[$tunnus_fetch_row['tunnus']] = $tunnus_fetch_row['tunnus'];
+			}
+
+			// poistetaan arraysta laskulla olevat tilausrivitunnukset
+			foreach ($keikoilla as $pointteri) {
+				if (isset($tunnus_chk_array[$pointteri['tunnus']])) unset($tunnus_chk_array[$pointteri['tunnus']]);
+			}
+
+			// keikalla oli muita kuin laskulla esiintyvi‰ rivej‰, tehd‰‰n uusi keikka
+			if (count($tunnus_chk_array) > 0) {
+
+				$query = "	SELECT kurssi
+							FROM valuu
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nimi = '$trow[oletus_valkoodi]'";
+				$checkres = pupe_query($query);
+				$row = mysql_fetch_array($checkres);
+				$kurssi = $row["kurssi"];
+
+				$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
+				$result = pupe_query($query);
+
+				$query = "	SELECT max(laskunro)
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tila = 'K'";
+				$checkres = pupe_query($query);
+				$row = mysql_fetch_array($checkres);
+				$id = $row[0] + 1;
+
+				$maa_lahetys = $row['maa_lahetys'] != '' ? $trow['maa_lahetys'] : $trow['maa'];
+
+				// meill‰ on $trow tullut parametrin‰
+				$query = "	INSERT into lasku set
+							yhtio        			= '$kukarow[yhtio]',
+							laskunro     			= '$id',
+							ytunnus	     			= '$trow[ytunnus]',
+							nimi         			= '$trow[nimi]',
+							valkoodi     			= '$trow[oletus_valkoodi]',
+							vienti       			= '$trow[oletus_vienti]',
+							vienti_kurssi			= '$kurssi',
+							toimitusehto 			= '$trow[toimitusehto]',
+							osoite       			= '$trow[osoite]',
+							postitp      			= '$trow[postitp]',
+							maa			 			= '$trow[maa]',
+							maa_lahetys 			= '$maa_lahetys',
+							kauppatapahtuman_luonne	= '$trow[kauppatapahtuman_luonne]',
+							kuljetusmuoto			= '$trow[kuljetusmuoto]',
+							rahti					= '$trow[oletus_kulupros]',
+							swift					= '$trow[swift]',
+							liitostunnus 			= '$trow[tunnus]',
+							comments				= '".t("Saapuminen luotu laskusta")." $osrow[laskunro]',
+							tila         			= 'K',
+							luontiaika	 			= now(),
+							laatija		 			= '$kukarow[kuka]'";
+				$insertres = pupe_query($query);
+				$keikan_tunnus = mysql_insert_id();
+				echo "<pre>",str_replace("\t", "", $query),"</pre>Keikan tunnus:$keikan_tunnus<br><br>";
+
+				$query  = "UNLOCK TABLE";
+				$result = pupe_query($query);
+
+				$keikoilla[0]['uusiotunnus'] = $keikan_tunnus;
+			}
+
+			reset($keikoilla);
+
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166
 			// muutetaan hinta ja rivi on ok.
 			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus']);

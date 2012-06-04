@@ -1596,7 +1596,26 @@
 				echo "<td class='back'>";
 
 				if ($row['tilausrivi'] == '' and $row['status'] != 'E') {
-					echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
+
+					if ($row['asn_sanomat'] == 'K' and $row['tilausrivi'] != '') {
+						$query = "	SELECT tunnus
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$row['tilausrivi']}%'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) != 0) {
+							echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
+						}
+						else {
+							echo "<font class='error'>",t("Tilausriviä")," {$row['tilausrivi']} ",t("ei ole kohdistettu ASN-sanomalle tai ASN-sanoma puuttuu"),"</font><br />";
+						}
+					}
+					else {
+						echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Etsi"),"' />";
+					}
+
 					echo "<input type='button' class='erobutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}' value='",t("Erolistalle"),"' />";
 				}
 

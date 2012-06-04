@@ -261,11 +261,25 @@
 
 				if (strpos($sscc_fetch_row['keikkatunnus'], trim($otunnus)) === FALSE) {
 
-					$query = "	UPDATE suuntalavat SET
-								keikkatunnus = '{$sscc_fetch_row['keikkatunnus']},{$otunnus}'
+					# tarkistetaan onko suuntalava ja saapuminen jo linkattu
+					$query = "	SELECT tunnus 
+								FROM suuntalavat_saapuminen
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$suuntalavan_tunnus}'";
-					$upd_res = pupe_query($query);
+								AND suuntalava = '{$suuntalavan_tunnus}'
+								AND saapuminen = '{$otunnus}'";
+					$suuntalava_saapuminen_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($suuntalava_saapuminen_chk_res) == 0) {
+						$query = "	INSERT INTO suuntalavat_saapuminen SET
+									yhtio = '{$kukarow['yhtio']}',
+									suuntalava = '{$suuntalavan_tunnus}',
+									saapuminen = '{$otunnus}',
+									laatija = '{$kukarow['kuka']}',
+									luontiaika = now(),
+									muutospvm = now(),
+									muuttaja = '{$kukarow['kuka']}'";
+						$insert_res = pupe_query($query);
+					}
 				}
 			}
 			else {

@@ -76,6 +76,9 @@
 		$query = "DELETE FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
 		$poista_result = pupe_query($query);
 
+		$query = "DELETE FROM suuntalavat_saapuminen WHERE yhtio = '{$kukarow['yhtio']}' AND suuntalava = '{$suuntalavan_tunnus}'";
+		$poista_result = pupe_query($query);
+
 		$tee = '';
 		$suuntalavan_tunnus = '';
 	}
@@ -216,12 +219,9 @@
 			$paino = str_replace(",", ".", $paino);
 			$korkeus = str_replace(",", ".", $korkeus);
 
-			$keikkatunnus = $otunnus;
-
 			if (trim($suuntalavan_tunnus) != '') {
 
-				$query = "	SELECT keraysvyohyke,
-							keikkatunnus
+				$query = "	SELECT keraysvyohyke
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
@@ -232,8 +232,8 @@
 				// t‰m‰n j‰lkeen koitetaan p‰ivitt‰‰ suuntalavan tunnus uudestaan k‰ytt‰en apuna uutta valittua ker‰ysvyˆhykett‰
 				if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
 
-					$query = "	UPDATE tilausrivi
-								SET tilausrivi.suuntalava = 0
+					$query = "	UPDATE tilausrivi SET 
+								tilausrivi.suuntalava = 0
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$otunnus}'
 								AND tilausrivi.tyyppi = 'O'
@@ -254,11 +254,8 @@
 					}
 				}
 
-				$keikkatunnuslisa = strpos($keraysvyohyke_chk_row['keikkatunnus'], $keikkatunnus) !== FALSE ? $keikkatunnus : "{$keraysvyohyke_chk_row['keikkatunnus']},{$keikkatunnus}";
-
 				$query = "	UPDATE suuntalavat SET
 							sscc 				= '{$sscc}',
-							keikkatunnus 		= '{$keikkatunnuslisa}',
 							alkuhyllyalue 		= '{$alkuhyllyalue}',
 							alkuhyllynro 		= '{$alkuhyllynro}',
 							alkuhyllyvali 		= '{$alkuhyllyvali}',
@@ -286,7 +283,6 @@
 							yhtio 				= '{$kukarow['yhtio']}',
 							tila 				= '',
 							sscc 				= '{$sscc}',
-							keikkatunnus 		= '{$keikkatunnus}',
 							alkuhyllyalue 		= '{$alkuhyllyalue}',
 							alkuhyllynro 		= '{$alkuhyllynro}',
 							alkuhyllyvali 		= '{$alkuhyllyvali}',
@@ -308,6 +304,16 @@
 							muutospvm 			= now()";
 				$insert_result = pupe_query($query);
 				$uusi_suuntalavan_tunnus = mysql_insert_id();
+
+				$query = "	INSERT INTO suuntalavat_saapuminen SET
+							yhtio = '{$kukarow['yhtio']}',
+							suuntalava = '{$uusi_suuntalavan_tunnus}',
+							saapuminen = '{$otunnus}',
+							laatija = '{$kukarow['kuka']}',
+							luontiaika = now(),
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'";
+				$insert_result = pupe_query($query);
 
 				// p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
 				if (trim($automaattinen_paivitys) == 'K') {
@@ -480,10 +486,13 @@
 		echo "<input type='hidden' name='tee' value='lisaa' />";
 
 		if (is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT * FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+			$query = "	SELECT suuntalavat.* 
+						FROM suuntalavat 
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}' 
+						AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
 			$suuntalavat_result = pupe_query($query);
 			$suuntalavat_row = mysql_fetch_assoc($suuntalavat_result);
-
 
 			echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
 
@@ -697,11 +706,11 @@
 		echo "<th>",t("Paino"),"</th>";
 		echo "<th>",t("Tila"),"</th></tr>";
 
-		$query = "	SELECT *, if(kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(tila = '', 0, if(tila = 'S', 1, 2)) sorttaus
+		$query = "	SELECT suuntalavat.*, if(suuntalavat.kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(suuntalavat.tila = '', 0, if(suuntalavat.tila = 'S', 1, 2)) sorttaus
 					FROM suuntalavat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila != 'P'
-					AND ((kaytettavyys = 'Y' AND keikkatunnus LIKE '%{$otunnus}%') OR kaytettavyys = 'L')
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+					AND suuntalavat.tila != 'P'
 					ORDER BY sorttaus";
 		$suuntalavat_result = pupe_query($query);
 

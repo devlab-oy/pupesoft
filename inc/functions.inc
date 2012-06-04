@@ -12526,10 +12526,10 @@ if (!function_exists('hae_suuntalava')) {
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio
 										AND suuntalavat.keraysvyohyke = tuote.keraysvyohyke
-										AND suuntalavat.keikkatunnus LIKE '%{$otunnus}%'
 										AND suuntalavat.tila = ''
 										AND (concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0'),lpad(upper(alkuhyllyvali),  5, '0'),lpad(upper(alkuhyllytaso),  5, '0')) <= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or alkuhyllyalue = '')
 										AND (concat(rpad(upper(loppuhyllyalue),  5, '0'),lpad(upper(loppuhyllynro),  5, '0'),lpad(upper(loppuhyllyvali),  5, '0'),lpad(upper(loppuhyllytaso),  5, '0')) >= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or loppuhyllyalue = ''))
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tunnus = '{$tunnus}'
 					ORDER BY alkuhyllypaikka

@@ -263,14 +263,14 @@
 
 			if (isset($valitut_lavat) and $valitut_lavat != "") {
 				$valitut_suuntalavat = explode(",", $valitut_lavat);
-				$valitut_suuntalisa = " AND tunnus in (".mysql_real_escape_string($valitut_lavat).")";
+				$valitut_suuntalisa = " AND suuntalavat.tunnus in (".mysql_real_escape_string($valitut_lavat).")";
 			}
 
-			$query = "	SELECT tunnus, sscc
+			$query = "	SELECT suuntalavat.tunnus, suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila 	= 'S'
-						AND keikkatunnus LIKE '%{$otunnus}%'
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tila 	= 'S'
 						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 

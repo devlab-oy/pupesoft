@@ -1761,13 +1761,27 @@
 				pupe_query($update);
 
 				if ($hinta_chk_row['suuntalava'] != 0) {
-					$query = "	UPDATE suuntalavat SET
-								keikkatunnus = '{$keikoilla[0]['uusiotunnus']}'
+
+					$query = "	SELECT tunnus
+								FROM suuntalavat_saapuminen
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND keikkatunnus LIKE '%{$hinta_chk_row['uusiotunnus']}%'
-								AND tunnus = '{$hinta_chk_row['suuntalava']}'";
-					echo "<pre>$query</pre>";
-					$suuntalava_upd_res = pupe_query($query);
+								AND suuntalava = '{$hinta_chk_row['suuntalava']}'
+								AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+					$suuntalavat_saapuminen_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($suuntalavat_saapuminen_chk_res) == 0) {
+
+						$query = "	INSERT INTO suuntalavat_saapuminen SET
+									yhtio = '{$kukarow['yhtio']}',
+									suuntalava = '{$hinta_chk_row['suuntalava']}',
+									saapuminen = '{$keikoilla[0]['uusiotunnus']}',
+									laatija = '{$kukarow['kuka']}',
+									luontiaika = now(),
+									muutospvm = now(),
+									muuttaja = '{$kukarow['kuka']}'";
+						$suuntalava_upd_res = pupe_query($query);
+						echo "<pre>$query</pre>";
+					}
 				}
 			}
 

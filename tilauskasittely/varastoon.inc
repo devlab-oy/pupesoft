@@ -123,16 +123,17 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
-		$query = "	SELECT keikkatunnus
-					FROM suuntalavat
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$suuntalavan_tunnus}'";
+					AND suuntalava = '{$suuntalavan_tunnus}'";
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
 		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}')
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
 	// tavallinen laskenta.. VARATTU PITÄÄ OLLA > 0 ja netto-kenttä tyhjä!
@@ -156,16 +157,17 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
-		$query = "	SELECT keikkatunnus
-					FROM suuntalavat
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$suuntalavan_tunnus}'";
+					AND suuntalava = '{$suuntalavan_tunnus}'";
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
 		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}')
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
 	// Näytetään ruudulla
@@ -841,10 +843,11 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
 
-			$query = "	SELECT sscc
+			$query = "	SELECT suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$suuntalavan_tunnus}'";
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$tilrivirow['uusiotunnus']}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -870,10 +873,11 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
 
-			$query = "	SELECT sscc
+			$query = "	SELECT suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$suuntalavan_tunnus}'";
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$tilrivirow['uusiotunnus']}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -1190,16 +1194,17 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
-		$query = "	SELECT keikkatunnus
-					FROM suuntalavat
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$suuntalavan_tunnus}'";
+					AND suuntalava = '{$suuntalavan_tunnus}'";
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
 		// päivitetään suuntalava puretuksi
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 		 			SET suuntalavat.tila = 'P'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
@@ -1214,6 +1219,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		// JÄMÄRIVEILTÄ tyhjennetään netto-kenttä, jotta tuotteet menevät seuraavalla kerralla varastoon.
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 		 			SET tilausrivi.netto = '',
 					suuntalavat.tila 	 = 'S'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
@@ -1232,6 +1238,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			// päivitetään suuntalava puretuksi
 			$query = "	UPDATE tilausrivi
 						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 			 			SET tilausrivi.suuntalava = 0
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})

@@ -138,7 +138,8 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         $loppupvm[] = $uusi_loppupvm;
     }
 
-    for ($i = 0; $i < count($alkuryhma); $i++) {
+    # Loopataan l‰pi ryhm‰v‰lit
+    for ($i = 0; $i < count($alkuryhma); $i++) {    
 
         if ($tyyppi == 'ytunnus') {
 			$query_lisa = "ytunnus = '$ytunnus'";
@@ -147,59 +148,82 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
 			$query_lisa = "asiakas = '$asiakasid'";
         }
 
+        # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
+        $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
+
+        # Jos ryhmi‰ ei lˆydy
+        if (count($ryhmat) == 0) {
+            echo "<font class='error'>Yht‰‰n ryhm‰‰ ei lˆytynyt v‰lilt‰ $alkuryhma[$i] - $loppuryhma[$i].</font>";
+            $tee = "alennustaulukko";
+            break;
+        }
+
         # Jos poistettava, loopataan ryhm‰v‰li ja poistetaan.
         if ($poista[$i] != "") {
-
-            $poistettavat_ryhma = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
-
-            foreach($poistettavat_ryhma as $poistettava_ryhma) {
+            foreach($ryhmat as $poistettava_ryhma) {
                 if ($alkupvm[$i] == "") {
                     $alkupvm[$i] = "0000-00-00";
                 }
                 if ($loppupvm[$i] == "") {
                     $loppupvm[$i] = "0000-00-00";
                 }
-                $poista_query = "	DELETE FROM asiakasalennus
-									WHERE yhtio		= '{$kukarow['yhtio']}'
-									AND $query_lisa
-									AND ryhma		= '$poistettava_ryhma'
-									AND alennus		= '{$alennus[$i]}'
-									AND alennuslaji	= '{$alennuslaji[$i]}'
-									AND minkpl		= '{$minkpl[$i]}'
-									AND monikerta	= '{$monikerta[$i]}'
-									AND alkupvm		= '{$alkupvm[$i]}'
-									AND loppupvm	= '{$loppupvm[$i]}'";
+                $poista_query = "   DELETE FROM asiakasalennus
+                                    WHERE yhtio     = '{$kukarow['yhtio']}'
+                                    AND $query_lisa
+                                    AND ryhma       = '$poistettava_ryhma'
+                                    AND alennus     = '{$alennus[$i]}'
+                                    AND alennuslaji = '{$alennuslaji[$i]}'
+                                    AND minkpl      = '{$minkpl[$i]}'
+                                    AND monikerta   = '{$monikerta[$i]}'
+                                    AND alkupvm     = '{$alkupvm[$i]}'
+                                    AND loppupvm    = '{$loppupvm[$i]}'";
                 $poista_result = pupe_query($poista_query);
                 $poista[$i] = NULL;
             }
         }
         # Jos ei poistettava niin lis‰t‰‰n uudet alennukset
         else {
-            # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
-            $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
 
-            if (count($ryhmat) == 0) {
-                echo "<font class='error'>Yht‰‰n ryhm‰‰ ei lˆytynyt v‰lilt‰ $alkuryhma[$i] - $loppuryhma[$i].</font>";
-                $tee = "alennustaulukko";
-                break;
-            }
-
+            # Ryhm‰v‰lin tunnukset
+            $tunnus = explode(",", $tunnukset[$i]);
+            $j = 0;
+            
+            # P‰ivitet‰‰n jos tunnus on setattu, muuten lis‰t‰‰n uusi
             foreach ($ryhmat as $ryhma) {
-                $query = "	INSERT INTO asiakasalennus SET
-							yhtio		= '{$kukarow['yhtio']}',
-							ryhma		= '$ryhma',
-							$query_lisa,
-							alennus		= '{$alennus[$i]}',
-							alennuslaji	= '{$alennuslaji[$i]}',
-							minkpl		= '{$minkpl[$i]}',
-							monikerta	= '{$monikerta[$i]}',
-							alkupvm		= '{$alkupvm[$i]}',
-							loppupvm	= '{$loppupvm[$i]}',
-							laatija		= '{$kukarow['kuka']}',
-							luontiaika	= now(),
-							muutospvm	= now(),
-							muuttaja	= '{$kukarow['kuka']}'";
-                $lisaa_result = pupe_query($query);
+                if (!empty($tunnus[$j])) {
+                    $query = "  UPDATE asiakasalennus SET
+                                yhtio       = '{$kukarow['yhtio']}',
+                                ryhma       = '$ryhma',
+                                $query_lisa,
+                                alennus     = '{$alennus[$i]}',
+                                alennuslaji = '{$alennuslaji[$i]}',
+                                minkpl      = '{$minkpl[$i]}',
+                                monikerta   = '{$monikerta[$i]}',
+                                alkupvm     = '{$alkupvm[$i]}',
+                                loppupvm    = '{$loppupvm[$i]}',
+                                muutospvm   = now(),
+                                muuttaja    = '{$kukarow['kuka']}'
+                                WHERE tunnus = '{$tunnus[$j]}'";
+                    $j++;
+                    $update_query = pupe_query($query);
+                }
+                else {
+                    $query = "	INSERT INTO asiakasalennus SET
+    							yhtio		= '{$kukarow['yhtio']}',
+    							ryhma		= '$ryhma',
+    							$query_lisa,
+    							alennus		= '{$alennus[$i]}',
+    							alennuslaji	= '{$alennuslaji[$i]}',
+    							minkpl		= '{$minkpl[$i]}',
+    							monikerta	= '{$monikerta[$i]}',
+    							alkupvm		= '{$alkupvm[$i]}',
+    							loppupvm	= '{$loppupvm[$i]}',
+    							laatija		= '{$kukarow['kuka']}',
+    							luontiaika	= now(),
+    							muutospvm	= now(),
+    							muuttaja	= '{$kukarow['kuka']}'";
+                    $lisaa_result = pupe_query($query);
+                }
             }
         }
     }
@@ -221,6 +245,7 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
     $uusi_monikerta = NULL;
     $uusi_alkupvm = NULL;
     $uusi_loppupvm = NULL;
+    $tunnukset = NULL;
 
     $tee = "alennustaulukko";
 }
@@ -256,6 +281,7 @@ if ($tee == "alennustaulukko") {
                     asiakasalennus.monikerta,
                     asiakasalennus.alkupvm,
                     asiakasalennus.loppupvm,
+                    asiakasalennus.tunnus,
                     ifnull(asiakasalennus.alennus, perusalennus.alennus) alennus
             FROM perusalennus
             LEFT JOIN asiakasalennus ON (perusalennus.ryhma = asiakasalennus.ryhma
@@ -270,13 +296,9 @@ if ($tee == "alennustaulukko") {
 
     $edellinen_rivi = "";
     $ensimmainen_ryhma = "";
-
-    # Alennustaulukko
-    $count = mysql_num_rows($result);
     $i = 0;
     do {
         $row = mysql_fetch_array($result);
-
         if ($ensimmainen_ryhma == "") {
             $ensimmainen_ryhma = $row['ryhma'];
         }
@@ -284,7 +306,9 @@ if ($tee == "alennustaulukko") {
         if ($edellinen_rivi != "" and ($edellinen_rivi['alennus'] != $row['alennus']
             or $edellinen_rivi['alennuslaji'] != $row['alennuslaji']
             or $edellinen_rivi['minkpl'] != $row['minkpl']
-            or $edellinen_rivi['monikerta'] != $row['monikerta'])) {
+            or $edellinen_rivi['monikerta'] != $row['monikerta']
+            or $edellinen_rivi['alkupvm'] != $row['alkupvm']
+            or $edellinen_rivi['loppupvm'] != $row['loppupvm'])) {
 
             // Kenttien tarkistus
             if ($alennus[$i] != "") {
@@ -341,13 +365,15 @@ if ($tee == "alennustaulukko") {
 
             $checked = (isset($poista[$i])) ? "checked" : "";
             echo "<td><input type='checkbox' name='poista[$i]' $checked></td>";
+            echo "<input type='hidden' name='tunnukset[$i]' value=".implode(",", $tunnukset).">";
             echo "</tr>";
 
             $ensimmainen_ryhma = $row['ryhma'];
             $i++;
+            $tunnukset = NULL;
         }
+        $tunnukset[] = $row['tunnus'];
         $edellinen_rivi = $row;
-
     } while ($row);
 
     echo "<tr><td colspan=9><input type='submit' value='P‰ivit‰'></td></tr>";
@@ -404,7 +430,7 @@ if ($tee == "alennustaulukko") {
 
 # Haetaan ryhm‰t perusalennus-taulusta, between $alkuryhma and $loppuryhma
 function hae_ryhmat($alkuryhma, $loppuryhma, $yhtio) {
-    $ryhmat_query = "	SELECT ryhma
+    $ryhmat_query = "	SELECT distinct(ryhma)
 						FROM perusalennus
 						WHERE yhtio = '$yhtio'
 						AND ryhma BETWEEN '$alkuryhma' AND '$loppuryhma'";

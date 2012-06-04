@@ -268,9 +268,10 @@
 
 			$query = "	SELECT suuntalavat.tunnus, suuntalavat.sscc
 						FROM suuntalavat
-						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
 						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
 						AND suuntalavat.tila 	= 'S'
+						AND (suuntalavat.kaytettavyys = 'L' OR (suuntalavat.kaytettavyys = 'Y' AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'))
 						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 

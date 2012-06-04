@@ -26,7 +26,7 @@
 	# Haetaan api_keyt yhtion_parametrit taulusta
 	# Kaikki yritykset joilla on api_avain ja ohjelmisto_api_avain kenttää täytettynä. Yrityksen_uuid on vaihtoehtoinen kenttä.
 	$sql_query = "	SELECT yhtion_parametrit.maventa_api_avain, yhtion_parametrit.maventa_ohjelmisto_api_avain, yhtion_parametrit.maventa_yrityksen_uuid, yhtio.nimi, yhtio.yhtio,
-					date_sub(yhtion_parametrit.maventa_aikaleima, INTERVAL 5 MINUTE) maventa_aikaleima
+					if(yhtion_parametrit.maventa_aikaleima != '0000-00-00 00:00:00', date_sub(yhtion_parametrit.maventa_aikaleima, INTERVAL 5 MINUTE), '0000-00-00 00:00:00') maventa_aikaleima
 					FROM yhtio
 					JOIN yhtion_parametrit USING (yhtio)
 					WHERE yhtion_parametrit.maventa_api_avain != ''

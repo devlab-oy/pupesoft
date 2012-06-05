@@ -1714,6 +1714,9 @@
 			// keikalla oli muita kuin laskulla esiintyvi‰ rivej‰, tehd‰‰n uusi keikka
 			if (count($tunnus_chk_array) > 0) {
 
+				echo "Keikalla oli muita kuin laskulla esiintyvi‰ rivej‰, tehd‰‰n uusi keikka<br>";
+				echo "<pre>",var_dump($tunnus_chk_array),"</pre>";
+
 				$query = "	SELECT kurssi
 							FROM valuu
 							WHERE yhtio = '$kukarow[yhtio]'

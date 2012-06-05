@@ -73,6 +73,22 @@
 	}
 
 	if ($tee == 'poista') {
+
+		$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) saapumiset
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$saapumiset_res = pupe_query($query);
+		$saapumiset_row = mysql_fetch_assoc($saapumiset_res);
+
+		$query = "	UPDATE tilausrivi SET
+					suuntalava = 0
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'O'
+					AND suuntalava = '{$suuntalavan_tunnus}'
+					AND uusiotunnus IN ({$saapumiset_row['saapumiset']})";
+		$poista_result = pupe_query($query);
+
 		$query = "DELETE FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
 		$poista_result = pupe_query($query);
 

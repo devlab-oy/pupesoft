@@ -2132,6 +2132,7 @@ if (!$cli and !isset($api_kentat)) {
 		'toimi'                           => 'Toimittaja',
 		'toimitustapa'                    => 'Toimitustavat',
 		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
+		'lahdot'            			  => 'Lähdöt',
 		'tullinimike'                     => 'Tullinimikeet',
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',

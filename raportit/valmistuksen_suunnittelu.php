@@ -852,7 +852,7 @@
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow["yhtio"]}'
-					order by tyyppi, nimitys";
+					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 
 		echo "<tr><th>".t("Valmisteiden kohdevarasto")."</th>";

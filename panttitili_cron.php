@@ -10,7 +10,6 @@
 		exit;
 	}
 
-	require ("inc/salasanat.php");
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 	require ("tilauskasittely/luo_myyntitilausotsikko.inc");

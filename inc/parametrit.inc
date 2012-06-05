@@ -195,6 +195,10 @@ unset($verkkolaskut_orig);
 unset($verkkolaskut_error);
 unset($verkkolaskut_reject);
 
+unset($teccomkansio);
+unset($teccomkansio_valmis);
+unset($teccomkansio_error);
+
 unset($DAY_ARRAY);
 unset($AIKA_ARRAY);
 unset($MONTH_ARRAY);
@@ -210,6 +214,7 @@ unset($ohjewiki_url);
 unset($synkronoi_kiellot);
 unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
+unset($tee_keraysera_debugdir);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();

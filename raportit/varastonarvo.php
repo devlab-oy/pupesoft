@@ -354,7 +354,10 @@ echo "<tr><th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.
 
 $varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
-$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+$query  = "	SELECT tunnus, nimitys
+			FROM varastopaikat
+			WHERE yhtio = '$kukarow[yhtio]'
+			ORDER BY tyyppi, nimitys";
 $vares = mysql_query($query) or pupe_error($query);
 
 while ($varow = mysql_fetch_array($vares)) {

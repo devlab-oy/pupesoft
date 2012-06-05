@@ -17,18 +17,22 @@
 	if ($komento['Ostotilaus'] == 'edi') {
 
 		// haetaan toimittajan tiedot
-		$query    = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$query = "	SELECT *
+					FROM toimi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$laskurow[liitostunnus]'";
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_array($toimires);
 
-		if (($toimirow['edi_palvelin']=='') or
-			($toimirow['edi_kayttaja']=='') or
-			($toimirow['edi_salasana']=='') or
-			($toimirow['edi_kuvaus']=='') or
-			($toimirow['edi_polku']=='')) {
+		if (!preg_match("/(excel|wabco)/", $toimirow['edi_kuvaus']) and ($toimirow['edi_palvelin'] == '' or $toimirow['edi_kayttaja'] == '' or $toimirow['edi_salasana'] == '' or $toimirow['edi_kuvaus'] == '' or $toimirow['edi_polku'] == '')) {
 			$tulosta_ostotilaus_ulos .= "<font class='error'>".t("Edi-tilauksen lähettämiseen tarvittavia tietoja ei ole syötetty")."! ".t("Tarkista toimittajan tiedot")."!</font>";
 		}
 		else {
+			// Otetaan ftp-palvelimen portti jos sellanen on setattu.
+			if (strpos($toimirow['edi_palvelin'], ":") !== FALSE) {
+				list($toimirow['edi_palvelin'], $toimirow['edi_portti']) = explode(":", $toimirow['edi_palvelin']);
+			}
+
 			require($toimirow['edi_kuvaus']);
 			$tee = '';
 		}

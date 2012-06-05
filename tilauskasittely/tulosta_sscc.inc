@@ -82,8 +82,9 @@
 
 		$query = "	SELECT * 
 					FROM kirjoittimet 
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND komento != 'email'
+					AND komento != 'edi'
 					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 

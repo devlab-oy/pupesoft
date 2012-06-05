@@ -34,7 +34,7 @@
 			if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
-			elseif (strpos($file, "_invoice") !== false){
+			elseif (strpos($file, "teccominvoice") !== false){
 				require("inc/verkkolasku-in-teccom.inc");
 			}
 			elseif (strpos($file, "ORAO") !== false){
@@ -549,12 +549,13 @@
 				$hyvak[4] = $trow['oletus_hyvak4'];
 				$hyvak[5] = $trow['oletus_hyvak5'];
 
-				$oletustili     = $trow['tilino'];
-				$oletuskust     = $trow['kustannuspaikka'];
-				$oletuskohde    = $trow['kohde'];
-				$oletusprojekti = $trow['projekti'];
-				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
-				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
+				$oletustili     	= $trow['tilino'];
+				$oletuskust     	= $trow['kustannuspaikka'];
+				$oletuskohde    	= $trow['kohde'];
+				$oletusprojekti 	= $trow['projekti'];
+				$selite         	= $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
+				$laskun_numero		= preg_replace("/[^0-9]/", "", $laskun_numero);
+				$onko_duplikaatti 	= FALSE;
 
 				// Onko t‰m‰ kauttalaskutusta?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
@@ -868,6 +869,8 @@
 				}
 
 				if (trim($laskun_numero) != '' and trim($trow['tunnus']) != '') {
+
+					// katsotaan onko lasku jo ostoreskontrassa
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio = '{$yhtio}'
@@ -879,6 +882,21 @@
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>\n".$komm;
+					}
+
+					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
+					if ($laskun_tyyppi == 'TECCOM-INVOICE') {
+						$query = "	SELECT *
+									FROM asn_sanomat
+									WHERE yhtio 		 = '{$yhtio}'
+									AND laji 			 = 'tec'
+									AND asn_numero 		 = '{$laskun_numero}'
+									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
+						$duplikaattilasku_check_res = pupe_query($query);
+
+						if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
+							$onko_duplikaatti = TRUE;
+						}
 					}
 				}
 
@@ -984,8 +1002,8 @@
 							ultilno_maa			= '$trow[ultilno_maa]',
 							viite 				= '$viite',
 							viesti 				= '$viesti',
-							sisviesti1 			= '$laskun_tilausviite',
-							sisviesti2 			= '',
+							sisviesti1 			= '$trow[ohjeitapankille]',
+							sisviesti2 			= '$laskun_tilausviite',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							lapvm 				= '$vpv-$vpk-$vpp',
 							vienti 				= '$trow[oletus_vienti]',
@@ -1063,7 +1081,7 @@
 
 	 			// Tehd‰n pelk‰t oletustiliˆinnit
 	 			// Pit‰‰ hardkoodata UNIKKO ohittamaan t‰m‰n.
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1169,10 +1187,12 @@
 					$vtontot 						= 0;
 					$vtontot_valuutassa 			= 0;
 					$maksimisumma 		 			= 0;
+					$sanomantarkistin				= 0;
 
 					$kustp		= $oletuskust;
 					$kohde		= $oletuskohde;
 					$projekti	= $oletusprojekti;
+					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 
 					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
@@ -1332,29 +1352,69 @@
 							}
 						}
 
+						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
+
+							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
+							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
+							if (!isset($rtuoteno[$i]['ale3'])) $rtuoteno[$i]['ale3'] = 0;
+							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
+							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
+
+							$asn_nettohinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
+
+							$insertquery = "	INSERT INTO asn_sanomat SET
+												asn_numero 			= '{$laskun_numero}',
+												hinta 				= '{$asn_nettohinta}',
+												kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
+												keikkarivinhinta	= 0,
+												kulu 				= '{$rtuoteno[$i]['kulu']}',
+												laatija 			= 'crond',
+												lahetyslistannro 	= '',
+												laji 				= 'tec',
+												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
+												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
+												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
+												lisakulu 			= '{$rtuoteno[$i]['lisakulu']}',
+												luontiaika 			= now(),
+												paketinnumero 		= '',
+												paketintunniste 	= '',
+												pakkauskulu 		= '{$laskun_pakkauskulu}',
+												rahtikulu 			= '{$laskun_rahtikulu}',
+												saapumispvm 		= '{$saapumispvm_chk}',
+												sscc_koodi			= '',
+												status				= '',
+												tilausnumero 		= '{$rtuoteno[$i]['ostotilausnro']}',
+												tilausrivi 			= '',
+												tilausrivinpositio 	= '{$rtuoteno[$i]['tilaajanrivinro']}',
+												toimittajanumero 	= '{$laskuttajan_toimittajanumero}',
+												toim_tuoteno 		= '{$rtuoteno[$i]['tuoteno']}',
+												toim_tuoteno2 		= '{$rtuoteno[$i]['tuoteno2']}',
+												tuoteno				= '',
+												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
+												yhtio 				= '{$yhtio}'";
+							$asn_ins_res = pupe_query($insertquery);
+							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
+						}
+
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
 
 	 				// Tuli pyˆristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-						// Pyˆristyserot
-						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$yhtio',
-									ltunnus 		 = '$tunnus',
-									tilino 			 = '$yhtiorow[pyoristys]',
-									kustp 			 = 0,
-									kohde 			 = 0,
-									projekti 		 = 0,
-									tapvm 			 = '$tpv-$tpk-$tpp',
-									summa 			 = $omasumma - $totsumma,
-									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
-									valkoodi 		 = '$valkoodi',
-									selite 			 = '$selite',
-									vero 			 = 0,
-									lukko 			 = '',
-									laatija 		 = 'verkkolas',
-									laadittu 		 = now()";
-						$result = pupe_query($query);
+
+						$vero = 0;
+
+						$summa = $omasumma - $totsumma;
+						$summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa;
+
+						$tili = $yhtiorow['pyoristys'];
+
+						// Jos oletusalvi lˆytyy ja pyˆristysero on yli 4 sentti‰, tehd‰‰n pyˆristyksest‰ myˆs alv-kirjaus
+						if ($oletusalvi != 0 and round(abs($totsumma - $omasumma), 2) >= 0.05) {
+							$vero = $oletusalvi;
+						}
+
+						require ("inc/teetiliointi.inc");
 					}
 
 					// jos kyseess‰ on tavaraa
@@ -1365,7 +1425,7 @@
 						 * F => D
 						 * I => G
 						*/
-						if ($laskun_tyyppi == "UNIKKO-INVOICE" and $trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+						if ($laskun_tyyppi == "UNIKKO-INVOICE" and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I')) {
 
 							if ($trow['oletus_vienti'] == 'C') 		$trow['oletus_vienti'] = 'A';
 							elseif ($trow['oletus_vienti'] == 'F') 	$trow['oletus_vienti'] = 'D';
@@ -1378,8 +1438,9 @@
 							$vienti_upd_res = pupe_query($query);
 						}
 
-						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						if ($laskun_tyyppi != "TECCOM-INVOICE") {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
 					}
 				}
 
@@ -1460,7 +1521,6 @@
 										maksu_kurssi = 1
 										WHERE tunnus = '$tunnus'";
 							$xresult = pupe_query($query);
-							//echo "Lasku merkittiin suoraan maksetuksi";
 						}
 					}
 					else {
@@ -1470,7 +1530,6 @@
 										tila = 'Q'
 										WHERE tunnus='$tunnus'";
 							$xresult = pupe_query($query);
-							//echo "Lasku merkittiin odottamaan suoritusta";
 						}
 					}
 				}

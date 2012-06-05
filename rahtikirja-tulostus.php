@@ -193,7 +193,11 @@
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
 					WHERE rahtikirjat.yhtio	= '$kukarow[yhtio]' ";
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+		// Jos keräyserät ja lähdöt on päällä, niin Unifaun 'hetitulostus' tilaukset merkataan tässä toimitetuiksi ja siksi näin
+		if (isset($lahetetaanko_unifaun_heti) and $lahetetaanko_unifaun_heti !== FALSE) {
+			$query .= " and rahtikirjat.tulostettu	!= '0000-00-00 00:00:00' ";
+		}
+		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 			$query .= " and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' ";
 		}
 
@@ -285,8 +289,12 @@
 						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 						WHERE rahtikirjat.yhtio			= '$kukarow[yhtio]' ";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-				// Normaalisti tämä ehto estää sen, että koontirahtikirjasta ei tuu yhtä monta koioita kuin tilausten määrä koontirahtikirjalla.
+			// Jos keräyserät ja lähdöt on päällä, niin Unifaun 'hetitulostus' tilaukset merkataan tässä toimitetuiksi ja siksi näin
+			if (isset($lahetetaanko_unifaun_heti) and $lahetetaanko_unifaun_heti !== FALSE) {
+				$query .= " and rahtikirjat.tulostettu	!= '0000-00-00 00:00:00' ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				// Normaalisti tämä ehto estää sen, että koontirahtikirjasta ei tuu yhtä monta kopiota kuin tilausten määrä koontirahtikirjalla.
 				$query .= " and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' ";
 			}
 			else {
@@ -402,9 +410,10 @@
 					// merkataan rahtikirjat tulostetuksi..
 					if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 						$query = "	UPDATE rahtikirjat
-									set tulostettu = now()
-									where tunnus in ($tunnukset)
-									and yhtio = '$kukarow[yhtio]'";
+									SET tulostettu = now()
+									WHERE tunnus  IN ($tunnukset)
+									AND yhtio 	   = '$kukarow[yhtio]'
+									AND tulostettu = '0000-00-00 00:00:00'";
 						$ures  = pupe_query($query);
 					}
 
@@ -479,9 +488,10 @@
 				// merkataan rahtikirjat tulostetuksi..
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query = "	UPDATE rahtikirjat
-								set tulostettu = now()
-								where tunnus in ($tunnukset)
-								and yhtio = '$kukarow[yhtio]'";
+								SET tulostettu = now()
+								WHERE tunnus  IN ($tunnukset)
+								AND yhtio 	   = '$kukarow[yhtio]'
+								AND tulostettu = '0000-00-00 00:00:00'";
 					$ures  = pupe_query($query);
 				}
 
@@ -576,47 +586,56 @@
 
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
-				// tulostetaan toimitustavan määrittelemä rahtikirja
-				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
-
-					// Otetaan talteen tässä $rahtikirjanro talteen
-					$rahtikirjanro_alkuperainen = $rahtikirjanro;
-
-					if ($tulosta_vak_yleisrahtikirja != '') {
-						require("tilauskasittely/rahtikirja_pdf.inc");
-					}
-
-					if ($toitarow['erittely'] != '') {
-						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
-					}
-
-					// palautetaan alkuperäinen $rahtikirjanro takaisin
-					$rahtikirjanro = $rahtikirjanro_alkuperainen;
-				}
-				else {
-					if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
+				// Kopsutulostus toistaiseksi vain A4-paperille unifaun keississä
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+					$toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
 				}
 
-				// Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
-					$query = "	UPDATE rahtikirjat
-								set rahtikirjanro = '$rahtikirjanro'
-								where tunnus in ($tunnukset)
-								and yhtio = '$kukarow[yhtio]'";
-					$ures  = pupe_query($query);
+				// Jos keräyserät ja lähdöt on päällä, niin tässä ei tulosteta rahtikirjaa jos Unifaun on käytössä
+				if (!isset($tee_varsinainen_tulostus) or (isset($tee_varsinainen_tulostus) and $tee_varsinainen_tulostus)) {
 
-					if (trim($pakkaustieto_tunnukset) != '') {
+					// tulostetaan toimitustavan määrittelemä rahtikirja
+					if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
+
+						// Otetaan talteen tässä $rahtikirjanro talteen
+						$rahtikirjanro_alkuperainen = $rahtikirjanro;
+
+						if ($tulosta_vak_yleisrahtikirja != '') {
+							require("tilauskasittely/rahtikirja_pdf.inc");
+						}
+
+						if ($toitarow['erittely'] != '') {
+							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+						}
+
+						// palautetaan alkuperäinen $rahtikirjanro takaisin
+						$rahtikirjanro = $rahtikirjanro_alkuperainen;
+					}
+					else {
+						if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
+					}
+
+					// Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
+					if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 						$query = "	UPDATE rahtikirjat
 									set rahtikirjanro = '$rahtikirjanro'
-									where tunnus in ($pakkaustieto_tunnukset)
+									where tunnus in ($tunnukset)
 									and yhtio = '$kukarow[yhtio]'";
 						$ures  = pupe_query($query);
+
+						if (trim($pakkaustieto_tunnukset) != '') {
+							$query = "	UPDATE rahtikirjat
+										set rahtikirjanro = '$rahtikirjanro'
+										where tunnus in ($pakkaustieto_tunnukset)
+										and yhtio = '$kukarow[yhtio]'";
+							$ures  = pupe_query($query);
+						}
 					}
 				}
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
 
-					$tulostauna		= "";
+					$tulostauna = "";
 
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
 						$tulostauna = "KYLLA";
@@ -937,8 +956,8 @@
 
 			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
 						FROM kirjoittimet
-						WHERE
-						$logistiikka_yhtiolisa
+						WHERE $logistiikka_yhtiolisa
+						AND komento != 'EDI'
 						GROUP BY komento
 						ORDER BY kirjoitin";
 			$kires = pupe_query($query);

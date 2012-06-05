@@ -288,8 +288,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
 					$keraysvyohyke = '';
 				}
@@ -298,6 +298,8 @@
 					$keraysvyohyke = implode(",", $keraysvyohyke);
 				}
 			}
+
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
 
@@ -344,6 +346,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
 						yhtio 							= '{$yhtio}'";
@@ -492,8 +495,8 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+			if (is_array($keraysvyohyke) and count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke == 'default') {
 					unset($keraysvyohyke);
 					$keraysvyohyke = '';
 				}
@@ -502,6 +505,9 @@
 					$keraysvyohyke = implode(",", $keraysvyohyke);
 				}
 			}
+
+
+			$max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
 			$query = "	UPDATE kuka
 						SET nimi 						= '{$firname}',
@@ -544,6 +550,7 @@
 						piirit							= '{$piirit}',
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
+						max_keraysera_alustat			= '{$max_keraysera_alustat}',
 						muuttaja						= '{$kukarow['kuka']}',
 						muutospvm						= now()
 						WHERE kuka	= '{$kuka}'
@@ -805,12 +812,19 @@
 
 						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 
-							$checked = in_array($keraysvyohyke_row['tunnus'], explode(",", $krow['keraysvyohyke'])) ? ' checked' : '';
+							$chk = strpos($krow['keraysvyohyke'], $keraysvyohyke_row['tunnus']) !== false ? ' checked' : '';
 
-							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$checked}>{$keraysvyohyke_row['nimitys']}<br />";
+							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$chk} />&nbsp;{$keraysvyohyke_row['nimitys']}<br />";
 						}
 
 						echo "</td></tr>";
+					}
+
+					if ($yhtiorow['kerayserat'] == 'K') {
+
+						$max_keraysera_alustat = (int) $krow['max_keraysera_alustat'] > 0 ? (int) $krow['max_keraysera_alustat'] : 0;
+
+						echo "<tr><th align='left'>",t("Max keräysvyöhyke alustat"),"</th><td><input type='text' name='max_keraysera_alustat' value='{$max_keraysera_alustat}' /></td></tr>";
 					}
 
 				}
@@ -973,7 +987,11 @@
 					echo "<tr><th align='left'>",t("Henkilökohtainen tulostin:"),"</td>";
 					echo "<td><select name='kirjoitin'><option value=''>",t("Ei oletuskirjoitinta"),"</option>";
 
-					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}'";
+					$query  = "	SELECT tunnus, kirjoitin
+								FROM kirjoittimet
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND komento != 'EDI'
+								ORDER BY kirjoitin";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {

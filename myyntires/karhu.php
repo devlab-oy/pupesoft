@@ -143,9 +143,8 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
-	$query = "	SELECT asiakas.ytunnus,
+	$query = "	SELECT asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp,
 				group_concat(distinct lasku.tunnus) karhuttavat,
-				group_concat(distinct lasku.liitostunnus) liitostunnarit,
 				sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
@@ -181,7 +180,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
-			$karhuttavat_asiakkaat[] = $karhuttavarow["liitostunnarit"];
+			$karhuttavat_asiakkaat[] = "'".$karhuttavarow["ytunnus"]."'";
 		}
 
 		if ($karhuakaikki != "") {
@@ -246,7 +245,8 @@ if ($tee == 'KARHUA')  {
 
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$asiakastiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$asiakastiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -263,23 +263,18 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
 
-	$as_tunnus = explode(",", $karhuttavat_asiakkaat[0]);
-
-	foreach ($as_tunnus as $astun) {
-		$query  = "	SELECT kentta01
-			        FROM kalenteri
-			        WHERE yhtio = '$kukarow[yhtio]'
-			        AND tyyppi  = 'Myyntireskontraviesti'
-			        AND liitostunnus = '$astun'
-			        AND yhtio   = '$kukarow[yhtio]'
-					ORDER BY tunnus desc
-					LIMIT 1";
+	if ($karhuttavat_asiakkaat[0] != "") {
+		$query  = "	SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(pvmalku,10) paivamaara
+			        FROM asiakas
+					JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
+					LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
+			        WHERE asiakas.yhtio = '$kukarow[yhtio]'
+		        	AND asiakas.ytunnus IN  ({$karhuttavat_asiakkaat[0]})
+					ORDER BY kalenteri.tunnus desc";
 		$amres = pupe_query($query);
 
-		if (mysql_num_rows($amres) > 0) {
-			$amrow = mysql_fetch_assoc($amres);
-
-			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01]</td></tr>";
+		while ($amrow = mysql_fetch_assoc($amres)) {
+			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
 		}
 	}
 

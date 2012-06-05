@@ -9,7 +9,7 @@
 		$tyyppi = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "erikoispakkaus") {
+	if (mysql_field_name($result, $i) == "erikoispakkaus" or mysql_field_name($result, $i) == "yksin_eraan") {
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
 		$ulos = "<td><select name='{$nimi}'>";

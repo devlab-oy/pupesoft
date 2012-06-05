@@ -136,7 +136,7 @@
 		if ($yhtiorow['suuntalavat'] == 'S') {
 
 			$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
-			$suoratoimitusrivi = $_POST['suoratoimitusrivi'];
+			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
 			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
 
@@ -144,7 +144,7 @@
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND keikkatunnus != 0
-							AND keikkatunnus IN ({$valittuotunnus}, {$otunnus})
+							AND keikkatunnus LIKE '%{$otunnus}%'
 							AND tila = ''
 							AND sscc = '".t("Suoratoimitus")."'";
 				$chk_suuntalava_res = pupe_query($query);
@@ -220,8 +220,10 @@
 			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 		}
 
+		// poistetaan myös netto = X, jos räplätään ruksia
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
-					uusiotunnus = '{$otunnus}'
+					uusiotunnus = '{$otunnus}',
+					netto = ''
 					$updatelisa
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
@@ -248,7 +250,7 @@
 			if ($suuntalavan_tunnus > 0) {
 				$data['suuntalava'] = $suuntalavan_tunnus;
 
-				$query = "	SELECT sscc
+				$query = "	SELECT sscc, keikkatunnus
 							FROM suuntalavat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$suuntalavan_tunnus}'";
@@ -256,6 +258,15 @@
 				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
+
+				if (strpos($sscc_fetch_row['keikkatunnus'], trim($otunnus)) === FALSE) {
+
+					$query = "	UPDATE suuntalavat SET
+								keikkatunnus = '{$sscc_fetch_row['keikkatunnus']},{$otunnus}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$suuntalavan_tunnus}'";
+					$upd_res = pupe_query($query);
+				}
 			}
 			else {
 				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti
@@ -344,6 +355,11 @@
 						and tuoteno = '{$rivi['tuoteno']}'
 						and {$tunken} = '{$tunnus}'";
 			$sarjares = pupe_query($query);
+		}
+
+		if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
 		}
 
 		$hinnat = laske_hinta($laskurow, $tunnus);

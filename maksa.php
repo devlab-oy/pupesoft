@@ -22,21 +22,23 @@
 
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
-	// Katsotaan montakopäivää halutaan automaattisesti käyttää kassa-alea
 	$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))";
 
-	if ($yhtiorow["ostoreskontra_kassaalekasittely"] == 1) {
-		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm,
-						if(kapvm >= adddate(curdate(),1) and adddate(kapvm,1) < erpcm, adddate(kapvm,1),
-								if(erpcm >= curdate(), erpcm,
-									curdate())))";
-	}
-	elseif ($yhtiorow["ostoreskontra_kassaalekasittely"] == 2) {
-		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm,
-						if(kapvm >= adddate(curdate(),1) and adddate(kapvm,1) < erpcm, adddate(kapvm,1),
-							if(kapvm >= adddate(curdate(),2) and adddate(kapvm,2) < erpcm, adddate(kapvm,2),
-								if(erpcm >= curdate(), erpcm,
-									curdate()))))";
+	// Katsotaan montako päivää 'yli' halutaan automaattisesti käyttää kassa-alea
+	if ($yhtiorow["ostoreskontra_kassaalekasittely"] > 0) {
+		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, ";
+
+		for ($i = 1; $i <= $yhtiorow["ostoreskontra_kassaalekasittely"]; $i++) {
+			$oletusmaksupaiva_kasittely .= "if(adddate(kapvm,$i) >= curdate() and adddate(kapvm,$i) < erpcm, adddate(kapvm,$i),";
+		}
+
+		$oletusmaksupaiva_kasittely .= " if(erpcm >= curdate(), erpcm, curdate())";
+
+		for ($i = 1; $i <= $yhtiorow["ostoreskontra_kassaalekasittely"]; $i++) {
+			$oletusmaksupaiva_kasittely .= ")";
+		}
+
+		$oletusmaksupaiva_kasittely .= ")";
 	}
 
 	if (count($_POST) == 0) {
@@ -800,15 +802,15 @@
 			}
 
 			$query = "	UPDATE lasku set
-						maksaja = '$kukarow[kuka]',
-						maksuaika = now(),
+						maksaja 	 = '$kukarow[kuka]',
+						maksuaika 	 = now(),
 						maksu_kurssi = '$tiliointirow[kurssi]',
-						maksu_tili = '$oltilrow[oletustili]',
-						tila = 'P',
-						alatila = if(date_add(kapvm, interval $yhtiorow[ostoreskontra_kassaalekasittely] day) >= curdate(), 'K', '')
-						WHERE tunnus='$tiliointirow[tunnus]'
-						and yhtio = '$kukarow[yhtio]'
-						and tila='M'";
+						maksu_tili 	 = '$oltilrow[oletustili]',
+						tila 		 = 'P',
+						alatila 	 = if(date_add(kapvm, interval $yhtiorow[ostoreskontra_kassaalekasittely] day) >= curdate(), 'K', '')
+						WHERE tunnus = '$tiliointirow[tunnus]'
+						and yhtio 	 = '$kukarow[yhtio]'
+						and tila	 = 'M'";
 			$updresult = pupe_query($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen

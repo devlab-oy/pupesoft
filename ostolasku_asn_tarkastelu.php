@@ -1573,7 +1573,7 @@
 				}
 				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
 
-					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus
+					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus, tilausrivi.tunnus
 								FROM lasku
 								JOIN tilausrivi ON (
 									tilausrivi.yhtio = lasku.yhtio
@@ -1597,7 +1597,21 @@
 					}
 
 					if ($kpl_row["otunnus"] != 0 and (strpos($kpl_row["otunnus"], $row['tilausnumero']) === FALSE)) {
-						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei täsmää<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font>";
+						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei täsmää<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font><br>";
+					}
+
+					if ($row['asn_sanomat'] == 'K') {
+						$query = "	SELECT *
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND toimittajanumero = '{$row['toimittajanumero']}'
+									AND tilausrivi LIKE '%{$kpl_row['tunnus']}%'
+									AND laji = 'asn'";
+						$chkres = pupe_query($query);
+
+						if (mysql_num_rows($chkres) == 0) {
+							echo "<font color='error'>ASN-riviä ei löydy tilausrivin tunnukselle $kpl_row[tunnus]</font>";
+						}
 					}
 				}
 				else {

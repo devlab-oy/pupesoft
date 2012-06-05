@@ -909,11 +909,11 @@
 					$split_array = array();
 
 					// Lasketaan ensin kaikki rivit yhteen ja sen jälkeen katsotaan tarvitaanko lisäriviä
-					foreach ($kaytettavat_tilausrivit as $tilriv) {
+					foreach ($kaytettavat_tilausrivit as $tilriv1) {
 
 						if ($kohdistamatta <= 0) break;
 
-						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+						$query = "SELECT kpl+varattu AS varattu FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv1}'";
 						echo "<pre>$query</pre>";
 						$kpl_chk_res = pupe_query($query);
 						$kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
@@ -921,8 +921,8 @@
 						echo "varattu: $kpl_chk_row[varattu]<br>";
 
 						$laskuri += $kpl_chk_row["varattu"];
-						$lisa_array[] = $tilriv;
-						$split_array[] = $tilriv;
+						$lisa_array[] = $tilriv1;
+						$split_array[] = $tilriv1;
 						$kohdistamatta -= $kpl_chk_row["varattu"];
 					}
 
@@ -1163,7 +1163,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
-						echo "<pre>",str_replace("\t", "", $updatequery),"</pre>";
+						echo "<pre>",str_replace("\t", "", $updatequery),"</pre><br />";
 						$upd_res = pupe_query($updatequery);
 
 						if ($tilausrivirow['asn_sanomat'] == 'L') {
@@ -1439,6 +1439,7 @@
 					foreach($lisa_array as $tilriv) {
 
 						$query = "SELECT uusiotunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre><br />";
 						$uusiotunnus_res = pupe_query($query);
 						$uusiotunnus_row = mysql_fetch_assoc($uusiotunnus_res);
 
@@ -1459,8 +1460,12 @@
 							$ostoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 							$ostoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
 							$ostoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
+
+							echo "lisättiin ostot arrayseen. Indx $indx<br>";
+							echo "<pre>",var_dump($ostoilla[$indx]),"</pre><br />";
 						}
 						else {
+
 							$indx = count($keikoilla);
 
 							// löytyi, on jo keikalla
@@ -1476,6 +1481,9 @@
 							$keikoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
 							$keikoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
 							$keikoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
+
+							echo "lisättiin keikat arrayseen. Indx $indx<br>";
+							echo "<pre>",var_dump($keikoilla[$indx]),"</pre><br />";
 						}
 					}
 				}

@@ -282,7 +282,7 @@
 
 				$data['suuntalava'] = $suuntalavan_tunnus;
 
-				$query = "	SELECT suuntalavat.sscc, suuntalavat_saapuminen.saapuminen
+				$query = "	SELECT suuntalavat.sscc, IFNULL(suuntalavat_saapuminen.saapuminen, '') AS saapuminen
 							FROM suuntalavat
 							LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
 							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
@@ -292,7 +292,7 @@
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
 
-				if ($sscc_fetch_row['saapuminen'] == '' or $sscc_fetch_row['saapuminen'] == 0) {
+				if ($sscc_fetch_row['saapuminen'] == '') {
 					$query = "	INSERT INTO suuntalavat_saapuminen SET
 								yhtio = '{$kukarow['yhtio']}',
 								suuntalava = '{$suuntalavan_tunnus}',

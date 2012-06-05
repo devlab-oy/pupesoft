@@ -109,27 +109,27 @@
 						AND tunnus = '{$tunnus}'";
 			$update_res = pupe_query($query);
 
-			$query = "	SELECT otunnus
+			$query = "	SELECT uusiotunnus
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$tunnus}'";
 			$otunnus_fetch_res = pupe_query($query);
 			$otunnus_fetch_row = mysql_fetch_assoc($otunnus_fetch_res);
 
-			$otunnus = $otunnus_fetch_row['otunnus'];
+			$uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
 
 			$query = "	SELECT saapuminen
 						FROM suuntalavat_saapuminen
 						WHERE yhtio = '{$kukarow['yhtio']}' 
 						AND suuntalava = '{$suuntalava}' 
-						AND saapuminen = '{$otunnus}'";
+						AND saapuminen = '{$uusiotunnus}'";
 			$fetch_res = pupe_query($query);
 
 			if (mysql_num_rows($fetch_res) == 0) {
 				$query = "	INSERT INTO suuntalavat_saapuminen SET
 							yhtio = '{$kukarow['yhtio']}',
 							suuntalava = '{$suuntalava}',
-							saapuminen = '{$otunnus}',
+							saapuminen = '{$uusiotunnus}',
 							laatija = '{$kukarow['kuka']}',
 							luontiaika = now(),
 							muutospvm = now(),

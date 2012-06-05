@@ -2,6 +2,26 @@
 
 	require("inc/parametrit.inc");
 
+
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
+
+		function toggleAll(toggleBox) {
+
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
+
+			for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,5) == nimi) {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
+
+		//-->
+		</script>";
+
 	echo "<font class='head'>".t("Alennusten ylläpito")."</font><hr>";
 
 	echo "<form name=asiakas method=post>";
@@ -389,7 +409,10 @@
 			$edellinen_rivi = $row;
 		} while ($row);
 
-		echo "<tr><td colspan=9 class='back'><input type='submit' value='".t("Päivitä")."'></td></tr>";
+		echo "<tr>";
+		echo "<td colspan='7' class='back'><input type='submit' value='".t("Päivitä")."'></td>";
+		echo "<td colspan='2' class='back' style='text-align:right;'>".t("Ruksaa kaikki")." <input type='checkbox' name='poist' onclick='toggleAll(this);'></td>";
+		echo "</tr>";
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";

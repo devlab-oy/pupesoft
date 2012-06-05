@@ -124,7 +124,6 @@
 						AND suuntalava = '{$suuntalava}' 
 						AND saapuminen = '{$otunnus}'";
 			$fetch_res = pupe_query($query);
-			$fetch_row = mysql_fetch_assoc($fetch_res);
 
 			if (mysql_num_rows($fetch_res) == 0) {
 				$query = "	INSERT INTO suuntalavat_saapuminen SET

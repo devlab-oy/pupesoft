@@ -1794,6 +1794,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
+				echo "Keikoilla<pre>",str_replace("\t", "", $update_asn),"</pre>";
 				pupe_query($update_asn);
 
 				if ($hinta_chk_row['perheid'] != 0) {
@@ -1920,6 +1921,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
 								AND laji = 'tec'";
+				echo "Ostoilla:<pre>",str_replace("\t", "", $update_asn),"</pre>";
 				pupe_query($update_asn);
 
 				if ($hinta_chk_row['perheid'] != 0) {

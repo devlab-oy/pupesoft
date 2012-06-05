@@ -198,11 +198,11 @@
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-		$otunnuslisa = "tilausrivi.otunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+		$otunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
 		$selectlisa = ", suuntalavat.sscc ";
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava)
-							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}') ";
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 		$orderlisa = " suuntalavat.sscc, ";
 	}
 	else {

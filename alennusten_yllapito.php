@@ -311,9 +311,7 @@
 					FROM perusalennus
 					LEFT JOIN asiakasalennus ON (perusalennus.ryhma = asiakasalennus.ryhma
 						AND perusalennus.yhtio = asiakasalennus.yhtio
-						$query_lisa
-						AND ((asiakasalennus.alkupvm <= current_date and if (asiakasalennus.loppupvm = '0000-00-00','9999-12-31', asiakasalennus.loppupvm) >= current_date)
-						OR (asiakasalennus.alkupvm = '0000-00-00' and asiakasalennus.loppupvm = '0000-00-00')))
+						$query_lisa)
 					WHERE perusalennus.yhtio = '{$kukarow["yhtio"]}'
 					ORDER BY perusalennus.ryhma";
 		$result = pupe_query($query);

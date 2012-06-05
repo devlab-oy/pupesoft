@@ -95,6 +95,11 @@
 		if ($tee == "") $tee = "alennustaulukko";
 	}
 
+	if ($oikeurow["paivitys"] != "1" and ($tee == 'uusi' or $tee == 'lisaa')) {
+		echo "<br><font class='error'>".t("Sinulla ei ole päivitysoikeutta")."!</font><br/>";
+		$tee = "alennustaulukko";
+	}
+
 	# Uusi lomakkeen kenttien tarkistus
 	if ($tee == 'uusi') {
 		list($yyyy, $mm, $dd) = explode('-', $uusi_alkupvm);

@@ -1194,7 +1194,9 @@
 					$projekti	= $oletusprojekti;
 					$saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
 
-					for ($i = 0; $i < count($rtuoteno); $i++) {
+					$count_rtuoteno = count($rtuoteno);
+
+					for ($i = 0; $i < $count_rtuoteno; $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 

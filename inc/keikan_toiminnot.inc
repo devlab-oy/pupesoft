@@ -118,23 +118,25 @@
 
 			$uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
 
-			$query = "	SELECT saapuminen
-						FROM suuntalavat_saapuminen
-						WHERE yhtio = '{$kukarow['yhtio']}' 
-						AND suuntalava = '{$suuntalava}' 
-						AND saapuminen = '{$uusiotunnus}'";
-			$fetch_res = pupe_query($query);
+			if ($suuntalava != 0) {
+				$query = "	SELECT saapuminen
+							FROM suuntalavat_saapuminen
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND suuntalava = '{$suuntalava}' 
+							AND saapuminen = '{$uusiotunnus}'";
+				$fetch_res = pupe_query($query);
 
-			if (mysql_num_rows($fetch_res) == 0) {
-				$query = "	INSERT INTO suuntalavat_saapuminen SET
-							yhtio = '{$kukarow['yhtio']}',
-							suuntalava = '{$suuntalava}',
-							saapuminen = '{$uusiotunnus}',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'";
-				$insert_res = pupe_query($query);
+				if (mysql_num_rows($fetch_res) == 0) {
+					$query = "	INSERT INTO suuntalavat_saapuminen SET
+								yhtio = '{$kukarow['yhtio']}',
+								suuntalava = '{$suuntalava}',
+								saapuminen = '{$uusiotunnus}',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					$insert_res = pupe_query($query);
+				}
 			}
 
 			echo json_encode('ok');

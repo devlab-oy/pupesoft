@@ -1648,6 +1648,7 @@
 								ale3 = 0,
 								uusiotunnus = '{$keikan_tunnus}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$hinta_chk_row['otunnus']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
@@ -1815,6 +1816,7 @@
 								ale3 = 0,
 								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$hinta_chk_row['otunnus']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
@@ -1942,6 +1944,7 @@
 								ale3 = 0,
 								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$hinta_chk_row['otunnus']}'
 								AND perheid = '{$hinta_chk_row['perheid']}'
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);

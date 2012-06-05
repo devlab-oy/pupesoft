@@ -126,7 +126,7 @@
 			$fetch_res = pupe_query($query);
 			$fetch_row = mysql_fetch_assoc($fetch_res);
 
-			if ($fetch_row['saapuminen'] == '' or $fetch_row['saapuminen'] == 0) {
+			if (mysql_num_rows($fetch_res) == 0 or $fetch_row['saapuminen'] == '' or $fetch_row['saapuminen'] == 0) {
 				$query = "	INSERT INTO suuntalavat_saapuminen SET
 							yhtio = '{$kukarow['yhtio']}',
 							suuntalava = '{$suuntalava}',

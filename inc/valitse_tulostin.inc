@@ -266,7 +266,7 @@
 				$valitut_suuntalisa = " AND suuntalavat.tunnus in (".mysql_real_escape_string($valitut_lavat).")";
 			}
 
-			$query = "	SELECT suuntalavat.tunnus, suuntalavat.sscc
+			$query = "	SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc
 						FROM suuntalavat
 						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
 						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'

@@ -1590,7 +1590,7 @@
 					$kpl_row = mysql_fetch_assoc($kpl_chk_res);
 
 					if (mysql_num_rows($kpl_chk_res) == 0) {
-						echo "<font color='orange'>Ostotilausriviä ei löydy</font>";
+						echo "<font color='orange'>Ostotilausriviä ei löydy</font><br>";
 					}
 					elseif ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
 						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br>$query<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
@@ -1610,9 +1610,11 @@
 						$chkres = pupe_query($query);
 
 						if (mysql_num_rows($chkres) == 0) {
-							echo "<font color='error'>ASN-riviä ei löydy tilausrivin tunnukselle $kpl_row[tunnus]</font>";
+							echo "<font color='error'>ASN-riviä ei löydy tilausrivin tunnukselle $kpl_row[tunnus]</font><br>";
 						}
 					}
+
+					echo "<font class='error'>",t("Virhe"),"</font>";
 				}
 				else {
 					echo "<font class='error'>",t("Virhe"),"</font>";

@@ -1886,7 +1886,7 @@
 						while ($tilriv_tunnukset_row = mysql_fetch_assoc($tilriv_tunnukset_res)) {
 
 							if ($tilriv_tunnukset_row['tunnukset'] != '') {
-								$query = "	UPDATE suuntalava SET
+								$query = "	UPDATE suuntalavat SET
 											kaytettavyys = 'L'
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$hinta_chk_row['suuntalava']}'";
@@ -2013,7 +2013,7 @@
 						while ($tilriv_tunnukset_row = mysql_fetch_assoc($tilriv_tunnukset_res)) {
 
 							if ($tilriv_tunnukset_row['tunnukset'] != '') {
-								$query = "	UPDATE suuntalava SET
+								$query = "	UPDATE suuntalavat SET
 											kaytettavyys = 'L'
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$hinta_chk_row['suuntalava']}'";

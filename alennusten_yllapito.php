@@ -138,15 +138,11 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
         $loppupvm[] = $uusi_loppupvm;
     }
 
-    # Loopataan läpi ryhmävälit
-    for ($i = 0; $i < count($alkuryhma); $i++) {    
+    # Query lisä ytunnuksen tai asiakasid:n mukaan
+    $query_lisa = ($tyyppi == 'ytunnus') ? "ytunnus = '$ytunnus'" : "asiakas = '$asiakasid'";
 
-        if ($tyyppi == 'ytunnus') {
-			$query_lisa = "ytunnus = '$ytunnus'";
-		}
-        else {
-			$query_lisa = "asiakas = '$asiakasid'";
-        }
+    # Loopataan läpi ryhmävälit (rivit)
+    for ($i = 0; $i < count($alkuryhma); $i++) {    
 
         # Haetaan ryhmät perusalennus-taulusta, between $alkuryhma and $loppuryhma
         $ryhmat = hae_ryhmat($alkuryhma[$i], $loppuryhma[$i], $kukarow['yhtio']);
@@ -160,7 +156,7 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
 
         # Jos poistettava, loopataan ryhmäväli ja poistetaan.
         if ($poista[$i] != "") {
-            foreach($ryhmat as $poistettava_ryhma) {
+            foreach ($ryhmat as $poistettava_ryhma) {
                 if ($alkupvm[$i] == "") {
                     $alkupvm[$i] = "0000-00-00";
                 }
@@ -181,15 +177,15 @@ if ($tee == 'lisaa' or $tee == 'uusi') {
                 $poista[$i] = NULL;
             }
         }
-        # Jos ei poistettava niin lisätään uudet alennukset
+        # Jos ei poistettava niin lisätään tai päivitetään uudet alennukset
         else {
 
             # Ryhmävälin tunnukset
             $tunnus = explode(",", $tunnukset[$i]);
             $j = 0;
-            
-            # Päivitetään jos tunnus on setattu, muuten lisätään uusi
+
             foreach ($ryhmat as $ryhma) {
+                # Päivitetään jos tunnus on setattu
                 if (!empty($tunnus[$j])) {
                     $query = "  UPDATE asiakasalennus SET
                                 yhtio       = '{$kukarow['yhtio']}',
@@ -267,12 +263,7 @@ if ($tee == "alennustaulukko") {
             <th>Poista</th>
         </tr>";
 
-    if ($tyyppi == 'ytunnus') {
-        $query_lisa = "AND asiakasalennus.ytunnus = '$ytunnus'";
-    }
-    else {
-        $query_lisa = "AND asiakasalennus.asiakas = '$asiakasid'";
-    }
+    $query_lisa = ($tyyppi == 'ytunnus') ? "AND asiakasalennus.ytunnus = '$ytunnus'" : "AND asiakasalennus.asiakas = '$asiakasid'";
 
     $query = "SELECT asiakasalennus.asiakas,
                     perusalennus.ryhma,
@@ -314,14 +305,14 @@ if ($tee == "alennustaulukko") {
             if ($alennus[$i] != "") {
                 $edellinen_rivi['alennus'] = ($edellinen_rivi['alennus'] == $alennus[$i]) ? $edellinen_rivi['alennus'] : $alennus[$i];
             }
-            if($alennuslaji[$i] != "") {
+            if ($alennuslaji[$i] != "") {
                 $edellinen_rivi['alennuslaji'] = ($edellinen_rivi['alennuslaji'] == $alennuslaji[$i]) ? $edellinen_rivi['alennuslaji'] : $alennuslaji[$i];
             }
-            if($minkpl[$i] != "" or $edellinen_rivi['minkpl'] == 0) {
+            if ($minkpl[$i] != "" or $edellinen_rivi['minkpl'] == 0) {
                 $edellinen_rivi['minkpl'] = ($edellinen_rivi['minkpl'] == $minkpl[$i]) ? $edellinen_rivi['minkpl'] : $minkpl[$i];
                 $edellinen_rivi['minkpl'] = ($edellinen_rivi['minkpl'] == '0') ? "" : $edellinen_rivi['minkpl'];
             }
-            if($monikerta[$i] != "") {
+            if ($monikerta[$i] != "") {
                 $edellinen_rivi['monikerta'] = ($edellinen_rivi['monikerta'] == $monikerta[$i]) ? $edellinen_rivi['monikerta'] : $monikerta[$i];
             }
             if ($alkupvm[$i] != "" or $loppupvm[$i] != "") {

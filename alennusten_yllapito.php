@@ -463,7 +463,7 @@
 	}
 
 	# Haetaan ryhmät perusalennus-taulusta, between $alkuryhma and $loppuryhma
-	function hae_ryhmat($alkuryhma, $loppuryhma, $yhtio) {
+	function hae_ryhmat($alkuryhma, $loppuryhma) {
 		global $kukarow;
 
 		$ryhmat_query = "	SELECT distinct(ryhma)

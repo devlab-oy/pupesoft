@@ -109,6 +109,35 @@
 						AND tunnus = '{$tunnus}'";
 			$update_res = pupe_query($query);
 
+			$query = "	SELECT otunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$otunnus_fetch_res = pupe_query($query);
+			$otunnus_fetch_row = mysql_fetch_assoc($otunnus_fetch_res);
+
+			$otunnus = $otunnus_fetch_row['otunnus'];
+
+			$query = "	SELECT saapuminen
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND suuntalava = '{$suuntalava}' 
+						AND saapuminen = '{$otunnus}'";
+			$fetch_res = pupe_query($query);
+			$fetch_row = mysql_fetch_assoc($fetch_res);
+
+			if ($fetch_row['saapuminen'] == '' or $fetch_row['saapuminen'] == 0) {
+				$query = "	INSERT INTO suuntalavat_saapuminen SET
+							yhtio = '{$kukarow['yhtio']}',
+							suuntalava = '{$suuntalava}',
+							saapuminen = '{$otunnus}',
+							laatija = '{$kukarow['kuka']}',
+							luontiaika = now(),
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'";
+				$insert_res = pupe_query($query);
+			}
+
 			echo json_encode('ok');
 		}
 	}

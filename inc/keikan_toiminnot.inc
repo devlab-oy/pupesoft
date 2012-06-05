@@ -293,7 +293,7 @@
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
 
-				if ($sscc_fetch_row['saapuminen'] == '') {
+				if ($suuntalavan_tunnus != 0 and $sscc_fetch_row['saapuminen'] == '') {
 					$query = "	INSERT INTO suuntalavat_saapuminen SET
 								yhtio = '{$kukarow['yhtio']}',
 								suuntalava = '{$suuntalavan_tunnus}',

@@ -119,7 +119,7 @@
 			$otunnus = $otunnus_fetch_row['otunnus'];
 
 			$query = "	SELECT saapuminen
-						FROM suuntalavat
+						FROM suuntalavat_saapuminen
 						WHERE yhtio = '{$kukarow['yhtio']}' 
 						AND suuntalava = '{$suuntalava}' 
 						AND saapuminen = '{$otunnus}'";

@@ -50,6 +50,12 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
+	// JT-selaus p‰ivitysoikeus, joko JT-selaus p‰ivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivej‰
+	$jtselaus_paivitys_oikeus = FALSE;
+	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and $yhtiorow["automaattinen_jt_toimitus"] == "J")) {
+		$jtselaus_paivitys_oikeus = TRUE;
+	}
+
 	if (isset($_POST['korvataanko']) and $_POST['korvataanko'] == 'KORVAA') {
 		$query = "	UPDATE tilausrivi
 					SET tuoteno = '$_POST[korvaava]'
@@ -125,7 +131,7 @@
 	require ("tee_jt_tilaus.inc");
 
 	//JT-rivit on poimittu
-	if ($oikeurow['paivitys'] == '1' and ($tee == 'POIMI' or $tee == "JT_TILAUKSELLE")) {
+	if ($jtselaus_paivitys_oikeus and ($tee == 'POIMI' or $tee == "JT_TILAUKSELLE")) {
 		foreach($jt_rivitunnus as $tunnukset) {
 
 			$tunnusarray = explode(',', $tunnukset);
@@ -150,7 +156,7 @@
 		$tee = "JATKA";
 	}
 
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
 		if ($toim == "ENNAKKO") {
 			$query  = "	SELECT *
 						FROM lasku
@@ -343,7 +349,7 @@
 	}
 
 	// Tutkitaan onko k‰ytt‰j‰ll‰ keskenolevia jt-rivej‰
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $from_varastoon_inc == "") {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $from_varastoon_inc == "") {
 
 		if ($toim == "ENNAKKO") {
 			$query = "	SELECT *
@@ -431,7 +437,7 @@
 	}
 
 	//muokataan tilausrivi‰
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'MUOKKAARIVI') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'MUOKKAARIVI') {
 		$query = "	SELECT *
 					FROM tilausrivi
 					WHERE tunnus = '$jt_rivitunnus' and yhtio='$kukarow[yhtio]'";
@@ -538,7 +544,7 @@
 	}
 
 	//Lis‰t‰‰n muokaattu tilausrivi
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'LISAARIVI') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'LISAARIVI') {
 
 		// lis‰‰ p‰iv‰m‰‰r‰n tarkistus.
 		if (checkdate($kerayskka, $keraysppa, $keraysvva)) {
@@ -1087,7 +1093,7 @@
 
 								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
 
-								if ($oikeurow['paivitys'] == '1') {
+								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
 										echo "<th valign='top'>".t("Toimita")."<br>".t("kaikki")."</th>";
 										echo "<th valign='top'>".t("Toimita")."<br>".t("m‰‰r‰")."</th>";
@@ -1107,7 +1113,7 @@
 
 								echo "</tr>";
 
-								if ($oikeurow['paivitys'] == '1') {
+								if ($jtselaus_paivitys_oikeus) {
 
 									echo "	<script type='text/javascript' language='JavaScript'>
 											<!--
@@ -1358,7 +1364,7 @@
 									echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
 								}
 
-								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
+								if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
 									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
 								}
 								else {
@@ -1382,7 +1388,7 @@
 								echo "</td>";
 							}
 
-							if ($oikeurow['paivitys'] == '1') {
+							if ($jtselaus_paivitys_oikeus) {
 								if ($toim == "ENNAKKO") {
 									$query = "	SELECT sum(varattu) jt, count(*) kpl
 												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -1770,7 +1776,7 @@
 
 									echo "</td>";
 
-									if ($oikeurow['paivitys'] == '1') {
+									if ($jtselaus_paivitys_oikeus) {
 										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$perherow[yksikko]'", "", "", "selite")."<br></font>";
 
 										if (!isset($toimpva) and isset($toimvko) and $toimvko > 0) {
@@ -1877,7 +1883,7 @@
 
 				if ($automaaginen == '' and $jt_rivilaskuri > 1) {
 
-					if ($oikeurow['paivitys'] == '1') {
+					if ($jtselaus_paivitys_oikeus) {
 
 						if ($kukarow["extranet"] == "" and $automaaginen == '') {
 
@@ -1893,7 +1899,7 @@
 								$colspan++;
 							}
 
-							if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
+							if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
 								$colspan++;
 							}
 

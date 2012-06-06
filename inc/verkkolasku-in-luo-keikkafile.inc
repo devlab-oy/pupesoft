@@ -944,7 +944,7 @@
 
 					if ($ylimaaraista > 0) {
 
-						$query = "	SELECT tilausrivi.*, toimi.asn_sanomat,
+						$query = "	SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus
 									FROM tilausrivi

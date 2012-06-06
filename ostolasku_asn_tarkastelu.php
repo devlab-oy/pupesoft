@@ -1083,7 +1083,7 @@
 			$toimittaja = (int) $toimittaja;
 			$tilausnro = (int) $tilausnro;
 
-			$query = "	SELECT tunnus
+			$query = "	SELECT tunnus, asn_sanomat
 						FROM toimi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND toimittajanro = '{$toimittaja}'
@@ -1166,7 +1166,7 @@
 
 				if (mysql_num_rows($chkres) > 0) continue;
 
-				if ($valitse != 'asn') {
+				if ($valitse != 'asn' and $toimirow['asn_sanomat'] == 'K') {
 					// katsotaan ett‰ asn rivi pit‰‰ olla olemassa
 					$query = "	SELECT *
 								FROM asn_sanomat

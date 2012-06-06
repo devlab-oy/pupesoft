@@ -17403,7 +17403,8 @@ if (!function_exists("erolista")) {
 				$kala -= 35;
 			}
 
-			$kuluproslisa = $toimirow['oletus_kulupros'] != 0 ? " * ((100 - {$toimirow['oletus_kulupros']}) / 100) " : "";
+			// $kuluproslisa = $toimirow['oletus_kulupros'] != 0 ? " * ((100 - {$toimirow['oletus_kulupros']}) / 100) " : "";
+			$kuluproslisa = "";
 
 			$query = "	SELECT tuoteno,
 						nimitys,

@@ -668,34 +668,40 @@
 					}
 
 					if ($tilausrivirow['uusiotunnus'] == 0) {
+
+						$indx = count($ostoilla);
+
 						// löytyi, ei ole keikalla
-						$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-						$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-						$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-						$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-						$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-						$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-						$ostoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$ostoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$ostoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$ostoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$ostoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						$ostoilla[$indx]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
+						$ostoilla[$indx]["hinta"] = $rtuoteno[$i]["hinta"];
+						$ostoilla[$indx]["kpl"] = $rtuoteno[$i]["kpl"];
+						$ostoilla[$indx]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+						$ostoilla[$indx]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+						$ostoilla[$indx]["insert_id"] = $rtuoteno[$i]["insert_id"];
+						$ostoilla[$indx]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$ostoilla[$indx]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$ostoilla[$indx]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$ostoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$ostoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$ostoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 					else {
+
+						$indx = count($keikoilla);
+
 						// löytyi, on jo keikalla
-						$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
-						$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
-						$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-						$keikoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-						$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-						$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-						$keikoilla[$i]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$keikoilla[$i]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$keikoilla[$i]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$keikoilla[$i]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$keikoilla[$i]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						$keikoilla[$indx]["tunnus"] = $tilausrivirow['tunnus'];
+						$keikoilla[$indx]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
+						$keikoilla[$indx]["hinta"] = $rtuoteno[$i]["hinta"];
+						$keikoilla[$indx]["kpl"] = $rtuoteno[$i]["kpl"];
+						$keikoilla[$indx]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+						$keikoilla[$indx]["insert_id"] = $rtuoteno[$i]["insert_id"];
+						$keikoilla[$indx]["lisakulu"] = isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$keikoilla[$indx]["kulu"] = isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$keikoilla[$indx]["ale1"] = isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$keikoilla[$indx]["ale2"] = isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$keikoilla[$indx]["ale3"] = isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$keikoilla[$indx]['tuoteno'] = $tilausrivirow['tuoteno'];
 					}
 				}
 				elseif ($rtuoteno[$i]["kpl"] < $tilausrivirow["varattu"]) {
@@ -834,34 +840,40 @@
 					}
 
 					if ($tilausrivirow['uusiotunnus'] == 0) {
+
+						$indx = count($ostoilla);
+
 						// löytyi, ei ole keikalla
-						$ostoilla[$i]["tunnus"] 			= $tilausrivirow['tunnus']; // tilausrivi tunnus
-						$ostoilla[$i]["hinta"] 				= $rtuoteno[$i]["hinta"];
-						$ostoilla[$i]["kpl"] 				= $rtuoteno[$i]["kpl"];
-						$ostoilla[$i]["laskuntunnus"]		= $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-						$ostoilla[$i]["tilaajanrivinro"]	= $rtuoteno[$i]["tilaajanrivinro"];
-						$ostoilla[$i]["insert_id"] 			= $rtuoteno[$i]["insert_id"];
-						$ostoilla[$i]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$ostoilla[$i]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$ostoilla[$i]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$ostoilla[$i]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$ostoilla[$i]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$ostoilla[$i]['tuoteno'] 			= $tilausrivirow['tuoteno'];
+						$ostoilla[$indx]["tunnus"] 			= $tilausrivirow['tunnus']; // tilausrivi tunnus
+						$ostoilla[$indx]["hinta"] 				= $rtuoteno[$i]["hinta"];
+						$ostoilla[$indx]["kpl"] 				= $rtuoteno[$i]["kpl"];
+						$ostoilla[$indx]["laskuntunnus"]		= $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+						$ostoilla[$indx]["tilaajanrivinro"]	= $rtuoteno[$i]["tilaajanrivinro"];
+						$ostoilla[$indx]["insert_id"] 			= $rtuoteno[$i]["insert_id"];
+						$ostoilla[$indx]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$ostoilla[$indx]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$ostoilla[$indx]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$ostoilla[$indx]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$ostoilla[$indx]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$ostoilla[$indx]['tuoteno'] 			= $tilausrivirow['tuoteno'];
 					}
 					else {
+
+						$indx = count($keikoilla);
+
 						// löytyi, on jo keikalla
-						$keikoilla[$i]["tunnus"] 			= $tilausrivirow['tunnus'];
-						$keikoilla[$i]["uusiotunnus"] 		= $tilausrivirow['uusiotunnus'];
-						$keikoilla[$i]["kpl"] 				= $rtuoteno[$i]["kpl"];
-						$keikoilla[$i]["hinta"] 			= $rtuoteno[$i]["hinta"];
-						$keikoilla[$i]["tilaajanrivinro"] 	= $rtuoteno[$i]["tilaajanrivinro"];
-						$keikoilla[$i]["insert_id"] 		= $rtuoteno[$i]["insert_id"];
-						$keikoilla[$i]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
-						$keikoilla[$i]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
-						$keikoilla[$i]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
-						$keikoilla[$i]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
-						$keikoilla[$i]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
-						$keikoilla[$i]['tuoteno'] 			= $tilausrivirow['tuoteno'];
+						$keikoilla[$indx]["tunnus"] 			= $tilausrivirow['tunnus'];
+						$keikoilla[$indx]["uusiotunnus"] 		= $tilausrivirow['uusiotunnus'];
+						$keikoilla[$indx]["kpl"] 				= $rtuoteno[$i]["kpl"];
+						$keikoilla[$indx]["hinta"] 			= $rtuoteno[$i]["hinta"];
+						$keikoilla[$indx]["tilaajanrivinro"] 	= $rtuoteno[$i]["tilaajanrivinro"];
+						$keikoilla[$indx]["insert_id"] 		= $rtuoteno[$i]["insert_id"];
+						$keikoilla[$indx]["lisakulu"] 			= isset($rtuoteno[$i]["lisakulu"]) ? $rtuoteno[$i]["lisakulu"] : 0;
+						$keikoilla[$indx]["kulu"] 				= isset($rtuoteno[$i]["kulu"]) ? $rtuoteno[$i]["kulu"] : 0;
+						$keikoilla[$indx]["ale1"] 				= isset($rtuoteno[$i]["ale1"]) ? $rtuoteno[$i]["ale1"] : 0;
+						$keikoilla[$indx]["ale2"] 				= isset($rtuoteno[$i]["ale2"]) ? $rtuoteno[$i]["ale2"] : 0;
+						$keikoilla[$indx]["ale3"] 				= isset($rtuoteno[$i]["ale3"]) ? $rtuoteno[$i]["ale3"] : 0;
+						$keikoilla[$indx]['tuoteno'] 			= $tilausrivirow['tuoteno'];
 					}
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat

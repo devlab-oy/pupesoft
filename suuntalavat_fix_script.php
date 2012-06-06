@@ -25,14 +25,18 @@
 
 	while ($suuntalavat_fetch_row = mysql_fetch_assoc($suuntalavat_fetch_res)) {
 
-		$query = "	INSERT INTO suuntalavat_saapuminen SET
-					yhtio = '{$kukarow['yhtio']}',
-					suuntalava = '{$suuntalavat_fetch_row['tunnus']}',
-					saapuminen = '{$suuntalavat_fetch_row['keikkatunnus']}',
-					laatija = 'cron',
-					luontiaika = now(),
-					muutospvm = now(),
-					muuttaja = 'cron'";
-		echo str_replace("\t", "", $query),"\n\n";
+		$arr = strpos($suuntalavat_fetch_row['keikkatunnus'], ",") !== FALSE ? explode(",", $suuntalavat_fetch_row['keikkatunnus']) : array($suuntalavat_fetch_row['keikkatunnus']);
 
+		foreach($arr as $saapuminen) {
+			$query = "	INSERT INTO suuntalavat_saapuminen SET
+						yhtio = '{$kukarow['yhtio']}',
+						suuntalava = '{$suuntalavat_fetch_row['tunnus']}',
+						saapuminen = '{$saapuminen}',
+						laatija = 'cron',
+						luontiaika = now(),
+						muutospvm = now(),
+						muuttaja = 'cron'";
+			echo str_replace("\t", "", $query),"\n\n";
+			// $insert_res = pupe_query($query);
+		}
 	}

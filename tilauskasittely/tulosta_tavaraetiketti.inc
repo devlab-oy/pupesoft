@@ -14,6 +14,7 @@
 
 	if (is_array($suuntalavat) and count($suuntalavat) > 0) {
 		$suuntalavalisa = " AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") ";
+		$suuntalava_implode = implode(",", $suuntalavat);
 	}
 	else {
 		echo "<font class='error'>",t("VIRHE: Et valinnut suuntalavaa"),"!</font>";
@@ -21,14 +22,23 @@
 		exit;
 	}
 
+	$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) keikkatunnus
+				FROM suuntalavat_saapuminen
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND suuntalava IN ({$suuntalava_implode})";
+	$uusiotunnus_chk_res = pupe_query($query);
+	$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
 	$query = "	SELECT tilausrivi.*, suuntalavat.sscc, tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu+tilausrivi.kpl siskpl, tuote.eankoodi
 				FROM tilausrivi
 				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
-				JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+				JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.uusiotunnus = '{$otunnus}'
+				AND {$uusiotunnuslisa}
 				AND tilausrivi.tyyppi = 'O'
 				AND tilausrivi.kpl = 0
 				AND tilausrivi.suuntalava > 0

@@ -7263,8 +7263,7 @@ if ($tee == '') {
 			}
 			elseif ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U') {
 
-				echo "
-					<form name='kaikkyht' action='$PHP_SELF' method='post' $javalisa $tilausjavalisa>
+				echo "<form name='kaikkyht' method='post' $javalisa $tilausjavalisa>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>

@@ -1889,6 +1889,8 @@ if ($tee == 'I') {
 	$maksimisumma 		 = 0;
 	$maksimisumma_i 	 = 0;
 
+	$laskun_kulut = array();
+
 	for ($i=1; $i<$maara; $i++) {
 		$ivero[$i]				= (float) $ivero[$i];
 		$isumma_valuutassa[$i]	= (float) $isumma[$i];
@@ -1981,13 +1983,19 @@ if ($tee == 'I') {
 		exit;
 	}
 
-	$laskun_kulut = array();
-
 	for ($i = 1; $i < $maara; $i++) {
 		if (strlen($itili[$i]) > 0) {
 
+			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
+			$ikohde_ins 	= $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
+			$iprojekti_ins 	= $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
+
 			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
+
 				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i]+$ialv[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+				$ialv[$i] = round($isumma[$i] - $isumma[$i] / (1 + ($ivero[$i] / 100)),2);
+				$ialv_valuutassa[$i] = round($isumma_valuutassa[$i] - $isumma_valuutassa[$i] / (1 + ($ivero[$i] / 100)),2);
 
 				$isumma[$i] -= $ialv[$i];
 
@@ -1997,10 +2005,6 @@ if ($tee == 'I') {
 					$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 				}
 			}
-
-			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
-			$ikohde_ins 	= $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
-			$iprojekti_ins 	= $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
 
 			// Kulutili
 			$query = "	INSERT INTO tiliointi SET

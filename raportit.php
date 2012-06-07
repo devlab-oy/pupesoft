@@ -1,13 +1,18 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
 if (isset($_POST["tee"])) {
 	if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-if ((($_REQUEST["toim"] != 'hyvaksynta') or ($_REQUEST["tee"] != 'T')) and ($_REQUEST["toim"] !='maksuvalmius')) $useslave = 1;
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
 
+// Näissä keisseissä ei slavea
+if (($_REQUEST["toim"] == 'hyvaksynta' and $_REQUEST["tee"] == 'T') or $_REQUEST["toim"] == 'maksuvalmius' or $_REQUEST["toim_tee"] == 'kululasku') {
+	$useslave = 0;
+}
 
 if ($_REQUEST["toim"] == 'avoimet') {
 	// DataTables päälle

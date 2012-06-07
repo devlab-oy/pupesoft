@@ -143,7 +143,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
+
+
 	$query = "	SELECT asiakas.ytunnus,
+				IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
+						concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
+						concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
 				group_concat(distinct lasku.tunnus) karhuttavat,
 				group_concat(distinct lasku.liitostunnus) liitostunnarit,
 				sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
@@ -163,13 +168,13 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.summa	!= 0
 						$maksuehtolista
 						$maa_lisa
-						group by lasku.tunnus
+						GROUP BY lasku.tunnus
 						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
 				$asiakaslisa
-				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
+				GROUP BY asiakas.ytunnus, asiakastiedot
 				HAVING karhuttava_summa > 0
 				ORDER BY asiakas.ytunnus";
 	$result = pupe_query($query);
@@ -244,9 +249,15 @@ if ($tee == 'KARHUA')  {
 	//otetaan asiakastiedot ekalta laskulta
 	$asiakastiedot = mysql_fetch_assoc($result);
 
-	$query = "	SELECT *
+	$query = "	SELECT *,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimi, nimi) nimi,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$asiakastiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$asiakastiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 

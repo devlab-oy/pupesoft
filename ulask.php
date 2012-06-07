@@ -1992,7 +1992,7 @@ if ($tee == 'I') {
 
 			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($vienti == 'C' or $vienti == 'F' or $vienti == 'I') and (trim($osto_rahti != '') or trim($osto_kulu) != '' or trim($osto_rivi_kulu) != '')) {
 
-				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($tunnus, $summa, $isumma[$i]+$ialv[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+				list($isumma[$i], $_arr) = ostolaskun_kulujen_tiliointi($summa, $isumma[$i]+$ialv[$i], $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
 				$ialv[$i] = round($isumma[$i] - $isumma[$i] / (1 + ($ivero[$i] / 100)),2);
 				$ialv_valuutassa[$i] = round($isumma_valuutassa[$i] - $isumma_valuutassa[$i] / (1 + ($ivero[$i] / 100)),2);

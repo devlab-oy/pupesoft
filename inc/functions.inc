@@ -15741,12 +15741,11 @@ if (!function_exists("pupesoft_sahkoposti")) {
 }
 
 if (!function_exists("ostolaskun_kulujen_tiliointi")) {
-	function ostolaskun_kulujen_tiliointi($tunnus, $laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0) {
+	function ostolaskun_kulujen_tiliointi($laskun_summa, $tiliointirivin_summa, $osto_rahti = 0, $osto_kulu = 0, $osto_rivi_kulu = 0) {
 
 		global $kukarow, $yhtiorow;
 
 		## TARVITAAN SEURAAVAT MUUTTUJAT:
-		# $tunnus
 		# $laskun_summa
 		# $tiliointirivin_summa
 		# $osto_rahti
@@ -15790,7 +15789,7 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 }
 
 if (!function_exists("etsi_kuuluvat_tilioinnit")) {
-	function etsi_kuuluvat_tilioinnit($tunnus) {
+	function etsi_kuuluvat_tilioinnit($tunnus, $ylikirjataanko = true) {
 		global $kukarow;
 
 		$summa = 0;
@@ -15808,13 +15807,15 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 			$summarow = mysql_fetch_assoc($result);
 			$summa += $summarow["summa"];
 
-			$query = "	UPDATE tiliointi SET
-						korjattu = '{$kukarow['kuka']}',
-						korjausaika = now()
-						WHERE aputunnus = '{$tunnus}'
-						and yhtio 		= '{$kukarow['yhtio']}'
-						and korjattu 	= ''";
-			$result = pupe_query($query);
+			if ($ylikirjataanko) {
+				$query = "	UPDATE tiliointi SET
+							korjattu = '{$kukarow['kuka']}',
+							korjausaika = now()
+							WHERE aputunnus = '{$tunnus}'
+							and yhtio 		= '{$kukarow['yhtio']}'
+							and korjattu 	= ''";
+				$result = pupe_query($query);
+			}
 		}
 
 		return $summa;

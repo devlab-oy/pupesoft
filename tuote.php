@@ -1750,8 +1750,8 @@
 							$maara";
 				$qresult = pupe_query($query);
 
-				// jos joku in-out varastonarvo
-				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
+				// jos jsarjanumeroseuranta S tai U ja inout varastonarvo
+				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 					$kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
 				}
 

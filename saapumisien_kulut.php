@@ -1,5 +1,10 @@
 <?php
+
+//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require("inc/parametrit.inc");
+
 echo "<font class='head'>".t("Saapumisien kulut")."</font><hr>";
 
 # Oletuksena viimeiset 30 p‰iv‰‰
@@ -37,50 +42,59 @@ echo "<table>
 		</td>
 	</tr>
 </table>";
-echo "<br/><input type='submit' value='Hae'>";
+echo "<br/><input type='submit' value='".t("Hae")."'>";
 echo "</form><br/>";
 
 # Toimittajan haku
 if ($ytunnus != '' and $toimittajaid == 0) {
 	require ("inc/kevyt_toimittajahaku.inc");
-	if ($toimittajaid == 0) exit;
+
+	if ($toimittajaid == 0) {
+		require("inc/footer.inc");
+		exit;
+	}
 }
 
 # Toimittajan tiedot
-if ($toimittajaid != "") {
-	  $toimittaja_query = "	SELECT * 
-							FROM toimi 
-							WHERE yhtio='{$kukarow[yhtio]}' 
-							AND tunnus='$toimittajaid'";
+if ($toimittajaid > 0) {
+	  $toimittaja_query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '$toimittajaid'";
 	  $toimittaja_result = pupe_query($toimittaja_query);
 	  $toimittaja = mysql_fetch_assoc($toimittaja_result);
 }
 
 # P‰iv‰m‰‰rien tarkistus
 if (checkdate($alkukk, $alkupp, $alkuvv) and checkdate($loppukk, $loppupp, $loppuvv)) {
-	$alkupvm = "$alkuvv-$alkukk-$alkupp";
+	$alkupvm  = "$alkuvv-$alkukk-$alkupp";
 	$loppupvm = "$loppuvv-$loppukk-$loppupp";
-} else {
-	echo "<font class='error'>Virheellinen p‰iv‰m‰‰r‰.</font>";
+}
+else {
+	echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰").".</font>";
 	$tee = "";
 }
 
 # Luo raportti
 if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
-	if (!empty($toimittajaid)) {
-		$query_lisa = "AND liitostunnus = $toimittaja[tunnus]";
-	} 
+
+	$query_lisa = "";
+
+	if (isset($toimittaja['tunnus']) and !empty($toimittaja['tunnus'])) {
+		$query_lisa .= "AND liitostunnus = {$toimittaja['tunnus']}";
+	}
+
 	$query_lisa .= " AND mapvm BETWEEN '$alkupvm' AND '$loppupvm'";
-	
+
 	# Haetaan kaikki saapumiset
-	$saapumiset_query = "	SELECT * 
-							FROM lasku 
-							WHERE tila='k' 
-							AND vanhatunnus='0' 
-							AND alatila='x' 
-							$query_lisa 
-							AND yhtio='{$kukarow['yhtio']}' 
-							ORDER BY nimi ASC"; 
+	$saapumiset_query = "	SELECT *
+							FROM lasku
+							WHERE tila		= 'K'
+							AND vanhatunnus	= 0
+							AND alatila		= 'X'
+							$query_lisa
+							AND yhtio 		= '{$kukarow['yhtio']}'
+							ORDER BY nimi ASC";
 	$saapumiset_result = pupe_query($saapumiset_query);
 
 	echo "<table>";
@@ -96,11 +110,13 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 					<td style='text-align: right;'>{$yhteensa['sks']}</td>
 					<td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
 					<td style='text-align: right;'>".round(((($yhteensa['sks'] / $yhteensa['vols'])-1) * 100), 2)."</tr>";
+
 					$yhteensa_kaikki['vols'] += $yhteensa['vols'];
 					$yhteensa_kaikki['sks'] += $yhteensa['sks'];
 					$yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
 					$yhteensa = NULL; # Nollataan yhteens‰ arvot
 			}
+
 			# Toimittaja
 			echo "<tr><td class='back' colspan='5'><br/><font class='head'>{$tama_rivi['nimi']}</font></td></tr>";
 			# Otsikkorivi
@@ -111,33 +127,33 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 				<th style='text-align: right;'>".t("Kuluja")."</th>
 				<th style='text-align: right;'>%</th>
 			</tr>";
-		} 
+		}
 
-		$query = "	SELECT group_concat(vanhatunnus) as vanhatunnus 
-					FROM lasku 
-					WHERE tila='K' 
-					AND vanhatunnus!=0 
-					AND laskunro={$tama_rivi['laskunro']} 
-					AND yhtio='{$kukarow['yhtio']}'";
-		$vanhatunnus = mysql_fetch_array(pupe_query($query));
+		$query = "	SELECT group_concat(vanhatunnus) as vanhatunnus
+					FROM lasku
+					WHERE tila		 = 'K'
+					AND vanhatunnus != 0
+					AND laskunro	 = {$tama_rivi['laskunro']}
+					AND yhtio		 = '{$kukarow['yhtio']}'";
+		$vanhatunnus = mysql_fetch_assoc(pupe_query($query));
 
 		if ($vanhatunnus['vanhatunnus'] != "") {
 			#vols, Vaihto-omaisuuslaskujen summa
-			$vols_query = "	SELECT round(sum(summa * vienti_kurssi),2) as summa 
-						FROM lasku 
-						WHERE tunnus IN ({$vanhatunnus['vanhatunnus']}) 
-						AND vienti IN ('C','F','I','J','K','L') 
-						AND yhtio='{$kukarow['yhtio']}'";
-			$vols = mysql_fetch_array(pupe_query($vols_query));
+			$vols_query = "	SELECT round(sum(summa * vienti_kurssi),2) as summa
+							FROM lasku
+							WHERE tunnus IN ({$vanhatunnus['vanhatunnus']})
+							AND vienti IN ('C','F','I','J','K','L')
+							AND yhtio = '{$kukarow['yhtio']}'";
+			$vols = mysql_fetch_assoc(pupe_query($vols_query));
 		}
 
 		if ($tama_rivi['tunnus'] != "") {
 			#sks, Saapumisen kokonaissumma
-			$sks_query = "	SELECT round(sum(tilausrivi.rivihinta),2) as saapumisen_summa 
-							FROM tilausrivi 
-							WHERE uusiotunnus={$tama_rivi['tunnus']} 
-							AND yhtio='{$kukarow['yhtio']}'";
-			$sks = mysql_fetch_array(pupe_query($sks_query));
+			$sks_query = "	SELECT round(sum(tilausrivi.rivihinta),2) as saapumisen_summa
+							FROM tilausrivi
+							WHERE uusiotunnus	= {$tama_rivi['tunnus']}
+							AND yhtio			= '{$kukarow['yhtio']}'";
+			$sks = mysql_fetch_assoc(pupe_query($sks_query));
 
 			echo "<tr class='aktiivi'>";
 			echo "<td>".$tama_rivi["laskunro"]."</td>";
@@ -162,6 +178,7 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 			<td style='text-align: right;'>{$yhteensa['sks']}</td>
 			<td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
 			<td style='text-align: right;'>".round((($yhteensa['sks'] / $yhteensa['vols']-1) * 100), 2)."</tr>";
+
 			$yhteensa_kaikki['vols'] += $yhteensa['vols'];
 			$yhteensa_kaikki['sks'] += $yhteensa['sks'];
 			$yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
@@ -175,13 +192,13 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 			<th style='text-align: right;'>".round($yhteensa_kaikki['kulut'], 2)."</th>
 			<th style='text-align: right;'>".round((($yhteensa_kaikki['sks'] / $yhteensa_kaikki['vols']-1) * 100), 2)."</th>
 			</tr>";
-		 
+
 		echo "</table>";
 	}
 	# mysql_num_rows == 0, ei lˆytynyt yht‰‰n saapumista
 	else {
-		echo "<font class='error'>Yht‰‰n saapumista ei lˆytynyt</font>";
+		echo "<font class='error'>".t("Yht‰‰n saapumista ei lˆytynyt")."</font>";
 	}
 }
 
-include("inc/footer.inc");
+require("inc/footer.inc");

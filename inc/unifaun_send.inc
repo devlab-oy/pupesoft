@@ -330,7 +330,7 @@ class Unifaun {
 							$this->toitarow['virallinen_selite'] == "TPSTD" or
 							$this->toitarow['virallinen_selite'] == "IT09" or
 							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
-						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234;
+						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
 						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
 						else $rahtisopimusnro = 123;
 					}
@@ -340,6 +340,10 @@ class Unifaun {
 
 						if (($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") and strlen($rahtisopimusnro) != 6) {
 							$rahtisopimusnro = 999999;
+						}
+
+						if ($this->toitarow['virallinen_selite'] == "KLGRP" and strlen($rahtisopimusnro) < 7) {
+							$rahtisopimusnro = 9999999;
 						}
 					}
 
@@ -353,7 +357,7 @@ class Unifaun {
 					#IT14 		--> OPAY
 					#KKSTD 		--> OPAY tai RPAY, 6 numeroa
 					#TPSTD 		--> RPAY, 6 numeroa
-					#KLGRP 		--> OPAY tai RPAY, min 4 max 8
+					#KLGRP 		--> OPAY tai RPAY, min 7 max 8
 					#MH10 		--> RPAY, numeric minlength(8)
 					#MH20 		--> N/A
 					#MH30	 	--> RPAY

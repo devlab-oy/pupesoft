@@ -44,7 +44,7 @@ if (!function_exists('finvoice_otsik')) {
 			$tulostuspalvelu	= "TULOSTUS";
 				break;
 			case '003721291126':
-			$tulostuspalvelu	= "TULOSTUSPALVELU";
+			$tulostuspalvelu	= "PRINT";
 				break;
 			default:
 			$tulostuspalvelu	= "";
@@ -79,8 +79,14 @@ if (!function_exists('finvoice_otsik')) {
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
 			if ($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == "100") {
-				$receiverpartyid 		= $tulostuspalvelu;
-				$receiverintermediator 	= $senderintermediator;
+				$receiverpartyid = $tulostuspalvelu;
+
+				if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+					$receiverintermediator = "";
+				}
+				else {
+					$receiverintermediator 	= $senderintermediator;
+				}
 
 				if ($lasrow["chn"] != "100" and $lasrow["chn"] != "112" and $silent == "") {
 					$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostuspalveluun.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";

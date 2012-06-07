@@ -587,7 +587,7 @@
 	if ($tee == "") {
 
 		// Näytetään muuten vaan sopivia tilauksia
-		echo "<br><form action='$PHP_SELF' method='post'>
+		echo "<br><form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<font class='head'>".t("Etsi sisäinen työmääräys").":<hr></font>
 				".t("Syötä tilausnumero, nimen tai laatijan osa").":
@@ -650,7 +650,7 @@
 						</td>";
 
 				echo "<td class='back'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' value='VALMIS'>
 						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>
 						<input type='submit' value='".t("Valmis")."'>

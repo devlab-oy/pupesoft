@@ -44,7 +44,7 @@
 
 	if ($tee == "edit") {
 
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type = 'hidden' name = 'tee' value ='write'>";
 		echo "<input type = 'hidden' name = 'id' value ='$id'>";
 
@@ -139,7 +139,7 @@
 				or die ("Kysely ei onnistu $query");
 
 		echo "	<table><tr>
-				<form action = '$PHP_SELF' method = 'post'>";
+				<form method = 'post'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
 			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'>

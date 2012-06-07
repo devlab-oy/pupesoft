@@ -464,7 +464,7 @@
 			$kayttajan_alv		= $alv;
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};				
+				${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
 			}
 
 			foreach ($tuoteno_array as $tuoteno) {
@@ -512,7 +512,7 @@
 						${'ale'.$alepostfix} = ${'ale_array'.$alepostfix}[$tuoteno];
 					}
 					else {
-						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};						
+						${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};
 					}
 				}
 
@@ -570,7 +570,7 @@
 			}
 
 			$tee = "Y";
-			
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
 				unset(${'ale'.$alepostfix});
 				unset(${'ale_array'.$alepostfix});
@@ -631,7 +631,7 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<td class='back'>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -652,7 +652,7 @@
 					</td>";
 
 			echo "<td class='back'>
-					<form action='$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -729,7 +729,7 @@
 			$sel = array();
 			$sel[$toim_nimitykset] = "CHECKED";
 
-			echo "<form action='$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -757,7 +757,7 @@
 				}
 				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
-				echo "<form action='$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1054,7 +1054,7 @@
 
 
 							echo "	<td valign='top' class='back' nowrap>
-									<form action='$PHP_SELF' method='post'>
+									<form method='post'>
 									<input type='hidden' name='toim' 				value = '$toim'>
 									<input type='hidden' name='lopetus' 			value = '$lopetus'>
 									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1067,7 +1067,7 @@
 
 							if ($saako_hyvaksya > 0) {
 								echo "<td valign='top' class='back'>
-										<form action='$PHP_SELF' method='post'>
+										<form method='post'>
 										<input type='hidden' name='toim' 				value = '$toim'>
 										<input type='hidden' name='lopetus' 			value = '$lopetus'>
 										<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1098,7 +1098,7 @@
 
 									echo "</tr>";
 
-									echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+									echo "	<form name='tilaus' method='post' autocomplete='off'>
 											<input type='hidden' name='toim' 			value = '$toim'>
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
@@ -1136,7 +1136,7 @@
 								}
 								elseif (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
 									echo "	<td class='back'>
-											<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+											<form name='tilaus' method='post' autocomplete='off'>
 											<input type='hidden' name='toim' 				value = '$toim'>
 											<input type='hidden' name='lopetus' 			value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1204,7 +1204,7 @@
 				echo "	<tr>
 						<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
 						<td colspan='2' nowrap>
-						<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto'>
+						<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto' class='multisubmit'>
 						<input type='hidden' name='otunnus' 		value = '$tilausnumero'>
 						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
@@ -1244,7 +1244,7 @@
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
 					echo "	<td class='back'>
-							<form action = '$PHP_SELF' method='post'>
+							<form method='post'>
 							<input type='hidden' name='toim' 				value = '$toim'>
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1258,7 +1258,7 @@
 
 				if ($toim != "HAAMU") {
 					echo "	<td class='back''>
-							<form action = '$PHP_SELF' method='post'>
+							<form method='post'>
 							<input type='hidden' name='toim' 				value = '$toim'>
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1280,7 +1280,7 @@
 							}
 					</SCRIPT>";
 				echo "	<td class='back' align='right'>
-						<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
+						<form method='post' onSubmit = 'return verify()'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1294,7 +1294,7 @@
 			}
 			elseif ($laskurow["tila"] == 'O') {
 				echo "	<td class='back' align='right'>
-						<form action = '$PHP_SELF' method='post'>
+						<form method='post'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

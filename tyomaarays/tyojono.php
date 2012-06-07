@@ -408,7 +408,7 @@
 			$tyojono_result = t_avainsana("TYOM_TYOJONO");
 
 			if (mysql_num_rows($tyostatus_result) > 0) {
-				echo "<form method='post' id='tmform' name='tmform' action=''>";
+				echo "<form method='post' id='tmform' name='tmform'>";
 				echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
 				echo "<input type='hidden' name='konserni' value='$konserni'>";
 				echo "<input type='hidden' name='myyntitilaus_haku' value='$myyntitilaus_haku'>";

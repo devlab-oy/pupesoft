@@ -660,7 +660,7 @@ if ($tee == 'YHTEENVETO') {
 if (!$php_cli) {
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
 	echo "<table>";
 

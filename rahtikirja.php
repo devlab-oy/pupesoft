@@ -327,7 +327,7 @@
 			echo "<td>$row[tunnus]</td>";
 			echo "<td>$row[nimi]</td>";
 
-			echo "	<td class='back'><form method='post' action='$PHP_SELF'>
+			echo "	<td class='back'><form method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tee' value='change'>
 					<input type='hidden' name='rakirno' value='$rakirno'>
@@ -1009,7 +1009,7 @@
 		$kentta = "etsi";
 
 		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toimtila' value='$tila'>";
 		echo "<input type='hidden' name='text' value='etsi'>";
@@ -1485,7 +1485,7 @@
 						echo "</td>";
 					}
 
-					echo "	<form method='post' action='$PHP_SELF'>
+					echo "	<form method='post'>
 							<td><input type='checkbox' name='kaikkicheckit[]' value='$row[tunnus]'></td>
 							<input type='hidden' name='id' value='$row[tunnus]'>
 							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
@@ -1611,7 +1611,7 @@
 						$temp_osittaiset .= "</td>";
 					}
 
-					$temp_osittaiset .= "<form method='post' action='$PHP_SELF'>";
+					$temp_osittaiset .= "<form method='post'>";
 					$temp_osittaiset .= "<td valign='top'>";
 
 					$checkit = explode(",",$row["tunnukset"]);
@@ -1658,7 +1658,7 @@
 					</script>";
 
 			echo "	<br>
-					<form method='post' action='$PHP_SELF'>
+					<form method='post'>
 					<input type='hidden' id='kaikki_ruksatut_tunnukset' name='tunnukset' value=''>";
 
 			echo "	<input type='hidden' name='toim' value='$toim'>
@@ -1708,7 +1708,7 @@
 		echo "<font class='head'>".t("Muokkaa rahtikirjatietoja")."</font><hr>";
 
 		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toimtila' value='$tila'>";
 		echo "<input type='hidden' name='text' value='etsi'>";
@@ -1916,7 +1916,7 @@
 
 				echo "<td class='back'>";
 
-				echo "	<form method='post' action='$PHP_SELF'>
+				echo "	<form method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='change'>
 						<input type='hidden' name='rakirno' value='$row[rakirno]'>
@@ -1927,7 +1927,7 @@
 						</form><br>";
 
 				if ($row["tilaus"] != $edotsikkonro) {
-					echo "<form method='post' action='$PHP_SELF'>
+					echo "<form method='post'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='id' value='$row[tilaus]'>
 							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
@@ -1936,7 +1936,7 @@
 							</form><br>";
 				}
 
-				echo "<form method='post' action='$PHP_SELF'>
+				echo "<form method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='lisaatilaus'>
 						<input type='hidden' name='rakirno' value='$row[rakirno]'>
@@ -2053,7 +2053,7 @@
 		}
 
 		echo "<table>";
-		echo "<form name='rahtikirjainfoa' action='$PHP_SELF?$ltun_linkklisa' method='post' autocomplete='off'>";
+		echo "<form name='rahtikirjainfoa' action = '?$ltun_linkklisa' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='add'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -2531,6 +2531,10 @@
 		if ($id != 'dummy' and $mista != 'rahtikirja-tulostus.php') {
 
 			if ($yhtiorow['rahti_ja_kasittelykulut_kasin'] != '') {
+
+				if ($otsik["rahtivapaa"] != "") {
+					echo "<br><font class='error'>".t("HUOM")."! ".t("Tilaus on merkattu rahtivapaaksi")."!</font><br>";
+				}
 
 				$query_ale_lisa = generoi_alekentta('M');
 

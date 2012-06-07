@@ -575,16 +575,21 @@ if (!function_exists("table_exists")) {
 }
 
 if (!function_exists("maventa_invoice_put_file")) {
-	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring) {
-		$files_out['file'] = base64_encode($xmlstring);
-		$files_out['filename'] = "$invoice_number.xml";
-		$files_out['attachment_type'] = 'FINVOICE';
+	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring, $kieli) {
+		$files_out['files'] 	= array();
+		$files_out['filenames'] = array();
 
-		$return_value = $client->invoice_put_file($api_keys, $files_out);
+		//Finvoice
+		$files_out['files'][0] 	   = base64_encode($xmlstring);
+		$files_out['filenames'][0] = "$invoice_number.xml";
 
-		$objecti = $return_value[0];
+		//PDF‰
+		$files_out['files'][1] 	   = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
+		$files_out['filenames'][1] = "$invoice_number.pdf";
 
-		return $objecti->status;
+		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+
+		return $return_value->status;
 	}
 }
 
@@ -1957,7 +1962,7 @@ if (!function_exists("synkronoi")) {
 
 		require_once("inc/pakolliset_sarakkeet.inc");
 
-		list($pakolliset, $kielletyt, $wherelliset, , , ) = pakolliset_sarakkeet($table);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 
 		if (count($wherelliset) == 0 and count($pakolliset) == 0) {
 			$synclog.= "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!\n";

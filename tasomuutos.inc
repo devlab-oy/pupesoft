@@ -125,7 +125,7 @@ if ($tee == "lisaa") {
 	echo "Lis‰‰ taso v‰liin: $taso - $edtaso<br>";
 
 	echo "<br>";
-	echo "	<form action = '$PHP_SELF' method='post'>
+	echo "	<form method='post'>
 			<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
 			<input type = 'hidden' name = 'tee' value = 'lisaalisaa'>
 			<input type = 'hidden' name = 'taso' value = '$taso'>
@@ -256,7 +256,7 @@ if ($tee == "muuta") {
 	echo "Muuta tason: $taso koodia<br>";
 
 	echo "<br>";
-	echo "	<form action = '$PHP_SELF' method='post'>
+	echo "	<form method='post'>
 			<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
 			<input type = 'hidden' name = 'tee' value = 'muutamuuta'>
 			<input type = 'hidden' name = 'taso' value = '$taso'>
@@ -302,7 +302,7 @@ if ($tee == "tilitaso") {
 	echo " taso!<br>";
 
 	echo "<br>";
-	echo "	<form action = '$PHP_SELF' method='post'>
+	echo "	<form method='post'>
 			<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
 			<input type = 'hidden' name = 'tee' value = 'tilitasotilitaso'>
 			<input type = 'hidden' name = 'kirjain' value = '$kirjain'>

@@ -5,7 +5,7 @@
 	echo "<font class='head'>".t("Sarjanumeroiden saldokorjaus")."</font><hr>";
 
 	if ($kukarow["kuka"] == "admin") {
-		echo "<form name='haku' action='$PHP_SELF' method='post'>";
+		echo "<form name='haku' method='post'>";
 		echo "<input type='hidden' name='toiminto' value='TULOSTA'>";
 		echo "<input type='submit' name='$subnimi' value='Korjaa!'>";
 		echo "</form>";

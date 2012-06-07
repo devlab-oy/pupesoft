@@ -804,7 +804,7 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-			$alku .= "<th><form action='$PHP_SELF' method='post' name='hyvaksy'>
+			$alku .= "<th><form method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -854,7 +854,7 @@
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
 					 			."<td align='left'>"
-					 			." <form action='$PHP_SELF' method='post' name='jalkitoimita'>
+					 			." <form method='post' name='jalkitoimita'>
 					 			   	<input type='hidden' name='toim' 			value = '$toim'>
 					 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 					 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>

@@ -93,7 +93,7 @@
 
 	echo "<table>";
 	echo "<th>".t("Valitse kuukausi").":</th><td>
-			<form action='$PHP_SELF' method='post'>
+			<form method='post'>
 			<input type='hidden' name='year'  value='$year'>
 			<input type='hidden' name='toim' value='$toim'>
 			<a href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&osasto=$osasto&toim=$toim'> << </a>

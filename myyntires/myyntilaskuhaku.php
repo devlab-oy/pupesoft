@@ -41,7 +41,7 @@
 	$index = "";
 	$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
-	echo "<br><form name = 'valinta' action = '' method='post'>";
+	echo "<br><form name = 'valinta' method='post'>";
 
 	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L','LN');
 

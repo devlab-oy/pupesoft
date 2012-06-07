@@ -222,7 +222,8 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -251,7 +252,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -299,9 +300,14 @@
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
 		$result = pupe_query($query);
-		if (mysql_num_rows($result) == 0) {
-			die(t("Lasku kateissa"));
+
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+
+			require ("inc/footer.inc");
+			exit;
 		}
+
 		$lrow = mysql_fetch_assoc($result);
 
 		if ($viesti == "" or (int) $hyvaksyja == 0) {
@@ -345,7 +351,7 @@
 
 			$hyvaksyjat .= "</table><br>";
 
-			echo "	<form action = '$PHP_SELF' method='post'>
+			echo "	<form method='post'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='$tee'>
 					<input type='hidden' name='formilta' value='true'>
@@ -364,7 +370,7 @@
 					<input type = 'submit' value = '".t("Palauta")."'>
 					</form>
 					<br>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
 					<input type = 'submit' value = '".t("Palaa laskun hyv‰ksynt‰‰n")."'>
 					</form>";
@@ -423,7 +429,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -453,7 +459,7 @@
 		echo "</tr></table>";
 
 		echo "<br><table><tr><td>".t("Anna syy kierron pys‰ytykselle")."</td>";
-		echo "	<form action = '$PHP_SELF' method='post'>
+		echo "	<form method='post'>
 				<input type='hidden' name='tee' value='W'>
 				<input type='hidden' name = 'nayta' value='$nayta'>
 				<input type='hidden' name='tunnus' value='$trow[tunnus]'>";
@@ -477,7 +483,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -503,8 +509,8 @@
 					and tunnus = '$tunnus'";
 		$result = pupe_query($query);
 
-		if (mysql_num_rows($result) !=1 ) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -530,7 +536,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -539,7 +545,7 @@
 		$laskurow = mysql_fetch_assoc($result);
 
 		if ($eka_hyvaksyja != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
-			echo pupe_eror('lasku on v‰‰r‰ss‰ tilassa');
+			echo "<font class = 'error'>".t('Lasku on v‰‰r‰ss‰ tilassa')."</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -573,8 +579,8 @@
 					hyvaksyja_nyt = '$kukarow[kuka]'";
 		$result = pupe_query($query);
 
-		if (mysql_num_rows($result) !=1 ) {
-			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -985,7 +991,7 @@
 
 		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $laskurow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 
-			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
+			echo "	<td class='back'><form method='post' onSubmit = 'return verify()'>
 					<input type='hidden' name='tee' value='D'>
 					<input type='hidden' name = 'nayta' value='$nayta'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -1039,7 +1045,7 @@
 
 		echo "<br><table>";
 		// Mahdollisuus antaa kommentti
-		echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
+		echo "	<form name='kommentti' method='post'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='V'>
 				<input type='hidden' name = 'nayta' value='$nayta'>
@@ -1115,7 +1121,7 @@
 			$hyvak[4] = $laskurow['hyvak4'];
 			$hyvak[5] = $laskurow['hyvak5'];
 
-			echo "<form name='uusi' action = '$PHP_SELF' method='post'>
+			echo "<form name='uusi' method='post'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='L'>
 					<input type='hidden' name='nayta' value='$nayta'>
@@ -1280,7 +1286,7 @@
 					if ($apurow["comments"] != "") $apurow["comments"] = "<i>($apurow[comments])</i>";
 
 					if ($apurow["alatila"] != "X") {
-						echo "<form name='poista' action = '$PHP_SELF' method='post'>
+						echo "<form name='poista' method='post'>
 								<input type='hidden' name = 'keikalla' value = 'on'>
 								<input type='hidden' name = 'tee' value = 'poista'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
@@ -1355,7 +1361,7 @@
 			if ($ok == 1) {
 
 				if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
-					echo "<form action = '$PHP_SELF' method='post'>
+					echo "<form method='post'>
 							<input type='hidden' name = 'tunnus' value='$tunnus'>
 							<input type='hidden' name = 'tee' value='H'>
 							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
@@ -1367,7 +1373,7 @@
 			}
 
 			if ($laskurow["h1time"] != "0000-00-00 00:00:00") {
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type='hidden' name='tee' value='palauta'>
 						<input type='hidden' name='tunnus' value='$tunnus'>
 						<input type='Submit' value='".t("Palauta lasku edelliselle hyv‰ksyj‰lle")."'>
@@ -1415,7 +1421,7 @@
 			echo "<table><tr>";
 
 			if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "<form method='post'>
 						<input type='hidden' name = 'tunnus' value='$tunnus'>
 						<input type='hidden' name = 'tee' value='H'>
 						<td class='back'><input type='Submit' value='".t("Hyv‰ksy lasku")."'></td>
@@ -1425,7 +1431,7 @@
 				echo "<font class='error'>",t("Hyv‰ksytt‰v‰n laskun summa ylitt‰‰ sallitun hyv‰ksynn‰n maksimisumman ja sinun j‰lkeesi hyv‰ksyj‰listalla ei ole esimiest‰si"),"!</font><br />";
 			}
 
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='tee' value='Z'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
 					<td class='back'><input type='Submit' value='".t("Pys‰yt‰ laskun k‰sittely")."'></td>
@@ -1441,7 +1447,7 @@
 		$liitteet = ebid($laskurow["tunnus"], true);
 
 		if (is_array($liitteet) and count($liitteet) > 0) {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name = 'tunnus' value='$tunnus'>
 					<input type='hidden' name = 'iframe' value='yes'>
@@ -1475,7 +1481,7 @@
 
 		if ($iframe == 'yes') {
 	  		echo "<td>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 	  				<input type='hidden' name = 'nayta' value='$nayta'>
@@ -1657,7 +1663,7 @@
 			}
 
 			echo "<td class='back' valign='top'>
-					<form action = '$PHP_SELF' method='post'>
+					<form method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='submit' value='".t("Valitse")."'>
@@ -1669,7 +1675,7 @@
 				// Mahdollisuus laittaa lasku holdiin
 				if ($trow['alatila'] != 'H') {
 					echo "<td class='back' valign='top'>
-							<form action='$PHP_SELF' method='post'>
+							<form method='post'>
 							<input type='hidden' name='tee' value='Z'>
 							<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 							<input type='submit' value='".t("Pys‰yt‰")."'>
@@ -1678,7 +1684,7 @@
 				}
 				else {
 					echo "<td class='back' valign='top'>
-							<form action='$PHP_SELF' method='post'>
+							<form method='post'>
 							<input type='hidden' name='tee' value='Z'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tunnus' value='$trow[tunnus]'>
@@ -1689,7 +1695,7 @@
 
 				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 					echo "<td class='back' valign='top'>
-							<form action='$PHP_SELF' method='post' onSubmit='return verify()'>
+							<form method='post' onSubmit='return verify()'>
 							<input type='hidden' name='tee' value='D'>
 							<input type='hidden' name='nayta' value='$nayta'>
 							<input type='hidden' name='tunnus' value = '$trow[tunnus]'>

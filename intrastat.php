@@ -104,6 +104,7 @@
 		}
 
 		$query = "";
+
 		// tässä tulee sitten nimiketietueet unionilla
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "keikka") {
 			$query = "	(SELECT
@@ -124,20 +125,37 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
-						FROM lasku use index (yhtio_tila_mapvm)
-						JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
-						LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-						LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-						WHERE lasku.kohdistettu = 'X'
-						and lasku.tila = 'K'
-						and lasku.vanhatunnus = 0
-						and lasku.kauppatapahtuman_luonne != '999'
-						and lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.mapvm >= '$vva-$kka-$ppa'
-						and lasku.mapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
+						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet";
+
+			if ($kukarow["yhtio"] != "artr") {
+				$query .= "	FROM lasku use index (yhtio_tila_mapvm)
+							JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0 $lisavarlisa)
+							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa)
+							LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
+							LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+							WHERE lasku.kohdistettu = 'X'
+							and lasku.tila = 'K'
+							and lasku.vanhatunnus = 0
+							and lasku.kauppatapahtuman_luonne != '999'
+							and lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.mapvm >= '$vva-$kka-$ppa'
+							and lasku.mapvm <= '$vvl-$kkl-$ppl'";
+			}
+			else {
+				$query .= "	FROM tilausrivi
+							JOIN lasku ON (tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and lasku.tila = 'K' and lasku.vanhatunnus = 0 and lasku.kauppatapahtuman_luonne != '999')
+							JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
+							LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+							LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi = 'O'
+							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
+							and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
+							and tilausrivi.kpl > 0
+							$lisavarlisa";
+			}
+
+			$query .= "	GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
 
@@ -738,7 +756,7 @@
 
 			echo "<br><table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Intrastat.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -769,7 +787,7 @@
 
 	echo "<br>
 
-	<form method='post' action='$PHP_SELF'>
+	<form method='post'>
 	<input type='hidden' name='tee' value='tulosta'>
 
 	<table>

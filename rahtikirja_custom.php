@@ -4,12 +4,12 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
 
-if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
+if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
     // tallennetaan rahtikirja
     $clean = array(
         'yhtio'        => $kukarow['yhtio'],
-		'merahti'      => (isset($_POST['merahti']) && $_POST['merahti'] == '1') ? 'K' : 'E',
+		'merahti'      => (isset($_POST['merahti']) and $_POST['merahti'] == '1') ? 'K' : 'E',
         'toimitustapa' => strip_tags($_POST['toimitustapa']),
         'otsikkonro'   => null, //tunnus,
 		'viitelah'     => strip_tags($_POST['viitelah']),
@@ -28,10 +28,10 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$_POST['kuutiot'][$i]	= str_replace(',', '.', $_POST['kuutiot'][$i]);
 		$_POST['lavametri'][$i]	= str_replace(',', '.', $_POST['lavametri'][$i]);
 
-		if((isset($_POST['kilot'][$i]) && is_numeric($_POST['kilot'][$i]))
-		|| (isset($_POST['kollit'][$i]) && is_numeric($_POST['kollit'][$i]))
-		|| (isset($_POST['kuutiot'][$i]) && is_numeric($_POST['kuutiot'][$i]))
-		|| (isset($_POST['lavametri'][$i]) && is_numeric($_POST['lavametri'][$i]))) {
+		if((isset($_POST['kilot'][$i]) and is_numeric($_POST['kilot'][$i]))
+		or (isset($_POST['kollit'][$i]) and is_numeric($_POST['kollit'][$i]))
+		or (isset($_POST['kuutiot'][$i]) and is_numeric($_POST['kuutiot'][$i]))
+		or (isset($_POST['lavametri'][$i]) and is_numeric($_POST['lavametri'][$i]))) {
 
 			$count++;
 
@@ -266,7 +266,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$asiakasid = false;
 }
 
-if (isset($_POST['ytunnus']) && $asiakasid !== false) {
+if (isset($_POST['ytunnus']) and $asiakasid !== false) {
     require 'inc/asiakashaku.inc';
 }
 
@@ -276,7 +276,7 @@ if (!$asiakasid) {
 	   echo "<br><br>";
 	}
 
-	echo "<table><form action='' method='POST' name='haku'>
+	echo "<table><form method='POST' name='haku'>
 	    	<tr><th>".t('Hae asiakas')."</th><td><input type='text' name='ytunnus' value=''></td>
 	        <td class='back'><input type='submit' value=".t('Etsi')."></td>
 	    	</tr></form></table>";
@@ -352,7 +352,7 @@ if ($asiakasid) {
 		$asiakasrow['toim_nimi']    = $tnimi;
 	}
 
-    echo "<form action='' method='post' name='rahtikirja'><table>";
+    echo "<form method='post' name='rahtikirja'><table>";
 	echo "<tr>
 			<th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
 	echo "<tr>
@@ -399,7 +399,7 @@ if ($asiakasid) {
 
     			// onko tämä valittu
     			$sel = '';
-    			if ((isset($_POST['toimitustapa']) && $_POST['toimitustapa'] == $toimt['selite'])
+    			if ((isset($_POST['toimitustapa']) and $_POST['toimitustapa'] == $toimt['selite'])
     			or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
     				$sel = "selected";
     				$toimitustapa_val = $toimt['selite'];
@@ -421,7 +421,10 @@ if (! isset($_POST['toimitustapa'])) {
     $sel 	 = '';
 
     // haetaan toimitustavan tiedot tarkastuksia varten
-    $apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
+    $apuqu2 = "	SELECT *
+				from toimitustapa
+				where yhtio	= '$kukarow[yhtio]'
+				and selite	= '$toimitustapa_val'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
@@ -433,7 +436,7 @@ if (! isset($_POST['toimitustapa'])) {
 else {
     $sel = '';
 
-    if (isset($_POST['merahti']) && $_POST['merahti'] === '0') {
+    if (isset($_POST['merahti']) and $_POST['merahti'] === '0') {
         $sel = 'selected';
     }
 }
@@ -545,7 +548,7 @@ else {
     	$i++;
     }
 
-	echo "</table><input type='hidden' name='asiakasid' value='{$asiakasid}'><input type='submit' name='tee' value='".t("Valmis")."'></form>";
+	echo "</table><input type='hidden' name='asiakasid' value='{$asiakasid}'><input type='submit' name='valmis' value='".t("Valmis")."'></form>";
 }
 
 /**
@@ -680,7 +683,11 @@ function pupe_varasto_fetch_all() {
  */
 function pupe_toimitustapa_fetch_all() {
 	// haetaan kaikki toimitustavat
-	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' order by jarjestys,selite";
+	$query  = "	SELECT *
+				FROM toimitustapa
+				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
+				and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc')
+				order by jarjestys,selite";
 	$result = pupe_query($query);
 
 	$data = array();

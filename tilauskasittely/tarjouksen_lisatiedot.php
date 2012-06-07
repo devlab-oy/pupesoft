@@ -115,7 +115,7 @@
 	}
 
 	if ($tee == "ETSILASKU") {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+		echo "<form method='post' autocomplete='off'>
 			<input type='hidden' name='ytunnus' value='$ytunnus'>
 			<input type='hidden' name='asiakasid' value='$asiakasid'>
 			<input type='hidden' name='tee' value='ETSILASKU'>";
@@ -250,7 +250,7 @@
 				echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 
 				echo "	<td class='back'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' value='NAYTAHTML'>
 						<input type='hidden' name='tunnus' value='$row[Tilaus]'>
 						<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -264,16 +264,16 @@
 						<input type='hidden' name='kkl' value='$kkl'>
 						<input type='hidden' name='vvl' value='$vvl'>
 						<input type='submit' value='".t("Näytä ruudulla")."'></form>
-						<form action='$PHP_SELF' method='post'>
+						<form method='post'>
 						<input type='hidden' name='tee' value='osamaksusoppari'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
 						<input type='Submit' value='".t("Rahoituslaskelma")."'>
 						</form>
-						<form action='$PHP_SELF' method='post'>
+						<form method='post'>
 						<input type='hidden' name='tee' value='vakuutushakemus'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
 						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'></form>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' value='TULOSTA'>
 						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
 						<input type='Submit' value='".t("Tulosta Lomakkeita")."'></form>
@@ -291,7 +291,7 @@
 	if ($tee == '') {
 		//syötetään tilausnumero
 		echo "<br><table>";
-		echo "<form action = '$PHP_SELF' method = 'post' name='hakuformi'>";
+		echo "<form method = 'post' name='hakuformi'>";
 
 		
 		echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";

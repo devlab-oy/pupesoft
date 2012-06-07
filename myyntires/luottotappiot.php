@@ -171,7 +171,7 @@ if ($tila == 'N') {
 
 	echo "<br><font class='message'>".t("Erittely:")."</font><br>";
 
-	echo "<form action = '$PHP_SELF' method = 'post' name='pvm'>";
+	echo "<form method = 'post' name='pvm'>";
 	echo "<input type='hidden' name='tila' value='K'>";
 	echo "<input type='hidden' name='eraantyneet' value='$eraantyneet'>";
 	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";
@@ -265,7 +265,7 @@ if ($tila == "") {
 				ORDER BY ytunnus";
 	$result = pupe_query($query);
 
-	echo "<form action = '$PHP_SELF' method = 'post'>";
+	echo "<form method = 'post'>";
 	echo "<table>";
 	echo "<tr><th>".t("Rajaus")."</th>";
 
@@ -310,7 +310,7 @@ if ($tila == "") {
 		echo "<td align='right'>$asiakas[laskut]</td>";
 
 		echo "<td class='back'>
-				<form action = '$PHP_SELF' method = 'post'>
+				<form method = 'post'>
 	   			<input type='hidden' name='tila' value='N'>
 				<input type='hidden' name='eraantyneet' value='$eraantyneet'>
 	   			<input type='hidden' name='liitostunnus' value='$asiakas[liitostunnus]'>

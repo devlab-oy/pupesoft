@@ -20,23 +20,23 @@
 			$selNOR = "SELECTED";
 		}
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<select name='factoringyhtio' onchange='submit();'>";
 		echo "<option value='Nordeasii' $selNOR>Näytä Nordea Factoring siirtotiedostot</option>";
 		echo "<option value='OKOsiirto' $selOKO>Näytä OKO Saatavarahoitus siirtotiedosto</option>";
 		echo "</select>";
 		echo "<input type='submit' value='Näytä'>";
 		echo "</form><br><br>";
-		
-		echo "<form method='post' action='$PHP_SELF'>";
+
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='factoringyhtio' value='$factoringyhtio'>";
 		echo "<select name='filenimi' multiple='FALSE' size='20'>";
 
 		$handle = opendir("dataout");
-		
+
 		$i=0;
-		
+
 		while ($file = readdir($handle)) {
 		  	$lista[$i] = $file;
 		 	$i++;
@@ -49,13 +49,13 @@
 				echo "<option value='$lista[$i]'>$lista[$i]</option>";
 			}
 		}
-		
+
 		closedir($handle);
 
 		echo "</select>";
 		echo "<input type='submit' value='Tallenna'></form>";
 		echo "<br><br>";
-	
+
 		require ("inc/footer.inc");
 	}
 

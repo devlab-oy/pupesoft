@@ -8,7 +8,7 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("Asiakkaan ostot tuoteryhmästä")."</font><hr>";
 
 if ($try=='' or $ytunnus=='') {
-	echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name=asiakas method='post' autocomplete='off'>";
 	echo "<table><tr>";
 	echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";

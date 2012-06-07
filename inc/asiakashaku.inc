@@ -370,7 +370,7 @@ if ($monta == 0) {
 	}
 
 	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -402,7 +402,7 @@ if ($monta == 0) {
 	}
 
 	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -533,7 +533,7 @@ if ($monta > 1 and $monta <= $limit) {
 					<td>$asiakas[postino] $brpostino</td>
 					<td>$asiakas[postitp] $brpostitp</td>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<td class='back'>";
 			echo "<input type='hidden' name='asiakasid' 	  value='$asiakas[tunnus]'>";
 			echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -592,7 +592,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "</table><br>";
 
 		if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 			echo "<input type='hidden' name='tee' 			  value='$tee'>";
 			echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -626,7 +626,7 @@ if ($monta > 1 and $monta <= $limit) {
 	}
 
 	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";

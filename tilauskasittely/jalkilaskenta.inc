@@ -492,14 +492,15 @@ if ($tuoteno != '') {
 
 			// yritet‰‰n korjata jotain joka on lukitulla tilikaudella.. kerrotaan siit‰
 			if ($korjaus_alku < $tilikausi_alku) {
-				echo "<font class='error'>".t("Korjauksia kaikkiin tapahtumiin ei voida tehd‰, koska tapahtumia on lukitulla tilikaudella")."!</font><br>";
+				echo "<font class='error'>".t("Korjauksia kaikkiin tuotteen %s tapahtumiin ei voida tehd‰, koska tapahtumia on lukitulla tilikaudella", "", $tuoteno)."!</font><br>";
 			}
 		}
 
 		if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti100pvm'] != '0000-00-00')) {
-			echo "<font class='error'>".t("T‰t‰ tuotetta ei en‰‰ voi korjata")."</font><br>";
+			echo "<font class='error'>".t("Tuote %s on ep‰kurantti! J‰lkilaskentaa ei suoriteta", "", $tuoteno)."!</font><br>";
+
 			if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-			$jlerror=1;
+			$jlerror = 1;
 		}
 
 		if ($jlerror != 1) {

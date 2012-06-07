@@ -134,15 +134,16 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 		}
 		if ($tee == 'XKAIKKI') {
 			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, myˆs myynti ja tasetilit
-			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
-						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						AND tili.yhtio = '$kukarow[yhtio]'
-						AND tiliointi.tilino = tili.tilino
+			$query = "	SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, 'n/a', 'n/a', 'n/a', tiliointi.selite
+						FROM tiliointi use index (yhtio_tilino_tapvm)
+						JOIN tili use index (tili_index) ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
+						WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
 						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
-						AND tiliointi.kustp = 0";
+						AND tiliointi.tilino not in ('{$yhtiorow["alv"]}', '{$yhtiorow["pyoristys"]}')
+						AND tiliointi.tapvm >= '{$yhtiorow["tilikausi_alku"]}'
+						AND tiliointi.tapvm <= '{$yhtiorow["tilikausi_loppu"]}'
+						AND tiliointi.kustp = 0
+						ORDER BY tiliointi.ltunnus";
 		}
 		if ($tee == 'W') {
 			$query = "	(SELECT lasku.tunnus ltunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
@@ -1360,7 +1361,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// N‰ytet‰‰n nappi vain jos siihen on oikeus
 	if ($oikeurow['paivitys'] == 1) {
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'tee' value='M'>
 				<input type = 'hidden' name = 'tila' value=''>
@@ -1383,7 +1384,7 @@ if ($tee == 'E' or $tee == 'F') {
 	// N‰ytet‰‰n nappi vain jos tieoja on
 	if ($trow['vienti'] != '' and $trow['vienti'] != 'A' and $trow['vienti'] != 'D' and $trow['vienti'] != 'G') {
 		if ($tee2 != 1) {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'tee' value='$tee'>
 				<input type = 'hidden' name = 'tee2' value='1'>
@@ -1391,7 +1392,7 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type = 'submit' value = '".t("Lis‰tiedot")."'></form>";
 		}
 		else {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'tee' value='$tee'>
 				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
@@ -1422,7 +1423,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		if ($trow['viesti'] == 'Korkolasku') {
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 			<input type='hidden' name='nayta_pdf' value='1'>
@@ -1442,13 +1443,13 @@ if ($tee == 'E' or $tee == 'F') {
 			$fnappula = t('N‰yt‰ tilausrivit');
 		}
 
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name = 'tee' value='$ftee'>
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 			<input type = 'submit' value = '$fnappula'>
 			</form>
-			<form action = '$PHP_SELF' method='post'>
+			<form method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name = 'tee' value='G'>
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
@@ -1502,7 +1503,7 @@ if ($tee == "") {
 		$kentta = 'tap';
 	}
 
-	echo "<form name = 'valikko' action = '$PHP_SELF' method='post'>";
+	echo "<form name = 'valikko' method='post'>";
 	echo "<input type='hidden' name='tee' value='Y'>";
 	echo "<table>";
 	echo "<tr><th colspan='3'>".t("Etsi tositetta")."</th></tr>";
@@ -1558,51 +1559,51 @@ if ($tee == "") {
 
 	echo "	<tr class='aktiivi'>
 			<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
-		  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joilla on manuaalisia alv kirjauksia")."</td>
-		  	<td><form action = '$PHP_SELF?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joilla on alv kirjauksia tileille, jotka ei ole alv-ilmoituksessa")."</td>
-		  	<td><form action = '$PHP_SELF?tee=alvkirjauksia_ilmanalvtasoa' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=alvkirjauksia_ilmanalvtasoa' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")." (".t("ei huomioida myynti- ja varastonmuutostilej‰").")</td>
-		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")." (".t("huomioidaan kaikki tilit").")</td>
-		  	<td><form action = '$PHP_SELF?tee=XKAIKKI' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=XKAIKKI' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei t‰sm‰‰")."</td>
-		  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ei t‰sm‰‰")."</td>
-		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ maksetut laskut, joilla on myyntisaamisia")."</td>
-		  	<td><form action = '$PHP_SELF?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden automaattikirjauksia on muutettu")."</td>
-		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden automaattisia alv-kirjauksia on muutettu")."</td>
-		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_alv_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=automaattikirjauksia_alv_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden marginaaliverotiliˆinnit ovat v‰‰rin")."</td>
-		  	<td><form action = '$PHP_SELF?tee=≈' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=≈' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			<tr class='aktiivi'>
 		  	<td>n‰yt‰ saldo pankin tiliotteen ja kirjanpidon v‰lill‰</td>
-		  	<td><form action = '$PHP_SELF?tee=KP' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	<td><form action = '?tee=KP' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			</table>";
 }

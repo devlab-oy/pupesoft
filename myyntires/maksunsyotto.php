@@ -417,7 +417,7 @@ if ($ytunnus != '' and $tee == "") {
 			}
 		</SCRIPT>";
 
-	echo "<form action='$PHP_SELF' method='post' onSubmit = 'return verify()' name='formi'>";
+	echo "<form method='post' onSubmit = 'return verify()' name='formi'>";
 	echo "<input type='hidden' name='tee' value='CHECK'/>\n";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
@@ -591,7 +591,7 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<font class='message'>",t("Maksajan hakuinfo")," ",asiakashakuohje(),"</font><br>";
 	echo "<br>";
 	echo t("Maksaja").": ";
-	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
+	echo "<form method='post' name='maksaja'>";
 	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
 	echo "<input type='hidden' name='tee' value='ETSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";

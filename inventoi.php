@@ -1080,7 +1080,7 @@
 			}
 
 			if ($lista != "") {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<select name='rivimaara' onchange='submit()'>";
 				echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
 				echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
@@ -1100,7 +1100,7 @@
 			}
 
 
-			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form name='inve' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
@@ -1452,7 +1452,7 @@
 			$noperow = mysql_fetch_assoc($noperes);
 
 			echo "<table>";
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
 			echo "<input type='hidden' name='tuoteno' value='$noperow[tuoteno]'>";
@@ -1470,7 +1470,7 @@
 			$yesres = pupe_query($query);
 			$yesrow = mysql_fetch_assoc($yesres);
 
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
 			echo "<input type='hidden' name='tuoteno' value='$yesrow[tuoteno]'>";
@@ -1479,7 +1479,7 @@
 			echo "</table>";
 		}
 
-		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form name='inve' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";
 
 		echo "<br><table>";
@@ -1497,7 +1497,7 @@
 		echo "</table>";
 		echo "<br><br>";
 
-		echo "<form method='post' action='$PHP_SELF' enctype='multipart/form-data'>
+		echo "<form method='post' enctype='multipart/form-data'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
 				<br><br>

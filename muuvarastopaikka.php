@@ -821,7 +821,7 @@
 
 		if ($ulos != "") {
 			$formi  = 'hakua';
-   			echo "<form action = '$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+   			echo "<form method='post' name='$formi' autocomplete='off'>";
    			echo "<input type='hidden' name='tee' value='Q'>";
    			echo "<input type='hidden' name='tulostakappale' value='$tulostakappale'>";
    			echo "<input type='hidden' name='kirjoitin' value='$kirjoitin'>";
@@ -851,7 +851,7 @@
 		echo "<table><tr>";
 
 		//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -862,7 +862,7 @@
 		echo "</td>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='S'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -876,7 +876,7 @@
 		echo "<table>";
 		echo "<tr>";
 
-		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>
 				<input type = 'hidden' name = 'tee' value ='N'>
 				<tr>
@@ -1054,7 +1054,7 @@
 				</tr></table></form><br>";
 
 		// Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)
-		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "	<form name = 'valinta' method='post'>
 				<input type = 'hidden' name = 'tee' value ='MUUTA'>
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
@@ -1111,7 +1111,7 @@
 		$ahyllyvali	= '';
 		$ahyllytaso	= '';
 
-		echo "<table><form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<table><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='UUSIPAIKKA'>
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lisää uusi varastopaikka")."</th></tr>
@@ -1124,14 +1124,14 @@
 				<tr><td><input type = 'submit' value = '".t("Lisää")."'></td></tr>
 				</table></form>";
 
-		echo "<br><hr><form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<br><hr><form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value=''>
 				<input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
 	}
 
 	if ($tee == '') {
 		// Tällä ollaan, jos olemme vasta valitsemassa tuotetta
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "<form name = 'valinta' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>
 				<tr><th>".t("Anna tuotenumero")."</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210)."</td></tr>

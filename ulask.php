@@ -1804,6 +1804,10 @@ if ($tee == 'I') {
 	$osto_kulu = (float) $osto_kulu;
 	$osto_rivi_kulu = (float) $osto_rivi_kulu;
 
+	$osto_rahti_alv = (float) $osto_rahti_alv;
+	$osto_kulu_alv = (float) $osto_kulu_alv;
+	$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
+
 	// Kirjoitetaan lasku
 	$query = "	INSERT into lasku set
 				yhtio 				= '$kukarow[yhtio]',
@@ -1856,7 +1860,10 @@ if ($tee == 'I') {
 				alv_tili 			= '$tilino_alv',
 				osto_rahti			= '{$osto_rahti}',
 				osto_kulu			= '{$osto_kulu}',
-				osto_rivi_kulu		= '{$osto_rivi_kulu}'";
+				osto_rivi_kulu		= '{$osto_rivi_kulu}',
+				osto_rahti_alv		= '{$osto_rahti_alv}',
+				osto_kulu_alv		= '{$osto_kulu_alv}',
+				osto_rivi_kulu_alv	= '{$osto_rivi_kulu_alv}'";
 	$result = pupe_query($query);
 	$tunnus = mysql_insert_id ($link);
 

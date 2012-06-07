@@ -78,7 +78,7 @@
 						ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
 			$perheresult = pupe_query($query);
 
-			while ($perherow = mysql_fetch_array($perheresult)) {
+			while ($perherow = mysql_fetch_assoc($perheresult)) {
 
 				$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
 
@@ -181,7 +181,7 @@
 					AND oletus != ''
 					LIMIT 1";
 		$olpares = pupe_query($olquery);
-		$olparow = mysql_fetch_array($olpares);
+		$olparow = mysql_fetch_assoc($olpares);
 
 		$paikka	= $olparow["olpaikka"];
 	}
@@ -535,7 +535,7 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$kres1 = pupe_query($query);
 
-			while ($krow1 = mysql_fetch_array($kres1)) {
+			while ($krow1 = mysql_fetch_assoc($kres1)) {
 				// Käydään läpi kaikki korvaavat...
 				$query = "	SELECT tuote.*
 							FROM korvaavat
@@ -545,7 +545,7 @@
 							order by korvaavat.jarjestys, korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
 
-				while ($krow2 = mysql_fetch_array($kres2)) {
+				while ($krow2 = mysql_fetch_assoc($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
@@ -652,7 +652,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'";
 			$zres = pupe_query($query);
-			$zrow = mysql_fetch_array($zres);
+			$zrow = mysql_fetch_assoc($zres);
 
 			if ($zrow["ei_saldoa"] == "") {
 
@@ -722,7 +722,7 @@
 				$zzrow 		= array();
 				$zzrowlask 	= 0;
 
-				while ($zrow = mysql_fetch_array($zres)) {
+				while ($zrow = mysql_fetch_assoc($zres)) {
 
 					// Saldolliset tuotteet
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
@@ -1246,7 +1246,7 @@
 											FROM tuote
 											WHERE yhtio='$kukarow[yhtio]' and tuoteno='$myy_tuoteno[$indeksi]'";
 								$tres = pupe_query($query);
-								$trow = mysql_fetch_array($tres);
+								$trow = mysql_fetch_assoc($tres);
 
 								$ale_kaikki_array = array();
 
@@ -1335,7 +1335,7 @@
 									if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 										$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 										$triviresult = pupe_query($query);
-										$trivinrow = mysql_fetch_array($triviresult);
+										$trivinrow = mysql_fetch_assoc($triviresult);
 
 										$rivinumero = $trivinrow["trivinro"]+1;
 										$tilrivinumero = $rivinumero;
@@ -1452,7 +1452,7 @@
 								$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
 
 								if (mysql_num_rows($lisatied_res) > 0) {
-									$lisatied_row = mysql_fetch_array($lisatied_res);
+									$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET
@@ -1536,7 +1536,7 @@
 												LIMIT ". (int) abs($varattu);
 									$sres = pupe_query($query);
 
-									while ($srow = mysql_fetch_array($sres)) {
+									while ($srow = mysql_fetch_assoc($sres)) {
 										$query = "	UPDATE sarjanumeroseuranta
 													SET $tunken 		 = '$lisatty_tun'
 													WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1572,7 +1572,7 @@
 													and hyllyvali 	= '$myy_hyllyvali[$indeksi]'
 													and sarjanumero = '$myy_era[$indeksi]'";
 										$lisa_res = pupe_query($query);
-										$lisa_row = mysql_fetch_array($lisa_res);
+										$lisa_row = mysql_fetch_assoc($lisa_res);
 
 										$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
 									}
@@ -1612,7 +1612,7 @@
 													and tunnus	= $perheid_lisaarivi
 													and tyyppi	= 'V'";
 										$lisa_res = pupe_query($query);
-										$lisa_row = mysql_fetch_array($lisa_res);
+										$lisa_row = mysql_fetch_assoc($lisa_res);
 
 										if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 											$valmistetyyppi = "M";
@@ -1776,14 +1776,14 @@
 				$trow["tuoteno"] = $kaikkituotteet[0];
 			}
 			else {
-				$trow = mysql_fetch_array($tuoteresult);
+				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 					$triviresult = pupe_query($query);
-					$trivinrow = mysql_fetch_array($triviresult);
+					$trivinrow = mysql_fetch_assoc($triviresult);
 
 					$rivinumero = $trivinrow["trivinro"]+1;
 				}
@@ -2133,7 +2133,7 @@
 				if (mysql_num_rows($ediresult) > 0) {
 
 					$edivastaavattuotteet = "";
-					$vrow = mysql_fetch_array($ediresult);
+					$vrow = mysql_fetch_assoc($ediresult);
 
 					$query = "	SELECT *
 								FROM vastaavat
@@ -2143,7 +2143,7 @@
 								ORDER BY jarjestys, tuoteno";
 					$edi2result = pupe_query($query);
 
-					while ($edirow = mysql_fetch_array($edi2result)) {
+					while ($edirow = mysql_fetch_assoc($edi2result)) {
 
 						list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
@@ -2262,15 +2262,30 @@
 				// Päivitetään suoratoimitus-myyntitilausrivin määrät
 				$query = "	UPDATE tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
-							SET tilausrivi.varattu = '$varattu',
-							tilausrivi.tilkpl 	   = '$varattu'
+							SET tilausrivi.tilkpl	= '$varattu',
+							tilausrivi.varattu 		= if(tilausrivi.varattu != 0, $varattu, 0),
+							tilausrivi.jt 			= if(tilausrivi.jt != 0, $varattu, 0)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tunnus = '$suoratoimitus_rivitun'";
 				$result = pupe_query($query);
 			}
 			elseif ($suoratoimitus_splittaus and $rivitunnus != $lisatty_tun) {
 				// Splitataan suoratoimitus-myyntitilausrivi
-				$uusi_suoratoimrivi = kopioi_tilausrivi($suoratoimitus_rivitun, array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.varattu"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun));
+				$query = "	SELECT varattu, jt
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$suoratoimitus_rivitun'";
+				$result = pupe_query($query);
+				$suora_row = mysql_fetch_assoc($result);
+
+				if ($suora_row["jt"] != 0) {
+					$pkentat = array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.jt"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun);
+				}
+				else {
+					$pkentat = array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.varattu"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun);
+				}
+
+				$uusi_suoratoimrivi = kopioi_tilausrivi($suoratoimitus_rivitun, $pkentat);
 				$suoratoimitus_splittaus = FALSE;
 			}
 
@@ -2286,7 +2301,7 @@
 			$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
 
 			if (mysql_num_rows($lisatied_res) > 0) {
-				$lisatied_row = mysql_fetch_array($lisatied_res);
+				$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET
@@ -2366,7 +2381,7 @@
 								LIMIT ". (int) abs($varattu+$jt);
 					$sres = pupe_query($query);
 
-					while ($srow = mysql_fetch_array($sres)) {
+					while ($srow = mysql_fetch_assoc($sres)) {
 						if ($var == "S") {
 							// jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni
 							$query = "	INSERT INTO sarjanumeroseuranta
@@ -2414,7 +2429,7 @@
 								and tunnus	= $perheid_lisaarivi
 								and tyyppi	= 'V'";
 					$lisa_res = pupe_query($query);
-					$lisa_row = mysql_fetch_array($lisa_res);
+					$lisa_row = mysql_fetch_assoc($lisa_res);
 
 					if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 						$valmistetyyppi = "M";

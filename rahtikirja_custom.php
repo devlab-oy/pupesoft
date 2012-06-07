@@ -422,7 +422,10 @@ if (! isset($_POST['toimitustapa'])) {
     $sel 	 = '';
 
     // haetaan toimitustavan tiedot tarkastuksia varten
-    $apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
+    $apuqu2 = "	SELECT *
+				from toimitustapa
+				where yhtio	= '$kukarow[yhtio]'
+				and selite	= '$toimitustapa_val'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
@@ -682,7 +685,11 @@ function pupe_varasto_fetch_all() {
  */
 function pupe_toimitustapa_fetch_all() {
 	// haetaan kaikki toimitustavat
-	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' order by jarjestys,selite";
+	$query  = "	SELECT *
+				FROM toimitustapa
+				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
+				and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc')
+				order by jarjestys,selite";
 	$result = pupe_query($query);
 
 	$data = array();

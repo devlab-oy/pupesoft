@@ -1476,14 +1476,14 @@
 					default:
 						$otsikko = t(mysql_field_name($result, $i));
 				}
-
-				if ($rajattu_nakyma != '') {
- 					$ulos = "";
- 					$tyyppi = 0;
- 				}
 			}
 
 			require ("inc/$toim"."rivi.inc");
+
+			if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '') {
+				$ulos = "";
+				$tyyppi = 0;
+			}
 
 			// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
 			if (mysql_field_name($result, $i) == "laatija" or

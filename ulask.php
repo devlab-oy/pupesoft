@@ -2120,7 +2120,9 @@ if ($tee == 'I') {
 				$tili = $yhtiorow[$key];
 				$summa = $value;
 
-				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
+				// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $ikustp[1], $ikohde[1], $iprojekti[1]);
 
 				require ("inc/teetiliointi.inc");
 			}

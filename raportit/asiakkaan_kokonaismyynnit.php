@@ -120,7 +120,7 @@ if ($ytunnus!='') {
 }
 
 
-echo "<br><br><form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<br><br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";

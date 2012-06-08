@@ -75,7 +75,7 @@
 	if ($viivatut != '') $viivacheck='checked';
 	if ($iframe != '') $iframechk='checked';
 
-	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "<form name = 'valinta' method='post'>
 			<table>
 			<tr><th>".t("Anna kausi, muodossa kk-vvvv").":</th>
 			<td><input type = 'text' name = 'kk' value='$kk' size=2></td>

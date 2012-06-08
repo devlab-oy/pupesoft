@@ -277,7 +277,7 @@
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<form method='post' action='$PHP_SELF' name='yllapitosopimus' onSubmit = 'return verify()'>";
+		echo "<form method='post' name='yllapitosopimus' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='tee' value='laskuta'>";
 
 		echo "<table>";

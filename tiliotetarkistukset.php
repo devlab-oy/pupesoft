@@ -56,7 +56,7 @@
 		if (!isset($vv)) $vv = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		if (!isset($pp)) $pp = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
-		echo "<form name = 'valikko' action = '$PHP_SELF' method='post'><table>
+		echo "<form name = 'valikko' method='post'><table>
 			  <tr>
 			  <th>".t("Alkupvm")."</th>
 			  <td>

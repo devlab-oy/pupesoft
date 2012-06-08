@@ -80,7 +80,7 @@
 			echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
 
 			echo "<table>";
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='asiakasid' value='$asiakasid'>
 					<input type='hidden' name='toiminto' value='lisatiedot'>
@@ -285,7 +285,7 @@
 		if ($tee == 'K') {
 
 			echo "<table>";
-			echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='otunnus' value='$otunnus'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -568,7 +568,7 @@
 		$kentta = "etsi";
 
 		// tehdään etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		
 		echo "<table>";
@@ -592,7 +592,7 @@
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>";
-		echo t("Syötä nimi")." / ".t("Laskunumero")." / ".t("Keikkanumero");
+		echo t("Syötä nimi")." / ".t("Laskunumero")." / ".t("Saapumisnumero");
 		echo "</th>";
 		echo "<td>";
 		echo "<input type='text' name='etsi' value='$etsi'>";
@@ -650,7 +650,7 @@
 					echo "<td>".tv1dateconv($tilrow["tapvm"])."</td>";
 
 					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF'>
+							<form method='post'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='otunnus' value='$tilrow[tunnus]'>
 							<input type='hidden' name='tee' value='K'>
@@ -676,7 +676,7 @@
 		$kentta="etsi";
 
 		// tehdään etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
 
@@ -739,7 +739,7 @@
 					if ($lask >= 1) {
 						$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
 						echo "<td class='back'>
-								<form method='post' action='$PHP_SELF'>
+								<form method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='otunnus' value='$tunnukset'>
 								<input type='hidden' name='tee' value='K'>
@@ -781,7 +781,7 @@
 				}
 
 				echo "<td class='back'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='otunnus' value='$tilrow[tilaus]'>
 						<input type='hidden' name='tee' value='K'>
@@ -803,7 +803,7 @@
 				$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
 
 				echo "<td class='back'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='otunnus' value='$tunnukset'>
 						<input type='hidden' name='tee' value='K'>
@@ -875,7 +875,7 @@
 						if ($lask >= 1) {
 							$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois						
 							echo "<td class='back'>
-									<form method='post' action='$PHP_SELF'>
+									<form method='post'>
 									<input type='hidden' name='toim' value='$toim'>
 									<input type='hidden' name='otunnus' value='$tunnukset'>
 									<input type='hidden' name='tee' value='K'>
@@ -905,7 +905,7 @@
 					echo "<td>$teksti</td>";
 
 					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF'>
+							<form method='post'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='otunnus' value='$tilrow[tilaus]'>
 							<input type='hidden' name='tee' value='K'>
@@ -927,7 +927,7 @@
 					$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
 					
 					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF'>
+							<form method='post'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='otunnus' value='$tunnukset'>
 							<input type='hidden' name='tee' value='K'>

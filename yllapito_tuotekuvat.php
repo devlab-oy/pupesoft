@@ -717,10 +717,10 @@
 				$laskuri = 0;
 
 				echo "<form action='",$PHP_SELF,"' method='post' ";
-					if ($mul_exl != 'tallennetaan') {
-						echo "onSubmit='return verify();'";
-					}
-				echo ">";
+				if ($mul_exl != 'tallennetaan') {
+					echo "onSubmit='return verify();'";
+				}
+				echo " class='multisubmit'>";
 				echo "<table cellpadding='2' cellspacing='2'>";
 
 					echo "<tr>";

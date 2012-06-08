@@ -284,7 +284,7 @@ if ($faarao == 'TUTKHM') {
 	$tila = '';
 }
 else {
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='tee' value='$tee'>";

@@ -341,7 +341,7 @@
 //					$Inf = $RgltryDtls->addChild('Inf', '');
 			$RmtInf = $CdtTrfTxInf->addChild('RmtInf', '');														// RemittanceInformation
 
-			if ($laskurow["viite"] > 0) {
+			if (strlen(trim($laskurow["viite"])) > 0) {
 				$Strd = $RmtInf->addChild('Strd', '');															// Structured (Max 9 occurrences)
 //					$RfrdDocInf = $Strd->addChild('RfrdDocInf', '');											// ReferredDocumentInformation
 //						$RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
@@ -356,7 +356,7 @@
 						$CdtrRef = $CdtrRefInf->addChild('CdtrRef', sprintf("%-1.35s", $laskurow['viite']));	// CreditorReference
 //					$AddtlRmtInf = $Strd->addChild('AddtlRmtInf', '');
 			}
-			else {
+			elseif ($laskurow['viesti'] != "") {
 				$Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viesti']));					// Unstructured (max 140 char)
 			}
 
@@ -406,7 +406,7 @@
 
 							$RmtdAmt->addAttribute('Ccy', $nettorow['valkoodi']);				   					// Attribute Currency
 
-					if ($nettorow["viite"] > 0) {
+					if (strlen(trim($nettorow["viite"])) > 0) {
 						$CdtrRefInf = $Strd->addChild('CdtrRefInf', '');						   					// CreditorReferenceInformation
 							$CdtrRefTp = $CdtrRefInf->addChild('CdtrRefTp', '');				   					// CreditorReferenceType
 								$Cd = $CdtrRefTp->addChild('Cd', 'SCOR');						   					// Code (SCOR = Structured Communication Reference)
@@ -427,9 +427,14 @@
 	require("inc/parametrit.inc");
 
 	// Onko maksuaineistoille annettu salasanat.php:ss‰ oma polku jonne tallennetaan
-
 	if (isset($tee) and $tee == "KIRJOITAKOPIO") {
 		$pankkitiedostot_polku = "/tmp/";
+	}
+	elseif (isset($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"])) {
+		$pankkitiedostot_polku = trim($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"]);
+		if (substr($pankkitiedostot_polku, -1) != "/") {
+			$pankkitiedostot_polku .= "/";
+		}
 	}
 	elseif (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
 		$pankkitiedostot_polku = trim($pankkitiedostot_polku);
@@ -527,7 +532,7 @@
 		}
 
 		if (mysql_num_rows($result) > 0 and $virheita == 0) {
-			echo "<form name = 'valinta' method='post' action = ''>";
+			echo "<form name = 'valinta' method='post'>";
 			echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITA'>";
 			echo "<input type = 'submit' value = '".t("Tee maksuaineistot")."'>";
 			echo "</form>";
@@ -771,7 +776,7 @@
 		}
 
 		echo "<tr><th>".t("Tallenna aineisto")."</th>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 
@@ -783,5 +788,23 @@
 		}
 
 		echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+		echo "</tr>";
+		echo "</table>";
+
+		// Jos kaikki siirtoon tarvittavat parametrit on kunnossa, siirret‰‰n tiedosto!
+		$y = $kukarow["yhtio"];
+		if (isset(	$maksuaineiston_siirto[$y]["host"],
+					$maksuaineiston_siirto[$y]["user"],
+					$maksuaineiston_siirto[$y]["pass"],
+					$maksuaineiston_siirto[$y]["path"],
+					$maksuaineiston_siirto[$y]["type"],
+					$maksuaineiston_siirto[$y]["file"],
+					$maksuaineiston_siirto[$y]["local_dir"],
+					$maksuaineiston_siirto[$y]["local_dir_ok"],
+					$maksuaineiston_siirto[$y]["local_dir_error"])) {
+			require("maksuaineisto_send.php");
+			echo "<br><font class='message'>".t("Maksuaineisto siirretty pankkiyhteysohjelmaan").".</font>";
+		}
 	}
+
 ?>

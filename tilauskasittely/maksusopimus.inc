@@ -266,7 +266,7 @@
 
 	if (mysql_num_rows($result) == 1) {
 
-		echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
+		echo "<form method='post' name='maksupositiot'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='$tee'>
@@ -275,7 +275,7 @@
 				</form>";
 
 		if ($laskurow["jaksotettu"] > 0) {
-			echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
+			echo "<form method='post' name='maksupositiot'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='$tee'>
@@ -284,7 +284,7 @@
 					</form>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF'>
+		echo "<form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
@@ -384,7 +384,7 @@
 				}
 
 				if ($row["uusiotunnus"] == 0) {
-					echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>";
+					echo "<form method='post' name='maksupositiot'>";
 					echo "<tr>";
 
 					echo "<td>$i</td>";
@@ -457,7 +457,7 @@
 							<input type='hidden' name='maksupositio' value='$row[tunnus]'>
 							<td class='back' valign='top'><input type='submit' value='".t("Tallenna")."'></td></form>";
 
-					echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
+					echo "<form method='post' name='maksupositiot'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 							<input type='hidden' name='tee' value='$tee'>

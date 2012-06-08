@@ -12,6 +12,7 @@ if (is_numeric($toimittajaid) and $toimittajaid > 0) {
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
+
 if ($monta == 0 and $ytunnus != '') {
 	//etsitään eka koko ytunnuksella
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and tyyppi != 'P'";
@@ -34,7 +35,9 @@ if ($monta == 0 and $ytunnus != '') {
 }
 
 if ($monta==0) {
-	echo "<font class='error'>".t("Toimittajaa")." '$ytunnus' ".t("ei löydy")."!</font><br>";
+	if (strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
+		echo "<font class='error'>".t("Toimittajaa")." '$ytunnus' ".t("ei löydy")."!</font><br>";
+	}
 	$ytunnus 		= "";
 	$toimittajaid 	= "";
 }
@@ -122,5 +125,3 @@ if ($monta > $limit) {
 	echo "<font class='error'>".t("VIRHE: Toimittajahaulla löytyi")." $monta ".t("sopivaa toimittajaa. Tarkenna hakuasi")."!</font><br><br>";
 	$ytunnus="";
 }
-
-?>

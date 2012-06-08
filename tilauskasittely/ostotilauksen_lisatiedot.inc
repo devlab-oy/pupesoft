@@ -110,7 +110,7 @@ if ($tee == "") {
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>".t("keikka")."</th>";
+	echo "<th>".t("saapuminen")."</th>";
 	echo "<th>".t("ytunnus")."</th>";
 	echo "<th>".t("nimi")."</th>";
 	echo "<th>".t("tapvm")."</th>";
@@ -131,7 +131,7 @@ if ($tee == "") {
 	echo "</table><br>";
 
 	echo "<table>";
-	echo "<form action = '$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "	<input type='hidden' name='toiminto' value='lisatiedot'>
 			<input type='hidden' name='otunnus' value='$otunnus'>

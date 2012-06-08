@@ -46,7 +46,7 @@
 	if ($tee == "") {
 		
 		// Näytetään muuten vaan sopivia tilauksia
-		echo "<br><form action='$PHP_SELF' method='post'>
+		echo "<br><form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<font class='message'>".t("Etsi laite").":<hr></font>
 				".t("Syötä sarjanumero").":
@@ -86,7 +86,7 @@
 						
 						if ($sarjarow1["tyyppi"] == "G") {
 							echo "<td class='back'>	
-									<form method='post' action='$PHP_SELF'>	
+									<form method='post'>	
 									<input type='hidden' name='tee' value='VALMIS'>
 									<input type='hidden' name='etsi' value='$etsi'>
 									<input type='hidden' name='tuoteno' value='$sarjarow1[tuoteno]'>

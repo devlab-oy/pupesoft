@@ -1,5 +1,7 @@
 <?php
 
+$pupe_DataTables = array("etusivun_tyomaarays");
+
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
@@ -207,21 +209,32 @@ if (!isset($tee) or $tee == '') {
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
+					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
 
-		echo "<table>";
+		pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
+
+		$padding_muuttuja = " style='padding-right:15px;'";
+
+		echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+		echo "<thead>";
+
 		echo "<tr>";
-		echo "<td colspan='4' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
+		echo "<td colspan='5' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
 		echo "</tr>";
+
 		echo "<tr>";
-		echo "<th>".t("Työnumero")."</th>";
-		echo "<th>".t("Prioriteetti")."</th>";
-		echo "<th>".t("Asiakas")."</th>";
-		echo "<th>".t("Päivämäärä")."</th>";
+		echo "<th $padding_muuttuja>".t("Työnumero")."</th>";
+		echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
+		echo "<th $padding_muuttuja>".t("Status")."</th>";
+		echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
+		echo "<th $padding_muuttuja>".t("Päivämäärä")."</th>";
 		echo "</tr>";
+
+		echo "</thead>";
+		echo "<tbody>";
 
 	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
 			// Laitetetaan taustaväri jos sellainen on syötetty
@@ -230,24 +243,16 @@ if (!isset($tee) or $tee == '') {
 			echo "<tr $varilisa>";
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
+			echo "<td>{$tyorow["tyostatus"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
-			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
+			echo "<td>{$tyorow["toimaika"]}</td>";
 			echo "</tr>";
 		}
+		echo "</tbody>";
 		echo "</table><br>";
 	}
 
-	// katsotaan onko käyttäjällä oikeus muutosite.php ja alv_laskelma_uusi.php
-	$queryoik = "	SELECT oikeu.tunnus
-					FROM oikeu
-					JOIN oikeu AS oikeu2 ON (oikeu2.yhtio = oikeu.yhtio AND oikeu2.kuka = oikeu.kuka AND oikeu2.nimi LIKE '%alv_laskelma_uusi.php')
-					WHERE oikeu.nimi LIKE '%muutosite.php'
-					AND oikeu.kuka = '{$kukarow['kuka']}'
-					AND oikeu.yhtio = '{$yhtiorow['yhtio']}'
-					LIMIT 1";
-	$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-	if (mysql_num_rows($res) == 1) {
+	if (tarkista_oikeus("alv_laskelma_uusi.php")) {
 
 		$ulos = '';
 
@@ -255,7 +260,8 @@ if (!isset($tee) or $tee == '') {
 		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min
 						FROM tilikaudet
 						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND tilikausi_alku >= '2010-11-01'";
+						AND tilikausi_alku >= '2010-11-01'
+						AND tilikausi_alku >= date_sub('{$yhtiorow['tilikausi_alku']}', interval 1 month)";
 		$min_result = pupe_query($min_query);
 		$min_row = mysql_fetch_assoc($min_result);
 

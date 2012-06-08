@@ -42,7 +42,7 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Keikka")."</th>";
+			echo "<th>".t("Saapuminen")."</th>";
 			echo "<th>".t("Yksiköt")."</th>";
 			echo "<th>".t("Rivit")."</th>";
 			echo "<th nowrap>".t("Viety varastoon")."</th>";
@@ -69,7 +69,7 @@
 					echo "<table>";
 					echo "<tr>";
 					echo "<th>".t("Nimi")."</th>";
-					echo "<th>".t("Keikka")."</th>";
+					echo "<th>".t("Saapuminen")."</th>";
 					echo "<th>".t("Yksiköt")."</th>";
 					echo "<th>".t("Rivit")."</th>";
 					echo "<th nowrap>".t("Viety varastoon")."</th>";
@@ -185,7 +185,7 @@
 	if (!isset($vvl)) $vvl = date("Y");
 	if (!isset($ppl)) $ppl = date("d");
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	echo "<br>";

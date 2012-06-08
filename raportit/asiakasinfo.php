@@ -381,7 +381,7 @@ if ($asiakasid > 0) {
 		echo "<br><font class='message'>".t("Myynti osastoittain tuoteryhmittäin viimeiset 12 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>)</font>";
 		echo "<hr>";
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<br>".t("Näytä/piilota osastojen ja tuoteryhmien nimet.");
 		echo "<input type ='hidden' name='ytunnus' value='$ytunnus'>";
@@ -1569,7 +1569,7 @@ if ($asiakasid > 0) {
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Alennustaulukko.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

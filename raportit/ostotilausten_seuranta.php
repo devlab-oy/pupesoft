@@ -92,7 +92,7 @@
 	if (!isset($ppl)) $ppl = date("d");
 
 	echo "<table>";
-	echo "<form action='' method='post' autocomplete='off' name='hakuform' id='hakuform'>";
+	echo "<form method='post' autocomplete='off' name='hakuform' id='hakuform'>";
 
 	echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
@@ -109,11 +109,11 @@
 	echo "<input type='hidden' name='tee' id='tee' value='aja'>";
 	echo "</form></table>";
 	echo "<br/>";
-	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/> = ",t("Keikan virallinen varastonarvo laskettu"),"<br/>";
-	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-yellow.png'/> = ",t("Keikan tuotteita viety varastoon"),"<br/>";
-	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ",t("Keikan tuotteita ei ole viety varastoon tai keikkaan ei ole liitetty yht‰‰n rivi‰"),"<br/>";
-	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ",t("Ostotilauksen tuotteita ei ole liitetty mihink‰‰n keikkaan"),"<br/>";
-	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-blue.png'/> = ",t("Toimittajan vaihto-omaisuuslasku, jota ei ole liitetty keikkaan"),"<br/>";
+	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/> = ",t("Saapumisen virallinen varastonarvo laskettu"),"<br/>";
+	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-yellow.png'/> = ",t("Saapumisen tuotteita viety varastoon"),"<br/>";
+	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-red.png'/> = ",t("Saapumisen tuotteita ei ole viety varastoon tai saapumiseen ei ole liitetty yht‰‰n rivi‰"),"<br/>";
+	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-white.png'/> = ",t("Ostotilauksen tuotteita ei ole liitetty mihink‰‰n saapumiseen"),"<br/>";
+	echo "<img src='".$palvelin2."pics/lullacons/bot-plain-blue.png'/> = ",t("Toimittajan vaihto-omaisuuslasku, jota ei ole liitetty saapumiseen"),"<br/>";
 
 	if (!is_numeric($ppa) or !is_numeric($kka) or !is_numeric($vva) or !is_numeric($ppl) or !is_numeric($kkl) or !is_numeric($vvl)) {
 		echo "<br/><font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰"),"!</font>";
@@ -243,7 +243,7 @@
 						echo "<th>",t("M‰‰r‰"),"</th>";
 						echo "<th>",t("Rivim‰‰r‰"),"</th>";
 						echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$tilrivi_row[valkoodi]</th>";
-						echo "<th>",t("Keikka"),"</th>";
+						echo "<th>",t("Saapuminen"),"</th>";
 						echo "<th>",t("Tavaralaskun"),"<br/>",t("luontiaika"),"</th>";
 						echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
 						echo "<th>",t("Viesti"),"</th>";
@@ -638,7 +638,7 @@
 
 			sort($tunnukset);
 
-			echo "<form method='post' action='' autocomplete='off' id='kommentti_form'>";
+			echo "<form method='post' autocomplete='off' id='kommentti_form'>";
 			echo "<input type='hidden' name='tee' value='kommentti'>";
 			echo "<input type='hidden' name='toimittajahaku' value='$toimittajaid'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

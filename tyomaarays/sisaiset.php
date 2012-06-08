@@ -34,7 +34,7 @@
 			</script></head>";
 
 
-	echo "<br>$thfont <form action = '$PHP_SELF?session=$session' name='vaihdaKuukausi' method='post'>Valitse kuukausi:
+	echo "<br>$thfont <form action = '?session=$session' name='vaihdaKuukausi' method='post'>Valitse kuukausi:
 		<select name='month' Onchange='kuu_Click()'>";
 	$i=1;
 	foreach($MonthNames as $val) {

@@ -273,7 +273,7 @@ if ($tee == "ETSILASKU") {
 		$ppl = date("d");
 
 	if ($toim != 'SOPIMUS') {
-		echo "<form method='post' action='' autocomplete='off'>
+		echo "<form method='post' autocomplete='off'>
 				<input type='hidden' name='toim' value='{$toim}'>
 				<input type='hidden' name='asiakasid' value='{$asiakasid}'>
 				<input type='hidden' name='tunnukset' value='{$tunnukset}'>
@@ -417,7 +417,7 @@ if ($tee == "ETSILASKU") {
 
 		echo "<th>".t("Näytä")."</th></tr>";
 
-		echo "	<form method='post' action='' autocomplete='off'>
+		echo "	<form method='post' autocomplete='off'>
 				<input type='hidden' name='kklkm' value='1'>
 				<input type='hidden' name='toim' value='{$toim}'>
 				<input type='hidden' name='tee' value='MONISTA'>";
@@ -1485,7 +1485,7 @@ if ($tee == 'MONISTA') {
 if ($tee == '' and $vain_monista == "") {
 	//syötetään tilausnumero
 	echo "<br><table>";
-	echo "<form action = '' method = 'post'>";
+	echo "<form method = 'post'>";
 	echo "<input type='hidden' name='toim' value='{$toim}'>";
 	echo "<tr>";
 
@@ -1511,7 +1511,7 @@ if ($tee == '' and $vain_monista == "") {
 	echo "</form>";
 
 	if ($toim == '') {
-		echo "<form action = '' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='toim' value='{$toim}'>";
 		echo "<input type='hidden' name='tee' value='mikrotila'>";
 		echo "<br><input type='submit' value='".t("Lue monistettavat laskut tiedostosta")."'>";

@@ -30,7 +30,7 @@
 		echo "<font class='message'>".t("Tulostamattomat")."</font><br><br>";
 
 		if (mysql_num_rows($tarrares) > 0) {
-			echo "<form action = '$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='uudet'>";
 			echo "<table>";
 			echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Toim.Nimi")."</th><th>".t("Rivejä")."</th><th>".t("Myyntieriä")."</th></tr>";
@@ -85,7 +85,7 @@
 
 		if (mysql_num_rows($tarrares) > 0) {
 
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='vanhat'>";
 
 			echo "<table>";

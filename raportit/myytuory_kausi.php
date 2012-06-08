@@ -227,7 +227,7 @@
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -243,7 +243,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.txt'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
@@ -252,7 +252,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.csv'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
@@ -263,7 +263,7 @@
 
 		//Käyttöliittymä
 		echo "<br>";
-		echo "<table><form method='post' action='$PHP_SELF'>";
+		echo "<table><form method='post'>";
 
 		if (!isset($kka))
 			$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));

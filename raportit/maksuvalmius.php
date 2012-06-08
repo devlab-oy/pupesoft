@@ -21,7 +21,7 @@
 		$sel4 = "CHECKED";
 	}
 
-	echo "<form action = '$PHP_SELF' method='post'>
+	echo "<form method='post'>
 			<input type = 'hidden' name = 'tee' value = '1'>
 			<table>
 			<tr>

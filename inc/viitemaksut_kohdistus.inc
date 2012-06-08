@@ -32,8 +32,6 @@
 				lasku.kapvm kapvm,
 				lasku.saldo_maksettu saldo_maksettu,
 				lasku.saldo_maksettu_valuutassa saldo_maksettu_valuutassa,
-				lasku.pyoristys laskupyoristys,
-				lasku.pyoristys_valuutassa laskupyoristys_valuutassa,
 				lasku.kasumma kasumma,
 				lasku.kasumma_valuutassa kasumma_valuutassa,
 				lasku.valkoodi laskuvaluutta,
@@ -62,8 +60,8 @@
 				LEFT JOIN factoring ON (factoring.yhtio = lasku.yhtio and factoring.valkoodi = lasku.valkoodi and factoring.factoringyhtio = maksuehto.factoring)
 				WHERE yhtio.yhtio = '$kukarow[yhtio]'
 				HAVING saamisetkpl > 0 and (
-				(laskuvaluutta  = yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu-laskupyoristys)                     						 < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma-saldo_maksettu-suoritettu-laskupyoristys)                                  < $Viitemaksujen_kohdistus_sallittu_heitto))) or
-				(laskuvaluutta != yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu-laskupyoristys_valuutassa) < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu-laskupyoristys_valuutassa) < $Viitemaksujen_kohdistus_sallittu_heitto))) or
+				(laskuvaluutta  = yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu)                     						 < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma-saldo_maksettu-suoritettu)                                  < $Viitemaksujen_kohdistus_sallittu_heitto))) or
+				(laskuvaluutta != yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu) < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu) < $Viitemaksujen_kohdistus_sallittu_heitto))) or
 				(laskuvaluutta  = yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu)                                  < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma-saldo_maksettu-suoritettu)                       < $Viitemaksujen_kohdistus_sallittu_heitto))) or
 				(laskuvaluutta != yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu) < $Viitemaksujen_kohdistus_sallittu_heitto)) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu) < $Viitemaksujen_kohdistus_sallittu_heitto))))";
 	$suorires = pupe_query($query);

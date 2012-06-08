@@ -71,7 +71,7 @@ if ($korjataan != '') {
 	$korj = 0;
 	$paikkasyot = 0;
 
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	for ($id = 0; $id < $countti; $id++) {
 		$error = '';
@@ -273,7 +273,7 @@ else {
 			</table>
 			<br>";
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'> <table>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'> <table>";
 			echo "<tr><td>".t("Valitse varasto:")."</td>
 				<td><select name='tuvarasto'>";
 

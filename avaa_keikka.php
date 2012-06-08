@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-print "<font class='head'>Avaa keikka</font><hr>";
+print "<font class='head'>".t("Avaa saapuminen")."</font><hr>";
 
 if ($tee == "avaa") {
 
@@ -19,11 +19,11 @@ if ($tee == "avaa") {
 	$res = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() != 1) {
-		echo "<font class='error'>".t("Keikan avaus epäonnistui")."!</font>";
+		echo "<font class='error'>".t("Saapumisen avaus epäonnistui")."!</font>";
 		$tee = "etsi";
 	}
 	else {
-		echo "<font class='message'>".t("Keikka avattu")."!</font>";
+		echo "<font class='message'>".t("Saapuminen avattu")."!</font>";
 		$tee = "";
 	}
 
@@ -46,7 +46,7 @@ if ($tee == "etsi") {
 
 		$row = mysql_fetch_array($res);
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='avaa'>";
 		echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 		echo "<input type='hidden' name='keikka' value='$row[laskunro]'>";
@@ -54,7 +54,7 @@ if ($tee == "etsi") {
 		echo "<table>";
 
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("saapuminen")."</th>";
 		echo "<th>".t("ytunnus")."</th>";
 		echo "<th>".t("nimi")."</th>";
 		echo "<th>".t("tapvm")."</th>";
@@ -74,21 +74,21 @@ if ($tee == "etsi") {
 		echo "</form>";
 	}
 	else {
-		echo "<font class='error'>".t("Keikkaa ei löytynyt").": $keikka!</font>";
+		echo "<font class='error'>".t("Saapumista ei löytynyt").": $keikka!</font>";
 	}
 }
 
-echo "<form action='$PHP_SELF' method='post'>";
+echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='etsi'>";
 
 echo "<table>";
 echo "<tr>";
-echo "<th>".t("Syötä keikkanumero").":</th>";
+echo "<th>".t("Syötä saapumisnumero").":</th>";
 echo "<td><input type='text' name='keikka'></td>";
 echo "</tr>";
 echo "</table>";
 
-echo "<br><input type='submit' value='".t("Etsi keikka")."'>";
+echo "<br><input type='submit' value='".t("Etsi saapuminen")."'>";
 echo "</form>";
 
 require ("inc/footer.inc");

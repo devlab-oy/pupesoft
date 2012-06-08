@@ -284,7 +284,7 @@
 		}
 
 		if ($alias_set != "VAHITTAISMYYNTI") {
-			$ulos .= " <a target='VIES' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("Tarkista VIES")."</a>";
+			$ulos .= " <a target='VIES' href='http://ec.europa.eu/taxation_customs/vies/?locale=".strtolower($kukarow["kieli"])."'>".t("Tarkista VIES")."</a>";
 			$ulos .= " <a target='YTJ' href='http://www.ytj.fi/yrityshaku.aspx?path=1547%3b1631%3b1678&kielikoodi=1".strtoupper($kukarow["kieli"])."'>".t("Tarkista YTJ")."</a>";
 		}
 
@@ -1034,7 +1034,7 @@
 		$ulos = "<td>";
 
 		if (tarkista_oikeus("luotonhallinta.php")) {
-			$ulos .= "<a href='${palvelin2}myyntires/luotonhallinta.php?tee=1&ytunnus=$trow[ytunnus]&lopetus=$lopetus'>".t("Luotonhallinta")."</a>";
+			$ulos .= "<a target='Luotonhallinta' href='${palvelin2}myyntires/luotonhallinta.php?tee=1&ytunnus=$trow[ytunnus]'>".t("Luotonhallinta")."</a>";
 		}
 		else {
 			$ulos .= t("Luottorajat ovat per ytunnus, k‰yt‰ Luotonhallinta -sovellusta");
@@ -1108,6 +1108,37 @@
 
 		$ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
 		$ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value=''>".t("K‰ytet‰‰n yhtiˆn oletusta")."</option>";
+		$ulos .= "<option value='E' $sel[E]>".t("Ker‰ysvahvistusta ei l‰hetet‰")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus l‰hetet‰‰n asiakkaalle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'maksukehotuksen_osoitetiedot') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("K‰ytet‰‰n yhtiˆn oletuksia")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n asiakkaan virallista osoitetta")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

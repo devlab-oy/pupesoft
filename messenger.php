@@ -31,7 +31,7 @@
 	$viimeisin_row = mysql_fetch_array($viimeisin_result);
 
 	echo "<table>";
-	echo "<form action='' method='post' name='messenger_form'>";
+	echo "<form method='post' name='messenger_form'>";
 	echo "<input type='hidden' name='messenger' value='X'>";
 	echo "<input type='hidden' name='status' value='X'>";
 	echo "<tr><th>".t("Vastaanottaja").": <select name='vastaanottaja'>";
@@ -75,7 +75,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 	
 	echo "<br>Näytä ";
-	echo "	<form method='post' action=''>
+	echo "	<form method='post'>
 				<select name='kpl' onChange='javascript:submit()'>";
 					
 					$sel = "";

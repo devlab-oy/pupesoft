@@ -93,7 +93,7 @@
 
 	}
 
-	echo "<form name='epaku' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form name='epaku' method='post' autocomplete='off'>";
 	echo "<input type='submit' name='tee' value='".t("Aja tavarakatelista")."'>";
 	echo "</form>";
 

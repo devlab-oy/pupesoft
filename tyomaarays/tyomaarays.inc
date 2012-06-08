@@ -355,7 +355,7 @@
 
 
 			echo "	<br><br><table>";
-			echo "	<form action='$PHP_SELF' method='post' enctype='multipart/form-data'>
+			echo "	<form method='post' enctype='multipart/form-data'>
 					<input type='hidden' name='tee' value = 'VAHINKO'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -465,7 +465,7 @@
 	if ($toim == "TYOMAARAYS" and $tee_tyomaarays == "MAARAAIKAISHUOLLOT") {
 		//m‰‰r‰aikaishuollot
 		echo "<table>";
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>

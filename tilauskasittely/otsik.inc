@@ -500,7 +500,7 @@
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
+		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -1247,7 +1247,7 @@
 						$sel_verollinen = 'selected';
 						$sel_veroton 	= '';
 					}
-					}
+				}
 
 				echo " <td>
 						<select name='alv'>
@@ -1346,10 +1346,6 @@
 
 			if ($srow["alv"] == 99.99) {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyynti‰")."</td>";
-			}
-			elseif ($toim == "YLLAPITO") {
-				// aina kotimaa
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")."</td>";
 			}
 			elseif ($alv_velvollisuus != "") {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])</td>";
@@ -1712,7 +1708,16 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
-			echo "<td>".t("Laskuta heti")." (".t("sis‰inen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
+			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
+			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
+			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
+			tarkista_oikeus("verkkolasku.php"))) {
+				echo "<td>".t("Laskuta heti")." (".t("sis‰inen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<td>".t("Ker‰ysprioriteetti").":</td><td>";
@@ -1731,7 +1736,12 @@
 			echo "</select>";
 
 			echo "</td>";
-			echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1796,7 +1806,12 @@
 			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$toimehtoseltark' size='20'>";
 			echo "</td>";
 
-			echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1867,8 +1882,13 @@
 				echo "<td></td><td></td>";
 			}
 
-			echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
-
+			if ($toim != "MYYNTITILI") {
+				echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
+			echo "</tr>";
 			echo "<tr><td>".t("Asiakkaan piiri").":</td><td>";
 
 			$pres = t_avainsana("PIIRI");
@@ -1957,7 +1977,7 @@
 			echo "</td>";
 			echo "</tr>";
 
-			if ($yhtiorow['laskutuskielto'] != 0) {
+			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
 				echo "<tr>";
 				echo "<td></td><td></td>";
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
@@ -2484,7 +2504,7 @@
 			echo "</form>";
 
 			if ($tilausnumero != "") {
-				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<form method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='OTSIK'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -3131,16 +3151,19 @@
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
 
-		// p‰ivitet‰‰n erikoisale tilausriveille
-		$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
-		$query_erikoisale = "	UPDATE tilausrivi
-								SET erikoisale = '{$erikoisale}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$erikoisale_query_otunnus}'
-								AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
-								AND netto  != 'N'
-								AND tyyppi != 'D'";
-		$upd_erikoisale_res = pupe_query($query_erikoisale);
+		// Jos erikoisalennus muuttuu
+		if ($laskurow["erikoisale"] != $erikoisale) {
+			// p‰ivitet‰‰n erikoisale tilausriveille
+			$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+			$query_erikoisale = "	UPDATE tilausrivi
+									SET erikoisale = '{$erikoisale}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$erikoisale_query_otunnus}'
+									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
+									AND netto  != 'N'
+									AND tyyppi != 'D'";
+			$upd_erikoisale_res = pupe_query($query_erikoisale);
+		}
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 

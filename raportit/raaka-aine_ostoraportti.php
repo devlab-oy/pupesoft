@@ -2,9 +2,6 @@
 
 	require("../inc/parametrit.inc");
 
-	// Otetaan jQuery mukaan
-	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
-
 	// Salitaan vain numeroita ja piste/pilkku input kentissä
 	echo '<script language="javascript">
 	$(document).ready(function() {
@@ -480,7 +477,7 @@
 		if (mysql_num_rows($res) > 0) {
 
 			// Kootaan raportti
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<table>";
 
 			$EDtoimittaja = false;
@@ -622,7 +619,7 @@
 	// Näytetään käyttöliittymä
 	if (!isset($tee) or $tee == "") {
 
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form method='post' autocomplete='off'>";
 
 		echo "<table>";
 		echo "<tr>";

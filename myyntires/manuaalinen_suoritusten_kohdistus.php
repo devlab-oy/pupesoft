@@ -109,7 +109,7 @@ if ($tila == "vaihdasuorituksentili") {
 					echo "<th>".t("laatija")."</th>";
 					echo "</tr>";
 
-					echo "<form method='post'>";
+					echo "<form method='post' action='manuaalinen_suoritusten_kohdistus.php'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 					echo "<input type='hidden' name='tila' value='muokkaasuoritusta'>";
 					echo "<input type='hidden' name='vastatili' value='$vastatili'>";
@@ -695,7 +695,8 @@ if ($tila == 'tee_kohdistus') {
 						yhtio_ovttunnus,
 						yhtio_kotipaikka,
 						yhtio_toimipaikka
-						FROM lasku WHERE tunnus IN ($laskutunnukset)
+						FROM lasku
+						WHERE tunnus IN ($laskutunnukset)
 						and yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
 			$result = pupe_query($query);
@@ -735,7 +736,8 @@ if ($tila == 'tee_kohdistus') {
 						yhtio_ovttunnus,
 						yhtio_kotipaikka,
 						yhtio_toimipaikka
-						FROM lasku WHERE tunnus IN ($laskutunnuksetkale)
+						FROM lasku
+						WHERE tunnus IN ($laskutunnuksetkale)
 						AND yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
 			$result = pupe_query($query);
@@ -1291,7 +1293,7 @@ if ($tila == 'suorituksenvalinta') {
 
 		echo "</tr>";
 
-		echo "<form action = '$PHP_SELF?tila=kohdistaminen' method = 'post'>";
+		echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=kohdistaminen' method = 'post'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
 		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
@@ -1430,7 +1432,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 		$sel5 = "selected";
 	}
 
-	echo "<form action = '$PHP_SELF' method = 'post'>";
+	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tunnus' value='$suoritus[tunnus]'>";
 	echo "<input type='hidden' name='tila' value='vaihdasuorituksentili'>";
@@ -1475,7 +1477,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
 
 
-	echo "<form method = 'post' name='summat'>";
+	echo "<form method = 'post' action='manuaalinen_suoritusten_kohdistus.php' name='summat'>";
 	echo "<table>";
 	echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
 	echo "<th>".t("Erotus")."</th><td><input type='text' name='jaljella' value='$suoritus_summa' readonly></td></tr>";
@@ -1539,7 +1541,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 				ORDER BY $jarjestys";
 	$result = pupe_query($query);
 
-	echo "<form action = '$PHP_SELF?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
+	echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<table><tr><th colspan='2'></th>";
 
@@ -1557,7 +1559,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 	echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 	echo"</form>";
 
-	echo "<form action = '$PHP_SELF?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)'>";
+	echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)' class='multisubmit'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 	$laskucount=0;
@@ -1803,7 +1805,7 @@ elseif ($tila == 'kohdistaminen') {
 if ($tila == '') {
 	echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen")."</font><hr>";
 
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST' action='manuaalinen_suoritusten_kohdistus.php'>";
 	echo "<input type='hidden' name='tila' value=''>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
@@ -1950,7 +1952,7 @@ if ($tila == '') {
 				<td valign='top'>$asiakas[viitteita]</td>
 				<td valign='top'>$lasku[maara]</td>";
 
-		echo "<form action='$PHP_SELF' method='POST'>";
+		echo "<form method='POST' action='manuaalinen_suoritusten_kohdistus.php'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tila' value='suorituksenvalinta'>";
 		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas[tunnus]'>";

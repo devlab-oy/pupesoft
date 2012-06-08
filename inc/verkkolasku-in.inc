@@ -241,10 +241,10 @@
 			}
 
 			if (!isset($yhtiorow) and $luolasku === TRUE) {
-				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "	SELECT distinct yhtio nimi, alert_email, postittaja_email
+				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin talhal-meileihin!
+				$query = "	SELECT distinct yhtio nimi, talhal_email, postittaja_email
 							FROM yhtion_parametrit
-							WHERE alert_email != ''
+							WHERE talhal_email != ''
 							AND postittaja_email != ''";
 				$result = pupe_query($query);
 
@@ -257,7 +257,7 @@
 				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
 				while ($yhtiorow = mysql_fetch_assoc($result)) {
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				}
 
 				return ($return);
@@ -300,6 +300,16 @@
 
 			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
 			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
+
+			// Hylätään viite jos se on nollaa
+			if (is_numeric($viite) and (int) $viite == 0) {
+				$viite = "";
+
+				// Setataan viesti
+				if (trim($laskun_numero) != "") $viesti = $laskun_numero;
+				else $viesti = "Lasku: $summa $valkoodi";
+			}
+
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 
@@ -401,7 +411,7 @@
 				// 6 etsitään toimittaja vat-numerolla ilman FI-etuliitettä
 				$query  = "	SELECT *
 							FROM toimi
-							WHERE ytunnus in ('$intvat', '$intvat2')
+							WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
@@ -475,7 +485,7 @@
 
 					$return .= "Laskun kuva: $url\n";
 
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 					return ($return);
 				}
@@ -553,7 +563,7 @@
 							and tyyppi 		= 'k'
 							and yhtio 		= '$yhtio'
 							and tilino 		= 0
-							and kuvaus 		= '$kauttalaskutus'";
+							and kuvaus 		= '".mysql_real_escape_string($kauttalaskutus)."'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
@@ -588,16 +598,16 @@
 								and tyyppi		= 'o'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
-									and mintuote = '$toim_asiakkaantiedot[postino]'
-									and maxtuote = '$toim_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -634,16 +644,16 @@
 								and tyyppi		= 'b'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
-									and mintuote = '$ostaja_asiakkaantiedot[postino]'
-									and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -680,7 +690,7 @@
 									and tyyppi 		= 'a'
 									and yhtio 		= '$yhtio'
 									and tilino 		= 0
-									and kuvaus 		= '$laskun_asiakastunnus'";
+									and kuvaus 		= '".mysql_real_escape_string($laskun_asiakastunnus)."'";
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) != 0) {
@@ -771,7 +781,7 @@
 
 					if (mysql_num_rows($avainresult) != 1) {
 						$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 					else {
@@ -805,7 +815,7 @@
 
 				if (!checkdate($erk, $erp, $erv)) {
 					$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
@@ -847,12 +857,12 @@
 				if ($krk > 0 and $krp > 0 and $krv > 0 and $kassaale != 0) {
 					if (!checkdate($krk, $krp, $krv)) {
 						$return .= "Virheellinen kassaeräpvm '$krv-$krk-$krp' kassaale '$kassaale'\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 					elseif ($kassaale == 0) {
 						$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 				}
@@ -876,35 +886,38 @@
 
 				if ($summa == 0) {
 					$return .= "Laskulta puuttuu summa!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
 				// Normaali viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 					$return .= "Viite '$viite' on väärin!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 				// RF-viitetarkistus
 				if (isset($viite) and strlen($viite) > 0 and  substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
 					$return .= "RF-Viite '$viite' on väärin!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
 				if (isset($viite) and strlen($viite) > 0 and isset($viesti) and strlen($viesti) > 0) {
 					$return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
-				$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
+				$query = "	SELECT kurssi
+							FROM valuu
+							WHERE nimi = '$valkoodi'
+							AND yhtio  = '$yhtio'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
 					$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
@@ -1118,8 +1131,12 @@
 
 						$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-						if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+						if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 							$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+						}
+
+						if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+							$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 						}
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
@@ -1168,8 +1185,8 @@
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
-							$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
-							$tuote  = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"]));  // Poistaa SQL-virheen mahdollisuuden
+							$selite = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"]));
+							$tuote  = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"]));
 
 							$query = "	SELECT tilino, kustp
 										FROM tiliointisaanto
@@ -1219,14 +1236,19 @@
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
 
-							// Unikko laskuissa tulee kirjauksetkin valuutassa, joten pitää laskea kurssi.
 							if ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0) {
+								// Unikko laskuissa tulee kirjauksetkin valuutassa
 								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta_valuutassa"];
+								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
+							}
+							elseif ($vrow["kurssi"] != 1) {
+								// Laskulla olevat rivihinnat ovat valuutassa
+								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta"];
 								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
 							}
 							else {
 								$summa = (float) $rtuoteno[$i]["rivihinta"];
-								$summa_valuutassa = 0;
+								$summa_valuutassa = $summa;
 							}
 
 							// Hyvityslasku tai summa alle nolla
@@ -1295,8 +1317,12 @@
 
 								$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-								if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+								if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 									$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+								}
+
+								if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+									$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 								}
 
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
@@ -1689,9 +1715,9 @@
 				// päästiin onnillisesti loppuun
 		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 
-				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				$tulos = mail($yhtiorow['talhal_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>\n";
+				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[talhal_email]<br>\n";
 				return 0;
 			}
 			else {

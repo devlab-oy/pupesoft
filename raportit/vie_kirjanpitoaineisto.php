@@ -211,7 +211,7 @@ elseif($tee == "vie") {
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tiedosto").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($zipfile))."'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='".$zipfile."'>";
@@ -223,7 +223,7 @@ elseif($tee == "vie") {
 }
 else {
 
-	echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "	<form name = 'valinta' method='post'>
 			<input type = 'hidden' name = 'tee' value = 'vie'>
 			<table>
 			<tr>

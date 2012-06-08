@@ -121,7 +121,7 @@ if ($tee == 'go') {
 
 
 
-echo "<table><form name='piiri' method='post' action='$PHP_SELF'>";
+echo "<table><form name='piiri' method='post'>";
 
 if (!isset($kka))
 	$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));

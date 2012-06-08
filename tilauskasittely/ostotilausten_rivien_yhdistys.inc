@@ -44,7 +44,7 @@ if ($tee == "teeyhdistys") {
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				echo "<font class='error'>".t("Keikka katosi, mit‰‰n ei tehty")."!</font><br><br>";
+				echo "<font class='error'>".t("Saapuminen katosi, mit‰‰n ei tehty")."!</font><br><br>";
 			}
 		}
 
@@ -52,7 +52,7 @@ if ($tee == "teeyhdistys") {
 		$toiminto = "";
 	}
 	else {
-		echo "<font class='error'>".t("Et valinnut yht‰‰n keikkaa")."!</font><br><br>";
+		echo "<font class='error'>".t("Et valinnut yht‰‰n saapumista")."!</font><br><br>";
 		$tee = "";
 	}
 }
@@ -62,7 +62,7 @@ if ($tee == "") {
 	// n‰ytet‰‰n v‰h‰ toimittajan tietoja
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>".t("Keikka")."</th>";
+	echo "<th>".t("Saapuminen")."</th>";
 	echo "<th colspan='5'>".t("Toimittaja")."</th>";
 	echo "</tr><tr>";
 	echo "<td>$laskurow[laskunro]</td>";
@@ -83,9 +83,9 @@ if ($tee == "") {
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<font class='head'>".t("Toimittajan keikat")."</font><hr>";
+		echo "<font class='head'>".t("Toimittajan saapumiset")."</font><hr>";
 
-		echo "<form action='$PHP_SELF' name='formi' method='post'>";
+		echo "<form name='formi' method='post'>";
 		echo "<input type='hidden' name='toiminto' value='yhdista'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='hidden' name='tee' value='teeyhdistys'>";
@@ -94,7 +94,7 @@ if ($tee == "") {
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("saapuminen")."</th>";
 		echo "<th>".t("ytunnus")."</th>";
 		echo "<th>".t("nimi")."</th>";
 		echo "<th>".t("kohdistettu")."</th>";
@@ -184,16 +184,16 @@ if ($tee == "") {
 
 		echo "</table>";
 
-		echo "<br><input type='submit' value='".t("Liit‰ valitut keikat")."'>";
+		echo "<br><input type='submit' value='".t("Liit‰ valitut saapumiset")."'>";
 		echo "</form>";
 
 		if ($toiminto != "") {
 			echo "<hr>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-			echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+			echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 			echo "</form>";
 		}
 

@@ -127,8 +127,8 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	else {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
-	
-	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+
+	if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
 		$tulostettava_tunnus = $laskurow['vanhatunnus'];
 	}
 	else {

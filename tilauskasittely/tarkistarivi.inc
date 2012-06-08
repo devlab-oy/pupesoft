@@ -161,7 +161,6 @@
 		// P - Puute
 		// J - Jt
 		// H - Väkisinhyväksytty
-		// S - Suoratoimitus pupesoft toimittajalta suoraan asiakkaalle
 		// T - Tilataan joltain toimittajalta omaan varastoon
 		// U - Tilataan joltain toimittajalta suoraan asiakkaalle
 		// V - Tehdaslisävarusterivi
@@ -420,16 +419,7 @@
 						ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		}
 
-		$omavarastores = pupe_query($query);
-
-		//Tutkitaan voidaanko tätä rivi suoratoimittaa mistään varastosta
-		if ($trow["sarjanumeroseuranta"] == "" and $kpl_st > 0) {
-			$suora_tuoteno 	= $row["tuoteno"];
-			$suora_kpl 		= $kpl_st;
-
-			require("suoratoimitusvalinta.inc");
-		}
-
+		$omavarastores  = pupe_query($query);
 		$varastot_array = array();
 
 		if ($kukarow["varasto"] != "") {
@@ -728,51 +718,6 @@
 		$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 	}
 
-	/*
-	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
-
-		// Suoratoimitushäkki
-		$query = "	SELECT sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja
-					from tilausrivi
-					where yhtio = '$kukarow[yhtio]'
-					and otunnus = '$row[otunnus]'
-					and perheid = '$row[tunnus]'
-					and tunnus != '$row[tunnus]'";
-		$maksuehtoresult = pupe_query($query);
-		$maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
-
-		if ($maksuehtorow["suoria"] == $maksuehtorow["lapsia"] and $maksuehtorow["toimittajia"] == 1) {
-			$query = "	update tilausrivi set
-						var			= '',
-						varattu 	= '$kpl_st',
-						jt 			= 0
-						where yhtio = '$kukarow[yhtio]'
-						and tunnus 	= '$row[tunnus]'";
-			$updres = pupe_query($query);
-
-			$row["var"] = "";
-		}
-
-		$sel1 = $sel2 = "";
-
-		if ($row["var"] == "P") {
-			$sel1 = "SELECTED";
-		}
-		elseif ($row["var"] == "J") {
-			$sel2 = "SELECTED";
-		}
-		else {
-			$sel3 = "SELECTED";
-		}
-
-		$paikat  = "<option value=''  $sel1>".t("Oletus")."</option>";
-		$paikat .= "<option value='P'  $sel1>".t("Jätä puutteeksi")."</option>";
-		$paikat .= "<option value='J' $sel2>".t("Jälkitoimitus")."</option>";
-		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
-		$paikat = "<select name='var' onchange='submit();'>".$paikat."</select>";
-	}
-	*/
-
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {
 
@@ -829,17 +774,14 @@
 
 		if (mysql_num_rows($siirtores) > 0) {
 			$siirtorow = mysql_fetch_assoc($siirtores);
-			if($siirtorow["tila"] == "O") {
+			if ($siirtorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty ostorivi poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty ostorivi poistetaan.");
 			}
 			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty valmistus poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty valmistus poistetaan.");
 			}
 
+			$nayta_sostolisateksti = "TOTTA";			
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
 		}
 	}
@@ -862,7 +804,7 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-			$alku .= "<th><form action='$PHP_SELF' method='post' name='hyvaksy'>
+			$alku .= "<th><form method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -912,7 +854,7 @@
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
 					 			."<td align='left'>"
-					 			." <form action='$PHP_SELF' method='post' name='jalkitoimita'>
+					 			." <form method='post' name='jalkitoimita'>
 					 			   	<input type='hidden' name='toim' 			value = '$toim'>
 					 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 					 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>

@@ -249,7 +249,7 @@
 
 				echo "<tr><th>".t("Tuotenumero")."</th><td>$muutarow[tuoteno] $muutarow[nimitys]</td></tr>";
 
-				echo "	<form action='$PHP_SELF' method='post' name='muokkaaformi'>
+				echo "	<form method='post' action='sarjanumeroseuranta.php' name='muokkaaformi'>
 						<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
 						<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
 						<input type='hidden' name='from' 				value='$from'>
@@ -1064,7 +1064,7 @@
 			</SCRIPT>";
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") {
-		echo "<form name='haku' action='$PHP_SELF' method='post'>";
+		echo "<form name='haku' action='sarjanumeroseuranta.php' method='post'>";
 		echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
 		echo "<input type='hidden' name='from' 				value = '$from'>";
 		echo "<input type='hidden' name='lopetus' 			value = '$lopetus'>";
@@ -1091,7 +1091,7 @@
 		echo "</form>";
 	}
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post' action='sarjanumeroseuranta.php'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value='$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value='$from'>";
 	echo "<input type='hidden' name='lopetus' 			value='$lopetus'>";
@@ -1193,7 +1193,7 @@
 
 				if (mysql_num_rows($keikkares) > 0) {
 					$keikkarow2 = mysql_fetch_assoc($keikkares);
-					$echoostuns = t("Keikka").": ".$keikkarow2["laskunro"];
+					$echoostuns = t("Saapuminen").": ".$keikkarow2["laskunro"];
 				}
 			}
 			else {
@@ -1359,7 +1359,7 @@
 	}
 
 	if ($rivirow["tuoteno"] != '') {
-		echo "	<form name='sarjaformi' action='$PHP_SELF' method='post'>
+		echo "	<form name='sarjaformi' action='sarjanumeroseuranta.php' method='post'>
 				<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
 				<input type='hidden' name='from' 				value='$from'>
 				<input type='hidden' name='lopetus' 			value='$lopetus'>
@@ -1528,7 +1528,7 @@
 			<input type='hidden' name='toiminto' value='kohdista'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 			<input type='hidden' name='otunnus' value='$otunnus'>
-			<input type='submit' value='".t("Takaisin keikkaan")."'>
+			<input type='submit' value='".t("Takaisin saapumiseen")."'>
 			</form>";
 	}
 

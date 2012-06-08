@@ -77,10 +77,12 @@
 		$maventa_laskumaara = count($maventa_laskuarray);
 
 		if ($maventa_laskumaara > 0) {
+			require_once("tilauskasittely/tulosta_lasku.inc");
+
 			for ($a = 1; $a < $maventa_laskumaara; $a++) {
 				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
 
-				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a]);
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], "");
 
 				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
 			}
@@ -379,12 +381,9 @@
 				// Hoidetaan pyöristys sekä valuuttakäsittely
 				if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 					$lasrow["kasumma"] 	 = $lasrow["kasumma_valuutassa"];
-					$lasrow["summa"] 	 = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+					$lasrow["summa"] 	 = $lasrow["summa_valuutassa"];
 					$lasrow["arvo"]		 = $lasrow["arvo_valuutassa"];
 					$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
-				}
-				else {
-					$lasrow["summa"] 	= sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);
 				}
 
 				// Ulkomaisen ytunnuksen korjaus
@@ -861,7 +860,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimixml)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
@@ -870,7 +869,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Lähetä pupevoice-aineisto uudestaan Itellaan").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tee' value='pupevoice_siirto'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
@@ -890,7 +889,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
@@ -936,7 +935,7 @@
 
 					echo "<table>";
 					echo "<tr><th>".t("Tallenna apix-aineisto").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='".basename($apixzipfile)."'>";
 					echo "<input type='hidden' name='filenimi' value='".basename($apixzipfile)."'>";
@@ -945,7 +944,7 @@
 
 					echo "<table>";
 					echo "<tr><th>".t("Lähetä aineisto uudestaan APIX:lle").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='tee' value='apix_siirto'>";
 					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 					echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
@@ -974,7 +973,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna Maventa-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
@@ -982,13 +981,14 @@
 				echo "</table><br><br>";
 
 				if ($virhe == 0) {
-					echo "<table>";
-					echo "<tr><th>".t("Lähetä aineisto uudestaan MAVENTA:lle").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='tee' value='maventa_siirto'>";
 					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-					echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
+					echo "<table>";
+					echo "<tr><th>".t("Lähetä aineisto uudestaan MAVENTA:lle").":</th>";
+					echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr>";
 					echo "</table>";
+					echo "</form>";
 				}
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
@@ -1005,7 +1005,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
@@ -1016,7 +1016,7 @@
 			if (file_exists(realpath($nimiedi))) {
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
@@ -1027,7 +1027,7 @@
 			if (file_exists(realpath($nimisisainenfinvoice))) {
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna Pupesoft-Finvoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimisisainenfinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";

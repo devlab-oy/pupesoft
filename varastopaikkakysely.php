@@ -30,7 +30,7 @@
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<form method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='V'>";
@@ -110,7 +110,7 @@
 
 		echo "<font class='head'>".t("Varastopaikka")." $varastopaikka</font><hr>";
 
-		echo "<form action='$PHP_SELF' method='post' name='formi3' autocomplete='off'>";
+		echo "<form method='post' name='formi3' autocomplete='off'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='W'>";

@@ -364,16 +364,16 @@ if ($tee == "") {
 
 	echo "<table>
 		<tr>
-			<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
+			<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
 			<th>".t("Nimi")."</th><td>$laskurow[nimi]</td>
 		</tr>";
 
-	echo "	<form action='$PHP_SELF' method='post'>";
+	echo "	<form method='post'>";
 	echo "	<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "	<input type='hidden' name='toiminto' value='varastopaikat'>
 			<input type='hidden' name='otunnus' value='$otunnus'>";
 
-	echo "<tr><th>".t("Saavuta keikka").":</th>
+	echo "<tr><th>".t("Saavuta saapuminen").":</th>
 			<td><select name='varasto' onchange = 'submit()'>
 			<option value='x' $selx>".t("Tuotteiden oletuspaikoille")."</option>
 			<option value='y' $sely>".t("Rivellä oleville paikoille")."</option>";
@@ -391,7 +391,7 @@ if ($tee == "") {
 	echo "</form>";
 	
 	if ($varasto == 'y') {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 			<input type='hidden' name='toiminto' value='varastopaikat'>
 			<input type='hidden' name='varasto' value='$varasto'>
@@ -479,7 +479,7 @@ if ($tee == "") {
 
 
 		//hakukentät
-		echo "<form action='$PHP_SELF' name='varastopaikkaformi' method='post'>";
+		echo "<form name='varastopaikkaformi' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='varastopaikat'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
@@ -711,7 +711,7 @@ if ($tee == "") {
 
 	if ($toiminto != "") {
 		echo "<hr>";
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
@@ -721,7 +721,7 @@ if ($tee == "") {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
 		
-		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 		echo "</form>";
 	}
 

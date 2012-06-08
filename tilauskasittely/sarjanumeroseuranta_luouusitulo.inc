@@ -49,7 +49,7 @@
 		echo "<tr><th>",t("Inventoidaan tulotapahtuma tuotteelle"),":</th><td>$tuoteno</td></tr>";
 
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='tuoteno'		value='$tuoteno'>
 				<input type='hidden' name='luousitee'	value='DOIT'>
 				<input type='hidden' name='toiminto'	value='luouusitulo'>

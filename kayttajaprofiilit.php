@@ -92,7 +92,7 @@
 							FROM oikeu
 							WHERE yhtio		= '$kukarow[yhtio]'
 							AND kuka		= '$profiili'
-							AND sovellus	= '$sov'							
+							AND sovellus	= '$sov'
 							AND nimi		= '$nimi'
 							AND alanimi		= '$alanimi'
 							AND profiili	= '$profiili'";
@@ -103,7 +103,7 @@
 								SET paivitys 	= '1'
 								WHERE yhtio		= '$kukarow[yhtio]'
 								AND kuka		= '$profiili'
-								AND sovellus	= '$sov'								
+								AND sovellus	= '$sov'
 								AND nimi		= '$nimi'
 								AND alanimi		= '$alanimi'
 								AND profiili	= '$profiili'";
@@ -147,8 +147,8 @@
 					foreach ($profiilit as $prof) {
 						$query = "	SELECT *
 									FROM oikeu
-									WHERE yhtio	 = '$kukarow[yhtio]' 
-									AND kuka	 = '$prof' 
+									WHERE yhtio	 = '$kukarow[yhtio]'
+									AND kuka	 = '$prof'
 									AND profiili = '$prof'";
 						$pres = pupe_query($query);
 
@@ -178,6 +178,17 @@
 											yhtio		= '$kukarow[yhtio]'";
 								$rresult = pupe_query($query);
 							}
+							elseif ($trow["paivitys"] == 1) {
+								// Meill‰ ei v‰ltt‰m‰tt‰ ollut p‰ivitysoikeutta, koska aiempi checki ei huomio sit‰. Lis‰t‰‰n p‰ivitysoikeus.
+								$query = "	UPDATE oikeu SET
+											paivitys = 1
+											WHERE yhtio		= '$kukarow[yhtio]'
+											AND kuka		= '$krow[kuka]'
+											AND sovellus	= '$trow[sovellus]'
+											AND nimi		= '$trow[nimi]'
+											AND alanimi 	= '$trow[alanimi]'";
+								$tarkesult = pupe_query($query);
+							}
 						}
 					}
 				}
@@ -194,14 +205,14 @@
 
 	echo "<table>
 
-			<form action='$PHP_SELF' method='post'>
+			<form method='post'>
 			<tr>
 				<th>".t("Luo uusi profiili").":</th>
 				<td><input type='text' name='uusiprofiili' size='25'></td>
 				<td class='back'><input type='submit' value='".t("Luo uusi profiili")."'></td>
 			</tr>
 			</form>
-			<form action='$PHP_SELF' method='post'>
+			<form method='post'>
 			<input type='hidden' name='sovellus' value='$sovellus'>
 			<input type='hidden' name='vainval' value='$vainval'>
 
@@ -238,7 +249,7 @@
 	echo "</td><td class='back'><input type='submit' value='".t("Valitse profiili")."'></form></td>";
 
 	if ($profiili != '') {
-		echo "<form method='post' action='$PHP_SELF' onSubmit = 'return verify()'>
+		echo "<form method='post' onSubmit = 'return verify()'>
 				<input type='hidden' name='tee' value='POISTA'>
 				<input type='hidden' name='profiili' value='$profiili'>
 				<td class='back'><input type='submit' value='".t("Poista t‰m‰ profiili")."'></td></form>";
@@ -267,7 +278,7 @@
 
 		if (mysql_num_rows($result) > 1) {
 
-			echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
+			echo "	<form name='vaihdaSovellus' method='POST'>
 					<input type='hidden' name='profiili' value='$profiili'>
 					<input type='hidden' name='uusiprofiili' value='$uusiprofiili'>
 					<tr><th>".t("Valitse sovellus").":</th><td>
@@ -337,7 +348,7 @@
 
 
 
-		echo "<form action='$PHP_SELF' name='suojax' method='post'>
+		echo "<form name='suojax' method='post'>
 				<input type='hidden' name='tee' value='PAIVITA'>
 				<input type='hidden' name='sovellus' value='$sovellus'>
 				<input type='hidden' name='profiili' value='$profiili'>";

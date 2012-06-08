@@ -194,6 +194,11 @@
 					and $logistiikka_yhtiolisa)
 					UNION
 					(SELECT laskunro, ytunnus, liitostunnus
+					FROM lasku use index (yhtio_vanhatunnus)
+					WHERE vanhatunnus='$otunnus'
+					and $logistiikka_yhtiolisa)
+					UNION
+					(SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku use index (yhtio_tunnusnippu)
 					WHERE tunnusnippu = '$otunnus'
 					and $logistiikka_yhtiolisa)";
@@ -277,22 +282,21 @@
 		$ytunnus   = $row["ytunnus"];
 
 		if ($cleantoim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];
+			$toimittajaid = $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];
+			$asiakasid = $row["liitostunnus"];
 		}
 	}
 
 	if ($ytunnus != '') {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
-			<input type='hidden' name='asiakasid' value='$asiakasid'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='nimi' value='$nimi'>
-			<input type='hidden' name='tee' value='TULOSTA'>";
-
+		echo "<form method='post' autocomplete='off'>
+				<input type='hidden' name='ytunnus' value='$ytunnus'>
+				<input type='hidden' name='asiakasid' value='$asiakasid'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='nimi' value='$nimi'>
+				<input type='hidden' name='tee' value='TULOSTA'>";
 
 		if ($asiakasid > 0) {
 			$query  = "	SELECT concat_ws(' ', nimi, nimitark) nimi
@@ -414,6 +418,14 @@
 							WHERE lasku.$logistiikka_yhtiolisa
 							and lasku.liitostunnus = '$litunn'
 							and $til
+							and lasku.vanhatunnus='$sopimus')
+							UNION
+							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+							FROM lasku
+							$yhtioekojoin
+							WHERE lasku.$logistiikka_yhtiolisa
+							and lasku.liitostunnus = '$litunn'
+							and $til
 							and lasku.clearing='sopimus'
 							and lasku.swift='$sopimus')";
 			}
@@ -425,6 +437,14 @@
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$otunnus')
+							UNION
+							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+							FROM lasku
+							$yhtioekojoin
+							WHERE lasku.$logistiikka_yhtiolisa
+							and lasku.liitostunnus = '$litunn'
+							and $til
+							and lasku.vanhatunnus='$otunnus')
 							UNION
 							(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
@@ -617,7 +637,7 @@
 
 				for ($i=1; $i<mysql_num_fields($result)-8; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<td valign='top' $class>".tv1dateconv($row[$i])."</td>";
+						echo "<td valign='top' $class>{$row[$i]}</td>";
 					}
 					elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
 						echo "<td valign='top' nowrap align='right' $class>";
@@ -650,7 +670,7 @@
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";
 
 				echo "<td class='back' valign='top'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
@@ -670,7 +690,7 @@
 						echo "<input type='hidden' name='nippu' value='$otunnus'>";
 					}
 				}
-				elseif ($sopimus>0) {
+				elseif ($sopimus > 0) {
 					echo "<input type='hidden' name='sopimus' value='$sopimus'>";
 				}
 				else {
@@ -702,7 +722,7 @@
 	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<br><table>";
@@ -730,7 +750,7 @@
 	}
 	else {
 		echo "<br>";
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
 		echo "</form>";

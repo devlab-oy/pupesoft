@@ -195,7 +195,7 @@
 
 		echo "<font class='head'>".t("Siirtolista").":</font><hr><br>";
 
-		echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+		echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='file'>
 				<input type='hidden' name='toim' value='$toim'>

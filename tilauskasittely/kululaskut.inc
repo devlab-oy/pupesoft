@@ -191,7 +191,7 @@ if ($tee_kululaskut == "liita") {
 					tila         = 'K'";
 		$result = pupe_query($query);
 
-		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
+		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin saapumiseen")." $laskurow[laskunro].</font><br><br>";
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
@@ -368,7 +368,7 @@ if ($silent == "") {
 
 		if (mysql_num_rows($result) != 0) {
 
-			echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+			echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("saapuminen").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
 			echo "<table>";
 			echo "<tr>
 					<th>".t("Nimi")."</th>
@@ -424,7 +424,7 @@ if ($silent == "") {
 				echo "<td valign='top'>$vienti_teksti</td>";
 
 				echo "<td valign='top' class='back'>
-						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
+						<form name='haku' method='post' autocomplete='off'>
 						<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -455,7 +455,7 @@ if ($silent == "") {
 
 					if ($mlrivirow["mrivi"] > 0 and $mlrivirow["mrivi"] != $mlrivirow["trivi"]) {
 						echo "<td valign='top' class='back'>
-								<form method='POST' action='$PHP_SELF'>
+								<form method='POST'>
 								<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
 								<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -479,7 +479,7 @@ if ($silent == "") {
 			echo "<hr>";
 		}
 
-		echo "<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
+		echo "<form name='haku' method='post' autocomplete='off'>
 				<input type='hidden' name='keikanalatila' value='$keikanalatila'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -505,7 +505,7 @@ if ($silent == "") {
 			$sel3 = "SELECTED";
 		}
 
-		echo "<br><font class='message'>".t("Liit‰ lasku")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+		echo "<br><font class='message'>".t("Liit‰ lasku")." (".t("saapuminen").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
 		echo "<table><tr>";
 		echo "<th>".t("Etsi lasku")."</th>";
 		echo "<th><SELECT name='hakutapa'>";
@@ -775,7 +775,7 @@ if ($silent == "") {
 
 					if ($voikolisata == "OK") {
 
-						echo "<form name='haku' action='$PHP_SELF' method='post'>";
+						echo "<form name='haku' method='post'>";
 
 						if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
 							echo "<td valign='top'><input type='text' name='liitasumma' size='8'></td>";
@@ -806,13 +806,13 @@ if ($silent == "") {
 					}
 					else {
 						echo "<td class='spec' valign='top'>";
-						echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle keikalle")."!";
+						echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle saapumiselle")."!";
 						echo "</td></tr>";
 					}
 				}
 				elseif ($listaustapa == "liitetyt" or $listaustapa == "") {
 					echo "<td valign='top' colspan='2'>";
-					echo t("Laskun summa on jo k‰ytetty keikalla/keikoilla")." $apurow[laskunrot]!";
+					echo t("Laskun summa on jo k‰ytetty saapumisella/keikoilla")." $apurow[laskunrot]!";
 					echo "</td></tr>";
 				}
 				else {
@@ -827,7 +827,7 @@ if ($silent == "") {
 	if ($toiminto != "" and $lopetus == '') {
 
 		echo "<hr>";
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
@@ -837,7 +837,7 @@ if ($silent == "") {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
 
-		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 		echo "</form>";
 	}
 }

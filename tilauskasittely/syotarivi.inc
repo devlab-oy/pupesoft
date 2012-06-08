@@ -496,7 +496,7 @@
 			echo "<input type='hidden' name='toimppa' value='$toimppa'>";
 			echo "<input type='hidden' name='toimkka' value='$toimkka'>";
 			echo "<input type='hidden' name='toimvva' value='$toimvva'>";
-			$kommentit_columns = 99;
+			$kommentit_columns = 75;
 		}
 
 		echo "<td valign='top' colspan='".($nrospanni-$nrospanni_vah)."'><textarea name='kommentti' cols='$kommentit_columns' rows='2' wrap='soft'>$kommentti</textarea></td>";
@@ -696,7 +696,7 @@
 	}
 	elseif (!$variaaritorivi and $miniliittyma == "JOO") {
 
-		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
+		echo "	<form name='rivi' action = '?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>
 				<input type='hidden' name='toim' value = '$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>

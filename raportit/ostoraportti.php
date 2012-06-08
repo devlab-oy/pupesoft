@@ -1737,7 +1737,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -1834,7 +1834,7 @@
 
 		if ($tee == "") {
 
-			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+			echo "	<form method='post' autocomplete='off'>
 					<input type='hidden' name='tee' id='tee' value=''>
 					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 					<br/>",t("Valitse v‰hint‰‰n yksi seuraavista:"),"<br/>";
@@ -1993,7 +1993,7 @@
 			}
 
 			echo "<table>";
-			echo "<form action='' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "	<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>

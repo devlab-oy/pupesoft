@@ -15,7 +15,7 @@
 
 	enable_ajax();
 
-	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<form method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='hae'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 

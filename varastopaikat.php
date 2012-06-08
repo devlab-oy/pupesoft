@@ -112,7 +112,7 @@ if ($tee == 'edit') {
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 
-	echo "<form method='post' action='$PHP_SELF'>
+	echo "<form method='post'>
 	<input type='hidden' name='tee' value='update'>
 	<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 
@@ -253,7 +253,7 @@ if ($tee == '') {
 		echo "<td>$row[tyyppi]</td>";
 		echo "<td>$row[nimitys]</td>";
 
-		echo "<form method='post' action='$PHP_SELF'>
+		echo "<form method='post'>
 		<input type='hidden' name='tee' value='edit'>
 		<input type='hidden' name='tunnus' value='$row[tunnus]'>
 		<td><input type='submit' value='".t("Muokkaa")."'></td></form>";
@@ -265,7 +265,7 @@ if ($tee == '') {
 					}
 			</SCRIPT>";
 
-		echo "<form method='post' action='$PHP_SELF' onSubmit = 'return verify()'>
+		echo "<form method='post' onSubmit = 'return verify()'>
 		<input type='hidden' name='tee' value='poista'>
 		<input type='hidden' name='tunnus' value='$row[tunnus]'>
 		<td><input type='submit' value='".t("Poista")."'></td></form>";
@@ -275,7 +275,7 @@ if ($tee == '') {
 
 	echo "</table><br>";
 
-	echo "<form method='post' action='$PHP_SELF'>
+	echo "<form method='post'>
 	<input type='hidden' name='tee' value='uusi'>
 	<input type='submit' value='".t("Tee uusi varastoalue")."'>
 	</form>";

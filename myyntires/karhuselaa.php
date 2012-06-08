@@ -105,7 +105,7 @@ if (isset($_POST['poista_tratta'])) {
 	}
 }
 
-echo "<form name='karhu_selaa' action='' method='post'>
+echo "<form name='karhu_selaa' method='post'>
 		<table>
 		<tr>
 			<th>".t("Ytunnus")."</th><td><input type='text' name='ytunnus'></td>
@@ -120,7 +120,7 @@ echo "<form name='karhu_selaa' action='' method='post'>
 
 if ($toim == "") {
 	echo "<br><br><font class='head'>".t("Selaa karhukierroksia / uudelleenlähetä kierros asiakkaille")."</font><hr />";
-	echo "<form name='karhu_selaa' action='' method='post'>
+	echo "<form name='karhu_selaa' method='post'>
 		<input type='submit' name='tee_kiekat' value='".t("Näytä karhukierrokset")."'>
 		</form><br>";
 }
@@ -296,7 +296,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 			}
 
 			if ($toim == "TRATTA") {
-				echo "<td><form action='' method='post'>";
+				echo "<td><form method='post'>";
 				echo "<input type='submit' name='poista_tratta' id='poista_tratta' value='",t("Poista"),"'>";
 				echo "<input type='hidden' name='poista_tratta_tunnus' id='poista_tratta_tunnus' value='$row[ktunnus]'>";
 				echo "<input type='hidden' name='ltunnus' id='ltunnus' value='$row[ltunnus]'>";

@@ -18,8 +18,19 @@
 		$ulos .= "<option value = 'S' $sel[S]>".t("Sisäinen")."</option>";
 		$ulos .= "<option value = 'U' $sel[U]>".t("Ulkoinen")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("ALV")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Tulosseuranta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "kumulatiivinen") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Kyllä")." ".t("Tulosseurannassa tämä taso lasketaan tilikauden alusta")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

@@ -1,9 +1,9 @@
 <?php
 
 	require ("inc/parametrit.inc");
-	
+
 	echo "<font class='head'>".t("Mysqlalias-avainsanojen yll‰pito")."</font><hr>";
-	
+
 	if ($upd == 1) {
 
 		list($xtaulu, $xalias_set) = explode("###", $taulu);
@@ -27,33 +27,34 @@
 						and selite	= '$xtaulu.$al_nimi'
 						and selitetark_2 = '$xalias_set'";
 			$al_res = mysql_query($query) or pupe_error($query);
-			
+
 			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "") {
-				
+
 				$pakollisuus = "";
-				
+
 				if ($mysqlaliaspakollisuus[$al_nimi] != "") {
 					$pakollisuus = "PAKOLLINEN";
 				}
-				
+
 				$xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
-				
+
 				$query = "	INSERT INTO avainsana
 							SET yhtio 		= '$kukarow[yhtio]',
 							laji			= 'MYSQLALIAS',
 							selite			= '$xtaulu.$al_nimi',
 							selitetark 		= '$xotsikko',
 							selitetark_2 	= '$xalias_set',
-							selitetark_3 	= '$pakollisuus'";
-				$al_res = mysql_query($query) or pupe_error($query);				
+							selitetark_3 	= '$pakollisuus',
+							selitetark_4	= '".$oletusarvo[$al_nimi]."'";
+				$al_res = mysql_query($query) or pupe_error($query);
 			}
 		}
 	}
-	
+
 	if ($kopsaataulu != "" and $uusisetti != "") {
-		
+
 		list($kopsaataulu, $alias_set) = explode("###", $kopsaataulu);
-		
+
 		$query = "	SELECT *
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -61,7 +62,7 @@
 					and selite like '$kopsaataulu.%'
 					and selitetark_2 = '$alias_set'";
 		$al_res1 = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "	SELECT *
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -69,7 +70,7 @@
 					and selite like '$kopsaataulu.%'
 					and selitetark_2 = '$uusisetti'";
 		$al_res2 = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
 			while ($al_row = mysql_fetch_array($al_res1)) {
 				$query = "	INSERT INTO avainsana
@@ -82,17 +83,17 @@
 			}
 		}
 	}
-	
+
 	// Nyt selataan
 	$query  = "SHOW TABLES FROM $dbkanta";
 	$tabresult = mysql_query($query) or pupe_error($query);
 
 	$sel[$taulu] = "SELECTED";
-	
+
 	echo "<form method = 'post'><table>";
 	echo "<tr><th>".t("Muokkaa aliasryhm‰‰").":</th><td>";
 	echo "<select name = 'taulu'>";
-	
+
 	while ($tables = mysql_fetch_array($tabresult)) {
 		if (file_exists("inc/".$tables[0].".inc")) {
 
@@ -103,9 +104,9 @@
 						and selite	like '".$tables[0].".%'
 						and selitetark_2 != ''";
 			$al_res = mysql_query($query) or pupe_error($query);
-			
+
 			echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
-			
+
 			if (mysql_num_rows($al_res) > 0) {
 				while ($alrow = mysql_fetch_array($al_res)) {
 					echo "<option value='$tables[0]###$alrow[selitetark_2]' ".$sel[$tables[0]."###".$alrow["selitetark_2"]].">$tables[0] - $alrow[selitetark_2]</option>";
@@ -113,19 +114,19 @@
 			}
 		}
 	}
-	
+
 	echo "</select></td><td class='back'>";
 	echo "<input type='submit' value='".t("Valitse")."'>";
 	echo "</td></tr></table></form><br><br>";
-	
-	if ($taulu == "") {	
-		
+
+	if ($taulu == "") {
+
 		echo "<form method = 'post'><table>";
-		echo "<tr><th>".t("Kopioi aliasryhm‰").":</th><td>";		
+		echo "<tr><th>".t("Kopioi aliasryhm‰").":</th><td>";
 		echo "<select name = 'kopsaataulu'>";
-		
+
 		mysql_data_seek($tabresult, 0);
-		
+
 		while ($tables = mysql_fetch_array($tabresult)) {
 			if (file_exists("inc/".$tables[0].".inc")) {
 
@@ -136,9 +137,9 @@
 							and selite	like '".$tables[0].".%'
 							and selitetark_2 != ''";
 				$al_res = mysql_query($query) or pupe_error($query);
-			
+
 				echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
-			
+
 				if (mysql_num_rows($al_res) > 0) {
 					while ($alrow = mysql_fetch_array($al_res)) {
 						echo "<option value='$tables[0]###$alrow[selitetark_2]' ".$sel[$tables[0]."###".$alrow["selitetark_2"]].">$tables[0] - $alrow[selitetark_2]</option>";
@@ -146,17 +147,17 @@
 				}
 			}
 		}
-	
+
 		echo "</select></td>";
-		
+
 		echo "<th>".t("Uuden aliasryhm‰n nimi").":</th><td><input type='text' size='30' name='uusisetti'>";
 		echo "</select></td><td class='back'>";
 		echo "<input type='submit' value='".t("Valitse")."'>";
 		echo "</td></tr></table></form><br><br>";
 	}
-	
+
 	// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
-	if ($taulu != "") {	
+	if ($taulu != "") {
 		echo "<form method = 'post'>";
 		echo "<input type = 'hidden' name = 'taulu' value = '$taulu'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
@@ -169,7 +170,7 @@
 					WHERE tunnus = 0";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-		
+
 		echo "<table><tr><td class='back' valign='top'>";
 		echo "<table>";
 		echo "<tr>";
@@ -177,6 +178,7 @@
 		echo "<th>N‰kyvyys</th>";
 		echo "<th>Pakollisuus</th>";
 		echo "<th>Seliteteksti</th>";
+		echo "<th>Oletusarvo</th>";
 		echo "<th>Esimerkkej‰</th>";
 		echo "</tr>";
 
@@ -217,6 +219,7 @@
 			$al_nimi = mysql_field_name($result, $i);
 			$otsikko = "";
 			$box 	 = "CHK";
+			$oletusarvo = "";
 
 			$query = "	SELECT *
 						FROM avainsana
@@ -229,15 +232,17 @@
 			if(mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
 
-				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);				
+				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);
 				$box = "CHECKED";
-				
+
 				if ($al_row['selitetark_3'] == 'PAKOLLINEN') {
 					$pakollisuusbox = "CHECKED";
 				}
 				else {
 					$pakollisuusbox = "";
 				}
+
+				$oletusarvo = $al_row['selitetark_4'];
 			}
 
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
@@ -251,11 +256,13 @@
 			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
 				echo "<tr>";
 				echo "<th align='left'>".mysql_field_name($result, $i)."</th>";
-				
+
 				echo "<th><input type='checkbox' name='mysqlaliasbox[".mysql_field_name($result, $i)."]' $box></th>";
 				echo "<th><input type='checkbox' name='mysqlaliaspakollisuus[".mysql_field_name($result, $i)."]' $pakollisuusbox></th>";
-				
+
 				echo "<th align='left'><input type='text' size='30' name='mysqlalias[".mysql_field_name($result, $i)."]' value='$otsikko'></th>";
+
+				echo "<th align='left'><input type='text' size='30' name='oletusarvo[".mysql_field_name($result, $i)."]' value='$oletusarvo'></th>";
 			}
 
 			if ($jatko == 0) {
@@ -297,9 +304,9 @@
 		}
 		echo "</table><br>";
 		echo "<input type='submit' value='".t("P‰ivit‰")."'>";
-		echo "</form>";		
+		echo "</form>";
 	}
-	
+
 	require ("inc/footer.inc");
 
 ?>

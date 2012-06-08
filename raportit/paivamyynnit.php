@@ -9,7 +9,7 @@
 
 	if (!isset($vuosi)) $vuosi = date("Y");
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	echo "<table>";

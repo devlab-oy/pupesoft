@@ -40,7 +40,7 @@
 	}
 
 	echo "<table>";
-	echo "<form action='$PHP_SELF' name='find' method='post'>";
+	echo "<form name='find' method='post'>";
 
 	echo "<tr><td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
 
@@ -121,7 +121,7 @@
 
 		//echo "<table><tr><td>";
 		echo "<table>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='nollaa'>";
 		echo "<input type='hidden' name='tupakkaamo' value='$tupakkaamo'>";
 		while ($row = mysql_fetch_array($pakkaamore)) {

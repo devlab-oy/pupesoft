@@ -22,7 +22,7 @@
 		$ppl = date("d");
 
 	// käyttis
-	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<form method='POST'>";
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 
 	echo "<table>";

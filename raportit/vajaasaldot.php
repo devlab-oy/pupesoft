@@ -21,7 +21,7 @@
 	}
 
 	// käyttis
-	echo "<br><form action='$PHP_SELF' method='POST'>";
+	echo "<br><form method='POST'>";
 	echo "<input type='hidden' name='tee' value='raportoi'>";
 	echo "<table>";
 	echo "<tr><th>".t("Rajaukset")."</th><td>";

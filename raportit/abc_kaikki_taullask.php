@@ -29,7 +29,7 @@
 	}
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='aja' value='AJA'>";
 	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -185,7 +185,7 @@
 		// n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
 		$asiakas_join_array = array('AK','AM','AP','AR');
 		$tuote_join_array = array('TK','TM','TP','TR','TV');
-		
+
 		if (in_array($abcchar,$asiakas_join_array)) {
 			$analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
 		}
@@ -346,7 +346,7 @@
 
 			echo "<br><br><table>";
 			echo "<tr><th>".t("Tallenna Excel").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='ABC_listaus.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

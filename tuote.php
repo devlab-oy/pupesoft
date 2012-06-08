@@ -12,14 +12,6 @@
 	if (!isset($tilalehinta))  	 $tilalehinta = "";
 	if (!isset($historia))  	 $historia = "";
 
-	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
-	else $tkysy_lopetus = "";
-
-	if ($lopetus != "") {
-		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-	}
-
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -39,13 +31,6 @@
 
 	// Enaboidaan ajax kikkare
 	enable_ajax();
-
-	if ($tee == 'NAYTATILAUS') {
-		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-		require ("raportit/naytatilaus.inc");
-		echo "<br><br><br>";
-		$tee = "Z";
-	}
 
 	if ($tee == 'N' or $tee == 'E') {
 
@@ -77,6 +62,21 @@
 			$tuoteno = '';
 			$tee='Y';
 		}
+	}
+
+	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
+	else $tkysy_lopetus = "";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+	}
+
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+		echo "<br><br><br>";
+		$tee = "Z";
 	}
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
@@ -144,7 +144,7 @@
 	echo "<table>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<form method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -156,7 +156,7 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
+	echo "<form method='post' name='formi2' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -178,7 +178,7 @@
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 	if ($ulos == '' and $tee == 'Z') {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
@@ -190,7 +190,7 @@
 		echo "</td>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tyyppi' value=''>";
@@ -1750,8 +1750,8 @@
 							$maara";
 				$qresult = pupe_query($query);
 
-				// jos joku in-out varastonarvo
-				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
+				// jos jsarjanumeroseuranta S tai U ja inout varastonarvo
+				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 					$kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
 				}
 
@@ -1967,7 +1967,7 @@
 	}
 
 	if ($ulos != "") {
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='Z'>";

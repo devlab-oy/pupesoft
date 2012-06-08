@@ -41,7 +41,7 @@
 
 		echo "<font class='head'>",t("Sähköinen markkinointi"),"</font><hr>";
 		echo "<table>";
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 
 		echo "<tr>";
 		echo "<th colspan='2'>",t("Asiakastiedot"),"</th>";
@@ -218,9 +218,9 @@
 
 			$asiakkaan_avainsana_where = "";
 			$asiakkaan_avainsana_join = "";
-			
+
 			if (isset($dyn) and count($dyn) > 0) {
-				
+
 				foreach($dyn as $muuttuja) {
 					if ($$muuttuja != '') {
 						$$muuttuja = mysql_real_escape_string($$muuttuja);
@@ -307,7 +307,7 @@
 			$query .= "	GROUP BY tunnus order by postitp, nimi";
 			$res = pupe_query($query);
 
-			echo "<form method='post' action=''>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<table>";
 			echo "<tr><th colspan='4'>",t("Tallennustoiminnot"),"</th></tr>";
 
@@ -376,7 +376,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake, t("Toim.Postitp"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Toim.Postino"), $format_bold);
-				$excelsarake++;				
+				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Myynti aikavälillä"), $format_bold);
 				$excelsarake++;
 
@@ -470,7 +470,7 @@
 						$worksheet->writeString($excelrivi, $excelsarake, $row["toim_postino"]);
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, $row["toim_postitp"]);
-						$excelsarake++;						
+						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"]));
 						$excelsarake++;
 

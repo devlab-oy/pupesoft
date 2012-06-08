@@ -180,7 +180,7 @@ if ($tee == "muutaomanprojektintila") {
 		}
 		else {
 			echo "<font class='head'>".t("Vaihda projektin tila")."</font><hr><br>";
-			echo "	<form action='$PHP_SELF?tee=$tee&tallenna=yes' name='vaihdatilaa' method='post'>
+			echo "	<form action = '?tee=$tee&tallenna=yes' name='vaihdatilaa' method='post'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
 					<center><table>
 					<tr>
@@ -236,7 +236,7 @@ if ($toim == "OMATPROJEKTIT" and ($projekti == 0 or $tallenna == 'yes')) {
 	else {
 		echo "<font class='head'>".t("Omat avoimet projektit")."</font><hr><br>";
 		
-		$lisayslomake = "<form action='$PHP_SELF?toim=$toim&tallenna=yes' method='post' name='lisaaomaprojekti'>
+		$lisayslomake = "<form action = '?toim=$toim&tallenna=yes' method='post' name='lisaaomaprojekti'>
 				<table>
 					<tr>
 						<th>".t("Projektin nimi").":</th>
@@ -423,7 +423,7 @@ if($toim == "HAKU" or $toim == "OMATPROJEKTITHAKU") {
 	}
 	$hakulisa .= "</select></td><td class='back'>&nbsp;</td><td class='back' colspan='2' align='right'><input type='submit' value='".t("Hae")."'></td></tr>";
 	
-	echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='haku'>
+	echo "	<form action = '?toim=$toim' method='post' name='haku'>
 			<input type='hidden' name='toim' value='$toim'>
 			<table>
 				<tr><th>".t("Projekti")."</th><td><input type='text' size='25' name='projekti' value='$projekti'></td><td class='back'>&nbsp;</td></tr>				
@@ -501,7 +501,7 @@ if((($toim != "HAKU" and $toim != "OMATPROJEKTITHAKU") or $projekti != "" or $as
 						<td>$row[kohde]</td>
 						<td>$row[projektipaallikko]</td>
 						<td class='back'>
-							<form action='$PHP_SELF' method='post'>
+							<form method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='projekti' value='$row[tunnus]'>
 								<input type='submit' value='".t("Avaa kalenteri")."'>

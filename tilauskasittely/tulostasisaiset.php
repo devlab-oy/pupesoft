@@ -60,7 +60,7 @@
 
 	if (!isset($tee) or $tee == '') {
 		//syötetään tilausnumero
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 		echo "<input type='hidden' name='tila' value='yksi'>";
 
@@ -108,7 +108,7 @@
 			$ppl = date("d");
 
 		echo "<table>";
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 		echo "<input type='hidden' name='tila' value='monta'>";
 		echo "<tr><th colspan='4'>".t("Tulosta sisäiset laskut päivämäärärajauksella")."</th></tr>";

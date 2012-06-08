@@ -300,6 +300,16 @@
 
 			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteest‰ kaikki v‰lilyˆnnit
 			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteest‰ N/A tieto, mik‰li joistakin skannauspalvelusta sellainen tulee
+
+			// Hyl‰t‰‰n viite jos se on nollaa
+			if (is_numeric($viite) and (int) $viite == 0) {
+				$viite = "";
+
+				// Setataan viesti
+				if (trim($laskun_numero) != "") $viesti = $laskun_numero;
+				else $viesti = "Lasku: $summa $valkoodi";
+			}
+
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 
@@ -401,7 +411,7 @@
 				// 6 etsit‰‰n toimittaja vat-numerolla ilman FI-etuliitett‰
 				$query  = "	SELECT *
 							FROM toimi
-							WHERE ytunnus in ('$intvat', '$intvat2')
+							WHERE REPLACE(REPLACE(REPLACE(ytunnus,'FI',''),'fi',''),'-','') in ('$intvat', '$intvat2')
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
@@ -553,7 +563,7 @@
 							and tyyppi 		= 'k'
 							and yhtio 		= '$yhtio'
 							and tilino 		= 0
-							and kuvaus 		= '$kauttalaskutus'";
+							and kuvaus 		= '".mysql_real_escape_string($kauttalaskutus)."'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
@@ -588,16 +598,16 @@
 								and tyyppi		= 'o'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
-									and mintuote = '$toim_asiakkaantiedot[postino]'
-									and maxtuote = '$toim_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($toim_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($toim_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($toim_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -634,16 +644,16 @@
 								and tyyppi		= 'b'";
 
 					if ($laskuformaatti == "INVOIC.D.96A") {
-						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
-									and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
-									and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
-									and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and SUBSTRING(kuvaus2,  1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and SUBSTRING(mintuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and SUBSTRING(maxtuote, 1, 30) = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 					else {
-						$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
-									and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
-									and mintuote = '$ostaja_asiakkaantiedot[postino]'
-									and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
+						$query .= " and kuvaus   = '".mysql_real_escape_string($ostaja_asiakkaantiedot['nimi'])."'
+									and kuvaus2  = '".mysql_real_escape_string($ostaja_asiakkaantiedot['osoite'])."'
+									and mintuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postino'])."'
+									and maxtuote = '".mysql_real_escape_string($ostaja_asiakkaantiedot['postitp'])."'";
 					}
 
 					$result = pupe_query($query);
@@ -680,7 +690,7 @@
 									and tyyppi 		= 'a'
 									and yhtio 		= '$yhtio'
 									and tilino 		= 0
-									and kuvaus 		= '$laskun_asiakastunnus'";
+									and kuvaus 		= '".mysql_real_escape_string($laskun_asiakastunnus)."'";
 						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) != 0) {
@@ -899,7 +909,10 @@
 					return ($return);
 				}
 
-				$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
+				$query = "	SELECT kurssi
+							FROM valuu
+							WHERE nimi = '$valkoodi'
+							AND yhtio  = '$yhtio'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -1118,8 +1131,12 @@
 
 						$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-						if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+						if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 							$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+						}
+
+						if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+							$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 						}
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
@@ -1168,8 +1185,8 @@
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
-							$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
-							$tuote  = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"]));  // Poistaa SQL-virheen mahdollisuuden
+							$selite = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["riviinfo"]));
+							$tuote  = mysql_real_escape_string(utf8_decode($rtuoteno[$i]["tuoteno"]));
 
 							$query = "	SELECT tilino, kustp
 										FROM tiliointisaanto
@@ -1219,14 +1236,19 @@
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
 
-							// Unikko laskuissa tulee kirjauksetkin valuutassa, joten pit‰‰ laskea kurssi.
 							if ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0) {
+								// Unikko laskuissa tulee kirjauksetkin valuutassa
 								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta_valuutassa"];
+								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
+							}
+							elseif ($vrow["kurssi"] != 1) {
+								// Laskulla olevat rivihinnat ovat valuutassa
+								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta"];
 								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
 							}
 							else {
 								$summa = (float) $rtuoteno[$i]["rivihinta"];
-								$summa_valuutassa = 0;
+								$summa_valuutassa = $summa;
 							}
 
 							// Hyvityslasku tai summa alle nolla
@@ -1295,8 +1317,12 @@
 
 								$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-								if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+								if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L')) {
 									$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+								}
+
+								if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+									$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 								}
 
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);

@@ -50,6 +50,12 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
+	// JT-selaus p‰ivitysoikeus, joko JT-selaus p‰ivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivej‰
+	$jtselaus_paivitys_oikeus = FALSE;
+	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and $yhtiorow["automaattinen_jt_toimitus"] == "J")) {
+		$jtselaus_paivitys_oikeus = TRUE;
+	}
+
 	if (isset($_POST['korvataanko']) and $_POST['korvataanko'] == 'KORVAA') {
 		$query = "	UPDATE tilausrivi
 					SET tuoteno = '$_POST[korvaava]'
@@ -125,7 +131,7 @@
 	require ("tee_jt_tilaus.inc");
 
 	//JT-rivit on poimittu
-	if ($oikeurow['paivitys'] == '1' and ($tee == 'POIMI' or $tee == "JT_TILAUKSELLE")) {
+	if ($jtselaus_paivitys_oikeus and ($tee == 'POIMI' or $tee == "JT_TILAUKSELLE")) {
 		foreach($jt_rivitunnus as $tunnukset) {
 
 			$tunnusarray = explode(',', $tunnukset);
@@ -150,7 +156,7 @@
 		$tee = "JATKA";
 	}
 
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
 		if ($toim == "ENNAKKO") {
 			$query  = "	SELECT *
 						FROM lasku
@@ -343,7 +349,7 @@
 	}
 
 	// Tutkitaan onko k‰ytt‰j‰ll‰ keskenolevia jt-rivej‰
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $from_varastoon_inc == "") {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $from_varastoon_inc == "") {
 
 		if ($toim == "ENNAKKO") {
 			$query = "	SELECT *
@@ -402,7 +408,7 @@
 		$stresult = pupe_query($query);
 
 		if (mysql_num_rows($stresult) > 0) {
-			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
+			echo "	<form name='valinta' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='maa' value='$maa'>
 					<input type='hidden' name='myyja' value='{$myyja}' />
@@ -431,7 +437,7 @@
 	}
 
 	//muokataan tilausrivi‰
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'MUOKKAARIVI') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'MUOKKAARIVI') {
 		$query = "	SELECT *
 					FROM tilausrivi
 					WHERE tunnus = '$jt_rivitunnus' and yhtio='$kukarow[yhtio]'";
@@ -506,7 +512,7 @@
 
 		echo t("Muuta rivi‰").":<br>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='LISAARIVI'>";
 		echo "<input type='hidden' name='jarj' value='$jarj'>";
@@ -538,7 +544,7 @@
 	}
 
 	//Lis‰t‰‰n muokaattu tilausrivi
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'LISAARIVI') {
+	if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'LISAARIVI') {
 
 		// lis‰‰ p‰iv‰m‰‰r‰n tarkistus.
 		if (checkdate($kerayskka, $keraysppa, $keraysvva)) {
@@ -776,11 +782,9 @@
 
 		$summarajauslisa = '';
 		$summarajausfail = '';
+		$query_ale_lisa = generoi_alekentta('M');
 
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
-
-			$query_ale_lisa = generoi_alekentta('M');
-
 			if (isset($summarajaus) and $summarajaus != '') {
 				$summarajaus = (float) $summarajaus;
 
@@ -854,7 +858,8 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -874,7 +879,8 @@
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
-							tilausrivin_lisatiedot.tilausrivilinkki
+							tilausrivin_lisatiedot.tilausrivilinkki,
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
@@ -899,11 +905,15 @@
 			if (mysql_num_rows($isaresult) > 0) {
 
 				$jt_rivilaskuri = 1;
+				$jt_hintalaskuri = 0;
 
 				while ($jtrow = mysql_fetch_array($isaresult)) {
 
 					//tutkitaan onko t‰m‰ suoratoimitusrivi
 					$onko_suoratoimi = "";
+
+					// Summataan hintaa
+					$jt_hintalaskuri += $jtrow["jt_rivihinta"];
 
 					if ($jtrow["tilausrivilinkki"] > 0) {
 						$query = "	SELECT tunnus
@@ -1083,7 +1093,7 @@
 
 								echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
 
-								if ($oikeurow['paivitys'] == '1') {
+								if ($jtselaus_paivitys_oikeus) {
 									if ($kukarow["extranet"] == "") {
 										echo "<th valign='top'>".t("Toimita")."<br>".t("kaikki")."</th>";
 										echo "<th valign='top'>".t("Toimita")."<br>".t("m‰‰r‰")."</th>";
@@ -1103,7 +1113,7 @@
 
 								echo "</tr>";
 
-								if ($oikeurow['paivitys'] == '1') {
+								if ($jtselaus_paivitys_oikeus) {
 
 									echo "	<script type='text/javascript' language='JavaScript'>
 											<!--
@@ -1139,7 +1149,7 @@
 										</script>";
 
 
-									echo "<form action='$PHP_SELF' method='post'>";
+									echo "<form method='post'>";
 									echo "<input type='hidden' name='maa' value='$maa'>";
 									echo "<input type='hidden' name='myyja' value='{$myyja}' />";
 
@@ -1354,7 +1364,7 @@
 									echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
 								}
 
-								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
+								if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
 									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
 								}
 								else {
@@ -1378,7 +1388,7 @@
 								echo "</td>";
 							}
 
-							if ($oikeurow['paivitys'] == '1') {
+							if ($jtselaus_paivitys_oikeus) {
 								if ($toim == "ENNAKKO") {
 									$query = "	SELECT sum(varattu) jt, count(*) kpl
 												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -1766,7 +1776,7 @@
 
 									echo "</td>";
 
-									if ($oikeurow['paivitys'] == '1') {
+									if ($jtselaus_paivitys_oikeus) {
 										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$perherow[yksikko]'", "", "", "selite")."<br></font>";
 
 										if (!isset($toimpva) and isset($toimvko) and $toimvko > 0) {
@@ -1873,7 +1883,7 @@
 
 				if ($automaaginen == '' and $jt_rivilaskuri > 1) {
 
-					if ($oikeurow['paivitys'] == '1') {
+					if ($jtselaus_paivitys_oikeus) {
 
 						if ($kukarow["extranet"] == "" and $automaaginen == '') {
 
@@ -1889,7 +1899,7 @@
 								$colspan++;
 							}
 
-							if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
+							if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
 								$colspan++;
 							}
 
@@ -1907,6 +1917,8 @@
 					}
 
 					echo "</table>";
+
+					echo "<table><th>".t("Kaikki j‰lkitoimitusrivit yhteens‰")."</th><td>".sprintf("%.02f", $jt_hintalaskuri)." {$yhtiorow["valkoodi"]}</td></tr></table>";
 
 					if ($jtseluas_rivienmaara >= 1000 and $ei_limiittia == "") {
 						echo "<font class='error'>".t("Haun tulos liian suuri! N‰ytet‰‰n ensimm‰iset 1000 rivi‰!")."</font><br>";
@@ -1945,7 +1957,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'";
 		$vtresult = pupe_query($query);
 
-		echo "	<form name='valinta' action='$PHP_SELF' method='post'>
+		echo "	<form name='valinta' method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<table>";
 

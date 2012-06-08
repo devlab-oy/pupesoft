@@ -8,7 +8,7 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>Hae tuotteen tulliprossa (veroperustetieto):</font><hr>";
 
 
-echo "<form method='post' action='$PHP_SELF'>
+echo "<form method='post'>
 	<br><br>
 	<table>
 	<tr><th>".t("Syötä tuotenumero").":</th>
@@ -19,7 +19,7 @@ echo "<form method='post' action='$PHP_SELF'>
 	</form><br><br><br><br>";
 
 echo t("Näytä kaikki tuotteet").":<hr>";
-echo "<form method='post' action='$PHP_SELF'>
+echo "<form method='post'>
 	<table>
 	<tr><th>".t("Simuloitu tuotteiden lähetysmaa").":</th>";
 

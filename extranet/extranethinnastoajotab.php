@@ -134,7 +134,7 @@
 	echo "<br>".t("Voit rajata hinnastoa joko valitsemalla yhden tuoteosaston, tai yhden tuoteryhmän. <br>Tai jos et tee mitään valintaa ajetaan hinnasto kaikista tuotteista").".<br>";
 	echo "<br>".t("Aja hinnasto painamalla Lähetä nappia. Hinnasto lähetetään sähköpostilla liitetiedostona").".";
 	echo "<br><br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 

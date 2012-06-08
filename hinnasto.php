@@ -21,7 +21,7 @@ elseif (@include("parametrit.inc"));
 else exit;
 
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
-echo "<form method='post' action=''>";
+echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
@@ -230,7 +230,7 @@ if (isset($submitnappi)) {
 	echo "<tr>";
 	echo "<th>".t("Tallenna hinnasto tiedostoon")."</th>";
 	echo "<td>";
-	echo "<form method='post' action=''>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='filenimi' value='$filenimi'>";
 	echo "<input type='hidden' name='kaunisnimi' value='".t("hinnasto")."'>";
 	echo "<input type='submit' value='".t("Tallenna")."'>";

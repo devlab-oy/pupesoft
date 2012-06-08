@@ -774,17 +774,14 @@
 
 		if (mysql_num_rows($siirtores) > 0) {
 			$siirtorow = mysql_fetch_assoc($siirtores);
-			if($siirtorow["tila"] == "O") {
+			if ($siirtorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty ostorivi poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty ostorivi poistetaan.");
 			}
 			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty valmistus poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty valmistus poistetaan.");
 			}
 
+			$nayta_sostolisateksti = "TOTTA";			
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
 		}
 	}
@@ -807,7 +804,7 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-			$alku .= "<th><form action='$PHP_SELF' method='post' name='hyvaksy'>
+			$alku .= "<th><form method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -857,7 +854,7 @@
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"
 					 			."<td align='right'>".sprintf("%.2f", $V_hinta)."</td>"
 					 			."<td align='left'>"
-					 			." <form action='$PHP_SELF' method='post' name='jalkitoimita'>
+					 			." <form method='post' name='jalkitoimita'>
 					 			   	<input type='hidden' name='toim' 			value = '$toim'>
 					 			   	<input type='hidden' name='lopetus' 		value = '$lopetus'>
 					 			   	<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>

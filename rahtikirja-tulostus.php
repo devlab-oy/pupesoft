@@ -879,12 +879,12 @@
 			echo "<table><tr><td>";
 
 			echo "<table><tr><td valign='top'>",t("Etsi numerolla"),":</td>";
-			echo "<form action='$PHP_SELF' method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
+			echo "<form method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
 			echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='",t("Etsi"),"'>&nbsp;<input type='submit' id='resetti' name='resetti' value='",t("Tyhjennä"),"'></td>";
 			echo "</form>";
 			echo "</tr>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
 			echo "<input type='hidden' name='edOpt' id='edOpt' value=''>";
 

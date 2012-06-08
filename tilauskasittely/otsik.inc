@@ -500,7 +500,7 @@
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
+		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -2504,7 +2504,7 @@
 			echo "</form>";
 
 			if ($tilausnumero != "") {
-				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<form method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='OTSIK'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -3151,16 +3151,19 @@
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
 
-		// p‰ivitet‰‰n erikoisale tilausriveille
-		$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
-		$query_erikoisale = "	UPDATE tilausrivi
-								SET erikoisale = '{$erikoisale}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$erikoisale_query_otunnus}'
-								AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
-								AND netto  != 'N'
-								AND tyyppi != 'D'";
-		$upd_erikoisale_res = pupe_query($query_erikoisale);
+		// Jos erikoisalennus muuttuu
+		if ($laskurow["erikoisale"] != $erikoisale) {
+			// p‰ivitet‰‰n erikoisale tilausriveille
+			$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+			$query_erikoisale = "	UPDATE tilausrivi
+									SET erikoisale = '{$erikoisale}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$erikoisale_query_otunnus}'
+									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
+									AND netto  != 'N'
+									AND tyyppi != 'D'";
+			$upd_erikoisale_res = pupe_query($query_erikoisale);
+		}
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 

@@ -1345,21 +1345,21 @@ if ($tee == 'P' or $tee == 'E') {
 				case '1':
 					if (!isset($osto_rahti)) $osto_rahti = '';
 
-					echo "<td>",t("Vaihto-omaisuuslaskun rahdit"),"</td>";
+					echo "<td>",t("Rahdit"),"</td>";
 					echo "<td><input type='text' name='osto_rahti' id='osto_rahti' tabindex='20' value='{$osto_rahti}' />";
 					echo "&nbsp;".alv_popup('osto_rahti_alv', $osto_rahti_alv)."</td>";
 					break;
 				case '2':
 					if (!isset($osto_kulu)) $osto_kulu = '';
 
-					echo "<td>",t("Vaihto-omaisuuslaskun kulut"),"</td>";
+					echo "<td>",t("Kulut"),"</td>";
 					echo "<td><input type='text' name='osto_kulu' id='osto_kulu' tabindex='21' value='{$osto_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_kulu_alv', $osto_kulu_alv)."</td>";
 					break;
 				case '3':
 					if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = '';
 
-					echo "<td>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</td>";
+					echo "<td>",t("Rivikohtaiset kulut"),"</td>";
 					echo "<td><input type='text' name='osto_rivi_kulu' id='osto_rivi_kulu' tabindex='22' value='{$osto_rivi_kulu}' />";
 					echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $osto_rivi_kulu_alv)."</td>";
 					break;

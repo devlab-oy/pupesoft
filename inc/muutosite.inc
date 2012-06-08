@@ -1315,8 +1315,8 @@
 						$query = "	SELECT tilino, sum(summa) summa, group_concat(tunnus) tunnukset
 									FROM tiliointi
 									WHERE ltunnus = '{$tunnus}'
-									AND yhtio = '{$kukarow['yhtio']}'
-									AND korjattu = ''
+									AND yhtio 	  = '{$kukarow['yhtio']}'
+									AND korjattu  = ''
 									AND tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
 									GROUP BY 1";
 						$sum_result = pupe_query($query);
@@ -1328,12 +1328,12 @@
 
 							foreach(explode(",", $sum_row['tunnukset']) as $tun) {
 
-								$query = "	SELECT vero, summa, tilino
+								$query = "	SELECT vero, summa, tilino, kustp, kohde, projekti, selite
 											FROM tiliointi
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND ltunnus = '{$tunnus}'
+											WHERE yhtio  = '{$kukarow['yhtio']}'
+											AND ltunnus  = '{$tunnus}'
 											AND korjattu = ''
-											AND tunnus = '{$tun}'";
+											AND tunnus 	 = '{$tun}'";
 								$vero_chk_res = pupe_query($query);
 								$vero_chk_row = mysql_fetch_assoc($vero_chk_res);
 
@@ -1344,9 +1344,27 @@
 								$summa_kuuluva_kulu_alv = etsi_kuuluvat_tilioinnit($tun, false);
 								$summa_kuuluva_kulu_alv_total += $summa_kuuluva_kulu_alv;
 
-								if ($sum_row['tilino'] == $yhtiorow['osto_rahti']) $laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['summa'] += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
-								if ($sum_row['tilino'] == $yhtiorow['osto_kulu']) $laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['summa'] += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
-								if ($sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) $laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['summa'] += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
+								if ($sum_row['tilino'] == $yhtiorow['osto_rahti']) {
+									$laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['summa']     += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
+									$laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['kustp'] 		= $vero_chk_row['kustp'];
+									$laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['kohde']		= $vero_chk_row['kohde'];
+									$laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['projekti']	= $vero_chk_row['projekti'];
+									$laskun_kulut_ylikirjaus['osto_rahti'][$vero_chk_row['vero']]['selite']		= $vero_chk_row['selite'];
+								}
+								if ($sum_row['tilino'] == $yhtiorow['osto_kulu']) {
+									$laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['summa']      += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
+									$laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['kustp'] 		= $vero_chk_row['kustp'];
+									$laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['kohde']		= $vero_chk_row['kohde'];
+									$laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['projekti']	= $vero_chk_row['projekti'];
+									$laskun_kulut_ylikirjaus['osto_kulu'][$vero_chk_row['vero']]['selite']		= $vero_chk_row['selite'];
+								}
+								if ($sum_row['tilino'] == $yhtiorow['osto_rivi_kulu']) {
+									$laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['summa'] 	   += $vero_chk_row['summa'] + $summa_kuuluva_kulu_alv;
+									$laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['kustp'] 		= $vero_chk_row['kustp'];
+									$laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['kohde']		= $vero_chk_row['kohde'];
+									$laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['projekti']	= $vero_chk_row['projekti'];
+									$laskun_kulut_ylikirjaus['osto_rivi_kulu'][$vero_chk_row['vero']]['selite']		= $vero_chk_row['selite'];
+								}
 							}
 						}
 
@@ -1364,22 +1382,29 @@
 						list($tiliointirow_summa, $_arr) = ostolaskun_kulujen_tiliointi($trow['summa'], $tiliointirow['summa'] + $summa_kuuluva + $summa_kulu + $summa_kuuluva_kulu_alv_total, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 					}
 
-					$vero = $tiliointirow['vero'];
-					$tili = $tiliointirow['tilino'];
+					$vero  = $tiliointirow['vero'];
+					$tili  = $tiliointirow['tilino'];
 					$summa = $tiliointirow_summa;
 
-					$kustp = $tiliointirow['kustp'];
-					$kohde = $tiliointirow['kohde'];
+					$kustp    = $tiliointirow['kustp'];
+					$kohde    = $tiliointirow['kohde'];
 					$projekti = $tiliointirow['projekti'];
+
+					$selite = $tiliointirow['selite'];
 
 					require ("inc/teetiliointi.inc");
 
 					$tiliointirow['summa'] = $summa;
 
+					// Kulutilionnin kustp
+					$kustp_kulutiliointi 	= $kustp;
+					$kohde_kulutiliointi    = $kohde;
+					$projekti_kulutiliointi = $projekti;
+
 					if ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0) {
 
 						// $_arr on saatu ostolaskun_kulujen_tiliointi-funktiosta
-						foreach($_arr as $_k => $_v) {
+						foreach ($_arr as $_k => $_v) {
 							$laskun_kulut[$_k] += $_v;
 						}
 					}
@@ -1426,12 +1451,12 @@
 
 					if ($_value['summa'] == 0) continue;
 
-					$tili = $yhtiorow[$key];
+					$tili   = $yhtiorow[$key];
+					$vero   = (float) $_key;
+					$summa  = -abs($_value['summa'] / $lkm);
+					$selite =  $_value["selite"];
 
-					$vero = (float) $_key;
-					$summa = -abs($_value['summa'] / $lkm);
-
-					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $_value["kustp"], $_value["kohde"], $_value["projekti"]);
 
 					require ("inc/teetiliointi.inc");
 				}
@@ -1441,12 +1466,11 @@
 
 				if ($value == 0) continue;
 
-				$vero = ${"{$key}_alv"};
+				$vero   = ${"{$key}_alv"};
+				$tili   = $yhtiorow[$key];
+				$summa  = $value;
 
-				$tili = $yhtiorow[$key];
-				$summa = $value;
-
-				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+				list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $kustp_kulutiliointi, $kohde_kulutiliointi, $projekti_kulutiliointi);
 
 				require ("inc/teetiliointi.inc");
 			}

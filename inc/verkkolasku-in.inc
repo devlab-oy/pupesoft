@@ -1380,6 +1380,10 @@
 
 							$asn_nettohinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
+							// osto_kulu = $laskun_pakkauskulu
+							// osto_rahti = invoiceSummary rahti
+							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
+
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',
 												hinta 				= '{$asn_nettohinta}',

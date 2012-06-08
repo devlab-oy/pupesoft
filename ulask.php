@@ -2093,9 +2093,6 @@ if ($tee == 'I') {
 							laadittu 			= now()";
 				$result = pupe_query($query);
 
-				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
-
 				// Varastonmuutos
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',

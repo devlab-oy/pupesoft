@@ -479,9 +479,9 @@ if ($silent == "") {
 				echo "<td valign='top'>$vienti_teksti</td>";
 
 				if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-					echo "<td valign='top'>{$llrow['osto_rahti']}</td>";
-					echo "<td valign='top'>{$llrow['osto_kulu']}</td>";
-					echo "<td valign='top'>{$llrow['osto_rivi_kulu']}</td>";
+					echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_rahti']),"</td>";
+					echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_kulu']),"</td>";
+					echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_rivi_kulu']),"</td>";
 				}
 
 				echo "<td valign='top' class='back'>

@@ -156,17 +156,18 @@ else {
 	}
 
 	// Siirto onnistui
-	if ($palautus == 0 and isset($ftpsucc)) {
+	if ($palautus == 0 and isset($ftpsucc) and $ftpsucc != "") {
 		// Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
 		rename($ftpfile, $ftpsucc."/".$filenimi);
 	}
-	elseif ($palautus != 0 and isset($ftpfail)) {
+	elseif ($palautus != 0 and isset($ftpfail) and $ftpfail != "") {
 		// Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
 		rename($ftpfile, $ftpfail."/".$filenimi);
 	}
 
-	// jos siirto ep‰onnistuu
-	if ($palautus != 0) {
+	// jos siirto ep‰onnistuu ja faildirri ei oo setattu nin l‰hetet‰‰n maili
+	// jos faildirri ON setattu niin ei ekoteta eik‰ meilata mitt‰‰n
+	if ($palautus != 0 and (!isset($ftpfail) or $ftpfail == "")) {
 		// ncftpput:in exit valuet
 		switch ($palautus) {
 			case  1:

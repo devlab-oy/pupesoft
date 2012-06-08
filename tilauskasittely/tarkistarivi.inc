@@ -774,17 +774,14 @@
 
 		if (mysql_num_rows($siirtores) > 0) {
 			$siirtorow = mysql_fetch_assoc($siirtores);
-			if($siirtorow["tila"] == "O") {
+			if ($siirtorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty ostorivi poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty ostorivi poistetaan.");
 			}
 			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
-				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty valmistus poistetaan ja luodaan uudestaan.");
-				$varmista_poisto .= t("Oletko varma, että haluat poistaan rivin?\\n\\nRivistä tehty valmistus poistetaan.");
 			}
 
+			$nayta_sostolisateksti = "TOTTA";			
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
 		}
 	}

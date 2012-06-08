@@ -4,17 +4,17 @@
 
 	echo "<font class='head'>".t("Luotonhallinta")."</font><hr>";
 
-	echo "<script>";
-	echo "function toggleAll(toggleBox) {";
-	echo "	var currForm = toggleBox.form;";
-	echo "	var isChecked = toggleBox.checked;";
-	echo "	for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {";
-	echo "		if (currForm.elements[elementIdx].type == 'checkbox') {";
-	echo "			currForm.elements[elementIdx].checked = isChecked;";
-	echo "		}";
-	echo "	}";
-	echo "}";
-	echo "</script>";
+	echo "<script>
+			function toggleAll(toggleBox) {
+				var currForm = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox') {
+						currForm.elements[elementIdx].checked = isChecked;
+					}
+				}
+			}
+			</script>";
 
 	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 		// k‰sitell‰‰n luottorajoja per ytunnus
@@ -25,13 +25,17 @@
 		$kasittely_periaate = "asiakas.tunnus";
 	}
 
+	if (isset($edytunnus) and isset($ytunnus) and $edytunnus != $ytunnus) {
+		unset($asiakasid);
+	}
+
 	if (isset($muutparametrit)) {
-		$muut = explode('#', $muutparametrit);
-		$pvm_alku = $muut[0];
-		$pvm_loppu = $muut[1];
-		$minimi_myynti = $muut[2];
-		$luottorajauksia = $muut[3];
-		$luottovakuutettu = $muut[4];
+		$muut 				= explode('#', $muutparametrit);
+		$pvm_alku 			= $muut[0];
+		$pvm_loppu 			= $muut[1];
+		$minimi_myynti 		= $muut[2];
+		$luottorajauksia 	= $muut[3];
+		$luottovakuutettu 	= $muut[4];
 	}
 
 	$asiakasrajaus = "";
@@ -52,6 +56,7 @@
 			else {
 				$asiakasrajaus = " and asiakas.tunnus = '$asiakasid' ";
 			}
+
 			$luottorajauksia = "Z";
 		}
 	}
@@ -84,7 +89,7 @@
 		$muutosprosentti = 10;
 	}
 	if ($luottorajauksia == "A" and (float) $muutosprosentti == 0) {
-		echo "<font class='error'>Virheellinen muutosprosentti</font>";
+		echo "<font class='error'>".t("Virheellinen muutosprosentti")."</font>";
 		$tee = "";
 	}
 
@@ -136,7 +141,9 @@
 
 	echo "<tr>";
 	echo "<th>".t("Vain asiakas")."</th>";
-	echo "<td><input type='text' name='ytunnus' value='$ytunnus'><input type='hidden' name='asiakasid' value='$asiakasid'>$asiakasrow[nimi]</td>";
+	echo "<td><input type='text' name='ytunnus' value='$ytunnus'><input type='hidden' name='asiakasid' value='$asiakasid'>";
+	if (isset($ytunnus) and $ytunnus != "") echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
+	echo "$asiakasrow[nimi]</td>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -159,7 +166,7 @@
 
 		foreach ($luottoraja as $ytunnus => $summa) {
 
-			$summa = trim($summa);
+			$summa = trim(str_replace(",", ".", $summa));
 
 			// Katsotaan onko tiedot muuttuneet
 			if ($summa == $alkuperainen_luottoraja[$ytunnus] and $myyntikielto[$ytunnus] == $alkuperainen_myyntikielto[$ytunnus]) {
@@ -182,7 +189,7 @@
 			$query = "	UPDATE asiakas SET
 						myyntikielto = '$myyntikielto[$ytunnus]',
 						luottoraja = '$summa'
-						WHERE asiakas.yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND $kasittely_periaate = '$ytunnus'";
 			$asiakasres = mysql_query($query) or pupe_error($query);
 
@@ -207,9 +214,9 @@
 					min(myyntikielto) myyntikielto,
 					min(ytunnus) tunniste
 					FROM asiakas
-					WHERE asiakas.yhtio = '$kukarow[yhtio]'
-					AND asiakas.laji != 'P'
-					AND asiakas.luottovakuutettu = '$luottolisa'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji != 'P'
+					AND luottovakuutettu = '$luottolisa'
 					$asiakasrajaus
 					$lisa
 					GROUP BY 1";
@@ -217,18 +224,25 @@
 
 		echo "<form name='paivitys' action='luotonhallinta.php' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='2'>";
+		echo "<input type='hidden' name='pvm_alku' value='$pvm_alku'>";
+		echo "<input type='hidden' name='pvm_loppu' value='$pvm_loppu'>";
+		echo "<input type='hidden' name='minimi_myynti' value='$minimi_myynti'>";
+		echo "<input type='hidden' name='luottorajauksia' value='$luottorajauksia'>";
+		echo "<input type='hidden' name='muutosprosentti' value='$muutosprosentti'>";
+		echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		echo "<table>";
-
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
-		echo "<th>".t("Laskutus nimi")."</th>";
-		echo "<th>".t("Toimitus nimi")."</th>";
-		echo "<th>".t("Verollinen myynti")." $yhtiorow[valkoodi]</th>";
-		echo "<th>".t("Veroton myynti")." $yhtiorow[valkoodi]</th>";
-		echo "<th>".t("Avoinsaldo nyt")."</th>";
-		echo "<th>".t("Luottoraja")." $yhtiorow[valkoodi]</th>";
+		echo "<th>".t("Laskutusnimi")."<br>".t("Toimitusnimi")."</th>";
+		echo "<th>".t("Verollinen myynti")."<br>".t("Veroton myynti")."</th>";
+		echo "<th>".t("Avoimet")."<br>".t("laskut")."</th>";
+		echo "<th>".t("Avoimet")."<br>".t("tilaukset")."</th>";
+		echo "<th>".t("Kaatotili")."</th>";
+		echo "<th>".t("Luottotilanne nyt")."</th>";
+		echo "<th>".t("Luottoraja")."<br>$yhtiorow[valkoodi]</th>";
 		echo "<th>".t("Myyntikielto")."</th>";
 
 		if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
@@ -237,6 +251,8 @@
 		}
 
 		echo "</tr>";
+
+		$query_alennuksia = generoi_alekentta('M');
 
 		while ($asiakasrow = mysql_fetch_array($asiakasres)) {
 
@@ -250,16 +266,6 @@
 						AND lasku.tapvm <= '$pvm_loppu'";
 			$myyntires = mysql_query($query) or pupe_error($query);
 			$myyntirow = mysql_fetch_array($myyntires);
-
-			$avoinsql = " 	SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
-							FROM lasku use index (yhtio_tila_mapvm)
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							AND lasku.tila = 'U'
-							AND lasku.alatila = 'X'
-							AND lasku.mapvm = '0000-00-00'
-							AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
-			$avoinres = pupe_query($avoinsql);
-			$avoinrow = mysql_fetch_assoc($avoinres);
 
 			// Ei n‰ytet‰ jos ei olla yli minimi myynnin
 			if (($luottorajauksia != "D" and $luottorajauksia != "Z" and $myyntirow["summa"] == 0) or ($myyntirow["summa"] < $minimi_myynti)) {
@@ -349,13 +355,55 @@
 				$chk = "";
 			}
 
+			// Avoimet laskut
+			$query = " 	SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
+						FROM lasku use index (yhtio_tila_mapvm)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila = 'U'
+						AND lasku.alatila = 'X'
+						AND lasku.mapvm = '0000-00-00'
+						AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
+			$avoimetlaskutres = pupe_query($query);
+			$avoimetlaskutrow = mysql_fetch_assoc($avoimetlaskutres);
+
+			// Kaatotili
+			$query = "	SELECT
+						sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
+						FROM suoritus
+						WHERE yhtio = '$kukarow[yhtio]'
+						and ltunnus > 0
+						and kohdpvm = '0000-00-00'
+						and asiakas_tunnus in ($asiakasrow[liitostunnukset])";
+			$kaatotilires = pupe_query($query);
+			$kaatotilirow = mysql_fetch_assoc($kaatotilires);
+
+			// Avoimet tilaukset
+			$query = "	SELECT
+						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+						FROM lasku
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+						  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
+						  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+						)
+						AND lasku.liitostunnus in ($asiakasrow[liitostunnukset])";
+			$avoimettilauksetres = pupe_query($query);
+			$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
+
 			echo "<tr class='aktiivi'>";
 			echo "<td>$asiakasrow[tunniste]</td>";
-			echo "<td>$asiakasrow[nimi]</td>";
-			echo "<td>$asiakasrow[toim_nimi]</td>";
-			echo "<td align='right'>$myyntirow[summa]</td>";
-			echo "<td align='right'>$myyntirow[arvo]</td>";
-			echo "<td align='right'>$avoinrow[laskuavoinsaldo]</td>";
+			echo "<td>$asiakasrow[nimi]<br>$asiakasrow[toim_nimi]</td>";
+			echo "<td align='right'>$myyntirow[summa]<br>$myyntirow[arvo]</td>";
+			echo "<td align='right'>$avoimetlaskutrow[laskuavoinsaldo]</td>";
+			echo "<td align='right'>$avoimettilauksetrow[tilausavoinsaldo]</td>";
+			echo "<td align='right'>$kaatotilirow[summa]</td>";
+
+			// Lasketaan luottotilanne nyt
+			$luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"],2);
+
+			echo "<td align='right'>$luottotilanne_nyt</td>";
+
 			echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
 			echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
 
@@ -370,10 +418,9 @@
 			// V‰litet‰‰n alkuper‰iset arvot, ettei p‰ivitet‰ asiakasta suotta
 			echo "<input type='hidden' name='alkuperainen_luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]'>";
 			echo "<input type='hidden' name='alkuperainen_myyntikielto[$asiakasrow[ytunnus]]' value='$asiakasrow[myyntikielto]'>";
-			echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
 		}
 
-		echo "<tr><td class='back' colspan='8' align='right'>Ruksaa kaikki &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+		echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
 		echo "</table>";
 
 		echo "<input type='submit' value='".t("P‰ivit‰ luottorajat")."'>";

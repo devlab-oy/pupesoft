@@ -33,7 +33,7 @@
 				laskun_lisatiedot.laskutus_postino,
 				laskun_lisatiedot.laskutus_postitp,
 				laskun_lisatiedot.laskutus_maa,
-				if (lasku.tila = 'L' and lasku.laskunro > 0, (SELECT lasku.mapvm FROM lasku l WHERE l.yhtio = lasku.yhtio AND l.laskunro = lasku.laskunro AND l.tila = 'U'), lasku.mapvm) mapvm,
+				if (lasku.tila = 'L' and lasku.laskunro > 0, (SELECT lasku.mapvm FROM lasku l WHERE l.yhtio = lasku.yhtio AND l.laskunro = lasku.laskunro AND l.tila = 'U' limit 1), lasku.mapvm) mapvm,
 				if (lasku.tila = 'U', (	SELECT group_concat(distinct alv SEPARATOR ' ')
 										FROM tilausrivi use index (uusiotunnus_index)
 										WHERE tilausrivi.yhtio = lasku.yhtio
@@ -1971,7 +1971,7 @@
 
 					echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
-					echo "<form method='post' action='$PHP_SELF'><td class='back'>
+					echo "<form method='post'><td class='back'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>

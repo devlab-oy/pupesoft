@@ -294,7 +294,7 @@
 
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Tilauskanta_Laskutus.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -317,7 +317,7 @@
 			if (!isset($yhtio)) $yhtio = "'$kukarow[yhtio]'";
 
 			echo "<br>\n\n\n";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='go'>";
 
 			// p‰iv‰m‰‰r‰rajaus

@@ -26,7 +26,7 @@
 
 			// voidaan merkata 25epäkurantiksi
 			if ($tuoterow['epakurantti25pvm'] == '0000-00-00') {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='25paalle'> ";
 				echo "<input type='submit' value='".t("Merkitään 25% epäkurantiksi")."'></form> ";
@@ -34,7 +34,7 @@
 
 			// voidaan merkata puoliepäkurantiksi
 			if ($tuoterow['epakurantti50pvm'] == '0000-00-00') {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='puolipaalle'> ";
 				echo "<input type='submit' value='".t("Merkitään puoliepäkurantiksi")."'></form> ";
@@ -42,7 +42,7 @@
 
 			// voidaan merkata 75epäkurantiksi
 			if ($tuoterow['epakurantti75pvm'] == '0000-00-00') {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='75paalle'> ";
 				echo "<input type='submit' value='".t("Merkitään 75% epäkurantiksi")."'></form> ";
@@ -50,7 +50,7 @@
 
 			// voidaan merkata epäkurantiksi
 			if ($tuoterow['epakurantti100pvm'] == '0000-00-00') {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='paalle'>";
 				echo "<input type='submit' value='".t("Merkitään epäkurantiksi")."'></form> ";
@@ -58,7 +58,7 @@
 
 			// voidaan aktivoida
 			if (($tuoterow['epakurantti25pvm'] != '0000-00-00') or ($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='pois'>";
 				echo "<input type='submit' value='".t("Aktivoidaan kurantiksi")."'></form>";
@@ -66,7 +66,7 @@
 			
 			// voidaan aktivoida
 			if (($tuoterow['epakurantti25pvm'] != '0000-00-00') or ($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name = 'tuoteno' value='$tuoterow[tuoteno]'>";
 				echo "<input type='hidden' name = 'tee' value='peru'>";
 				echo "<input type='submit' value='".t("Aktivoidaan kurantiksi, ei nosteta keskihankintahintaa")."'></form>";
@@ -80,7 +80,7 @@
 
 	if ($tee == '') {
 		echo "<table><tr><th>".t("Valitse tuote")."</th><td>";
-		echo "<form name='epaku' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<form name='epaku' method='post' autocomplete='off'>";
 		echo "<input type='text' name='tuoteno'>";
 		echo "</td><td>";
 		echo "<input type='hidden' name='tee' value='vahvista'>";

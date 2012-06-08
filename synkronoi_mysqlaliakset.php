@@ -68,7 +68,7 @@ if ($tee == "TEE") {
 	echo "<br><table>";
 
 	foreach ($rivit as $rivi) {
-		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys) = explode("\t", trim($rivi));
+		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys) = explode("\t", trim($rivi));
 
 		$sanakirjaquery = "	SELECT *
 							FROM avainsana
@@ -91,6 +91,7 @@ if ($tee == "TEE") {
 								selitetark		= '$selitetark',
 								selitetark_2	= '$selitetark_2',
 								selitetark_3	= '$selitetark_3',
+								selitetark_4	= '$selitetark_4',
 								jarjestys		= '$jarjestys',
 								laatija			= '$kukarow[kuka]',
 								luontiaika		= now()";
@@ -107,7 +108,7 @@ if ($tee == "TEE") {
 }
 
 echo "	<br><br>
-		<form method='post' action='$PHP_SELF'>
+		<form method='post'>
 		<input type='hidden' name='tee' value='TEE'>
 		<input type='submit' value='".t("Hae uusimmat mysqlaliakset")."'>
 		</form>";

@@ -15,6 +15,25 @@ if(!function_exists("tilitarkista")) {
 
 		}
 
+		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and (int) trim($t[$i]) != 0) {
+
+			if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
+			if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
+			if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
+
+			$tpque = "	SELECT tunnus
+						from kustannuspaikka
+						where yhtio = '$kukarow[yhtio]'
+						and tyyppi = '$kptyyppi'
+						and kaytossa != 'E'
+						and tunnus = '$t[$i]'";
+			$tpres = pupe_query($tpque);
+
+			if (mysql_num_rows($tpres) == 0) {
+				$virhe[$i] .= t("Tilin tarkennetta ei löydy")."!";
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "ulkoinen_taso" and trim($t[$i]) == "") {
 			$virhe[$i] = t("Ulkoinen taso on syötettävä")."!";
 		}

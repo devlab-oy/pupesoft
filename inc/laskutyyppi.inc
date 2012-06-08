@@ -266,12 +266,15 @@
 			switch($alatila) {
 				case "":
 					$alatila = "kesken";
-					break;				
+					break;
 				case "A":
 					$alatila = "Tilaus l‰hetetty/tulostettu";
 					break;
 				case "B":
 					$alatila = "";
+					break;
+				case "X":
+					$alatila = "Valmis";
 					break;
 			}
 			break;
@@ -353,7 +356,7 @@
 					break;
 				case "C":
 					$alatila = "Reklamaatio hyllytet‰‰n";
-					break;				
+					break;
 			}
 			break;
 		case "0":

@@ -1337,15 +1337,15 @@
 
 				// er‰p‰iv‰ punasella jos se on er‰‰ntynyt
 				if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
-					echo "<font class='error'>".tv1dateconv($trow['erpcm'])."</font>";
+					echo "<font class='error'>{$trow['erpcm']}</font>";
 				}
 				else {
-					echo tv1dateconv($trow['erpcm']);
+					echo $trow['erpcm'];
 				}
 
 				if ($trow['kapvm'] != '0000-00-00') {
 					echo "<td valign='top' align='right' nowrap>";
-					echo tv1dateconv($trow['kapvm'])."<br>";
+					echo $trow['kapvm']."<br>";
 					echo "$trow[ykasumma] $yhtiorow[valkoodi]<br>";
 					if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 						echo "$trow[summa] $trow[valkoodi]";
@@ -1539,7 +1539,7 @@
 
 			// jos limiitti riitt‰‰ niin annetaan mahdollisuus poimia kaikki
 			if ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti_koti'] >= $summa) {
-				echo "<br><form action = '$PHP_SELF' method='post'>
+				echo "<br><form method='post'>
 					<input type='hidden' name = 'tili' value='$tili'>
 					<input type='hidden' name = 'tee' value='NV'>
 					<input type='hidden' name = 'kaikki' value='$kaikki'>

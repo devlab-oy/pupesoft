@@ -115,19 +115,33 @@ if (!function_exists("pupesoft_rest")) {
 		curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
-		$data_json = json_encode($parameters["data"]);
+		if (isset($parameters["auth_user"]) and isset($parameters["auth_pass"])) {
+			curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($handle, CURLOPT_USERPWD, "{$parameters["auth_user"]}:{$parameters["auth_pass"]}");
+		}
+
+		if (isset($parameters["cookie"])) {
+			curl_setopt($handle, CURLOPT_COOKIE, $parameters["cookie"]);
+		}
+
+		if (isset($parameters["posttype"]) and $parameters["posttype"] == "array") {
+			$post_data = $parameters["data"];
+		}
+		else {
+			$post_data = json_encode($parameters["data"]);
+		}
 
 		switch ($parameters["method"]) {
 			case "GET":
-				// Default
+				curl_setopt($handle, CURLOPT_URL, $parameters["url"]."?".http_build_query($parameters["data"]));
 				break;
 			case "POST":
 				curl_setopt($handle, CURLOPT_POST, true);
-				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
 				break;
 			case "PUT":
 				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
-				curl_setopt($handle, CURLOPT_POSTFIELDS, $data_json);
+				curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
 				break;
 			case "DELETE":
 				curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -561,16 +575,21 @@ if (!function_exists("table_exists")) {
 }
 
 if (!function_exists("maventa_invoice_put_file")) {
-	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring) {
-		$files_out['file'] = base64_encode($xmlstring);
-		$files_out['filename'] = "$invoice_number.xml";
-		$files_out['attachment_type'] = 'FINVOICE';
+	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring, $kieli) {
+		$files_out['files'] 	= array();
+		$files_out['filenames'] = array();
 
-		$return_value = $client->invoice_put_file($api_keys, $files_out);
+		//Finvoice
+		$files_out['files'][0] 	   = base64_encode($xmlstring);
+		$files_out['filenames'][0] = "$invoice_number.xml";
 
-		$objecti = $return_value[0];
+		//PDFä
+		$files_out['files'][1] 	   = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
+		$files_out['filenames'][1] = "$invoice_number.pdf";
 
-		return $objecti->status;
+		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+
+		return $return_value->status;
 	}
 }
 
@@ -972,49 +991,11 @@ if (!function_exists("saldo_myytavissa")) {
 			$myytavissa		= 0;
 		}
 		else {
-			//Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
+
 			if ($yhtio != "") {
-				$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
-							from yhtio
-							where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-				$pres = pupe_query($query);
-				$prow = mysql_fetch_assoc($pres);
-
-				$yhtiot = explode(",", $prow["yhtiot"]);
-
-				if (in_array($yhtio, $yhtiot) and $yhtio != $kukarow["yhtio"]) {
-					// Jos yhtiö on joku konserniyhtiöistä niin tutkitaan suoratoimitus juttuja
-					$query = "	SELECT tyyppi_tieto, liitostunnus, toim_tuoteno
-								from tuotteen_toimittajat, toimi
-								where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-								and tuotteen_toimittajat.tuoteno = '$tuoteno'
-								and toimi.yhtio         = tuotteen_toimittajat.yhtio
-								and toimi.tunnus        = tuotteen_toimittajat.liitostunnus
-								and toimi.tyyppi        = 'S'
-								and toimi.tyyppi_tieto  = '$yhtio'
-								and toimi.edi_palvelin != ''
-								and toimi.edi_kayttaja != ''
-								and toimi.edi_salasana != ''
-								and toimi.edi_polku    != ''
-								and toimi.oletus_vienti in ('C','F','I')";
-					$superjtres  = pupe_query($query);
-
-					if (mysql_num_rows($superjtres) > 0) {
-						$superrow = mysql_fetch_assoc($superjtres);
-
-						$yhtiolisa	= $yhtio;
-						$tuoteno 	= $superrow["toim_tuoteno"];
-					}
-					else {
-						$yhtiolisa	= $yhtio;
-					}
-				}
-				elseif ($yhtio == $kukarow["yhtio"]) {
-					$yhtiolisa = $kukarow["yhtio"];
-				}
-				else {
-					return array(FALSE, FALSE, FALSE, FALSE);
-				}
+				// Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
+				// (TÄMÄ OMINAISUUS DEPRECATED!)
+				$yhtiolisa = $kukarow["yhtio"];
 			}
 			else {
 				$yhtiolisa = $kukarow["yhtio"];
@@ -1981,7 +1962,7 @@ if (!function_exists("synkronoi")) {
 
 		require_once("inc/pakolliset_sarakkeet.inc");
 
-		list($pakolliset, $kielletyt, $wherelliset, , , ) = pakolliset_sarakkeet($table);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
 
 		if (count($wherelliset) == 0 and count($pakolliset) == 0) {
 			$synclog.= "VIRHE: Pyydettyä taulua $table ei voida synkronoida, sitä ei ole määritelty!\n";
@@ -6721,27 +6702,9 @@ function toimehtoTarkenne(toimehto) {
 	}
 }
 
-if (!function_exists("enable_jquery")) {
-	function enable_jquery() {
-
-		echo "<script type='text/javascript' language='javascript'>";
-
-		if (file_exists("inc/jquery.min.js")) {
-			require_once("inc/jquery.min.js");
-		}
-		else {
-			require_once("jquery.min.js");
-		}
-
-		echo "</script>";
-	}
-}
-
 if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
-
-	enable_jquery();
 
 	echo "<script type='text/javascript' language='javascript'>";
 
@@ -8593,7 +8556,7 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 	function hae_rahtisopimusnumero ($toimitustapa, $ytunnus = "", $asiakastunnus = "") {
 		global $kukarow;
 
-		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero 
+		// Pelkällä toimitustavalla haettuna palautetaan firman oma sopimusnumero
 		if ($ytunnus == "" and $asiakastunnus == "") {
 			$query = "	SELECT sopimusnro rahtisopimus
 						FROM toimitustapa
@@ -9466,38 +9429,39 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 }
 
 if (!function_exists("jt_toimita")) {
-	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee, $automaattinen_poiminta = '') {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
 
+		if (!is_array($jtrivit)) $jtrivit = array();
+		if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
+
 		if ($automaattinen_poiminta != '') {
-			$asiakasno 			= $toimittaja;
-			$toimittaja			= "";
-
-			$asiakasid			= $toimittajaid;
-			$toimittajaid		= "";
-
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$tilaus_on_jo		= "KYLLA";
-			$vain_rivit 		= "";
-			$from_varastoon_inc = "";
+			$asiakasno 			  = $toimittaja;
+			$toimittaja			  = "";
+			$asiakasid			  = $toimittajaid;
+			$toimittajaid		  = "";
+			$asiakasmaa 		  = "";
+			$jarj	 			  = "luontiaika";
+			$tilaus				  = "";
+			$toimi				  = "";
+			$suoratoimit		  = "";
+			$tilaus_on_jo		  = "KYLLA";
+			$suoratoimitus_rivit  = array();
+			$suoratoimitus_paikat = array();
+			$from_varastoon_inc   = "";
 		}
 		else {
-			$asiakasno 			= "";
-			$asiakasid			= "";
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$tilaus_on_jo		= "";
-			$vain_rivit 		= $jtrivit;
-			$from_varastoon_inc = "varastoon.inc";
+			$asiakasno 			  = "";
+			$asiakasid			  = "";
+			$asiakasmaa 		  = "";
+			$jarj	 			  = "luontiaika";
+			$tilaus				  = "";
+			$toimi				  = "";
+			$suoratoimit		  = "";
+			$tilaus_on_jo		  = "";
+			$suoratoimitus_rivit  = $jtrivit;
+			$suoratoimitus_paikat = $jtrivit_paikat;
+			$from_varastoon_inc   = "varastoon.inc";
 		}
 
 		require('jtselaus.php');
@@ -11581,11 +11545,6 @@ if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
 		global $yhtiorow;
 
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		require_once("DataTables/media/js/jquery.dataTables.min.js");
-		echo "</script>";
-
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
@@ -11911,7 +11870,6 @@ if (!function_exists("pupe_DataTables")) {
 						if ($(this).is(':checked')) {
 
 							var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
-
 							var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
 
 							$.post('{$_SERVER['SCRIPT_NAME']}',
@@ -12056,7 +12014,6 @@ if (!function_exists("pupe_DataTables")) {
 							// OTETAAN TARVITTAVAT TUNNUKSET JA MUUTTUJAT TALTEEN
 							var tun 					= $(this).attr('id').substring(9);
 							var otunnus 				= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 		= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_hinta_value 		= parseFloat($('#rivi_hinta_'+tun).val());
 							var rivi_kpl_alkuperainen 	= parseFloat($('#rivi_kpl_alkuperainen_'+tun).val());
 							var rivi_hinta_alkup		= parseFloat($('#rivihintaalkuperainen_'+tun).val());
@@ -12077,8 +12034,7 @@ if (!function_exists("pupe_DataTables")) {
 											ajax_toiminto: 'rivi_kpl',
 											kpl: kpl,
 											no_head: 'yes',
-											ohje: 'off',
-											suoratoimitukset: suoratoimitukset },
+											ohje: 'off'},
 										function(return_value) {
 											var data = jQuery.parseJSON(return_value);
 
@@ -12098,8 +12054,7 @@ if (!function_exists("pupe_DataTables")) {
 												ajax_toiminto: 'rivi_kpl_splittaus',
 												no_head: 'yes',
 												ohje: 'off',
-												uuden_rivin_kpl: uuden_rivin_kpl,
-												suoratoimitukset: suoratoimitukset },
+												uuden_rivin_kpl: uuden_rivin_kpl},
 											function(return_value) {
 
 												var data = jQuery.parseJSON(return_value);
@@ -12179,7 +12134,6 @@ if (!function_exists("pupe_DataTables")) {
 							var monesko				= $(this).attr('name').substring(8,9);
 							var tun 				= $(this).attr('id').substring(10);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_ale_alkup		= parseFloat($('#rivialealkuperainen'+monesko+'_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
 							var ale 				= parseFloat(this.value);
@@ -12193,7 +12147,6 @@ if (!function_exists("pupe_DataTables")) {
 										ale: ale,
 										no_head: 'yes',
 										ohje: 'off',
-										suoratoimitukset: suoratoimitukset,
 										monesko_kentta: monesko},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
@@ -12231,7 +12184,6 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name^=\"rivi_hinta\"]').each(function(){
 							var tun 				= $(this).attr('id').substring(11);
 							var otunnus 			= $('input[name=\"otunnus\"]').val();
-							var suoratoimitukset 	= $('input[name=\"suoratoimitukset_ajaxille\"]').val();
 							var rivi_kpl_value 		= parseFloat($('#rivi_kpl_'+tun).val());
 							var rivi_hinta_alkup	= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
@@ -12250,8 +12202,7 @@ if (!function_exists("pupe_DataTables")) {
 										ajax_toiminto: 'rivi_hinta',
 										hinta: hinta,
 										no_head: 'yes',
-										ohje: 'off',
-										suoratoimitukset: suoratoimitukset },
+										ohje: 'off'},
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#rivin_hinta_'+tun).html(data.hinta);
@@ -12330,7 +12281,6 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (!$('#rivi_valitut_tunnukset_'+rivi_ja_otsikko[0]).is(':checked')) {
 								var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko[0]+' option:selected').val();
-
 								var suoratoimitusrivi = $('#suoratoimitus_'+rivi_ja_otsikko[0]) ? 'X' : '';
 
 								$.post('{$_SERVER['SCRIPT_NAME']}',
@@ -15639,5 +15589,153 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 			// Tulostetaan PDF
 			print_pdf_vakadr($params_vak);
 		}
+	}
+}
+
+if (!function_exists("pupesoft_sahkoposti")) {
+
+	function pupesoft_sahkoposti($parametrit) {
+
+		/* Tällä funktiolla lähetetään sähköposti, johon voidaan liittää yksi tai useampi liitetiedosto.
+
+		Parametrinä seuraavanlainen array:
+
+		$parametri = array( "to" 		=> "devlab@devlab.fi",
+							"cc" 		=> "",
+							"subject"	=> "Mail from Pupesoft!",
+							"ctype"		=> "html",
+							"body"		=> "<h1>Hello from Pupesoft!</h1>",
+
+							"attachements" => array(0 	=> array(
+														"filename"		=> "/foo/baz/file1.txt",
+														"newfilename"	=> "report.txt",
+														"ctype"			=> "text"),
+
+													1 	=> array(
+														"filename"		=> "/bar/foo/file2",
+														"newfilename"	=> "pretty_report.xls",
+														"ctype"			=> "excel"),
+							)
+		);
+
+		*/
+
+		global $yhtiorow, $kukarow;
+
+		// Tarvitaan seuraavat parametrit
+		$email_to		= isset($parametrit["to"]) ? $parametrit["to"] : "";
+		$email_cc		= isset($parametrit["cc"]) ? $parametrit["cc"] : "";
+		$email_subject	= isset($parametrit["subject"]) ? $parametrit["subject"] : "";
+		$email_ctype 	= isset($parametrit["ctype"]) ? strtoupper($parametrit["ctype"]) : "";
+		$email_body 	= isset($parametrit["body"]) ? $parametrit["body"] : "";
+
+		// Liitetiedostoja tulee parametreissä arrayna
+		$liitteet		= (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
+
+		// Kaikki pitää tulla kunnossa (paitsi body ja cc)
+		if ($email_to == "" or $email_subject == "" or $email_ctype == "" or $liitteet == "") {
+			return false;
+		}
+
+		$content = "";
+		$bound = uniqid(time()."_") ;
+		$header = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
+
+		if ($email_cc != "") {
+			$header .= "Cc: $email_cc\n";
+		}
+
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+		if ($email_body != "") {
+			$content .= "--$bound\n";
+			if ($email_ctype == "HTML") {
+				$content .= "Content-Type: text/html; charset=\"iso-8859-1\"\n";
+			}
+			else {
+				$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+			}
+			$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
+			$content .= "$email_body\n\n";
+		}
+
+		$content .= "--$bound";
+
+		foreach ($liitteet as $liite) {
+
+			// Tarkistetaan $liite arrayn oikeellisuus
+			$attachement_filename		= isset($liite["filename"]) ? $liite["filename"] : "";
+			$attachement_newfilename	= isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+			$attachement_ctype			= isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+
+			// Jos tiedostoa ei löydy tai ctype on tyjää, hypätään filen yli.
+			if (!file_exists($attachement_filename) or !is_readable($attachement_filename) or $attachement_ctype == "") {
+				continue;
+			}
+
+			// Otetaan tiedoston sisältö muuttujaan
+			$attachement_content = chunk_split(base64_encode(file_get_contents($attachement_filename)));
+
+			// Tiedostosta vain nimi
+			$attachement_name = basename($attachement_filename);
+
+			// Jos on poikkeava nimi, otetaan se
+			if ($attachement_newfilename != "") {
+				$attachement_name = basename($attachement_newfilename);
+			}
+			// Lisätään extensioni filenameen
+			$attachement_name .= ".$attachement_ctype";
+
+			// Boundin jälkeen aina rivinvaihto
+			$content .= "\n";
+
+			if ($attachement_ctype == "TEXT") {
+				$content .= "Content-Type: text/plain; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "PS") {
+				$content .= "Content-Type: application/ps; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "JPG" or $attachement_ctype == "JPEG") {
+				$content .= "Content-Type: image/jpeg; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "PNG") {
+				$content .= "Content-Type: image/png; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "GIF") {
+				$content .= "Content-Type: image/gif; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "TIF" or $attachement_ctype == "TIFF") {
+				$content .= "Content-Type: image/tiff; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "BMP") {
+				$content .= "Content-Type: image/bmp; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "EXCEL") {
+				$content .= "Content-Type: application/excel; name=\"$attachement_name\"\n";
+			}
+			elseif ($attachement_ctype == "PDF") {
+				$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
+			}
+			else {
+				// Defaulttina myös pdf ?
+				$content .= "Content-Type: application/pdf; name=\"$attachement_name\"\n";
+			}
+
+			$content .= "Content-Transfer-Encoding: base64\n";
+			$content .= "Content-Disposition: attachment; filename=\"$attachement_name\"\n\n";
+			$content .= $attachement_content;
+			$content .= "\n";
+			$content .= "--$bound";
+		}
+
+		// Vikassa boundissa pitää olla -- lopussa.
+		$content .= "--\n";
+
+		$boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+
+		if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
+
+		return $boob;
 	}
 }

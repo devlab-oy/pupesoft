@@ -35,11 +35,11 @@
 	}
 
 	if ($tee == "KOPIOI") {
-
+		
 		if ($kop_isatuo == "") {
 				echo "<br><br>";
 				echo "<table>";
-				echo "	<form action='$PHP_SELF' method='post' name='valinta' autocomplete='off'>
+				echo "	<form method='post' name='valinta' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='KOPIOI'>
 						<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
@@ -167,10 +167,10 @@
 		$formi  = 'performi';
 		$kentta = 'hakutuoteno';
 
-		if ($hakutuoteno2 != "") $hakutuoteno = $hakutuoteno2;
+		if ($hakutuoteno2 != "") $hakutuoteno = trim($hakutuoteno2);
 
 		echo "<br><table>";
-		echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>
+		echo "<form method='post' name='$formi' autocomplete='off'>
 				<input type='hidden' name='toim' value='$toim'>
 			<tr>";
 
@@ -233,6 +233,8 @@
 
 		if (trim($isatuoteno) != trim($tuoteno)) {
 			$ok = 1;
+			$isatuoteno = trim($isatuoteno);
+			$tuoteno = trim($tuoteno);
 
 			$query  = "	SELECT *
 						from tuoteperhe
@@ -333,6 +335,8 @@
 	}
 
 	if ($tee == 'POISTA') {
+		$isatuoteno = trim($isatuoteno);
+		
 		// Varmistetaan, että faktat ei mene rikki
 		$query = "	SELECT
 					group_concat(distinct if(fakta = '', null, fakta)) fakta,
@@ -360,6 +364,8 @@
 	}
 
 	if ($tee == 'TALLENNAFAKTA') {
+		$isatuoteno = trim($isatuoteno);
+
 		$query = "	UPDATE tuoteperhe
 					SET fakta = '', fakta2 = '', omasivu = ''
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -393,6 +399,9 @@
 	if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 		$lisa = "";
 		$tchk = "";
+		
+		$isatuoteno = trim($isatuoteno);
+		$hakutuoteno = trim($hakutuoteno);
 
 		if ($isatuoteno != '') {
 			$lisa = " and isatuoteno='$isatuoteno'";
@@ -449,7 +458,7 @@
 				#echo "<th>".t("Rivikommentti")."</th>";
 				echo "<td class='back'></td></tr>";
 
-				echo "	<form action='$PHP_SELF' method='post' name='lisaa' autocomplete='off'>
+				echo "	<form method='post' name='lisaa' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tunnus' value='$zrow[tunnus]'>
 						<input type='hidden' name='tee' value='LISAA'>
@@ -524,7 +533,7 @@
 					$sel2 = "SELECTED";
 				}
 
-				echo "<table><form action='$PHP_SELF' method='post' autocomplete='off'>
+				echo "<table><form method='post' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 				  		<input type='hidden' name='tee' value='TALLENNAESITYSMUOTO'>
 				  		<input type='hidden' name='tunnus' value='$prow[tunnus]'>
@@ -566,7 +575,7 @@
 
 				echo "</table><br>";
 
-				echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+				echo "<form method='post' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 				  		<input type='hidden' name='tee' value='TALLENNAFAKTA'>
 				  		<input type='hidden' name='tunnus' value='$prow[tunnus]'>
@@ -674,7 +683,7 @@
 				$kop_fakta   = array();
 
 				if ($tunnus == "") {
-					echo "	<form action='$PHP_SELF' method='post' name='lisaa' autocomplete='off'>
+					echo "	<form method='post' name='lisaa' autocomplete='off'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='LISAA'>
 							<input type='hidden' name='isatuoteno' value='$row[isatuoteno]'>
@@ -757,7 +766,7 @@
 							}
 						}
 
-						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+						echo "<form method='post' autocomplete='off'>
 								<td class='back'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$prow[tunnus]'>
@@ -767,7 +776,7 @@
 								</td></form>";
 
 
-						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
+						echo "<form method='post' autocomplete='off'>
 								<td class='back'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tee' value='POISTA'>
@@ -789,7 +798,7 @@
 						$zrow = mysql_fetch_array($zresult);
 
 
-						echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+						echo "	<form method='post' autocomplete='off'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$zrow[tunnus]'>
 								<input type='hidden' name='tee' value='LISAA'>
@@ -855,7 +864,7 @@
 				echo "</table>";
 
 				echo "<br><br>";
-				echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+				echo "	<form method='post' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='KOPIOI'>
 						<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
@@ -944,7 +953,7 @@
 			$formi	= "haku";
 			$kentta = "isatuoteno_haku";
 
-			echo "<form name='haku' action='$PHP_SELF' method='post'>";
+			echo "<form name='haku' method='post'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 
 			echo "<br><br><table>";

@@ -40,7 +40,7 @@
 
 		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br>\n<br>\n";
 
-		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
+		echo "<form enctype='multipart/form-data' name='sendfile' method='post'>";
 		echo "<table>";
 		echo "	<tr>
 					<th>".t("Pankin aineisto").":</th>
@@ -269,7 +269,7 @@
 
 									file_put_contents("/tmp/".$tmpfile, $kokoaineisto);
 
-									echo "<form action='$PHP_SELF' method='post' onSubmit='return verify();'>";
+									echo "<form method='post' onSubmit='return verify();'>";
 									echo "<input type='hidden' name='virhe_file' value='$tmpfile'>
 											<input type='submit' value='".t("Käsittele aineisto vaikka kyseisen päivän/tilin aineisto on jo käsitelty")."'>";
 									echo "</form><br>\n<br>\n";

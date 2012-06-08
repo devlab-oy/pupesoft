@@ -12,14 +12,6 @@
 	if (!isset($tilalehinta))  	 $tilalehinta = "";
 	if (!isset($historia))  	 $historia = "";
 
-	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
-	else $tkysy_lopetus = "";
-
-	if ($lopetus != "") {
-		// Lisätään tämä lopetuslinkkiin
-		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-	}
-
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -39,13 +31,6 @@
 
 	// Enaboidaan ajax kikkare
 	enable_ajax();
-
-	if ($tee == 'NAYTATILAUS') {
-		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-		require ("raportit/naytatilaus.inc");
-		echo "<br><br><br>";
-		$tee = "Z";
-	}
 
 	if ($tee == 'N' or $tee == 'E') {
 
@@ -77,6 +62,21 @@
 			$tuoteno = '';
 			$tee='Y';
 		}
+	}
+
+	if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
+	else $tkysy_lopetus = "";
+
+	if ($lopetus != "") {
+		// Lisätään tämä lopetuslinkkiin
+		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+	}
+
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+		echo "<br><br><br>";
+		$tee = "Z";
 	}
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
@@ -144,7 +144,7 @@
 	echo "<table>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<form method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -156,7 +156,7 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
+	echo "<form method='post' name='formi2' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -178,7 +178,7 @@
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 	if ($ulos == '' and $tee == 'Z') {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
@@ -190,7 +190,7 @@
 		echo "</td>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tyyppi' value=''>";
@@ -423,7 +423,7 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td>$tuoterow[tuoteno]";
+			echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
 
 			//haetaan orginaalit
 			if (table_exists("tuotteen_orginaalit")) {
@@ -480,7 +480,7 @@
 
 			echo "</td>";
 
-			echo "<td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
+			echo "<td>$tuoterow[eankoodi]</td><td colspan='2' style='font-weight:bold;'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
 			echo "</tr>";
 
@@ -541,7 +541,7 @@
 				echo "{$tt_rivi["toim_tuoteno"]}<br>";
 			}
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
 			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["nettohinta"])."/".hintapyoristys($tuoterow["myymalahinta"])."</td>";
 			echo "<td valign='top' align='right'>";
 
@@ -549,7 +549,7 @@
 				echo hintapyoristys($tt_rivi["ostohinta"],6,TRUE)." {$tt_rivi["valuutta"]} / {$tt_rivi["alennus"]}%<br>";
 			}
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
@@ -562,7 +562,7 @@
 			}
 
 			echo "</td>";
-			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["vihahin"], 6, TRUE);
+			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["vihahin"], 6, TRUE);
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
@@ -938,7 +938,7 @@
 
 						echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
 									<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
-									<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+									<td align='right' style='font-weight:bold;'>".sprintf("%.2f", $myytavissa)."</td>
 									</tr>";
 					}
 				}
@@ -965,98 +965,9 @@
 						<th style='text-align:right;'>".sprintf("%.2f", $kokonaissaldo)."</th>
 						<th style='text-align:right;'>".sprintf("%.2f", $kokonaishyllyssa)."</th>
 						<th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>
-						</tr>
-						";
+						</tr>";
 
 				echo "</table><br>";
-
-				// katsotaan onko tälle tuotteelle yhtään sisäistä toimittajaa ja että toimittajan tiedoissa on varmasti kaikki EDI mokkulat päällä ja oletusvienti on jotain vaihto-omaisuutta
-				$query = "	SELECT tyyppi_tieto, liitostunnus
-							from tuotteen_toimittajat, toimi
-							where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-							and tuotteen_toimittajat.tuoteno = '$tuoteno'
-							and toimi.yhtio         = tuotteen_toimittajat.yhtio
-							and toimi.tunnus        = tuotteen_toimittajat.liitostunnus
-							and toimi.tyyppi        = 'S'
-							and toimi.tyyppi_tieto != ''
-							and toimi.edi_palvelin != ''
-							and toimi.edi_kayttaja != ''
-							and toimi.edi_salasana != ''
-							and toimi.edi_polku    != ''
-							and toimi.oletus_vienti in ('C','F','I')";
-				$kres  = pupe_query($query);
-
-				if (mysql_num_rows($kres) > 0) {
-
-					echo "<table>";
-					echo "<tr>";
-					echo "<th>".t("Suoratoimitus Yhtiö/Varasto")."</th>";
-					echo "<th>".t("Saldo")."</th>";
-					echo "</tr>";
-
-					$kokonaissaldo = 0;
-					$firmanimi = '';
-
-					while ($superrow = mysql_fetch_assoc($kres)) {
-						$query = "	SELECT yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, alkuhyllyalue, loppuhyllyalue, alkuhyllynro, loppuhyllynro, sum(saldo) saldo
-									from tuotepaikat
-									join yhtio on yhtio.yhtio=tuotepaikat.yhtio
-									join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-									and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-									and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-									where tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
-									and tuoteno = '$tuoteno'
-									and varastopaikat.tyyppi = ''
-									group by 1,2,3,4
-									order by 5";
-						$kres2  = pupe_query($query);
-
-						if (mysql_num_rows($kres2) > 0) {
-
-							while ($krow  = mysql_fetch_assoc($kres2)) {
-								// katotaan ennakkopoistot toimittavalta yritykseltä
-								$query = "	SELECT sum(varattu) varattu
-											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-											where yhtio	= '$krow[yhtio]' and
-											tyyppi		= 'L' and
-											varattu		> 0 and
-											tuoteno		= '$tuoteno'
-											and concat(rpad(upper('$krow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$krow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-											and concat(rpad(upper('$krow[loppuhyllyalue]') ,5,'0'),lpad(upper('$krow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
-								$krtre = pupe_query($query);
-								$krtur = mysql_fetch_assoc($krtre);
-
-								// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
-								$query = "	SELECT sum(jt) varattu
-											from tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-											where yhtio			= '$kukarow[yhtio]'
-											and tyyppi			= 'L'
-											and laskutettuaika	= '0000-00-00'
-											and var				= 'S'
-											and tuoteno			= '$tuoteno'
-											and tilaajanrivinro	= '$superrow[liitostunnus]'
-											and hyllyalue 		= '$krow[hyllyalue]'
-											and hyllynro 		= '$krow[hyllynro]'
-											and hyllyvali 		= '$krow[hyllyvali]'
-											and hyllytaso 		= '$krow[hyllytaso]'";
-								$krtre = pupe_query($query);
-								$krtu2 = mysql_fetch_assoc($krtre);
-
-								// katotaan tuotteen saldo
-								$saldo = sprintf("%.02f",$krow["saldo"] - $krtur["varattu"] - $krtu2["varattu"]);
-
-								echo "<tr><td>$krow[nimi]/$krow[nimitys]</td>";
-								echo "<td align='right'>$saldo</td></tr>";
-
-								$firmanimi = $krow['nimi'];
-
-								$kokonaissaldo += $saldo;
-							}
-						}
-					}
-					echo "<tr><th>".t("Suoratoimitettavissa Yhteensä")."</th><td align='right'>".sprintf("%.02f",$kokonaissaldo)."</td></tr>";
-					echo "</table>";
-				}
 			}
 
 			// Tilausrivit tälle tuotteelle
@@ -1839,8 +1750,8 @@
 							$maara";
 				$qresult = pupe_query($query);
 
-				// jos joku in-out varastonarvo
-				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
+				// jos jsarjanumeroseuranta S tai U ja inout varastonarvo
+				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 					$kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
 				}
 
@@ -2056,7 +1967,7 @@
 	}
 
 	if ($ulos != "") {
-			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='Z'>";

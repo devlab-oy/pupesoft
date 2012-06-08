@@ -5,10 +5,6 @@
 
 	require ("../inc/parametrit.inc");
 
-	echo "<script type='text/javascript' language='javascript'>";
-	require_once("inc/jquery.min.js");
-	echo "</script>";
-
 	gauge();
 
 	echo "	<script type='text/javascript' charset='utf-8'>
@@ -110,7 +106,7 @@
 
 	echo "<font class='head'>",t("Myyntitilasto"),"</font><hr>";
 
-	echo "<form method='post' action=''>";
+	echo "<form method='post'>";
 	echo "<table><tr>";
 	echo "<td class='back'><div id='chart_div'></div></td>";
 	echo "</tr><tr>";
@@ -164,46 +160,51 @@
 	echo "<input type='text' name='vvl' id='vvl' value='{$vvl}' size='5'></td>";
 	echo "</tr>";
 
-	$query = "	SELECT group_concat(yhtio) AS yhtiot
-				FROM yhtio
-				WHERE konserni = '$yhtiorow[konserni]'
-				and konserni != ''";
-	$yhtio_res = pupe_query($query);
-	$yhtio_array = mysql_fetch_assoc($yhtio_res);
+	if ($yhtiorow['konserni'] != "") {
+		$query = "	SELECT group_concat(yhtio) AS yhtiot
+					FROM yhtio
+					WHERE konserni = '$yhtiorow[konserni]'
+					and konserni != ''";
+		$yhtio_res = pupe_query($query);
+		$yhtio_array = mysql_fetch_assoc($yhtio_res);
 
-	$query = "	SELECT nimi, yhtio
-				FROM yhtio
-				WHERE konserni = '$yhtiorow[konserni]'
-				and konserni != ''";
-	$yhtio_res = pupe_query($query);
+		$query = "	SELECT nimi, yhtio
+					FROM yhtio
+					WHERE konserni = '$yhtiorow[konserni]'
+					and konserni != ''";
+		$yhtio_res = pupe_query($query);
+		$numrows = mysql_num_rows($yhtio_res);
 
-	$numrows = mysql_num_rows($yhtio_res);
+		echo "<tr>";
+		echo "<th rowspan='{$numrows}'>",t("Valitse yhtiö"),"</th>";
 
-	echo "<tr>";
-	echo "<input type='hidden' name='yhtiot[]' value='default' />";
-	echo "<th rowspan='{$numrows}'>",t("Valitse yhtiö"),"</th>";
+		$i = 0;
 
-	$i = 0;
+		while ($yhtio_row = mysql_fetch_assoc($yhtio_res)) {
 
-	if (!isset($yhtiot)) $yhtiot = array();
+			if ($i > 0) {
+				echo "</tr><tr>";
+			}
 
-	$chk = array_fill_keys($yhtiot, " checked") + array_fill_keys(explode(",", $yhtio_array['yhtiot']), '');
+			$chk = "";
 
-	while ($yhtio_row = mysql_fetch_assoc($yhtio_res)) {
+			if (!isset($yhtiot) and $yhtio_row['yhtio'] == $kukarow['yhtio']) {
+				$chk = "CHECKED";
+			}
 
-		if ($i > 0) {
-			echo "</tr><tr>";
+			if (isset($yhtiot[$yhtio_row['yhtio']]) and $yhtiot[$yhtio_row['yhtio']] != "") {
+				$chk = "CHECKED";
+			}
+
+			echo "<td><input type='checkbox' name='yhtiot[{$yhtio_row['yhtio']}]' value='{$yhtio_row['yhtio']}' $chk> {$yhtio_row['nimi']}</td>";
+			$i++;
 		}
 
-		if (count($yhtiot) < 2 and $yhtio_row['yhtio'] == $kukarow['yhtio']) {
-			$chk[$yhtio_row['yhtio']] = ' checked';
-		}
-
-		echo "<td><input type='checkbox' name='yhtiot[]' value='{$yhtio_row['yhtio']}'{$chk[$yhtio_row['yhtio']]}/> {$yhtio_row['nimi']}</td>";
-		$i++;
+		echo "</tr>";
 	}
-
-	echo "</tr>";
+	else {
+		$yhtiot = array($kukarow['yhtio']);
+	}
 
 	if (!isset($naytetaan_tulos)) $naytetaan_tulos = '';
 
@@ -224,7 +225,7 @@
 
 	if (!isset($tee)) $tee = '';
 
-	if (isset($yhtiot) and count($yhtiot) == 1) {
+	if ($tee == 'laske' and (!isset($yhtiot) or count($yhtiot) == 0)) {
 		echo "<font class='error'>",t("Et valinnut yhtiötä"),"!</font>";
 		$tee = '';
 	}
@@ -235,9 +236,6 @@
 	}
 
 	if ($tee == 'laske') {
-
-		// poistetaan default
-		unset($yhtiot[0]);
 
 		$query_yhtiot = implode("','", $yhtiot);
 

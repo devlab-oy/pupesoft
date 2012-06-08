@@ -92,7 +92,7 @@
 	if (!isset($ppl)) $ppl = date("d");
 
 	echo "<table>";
-	echo "<form action='' method='post' autocomplete='off' name='hakuform' id='hakuform'>";
+	echo "<form method='post' autocomplete='off' name='hakuform' id='hakuform'>";
 
 	echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
@@ -638,7 +638,7 @@
 
 			sort($tunnukset);
 
-			echo "<form method='post' action='' autocomplete='off' id='kommentti_form'>";
+			echo "<form method='post' autocomplete='off' id='kommentti_form'>";
 			echo "<input type='hidden' name='tee' value='kommentti'>";
 			echo "<input type='hidden' name='toimittajahaku' value='$toimittajaid'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

@@ -817,6 +817,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "saapumisen_jt_kasittely") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Ostotilauksen saapuvan määrän ollessa tilattua pienempi, erotukselle ei tehdä mitään")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Ostotilauksen saapuvan määrän ollessa tilattua pienempi, erotus siirretään uudelle riville")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "naytetaan_katteet_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -913,27 +927,6 @@
 
 		$ulos .= "<option value='' $sel1>".t("Laskun loppusummaa ei pyöristetä")."</option>";
 		$ulos .= "<option value='o' $sel2>".t("Laskun loppusumma pyöristetään lahimpään kokonaislukuun")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "suoratoim_automaatio") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1="";
-		$sel2="";
-
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value='' $sel1>".t("Riviä ei automaattisesti myydä konserniyhtiön varastosta")."</option>";
-		$ulos .= "<option value='o' $sel2>".t("Jos oma saldo ei riitä rivi yritetään myydä konserniyhtiön varastosta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

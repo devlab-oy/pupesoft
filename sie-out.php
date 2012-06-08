@@ -113,7 +113,7 @@ if ($kausi!='') {
 
 if ($kausi == '') {
 //Näytetään käyttöliittymä
-	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "<form name = 'valinta' method='post'>
 		<table>
 		<tr><td>".t("Anna kausi")."</td><td><input type = 'text' name = 'kausi' size=8> Esim 2003-08</td></tr>
 		<tr><td>Perustiedot</td><td><input type = 'checkbox' name = 'perustiedot'></td></tr>

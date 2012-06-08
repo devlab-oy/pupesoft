@@ -5,11 +5,11 @@
 	$query = "	SELECT tuote.tuoteno, tuote.yksikko, if(tuote.tarrakpl>0,tuote.tarrakpl,1) tarrakpl, tilausrivi.varattu+tilausrivi.kpl varattu, tuote.tarrakerroin
 				FROM tilausrivi
 				JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-				WHERE tilausrivi.uusiotunnus = '$otunnus' 
+				WHERE tilausrivi.uusiotunnus = '$otunnus'
 				and tilausrivi.yhtio='$kukarow[yhtio]'
 				ORDER BY tuote.tuoteno";
 	$res= mysql_query($query) or pupe_error($query);
-	
+
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
 	$filenimi = "/tmp/Tuotetarrat-".md5(uniqid(mt_rand(), true)).".txt";
@@ -24,11 +24,11 @@
 	fputs($fh, $sisalto);
 
 	while ($row = mysql_fetch_array($res)) {
-		
+
 		if ($row["tarrakerroin"] == 0) $row["tarrakerroin"] = 1;
-		
+
 		$tarrakpl = $row["varattu"] * $row["tarrakerroin"];
-		
+
 		//mahtuu 7 tarraa per rivi
 		for($a = 0; $a < $tarrakpl; $a++) {
 			if ($laskuri % 7 == 0 and $laskuri > 0) {
@@ -69,22 +69,22 @@
 		$ctype = "TEXT";
 		$kutsu = "tuotetarrat-".date("Y-m-d").".txt";
 		require("inc/sahkoposti.inc");
-		
+
 		//p‰‰dyt‰‰n taas selailemaan toimittajia
 		echo t("Tuotetarrat tulostuu")."...<br>";
 	}
 	else {
 		//paperilista pit‰‰ saada kauniiksi
-		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
-		
+		$line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=1 --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
+
 		if ($tee == 'NAYTATILAUS') {
 			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
 			echo file_get_contents($filenimi.".ps");
 		}
-		else {				
+		else {
 			//itse print komento tulee valitse_tulosin.incilt‰...
 			$line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
-			
+
 			//p‰‰dyt‰‰n taas selailemaan toimittajia
 			echo t("Tuotetarrat tulostuu")."...<br>";
 		}
@@ -92,5 +92,5 @@
 	}
 
 	system("rm -f $filenimi");
-	
+
 ?>

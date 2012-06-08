@@ -8,6 +8,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
 		if (mysql_field_name($result, $i) == "admin_email" or
 			mysql_field_name($result, $i) == "alert_email" or
+			mysql_field_name($result, $i) == "talhal_email" or
 			mysql_field_name($result, $i) == "postittaja_email") {
 
 			if (trim($t[$i]) == '') {

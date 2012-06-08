@@ -11,24 +11,6 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
-function poistalaskuserverilta($skanlasku) {
-
-	GLOBAL $kukarow, $yhtiorow;
-	$path_parts = pathinfo($skanlasku);
-	$ctype = $path_parts['extension'];
-
-	$liite 	= $skanlasku;
-	$komento = 'email';
-	$kutsu	=	t("Poistettu lasku");
-	$content_body = t("Liitteenä Pupesoftista poistettu skannattulasku");
-	$liite = "skannaus/".$liite;
-
-	if ($skanlasku !='') {
-		include("inc/sahkoposti.inc");
-	}
-	return $boob;
-}
-
 function listdir($start_dir = '.') {
 
 	$files = array();
@@ -63,6 +45,10 @@ function listdir($start_dir = '.') {
 function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
 
 	$dir = $yhtiorow['skannatut_laskut_polku'];
+
+	if (!is_dir($dir) or !is_writable($dir)) {
+		return false;
+	}
 
 	// käydään läpi ensin käsiteltävät kuvat
 	$files = listdir($dir);
@@ -130,15 +116,32 @@ echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'poistalasku') {
 
-	$boob = poistalaskuserverilta($skannattu_lasku);
-	$tee = '';
+	// Lähetetään lasku sähköpostilla
+	$poistettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
+	$path_parts = pathinfo($poistettava_lasku);
+
+	// Sähköpostin lähetykseen parametrit
+	$parametri = array( "to" 			=> $kukarow["eposti"],
+						"cc" 			=> "",
+						"subject"		=> t("Poistettu lasku"),
+						"ctype"			=> "text",
+						"body"			=> t("Liitteenä Pupesoftista poistettu skannattu lasku."),
+						"attachements"	=> array(0 	=> array(
+													"filename"		=> $poistettava_lasku,
+													"newfilename"	=> "",
+													"ctype"			=> $path_parts['extension']),
+						)
+					);
+	$boob = pupesoft_sahkoposti($parametri);
 
 	if ($boob === FALSE) {
-		echo t("VIRHE: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
+		echo t("VIRHE: Sähköpostin lähetys epäonnistui. Ei poisteta skannattua laskua");
 	}
 	else {
-		unlink($skannatut_laskut_polku.$skannattu_lasku);
+		// Poistetaan tiedosto
+		unlink($poistettava_lasku);
 
+		// Haetaan seuraava lasku
 		$silent = 'ei näytetä käyttöliittymää';
 		$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);
 
@@ -168,6 +171,8 @@ if ($tee == 'poistalasku') {
 			echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
 		}
 	}
+
+	$tee = "";
 }
 
 if ($tee == 'VIIVA') {
@@ -895,15 +900,22 @@ if ($tee == 'P' or $tee == 'E') {
 
 		// Oletusarvot toimittajalta, jos ekaaa kertaa täällä
 		if ($tee == 'P') {
+
+			// Katsotaan onko meillä "tuuraajia" hyväksynnässä
+			for ($tuuraaja_i = 1; $tuuraaja_i < 6; $tuuraaja_i++) {
+				$query = "	SELECT if (kuka.tuuraaja != '', kuka.tuuraaja, kuka.kuka) kuka
+							FROM kuka
+							WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+							AND kuka.kuka = '{$trow['oletus_hyvak'.$tuuraaja_i]}'";
+				$result = pupe_query($query);
+				$hyvak_row = mysql_fetch_assoc($result);
+				$hyvak[$tuuraaja_i] = $hyvak_row['kuka'];
+			}
+
 			$valkoodi 			= $trow['oletus_valkoodi'];
 			$kar      			= $trow['oletus_kapvm'];
 			$kapro    			= $trow['oletus_kapro'];
 			if ($tee2 != 'V') 	$err = $trow['oletus_erapvm']; // Viivakoodilla on aina erapvm ja sitä käytetään
-			$hyvak[1]   		= $trow['oletus_hyvak1'];
-			$hyvak[2]   		= $trow['oletus_hyvak2'];
-			$hyvak[3]   		= $trow['oletus_hyvak3'];
-			$hyvak[4]   		= $trow['oletus_hyvak4'];
-			$hyvak[5]   		= $trow['oletus_hyvak5'];
 			$oltil      		= $trow['tilino'];
 			$olkustp    		= $trow['kustannuspaikka'];
 			$olkohde    		= $trow['kohde'];
@@ -923,7 +935,7 @@ if ($tee == 'P' or $tee == 'E') {
 			$fakta = "<br><br><font class='message'>$trow[fakta]</font>";
 		}
 
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
@@ -1011,7 +1023,7 @@ if ($tee == 'P' or $tee == 'E') {
 	else {
 
  		// jaaha, ei ollut toimittajaa, joten pyydetään syöttämään tiedot
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='oma' value='1'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
@@ -1879,11 +1891,14 @@ if ($tee == 'I') {
 					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
-
 				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+				if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($vienti == 'J' or $vienti == 'K' or $vienti == 'L')) {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+				}
+
+				if ($yhtiorow['varastonmuutos_rahti'] != "" and ($vienti == 'B' or $vienti == 'E' or $vienti == 'H')) {
+					$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 				}
 
 				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
@@ -2279,7 +2294,7 @@ if (strlen($tee) == 0) {
 
 	echo "<br><table>";
 
-	echo "<tr><th nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>$hiddenit".t("Perusta lasku viivakoodilukijalla")."</th>";
+	echo "<tr><th nowrap><form name = 'viivat' action = '?tee=VIIVA' method='post'>$hiddenit".t("Perusta lasku viivakoodilukijalla")."</th>";
 	echo "<td><input type = 'text' name = 'nimi' size='8'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -2292,7 +2307,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><th nowrap><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</th>";
+	echo "<tr><th nowrap><form action = '?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</th>";
 	echo "<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -2305,7 +2320,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<th nowrap><form action = '$PHP_SELF?tee=P' method='post'>$hiddenit".t("Perusta lasku ilman toimittajatietoja")."</th>";
+	echo "<th nowrap><form action = '?tee=P' method='post'>$hiddenit".t("Perusta lasku ilman toimittajatietoja")."</th>";
 
 	echo "<td>
 		<select name='tyyppi'>
@@ -2334,7 +2349,7 @@ if (strlen($tee) == 0) {
 
 			$row = mysql_fetch_assoc($result);
 
-			echo "<th><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
+			echo "<th><form action = '?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
 
 			echo "<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>

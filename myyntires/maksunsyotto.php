@@ -278,7 +278,7 @@ if ($tee == "SYOTTO") {
 	}
 
 	// takasin jonnekin
-	if ($jatko != t("Tallenna suoritus")) {
+	if (isset($s_tallenna_kohdista)) {
 		echo "<br>";
 		$oikeus = 1;
 		$tila = "kohdistaminen";
@@ -417,7 +417,7 @@ if ($ytunnus != '' and $tee == "") {
 			}
 		</SCRIPT>";
 
-	echo "<form action='$PHP_SELF' method='post' onSubmit = 'return verify()' name='formi'>";
+	echo "<form method='post' onSubmit = 'return verify()' name='formi'>";
 	echo "<input type='hidden' name='tee' value='CHECK'/>\n";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
@@ -576,8 +576,8 @@ if ($ytunnus != '' and $tee == "") {
 	</tr>
 	</table>
 	<br>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
+	<input type='submit' name='s_tallenna_kohdista' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
+	<input type='submit' name='s_tallenna' value='".t("Tallenna suoritus")."'>
 	</form>";
 
 	$formi = "formi";
@@ -591,7 +591,7 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<font class='message'>",t("Maksajan hakuinfo")," ",asiakashakuohje(),"</font><br>";
 	echo "<br>";
 	echo t("Maksaja").": ";
-	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
+	echo "<form method='post' name='maksaja'>";
 	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
 	echo "<input type='hidden' name='tee' value='ETSI'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";

@@ -19,7 +19,7 @@
 
 	echo "<font class='head'>".t("Asiakaslista")."</font><hr>";
 
-	echo "<form action='$PHP_SELF' method='post'>
+	echo "<form method='post'>
 			<input type='hidden' name='voipcall' value='kala'>";
 
 	$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");

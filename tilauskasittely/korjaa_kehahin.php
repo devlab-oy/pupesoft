@@ -12,7 +12,7 @@
 
 	if ($tee == "KORJAA") {
 		// takasin tuotteen valintaan
-		$tee = "VALITSE";
+		$tee = "";
 
 		$query = "	SELECT *
 					FROM tapahtuma
@@ -62,7 +62,7 @@
 						ORDER BY laadittu DESC";
 			$res = pupe_query($query);
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='KORJAA'>";
 
 			echo "<table>";
@@ -79,6 +79,8 @@
 			echo "<th>kääntöpiste</th>";
 			echo "</tr>";
 
+			$selected = "";
+
 			while ($rivi = mysql_fetch_array($res)) {
 
 				echo "<tr>";
@@ -93,11 +95,18 @@
 				echo "<td>";
 
 				if ($rivi["laji"] == "tulo" or $rivi['laji'] == 'valmistus') {
+
+					$value = "";
+					if ($selected == "") {
+						$value = "CHECKED";
+						$selected = "X";
+					}
+
 					if ($rivi["rivitunnus"] != 0) {
-						echo "<input type='radio' name='rivitunnus' value='{$rivi["tunnus"]}'>";
+						echo "<input type='radio' name='rivitunnus' $value value='{$rivi["tunnus"]}'>";
 					}
 					else {
-						echo "<input type='radio' name='rivitunnus' value='{$rivi["tunnus"]}'>";
+						echo "<input type='radio' name='rivitunnus' $value value='{$rivi["tunnus"]}'>";
 						echo "<font class='error'>Rivitunnus missing!</font>";
 					}
 				}
@@ -115,10 +124,10 @@
 	// meillä ei ole valittua tilausta
 	if ($tee == "") {
 		$formi  = "find";
-		$kentta = "etsi";
+		$kentta = "tuoteno";
 
 		// tehdään etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='post'>";
 		echo t("Etsi tuotenumero").": ";
 		echo "<input type='hidden' name='tee' value='VALITSE'>";
 		echo "<input type='text' name='tuoteno'>";

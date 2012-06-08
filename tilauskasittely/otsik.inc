@@ -500,7 +500,7 @@
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
+		echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -1709,7 +1709,7 @@
 			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS")))) $osath = 'CHECKED';
 
 			// Pit‰‰ olla myyntitilaus ja k‰ytt‰j‰ll‰ oikeus laskuttaa tilaus
-			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
+			if (($toim == "PIKATILAUS" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim =="REKLAMAATIO") and (tarkista_oikeus("valitse_laskutettavat_tilaukset.php") or
 			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VAINLASKUTA") or
 			tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
 			tarkista_oikeus("verkkolasku.php"))) {
@@ -2504,7 +2504,7 @@
 			echo "</form>";
 
 			if ($tilausnumero != "") {
-				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<form method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='OTSIK'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
@@ -3151,16 +3151,19 @@
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
 
-		// p‰ivitet‰‰n erikoisale tilausriveille
-		$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
-		$query_erikoisale = "	UPDATE tilausrivi
-								SET erikoisale = '{$erikoisale}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$erikoisale_query_otunnus}'
-								AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
-								AND netto  != 'N'
-								AND tyyppi != 'D'";
-		$upd_erikoisale_res = pupe_query($query_erikoisale);
+		// Jos erikoisalennus muuttuu
+		if ($laskurow["erikoisale"] != $erikoisale) {
+			// p‰ivitet‰‰n erikoisale tilausriveille
+			$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+			$query_erikoisale = "	UPDATE tilausrivi
+									SET erikoisale = '{$erikoisale}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$erikoisale_query_otunnus}'
+									AND tuoteno not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}')
+									AND netto  != 'N'
+									AND tyyppi != 'D'";
+			$upd_erikoisale_res = pupe_query($query_erikoisale);
+		}
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 

@@ -56,7 +56,7 @@
 	echo "</table>";
 	
 	if ($lask > 0 and $tee == "") {
-		echo "	<form method='post' action='$PHP_SELF'>
+		echo "	<form method='post'>
 				<input type='hidden' name='tee' value='KOHDISTA'>
 				<input type='submit' value='".t("Tee kohdistus")."'>
 				</form>";

@@ -193,7 +193,7 @@
 		echo "</table><br><br><br><br>";
 	}
 
-	echo "<table><form name='uliuli' method='post' action='$PHP_SELF'>";
+	echo "<table><form name='uliuli' method='post'>";
 	echo "<input type='hidden' name='tee' value='aja'>";
 	echo "<input type='hidden' name='tunnus' value=''>";
 

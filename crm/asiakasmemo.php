@@ -19,7 +19,7 @@
 			echo "<br><table>";
 			echo "<tr>
 					<th>".t("Asiakas").":</th>
-					<form action = '$PHP_SELF' method = 'post'>
+					<form method = 'post'>
 					<td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
 					</tr>";
@@ -122,7 +122,7 @@
 		if ($tee == "ASANALYYSI") {
 
 			echo "<table>";
-			echo "<form action='$PHP_SELF' method='POST'>
+			echo "<form method='POST'>
 					<input type='hidden' name='tee' value='LISAAASANALYYSI'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -394,7 +394,7 @@
 							ORDER BY nimi";
 				$result = pupe_query($query);
 
-				$yhenkilo = "<form action='$PHP_SELF' method='POST'>
+				$yhenkilo = "<form method='POST'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -560,7 +560,7 @@
 
 				echo "</tr>";
 				echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
-				echo "<form action='$PHP_SELF' method='POST'>";
+				echo "<form method='POST'>";
 				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -596,7 +596,7 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 				echo "<table width='620'>";
 
-				echo "	<form action='$PHP_SELF' method='POST' enctype='multipart/form-data'>
+				echo "	<form method='POST' enctype='multipart/form-data'>
 						<input type='hidden' name='tee' 		value='UUSIMEMO'>
 						<input type='hidden' name='korjaus' 	value='$tunnus'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
@@ -797,7 +797,7 @@
 						</td></tr>";
 
 				echo "	<td colspan='3' align='right' class='back'>
-						<form action='$PHP_SELF' method='POST'>
+						<form method='POST'>
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
@@ -889,7 +889,7 @@
 
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
-						echo "<form action='$PHP_SELF' method='POST'>";
+						echo "<form method='POST'>";
 						echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
 						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
 						echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";

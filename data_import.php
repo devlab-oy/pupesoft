@@ -317,7 +317,7 @@
 	// Selectoidaan aktiivi
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys(array_keys($taulut), '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";
@@ -369,8 +369,8 @@
 		</tr>";
 		echo "<tr><th>".t("Asiakkaan valinta").":</th>
 				<td><select name='asiakkaanvalinta'>
-				<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 				<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+				<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
 				</select></td>
 		</tr>";
 	}
@@ -447,13 +447,13 @@
 			echo "<td>{$file["orig_file"]}</td>";
 			echo "<td>{$file["taulu"]}</td>";
 			echo "<td>{$file["aika"]}</td>";
-			echo "<td><form method='post'>";
+			echo "<td><form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='{$file["lognimi"]}'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["filename"]}'>";
 			echo "<input type='submit' value='".t("Tallenna")."'>";
 			echo "</form></td>";
-			echo "<td><form method='post'>";
+			echo "<td><form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='{$file["errnimi"]}'>";
 			echo "<input type='hidden' name='datain_filenimi' value='{$file["errfilename"]}'>";

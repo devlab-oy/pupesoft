@@ -1897,8 +1897,8 @@ if ($tee == 'I') {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 				}
 
-				if ($yhtiorow['rahti_varastonmuutos'] != "" and ($vienti == 'B' or $vienti == 'E' or $vienti == 'H')) {
-					$varastonmuutostili = $yhtiorow["rahti_varastonmuutos"];
+				if ($yhtiorow['varastonmuutos_rahti'] != "" and ($vienti == 'B' or $vienti == 'E' or $vienti == 'H')) {
+					$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 				}
 
 				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle

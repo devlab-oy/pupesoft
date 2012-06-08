@@ -1132,8 +1132,8 @@
 							$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 						}
 
-						if ($yhtiorow['rahti_varastonmuutos'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
-							$varastonmuutostili = $yhtiorow["rahti_varastonmuutos"];
+						if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+							$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 						}
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
@@ -1313,8 +1313,8 @@
 									$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 								}
 
-								if ($yhtiorow['rahti_varastonmuutos'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
-									$varastonmuutostili = $yhtiorow["rahti_varastonmuutos"];
+								if ($yhtiorow['varastonmuutos_rahti'] != "" and ($trow['oletus_vienti'] == 'B' or $trow['oletus_vienti'] == 'E' or $trow['oletus_vienti'] == 'H')) {
+									$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
 								}
 
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);

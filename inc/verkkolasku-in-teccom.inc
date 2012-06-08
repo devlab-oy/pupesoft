@@ -35,6 +35,15 @@
 	$laskun_pakkauskulu				= 0;
 	$laskun_rahtikulu				= 0;
 
+	/*
+	 * osto_kulu = $laskun_pakkauskulu
+	 * osto_rahti = invoiceSummary rahti
+	 * osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
+	 */
+	$osto_kulu = 0;
+	$osto_rahti = 0;
+	$osto_rivi_kulu = 0;
+
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
@@ -71,6 +80,7 @@
 
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount) and $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount != 0) {
 		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
+		$osto_kulu = $laskun_pakkauskulu;
 	}
 
 	if (isset($xml->InvoiceHeader->OrderRef)) {
@@ -273,6 +283,39 @@
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount); // summa
 				}
 
+				// ZF ja GKN
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)
+					and ($laskuttajan_toimittajanumero == '123007' or $laskuttajan_toimittajanumero == "123084")) {
+
+					$node_search = $tuotetieto->xpath(".//AllowOrCharge");
+
+					foreach ($node_search as $node_x) {
+
+						$attribute = $node_x->AllowOrChargeIdentifier->attributes()->Value;
+
+						if (strtolower($attribute) == "charge") {
+
+							$charge_description = strtolower(trim($node_x->AllowOrChargeDescription));
+							$charge_code = strtolower(trim($node_x->AllowOrChargeCode));
+
+							if ($charge_code == 'zfwa' or $charge_description == "core value") {
+								$rtuoteno[$i]['rivihinta'] -= (float) str_replace(",", ".", $node_x->Amount);
+							}
+						}
+					}
+				}
+
+				// BehrHella
+				if ($laskuttajan_toimittajanumero == '123108' and isset($tuotetieto->TotalValue->Amount) and isset($tuotetieto->TotalPrice->Amount)) {
+
+					$chk_sum = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount) - (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount);
+
+					if ($chk_sum > 0) {
+						$osto_rivi_kulu += $chk_sum;
+						$rtuoteno[$i]['rivihinta'] -= $chk_sum;
+					}
+				}
+
 				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 
 				// otetaan talteen "AllowOrCharge" kentät. 
@@ -292,7 +335,8 @@
 
 						$attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
-						if (strtolower($attribute) == "allow") {
+						// ei oteta alennuksia huomioon Klokkerholm-keississä
+						if (strtolower($attribute) == "allow" and $laskuttajan_toimittajanumero != "123418") {
 
 							if (!isset($rtuoteno[$i]['ale1'])) {
 
@@ -364,9 +408,9 @@
 												AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 												AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
 												AND tuotteen_toimittajat.toim_tuoteno != '')
-											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio 
-												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno 
-												AND tuoteperhe.tyyppi IN ('P','')  
+											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuotteen_toimittajat.yhtio
+												AND tuoteperhe.isatuoteno = tuotteen_toimittajat.tuoteno
+												AND tuoteperhe.tyyppi IN ('P','')
 												AND tuoteperhe.ohita_kerays != '')
 											JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio AND tuote.tuoteno = tuoteperhe.tuoteno AND tuote.status != 'P')
 											WHERE toimi.yhtio = '{$kukarow['yhtio']}'
@@ -394,29 +438,31 @@
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
 							}
-							elseif ($charge_description == 'freight costs') {
+							elseif ($charge_description == 'freight costs' or $charge_code == 'zfwa') {
 
 								/*
 								 * Rahtikulu
 								 * =========
-								 * 
+								 *
 								 * freight costs = BOSCH
 								 */
 
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
+								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 							}
 							else {
 
 								/*
 								 * Muut kulut
 								 * ==========
-								 * 
+								 *
 								 * zpkp = ZF
 								 */
 
 								if ($charge_code != 'zpkp') {
 									if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
 									$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
+									$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								}
 							}
 						}

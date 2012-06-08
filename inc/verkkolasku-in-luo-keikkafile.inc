@@ -21,7 +21,7 @@
 		// Haetaan seuraava vapaa keikkaid
 		$query  = "	SELECT MAX(laskunro) + 1
 					FROM lasku
-					WHERE yhtio = '{$kukarow['yhtio']}' 
+					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila = 'K'";
 		$result = pupe_query($query);
 		$row    = mysql_fetch_array($result);
@@ -109,7 +109,7 @@
 			$query = "	SELECT tilausrivi.*, lasku.ketjutus
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tunnus = '{$rtuoteno[$i]['tilaajanrivinro']}'
 						AND tilausrivi.tyyppi = 'O'";
 			$result = pupe_query($query);
@@ -2158,9 +2158,12 @@
 		}
 	}
 	elseif ($kohdistettujariveja == 0 and $aladellaa == "") {
-		// dellataan perustettu keikka ku ei kerran löytyny rivejä.. jos ei olla asetettu ÄLÄDELLAA muuttujaaa
-		$query = "DELETE from lasku WHERE yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkanumeroapu'";
-		$result = pupe_query($query);
+
+		if ((int) $keikkanumeroapu > 0) {
+			// dellataan perustettu keikka ku ei kerran löytyny rivejä.. jos ei olla asetettu ÄLÄDELLAA muuttujaaa
+			$query = "DELETE from lasku WHERE yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkanumeroapu'";
+			$result = pupe_query($query);
+		}
 
 		$laskuvirhe .= t("Poistettiin")." ".t("saapuminen")." $keikkanumeroapu ".t("Yhtään riviä ei löytynyt")."!\n";
 	}

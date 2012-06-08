@@ -1891,11 +1891,14 @@ if ($tee == 'I') {
 					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
-
 				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+				if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($vienti == 'J' or $vienti == 'K' or $vienti == 'L')) {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+				}
+
+				if ($yhtiorow['rahti_varastonmuutos'] != "" and ($vienti == 'B' or $vienti == 'E' or $vienti == 'H')) {
+					$varastonmuutostili = $yhtiorow["rahti_varastonmuutos"];
 				}
 
 				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle

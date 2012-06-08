@@ -2060,9 +2060,16 @@ if ($tee == 'I') {
 
 				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
-				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+				if ($yhtiorow['raaka_ainevarastonmuutos'] != "" and ($vienti == 'J' or $vienti == 'K' or $vienti == 'L')) {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 				}
+
+				if ($yhtiorow['varastonmuutos_rahti'] != "" and ($vienti == 'B' or $vienti == 'E' or $vienti == 'H')) {
+					$varastonmuutostili = $yhtiorow["varastonmuutos_rahti"];
+				}
+
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp_ins, $kohde_ins, $projekti_ins);
@@ -2085,9 +2092,6 @@ if ($tee == 'I') {
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$result = pupe_query($query);
-
-				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				// Varastonmuutos
 				$query = "	INSERT INTO tiliointi SET

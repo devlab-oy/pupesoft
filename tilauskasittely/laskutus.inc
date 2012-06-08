@@ -913,7 +913,7 @@
 		$katesumma  			= round((float) $katesumma, 2);
 
 		// jos maksetaan k‰teisell‰ pyˆristet‰‰n l‰himp‰‰n viiteen senttiin
-		if ($xrow["kateinen"] == 'p') {
+		if ($xrow["kateinen"] == 'p' and $yhtiorow['maa'] != 'EE') {
 			// kotivaluutassa
 			if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$pyorerotus = round((float) $loppusumma, 2) - round((float) round((float) $loppusumma / 0.05) * 0.05, 2);
@@ -927,7 +927,8 @@
 		// Etsit‰‰n asiakas
 		$query = "	SELECT laskunsummapyoristys
 					FROM asiakas
-					WHERE tunnus='$orow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					WHERE tunnus = '$orow[liitostunnus]'
+					and yhtio	 = '$kukarow[yhtio]'";
 		$asres = pupe_query($query);
 		$asrow = mysql_fetch_assoc($asres);
 
@@ -965,13 +966,13 @@
 		// HUOM: Tallennetaan PY÷RISTETTY loppusumma laskun loppusummaksi.
 		$loppusumma 			= round($loppusumma - $pyorerotus, 2);
 		$loppusumma_valuutassa 	= round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
-		
+
 		// Jos kotivaluutassa niin vied‰‰n samat luvut n‰ihin kenttiin
 		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$loppusumma_valuutassa = $loppusumma;
 			$pyorerotus_valuutassa = $pyorerotus;
 		}
-		
+
 		$query = "	UPDATE lasku
 					SET alatila 			= 'V',
 					arvo 					= '$arvosumma',

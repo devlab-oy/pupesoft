@@ -340,17 +340,27 @@
 
 			echo "&nbsp;&nbsp;";
 
-			echo "<td class='back'>
-					<form method='post' autocomplete='off'>
-					<input type='hidden' name='toim' 				value = '$toim'>
-					<input type='hidden' name='lopetus' 			value = '$lopetus'>
-					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
-					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
-					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
-					<input type='hidden' name='tila' 				value = 'vaihdaasiakas'>
-					<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
-					<input type='submit' ACCESSKEY='A' value='".t("Vaihda toimittaja")."'></form>
-					</td>";
+			$query = "	SELECT tunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$tilausnumero}'
+						AND uusiotunnus > 0
+						LIMIT 1";
+			$vresult = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($vresult) == 0) {
+				echo "<td class='back'>
+						<form method='post' autocomplete='off'>
+						<input type='hidden' name='toim' 				value = '$toim'>
+						<input type='hidden' name='lopetus' 			value = '$lopetus'>
+						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+						<input type='hidden' name='tila' 				value = 'vaihdaasiakas'>
+						<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
+						<input type='submit' ACCESSKEY='A' value='".t("Vaihda toimittaja")."'></form>
+						</td>";
+			}
 		}
 	}
 

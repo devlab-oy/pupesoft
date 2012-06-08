@@ -1378,7 +1378,7 @@
 							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
 
-							$asn_nettohinta = round($rtuoteno[$i]["rivihinta"]/$rtuoteno[$i]['kpl'], 2);
+							$asn_nettohinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',

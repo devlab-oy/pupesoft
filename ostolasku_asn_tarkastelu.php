@@ -1817,7 +1817,7 @@
 				echo "<td>{$row['swift']}</td>";
 				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
-				#echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
+				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
 
 				if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {

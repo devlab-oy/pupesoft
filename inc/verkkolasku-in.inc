@@ -909,7 +909,10 @@
 					return ($return);
 				}
 
-				$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
+				$query = "	SELECT kurssi
+							FROM valuu
+							WHERE nimi = '$valkoodi'
+							AND yhtio  = '$yhtio'";
 				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -1233,14 +1236,19 @@
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
 
-							// Unikko laskuissa tulee kirjauksetkin valuutassa, joten pit‰‰ laskea kurssi.
 							if ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0) {
+								// Unikko laskuissa tulee kirjauksetkin valuutassa
 								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta_valuutassa"];
+								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
+							}
+							elseif ($vrow["kurssi"] != 1) {
+								// Laskulla olevat rivihinnat ovat valuutassa
+								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta"];
 								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
 							}
 							else {
 								$summa = (float) $rtuoteno[$i]["rivihinta"];
-								$summa_valuutassa = 0;
+								$summa_valuutassa = $summa;
 							}
 
 							// Hyvityslasku tai summa alle nolla

@@ -1368,7 +1368,9 @@
 					$tili = $tiliointirow['tilino'];
 					$summa = $tiliointirow_summa;
 
-					list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili);
+					$kustp = $tiliointirow['kustp'];
+					$kohde = $tiliointirow['kohde'];
+					$projekti = $tiliointirow['projekti'];
 
 					require ("inc/teetiliointi.inc");
 

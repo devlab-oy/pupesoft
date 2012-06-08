@@ -965,9 +965,6 @@ if ($tee == 'P' or $tee == 'E') {
 							$('#summa_echotus').html($('#summa').val());
 						}
 					});
-
-					
-
 				});
 			</script>";
 

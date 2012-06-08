@@ -427,9 +427,9 @@ if ($silent == "") {
 					<th>".t("Vienti")."</th>";
 
 			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("rahdit"),"</th>";
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("kulut"),"</th>";
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("rivikohtaiset kulut"),"</th>";
+				echo "<th>",t("Rahdit"),"</th>";
+				echo "<th>",t("Kulut"),"</th>";
+				echo "<th>",t("Rivikohtaiset kulut"),"</th>";
 			}
 
 			echo "</tr>";
@@ -716,9 +716,9 @@ if ($silent == "") {
 					<th>".t("Summa")."</th>";
 
 			if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("rahdit"),"</th>";
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("kulut"),"</th>";
-				echo "<th>",t("Vaihto-omaisuus"),"<br />",t("rivikohtaiset kulut"),"</th>";
+				echo "<th>",t("Rahdit"),"</th>";
+				echo "<th>",t("Kulut"),"</th>";
+				echo "<th>",t("Rivikohtaiset kulut"),"</th>";
 			}
 
 			echo "</tr>";

@@ -222,7 +222,8 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -251,7 +252,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -299,9 +300,14 @@
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
 		$result = pupe_query($query);
-		if (mysql_num_rows($result) == 0) {
-			die(t("Lasku kateissa"));
+
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+
+			require ("inc/footer.inc");
+			exit;
 		}
+
 		$lrow = mysql_fetch_assoc($result);
 
 		if ($viesti == "" or (int) $hyvaksyja == 0) {
@@ -423,7 +429,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -477,7 +483,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -503,8 +509,8 @@
 					and tunnus = '$tunnus'";
 		$result = pupe_query($query);
 
-		if (mysql_num_rows($result) !=1 ) {
-			echo t('lasku kateissa') . "$tunnus</font>";
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -530,7 +536,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -539,7 +545,7 @@
 		$laskurow = mysql_fetch_assoc($result);
 
 		if ($eka_hyvaksyja != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
-			echo pupe_eror('lasku on v‰‰r‰ss‰ tilassa');
+			echo "<font class = 'error'>".t('Lasku on v‰‰r‰ss‰ tilassa')."</font>";
 
 			require ("inc/footer.inc");
 			exit;
@@ -573,8 +579,8 @@
 					hyvaksyja_nyt = '$kukarow[kuka]'";
 		$result = pupe_query($query);
 
-		if (mysql_num_rows($result) !=1 ) {
-			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
 			require ("inc/footer.inc");
 			exit;

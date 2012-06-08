@@ -32,7 +32,7 @@ if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
 }
 
 // katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
-$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
+$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, sum(osto_kulu + osto_rahti + osto_rivi_kulu) as osto_kulut, valkoodi, vienti
 			FROM lasku
 			WHERE yhtio = '$kukarow[yhtio]'
 			and tila = 'K'
@@ -47,7 +47,7 @@ if (mysql_num_rows($result) == 1) {
 	$kulurow = mysql_fetch_assoc($result);
 }
 else {
-	$kulurow = array(); // muuten tyhj‰‰
+	$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => "", "osto_kulut" => 0); // muuten tyhj‰‰
 }
 
 //nyt kohdistus on onnistunut sentilleen. Ollan valmiita ja tulostetaan purkulistat
@@ -1000,9 +1000,9 @@ if ($tila == '') {
 	}
 
 	$valittusumma 			= sprintf("%.2f", round($hintarow["hinta"],2));
-	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma, 2));
-	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"];
-	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"], 2));
+	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma-$kulurow['osto_kulut'], 2));
+	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"]-$kulurow['osto_kulut'];
+	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $kulurow['osto_kulut'], 2));
 	$valitutrivit 			= mysql_num_rows($result);
 
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
@@ -1282,7 +1282,7 @@ if ($tila == '') {
 	</tr>
 	<tr>
 		<th>".t("Toimittaja")."</th><td>$laskurow[nimi]</td>
-		<th>".t("Eturahti")."</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
+		<th>".t("Laskun kulut")."</th><td style='text-align:right'><span id='laskun_kulut'>{$kulurow['osto_kulut']}</span> $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
 	</tr>
 	<tr>
@@ -1305,16 +1305,17 @@ if ($tila == '') {
 	}
 
 	echo "</td>
-		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'>$kohdistettava_summa $kulurow[valkoodi]</td>
+		<th>".t("Eturahti")."</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
-		<th>".t("Erikoisalennus")."</th><td>".($laskurow["erikoisale"]*1)."%</td>
-		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right'>$ok $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")$okend</td>
+		<th>".t("Erikoisalennus")."</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale"]*1)."</span>%</td>
+		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
-		</tr>";
+		</tr>
+		<tr>";
 
-	echo "<tr><th>".t("N‰ytet‰‰n rivit")."</th>";
+	echo "<th>",t("N‰ytet‰‰n rivit"),"</th>";
 
 	if ($chk3 == "checked"){
 			$sivu  = 1;
@@ -1322,11 +1323,19 @@ if ($tila == '') {
 			$loppu = mysql_num_rows($result);
 	}
 	else {
-		$loppu = $alku+50;
-		$sivu = round($loppu/50,0);
+		$loppu = $alku + 50;
+		$sivu = round($loppu / 50, 0);
 	}
 
- 	echo "<td>$alku - $loppu  ".t("Sivu").": $sivu</td>";
+ 	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
+
+	echo "<th>".t("Kohdistettu summa (riv/kpl)")."</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi] (<span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span>/<span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span>)$okend</td>
+		<th></th><td></td>
+		</tr>";
+
+	echo "<tr>";
+
+	echo "<th></th><td></td>";
 
 	echo "<th>".t("J‰ljell‰")."</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
 

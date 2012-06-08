@@ -23,6 +23,13 @@
 		$laskurow['tapvm'] = $tiliointipvm;
 	}
 
+	$tapvmlisa = "'{$laskurow['tapvm']}'";
+
+	// jos tiliöinti on suljetulla tilikaudella, laitetaan uusi tiliöinti kuluvalle tilikaudelle eli tälle päivälle
+	if (isset($suljettu_tilikausi) and $suljettu_tilikausi) {
+		$tapvmlisa = "now()";
+	}
+
 	// jos ollaan muokkaamassa tiliöintiä ja se on ollut valuutassa
 	if (isset($vanhasumma) and isset($vanhasumma_valuutassa) and isset($vanhasumma_valkoodi) and $vanhasumma != "" and $vanhasumma_valuutassa != "" and $vanhasumma_valkoodi != "") {
 		// lasketaan kurssi
@@ -72,7 +79,7 @@
 					AND summa 			 = '{$summa}'
 					AND summa_valuutassa = '{$summa_valuutassa}'
 					AND valkoodi 		 = '{$valkoodi}'
-					AND tapvm 			 = '{$laskurow['tapvm']}'
+					AND tapvm 			 = {$tapvmlisa},
 					AND tosite 			 = '{$tositenro}'
 					AND vero 			 = '{$vero}'
 					AND selite 			 = '{$selite}'";
@@ -98,7 +105,7 @@
 						kustp    		 = '{$kustp_ins}',
 						kohde	 		 = '{$kohde_ins}',
 						projekti 		 = '{$projekti_ins}',
-						tapvm 			 = '{$laskurow['tapvm']}',
+						tapvm 			 = {$tapvmlisa},
 						summa 			 = '{$summa}',
 						summa_valuutassa = '{$summa_valuutassa}',
 						valkoodi 		 = '{$valkoodi}',
@@ -121,7 +128,7 @@
 					kustp    		 = '{$kustp_ins}',
 					kohde	 		 = '{$kohde_ins}',
 					projekti 		 = '{$projekti_ins}',
-					tapvm 			 = '{$laskurow['tapvm']}',
+					tapvm 			 = {$tapvmlisa},
 					summa 			 = '{$summa}',
 					summa_valuutassa = '{$summa_valuutassa}',
 					valkoodi 		 = '{$valkoodi}',
@@ -150,7 +157,7 @@
 					kustp 			 = 0,
 					kohde 			 = 0,
 					projekti 		 = 0,
-					tapvm 			 = '{$laskurow['tapvm']}',
+					tapvm 			 = {$tapvmlisa},
 					summa 			 = '{$alv}',
 					summa_valuutassa = '{$alv_valuutassa}',
 					valkoodi 		 = '{$valkoodi}',

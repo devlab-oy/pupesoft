@@ -1302,7 +1302,8 @@
 
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
-								echo "osto_kulu loopin sisällä: $osto_kulu summa ennen: $summa<br>";
+								echo "osto_rahti: $osto_rahti<br>osto_kulu: $osto_kulu<br>osto_rivi_kulu: $osto_rivi_kulu<br><br>";
+								echo "summa ennen: $summa<br>";
 
 								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 

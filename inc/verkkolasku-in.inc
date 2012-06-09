@@ -1333,6 +1333,8 @@
 
 							$vero = (float) $vero;
 
+							echo "rtuoteno alv: {$rtuoteno[$i]["alv"]} oletusalvi: $oletusalvi vero: $vero<br><br>";
+
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
 							$vtonsumma						 = $summa;

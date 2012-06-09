@@ -1316,6 +1316,7 @@
 
 								echo "summa jälkeen: $summa<br><br>";
 
+								$summa_vero_chk = round($summa - $summa / (1 + ($vero / 100)),2);
 								$summa = round($summa - $summa_vero_chk, 2);
 
 								echo "summa roundouksen jälkeen: $summa<br><br>";

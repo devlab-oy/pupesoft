@@ -1313,7 +1313,13 @@
 								$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
 								$summa_tmp = $summa;
 
-								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+								$omasumma_chk = $omasumma;
+
+								if ($ei_oteta_kulua_pois) {
+									$omasumma_chk = $omasumma - ($osto_rahti + $osto_kulu + $osto_rivi_kulu);
+								}
+
+								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma_chk, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
 								echo "summa jälkeen: $summa<br><br>";
 

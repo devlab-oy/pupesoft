@@ -1311,15 +1311,21 @@
 								echo "summa ennen: $summa<br>";
 
 								$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+								$summa_tmp = $summa;
 
 								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
 								echo "summa jälkeen: $summa<br><br>";
 
-								$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
-								$summa_vero_chk = $summa_vero_chk - $summa;
+								if ($ei_oteta_kulua_pois) {
+									$summa = $summa_tmp;
+								}
+								else {
+									$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+									$summa_vero_chk = $summa_vero_chk - $summa;
 
-								$summa = round($summa - $summa_vero_chk, 2);
+									$summa = round($summa - $summa_vero_chk, 2);
+								}
 
 								echo "summa roundouksen jälkeen: $summa<br><br>";
 								echo "_arr: <pre>",var_dump($_arr),"</pre><br><br>";
@@ -1330,6 +1336,7 @@
 									$_v = round($_v, 2);
 
 									echo "_v: $_v<br>";
+									echo "vero: ".${"{$_k}_alv"}."<br>";
 
 									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 									$totsumma += $_v;

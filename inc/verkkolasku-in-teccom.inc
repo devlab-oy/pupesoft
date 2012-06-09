@@ -44,6 +44,8 @@
 	$osto_rahti = 0;
 	$osto_rivi_kulu = 0;
 
+	$ei_oteta_kulua_pois = false;
+
 	if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
 		$laskuttajan_toimittajanumero = "123312";
 	}
@@ -458,6 +460,10 @@
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu_alv = $laskun_alv;
+
+								if ($charge_description == 'freight costs') {
+									$ei_oteta_kulua_pois = true;
+								}
 							}
 							else {
 
@@ -499,6 +505,12 @@
 				$x = 0;
 				$i++;
 			}
+		}
+
+		if ($laskun_alv != 0) {
+			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)),2);
+			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)),2);
+			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)),2);
 		}
 	}
 

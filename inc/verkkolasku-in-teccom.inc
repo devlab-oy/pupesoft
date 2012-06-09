@@ -84,6 +84,10 @@
 		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
 		$osto_kulu = $laskun_pakkauskulu;
 		$osto_kulu_alv = $laskun_alv;
+
+		if ($laskuttajan_toimittajanumero == "123441") {
+			$ei_oteta_kulua_pois = true;
+		}
 	}
 
 	$laskun_alv = 0;

@@ -1310,11 +1310,13 @@
 								echo "osto_rahti: $osto_rahti<br>osto_kulu: $osto_kulu<br>osto_rivi_kulu: $osto_rivi_kulu<br><br>";
 								echo "summa ennen: $summa<br>";
 
-								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, round($summa * (1+($vero/100)),2), $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+								$summa_vero_chk = round($summa - $summa / (1 + ($vero / 100)),2);
+
+								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa + $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
 								echo "summa jälkeen: $summa<br><br>";
 
-								$summa = round($summa, 2);
+								$summa = round($summa - $summa_vero_chk, 2);
 
 								echo "summa roundouksen jälkeen: $summa<br><br>";
 								echo "_arr: <pre>",var_dump($_arr),"</pre><br><br>";

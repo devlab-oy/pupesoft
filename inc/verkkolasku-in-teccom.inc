@@ -450,8 +450,6 @@
 
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
-
-								$rtuoteno[$i]["rivihinta"] += (float) str_replace(",", ".", $node->Amount);
 							}
 							else {
 

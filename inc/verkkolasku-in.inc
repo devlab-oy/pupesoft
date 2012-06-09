@@ -1467,9 +1467,11 @@
 
 					if ($ei_oteta_kulua_pois and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
 						$laskun_kulut = array(
+							$vero => array(
 							'osto_kulu' => $osto_kulu,
 							'osto_rahti' => $osto_rahti,
 							'osto_rivi_kulu' => $osto_rivi_kulu
+							)
 						);
 					}
 

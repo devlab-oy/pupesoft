@@ -1318,6 +1318,9 @@
 
 									$summa = $summa - $summa_vero_chk;
 								}
+								else {
+									$totsumma += ($osto_rahti + $osto_kulu + $osto_rivi_kulu);
+								}
 
 								foreach($_arr as $_k => $_v) {
 									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;

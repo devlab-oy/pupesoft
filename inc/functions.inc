@@ -17689,6 +17689,8 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 			'osto_rivi_kulu' => 0
 		);
 
+		echo "ratio $til_sum_ratio = riv_sum $tiliointirivin_summa / laskun_summa $laskun_summa<br><br>";
+
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
 			if ($ix == 1 and trim($osto_rahti) != 0) {
@@ -17702,8 +17704,12 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 				$return_array['osto_kulu'] += $summa;
 			}
 			elseif ($ix == 3 and trim($osto_rivi_kulu) != 0) {
+				echo "osto_rivi_kulu: $osto_rivi_kulu<br>";
 				$summa 			= str_replace(",", ".", $osto_rivi_kulu) * $til_sum_ratio;
+				echo "summa ration jälkeen: $summa<br>";
+				echo "tiliointirivin_summa ennen: $tiliointirivin_summa<br>";
 				$tiliointirivin_summa = $tiliointirivin_summa - $summa;
+				echo "tiliointirivin_summa jälkeen: $tiliointirivin_summa<br><br>";
 				$return_array['osto_rivi_kulu'] += $summa;
 			}
 		}

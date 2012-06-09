@@ -1307,10 +1307,6 @@
 
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
-								echo "osto_rahti: $osto_rahti<br>osto_kulu: $osto_kulu<br>osto_rivi_kulu: $osto_rivi_kulu<br><br>";
-								echo "summa ennen: $summa<br>";
-
-								// $summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
 								$summa_vero_chk = $summa * (1 + ($vero / 100));
 								$summa_tmp = $summa;
 
@@ -1321,8 +1317,6 @@
 								}
 
 								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma_chk, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
-
-								echo "summa jälkeen: $summa<br><br>";
 
 								if ($ei_oteta_kulua_pois) {
 									$summa = $summa_tmp;
@@ -1336,25 +1330,15 @@
 									$summa = $summa - $summa_vero_chk;
 								}
 
-								echo "summa roundouksen jälkeen: $summa<br><br>";
-								echo "_arr: <pre>",var_dump($_arr),"</pre><br><br>";
-
 								foreach($_arr as $_k => $_v) {
 									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
 									$_v = round($_v, 2);
 
-									echo "_v: $_v<br>";
-									echo "vero: ".${"{$_k}_alv"}."<br>";
-
 									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 									$totsumma += $_v;
 								}
-
-								echo "loopissa laskun_kulut: <pre>",var_dump($laskun_kulut),"</pre>";
 							}
-
-							echo "rtuoteno alv: {$rtuoteno[$i]["alv"]} oletusalvi: $oletusalvi vero: $vero<br><br>";
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
@@ -1492,9 +1476,15 @@
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
 
-					if (count($laskun_kulut) > 0) {
+					if ($ei_oteta_kulua_pois and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
+						$laskun_kulut = array(
+							'osto_kulu' => $osto_kulu,
+							'osto_rahti' => $osto_rahti,
+							'osto_rivi_kulu' => $osto_rivi_kulu
+						);
+					}
 
-						echo "Laskun kulut lopussa array<br><br>";
+					if (count($laskun_kulut) > 0) {
 
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
@@ -1507,8 +1497,6 @@
 								// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
 								// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
 								list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
-
-								echo "tili: $tili summa: $summa<br>";
 
 								require ("inc/teetiliointi.inc");
 							}

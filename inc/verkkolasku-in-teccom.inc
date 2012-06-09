@@ -297,7 +297,7 @@
 				}
 
 				// ZF ja GKN
-				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)
+				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and (float) trim($tuotetieto->AllowOrCharge->Amount) != 0
 					and ($laskuttajan_toimittajanumero == '123007' or $laskuttajan_toimittajanumero == "123084")) {
 
 					$node_search = $tuotetieto->xpath(".//AllowOrCharge");

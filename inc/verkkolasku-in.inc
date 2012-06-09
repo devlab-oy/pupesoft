@@ -1319,9 +1319,13 @@
 
 									$_v = round($_v, 2);
 
+									echo "_v: $_v<br>";
+
 									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 									$totsumma += $_v;
 								}
+
+								echo "loopissa laskun_kulut: <pre>",var_dump($laskun_kulut),"</pre>";
 							}
 
 							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];

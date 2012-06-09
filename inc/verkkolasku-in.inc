@@ -1310,7 +1310,8 @@
 								echo "osto_rahti: $osto_rahti<br>osto_kulu: $osto_kulu<br>osto_rivi_kulu: $osto_rivi_kulu<br><br>";
 								echo "summa ennen: $summa<br>";
 
-								$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+								// $summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+								$summa_vero_chk = $summa * (1 + ($vero / 100));
 								$summa_tmp = $summa;
 
 								$omasumma_chk = $omasumma;
@@ -1327,10 +1328,12 @@
 									$summa = $summa_tmp;
 								}
 								else {
-									$summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+									// $summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
+									$summa_vero_chk = $summa * (1 + ($vero / 100));
 									$summa_vero_chk = $summa_vero_chk - $summa;
 
-									$summa = round($summa - $summa_vero_chk, 2);
+									// $summa = round($summa - $summa_vero_chk, 2);
+									$summa = $summa - $summa_vero_chk;
 								}
 
 								echo "summa roundouksen jälkeen: $summa<br><br>";

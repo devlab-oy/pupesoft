@@ -977,6 +977,18 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
+				echo "osto_kulu ennen alustusta: $osto_kulu<br><br>";
+
+				$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
+				$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
+				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
+
+				echo "osto_kulu jälkeen alustuksen: $osto_kulu<br><br>";
+
+				$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
+				$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
+				$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : $osto_rivi_kulu_alv;
+
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -1026,7 +1038,13 @@
 							hyvaksynnanmuutos	= '$trow[oletus_hyvaksynnanmuutos]',
 							comments 			= '$komm',
 							laskunro 			= '$laskun_numero',
-							asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero'";
+							asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero',
+							osto_rahti			= '{$osto_rahti}',
+							osto_kulu			= '{$osto_kulu}',
+							osto_rivi_kulu		= '{$osto_rivi_kulu}',
+							osto_rahti_alv		= '{$osto_rahti_alv}',
+							osto_kulu_alv		= '{$osto_kulu_alv}',
+							osto_rivi_kulu_alv	= '{$osto_rivi_kulu_alv}'";
 				$result = pupe_query($query);
 				$tunnus = mysql_insert_id();
 
@@ -1196,14 +1214,6 @@
 					$maksimisumma 		 			= 0;
 					$sanomantarkistin				= 0;
 
-					$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
-					$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
-					$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
-
-					$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
-					$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
-					$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : $osto_rivi_kulu_alv;
-
 					$laskun_kulut = array();
 
 					$kustp		= $oletuskust;
@@ -1292,12 +1302,24 @@
 
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
+								echo "osto_kulu loopin sisällä: $osto_kulu summa ennen: $summa<br>";
+
 								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+								echo "summa jälkeen: $summa<br><br>";
+
+								$summa = round($summa, 2);
+
+								echo "summa roundouksen jälkeen: $summa<br><br>";
+								echo "_arr: <pre>",var_dump($_arr),"</pre><br><br>";
 
 								foreach($_arr as $_k => $_v) {
 									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
+									$_v = round($_v, 2);
+
 									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
+									$totsumma += $_v;
 								}
 							}
 
@@ -1444,6 +1466,8 @@
 
 					if (count($laskun_kulut) > 0) {
 
+						echo "Laskun kulut lopussa array<br><br>";
+
 						foreach ($laskun_kulut as $vero => $_array) {
 							foreach ($_array as $key => $value) {
 
@@ -1456,9 +1480,13 @@
 								// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
 								list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
+								echo "tili: $tili summa: $summa<br>";
+
 								require ("inc/teetiliointi.inc");
 							}
 						}
+
+						echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
 					}
 
 	 				// Tuli pyöristyseroja

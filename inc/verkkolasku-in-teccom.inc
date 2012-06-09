@@ -81,6 +81,13 @@
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount) and $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount != 0) {
 		$laskun_pakkauskulu = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceCharge->Amount);
 		$osto_kulu = $laskun_pakkauskulu;
+		$osto_kulu_alv = $laskun_alv;
+	}
+
+	$laskun_alv = 0;
+
+	if (isset($xml->InvoiceSummary->Tax->Percent) and $xml->InvoiceSummary->Tax->Percent != 0) {
+		$laskun_alv = (float) str_replace(",", ".", $xml->InvoiceSummary->Tax->Percent);
 	}
 
 	if (isset($xml->InvoiceHeader->OrderRef)) {
@@ -450,6 +457,7 @@
 
 								$laskun_rahtikulu += (float) str_replace(",", ".", $node->Amount);
 								$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
+								$osto_rivi_kulu_alv = $laskun_alv;
 							}
 							else {
 
@@ -464,6 +472,7 @@
 									if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
 									$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
 									$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);
+									$osto_rivi_kulu_alv = $laskun_alv;
 								}
 							}
 						}

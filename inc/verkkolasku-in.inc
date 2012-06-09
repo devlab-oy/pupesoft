@@ -1300,12 +1300,17 @@
 								$summa = $summa * -1;
 							}
 
+							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];
+							else $vero = $oletusalvi;
+
+							$vero = (float) $vero;
+
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
 								echo "osto_rahti: $osto_rahti<br>osto_kulu: $osto_kulu<br>osto_rivi_kulu: $osto_rivi_kulu<br><br>";
 								echo "summa ennen: $summa<br>";
 
-								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, round($summa * (1+($vero/100)),2), $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
 								echo "summa jälkeen: $summa<br><br>";
 
@@ -1327,11 +1332,6 @@
 
 								echo "loopissa laskun_kulut: <pre>",var_dump($laskun_kulut),"</pre>";
 							}
-
-							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];
-							else $vero = $oletusalvi;
-
-							$vero = (float) $vero;
 
 							echo "rtuoteno alv: {$rtuoteno[$i]["alv"]} oletusalvi: $oletusalvi vero: $vero<br><br>";
 

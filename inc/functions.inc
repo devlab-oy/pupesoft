@@ -17689,8 +17689,6 @@ if (!function_exists("ostolaskun_kulujen_tiliointi")) {
 			'osto_rivi_kulu' => 0
 		);
 
-		echo "ratio $til_sum_ratio = riv_sum $tiliointirivin_summa / laskun_summa $laskun_summa<br><br>";
-
 		for ($ix = 1; $ix <= $yhtiorow['ostolaskun_kulutilit']; $ix++) {
 
 			if ($ix == 1 and trim($osto_rahti) != 0) {

@@ -1307,26 +1307,15 @@
 
 							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
 
-								$summa_vero_chk = $summa * (1 + ($vero / 100));
-								$summa_tmp = $summa;
+								if (!isset($ei_oteta_kulua_pois) or !$ei_oteta_kulua_pois) {
 
-								$omasumma_chk = $omasumma;
+									$summa_vero_chk = $summa * (1 + ($vero / 100));
 
-								if ($ei_oteta_kulua_pois) {
-									$omasumma_chk = $omasumma - ($osto_rahti + $osto_kulu + $osto_rivi_kulu);
-								}
+									list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
-								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma_chk, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
-
-								if ($ei_oteta_kulua_pois) {
-									$summa = $summa_tmp;
-								}
-								else {
-									// $summa_vero_chk = round($summa * (1 + ($vero / 100)),2);
 									$summa_vero_chk = $summa * (1 + ($vero / 100));
 									$summa_vero_chk = $summa_vero_chk - $summa;
 
-									// $summa = round($summa - $summa_vero_chk, 2);
 									$summa = $summa - $summa_vero_chk;
 								}
 

@@ -1317,15 +1317,15 @@
 									$summa_vero_chk = $summa_vero_chk - $summa;
 
 									$summa = $summa - $summa_vero_chk;
-								}
 
-								foreach($_arr as $_k => $_v) {
-									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
+									foreach($_arr as $_k => $_v) {
+										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
 
-									$_v = round($_v, 2);
+										$_v = round($_v, 2);
 
-									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
-									$totsumma += $_v;
+										$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
+										$totsumma += $_v;
+									}
 								}
 							}
 

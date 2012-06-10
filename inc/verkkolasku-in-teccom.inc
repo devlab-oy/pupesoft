@@ -70,6 +70,10 @@
 		$laskuttajan_toimittajanumero = "123442";
 	}
 
+	if ($laskuttajan_toimittajanumero == "123342") {
+		$ei_oteta_kulua_pois = true;
+	}
+
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
 	}
@@ -331,7 +335,7 @@
 
 				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
 
-				// otetaan talteen "AllowOrCharge" kentät. 
+				// otetaan talteen "AllowOrCharge" kentät.
 				// täältä tulevat alennukset ja runko-, rahti- ja muutkulut
 				if (isset($tuotetieto->AllowOrCharge->AllowOrChargeIdentifier) and ((float) trim($tuotetieto->AllowOrCharge->Amount) != 0 or (float) trim($tuotetieto->AllowOrCharge->Percent) != 0)) {
 

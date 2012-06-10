@@ -477,9 +477,10 @@
 								 *
 								 * zpkp = ZF
 								 * zpnp = ZF
+								 * pn00 = GKN
 								 */
 
-								if ($charge_code != 'zpkp' and $charge_code != 'zpnp') {
+								if (($laskuttajan_toimittajanumero == "123084" and $charge_code != 'pn00' and $charge_code != '') or ($laskuttajan_toimittajanumero != "123084" and $charge_code != 'zpkp' and $charge_code != 'zpnp')) {
 									if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
 									$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
 									$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);

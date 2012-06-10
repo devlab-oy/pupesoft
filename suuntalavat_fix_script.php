@@ -54,7 +54,7 @@
 						luontiaika = now(),
 						muutospvm = now(),
 						muuttaja = 'cron'";
-			echo str_replace("\t", "", $query),"\n\n";
-			// $insert_res = pupe_query($query);
+			// echo str_replace("\t", "", $query),"\n\n";
+			$insert_res = pupe_query($query);
 		}
 	}

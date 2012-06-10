@@ -70,10 +70,6 @@
 		$laskuttajan_toimittajanumero = "123442";
 	}
 
-	if ($laskuttajan_toimittajanumero == "123342") {
-		$ei_oteta_kulua_pois = true;
-	}
-
 	if (isset($xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount)  and $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount != 0) {
 		$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceSummary->InvoiceTotals->InvoiceAmountPayable->Amount);
 	}
@@ -519,6 +515,11 @@
 			$osto_kulu = round($osto_kulu * (1 + ($laskun_alv / 100)),2);
 			$osto_rahti = round($osto_rahti * (1 + ($laskun_alv / 100)),2);
 			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)),2);
+		}
+
+		// Valeo
+		if ($laskuttajan_toimittajanumero == "123342") {
+			$osto_rivi_kulu = 0;
 		}
 	}
 

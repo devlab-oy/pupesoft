@@ -479,7 +479,7 @@
 								 * zpnp = ZF
 								 */
 
-								if ($charge_code != 'zpkp' or $charge_code != 'zpnp') {
+								if ($charge_code != 'zpkp' and $charge_code != 'zpnp') {
 									if (!isset($rtuoteno[$i]["kulu"])) $rtuoteno[$i]["kulu"] = 0;
 									$rtuoteno[$i]["kulu"] += (float) str_replace(",", ".", $node->Amount);
 									$osto_rivi_kulu += (float) str_replace(",", ".", $node->Amount);

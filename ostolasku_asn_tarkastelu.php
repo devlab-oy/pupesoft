@@ -67,6 +67,11 @@
 						$('#kolliformi').attr('action', '?').submit();
 					});
 
+					$('.vahvistavakisinbutton').click(function(){
+						$('#tee').val('vahvistavakisinkolli');
+						$('#kolliformi').attr('action', '?').submit();
+					});
+
 					$('.poistakohdistus').click(function(){
 						$('#tee').val('poistakohdistus');
 						$('#kolliformi').attr('action', '?').submit();
@@ -197,325 +202,368 @@
 		}
 	}
 
-	if ($tee == 'vahvistakolli') {
+	if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
-		if ($valitse == 'asn') {
-			$kolli = mysql_real_escape_string($kolli);
-			$wherelisa = "AND paketintunniste = '{$kolli}'";
-		}
-		else {
-			$wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";
-		}
+		$automaattikohdistukseen = true;
 
-		$paketin_rivit 		= array();
-		$paketin_tunnukset 	= array();
-		$rtuoteno			= array();
-		$laskuttajan_toimittajanumero = "";
+		if ($valitse != 'asn' and $tee == 'vahvistavakisinkolli') {
 
-		$query = "	SELECT *
-					FROM asn_sanomat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND status != 'E'
-					{$wherelisa}";
-		$kollires = pupe_query($query);
-
-		$i = 0;
-		$keikoilla	= array();
-		$ostoilla	= array();
-		$tullaan_virhetarkistuksesta = true;
-
-		while ($kollirow = mysql_fetch_assoc($kollires)) {
-
-			if ($valitse == 'asn') {
-
-				$toimittaja = $kollirow['toimittajanumero'];
-				$asn_numero = $kollirow['asn_numero'];
-				$paketin_tunnukset[] = $kollirow['tunnus'];
-
-				// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
-				if (strpos($kollirow['tilausrivi'], ",") !== false) {
-					foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
-						$paketin_rivit[] = $tunnus;
-					}
-				}
-				else {
-					$paketin_rivit[] = $kollirow['tilausrivi'];
-				}
-
-				// Haetaan tuotteen lapset jotka ovat runkoveloituksia
-				$query = "	SELECT GROUP_CONCAT(tuoteperhe.tuoteno) lapset
-							FROM tuoteperhe
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND isatuoteno = '{$kollirow['tuoteno']}'
-							AND ohita_kerays != ''";
-				$result = pupe_query($query);
-				$lapset = mysql_fetch_assoc($result);
-
-				// Lapsia lˆytyi, t‰m‰ on is‰tuote
-				if ($lapset["lapset"] != NULL) {
-
-					// Haetaan tilausnumerot joilla t‰m‰ tuote on
-					$query = "	SELECT group_concat(otunnus) tilaukset
-								FROM tilausrivi
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
-					$result = pupe_query($query);
-					$tilaukset = mysql_fetch_assoc($result);
-
-					foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
-
-						// Haetaan t‰m‰n is‰tuotteen lapsituotteiden tunnukset
-						$query = " 	SELECT tunnus, tuoteno
-									FROM tilausrivi
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
-									AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
-						$result = pupe_query($query);
-
-						if (mysql_num_rows($result) == 0) {
-
-							// otetaan ensimm‰isen is‰tuotteen tilausrivin tiedot
-							$query = "	SELECT *
-										FROM tilausrivi
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus IN ({$kollirow['tilausrivi']})";
-							$isa_chk_res = pupe_query($query);
-							$isa_chk_row = mysql_fetch_assoc($isa_chk_res);
-
-							$query = "	SELECT tuoteperhe.isatuoteno,
-										tuoteperhe.tuoteno,
-										tuote.tuoteno,
-										tuote.try,
-										tuote.osasto,
-										tuote.nimitys,
-										tuote.yksikko,
-										tuote.myyntihinta,
-										tuotepaikat.hyllyalue,
-										tuotepaikat.hyllynro,
-										tuotepaikat.hyllytaso,
-										tuotepaikat.hyllyvali
-										FROM tuote
-										JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = '{$kollirow['tuoteno']}' AND tuoteperhe.tyyppi IN ('P','')  AND tuoteperhe.ohita_kerays != '')
-										JOIn tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
-										WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-										AND tuote.status != 'P'
-										AND tuote.tuoteno = '{$lapsi_tuoteno}'";
-							$lapsiresult = pupe_query($query);
-
-							while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
-								// hae tuotteen ostohinta
-								$laskuselect = "SELECT *
-												FROM lasku
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$isa_chk_row['otunnus']}'";
-								$laskures	= pupe_query($laskuselect);
-								$laskurow	= mysql_fetch_assoc($laskures);
-
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
-
-								$lisainsert = "	INSERT INTO tilausrivi SET
-												yhtio			= '{$kukarow['yhtio']}',
-												tyyppi			= 'O',
-												toimaika		= '{$isa_chk_row['toimaika']}',
-												kerayspvm		= '{$isa_chk_row['kerayspvm']}',
-												otunnus			= '{$isa_chk_row['otunnus']}',
-												tuoteno			= '{$lapsitieto['tuoteno']}',
-												try				= '{$lapsitieto['try']}',
-												osasto			= '{$lapsitieto['osasto']}',
-												nimitys			= '{$lapsitieto['nimitys']}',
-												yksikko			= '{$lapsitieto['yksikko']}',
-												tilkpl			= '{$isa_chk_row['tilkpl']}',
-												varattu			= '{$isa_chk_row['varattu']}',
-												hinta			= '{$hinta}',
-												laatija			= 'lapset',
-												kommentti		= 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-												laadittu		=  now(),
-												hyllyalue		= '{$lapsitieto['hyllyalue']}',
-												hyllynro		= '{$lapsitieto['hyllynro']}',
-												hyllytaso		= '{$lapsitieto['hyllytaso']}',
-												hyllyvali		= '{$lapsitieto['hyllyvali']}',
-												uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
-												perheid			= '{$isa_chk_row['tunnus']}'";
-								$inskres = pupe_query($lisainsert);
-
-								$id = mysql_insert_id();
-								$paketin_rivit[] = $id;
-
-								// p‰ivitet‰‰n is‰
-								$updateisa = "	UPDATE tilausrivi SET
-												perheid = tunnus
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$isa_chk_row['tunnus']}'";
-								$updateres = pupe_query($updateisa);
-
-								$query = "	SELECT *
-											FROM asn_sanomat
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'asn'
-											AND tilausrivi LIKE '%{$isa_chk_row['tunnus']}%'";
-								$info_res = pupe_query($query);
-								$info_row = mysql_fetch_assoc($info_res);
-
-								// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-								$fields = "yhtio";
-								$values = "'{$kukarow['yhtio']}'";
-
-								// Ei monisteta tunnusta
-								for ($ii = 1; $ii < mysql_num_fields($info_res) - 1; $ii++) {
-
-									$fieldname = mysql_field_name($info_res,$ii);
-
-									$fields .= ", ".$fieldname;
-
-									switch ($fieldname) {
-										case 'tilausrivi':
-											$values .= ", '{$id}'";
-											break;
-										case 'tuoteno':
-										case 'toim_tuoteno':
-										case 'toim_tuoteno2':
-											$values .= ", '{$lapsitieto['tuoteno']}'";
-											break;
-										case 'hinta':
-											$values .= ", '{$hinta}'";
-											break;
-										default:
-											$values .= ", '".$info_row[$fieldname]."'";
-									}
-								}
-
-								$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
-								$uusires = pupe_query($kysely);
-							}
-
-							$paketin_rivit[] = $isa_chk_row["tunnus"];
-						}
-						else {
-							while ($rivi = mysql_fetch_assoc($result)) {
-								$paketin_rivit[] = $rivi["tunnus"];
-							}
-						}
-					}
-				}
-
-				$sscc_paketti_tunnus = $kollirow["paketintunniste"];
-			}
-			else {
-
-				$query = "	SELECT *
-							FROM tilausrivi
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$kollirow['tilausrivi']}'";
-				$tilausrivires = pupe_query($query);
-				$tilausrivirow = mysql_fetch_assoc($tilausrivires);
-
-				$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
-				$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
-				$rtuoteno[$i]['tuoteno3'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['toim_tuoteno2'] : "";
-				$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
-				$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
-				$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
-				$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
-				$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
-				$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
-				$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
-				$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
-				$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
-				$rtuoteno[$i]['kauttalaskutus']		= "";
-				$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
-				$rtuoteno[$i]['status']				= $kollirow['status'];
-
-				if ($tilausrivirow['uusiotunnus'] == 0) {
-					// lˆytyi, ei ole keikalla
-					$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-					$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-					$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-					$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-					$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-					$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-					$ostoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-					$ostoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
-					$ostoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
-					$ostoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
-					$ostoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
-					$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
-				}
-				else {
-					// lˆytyi, on jo keikalla
-					$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
-					$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
-					$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-					$keikoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-					$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-					$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-					$keikoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-					$keikoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
-					$keikoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
-					$keikoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
-					$keikoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
-					$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
-				}
-
-				$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
-
-				$i++;
-			}
-		}
-
-		if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+			// Kun vahvistetaan katsotaan onko lasku liitetty jo keikkaan
+			// Jos on, niin merkataan asn_sanoma status x eik‰ menn‰ automaattikohdistukseen
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laskunro = '{$lasku}'
-						AND tila = 'H'";
-			$tunnus_fetch_res = pupe_query($query);
-			$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
+						AND tila IN ('H','Y','M','P','Q')
+						AND laskunro = '".mysql_real_escape_string($lasku)."'";
+			$ostolasku_chk_res = pupe_query($query);
 
-			$tunnus = $tunnus_fetch_row['tunnus'];
+			if (mysql_num_rows($ostolasku_chk_res) > 0) {
+				$ostolasku_chk_row = mysql_fetch_assoc($ostolasku_chk_res);
 
-			$query = "	SELECT *
-						FROM toimi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						and toimittajanro = '{$laskuttajan_toimittajanumero}'
-						and tyyppi != 'P'";
-			$result = pupe_query($query);
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'K'
+							AND vanhatunnus = '{$ostolasku_chk_row['tunnus']}'";
+				$liitosotsikko_chk_res = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
-				$trow = mysql_fetch_assoc($result);
+				if (mysql_num_rows($liitosotsikko_chk_res) > 0) {
 
-				require('inc/verkkolasku-in-luo-keikkafile.inc');
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND asn_numero = '{$lasku}'";
+					$upd_res = pupe_query($query);
 
-				if ($virheet == 0) {
+					$automaattikohdistukseen = false;
 
-					$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status != 'E' {$wherelisa}";
-					$kollires = pupe_query($query);
-
-					while ($kollirow = mysql_fetch_assoc($kollires)) {
-						$query = "	UPDATE asn_sanomat SET
-									status = 'X'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$kollirow['tunnus']}'";
-						$updateres = pupe_query($query);
-					}
-
+					echo "<font class='message'>",t("Lasku oli jo liitetty saapumiseen"),". ",t("P‰ivitet‰‰n lasku k‰sitellyksi"),".</font><br /><br />";
 				}
-
-				// verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 			}
 		}
 
-		if ($valitse == 'asn' and count($paketin_rivit) > 0) {
+		if ($automaattikohdistukseen) {
 
-			$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
-			$tuotenores = pupe_query($query);
-			$tuotenorow = mysql_fetch_assoc($tuotenores);
+			if ($valitse == 'asn') {
+				$kolli = mysql_real_escape_string($kolli);
+				$wherelisa = "AND paketintunniste = '{$kolli}'";
+			}
+			else {
+				$wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";
+			}
 
-			$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
+			$paketin_rivit 		= array();
+			$paketin_tunnukset 	= array();
+			$rtuoteno			= array();
+			$laskuttajan_toimittajanumero = "";
 
-			require('inc/asn_kohdistus.inc');
+			$query = "	SELECT *
+						FROM asn_sanomat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND status != 'E'
+						{$wherelisa}";
+			$kollires = pupe_query($query);
 
-			asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+			$i = 0;
+			$keikoilla	= array();
+			$ostoilla	= array();
+			$tullaan_virhetarkistuksesta = $tee == 'vahvistavakisinkolli' ? false : true;
 
+			while ($kollirow = mysql_fetch_assoc($kollires)) {
+
+				if ($valitse == 'asn') {
+
+					$toimittaja = $kollirow['toimittajanumero'];
+					$asn_numero = $kollirow['asn_numero'];
+					$paketin_tunnukset[] = $kollirow['tunnus'];
+
+					// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
+					if (strpos($kollirow['tilausrivi'], ",") !== false) {
+						foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
+							$paketin_rivit[] = $tunnus;
+						}
+					}
+					else {
+						$paketin_rivit[] = $kollirow['tilausrivi'];
+					}
+
+					// Haetaan tuotteen lapset jotka ovat runkoveloituksia
+					$query = "	SELECT GROUP_CONCAT(tuoteperhe.tuoteno) lapset
+								FROM tuoteperhe
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND isatuoteno = '{$kollirow['tuoteno']}'
+								AND ohita_kerays != ''";
+					$result = pupe_query($query);
+					$lapset = mysql_fetch_assoc($result);
+
+					// Lapsia lˆytyi, t‰m‰ on is‰tuote
+					if ($lapset["lapset"] != NULL) {
+
+						// Haetaan tilausnumerot joilla t‰m‰ tuote on
+						$query = "	SELECT group_concat(otunnus) tilaukset
+									FROM tilausrivi
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.tunnus IN ({$kollirow['tilausrivi']})";
+						$result = pupe_query($query);
+						$tilaukset = mysql_fetch_assoc($result);
+
+						foreach (explode(",", $lapset['lapset']) as $lapsi_tuoteno) {
+
+							// Haetaan t‰m‰n is‰tuotteen lapsituotteiden tunnukset
+							$query = " 	SELECT tunnus, tuoteno
+										FROM tilausrivi
+										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivi.otunnus IN ({$tilaukset['tilaukset']})
+										AND tilausrivi.tuoteno = '{$lapsi_tuoteno}'";
+							$result = pupe_query($query);
+
+							if (mysql_num_rows($result) == 0) {
+
+								// otetaan ensimm‰isen is‰tuotteen tilausrivin tiedot
+								$query = "	SELECT *
+											FROM tilausrivi
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus IN ({$kollirow['tilausrivi']})";
+								$isa_chk_res = pupe_query($query);
+								$isa_chk_row = mysql_fetch_assoc($isa_chk_res);
+
+								$query = "	SELECT tuoteperhe.isatuoteno,
+											tuoteperhe.tuoteno,
+											tuote.tuoteno,
+											tuote.try,
+											tuote.osasto,
+											tuote.nimitys,
+											tuote.yksikko,
+											tuote.myyntihinta,
+											tuotepaikat.hyllyalue,
+											tuotepaikat.hyllynro,
+											tuotepaikat.hyllytaso,
+											tuotepaikat.hyllyvali
+											FROM tuote
+											JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = '{$kollirow['tuoteno']}' AND tuoteperhe.tyyppi IN ('P','')  AND tuoteperhe.ohita_kerays != '')
+											JOIn tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
+											WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+											AND tuote.status != 'P'
+											AND tuote.tuoteno = '{$lapsi_tuoteno}'";
+								$lapsiresult = pupe_query($query);
+
+								while ($lapsitieto = mysql_fetch_assoc($lapsiresult)) {
+									// hae tuotteen ostohinta
+									$laskuselect = "SELECT *
+													FROM lasku
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$isa_chk_row['otunnus']}'";
+									$laskures	= pupe_query($laskuselect);
+									$laskurow	= mysql_fetch_assoc($laskures);
+
+									list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
+
+									$lisainsert = "	INSERT INTO tilausrivi SET
+													yhtio			= '{$kukarow['yhtio']}',
+													tyyppi			= 'O',
+													toimaika		= '{$isa_chk_row['toimaika']}',
+													kerayspvm		= '{$isa_chk_row['kerayspvm']}',
+													otunnus			= '{$isa_chk_row['otunnus']}',
+													tuoteno			= '{$lapsitieto['tuoteno']}',
+													try				= '{$lapsitieto['try']}',
+													osasto			= '{$lapsitieto['osasto']}',
+													nimitys			= '{$lapsitieto['nimitys']}',
+													yksikko			= '{$lapsitieto['yksikko']}',
+													tilkpl			= '{$isa_chk_row['tilkpl']}',
+													varattu			= '{$isa_chk_row['varattu']}',
+													hinta			= '{$hinta}',
+													laatija			= 'lapset',
+													kommentti		= 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+													laadittu		=  now(),
+													hyllyalue		= '{$lapsitieto['hyllyalue']}',
+													hyllynro		= '{$lapsitieto['hyllynro']}',
+													hyllytaso		= '{$lapsitieto['hyllytaso']}',
+													hyllyvali		= '{$lapsitieto['hyllyvali']}',
+													uusiotunnus		= '{$isa_chk_row['uusiotunnus']}',
+													perheid			= '{$isa_chk_row['tunnus']}'";
+									$inskres = pupe_query($lisainsert);
+
+									$id = mysql_insert_id();
+									$paketin_rivit[] = $id;
+
+									// p‰ivitet‰‰n is‰
+									$updateisa = "	UPDATE tilausrivi SET
+													perheid = tunnus
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$isa_chk_row['tunnus']}'";
+									$updateres = pupe_query($updateisa);
+
+									$query = "	SELECT *
+												FROM asn_sanomat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND laji = 'asn'
+												AND tilausrivi LIKE '%{$isa_chk_row['tunnus']}%'";
+									$info_res = pupe_query($query);
+									$info_row = mysql_fetch_assoc($info_res);
+
+									// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+									$fields = "yhtio";
+									$values = "'{$kukarow['yhtio']}'";
+
+									// Ei monisteta tunnusta
+									for ($ii = 1; $ii < mysql_num_fields($info_res) - 1; $ii++) {
+
+										$fieldname = mysql_field_name($info_res,$ii);
+
+										$fields .= ", ".$fieldname;
+
+										switch ($fieldname) {
+											case 'tilausrivi':
+												$values .= ", '{$id}'";
+												break;
+											case 'tuoteno':
+											case 'toim_tuoteno':
+											case 'toim_tuoteno2':
+												$values .= ", '{$lapsitieto['tuoteno']}'";
+												break;
+											case 'hinta':
+												$values .= ", '{$hinta}'";
+												break;
+											default:
+												$values .= ", '".$info_row[$fieldname]."'";
+										}
+									}
+
+									$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
+									$uusires = pupe_query($kysely);
+								}
+
+								$paketin_rivit[] = $isa_chk_row["tunnus"];
+							}
+							else {
+								while ($rivi = mysql_fetch_assoc($result)) {
+									$paketin_rivit[] = $rivi["tunnus"];
+								}
+							}
+						}
+					}
+
+					$sscc_paketti_tunnus = $kollirow["paketintunniste"];
+				}
+				else {
+
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$kollirow['tilausrivi']}'";
+					$tilausrivires = pupe_query($query);
+					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+
+					$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
+					$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
+					$rtuoteno[$i]['tuoteno3'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['toim_tuoteno2'] : "";
+					$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
+					$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
+					$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
+					$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
+					$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
+					$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
+					$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
+					$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
+					$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
+					$rtuoteno[$i]['kauttalaskutus']		= "";
+					$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
+					$rtuoteno[$i]['status']				= $kollirow['status'];
+
+					if ($tullaan_virhetarkistuksesta) {
+						if ($tilausrivirow['uusiotunnus'] == 0) {
+							// lˆytyi, ei ole keikalla
+							$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
+							$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
+							$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
+							$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+							$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+							$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
+							$ostoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+							$ostoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
+							$ostoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
+							$ostoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
+							$ostoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
+							$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						}
+						else {
+							// lˆytyi, on jo keikalla
+							$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
+							$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
+							$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
+							$keikoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
+							$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+							$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
+							$keikoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+							$keikoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
+							$keikoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
+							$keikoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
+							$keikoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
+							$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+						}
+					}
+
+					$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
+
+					$i++;
+				}
+			}
+
+			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laskunro = '{$lasku}'
+							AND tila = 'H'";
+				$tunnus_fetch_res = pupe_query($query);
+				$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
+
+				$tunnus = $tunnus_fetch_row['tunnus'];
+
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and toimittajanro = '{$laskuttajan_toimittajanumero}'
+							and tyyppi != 'P'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_assoc($result);
+
+					require('inc/verkkolasku-in-luo-keikkafile.inc');
+
+					if ($virheet == 0) {
+
+						$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status != 'E' {$wherelisa}";
+						$kollires = pupe_query($query);
+
+						while ($kollirow = mysql_fetch_assoc($kollires)) {
+							$query = "	UPDATE asn_sanomat SET
+										status = 'X'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$kollirow['tunnus']}'";
+							$updateres = pupe_query($query);
+						}
+
+					}
+
+					// verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+				}
+			}
+
+			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
+
+				$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
+				$tuotenores = pupe_query($query);
+				$tuotenorow = mysql_fetch_assoc($tuotenores);
+
+				$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
+
+				require('inc/asn_kohdistus.inc');
+
+				asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $sscc_paketti_tunnus);
+
+			}
 		}
 
 		$tee = '';
@@ -1591,6 +1639,7 @@
 
 					if (mysql_num_rows($kpl_chk_res) == 0) {
 						echo "<font color='orange'>Ostotilausrivi‰ ei lˆydy</font><br>";
+						$virhe++;
 					}
 					elseif ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
 						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br>$query<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
@@ -1611,6 +1660,7 @@
 
 						if (mysql_num_rows($chkres) == 0) {
 							echo "<font color='error'>ASN-rivi‰ ei lˆydy tilausrivin tunnukselle $kpl_row[tunnus]</font><br>";
+							$virhe++;
 						}
 					}
 
@@ -1640,6 +1690,8 @@
 
 				echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
+
+			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Vahvista v‰kisin"),"' /></th></tr>";
 
 			echo "</table>";
 			echo "</form>";

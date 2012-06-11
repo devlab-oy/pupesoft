@@ -17260,6 +17260,7 @@ if (!function_exists("erolista")) {
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND asn_numero IN ({$lasku})
 					AND laji = '{$lajilisa}'
+					AND tilausrivi != ''
 					ORDER BY asn_numero";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);

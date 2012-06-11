@@ -69,12 +69,67 @@
 				
 				if ($kpl > 0.0 and $tuote != "") {
 
+					$toinen_tuoteno = "";
+
+					if ($tavarantoimittajanumero == "123067") {
+						$orgtuote = $tuote;
+						$lyhennetty_tuoteno = substr($tuote, 0, -3);
+						$jatkettu_tuoteno = $lyhennetty_tuoteno."090";
+
+						if ($tuote2 != "") {
+							$toinen_tuoteno = ",'{$tuote2}'";
+						}
+
+						$poikkeus_tuoteno =" in ('{$orgtuote}','{$lyhennetty_tuoteno}','{$jatkettu_tuoteno}' {$toinen_tuoteno})";
+					}
+					elseif ($tavarantoimittajanumero == "123453") {
+						$suba = substr($tuote,0,3);
+						$subb = substr($tuote,3);
+						$tuote_x = $suba."-".$subb;
+						$yhteen = $tuote_x;
+
+						if ($tuote2 != "") {
+							$toinen_tuoteno = ",'{$tuote2}'";
+						}
+
+						$poikkeus_tuoteno = " in ('{$tuote_x}','{$yhteen}' {$toinen_tuoteno}) ";
+					}
+					elseif ($tavarantoimittajanumero == "123178") {
+						$orgtuote = $tuote;
+						$lyhennetty = substr($tuote,3);
+
+						if ($tuote2 != "") {
+							$lyhennetty_toinen = substr($tuote2,3);
+							$toinen_tuoteno = ",'{$tuote2}','{$lyhennetty_toinen}'";
+						}
+
+						$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
+					}
+					elseif ($tavarantoimittajanumero == "123084") {
+						$orgtuote = $tuote;
+						$lyhennetty = ltrim($tuote,'0');
+
+						if ($tuote2 != "") {
+							$lyhennetty_toinen = ltrim($tuote2,'0');
+							$toinen_tuoteno = ",'{$tuote2}','{$lyhennetty_toinen}'";
+						}
+
+						$poikkeus_tuoteno = " in ('{$orgtuote}','{$lyhennetty}' {$toinen_tuoteno}) ";
+					}
+					else {
+						if ($tuote2 != "") {
+							$toinen_tuoteno = ",'{$tuote2}'";
+						}
+
+						$poikkeus_tuoteno = " in ('{$tuote}' {$toinen_tuoteno}) ";
+					}
+
 					$query = "	SELECT tuotteen_toimittajat.tuotekerroin
 								FROM toimi
 								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
 															AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
 															#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno IN ('{$tuote}','{$tuote2}')
+															AND tuotteen_toimittajat.toim_tuoteno {$poikkeus_tuoteno}
 															AND tuotteen_toimittajat.toim_tuoteno != '')
 								WHERE toimi.yhtio = '{$kukarow['yhtio']}'
 								AND toimi.toimittajanro = '{$tavarantoimittajanumero}'

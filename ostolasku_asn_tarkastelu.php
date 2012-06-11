@@ -371,6 +371,7 @@
 													yksikko			= '{$lapsitieto['yksikko']}',
 													tilkpl			= '{$isa_chk_row['tilkpl']}',
 													varattu			= '{$isa_chk_row['varattu']}',
+													kpl				= '{$isa_chk_row['kpl']}',
 													hinta			= '{$hinta}',
 													laatija			= 'lapset',
 													kommentti		= 'ASN-sanomalta: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',

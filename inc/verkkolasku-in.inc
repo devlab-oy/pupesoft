@@ -1424,6 +1424,19 @@
 
 							$asn_nettohinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
+							// Laitetaan bruttohinta asn_sanomat-tauluun
+							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {
+								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
+							}
+
+							if (isset($rtuoteno[$i]['ale2']) and trim($rtuoteno[$i]['ale2']) != 0) {
+								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
+							}
+
+							if (isset($rtuoteno[$i]['ale3']) and trim($rtuoteno[$i]['ale3']) != 0) {
+								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
+							}
+
 							// osto_kulu = $laskun_pakkauskulu
 							// osto_rahti = invoiceSummary rahti
 							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])

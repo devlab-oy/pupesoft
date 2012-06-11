@@ -345,18 +345,23 @@ if (!function_exists('alku_lahete')) {
 			}
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 
+			// Jos rahtivapaa
+			if($laskurow['rahtivapaa'] == 'o') {
+				$rahtivapaa = "Rahtivapaa";
+			}
+
 			if ($extranet_tilausvahvistus != 1) {
-				if ($laskurow["kohdistettu"] == "K") {
+				if ($laskurow["kohdistettu"] == "K" or $lahetetyyppi_avainsana == 1) {
 					// Käytetään LÄHETTÄJÄN rahtisopimusta, EI näytetä lähettäjän sopparinumeroa.
 					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
-					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),	 $thispage, $boldi);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'] . " {$rahtivapaa}", "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
 				}
 				else {
 					// Käytetään VASTAANOTTAJAN rahtisopimusta, näytetään sopparinumero.
 					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
 					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa']. " {$rahtivapaa}", "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
 				}
 			}
 
@@ -368,22 +373,19 @@ if (!function_exists('alku_lahete')) {
 			{
 				# Rahdinmaksaja
 				$pdf->draw_rectangle(695, 300, 674, 420, $thispage, $rectparam);
-				$pdf->draw_text(310, 687, t("Rahtisopimus", $kieli), $thispage, $pieni);
+				$pdf->draw_text(310, 687, t("Rahdinmaksaja", $kieli), $thispage, $pieni);
 
 				if ($laskurow['kohdistettu'] == 'K') {
-					$pdf->draw_text(310, 677, "Lähettäjän", $thispage, $norm);
-				} else $pdf->draw_text(310, 677, "Vastaanottajan", $thispage, $norm);
-
-				# Rahtivapaus
-				$pdf->draw_rectangle(653, 420, 674, 580, $thispage, $rectparam);
-				$pdf->draw_text(430, 666, t("Rahtivapaa", $kieli), $thispage, $pieni);
-
-				if ($laskurow['rahtivapaa'] == 'o') {
-					$pdf->draw_text(430, 656, "Kyllä", $thispage, $norm);
-				} else $pdf->draw_text(430, 656, "Ei", $thispage, $norm);
+					$pdf->draw_text(310, 677, "Lähettäjä", $thispage, $norm);
+				} else $pdf->draw_text(310, 677, "Vastaanottaja", $thispage, $norm);
 
 				# Rahtisopimusnumero
-				$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+				if($laskurow['kohdistettu'] == 'K') {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+				}
+				else {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				}
 
 				$pdf->draw_rectangle(695, 420, 674, 580, $thispage, $rectparam);
 				$pdf->draw_text(430, 687, t("Rahtisopimusnumero", $kieli), $thispage, $pieni);

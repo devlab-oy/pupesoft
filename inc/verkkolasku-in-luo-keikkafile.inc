@@ -1950,7 +1950,7 @@
 								$query = "	DELETE FROM suuntalavat_saapuminen
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND suuntalava = '{$hinta_chk_row['suuntalava']}'
-											AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+											AND saapuminen = '{$tilriv_tunnukset_row['uusiotunnus']}'";
 								$del_res = pupe_query($query);
 							}
 						}
@@ -2078,7 +2078,7 @@
 								$query = "	DELETE FROM suuntalavat_saapuminen
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND suuntalava = '{$hinta_chk_row['suuntalava']}'
-											AND saapuminen = '{$keikoilla[0]['uusiotunnus']}'";
+											AND saapuminen = '{$tilriv_tunnukset_row['uusiotunnus']}'";
 								$del_res = pupe_query($query);
 							}
 						}

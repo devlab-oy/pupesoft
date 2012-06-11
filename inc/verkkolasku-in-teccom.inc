@@ -443,8 +443,17 @@
 									$rtuoteno[$x]['ostotilausnro'] 		= $rtuoteno[$i]['ostotilausnro'];
 									$rtuoteno[$x]['tilaajanrivinro'] 	= $rtuoteno[$i]['tilaajanrivinro'];
 									$rtuoteno[$x]['kpl'] 				= $rtuoteno[$i]['kpl'];
-									$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
-									$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
+
+									// GKN-case: ilmoittavat yksikköhinnan Amountissa.
+									if ($laskuttajan_toimittajanumero == "123084") {
+										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount) * $rtuoteno[$x]['kpl'];
+										$rtuoteno[$x]['hinta']				= (float) str_replace(",", ".", $node->Amount);
+										}
+									else {
+										$rtuoteno[$x]['rivihinta']			= (float) str_replace(",", ".", $node->Amount);
+										$rtuoteno[$x]['hinta']				= $rtuoteno[$x]['rivihinta'] / $rtuoteno[$x]['kpl'];
+									}
+
 									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
 									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%

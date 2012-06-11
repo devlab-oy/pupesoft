@@ -511,6 +511,17 @@
 			}
 
 			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+
+				if ($tee == 'vahvistavakisinkolli' and !$tullaan_virhetarkistuksesta) {
+					$query = "	UPDATE asn_sanomat SET
+								status = '',
+								tilausrivi = ''
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND laji = 'tec'
+								AND asn_numero = '{$lasku}'";
+					$upd_res = pupe_query($query);
+				}
+
 				$query = "	SELECT tunnus, osto_rahti, osto_kulu, osto_rivi_kulu, osto_rahti_alv, osto_kulu_alv, osto_rivi_kulu_alv
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'

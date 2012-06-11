@@ -17338,8 +17338,8 @@ if (!function_exists("erolista")) {
 
 			$pdf->draw_text(430, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 
-			$pdf->draw_text(500, $kala, t("Laskun", $kieli), $thispage, $boldi);
-			$pdf->draw_text(500, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
+			$pdf->draw_text(500, $kala, t("L.Riv.Hin", $kieli), $thispage, $boldi);
+			$pdf->draw_text(500, $kala - $rivinkorkeus, t("T.Riv.Hin", $kieli), $thispage, $boldi);
 
 			$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 
@@ -17395,8 +17395,8 @@ if (!function_exists("erolista")) {
 
 					$pdf->draw_text(430, $kala, t("Hintaero", $kieli), $thispage, $boldi);
 
-					$pdf->draw_text(500, $kala, t("Laskun", $kieli), $thispage, $boldi);
-					$pdf->draw_text(500, $kala - $rivinkorkeus, t("Rivihinta", $kieli), $thispage, $boldi);
+					$pdf->draw_text(500, $kala, t("L.Riv.Hin", $kieli), $thispage, $boldi);
+					$pdf->draw_text(500, $kala - $rivinkorkeus, t("T.Riv.Hin", $kieli), $thispage, $boldi);
 
 					$pdf->draw_text(570, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
 
@@ -17455,6 +17455,7 @@ if (!function_exists("erolista")) {
 					$pdf->draw_text(360, $kala - $rivinkorkeus, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 
 					$pdf->draw_text(430, $kala - $rivinkorkeus, $hintaero, $thispage, $norm);
+					$pdf->draw_text(500, $kala - $rivinkorkeus, round($rivirow['rivihinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
 					$pdf->draw_text(570, $kala - $rivinkorkeus, $rivihintaero, $thispage, $norm);
 
 					$pdf->draw_text(640, $kala - $rivinkorkeus, $rivirow['ale1'], $thispage, $norm);

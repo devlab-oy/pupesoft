@@ -1628,7 +1628,23 @@
 			$query  = "UNLOCK TABLE";
 			$result = pupe_query($query);
 
-			verkkolasku_luo_liitosotsikko($tunnus, $keikan_tunnus);
+			if (!isset($osto_kulu)) $osto_kulu = 0;
+			if (!isset($osto_kulu_alv)) $osto_kulu_alv = 0;
+			if (!isset($osto_rahti)) $osto_rahti = 0;
+			if (!isset($osto_rahti_alv)) $osto_rahti_alv = 0;
+			if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
+			if (!isset($osto_rivi_kulu_alv)) $osto_rivi_kulu_alv = 0;
+
+			$laskun_kulut = array(
+				'osto_kulu' => $osto_kulu,
+				'osto_kulu_alv' => $osto_kulu_alv,
+				'osto_rahti' => $osto_rahti,
+				'osto_rahti_alv' => $osto_rahti_alv,
+				'osto_rivi_kulu' => $osto_rivi_kulu,
+				'osto_rivi_kulu_alv' => $osto_rivi_kulu_alv
+			);
+
+			verkkolasku_luo_liitosotsikko($tunnus, $keikan_tunnus, $laskun_kulut);
 
 			// lis‰t‰‰n tuotteet keikalle ja kohdistetaan
 			foreach ($ostoilla as $pointteri) {
@@ -1794,9 +1810,25 @@
 
 			reset($keikoilla);
 
+			if (!isset($osto_kulu)) $osto_kulu = 0;
+			if (!isset($osto_kulu_alv)) $osto_kulu_alv = 0;
+			if (!isset($osto_rahti)) $osto_rahti = 0;
+			if (!isset($osto_rahti_alv)) $osto_rahti_alv = 0;
+			if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
+			if (!isset($osto_rivi_kulu_alv)) $osto_rivi_kulu_alv = 0;
+
+			$laskun_kulut = array(
+				'osto_kulu' => $osto_kulu,
+				'osto_kulu_alv' => $osto_kulu_alv,
+				'osto_rahti' => $osto_rahti,
+				'osto_rahti_alv' => $osto_rahti_alv,
+				'osto_rivi_kulu' => $osto_rivi_kulu,
+				'osto_rivi_kulu_alv' => $osto_rivi_kulu_alv
+			);
+
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166
 			// muutetaan hinta ja rivi on ok.
-			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus']);
+			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]['uusiotunnus'], $laskun_kulut);
 
 			foreach ($keikoilla as $pointteri) {
 

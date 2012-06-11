@@ -6068,7 +6068,7 @@ if (!function_exists("verkkolasku_luo_keikkafile")) {
 }
 
 if (!function_exists("verkkolasku_luo_liitosotsikko")) {
-	function verkkolasku_luo_liitosotsikko ($laskutunnus, $otunnus) {
+	function verkkolasku_luo_liitosotsikko ($laskutunnus, $otunnus, $laskun_kulut = array()) {
 		global $yhtiorow, $kukarow;
 
 		// Tarvitaan $laskutunnus jossa on ostoreskontralaskun tunnus
@@ -6077,6 +6077,15 @@ if (!function_exists("verkkolasku_luo_liitosotsikko")) {
 		$tee_kululaskut = "liita";
 		$silent 		= "SILENT";
 		$keikanalatila 	= "";
+
+		if (count($laskun_kulut) > 0) {
+			$osto_kulu = $laskun_kulut['osto_kulu'];
+			$osto_kulu_alv = $laskun_kulut['osto_kulu_alv'];
+			$osto_rahti = $laskun_kulut['osto_rahti'];
+			$osto_rahti_alv = $laskun_kulut['osto_rahti_alv'];
+			$osto_rivi_kulu = $laskun_kulut['osto_rivi_kulu'];
+			$osto_rivi_kulu_alv = $laskun_kulut['osto_rivi_kulu_alv'];
+		}
 
 		require("tilauskasittely/kululaskut.inc");
 	}

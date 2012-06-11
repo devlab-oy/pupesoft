@@ -1627,16 +1627,15 @@
 						$hintapoikkeavuus = true;
 					}
 				}
-				elseif ($row['tilausrivi'] == '' and $row['tilausrivinpositio'] != '') {
+				elseif ($row['tilausrivi'] == '') {
 
 					$query = "	SELECT tilausrivi.tilkpl, tilausrivi.otunnus, tilausrivi.tunnus
 								FROM lasku
 								JOIN tilausrivi ON (
 									tilausrivi.yhtio = lasku.yhtio
 									AND tilausrivi.otunnus = lasku.tunnus
-									AND tilausrivi.tilaajanrivinro = '{$row['tilausrivinpositio']}'
 									AND tilausrivi.tuoteno = '{$row['tuoteno']}'
-									AND tilausrivi.varattu + tilausrivi.kpl = '{$row['kappalemaara']}'
+									AND (tilausrivi.varattu + tilausrivi.kpl) = '{$row['kappalemaara']}'
 								)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
@@ -1650,26 +1649,11 @@
 						$virhe++;
 					}
 					elseif ($kpl_row["tilkpl"] != $row["kappalemaara"]) {
-						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br>$query<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
+						echo "<font color='orange'>Kpl ongelma<br>tunnus: $row[tunnus]<br />tilauksella {$kpl_row["tilkpl"]}<br />sanomassa {$row["kappalemaara"]}</font><br />";
 					}
 
 					if ($kpl_row["otunnus"] != 0 and (strpos($kpl_row["otunnus"], $row['tilausnumero']) === FALSE)) {
 						echo "<font color='scarlet'>Sanoman ostotilausnro ja <br>laskun ostotilausnro ei täsmää<br> Tilaus: {$kpl_row["otunnus"]} <br>sanoma:{$row['tilausnumero']}</font><br>";
-					}
-
-					if ($row['asn_sanomat'] == 'K') {
-						$query = "	SELECT *
-									FROM asn_sanomat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND toimittajanumero = '{$row['toimittajanumero']}'
-									AND tilausrivi LIKE '%{$kpl_row['tunnus']}%'
-									AND laji = 'asn'";
-						$chkres = pupe_query($query);
-
-						if (mysql_num_rows($chkres) == 0) {
-							echo "<font color='error'>ASN-riviä ei löydy tilausrivin tunnukselle $kpl_row[tunnus]</font><br>";
-							$virhe++;
-						}
 					}
 
 					echo "<font class='error'>",t("Virhe"),"</font>";

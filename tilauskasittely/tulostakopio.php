@@ -1585,7 +1585,7 @@
 				$laskurow = mysql_fetch_assoc($result);
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus = '$laskurow[liitostunnus]'
 							and yhtio = '$kukarow[yhtio]'";
@@ -1837,7 +1837,7 @@
 				$tilausnumeroita = $otunnus;
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);

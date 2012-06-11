@@ -248,16 +248,20 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
 			}
 
-			if (($asrow["asiakasnro"] == "" or $asrow["asiakasnro"] == 0) and $laskurow["ytunnus"] != "") {
-				$asrow["asiakasnro"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
-			}
-
+			$asrow["ytunnus"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, 						$rectparam);
 			$pdf->draw_rectangle(779, 420, 758, 580, $thispage, 						$rectparam);
-			$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
-			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 
+			if ($asrow["asiakasnro_aito"] == "" or $asrow["asiakasnro_aito"] == "0") {
+				$pdf->draw_text(310, 771, t("Ytunnus", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"], 							$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(310, 771, t("Ytunnus / Asiakasnumero", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"] ." / ". $asrow["asiakasnro_aito"], 			$thispage, $norm);
+			}
 			$pdf->draw_text(430, 771, t("Vastaanotettu", $kieli),						$thispage, $pieni);
+
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
 				$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"]), $thispage, $norm);
 			}
@@ -728,11 +732,24 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 			$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-			$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
-			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
-			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
-			$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 
+			if ($asrow["asiakasnro_aito"] == "" or $asrow["asiakasnro_aito"] == "0") {
+				$pdf->draw_text(310, 771, t("Ytunnus", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"], 							$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(310, 771, t("Ytunnus / Asiakasnumero", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"] ." / ". $asrow["asiakasnro_aito"], 			$thispage, $norm);
+			}
+			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
+			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
+			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
+			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
+				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
+			}
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);

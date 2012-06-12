@@ -261,6 +261,7 @@
 						FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status != 'E'
+						AND tilausrivi != ''
 						{$wherelisa}";
 			$kollires = pupe_query($query);
 

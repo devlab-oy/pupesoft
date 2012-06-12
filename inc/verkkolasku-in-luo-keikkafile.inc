@@ -487,6 +487,26 @@
 								echo "Tullaan virhetarkistuksesta. Lisätään käytettäviin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 							}
+							else {
+								// voi olla, että tuoteperheen lapsi ei ole lisätty ASN-tauluun
+								// TÄMÄ ON PUUKOTUS
+								if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+
+									// isä pitää olla jo kohdistettu
+									$query = "	SELECT tunnus
+												FROM asn_sanomat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND laji = 'asn'
+												AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
+												AND status = 'X'";
+									$chk_res = pupe_query($query);
+
+									if (mysql_num_rows($chk_res) != 0) {
+										echo "Tullaan virhetarkistuksesta. Lisätään käytettäviin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+										$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+									}
+								}
+							}
 						}
 						else {
 							echo "Tullaan virhetarkistuksesta. Lisätään käytettäviin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
@@ -518,6 +538,26 @@
 							if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
 								echo "lisätään käytettäviin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+							}
+							else {
+								// voi olla, että tuoteperheen lapsi ei ole lisätty ASN-tauluun
+								// TÄMÄ ON PUUKOTUS
+								if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+
+									// isä pitää olla jo kohdistettu
+									$query = "	SELECT tunnus
+												FROM asn_sanomat
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND laji = 'asn'
+												AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
+												AND status = 'X'";
+									$chk_res = pupe_query($query);
+
+									if (mysql_num_rows($chk_res) != 0) {
+										echo "Lisätään käytettäviin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+										$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+									}
+								}
 							}
 						}
 						else {

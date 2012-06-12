@@ -1608,6 +1608,8 @@
 
 			echo "Nämä checkataaan: <pre>",var_dump($tunnus_chk_array),"</pre>";
 
+			echo "Keikoilla: <pre>",var_dump($keikoilla),"</pre>";
+
 			// poistetaan arraysta laskulla olevat tilausrivitunnukset
 			foreach ($keikoilla as $pointteri2) {
 				if (isset($tunnus_chk_array["{$pointteri2['tunnus']}"])) {

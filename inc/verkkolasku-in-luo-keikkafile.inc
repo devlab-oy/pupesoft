@@ -159,6 +159,8 @@
 
 			if (isset($rtuoteno[$i]['tuoteno3']) and trim($rtuoteno[$i]['tuoteno3']) != "") $toim_tuotenolisa .= ",'{$rtuoteno[$i]['tuoteno3']}'";
 
+			$kaytettavat_tilausrivit = array();
+
 			// tiukka 1
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 						FROM tilausrivi
@@ -187,9 +189,11 @@
 
 			if (mysql_num_rows($kokeillaan) > 0) {
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// tiukka 2
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -218,10 +222,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 1
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -249,10 +255,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 2
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -280,10 +288,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// lˆys‰
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -310,10 +320,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// tiukka 1
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -339,10 +351,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// tiukka 2
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -370,10 +384,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 1
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -398,10 +414,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// v‰ljempi 2
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -428,10 +446,12 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
-			if (mysql_num_rows($kokeillaan) == 0) {
+			if (count($kaytettavat_tilausrivit) == 0) {
 				// lˆys‰
 				$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 							FROM tilausrivi
@@ -454,136 +474,16 @@
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 				else {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				}
 			}
 
-			$checkres = pupe_query($query);
-
-			echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
-
-			$kaytettavat_tilausrivit = array();
-
 			// if (mysql_num_rows($checkres) == 1 and $tilausrivirow['uusiotunnus'] == 0 and $tilausrivirow['asn_sanomat'] == 'L') {
-			if (mysql_num_rows($checkres) > 0) {
-
-				while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
-
-					if (isset($tullaan_virhetarkistuksesta) and $tullaan_virhetarkistuksesta) {
-
-						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							// tilausrivi pit‰‰ olla jo kohdistettu
-							$query = "	SELECT tunnus
-										FROM asn_sanomat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'asn'
-										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
-										AND status = 'X'";
-							$chk_res = pupe_query($query);
-
-							if (mysql_num_rows($chk_res) != 0) {
-								echo "Tullaan virhetarkistuksesta. Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
-								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-							}
-							else {
-								// voi olla, ett‰ tuoteperheen lapsi ei ole lis‰tty ASN-tauluun
-								// TƒMƒ ON PUUKOTUS
-								if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
-
-									// is‰ pit‰‰ olla jo kohdistettu
-									$query = "	SELECT tunnus
-												FROM asn_sanomat
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'asn'
-												AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
-												AND status = 'X'";
-									$chk_res = pupe_query($query);
-
-									if (mysql_num_rows($chk_res) != 0) {
-										echo "Tullaan virhetarkistuksesta. Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
-										$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-									}
-								}
-							}
-						}
-						else {
-							echo "Tullaan virhetarkistuksesta. Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
-							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-						}
-					}
-					else {
-
-						if ($tilausrivirow['asn_sanomat'] == 'K') {
-							// tilausrivi pit‰‰ olla jo kohdistettu
-							$query = "	SELECT tunnus
-										FROM asn_sanomat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'asn'
-										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
-										AND status = 'X'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
-							$chk_res = pupe_query($query);
-
-							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus
-										FROM asn_sanomat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'tec'
-										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
-							$chk_res2 = pupe_query($query);
-
-							if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
-								echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
-								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-							}
-							else {
-								// voi olla, ett‰ tuoteperheen lapsi ei ole lis‰tty ASN-tauluun
-								// TƒMƒ ON PUUKOTUS
-								if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
-
-									// is‰ pit‰‰ olla jo kohdistettu
-									$query = "	SELECT tunnus
-												FROM asn_sanomat
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'asn'
-												AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
-												AND status = 'X'";
-									$chk_res = pupe_query($query);
-
-									if (mysql_num_rows($chk_res) != 0) {
-										echo "Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
-										$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-									}
-								}
-							}
-						}
-						else {
-							// tilausrivi ei saa olla jo kohdistettu
-							$query = "	SELECT tunnus
-										FROM asn_sanomat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'tec'
-										AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
-							$chk_res = pupe_query($query);
-
-							if (mysql_num_rows($chk_res) == 0) {
-								echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
-								$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
-							}
-						}
-					}
-				}
-
-				if (count($kaytettavat_tilausrivit) == 0) {
-					echo "Ei yht‰‰n k‰ytett‰v‰‰ tilausrivi‰!!! ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."<br>";
-					echo "8 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
-					$virheet++;
-					continue;
-				}
+			if (count($kaytettavat_tilausrivit) > 0) {
 
 				$tilausrivi_nro = "";
 

@@ -17778,3 +17778,84 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 		return $summa;
 	}
 }
+
+if (!function_exists("teccom_kaytettavat_tilausrivit")) {
+	function teccom_kaytettavat_tilausrivit($checkres) {
+
+		global $kukarow;
+
+		$kaytettavat_tilausrivit = array();
+
+		if (!is_resource($checkres) or mysql_num_rows($checkres) == 0) {
+			return $kaytettavat_tilausrivit;
+		}
+
+		echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
+
+		while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
+
+			if ($tilausrivirow['asn_sanomat'] == 'K') {
+				// tilausrivi pit‰‰ olla jo kohdistettu
+				$query = "	SELECT tunnus
+							FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'asn'
+							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
+							AND status = 'X'";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				$chk_res = pupe_query($query);
+
+				// tilausrivi ei saa olla jo kohdistettu
+				$query = "	SELECT tunnus
+							FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tec'
+							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				$chk_res2 = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
+					echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+				}
+				else {
+					// voi olla, ett‰ tuoteperheen lapsi ei ole lis‰tty ASN-tauluun
+					// TƒMƒ ON PUUKOTUS
+					if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+
+						// is‰ pit‰‰ olla jo kohdistettu
+						$query = "	SELECT tunnus
+									FROM asn_sanomat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'asn'
+									AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
+									AND status = 'X'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) != 0) {
+							echo "Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+						}
+					}
+				}
+			}
+			else {
+				// tilausrivi ei saa olla jo kohdistettu
+				$query = "	SELECT tunnus
+							FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji = 'tec'
+							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				$chk_res = pupe_query($query);
+
+				if (mysql_num_rows($chk_res) == 0) {
+					echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
+					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
+				}
+			}
+		}
+
+		return $kaytettavat_tilausrivit;
+	}
+}

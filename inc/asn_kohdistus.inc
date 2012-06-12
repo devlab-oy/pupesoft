@@ -165,6 +165,7 @@
 								}
 
 								$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
+								echo "<pre>$kysely</pre>";
 								$uusires = pupe_query($kysely);
 							}
 						}
@@ -741,6 +742,7 @@
 						}
 
 						$kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
+						echo "<pre>$kysely</pre>";
 						$uusires = pupe_query($kysely);
 					}
 				}

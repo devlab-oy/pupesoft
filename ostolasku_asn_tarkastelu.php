@@ -232,7 +232,8 @@
 					$query = "	UPDATE asn_sanomat SET
 								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND asn_numero = '{$lasku}'";
+								AND asn_numero = '{$lasku}'
+								AND status != 'E'";
 					$upd_res = pupe_query($query);
 
 					$automaattikohdistukseen = false;
@@ -519,7 +520,8 @@
 								tilausrivi = ''
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = 'tec'
-								AND asn_numero = '{$lasku}'";
+								AND asn_numero = '{$lasku}'
+								AND status != 'E'";
 					$upd_res = pupe_query($query);
 				}
 

@@ -523,22 +523,15 @@
 					$upd_res = pupe_query($query);
 				}
 
-				$query = "	SELECT tunnus, osto_rahti, osto_kulu, osto_rivi_kulu, osto_rahti_alv, osto_kulu_alv, osto_rivi_kulu_alv
+				$query = "	SELECT tunnus
 							FROM lasku
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laskunro = '{$lasku}'
-							AND tila = 'H'";
+							AND tila IN ('H','Y','M','P','Q')";
 				$tunnus_fetch_res = pupe_query($query);
 				$tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res);
 
 				$tunnus = $tunnus_fetch_row['tunnus'];
-
-				$osto_kulu = $tunnus_fetch_row['osto_kulu'];
-				$osto_rahti = $tunnus_fetch_row['osto_rahti'];
-				$osto_rivi_kulu = $tunnus_fetch_row['osto_rivi_kulu'];
-				$osto_kulu_alv = $tunnus_fetch_row['osto_kulu_alv'];
-				$osto_rahti_alv = $tunnus_fetch_row['osto_rahti_alv'];
-				$osto_rivi_kulu_alv = $tunnus_fetch_row['osto_rivi_kulu_alv'];
 
 				$query = "	SELECT *
 							FROM toimi

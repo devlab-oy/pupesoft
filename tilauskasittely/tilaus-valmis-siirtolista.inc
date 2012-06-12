@@ -43,7 +43,7 @@
 		$laskurow['h1time'] = date('Y-m-d H:i:s');
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
-	
+
 	//otetaan varmuuden vuoksi alkuper‰isen otsikon tunnus
 	$alkuplaskutunnus = $laskurow["tunnus"];
 
@@ -51,9 +51,10 @@
 	$query = "	SELECT tilausrivi.*
 				from tilausrivi use index (yhtio_otunnus)
 				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-				where tilausrivi.yhtio='$kukarow[yhtio]'
-				and tilausrivi.otunnus='$laskurow[tunnus]'
-				and tilausrivi.keratty!=''
+				where tilausrivi.yhtio  = '$kukarow[yhtio]'
+				and tilausrivi.otunnus  = '$laskurow[tunnus]'
+				and tilausrivi.tyyppi  != 'D'
+				and tilausrivi.keratty != ''
 				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
@@ -110,6 +111,7 @@
 						WHERE otunnus 	= '$laskurow[tunnus]'
 						and yhtio		= '$kukarow[yhtio]'
 						and hyllyalue  != ''
+						and tyyppi	   != 'D'
 						ORDER BY sorttauskentta";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -294,7 +296,9 @@
 					// Mit‰‰n ker‰tt‰v‰‰ ei ooo, mutta jt:t‰ voi olla
 					$query = "	SELECT count(*) riveja, sum(if(var='J', 1, 0)) jteet
 								FROM tilausrivi
-								WHERE yhtio='$kukarow[yhtio]' and tyyppi in ($tvs_tyyppi) and otunnus='$laskurow[tunnus]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi in ($tvs_tyyppi)
+								and otunnus = '$laskurow[tunnus]'";
 					$tresult = mysql_query($query) or pupe_error($query);
 					$rivirow = mysql_fetch_array($tresult);
 
@@ -383,7 +387,7 @@
 				$query = "SELECT * FROM lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$alkuplaskutunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_assoc($result);
-				
+
 				$tee = "valmis";
 				$tulostetaan = "OK";
 			}
@@ -501,6 +505,7 @@
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.var in ('','H')
+							and tilausrivi.tyyppi != 'D'
 							$lisasalker
 							$lisa
 							ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";

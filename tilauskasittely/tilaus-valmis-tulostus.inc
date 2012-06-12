@@ -168,7 +168,7 @@
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						WHERE tilausrivi.otunnus in ($tilausnumeroita)
 						and tilausrivi.yhtio   = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi  != 'D'
+						and tilausrivi.tyyppi != 'D'
 						$lisa1
 						$where_lisa
 						ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";

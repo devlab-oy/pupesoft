@@ -1232,9 +1232,9 @@
 						echo "Splitrivin select:<pre>",str_replace("\t", "", $split_query),"</pre>";
 						$split_result	= pupe_query($split_query);
 						$split_row		= mysql_fetch_assoc($split_result);
-						$erotus			= $split_row["tilkpl"] - $positiivinen_arvo;
+						$erotus			= ($split_row["kpl"] + $split_row['varattu']) - $positiivinen_arvo;
 
-						echo "erotus: $erotus ($split_row[tilkpl] - $positiivinen_arvo)<br><br>";
+						echo "erotus: $erotus ($split_row[kpl] + $split_row[varattu] - $positiivinen_arvo)<br><br>";
 
 						$kaytetyt_tilausrivit[] = $vika_rivi;
 
@@ -1293,11 +1293,13 @@
 						$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
 						$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
 
+						$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
+
 						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 						$query = "	UPDATE tilausrivi SET
 									{$splitlisa}
 									{$splitlisa2}
-									kommentti = concat(kommentti,' Ennen splittausta {$split_row['tilkpl']} : kohdistettiin {$erotus}')
+									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";

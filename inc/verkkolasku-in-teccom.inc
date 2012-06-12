@@ -268,27 +268,6 @@
 
 				$rtuoteno[$i]["kpl"] = (int) str_replace(",", ".", $tuotetieto->Quantity);
 
-				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
-							FROM toimi
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
-														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
-														#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
-														AND tuotteen_toimittajat.toim_tuoteno != '')
-							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
-							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
-							AND toimi.tyyppi != 'P'
-							AND toimi.asn_sanomat IN ('K', 'L')";
-				$tuotekerroin_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
-					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
-
-					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
-						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
-					}
-				}
-
 				if (isset($tuotetieto->TotalValue->Amount)) {
 					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount); // summa
 				}
@@ -330,6 +309,27 @@
 				}
 
 				$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"];
+
+				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
+							FROM toimi
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+														#AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}','{$rtuoteno[$i]['tuoteno2']}')
+														AND tuotteen_toimittajat.toim_tuoteno != '')
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+							AND toimi.tyyppi != 'P'
+							AND toimi.asn_sanomat IN ('K', 'L')";
+				$tuotekerroin_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
+					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
+
+					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
+					}
+				}
 
 				// otetaan talteen "AllowOrCharge" kent‰t.
 				// t‰‰lt‰ tulevat alennukset ja runko-, rahti- ja muutkulut

@@ -173,7 +173,7 @@
 		$result = pupe_query($query);
 		$kerattavat_rivit_row = mysql_fetch_assoc($result);
 
-		// Jos kesekeräistä keikka ei ole, niin tehdää uusi erä
+		// Jos keskeneräistä keikkaa ei ole, niin tehdää uusi erä
 		if (trim($kerattavat_rivit_row['tilausrivit']) == '') {
 			$query = "	SELECT keraysvyohyke, oletus_varasto
 						FROM kuka
@@ -203,7 +203,7 @@
 					if (count($lisatyt_tilaukset) > 0) {
 
 						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = $lisatyt_tilaukset[0];
+						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
 						// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
 						$query = "	UPDATE lasku SET
@@ -668,7 +668,6 @@
 
 		if ($splitlineflag == 0) {
 			###### TEHDÄÄN UUSI SSCC-NUMERO
-			// emuloidaan transactioita mysql LOCK komennolla
 			$query = "LOCK TABLES avainsana WRITE";
 			$res   = pupe_query($query);
 

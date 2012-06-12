@@ -528,6 +528,17 @@
 			$osto_rivi_kulu = round($osto_rivi_kulu * (1 + ($laskun_alv / 100)),2);
 		}
 
+		// lasketaan mätsäävätkö rivihinnat ja laskunloppusumma, jos ei niin lisätään se kuluihin.
+		$chk_sum = 0;
+
+		for ($ix = 0; $ix < count($rtuoteno); $ix++) {
+			$chk_sum += $rtuoteno[$ix]['rivihinta'];
+		}
+
+		if ($chk_sum > 0 and $chk_sum != $laskun_summa_eur) {
+			$osto_kulu += (abs($chk_sum	- $laskun_summa_eur));
+		}
+
 		// Valeo
 		if ($laskuttajan_toimittajanumero == "123342") {
 			$osto_rivi_kulu = 0;

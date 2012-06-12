@@ -97,7 +97,9 @@ else {
 		}
 
 		// Otetaan .TMP pääte veks ku siirto on valmis
-		if ($upload === TRUE) {
+		if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
+			// Jos $ftpport on käytössä niin käytetään näitä komentoja.
+			// Näyttää siltä, että ftp_rename ei osaa hanskata renametusta kun käytetään custom porttia
 			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
             $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
 
@@ -105,13 +107,29 @@ else {
 				$rename1 = FALSE;
 			}
 		}
+		elseif ($upload === TRUE) {
+			$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
+
+			// Jos rename epäonnistuu, koitetaan poistaa .TMP tiedosto
+			if ($rename1 === FALSE) {
+				$rename1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+
+				if ($rename1 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
+				}
+			}
+		}
 
 		// Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+			$rename2 = ftp_rename($conn_id, "{$ftppath}{$filenimi}", "{$ftppath}{$renameftpfile}");
 
-			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
+			// Jos rename epäonnistuu, koitetaan poistaa turha välitiedosto
+			if ($rename2 === FALSE) {
+				$rename2 = ftp_delete($conn_id, "{$ftppath}{$filenimi}");
+				if ($rename2 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$filenimi}");
+				}
 				$rename2 = FALSE;
 			}
 		}

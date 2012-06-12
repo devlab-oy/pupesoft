@@ -1603,12 +1603,17 @@
 			$tunnus_chk_array = array();
 
 			while ($tunnus_fetch_row = mysql_fetch_assoc($tunnus_fetch_res)) {
-				$tunnus_chk_array[$tunnus_fetch_row['tunnus']] = $tunnus_fetch_row['tunnus'];
+				$tunnus_chk_array["{$tunnus_fetch_row['tunnus']}"] = $tunnus_fetch_row['tunnus'];
 			}
+
+			echo "Nämä checkataaan: <pre>",var_dump($tunnus_chk_array),"</pre>";
 
 			// poistetaan arraysta laskulla olevat tilausrivitunnukset
 			foreach ($keikoilla as $pointteri2) {
-				if (isset($tunnus_chk_array[$pointteri2['tunnus']])) unset($tunnus_chk_array[$pointteri2['tunnus']]);
+				if (isset($tunnus_chk_array["{$pointteri2['tunnus']}"])) {
+					echo "$pointteri2['tunnus'] löytyi, unsetataan se!<br><br>";
+					unset($tunnus_chk_array["{$pointteri2['tunnus']}"]);
+				}
 			}
 
 			// keikalla oli muita kuin laskulla esiintyviä rivejä, tehdään uusi keikka

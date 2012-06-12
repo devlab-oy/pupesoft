@@ -1611,7 +1611,7 @@
 			// poistetaan arraysta laskulla olevat tilausrivitunnukset
 			foreach ($keikoilla as $pointteri2) {
 				if (isset($tunnus_chk_array["{$pointteri2['tunnus']}"])) {
-					echo "$pointteri2['tunnus'] löytyi, unsetataan se!<br><br>";
+					echo "$pointteri2[tunnus] löytyi, unsetataan se!<br><br>";
 					unset($tunnus_chk_array["{$pointteri2['tunnus']}"]);
 				}
 			}

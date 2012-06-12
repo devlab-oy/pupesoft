@@ -1556,20 +1556,13 @@
 			$query  = "UNLOCK TABLE";
 			$result = pupe_query($query);
 
-			if (!isset($osto_kulu)) $osto_kulu = 0;
-			if (!isset($osto_kulu_alv)) $osto_kulu_alv = 0;
-			if (!isset($osto_rahti)) $osto_rahti = 0;
-			if (!isset($osto_rahti_alv)) $osto_rahti_alv = 0;
-			if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
-			if (!isset($osto_rivi_kulu_alv)) $osto_rivi_kulu_alv = 0;
-
 			$laskun_kulut = array(
-				'osto_kulu' => $osto_kulu,
-				'osto_kulu_alv' => $osto_kulu_alv,
-				'osto_rahti' => $osto_rahti,
-				'osto_rahti_alv' => $osto_rahti_alv,
-				'osto_rivi_kulu' => $osto_rivi_kulu,
-				'osto_rivi_kulu_alv' => $osto_rivi_kulu_alv
+				'osto_kulu' => $osrow['osto_kulu'],
+				'osto_kulu_alv' => $osrow['osto_kulu_alv'],
+				'osto_rahti' => $osrow['osto_rahti'],
+				'osto_rahti_alv' => $osrow['osto_rahti_alv'],
+				'osto_rivi_kulu' => $osrow['osto_rivi_kulu'],
+				'osto_rivi_kulu_alv' => $osrow['osto_rivi_kulu_alv']
 			);
 
 			verkkolasku_luo_liitosotsikko($tunnus, $keikan_tunnus, $laskun_kulut);
@@ -1738,20 +1731,13 @@
 
 			reset($keikoilla);
 
-			if (!isset($osto_kulu)) $osto_kulu = 0;
-			if (!isset($osto_kulu_alv)) $osto_kulu_alv = 0;
-			if (!isset($osto_rahti)) $osto_rahti = 0;
-			if (!isset($osto_rahti_alv)) $osto_rahti_alv = 0;
-			if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
-			if (!isset($osto_rivi_kulu_alv)) $osto_rivi_kulu_alv = 0;
-
 			$laskun_kulut = array(
-				'osto_kulu' => $osto_kulu,
-				'osto_kulu_alv' => $osto_kulu_alv,
-				'osto_rahti' => $osto_rahti,
-				'osto_rahti_alv' => $osto_rahti_alv,
-				'osto_rivi_kulu' => $osto_rivi_kulu,
-				'osto_rivi_kulu_alv' => $osto_rivi_kulu_alv
+				'osto_kulu' => $osrow['osto_kulu'],
+				'osto_kulu_alv' => $osrow['osto_kulu_alv'],
+				'osto_rahti' => $osrow['osto_rahti'],
+				'osto_rahti_alv' => $osrow['osto_rahti_alv'],
+				'osto_rivi_kulu' => $osrow['osto_rivi_kulu'],
+				'osto_rivi_kulu_alv' => $osrow['osto_rivi_kulu_alv']
 			);
 
 			// jos tullaan t‰h‰n kohtaan niin kappalem‰‰r‰t t‰sm‰‰. On jo tarkistettu rivill‰ 166

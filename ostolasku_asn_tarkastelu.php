@@ -268,7 +268,7 @@
 						{$wherelisa}";
 			$kollires = pupe_query($query);
 
-			$i = 0;
+			$i = $x = 0;
 			$keikoilla	= array();
 			$ostoilla	= array();
 			$tullaan_virhetarkistuksesta = $tee == 'vahvistavakisinkolli' ? false : true;
@@ -475,41 +475,45 @@
 									AND tunnus IN ({$kollirow['tilausrivi']})";
 						$tilausrivires = pupe_query($query);
 
+
+
 						while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 							if ($tilausrivirow['uusiotunnus'] == 0) {
 								// löytyi, ei ole keikalla
-								$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-								$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-								$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-								$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-								$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-								$ostoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-								$ostoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-								$ostoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
-								$ostoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
-								$ostoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
-								$ostoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
-								$ostoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+								$ostoilla[$x]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
+								$ostoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
+								$ostoilla[$x]["kpl"] = $rtuoteno[$i]["kpl"];
+								$ostoilla[$x]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+								$ostoilla[$x]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+								$ostoilla[$x]["insert_id"] = $rtuoteno[$i]["insert_id"];
+								$ostoilla[$x]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+								$ostoilla[$x]["kulu"] = $rtuoteno[$i]["kulu"];
+								$ostoilla[$x]["ale1"] = $rtuoteno[$i]["ale1"];
+								$ostoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
+								$ostoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
+								$ostoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
 							}
 							else {
 								// löytyi, on jo keikalla
-								$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
-								$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
-								$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
-								$keikoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
-								$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-								$keikoilla[$i]["insert_id"] = $rtuoteno[$i]["insert_id"];
-								$keikoilla[$i]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-								$keikoilla[$i]["kulu"] = $rtuoteno[$i]["kulu"];
-								$keikoilla[$i]["ale1"] = $rtuoteno[$i]["ale1"];
-								$keikoilla[$i]["ale2"] = $rtuoteno[$i]["ale2"];
-								$keikoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
-								$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
+								$keikoilla[$x]["tunnus"] = $tilausrivirow['tunnus'];
+								$keikoilla[$x]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
+								$keikoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
+								$keikoilla[$x]["kpl"] = $rtuoteno[$i]["kpl"];
+								$keikoilla[$x]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+								$keikoilla[$x]["insert_id"] = $rtuoteno[$i]["insert_id"];
+								$keikoilla[$x]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+								$keikoilla[$x]["kulu"] = $rtuoteno[$i]["kulu"];
+								$keikoilla[$x]["ale1"] = $rtuoteno[$i]["ale1"];
+								$keikoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
+								$keikoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
+								$keikoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
 							}
 
-							$i++;
+							$x++;
 						}
 					}
+
+					$i++;
 
 					$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];
 				}

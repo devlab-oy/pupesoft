@@ -453,7 +453,7 @@
 					$query = "	SELECT *
 								FROM tilausrivi
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$kollirow['tilausrivi']}'";
+								AND tunnus IN ({$kollirow['tilausrivi']})";
 					$tilausrivires = pupe_query($query);
 					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
 

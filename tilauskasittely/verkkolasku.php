@@ -1101,13 +1101,13 @@
 
 							$rah++;
 						}
-						elseif ($silent == "") {
+						elseif ($rahtihinta != 0 and $silent == "") {
 							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
 						}
 					}
 
 					if ($silent == "") {
-						$tulos_ulos .= "</table>\n".sprintf(t("Lisättiin rahtikulu %s kpl rahtikirjaan"),$rah).".";
+						$tulos_ulos .= "</table>\n".sprintf(t("Lisättiin rahtikulu %s kpl rahtikirjaan"), $rah).".";
 					}
 				}
 				elseif ($silent == "") {

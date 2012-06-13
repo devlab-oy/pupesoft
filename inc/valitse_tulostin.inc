@@ -81,7 +81,7 @@
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
 
-		$query2 = "	SELECT lahetetyyppi
+		$query2 = "	SELECT asiakas.lahetetyyppi
 					FROM lasku
 					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";

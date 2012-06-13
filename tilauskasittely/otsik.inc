@@ -1978,15 +1978,14 @@
 			echo "</tr>";
 
 			# Lähetetyypin valinta
-			$lahetetyyppi_result = t_avainsana("LAHETETYYPPI");
+			$lahetetyypit = t_avainsana("LAHETETYYPPI");
 			echo "<tr>";
 			echo "<td>".t("Lähetetyyppi").":</td>";
 			echo "<td><select name='lahetetyyppi' style='max-width: 300px'>";
-			echo "<option value=''>Oletustyyppi</option>"; # Tyhja valinta
-
-			while ($vrow = mysql_fetch_assoc($lahetetyyppi_result)) {
+			$lahetetyyppi = pupesoft_lahetetyyppi($laskurow['tunnus']);
+			while ($vrow = mysql_fetch_assoc($lahetetyypit)) {
 				$sel = "";
-				if ($srow['lahetetyyppi'] == $vrow['selite']) $sel = "selected";
+				if ($lahetetyyppi == $vrow['selite']) $sel = "selected";
 				echo "<option value='{$vrow['selite']}' $sel>".$vrow['selitetark']."</option>";
 			}
 

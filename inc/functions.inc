@@ -14725,6 +14725,66 @@ if (!function_exists("tee_keraysera")) {
 	}
 }
 
+
+if (!function_exists("pupesoft_lahetetyyppi")) {
+	function pupesoft_lahetetyyppi($laskutunnus) {
+		global $kukarow;
+
+		if ((int) $laskutunnus == 0) {
+			return false;	
+		}
+
+		# Haetaan laskun lähetetyyppi
+		$query = "	SELECT lahetetyyppi, liitostunnus
+					FROM lasku
+					WHERE tunnus = '$laskutunnus'
+					AND yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 1) {
+				
+			$lahetetyyppi = mysql_fetch_assoc($result);
+
+			if ($lahetetyyppi['lahetetyyppi'] != '') {
+				return $lahetetyyppi['lahetetyyppi'];
+			}
+
+			# Jos tilauksella ei ollut lähetetyyppiä, haetaan asiakkaan oletuslähettyyppi
+			$query = "	SELECT lahetetyyppi
+						FROM asiakas
+						WHERE tunnus = '$lahetetyyppi[liitostunnus]'
+						AND yhtio = '$kukarow[yhtio]'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) == 1) {
+
+				$lahetetyyppi = mysql_fetch_assoc($result);
+
+				if ($lahetetyyppi['lahetetyyppi'] != '') {
+					return $lahetetyyppi['lahetetyyppi'];
+				}
+			}
+
+		}
+
+		# Jos ei asiakkaalla ei ole lähetetyyppiä, haetaan yhtiön oletuslähetetyyppi
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji = 'LAHETETYYPPI'
+					ORDER BY jarjestys, selite
+					LIMIT 1";
+		$result = pupe_query($query);
+		$lahetetyyppi = mysql_fetch_assoc($result);
+
+		if ($lahetetyyppi['selite'] != '') {
+			return $lahetetyyppi['selite'];
+		}
+
+		return false;
+	}
+}
+
 if (!function_exists("pupesoft_tulosta_lahete")) {
 	function pupesoft_tulosta_lahete($params) {
 		global $kukarow, $yhtiorow;
@@ -14740,41 +14800,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$result = pupe_query($query);
 		$asrow = mysql_fetch_assoc($result);
 
-		//haetaan laskulle asetettu lähetetyyppi
-		$query = "SELECT lahetetyyppi
-					FROM lasku
-					WHERE tunnus='$laskurow[tunnus]' AND yhtio='$kukarow[yhtio]'";
-		$result = pupe_query($query);
-		$laskun_lahetetyyppi = mysql_fetch_assoc($result);
-
-		$lahetetyyppi = "";
-
-		if (isset($sellahetetyyppi) and $sellahetetyyppi != '') {
-			$lahetetyyppi = $sellahetetyyppi;
-		}
-		// Käytetään laskun lähetetyyppiä
-		elseif ($laskun_lahetetyyppi["lahetetyyppi"] != '') {
-			$lahetetyyppi = $laskun_lahetetyyppi["lahetetyyppi"];
-		}
-		// Käytetään asiakkaan lähetetyyppiä
-		elseif ($asrow["lahetetyyppi"] != '') {
-		 	$lahetetyyppi = $asrow["lahetetyyppi"];
-		}
-		else {
-			//Haetaan yhtiön oletuslähetetyyppi
-			$query = "  SELECT selite
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-						ORDER BY jarjestys, selite
-						LIMIT 1";
-			$vres = pupe_query($query);
-			$vrow = mysql_fetch_assoc($vres);
-
-			if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-				$lahetetyyppi = $vrow["selite"];
-			}
-		}
-
+		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 		/*
 		Testausta varten.....
 		$lahetetyyppi = "tulosta_lahete.inc";

@@ -66,7 +66,7 @@
 
 	$mista = 'asiakas';
 	$valittu = "";
-	
+
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
@@ -81,18 +81,11 @@
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
 
-		$query2 = "	SELECT asiakas.lahetetyyppi
-					FROM lasku
-					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";
-		$vresult2 = pupe_query($query2);
-		$row2 = mysql_fetch_array($vresult2);
-
+		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 		$vresult = t_avainsana("LAHETETYYPPI");
-
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
-			if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
+			if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
 
 			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}

@@ -1499,28 +1499,7 @@
 							$result = pupe_query($query);
 							$asrow = mysql_fetch_assoc($result);
 
-							$lahetetyyppi = "";
-
-							if ($sellahetetyyppi != '') {
-								$lahetetyyppi = $sellahetetyyppi;
-							}
-							elseif ($asrow["lahetetyyppi"] != '') {
-								$lahetetyyppi = $asrow["lahetetyyppi"];
-							}
-							else {
-								//Haetaan yhtiön oletuslähetetyyppi
-								$query = "  SELECT selite
-											FROM avainsana
-											WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-											ORDER BY jarjestys, selite
-											LIMIT 1";
-								$vres = pupe_query($query);
-								$vrow = mysql_fetch_assoc($vres);
-
-								if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-									$lahetetyyppi = $vrow["selite"];
-								}
-							}
+							$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 
 							require("tulosta_lahete.inc");
 

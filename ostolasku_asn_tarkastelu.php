@@ -258,11 +258,13 @@
 			$rtuoteno			= array();
 			$laskuttajan_toimittajanumero = "";
 
+			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != ''";
+
 			$query = "	SELECT *
 						FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status != 'E'
-						AND tilausrivi != ''
+						{$tilausrivilisa}
 						{$wherelisa}";
 			$kollires = pupe_query($query);
 
@@ -450,30 +452,30 @@
 				}
 				else {
 
-					$query = "	SELECT *
-								FROM tilausrivi
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus IN ({$kollirow['tilausrivi']})";
-					$tilausrivires = pupe_query($query);
+					$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
+					$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
+					$rtuoteno[$i]['tuoteno3'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['toim_tuoteno2'] : "";
+					$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
+					$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
+					$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
+					$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
+					$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
+					$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
+					$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
+					$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
+					$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
+					$rtuoteno[$i]['kauttalaskutus']		= "";
+					$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
+					$rtuoteno[$i]['status']				= $kollirow['status'];
 
-					while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
-						$rtuoteno[$i]['tuoteno'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['tuoteno'] : $kollirow['toim_tuoteno2'];
-						$rtuoteno[$i]['tuoteno2'] 			= $kollirow['toim_tuoteno'];
-						$rtuoteno[$i]['tuoteno3'] 			= trim($kollirow['tuoteno']) != "" ? $kollirow['toim_tuoteno2'] : "";
-						$rtuoteno[$i]['ostotilausnro'] 		= $kollirow['tilausnumero'];
-						$rtuoteno[$i]['tilaajanrivinro'] 	= $kollirow['tilausrivinpositio'];
-						$rtuoteno[$i]['kpl'] 				= $kollirow['kappalemaara'];
-						$rtuoteno[$i]['hinta'] 				= $kollirow['hinta'];
-						$rtuoteno[$i]['ale1'] 				= $kollirow['lasku_ale1'];
-						$rtuoteno[$i]['ale2'] 				= $kollirow['lasku_ale2'];
-						$rtuoteno[$i]['ale3'] 				= $kollirow['lasku_ale3'];
-						$rtuoteno[$i]['lisakulu'] 			= $kollirow['lisakulu'];
-						$rtuoteno[$i]['kulu'] 				= $kollirow['kulu'];
-						$rtuoteno[$i]['kauttalaskutus']		= "";
-						$rtuoteno[$i]['insert_id']			= $kollirow['tunnus'];
-						$rtuoteno[$i]['status']				= $kollirow['status'];
+					if ($tullaan_virhetarkistuksesta) {
+						$query = "	SELECT *
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus IN ({$kollirow['tilausrivi']})";
+						$tilausrivires = pupe_query($query);
 
-						if ($tullaan_virhetarkistuksesta) {
+						while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 							if ($tilausrivirow['uusiotunnus'] == 0) {
 								// löytyi, ei ole keikalla
 								$ostoilla[$i]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
@@ -504,9 +506,9 @@
 								$keikoilla[$i]["ale3"] = $rtuoteno[$i]["ale3"];
 								$keikoilla[$i]['tuoteno'] = $tilausrivirow['tuoteno'];
 							}
-						}
 
-						$i++;
+							$i++;
+						}
 					}
 
 					$laskuttajan_toimittajanumero = $kollirow['toimittajanumero'];

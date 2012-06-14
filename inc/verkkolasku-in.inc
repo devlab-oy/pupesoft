@@ -1483,6 +1483,7 @@
 							echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
+							echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;

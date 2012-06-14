@@ -211,22 +211,6 @@
 			}
 		}
 
-		//	Jos meillä on tilauksien seuranta käytössä ja svnStatus on ok meillä on oltava sopiva seuranta
-		if ($yhtiorow["tilauksen_seuranta"] != "" and $seuranta == "" and in_array($toim, array("TARJOUS", "PROJEKTI"))) {
-			echo "<font class='error'>".t("VIRHE: Anna tilaukselle seuranta")."!</font><br>";
-			$tee = "OTSIK";
-			$tila = "";
-			unset($jatka);
-		}
-
-		//	Jos meillä on tilauksien seuranta käytössä ja svnStatus on ok meillä on oltava sopiva seuranta
-		if ($yhtiorow["tilauksen_kohteet"] == "K" and $asiakkaan_kohde == "" and in_array($toim, array("PROJEKTI", "TARJOUS"))) {
-			echo "<font class='error'>".t("VIRHE: Anna kohde")."!</font><br>";
-			$tee = "OTSIK";
-			$tila = "";
-			unset($jatka);
-		}
-
 		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {
 			echo "<font class='error'>".t("VIRHE: Anna tilaukselle yhteyshenkilö")."!</font><br>";
 			$tee = "OTSIK";

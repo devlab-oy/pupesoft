@@ -1644,7 +1644,7 @@
 			}
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito" and $from != "positioselain"))) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
 				$la_tunnus = $perhe;

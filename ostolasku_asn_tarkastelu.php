@@ -1008,7 +1008,7 @@
 						AND tunnus = '{$_tunn}'";
 			$updres = pupe_query($query);
 
-			$tee = 'nayta';
+			$tee = 'etsi';
 		}
 	}
 

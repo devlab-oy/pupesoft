@@ -977,13 +977,13 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				echo "osto_kulu ennen alustusta: $osto_kulu<br><br>";
+				#echo "osto_kulu ennen alustusta: $osto_kulu<br><br>";
 
 				$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
 				$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
 				$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
 
-				echo "osto_kulu jälkeen alustuksen: $osto_kulu<br><br>";
+				#echo "osto_kulu jälkeen alustuksen: $osto_kulu<br><br>";
 
 				$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
 				$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
@@ -1422,28 +1422,28 @@
 							if (!isset($rtuoteno[$i]['lisakulu'])) $rtuoteno[$i]['lisakulu'] = 0;
 							if (!isset($rtuoteno[$i]['kulu'])) $rtuoteno[$i]['kulu'] = 0;
 
-							$asn_nettohinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
+							$asn_hinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
-							echo "Lasketaan nettohintaa...<br>";
-							echo "{$asn_nettohinta} = round({$summa_valuutassa}/{$rtuoteno[$i]['kpl']}, 2)<br><br>";
+							#echo "Lasketaan nettohintaa...<br>";
+							#echo "{$asn_hinta} = round({$summa_valuutassa}/{$rtuoteno[$i]['kpl']}, 2)<br><br>";
 
 							// Laitetaan bruttohinta asn_sanomat-tauluun
 							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {
-								echo "Ale1 löytyi!<br>";
-								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale1']}) / 100)<br><br>";
-								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
+								#echo "Ale1 löytyi!<br>";
+								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale1']}) / 100)<br><br>";
+								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale2']) and trim($rtuoteno[$i]['ale2']) != 0) {
-								echo "Ale2 löytyi!<br>";
-								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale2']}) / 100)<br><br>";
-								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
+								#echo "Ale2 löytyi!<br>";
+								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale2']}) / 100)<br><br>";
+								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale3']) and trim($rtuoteno[$i]['ale3']) != 0) {
-								echo "Ale3 löytyi!<br>";
-								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale3']}) / 100)<br><br>";
-								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
+								#echo "Ale3 löytyi!<br>";
+								#echo "{$asn_hinta} / ((100 - {$rtuoteno[$i]['ale3']}) / 100)<br><br>";
+								$asn_hinta = $asn_hinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
 							}
 
 							// osto_kulu = $laskun_pakkauskulu
@@ -1452,7 +1452,7 @@
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',
-												hinta 				= '{$asn_nettohinta}',
+												hinta 				= '{$asn_hinta}',
 												kappalemaara 		= '{$rtuoteno[$i]['kpl']}',
 												keikkarivinhinta	= 0,
 												kulu 				= '{$rtuoteno[$i]['kulu']}',
@@ -1480,10 +1480,10 @@
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";
-							echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
+							#echo "<pre>",str_replace("\t", "", $insertquery),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
-							echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
+							#echo "insert_id: {$rtuoteno[$i]["insert_id"]}<br><br>";
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
@@ -1520,7 +1520,7 @@
 							}
 						}
 
-						echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
+						#echo "Tuliko pyöristyseroja $omasumma - $totsumma<br><br>";
 					}
 
 	 				// Tuli pyöristyseroja

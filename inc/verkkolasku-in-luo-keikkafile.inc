@@ -1495,6 +1495,8 @@
 			$keikan_tunnus = mysql_insert_id();
 			echo "<pre>",str_replace("\t", "", $query),"</pre>Keikan tunnus:$keikan_tunnus<br><br>";
 
+			echo "<font class='message'>Liitetty saapumiseen {$id}</font><br><br>";
+
 			$query  = "UNLOCK TABLE";
 			$result = pupe_query($query);
 
@@ -1677,6 +1679,12 @@
 
 				$keikoilla[0]['uusiotunnus'] = $keikan_tunnus;
 			}
+
+			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";
+			$saapuminen_nro_res = pupe_query($query);
+			$saapuminen_nro_row = mysql_fetch_array($saapuminen_nro_res);
+
+			echo "<font class='message'>Liitetty saapumiseen {$saapuminen_nro_row['laskunro']}</font><br><br>";
 
 			reset($keikoilla);
 

@@ -1642,7 +1642,7 @@
 				echo "<td>{$row['nimitys']}</td>";
 				echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
 				echo "<td align='right'>{$row['kappalemaara']}</td>";
-				echo "<td align='right'>{$row['hinta']}</td>";
+				echo "<td align='right'>",hintapyoristys($row['hinta']),"</td>";
 
 				echo "<td>";
 

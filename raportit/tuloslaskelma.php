@@ -9,7 +9,7 @@
 		require ("../inc/parametrit.inc");
 	}
 	else {
-		if ($from != "PROJEKTIKALENTERI" or (int) $mul_proj[0] == 0) {
+		if ((int) $mul_proj[0] == 0) {
 			die("<font class='error'>Älä edes yritä!</font>");
 		}
 	}
@@ -51,9 +51,7 @@
 			exit;
 		}
 
-		if ($from != "PROJEKTIKALENTERI") {
-			echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
-		}
+		echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 
 		if ($tltee == "aja") {
 
@@ -122,280 +120,276 @@
 			}
 		}
 
-		//	UI vain jos sille on tarvetta
-		if ($from != "PROJEKTIKALENTERI") {
-			// tehdään käyttöliittymä, näytetään aina
-			$sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
-			if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
+		// tehdään käyttöliittymä, näytetään aina
+		$sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
+		if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
 
-			echo "<br>";
-			echo "	<form action = 'tuloslaskelma.php' method='post'>
-					<input type = 'hidden' name = 'tltee' value = 'aja'>
-					<input type='hidden' name='toim' value='$toim'>
-					<table>";
+		echo "<br>";
+		echo "	<form action = 'tuloslaskelma.php' method='post'>
+				<input type = 'hidden' name = 'tltee' value = 'aja'>
+				<input type='hidden' name='toim' value='$toim'>
+				<table>";
 
-			echo "	<tr>
-					<th valign='top'>".t("Tyyppi")."</th>
-					<td>";
+		echo "	<tr>
+				<th valign='top'>".t("Tyyppi")."</th>
+				<td>";
 
-			echo "	<select name = 'tyyppi'>
-					<option $sel[4] value='4'>".t("Sisäinen tuloslaskelma")."</option>
-					<option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
-					<option $sel[T] value='T'>".t("Tase")."</option>
-					<option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
-					<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
-					</select>";
+		echo "	<select name = 'tyyppi'>
+				<option $sel[4] value='4'>".t("Sisäinen tuloslaskelma")."</option>
+				<option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
+				<option $sel[T] value='T'>".t("Tase")."</option>
+				<option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
+				<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
+				</select>";
 
-			echo "</td></tr>";
+		echo "</td></tr>";
 
-			if (!isset($plvv)) {
-				$query = "	SELECT *
-							FROM tilikaudet
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tilikausi_alku <= now()
-							and tilikausi_loppu >= now()";
-				$result = pupe_query($query);
-				$tilikausirow = mysql_fetch_assoc($result);
-
-				$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
-				$plvk = substr($tilikausirow['tilikausi_alku'], 5, 2);
-				$plvp = substr($tilikausirow['tilikausi_alku'], 8, 2);
-			}
-
-			echo "	<th valign='top'>".t("Alkukausi")."</th>
-					<td><select name='plvv'>";
-
-			$sel = array();
-			$sel[$plvv] = "SELECTED";
-
-			for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-
-				if (!isset($sel[$i])) {
-					$sel[$i] = "";
-				}
-
-				echo "<option value='$i' $sel[$i]>$i</option>";
-			}
-
-			echo "</select>";
-
-			$sel = array();
-			$sel[$plvk] = "SELECTED";
-
-			echo "<select name='plvk'>";
-
-			for ($opt = 1; $opt <= 12; $opt++) {
-				$opt = sprintf("%02d", $opt);
-
-				if (!isset($sel[$opt])) {
-					$sel[$opt] = "";
-				}
-
-				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
-			}
-
-			echo "</select>";
-
-			$sel = array();
-			$sel[$plvp] = "SELECTED";
-
-			echo "<select name='plvp'>";
-
-			for ($opt = 1; $opt <= 31; $opt++) {
-				$opt = sprintf("%02d", $opt);
-
-				if (!isset($sel[$opt])) {
-					$sel[$opt] = "";
-				}
-
-				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
-			}
-
-			echo "</select></td></tr>";
-
-			echo "<tr>
-				<th valign='top'>".t("Loppukausi")."</th>
-				<td><select name='alvv'>";
-
-			$sel = array();
-			$sel[$alvv] = "SELECTED";
-
-			for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
-				echo "<option value='$i' $sel[$i]>$i</option>";
-			}
-
-			echo "</select>";
-
-			$sel = array();
-			$sel[$alvk] = "SELECTED";
-
-			echo "<select name='alvk'>";
-
-			for ($opt = 1; $opt <= 12; $opt++) {
-				$opt = sprintf("%02d", $opt);
-
-				if (!isset($sel[$opt])) {
-					$sel[$opt] = "";
-				}
-
-				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
-			}
-
-			echo "</select>";
-
-			$sel = array();
-			$sel[$alvp] = "SELECTED";
-
-			echo "<select name='alvp'>";
-
-			for ($opt = 1; $opt <= 31; $opt++) {
-				$opt = sprintf("%02d", $opt);
-
-				if (!isset($sel[$opt])) {
-					$sel[$opt] = "";
-				}
-
-				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
-			}
-
-			echo "</select></td></tr>";
-
-			echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
-
+		if (!isset($plvv)) {
 			$query = "	SELECT *
 						FROM tilikaudet
 						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER BY tilikausi_alku DESC";
-			$vresult = pupe_query($query);
+						and tilikausi_alku <= now()
+						and tilikausi_loppu >= now()";
+			$result = pupe_query($query);
+			$tilikausirow = mysql_fetch_assoc($result);
 
-			echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
-
-			while ($vrow=mysql_fetch_assoc($vresult)) {
-				$sel="";
-				if ($tkausi == $vrow["tunnus"]) {
-					$sel = "selected";
-				}
-				echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
-			}
-			echo "</select></td>";
-			echo "</tr>";
-
-			$sel = array();
-			$sel[$rtaso] = "SELECTED";
-
-			echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
-					<td><select name='rtaso'>";
-
-			$query = "	SELECT max(length(taso)) taso
-						from taso
-						where yhtio = '$kukarow[yhtio]'";
-			$vresult = pupe_query($query);
-			$vrow = mysql_fetch_assoc($vresult);
-
-			echo "<option value='TILI'>".t("Tili taso")."</option>\n";
-
-			for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
-				echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
-			}
-
-			echo "</select></td></tr>";
-
-			$sel = array(1 => "", 1000 => "", 10000 => "", 100000 => "", 1000000 => "");
-			$sel[$tarkkuus] = "SELECTED";
-
-			echo "<tr><th valign='top'>".t("Lukujen tarkkuus")."</th>
-					<td><select name='tarkkuus'>
-						<option $sel[1]   value='1'>".t("Älä jaa lukuja")."</option>
-						<option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
-						<option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
-						<option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
-						<option $sel[1000000] value='1000000'>".t("Jaa 1 000 000:lla")."</option>
-						</select>";
-
-			$sel = array(0 => "", 1 => "", 2 => "");
-			$sel[$desi] = "SELECTED";
-
-			echo "<select name='desi'>
-					<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
-					<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
-					<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
-					</select></td></tr>";
-
-			$vchek = $bchek = $ychek = "";
-			if ($vertailued != "")   $vchek = "CHECKED";
-			if ($vertailubu != "")   $bchek = "CHECKED";
-			if ($ei_yhteensa != "")   $ychek = "CHECKED";
-
-			$kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
-			$kausi[$kaikkikaudet] = "SELECTED";
-
-			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
-
-			echo "<td><select name='kaikkikaudet'>
-					<option value='VY' $kausi[VY]>".t("Näytä vain viimeisin kausi ja yhteensäsumma")."</option>
-					<option value='KY' $kausi[KY]>".t("Näytä kaikki kaudet ja yhteensäsumma")."</option>
-					<option value='V'  $kausi[V]>".t("Näytä vain viimeisin kausi")."</option>
-					<option value='K'  $kausi[K]>".t("Näytä kaikki kaudet")."</option>
-					<option value='Y'  $kausi[Y]>".t("Näytä vain yhteensäsumma")."</option>
-					</select>
-					</td></tr>";
-
-			echo "<tr><th valign='top'>".t("Vertailu")."</th>";
-			echo "<td>";
-			echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
-			echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
-			echo "</td></tr>";
-
-			echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
-
-			$konsel = array("AT" => "", "T" => "", "A" => "");
-			$konsel[$konsernirajaus] = "SELECTED";
-
-			echo "<td><select name='konsernirajaus'>
-					<option value=''>".t("Näytetään kaikki tiliöinnit")."</option>
-					<option value='AT' $konsel[AT]>".t("Näytetään konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
-					<option value='T'  $konsel[T]>".t("Näytetään konsernitoimitajien tiliöinnit")."</option>
-					<option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
-					</select>
-					</td></tr>";
-
-			echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
-
-			$bchek = array("KUSTP" => "", "KOHDE" => "", "PROJEKTI" => "", "ASOSASTO" => "", "ASRYHMA" => "");
-
-			if (is_array($sarakebox)) {
-				foreach ($sarakebox as $sara => $sarav) {
-					if ($sara != "") $bchek[$sara] = "CHECKED";
-				}
-			}
-
-			echo "<td>";
-			echo "&nbsp;<input type='checkbox' name='sarakebox[KUSTP]' $bchek[KUSTP]> ".t("Kustannuspaikoittain");
-			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
-			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
-			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
-			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
-			echo "</td></tr>";
-
-			if ($teepdf != "") $vchek = "CHECKED";
-			if ($teexls != "") $bchek = "CHECKED";
-
-			echo "<tr><th valign='top'>".t("Tulostus")."</th>";
-			echo "<td>";
-			echo "&nbsp;<input type='checkbox' name='teepdf' value='OK' $vchek> ".t("Tee PDF");
-			echo "<br>&nbsp;<input type='checkbox' name='teexls' value='OK' $bchek> ".t("Tee Excel");
-			echo "</td></tr>";
-
-			echo "</table><br>";
-
-			$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
-			$noautosubmit = TRUE;
-
-			require ("tilauskasittely/monivalintalaatikot.inc");
-
-			echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
-
+			$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
+			$plvk = substr($tilikausirow['tilikausi_alku'], 5, 2);
+			$plvp = substr($tilikausirow['tilikausi_alku'], 8, 2);
 		}
+
+		echo "	<th valign='top'>".t("Alkukausi")."</th>
+				<td><select name='plvv'>";
+
+		$sel = array();
+		$sel[$plvv] = "SELECTED";
+
+		for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+
+			if (!isset($sel[$i])) {
+				$sel[$i] = "";
+			}
+
+			echo "<option value='$i' $sel[$i]>$i</option>";
+		}
+
+		echo "</select>";
+
+		$sel = array();
+		$sel[$plvk] = "SELECTED";
+
+		echo "<select name='plvk'>";
+
+		for ($opt = 1; $opt <= 12; $opt++) {
+			$opt = sprintf("%02d", $opt);
+
+			if (!isset($sel[$opt])) {
+				$sel[$opt] = "";
+			}
+
+			echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+		}
+
+		echo "</select>";
+
+		$sel = array();
+		$sel[$plvp] = "SELECTED";
+
+		echo "<select name='plvp'>";
+
+		for ($opt = 1; $opt <= 31; $opt++) {
+			$opt = sprintf("%02d", $opt);
+
+			if (!isset($sel[$opt])) {
+				$sel[$opt] = "";
+			}
+
+			echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+		}
+
+		echo "</select></td></tr>";
+
+		echo "<tr>
+			<th valign='top'>".t("Loppukausi")."</th>
+			<td><select name='alvv'>";
+
+		$sel = array();
+		$sel[$alvv] = "SELECTED";
+
+		for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+			echo "<option value='$i' $sel[$i]>$i</option>";
+		}
+
+		echo "</select>";
+
+		$sel = array();
+		$sel[$alvk] = "SELECTED";
+
+		echo "<select name='alvk'>";
+
+		for ($opt = 1; $opt <= 12; $opt++) {
+			$opt = sprintf("%02d", $opt);
+
+			if (!isset($sel[$opt])) {
+				$sel[$opt] = "";
+			}
+
+			echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+		}
+
+		echo "</select>";
+
+		$sel = array();
+		$sel[$alvp] = "SELECTED";
+
+		echo "<select name='alvp'>";
+
+		for ($opt = 1; $opt <= 31; $opt++) {
+			$opt = sprintf("%02d", $opt);
+
+			if (!isset($sel[$opt])) {
+				$sel[$opt] = "";
+			}
+
+			echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+		}
+
+		echo "</select></td></tr>";
+
+		echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
+
+		$query = "	SELECT *
+					FROM tilikaudet
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tilikausi_alku DESC";
+		$vresult = pupe_query($query);
+
+		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+
+		while ($vrow=mysql_fetch_assoc($vresult)) {
+			$sel="";
+			if ($tkausi == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
+		}
+		echo "</select></td>";
+		echo "</tr>";
+
+		$sel = array();
+		$sel[$rtaso] = "SELECTED";
+
+		echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
+				<td><select name='rtaso'>";
+
+		$query = "	SELECT max(length(taso)) taso
+					from taso
+					where yhtio = '$kukarow[yhtio]'";
+		$vresult = pupe_query($query);
+		$vrow = mysql_fetch_assoc($vresult);
+
+		echo "<option value='TILI'>".t("Tili taso")."</option>\n";
+
+		for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
+			echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+		}
+
+		echo "</select></td></tr>";
+
+		$sel = array(1 => "", 1000 => "", 10000 => "", 100000 => "", 1000000 => "");
+		$sel[$tarkkuus] = "SELECTED";
+
+		echo "<tr><th valign='top'>".t("Lukujen tarkkuus")."</th>
+				<td><select name='tarkkuus'>
+					<option $sel[1]   value='1'>".t("Älä jaa lukuja")."</option>
+					<option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
+					<option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
+					<option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
+					<option $sel[1000000] value='1000000'>".t("Jaa 1 000 000:lla")."</option>
+					</select>";
+
+		$sel = array(0 => "", 1 => "", 2 => "");
+		$sel[$desi] = "SELECTED";
+
+		echo "<select name='desi'>
+				<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
+				<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
+				<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
+				</select></td></tr>";
+
+		$vchek = $bchek = $ychek = "";
+		if ($vertailued != "")   $vchek = "CHECKED";
+		if ($vertailubu != "")   $bchek = "CHECKED";
+		if ($ei_yhteensa != "")   $ychek = "CHECKED";
+
+		$kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
+		$kausi[$kaikkikaudet] = "SELECTED";
+
+		echo "<tr><th valign='top'>".t("Näkymä")."</th>";
+
+		echo "<td><select name='kaikkikaudet'>
+				<option value='VY' $kausi[VY]>".t("Näytä vain viimeisin kausi ja yhteensäsumma")."</option>
+				<option value='KY' $kausi[KY]>".t("Näytä kaikki kaudet ja yhteensäsumma")."</option>
+				<option value='V'  $kausi[V]>".t("Näytä vain viimeisin kausi")."</option>
+				<option value='K'  $kausi[K]>".t("Näytä kaikki kaudet")."</option>
+				<option value='Y'  $kausi[Y]>".t("Näytä vain yhteensäsumma")."</option>
+				</select>
+				</td></tr>";
+
+		echo "<tr><th valign='top'>".t("Vertailu")."</th>";
+		echo "<td>";
+		echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
+		echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
+		echo "</td></tr>";
+
+		echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
+
+		$konsel = array("AT" => "", "T" => "", "A" => "");
+		$konsel[$konsernirajaus] = "SELECTED";
+
+		echo "<td><select name='konsernirajaus'>
+				<option value=''>".t("Näytetään kaikki tiliöinnit")."</option>
+				<option value='AT' $konsel[AT]>".t("Näytetään konserniasiakkaiden ja konsernitoimittajien tiliöinnit")."</option>
+				<option value='T'  $konsel[T]>".t("Näytetään konsernitoimitajien tiliöinnit")."</option>
+				<option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
+				</select>
+				</td></tr>";
+
+		echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
+
+		$bchek = array("KUSTP" => "", "KOHDE" => "", "PROJEKTI" => "", "ASOSASTO" => "", "ASRYHMA" => "");
+
+		if (is_array($sarakebox)) {
+			foreach ($sarakebox as $sara => $sarav) {
+				if ($sara != "") $bchek[$sara] = "CHECKED";
+			}
+		}
+
+		echo "<td>";
+		echo "&nbsp;<input type='checkbox' name='sarakebox[KUSTP]' $bchek[KUSTP]> ".t("Kustannuspaikoittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
+		echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
+		echo "</td></tr>";
+
+		if ($teepdf != "") $vchek = "CHECKED";
+		if ($teexls != "") $bchek = "CHECKED";
+
+		echo "<tr><th valign='top'>".t("Tulostus")."</th>";
+		echo "<td>";
+		echo "&nbsp;<input type='checkbox' name='teepdf' value='OK' $vchek> ".t("Tee PDF");
+		echo "<br>&nbsp;<input type='checkbox' name='teexls' value='OK' $bchek> ".t("Tee Excel");
+		echo "</td></tr>";
+
+		echo "</table><br>";
+
+		$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+		$noautosubmit = TRUE;
+
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
 		if ($tltee == "aja") {
 			// Desimaalit
@@ -1465,36 +1459,32 @@
 				}
 			}
 
-			//	Projektikalenterilla ei sallita PDF tulostusta
-			if ($from != "PROJEKTIKALENTERI") {
+			if ($toim == "TASOMUUTOS") {
+				echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
+			}
 
-				if ($toim == "TASOMUUTOS") {
-					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
-				}
+			if (isset($teepdf) and $teepdf == "OK") {
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
 
-				if (isset($teepdf) and $teepdf == "OK") {
-					//keksitään uudelle failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
+				//kirjoitetaan pdf faili levylle..
+				$fh = fopen("/tmp/".$pdffilenimi, "w");
+				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
+				fclose($fh);
 
-					//kirjoitetaan pdf faili levylle..
-					$fh = fopen("/tmp/".$pdffilenimi, "w");
-					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
-					fclose($fh);
-
-					echo "<br><table>";
-					echo "<tr><th>".t("Tallenna pdf").":</th>";
-					echo "<form method='post' class='multisubmit'>";
-					echo "<input type='hidden' name='toim' value='$toim'>";
-					echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-					// poistetaan välilyönti
-					$otsikko = str_replace(" ","_",$otsikko);
-					echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
-					echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
-					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-					echo "</table><br>";
-				}
+				echo "<br><table>";
+				echo "<tr><th>".t("Tallenna pdf").":</th>";
+				echo "<form method='post' class='multisubmit'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+				// poistetaan välilyönti
+				$otsikko = str_replace(" ","_",$otsikko);
+				echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
 			}
 
 			if (isset($teexls) and $teexls == "OK" and isset($workbook)) {

@@ -926,12 +926,14 @@
 			$tuoteno_row = mysql_fetch_assoc($tuoteno_res);
 
 			$_tunn = $valitse == 'asn' ? $asn_rivi : $rivitunnus;
+			$lajilisa = $valitse == 'asn' ? "and laji = 'asn'" : "and laji = 'tec'";
 
 			// haetaan ASN-sanomalta kpl määrä
 			$hakuquery = "	SELECT *
 							FROM asn_sanomat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$_tunn}'";
+							AND tunnus = '{$_tunn}'
+							{$lajilisa}";
 			$hakures = pupe_query($hakuquery);
 			$asn_row_haku = mysql_fetch_assoc($hakures);
 
@@ -1122,6 +1124,8 @@
 		echo "<th>&nbsp;</th>";
 		echo "</tr>";
 
+		$chk = (isset($rivit_ei_asnlla) and trim($rivit_ei_asnlla) != '') ? " checked" : "";
+
 		echo "<tr>";
 		echo "<td>{$toimittaja}</td>";
 		echo "<td><input type='text' name='tilausnro' value='{$tilausnro}' /></td>";
@@ -1129,6 +1133,9 @@
 		echo "<td><input type='text' name='tilaajanrivinro' value='{$tilaajanrivinro}' /></td>";
 		echo "<td><input type='text' name='kpl' value='{$kpl}' /></td>";
 		echo "<td><input type='submit' value='",t("Etsi"),"' /></td>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("Näytä myös rivit joita ei ole ASN:llä tullut"),"</td>";
 		echo "</tr>";
 		echo "</table>";
 		echo "</form>";
@@ -1246,7 +1253,7 @@
 
 				if (mysql_num_rows($chkres) > 0) continue;
 
-				if ($valitse != 'asn' and $toimirow['asn_sanomat'] == 'K') {
+				if ($valitse != 'asn' and $toimirow['asn_sanomat'] == 'K' and (!isset($rivit_ei_asnlla) or trim($rivit_ei_asnlla) == '')) {
 					// katsotaan että asn rivi pitää olla olemassa
 					$query = "	SELECT *
 								FROM asn_sanomat

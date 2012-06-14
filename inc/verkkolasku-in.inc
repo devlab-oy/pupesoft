@@ -1424,16 +1424,25 @@
 
 							$asn_nettohinta = round($summa_valuutassa/$rtuoteno[$i]['kpl'], 2);
 
+							echo "Lasketaan nettohintaa...<br>";
+							echo "{$asn_nettohinta} = round({$summa_valuutassa}/{$rtuoteno[$i]['kpl']}, 2)<br><br>";
+
 							// Laitetaan bruttohinta asn_sanomat-tauluun
 							if (isset($rtuoteno[$i]['ale1']) and trim($rtuoteno[$i]['ale1']) != 0) {
+								echo "Ale1 löytyi!<br>";
+								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale1']}) / 100)<br><br>";
 								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale1']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale2']) and trim($rtuoteno[$i]['ale2']) != 0) {
+								echo "Ale2 löytyi!<br>";
+								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale2']}) / 100)<br><br>";
 								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale2']) / 100);
 							}
 
 							if (isset($rtuoteno[$i]['ale3']) and trim($rtuoteno[$i]['ale3']) != 0) {
+								echo "Ale3 löytyi!<br>";
+								echo "{$asn_nettohinta} / ((100 - {$rtuoteno[$i]['ale3']}) / 100)<br><br>";
 								$asn_nettohinta = $asn_nettohinta / ((100 - $rtuoteno[$i]['ale3']) / 100);
 							}
 
@@ -1471,6 +1480,7 @@
 												tuoteno				= '',
 												vastaanottaja 		= '{$ostaja_asiakkaantiedot['nimi']}',
 												yhtio 				= '{$yhtio}'";
+							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$asn_ins_res = pupe_query($insertquery);
 							$rtuoteno[$i]["insert_id"] = mysql_insert_id();
 						}

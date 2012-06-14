@@ -94,6 +94,10 @@ if ($tee == 'L') {
 	$index = " use index (yhtio_tila_laskunro) ";
 }
 
+if ($laskuntyyppi != "K") {
+	$ehto .= " AND lasku.tila = '$laskuntyyppi' ";
+}
+
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
 	$ehto .= " and lasku.tapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.tapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
 
@@ -220,6 +224,19 @@ if (mysql_num_rows($result) > 0) {
 	echo "</td></tr>";
 }
 
+$sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');
+
+echo "<tr><th>".t("Laskun tila")."</th>";
+echo "<td><select name = 'laskuntyyppi'>
+		<option {$sel['K']} value = 'K'>".t("Kaikki")."</option>
+		<option {$sel['H']} value = 'H'>".t("Hyväksyttävänä")."</option>
+		<option {$sel['M']} value = 'M'>".t("Valmis maksatukseen")."</option>
+		<option {$sel['P']} value = 'P'>".t("Poiminnassa")."</option>
+		<option {$sel['Q']} value = 'Q'>".t("Odottaa suoritusta")."</option>
+		<option {$sel['Y']} value = 'Y'>".t("Maksettu")."</option>
+		</select></td>
+		</tr>";
+
 $sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'N', 'V', 'W', 'K', 'L'), '');
 
 echo "<tr>";
@@ -260,7 +277,7 @@ if ($tee != '') {
 		$tiliointilisa = '';
 	}
 
-	$query = "	SELECT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
+	$query = "	SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
 				lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
 				lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 			  	FROM lasku $index

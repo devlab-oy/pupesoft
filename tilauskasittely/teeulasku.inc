@@ -555,8 +555,8 @@
 	// haetaan asiakkaan tiedot (esim konserniyhtiö)
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ytunnus = '$laskurow[ytunnus]'";
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND tunnus = '{$laskurow["liitostunnus"]}'";
 	$konsres = pupe_query($query);
 	$konsrow = mysql_fetch_assoc($konsres);
 

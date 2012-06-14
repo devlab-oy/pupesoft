@@ -235,7 +235,7 @@
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
-	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcrajaustapa);
 
 	// Tarvittavat päivämäärät
 	if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));

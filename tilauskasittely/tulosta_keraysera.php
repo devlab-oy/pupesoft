@@ -555,7 +555,7 @@
 					if (count($lisatyt_tilaukset) > 0) {
 
 						$otunnukset = implode(",", $lisatyt_tilaukset);
-						$kerayslistatunnus = $lisatyt_tilaukset[0];
+						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
 						$query = "	SELECT *
 									FROM lasku

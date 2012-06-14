@@ -1682,7 +1682,7 @@
 
 			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$keikoilla[0]['uusiotunnus']}'";
 			$saapuminen_nro_res = pupe_query($query);
-			$saapuminen_nro_row = mysql_fetch_array($saapuminen_nro_res);
+			$saapuminen_nro_row = mysql_fetch_assoc($saapuminen_nro_res);
 
 			echo "<font class='message'>Liitetty saapumiseen {$saapuminen_nro_row['laskunro']}</font><br><br>";
 

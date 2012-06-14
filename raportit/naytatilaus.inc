@@ -855,7 +855,7 @@
 		echo "<table>";
 		echo "<tr><th>#</th>";
 
-		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T") {
 
 			$trivityyppi_result = t_avainsana("TRIVITYYPPI");
 
@@ -1203,7 +1203,7 @@
 				$borderlask--;
 			}
 
-			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 
 				echo "<td $class valign='top'>";
 
@@ -1215,17 +1215,6 @@
 						$sel = "";
 						if ($trrow["selite"]==$row["positio"]) echo "$trrow[selitetark]";
 					}
-				}
-
-				if ($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"] > 0) {
-					$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]' and tunnus = '$row[asiakkaan_positio]'";
-					$posres = pupe_query($posq);
-					$posrow = mysql_fetch_assoc($posres);
-
-					echo "$posrow[tunnus] - $posrow[positio]";
-				}
-				elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
-					echo "<font class='info'>".t("Kohdetta ei valittu")."</font>";
 				}
 
 				echo "</td>";
@@ -1595,7 +1584,7 @@
 				if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 					$cspan++;
 				}
-				if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+				if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 					$cspan++;
 				}
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -1633,7 +1622,7 @@
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 				$colspan++;
 			}
-			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 				$colspan++;
 			}
 			if ($kukarow["extranet"] != "") {

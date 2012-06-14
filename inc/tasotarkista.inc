@@ -21,6 +21,9 @@ if(!function_exists("tasotarkista")) {
 			elseif (in_array(strtoupper($tyyppitalteen), array('S','U')) and !in_array(substr(trim($t[$i]), 0, 1), array("1", "2", "3"))) {
 				$virhe[$i] = t("Taso tulee alkaa numerolla 1, 2 tai 3!");
 			}
+			elseif ((strtoupper($tyyppitalteen) == 'B') and !is_numeric($t[$i])) {
+				$virhe[$i] = t("Tulosseuranta taso tulee olla numero!");
+			}			
 			else {
 				$query = "	SELECT tunnus
 							FROM taso

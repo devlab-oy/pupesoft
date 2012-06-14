@@ -31,7 +31,7 @@
 		echo "<tr>";
 		echo "<td>".t("Valitse osasto").":</td>";
 		
-		echo "<form action='$PHP_SELF' method='POST'>";
+		echo "<form method='POST'>";
 		echo "<td><select name='osasto' onchange='submit()'><option value=''>".t("Ei osastoa")."</option>";
 
 		$vares = t_avainsana("HENKILO_OSASTO");
@@ -127,7 +127,7 @@
 					}
 					 
 					if ($row["kuittaus"] == "") {
-						echo "<form action='$PHP_SELF' method='POST'>";
+						echo "<form method='POST'>";
 						echo "<input type='hidden' name='osasto' value='$osasto'>";
 						echo "<input type='hidden' name='konserni' value='$konserni'>";
 						echo "<input type='hidden' name='kuitatut' value='$kuitatut'>";						
@@ -139,7 +139,7 @@
 					}
 					
 					if ($row["kuittaus"] != "" and $row["ero"] >= 0) {
-						echo "<form action='$PHP_SELF' method='POST'>";
+						echo "<form method='POST'>";
 						echo "<input type='hidden' name='osasto' value='$osasto'>";
 						echo "<input type='hidden' name='konserni' value='$konserni'>";
 						echo "<input type='hidden' name='kuitatut' value='$kuitatut'>";						

@@ -60,7 +60,7 @@
 
 
 	//Etsi-kenttä
-	echo "<br><table><form action = '$PHP_SELF' method='post'>
+	echo "<br><table><form method='post'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='tee' value='ETSI'>";
 
@@ -204,7 +204,7 @@
 						lasku.tila, lasku.alatila
 						FROM tilausrivi
 						JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-						JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+						JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('O','K')
 						and tilausrivi.tyyppi = 'O'
@@ -253,7 +253,7 @@
 						tuote.sarjanumeroseuranta,
 						tilausrivi.var
 						FROM tilausrivi
-						JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.yhtio=tilausrivi.yhtio
@@ -439,7 +439,7 @@
 										// Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
 										$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
 													FROM sarjanumeroseuranta
-													JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+													JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 													WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
 													and sarjanumeroseuranta.tuoteno 	= '$row[tuoteno]'
 													and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
@@ -530,7 +530,7 @@
 					}
 				}
 
-				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
+				echo "<form method='post'><td class='back' valign='top'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tunnus' value='$row[tilaus]'>
@@ -632,7 +632,7 @@
 
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
 				if($toim == "MYYNTI") {

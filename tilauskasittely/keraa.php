@@ -14,20 +14,20 @@
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
-	if (!isset($toim)) 			$toim = '';
-	if (!isset($id)) 			$id = 0;
-	if (!isset($tee)) 			$tee = '';
-	if (!isset($jarj)) 			$jarj = '';
-	if (!isset($etsi)) 			$etsi = '';
-	if (!isset($tuvarasto)) 	$tuvarasto = '';
-	if (!isset($tumaa)) 		$tumaa = '';
-	if (!isset($tutoimtapa)) 	$tutoimtapa = '';
-	if (!isset($tutyyppi))	 	$tutyyppi = '';
-	if (!isset($rahtikirjaan)) 	$rahtikirjaan = '';
-	if (!isset($sorttaus)) 		$sorttaus = '';
-	if (!isset($keraajalist)) 	$keraajalist = '';
-	if (!isset($sel_lahete)) 	$sel_lahete = array();
-	if (!isset($sel_oslapp)) 	$sel_oslapp = array();
+	if (!isset($toim)) 			$toim 			= '';
+	if (!isset($id)) 			$id 			= 0;
+	if (!isset($tee)) 			$tee 			= '';
+	if (!isset($jarj)) 			$jarj 			= '';
+	if (!isset($etsi)) 			$etsi 			= '';
+	if (!isset($tuvarasto)) 	$tuvarasto 		= '';
+	if (!isset($tumaa)) 		$tumaa 			= '';
+	if (!isset($tutoimtapa)) 	$tutoimtapa 	= '';
+	if (!isset($tutyyppi))	 	$tutyyppi 		= '';
+	if (!isset($rahtikirjaan)) 	$rahtikirjaan 	= '';
+	if (!isset($sorttaus)) 		$sorttaus 		= '';
+	if (!isset($keraajalist)) 	$keraajalist 	= '';
+	if (!isset($sel_lahete)) 	$sel_lahete 	= array();
+	if (!isset($sel_oslapp)) 	$sel_oslapp 	= array();
 
 	$keraysvirhe = 0;
 	$virherivi   = 0;
@@ -1185,7 +1185,7 @@
 		if ($muuttuiko == 'kylsemuuttu') {
 			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
+				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
 							FROM lasku
 							JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
@@ -1261,8 +1261,8 @@
 				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
 				$ulos .= "</body></html>";
 
-				// korvataan poikkeamameili keräysvahvistuksella
-				if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["kerayspoikkeama"] == 0) {
+				// korvataan poikkeama-meili keräysvahvistuksella
+				if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1320,7 +1320,7 @@
 							lasku.toimitustapa,
 							lasku.jaksotettu
 							FROM lasku
-							LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.nouto=''
+							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 							where lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tunnus in ($tilausnumeroita)
 							and lasku.tila in ($tila)
@@ -1515,7 +1515,7 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, asiakas.email
+					$query = "	SELECT lasku.*, asiakas.email, asiakas.keraysvahvistus_lahetys
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.tunnus in ($tilausnumeroita)
@@ -1553,7 +1553,7 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
 
 							$otunnus = $laskurow["tunnus"];
 
@@ -1792,7 +1792,7 @@
 									$komento .= " -#$lahetekpl ";
 								}
 
-								if ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "") {
+								if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
 									$komento = array($komento);
 									$komento[] = "asiakasemail".$laskurow['email'];
 								}
@@ -1843,10 +1843,10 @@
 				}
 			}
 
-			$boob    			= '';
-			$header  			= '';
-			$content 			= '';
-			$rivit   			= '';
+			$boob    = '';
+			$header  = '';
+			$content = '';
+			$rivit   = '';
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 				$query = "	SELECT tunnus
@@ -1888,7 +1888,7 @@
 			$kentta	= "etsi";
 
 			echo "<table>";
-			echo "<form action='' name='find' method='post'>";
+			echo "<form name='find' method='post'>";
 			echo "<input type='hidden' name='toim' value='{$toim}'>";
 			echo "<input type='hidden' id='jarj' name='jarj' value='{$jarj}'>";
 			echo "<tr><th>",t("Valitse varasto"),":</th><td><select name='tuvarasto' onchange='submit()'>";
@@ -2230,7 +2230,7 @@
 
 					$riveja_yht += $row['riveja'];
 
-					echo "<td valign='top'><form method='post' action=''>";
+					echo "<td valign='top'><form method='post'>";
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 						echo "<input type='hidden' name='id' value='{$row['keraysera']}' />";
@@ -2444,7 +2444,7 @@
 			$riveja = mysql_num_rows($result);
 
 			if ($riveja > 0) {
-				echo "<form name = 'rivit' method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<form name = 'rivit' method='post' autocomplete='off'>";
 				echo "	<input type='hidden' name='tee' value='P'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='id'  value='$id'>";
@@ -2858,7 +2858,7 @@
 							echo "<tr><td colspan='{$colspanni}'>";
 
 							while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-								echo chr((64+$keraysera_row['pakkausnro']))," <input type='text' name='keraysera_maara[{$keraysera_row['tunnus']}]' id='{$row['tunnus']}_{$keraysera_row['tunnus']}' value='{$keraysera_row['kpl']}' size='4' />&nbsp;";
+								echo chr((64+$keraysera_row['pakkausnro']))," <input type='text' name='keraysera_maara[{$keraysera_row['tunnus']}]' id='{$row['tunnus']}_{$keraysera_row['tunnus']}' value='".(float) $keraysera_row['kpl']."' size='4' />&nbsp;";
 							}
 
 							echo "</td></tr>";

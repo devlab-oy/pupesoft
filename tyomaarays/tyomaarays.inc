@@ -73,6 +73,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  != 'D'
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
 					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -231,7 +232,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -258,7 +263,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -285,7 +294,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -355,7 +368,7 @@
 
 
 			echo "	<br><br><table>";
-			echo "	<form action='$PHP_SELF' method='post' enctype='multipart/form-data'>
+			echo "	<form method='post' enctype='multipart/form-data'>
 					<input type='hidden' name='tee' value = 'VAHINKO'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -465,7 +478,7 @@
 	if ($toim == "TYOMAARAYS" and $tee_tyomaarays == "MAARAAIKAISHUOLLOT") {
 		//määräaikaishuollot
 		echo "<table>";
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>

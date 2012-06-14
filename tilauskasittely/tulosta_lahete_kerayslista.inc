@@ -166,6 +166,7 @@ if (!function_exists('alku_kerayslista')) {
 			$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 			$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
+			$prioriteetin_kuvaus = ($laskurow["hyvaksynnanmuutos"] != "") ? t_avainsana("ASIAKASLUOKKA", $kieli, "and avainsana.selite = '{$laskurow["hyvaksynnanmuutos"]}'", "", "", "selitetark") : "X";
 
 			if ($tyyppi == "SIIRTOLISTA") {
 				$pdf->draw_text(310,815, t("Siirtolista", $kieli), 		$thispage, $iso);
@@ -342,6 +343,10 @@ if (!function_exists('alku_kerayslista')) {
 
 
 			$komm = "";
+
+			if ($prioriteetin_kuvaus != "X") {
+				$komm .= "\n$prioriteetin_kuvaus";
+			}
 
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
 				$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];

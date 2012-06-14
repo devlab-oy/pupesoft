@@ -28,9 +28,17 @@ $kieliarray = array("se","en","de","no","dk","ee");
 
 if ($tee == "TEE" or $tee == "UPDATE") {
 
-	$file	 = fopen("http://api.devlab.fi/referenssisanakirja.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
-	$rivi    = fgets($file);
-	$otsikot = explode("\t", strtoupper(trim($rivi)));
+	$ch  = curl_init();
+	curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssisanakirja.sql");
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+	$sanakirja = curl_exec ($ch);
+	$sanakirja = explode("\n", trim($sanakirja));
+
+	// Eka rivi
+	$otsikot = explode("\t", strtoupper(trim(array_shift($sanakirja))));
 
 	if (count($otsikot) > 1) {
 		$sync_otsikot = array();
@@ -57,7 +65,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 			$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
 			$sanakirjaresult = pupe_query($sanakirjaquery);
 
-			while ($rivi = fgets($file)) {
+			foreach ($sanakirja as $rivi) {
 				// luetaan rivi tiedostosta..
 				$poista	 = array("'", "\\");
 				$rivi	 = str_replace($poista,"",$rivi);
@@ -153,8 +161,6 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 				}
 			}
 
-			fclose($file);
-
 			$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
 								FROM sanakirja
 								WHERE synkronoi = ''
@@ -177,7 +183,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 			echo "</table><br><br>";
 
 
-			echo "	<form method='post' action='$PHP_SELF'>
+			echo "	<form method='post'>
 					<input type='hidden' name='tee' value='UPDATE'>
 					<input type='submit' value='".t("Synkronoi")."'>
 
@@ -187,7 +193,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 }
 else {
 	echo "	<br><br>
-			<form method='post' action='$PHP_SELF'>
+			<form method='post'>
 			<input type='hidden' name='tee' value='TEE'>
 			<input type='submit' value='".t("Vertaa sanakirjoja")."'>
 			</form>";

@@ -1,7 +1,7 @@
 <?php
 
 	//hatetaan asiakkaan lähetetyyppi
-	$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+	$query = "  SELECT lahetetyyppi, lahetteen_jarjestys, lahetteen_jarjestys_suunta, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 				FROM asiakas
 				WHERE tunnus = '$laskurow[liitostunnus]'
 				and yhtio = '$kukarow[yhtio]'";
@@ -22,7 +22,7 @@
 	}
 	elseif ($naytatvale == 6) {
 		$lahetetyyppi = "tulosta_lahete_custom.inc";
-	}	
+	}
 	elseif ($naytatvale == 7) {
 		$lahetetyyppi = "tulosta_lahete_ean.inc";
 	}
@@ -81,7 +81,8 @@
 	}
 
 	// katotaan miten halutaan sortattavan
-	$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+	$sorttauskentta = generoi_sorttauskentta($asrow["lahetteen_jarjestys"] != "" ? $asrow["lahetteen_jarjestys"] : $yhtiorow["lahetteen_jarjestys"]);
+	$order_sorttaus = $asrow["lahetteen_jarjestys_suunta"] != "" ? $asrow["lahetteen_jarjestys_suunta"] : $yhtiorow["lahetteen_jarjestys_suunta"];
 
 	if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 	else $pjat_sortlisa = "";
@@ -118,7 +119,7 @@
 					and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
-					ORDER BY $pjat_sortlisa jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+					ORDER BY $pjat_sortlisa jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 	}
 	else {
 		$query = "  SELECT tilausrivi.*,
@@ -142,9 +143,9 @@
 	}
 
 	$riresult = pupe_query($query);
-	
+
 	// tämä siksi koska halutaan alkuperäisen tilauksen tilausnumero pdf-filuun.
-	if ($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) {
+	if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
 		$laskurow["tunnus"] = $laskurow['vanhatunnus'];
 	}
 

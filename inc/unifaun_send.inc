@@ -321,14 +321,71 @@ class Unifaun {
 					$rahtisopimus_res = pupe_query($query);
 					$rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
 
-					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? "n/a" : $rahtisopimus_row['rahtisopimus'];
+					$rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? 0 : $rahtisopimus_row['rahtisopimus'];
+
+					// Jos sopparinumero puuttuu
+					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
+
+						if ($this->toitarow['virallinen_selite'] == "KKSTD" or
+							$this->toitarow['virallinen_selite'] == "TPSTD" or
+							$this->toitarow['virallinen_selite'] == "IT09" or
+							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
+						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
+						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
+						else $rahtisopimusnro = 123;
+					}
+
+					// Jos sopparinumero on, mutta se on virheellinen
+					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
+
+						if (($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") and strlen($rahtisopimusnro) != 6) {
+							$rahtisopimusnro = 999999;
+						}
+
+						if ($this->toitarow['virallinen_selite'] == "KLGRP" and strlen($rahtisopimusnro) < 7) {
+							$rahtisopimusnro = 9999999;
+						}
+					}
 
 					$uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro)); 	# Customer number
 					$uni_par_val->addAttribute('n', "custno");
+
+					// Nämä ovat nyt käytössä:
+					#FREEG 		--> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
+					#H48 		--> RPAY
+					#IT09 		--> OPAY
+					#IT14 		--> OPAY
+					#KKSTD 		--> OPAY tai RPAY, 6 numeroa
+					#TPSTD 		--> RPAY, 6 numeroa
+					#KLGRP 		--> OPAY tai RPAY, min 7 max 8
+					#MH10 		--> RPAY, numeric minlength(8)
+					#MH20 		--> N/A
+					#MH30	 	--> RPAY
+					#SBTLFIEXP 	--> N/A
+					#TPSTD 		--> RPAY, 1-6 numeroa
+
+					// RPAY (receiver pays) and OPAY (other payer)
+					$allowed_rpay = array(
+						'FREEG',
+						'H48',
+						'KKSTD',
+						'TPSTD',
+						'KLGRP',
+						'MH10',
+						'MH30',
+					);
+
+					$allowed_opay = array(
+						'IT09',
+						'IT14',
+					);
 				}
 
 				if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
-					$uni_rcv_val = $uni_receiver->addChild('val', $this->asiakasrow['tunnus']); # HIT InNight mandatory.
+					// HITin id4user -kentän arvo määritetään asiakas/toimitusosoitekohtaiseksi
+					$id4user = md5($this->postirow["liitostunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+
+					$uni_rcv_val = $uni_receiver->addChild('val', $id4user); # HIT InNight mandatory.
 					$uni_rcv_val->addAttribute('n', "id4user");
 				}
 
@@ -566,20 +623,24 @@ class Unifaun {
 						#$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
 						#$uni_ser_val->addAttribute('n', "bookingoffice");
 
-					$allowed_rpay = array(
-						'HIT',
-						'KK',
-						'KL',
-						'MH',
-						'TNT',
-					);
-
-					if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['rahdinkuljettaja'], $allowed_rpay)) {
+					if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
 						$uni_addon = $uni_service->addChild('addon');
 						$uni_addon->addAttribute('adnid', 'rpay');
 
 						$uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
 						$uni_add_val->addAttribute('n', 'custno');
+					}
+					elseif ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
+						$uni_addon = $uni_service->addChild('addon');
+						$uni_addon->addAttribute('adnid', 'opay');
+
+						$uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
+						$uni_add_val->addAttribute('n', 'custno');
+
+						if ($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") {
+							$uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); # Payment reference. Used with add-on COD.
+							$uni_add_val->addAttribute('n', "reference");
+						}
 					}
 
 					if ($this->toitarow['virallinen_selite'] == "P19" and $this->rakir_row["puhelin"] != "") {

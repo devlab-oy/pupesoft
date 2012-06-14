@@ -33,19 +33,19 @@ if ($tee == 'LISAA') {
 
 if ($tee == "AMERIKA") {
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko1'>";
 	echo "<input type='submit' value='".t("Valitse viikko 1")."'></td>";
 	echo "</form>";
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko2'>";
 	echo "<input type='submit' value='".t("Valitse viikko 2")."'></td>";
 	echo "</form>";
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='hidden' name='viikko' value='viikko3'>";
 	echo "<input type='submit' value='".t("Valitse viikko 3")."'></td>";
@@ -149,7 +149,7 @@ if ($tee == "AMERIKA") {
 		}
 	}
 
-	echo "<form action='$PHP_SELF' method='post'>
+	echo "<form method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<table>";
 	
@@ -180,7 +180,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Maanantai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta01' cols='40' rows='7'>";
 			
-	for($b=0; $b<sizeof(${$viikko}[1]); $b++) {
+	for($b=0; $b<count(${$viikko}[1]); $b++) {
 		echo ${$viikko}[1][$b]."\n";
 	}
 			
@@ -191,7 +191,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Tiistai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta02' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[2]); $b++) {
+	for($b=0; $b<count(${$viikko}[2]); $b++) {
 		echo ${$viikko}[2][$b]."\n";
 	}
 	
@@ -202,7 +202,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Keskiviikko")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta03' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[3]); $b++) {
+	for($b=0; $b<count(${$viikko}[3]); $b++) {
 		echo ${$viikko}[3][$b]."\n";
 	}
 	
@@ -212,7 +212,7 @@ if ($tee == "AMERIKA") {
 		<tr>
 			<th>".t("Torstai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta04' cols='40' rows='7'>";
-	for($b=0; $b<sizeof(${$viikko}[4]); $b++) {
+	for($b=0; $b<count(${$viikko}[4]); $b++) {
 		echo ${$viikko}[4][$b]."\n";
 	}
 	echo "	</textarea></td>
@@ -222,7 +222,7 @@ if ($tee == "AMERIKA") {
 			<th>".t("Perjantai")."</th>
 			<td colspan='3'><textarea wrap='none' name='kentta05' cols='40' rows='7'>";
 	
-	for($b=0; $b<sizeof(${$viikko}[5]); $b++) {
+	for($b=0; $b<count(${$viikko}[5]); $b++) {
 		echo ${$viikko}[5][$b]."\n";
 	}
 	
@@ -260,7 +260,7 @@ if ($tee == "SYOTA") {
 		}
 	}
 		
-	echo "<form action='$PHP_SELF' method='post'>
+	echo "<form method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
 		<table>";
 		
@@ -333,12 +333,12 @@ if ($tee == "POISTA") {
 
 if ($tee == '') {
 	
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='SYOTA'>";
 	echo "<input type='submit' value='".t("Lisää uusi ruokalista")."'></td>";
 	echo "</form>";
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='AMERIKA'>";
 	echo "<input type='submit' value='".t("Lisää uusi Luonasamerika-ruokalista")."'></td>";
 	echo "</form>";
@@ -374,7 +374,7 @@ if ($tee == '') {
 			
 			// napit begin
 			echo "<table><tr><td class='back'>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='SYOTA'>";
 			echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
 			echo "<input type='submit' value='".t("Muokkaa")."'>";

@@ -1,14 +1,23 @@
 <?php
 
 $lue_data_output_file = "";
+$lue_data_output_text = "";
 $lue_data_err_file = "";
 $lue_data_virheelliset_rivit = array();
+$api_output = "";
+$api_status = TRUE;
 
 // Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
 //apache_setenv('no-gzip', 1);
 ini_set('zlib.output_compression', 0);
 ini_set('implicit_flush', 1);
 ob_implicit_flush(1);
+
+ini_set("memory_limit", "5G");
+ini_set("post_max_size", "100M");
+ini_set("upload_max_filesize", "100M");
+ini_set("mysql.connect_timeout", 600);
+ini_set("max_execution_time", 18000);
 
 if (php_sapi_name() == 'cli') {
 
@@ -19,8 +28,6 @@ if (php_sapi_name() == 'cli') {
 	$cli = true;
 
 	ini_set("include_path", ".".PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
-	ini_set("mysql.connect_timeout", 600);
-	ini_set("memory_limit", "1G");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -84,17 +91,28 @@ if (php_sapi_name() == 'cli') {
 else {
 	// Laitetaan max time 5H
 	ini_set("max_execution_time", 18000);
-	require ("inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") !== FALSE) {
+		require ("inc/parametrit.inc");
+	}
 	$cli = false;
 }
 
+
 // Funktio, jolla tehdään luedatan output
-function lue_data_echo($string) {
+function lue_data_echo($string, $now = false) {
 
-	global $cli, $lue_data_output_file;
+	global $cli, $lue_data_output_file, $lue_data_output_text, $api_kentat, $api_output;
 
-	if ($cli === FALSE) {
-		echo $string;
+	if (isset($api_kentat)) {
+		$api_output .= $string."\n";
+	}
+	elseif ($cli === FALSE) {
+		if ($now === TRUE) {
+			echo $string;
+		}
+		else {
+			$lue_data_output_text .= $string;
+		}
 	}
 	elseif ($lue_data_output_file == "") {
 		echo strip_tags($string)."\n";
@@ -130,13 +148,13 @@ if (!$cli and $oikeurow['paivitys'] != '1') {
 }
 
 if (!isset($table)) $table = '';
+
 $kasitellaan_tiedosto = FALSE;
+require ("inc/pakolliset_sarakkeet.inc");
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
 	$kasitellaan_tiedosto = TRUE;
-
-	require ("inc/pakolliset_sarakkeet.inc");
 
 	if ($_FILES['userfile']['size'] == 0) {
 		lue_data_echo("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
@@ -155,13 +173,19 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		$kasitellaan_tiedosto = FALSE;
 	}
 }
+elseif (isset($api_kentat) and count($api_kentat) > 0) {
+	$kasitellaan_tiedosto = TRUE;
+}
 
 if ($kasitellaan_tiedosto) {
 
 	/** Käsiteltävän filen nimi **/
 	$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
-	if ($ext == "DATAIMPORT") {
+	if (isset($api_kentat) and count($api_kentat) > 0) {
+		$excelrivit = $api_kentat;
+	}
+	elseif ($ext == "DATAIMPORT") {
 		/** Ladataan CSV file **/
 		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
@@ -313,7 +337,7 @@ if ($kasitellaan_tiedosto) {
 			$table_tarkenne = substr($taulu, 11);
 		}
 
-		list(, , , , $joinattava, ) = pakolliset_sarakkeet($taulu);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattava, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($taulu);
 
 		// Laitetaan aina kaikkiin tauluihin
 		$joinattava["TOIMINTO"] = $table;
@@ -359,6 +383,7 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
+			lue_data_echo($lue_data_output_text, true);
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -442,6 +467,11 @@ if ($kasitellaan_tiedosto) {
 	exit;
 	*/
 
+	// REST-api ei salli etenemispalkkia
+	if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+		require('inc/ProgressBar.class.php');
+	}
+
 	$taulunrivit_keys = array_keys($taulunrivit);
 
 	for ($tril = 0; $tril < count($taulunrivit); $tril++) {
@@ -462,6 +492,7 @@ if ($kasitellaan_tiedosto) {
 		$indeksi_where	= array();
 		$trows			= array();
 		$tlength		= array();
+		$tdecimal		= array();
 		$apu_sarakkeet	= array();
 		$rivimaara 		= count($rivit);
 		$dynaamiset_rivit = array();
@@ -489,6 +520,8 @@ if ($kasitellaan_tiedosto) {
 			$tlengthpit = preg_replace("/[^0-9,]/", "", $row[1]);
 
 			if (strpos($tlengthpit, ",") !== FALSE) {
+				// Otetaan desimaalien määrä talteen
+				$tdecimal[$table_mysql.".".strtoupper($row[0])] = (int) substr($tlengthpit, strpos($tlengthpit, ",")+1);
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 			}
 
@@ -526,7 +559,7 @@ if ($kasitellaan_tiedosto) {
 		}
 
 		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, , $saakopoistaa) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
@@ -616,25 +649,48 @@ if ($kasitellaan_tiedosto) {
 			if ($lue_data_output_file != "") {
 				lue_data_echo("## LUE-DATA-EOF ##");
 			}
-			require ("inc/footer.inc");
-			exit;
+
+			if (!isset($api_kentat)) {
+				lue_data_echo($lue_data_output_text, true);
+				require ("inc/footer.inc");
+				exit;
+			}
+			else {
+				// Jos tullaan api.php:stä ja päädytään virheeseen, tällä estetään ettei mennä for-looppiin riville 650
+				// EI voida sanoa EXIT tai DIE koska api.php pitää mennä loppuun.
+				$rivit = array();
+				$api_status = FALSE;
+			}
 		}
 
 		lue_data_echo("<br><font class='message'>".t("Tiedosto ok, aloitetaan päivitys")." $table_mysql-".t("tauluun")."...<br></font>");
+		lue_data_echo($lue_data_output_text, true);
 
+		$lue_data_output_text = "";
 		$rivilaskuri = 1;
 
 		$puun_alkio_index_plus = 0;
 
 		$max_rivit = count($rivit);
 
+		// REST-api ei salli etenemispalkkia
+		if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+			$bar = new ProgressBar();
+			$bar->initialize($max_rivit);
+		}
+
 		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
 
 			// Komentorivillä piirretään progressbar, ellei ole output loggaus päällä
-			if ($cli and $lue_data_output_file == "") {
-				progress_bar($eriviindex, $max_rivit);
+			// REST-api skippaa
+			if (!isset($api_kentat)) {
+				if ($cli and $lue_data_output_file == "") {
+					progress_bar($eriviindex, $max_rivit);
+				}
+				elseif (!$cli or $lue_data_output_file != "") {
+					$bar->increase();
+				}
 			}
-
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
@@ -659,10 +715,6 @@ if ($kasitellaan_tiedosto) {
 			$tpupque 			= '';
 			$toimi_liitostunnus = '';
 			$chtoimittaja		= '';
-
-			if ($cli === FALSE and ($rivilaskuri % 500) == 0) {
-				echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
-			}
 
 			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
 				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
@@ -701,6 +753,20 @@ if ($kasitellaan_tiedosto) {
 			if (is_array($wherelliset)) {
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
+			}
+
+			// Lisätään taulun oletusarvot, jos ollaan lisäämässä uutta tietuetta
+			if ($rivi[$postoiminto] == "LISAA") {
+				foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+					// Etsitään taulunotsikot arraystä KEY, jonka arvo on oletuskenttä
+					$oletus_positio = array_keys($taulunotsikot[$taulu], $oletus_kentta, true);
+
+					// Kenttä löytyy taulukosta ja se on tyhjä, laitetaan siihen oletusarvo
+					// Jos kenttää EI LÖYDY, niin lisätään se muiden oletusten kanssa alempana
+					if (count($oletus_positio) == 1 and $rivi[$oletus_positio[0]] == "") {
+						$rivi[$oletus_positio[0]] = $oletus_arvo;
+					}
+				}
 			}
 
 			$avkmuuttuja = FALSE;
@@ -1185,8 +1251,20 @@ if ($kasitellaan_tiedosto) {
 						$rivi[$r] = trim(addslashes($rivi[$r]));
 
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
+
 							//korvataan decimal kenttien pilkut pisteillä...
 							$rivi[$r] = str_replace(",", ".", $rivi[$r]);
+
+							$desimaali_talteen = (float) $rivi[$r];
+
+							// Jos MySQL kentässä on desimaaleja, pyöristetään luku sallittuun tarkkuuteen
+							if ($tdecimal[$table_mysql.".".$otsikko] > 0) {
+								$rivi[$r] = round($rivi[$r], $tdecimal[$table_mysql.".".$otsikko]);
+							}
+
+							if ($desimaali_talteen != $rivi[$r]) {
+								lue_data_echo(t("Huomio rivillä").": $rivilaskuri <font class='message'>".t("Luku pyöristettiin sallittuun tarkkuuteen")." $desimaali_talteen &raquo; $rivi[$r]</font><br>");
+							}
 						}
 
 						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($rivi[$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
@@ -1418,8 +1496,35 @@ if ($kasitellaan_tiedosto) {
 								$chryhma = $rivi[$r];
 							}
 
-							if ($otsikko == 'ASIAKAS' and (int) $rivi[$r] > 0) {
+							// Asiakas sarakkaassa on tunnus
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '1' and $rivi[$r] != "") {
 								$chasiakas = $rivi[$r];
+							}
+
+							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pitää olla setattu) (tämä on oletus eräajossa)
+							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta != '1' and $rivi[$r] != "") {
+								$etsitunnus = " SELECT tunnus
+												FROM asiakas
+												USE INDEX (toim_ovttunnus_index)
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND toim_ovttunnus = '$rivi[$r]'
+												AND toim_ovttunnus != ''
+												AND ytunnus != ''
+												AND ytunnus = '".$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+								$etsiresult = pupe_query($etsitunnus);
+
+								if (mysql_num_rows($etsiresult) == 1) {
+									$etsirow = mysql_fetch_assoc($etsiresult);
+
+									// Vaihdetaan asiakas sarakkeeseen tunnus sekä ytunnus tulee nollata (koska ei saa olla molempia)
+									$chasiakas = $etsirow['tunnus'];
+									$chytunnus = "";
+									$rivi[$r] = $etsirow['tunnus'];
+									$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])] = "";
+								}
+								else {
+									$chasiakas = -1;
+								}
 							}
 
 							if ($otsikko == 'TOIMITTAJA' and (int) $rivi[$r] > 0) {
@@ -1605,7 +1710,7 @@ if ($kasitellaan_tiedosto) {
 					if ($chytunnus != '') {
 						$and .= " and ytunnus = '$chytunnus'";
 					}
-					if ($chasiakas > 0) {
+					if ($chasiakas != 0) {
 						$and .= " and asiakas = '$chasiakas'";
 					}
 					if ($chsegmentti > 0) {
@@ -1660,9 +1765,115 @@ if ($kasitellaan_tiedosto) {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
+				// Ollaan lisäämässä tietuetta, katsotaan että on kaikki oletukset MySQL aliaksista
+				// Taulun oletusarvot, jos ollaan lisäämässä uutta tietuetta
+				if ($rivi[$postoiminto] == "LISAA") {
+					foreach ($oletukset as $oletus_kentta => $oletus_arvo) {
+						if (stripos($query, ", $oletus_kentta = ") === FALSE) {
+							$query .= ", $oletus_kentta = '$oletus_arvo' ";
+						}
+					}
+				}
+
 				// lisätään tuote, mutta ei olla speksattu alvia ollenkaan...
 				if ($rivi[$postoiminto] == 'LISAA' and $table_mysql == 'tuote' and stripos($query, ", alv = ") === FALSE) {
 					$query .= ", alv = '$oletus_alvprossa' ";
+				}
+
+				// Jos on asiakas-taulu, niin populoidaan kaikkien dropdown-menujen arvot, mikäli niitä ei ole annettu.
+				if ($table_mysql == 'asiakas' and $rivi[$postoiminto] == 'LISAA') {
+					if (stripos($query, ", maksuehto = ") === FALSE) {
+						$select_query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND kaytossa='' ORDER BY jarjestys, teksti limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						$query .= ", maksuehto = '{$select_row["tunnus"]}' ";
+					}
+
+					if (stripos($query, ", toimitustapa = ") === FALSE) {
+						$select_query = "SELECT * FROM toimitustapa WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY jarjestys, selite limit 1";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						$query .= ", toimitustapa = '{$select_row["selite"]}' ";
+					}
+
+					if (stripos($query, ", valkoodi = ") === FALSE) {
+						$query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
+					}
+
+					if (stripos($query, ", kerayspoikkeama = ") === FALSE) {
+						$query .= ", kerayspoikkeama = '0' ";
+					}
+
+					if (stripos($query, ", laskutusvkopv = ") === FALSE) {
+						$query .= ", laskutusvkopv = '0' ";
+					}
+
+					if (stripos($query, ", laskutyyppi = ") === FALSE) {
+						$query .= ", laskutyyppi = '-9' ";
+					}
+
+					if (stripos($query, ", maa = ") === FALSE) {
+						$query .= ", maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kansalaisuus = ") === FALSE) {
+						$query .= ", kansalaisuus = '{$yhtiorow["kieli"]}' ";
+					}
+
+					if (stripos($query, ", laskutus_maa = ") === FALSE) {
+						$query .= ", laskutus_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", toim_maa = ") === FALSE) {
+						$query .= ", toim_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kolm_maa = ") === FALSE) {
+						$query .= ", kolm_maa = '{$yhtiorow["maa"]}' ";
+					}
+
+					if (stripos($query, ", kieli = ") === FALSE) {
+						$query .= ", kieli = '{$yhtiorow["kieli"]}' ";
+					}
+
+					if (stripos($query, ", chn = ") === FALSE) {
+						$query .= ", chn = '100' ";
+					}
+
+					if (stripos($query, ", alv = ") === FALSE) {
+						//yhtiön oletusalvi!
+						$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
+						$wtres  = pupe_query($wquery);
+						$wtrow  = mysql_fetch_array($wtres);
+
+						$query .= ", alv = '{$wtrow["selite"]}' ";
+					}
+
+					if (stripos($query, ", asiakasnro = ") === FALSE and $yhtiorow["automaattinen_asiakasnumerointi"] != "") {
+
+						if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+							$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+						}
+						else {
+							$apu_asiakasnumero = 0;
+						}
+
+						$select_query = "	SELECT MAX(asiakasnro+0) asiakasnro
+											FROM asiakas USE INDEX (asno_index)
+											WHERE yhtio = '{$kukarow["yhtio"]}'
+											AND asiakasnro+0 >= $apu_asiakasnumero";
+						$select_result = pupe_query($select_query);
+						$select_row = mysql_fetch_assoc($select_result);
+
+						if ($select_row['asiakasnro'] != '') {
+							$vapaa_asiakasnro = $select_row['asiakasnro'] + 1;
+						}
+
+						$query .= ", asiakasnro = '$vapaa_asiakasnro' ";
+					}
+
 				}
 
 				if ($rivi[$postoiminto] == 'MUUTA') {
@@ -1766,29 +1977,6 @@ if ($kasitellaan_tiedosto) {
 							$funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 						}
 
-						if ($tassafailissa) {
-
-							$tarkista_sarake = mysql_field_name($result, $i);
-
-							// Oletusaliakset
-							$query = "	SELECT selitetark_3
-										FROM avainsana
-										WHERE yhtio = '$kukarow[yhtio]'
-										and laji = 'MYSQLALIAS'
-										and selite = '$table_mysql.$tarkista_sarake'
-										and selitetark_2 = ''";
-							$al_res = pupe_query($query);
-							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
-
-							if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
-								if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
-								     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
-									$virhe[$i] .= t("Tieto on pakollinen")."!";
-									$errori = 1;
-								}
-							}
-						}
-
 						// Ignoorataan virhe jos se ei koske tässä failissa olutta saraketta
 						if ($tassafailissa and isset($virhe[$i]) and $virhe[$i] != "") {
 							switch ($table_mysql) {
@@ -1859,11 +2047,12 @@ if ($kasitellaan_tiedosto) {
 
 			// Meillä oli joku virhe
 			if ($tila == 'ohita' or $hylkaa > 0) {
+				$api_status = FALSE;
 				$lue_data_virheelliset_rivit[$rivilaskuri-1] = $excelrivit[$rivilaskuri-1];
 			}
 		}
 
-		lue_data_echo(t("Päivitettiin")." $lask ".t("riviä")."!<br><br>");
+		lue_data_echo("<br><font class='message'>".t("Päivitettiin")." $lask ".t("riviä")."!</font><br><br>");
 
 		// Kirjoitetaan LOG fileen lopputagi, jotta tiedetään että ajo on valmis
 		if ($lue_data_output_file != "") {
@@ -1912,7 +2101,9 @@ if ($kasitellaan_tiedosto) {
 	}
 }
 
-if (!$cli) {
+lue_data_echo("<br>".$lue_data_output_text, true);
+
+if (!$cli and !isset($api_kentat)) {
 	// Taulut, jota voidaan käsitellä
 	$taulut = array(
 		'abc_parametrit'                  => 'ABC-parametrit',
@@ -1996,7 +2187,7 @@ if (!$cli) {
 	// Selectoidaan aktiivi
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($taulut, '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>";
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 	echo "<input type='hidden' name='tee' value='file'>";
 	echo "<table>";
 	echo "<tr>";
@@ -2046,6 +2237,12 @@ if (!$cli) {
 					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
 					</select></td>
 			</tr>";
+		echo "<tr><th>".t("Asiakkaan valinta").":</th>
+					<td><select name='asiakkaanvalinta'>
+					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
+					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					</select></td>
+			</tr>";
 	}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {
@@ -2067,6 +2264,6 @@ if (!$cli) {
 		<br>";
 }
 
-require ("inc/footer.inc");
+if (!isset($api_kentat)) require ("inc/footer.inc");
 
 ?>

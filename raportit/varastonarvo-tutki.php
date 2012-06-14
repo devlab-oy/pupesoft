@@ -24,7 +24,7 @@
 	if ($pp1 == "00" or $kk1 == "00" or $vv1 == "0000") $tee = $pp1 = $kk1 = $vv1 = "";
 
 	// piirrellään formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<form method='post' autocomplete='OFF'>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Syötä alku pp-kk-vvvv").":</th>";
@@ -373,7 +373,7 @@
 		echo "</table><br><br>Yhteensä: $eroyht<br>";
 
 		echo "<br><hr>";
-		echo "<font class='message'>".t("Keikat ja niiden varastonmuutos (listataan vain jos eroja)")."</font><br><br>";
+		echo "<font class='message'>".t("Saapumiset ja niiden varastonmuutos (listataan vain jos eroja)")."</font><br><br>";
 
 		// haetaan kaikki ajanjakson keikat
 		$query  = "	SELECT *
@@ -389,7 +389,7 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
+		echo "<th>".t("saapuminen")."</th>";
 		echo "<th>".t("toimittaja")."</th>";
 		echo "<th>".t("jälkilaskettu")."</th>";
 		echo "<th>".t("laskut")."</th>";
@@ -505,7 +505,7 @@
 		$ero = $lomuutos - $kpmuutos;
 
 		echo "<tr>";
-		echo "<th colspan='4'>".t('Keikat yhteensä')."</th>";
+		echo "<th colspan='4'>".t('Saapumiset yhteensä')."</th>";
 		echo "<th align='right' NOWRAP>".round($timuutos,2)."</th>";
 		echo "<th align='right' NOWRAP>".round($lomuutos,2)."</th>";
 		echo "<th align='right' NOWRAP>".round($kpmuutos,2)."</th>";

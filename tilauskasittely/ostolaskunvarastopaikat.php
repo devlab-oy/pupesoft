@@ -2,7 +2,7 @@
 
 	require('../inc/parametrit.inc');
 
-	echo "<font class='head'>".t("Keikan varastopaikat")."</font><hr>";
+	echo "<font class='head'>".t("Saapumisen varastopaikat")."</font><hr>";
 
 	if ($otunnus != "") {	//toimittaja ja lasku on valittu. Nyt kohdistetaan, muutetaan ja lisätään rivejä.
 		require('ostorivienvarastopaikat.inc');
@@ -19,7 +19,7 @@
 		if ($tila == 'Y') $selecty=" selected ";
 
 		if ($tila=='' or $tila=='N' or $tila=='Y') {
-			echo "<br><form name='valinta' action='$PHP_SELF' method='post'>
+			echo "<br><form name='valinta' method='post'>
 					<td>".t("Etsi toimittaja").": </td>
 					<td><input type = 'text' name = 'nimi' value='$nimi'></td>
 					<td><select name='tila'>
@@ -57,23 +57,23 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='message'>".t("Yhtään sopivaa keikkaa ei löytynyt").".</font><br><br>";
+			echo "<font class='message'>".t("Yhtään sopivaa saapumista ei löytynyt").".</font><br><br>";
 		}
 		elseif (mysql_num_rows($result) > 100) {
-			echo "<font class='message'>".t("Haulla löytyi liikaa keikkoja")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
+			echo "<font class='message'>".t("Haulla löytyi liikaa saapumisia")." (>100). ".t("Tarkenna hakua").".</font><br><br>";
 		}
 		else {
 			echo "<table>";
 
 			echo "<tr>
-					<th>".t("Keikka")."</th>
+					<th>".t("Saapuminen")."</th>
 					<th>".t("Ytunnus")."</th>
 					<th>".t("Nimi")."</th>
 					<th></th>
 				</tr>";
 
 			while ($trow = mysql_fetch_array ($result)) {
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form method='post'>";
 				echo "<tr>";
 				echo "<input type='hidden' name='otunnus' value='$trow[tunnus]'>";
 				echo "<input type='hidden' name='tee' value=''>";

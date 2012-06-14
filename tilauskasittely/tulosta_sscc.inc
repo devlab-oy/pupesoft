@@ -60,7 +60,7 @@
 	}
 
 	if ($tee == '') {
-		echo "<form action='' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 		echo "<input type='hidden' name='toiminto' value='tulosta_sscc'>";
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";

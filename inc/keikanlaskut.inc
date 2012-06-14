@@ -88,13 +88,14 @@
 
 	echo "</form>";
 
-	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
+	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty saapumisiin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 				lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				lasku.alv,
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+				round(lasku.osto_rahti + lasku.osto_kulu + lasku.osto_rivi_kulu, 2) 'kulut'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -123,6 +124,7 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Summa valuutassa")."</th>";
 		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Kulut")."</th>";
 		echo "<th>".t("Veroton summa")."</th>";
 		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
@@ -161,7 +163,7 @@
 				$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
 			}
 
-			$trow["arvo"] = round((float) $trow["summaeur"] - (float) $alvisumma, 2);
+			$trow["arvo"] = round((float) $trow["summaeur"] - (float) $alvisumma - (float) $trow['kulut'], 2);
 
 			$vienti = $trow["vienti"];
 			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
@@ -182,6 +184,7 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["kulut"])." $yhtiorow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["arvo"])." $yhtiorow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>$trow[laskunro]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
@@ -214,6 +217,7 @@
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th></th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_eive,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";
@@ -224,7 +228,7 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
+	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan saapumisiin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				(	SELECT sum(summa) summa
@@ -258,7 +262,7 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Lasku valuutassa")."</th>";
 		echo "<th>".t("Lasku")."</th>";
-		echo "<th>".t("Liitetty keikkaan")."</th>";
+		echo "<th>".t("Liitetty saapumiseen")."</th>";
 		echo "<th>".t("Varastotilillä")."</th>";
 		echo "<th>".t("Erotus")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
@@ -596,7 +600,7 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<font class='head'>".t("Keikkojen eturahdit")."</font><hr>";
+	echo "<font class='head'>".t("Saapumisten eturahdit")."</font><hr>";
 
 	$query = "	SELECT *, lasku.rahti_etu*lasku.vienti_kurssi rahti
 				FROM lasku
@@ -610,13 +614,13 @@
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." keikkaa. <a href=\"javascript:toggleGroup('see')\">Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." ".t("saapumista").". <a href=\"javascript:toggleGroup('see')\">".t("Näytä")." / ".t("Piilota")."</a><br><br>";
 
 		echo "<div id='see' style='display:none'>";
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("Keikka")."</th>";
+		echo "<th>".t("Saapuminen")."</th>";
 		echo "<th>".t("Ytunnus")."</th>";
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
@@ -646,7 +650,7 @@
 		echo "</div>";
 	}
 	else {
-		echo "<font class='message'>".t("Ei keikkoja")."!</font><br><br>";
+		echo "<font class='message'>".t("Ei saapumisia")."!</font><br><br>";
 	}
 
 ?>

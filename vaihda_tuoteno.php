@@ -520,7 +520,7 @@ elseif ($tee == "file") {
 
 if ($tee == "") {
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 
 			<table>
 

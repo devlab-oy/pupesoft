@@ -168,7 +168,7 @@
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						WHERE tilausrivi.otunnus in ($tilausnumeroita)
 						and tilausrivi.yhtio   = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi  != 'D'
+						and tilausrivi.tyyppi != 'D'
 						$lisa1
 						$where_lisa
 						ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -294,17 +294,26 @@
 
 			// jos halutaan MYÖS lähete
 			if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
-				$params = array(
-					'laskurow'					=> $laskurow,
-					'sellahetetyyppi' 			=> "",
-					'extranet_tilausvahvistus'	=> "",
-					'naytetaanko_rivihinta'		=> "",
-					'tee'						=> "",
-					'toim'						=> $toim,
-					'query_ale_lisa'			=> "",
-					'komento'					=> $komento
-					);
-				pupesoft_tulosta_lahete($params);
+				$lahetteen_tulostustapa_query = "	SELECT *
+													FROM lasku
+													WHERE yhtio = '{$kukarow["yhtio"]}'
+													AND tunnus in ($tilausnumeroita)";
+				$lahetteen_tulostustapa_result = pupe_query($lahetteen_tulostustapa_query);
+
+				// Loopataan kaikki keräyslistan tilaukset ja tulostetaan lähete
+				while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
+					$params = array(
+						'laskurow'					=> $lahetteen_tulostustapa_row,
+						'sellahetetyyppi' 			=> "",
+						'extranet_tilausvahvistus'	=> "",
+						'naytetaanko_rivihinta'		=> "",
+						'tee'						=> "",
+						'toim'						=> $toim,
+						'query_ale_lisa'			=> "",
+						'komento'					=> $komento
+						);
+					pupesoft_tulosta_lahete($params);
+				}
 			}
 
 			$returnvalue = 0;

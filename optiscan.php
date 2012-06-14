@@ -159,34 +159,91 @@
 		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
 		// Katsotaan onko käyttäjällä jo keräyserä keräyksessä
-		$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
+		// Jos on useampi, niin napataan vain yksi erä kerrallaan
+		$query = "	SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 					FROM kerayserat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laatija = '{$kukarow['kuka']}'
-					AND tila    = 'K'";
+					WHERE yhtio 		= '{$kukarow['yhtio']}'
+					AND laatija 		= '{$kukarow['kuka']}'
+					AND ohjelma_moduli 	= 'OPTISCAN'
+					AND tila    		= 'K'
+					AND keratty 		= ''
+					GROUP BY nro
+					ORDER BY nro
+					LIMIT 1";
 		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		$kerattavat_rivit_row = mysql_fetch_assoc($result);
 
-		if (trim($row['tilausrivit']) != '') {
-
-			$kpl_arr = explode(",", $row['tilausrivit']);
-			$kpl = count($kpl_arr);
-			$n = 1;
-
-			$query = "	SELECT keraysvyohyke
+		// Jos keskeneräistä keikkaa ei ole, niin tehdää uusi erä
+		if (trim($kerattavat_rivit_row['tilausrivit']) == '') {
+			$query = "	SELECT keraysvyohyke, oletus_varasto
 						FROM kuka
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND kuka = '{$kukarow['kuka']}'
-						AND extranet = ''
-						AND keraysvyohyke != ''";
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						AND kuka 			= '{$kukarow['kuka']}'
+						AND extranet 		= ''
+						AND keraysvyohyke  != ''
+						AND oletus_varasto != ''";
 			$result = pupe_query($query);
-			$ker_row = mysql_fetch_assoc($result);
+
+			if (mysql_num_rows($result) == 0) {
+				$response = "N,,,,,,,,,,,,,1,Käyttäjätiedot virheelliset\r\n";
+			}
+			else {
+				$row = mysql_fetch_assoc($result);
+
+				// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
+				$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto']);
+
+				if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
+					// Tallennetaan missä tää erä on tehty
+					$ohjelma_moduli = "OPTISCAN";
+
+					require('inc/tallenna_keraysera.inc');
+
+					// Nämä tilaukset tallennettin keräyserään
+					if (count($lisatyt_tilaukset) > 0) {
+
+						$otunnukset = implode(",", $lisatyt_tilaukset);
+						$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+
+						// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
+						$query = "	UPDATE lasku SET
+									tila 	  = 'L',
+									lahetepvm = now(),
+									kerayslista = '{$kerayslistatunnus}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus in ({$otunnukset})";
+						$upd_res = pupe_query($query);
+
+						// Haetaan kerättävät rivit
+						$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+									FROM kerayserat
+									WHERE yhtio 		= '{$kukarow['yhtio']}'
+									AND laatija 		= '{$kukarow['kuka']}'
+									AND ohjelma_moduli 	= 'OPTISCAN'
+									AND tila    		= 'K'
+									AND nro 			= '$kerayseran_numero'
+									AND keratty 		= ''";
+						$result = pupe_query($query);
+						$kerattavat_rivit_row = mysql_fetch_assoc($result);
+					}
+				}
+
+				// poistetaan lukko
+				$query = "UNLOCK TABLES";
+				$res   = pupe_query($query);
+			}
+		}
+
+		if (trim($kerattavat_rivit_row['tilausrivit']) != '') {
+			$kpl_arr = explode(",", $kerattavat_rivit_row['tilausrivit']);
+			$kpl 	 = count($kpl_arr);
+			$n 		 = 1;
 
 			// haetaan keräysvyöhykkeen takaa keräysjärjestys
 			$query = "	SELECT keraysjarjestys
 						FROM keraysvyohyke
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ker_row['keraysvyohyke']}'";
+						AND tunnus  = '{$kerattavat_rivit_row['keraysvyohyke']}'";
 			$keraysjarjestys_res = pupe_query($query);
 			$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
 
@@ -207,7 +264,7 @@
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.tunnus IN ({$row['tilausrivit']})
+						AND tilausrivi.tunnus IN ({$kerattavat_rivit_row['tilausrivit']})
 						ORDER BY {$orderby}";
 			$rivi_result = pupe_query($query);
 
@@ -245,147 +302,14 @@
 				}
 
 				$rivi_row['tuoteno'] = implode("", $_arr);
-
 				$rivi_row['tuoteno'] = implode(" ,,, ", str_split($rivi_row['tuoteno'], 3));
-
 				$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
 
 				$response .= "N,";
 				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-				// $response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
 				$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
 
 				$n++;
-			}
-		}
-		else {
-
-			$query = "	SELECT keraysvyohyke, oletus_varasto
-						FROM kuka
-						WHERE yhtio 		= '{$kukarow['yhtio']}'
-						AND kuka 			= '{$kukarow['kuka']}'
-						AND extranet 		= ''
-						AND keraysvyohyke  != ''
-						AND oletus_varasto != ''";
-			$result = pupe_query($query);
-
-			if (mysql_num_rows($result) == 0) {
-				$response = "N,,,,,,,,,,,,,1,Käyttäjätiedot virheelliset\r\n";
-			}
-			else {
-				$row = mysql_fetch_assoc($result);
-
-				// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-				$erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto'], FALSE);
-
-				if (isset($erat['tilaukset']) and count($erat['tilaukset']) != 0) {
-					$otunnukset = implode(",", $erat['tilaukset']);
-
-					require('inc/tallenna_keraysera.inc');
-
-					$kerayslistatunnus = trim(array_shift($erat['tilaukset']));
-
-					// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
-					$query = "	UPDATE lasku SET
-								tila = 'L',
-								lahetepvm = now(),
-								kerayslista = '{$kerayslistatunnus}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus in ({$otunnukset})";
-					$upd_res = pupe_query($query);
-
-					$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
-								FROM kerayserat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND laatija = '{$kukarow['kuka']}'
-								AND tila = 'K'";
-					$result = pupe_query($query);
-					$row = mysql_fetch_assoc($result);
-
-					$kpl_arr = explode(",", $row['tilausrivit']);
-					$kpl = count($kpl_arr);
-					$n = 1;
-
-					// haetaan keräysvyöhykkeen takaa keräysjärjestys
-					$query = "	SELECT keraysjarjestys
-								FROM keraysvyohyke
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$row['keraysvyohyke']}'";
-					$keraysjarjestys_res = pupe_query($query);
-					$keraysjarjestys_row = mysql_fetch_assoc($keraysjarjestys_res);
-
-					$orderby_select = $keraysjarjestys_row['keraysjarjestys'] == "V" ? ",".generoi_sorttauskentta("3") : "";
-					$orderby = $keraysjarjestys_row['keraysjarjestys'] == 'P' ? "kokonaismassa" : ($keraysjarjestys_row['keraysjarjestys'] == "V" ? "sorttauskentta" : "vh.indeksi");
-
-					$query = "	SELECT keraysvyohyke.nimitys AS ker_nimitys,
-								tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
-								IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
-								tilausrivi.tuoteno, ROUND(kerayserat.kpl, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
-								kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus,
-								(tuote.tuotemassa * ROUND(kerayserat.kpl, 0)) AS kokonaismassa,
-								kerayserat.nro, tuote.kerayskommentti
-								{$orderby_select}
-								FROM tilausrivi
-								JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus IN ({$row['tilausrivit']})
-								ORDER BY {$orderby}";
-					$rivi_result = pupe_query($query);
-
-					while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
-
-						$rivi_row['kerayskommentti'] = str_replace(array("'", ","), "", $rivi_row['kerayskommentti']);
-
-						$pakkauskirjain = strtoupper(chr((64+$rivi_row['pakkausnro'])));
-						$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
-
-						$hyllypaikka = $rivi_row['hyllyalue'];
-						$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka." ".$rivi_row['hyllynro'] : $hyllypaikka;
-						$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka." ".$rivi_row['hyllyvali'] : $hyllypaikka;
-						$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka." ".$rivi_row['hyllytaso'] : $hyllypaikka;
-
-						$hyllypaikka = implode(" ", str_split(strtoupper(trim($hyllypaikka))));
-
-						// W7 12 80 => W71280 => w71280 => w 7 128 0
-						$rivi_row['tuoteno'] = strtoupper(str_replace(" ", "", $rivi_row['tuoteno']));
-
-						$_tmp = str_split($rivi_row['tuoteno']);
-						$_cnt = count($_tmp);
-						$_arr = array();
-
-						for ($i = 0; $i < $_cnt; $i++) {
-							if ($i < $_cnt-1 and !is_numeric($_tmp[$i])) {
-								array_push($_arr, $_tmp[$i], " ");
-							}
-							elseif ($i < $_cnt-1 and is_numeric($_tmp[$i]) and isset($_tmp[$i+1]) and !is_numeric($_tmp[$i+1])) {
-								array_push($_arr, $_tmp[$i], " ");
-							}
-							else {
-								array_push($_arr, $_tmp[$i]);
-							}
-						}
-
-						$rivi_row['tuoteno'] = implode("", $_arr);
-
-						$rivi_row['tuoteno'] = implode(" ,,, ", str_split($rivi_row['tuoteno'], 3));
-
-						$rivi_row['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite");
-
-						$response .= "N,";
-						$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-						// $response .= "{$kpl} riviä,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$n},0\r\n";
-						$response .= "{$kpl} riviä,{$rivi_row['nro']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},\"{$rivi_row['tuoteno']}\",{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},{$rivi_row['kerayskommentti']},0\r\n";
-
-						$n++;
-					}
-				}
-
-				// poistetaan lukko
-				$query = "UNLOCK TABLES";
-				$res   = pupe_query($query);
 			}
 		}
 
@@ -744,7 +668,6 @@
 
 		if ($splitlineflag == 0) {
 			###### TEHDÄÄN UUSI SSCC-NUMERO
-			// emuloidaan transactioita mysql LOCK komennolla
 			$query = "LOCK TABLES avainsana WRITE";
 			$res   = pupe_query($query);
 

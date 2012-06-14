@@ -8,15 +8,15 @@
 	if (!isset($tee)) $tee = "";
 
 	// sallitaan vain numerot 0-9
-	$tunnus = preg_replace("[^0-9]", "", $tunnus);
+	$tunnus = preg_replace("/[^0-9]/", "", $tunnus);
 
 	if ($tunnus != "" and $tee == "vaihda") {
 
-		$tila_query  = "	SELECT *
-							FROM lasku
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tila IN ('L','N','A','V','C')
-							AND tunnus = '{$tunnus}'";
+		$tila_query  = " SELECT *
+						 FROM lasku
+						 WHERE yhtio = '{$kukarow['yhtio']}'
+						 AND tila IN ('L','N','A','V','C')
+						 AND tunnus = '{$tunnus}'";
 		$tila_result = pupe_query($tila_query);
 
 		if (mysql_num_rows($tila_result) == 1) {
@@ -27,7 +27,6 @@
 			$locre = pupe_query($query);
 
 			if ($tila_row['tila'] == "C") {
-
 				if ($tila == "3") {
 					$query = "	UPDATE tilausrivi SET
 								keratty        = '',
@@ -45,15 +44,13 @@
 								AND tunnus = '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
-
 			}
 			else {
-
 				// lähete tulostettu
 				if ($tila == "3") {
 					$query = "	UPDATE tilausrivi SET
@@ -79,8 +76,8 @@
 								AND tunnus = '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
@@ -108,8 +105,8 @@
 								AND tunnus 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
@@ -170,8 +167,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 			}
@@ -207,8 +204,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 			}
@@ -230,8 +227,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
@@ -252,9 +249,9 @@
 			           $tunken = "ostorivitunnus";
 			       }
 
-			       $query = "	UPDATE sarjanumeroseuranta SET 
-			       				{$tunken} = 0 
-			       				WHERE yhtio = '{$kukarow['yhtio']}' 
+			       $query = "	UPDATE sarjanumeroseuranta SET
+			       				{$tunken} = 0
+			       				WHERE yhtio = '{$kukarow['yhtio']}'
 			       				AND {$tunken} = '{$srow['tunnus']}'";
 			       $sarjares = pupe_query($query);
 				}
@@ -287,7 +284,7 @@
 					($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('','A','J','C'))) or
 					($tila_row["tila"] == "C" and in_array($tila_row["alatila"], array('','A','B','C')))) {
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
 				echo "<input type='hidden' name='tee' value='vaihda' />";
 				echo "<input type='hidden' name='tunnus' value='{$tila_row['tunnus']}' />";
@@ -307,7 +304,7 @@
 					if ($yhtiorow['reklamaation_kasittely'] == 'U') {
 						if (in_array($tila_row["alatila"], array('B','C'))) {
 							echo "<option value = '2'>",t("Reklamaatio odottaa tuotteita"),"</option>";
-						}		
+						}
 						if ($tila_row["alatila"] == "C") {
 							echo "<option value = '3'>",t("Reklamaatio vastaanotettu"),"</option>";
 						}
@@ -343,7 +340,7 @@
 
 			require ("raportit/naytatilaus.inc");
 
-			echo "<form method='post' action=''>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='parametrit' value='{$parametrit}' />";
 			echo "<td class='back'><input type='submit' value='",t("Peruuta"),"'></td>";
 			echo "</form>";
@@ -357,7 +354,7 @@
 	}
 
 	if ($tee == "") {
-		echo "<form method='post' action=''>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='valitse'>";
 		echo "<table>";
 		echo "<tr>";

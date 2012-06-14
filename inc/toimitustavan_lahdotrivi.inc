@@ -99,6 +99,10 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "alkupvm") {
+		$tyyppi = 1.5;
+	}
+
 	if (mysql_field_name($result, $i) == "varasto") {
 
 		$query = "	SELECT tunnus, nimitys

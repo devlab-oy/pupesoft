@@ -43,30 +43,37 @@
 		while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
 
 			// HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
-			$erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"], FALSE);
+			$erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
-			if (count($erat['tilaukset']) > 0) {
+			if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
+				// Tallennetaan missä tää erä on tehty
+				$ohjelma_moduli = "KARDEX";
 
-				// Tallennetaan keröyserä
+				// Tallennetaan keräyserä
 				require('inc/tallenna_keraysera.inc');
 
-				$otunnukset = implode(",", $erat['tilaukset']);
+				// Nämä tilaukset tallennettin keräyserään
+				if (count($lisatyt_tilaukset) > 0) {
 
-				// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
-				$query = "	UPDATE lasku SET
-							tila = 'L',
-							lahetepvm = now(),
-							kerayslista = '{$kerayseran_numero}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus in ({$otunnukset})";
-				$upd_res = pupe_query($query);
+					$otunnukset = implode(",", $lisatyt_tilaukset);
+					$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+
+					// tilaus on jo tilassa N A, päivitetään nyt tilaus "keräyslista tulostettu" eli L A
+					$query = "	UPDATE lasku SET
+								tila = 'L',
+								lahetepvm = now(),
+								kerayslista = '{$kerayslistatunnus}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus in ({$otunnukset})";
+					$upd_res = pupe_query($query);
+				}
 			}
 
 			// lukitaan tableja
 			$query = "UNLOCK TABLES";
 			$result = pupe_query($query);
 
-			if (count($erat['tilaukset']) > 0) {
+			if (count($lisatyt_tilaukset) > 0) {
 
 				$reittietikettitulostin = $gen_ker_row['printteri8'];
 

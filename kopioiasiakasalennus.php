@@ -103,7 +103,7 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			echo "<form action='' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='write'>";
 			echo "<input type='hidden' name='tunnus' value='{$tunnus}'>";
 

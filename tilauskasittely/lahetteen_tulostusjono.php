@@ -103,10 +103,6 @@
 
 		enable_ajax();
 
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		echo "</script>";
-
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
 			$('.tilaa').live('click', function(){
@@ -357,7 +353,7 @@
 					echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
 				}
 
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='toim' 			value='$toim'>";
 				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -672,7 +668,7 @@
 		$kentta	= "etsi";
 
 		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<form name='find' method='POST' action='lahetteen_tulostusjono.php'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 
@@ -805,7 +801,7 @@
 			$jarjx = " ORDER BY t_tyyppi desc, $jarj ";
 		}
 		else {
-			$jarjx = " ORDER BY t_tyyppi desc, prioriteetti, kerayspvm ";
+			$jarjx = " ORDER BY t_tyyppi desc, prioriteetti, kerayspvm, h1time ";
 		}
 
 		if ($toim == 'SIIRTOLISTA') {
@@ -1003,7 +999,7 @@
 						echo "<$ero valign='top'></$ero>";
 					}
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -1033,7 +1029,7 @@
 
 					require("varaston_tulostusalue.inc");
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 
 					if ($yhtiorow["pakkaamolokerot"] != "") {
 
@@ -1093,7 +1089,7 @@
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
 					echo "<$ero valign='top'><input type='submit' 	value='".t("Tulosta")."'></form></$ero>";
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
@@ -1134,7 +1130,7 @@
 
 			if ($oikeurow['paivitys'] == 1) {
 				echo "<table>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 
 				if ($toim == 'SIIRTOLISTA') {
 					echo "<tr><th colspan='2'>".t("Tulosta kaikki siirtolistat")."</th></tr>";
@@ -1161,7 +1157,7 @@
 							WHERE
 							$logistiikka_yhtiolisa
 							GROUP BY komento
-							ORDER BY kirjoitin";
+							ORDER BY jarjestys, kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);
 
 				echo "<tr><td><select name='valittu_tulostin'>";
@@ -1171,6 +1167,11 @@
 
 					//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
 					if ($kirrow['tunnus'] == $kukarow['kirjoitin']) {
+						$sel = "SELECTED";
+					}
+
+					// Varaston oletus keräyslistatulostin (tai tarkalleen listan vikan keräyslistan varaston oletustulostin, mutta yleensä listaaan aina per varasto)
+					if ($kirjoitin != "" and $kukarow['kirjoitin'] == 0 and $kirrow['tunnus'] == $kirjoitin) {
 						$sel = "SELECTED";
 					}
 

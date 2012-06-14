@@ -57,8 +57,6 @@ else {
 		$tapvm							= $lasku['tapvm'];
 		$loppusumma						= $lasku['summa'];
 		$loppusumma_valuutassa			= $lasku['summa_valuutassa'];
-		$laskun_pyoristys				= $lasku['pyoristys'];
-		$laskun_pyoristys_valuutassa	= $lasku['pyoristys_valuutassa'];
 		$tilino							= 0;
 		$tilino_eu						= 0;
 		$tilino_ei_eu					= 0;
@@ -377,10 +375,6 @@ else {
 			$laskutusres = pupe_query($query);
 		}
 	}
-
-	// Otetaan huomioon myös laskun pyöristykset
-	$loppusumma = $loppusumma - $laskun_pyoristys;
-	$loppusumma_valuutassa = $loppusumma_valuutassa - $laskun_pyoristys_valuutassa;
 
 	// Otetaan loppusumma myös apusumma muuttujaan
 	$apusumma = $loppusumma;

@@ -672,6 +672,23 @@
 								$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, saldo, saldoaika)
 											VALUES ('$kukarow[yhtio]','Z','99','99','99','X','$trow[tuoteno]',$trow[varattu]*-1,now())";
 								$laskutusres = pupe_query($query);
+
+								$tapahtumaquery = "	INSERT into tapahtuma set
+													yhtio 		= '$kukarow[yhtio]',
+													tuoteno 	= '$trow[tuoteno]',
+													kpl 		= 0,
+													kplhinta	= 0,
+													hinta 		= 0,
+													laji 		= 'uusipaikka',
+													hyllyalue 	= '$hyllyalue',
+													hyllynro 	= '$hyllynro',
+													hyllyvali 	= '$hyllyvali',
+													hyllytaso 	= '$hyllytaso',
+													selite 		= '".t("Tuotteella ei ole yht‰‰n varastopaikkaa, perustettiin uusi").": Z 99 99 99',
+													laatija 	= '$kukarow[kuka]',
+													laadittu 	= now()";
+								$tapahtumaresult = pupe_query($tapahtumaquery);
+
 							}
 						}
 					}
@@ -896,7 +913,7 @@
 		$katesumma  			= round((float) $katesumma, 2);
 
 		// jos maksetaan k‰teisell‰ pyˆristet‰‰n l‰himp‰‰n viiteen senttiin
-		if ($xrow["kateinen"] == 'p') {
+		if ($xrow["kateinen"] == 'p' and $yhtiorow['maa'] != 'EE') {
 			// kotivaluutassa
 			if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$pyorerotus = round((float) $loppusumma, 2) - round((float) round((float) $loppusumma / 0.05) * 0.05, 2);
@@ -910,7 +927,8 @@
 		// Etsit‰‰n asiakas
 		$query = "	SELECT laskunsummapyoristys
 					FROM asiakas
-					WHERE tunnus='$orow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					WHERE tunnus = '$orow[liitostunnus]'
+					and yhtio	 = '$kukarow[yhtio]'";
 		$asres = pupe_query($query);
 		$asrow = mysql_fetch_assoc($asres);
 
@@ -943,6 +961,16 @@
 
 		if (isset($korkolasku) and $korkolasku == "kylla") {
 			$viivastyskorko = 0;
+		}
+
+		// HUOM: Tallennetaan PY÷RISTETTY loppusumma laskun loppusummaksi.
+		$loppusumma 			= round($loppusumma - $pyorerotus, 2);
+		$loppusumma_valuutassa 	= round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
+
+		// Jos kotivaluutassa niin vied‰‰n samat luvut n‰ihin kenttiin
+		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$loppusumma_valuutassa = $loppusumma;
+			$pyorerotus_valuutassa = $pyorerotus;
 		}
 
 		$query = "	UPDATE lasku

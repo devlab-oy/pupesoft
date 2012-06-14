@@ -11,7 +11,7 @@
 	$peruste = isset($peruste) ? $peruste : "tyojono";
 	$sel = ($peruste == "suorittaja") ? "SELECTED" : "";
 
-	echo "<form action='$PHP_SELF' name='vaihdaPeruste' method='POST'>";
+	echo "<form name='vaihdaPeruste' method='POST'>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Näytä työmääräykset")."</th>";

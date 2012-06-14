@@ -63,7 +63,7 @@
 
 	if ($tee == "") {
 
-		echo "<form name='form' action = '$PHP_SELF' method='post' name='tekstari'>";
+		echo "<form name='form' method='post' name='tekstari'>";
 		echo "<input type='hidden' name='tee' value = 'laheta'>";
 		echo "<table>";
 

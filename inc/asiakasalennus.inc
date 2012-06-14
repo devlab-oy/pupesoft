@@ -13,7 +13,7 @@
 	// HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
 	$hakukentat = "tunnus, asiakas, ytunnus,asiakas_segmentti, asiakas_ryhma,piiri, tuoteno, ryhma, alennus, alennuslaji, minkpl, alkupvm/loppupvm";
 
-	$jarjestys = 'ytunnus, asiakas_ryhma,piiri, tuoteno, ryhma, minkpl, alkupvm, loppupvm';
+	$jarjestys = "asiakasalennus.ytunnus, asiakasalennus.asiakas_ryhma, asiakasalennus.piiri, asiakasalennus.tuoteno, asiakasalennus.ryhma, asiakasalennus.minkpl, asiakasalennus.alkupvm, asiakasalennus.loppupvm";
 
 	if ($nayta_eraantyneet != "") {
 		$rajauslisa = " and asiakasalennus.loppupvm > '0000-00-00' and asiakasalennus.loppupvm < now() ";

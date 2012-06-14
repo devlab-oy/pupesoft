@@ -3,7 +3,7 @@
 if(!function_exists("yrititarkista")) {
 	function yrititarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
-		
+
 		if (mysql_field_name($result, $i) == "nimi") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
@@ -52,7 +52,7 @@ if(!function_exists("yrititarkista")) {
 			}
 			else {
 				$t[$i]=$pankkitili;
-			}			
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "bic" and $t[$i] != "") {
@@ -62,6 +62,18 @@ if(!function_exists("yrititarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tilino") {
+
+			$query = "	SELECT yhtio
+						FROM yriti
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino  = '$t[$i]'
+						and tunnus != '$tunnus'";
+			$sresult = pupe_query($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				$virhe[$i] = t("Tili on jo perustettu j‰rjestelm‰‰n")."!";
+				$errori = 1;
+			}
 
 			if (strtoupper($yhtiorow['maa']) == 'FI') {
 

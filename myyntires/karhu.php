@@ -143,9 +143,13 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
+
+
 	$query = "	SELECT asiakas.ytunnus,
+				IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
+						concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
+						concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
 				group_concat(distinct lasku.tunnus) karhuttavat,
-				group_concat(distinct lasku.liitostunnus) liitostunnarit,
 				sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
@@ -163,13 +167,13 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.summa	!= 0
 						$maksuehtolista
 						$maa_lisa
-						group by lasku.tunnus
+						GROUP BY lasku.tunnus
 						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
 				$asiakaslisa
-				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
+				GROUP BY asiakas.ytunnus, asiakastiedot
 				HAVING karhuttava_summa > 0
 				ORDER BY asiakas.ytunnus";
 	$result = pupe_query($query);
@@ -181,7 +185,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
-			$karhuttavat_asiakkaat[] = $karhuttavarow["liitostunnarit"];
+			$karhuttavat_asiakkaat[] = "'".$karhuttavarow["ytunnus"]."'";
 		}
 
 		if ($karhuakaikki != "") {
@@ -244,9 +248,15 @@ if ($tee == 'KARHUA')  {
 	//otetaan asiakastiedot ekalta laskulta
 	$asiakastiedot = mysql_fetch_assoc($result);
 
-	$query = "	SELECT *
+	$query = "	SELECT *,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimi, nimi) nimi,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$asiakastiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$asiakastiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -263,23 +273,18 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
 
-	$as_tunnus = explode(",", $karhuttavat_asiakkaat[0]);
-
-	foreach ($as_tunnus as $astun) {
-		$query  = "	SELECT kentta01
-			        FROM kalenteri
-			        WHERE yhtio = '$kukarow[yhtio]'
-			        AND tyyppi  = 'Myyntireskontraviesti'
-			        AND liitostunnus = '$astun'
-			        AND yhtio   = '$kukarow[yhtio]'
-					ORDER BY tunnus desc
-					LIMIT 1";
+	if ($karhuttavat_asiakkaat[0] != "") {
+		$query  = "	SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(pvmalku,10) paivamaara
+			        FROM asiakas
+					JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
+					LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
+			        WHERE asiakas.yhtio = '$kukarow[yhtio]'
+		        	AND asiakas.ytunnus IN  ({$karhuttavat_asiakkaat[0]})
+					ORDER BY kalenteri.tunnus desc";
 		$amres = pupe_query($query);
 
-		if (mysql_num_rows($amres) > 0) {
-			$amrow = mysql_fetch_assoc($amres);
-
-			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01]</td></tr>";
+		while ($amrow = mysql_fetch_assoc($amres)) {
+			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
 		}
 	}
 
@@ -308,7 +313,7 @@ if ($tee == 'KARHUA')  {
 				order by sorttaus, jarjestys";
 	$res = mysql_query($query) or pupe_error();
 
-	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='lahetaformi' method='post'>";
 	echo "<select name='karhuviesti'>";
 
 	$sel1 = $sel2 = $sel3 = '';
@@ -488,7 +493,7 @@ if ($tee == 'KARHUA')  {
 
 	echo "</td></form>";
 
-	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='ohitaformi' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
@@ -506,7 +511,7 @@ if ($tee == 'KARHUA')  {
 
 if ($tee == "") {
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='ALOITAKARHUAMINEN'>";
 	echo t("Syötä ytunnus jos haluat karhuta tiettyä asiakasta").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa karhuamisen ensimmäisestä asiakkaasta").".<br><br>";
 

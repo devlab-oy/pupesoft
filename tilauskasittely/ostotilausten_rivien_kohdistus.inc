@@ -32,7 +32,7 @@ if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
 }
 
 // katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
-$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
+$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, sum(osto_kulu + osto_rahti + osto_rivi_kulu) as osto_kulut, valkoodi, vienti
 			FROM lasku
 			WHERE yhtio = '$kukarow[yhtio]'
 			and tila = 'K'
@@ -47,7 +47,7 @@ if (mysql_num_rows($result) == 1) {
 	$kulurow = mysql_fetch_assoc($result);
 }
 else {
-	$kulurow = array(); // muuten tyhj‰‰
+	$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => "", "osto_kulut" => 0); // muuten tyhj‰‰
 }
 
 //nyt kohdistus on onnistunut sentilleen. Ollan valmiita ja tulostetaan purkulistat
@@ -149,7 +149,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 	echo t("Muuta rivi‰").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
@@ -168,7 +168,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 //Lis‰t‰‰n sarjanumeroita
 if ($tila == "sarjanumerot") {
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
@@ -199,7 +199,7 @@ if ($tila == 'uusirivi') {
 	echo t("Tee uusi rivi").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$toimittajaid;
 
 	if (is_array($haku)) {
 		foreach($haku as $i => $hakusana) {
@@ -484,8 +484,7 @@ if (isset($muut_siirrettavat)) {
 	$nayta_kohdistetut 	= $muut[1];
 	$ojarj 				= $muut[2];
 	$nayta_kaikki 		= $muut[3];
-	$suoratoimitukset	= $muut[4];
-	$toimittajaid 		= $muut[5];
+	$toimittajaid 		= $muut[4];
 
 	for($i = 4; $i < count($muut); $i++) {
 		list($h,$s) = explode('#', $muut[$i]);
@@ -627,7 +626,8 @@ if ($tila == 'tee_siirto') {
 								SET uusiotunnus = '$otunnus',
 								erikoisale 		= '$laskurow[erikoisale]',
 								kerattyaika 	= now(),
-								keratty 		= '$kukarow[kuka]'
+								keratty 		= '$kukarow[kuka]',
+								suuntalava = 0
 								$kpl_lisa
 								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$valittuuusiotunnus'
@@ -643,11 +643,11 @@ if ($tila == 'tee_siirto') {
 					$result = pupe_query($query);
 				}
 				else {
-					echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
+					echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
 				}
 			}
 			else {
-				echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirret‰‰n on lukittu")."</font><br>!";
+				echo "<font class='error'>".t("VIRHE: Saapuminen jolta rivi siirret‰‰n on lukittu")."</font><br>!";
 			}
 		}
 
@@ -879,6 +879,30 @@ if ($tila == 'tee_kohdistus') {
 							and tunnus='$tunnus'
 							and varattu<>'$kpl'";
 				$result = pupe_query($query);
+
+				$jalkitoimitukseen_kpl = $rivi_kpl_alkuperainen[$tunnus] - $kpl;
+
+				// Kopioidaan rivin erotus uudelle tilausriville
+				if ($yhtiorow["saapumisen_jt_kasittely"] == "K" and $jalkitoimitukseen_kpl > 0 and $kpl > 0 and $rivi_kpl_alkuperainen[$tunnus] > 0) {
+					// J‰tet‰‰n loppurivi JT:seen
+					$parametrit = array (
+						"method" => "POST",
+						"url" => "{$palvelin2}tilauskasittely/keikka.php",
+						"headers" => array ('Accept:text/html'),
+						"cookie" => "pupesoft_session={$_COOKIE['pupesoft_session']}",
+						"posttype" => "array",
+						"data" => array (
+							"keikan_otunnus" => $otunnus,
+							"tunnus" => $tunnus,
+							"ajax_toiminto" => 'rivi_kpl_splittaus',
+							"no_head" => 'yes',
+							"ohje" => 'off',
+							"uuden_rivin_kpl" => $jalkitoimitukseen_kpl,
+						)
+					);
+
+					$return = pupesoft_rest($parametrit);
+				}
 			}
 
 			if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
@@ -977,9 +1001,9 @@ if ($tila == '') {
 	}
 
 	$valittusumma 			= sprintf("%.2f", round($hintarow["hinta"],2));
-	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma, 2));
-	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"];
-	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"], 2));
+	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma-$kulurow['osto_kulut'], 2));
+	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"]-$kulurow['osto_kulut'];
+	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $kulurow['osto_kulut'], 2));
 	$valitutrivit 			= mysql_num_rows($result);
 
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
@@ -1033,7 +1057,7 @@ if ($tila == '') {
 	#$kennim_array[] = t('Extrakulu');
 	$kennim_array[] = t('Toimaika');
 	$kennim_array[] = t('Kommentti');
-	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t('Keikka');
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") $kennim_array[] = t('Saapuminen');
 
 	$kenhak_array = array();
 	$kenhak_array[] = 'otunnus';
@@ -1151,10 +1175,6 @@ if ($tila == '') {
 		$limit = "";
 	}
 
-	if ($suoratoimitukset == "vaan") {
-		$tilaajanrivinro = " and tilausrivi.tilaajanrivinro > 0 ";
-	}
-
 	$kentat = "";
 	foreach ($kentat_array as $kentta) {
 		$kentat .= $kentta.", ";
@@ -1229,10 +1249,6 @@ if ($tila == '') {
 		$chk4 = "checked";
 	}
 
-	if ($suoratoimitukset != "") {
-		$chk6 = "checked";
-	}
-
 	if ($laskunsumma == 0 and $valitutrivit > 0) { // jos ollaan saatu kohdistus nollaan ja ollaan valittu jotain
 		$ok = "<font class='ok'>";
 		$okend = "</font>";
@@ -1250,7 +1266,7 @@ if ($tila == '') {
 	$kappaleetrow = mysql_fetch_assoc($kappaleetres);
 
 	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
-	echo "<form action='$PHP_SELF' name='formi' method='post'>";
+	echo "<form name='formi' method='post'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='alku' value='$alku'>";
@@ -1261,13 +1277,13 @@ if ($tila == '') {
 
 	echo "<table>
 	<tr>
-		<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
+		<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
 		<th>".t("Laskun summa")."</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
 		<th>".t("Perusn‰kym‰").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
 	</tr>
 	<tr>
 		<th>".t("Toimittaja")."</th><td>$laskurow[nimi]</td>
-		<th>".t("Eturahti")."</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
+		<th>".t("Laskun kulut")."</th><td style='text-align:right'><span id='laskun_kulut'>{$kulurow['osto_kulut']}</span> $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
 	</tr>
 	<tr>
@@ -1290,16 +1306,17 @@ if ($tila == '') {
 	}
 
 	echo "</td>
-		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'>$kohdistettava_summa $kulurow[valkoodi]</td>
+		<th>".t("Eturahti")."</th><td style='text-align:right'>$laskurow[rahti_etu] $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
-		<th>".t("Erikoisalennus")."</th><td>".($laskurow["erikoisale"]*1)."%</td>
-		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right'>$ok $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")$okend</td>
+		<th>".t("Erikoisalennus")."</th><td><span id='keikan_erikoisale'>".($laskurow["erikoisale"]*1)."</span>%</td>
+		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'><span id='kohdistettava_summa'>$kohdistettava_summa</span> $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
-		</tr>";
+		</tr>
+		<tr>";
 
-	echo "<tr><th>".t("N‰ytet‰‰n rivit")."</th>";
+	echo "<th>",t("N‰ytet‰‰n rivit"),"</th>";
 
 	if ($chk3 == "checked"){
 			$sivu  = 1;
@@ -1307,15 +1324,23 @@ if ($tila == '') {
 			$loppu = mysql_num_rows($result);
 	}
 	else {
-		$loppu = $alku+50;
-		$sivu = round($loppu/50,0);
+		$loppu = $alku + 50;
+		$sivu = round($loppu / 50, 0);
 	}
 
- 	echo "<td>$alku - $loppu  ".t("Sivu").": $sivu</td>";
+ 	echo "<td>{$alku} - {$loppu}  ",t("Sivu"),": {$sivu}</td>";
+
+	echo "<th>".t("Kohdistettu summa (riv/kpl)")."</th><td id='kohdistettu_summa_td' style='text-align:right'>$ok <span id='kohdistettu_summa'>$valittusumma</span> $kulurow[valkoodi] (<span id='kohdistettu_rivit'>$kappaleetrow[rivit]</span>/<span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span>)$okend</td>
+		<th></th><td></td>
+		</tr>";
+
+	echo "<tr>";
+
+	echo "<th></th><td></td>";
 
 	echo "<th>".t("J‰ljell‰")."</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
 
-	echo "<th>".t("N‰yt‰ vain suoratoimitukset").":</th><td><INPUT type='checkbox' $chk6 name='suoratoimitukset' value='vaan' onclick='submit()'></td>";
+	echo "<th></th><td></td>";
 	echo "</form>";
 
 	echo "</tr>";
@@ -1334,7 +1359,7 @@ if ($tila == '') {
 		echo "<input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'>";
 		echo "<input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kohdista'>";
 		echo "<input type='hidden' name='tila' value='uusirivi'>";
@@ -1342,13 +1367,12 @@ if ($tila == '') {
 		echo "<input type='hidden' name='alku' value='$alku'>";
 		echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 		echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-		echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 		echo $hiddenit;
 		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-		echo "<form action='$PHP_SELF' name='formi' method='post'>";
+		echo "<form name='formi' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kohdista'>";
 		echo "<input type='hidden' name='alku' value='$alku'>";
@@ -1360,7 +1384,7 @@ if ($tila == '') {
 		echo "<input type='submit' value='".t("Kohdista tiedostosta")."'>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kohdista'>";
 		echo "<input type='hidden' name='tila' value=''>";
@@ -1369,13 +1393,12 @@ if ($tila == '') {
 		echo "<input type='hidden' name='alku' value='$alku'>";
 		echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 		echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-		echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 		echo $hiddenit;
 		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		echo "<input type='submit' value='".t("Siirr‰ rivej‰ toiselta keikalta")."'></form>";
+		echo "<input type='submit' value='".t("Siirr‰ rivej‰ toiselta saapumiselta")."'></form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kohdista'>";
 		echo "<input type='hidden' name='laskunsumma' value='$laskunsumma'>";
@@ -1402,12 +1425,12 @@ if ($tila == '') {
 	$viimenen_sivu = mysql_num_rows($result)+$alku-50;
 
 	echo "	<td class='back' colspan='12' align='center'>
-			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa&suoratoimitukset=$suoratoimitukset'><<<</a>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><<<</a>
 			&nbsp;&nbsp;
-			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
-			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
 			&nbsp;&nbsp;
-			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>>>></a>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>>>></a>
 			</td>";
 
 	echo "</tr>";
@@ -1415,7 +1438,7 @@ if ($tila == '') {
 	echo "<tr></tr><tr><th>x</th>";
 
 	//hakukent‰t
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
@@ -1429,10 +1452,9 @@ if ($tila == '') {
 	echo "<input type='hidden' name='tee' value='$tee'>";
 	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 	echo "<input type='hidden' name='ojarj' value='$ojarj'>";
 
-	$href = "$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj";
+	$href = "$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj";
 
 	echo "<th nowrap valign='top'>";
 	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") echo "<a href='$href=14".$ulisa."'>$kennim_array[14]</a><br>";
@@ -1549,7 +1571,6 @@ if ($tila == '') {
 	echo "<input type='hidden' name='tee' value='K'>";
 	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 	echo $hiddenit;
 	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 
@@ -1737,7 +1758,7 @@ if ($tila == '') {
 		echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
 		echo "</ul>";
 		echo "</div>";
-		echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//suoratoimitukset=$suoratoimitukset//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
+		echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
 		echo "<br>$rivirow[toim_tuoteno]";
 
 		$query = "	SELECT sarjanumeroseuranta
@@ -1783,10 +1804,10 @@ if ($tila == '') {
 			$sarjarow2 = mysql_fetch_assoc($sarjares);
 
 			if ($sarjarow2["kpl"] == abs($rivirow["siskpl"])) {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#00FF00;'>$snro_ok</font></a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#00FF00;'>$snro_ok</font></a>)";
 			}
 			else {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#DD0000;'>$snro</a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#DD0000;'>$snro</a>)";
 			}
 		}
 		echo "</$td>";
@@ -1805,7 +1826,9 @@ if ($tila == '') {
 			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='siirrettavat_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
 		}
 		elseif ($rivirow["varattu"] != 0 and !$onkosuoratoimitus) {
-			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
+			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]."&nbsp;&nbsp;".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite");
+			echo "<input type='hidden' name='rivi_kpl_alkuperainen[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."'";
+			echo"</$td>";
 		}
 		else {
 			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";
@@ -1900,15 +1923,15 @@ if ($tila == '') {
 		echo "<$td $classlisa valign='top'>";
 
 		if ($rivirow["varastossa_kpl"] == 0) {
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a><br>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a><br>";
 		}
 
 		if ((!isset($nayta_siirrettavat) or $nayta_siirrettavat == "") and $rivirow["rivitunnus"] == $rivirow["perheid2"] and mysql_num_rows($lisaresult) > 0) {
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lis‰varusteet")."</a><br>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lis‰varusteet")."</a><br>";
 		}
 
 		if ((!isset($nayta_siirrettavat) or $nayta_siirrettavat == "") and ($sarjarow["sarjanumeroseuranta"] == "S" or $sarjarow["sarjanumeroseuranta"] == "U" or $sarjarow["sarjanumeroseuranta"] == "V") and ($rivirow["rivitunnus"] == $rivirow["perheid2"] or $rivirow["perheid2"] == 0)) {
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liit‰ rivi")."</a>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liit‰ rivi")."</a>";
 		}
 
 		echo "</$td>";
@@ -1934,8 +1957,8 @@ if ($tila == '') {
 	}
 
  	echo "<tr><td class='back' colspan='12' align='center'>";
-	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a> ";
- 	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>";
+	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a> ";
+ 	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>";
 	echo "</th></tr>";
 	echo "</table>";
 
@@ -1954,7 +1977,7 @@ if ($tila == '') {
 		echo "<input type='submit' name='ala_kohdista_mitaan' value='".t("Poista kaikki kohdistukset")."'>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 				<input type='hidden' name='toiminto' value='kohdista'>
 				<input type='hidden' name='tila' value='uusirivi'>
@@ -1962,14 +1985,13 @@ if ($tila == '') {
 				<input type='hidden' name='alku' value='$alku'>
 				<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
 				<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
-				<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
 				<input type='hidden' name='otunnus' value='$otunnus'>
 				<input type='submit' value='".t("Tee uusi rivi")."'>
 				</form>";
 
-		echo "<form action='$PHP_SELF' name='formi' method='post'>
+		echo "<form name='formi' method='post'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 				<input type='hidden' name='toiminto' value='kohdista'>
 				<input type='hidden' name='alku' value='$alku'>
@@ -1981,7 +2003,7 @@ if ($tila == '') {
 				<input type='submit' value='".t("Kohdista tiedostosta")."'>
 				</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 				<input type='hidden' name='toiminto' value='kohdista'>
 				<input type='hidden' name='tila' value=''>
@@ -1990,14 +2012,13 @@ if ($tila == '') {
 				<input type='hidden' name='alku' value='$alku'>
 				<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
 				<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
-				<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
 				$hiddenit
 				<input type='hidden' name='ojarj' value=\"$ojarj\">
 				<input type='hidden' name='otunnus' value='$otunnus'>
-				<input type='submit' value='".t("Siirr‰ rivej‰ toiselta keikalta")."'>
+				<input type='submit' value='".t("Siirr‰ rivej‰ toiselta saapumiselta")."'>
 				</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form method='post'>
 				<input type='submit' value='".t("Kohdistus valmis")."'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 				<input type='hidden' name='toiminto' value='kohdista'>

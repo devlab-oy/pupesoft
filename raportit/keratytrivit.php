@@ -294,7 +294,7 @@
 	}
 
 	//Käyttöliittymä
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));

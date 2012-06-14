@@ -13,6 +13,7 @@ else exit;
 # $ftpport --> Custom portti, ei pakollinen
 # $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 # $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
+# $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
 
 // Palautetaan:
 # $palautus
@@ -77,6 +78,11 @@ else {
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
 
+		// Tehd‰‰n NAMEFMT komento, jos kyseess‰ on iSeries/AS400 palvelin
+		if (isset($ftptype) and $ftptype == "AS400") {
+			$quote = ftp_site($conn_id, "NAMEFMT 1");
+		}
+
 		// K‰ytet‰‰n aina .TMP p‰‰tett‰ kun siirto on kesken
 		$ftpfile_tmp = $filenimi.".TMP";
 
@@ -91,21 +97,39 @@ else {
 		}
 
 		// Otetaan .TMP p‰‰te veks ku siirto on valmis
-		if ($upload === TRUE) {
+		if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
+			// Jos $ftpport on k‰ytˆss‰ niin k‰ytet‰‰n n‰it‰ komentoja.
+			// N‰ytt‰‰ silt‰, ett‰ ftp_rename ei osaa hanskata renametusta kun k‰ytet‰‰n custom porttia
 			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
             $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
 
-			if (stripos($rename[0], "command successful") === FALSE) {
+			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
 				$rename1 = FALSE;
+			}
+		}
+		elseif ($upload === TRUE) {
+			$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
+
+			// Jos rename ep‰onnistuu, koitetaan poistaa .TMP tiedosto
+			if ($rename1 === FALSE) {
+				$rename1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+
+				if ($rename1 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
+				}
 			}
 		}
 
 		// Pit‰‰kˆ faili viel‰ nimet‰ kokonaan uudestaan (Finvoice iPost)
 		if ($upload === TRUE and $renameftpfile != "") {
-			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$filenimi}");
-            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$renameftpfile}");
+			$rename2 = ftp_rename($conn_id, "{$ftppath}{$filenimi}", "{$ftppath}{$renameftpfile}");
 
-			if (stripos($rename[0], "command successful") === FALSE) {
+			// Jos rename ep‰onnistuu, koitetaan poistaa turha v‰litiedosto
+			if ($rename2 === FALSE) {
+				$rename2 = ftp_delete($conn_id, "{$ftppath}{$filenimi}");
+				if ($rename2 === FALSE) {
+					$raw = ftp_raw($conn_id, "quote dele {$ftppath}{$filenimi}");
+				}
 				$rename2 = FALSE;
 			}
 		}
@@ -142,17 +166,18 @@ else {
 	}
 
 	// Siirto onnistui
-	if ($palautus == 0 and isset($ftpsucc)) {
+	if ($palautus == 0 and isset($ftpsucc) and $ftpsucc != "") {
 		// Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
 		rename($ftpfile, $ftpsucc."/".$filenimi);
 	}
-	elseif ($palautus != 0 and isset($ftpfail)) {
+	elseif ($palautus != 0 and isset($ftpfail) and $ftpfail != "") {
 		// Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
 		rename($ftpfile, $ftpfail."/".$filenimi);
 	}
 
-	// jos siirto ep‰onnistuu
-	if ($palautus != 0) {
+	// jos siirto ep‰onnistuu ja faildirri ei oo setattu nin l‰hetet‰‰n maili
+	// jos faildirri ON setattu niin ei ekoteta eik‰ meilata mitt‰‰n
+	if ($palautus != 0 and (!isset($ftpfail) or $ftpfail == "")) {
 		// ncftpput:in exit valuet
 		switch ($palautus) {
 			case  1:
@@ -174,7 +199,7 @@ else {
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
 
-		$rivi  = "$PHP_SELF\n";
+		$rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
 		$rivi .= "\n";
 		$rivi .= t("Tiedoston")." '$ftpfile' ".t("l‰hetys ep‰onnistui")."!\n";
 		$rivi .= "\n";
@@ -196,7 +221,7 @@ else {
 		}
 	}
 	elseif ($palautus_pyynto != "") {
-		$rivi  = "$PHP_SELF\n";
+		$rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("l‰hetys onnistui")."!\n";
 		$rivi .= "\n";
@@ -209,7 +234,7 @@ else {
 }
 
 //echotaan rudulle jos kyseess‰ ei ole batch-ajo
-if ($tulos_ulos == "") {
+if (!isset($tulos_ulos) or $tulos_ulos == "") {
 	echo $tulos_ulos_ftp;
 }
 elseif ($tulos_ulos == "edi") {

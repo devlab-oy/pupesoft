@@ -317,6 +317,7 @@
 	$origtuotteet 		= "";
 	$poislisa_mulsel 	= "";
 	$lisa_parametri		= "";
+	$hinta_rajaus		= "";
 
 	if (!isset($ojarj)) {
 		$ojarj = '';
@@ -376,7 +377,7 @@
 										 and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 										 and varastopaikat.tyyppi = '')
 										 WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
-
+			$hinta_rajaus  		= ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
 			$poislisa_mulsel	= " and tuote.status in ('P','X') ";
 		}
 		else {
@@ -595,7 +596,7 @@
 			echo "<div>";
 		}
 
-		echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
+		echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		if (!isset($tultiin)) {
@@ -788,7 +789,7 @@
 
 		if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
 			function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
-				global $kukarow, $kieltolisa, $poislisa;
+				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
 
 				if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
 				else $kyselylisa = "";
@@ -801,6 +802,7 @@
 							tuote.osasto,
 							tuote.try,
 							tuote.myyntihinta,
+							tuote.myymalahinta,
 							tuote.nettohinta,
 							tuote.aleryhma,
 							tuote.status,
@@ -814,12 +816,13 @@
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 							tuote.sarjanumeroseuranta
 							FROM {$tvk_taulu}
-							JOIN tuote ON tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno
+							JOIN tuote ON (tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno $hinta_rajaus)
 							WHERE {$tvk_taulu}.yhtio = '$kukarow[yhtio]'
 							and {$tvk_taulu}.id = '$tvk_korvaavat'
 							$kyselylisa
 							$kieltolisa
 							$poislisa
+							$extra_poislisa
 							ORDER BY {$tvk_taulu}.jarjestys, {$tvk_taulu}.tuoteno";
 				$kores = pupe_query($query);
 
@@ -829,7 +832,7 @@
 
 		if (!function_exists("tuoteselaushaku_tuoteperhe")) {
 			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
-				global $kukarow, $kieltolisa, $poislisa;
+				global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
 
 				if (!in_array($tuoteno, $isat_array)) {
 					$isat_array[] = $tuoteno;
@@ -843,6 +846,7 @@
 								tuote.osasto,
 								tuote.try,
 								tuote.myyntihinta,
+								tuote.myymalahinta,
 								tuote.nettohinta,
 								tuote.aleryhma,
 								tuote.status,
@@ -857,12 +861,13 @@
 								tuote.sarjanumeroseuranta,
 								tuoteperhe.tyyppi
 								FROM tuoteperhe
-								JOIN tuote ON tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno
+								JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno $hinta_rajaus)
 								WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
 								and tuoteperhe.isatuoteno = '$tuoteno'
 								AND tuoteperhe.tyyppi = '$tyyppi'
 								$kieltolisa
 								$poislisa
+								$extra_poislisa
 								ORDER BY tuoteperhe.tuoteno";
 					$kores = pupe_query($query);
 
@@ -889,6 +894,7 @@
 					tuote.osasto,
 					tuote.try,
 					tuote.myyntihinta,
+					tuote.myymalahinta,
 					tuote.nettohinta,
 					tuote.aleryhma,
 					tuote.status,
@@ -909,6 +915,7 @@
 					$lisa
 					$extra_poislisa
 					$poislisa
+					$hinta_rajaus
 					ORDER BY $jarjestys $sort
 					LIMIT 500";
 		$result = pupe_query($query);
@@ -1591,7 +1598,13 @@
 						}
 					}
 
-					echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>$myyntihinta";
+					echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
+
+					if ($hinta_rajaus != "") {
+						echo '<font style="text-decoration:line-through;">'.hintapyoristys($row["myymalahinta"]).' '.$yhtiorow["valkoodi"].'</font></br>';
+					}
+
+					echo ($poistetut !="" and $kukarow["extranet"] != "") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
 
 					if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 						echo "<br>".hintapyoristys($row["nettohinta"])." $yhtiorow[valkoodi]";
@@ -1619,7 +1632,9 @@
 							}
 
 							if ($kokonaismyytavissa > 0) {
-								echo "<td valign='top' class='$vari' $classrigh><font class='green'>".t("On")."</font></td>";
+								echo "<td valign='top' class='$vari' $classrigh>";
+								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
+								echo "</td>";
 							}
 							else {
 								echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t("Ei")."</font></td>";
@@ -1822,16 +1837,14 @@
 
 						if ($myytavissa > 0) {
 
-							echo "<font class='green'>";
-
 							if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
+								echo "<font class='green'>";
 								echo $myytavissa;
+								echo "</font>";
 							}
 							else {
-								echo t("On");
+								echo ($hinta_rajaus != "") ? "<font class='green'>".t("P‰‰varasto").": ".t("On")."</font>": "<font class='green'>".t("On")."</font>";
 							}
-
-							echo "</font>";
 						}
 						elseif ($tilauslisa != "") {
 							echo "$tilauslisa";

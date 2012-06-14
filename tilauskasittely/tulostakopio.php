@@ -276,7 +276,7 @@
 		js_popup(-100);
 
 		//syötetään tilausnumero
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
+		echo "<form method='post' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tee' value='ETSILASKU'>";
@@ -378,7 +378,7 @@
 			echo "<tr>";
 
 			if ($toim == "PURKU" or $toim == "TARIFFI" or $toim == "VASTAANOTTORAPORTTI") {
-				echo "<th>".t("Keikkanumero")."</th>";
+				echo "<th>".t("Saapumisnumero")."</th>";
 			}
 			else {
 				echo "<th>".t("Laskunumero")."</th>";
@@ -809,7 +809,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))";
 
@@ -887,8 +887,8 @@
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
-			$where5 = " AND tilausrivi.kpl !=0 ";
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')";
+			$where5 = " AND tilausrivi.kpl != 0 ";
 		}
 
 		// Etsitään muutettavaa tilausta
@@ -942,7 +942,7 @@
 						//-->
 						</script>";
 
-				echo "	<form method='post' action='$PHP_SELF'>
+				echo "	<form method='post'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='toim' value='$toim'>
@@ -980,7 +980,7 @@
 			if ($tila == 'monta') {
 				echo "<th valign='top'>".t("Tulosta")."</th>";
 
-				echo "  <form method='post' name='tulosta' action='$PHP_SELF' autocomplete='off'>
+				echo "  <form method='post' name='tulosta' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='mista' value='tulostakopio'>
@@ -1058,7 +1058,7 @@
 					echo "<td class='back' valign='top'>";
 
 					if ($kukarow["extranet"] == "") {
-						echo "	<form method='post' action='$PHP_SELF'>
+						echo "	<form method='post'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
 								<input type='hidden' name='tee' value='NAYTAHTML'>
 								<input type='hidden' name='toim' value='$toim'>
@@ -1082,7 +1082,7 @@
 								<br>";
 					}
 
-					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='$PHP_SELF' autocomplete='off'>
+					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' autocomplete='off'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 							<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
@@ -1095,7 +1095,7 @@
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>
-							<form method='post' action='$PHP_SELF' autocomplete='off'>
+							<form method='post' autocomplete='off'>
 							<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 							<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>
@@ -1668,6 +1668,7 @@
 							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 							WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi  != 'D'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
 							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";

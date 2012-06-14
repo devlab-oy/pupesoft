@@ -78,7 +78,7 @@
 						ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
 			$perheresult = pupe_query($query);
 
-			while ($perherow = mysql_fetch_array($perheresult)) {
+			while ($perherow = mysql_fetch_assoc($perheresult)) {
 
 				$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
 
@@ -182,7 +182,7 @@
 					AND oletus != ''
 					LIMIT 1";
 		$olpares = pupe_query($olquery);
-		$olparow = mysql_fetch_array($olpares);
+		$olparow = mysql_fetch_assoc($olpares);
 
 		$paikka	= $olparow["olpaikka"];
 	}
@@ -250,7 +250,6 @@
 	$lapsiyhteensa			 = 0;
 	$korvaavan_isaa_myyty	 = 0;
 	$perheid_lisaarivi		 = 0;
-	$suoratoimeikiitos 		 = '';
 	$lop					 = "";
 	$tuoteperhe				 = array(); 				// Tuoteperheiden lapset menev‰t t‰nne
 	$kaikkituotteet			 = array(); 				// t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
@@ -434,30 +433,6 @@
 		$toimittajan_tunnus	= "";
 	}
 
-	// Jos kyseess‰ on suoratoimitus joka tilataan toisesta firmasta suoraan
-	if (substr($paikka,0,3) == "@@@") {
-
-		if (strpos($paikka, "&&&") !== FALSE) {
-			$superpaikka = substr($paikka, 0, strpos($paikka, "&&&"));
-			$loppupaikka = substr($paikka, strpos($paikka, "&&&")+3);
-
-			$lop = "LOP#!°!#".$toimittamatta;
-			$toimittamatta = $loppupaikka;
-		}
-		else {
-			$superpaikka = $paikka;
-		}
-
-		$var 		 = "S";
-		$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-		$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-	}
-	elseif ($var == "S" and substr($paikka,0,3) != "@@@") {
-		$var 		= "";
-		$rivinumero	= "";
-		$suoratoimeikiitos = "ei";
-	}
-
 	$perhelisa = "";
 
 	//Haetaan myˆs tuoteperheet tai reseptit, t‰ss‰ parametrit niille.
@@ -570,7 +545,7 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$kres1 = pupe_query($query);
 
-			while ($krow1 = mysql_fetch_array($kres1)) {
+			while ($krow1 = mysql_fetch_assoc($kres1)) {
 				// K‰yd‰‰n l‰pi kaikki korvaavat...
 				$query = "	SELECT tuote.*
 							FROM korvaavat
@@ -580,7 +555,7 @@
 							order by korvaavat.jarjestys, korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
 
-				while ($krow2 = mysql_fetch_array($kres2)) {
+				while ($krow2 = mysql_fetch_assoc($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
@@ -687,7 +662,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'";
 			$zres = pupe_query($query);
-			$zrow = mysql_fetch_array($zres);
+			$zrow = mysql_fetch_assoc($zres);
 
 			if ($zrow["ei_saldoa"] == "") {
 
@@ -757,7 +732,7 @@
 				$zzrow 		= array();
 				$zzrowlask 	= 0;
 
-				while ($zrow = mysql_fetch_array($zres)) {
+				while ($zrow = mysql_fetch_assoc($zres)) {
 
 					// Saldolliset tuotteet
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
@@ -982,7 +957,7 @@
 
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
+							if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 
 							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 							$myy_tuoteno[$i]   = strtoupper($tuoteno);
@@ -1288,7 +1263,7 @@
 											FROM tuote
 											WHERE yhtio='$kukarow[yhtio]' and tuoteno='$myy_tuoteno[$indeksi]'";
 								$tres = pupe_query($query);
-								$trow = mysql_fetch_array($tres);
+								$trow = mysql_fetch_assoc($tres);
 
 								$ale_kaikki_array = array();
 
@@ -1311,7 +1286,7 @@
 									}
 
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
+									if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]") === FALSE) {
 										$kommentti .= " ".t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 									}
 
@@ -1323,7 +1298,7 @@
 
 								if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
+									if (stripos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
 										$kommentti .= " ".t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
 									}
 								}
@@ -1383,7 +1358,7 @@
 									if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 										$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 										$triviresult = pupe_query($query);
-										$trivinrow = mysql_fetch_array($triviresult);
+										$trivinrow = mysql_fetch_assoc($triviresult);
 
 										$rivinumero = $trivinrow["trivinro"]+1;
 										$tilrivinumero = $rivinumero;
@@ -1405,17 +1380,9 @@
 								// Onko tuotteella staattinen tilausrivikommentti
 								if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
 									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
-										$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
-									}
-								}
-
-								if ($rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
-									if (trim($kommentti) != "")	$kommentti .= "\n";
-
-									// Tilausrivin systeemikommentti
-									if (strpos($kommentti, t("Poistuva tuote")) === FALSE) {
-										$kommentti .= t("Poistuva tuote");
+									if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
+										if (trim($kommentti) != "")	$kommentti = "\n".$kommentti;
+										$kommentti = trim($trow["tilausrivi_kommentti"].$kommentti);
 									}
 								}
 
@@ -1511,7 +1478,7 @@
 								}
 
 								if (mysql_num_rows($lisatied_res) > 0) {
-									$lisatied_row = mysql_fetch_array($lisatied_res);
+									$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET
@@ -1595,7 +1562,7 @@
 												LIMIT ". (int) abs($varattu);
 									$sres = pupe_query($query);
 
-									while ($srow = mysql_fetch_array($sres)) {
+									while ($srow = mysql_fetch_assoc($sres)) {
 										$query = "	UPDATE sarjanumeroseuranta
 													SET $tunken 		 = '$lisatty_tun'
 													WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1616,7 +1583,7 @@
 									$myy_sarjatunnus = "";
 								}
 
-								if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $myy_era[$indeksi] != "") {
+								if ($rivityyppi != "T" and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and $myy_era[$indeksi] != "") {
 
 									if ($varattu > 0) {
 										$tunken = "myyntirivitunnus";
@@ -1631,7 +1598,7 @@
 													and hyllyvali 	= '$myy_hyllyvali[$indeksi]'
 													and sarjanumero = '$myy_era[$indeksi]'";
 										$lisa_res = pupe_query($query);
-										$lisa_row = mysql_fetch_array($lisa_res);
+										$lisa_row = mysql_fetch_assoc($lisa_res);
 
 										$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
 									}
@@ -1671,7 +1638,7 @@
 													and tunnus	= $perheid_lisaarivi
 													and tyyppi	= 'V'";
 										$lisa_res = pupe_query($query);
-										$lisa_row = mysql_fetch_array($lisa_res);
+										$lisa_row = mysql_fetch_assoc($lisa_res);
 
 										if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 											$valmistetyyppi = "M";
@@ -1736,34 +1703,6 @@
 		$puu_var		= array();
 		$puu_ohita_kerays = array();
 
-		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
-		if ($yhtiorow["suoratoim_automaatio"] != '' and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
-
-			if ($lisaarivi_debug==1) echo "Tehd‰‰n suoratoimitusautomaatio<br>";
-
-			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
-			$suora_kpl		= $toimittamatta;
-
-			require("suoratoimitusvalinta.inc");
-
-			if (count($suoratoim_array) > 0) {
-				if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-					$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-					$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-					$lop = "LOP#!°!#".$toimittamatta;
-					$toimittamatta = $loppupaikka;
-				}
-				else {
-					$superpaikka = $suoratoim_array[0];
-				}
-
-				$var 		 = "S";
-				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-			}
-		}
-
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
 			if ($toimittamatta >= $suoratoimitus_rivikpl) {
@@ -1789,17 +1728,17 @@
 			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 
-			if (substr($var,0,8) == "LOJ#!°!#") {
+			if (substr($var,0,8) == "LOJ#!°!#" and substr($var, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($var,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($var, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
 				$puu_var[]		= "";
 			}
-			elseif (substr($lop,0,8) == "LOP#!°!#") {
+			elseif (substr($lop,0,8) == "LOP#!°!#" and substr($lop, 8) - $toimittamatta > 0) {
 				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
-				$puu_kpl[] 		= substr($lop,8) - $toimittamatta;
+				$puu_kpl[] 		= substr($lop, 8) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
 				$puu_ein[]		= "";
@@ -1866,40 +1805,14 @@
 				$trow["tuoteno"] = $kaikkituotteet[0];
 			}
 			else {
-				$trow = mysql_fetch_array($tuoteresult);
-			}
-
-			if ($yhtiorow["suoratoim_automaatio"] != '' and $rivityyppi != 'E' and $var == "X") {
-
-				$var 			= "";
-				$suora_tuoteno 	= $trow["tuoteno"];
-				$suora_kpl		= $kpl;
-
-				require("suoratoimitusvalinta.inc");
-
-				if (count($suoratoim_array) > 0) {
-					if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
-						$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
-						$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
-
-						$lop = "LOP#!°!#".$toimittamatta;
-						$toimittamatta = $loppupaikka;
-					}
-					else {
-						$superpaikka = $suoratoim_array[0];
-					}
-
-					$var 		 = "S";
-					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#!°!#')+5);
-					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
-				}
+				$trow = mysql_fetch_assoc($tuoteresult);
 			}
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
 				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 					$triviresult = pupe_query($query);
-					$trivinrow = mysql_fetch_array($triviresult);
+					$trivinrow = mysql_fetch_assoc($triviresult);
 
 					$rivinumero = $trivinrow["trivinro"]+1;
 				}
@@ -1973,7 +1886,6 @@
 					case 'J' : // J‰lkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
-					case 'S' : // Suoratoimitus-JT
 					case 'T' : // Tilataan toimittajalta
 						// Yhtiˆn parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -2050,7 +1962,7 @@
 					$puurivires = t_avainsana("PUUTEKOMM");
 
 					if ($kutsuja == "EDITILAUS" and $trow['status'] == 'T') {
-						if (strpos($kommentti, t("Tilaustuote.")) === FALSE) {
+						if (stripos($kommentti, t("Tilaustuote.")) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".t("Tilaustuote.");
 						}
@@ -2059,13 +1971,13 @@
 
 						$puurivirow = mysql_fetch_assoc($puurivires);
 
-						if (strpos($kommentti, $puurivirow["selite"]) === FALSE) {
+						if (stripos($kommentti, $puurivirow["selite"]) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".$puurivirow["selite"];
 						}
 					}
 					elseif ($kutsuja == "EDITILAUS") {
-						if (strpos($kommentti, t("Tuote Loppu.")) === FALSE) {
+						if (stripos($kommentti, t("Tuote Loppu.")) === FALSE) {
 							// Tilausrivin systeemikommentti
 							$kommentti .= " ".t("Tuote Loppu.");
 						}
@@ -2173,15 +2085,6 @@
 
 					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
-				elseif ($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
-					}
-
-					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
-				}
 
 				if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
 			}
@@ -2213,7 +2116,7 @@
 
 			if (!is_array($korkieltokommi) and $korkieltokommi != '') {
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, $korkieltokommi) === FALSE) {
+				if (stripos($kommentti, $korkieltokommi) === FALSE) {
 					$kommentti .= " ".$korkieltokommi;
 				}
 			}
@@ -2229,18 +2132,19 @@
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
 
+			// Onko tuotteella staattinen tilausrivikommentti
 			if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
-					$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
+				if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
+					if (trim($kommentti) != "")	$kommentti = "\n".$kommentti;
+					$kommentti = trim($trow["tilausrivi_kommentti"].$kommentti);
 				}
 			}
 
 			if ($rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
-				if (trim($kommentti) != "")	$kommentti .= "\n";
-
 				// Tilausrivin systeemikommentti
-				if (strpos($kommentti, t("Poistunut tuote")) === FALSE) {
+				if (stripos($kommentti, t("Poistunut tuote")) === FALSE) {
+					if (trim($kommentti) != "")	$kommentti .= "\n";
 					$kommentti .= t("Poistunut tuote");
 				}
 			}
@@ -2258,7 +2162,7 @@
 				if (mysql_num_rows($ediresult) > 0) {
 
 					$edivastaavattuotteet = "";
-					$vrow = mysql_fetch_array($ediresult);
+					$vrow = mysql_fetch_assoc($ediresult);
 
 					$query = "	SELECT *
 								FROM vastaavat
@@ -2268,7 +2172,7 @@
 								ORDER BY jarjestys, tuoteno";
 					$edi2result = pupe_query($query);
 
-					while ($edirow = mysql_fetch_array($edi2result)) {
+					while ($edirow = mysql_fetch_assoc($edi2result)) {
 
 						list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
@@ -2393,15 +2297,30 @@
 				// P‰ivitet‰‰n suoratoimitus-myyntitilausrivin m‰‰r‰t
 				$query = "	UPDATE tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
-							SET tilausrivi.varattu = '$varattu',
-							tilausrivi.tilkpl 	   = '$varattu'
+							SET tilausrivi.tilkpl	= '$varattu',
+							tilausrivi.varattu 		= if(tilausrivi.varattu != 0, $varattu, 0),
+							tilausrivi.jt 			= if(tilausrivi.jt != 0, $varattu, 0)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tunnus = '$suoratoimitus_rivitun'";
 				$result = pupe_query($query);
 			}
 			elseif ($suoratoimitus_splittaus and $rivitunnus != $lisatty_tun) {
 				// Splitataan suoratoimitus-myyntitilausrivi
-				$uusi_suoratoimrivi = kopioi_tilausrivi($suoratoimitus_rivitun, array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.varattu"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun));
+				$query = "	SELECT varattu, jt
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$suoratoimitus_rivitun'";
+				$result = pupe_query($query);
+				$suora_row = mysql_fetch_assoc($result);
+
+				if ($suora_row["jt"] != 0) {
+					$pkentat = array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.jt"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun);
+				}
+				else {
+					$pkentat = array("tilausrivi.tilkpl"=> $varattu, "tilausrivi.varattu"=> $varattu, "tilausrivin_lisatiedot.tilausrivilinkki"=> $lisatty_tun);
+				}
+
+				$uusi_suoratoimrivi = kopioi_tilausrivi($suoratoimitus_rivitun, $pkentat);
 				$suoratoimitus_splittaus = FALSE;
 			}
 
@@ -2427,7 +2346,7 @@
 			}
 
 			if (mysql_num_rows($lisatied_res) > 0) {
-				$lisatied_row = mysql_fetch_array($lisatied_res);
+				$lisatied_row = mysql_fetch_assoc($lisatied_res);
 
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET
@@ -2509,7 +2428,7 @@
 								LIMIT ". (int) abs($varattu+$jt);
 					$sres = pupe_query($query);
 
-					while ($srow = mysql_fetch_array($sres)) {
+					while ($srow = mysql_fetch_assoc($sres)) {
 						if ($var == "S") {
 							// jos syˆtet‰‰n sarjanumertollinen tuote suoratoimitukseen niin liitet‰‰n t‰m‰ myyntirivi siihen kiinni
 							$query = "	INSERT INTO sarjanumeroseuranta
@@ -2557,7 +2476,7 @@
 								and tunnus	= $perheid_lisaarivi
 								and tyyppi	= 'V'";
 					$lisa_res = pupe_query($query);
-					$lisa_row = mysql_fetch_array($lisa_res);
+					$lisa_row = mysql_fetch_assoc($lisa_res);
 
 					if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 						$valmistetyyppi = "M";

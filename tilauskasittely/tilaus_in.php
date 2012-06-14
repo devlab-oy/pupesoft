@@ -77,7 +77,7 @@ else {
 
 	echo "<font class='head'>".t("Tilausten sis‰‰nluku")."</font><hr>";
 
-	echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>
+	echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
 
 		<table>
 		<tr>

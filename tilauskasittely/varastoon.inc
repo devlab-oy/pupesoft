@@ -3,7 +3,7 @@
 // tarvitaan $laskurow array, jossa on meid‰n keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-if ($toiminto == "kalkyyli" and $tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($toiminto == "kalkyyli" and $tee == "" and $kauttalaskutus == '') {
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
 
@@ -40,8 +40,8 @@ if ($toiminto == "kalkyyli" and $tee == "" and $suoratoimitus == '' and $kauttal
 $varastoon_msg  		  = "";
 $jalkilaskenta_debug_text = "";
 
-if ($tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
-	$varastoon_msg .= "<form action='$PHP_SELF' name='riviformi' method='post'>";
+if ($tee == "" and $kauttalaskutus == '') {
+	$varastoon_msg .= "<form name='riviformi' method='post'>";
 	$varastoon_msg .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
 	if ($toiminto == "kaikkiok") {
@@ -55,7 +55,7 @@ if ($tee == "" and $suoratoimitus == '' and $kauttalaskutus == '') {
 	$varastoon_msg .= "<input type='hidden' name='otunnus' value='$otunnus'>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 
 	// Tarkastetaan onko taricit k‰ytˆss‰
 	$tv_kaytossa = FALSE;
@@ -73,6 +73,7 @@ if ($suoratoimitus == '' and $kauttalaskutus == '') {
 						<th valign='top'>".t("Varastoonvientip‰iv‰")."</th>";
 
 	if ($toiminto == "kalkyyli" and ($tee == '' or $tee == 'varastoon') and $yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+		$varastoon_msg .= "<th valign='top'>".t("Saapuminen")."</th>";
 		$varastoon_msg .= "<th valign='top'>".t("Suuntalava")."</th>";
 	}
 
@@ -117,10 +118,22 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
+
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}')
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
 	// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja netto-kentt‰ tyhj‰!
@@ -129,8 +142,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-				$suuntalavajoin
-				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+				{$suuntalavajoin}
+				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
@@ -139,10 +152,22 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
 
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}') ";
+
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = '{$suuntalavan_tunnus}')
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
 	// N‰ytet‰‰n ruudulla
@@ -150,8 +175,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-				$suuntalavajoin
-				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+				{$suuntalavajoin}
+				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
@@ -190,7 +215,7 @@ else {
 if ($laskurow["vienti_kurssi"] == 0) {
 	echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 
-	if ($suoratoimitus == '' and $kauttalaskutus == '') {
+	if ($kauttalaskutus == '') {
 		exit;
 	}
 }
@@ -243,16 +268,17 @@ else {
 	}
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br>";
-	echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
+	echo "<font class='message'>".t("Saapuminen")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 	echo "<font class='message'>".t("Rahdin m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
-$summa		 = 0;
-$jtrivit	 = '';
-$jtvarastot	 = array();
-$rivia 		 = 0;
+$summa		 	 = 0;
+$jtrivit	 	 = array();
+$jtrivit_paikat	 = array();
+$jtvarastot	 	 = array();
+$rivia 		 	 = 0;
 $korjattavat_valmistukset 	  = array();
 $korjattavat_valmistukset_ind = 0;
 $suoralisa 	= "";
@@ -274,14 +300,14 @@ $tilikausi_alku  = (int) date('Ymd',mktime(0,0,0, $tkakk, $tkapp, $tkavv));
 $tilikausi_loppu = (int) date('Ymd',mktime(0,0,0, $tklkk, $tklpp, $tklvv));
 
 // jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
-if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '') {
 	echo "<font class='message'>".t("Suoritetaan j‰lkilaskentaa %s tuotteelle", "", mysql_num_rows($presult)).":<br></font>";
 }
-elseif ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<font class='message'>".t("Vied‰‰n varastoon %s tuotetta", "", mysql_num_rows($presult)).":<br></font>";
 }
 
-if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	require_once ('inc/ProgressBar.class.php');
 
 	$bar = new ProgressBar();
@@ -293,7 +319,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	$hankintakulut = "";
 
-	if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+	if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 		$bar->increase(); //calls the bar with every processed element
 	}
 
@@ -516,7 +542,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		// muuten t‰ss‰ ollaan sitten viem‰ss‰ kamaa ihan oikeesti saldoille.. tehd‰‰n siihen liittyv‰t hommat.
 		$uusikehahin = "";
 
-		if ($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"]>0) {
+		if ($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"] > 0) {
 			$lisavartlisa = " ".t("Saldo on varattu.");
 		}
 		else {
@@ -747,6 +773,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					{$millepakallemeni}
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
+					and varattu != 0
 					and (tunnus = '$tilrivirow[tunnus]' or perheid = '$tilrivirow[tunnus]')";
 		$varastoon_result = pupe_query($query);
 
@@ -755,17 +782,19 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		//	Kohdistetaan vain oikeille asiakkaille n‰iss‰ caseissa
 		if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
 			//Tutkitaan lˆytyykˆ JT-rivi joka m‰pp‰ytyy t‰h‰n ostoriviin
-		   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, group_concat(tilausrivi.tunnus)), 0) jtrivit
+		   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, tilausrivi.tunnus), 0) jtrivi
 		   				FROM tilausrivin_lisatiedot
 		   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 		   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
 		   				AND tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
 						$suoralisa";
 			$varastoon_result = pupe_query($query);
-			$varastoon_row = mysql_fetch_assoc($varastoon_result);
 
-			if ($varastoon_row["jtrivit"] != "") {
-				$jtrivit .= "$varastoon_row[jtrivit],";
+			while ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+				// Mitk‰ suoratoimitukset tuloutettiin t‰ll‰ keikalla
+				$jtrivit[$varastoon_row["jtrivi"]] = $varastoon_row["jtrivi"];
+				// Katotaan mille paikalle n‰‰ meni, jotta suoratoimitus voidaan laukasta t‰lt‰ paikalta
+				$jtrivit_paikat[$varastoon_row["jtrivi"]] = $tapahtumaid;
 			}
 		}
 	}
@@ -807,10 +836,18 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "	SELECT sscc
+
+			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['uusiotunnus']}'";
+			$saapuminen_chk_res = pupe_query($query);
+			$saapuminen_chk_row = mysql_fetch_assoc($saapuminen_chk_res);
+
+			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
+
+			$query = "	SELECT suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$suuntalavan_tunnus}'";
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$tilrivirow['uusiotunnus']}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -829,10 +866,18 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		$varastoon_msg .= "<td valign='top' nowrap>".tv1dateconv("$vpvva-$vpkka-$vpppa")."</td>";
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
-			$query = "	SELECT sscc
+
+			$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['uusiotunnus']}'";
+			$saapuminen_chk_res = pupe_query($query);
+			$saapuminen_chk_row = mysql_fetch_assoc($saapuminen_chk_res);
+
+			$varastoon_msg .= "<td>{$saapuminen_chk_row['laskunro']}</td>";
+
+			$query = "	SELECT suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$suuntalavan_tunnus}'";
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$tilrivirow['uusiotunnus']}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tunnus  = '{$suuntalavan_tunnus}'";
 			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
@@ -917,7 +962,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br><br>";
 	echo $varastoon_msg;
 	echo $jalkilaskenta_debug_text;
@@ -1025,7 +1070,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("HUOM: Keikkaan ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM: Saapumiseen ei ole liitetty yht‰‰n vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 
@@ -1037,7 +1082,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 		$cspani++;
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani++;
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani += 2;
 
 	echo "<tr><td align='center' class='tumma'><input type='checkbox' name='var' onclick='toggleAll(this);'></td>";
 
@@ -1065,7 +1110,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	echo "</td></tr>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 	echo "<tr>";
 }
 
@@ -1089,11 +1134,11 @@ if ($tee == "") {
 
 	echo "<td class='back' colspan='2'><input type='submit' value='".t("P‰ivit‰")."'></td>";
 }
-elseif ($suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($kauttalaskutus == '') {
 	echo "<td class='back' colspan='2'></td>";
 }
 
-if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	if ($tv_kaytossa) $cspani = 7;
 	else $cspani = 6;
 
@@ -1101,7 +1146,7 @@ if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '')
 		$cspani++;
 	}
 
-	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani++;
+	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) $cspani += 2;
 
 	echo "<td colspan='$cspani' class='back' align='right'>".t("Yhteens‰").":</th><td align='right'>".sprintf("%.2f", $summa)."</td>";
 }
@@ -1109,11 +1154,11 @@ if ($mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '')
 if ($tv_kaytossa and $tee == "") {
 	echo "<th><input type='submit' value='".t("P‰ivit‰")."'></th>";
 }
-elseif ($tv_kaytossa and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($tv_kaytossa and $kauttalaskutus == '') {
 	echo "<th></th>";
 }
 
-if ($suoratoimitus == '' and $kauttalaskutus == '') {
+if ($kauttalaskutus == '') {
 	echo "</tr>";
 	echo "</table></form><br>";
 }
@@ -1139,31 +1184,30 @@ if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistuk
 	echo "</table>";
 }
 
-if ($toiminto == "kaikkiok" and $tee == "varma" and $suoratoimitus == '' and $kauttalaskutus == '') {
-	echo "<br><font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
+if ($toiminto == "kaikkiok" and $tee == "varma" and $kauttalaskutus == '') {
+	echo "<br><font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
 }
-elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == '' and $kauttalaskutus == '') {
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '') {
 	if ($mobiili_keikka != "yes") {
-		echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
+		echo "<font class='message'>".t("Vietiin saapuminen")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
-		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
-		// jos ollaan viety koko lava purkamatta varastoon niin silloin s‰ilytet‰‰n tilausrivin linkki suuntalavalle
-		$suuntalavalisa = "";
-
-		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
-			$suuntalavalisa = ", tilausrivi.suuntalava = 0 ";
-		}
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
 		// p‰ivitet‰‰n suuntalava puretuksi
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 		 			SET suuntalavat.tila = 'P'
-					{$suuntalavalisa}
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
 					AND tilausrivi.netto 		= ''
 					AND tilausrivi.kpl 		   != 0
 					AND tilausrivi.tyyppi 		= 'O'
@@ -1175,16 +1219,35 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 		// JƒMƒRIVEILTƒ tyhjennet‰‰n netto-kentt‰, jotta tuotteet menev‰t seuraavalla kerralla varastoon.
 		$query = "	UPDATE tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 		 			SET tilausrivi.netto = '',
 					suuntalavat.tila 	 = 'S'
 					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus 	= '{$laskurow['tunnus']}'
+					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
 					AND tilausrivi.netto 		= 'X'
 					AND tilausrivi.kpl 			= 0
 					AND tilausrivi.varattu 	   != 0
 					AND tilausrivi.tyyppi	 	= 'O'
 					AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
 		$netto_suuntalava_result = pupe_query($query);
+
+		// Jos suuntalava on purettu ja rivi virty normaalisti hyllyyn niin nollataan linkki suuntalavalle
+		// jos ollaan viety koko lava purkamatta varastoon niin silloin s‰ilytet‰‰n tilausrivin linkki suuntalavalle
+		if ($yhtiorow['suuntalavat'] == 'S' and (!isset($koko_suuntalava) or trim($koko_suuntalava) != 'X')) {
+
+			// p‰ivitet‰‰n suuntalava puretuksi
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+			 			SET tilausrivi.suuntalava = 0
+						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
+						AND tilausrivi.netto 		= ''
+						AND tilausrivi.kpl 		   != 0
+						AND tilausrivi.tyyppi 		= 'O'
+						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
+			$netto_suuntalava_result = pupe_query($query);
+		}
 	}
 
 	//	Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..
@@ -1196,7 +1259,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 				and alanimi = ''";
 	$jtoikeudetres = pupe_query($query);
 
-	if (mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
+	if ((mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") or $yhtiorow["automaattinen_jt_toimitus"] == 'J')  {
 
 		$jtoikeudetrow = mysql_fetch_assoc($jtoikeudetres);
 		$mista = 'varastoon.inc';
@@ -1210,31 +1273,30 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 			}
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','S','V')) and trim($jtrivit) != "") {
-			$jtrivit = substr($jtrivit, 0, -1);
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','S','V')) and count($jtrivit) > 0) {
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA");
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T'))) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "tosi_automaaginen", "JATKA");
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J'))) {
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA");
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
-		if ($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) {
-			jt_toimita("", "", "", "", "dummy", "TOIMITA");
+		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','J','S','V'))) or $yhtiorow["automaattinen_jt_toimitus"] == 'J') {
+			jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
 		}
 	}
 }
 
-if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kauttalaskutus == '') {
+if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<br><hr>";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
 	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+	echo "<input type='submit' value='".t("Takaisin saapumisen valintaan")."'>";
 	echo "</form>&nbsp;";
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value=''>";
 	echo "<input type='hidden' name='ytunnus' value=''>";

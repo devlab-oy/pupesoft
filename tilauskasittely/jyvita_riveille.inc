@@ -67,7 +67,16 @@ if ($anna_ea == "TOKI" and ($jysum < 0 or $jysum >= 100)) {
 	echo "<font class='error'>".t("Erikoisalennus tulee olla")." 0 - 100%!!</font><br>";
 }
 elseif ($jysum == 0) {
-	echo "<font class='error'>".t("Jyvitettävä summa ei saa olla nolla")."!</font><br>";
+	if ($yhtiorow["jyvita_alennus"] == "") {
+		// Nollataan jyvitys
+		$query = "UPDATE lasku SET hinta = '0' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$laskurow["hinta"] = 0;
+	}
+	else {
+		echo "<font class='error'>".t("Jyvitettävä summa ei saa olla nolla")."!</font><br>";
+	}
 }
 elseif ($jysum < 0 and $nega_summa >= 0) {
 	echo "<font class='error'>".t("Et voi jyvittää summaa negatiiviseksi jos sinulla ei ole hyvitysrivejä")."!</font><br>";
@@ -87,9 +96,6 @@ else {
 	elseif ($yhtiorow["jyvita_alennus"] == "T" or ($yhtiorow["jyvita_alennus"] == "P" and $toim == "PROJEKTI")) {
 		// 	Alennus lisätään alennustuotteelle
 		//	TODO tämä on osittain turhaa koska projektia ei ole vielä köytössä, kohta on!
-
-		echo "jyvitetään tuotteella";
-
 		$query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[alennus_tuotenumero]'";
 		$rhire = mysql_query($query) or pupe_error($query);
 
@@ -108,7 +114,7 @@ else {
 			else {
 				$rivityyppi = "L";
 			}
-			
+
 			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', '$rivityyppi', '$alv', '')";
 			$addtil = mysql_query($query) or pupe_error($query);
 		}
@@ -131,7 +137,7 @@ else {
 			$jypro = $halu_summa / $nega_summa;
 
 			// Rullataan tilausrivejä
-			$query = "	SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl 
+			$query = "	SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
 						FROM tilausrivi
 						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt < 0
@@ -146,7 +152,7 @@ else {
 			$jypro = $halu_summa / $plus_summa;
 
 			// Rullataan tilausrivejä
-			$query = "	SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl 
+			$query = "	SELECT tunnus, tuoteno, hinta, {$ale_query_select_lisa} tilkpl
 						FROM tilausrivi
 						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt > 0

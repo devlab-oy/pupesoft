@@ -129,7 +129,7 @@
 	$tyyppisel[$raporttityyppi] = "SELECTED";
 
 	echo "<br>";
-	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<form method='post' autocomplete='off'>";
 
 	echo "<table>";
 

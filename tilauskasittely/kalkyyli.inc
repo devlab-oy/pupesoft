@@ -77,7 +77,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
 		require("varastoon.inc");
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
 		echo "<input type='hidden' name='tee' value='varastoon'>";
@@ -102,7 +102,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 		echo "<input type='submit' value='".t("Hyv‰lt‰ n‰ytt‰‰, vie varastoon!")."'>";
 		echo "</form>";
 
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
@@ -117,7 +117,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 	}
 }
 else {
-	echo "<br><br><font class='error'>".t("Keikan tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
+	echo "<br><br><font class='error'>".t("Saapumisen tiedot eiv‰t t‰sm‰‰! Korjaa asia")."!</font><br>";
 }
 
 // poistetaan lock file

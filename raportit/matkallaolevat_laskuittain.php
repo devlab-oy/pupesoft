@@ -28,7 +28,7 @@
 		}
 	}
 
-	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<form method='post'>";
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Syötä alkupäivä")."</th>";

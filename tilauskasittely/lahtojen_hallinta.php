@@ -1,6 +1,10 @@
 <?php
 
+	ini_set('zlib.output_compression', 1);
+
 	require ("../inc/parametrit.inc");
+
+	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
 	if (isset($man_aloitus)) {
 
@@ -18,11 +22,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		unset($man_aloitus);
-		unset($vaihda_prio);
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($vaihda_prio)) {
@@ -55,9 +60,10 @@
 					$valittu_lahto = trim($valittu_lahto);
 				}
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='vaihda_prio' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
+				echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
 				echo "<table>";
 				echo "<tr>";
@@ -75,10 +81,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		unset($vaihda_prio);
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($siirra_lahtoon)) {
@@ -144,8 +152,8 @@
 					if ($tila_chk_row['tila'] == 'T' and $old_row['liitostunnus'] != $new_row['liitostunnus']) {
 						$query = "	UPDATE rahtikirjat
 									SET toimitustapa = '{$new_row['selite']}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND rahtikirjanro = '{$tilausnumero}'";
+									WHERE yhtio 		= '{$kukarow['yhtio']}'
+									AND rahtikirjanro 	= '{$tilausnumero}'";
 						$upd_res = pupe_query($query);
 					}
 
@@ -165,7 +173,7 @@
 
 				foreach ($checkbox_child as $tilnro) {
 
-					$query = "	SELECT DISTINCT sscc_ulkoinen, tila
+					$query = "	SELECT DISTINCT nro, sscc, sscc_ulkoinen, tila
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otunnus = '{$tilnro}'";
@@ -190,7 +198,7 @@
 							$res = pupe_query($query);
 							$row = mysql_fetch_assoc($res);
 
-							if ($toitarow['tulostustapa'] == 'E') {
+							if ($toitarow['tulostustapa'] == 'E' and ((is_numeric($era_row['sscc_ulkoinen']) and (int) $era_row['sscc_ulkoinen'] > 0) or (!is_numeric($era_row['sscc_ulkoinen']) and (string) $era_row['sscc_ulkoinen'] != ""))) {
 								if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 								}
@@ -229,7 +237,7 @@
 										JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 										JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
 										WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-										AND lasku.tunnus = '{$row['tunnus']}'";
+										AND lasku.tunnus  = '{$row['tunnus']}'";
 							$rakir_res = pupe_query($query);
 							$rakir_row = mysql_fetch_assoc($rakir_res);
 
@@ -243,7 +251,9 @@
 										JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
 										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 										LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-										WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+										WHERE kerayserat.yhtio 		 = '{$kukarow['yhtio']}'
+										AND kerayserat.nro 			 = '{$sscc_chk_row['nro']}'
+										AND kerayserat.sscc 		 = '{$sscc_chk_row['sscc']}'
 										AND kerayserat.sscc_ulkoinen = '{$sscc_chk_row['sscc_ulkoinen']}'
 										GROUP BY 1,2,3,4";
 							$keraysera_res = pupe_query($query);
@@ -333,9 +343,9 @@
 				$chk_res = pupe_query($query);
 				$chk_row = mysql_fetch_assoc($chk_res);
 
-				echo "<font class='head'>",t("Nykyinen lähtö"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br />";
+				echo "<br><font class='head'>",t("Nykyinen lähtö"),": ",tv1dateconv($chk_row['pvm'])," {$chk_row['lahdon_kellonaika']} - {$chk_row['asiakasluokka']} - {$chk_row['selite']}</font><br /><br>";
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='siirra_lahtoon' value='X' />";
 				echo "<input type='hidden' name='valittu_lahto' value='{$valittu_lahto}' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
@@ -350,7 +360,7 @@
 							FROM lahdot
 							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
 							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.aktiivi IN ('', 'P')
+							AND lahdot.aktiivi IN ('','P','T')
 							AND lahdot.tunnus != '{$valittu_lahto}'
 							AND lahdot.varasto = '{$select_varasto}'
 							AND lahdot.asiakasluokka = '{$asluok_row['asiakasluokka']}'
@@ -395,10 +405,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
 		}
 
-		$valittu_lahto = "";
-		unset($siirra_lahtoon);
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($muokkaa_lahto)) {
@@ -433,13 +445,7 @@
 				$checkbox_parent = unserialize(urldecode($checkbox_parent));
 
 				if (is_array($checkbox_parent) and count($checkbox_parent) > 0) {
-					if ($lahto_muokkaus_aktiivi == "P") {
-						$lahto_muokkaus_aktiivi = "P";
-					}
-					elseif ($lahto_muokkaus_aktiivi == "E") {
-						$lahto_muokkaus_aktiivi = "E";
-					}
-					else {
+					if ($lahto_muokkaus_aktiivi != "P" and $lahto_muokkaus_aktiivi != "E" and $lahto_muokkaus_aktiivi != "T") {
 						$lahto_muokkaus_aktiivi = "";
 					}
 
@@ -464,10 +470,10 @@
 						}
 
 						$query = "	UPDATE lahdot SET
-									lahdon_kellonaika = '{$lahto_muokkaus_kellonaika}:00',
-									viimeinen_tilausaika = '{$lahto_muokkaus_tilausaika}:00',
-									kerailyn_aloitusaika = '{$lahto_muokkaus_aloitusaika}:00',
-									aktiivi = '{$lahto_muokkaus_aktiivi}'
+									lahdon_kellonaika 		= '{$lahto_muokkaus_kellonaika}:00',
+									viimeinen_tilausaika 	= '{$lahto_muokkaus_tilausaika}:00',
+									kerailyn_aloitusaika 	= '{$lahto_muokkaus_aloitusaika}:00',
+									aktiivi 				= '{$lahto_muokkaus_aktiivi}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$lahto}'";
 						$upd_res = pupe_query($query);
@@ -491,11 +497,13 @@
 							SUBSTRING(viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 							SUBSTRING(kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
 							aktiivi
-							FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+							FROM lahdot
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus  = '{$lahto}'";
 				$lahto_res = pupe_query($query);
 				$lahto_row = mysql_fetch_assoc($lahto_res);
 
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='muokkaa_lahto' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -509,7 +517,7 @@
 				echo "<option value=''>",t("Aktiivi"),"</option>";
 				echo "<option value='P'{$sel['P']}>",t("Pysäytetty"),"</option>";
 				echo "<option value='E'{$sel['E']}>",t("Ei aktiivi"),"</option>";
-
+				echo "<option value='T'{$sel['T']}>",t("Aktiivi, ei oteta lisää tilauksia"),"</option>";
 				echo "</select>";
 				echo "</td></tr>";
 				echo "<tr><th>",t("Lähdön kellonaika"),"</th><td><input type='text' name='lahto_muokkaus_kellonaika' value='{$lahto_row['lahdon_kellonaika']}' /></td></tr>";
@@ -527,8 +535,12 @@
 			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
 		}
 
-		unset($muokkaa_lahto);
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
 
 	if (isset($tulosta_rahtikirjat) and isset($select_varasto) and $select_varasto > 0) {
@@ -557,7 +569,8 @@
 					$result = pupe_query($query);
 
 					$toimitustapa_varasto = "";
-					$lahetetaanko_unifaun = FALSE;
+					$lahetetaanko_unifaun_era  = FALSE;
+					$lahetetaanko_unifaun_heti = FALSE;
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$sel_ltun[] = $row['tunnus'];
@@ -571,29 +584,35 @@
 						$toimitustapa_res = pupe_query($query);
 						$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
+						// Erätulostus
 						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
-							$lahetetaanko_unifaun = $toimitustapa_row["rahtikirja"];
+							$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
 
 							$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
 							$mergeid_arr[$mergeid] = $mergeid;
 						}
+
+						// Hetitulostus
+						if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
+							$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
+						}
 					}
 
 					if (count($sel_ltun) > 0) {
-						if ($lahetetaanko_unifaun !== FALSE) {
+						if ($lahetetaanko_unifaun_era !== FALSE) {
 							foreach ($mergeid_arr as $mergeid) {
 
-								if ($lahetetaanko_unifaun == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+								if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 								}
-								elseif ($lahetetaanko_unifaun == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+								elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 								}
 
 								$query = "	SELECT unifaun_nimi
 											FROM kirjoittimet
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$komento}'";
+											AND tunnus  = '{$komento}'";
 								$kires = pupe_query($query);
 								$kirow = mysql_fetch_assoc($kires);
 
@@ -610,25 +629,9 @@
 
 						$tee 		= "tulosta";
 						$nayta_pdf  = 'foo';
+						$tee_varsinainen_tulostus = ($lahetetaanko_unifaun_era !== FALSE or $lahetetaanko_unifaun_heti !== FALSE) ? FALSE : TRUE;
 
 						require ("rahtikirja-tulostus.php");
-
-						$query = "	SELECT COUNT(tunnus) as tunnus
-									FROM lasku
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-									AND toimitustavan_lahto = '{$lahto}'";
-						$result = pupe_query($query);
-
-						$row = mysql_fetch_assoc($result);
-
-						if ($row['tunnus'] == count($sel_ltun)) {
-							$query = "	UPDATE lahdot
-										SET aktiivi = 'S'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus  = '{$lahto}'";
-							$upd_res = pupe_query($query);
-						}
 
 						$tee = "";
 					}
@@ -644,14 +647,14 @@
 					$query = "	(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
 								FROM lasku
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'N'
+								AND lasku.tila 	  = 'N'
 								AND lasku.alatila = 'A'
 								AND lasku.toimitustavan_lahto = '{$lahto}')
 								UNION
 								(SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, lasku.toimitustapa
 								FROM lasku
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'L'
+								AND lasku.tila 	  = 'L'
 								AND lasku.alatila IN ('A','C')
 								AND lasku.toimitustavan_lahto = '{$lahto}')";
 					$result = pupe_query($query);
@@ -680,7 +683,7 @@
 				}
 			}
 			else {
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tulosta_rahtikirjat' value='X' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
@@ -773,10 +776,13 @@
 			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
 		}
 
-		unset($tulosta_rahtikirjat);
+		// Unsetataan tässä KAIKKI postatut muuttujat paitsi valittu varasto
+		if (isset($_REQUEST)) {
+			foreach($_REQUEST as $a => $b) {
+				if ($a != "select_varasto") unset(${$a});
+			}
+		}
 	}
-
-	enable_jquery();
 
 	echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
@@ -1397,76 +1403,6 @@
 
 					});
 
-					// 1. tason lähdön napin eventti
-					// $('td.toggleable').live('click', function() {
-
-					// 	var id = this.id.split(\"__\", 2);
-
-					// 	var toggleable = $('#toggleable_'+id[0]+'__'+id[1]);
-
-					// 	if (toggleable.is(':visible')) {
-
-					// 		$('th.sort_row_by:visible').off();
-
-					// 		$('#valittu_lahto').val('');
-
-					// 		$('input.filter_row_by_text:visible').attr('disabled', false).val('');
-					// 		$('select.filter_row_by_select:visible').attr('disabled', false).each(function() {
-					// 			$(this).children('option:first').attr('selected', true);
-					// 		});
-
-					// 		$('div.toggleable_row_child_div_order:visible, div.toggleable_row_child_div_sscc:visible').hide();
-
-					// 		toggleable.hide();
-
-					// 		$('td.toggleable_row_order, td.toggleable_row_sscc').removeClass('tumma');
-
-					// 		$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
-					// 		$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').show();
-
-					// 		$('select.filter_parent_row_by').attr('disabled', false).trigger('change');
-
-					// 		$('#uni_client_search').attr('disabled', false);
-					// 		$('#uni_client_search[value!=\"\"]').trigger('keyup');
-
-					// 		$('#uni_locality_search').attr('disabled', false);
-					// 		$('#uni_locality_search[value!=\"\"]').trigger('keyup');
-
-					// 		$('#uni_order_search').attr('disabled', false);
-					// 		$('#uni_order_search[value!=\"\"]').trigger('keyup');
-
-					// 		$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
-
-					// 		$('#header_parent th.sort_parent_row_by:visible').on('click', column_sort);
-					// 	}
-					// 	else {
-
-					// 		$('#uni_client_search').attr('disabled', true);
-					// 		$('#uni_order_search').attr('disabled', true);
-					// 		$('#uni_locality_search').attr('disabled', true);
-
-					// 		$('select.filter_parent_row_by').attr('disabled', true);
-
-					// 		$('#header_parent th.sort_parent_row_by:visible').off();
-
-					// 		$('#valittu_lahto').val(id[0]+'__'+id[1]);
-
-					// 		var parent_element = toggleable.parent();
-
-					// 		$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
-					// 		$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
-
-					// 		toggleable.css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
-
-					// 		var children = toggleable.children().children().children();
-
-					// 		children.filter('tr[class=\"toggleable_row_tr\"]').show();
-					// 		children.filter('tr[id^=\"toggleable_row_child_\"]').hide();
-
-					// 		$('th.sort_row_by:visible').on('click', column_sort);
-					// 	}
-					// });
-
 					$('tr[id^=\"toggleable_row_child_\"]:visible').hide();
 
 					// 2. tason tilausnumeronapin eventti
@@ -1630,11 +1566,6 @@
 						}
 					});
 
-					if ($('#valittu_lahto').val() != '') {
-						var val = $('#valittu_lahto').val();
-						$('#'+val).trigger('click');
-					}
-
 					$('#select_varasto').live('change', function() {
 						$('#varastoformi').submit();
 					});
@@ -1652,15 +1583,26 @@
 					});
 
 					$('#tulosta_rahtikirjat').on('click', function() {
+
+						var lahdot = '';
+						var lahdotcount = 0;
+
 						$('input[name^=\"checkbox_parent\"]').each(function() {
 							if ($(this).is(':checked')) {
+
+								lahdot=lahdot+$(this).val()+', ';
+								lahdotcount++;
+
 								$('#tulosta_rahtikirjat').after('<input type=\"hidden\" name=\"checkbox_parent[]\" value=\"'+$(this).val()+'\">');
 							}
 						});
 
 						$(this).after('<input type=\"hidden\" name=\"tulosta_rahtikirjat\" value=\"X\">');
 
-						$('#napitformi').submit();
+						if (lahdotcount > 1) lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdöt")."'+': '+lahdot.substring(0, lahdot.length - 2);
+						else lahdot = '".t("Oletko varma, että haluat tulostaa rahtikirjat ja sulkea lähdön")."'+': '+lahdot.substring(0, lahdot.length - 2);
+
+						if (confirm(lahdot)) $('#napitformi').submit();
 					});
 
 					$('#vaihda_prio').on('click', function() {
@@ -1704,8 +1646,6 @@
 				//-->
 			</script>";
 
-	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
-
 	if (!isset($parent_row_select_status)) $parent_row_select_status = "";
 	if (!isset($parent_row_select_prio)) $parent_row_select_prio = "";
 	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
@@ -1717,7 +1657,7 @@
 	if (!isset($tee)) $tee = "";
 
 	if ($tee == "") {
-		echo "<form method='post' id='varastoformi' action=''>";
+		echo "<br><form method='post' id='varastoformi'>";
 		echo "<table>";
 
 		echo "<tr><th>",t("Valitse varasto"),"</th><td class='back' style='vertical-align:middle;'>&nbsp;";
@@ -1744,7 +1684,7 @@
 		echo "</select>";
 		echo "</td></tr>";
 		echo "</table>";
-		echo "</form>";
+		echo "</form><br>";
 	}
 
 	if ($select_varasto > 0) {
@@ -1753,7 +1693,7 @@
 
 		$query = "	SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
 					FROM lasku
-					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+					JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.perheid != 0 AND tilausrivi.perheid != tilausrivi.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
@@ -1792,15 +1732,20 @@
 
 		$ei_lapsia_lisa = count($ohita_kerays_lapset) > 0 ? "AND tilausrivi.tunnus NOT IN (".implode(",", $ohita_kerays_lapset).")" : "";
 
-		echo "<form method='post' id='napitformi' action=''>";
+		echo "<form method='post' id='napitformi'>";
 		echo "<table>";
 		echo "<tr>";
-		echo "<td claass='back'>";
-		echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
-		echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
-		echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
-		echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
-		echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+		echo "<td class='back'>";
+
+		if ($tee == 'lahto' and trim($tilaukset) != '') {
+			echo "<button type='button' id='man_aloitus'>",t("Man. aloitus"),"</button>&nbsp;";
+			echo "<button type='button' id='vaihda_prio'>",t("Vaihda prio"),"</button>&nbsp;";
+			echo "<button type='button' id='siirra_lahtoon'>",t("Siirrä lähtöön"),"</button>";
+		}
+		else {
+			echo "<button type='button' id='muokkaa_lahto'>",t("Muokkaa lähtö"),"</button>&nbsp;";
+			echo "<button type='button' id='tulosta_rahtikirjat'>",t("Tulosta rahtikirjat"),"</button>&nbsp;";
+		}
 
 		if ($valittu_lahto == "" and isset($tilaukset) and $tilaukset != "") {
 			$query = "	SELECT toimitustavan_lahto
@@ -1832,20 +1777,12 @@
 						lahdot.aktiivi,
 						GROUP_CONCAT(IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) SEPARATOR '') AS 'toimitustavan_lahto_siirto',
 						GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
-						#COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
-						#SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
-						#COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
-						#SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
 						COUNT(DISTINCT lasku.liitostunnus) AS 'asiakkaita',
 						GROUP_CONCAT(DISTINCT CONCAT(lasku.nimi, ' ', IF(lasku.nimi != lasku.toim_nimi, lasku.toim_nimi, '')) SEPARATOR ' ') AS asiakkaiden_nimet,
 						GROUP_CONCAT(DISTINCT CONCAT(lasku.toim_postitp) SEPARATOR ' ') AS asiakkaiden_postitp,
 						GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset'
-						#ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
-						#ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
-						#ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
-						#ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 						FROM lasku
-						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J') {$ei_lapsia_lisa})
@@ -1869,7 +1806,7 @@
 				$carriers[$row['lahdon_selite']] = $row['lahdon_selite'];
 			}
 
-			echo "<br /><br />";
+			echo "<br />";
 
 			$colspan_parent = 17;
 
@@ -1879,9 +1816,9 @@
 			echo "<tr><th>",t("Etsi tilausnumero"),"</th><td colspan='3'><input type='text' class='order' id='uni_order_search' value='' /></td></tr>";
 			echo "</table>";
 
-			echo "<br /><br />";
+			echo "<br />";
 
-			echo "<form method='post' action=''>";
+			echo "<form method='post'>";
 			echo "<table>";
 
 			echo "<tr><td colspan='{$colspan_parent}' class='back'>&nbsp;</td></tr>";
@@ -1913,7 +1850,7 @@
 			echo "</th>";
 
 			echo "<th class='sort_parent_row_by' id='parent_row_transfer'>S <img class='parent_row_direction_transfer' /></th>";
-			echo "<th class='sort_parent_row_by' id='parent_row_stopped'>P <img class='parent_row_direction_stopped' /></th>";
+			echo "<th class='sort_parent_row_by' id='parent_row_stopped'>P <img class='parent_row_direction_stopped' /><br>T</th>";
 			echo "<th></th>";
 			echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 
@@ -2041,6 +1978,9 @@
 				if ($row['aktiivi'] == 'P') {
 					echo "<td class='center toggleable_parent_row_stopped' id='X__{$row['lahdon_tunnus']}{$row['aktiivi']}__{$y}'>X</td>";
 				}
+				elseif ($row['aktiivi'] == 'T') {
+					echo "<td class='center toggleable_parent_row_stopped' id='T__{$row['lahdon_tunnus']}{$row['aktiivi']}__{$y}'>T</td>";
+				}
 				else {
 					echo "<td class='center toggleable_parent_row_stopped' id='!__{$row['lahdon_tunnus']}X__{$y}'>&nbsp;</td>";
 				}
@@ -2048,14 +1988,14 @@
 				echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
 
 				echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'>";
-				echo "<form method='post' action=''>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tee' value='lahto' />";
 				echo "<input type='hidden' name='ei_lapsia_lisa' value='{$ei_lapsia_lisa}' />";
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/lahtojen_hallinta.php////tee=//select_varasto={$select_varasto}' />";
 				echo "<input type='hidden' name='lahdon_tunnus' value='{$row['lahdon_tunnus']}' />";
 				echo "<input type='hidden' name='tilaukset' value='{$row['tilaukset']}' />";
-				echo "<button type='submit'>{$row['lahdon_tunnus']}</button>";
+				echo "<button type='submit' id='{$row['lahdon_tunnus']}'>{$row['lahdon_tunnus']}</button>";
 				echo "</form>";
 				echo "</td>";
 				echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
@@ -2149,7 +2089,7 @@
 						toimitustapa.selite AS 'toimitustapa',
 						toimitustapa.lahdon_selite
 						FROM lasku
-						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('','P','T'))
 						JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 						JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -2253,7 +2193,7 @@
 			echo "<th class='sort_row_by' id='row_prio__{$row['lahdon_tunnus']}__{$y}'>",t("Prio")," <img class='row_direction_prio' />";
 			echo "<br />";
 			echo "<select class='filter_row_by_select' name='child_row_select_prio' id='child_row_select_prio'>";
-			echo "<option value=''>",t("Valitse"),"</option>";
+			echo "<option value=''></option>";
 
 			foreach ($priorities as $prio) {
 				echo "<option value='{$prio}'>{$prio}</option>";
@@ -2264,12 +2204,12 @@
 
 			echo "<th class='sort_row_by' id='row_order__{$row['lahdon_tunnus']}__{$y}'>",t("Tilausnumero")," <img class='row_direction_order' />";
 			echo "<br />";
-			echo "<input type='text' class='filter_row_by_text' id='child_row_text_order__{$row['lahdon_tunnus']}__{$y}' value='' size='10' />";
+			echo "<input type='text' class='filter_row_by_text' id='child_row_text_order__{$row['lahdon_tunnus']}__{$y}' value='' size='8' />";
 			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_orderold__{$row['lahdon_tunnus']}__{$y}'>",t("Vanhatunnus")," <img class='row_direction_orderold' />";
 			echo "<br />";
-			echo "<input type='text' class='filter_row_by_text' id='child_row_text_orderold__{$row['lahdon_tunnus']}__{$y}' value='' size='10' />";
+			echo "<input type='text' class='filter_row_by_text' id='child_row_text_orderold__{$row['lahdon_tunnus']}__{$y}' value='' size='8' />";
 			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_type__{$row['lahdon_tunnus']}__{$y}'>",t("Tilaustyyppi")," <img class='row_direction_type' /></th>";
@@ -2289,7 +2229,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'";
 			$keraysvyohyke_result = pupe_query($query);
 
-			echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' />";
+			echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Vyöhyke")," <img class='row_direction_picking_zone' />";
 			echo "<br />";
 			echo "<select class='filter_row_by_select' id='child_row_select_picking_zone'>";
 			echo "<option value=''>",t("Valitse"),"</option>";
@@ -2303,10 +2243,10 @@
 
 			echo "<th class='sort_row_by' id='row_batch__{$row['lahdon_tunnus']}__{$y}'>",t("Erä")," <img class='row_direction_batch' />";
 			echo "<br />";
-			echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch__{$row['lahdon_tunnus']}__{$y}' value='' size='6' />";
+			echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch__{$row['lahdon_tunnus']}__{$y}' value='' size='3' />";
 			echo "</th>";
 
-			echo "<th class='sort_row_by' id='row_rows__{$row['lahdon_tunnus']}__{$y}'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
+			echo "<th class='sort_row_by' id='row_rows__{$row['lahdon_tunnus']}__{$y}'>R/K <img class='row_direction_rows' /></th>";
 			echo "<th class='sort_row_by' id='row_sscc__{$row['lahdon_tunnus']}__{$y}'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
 			echo "<th class='sort_row_by' id='row_package__{$row['lahdon_tunnus']}__{$y}'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
 			echo "<th class='sort_row_by' id='row_weight__{$row['lahdon_tunnus']}__{$y}'>",t("Paino")," <img class='row_direction_weight' /></th>";

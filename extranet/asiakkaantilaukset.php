@@ -56,7 +56,7 @@
 	}
 
 
-	echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+	echo "<form method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='TULOSTA'>";
 
 	echo "<table>";
@@ -155,7 +155,7 @@
 
 			echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
-			echo "<form method='post' action='$PHP_SELF'><td class='back'>
+			echo "<form method='post'><td class='back'>
 					<input type='hidden' name='tee' value='NAYTATILAUS'>
 					<input type='hidden' name='tunnus' value='$row[tilaus]'>
 					<input type='hidden' name='ppa' value='$ppa'>

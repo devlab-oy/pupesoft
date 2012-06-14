@@ -1,37 +1,226 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
 
 	echo "<br>";
-	echo "<table><form method='post' action=''>";
+	echo "<table><form method='post'>";
 	echo "<input type='hidden' name='tee' value='nayta'>";
+	echo "<tr><th>Tilausnumero:</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
+	echo "<tr><th>Laskunumero:</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
 	echo "<tr><th>Valitse päivä:</th>";
-
 	echo "<td><select name='paiva'>";
 
 	for ($y = 20120401; $y <= date("Ymd"); $y++) {
-		
+
 		$z = substr($y,0,4)."-".substr($y,4,2)."-".substr($y,6,2);
-		
+
 		$sel = ($paiva == $z) ? "SELECTED" : "";
-		
+
 		echo "<option value='$z' $sel>".substr($y,6,2).".".substr($y,4,2).".".substr($y,0,4)."</option>";
 	}
 
 	echo "</select></td>";
-	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table><br><br>";
+
+	echo "<tr><th>Valitse virhelaji:</th>";
+	echo "<td><select name='virhelaji'>";
+
+	$sel1 = $sel2 = $sel3 = "";
+
+	if ($virhelaji == "rahtiveloitus") 				$sel1 = "SELECTED";
+	if ($virhelaji == "laskeiker") 					$sel2 = "SELECTED";
+	if ($virhelaji == "nollarivit") 				$sel3 = "SELECTED";
+	if ($virhelaji == "lahtosuljettueilaskutettu") 	$sel4 = "SELECTED";
+	if ($virhelaji == "lahtosuljettueikeratty") 	$sel5 = "SELECTED";
+
+	echo "<option value='' >Valitse</option>";
+	#echo "<option value='rahtiveloitus' $sel1>Väärä rahtimaksu</option>";
+	echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei kerätty</option>";
+	echo "<option value='nollarivit' $sel3>Kerättävä määrä nolla</option>";
+	echo "<option value='lahtosuljettueilaskutettu' $sel4>Laskuttamaton tilaus suljetussa lähdössä (ei päivärajausta)</option>";
+	echo "<option value='lahtosuljettueikeratty' $sel5>Keräämätön tilaus suljetussa lähdössä (ei päivärajausta)</option>";
+	echo "</select></td>";
+
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table></form><br><br>";
+
+
+	echo "<table><form method='post'>";
+	echo "<input type='hidden' name='tee' value='rahtisopparitilanne'>";
+	echo "<td class='back'><input type='submit' value='".t("Näytä asiakkaat/toimitustavat joilta puuttuu rahtisopimus")."'></td></tr></table></form><br><br>";
+
+
+	if ($tee == "rahtisopparitilanne") {
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and laji not in ('P','R')
+					order by toimitustapa";
+		$asiakas_res = pupe_query($query);
+
+		echo "<table>";
+
+		echo "<tr>";
+		echo "<th>asiakasnro</th>";
+		echo "<th>ytunnus</th>";
+		echo "<th>nimi</th>";
+		echo "<th>toimitustapa</th>";
+		echo "<th>unifaun koodi</th>";
+		echo "<th>rahdinkuljettaja</th>";
+		echo "<th>kumman soppari</th>";
+		echo "<th>rahtisopimus</th>";
+		echo "<th>rahtikirjatyyppi</th>";
+		echo "</tr>";
+
+		while ($asiakasrow = mysql_fetch_assoc($asiakas_res)) {
+
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and selite  = '{$asiakasrow['toimitustapa']}'";
+			$toimtapa_res = pupe_query($query);
+			$toimtaparow = mysql_fetch_assoc($toimtapa_res);
+
+			if ($toimtaparow["nouto"] == "" and $toimtaparow["rahtikirja"] != "rahtikirja_tyhja.inc") {
+
+				if ($toimtaparow["merahti"] == "K") $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], "", "");
+				else $rahsoprow = hae_rahtisopimusnumero($asiakasrow["toimitustapa"], $asiakasrow["ytunnus"], $asiakasrow["tunnus"]);
+
+				$kumman = ($toimtaparow["merahti"] == "") ? "Vastaanottajan" : "Lähettäjän";
+
+				$pitvirh = FALSE;
+
+				if (strlen($rahsoprow['rahtisopimus']) > 0) {
+					if (($toimtaparow['virallinen_selite'] == "KKSTD" or
+						$toimtaparow['virallinen_selite'] == "IT09" or
+						$toimtaparow['virallinen_selite'] == "IT14") and strlen($rahsoprow['rahtisopimus']) < 6) {
+						$pitvirh = TRUE;
+					}
+					elseif ($toimtaparow['virallinen_selite'] == "KLGRP" and strlen($rahsoprow['rahtisopimus']) < 4) {
+						$pitvirh = TRUE;
+					}
+					elseif ($toimtaparow['virallinen_selite'] == "MH10" and strlen($rahsoprow['rahtisopimus']) < 8) {
+						$pitvirh = TRUE;
+					}
+				}
+
+				if ($rahsoprow["rahtisopimus"] == "" or $pitvirh) {
+				 	echo "<tr>";
+					echo "<td>$asiakasrow[asiakasnro]</td>";
+					echo "<td>$asiakasrow[ytunnus]</td>";
+					echo "<td>$asiakasrow[nimi]</td>";
+					echo "<td>$asiakasrow[toimitustapa]</td>";
+					echo "<td>$toimtaparow[virallinen_selite]</td>";
+					echo "<td>$toimtaparow[rahdinkuljettaja]</td>";
+					echo "<td>$kumman</td>";
+					echo "<td>$rahsoprow[rahtisopimus]";
+					if ($pitvirh) echo "<br><font class='error'>Liian lyhyt sopimusnro</font>";
+					echo "</td>";
+					echo "<td>$toimtaparow[rahtikirja]</td>";
+					echo "</tr>";
+				}
+			}
+		}
+
+		echo "</table>";
+	}
 
 	if ($tee == "nayta") {
 
-		$query = "	SELECT tunnus, laskunro
+		$tilaus = mysql_real_escape_string($tilaus);
+		$lasku = mysql_real_escape_string($lasku);
+		$paiva = mysql_real_escape_string($paiva);
+
+		$pvmlisa = " and tapvm = '$paiva' and summa > 0 AND tila = 'U' AND alatila = 'X'";
+
+		if ($tilaus > 0) {
+			$query = "	SELECT laskunro, tunnus, vanhatunnus, tila, alatila
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tila IN ('N','L')
+						and tunnus = $tilaus";
+			$lasku_res = pupe_query($query);
+
+			if (mysql_num_rows($lasku_res) > 0) {
+				$laskurow = mysql_fetch_assoc($lasku_res);
+
+				if ($laskurow['laskunro'] > 0) {
+					$laskulisa 	= " and laskunro = {$laskurow['laskunro']} and summa > 0 AND tila = 'U' AND alatila = 'X' ";
+				}
+				else {
+					$laskulisa 	= " and vanhatunnus = {$laskurow['vanhatunnus']} and tila in ('U','L','N') ";
+				}
+
+				$virhelaji  = "NAYTAKAIKKI";
+				$pvmlisa 	= "";
+				$lasku 		= "";
+			}
+			else {
+				$laskulisa 	= " and tunnus = 0 ";
+			}
+		}
+
+		if ($virhelaji == "lahtosuljettueilaskutettu") {
+			$query = "	SELECT group_concat(lasku.tunnus) tunnukset
+						FROM lasku
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto and lahdot.aktiivi='S')
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tila IN ('N','L')
+						AND lasku.alatila not in ('D','X')
+						AND lasku.luontiaika > '2012-04-01 00:00:00'";
+			$lasku_res = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($lasku_res);
+
+			if ($laskurow["tunnukset"] != "") {
+				$laskulisa 	= " and tunnus in ({$laskurow['tunnukset']}) and tila in ('L','N') ";
+
+				$virhelaji  = "NAYTAKAIKKI";
+				$pvmlisa 	= "";
+				$lasku 		= "";
+			}
+			else {
+				$laskulisa 	= " and tunnus = 0 ";
+			}
+		}
+
+		if ($virhelaji == "lahtosuljettueikeratty") {
+			$query = "	SELECT group_concat(lasku.tunnus) tunnukset
+						FROM lasku
+						JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto and lahdot.aktiivi='S')
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tila IN ('N','L')
+						AND lasku.alatila = 'A'
+						AND lasku.luontiaika > '2012-04-01 00:00:00'";
+			$lasku_res = pupe_query($query);
+			$laskurow = mysql_fetch_assoc($lasku_res);
+
+			if ($laskurow["tunnukset"] != "") {
+				$laskulisa 	= " and tunnus in ({$laskurow['tunnukset']}) and tila in ('L','N') ";
+
+				$virhelaji  = "NAYTAKAIKKI";
+				$pvmlisa 	= "";
+				$lasku 		= "";
+			}
+			else {
+				$laskulisa 	= " and tunnus = 0 ";
+			}
+		}
+
+		if ($lasku > 0) {
+			$laskulisa 	= " and laskunro = {$lasku} AND tila = 'U' AND alatila = 'X' ";
+
+			$virhelaji  = "NAYTAKAIKKI";
+			$pvmlisa 	= "";
+		}
+
+		$query = "	SELECT distinct laskunro, vanhatunnus
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila 	= 'U'
-					AND alatila = 'X'
-					and tapvm   = '$paiva'
-					and summa > 0
+					{$laskulisa}
+					{$pvmlisa}
 					ORDER BY tunnus";
 		$lasku_res = pupe_query($query);
 
@@ -42,16 +231,25 @@
 			$rivi 		= "";
 			$naytarivi  = FALSE;
 
-			$query = "	SELECT tunnus, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa
+			if ($virhelaji == "NAYTAKAIKKI") {
+				$naytarivi = TRUE;
+			}
+
+			if ($laskurow['laskunro'] > 0) {
+				$laskulisa 	= " and laskunro = {$laskurow['laskunro']} and summa > 0 AND tila = 'L' AND alatila = 'X' ";
+			}
+			else {
+				$laskulisa 	= " and vanhatunnus = {$laskurow['vanhatunnus']} and tila in ('U','L','N') ";
+			}
+
+			$query = "	SELECT tunnus, laskunro, nimi, toimitustapa, tila, alatila, tilaustyyppi, toimitustavan_lahto, varasto, kohdistettu, rahtivapaa, eilahetetta
 						FROM lasku
 						WHERE yhtio  = '{$kukarow['yhtio']}'
-						and laskunro = '{$laskurow['laskunro']}'
-						AND tila 	 = 'L'
-						AND alatila  = 'X'";
+						{$laskulisa}";
 			$tilaus_res = pupe_query($query);
 
 			$tilaukset = "";
-			
+
 			$rivi .= "<tr>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Lasku/Tilaus</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Asiakas</th>";
@@ -89,8 +287,8 @@
 
 				// Tilauksen tiedot
 				$rivi .= "<tr>";
-				$rivi .= "<td class='spec'>$laskurow[laskunro] / <a target='Asiakkaantilaukset' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&tunnus=$tilausrow[tunnus]'>$tilausrow[tunnus]</a></td>";
-				$rivi .= "<td class='spec'>$tilausrow[nimi]</td>";
+				$rivi .= "<td class='spec'>$tilausrow[laskunro] / <a target='Asiakkaantilaukset' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=MYYNTI&tunnus=$tilausrow[tunnus]'>$tilausrow[tunnus]</a></td>";
+				$rivi .= "<td class='spec'>$tilausrow[nimi] / $tilausrow[eilahetetta]</td>";
 				$rivi .= "<td class='spec'>$tilausrow[toimitustapa] / $tilausrow[toimitustavan_lahto] / ($tilausrow[kohdistettu]|$tilausrow[rahtivapaa])</td>";
 				$rivi .= "<td class='spec'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
 				$rivi .= "</tr>";
@@ -98,17 +296,27 @@
 
 			$tilaukset = substr($tilaukset, 0, -1);
 
+			if ($virhelaji == "nollarivit") {
+				$kpllisa = " and tilausrivi.kpl+tilausrivi.varattu = 0 and tilausrivi.keratty = '' ";
+			}
+			else {
+				$kpllisa = " and tilausrivi.tilkpl >= 0 ";
+			}
+
 			// Tilausrivit
-			$query = "	SELECT tilausrivi.*, keraysvyohyke.nimitys kervyohyke
+			$query = "	SELECT tilausrivi.*, tilausrivi.varattu+tilausrivi.kpl kpl,
+						keraysvyohyke.nimitys kervyohyke
 						FROM tilausrivi
 						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa ='')
-						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.ohita_kerays = '')
+						JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 						LEFT JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tilausrivi.yhtio AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)
 						LEFT JOIN keraysvyohyke ON (varaston_hyllypaikat.yhtio = keraysvyohyke.yhtio AND varaston_hyllypaikat.keraysvyohyke = keraysvyohyke.tunnus)
-						WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
-						and tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'
-						and tilausrivi.kpl 		   > 0
-						ORDER BY tilausrivi.tunnus";
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						and tilausrivi.otunnus in ($tilaukset)
+						and tilausrivi.tyyppi != 'D'
+						and tilausrivi.var not in ('P','J')
+						{$kpllisa}
+						ORDER BY tilausrivi.otunnus, tilausrivi.tunnus";
 			$tilausrivi_res = pupe_query($query);
 
 			$rivi .= "<tr>";
@@ -116,6 +324,7 @@
 			$rivi .= "<table style='width:100%; height:100%;'>";
 
 			$rivi .= "<tr>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilaus</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tuote</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tilkpl</th>";
@@ -133,12 +342,25 @@
 			$rivi .= "</tr>";
 
 			$ohita_kerays = array();
+			$edotunnus = 0;
 
 			while ($tilausrivirow = mysql_fetch_assoc($tilausrivi_res)) {
 
+				if ($virhelaji == "nollarivit") {
+					$naytarivi = TRUE;
+				}
+
+				if ($edotunnus != $tilausrivirow["otunnus"] and $edotunnus > 0) {
+					$rivi .= "<tr>";
+					$rivi .= "<td colspan='15' style='height:5px; padding:0px; margin:0px;'><hr style='padding:0px; margin:2px;'></td>";
+					$rivi .= "</tr>";
+				}
+
+				$edotunnus = $tilausrivirow["otunnus"];
+
 				// Kerayserä/erät
 				$query = "	SELECT group_concat(luontiaika) luontiaika,
-							group_concat(nro) nro,
+							group_concat(distinct nro) nro,
 							group_concat(pakkausnro) pakkausnro,
 							round(sum(kpl)) kpl,
 							round(sum(kpl_keratty)) kpl_keratty
@@ -180,10 +402,11 @@
 				$kereraekotus = (isset($ohita_kerays[$tilausrivirow['tunnus']])) ? "KERÄYS OHITETEAAN" : $kerayserarow["nro"];
 
 				$rivi .= "<tr>";
+				$rivi .= "<td>$tilausrivirow[otunnus]</td>";
 				$rivi .= "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tilausrivirow["tuoteno"])."'>$tilausrivirow[tuoteno]</a></td>";
 				$rivi .= "<td>".substr($tilausrivirow["nimitys"],0,20)."</td>";
 				$rivi .= "<td align='right'>".(float) ($tilausrivirow["tilkpl"])."</td>";
-				$rivi .= "<td align='right'>".(float) ($tilausrivirow["varattu"]+$tilausrivirow["kpl"])."</td>";
+				$rivi .= "<td align='right'>".(float) ($tilausrivirow["kpl"])."</td>";
 				$rivi .= "<td>$tilausrivirow[var]</td>";
 				$rivi .= "<td>$kereraekotus</td>";
 				$rivi .= "<td>$pakkaus_kirjain</td>";
@@ -196,7 +419,7 @@
 				$rivi .= "<td align='right'>$kerayserarow[kpl_keratty]</td>";
 				$rivi .= "</tr>";
 
-				if ($tilausrivirow["kpl"] != 0 and $tilausrivirow["keratty"] == "" and !isset($ohita_kerays[$tilausrivirow['tunnus']])) {
+				if ($virhelaji == "laskeiker" and $tilausrivirow["kpl"] > 0 and $tilausrivirow["keratty"] == "" and !isset($ohita_kerays[$tilausrivirow['tunnus']])) {
 					$naytarivi = TRUE;
 				}
 			}
@@ -218,7 +441,7 @@
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Pakkaus</th>";
 			$rivi .= "</tr>";
 
-			$query = "	SELECT rahtikirjanro, kollit, round(kilot,2) kilot, kuutiot, pakkaus
+			$query = "	SELECT otsikkonro, rahtikirjanro, kollit, round(kilot,2) kilot, kuutiot, pakkaus
 						FROM rahtikirjat
 						WHERE yhtio	= '{$kukarow['yhtio']}'
 						and otsikkonro in ($tilaukset)";
@@ -226,7 +449,7 @@
 
 			while ($rakirrow = mysql_fetch_assoc($rakir_res)) {
 				$rivi .= "<tr>";
-				$rivi .= "<td>$rakirrow[rahtikirjanro]</td>";
+				$rivi .= "<td>$rakirrow[otsikkonro]</td>";
 				$rivi .= "<td>$rakirrow[kollit]</td>";
 				$rivi .= "<td>$rakirrow[kilot]</td>";
 				$rivi .= "<td>$rakirrow[kuutiot]</td>";
@@ -283,24 +506,24 @@
 			$rivi .= "</td>";
 			$rivi .= "</tr>";
 
-
+			/*
 			// Rahtiveloitus
 			$rivi .= "<tr>";
 			$rivi .= "<td class='back' colspan='4' style='padding:0px; margin:0px;'>";
 			$rivi .= "<table style='width:100%; height:100%;'>";
 
 			$rivi .= "<tr>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tuoteno</th>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 120px;'>Rahti laskutettu</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 420px;'>Toimitustapa</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Hinta</th>";
 			$rivi .= "</tr>";
 
 			// Rahtiveloitus
 			$query = "	SELECT tuoteno, nimitys, round(hinta, 2) hinta
 						FROM tilausrivi
-						WHERE yhtio 	= '{$kukarow['yhtio']}'
-						and uusiotunnus = '{$laskurow['tunnus']}'
-						and tuoteno 	= '{$yhtiorow['rahti_tuotenumero']}'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and otunnus in ($tilaukset)
+						and tuoteno = '{$yhtiorow['rahti_tuotenumero']}'";
 			$raku_res = pupe_query($query);
 
 			$veloitettu = 0;
@@ -326,8 +549,8 @@
 			$rivi .= "<table style='width:100%; height:100%;'>";
 
 			$rivi .= "<tr>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Tuoteno</th>";
-			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Nimitys</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 120px;'>Rahti laskennallinen</th>";
+			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px; width: 420px;'>Toimitustapa</th>";
 			$rivi .= "<th style='font-size:10px; padding:1px; margin:0px;'>Hinta</th>";
 			$rivi .= "</tr>";
 
@@ -452,9 +675,10 @@
 			$rivi .= "</td>";
 			$rivi .= "</tr>";
 
-			if ($veloitettu_oispitany != $veloitettu) {
+			if ($virhelaji == "rahtiveloitus" and $veloitettu_oispitany != $veloitettu) {
 				$naytarivi = TRUE;
 			}
+			*/
 
 			// Välirivi
 			$rivi .= "<tr>";

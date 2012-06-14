@@ -534,10 +534,10 @@
 		fclose($fhtark);
 
 		//paperilista pitää saada kauniiksi
-		$line1 = exec("a2ps -o ".$paperifaili.".ps --no-header --columns=1 -r --chars-per-line=169 --margin=0 --borders=0 $paperifaili");
+		$line1 = exec("a2ps -o ".$paperifaili.".ps --no-header -r --columns=1 --chars-per-line=169 --margin=0 --borders=0 $paperifaili");
 
 		//tarkastuslistalle sama juttu
-		$line2 = exec("a2ps -o ".$tarkfaili.".ps --no-header --columns=1 -r --chars-per-line=121 --margin=0 --borders=0 $tarkfaili");
+		$line2 = exec("a2ps -o ".$tarkfaili.".ps --no-header -r --columns=1 --chars-per-line=121 --margin=0 --borders=0 $tarkfaili");
 
     	//lopuks käännetään vielä pdf:iks ja lähetetään sähköpostiin, voi sitten tulostella kun siltä tuntuu
 		$line3 = exec("ps2pdf -sPAPERSIZE=a4 ".$paperifaili.".ps ".$paperifaili.".pdf");
@@ -721,7 +721,7 @@
 
 		//syötetään ajanjakso
 		echo "<table>";
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form method = 'post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>
 				<input type='hidden' name='toim' value='$toim'>";
 

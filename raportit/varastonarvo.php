@@ -32,7 +32,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 	</script>";
 
 // piirrell‰‰n formi
-echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
+echo "<form name='formi' method='post' autocomplete='OFF'>";
 
 if ($valitaan_useita == "") {
 

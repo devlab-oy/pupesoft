@@ -1,8 +1,8 @@
 <?php
 
 	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require "../inc/parametrit.inc";
@@ -13,6 +13,11 @@
 	}
 
 	echo "<font class='head'>".t("Tulosta osoitetarrat")."</font><hr>";
+
+	if (isset($TULOSTA) and $TULOSTA != "") {
+		$tee = "TULOSTA";
+	}
+
 
 	if ($tee == "TULOSTA" and count($otunnus) == 0) {
 		$tee = "";
@@ -282,14 +287,14 @@
 			// We need to explicitly close the workbook
 			$workbook->close();
 
+			echo "<form method='post' class='multisubmit'>";
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='Osoitetiedot.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+			echo "</table></form><br>";
 		}
 		else {
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -300,7 +305,7 @@
 			fputs($fh, $sisalto);
 			fclose($fh);
 
-			$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=$sarakkeet -R --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
+			$line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=$sarakkeet --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
 
 			// itse print komento...
 			if ($komento["Tarrat"] == 'email') {
@@ -348,7 +353,6 @@
 
 			//-->
 			</script>";
-
 
 		$kentat = "nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
@@ -399,15 +403,11 @@
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF' method = 'post'>
-			<input type='hidden' name='asmemo_viesti' value='$asmemo_viesti'>
-			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
-			<input type='hidden' name='raportti' value='$raportti'>
-			<input type='hidden' name='toimas' value='$toimas'>
-			<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
-
 		$lim = "";
 		$lim[$limitti] = "SELECTED";
+
+		echo "<form method = 'post'>
+			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Rivim‰‰r‰rajaus").":</th>
@@ -469,12 +469,7 @@
 			echo "<br><input type='text' size='3' name = 'haku[11]' value = '$haku[11]'></th>";
 		}
 
-		echo "<td class='back' valign='bottom'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
-		echo "</form>";
-
-		echo "<form action = '$PHP_SELF?limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku$ulisa' method = 'post'>
-				<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
-				<input type='hidden' name='tee' value='TULOSTA'>";
+		echo "<td class='back' valign='bottom'><input type='submit' value = '".t("Etsi")."'></td></tr>";
 
 		while ($trow = mysql_fetch_assoc($result)) {
 
@@ -535,7 +530,7 @@
 				<option value='24' $sel[24]>24 ".t("Tarraa")."</option>
 				<option value='EX' $sel[EX]>".t("Excel-tiedosto")."</option>
 				</select></td></tr>";
-		echo "<tr><td class='back'><input type='Submit' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";
+		echo "<tr><td class='back'><input type='submit' name='TULOSTA' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";
 	}
 
 	require ("inc/footer.inc");

@@ -22,21 +22,23 @@
 
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
-	// Katsotaan montakop‰iv‰‰ halutaan automaattisesti k‰ytt‰‰ kassa-alea
 	$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))";
 
-	if ($yhtiorow["ostoreskontra_kassaalekasittely"] == 1) {
-		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm,
-						if(kapvm >= adddate(curdate(),1) and adddate(kapvm,1) < erpcm, adddate(kapvm,1),
-								if(erpcm >= curdate(), erpcm,
-									curdate())))";
-	}
-	elseif ($yhtiorow["ostoreskontra_kassaalekasittely"] == 2) {
-		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm,
-						if(kapvm >= adddate(curdate(),1) and adddate(kapvm,1) < erpcm, adddate(kapvm,1),
-							if(kapvm >= adddate(curdate(),2) and adddate(kapvm,2) < erpcm, adddate(kapvm,2),
-								if(erpcm >= curdate(), erpcm,
-									curdate()))))";
+	// Katsotaan montako p‰iv‰‰ 'yli' halutaan automaattisesti k‰ytt‰‰ kassa-alea
+	if ($yhtiorow["ostoreskontra_kassaalekasittely"] > 0) {
+		$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, ";
+
+		for ($i = 1; $i <= $yhtiorow["ostoreskontra_kassaalekasittely"]; $i++) {
+			$oletusmaksupaiva_kasittely .= "if(adddate(kapvm,$i) >= curdate() and adddate(kapvm,$i) < erpcm, adddate(kapvm,$i),";
+		}
+
+		$oletusmaksupaiva_kasittely .= " if(erpcm >= curdate(), erpcm, curdate())";
+
+		for ($i = 1; $i <= $yhtiorow["ostoreskontra_kassaalekasittely"]; $i++) {
+			$oletusmaksupaiva_kasittely .= ")";
+		}
+
+		$oletusmaksupaiva_kasittely .= ")";
 	}
 
 	if (count($_POST) == 0) {
@@ -101,6 +103,22 @@
 					AND tila = 'M'
 					AND erpcm > curdate() ";
 		$result = pupe_query($query);
+	}
+
+	// Jos ei saada poimia kun yhden pankin maksuja aineistoon
+	if ($tee == 'H' and $yhtiorow['pankkitiedostot'] == 'F') {
+		$query = "	SELECT lasku.tunnus
+					FROM lasku
+					WHERE lasku.yhtio 		= '{$kukarow["yhtio"]}'
+					and lasku.maksu_tili 	!= '{$oltilrow["oletustili"]}'
+					and lasku.tila	 		= 'P'
+					and lasku.maksaja 		= '{$kukarow["kuka"]}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+			echo "<font class='error'>".t("Sinulla on maksuja poimittuna jo toisesta pankista. Siirr‰ maksuaineisto pankkiin ennenkuin lis‰‰t toisen pankin maksuja aineistoon").".</font><br><br>";
+			$tee = "V";
+		}
 	}
 
 	// Lasku merkit‰‰n maksettavaksi ja v‰hennet‰‰n limiitti‰ tai tehd‰‰n vain tarkistukset p‰itt‰invientiin.
@@ -784,15 +802,15 @@
 			}
 
 			$query = "	UPDATE lasku set
-						maksaja = '$kukarow[kuka]',
-						maksuaika = now(),
+						maksaja 	 = '$kukarow[kuka]',
+						maksuaika 	 = now(),
 						maksu_kurssi = '$tiliointirow[kurssi]',
-						maksu_tili = '$oltilrow[oletustili]',
-						tila = 'P',
-						alatila = if(date_add(kapvm, interval $yhtiorow[ostoreskontra_kassaalekasittely] day) >= curdate(), 'K', '')
-						WHERE tunnus='$tiliointirow[tunnus]'
-						and yhtio = '$kukarow[yhtio]'
-						and tila='M'";
+						maksu_tili 	 = '$oltilrow[oletustili]',
+						tila 		 = 'P',
+						alatila 	 = if(date_add(kapvm, interval $yhtiorow[ostoreskontra_kassaalekasittely] day) >= curdate(), 'K', '')
+						WHERE tunnus = '$tiliointirow[tunnus]'
+						and yhtio 	 = '$kukarow[yhtio]'
+						and tila	 = 'M'";
 			$updresult = pupe_query($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
@@ -1321,15 +1339,15 @@
 
 				// er‰p‰iv‰ punasella jos se on er‰‰ntynyt
 				if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
-					echo "<font class='error'>".tv1dateconv($trow['erpcm'])."</font>";
+					echo "<font class='error'>{$trow['erpcm']}</font>";
 				}
 				else {
-					echo tv1dateconv($trow['erpcm']);
+					echo $trow['erpcm'];
 				}
 
 				if ($trow['kapvm'] != '0000-00-00') {
 					echo "<td valign='top' align='right' nowrap>";
-					echo tv1dateconv($trow['kapvm'])."<br>";
+					echo $trow['kapvm']."<br>";
 					echo "$trow[ykasumma] $yhtiorow[valkoodi]<br>";
 					if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 						echo "$trow[summa] $trow[valkoodi]";
@@ -1523,7 +1541,7 @@
 
 			// jos limiitti riitt‰‰ niin annetaan mahdollisuus poimia kaikki
 			if ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti_koti'] >= $summa) {
-				echo "<br><form action = '$PHP_SELF' method='post'>
+				echo "<br><form method='post'>
 					<input type='hidden' name = 'tili' value='$tili'>
 					<input type='hidden' name = 'tee' value='NV'>
 					<input type='hidden' name = 'kaikki' value='$kaikki'>

@@ -29,7 +29,7 @@
 	else				$chk = "";
 
 	// piirrell‰‰n formi
-	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF' id='abc_yhteenveto_form'>";
+	echo "<form method='post' autocomplete='OFF' id='abc_yhteenveto_form'>";
 	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 

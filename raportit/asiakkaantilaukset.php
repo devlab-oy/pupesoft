@@ -282,15 +282,15 @@
 		$ytunnus   = $row["ytunnus"];
 
 		if ($cleantoim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];
+			$toimittajaid = $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];
+			$asiakasid = $row["liitostunnus"];
 		}
 	}
 
 	if ($ytunnus != '') {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+		echo "<form method='post' autocomplete='off'>
 				<input type='hidden' name='ytunnus' value='$ytunnus'>
 				<input type='hidden' name='asiakasid' value='$asiakasid'>
 				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -404,7 +404,7 @@
 							and lasku.laskunro='$laskunro'";
 			}
 			elseif ($sopimus > 0) {
-				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.tunnus tilaus2
+				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
 							$yhtioekojoin
 							WHERE lasku.$logistiikka_yhtiolisa
@@ -637,7 +637,7 @@
 
 				for ($i=1; $i<mysql_num_fields($result)-8; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<td valign='top' $class>".tv1dateconv($row[$i])."</td>";
+						echo "<td valign='top' $class>{$row[$i]}</td>";
 					}
 					elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
 						echo "<td valign='top' nowrap align='right' $class>";
@@ -670,7 +670,7 @@
 				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";
 
 				echo "<td class='back' valign='top'>
-						<form method='post' action='$PHP_SELF'>
+						<form method='post'>
 						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
@@ -722,7 +722,7 @@
 	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<br><table>";
@@ -750,7 +750,7 @@
 	}
 	else {
 		echo "<br>";
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
 		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
 		echo "</form>";

@@ -41,7 +41,7 @@
 	$index = "";
 	$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
-	echo "<br><form name = 'valinta' action = '' method='post'>";
+	echo "<br><form name = 'valinta' method='post'>";
 
 	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L','LN');
 
@@ -237,13 +237,13 @@
 				echo "<tr class='aktiivi'>";
 
 				if ($kukarow['taso'] < 2) {
-					echo "<td valign='top'>",tv1dateconv($trow["tapvm"]),"</td>";
+					echo "<td valign='top'>{$trow["tapvm"]}</td>";
 				}
 				else {
-					echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus={$trow['tunnus']}&lopetus={$lopetus}'>",tv1dateconv($trow["tapvm"]),"</td>";
+					echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus={$trow['tunnus']}&lopetus={$lopetus}'>{$trow["tapvm"]}</td>";
 				}
 
-				echo "<td valign='top'>",tv1dateconv($trow["erpcm"]),"</td>";
+				echo "<td valign='top'>{$trow["erpcm"]}</td>";
 				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopetus}'>{$trow['laskunro']}</td>";
 				echo "<td valign='top'><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>{$trow['nimi']}</a></td>";
 				echo "<td valign='top' align='right'>{$trow['summa']}</td>";

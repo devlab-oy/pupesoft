@@ -235,7 +235,7 @@
 
 	if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
-	list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
+	list($ryhmanimet, $ryhmaprossat, $kiertonopeus_tavoite, $palvelutaso_tavoite, $varmuusvarasto_pv, $toimittajan_toimitusaika_pv) = hae_ryhmanimet($abcrajaustapa);
 
 	// Tarvittavat päivämäärät
 	if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
@@ -294,10 +294,6 @@
 	if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 		enable_ajax();
-
-		echo "<script type='text/javascript' language='javascript'>";
-		require_once("inc/jquery.min.js");
-		echo "</script>";
 
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
@@ -719,7 +715,7 @@
 	// näytetään käyttöliittymä..
 	$abcnimi = $ryhmanimet[$abcrajaus];
 
-	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+	echo "	<form method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>
 			<table>";
 

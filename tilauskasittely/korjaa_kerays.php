@@ -57,7 +57,7 @@
 		$kentta = "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
+		echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
 		$haku = '';
 		if (is_string($etsi)) $haku = "and lasku.nimi LIKE '%".mysql_real_escape_string($etsi)."%'";
@@ -102,7 +102,7 @@
 			echo "<td>$tilrow[asiakas]</td>";
 			echo "<td>$tilrow[laadittu]</td>";
 			echo "<td>$tilrow[laatija]</td>";
-			echo "<td class='back'><form method='post' action='$PHP_SELF'>
+			echo "<td class='back'><form method='post'>
 					<input type='hidden' name='tee' value='KORJAA'>
 					<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>
 				  	<input type='hidden' name='tunnus' value='$tilrow[tunnus]'>

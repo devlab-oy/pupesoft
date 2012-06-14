@@ -76,7 +76,7 @@
 
 	echo t("Osoiteväli");
 
-	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+	echo "<form method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -142,7 +142,7 @@
 	echo "<table><tr>";
 	echo "<th>".t("Hyllyosoite")."</th><th>".t("Kirjoitin")."</th><th>".t("Malli")."</th>";
 
-	echo "<tr><form action='$PHP_SELF' method='post' name='kala' autocomplete='off'>";
+	echo "<tr><form method='post' name='kala' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='lisa' value='yks'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";

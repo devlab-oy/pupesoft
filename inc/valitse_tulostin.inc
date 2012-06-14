@@ -263,13 +263,15 @@
 
 			if (isset($valitut_lavat) and $valitut_lavat != "") {
 				$valitut_suuntalavat = explode(",", $valitut_lavat);
-				$valitut_suuntalisa = " AND tunnus in (".mysql_real_escape_string($valitut_lavat).")";
+				$valitut_suuntalisa = " AND suuntalavat.tunnus in (".mysql_real_escape_string($valitut_lavat).")";
 			}
 
-			$query = "	SELECT tunnus, sscc
+			$query = "	SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc
 						FROM suuntalavat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tila 	= 'S'
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+						AND suuntalavat.tila 	= 'S'
+						AND (suuntalavat.kaytettavyys = 'L' OR (suuntalavat.kaytettavyys = 'Y' AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'))
 						{$valitut_suuntalisa}";
 			$suuntalavat_res = pupe_query($query);
 
@@ -388,7 +390,7 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") === FALSE) {
 		//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
-		require("footer.inc");
+		require("inc/footer.inc");
 		exit;
 	}
 ?>

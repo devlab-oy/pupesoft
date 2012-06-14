@@ -54,7 +54,7 @@
 				$pdf->draw_text(280,  535, $laskurow["tunnus"],				$firstpage, $p);
 			}
 			else {
-				$pdf->draw_text(280,  545, t("Keikkanumero", $kieli),		$firstpage, $pieni);
+				$pdf->draw_text(280,  545, t("Saapumisnumero", $kieli),		$firstpage, $pieni);
 				$pdf->draw_text(280,  535, $laskurow["laskunro"],			$firstpage, $p);
 			}
 
@@ -187,16 +187,22 @@
 		$mitkalisa = "";
 	}
 
+	$otunnuslisa = "tilausrivi.otunnus = '{$otunnus}'";
+
 	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
+
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava IN (".implode(",", $suuntalavat).")";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$otunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
 		$selectlisa = ", suuntalavat.sscc ";
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava)
-		 					JOIN varaston_hyllypaikat ON (	varaston_hyllypaikat.yhtio = tilausrivi.yhtio
-															AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue
-															AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro
-															AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali
-															AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)";
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava) ";
-		$orderlisa = " suuntalavat.sscc, varaston_hyllypaikat.indeksi, ";
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 		$orderlisa = " suuntalavat.sscc, ";
 	}
 	else {
@@ -283,8 +289,8 @@
 					FROM tilausrivi
 					$suuntalavajoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
-					JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-					WHERE tilausrivi.uusiotunnus = '$otunnus'
+					LEFT JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+					WHERE {$otunnuslisa}
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					$mitkalisa
 					ORDER BY $orderlisa sorttauskentta, tilausrivi.tunnus";
@@ -311,9 +317,9 @@
 		$out  = chr(10);
 		$out .= sprintf('%-20.20s',	$yhtiorow["nimi"]);
 		$out .= sprintf('%4s',		' ');
-		$out .= sprintf('%-26.26s',	'PURKULISTA');
+		$out .= sprintf('%-26.26s',	t("Purkulista"));
 		$out .= sprintf('%16s', 	' ');
-		$out .= sprintf('%-6.6s', 	'AJOPVM');
+		$out .= sprintf('%-6.6s', 	t("Ajopvm"));
 		$out .= sprintf('%1s', 		' ');
 		$out .= sprintf('%8.8s', 	date("d/m/y")); // Ajopvm
 		$out .= chr(10).chr(13);	// Line feed (Rivinvaihto) + Carriage return (Siirretään kirjoituspää rivin alkuun)
@@ -323,9 +329,9 @@
 		$out .= chr(10).chr(13);
 
 		// RIVI 3
-		$out .= sprintf('%-65.65s',	$laskurow["ytunnus"].' '.$laskurow["nimi"]);	// Mistä tavara tulee
+		$out .= sprintf('%-62.62s',	$laskurow["ytunnus"].' '.$laskurow["nimi"]);	// Mistä tavara tulee
 		$out .= sprintf('%1s',		' ');
-		$out .= sprintf('%7s',		'KEIKKA:');
+		$out .= sprintf('%10s',		t("Saapuminen").':');
 		$out .= sprintf('%-11.11s',	$laskurow["laskunro"]);							// Keikan numero
 		$out .= chr(10).chr(13);
 
@@ -334,12 +340,12 @@
 		$out .= chr(10).chr(13);
 
 		// RIVI 5
-		$out .= sprintf('%-47s',	'TUOTENO / NIMITYS');
-		$out .= sprintf('%-15s',	'HYLLY');
-		$out .= sprintf('%17s',		'TILATTU');
+		$out .= sprintf('%-47s',	t("Tuoteno")." / ".t("Nimitys"));
+		$out .= sprintf('%-15s',	t("Hylly"));
+		$out .= sprintf('%17s',		t("Tilattu"));
 		$out .= sprintf('%1s',		' ');
-		$out .= sprintf('%3.3s',	'YKS');
-		$out .= sprintf('%12.12s',	'SAAPUNUT');
+		$out .= sprintf('%3.3s',	t("Yks"));
+		$out .= sprintf('%12.12s',	t("Saapunut"));
 		$out .= chr(10).chr(13);
 
 		while ($row = mysql_fetch_array($result)) {
@@ -359,9 +365,12 @@
 			// RIVI 2
 			$out .= sprintf('%99s',		' ');
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
-			$out .= chr(10).chr(13);
+			$out .= chr(10).chr(10).chr(13);
 		}
-		
+
+		// 2 Form Feediä
+		$out .= chr(12).chr(12);
+
 		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {
@@ -519,10 +528,10 @@
 								FROM tuotepaikat
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$row[tuoteno]'
-								and hyllyalue = '".$t1[$row[tunnus]]."'
-								and hyllynro = '".$t2[$row[tunnus]]."'
-								and hyllyvali = '".$t3[$row[tunnus]]."'
-								and hyllytaso = '".$t4[$row[tunnus]]."'";
+								and hyllyalue = '".$t1[$row['tunnus']]."'
+								and hyllynro  = '".$t2[$row['tunnus']]."'
+								and hyllyvali = '".$t3[$row['tunnus']]."'
+								and hyllytaso = '".$t4[$row['tunnus']]."'";
 					$olesaldoresult = pupe_query($query);
 					$olesaldorow = mysql_fetch_array($olesaldoresult);
 
@@ -542,7 +551,7 @@
 
 					$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-					$pdf->draw_text(475, $kala, $t1[$row[tunnus]]." ".$t2[$row[tunnus]]." ".$t3[$row[tunnus]]." ".$t4[$row[tunnus]]." (".$hyllyssa.") ",		$firstpage, $p);
+					$pdf->draw_text(475, $kala, $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
 				else {
 

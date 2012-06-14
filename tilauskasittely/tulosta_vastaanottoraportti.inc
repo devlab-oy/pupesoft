@@ -40,7 +40,7 @@
 			tulosta_logo_pdf($pdf, $firstpage, $laskurow);
 
 			$pdf->draw_rectangle(785, 310, 765, 580, $firstpage, $rectparam);
- 			$pdf->draw_text(315, 778, t("Keikka", $kieli), $firstpage, $pieni);
+ 			$pdf->draw_text(315, 778, t("Saapuminen", $kieli), $firstpage, $pieni);
  			$pdf->draw_text(315, 768, $laskurow['laskunro'], $firstpage, $norm);
 
 			$pdf->draw_rectangle(785, 445, 765, 445, $firstpage, $rectparam);
@@ -124,6 +124,7 @@
 	if ($yhtiorow["suuntalavat"] == "S") {
 		$select_lisa = ", suuntalavat.sscc,	keraysvyohyke.nimitys AS keraysvyohyke_nimitys";
 		$join_lisat	 = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'P' AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
 						 JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)";
 		$where_lisa	 = " AND tilausrivi.suuntalava != 0";
 	}

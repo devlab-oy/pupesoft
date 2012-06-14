@@ -28,7 +28,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>
-				<th>".t("Keikka")."</th>
+				<th>".t("Saapuminen")."</th>
 				<th>".t("Toimittaja")."</th>
 				<th>".t("Ytunnus")."</th>
 				<th>".t("Toimitusehto")."</th>
@@ -98,7 +98,7 @@
 
 	//Käyttöliittymä
 	echo "<br><br><br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	// ehdotetaan 7 päivää taaksepäin
 	if (!isset($kka))

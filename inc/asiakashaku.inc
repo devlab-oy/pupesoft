@@ -362,15 +362,15 @@ elseif ($asiakasnro != '') {
 }
 
 if ($monta == 0) {
-	if ($ytunnus) {
+	if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
 		echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
 	}
-	elseif ($asiakasnro) {
+	elseif ($asiakasnro and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
 
 	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -402,7 +402,7 @@ if ($monta == 0) {
 	}
 
 	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -434,7 +434,9 @@ if ($monta == 0) {
 		echo "</form>";
 	}
 
-	echo "<br><br>";
+	if (strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
+		echo "<br><br>";
+	}
 
 	$ytunnus = "";
 	$asiakasnro = "";
@@ -531,7 +533,7 @@ if ($monta > 1 and $monta <= $limit) {
 					<td>$asiakas[postino] $brpostino</td>
 					<td>$asiakas[postitp] $brpostitp</td>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<td class='back'>";
 			echo "<input type='hidden' name='asiakasid' 	  value='$asiakas[tunnus]'>";
 			echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -590,7 +592,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "</table><br>";
 
 		if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 			echo "<input type='hidden' name='tee' 			  value='$tee'>";
 			echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -624,7 +626,7 @@ if ($monta > 1 and $monta <= $limit) {
 	}
 
 	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
@@ -718,5 +720,3 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 		echo "</table><br>";
 	}
 }
-
-?>

@@ -71,7 +71,7 @@
 	if ($tee == '') {
 		//Käyttöliittymä
 		echo "<br>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "Luo uusi siirtotiedosto<br>";
 		echo "<table>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -149,7 +149,7 @@
 
 		//Käyttöliittymä
 		echo "<br>";
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post'>";
 		echo "Uudelleenluo siirtotiedosto<br>";
 		echo "<table>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -606,7 +606,7 @@
 				echo "<br><br>";
 				echo "<table>";
 				echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 
 				if($toim == "SVEA") {
@@ -617,7 +617,7 @@
 				echo "<td><input type='submit' value='Tallenna'></td></form>";
 				echo "</tr>";
 				echo "<tr><th>Siirrä siirtoaineisto SVEA:lle ftp:llä:</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post'>";
 				echo "<input type='hidden' name='tee' value='siirra_tiedosto'>";
 
 				if($toim == "SVEA") {

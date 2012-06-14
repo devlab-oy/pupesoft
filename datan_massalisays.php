@@ -615,7 +615,7 @@ foreach ($files as $file) {
 }
 
 // käyttöliittymä
-echo "<form name='uliuli' method='post' action='$PHP_SELF'>";
+echo "<form name='uliuli' method='post'>";
 echo "<input type='hidden' name='tee' value='GO'>";
 
 echo "<table>";
@@ -636,7 +636,7 @@ if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0)
 	echo "<br><br>";
 	echo "<font class='head'>".t("Kuvien uloskirjoitus")."</font><hr>";
 
-	echo "<form name='dumppi' method='post' action='$PHP_SELF'>";
+	echo "<form name='dumppi' method='post'>";
 	echo "<input type='hidden' name='tee' value='DUMPPAA'>";
 	echo "<input type='hidden' name='mitkadumpataan' value='tuote'>";
 

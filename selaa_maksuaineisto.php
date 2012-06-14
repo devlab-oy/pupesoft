@@ -12,7 +12,7 @@
 	if (!isset($tee)) $tee = '';
 
 	echo "<table>";
-	echo "<form method='post' action=''>";
+	echo "<form method='post'>";
 
 	echo "<th valign='top'>",t("Alkupvm"),"</th>";
 	echo "<td><select name='alkuvv'>";

@@ -27,7 +27,7 @@
 		echo "<br><br>";
 
 		if (mysql_num_rows($result) > 0) {
-			echo "<form name = 'valinta' method='post' action = ''>";
+			echo "<form name = 'valinta' method='post'>";
 			echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITA'>";
 			echo "<input type = 'submit' value = '".t("Tee maksuaineistot")."'>";
 			echo "</form>";
@@ -352,7 +352,7 @@
 					echo "<tr><th>".t("Tapahtumia")."</td><td>$makskpl ".t("kpl")."</td></tr>";
 
 					// Jokainen pankki ja p‰iv‰ omaan tiedostoon
-					if ($yhtiorow['pankkitiedostot'] != '') {
+					if ($yhtiorow['pankkitiedostot'] == 'E') {
 						if (is_resource($toot)) {
 							fclose($toot);
 
@@ -361,7 +361,7 @@
 							}
 
 							echo "<tr><th>".t("Tallenna aineisto")."</th>";
-							echo "<form method='post' action='$PHP_SELF'>";
+							echo "<form method='post' class='multisubmit'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 							echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -400,7 +400,7 @@
 		}
 
 		// Pankit ja p‰iv‰t yhdistet‰‰n
-		if ($yhtiorow['pankkitiedostot'] == '') {
+		if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
 			if (is_resource($toot)) {
 				fclose($toot);
 
@@ -410,7 +410,7 @@
 
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th>".t("Tallenna aineisto")."</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' class='multisubmit'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 				echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -827,7 +827,7 @@
 					unset($edmaksu_tili);
 
 					// Jokainen pankki ja p‰iv‰ omaan tiedostoon
-					if ($yhtiorow['pankkitiedostot'] != '') {
+					if ($yhtiorow['pankkitiedostot'] == 'E') {
 						if (is_resource($toot)) {
 							fclose($toot);
 
@@ -837,7 +837,7 @@
 
 							echo "<tr><td class='back'><br></td></tr>";
 							echo "<tr><th>".t("Tallenna aineisto")."</th>";
-							echo "<form method='post' action='$PHP_SELF'>";
+							echo "<form method='post' class='multisubmit'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 							echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
@@ -865,7 +865,7 @@
 			echo "<tr><th>".t("Tapahtumia")."</th><td>$totkpl ".t("kpl")."</td></tr>";
 
 			// Pankit ja p‰iv‰t yhdistet‰‰n
-			if ($yhtiorow['pankkitiedostot'] == '') {
+			if ($yhtiorow['pankkitiedostot'] == '' or $yhtiorow['pankkitiedostot'] == 'F') {
 				if (is_resource($toot)) {
 					fclose($toot);
 
@@ -875,7 +875,7 @@
 
 					echo "<tr><td class='back'><br></td></tr>";
 					echo "<tr><th>".t("Tallenna aineisto")."</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' class='multisubmit'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 					echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";

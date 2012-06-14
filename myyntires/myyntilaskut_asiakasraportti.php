@@ -453,7 +453,7 @@
 							ORDER BY $jarjestys $jarjestys_suunta";
 				$result = pupe_query($query);
 
-				echo "<form action = '$PHP_SELF?ojarj=".$ojarj.$ulisa."' method = 'post'>
+				echo "<form action = '?ojarj=".$ojarj.$ulisa."' method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
@@ -499,7 +499,7 @@
 				echo "</tr>";
 				echo "</table></form><br>";
 
-				echo "<form action = '$PHP_SELF' method = 'post'>
+				echo "<form method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'ojarj' value='$ojarj'>
 						<input type='hidden' name = 'jarjestys_suunta' value='$jarjestys_suunta'>
@@ -654,7 +654,7 @@
 			js_popup(-100);
 
 			/* hakuformi */
-			echo "<br><form name='$formi' action='$PHP_SELF' method='GET'>";
+			echo "<br><form name='$formi' method='GET'>";
 			echo "<input type='hidden' name='alatila' value='etsi'>";
 			echo "<table>";
 			echo "<tr><th>".t("Asiakas").":</th>";

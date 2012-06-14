@@ -30,7 +30,7 @@
 		if ($osasto != '') {
 			$osastot = explode(" ",$osasto);
 
-			for($i = 0; $i < sizeof($osastot); $i++) {
+			for($i = 0; $i < count($osastot); $i++) {
 				$osastot[$i] = trim($osastot[$i]);
 
 				if ($osastot[$i] != '') {
@@ -54,7 +54,7 @@
 		if ($try != '') {
 			$tryt = explode(" ",$try);
 
-			for($i = 0; $i < sizeof($tryt); $i++) {
+			for($i = 0; $i < count($tryt); $i++) {
 				$tryt[$i] = trim($tryt[$i]);
 
 				if ($tryt[$i] != '') {
@@ -159,7 +159,7 @@
 
 			$filenimi = "/tmp/$kukarow[yhtio].$kukarow[kuka].zip";
 			echo "<br><table><tr><th>".t("Tallenna hinnasto tiedostoon")."</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post'>";
 			echo "<input type='hidden' name='filenimi' value='$filenimi'>";
 			echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr>";
 			echo "</form></table>";
@@ -171,7 +171,7 @@
 
 	//Käyttöliittymä
 	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<table><form method='post'>";
 
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 	echo "<tr><th>".t("Syötä osastot ja tuoteryhmät").":</th>

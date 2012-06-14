@@ -59,7 +59,7 @@ if ($tee == "ALOITAKOROTUS") {
 
 	$minimisumma = (float) $minimisumma;
 
-	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
+	$query = "	SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
 				FROM yhtio
 				WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = pupe_query($query);
@@ -175,7 +175,7 @@ if ($tee == "KOROTA")  {
 	echo "</tr>";
 	echo "</table><br>";
 
-	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
+	echo "<form name='lahetaformi' method='post'>";
 	echo "<table><tr>";
 	echo "<th>".t("Laskunpvm")."</th>";
 	echo "<th>".t("Laskunro")."</th>";
@@ -262,7 +262,7 @@ if ($tee == "KOROTA")  {
 	echo "<td class='back'><input type='submit' value='".t("Tee korkolasku")."'></td>";
 	echo "</form>";
 
-	echo "<form  name='ohitaformi' action='$PHP_SELF' method='post'>";
+	echo "<form  name='ohitaformi' method='post'>";
 	echo "<input name='tee' type='hidden' value='KOROTA'>";
 
 	foreach($korotettavat as $tunnukset) {
@@ -287,7 +287,7 @@ if ($tee == "KOROTA")  {
 
 if ($tee == "") {
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form method='post'>";
 	echo "<input name='tee' type='hidden' value='ALOITAKOROTUS'>";
 	echo t("Syötä ytunnus jos haluat lähettää korkolaskun tietylle asiakkaalle").".<br>";
 	echo t("Jätä kenttä tyhjäksi jos haluat aloittaa ensimmäisestä asiakkaasta").".<br>";

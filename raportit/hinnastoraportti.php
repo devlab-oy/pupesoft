@@ -167,7 +167,7 @@
 
 			echo "<br><br>";
 			echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
@@ -191,7 +191,7 @@
 		$chk2 = "";
 	}
 
-	echo "<br><form method='post' action='$PHP_SELF'>";
+	echo "<br><form method='post'>";
 	echo "<input type='hidden' name='raptee' value='AJA'>";
 	echo "<table>";
 	echo "<tr>

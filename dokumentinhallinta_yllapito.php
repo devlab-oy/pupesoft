@@ -73,7 +73,7 @@ echo "
 		</tr>
 		<tr>
 			<td>
-				<form action = '$PHP_SELF' method='POST'>
+				<form method='POST'>
 				<input type='hidden' name='tee' value='perusta_uusi'>		
 					<select name='tyyppi'>
 						<option value = ''>".t("Valitse laji")."</option>
@@ -90,7 +90,7 @@ echo "
 		</tr>
 		<tr>
 			<td>
-				<form action = '$PHP_SELF' method='POST'>
+				<form method='POST'>
 				<input type='hidden' name='tee' value='sulje'>
 					<select name='tyyppi'>
 						<option value = ''>".t("Valitse laji")."</option>
@@ -105,7 +105,7 @@ echo "
 	<br>";
 
 echo "
-	<form action = '$PHP_SELF' method='POST'>
+	<form method='POST'>
 	<input type='hidden' name='tee' value='luo_asiakaskansiot'>
 	<input type = 'submit' value = 'Luo asiakaskansiot'>
 	</form>";

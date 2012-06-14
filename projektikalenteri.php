@@ -458,19 +458,15 @@ if((($toim != "HAKU" and $toim != "OMATPROJEKTITHAKU") or $projekti != "" or $as
 		if ($asiakas != "") {
 			$rajaus .= "and (lasku.nimi LIKE '%$asiakas%' or lasku.nimitark LIKE '%$asiakas%')";
 		}
-		if ($kohde != "") {
-			$rajaus .= "and asiakkaan_kohde.kohde LIKE '%$kohde%'";
-		}
 	}
 	else {
 		$rajaus = " and lasku.alatila!='X'";
 	}
 	
-	$query = "	SELECT lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, laskun_lisatiedot.seuranta, laskun_lisatiedot.projektipaallikko, asiakkaan_kohde.kohde kohde
+	$query = "	SELECT lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, laskun_lisatiedot.seuranta, laskun_lisatiedot.projektipaallikko
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 				LEFT JOIN kuka pp ON pp.yhtio=lasku.yhtio and pp.kuka=laskun_lisatiedot.projektipaallikko
-				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde 
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
 				and lasku.tila = 'R' $tilaustyyppirajaus
 				$rajaus

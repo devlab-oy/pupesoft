@@ -3349,7 +3349,6 @@
 							tunnusnippu_tarjous			= '$tunnusnippu_tarjous',
 							rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 							kasinsyotetty_viite			= '$kasinsyotetty_viite',
-							asiakkaan_kohde				= '$asiakkaan_kohde',
 							kantaasiakastunnus			= '$kantaasiakastunnus',
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;

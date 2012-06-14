@@ -17,16 +17,6 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$myytilrow = mysql_fetch_array($result);
 
-			//	Halutaan kohteen nimi jos sellainen on
-			$query = "	SELECT asiakkaan_kohde.kohde
-						FROM laskun_lisatiedot
-						JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
-						WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
-						and asiakkaan_kohde > 0
-						and otunnus = '$otunnus'";
-			$result = mysql_query($query) or pupe_error($query);
-			$kohderow = mysql_fetch_array($result);
-
 			//otetaan ensin vain lis‰varusteettomat tuotteet tai lis‰varusteperheiden is‰t
 			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, jt+varattu kpl, tilausrivi.tunnus rivitunnus
 						FROM tilausrivi
@@ -43,7 +33,7 @@
 			if (mysql_num_rows($lsresult) > 0) {
 				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 
-					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]." ".$kohderow["kohde"]." ".$valmlisaarivi["tuoteno"]);
+					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]." ".$valmlisaarivi["tuoteno"]);
 
 					// Tarkistetaan onko meill‰ jo otsikko
 					$query = "	SELECT tunnus
@@ -200,87 +190,6 @@
 
 					$kysely  = "UPDATE tilausrivin_lisatiedot SET $values WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$perheid_lisaarivi'";
 					$insres2 = mysql_query($kysely) or pupe_error($kysely);
-
-					if($uusiPituus > 0) {
-						//	Fiksataan viel‰ rakenteen osapalikat jos meill‰ on multidimensionaalinen kappale valmistettavana
-						$query = "	SELECT 	tilausrivi.tunnus, tuote.vaaditaan_kpl2,
-											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.hinta/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.hinta) yksikkohinta,
-											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.tilkpl/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.tilkpl) yksikkotilkpl,
-											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.varattu/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.varattu) yksikkovarattu
-									FROM tilausrivi use index (yhtio_otunnus)
-									LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-									LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-									and tilausrivi.otunnus = '$tunnus'
-									and (tilausrivi.tunnus = '$perheid_lisaarivi' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$perheid_lisaarivi' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))) or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$perheid_lisaarivi' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))))
-									ORDER BY tunnus";
-						$lapsires = mysql_query($query) or pupe_error($query);
-
-						while($lapsi = mysql_fetch_array($lapsires)) {
-
-							//	P‰ivitet‰‰n positio tai rivityyppi
-							$query = "	UPDATE tilausrivin_lisatiedot
-										SET $lisaalisa
-										muutospvm				= now(),
-										muuttaja				= '$kukarow[kuka]'
-										WHERE yhtio			 = '$kukarow[yhtio]'
-										and tilausrivitunnus = '$lapsi[tunnus]'";
-							$uresult = mysql_query($query) or pupe_error($query);
-
-							//	Fiksataan m‰‰r‰‰ tai hinta
-							if(in_array($lapsi["vaaditaan_kpl2"], array("P","K","M")) and (isset($asiakkaan_positio) or isset($pituus))) {
-
-								//	Lasketaan kertoimet, ekana tulee aina perheen faija
-								if(!isset($uusiPituus)) {
-									if($lapsi["vaaditaan_kpl2"] == "P") {
-										$query  = "	SELECT pituus
-													FROM asiakkaan_positio
-													WHERE yhtio = '$kukarow[yhtio]'
-													and tunnus = '$asiakkaan_positio'";
-										$posres = mysql_query($query) or pupe_error($query);
-										$posrow = mysql_fetch_array($posres);
-										$uusiPituus = $posrow["pituus"];
-									}
-									elseif($lapsi["vaaditaan_kpl2"] == "M") {
-										$uusiPituus = $pituus;
-									}
-
-									//	Varmistetaan, ett‰ saadaan aina jotain lukuja
-									if( (int) $uusiPituus == 0) {
-										$uusiPituus == 10000;
-									}
-								}
-
-								if($lapsi["vaaditaan_kpl2"] == "P") {
-									$uhinta = round(($uusiPituus * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
-
-									$query = "	UPDATE tilausrivi
-												SET hinta = '$uhinta'
-												WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lapsi[tunnus]'";
-									$updre = mysql_query($query) or pupe_error($query);
-								}
-								elseif($lapsi["vaaditaan_kpl2"] == "K") {
-									$uvarattu = $uusiPituus*($lapsi["yksikkovarattu"]/1000);
-									$utilkpl = $uusiPituus*($lapsi["yksikkotilkpl"]/1000);
-
-									$query = "	UPDATE tilausrivi
-												SET varattu = '$uvarattu',
-													tilkpl	= '$utilkpl'
-												WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lapsi[tunnus]'";
-									$updre = mysql_query($query) or pupe_error($query);
-									//echo $query."<br>";
-								}
-
-								//	Tallennetaan t‰m‰ pituus viel‰ lis‰tietoihin
-								$query = "	UPDATE tilausrivin_lisatiedot SET
-												pituus 					= '$uusiPituus',
-												muutospvm				= now(),
-												muuttaja				= '$kukarow[kuka]'
-											WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus = '$lapsi[tunnus]'";
-								$updre = mysql_query($query) or pupe_error($query);
-							}
-						}
-					}
 
 					//	Tehd‰‰n rivist‰ normi JT
 					$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";

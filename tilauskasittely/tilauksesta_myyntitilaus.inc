@@ -214,12 +214,6 @@
 						$values .= ", '$projekti'";
 						$pvalues .= ", '$projekti'";
 						break;
-					case 'asiakkaan_kohde':
-						//	tämä talteen!
-						$asiakkaan_kohde = $monistarow2[$i];
-						$values .= ", '$asiakkaan_kohde'";
-						$pvalues .= ", '$asiakkaan_kohde'";
-						break;
 					default:
 						$values .= ", '".$monistarow2[$i]."'";
 						$pvalues .= ", '".$monistarow2[$i]."'";

@@ -288,7 +288,6 @@
 						asiakashinta as ashin1 READ,
 						asiakashinta as ashin2 READ,
 						asiakaskommentti READ,
-						asiakkaan_positio READ,
 						avainsana as a READ,
 						avainsana as avainsana_kieli READ,
 						avainsana as b READ,

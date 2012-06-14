@@ -1124,6 +1124,16 @@
 		echo "<th>&nbsp;</th>";
 		echo "</tr>";
 
+		$toimittaja = (int) $toimittaja;
+
+		$query = "	SELECT tunnus, asn_sanomat
+					FROM toimi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND toimittajanro = '{$toimittaja}'
+					AND tyyppi != 'P'";
+		$toimires = pupe_query($query);
+		$toimirow = mysql_fetch_assoc($toimires);
+
 		$chk = (isset($rivit_ei_asnlla) and trim($rivit_ei_asnlla) != '') ? " checked" : "";
 
 		echo "<tr>";
@@ -1134,9 +1144,12 @@
 		echo "<td><input type='text' name='kpl' value='{$kpl}' /></td>";
 		echo "<td><input type='submit' value='",t("Etsi"),"' /></td>";
 		echo "</tr>";
-		echo "<tr>";
-		echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("Näytä myös rivit joita ei ole ASN:llä tullut"),"</td>";
-		echo "</tr>";
+
+		if ($toimirow['asn_sanomat'] == 'K') {
+			echo "<tr>";
+			echo "<td colspan='6' class='back'><input type='checkbox' name='rivit_ei_asnlla'{$chk} /> ",t("Näytä myös rivit joita ei ole ASN:llä tullut"),"</td>";
+			echo "</tr>";
+		}
 		echo "</table>";
 		echo "</form>";
 
@@ -1167,16 +1180,7 @@
 			echo "<th>",t("Poista"),"</th>";
 			echo "</tr>";
 
-			$toimittaja = (int) $toimittaja;
 			$tilausnro = (int) $tilausnro;
-
-			$query = "	SELECT tunnus, asn_sanomat
-						FROM toimi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND toimittajanro = '{$toimittaja}'
-						AND tyyppi != 'P'";
-			$toimires = pupe_query($query);
-			$toimirow = mysql_fetch_assoc($toimires);
 
 			$tilaajanrivinrolisa = trim($tilaajanrivinro) != '' ? " and tilausrivi.tilaajanrivinro = ".(int) $tilaajanrivinro : '';
 			$tilausnrolisa = (trim($tilausnro) != '' and trim($tilausnro) != 0) ? " and lasku.tunnus LIKE '%{$tilausnro}'" : '';

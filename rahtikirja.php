@@ -708,9 +708,9 @@
 
 			// Katsotaan pitäisikö tämä rahtikirja tulostaa heti...
 			$query = "	SELECT *
-						from toimitustapa
-						where yhtio = '$kukarow[yhtio]'
-						and selite = '$toimitustapa'";
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite  = '$toimitustapa'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -736,12 +736,13 @@
 								sisamaan_kuljetusmuoto  			= '$row[sisamaan_kuljetusmuoto]',
 								sisamaan_kuljetus_kansallisuus		= '$row[sisamaan_kuljetus_kansallisuus]',
 								vahennettava_era 					= '$row[vahennettava_era]'
-								where yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset)";
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus in ($tunnukset)";
 					$updateres = pupe_query($query);
 				}
 
 				// tämä toimitustapa pitäisi tulostaa nyt..
-				if ($row['nouto']=='' and ($row['tulostustapa']=='H' or $row['tulostustapa']=='K')) {
+				if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or $row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
 					// rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
 					// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
@@ -755,8 +756,11 @@
 				} // end if tulostetaanko heti
 
 				// Haetaan laskun kaikki tiedot uudestaan koska rahtikirja-tulostus.php ilikirjaa muuttujamme
-				$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskurow_rakirsyotto_original[tunnus]'";
-				$lasresult   = pupe_query($query);
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tunnus	= '$laskurow_rakirsyotto_original[tunnus]'";
+				$lasresult = pupe_query($query);
 				$laskurow = mysql_fetch_assoc($lasresult);
 
 			} // end if löytykö toimitustapa
@@ -791,16 +795,17 @@
 			}
 			elseif ($laskurow["varasto"] == '') {
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]'
-							order by alkuhyllyalue,alkuhyllynro
-							limit 1";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							ORDER BY alkuhyllyalue,alkuhyllynro
+							LIMIT 1";
 			}
 			else {
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
-							order by alkuhyllyalue,alkuhyllynro";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus='$laskurow[varasto]'
+							ORDER BY alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = pupe_query($query);
 
@@ -1854,7 +1859,7 @@
 					JOIN varastopaikat use index (PRIMARY) ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
 					WHERE lasku.$logistiikka_yhtiolisa
 					AND	lasku.tila = '$tila'
-					AND (lasku.alatila in ('B','E') or (lasku.alatila='D' and toimitustapa.tulostustapa='H'))
+					AND (lasku.alatila in ('B','E') or (lasku.alatila = 'D' and toimitustapa.tulostustapa = 'H'))
 					$haku
 					$tilaustyyppi
 					GROUP BY 1,2,3

@@ -494,12 +494,25 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment ID. UFPS only.
 				#$uni_shi_val->addAttribute('n', "shpid");
 
+
+				if ($yhtiorow['kerayserat'] == 'K') {
+					$pakkausid = chr(64+$this->postirow['pakkausid']);
+				}
+				else {
+					$pakkausid = $this->postirow['kuljetusohjeet'];
+				}
+
 				# PakkausID
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr(chr(64+$this->postirow['pakkausid']), 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($pakkausid, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext1");
 
 				# kollilaji
-				$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus']." / ".$this->postirow['rivimaara'];
+				if ($yhtiorow['kerayserat'] == 'K') {
+					$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus']." / ".$this->postirow['rivimaara'];
+				}
+				else {
+					$kollilaji = "";
+				}
 
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($kollilaji, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext2");

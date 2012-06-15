@@ -50,7 +50,7 @@
 
 		// Ollaan tässä skriptissä tulostamassa erärahtikirjoja
 		// Unifaun keississä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-		if (isset($tulosta_rahtikirjat) and $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat) and $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
 			$tee = "close_with_printer";
 		}
 	}
@@ -198,64 +198,54 @@
 	// Kutsutaan unifaunin _closeWithPrinter-metodia
 	if ($tee == 'close_with_printer') {
 
-		$query = "	SELECT tunnus, toimitustavan_lahto, toimitustapa, ytunnus, toim_osoite, toim_postino, toim_postitp
-					FROM lasku
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila 	= 'L'
-					AND alatila = 'B'
-					AND toimitustavan_lahto = '{$lahto}'";
-		$result = pupe_query($query);
+		require("inc/unifaun_send.inc");
 
-		$toimitustapa_varasto = "";
-		$lahetetaanko_unifaun_era  = FALSE;
-		$lahetetaanko_unifaun_heti = FALSE;
+		$query = "	SELECT distinct lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus
+					FROM rahtikirjat
+					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G')
+					$ltun_querylisa
+					$vainvakilliset
+					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+					LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+					LEFT JOIN rahtisopimukset ON (lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+					WHERE rahtikirjat.yhtio			= '$kukarow[yhtio]'
+					AND rahtikirjat.tulostettu		= '0000-00-00 00:00:00'
+					AND rahtikirjat.toimitustapa	= '$toimitustapa'
+					AND rahtikirjat.tulostuspaikka	= '$varasto'
+					$jvehto
+					ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
+		$rakir_res = pupe_query($query);
 
-		while ($row = mysql_fetch_assoc($result)) {
-			$sel_ltun[] = $row['tunnus'];
+		$mergeid_arr = array();
 
-			$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$select_varasto;
+		while ($row = mysql_fetch_assoc($rakir_res)) {
+			$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
+			$mergeid_arr[$mergeid] = $mergeid;
 
-			$query = "	SELECT *
-						FROM toimitustapa
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND selite  = '{$row['toimitustapa']}'";
-			$toimitustapa_res = pupe_query($query);
-			$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
-
-			// Erätulostus
-			if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'E') {
-				$lahetetaanko_unifaun_era = $toimitustapa_row["rahtikirja"];
-
-				$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
-				$mergeid_arr[$mergeid] = $mergeid;
-			}
-
-			// Hetitulostus
-			if (($toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toimitustapa_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') and $toimitustapa_row['tulostustapa'] == 'H') {
-				$lahetetaanko_unifaun_heti = $toimitustapa_row["rahtikirja"];
-			}
+			echo "Tulostetaan rahtikirja: $row[ytunnus].$row[toim_osoite].$row[toim_postino].$row[toim_postitp]<br>";
 		}
 
+		$query = "	SELECT unifaun_nimi
+					FROM kirjoittimet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus  = '{$kirjoitin_tunnus}'";
+		$kires = pupe_query($query);
+		$kirow = mysql_fetch_assoc($kires);
 
 		foreach ($mergeid_arr as $mergeid) {
 
-			if ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+			if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 				$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
 			}
-			elseif ($lahetetaanko_unifaun_era == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+			elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 				$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 			}
-
-			$query = "	SELECT unifaun_nimi
-						FROM kirjoittimet
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus  = '{$komento}'";
-			$kires = pupe_query($query);
-			$kirow = mysql_fetch_assoc($kires);
 
 			$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
 			$unifaun->ftpSend();
 		}
+
+		$tee = '';
 	}
 
 	// Tulostetaan rahtikirja
@@ -511,16 +501,16 @@
 					$tunnukset = $vanhat_tunnukset;
 				}
 
-				// merkataan tilausrivit toimitetuiksi..
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				// merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun erätulostuksen kollitarra
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc'))) {
 					$query = "	UPDATE tilausrivi
-								set toimitettu = '$kukarow[kuka]', toimitettuaika = now()
-								where otunnus  in ($otunnukset)
-								and yhtio 	 	= '$kukarow[yhtio]'
-								and var not in ('P','J')
-								and keratty    != ''
-								and toimitettu  = ''
-								and tyyppi 	 	= 'L'";
+								SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+								WHERE otunnus in ($otunnukset)
+								AND yhtio 	   = '$kukarow[yhtio]'
+								AND var not in ('P','J')
+								AND keratty    != ''
+								AND toimitettu  = ''
+								AND tyyppi 	 	= 'L'";
 					$ures  = pupe_query($query);
 				}
 
@@ -576,7 +566,7 @@
 				// tulostetaan rahtikirja
 
 				// merkataan rahtikirjat tulostetuksi..
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc'))) {
 					$query = "	UPDATE rahtikirjat
 								SET tulostettu = now()
 								WHERE tunnus  IN ($tunnukset)
@@ -757,12 +747,9 @@
 				}
 
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin..
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '') {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '' and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc'))) {
 
 					// kotimaan myynti menee alatilaan D
-
-
-
 					$query = "UPDATE lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";
 					$ures  = pupe_query($query);
 

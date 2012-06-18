@@ -59,7 +59,7 @@
 		require_once ("tulosta_lahete_kerayslista.inc");
 
 		//haetaan asiakkaan tiedot
-		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);
@@ -290,6 +290,7 @@
 		if ($komento != "") {
 			//tulostetaan sivu
 			$params_kerayslista["komento"] = $komento;
+
 			print_pdf_kerayslista($params_kerayslista);
 
 			// jos halutaan MYÖS lähete
@@ -305,13 +306,15 @@
 					$params = array(
 						'laskurow'					=> $lahetteen_tulostustapa_row,
 						'sellahetetyyppi' 			=> "",
-						'extranet_tilausvahvistus'	=> "",
+						'extranet_tilausvahvistus' 	=> "",
 						'naytetaanko_rivihinta'		=> "",
 						'tee'						=> "",
 						'toim'						=> $toim,
-						'query_ale_lisa'			=> "",
-						'komento'					=> $komento
+						'komento' 					=> $komento,
+						'lahetekpl'					=> "",
+						'kieli' 					=> ""
 						);
+
 					pupesoft_tulosta_lahete($params);
 				}
 			}

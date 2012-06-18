@@ -14,6 +14,7 @@ if ($livesearch_tee == "TILIHAKU") {
 function listdir($start_dir = '.') {
 
 	$files = array();
+	$ohitetut_laskut = array();
 
 	if (is_dir($start_dir)) {
 
@@ -29,16 +30,23 @@ function listdir($start_dir = '.') {
 				$files = array_merge($files, listdir($filepath));
 			}
 			else {
-				array_push($files, $filepath);
+				if(strstr($file, "skip_")) {
+					array_push($ohitetut_laskut, $filepath);
+				}
+				else {
+					array_push($files, $filepath);
+				}
 			}
 		}
 		closedir($fh);
+
+		# Sortataan laskut ja mergetetään skipattujen kanssa, skipatut siis viimeiseksi
 		sort($files);
+		$files = array_merge($files, $ohitetut_laskut);
 	}
 	else {
 		$files = false;
 	}
-
 	return $files;
 }
 

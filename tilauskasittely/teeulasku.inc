@@ -172,21 +172,41 @@
 			else $lisa_comments .= trim($frow["teksti_fi"])." \n";
 		}
 	}
-
 	if ($lasrow["vienti"] == 'E') {
-		//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
-		$query = "	SELECT tilausrivi.tunnus
+		# Katsotaan onko kyseessä kolmikantakauppa
+		$query = "	SELECT lasku.tunnus, lasku.toim_maa
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
-					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.otunnus in ($tunnukset)";
-		$abulisares = pupe_query($query);
+					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio
+						AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
+						AND t3.tyyppi = 'O')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+						AND lasku.tunnus = t3.otunnus
+						AND lasku.toim_maa != '$yhtiorow[maa]')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.otunnus IN ($tunnukset)";
+		$result = pupe_query($query);
 
-		if (mysql_num_rows($abulisares) == 0) {
-			$lisa_comments .= "Reverse charge, intangible service. \n";
+		if (mysql_num_rows($result) > 0) {
+			$lisa_comments .= "VAT 0% Triangulation.\n";
 		}
 		else {
-			$lisa_comments .= "VAT 0% Intra community supply. \n";
+			//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
+			$query = "	SELECT tilausrivi.tunnus
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
+						WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+						and tilausrivi.otunnus in ($tunnukset)";
+			$abulisares = pupe_query($query);
+
+			if (mysql_num_rows($abulisares) == 0) {
+				$lisa_comments .= "Reverse charge, intangible service. \n";
+			}
+			else {
+				$lisa_comments .= "VAT 0% Intra community supply. \n";
+			}
 		}
 	}
 

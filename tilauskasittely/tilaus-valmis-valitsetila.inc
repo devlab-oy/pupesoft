@@ -330,6 +330,7 @@
 					'query_ale_lisa'			=> "",
 					'komento'					=> $komento
 					);
+
 				pupesoft_tulosta_lahete($params);
 			}
 		}

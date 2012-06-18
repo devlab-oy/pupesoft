@@ -1135,7 +1135,7 @@ if (!function_exists('rivi_lahete')) {
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		//hatetaan tuotteen myyntihinta
+		// Haetaan tuotteen myyntihinta
 		$query = "	SELECT *
                     FROM tuote
                     WHERE tuoteno	= '$row[tuoteno]'
@@ -2516,7 +2516,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(445-$oikpos, $kala, $row["varattu"], $thispage, $norm);
 
-			//hatetaan tuotteen myyntihinta
+			// Haetaan tuotteen myyntihinta
 			$query = "	SELECT *
 	                    FROM tuote
 	                    WHERE tuoteno	= '$row[tuoteno]'

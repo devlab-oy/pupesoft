@@ -658,7 +658,7 @@ if (!function_exists('rivi_tarjous')) {
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		//hatetaan tuotteen myyntihinta
+		// Haetaan tuotteen myyntihinta
 		$query = "	SELECT round(if(isnull(hinnasto.hinta) OR hinnasto.hinta = '', round(tuote.myyntihinta / if('$laskurow[vienti_kurssi]' = 0, 1, '$laskurow[vienti_kurssi]'), '$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1 + (if('$yhtiorow[alv_kasittely]' = '', 0, tuote.alv) / 100)), '$yhtiorow[hintapyoristys]') myyntihinta,
        				tuote.aleryhma
                     FROM tuote

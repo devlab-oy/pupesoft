@@ -43,7 +43,7 @@
 		$laskurow['h1time'] = date('Y-m-d H:i:s');
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
-	
+
 	//otetaan varmuuden vuoksi alkuperäisen otsikon tunnus
 	$alkuplaskutunnus = $laskurow["tunnus"];
 
@@ -383,7 +383,7 @@
 				$query = "SELECT * FROM lasku where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$alkuplaskutunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_assoc($result);
-				
+
 				$tee = "valmis";
 				$tulostetaan = "OK";
 			}
@@ -458,8 +458,8 @@
 				// Tulostetaan keräyslista
 				require_once ("tulosta_lahete_kerayslista.inc");
 
-				//hatetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				// Haetaan asiakkaan tiedot
+				$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$riresult = mysql_query($query) or pupe_error($query);

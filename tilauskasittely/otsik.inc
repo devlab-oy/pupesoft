@@ -1979,10 +1979,13 @@
 
 			# Lähetetyypin valinta
 			$lahetetyypit = t_avainsana("LAHETETYYPPI");
+
 			echo "<tr>";
 			echo "<td>".t("Lähetetyyppi").":</td>";
 			echo "<td><select name='lahetetyyppi' style='max-width: 300px'>";
+
 			$lahetetyyppi = pupesoft_lahetetyyppi($laskurow['tunnus']);
+
 			while ($vrow = mysql_fetch_assoc($lahetetyypit)) {
 				$sel = "";
 				if ($lahetetyyppi == $vrow['selite']) $sel = "selected";

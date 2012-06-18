@@ -70,9 +70,9 @@
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
-		$editsql = "	SELECT * 
-						FROM toimi 
-						WHERE yhtio = '$kukarow[yhtio]' 
+		$editsql = "	SELECT *
+						FROM toimi
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$toimittajaid'";
 		$edires = pupe_query($editsql);
 		$editoimrow = mysql_fetch_assoc($edires);
@@ -82,7 +82,9 @@
 		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
 
 		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
+
 		$vresult = t_avainsana("LAHETETYYPPI");
+
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
@@ -99,7 +101,8 @@
 
 		$query2 = "	SELECT tilausvahvistus
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$otunnus'";
 		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
@@ -245,8 +248,8 @@
 	foreach($tulostimet as $tulostin) {
 
 		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
-			$query = "	SELECT tunnus, sscc 
-						FROM suuntalavat 
+			$query = "	SELECT tunnus, sscc
+						FROM suuntalavat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tila = 'S'";
 			$suuntalavat_res = pupe_query($query);
@@ -262,7 +265,7 @@
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
-		
+
 		if (isset($editoimrow) and $editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '' and $editoimrow["edi_kuvaus"] != '') {
 			$rajaus = "";
 			$valittu = "edi";
@@ -355,7 +358,7 @@
 			}
 		}
 	}
-	
+
 	if ($laskurow['kirjoitin'] == "edi") {
 		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}

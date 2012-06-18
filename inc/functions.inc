@@ -14915,9 +14915,9 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		'nimitysleveys'				=> '',
 		'tyyppi'					=> '',
 		'useita'					=> '',
-		'ei_echoa'					=> $ei_echoa,
 		'komento'					=> $komento,
 		'yhteensamaara'				=> 0,
+		'lahetekpl'					=> $lahetekpl,
 		);
 
 		if ($laskurow["tila"] == "G") {
@@ -14935,7 +14935,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$params_lahete = rivi_lahete($params_lahete);
 		}
 
-		//Haetaan erikseen toimitettavat tuotteet
+		// Haetaan erikseen toimitettavat tuotteet
 		if ($laskurow["vanhatunnus"] != 0) {
 			$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 						FROM lasku use index (yhtio_vanhatunnus)
@@ -15010,6 +15010,11 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
 			$params_lahete = kuittaus_lahete($params_lahete);
+		}
+
+		if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE and $yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "") {
+			$komento = array($komento);
+			$komento[] = "asiakasemail".$laskurow['email'];
 		}
 
 		if (is_array($komento) and isset($komento["Lähete"])) $params_lahete["komento"] = $komento["Lähete"];

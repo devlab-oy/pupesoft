@@ -1781,7 +1781,6 @@
 			}
 
 			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
-
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> $sellahetetyyppi,
@@ -1789,8 +1788,8 @@
 					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
 					'tee'						=> $tee,
 					'toim'						=> $toim,
-					'query_ale_lisa' 			=> $query_ale_lisa,
 					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli
 					);
 

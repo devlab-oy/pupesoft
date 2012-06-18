@@ -290,6 +290,7 @@
 		if ($komento != "") {
 			//tulostetaan sivu
 			$params_kerayslista["komento"] = $komento;
+
 			print_pdf_kerayslista($params_kerayslista);
 
 			// jos halutaan MYÖS lähete
@@ -305,12 +306,13 @@
 					$params = array(
 						'laskurow'					=> $lahetteen_tulostustapa_row,
 						'sellahetetyyppi' 			=> "",
-						'extranet_tilausvahvistus'	=> "",
+						'extranet_tilausvahvistus' 	=> "",
 						'naytetaanko_rivihinta'		=> "",
 						'tee'						=> "",
 						'toim'						=> $toim,
-						'query_ale_lisa'			=> "",
-						'komento'					=> $komento
+						'komento' 					=> $komento,
+						'lahetekpl'					=> "",
+						'kieli' 					=> ""
 						);
 
 					pupesoft_tulosta_lahete($params);

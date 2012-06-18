@@ -1141,7 +1141,7 @@ if (!function_exists('rivi_lahete')) {
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		//hatetaan tuotteen myyntihinta
+		// Haetaan tuotteen myyntihinta
 		$query = "	SELECT *
                     FROM tuote
                     WHERE tuoteno	= '$row[tuoteno]'
@@ -2522,7 +2522,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(445-$oikpos, $kala, $row["varattu"], $thispage, $norm);
 
-			//hatetaan tuotteen myyntihinta
+			// Haetaan tuotteen myyntihinta
 			$query = "	SELECT *
 	                    FROM tuote
 	                    WHERE tuoteno	= '$row[tuoteno]'
@@ -3449,9 +3449,7 @@ if (!function_exists('print_pdf_lahete')) {
 						$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
 					}
 					else {
-						if (!isset($ei_echoa) or trim($ei_echoa) == '') {
-							echo t("Lähete tulostuu")."...<br>";
-						}
+						echo t("Lähete tulostuu")."...<br>";
 
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 
@@ -3471,7 +3469,6 @@ if (!function_exists('print_pdf_lahete')) {
 						$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
 						$content_body .= $yhtiorow["nimi"]."\n";
 					}
-
 
 					$newfilename = str_replace(" ", "_", $kutsu);
 
@@ -3495,10 +3492,14 @@ if (!function_exists('print_pdf_lahete')) {
 									);
 
 					pupesoft_sahkoposti($parametri);
-
 				}
 				elseif ($komento != '' and $komento != 'edi') {
 					echo t("Lähete tulostuu")."...<br>";
+
+					if ($lahetekpl > 1) {
+						$komento .= " -#$lahetekpl ";
+					}
+
 					$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 				}
 			}

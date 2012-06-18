@@ -323,13 +323,15 @@
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> "",
-					'extranet_tilausvahvistus'	=> "",
+					'extranet_tilausvahvistus' 	=> "",
 					'naytetaanko_rivihinta'		=> "",
 					'tee'						=> "",
 					'toim'						=> $toim,
-					'query_ale_lisa'			=> "",
-					'komento'					=> $komento
+					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
+					'kieli' 					=> ""
 					);
+
 				pupesoft_tulosta_lahete($params);
 			}
 		}

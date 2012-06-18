@@ -874,9 +874,8 @@
 
 			if ($kutsuttu > 0) {
 				$vastaavat_html .= "</table>";
-			}
-
-			$vastaavattuotteet = 1;
+				$vastaavattuotteet = 1;
+			}			
 		}
 	}
 

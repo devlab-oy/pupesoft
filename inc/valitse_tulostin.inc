@@ -85,18 +85,13 @@
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><th>".t("Tulosta")."</th><td><select name='sellahetetyyppi'>";
 
-		$query2 = "	SELECT lahetetyyppi
-					FROM lasku
-					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";
-		$vresult2 = pupe_query($query2);
-		$row2 = mysql_fetch_array($vresult2);
+		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 
 		$vresult = t_avainsana("LAHETETYYPPI");
 
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
-			if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
+			if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
 
 			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}
@@ -110,7 +105,8 @@
 
 		$query2 = "	SELECT tilausvahvistus
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$otunnus'";
 		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
@@ -382,7 +378,7 @@
 		}
 	}
 
-	if ($laskurow['kirjoitin'] == "edi") {
+	if (isset($laskurow) and $laskurow['kirjoitin'] == "edi") {
 		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}
 

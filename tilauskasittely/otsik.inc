@@ -1979,12 +1979,27 @@
 			echo "</td>";
 			echo "</tr>";
 
-			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
-				echo "<tr>";
-				echo "<td></td><td></td>";
-				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
-				echo "</tr>";
+			# Lähetetyypin valinta
+			$lahetetyypit = t_avainsana("LAHETETYYPPI");
+
+			echo "<tr>";
+			echo "<td>".t("Lähetetyyppi").":</td>";
+			echo "<td><select name='lahetetyyppi' style='max-width: 300px'>";
+
+			$lahetetyyppi = pupesoft_lahetetyyppi($laskurow['tunnus']);
+
+			while ($vrow = mysql_fetch_assoc($lahetetyypit)) {
+				$sel = "";
+				if ($lahetetyyppi == $vrow['selite']) $sel = "selected";
+				echo "<option value='{$vrow['selite']}' $sel>".$vrow['selitetark']."</option>";
 			}
+
+			echo "</select></td>";
+
+			if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
+				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
+			}
+			echo "</tr>";
 
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "<tr>";
@@ -3019,6 +3034,7 @@
 					clearing							= '$clearing',
 					comments 							= '$comments',
 					eilahetetta 						= '$eilahe',
+					lahetetyyppi 						= '$lahetetyyppi',
 					erikoisale 							= '$erikoisale',
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					huolitsija 							= '$huolitsija',

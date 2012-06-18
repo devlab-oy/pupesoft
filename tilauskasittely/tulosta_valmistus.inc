@@ -26,7 +26,7 @@ $rivinkorkeus			= 17;
 
 if (!function_exists('alku_valm')) {
 	function alku_valm($tyyppi = "") {
-		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
+		global $pdf, $sivu, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
 
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -418,7 +418,7 @@ if (!function_exists('rivi_otsikot_valm')) {
 
 if (!function_exists('rivi_valm')) {
 	function rivi_valm($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
+		global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
 
 		static $tuoteperhe_omallesivulle = "";
 
@@ -492,7 +492,7 @@ if (!function_exists('rivi_valm')) {
 
 if (!function_exists('rivi_valmistus')) {
 	function rivi_valmistus($thispage, $tyyppi = "") {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
+		global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
 
 		$p["height"]	= 10;
 		$p["font"]		= "Times-Roman";

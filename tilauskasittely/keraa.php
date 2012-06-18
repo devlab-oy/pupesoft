@@ -2517,18 +2517,14 @@
 				if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
 					echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
 
-					$query2 = "	SELECT lahetetyyppi
-								FROM lasku
-								JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
-					$vresult2 = pupe_query($query2);
-					$row2 = mysql_fetch_assoc($vresult2);
+					$lahetetyyppi = pupesoft_lahetetyyppi($id);
 
 					$vresult = t_avainsana("LAHETETYYPPI");
 
-					while ($row = mysql_fetch_assoc($vresult)) {
+					while($row = mysql_fetch_array($vresult)) {
 						$sel = "";
-						if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
+						if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
+
 						echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 					}
 

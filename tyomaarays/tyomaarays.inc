@@ -33,8 +33,8 @@
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 
-		//hatetaan asiakkaan tiedot
-		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		// Haetaan asiakkaan tiedot
+		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$result = pupe_query($query);

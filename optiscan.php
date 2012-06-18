@@ -641,8 +641,6 @@
 
 			$komento["Lähete"] = $kirj_row['komento'];
 
-			$ei_echoa = 'eini';
-
 			foreach (explode(",", $row['otunnukset']) as $otun) {
 
 				$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otun}'";
@@ -650,16 +648,16 @@
 				$laskurow = mysql_fetch_assoc($laskures);
 
 				$params = array(
-					'laskurow' => $laskurow,
-					'sellahetetyyppi' => '',
-					'extranet_tilausvahvistus' => '',
-					'naytetaanko_rivihinta' => '',
-					'tee' => '',
-					'toim' => '',
-					'query_ale_lisa' => $query_ale_lisa,
-					'komento' => $komento,
-					'ei_echoa' => $ei_echoa
-				);
+					'laskurow'					=> $laskurow,
+					'sellahetetyyppi' 			=> "",
+					'extranet_tilausvahvistus' 	=> "",
+					'naytetaanko_rivihinta'		=> "",
+					'tee'						=> "",
+					'toim'						=> "",
+					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
+					'kieli' 					=> ""
+					);
 
 				pupesoft_tulosta_lahete($params);
 			}

@@ -126,8 +126,8 @@
 			$query = "	(SELECT
 						tuote.tullinimike1,
 						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys)) alkuperamaa,
+						if (lasku.maa_maara='', if (lasku.toim_maa='', '$yhtiorow[maa]', lasku.toim_maa), lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
@@ -175,7 +175,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
-
+		
 		if ($tapahtumalaji == "kaikki") {
 			$query .= "	UNION";
 		}
@@ -430,6 +430,7 @@
 
 				$row["paino"] 		+= $lisavarrow["paino"];
 				$row["rivihinta"] 	+= $lisavarrow["rivihinta"];
+					
 			}
 
 			// 3. Nimiketietue
@@ -512,6 +513,7 @@
 					if ($tapa == "tuonti") {
 						$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
 						$worksheet->write($excelrivi, 4, $row["maalahetys"]);
+							
 					}
 					else {
 						$worksheet->write($excelrivi, 5, $row["maamaara"]);

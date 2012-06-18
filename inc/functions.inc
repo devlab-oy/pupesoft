@@ -14800,7 +14800,12 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$result = pupe_query($query);
 		$asrow = mysql_fetch_assoc($result);
 
-		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
+		if (isset($sellahetetyyppi) and $sellahetetyyppi != '') {
+			$lahetetyyppi = $sellahetetyyppi;
+		}
+		else {
+			$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
+		}
 
 		/*
 		Testausta varten.....

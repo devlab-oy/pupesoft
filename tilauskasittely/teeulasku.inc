@@ -190,7 +190,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
-			$lisa_comments .= "Triangulation!\n";
+			$lisa_comments .= "VAT 0% Triangulation.\n";
 		}
 		else {
 			//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..

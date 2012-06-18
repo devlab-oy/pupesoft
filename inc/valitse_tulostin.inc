@@ -359,7 +359,7 @@
 		}
 	}
 
-	if ($laskurow['kirjoitin'] == "edi") {
+	if (isset($laskurow) and $laskurow['kirjoitin'] == "edi") {
 		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}
 

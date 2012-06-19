@@ -972,7 +972,7 @@
 
 			// Tilausrivit t‰lle tuotteelle
 			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						if (tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
+						if (tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm, tilausrivi.laadittu,
 						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tila laskutila, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -1003,7 +1003,8 @@
 						<th>".t("Asiakas/Toimittaja")."</th>
 						<th>".t("Tilaus/Saapuminen")."</th>
 						<th>".t("Tyyppi")."</th>
-						<th>".t("Pvm")."</th>
+						<th>".t("Luontiaika")."</th>
+						<th>".t("Toim.aika")."</th>
 						<th>".t("M‰‰r‰")."</th>
 						<th>".t("Myyt‰viss‰")."</th>
 						</tr>";
@@ -1095,7 +1096,7 @@
 
 					if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $ekotettiin == 0) {
 						echo "<tr>
-								<td colspan='5' align='right' class='spec'>".t("Myyt‰viss‰ nyt").":</td>
+								<td colspan='6' align='right' class='spec'>".t("Myyt‰viss‰ nyt").":</td>
 								<td align='right' class='spec'>".sprintf('%.2f', $myyta)."</td>
 								</tr>";
 						$ekotettiin = 1;
@@ -1107,6 +1108,7 @@
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
+							<td>".tv1dateconv($jtrow["laadittu"])."</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
@@ -1115,7 +1117,7 @@
 
 				foreach ($yhteensa as $type => $kappale) {
 					echo "<tr>";
-					echo "<th colspan='4'>$type ".t("yhteens‰")."</th>";
+					echo "<th colspan='5'>$type ".t("yhteens‰")."</th>";
 					echo "<th style='text-align:right;'>$kappale</th>";
 					echo "<th></th>";
 					echo "</tr>";

@@ -33,8 +33,8 @@
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 
-		//hatetaan asiakkaan tiedot
-		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		// Haetaan asiakkaan tiedot
+		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$result = pupe_query($query);
@@ -73,6 +73,7 @@
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  != 'D'
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
 					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -231,7 +232,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -258,7 +263,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole
@@ -285,7 +294,11 @@
 		$result = pupe_query($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and tyyppi != 'D'";
 		$keres = pupe_query($query);
 
 		//Yhtään riviä ei ole

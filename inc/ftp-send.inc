@@ -97,7 +97,17 @@ else {
 		}
 
 		// Otetaan .TMP p‰‰te veks ku siirto on valmis
-		if ($upload === TRUE) {
+		if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
+			// Jos $ftpport on k‰ytˆss‰ niin k‰ytet‰‰n n‰it‰ komentoja.
+			// N‰ytt‰‰ silt‰, ett‰ ftp_rename ei osaa hanskata renametusta kun k‰ytet‰‰n custom porttia
+			$rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
+            $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+
+			if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
+				$rename1 = FALSE;
+			}
+		}
+		elseif ($upload === TRUE) {
 			$rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
 
 			// Jos rename ep‰onnistuu, koitetaan poistaa .TMP tiedosto

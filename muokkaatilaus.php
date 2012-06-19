@@ -479,11 +479,14 @@
 			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
 			echo "<input type='hidden' name='limit' value='$limit'>";
 			echo "<font class='head'>".t("Etsi")." $otsikko<hr></font>";
-			if ($toim != "YLLAPITO") {
-				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
+			if ($toim == "YLLAPITO") {
+				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
+			}
+			else if ($toim == "MYYNTITILITOIMITA") {
+				echo t("Syötä tuotenumeron, tilausnumeron, nimen tai laatijan osa");
 			}
 			else {
-				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
+				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
 			echo "<input type='text' name='etsi'>";
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
@@ -496,8 +499,14 @@
 			$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
 			$haku = "";
-			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%')";
-			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
+			$myyntitili_haku = "";
+
+			if ($toim == "MYYNTITILITOIMITA") {
+				$myyntitili_haku = "or tilausrivi.tuoteno like '%$etsi%'";
+			}
+
+			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%' $myyntitili_haku)";
+			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku)";
 
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
 				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
@@ -755,13 +764,15 @@
 			$miinus = 4;
 		}
 		elseif ($toim == "MYYNTITILITOIMITA") {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+			$query = "	SELECT group_concat(distinct lasku.tunnus) tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
 						lasku.viesti tilausviite, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'
 						$haku
+						group by lasku.liitostunnus
 						order by lasku.luontiaika desc
 						$rajaus";
 

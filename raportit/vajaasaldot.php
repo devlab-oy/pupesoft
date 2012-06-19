@@ -2,7 +2,7 @@
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -222,6 +222,7 @@
 
 				if (isset($workbook)) {
 					$workbook->close();
+					echo "<br>";
 					echo "<table>";
 					echo "<tr><th>".t("Tallenna excel").":</th>";
 					echo "<form method='post' class='multisubmit'>";

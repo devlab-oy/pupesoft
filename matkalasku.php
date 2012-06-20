@@ -1438,7 +1438,8 @@ if ($tee == "MUOKKAA") {
 						break;
 				}
 
-				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti
+				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
+							IF(tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if(tuote.vienti != '', 2, 3)) sorttaus
 							FROM tuote
 							JOIN tili ON (tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -1446,7 +1447,7 @@ if ($tee == "MUOKKAA") {
 							and tuote.status != 'P'
 							and tuote.tilino != ''
 							$lisat
-							ORDER BY tuote.vienti IN ('$yhtiorow[maa]') DESC, tuote.vienti ASC, tuote.nimitys";
+							ORDER BY sorttaus, tuote.nimitys";
 				$tres = pupe_query($query);
 				$valinta = "";
 

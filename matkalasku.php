@@ -1345,7 +1345,7 @@ if ($tee == "MUOKKAA") {
 
 			if ($laskurow["tilaustyyppi"] == "M") {
 				echo "	<tr><th>".t("Viite")."</th>
-						<td><input type='text' size='30' name='viesti' value='$laskurow[viite]'></td></tr>";
+						<td><input type='text' size='30' name='viesti' value='$laskurow[viite]'><input type='submit' value='".t("Tallenna viite")."'></td></tr>";
 			}
 			else {
 				echo "	<tr><th>".t("Viite")."</th>
@@ -1389,7 +1389,7 @@ if ($tee == "MUOKKAA") {
 					</tr>
 					<th>".t("Liitteen kuvaus")."</th>
 					<td><input type='text' size='40' name='kuvaselite' value='$kuvaselite'></td>
-					<td class='back'><input type='submit' value='".t("Tallenna")."'</td>
+					<td class='back'><input type='submit' value='".t("Tallenna liite")."'></td>
 					</tr>
 					</table><br>";
 			echo "</form>";
@@ -1510,6 +1510,27 @@ if ($tee == "MUOKKAA") {
 	else {
 		echo "	<tr><th>".t("Viite")."</th>
 				<td>$laskurow[viite]</td></tr>";
+
+		echo "<tr>";
+		echo "<th align='left'>".t("Liitteet")."</th>";
+
+		echo "<td>";
+
+		$query = "	SELECT *
+					from liitetiedostot
+					where yhtio = '$kukarow[yhtio]'
+					and liitos  = 'lasku'
+					and liitostunnus = '$tilausnumero'";
+		$liiteres = pupe_query($query);
+
+		if (mysql_num_rows($liiteres) > 0) {
+			while ($liiterow = mysql_fetch_assoc($liiteres)) {
+				echo "<a target='kuvaikkuna' href='".$palvelin2."view.php?id=$liiterow[tunnus]'>$liiterow[selite]</a>";
+				echo "<br>\n";
+			}
+		}
+
+		echo "</td></tr>";
 		echo "</table><br>";
 	}
 

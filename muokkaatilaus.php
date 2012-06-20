@@ -772,6 +772,7 @@
 						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'
 						$haku
+						GROUP BY lasku.tunnus
 						order by lasku.luontiaika desc
 						$rajaus";
 

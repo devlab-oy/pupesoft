@@ -187,7 +187,7 @@
 		$mitkalisa = "";
 	}
 
-	$otunnuslisa = "tilausrivi.otunnus = '{$otunnus}'";
+
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
 
@@ -206,9 +206,10 @@
 		$orderlisa = " suuntalavat.sscc, ";
 	}
 	else {
-		$selectlisa = "";
+		$otunnuslisa 	= "tilausrivi.uusiotunnus = '{$otunnus}'";
+		$selectlisa 	= "";
 		$suuntalavajoin = "";
-		$orderlisa = "";
+		$orderlisa 		= "";
 	}
 
 	if ($mista == "vastaanota" and $vainlistaus == '') {

@@ -98,8 +98,8 @@
 					$rivitunnus = 0;
 
 					# Tarkistukset, var ja kpl
-					if ($var != 'A' or $var != 'B') {
-						echo "VAR pit‰‰ olla A tai B";
+					if ($var != 'A' and $var != 'B'	) {
+						echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
 						continue;
 					}
 
@@ -127,6 +127,8 @@
 									AND tuoteno='$tuoteno'
 									AND kpl = '$kpl'";
 
+						$result = pupe_query($query);
+
 						if (mysql_num_rows($result) == 1) {
 							$row = mysql_fetch_assoc($result);
 							$rivitunnus = $row['tunnus'];
@@ -139,7 +141,7 @@
 						require("laskuta_myyntitilirivi.inc");
 					}
 					else {
-						echo "ei onnistu, tuotetta ei osata valita";
+						echo "<font class='error'>".t("Tuotetta ei osattu valita")."</font><br>";
 					}
 
 				}

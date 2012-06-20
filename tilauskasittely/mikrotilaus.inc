@@ -85,10 +85,11 @@
 			}
 
 			$filetyyppi = "";
-			$rivilask1 = 1;
+			$rivilask1 = 0;
 
 			# Tiedostosta päivitys
 			foreach ($excelrivi as $rivi) {
+				$rivilask1++;
 
 				# tila==G, alatila==V
 				if ($toim == "MYYNTITILI" and $laskurow['tila'] == "G" and $laskurow['alatila'] == "V" and $laskurow['tilaustyyppi'] == 'M') {
@@ -338,7 +339,6 @@
 							echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
 						}
 					}
-					$rivilask1++;
 				}
 			}
 

@@ -12,7 +12,11 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]'";
+		$query = "	SELECT *
+					from kirjoittimet
+					where yhtio = '$kukarow[yhtio]'
+					AND komento != 'EDI'
+					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";

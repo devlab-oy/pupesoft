@@ -626,7 +626,8 @@ if ($tila == 'tee_siirto') {
 								SET uusiotunnus = '$otunnus',
 								erikoisale 		= '$laskurow[erikoisale]',
 								kerattyaika 	= now(),
-								keratty 		= '$kukarow[kuka]'
+								keratty 		= '$kukarow[kuka]',
+								suuntalava = 0
 								$kpl_lisa
 								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$valittuuusiotunnus'

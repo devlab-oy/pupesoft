@@ -715,11 +715,11 @@
 
 		// haetaan kaikki tapahtumat, joilla ei ole tuotepaikkaa tai se ei kuulu mihink‰‰n varastoon
 		$query = "	SELECT tapahtuma.tuoteno, varastopaikat.alkuhyllyalue, tapahtuma.tunnus, concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) paikka, tapahtuma.laadittu, tapahtuma.laji
-					FROM tapahtuma 
+					FROM tapahtuma
 					JOIN tuote on (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '')
 					LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
 												AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-												AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))					
+												AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laji not in ('ep‰kurantti', 'uusipaikka', 'poistettupaikka')
 					HAVING varastopaikat.alkuhyllyalue IS NULL
@@ -800,12 +800,11 @@
 
 		$query  = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio='$kukarow[yhtio]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 
 		while ($varow = mysql_fetch_array($vares)) {
-
-
 			$sel='';
 			if ($varow['tunnus']==$varasto) $sel = 'selected';
 

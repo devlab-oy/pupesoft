@@ -2267,9 +2267,9 @@
 
 				$query = "	SELECT *
 							FROM kirjoittimet
-							WHERE
-							yhtio = '$kukarow[yhtio]'
-							ORDER by kirjoitin";
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND komento != 'EDI'
+							ORDER BY kirjoitin";
 				$kirre = pupe_query($query);
 
 				echo "<th>".t("Rahtikirjatulostin")."</th><td><select name='komento'>";
@@ -2358,7 +2358,8 @@
 
 				$query = "	SELECT *
 							from kirjoittimet
-							where yhtio='$kukarow[yhtio]'
+							where yhtio = '$kukarow[yhtio]'
+							AND komento != 'EDI'
 							ORDER BY kirjoitin";
 				$kires = pupe_query($query);
 
@@ -2648,9 +2649,9 @@
 
 			$query = "	SELECT *
 						FROM kirjoittimet
-						WHERE
-						yhtio='$kukarow[yhtio]'
-						ORDER by kirjoitin";
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
 			$kirre = pupe_query($query);
 
 			echo "<br><table>";

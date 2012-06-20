@@ -108,7 +108,7 @@ if ($tee == "") {
 	if ($llrow["vosumma_valuutassa"] == "") $llrow["vosumma_valuutassa"] = "0.00";
 
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
-	echo "<table>";
+	echo "<br><table>";
 	echo "<tr>";
 	echo "<th>".t("saapuminen")."</th>";
 	echo "<th>".t("ytunnus")."</th>";

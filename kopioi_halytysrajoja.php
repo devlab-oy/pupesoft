@@ -228,7 +228,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]' and (tunnus = '$kopioitavavarasto' or tunnus = '$kohdevarasto')
-				ORDER BY nimitys";
+				ORDER BY tyyppi, nimitys";
 	$result = pupe_query($query);
 
 	echo "<tr><th>".t("Varastosta varastoon")."</th><td>";
@@ -483,9 +483,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
-				ORDER BY nimitys";
+				ORDER BY tyyppi, nimitys";
 	$vtresult = pupe_query($query);
-
 
 	echo "<tr><th>Kopioitava varasto</th>\n";
 	echo "<td><select name='kopioitavavarasto'>\n";

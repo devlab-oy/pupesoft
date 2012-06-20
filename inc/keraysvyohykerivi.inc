@@ -91,7 +91,7 @@
 
 		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='S'{$sel['S']}>".t("Saa olla useita asiakkaita")."<br />";
 		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='K'{$sel['K']}>".t("Keräyserän alustoja voi olla useista lähdöistä")."<br />";
-		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Alustoissa voi olla useita prioriteettejä")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Keräyserässä voi olla useita prioriteettejä")."<br />";
 
 		$ulos .= "</td>";
 		$jatko = 0;
@@ -103,7 +103,7 @@
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					ORDER BY nimitys";
+					ORDER BY tyyppi, nimitys";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 
 		while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
@@ -124,7 +124,12 @@
 
 		$printterilisa = mysql_field_name($result,$i) == 'printteri8' ? " and komento != 'email' " : '';
 
-		$query = "SELECT * FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' {$printterilisa} ORDER BY kirjoitin";
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					{$printterilisa}
+					AND komento != 'EDI'
+					ORDER BY kirjoitin";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";

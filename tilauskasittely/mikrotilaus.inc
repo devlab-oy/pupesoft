@@ -144,7 +144,6 @@
 					else {
 						echo "<font class='error'>".t("Tuotetta ei osattu valita")."</font><br>";
 					}
-
 				}
 				else {
 

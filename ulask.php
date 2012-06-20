@@ -2643,14 +2643,14 @@ if (strlen($tee) == 0) {
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
 		echo "<input type='hidden' name='tee' value='poistalasku'>";
-		echo "<input type='submit' value='Poista skannattu lasku' name='Poista'/></form></td>";
+		echo "<input type='submit' value='".t("Poista skannattu")." lasku' name='Poista'/></form></td>";
 
 		echo "<td class='back'>";
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
 		echo "<input type='hidden' name='tee' value='ohita_lasku'>";
-		echo "<input type='submit' value='Ohita lasku' name='ohita_lasku'/></form></td></tr></table>";
+		echo "<input type='submit' value='".t("Ohita lasku")."' name='ohita_lasku'/></form></td></tr></table>";
 
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 

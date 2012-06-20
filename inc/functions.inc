@@ -1,5 +1,161 @@
 <?php
 
+if (!function_exists("pupesoft_login")) {
+	function pupesoft_login($params) {
+
+		$user = $params['user'];
+		$salasana = $params['salasana'];
+		$salamd5 = $params['salamd5'];
+		$mikayhtio = $params['mikayhtio'];
+		$uusi1 = $params['uusi1'];
+		$uusi2 = $params['uusi2'];
+		$yhtio = $params['yhtio'];
+		$browkieli = $params['browkieli'];
+		$palvelin = $params['palvelin'];
+		$palvelin2 = $params['palvelin2'];
+
+		$session = "";
+		$usea 	 = 0;
+
+		$return = array(
+			'status' => false,
+			'error' => '',
+			'message' => ''
+		);
+
+		srand((double) microtime() * 1000000);
+
+		$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
+					FROM kuka
+					JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
+					where kuka.kuka		= '{$user}'
+					and kuka.extranet 	= ''
+					GROUP BY 1,2,3,4";
+		$result = mysql_query($query) or pupe_error($query);
+		$krow = mysql_fetch_assoc($result);
+
+		if (isset($salamd5) and $salamd5 != '') $vertaa = $salamd5;
+		elseif (isset($salasana) and $salasana == '') $vertaa = $salasana;
+		else $vertaa = md5(trim($salasana));
+
+		if (mysql_num_rows($result) > 0 and $vertaa == $krow['salasana']) {
+
+			// jos meillä on vaan kaks yhtiotä ja ollaan tulossa firman vaihdosta, vaihdetaan suoraan toiseen
+			if (mysql_num_rows($result) == 2 and isset($mikayhtio) and $mikayhtio != "") {
+
+				mysql_data_seek($result,0); // ressu alkuun
+
+				while ($vaihdarow = mysql_fetch_assoc($result)) {
+
+					if ($mikayhtio != $vaihdarow["yhtio"]) {
+						$krow = $vaihdarow;
+						$yhtio = $vaihdarow["yhtio"];
+						$usea = 0;
+					}
+				}
+			}
+
+			// Onko monta sopivaa käyttäjätietuetta == samalla henkilöllä monta yritystä!
+			if (mysql_num_rows($result) > 1) {
+				$usea = 1;
+			}
+
+			if (isset($uusi1) and strlen(trim($uusi1)) > 0) {
+				if (trim($uusi1) != trim($uusi2)) {
+					$return['error'] = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
+					$err = 1;
+					$usea = 0;
+				}
+				elseif (strlen(trim($uusi1)) < 6) {
+					$return['error'] = t("Uusi salasanasi on liian lyhyt").". ".t("Salasanan pitää olla vähintään 6 merkkiä pitkä").". ".t("Salasanaasi ei vaihdettu")."! ";
+					$err = 1;
+					$usea = 0;
+				}
+				elseif (stristr($uusi1, $krow["kuka"])) {
+					$return['error'] = t("Salasanasi ei saa sisältää käyttäjätunnustasi").". ".t("Salasanaasi ei vaihdettu")."!";
+					$err = 1;
+					$usea = 0;
+				}
+				else {
+					$uusi1 = md5(trim($uusi1));
+
+					$query = "	UPDATE kuka
+								SET salasana = '{$uusi1}'
+								WHERE kuka = '{$user}'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$vertaa = trim($uusi1);
+					$salasana = trim($uusi2);
+					$return['message'] = t("Salasanasi vaihdettiin onnistuneesti")."!";
+				}
+			}
+
+			// Kaikki ok!
+			if (!isset($err) or $err != 1) {
+
+				// Pitääkö vielä kysyä yritystä???
+				if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
+
+					for ($i = 0; $i < 25; $i++) {
+						$session = $session . chr(rand(65,90)) ;
+					}
+
+					$query = "	UPDATE kuka
+								SET session = '{$session}',
+								lastlogin = now()
+								WHERE kuka = '{$user}'";
+
+					if (isset($yhtio) and strlen($yhtio) > 0) $query .= " and yhtio = '{$yhtio}'";
+					else $query .= " and yhtio = '{$krow['yhtio']}'";
+
+					$result = mysql_query($query) or pupe_error($query);
+
+					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+
+					if ($bool === FALSE) {
+						$return['error'] = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";
+					}
+					else {
+
+						// katsotaan onko käyttäjällä oletus_ohjelma.. jos on mennään suoraan siihen.
+						$query = "	SELECT oletus_ohjelma
+									FROM kuka
+									WHERE session = '{$session}'";
+						$result = mysql_query($query) or pupe_error($query);
+						$row = mysql_fetch_assoc($result);
+
+						if ($row["oletus_ohjelma"] != "") {
+
+							$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
+
+							$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
+
+							if ($oletus_ohjelman_osat[2] != "") {
+								$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
+							}
+						}
+
+						echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}'>";
+						exit;
+					}
+				}
+			}
+		}
+		else {
+			$return['error'] = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
+		}
+
+		// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+		error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
+
+		$return['usea'] = $usea;
+		$return['vertaa'] = $vertaa;
+		$return['salasana'] = $salasana;
+
+		return $return;
+	}
+}
+
 if (!function_exists("pupe_query")) {
 	function pupe_query($query, $link = NULL) {
 

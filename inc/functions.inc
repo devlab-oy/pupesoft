@@ -14794,7 +14794,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		$otunnus = $laskurow["tunnus"];
 
 		//hatetaan asiakkaan lähetetyyppi
-		$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+		$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$result = pupe_query($query);
@@ -14804,9 +14804,6 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		if (isset($sellahetetyyppi) and $sellahetetyyppi != '') {
 			$lahetetyyppi = $sellahetetyyppi;
-		}
-		elseif ($asrow["lahetetyyppi"] != '') {
-			$lahetetyyppi = $asrow["lahetetyyppi"];
 		}
 		else {
 			$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);

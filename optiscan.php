@@ -342,10 +342,39 @@
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$nro}'";
+					AND nro 	= '{$nro}'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
+			$response = "1, Ei printattavaa\r\n\r\n";
+		}
+
+		if (trim($response) == '') {
+			// Tarkistetaan, ettei ole dupllikaattier‰ joka on jo jollain toisella tyypill‰ ker‰yksess‰
+			// Sama tilaus ja sama tilausnumero, mutta eri ker‰yser‰ ==> FAIL
+			$duplikaatti = 0;
+
+			while ($row = mysql_fetch_assoc($result)) {
+				$query = "	SELECT *
+							FROM kerayserat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							AND nro			< '{$nro}'
+							AND tilausrivi	= '{$row['tilausrivi']}'
+							AND otunnus		= '{$row['otunnus']}'";
+				$dupl_res = pupe_query($query);
+
+				if (mysql_num_rows($dupl_res) > 0) $duplikaatti++;
+			}
+		}
+
+		if ($duplikaatti > 0) {
+			// P‰ivitet‰‰n duoplikaattier‰ ÷-tilaan
+			$query = "	UPDATE kerayserat
+						SET tila = '÷'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND nro 	= '{$nro}'";
+			$upd_res = pupe_query($query);
+
 			$response = "1, Ei printattavaa\r\n\r\n";
 		}
 

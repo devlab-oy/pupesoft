@@ -421,7 +421,7 @@ if (!function_exists('alku_kerayslista')) {
 							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+							AND tilausrivi.otunnus IN ($tilausnumeroita)
 							AND tilausrivi.tyyppi != 'D'";
 				$query_result = pupe_query($query);
 				$isa_tilaus = mysql_fetch_assoc($query_result);
@@ -430,17 +430,22 @@ if (!function_exists('alku_kerayslista')) {
 				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
 					$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, count(tilausrivi.tunnus) kpl
 								FROM tilausrivin_lisatiedot
-								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								AND tilausrivi.tyyppi != 'D'
 								AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 								WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivin_lisatiedot.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
-								GROUP BY tilausrivin_lisatiedot.vanha_otunnus";
+								GROUP BY tilausrivin_lisatiedot.vanha_otunnus
+								HAVING kpl = 0";
 					$query_result = pupe_query($query);
 
-					// Jos yhdelläkään tilauksella ei ole toimitettuja rivejä.
-					if (mysql_num_rows($query_result) == 0) {
-						$komm .= "\n".t("Ensimmäinen toimitus");
+					// Jos yksikin tilaus jossa ei ole toimitettuja rivejä
+					if (mysql_num_rows($query_result) > 0) {
+						$komm .= "\n".t("Ensimmäinen toimitus tilaukselle");
+
+						while ($ensimmainen_toimitus_row = mysql_fetch_assoc($query_result)) {
+							$komm .= " {$ensimmainen_toimitus_row['vanha_otunnus']}";
+						}
 					}
 				}
 			}

@@ -41,9 +41,10 @@ echo "
 		FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666699; font-weight:bold; letter-spacing: .05em;}
 		FONT.menu		{font-size:10pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666;}
 		FONT.error		{font-size:8pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #ff6666;}
-		TD				{padding:3pt; width:50%; height: 100%; -moz-border-radius: 5pt; -webkit-border-radius: 5pt; background: #eee}
-		TD.head, TD.menu, TD.error {text-align: center;}
-		TABLE.tulouta, TABLE.inner	{padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
+		TD				{padding:3pt; width:50%; height: 100%; -moz-border-radius: 5pt; -webkit-border-radius: 5pt; text-align: center;}
+		TD.menu 		{background: #eee}
+		TABLE.tulouta 	{background: #FFF}
+		TABLE.inner	{padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
 		TABLE.inner		{width: 100%;}
 		INPUT, BUTTON	{font-size:10pt; width:100%}
 		SELECT			{width:100%}
@@ -66,19 +67,19 @@ echo "
 								</td>
 							</tr>
 							<tr>
-								<td>
+								<td class='menu'>
 									<select name='tulotyyppi' size='4'>
 										<option value='suuntalava'>ASN / Suuntalava</option>
 									</select>
 								</td>
 							</tr>
 							<tr>
-								<td>
-									<button value=''>Suuntalavat</button>
+								<td class='menu'>
+									<button value='wat'>Suuntalavat</button>
 								</td>
 							</tr>
 							<tr>
-								<td>
+								<td class='menu'>
 									<button name='submit' value='submit' onclick='submit();'>OK</button>
 									<button name='submit' value='cancel' onclick='submit();'>Kesk</button>
 								</td>

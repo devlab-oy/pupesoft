@@ -18,8 +18,10 @@ echo "
 		FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666699; font-weight:bold; letter-spacing: .05em;}
 		FONT.menu		{font-size:10pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666;}
 		FONT.error		{font-size:9pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #ff6666;}
-		TD				{padding:3pt; width:50%; height: 100%; -moz-border-radius: 5pt; -webkit-border-radius: 5pt;}
-		TABLE.tulouta	{padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
+		TD				{padding:3pt; width:50%; height: 100%; -moz-border-radius: 5pt; -webkit-border-radius: 5pt; background: #eee}
+		TD.head			{text-align: center;}
+		TABLE.paavalikko, TABLE.main {padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
+		TABLE.paavalikko {width: 100%;}
 		INPUT, BUTTON	{font-size:10pt; width:100%}
 	-->
 	</style>
@@ -30,33 +32,35 @@ echo "
 
 	<body>
 
-		<table class='tulouta' border='0'>
+		<table class='main' border='0'>
 			<tr>
-				<td colspan='2'>
-					<font class='head'>",t("P‰‰valikko", $browkieli),"</font>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<button value=''>Siirto</button>
-				</td>
-				<td>
-					<form name='tulouta' target='_top' action='tulouta.php' method='post'>
-						<button value='' onclick='submit();'>Tulouta</button>
-					</form>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<button value=''>Inventointi</button>
-				</td>
-				<td>
-					<button value=''>Tuki</button>
-				</td>
-			</tr>
-			<tr>
-				<td colspan='2'>
-					<button value=''>Lopeta</button>
+				<td class='head'><font class='head'>",t("P‰‰valikko", $browkieli),"</font><br><br>
+
+					<table class='paavalikko'>
+						<tr>
+							<td>
+								<button value=''>Siirto</button>
+							</td>
+							<td>
+								<form name='tulouta' target='_top' action='tulouta.php' method='post'>
+									<button value='' onclick='submit();'>Tulouta</button>
+								</form>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button value=''>Inventointi</button>
+							</td>
+							<td>
+								<button value=''>Tuki</button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan='2'>
+								<button value=''>Lopeta</button>
+							</td>
+						</tr>
+					</table>
 				</td>
 			</tr>
 		</table>

@@ -242,6 +242,8 @@ $pupesoft_scheme = (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') ? "h
 $pupesoft_server = (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_X_FORWARDED_SERVER'] : $_SERVER['SERVER_NAME'];
 $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') ? ":".$_SERVER['SERVER_PORT'] : "";
 
+$palvelin = $mobile ? $palvelin_mobile : $palvelin;
+
 // $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:stä
 // $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
 $palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
@@ -336,8 +338,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		if (@include_once("login.php"));
+		if ($mobile and include_once("mobiili/login.php"));
+		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
+
 	}
 
 	exit;

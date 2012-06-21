@@ -13,6 +13,7 @@ if (!function_exists("pupesoft_login")) {
 		$browkieli = $params['browkieli'];
 		$palvelin = $params['palvelin'];
 		$palvelin2 = $params['palvelin2'];
+		$mobile = $params['mobile'];
 
 		$session = "";
 		$usea 	 = 0;
@@ -124,14 +125,21 @@ if (!function_exists("pupesoft_login")) {
 						$result = mysql_query($query) or pupe_error($query);
 						$row = mysql_fetch_assoc($result);
 
+						$row['oletus_ohjelma'] = 'mobiili##paavalikko';
+
 						if ($row["oletus_ohjelma"] != "") {
 
 							$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
 
-							$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
+							if ($mobile) {
+								$palvelin2 .= "mobiili/paavalikko.php";
+							}
+							else {
+								$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
 
-							if ($oletus_ohjelman_osat[2] != "") {
-								$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
+								if ($oletus_ohjelman_osat[2] != "") {
+									$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
+								}
 							}
 						}
 

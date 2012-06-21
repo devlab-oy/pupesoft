@@ -88,7 +88,7 @@
 	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = '' ";
 	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
 
-	$path = "/tmp/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
+	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
 	// Teh‰‰n uysi dirikka
 	system("mkdir $path");

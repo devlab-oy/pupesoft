@@ -413,8 +413,10 @@ if (!function_exists('alku_kerayslista')) {
 
 			# Jos JT-tilaus niin tarkistetaan monta jälkitilausta on tehty.
 			if ($laskurow['clearing'] == 'JT-TILAUS') {
-				// Haetaan kaikki isätilaukset
-				$query = "	SELECT group_concat(DISTINCT vanha_otunnus) vanhat_otunnukset
+
+				# vanha_otunnus on alkuperäinen tilausnumero
+				# Haetaan kaikkien tällä tilauksella olevien tilausrivien alkuperäiset tilausnumerot
+				$query = "	SELECT group_concat(DISTINCT tilausrivin_lisatiedot.vanha_otunnus) alkuperaiset_tilaukset
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -424,18 +426,22 @@ if (!function_exists('alku_kerayslista')) {
 				$query_result = pupe_query($query);
 				$isa_tilaus = mysql_fetch_assoc($query_result);
 
-				// Isätilausten kaikki lapsitilaukset, eli löytyykö jälkitilauksia
-				if($isa_tilaus['vanhat_otunnukset'] != NULL) {
-					$query = "	SELECT DISTINCT tilausrivi.otunnus uudet_otunnukset
+				# Lasketaan kuinka monta toimitettua tilausriviä löytyy per alkuperäinen tilaus
+				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
+					$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, count(tilausrivi.tunnus) kpl
 								FROM tilausrivin_lisatiedot
-								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.otunnus != '{$laskurow['tunnus']}')
+								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+								AND tilausrivi.tyyppi != 'D'
+								AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 								WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-								and tilausrivin_lisatiedot.vanha_otunnus IN ({$isa_tilaus['vanhat_otunnukset']})";
+								AND tilausrivin_lisatiedot.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
+								GROUP BY tilausrivin_lisatiedot.vanha_otunnus";
 					$query_result = pupe_query($query);
-				}
-				// Yksikin rivi palautuu niin on tehty jo JT-tilaus
-				if (mysql_num_rows($query_result) < 1) {
-					$komm .= "\n".t("Ensimmäinen toimitus");
+
+					// Jos yhdelläkään tilauksella ei ole toimitettuja rivejä.
+					if (mysql_num_rows($query_result) == 0) {
+						$komm .= "\n".t("Ensimmäinen toimitus");
+					}
 				}
 			}
 

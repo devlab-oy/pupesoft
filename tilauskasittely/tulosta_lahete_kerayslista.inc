@@ -241,8 +241,9 @@ if (!function_exists('alku_kerayslista')) {
 				$pdf->draw_text(310, 782, $kerayseran_numero,							$thispage, $boldi);
 			}
 			else {
-				$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 			$thispage, $pieni);
-				$pdf->draw_text(310, 782, $tilausnumeroita,							$thispage, $boldi);
+				list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
+				$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 		$thispage, $pieni);
+				$pdf->draw_text(310, 782, $ff_string,							$thispage, $ff_font);
 			}
 
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
@@ -428,7 +429,7 @@ if (!function_exists('alku_kerayslista')) {
 
 				# Lasketaan kuinka monta toimitettua tilausriviä löytyy per alkuperäinen tilaus
 				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
-					$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, count(tilausrivi.tunnus) kpl
+					$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
 								FROM tilausrivin_lisatiedot
 								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								AND tilausrivi.tyyppi != 'D'
@@ -436,16 +437,12 @@ if (!function_exists('alku_kerayslista')) {
 								WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivin_lisatiedot.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
 								GROUP BY tilausrivin_lisatiedot.vanha_otunnus
-								HAVING kpl = 0";
+								ORDER BY toimituksia";
 					$query_result = pupe_query($query);
 
 					// Jos yksikin tilaus jossa ei ole toimitettuja rivejä
-					if (mysql_num_rows($query_result) > 0) {
-						$komm .= "\n".t("Ensimmäinen toimitus tilaukselle");
-
-						while ($ensimmainen_toimitus_row = mysql_fetch_assoc($query_result)) {
-							$komm .= " {$ensimmainen_toimitus_row['vanha_otunnus']}";
-						}
+					while ($ensimmainen_toimitus_row = mysql_fetch_assoc($query_result)) {
+						$komm .= "\n{$ensimmainen_toimitus_row['toimituksia']}. ".t("toimitus tilauksesta")." {$ensimmainen_toimitus_row['vanha_otunnus']}";
 					}
 				}
 			}

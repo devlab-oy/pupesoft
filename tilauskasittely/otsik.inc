@@ -1984,7 +1984,7 @@
 			echo "<td>".t("Lähetetyyppi").":</td>";
 			echo "<td><select name='lahetetyyppi' style='max-width: 300px'>";
 
-			$lahetetyyppi = pupesoft_lahetetyyppi($laskurow['tunnus']);
+			$lahetetyyppi = pupesoft_lahetetyyppi($laskurow['tunnus'], $srow['liitostunnus']);
 
 			while ($vrow = mysql_fetch_assoc($lahetetyypit)) {
 				$sel = "";

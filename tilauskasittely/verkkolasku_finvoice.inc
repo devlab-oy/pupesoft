@@ -646,9 +646,6 @@ if (!function_exists('finvoice_rivi')) {
 					$lisakomm .= $tilrow["laskuviesti"];
 				}
 
-				# Lis‰t‰‰n asiakkaan tilausnumero kommenttikentt‰‰n
-				$lisakomm .= "|"."Asiakkaan tilausnumero: ".$lasrow['asiakkaan_tilausnumero'];
-
 				// T‰m‰ on tilauksen vika rivi, laitetaan tyˆm‰‰rystiedot t‰h‰n
 				$query = "	SELECT tyomaarays.*
 							FROM lasku
@@ -703,6 +700,11 @@ if (!function_exists('finvoice_rivi')) {
 						}
 					}
 				}
+			}
+
+			# Lis‰t‰‰n asiakkaan tilausnumero kommenttikentt‰‰n
+			if ($tilrow['asiakkaan_tilausnumero'] != "") {
+				$tilrow["kommentti"] .= "|"."Asiakkaan tilausnumero: ".$tilrow['asiakkaan_tilausnumero'];
 			}
 
 			// Siivotaan myˆs lis‰kommentti

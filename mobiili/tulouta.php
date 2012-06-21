@@ -35,7 +35,7 @@ echo "
 
 		<table class='tulouta' border='0'>
 			<tr>
-				<td class='head'><font class='head'>",t("P‰‰valikko", $browkieli),"</font><br><br>
+				<td class='head'><font class='head'>",t("Tulouta", $browkieli),"</font><br><br>
 
 					<table class='inner'>
 						<tr>

@@ -193,7 +193,7 @@
 
 		if ($myyja != 0) {
 
-			if (strlen($myyja) > 5) {
+			if (strlen($myyja) > 11) {
 				echo "<font class='error'>",t("Myyj‰numero enint‰‰n 5 merkki‰"),"</font><br>";
 				$jatka = 1; // ei perusteta
 				unset($submit_button);
@@ -909,7 +909,7 @@
 				}
 
 				if ($toim != 'extranet') {
-					echo "<tr><th align='left'>",t("Myyj‰nro"),":</th><td><input type='text' name='myyja' value='{$krow['myyja']}' size='5'></td></tr>";
+					echo "<tr><th align='left'>",t("Myyj‰nro"),":</th><td><input type='text' name='myyja' value='{$krow['myyja']}' size='8'></td></tr>";
 					echo "<tr><th align='left'>",t("Ker‰‰j‰nro"),":</th><td><input type='text' name='keraajanro' value='{$krow['keraajanro']}' size='5'></td></tr>";
 
 					echo "<tr><th align='left'>",t("Osasto"),":</td>";

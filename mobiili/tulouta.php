@@ -12,7 +12,7 @@ $error = array(
 	'tulotyyppi' => '',
 );
 
-if (isset($tulotyyppi) and trim($tulotyyppi) != '') {
+if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim($tulotyyppi) != '') {
 
 	if ($tulotyyppi == 'suuntalava') {
 		require("alusta.php");
@@ -82,7 +82,7 @@ echo "
 							<tr>
 								<td class='menu'>
 									<button name='submit' value='submit' onclick='submit();'>OK</button>
-									<button name='submit' value='cancel' onclick='submit();'>Kesk</button>
+									<button name='submit' value='cancel' onclick='submit();'>Takaisin</button>
 								</td>
 							</tr>
 						</table>

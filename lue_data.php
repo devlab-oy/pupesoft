@@ -467,6 +467,11 @@ if ($kasitellaan_tiedosto) {
 	exit;
 	*/
 
+	// REST-api ei salli etenemispalkkia
+	if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+		require('inc/ProgressBar.class.php');
+	}
+
 	$taulunrivit_keys = array_keys($taulunrivit);
 
 	for ($tril = 0; $tril < count($taulunrivit); $tril++) {
@@ -670,7 +675,6 @@ if ($kasitellaan_tiedosto) {
 
 		// REST-api ei salli etenemispalkkia
 		if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
-			require('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$bar->initialize($max_rivit);
 		}

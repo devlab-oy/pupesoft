@@ -228,7 +228,7 @@ if ($tee == "SYOTA") {
 		 </tr>
 		 <tr>
 			<th>".t("P‰iv‰m‰‰r‰")."</th>
-			<td>$rivi[pvmalku]</td>
+			<td>".tv1dateconv($rivi['pvmalku'], "PITKA")."</td>
 		 </tr>";
 
 	echo "<tr><th>".t("Kieli").":&nbsp;</th><td>";
@@ -465,7 +465,7 @@ if ($tee == "PRINTTAA") {
 		<TR><TD VALIGN=middle bgcolor='#000000'>
 				<FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
 				<B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-				<B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": $paivays</SMALL></B>
+				<B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($paivays, "PITKA")."</SMALL></B>
 				</FONT>
 		<!--
 			</TD><TD ALIGN=right bgcolor='#000000'>
@@ -648,8 +648,8 @@ if ($tee == '') {
 					<td valign='top'>$uutinen[kentta02]</font><br><a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a></td>
 					</tr>";
 
-			echo"<tr><th colspan='2'>";
-			echo "Toimittaja: $uutinen[nimi]<br>P‰iv‰m‰‰r‰: $uutinen[pvmalku]";
+			echo "<tr><th colspan='2'>";
+			echo t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($uutinen['pvmalku'], "PITKA")."";
 
 			if ($toim == "VERKKOKAUPPA") {
 				echo "<br>Osasto: $uutinen[kentta09]";

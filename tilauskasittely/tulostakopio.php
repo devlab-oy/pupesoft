@@ -107,7 +107,7 @@
 	}
 	if ($toim == "SIIRTOLISTA") {
 		$fuse = t("Siirtolista");
-	}
+	}	
 	if ($toim == "VALMISTUS") {
 		$fuse = t("Valmistus");
 	}
@@ -647,6 +647,48 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
+
+		if ($toim == "KOONTILAHETE") {
+                    
+                    //myyntitilaus. Tulostetaan lähete.
+
+                    /* 
+                     * SELECT * FROM tilausrivi
+                     * JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus
+                     *      AND tilausrivi.yhtio = lasku.yhtio)
+                     * JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus)
+                     * JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus)
+                     * WHERE lasku.tunnus = lasku.vanhatunnus LIMIT 1000;
+                     * ORDER BY kerayserat.sscc_ulkoinen
+                     *
+                     * select otunnus, pakkaus, sscc_ulkoinen from kerayserat limit 1;
+                     *
+                     * Laskun tila... tarvitaanko?
+                     *
+                     *
+                     * SELECT * FROM tilausrivi JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus AND tilausrivi.yhtio = lasku.yhtio) JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus) JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus) WHERE lasku.tunnus = lasku.vanhatunnus AND tilausrivi.otunnus = 6956515 ORDER BY kerayserat.sscc_ulkoinen LIMIT 1000;
+                     *
+                     *
+                    */
+                    
+                    $joinlisa  = 
+                        $where1 .= " lasku.tila in ('L','N','V','G') ";
+
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
+				$where2 .= $wherenimi;
+			}
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+                        $use = " use index (yhtio_tila_luontiaika) ";
+
+		}
+
 
 		if ($toim == "KERAYSLISTA") {
 

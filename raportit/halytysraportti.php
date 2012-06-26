@@ -646,7 +646,8 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							ORDER BY id, tuote.tuoteno";
+							ORDER BY id, tuote.tuoteno
+							LIMIT 10";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
 			else {
@@ -697,7 +698,8 @@
 							$lisaa
 							and tuote.ei_saldoa = ''
 							$varastot
-							order by id, tuote.tuoteno, varastopaikka";
+							order by id, tuote.tuoteno, varastopaikka
+							LIMIT 10";
 			}
 
 			$res = pupe_query($query);
@@ -764,11 +766,13 @@
 
 
 			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
 			$excelsarake++;
 
 			if ($paikoittain != '') {
 				$rivi .= t("Varastopaikka")."\t";
-
 
 				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
 				$excelsarake++;
@@ -778,7 +782,7 @@
 				$rivi .= $sarakkeet[$val];
 
 				if ($sarakkeet[$val] != '') {
-					$worksheet->writeString($excelrivi, $excelsarake, ucfirst($sarakkeet[$val]), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, ucfirst(trim($sarakkeet[$val])), $format_bold);
 					$excelsarake++;
 				}
 			}
@@ -1952,7 +1956,7 @@
 
 			echo "<br>";
 			
-			$worksheet->dumpxml();
+			$worksheet->saveXML();
 
 			#$workbook->close();
 
@@ -2732,7 +2736,7 @@
 					echo "</tr><tr>";
 				}
 
-				echo "<td><input type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
+				echo "<td><input type='checkbox' name='valitut[$key]' value='$key'>".ucfirst($sarake)."</td>";
 				$lask++;
 			}
 

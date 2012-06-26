@@ -3144,7 +3144,7 @@ if (!function_exists("alehinta")) {
 		// haetaan asiakkaan segmentit
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 	   				FROM puun_alkio
-					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+						JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
 	   				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
 	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
 					AND puun_alkio.laji    = 'asiakas'
@@ -16390,7 +16390,7 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND laji = 'LAHETETYYPPI'
-					ORDER BY jarjestys, selite
+						ORDER BY jarjestys, selite
 					LIMIT 1";
 		$result = pupe_query($query);
 		$lahetetyyppi = mysql_fetch_assoc($result);
@@ -16448,12 +16448,28 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		// katotaan miten halutaan sortattavan
 		// haetaan asiakkaan tietojen takaa sorttaustiedot
+
+		if ($toim == "KOONTILAHETE") {
+			
+		}
 		$order_sorttaus = '';
 
 		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$laskurow[liitostunnus]'";
+		/*
+		
+		* SELECT * FROM tilausrivi
+        * JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus
+        *      AND tilausrivi.yhtio = lasku.yhtio)
+        * JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus)
+        * JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus)
+        * WHERE lasku.tunnus = lasku.vanhatunnus LIMIT 1000;
+        * ORDER BY kerayserat.sscc_ulkoinen
+		
+		*/
+		
 		$asiakas_apu_res = pupe_query($asiakas_apu_query);
 
 		if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -16486,11 +16502,13 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-					tuote.sarjanumeroseuranta
+					tuote.sarjanumeroseuranta, kerayserat.sscc_ulkoinen
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					JOIN kerayserat ON ( kerayserat.otunnus = tilausrivi.otunnus
+										AND kerayserat.yhtio = tilausrivi.yhtio)
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa

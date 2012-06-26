@@ -15856,35 +15856,3 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 		return $summa;
 	}
 }
-
-if (!function_exists("pupeExcel")) {
-	function pupeExcel() {
-		global $kukarow, $pupe_root_polku;
-
-		$filenimi = md5(uniqid(rand(),true));
-
-		// Luodaaan excel-tiedosto pupen templatesta
-		exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$filenimi");
-
-		// Replacetetaan näin:
-		#writeString() --> pupeExcelWriteString()
-		#writeNumber() --> pupeExcelWriteNumber()
-		#write()       --> pupeExcelWriteString()
-
-		return $filenimi;
-	}
-}
-
-if (!function_exists("pupeExcelWriteNumber")) {
-	function pupeExcelWriteNumber($excelrivi, $excelsarake, $number, $style = array()) {
-		global $kukarow;
-
-	}
-}
-
-if (!function_exists("pupeExcelWriteString")) {
-	function pupeExcelWriteString($excelrivi, $excelsarake, $string, $style = array()) {
-		global $kukarow;
-
-	}
-}

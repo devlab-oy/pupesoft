@@ -1952,9 +1952,7 @@
 
 			echo "<br>";
 
-			$worksheet->saveXML();
-
-			#$workbook->close();
+			$excelnimi = $worksheet->close();
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";

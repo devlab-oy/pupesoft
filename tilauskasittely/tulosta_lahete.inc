@@ -1069,6 +1069,64 @@ if (!function_exists('rivi_otsikot_lahete')) {
 	}
 }
 
+if (!function_exists('kollirivi_lahete')) {
+	function kollirivi_lahete($params) {
+		global $kukarow, $yhtiorow;
+
+		// Luodaan muuttujat
+		extract($params);
+		
+		// Mahtuuko rivi tälle sivulle
+		$kalatest = $kala;
+		
+		$pdf = $params["pdf"];
+		$thispage = $params["thispage"];
+		$font = $params["norm"];
+
+		$x = 25;
+		$y = 500;
+		
+		// Kysely kollin kokonaispainon selvittämiseksi
+		
+		
+		$tuoteno = $row['tuoteno'];
+		
+		$query = "	SELECT SUM(tuote.tuotemassa) AS kollimassa
+                    FROM tilausrivi
+					JOIN kerayserat ON ( kerayserat.otunnus = tilausrivi.otunnus
+										AND kerayserat.yhtio = tilausrivi.yhtio)
+					JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus
+										AND pakkaus.yhtio = kerayserat.yhtio)
+					JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+										AND tuote.yhtio = tuote.yhtio)
+                    WHERE tuote.tuoteno	= '" . $tuoteno . "'";
+		
+        $paino_result = pupe_query($query);
+		//$paino = mysql_fetch_assoc($paino_result)['kollimassa'];
+				
+		$pdf->draw_text($x, $y, "Kolli: ".$row['pakkaus']." - ".$row['sscc_ulkoinen'].
+			"\t\tVAK-tiedot: Bruttopaino x.x kg sisältäen:" .$tuoteno, $thispage, $font);
+
+		$return = array();
+		$return['kala'] = $kala;
+		$return['rivinkorkeus'] = 20;
+		$return['thispage'] = $thispage;
+		$return['rectparam'] = $rectparam;
+
+		// Rivin loppuviiva
+		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
+			$x[0] = 20;
+			$x[1] = 580;
+			$y[0] = $y[1] = $return["kala"] + $return["rivinkorkeus"] - 4;
+			$pdf->draw_line($x, $y, $return["thispage"], $return["rectparam"]);
+		}
+		
+		$return = compact(array_keys($params));
+
+		return $return;
+	}
+}
+
 if (!function_exists('rivi_lahete')) {
 	function rivi_lahete($params) {
 		global $kukarow, $yhtiorow;

@@ -16449,9 +16449,6 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		// katotaan miten halutaan sortattavan
 		// haetaan asiakkaan tietojen takaa sorttaustiedot
 
-		if ($toim == "KOONTILAHETE") {
-			
-		}
 		$order_sorttaus = '';
 
 		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
@@ -16502,13 +16499,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-					tuote.sarjanumeroseuranta, kerayserat.sscc_ulkoinen
+					tuote.sarjanumeroseuranta /* Anssi */, kerayserat.sscc_ulkoinen, pakkaus.pakkaus, tuote.tuotemassa /* issnA */
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					/* Anssi */
 					JOIN kerayserat ON ( kerayserat.otunnus = tilausrivi.otunnus
 										AND kerayserat.yhtio = tilausrivi.yhtio)
+					JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus
+										AND pakkaus.yhtio = kerayserat.yhtio)
+					/*JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+										AND tuote.yhtio = tilausrivi.yhtio)   <--- tuote on jo valittunansa :|
+					/* issnA */
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
@@ -16570,7 +16573,12 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		while ($row = mysql_fetch_assoc($riresult)) {
 			$params_lahete["row"] = $row;
-			$params_lahete = rivi_lahete($params_lahete);
+			if ($koontilahete) {
+				$params_lahete = kollirivi_lahete($params_lahete);
+				//$params_lahete = rivi_lahete($params_lahete);
+			} else {
+				$params_lahete = rivi_lahete($params_lahete);
+			}
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet

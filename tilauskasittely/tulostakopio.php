@@ -216,7 +216,7 @@
 
 	// Extranettaajat voivat ottaa kopioita omista laskuistaan ja lähetteistään
 	if ($kukarow["extranet"] != "") {
-		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
+		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
 			$query  = "	SELECT *
 						FROM asiakas
 						WHERE yhtio	= '$kukarow[yhtio]'
@@ -630,7 +630,7 @@
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+		if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -651,25 +651,6 @@
 		if ($toim == "KOONTILAHETE") {
                     
                     //myyntitilaus. Tulostetaan lähete.
-
-                    /* 
-                     * SELECT * FROM tilausrivi
-                     * JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus
-                     *      AND tilausrivi.yhtio = lasku.yhtio)
-                     * JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus)
-                     * JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus)
-                     * WHERE lasku.tunnus = lasku.vanhatunnus LIMIT 1000;
-                     * ORDER BY kerayserat.sscc_ulkoinen
-                     *
-                     * select otunnus, pakkaus, sscc_ulkoinen from kerayserat limit 1;
-                     *
-                     * Laskun tila... tarvitaanko?
-                     *
-                     *
-                     * SELECT * FROM tilausrivi JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus AND tilausrivi.yhtio = lasku.yhtio) JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus) JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus) WHERE lasku.tunnus = lasku.vanhatunnus AND tilausrivi.otunnus = 6956515 ORDER BY kerayserat.sscc_ulkoinen LIMIT 1000;
-                     *
-                     *
-                    */
                     
 			$joinlisa  = "JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
 							AND tilausrivi.yhtio = lasku.yhtio)
@@ -1259,7 +1240,7 @@
 				}
 			}
 		}
-		elseif ($toim == "LAHETE" or toim == "KOONTILAHETE") {
+		elseif ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
 			$tulostimet[0] = 'Lähete';
 			if ($kappaleet > 0 and $komento["Lähete"] != 'email') {
 				$komento["Lähete"] .= " -# $kappaleet ";
@@ -1313,7 +1294,7 @@
 				$komento["Yllapitosopimus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+			elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
@@ -1885,25 +1866,14 @@
 				$tee = '';
 			}
 
-			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
-				$params = array(
-					'laskurow'					=> $laskurow,
-					'sellahetetyyppi' 			=> $sellahetetyyppi,
-					'extranet_tilausvahvistus' 	=> $extranet_tilausvahvistus,
-					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-					'tee'						=> $tee,
-					'toim'						=> $toim,
-					'komento' 					=> $komento,
-					'lahetekpl'					=> "",
-					'kieli' 					=> $kieli
-					);
-
-				pupesoft_tulosta_lahete($params);
-
-				$tee = '';
-			}
-			
-			elseif ($toim == "KOONTILAHETE") {
+			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
+				
+				if ($toim == "KOONTILAHETE") {
+					$koontilahete = TRUE;
+				} else {
+					$koontilahete = FALSE;
+				}
+				
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> $sellahetetyyppi,
@@ -1914,14 +1884,13 @@
 					'komento' 					=> $komento,
 					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli,
-					'koonti'					=> TRUE
+					'koontilahete'				=> $koontilahete
 					);
 
 				pupesoft_tulosta_lahete($params);
 
 				$tee = '';
 			}
-			
 
 			if ($toim == "DGD") {
 

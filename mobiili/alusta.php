@@ -1,5 +1,7 @@
 <?php
 
+$_GET['ohje'] = 'off';
+
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 

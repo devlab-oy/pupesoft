@@ -1,5 +1,7 @@
 <?php
 
+$_GET['ohje'] = 'off';
+
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
@@ -62,6 +64,11 @@ echo "
 				<tr>
 					<td colspan='4' class='head'><font class='head'>",t("Suuntalavan tuotteet", $browkieli),"</font><br /><br />
 						<table class='inner'>
+							<tr>
+								<td>
+									<font class='menu'>",t("Viivakoodi", $browkieli),"</font>&nbsp;<input type='text' name='viivakoodi' value='' />
+								</td>
+							</tr>
 							<tr>
 								<td class='menu'>
 									<font class='menu'>",t("Tuotenro", $browkieli),"</font>&nbsp;

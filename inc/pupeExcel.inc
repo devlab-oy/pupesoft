@@ -150,6 +150,9 @@ class pupeExcel {
 
 		// if shared string is not in the xml we add it and return its index
 		$si = $this->_sharedStrings->addChild("si", "");
+
+		if ($string == "") $string = NULL;
+
 		$si->addChild("t", $string);
 
 		$this->_stringCount++;
@@ -220,7 +223,7 @@ class pupeExcel {
 
 		$xlsxfile = "/tmp/".md5(uniqid(rand(),true)).".xlsx";
 
-		exec("cd /tmp/{$this->_foldername}; /usr/bin/zip -r {$xlsxfile} *;");
+		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r {$xlsxfile} *;");
 
 		#return $excelnimi;
 		#file_put_contents("/tmp/KALA.xml", $this->_sheetData->asXML());

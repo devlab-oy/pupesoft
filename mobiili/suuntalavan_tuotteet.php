@@ -16,7 +16,7 @@ if (isset($submit) and trim($submit) != '') {
 $tuotteet = array();
 
 if (isset($alusta_tunnus)) {
-	$res = suuntalavan_tuotteet(array($alusta_tunnus), $laskurow['liitostunnus']);
+	$res = suuntalavan_tuotteet(array($alusta_tunnus), $laskurow['liitostunnus'], "tuotepaikka");
 
 	$i = 0;
 
@@ -32,10 +32,6 @@ if (isset($alusta_tunnus)) {
 }
 
 echo "
-<html>
-	<head>
-	<title>",t("Suuntalavan tuotteet", $browkieli),"</title>
-
 	<style type='text/css'>
 	<!--
 		A				{color: #c0c0c0; text-decoration:none;}
@@ -51,50 +47,59 @@ echo "
 		TABLE.inner		{width: 100%; padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
 		INPUT, BUTTON	{font-size:10pt; width:100%}
 		SELECT			{width:100%; font-size:10pt;}
+		.tumma 			{color: #f2f2f2; background-color: #1f4458;}
 	-->
 	</style>
 
-	<meta http-equiv='Pragma' content='no-cache'>
-	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
-	</head>
+  	<script type='text/javascript'>
+  		$(function() {
+			document.getElementById('viivakoodi').focus();
 
-	<body onload='setFocus();'>
+			$('td.selectable').on('click', function() {
+				$('td.tumma').removeClass('tumma');
+
+				$(this).parent().children().toggleClass('tumma');
+			});
+  		});
+	</script>
+
+	<body>
 		<form method='post' action=''>
 			<table class='alusta' border='0'>
 				<tr>
 					<td colspan='4' class='head'><font class='head'>",t("Suuntalavan tuotteet", $browkieli),"</font><br /><br />
 						<table class='inner'>
 							<tr>
-								<td>
-									<font class='menu'>",t("Viivakoodi", $browkieli),"</font>&nbsp;<input type='text' name='viivakoodi' value='' />
+								<td colspan='4'>
+									<font class='menu'>",t("Viivakoodi", $browkieli),"</font>&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 								</td>
 							</tr>
 							<tr>
-								<td class='menu'>
-									<font class='menu'>",t("Tuotenro", $browkieli),"</font>&nbsp;
-									<font class='menu'>",t("M‰‰r‰", $browkieli),"</font>&nbsp;
-									<font class='menu'>",t("Yks", $browkieli),"</font>&nbsp;
-									<font class='menu'>",t("Osoite", $browkieli),"</font>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<select name='foo' size='4'>";
+								<th>
+									",t("Tuotenro", $browkieli),"
+								</th>
+								<th>
+									",t("M‰‰r‰", $browkieli),"
+								</th>
+								<th>
+									",t("Yks", $browkieli),"
+								</th>
+								<th>
+									",t("Osoite", $browkieli),"
+								</th>
+							</tr>";
 
-									foreach ($tuotteet as $tuote) {
-										echo "<option value='{$tuote['tilriv_tunnus']}'>";
-										echo "{$tuote['tuoteno']}&nbsp;&raquo;&nbsp;";
-										echo "{$tuote['maara']}&nbsp;&raquo;&nbsp;";
-										echo "{$tuote['yks']}&nbsp;&raquo;&nbsp;";
-										echo "<span style='padding-left:10px;'>{$tuote['osoite']}</span>";
-										echo "</option>";
-									}
+							foreach ($tuotteet as $tuote) {
+								echo "<tr>";
+								echo "<td class='selectable' nowrap>{$tuote['tuoteno']}</td>";
+								echo "<td class='selectable' nowrap>{$tuote['maara']}</td>";
+								echo "<td class='selectable' nowrap>{$tuote['yks']}</td>";
+								echo "<td class='selectable' nowrap>{$tuote['osoite']}</td>";
+								echo "</tr>";
+							}
 
-echo "								</select>
-								</td>
-							</tr>
-							<tr>
-								<td class='menu'>
+echo "						<tr>
+								<td colspan='4' class='menu'>
 									<button name='submit' value='submit' onclick='submit();'>OK</button>
 									<button name='submit' value='cancel' onclick='submit();'>Lopeta</button>
 								</td>
@@ -105,7 +110,6 @@ echo "								</select>
 				<tr>
 					<td colspan='4' class='back'>{$error['alusta']}</td>
 				</tr>";
-
 
 echo "		</table>
 		</form>

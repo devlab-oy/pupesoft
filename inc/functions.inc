@@ -18108,7 +18108,7 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 }
 
 if (!function_exists("suuntalavan_tuotteet")) {
-	function suuntalavan_tuotteet($suuntalavat, $liitostunnus) {
+	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "") {
 		global $kukarow;
 
 		if (is_array($suuntalavat) and count($suuntalavat) > 0) {
@@ -18120,6 +18120,8 @@ if (!function_exists("suuntalavan_tuotteet")) {
 			require('../inc/footer.inc');
 			exit;
 		}
+
+		$order = "tuotepaikka" ? "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso" : "suuntalavat.sscc, tilausrivi.tuoteno";
 
 		$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) keikkatunnus
 					FROM suuntalavat_saapuminen
@@ -18141,7 +18143,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
 					AND tilausrivi.suuntalava > 0
-					ORDER BY suuntalavat.sscc, tilausrivi.tuoteno";
+					ORDER BY {$order}";
 		$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
 
 		return $tavaraetiketti_res;

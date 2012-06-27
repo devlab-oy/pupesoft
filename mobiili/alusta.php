@@ -20,8 +20,14 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 		exit;
 	}
 
-	if ($submit == 'submit' and $alusta == $alusta_chk) {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php'>";
+	if ($submit == 'submit' and $alusta == $alusta_chk and trim($alusta_tunnus) != '' and trim($liitostunnus) != '') {
+
+		$alusta_tunnus = (int) $alusta_tunnus;
+		$liitostunnus = (int) $liitostunnus;
+
+		$url = "?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
+
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php{$url}'>";
 		exit;
 	}
 
@@ -110,6 +116,8 @@ if (isset($return) and count($return) > 0) {
 	}
 
 	echo "<input type='hidden' name='alusta_chk' value='{$alusta}' />";
+	echo "<input type='hidden' name='alusta_tunnus' value='{$return[0]['suuntalava']}' />";
+	echo "<input type='hidden' name='liitostunnus' value='{$return[0]['liitostunnus']}' />";
 	echo "<input type='hidden' name='sallitaan_eteenpain' value='X' />";
 }
 

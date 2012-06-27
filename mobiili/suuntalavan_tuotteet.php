@@ -11,6 +11,24 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+$tuotteet = array();
+
+if (isset($alusta_tunnus)) {
+	$res = suuntalavan_tuotteet(array($alusta_tunnus), $laskurow['liitostunnus']);
+
+	$i = 0;
+
+	while ($row = mysql_fetch_assoc($res)) {
+		$tuotteet[$i]['tilriv_tunnus'] = $row['tunnus'];
+		$tuotteet[$i]['tuoteno'] = $row['tuoteno'];
+		$tuotteet[$i]['maara'] = $row['varattu'];
+		$tuotteet[$i]['yks'] = $row['yksikko'];
+		$tuotteet[$i]['osoite'] = "{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}";
+
+		$i++;
+	}
+}
+
 echo "
 <html>
 	<head>
@@ -30,7 +48,7 @@ echo "
 		TABLE.alusta	{width:500px;}
 		TABLE.inner		{width: 100%; padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
 		INPUT, BUTTON	{font-size:10pt; width:100%}
-		SELECT			{width:100%}
+		SELECT			{width:100%; font-size:10pt;}
 	-->
 	</style>
 
@@ -54,9 +72,18 @@ echo "
 							</tr>
 							<tr>
 								<td>
-									<select name='foo' size='4'>
-										<option>foo</option>
-									</select>
+									<select name='foo' size='4'>";
+
+									foreach ($tuotteet as $tuote) {
+										echo "<option value='{$tuote['tilriv_tunnus']}'>";
+										echo "{$tuote['tuoteno']}&nbsp;&raquo;&nbsp;";
+										echo "{$tuote['maara']}&nbsp;&raquo;&nbsp;";
+										echo "{$tuote['yks']}&nbsp;&raquo;&nbsp;";
+										echo "<span style='padding-left:10px;'>{$tuote['osoite']}</span>";
+										echo "</option>";
+									}
+
+echo "								</select>
 								</td>
 							</tr>
 							<tr>

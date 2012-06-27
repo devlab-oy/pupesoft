@@ -77,19 +77,17 @@ class pupeExcel {
 		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
 	}
 
-	function columnChar($num) {
+	function columnChar($columnNumber) {
 
-		$str 	= "";
-		$start	= 65;
-		$end	= 90;
-		$cache  = ($end-$start);
+		$columnName = "";
 
-		while ($num != 0) {
-			$str = chr(($num%$cache)+$start-1).$str;
-			$num = ($num-($num%$cache))/$cache;
+		while ($columnNumber > 0) {
+			$modulo = ($columnNumber - 1) % 26;
+			$columnName = chr(65 + $modulo) + $columnName;
+			$columnNumber = (int) (($columnNumber - $modulo) / 26);
 		}
 
-	    return $str;
+		return $columnName;
 	}
 
 	function returnRow($excelrivi) {

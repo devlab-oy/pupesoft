@@ -3,41 +3,18 @@
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-$error = array(
-	'alusta' => '',
-);
-
-if (!isset($alusta)) $alusta = '';
-
-if (isset($submit) and trim($submit) == 'submit' and trim($alusta) == '') {
-	$error['alusta'] = "<font class='error'>".t("Syötä alustan SSCC").".</font>";
-}
-
-if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
+if (isset($submit) and trim($submit) != '') {
 
 	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
 		exit;
-	}
-
-	if ($submit == 'submit' and $alusta == $alusta_chk) {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php'>";
-		exit;
-	}
-
-	if ($submit == 'submit') {
-		$return = etsi_suuntalava_sscc(trim($alusta));
-
-		if (count($return) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei löytynyt").".</font>";
-		}
 	}
 }
 
 echo "
 <html>
 	<head>
-	<title>",t("Alusta", $browkieli),"</title>
+	<title>",t("Suuntalavan tuotteet", $browkieli),"</title>
 
 	<style type='text/css'>
 	<!--
@@ -57,12 +34,6 @@ echo "
 	-->
 	</style>
 
-	<script type='text/javascript'>
-		function setFocus() {
-			document.getElementById('alusta').focus();
-		}
-	</script>
-
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
 	</head>
@@ -71,11 +42,21 @@ echo "
 		<form method='post' action=''>
 			<table class='alusta' border='0'>
 				<tr>
-					<td colspan='4' class='head'><font class='head'>",t("Alusta", $browkieli),"</font><br /><br />
+					<td colspan='4' class='head'><font class='head'>",t("Suuntalavan tuotteet", $browkieli),"</font><br /><br />
 						<table class='inner'>
 							<tr>
 								<td class='menu'>
-									<input type='text' id='alusta' name='alusta' value='{$alusta}' />
+									<font class='menu'>",t("Tuotenro", $browkieli),"</font>&nbsp;
+									<font class='menu'>",t("Määrä", $browkieli),"</font>&nbsp;
+									<font class='menu'>",t("Yks", $browkieli),"</font>&nbsp;
+									<font class='menu'>",t("Osoite", $browkieli),"</font>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<select name='foo' size='4'>
+										<option>foo</option>
+									</select>
 								</td>
 							</tr>
 							<tr>
@@ -91,27 +72,6 @@ echo "
 					<td colspan='4' class='back'>{$error['alusta']}</td>
 				</tr>";
 
-if (isset($return) and count($return) > 0) {
-
-	echo "<tr>";
-	echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
-	echo "<th nowrap>",t("Toim.nro", $browkieli),"</th>";
-	echo "<th nowrap>",t("Nimi", $browkieli),"</th>";
-	echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
-	echo "</tr>";
-
-	foreach ($return as $row) {
-		echo "<tr>";
-		echo "<td nowrap>{$row['saapuminen_nro']}</td>";
-		echo "<td nowrap>{$row['toimittajanro']}</td>";
-		echo "<td nowrap>{$row['nimi']}</td>";
-		echo "<td nowrap>{$row['varastossa']} / {$row['kohdistettu']}</td>";
-		echo "</tr>";
-	}
-
-	echo "<input type='hidden' name='alusta_chk' value='{$alusta}' />";
-	echo "<input type='hidden' name='sallitaan_eteenpain' value='X' />";
-}
 
 echo "		</table>
 		</form>

@@ -18074,3 +18074,39 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		return $kaytettavat_tilausrivit;
 	}
 }
+
+if (!function_exists('etsi_suuntalava_sscc')) {
+	function etsi_suuntalava_sscc($sscc) {
+		global $kukarow;
+
+		$sscc = mysql_real_escape_string($sscc);
+
+		$query = "	SELECT suuntalavat.tunnus as suuntalava,
+					suuntalavat_saapuminen.saapuminen,
+					lasku.laskunro AS saapuminen_nro,
+					toimi.toimittajanro,
+					toimi.nimi,
+					SUM(IF((tilausrivi.uusiotunnus != 0 AND tilausrivi.kpl != 0), 1, 0)) AS varastossa,
+					SUM(IF((tilausrivi.uusiotunnus != 0 AND tilausrivi.kpl = 0), 1, 0)) AS kohdistettu
+					FROM suuntalavat
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+					JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K')
+					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
+					LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O')
+					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+					AND suuntalavat.sscc = '{$sscc}'
+					AND suuntalavat.tila = 'S'
+					GROUP BY 1,2,3,4,5";
+		$result = pupe_query($query);
+
+		$return = array();
+
+		if (mysql_num_rows($result) > 0) {
+			while ($row = mysql_fetch_assoc($result)) {
+				$return[] = $row;
+			}
+		}
+
+		return $return;
+	}
+}

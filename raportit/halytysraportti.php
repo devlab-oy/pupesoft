@@ -756,7 +756,7 @@
 			include('inc/pupeExcel.inc');
 
 			$worksheet 	 = new pupeExcel();
-			$format_bold = "BOLD";
+			$format_bold = array("bold" => TRUE);
 
 			$rivi 		 = "";
 			$excelrivi 	 = 0;
@@ -1958,7 +1958,7 @@
 			echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.xls'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Hälytysraportti.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
@@ -2730,7 +2730,7 @@
 					echo "</tr><tr>";
 				}
 
-				echo "<td><input type='checkbox' name='valitut[$key]' value='$key'>".ucfirst($sarake)."</td>";
+				echo "<td><input type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
 				$lask++;
 			}
 

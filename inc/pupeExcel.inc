@@ -77,17 +77,14 @@ class pupeExcel {
 		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
 	}
 
-	function columnChar($columnNumber) {
+	function columnChar($n) {
+		$n--;
 
-		$columnName = "";
-
-		while ($columnNumber > 0) {
-			$modulo = ($columnNumber - 1) % 26;
-			$columnName = chr(65 + $modulo) + $columnName;
-			$columnNumber = (int) (($columnNumber - $modulo) / 26);
+		for ($r = ""; $n >= 0; $n = intval($n / 26) - 1) {
+			$r = chr($n % 26 + 0x41) . $r;
 		}
 
-		return $columnName;
+		return $r;
 	}
 
 	function returnRow($excelrivi) {
@@ -151,12 +148,18 @@ class pupeExcel {
 
 		if ($string == "") $string = NULL;
 
-		$si->addChild("t", $string);
+		$si->addChild("t", utf8_encode($string));
 
 		$this->_stringCount++;
 		$this->_stringUniqueCount++;
 
 		return $index;
+	}
+
+	function setStyle($cell, $style) {
+		if (isset($style["bold"]) and $style["bold"]) {
+			#$cell->addAttribute('s', '1');
+		}
 	}
 
 	function writeNumber($excelrivi, $excelsarake, $number, $style = array()) {
@@ -174,6 +177,9 @@ class pupeExcel {
 
 		// Cell
 		$cell = $this->returnCell($row, $excelrivi, $excelsarake);
+
+		// Add style attribute
+		$this->setStyle($cell, $style);
 
 		// Set cell value
 		$cell->v = (float) $number;
@@ -193,6 +199,9 @@ class pupeExcel {
 
 		// Cell
 		$cell = $this->returnCell($row, $excelrivi, $excelsarake);
+
+		// Add style attribute
+		$this->setStyle($cell, $style);
 
 		// Add string attribute
 		$cell->addAttribute('t', 's');
@@ -219,11 +228,10 @@ class pupeExcel {
 		file_put_contents($this->_sheetDataFile, trim(str_replace("\n", "\r\n", $this->_sheetData->asXML())));
 		file_put_contents($this->_sharedStringsFile, trim(str_replace("\n", "\r\n", $this->_sharedStrings->asXML())));
 
-		$xlsxfile = "/tmp/".md5(uniqid(rand(),true)).".xlsx";
+		$xlsxfile = md5(uniqid(rand(),true)).".xlsx";
 
-		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r {$xlsxfile} *;");
-
-		#return $excelnimi;
-		#file_put_contents("/tmp/KALA.xml", $this->_sheetData->asXML());
+		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$this->_foldername};");
+		
+		return $xlsxfile;
 	}
 }

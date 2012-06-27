@@ -87,7 +87,9 @@ if (!function_exists("pupesoft_login")) {
 
 					$vertaa = trim($uusi1);
 					$salasana = trim($uusi2);
-					$return['message'] = t("Salasanasi vaihdettiin onnistuneesti")."!";
+
+					// K‰ytet‰‰n error-indexi‰ t‰m‰n viestin v‰litt‰miseen
+					$return['error'] = t("Salasanasi vaihdettiin onnistuneesti")."!";
 				}
 			}
 
@@ -156,7 +158,21 @@ if (!function_exists("pupesoft_login")) {
 		// Kirjataan ep‰onnistunut kirjautuminen virhelokiin...
 		error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 
-		$return['usea'] = $usea;
+		if ($usea == 1) {
+			$query = "	SELECT yhtio.nimi, yhtio.yhtio, IF(yhtio.jarjestys = 0, 9999, yhtio.jarjestys) jarj
+						FROM kuka
+						JOIN yhtio ON yhtio.yhtio = kuka.yhtio
+						WHERE kuka.kuka	= '{$user}'
+						AND kuka.extranet = ''
+						ORDER BY jarj, yhtio.nimi";
+			$result = pupe_query($query);
+
+			while ($yrow = mysql_fetch_assoc($result)) {
+				$return['usea'][$yrow['yhtio']] = $yrow['nimi'];
+			}
+		}
+
+		$return['usea_yhtio'] = $usea;
 		$return['vertaa'] = $vertaa;
 		$return['salasana'] = $salasana;
 

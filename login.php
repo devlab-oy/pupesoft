@@ -98,17 +98,9 @@ else {
 
 echo "</td><td><font class='head'>",t("Sisäänkirjautuminen", $browkieli),"</font><br><br>";
 
-if (isset($return['usea']) and $return['usea'] == 1) {
+if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
-	$query = "	SELECT yhtio.nimi, yhtio.yhtio, if(yhtio.jarjestys=0, 9999, yhtio.jarjestys) jarj
-				FROM kuka
-				JOIN yhtio ON yhtio.yhtio = kuka.yhtio
-				WHERE kuka.kuka	= '{$user}'
-				AND kuka.extranet = ''
-				ORDER BY jarj, yhtio.nimi";
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) == 0) {
+	if (count($return['usea']) == 0) {
 		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli),"!";
 		exit;
 	}
@@ -117,13 +109,12 @@ if (isset($return['usea']) and $return['usea'] == 1) {
 	echo "<tr><td colspan='2'><font class='menu'>",t("Valitse käsiteltävä yritys", $browkieli),":</font></td></tr>";
 	echo "<tr>";
 
-	while ($yrow = mysql_fetch_array($result)) {
+	foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
 
-		for ($i = 0; $i < mysql_num_fields($result) - 2; $i++) {
-			echo "<td><font class='menu'>{$yrow[$i]}</font></td>";
-		}
+		echo "<td><font class='menu'>{$_yhtionimi}</font></td>";
 
-		echo "<form action = 'login.php' method='post'>";
+		echo "<td>";
+		echo "<form action = '' method='post'>";
 
 		if (isset($return['error'])) {
 			echo "<input type='hidden' name='return[error]' value='{$return['error']}'>";
@@ -131,9 +122,10 @@ if (isset($return['usea']) and $return['usea'] == 1) {
 
 		echo "<input type='hidden' name='user'     value='{$user}'>";
 		echo "<input type='hidden' name='salamd5' value='{$return['vertaa']}'>";
-		echo "<input type='hidden' name='yhtio'    value='{$yrow['yhtio']}'>";
-		echo "<td><input type='submit' value='",t("Valitse"),"'></td></tr></form>";
+		echo "<input type='hidden' name='yhtio'    value='{$_yhtio}'>";
+		echo "<input type='submit' value='",t("Valitse"),"'></form></td></tr>";
 	}
+
 	echo "</table><br>";
 
 	if (isset($return['error']) and $return['error'] != "") {

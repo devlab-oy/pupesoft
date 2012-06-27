@@ -1488,7 +1488,13 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
+
+							if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
+								$komento = array($komento);
+								$komento[] = "asiakasemail".$laskurow['email'];
+							}
+
 							$params = array(
 								'laskurow'					=> $laskurow,
 								'sellahetetyyppi' 			=> $sellahetetyyppi,

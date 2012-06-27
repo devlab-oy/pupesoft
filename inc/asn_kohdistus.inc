@@ -833,6 +833,7 @@
 								postitp      			= '{$toimittajarow['postitp']}',
 								maa			 			= '{$toimittajarow['maa']}',
 								maa_lahetys 			= '{$maa_lahetys}',
+								maa_maara				= '{$yhtiorow['maa']}',
 								comments				= '{$edellinen_asn_numero}',
 								kauppatapahtuman_luonne	= '{$toimittajarow['kauppatapahtuman_luonne']}',
 								kuljetusmuoto			= '{$toimittajarow['kuljetusmuoto']}',

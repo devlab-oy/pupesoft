@@ -755,7 +755,7 @@
 
 			include('inc/pupeExcel.inc');
 
-			$worksheet 	 = new pupeExcel();					
+			$worksheet 	 = new pupeExcel();
 			$format_bold = "BOLD";
 
 			$rivi 		 = "";
@@ -764,10 +764,6 @@
 
 			$rivi .= t("tuoteno")."\t";
 
-
-			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
-			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
-			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
 			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
 			$excelsarake++;
 
@@ -1955,7 +1951,7 @@
 			$total     = round($endtime-$starttime,0);
 
 			echo "<br>";
-			
+
 			$worksheet->saveXML();
 
 			#$workbook->close();
@@ -2690,7 +2686,7 @@
 			echo "<tr><th>".t("Luo uusi oma raportti").":</th><td colspan='3'><input type='text' size='40' name='uusirappari' value=''></td></tr>";
 			echo "<tr><th>".t("Valitse raportti").":</th><td colspan='3'>";
 
-			//Haetaan tallennetut hälyrapit
+			// Haetaan tallennetut hälyrapit
 			$query = "	SELECT distinct selite, concat('(',replace(selite, '##',') ')) nimi
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'

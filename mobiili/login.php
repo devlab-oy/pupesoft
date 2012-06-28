@@ -83,16 +83,15 @@ if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 		exit;
 	}
 
-	echo "<table class='login'>";
+	echo "<table class='login' border=1>";
 	echo "<tr><td colspan='2'>",t("Valitse käsiteltävä yritys", $browkieli),":</td></tr>";
-	echo "<tr>";
 
 	foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
 
-		echo "<td>{$_yhtionimi}</td>";
+		echo "<form action = '' method='post'>";
+		echo "<tr>";
 
 		echo "<td>";
-		echo "<form action = '' method='post'>";
 
 		if (isset($return['error'])) {
 			echo "<input type='hidden' name='return[error]' value='{$return['error']}'>";
@@ -101,7 +100,11 @@ if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 		echo "<input type='hidden' name='user'     value='{$user}'>";
 		echo "<input type='hidden' name='salamd5' value='{$return['vertaa']}'>";
 		echo "<input type='hidden' name='yhtio'    value='{$_yhtio}'>";
-		echo "<input type='submit' value='",t("Valitse"),"'></form></td></tr>";
+		echo "<input type='submit' value='{$_yhtionimi}'>";
+		echo "</td>";
+		echo "</tr>";
+		echo "<tr><td>&nbsp;</td></tr>";
+		echo "</form>";
 	}
 
 	echo "</table><br />";

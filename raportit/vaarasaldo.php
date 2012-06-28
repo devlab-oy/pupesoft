@@ -8,8 +8,8 @@
 	echo "<font class='head'>".t("Keräyspoikkeamat").":</font><hr>";
 
 	if ($tee != '') {
-		$query = "	SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty, 
-					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka, 
+		$query = "	SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty,
+					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
 					tilausrivi.nimitys, tilausrivi.yksikko, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
@@ -43,12 +43,12 @@
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
 				//saldolaskentaa tulevaisuuteen
-				$query = "	SELECT sum(varattu) varattu, 
+				$query = "	SELECT sum(varattu) varattu,
 							min(toimaika) toimaika
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tuoteno = '$row[tuoteno]' 
-							and tyyppi='O' 
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and tyyppi='O'
 							and varattu > 0";
 				$result2 = mysql_query($query) or pupe_error($query);
 				$prow = mysql_fetch_array($result2);

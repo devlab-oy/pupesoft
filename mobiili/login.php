@@ -1,9 +1,15 @@
 <?php
 
+$_GET['ohje'] = 'off';
+$_GET["no_css"] = 'yes';
+
+$mobile = true;
+
 //kayttaja on syottanyt tietonsa login formiin
 if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
 	$login = "yes";
+
 	if (@include_once("../inc/parametrit.inc"));
 	elseif (@include_once("inc/parametrit.inc"));
 
@@ -60,24 +66,15 @@ echo "
 
 <style type='text/css'>
 <!--
-	A				{color: #c0c0c0; text-decoration:none;}
-	A:hover			{color: #ff0000; text-decoration:none;}
-	IMG				{padding:10pt;}
-	BODY			{background:#fff;}
-	FONT.info		{font-size:8pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #c0c0c0;}
-	FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666699; font-weight:bold; letter-spacing: .05em;}
-	FONT.menu		{font-size:10pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666;}
-	FONT.error		{font-size:9pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #ff6666;}
-	TD				{padding:3pt;}
-	TABLE.login		{padding:7pt; border-width: 1px 1px 1px 1px; /* top right bottom left */ border-style: solid; border-color: #a0a0a0; vertical-align: top; background: #eee; -moz-border-radius: 10pt; -webkit-border-radius: 10pt;}
-	INPUT			{font-size:10pt;}
+	a, a:visited	{color: #c0c0c0; text-decoration:none;}
+	.error		{color: #ff6666;}
 -->
 </style>
 
 <body>
 <table class='main' border='0'>
 <tr>
-<td><font class='head'>",t("Sis‰‰nkirjautuminen", $browkieli),"</font><br><br>";
+<td><h1>",t("Sis‰‰nkirjautuminen", $browkieli),"</h1>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
@@ -87,12 +84,12 @@ if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 	}
 
 	echo "<table class='login'>";
-	echo "<tr><td colspan='2'><font class='menu'>",t("Valitse k‰sitelt‰v‰ yritys", $browkieli),":</font></td></tr>";
+	echo "<tr><td colspan='2'>",t("Valitse k‰sitelt‰v‰ yritys", $browkieli),":</td></tr>";
 	echo "<tr>";
 
 	foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
 
-		echo "<td><font class='menu'>{$_yhtionimi}</font></td>";
+		echo "<td>{$_yhtionimi}</td>";
 
 		echo "<td>";
 		echo "<form action = '' method='post'>";
@@ -107,29 +104,26 @@ if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 		echo "<input type='submit' value='",t("Valitse"),"'></form></td></tr>";
 	}
 
-	echo "</table><br>";
+	echo "</table><br />";
 
 	if (isset($return['error']) and $return['error'] != "") {
-		echo "<font class='error'>{$return['error']}</font><br><br>";
+		echo "<font class='error'>{$return['error']}</font><br /><br />";
 	}
-	echo "<font class='info'>Copyright &copy; 2002-",date("Y")," <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
 
 	echo "<table class='login'>
 			<form name='login' target='_top' action='' method='post'>
 
-			<tr><td><font class='menu'>",t("K‰ytt‰j‰tunnus",$browkieli),":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-			<tr><td><font class='menu'>",t("Salasana",$browkieli),":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+			<tr><td>",t("K‰ytt‰j‰tunnus",$browkieli),":</td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+			<tr><td>",t("Salasana",$browkieli),":</td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 		</table>";
 
 	if (isset($return['error']) and $return['error'] != "") {
-			echo "<br><font class='error'>{$return['error']}</font><br>";
+			echo "<br /><font class='error'>{$return['error']}</font><br />";
 	}
 
-	echo "	<br><input type='submit' value='",t("Sis‰‰n",$browkieli),"'>
-			<br><br>
-			<font class='info'>Copyright &copy; 2002-",date("Y")," <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
+	echo "	<br /><input type='submit' value='",t("Sis‰‰n",$browkieli),"'>
 			</form>";
 
 	echo "<script LANGUAGE='JavaScript'>window.document.{$formi}.{$kentta}.focus();</script>";

@@ -1612,16 +1612,10 @@ if ($tila == '') {
 		$onkosuoratoimitus = FALSE;
 		$onkosuoratoimitus_suoraan_asiakkaalle = FALSE;
 
-		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
-	   				FROM tilausrivin_lisatiedot
-	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-	   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivirow[rivitunnus]'";
-		$varastoon_result = pupe_query($query);
+		$onko_suoratoimitus_res = onko_suoratoimitus($rivirow['rivitunnus']);
 
-		if ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+		if ($varastoon_row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 			$onkosuoratoimitus = TRUE;
 
 			if ($varastoon_row["suoraan_laskutukseen"] != "") {

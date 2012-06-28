@@ -417,10 +417,9 @@ if (!function_exists('alku_kerayslista')) {
 
 				# vanha_otunnus on alkuperäinen tilausnumero
 				# Haetaan kaikkien tällä tilauksella olevien tilausrivien alkuperäiset tilausnumerot
-				$query = "	SELECT group_concat(DISTINCT tilausrivin_lisatiedot.vanha_otunnus) alkuperaiset_tilaukset
+				$query = "	SELECT group_concat(DISTINCT tlt2.vanha_otunnus) alkuperaiset_tilaukset
 							FROM tilausrivi
-							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus IN ($tilausnumeroita)
 							AND tilausrivi.tyyppi != 'D'";
@@ -429,14 +428,12 @@ if (!function_exists('alku_kerayslista')) {
 
 				# Lasketaan kuinka monta toimitettua tilausriviä löytyy per alkuperäinen tilaus
 				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
-					$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
-								FROM tilausrivin_lisatiedot
-								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
-								WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivin_lisatiedot.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
-								GROUP BY tilausrivin_lisatiedot.vanha_otunnus
+					$query = "	SELECT tlt2.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
+								FROM tilausrivin_lisatiedot as tlt2
+								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
+								GROUP BY tlt2.vanha_otunnus
 								ORDER BY toimituksia";
 					$query_result = pupe_query($query);
 

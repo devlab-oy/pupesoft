@@ -395,9 +395,7 @@ if (!function_exists('alku_kerayslista')) {
 				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
 					$query = "	SELECT tlt2.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
 								FROM tilausrivin_lisatiedot as tlt2
-								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus
-								AND tilausrivi.tyyppi != 'D'
-								AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
 								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
 								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
 								GROUP BY tlt2.vanha_otunnus

@@ -9,7 +9,7 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 if (isset($submit) and trim($submit) == 'cancel') {
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=paavalikko.php'>";
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}mobiili'>";
 	exit;
 }
 

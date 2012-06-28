@@ -83,8 +83,8 @@ if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 		exit;
 	}
 
-	echo "<table class='login' border=1>";
-	echo "<tr><td colspan='2'>",t("Valitse yritys", $browkieli),":</td></tr>";
+	echo "<table class='login'>";
+	echo "<tr><td>",t("Valitse yritys", $browkieli),":</td></tr>";
 
 	foreach ($return['usea'] as $_yhtio => $_yhtionimi) {
 

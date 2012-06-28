@@ -127,14 +127,14 @@ if (!function_exists("pupesoft_login")) {
 						$result = mysql_query($query) or pupe_error($query);
 						$row = mysql_fetch_assoc($result);
 
-						$row['oletus_ohjelma'] = 'mobiili##paavalikko';
+						$row['oletus_ohjelma'] = 'mobiili##index';
 
 						if ($row["oletus_ohjelma"] != "") {
 
 							$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
 
 							if ($mobile) {
-								$palvelin2 .= "mobiili/paavalikko.php";
+								$palvelin2 .= "mobiili/index.php";
 							}
 							else {
 								$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";

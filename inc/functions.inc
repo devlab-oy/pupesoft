@@ -16455,17 +16455,6 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$laskurow[liitostunnus]'";
-		/*
-		
-		* SELECT * FROM tilausrivi
-        * JOIN lasku ON (tilausrivi.otunnus = lasku.tunnus
-        *      AND tilausrivi.yhtio = lasku.yhtio)
-        * JOIN kerayserat ON (tilausrivi.otunnus = kerayserat.otunnus)
-        * JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus)
-        * WHERE lasku.tunnus = lasku.vanhatunnus LIMIT 1000;
-        * ORDER BY kerayserat.sscc_ulkoinen
-		
-		*/
 		
 		$asiakas_apu_res = pupe_query($asiakas_apu_query);
 
@@ -16491,6 +16480,21 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
+		if ($toim == 'KOONTILAHETE') {
+			$koontiselect = ",kerayserat.sscc_ulkoinen, pakkaus.pakkaus, tuote.tuotemassa";
+			$koontijoin = "
+				/* join tilausrivi on (tilausrivi.tunnus = kerayserat.tilausrivi) */
+				JOIN kerayserat ON ( kerayserat.tilausrivi = tilausrivi.tunnus
+								AND kerayserat.yhtio = tilausrivi.yhtio)
+				JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus
+								AND pakkaus.yhtio = kerayserat.yhtio) ";
+			$koontisort = "kerayserat.sscc_ulkoinen, ";
+		} else {
+			$koontiselect = "";
+			$koontijoin = "";
+			$koontisort = "";
+		}
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*,
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
@@ -16499,24 +16503,17 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-					tuote.sarjanumeroseuranta /* Anssi */, kerayserat.sscc_ulkoinen, pakkaus.pakkaus, tuote.tuotemassa /* issnA */
+					tuote.sarjanumeroseuranta $koontiselect
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					/* Anssi */
-					JOIN kerayserat ON ( kerayserat.otunnus = tilausrivi.otunnus
-										AND kerayserat.yhtio = tilausrivi.yhtio)
-					JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus
-										AND pakkaus.yhtio = kerayserat.yhtio)
-					/*JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
-										AND tuote.yhtio = tilausrivi.yhtio)   <--- tuote on jo valittunansa :|
-					/* issnA */
+					$koontijoin
 					WHERE tilausrivi.otunnus = '$otunnus'
-					and tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
-					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-					ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+					ORDER BY $koontisort jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
 
 		$params_lahete = array(
@@ -16570,15 +16567,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		// Piirretään rivit
 		mysql_data_seek($riresult,0);
-
 		while ($row = mysql_fetch_assoc($riresult)) {
-			$params_lahete["row"] = $row;
-			if ($koontilahete) {
-				$params_lahete = kollirivi_lahete($params_lahete);
-				//$params_lahete = rivi_lahete($params_lahete);
-			} else {
-				$params_lahete = rivi_lahete($params_lahete);
+			if (!isset($sscc)) { // Ensimmäinen kierros
+				$sscc = "";
 			}
+
+			$params_lahete["row"] = $row;
+
+			// Mikäli kolli on merkitty ja se vaihtuu, tulostetaan kollirivi
+			if ( ($sscc == "" or $row['sscc_ulkoinen'] != $sscc) and $row['sscc_ulkoinen'] != "0" ) {
+				$params_lahete = kollirivi_lahete($params_lahete);
+			}
+			$params_lahete = rivi_lahete($params_lahete);
+			$sscc = $row['sscc_ulkoinen'];
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet

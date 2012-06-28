@@ -18108,7 +18108,7 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 }
 
 if (!function_exists("suuntalavan_tuotteet")) {
-	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "") {
+	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "") {
 		global $kukarow;
 
 		if (is_array($suuntalavat) and count($suuntalavat) > 0) {
@@ -18121,7 +18121,20 @@ if (!function_exists("suuntalavan_tuotteet")) {
 			exit;
 		}
 
-		$order = "tuotepaikka" ? "tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso" : "suuntalavat.sscc, tilausrivi.tuoteno";
+		$ascdesc = $ascdesc != "" ? mysql_real_escape_string($ascdesc) : "";
+
+		if ($order == "tuotepaikka") {
+			$order = "hyllypaikka";
+		}
+		elseif ($order == "maara") {
+			$order = "siskpl";
+		}
+		elseif ($order == "yksikko") {
+			$order = "tilausrivi.yksikko";
+		}
+		else {
+			$order = "suuntalavat.sscc, tilausrivi.tuoteno";
+		}
 
 		$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) keikkatunnus
 					FROM suuntalavat_saapuminen
@@ -18132,7 +18145,17 @@ if (!function_exists("suuntalavan_tuotteet")) {
 
 		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
-		$query = "	SELECT tilausrivi.*, suuntalavat.sscc, tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu+tilausrivi.kpl siskpl, tuote.eankoodi
+		$tuoteno = mysql_real_escape_string($tuoteno);
+
+		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
+
+		$query = "	SELECT tilausrivi.*,
+					suuntalavat.sscc,
+					tuotteen_toimittajat.toim_tuoteno,
+					tilausrivi.varattu + tilausrivi.kpl siskpl,
+					tuote.eankoodi,
+					IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) AS tuotekerroin,
+					CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) AS hyllypaikka
 					FROM tilausrivi
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
@@ -18143,9 +18166,28 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
 					AND tilausrivi.suuntalava > 0
-					ORDER BY {$order}";
+					{$tuotenolisa}
+					ORDER BY {$order} {$ascdesc}";
 		$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
 
 		return $tavaraetiketti_res;
+	}
+}
+
+if (!function_exists('onko_suoratoimitus')) {
+	function onko_suoratoimitus($rivitunnus) {
+		global $kukarow;
+
+		$rivitunnus = (int) $rivitunnus;
+
+	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
+	   				FROM tilausrivin_lisatiedot
+	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+	   				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '{$rivitunnus}'";
+		$varastoon_result = pupe_query($query);
+
+		return $varastoon_result;
 	}
 }

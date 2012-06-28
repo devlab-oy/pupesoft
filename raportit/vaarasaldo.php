@@ -5,73 +5,67 @@
 
 	require('../inc/parametrit.inc');
 
-	echo "<font class='head'>".t("V‰‰r‰t saldot").":</font><hr>";
+	echo "<font class='head'>".t("Ker‰yspoikkeamat").":</font><hr>";
 
 	if ($tee != '') {
-		$query = "	SELECT tuoteno, nimitys, tilkpl, kpl, keratty, concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso) tuotepaikka, nimitys, yksikko, hyllyalue, hyllynro, hyllytaso, hyllyvali,
+		$query = "	SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty,
+					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
+					tilausrivi.nimitys, tilausrivi.yksikko, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
-					WHERE yhtio='$kukarow[yhtio]' and laadittu>='$vva-$kka-$ppa 00:00:00'
-					and laadittu<='$vvl-$kkl-$ppl 23:59:59' and tyyppi='L' and laskutettu!='' and var!='J' and var!='P'
-					and tilkpl<>kpl
+					JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  = 'L'
+					and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
+					and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
+					and tilausrivi.var not in ('P','J')
+					and tilausrivi.tilkpl <> tilausrivi.kpl
 					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0 ) {
-			echo "<table><tr><th>".t("Varastopaikka")."</th><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th>
-					<th>".t("Toimittajan tuoteno")."</th><th>".t("Tilattu")."</th><th>".t("Toimitettu")."</th>
-					<th nowrap>".t("Tilauksessa")."</th>
-					<th>".t("Ensimm‰inen toimitus")."</th><th>".t("Hyllyss‰")."</th><th>".t("Saldo")."</th><th>".t("Ker‰‰j‰")."</th></tr>";
+			echo "<table><tr>
+					<th>".t("Varastopaikka")."</th>
+					<th>".t("Tuoteno")."</th>
+					<th>".t("Nimitys")."</th>
+					<th>".t("Toimittajan tuoteno")."</th>
+					<th>".t("Asiakas")."</th>
+					<th>".t("Tilattu")."</th>
+					<th>".t("Toimitettu")."</th>
+					<th>".t("Tilauksessa")."</th>
+					<th>".t("Ensimm‰inen toimitus")."</th>
+					<th>".t("Hyllyss‰")."</th>
+					<th>".t("Saldo")."</th>
+					<th>".t("Ker‰‰j‰")."</th></tr>";
 
 			while ($row = mysql_fetch_array($result)) {
-				$query = "	SELECT tuotepaikat.saldo, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-							group_concat(tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno
-							FROM tuotepaikat
-							JOIN tuote USING (yhtio, tuoteno)
-							LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
-							WHERE hyllyalue='$row[hyllyalue]'
-							and hyllynro='$row[hyllynro]'
-							and hyllytaso='$row[hyllytaso]'
-							and hyllyvali='$row[hyllyvali]'
-							and tuotepaikat.yhtio='$kukarow[yhtio]'
-							and tuotepaikat.tuoteno='$row[tuoteno]'
-							GROUP BY 1,2,3,4,5";
-				$result1 = mysql_query($query) or pupe_error($query);
-				$srow = mysql_fetch_array($result1);
 
-				//jo ker‰tyt mutta ei laskutettu
-				$query = "	SELECT ifnull(sum(tilausrivi.varattu),0) kermaara
-							FROM tuotepaikat, tilausrivi
-							WHERE tuotepaikat.yhtio = tilausrivi.yhtio
-							and tuotepaikat.tuoteno = tilausrivi.tuoteno
-							and keratty != ''
-							and laskutettu = ''
-							and varattu <> 0
-							and tilausrivi.tyyppi in ('L','G','V')
-							and tuotepaikat.hyllyalue = tilausrivi.hyllyalue
-							and tuotepaikat.hyllynro  = tilausrivi.hyllynro
-							and tuotepaikat.hyllyvali = tilausrivi.hyllyvali
-							and tuotepaikat.hyllytaso = tilausrivi.hyllytaso
-							and '$row[hyllyalue]' = tilausrivi.hyllyalue
-							and '$row[hyllynro]'  = tilausrivi.hyllynro
-							and '$row[hyllyvali]' = tilausrivi.hyllyvali
-							and '$row[hyllytaso]' = tilausrivi.hyllytaso
-							and tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.tuoteno='$row[tuoteno]'";
-				$kerresult = mysql_query($query) or pupe_error($query);
-				$kerrow = mysql_fetch_array ($kerresult);
-				$hyllyssa = $srow['saldo'] - $kerrow['kermaara'];
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
 				//saldolaskentaa tulevaisuuteen
-				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
+				$query = "	SELECT sum(varattu) varattu,
+							min(toimaika) toimaika
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$row[tuoteno]' and tyyppi='O' and varattu > 0";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and tyyppi='O'
+							and varattu > 0";
 				$result2 = mysql_query($query) or pupe_error($query);
 				$prow = mysql_fetch_array($result2);
 
-				echo "	<tr><td>$row[tuotepaikka]</td><td>$row[tuoteno]</td><td>".t_tuotteen_avainsanat($row, 'nimitys')."</td><td>$srow[toim_tuoteno]</td><td>".str_replace(".",",",$row['tilkpl'])."</td><td>".str_replace(".",",",$row['kpl'])."</td>
-						<td>".str_replace(".",",",$prow['varattu'])."</td><td>$prow[toimaika]</td><td>".str_replace(".",",",sprintf("%.2f",$hyllyssa))."</td><td>".str_replace(".",",",$srow['saldo'])."</td><td>$row[keratty]</td></tr>";
-
+				echo "<tr>
+						<td>$row[tuotepaikka]</td>
+						<td>$row[tuoteno]</td>
+						<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>
+						<td>$srow[toim_tuoteno]</td>
+						<td>$row[asiakas]</td>
+						<td align='right'>{$row['tilkpl']}</td>
+						<td align='right'>{$row['kpl']}</td>
+						<td align='right'>{$prow['varattu']}</td>
+						<td>$prow[toimaika]</td>
+						<td align='right'>{$hyllyssa}</td>
+						<td align='right'>{$saldo}</td>
+						<td>$row[keratty]</td></tr>";
 			}
 
 			echo "</table>";
@@ -110,8 +104,6 @@
 			<input type='text' name='kkl' value='$kkl' size='3'>
 			<input type='text' name='vvl' value='$vvl' size='5'>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
-
-
 
 	require ("../inc/footer.inc");
 ?>

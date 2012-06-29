@@ -18108,7 +18108,7 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 }
 
 if (!function_exists("suuntalavan_tuotteet")) {
-	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "") {
+	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "", $tilriv = 0) {
 		global $kukarow;
 
 		if (is_array($suuntalavat) and count($suuntalavat) > 0) {
@@ -18149,6 +18149,10 @@ if (!function_exists("suuntalavan_tuotteet")) {
 
 		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
 
+		$tilriv = (int) $tilriv;
+
+		$tilrivlisa = trim($tilriv) != 0 ? " and tilausrivi.tunnus = '{$tilriv}'" : "";
+
 		$query = "	SELECT tilausrivi.*,
 					suuntalavat.sscc,
 					tuotteen_toimittajat.toim_tuoteno,
@@ -18160,13 +18164,14 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
 					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
+					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$liitostunnus}')
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND {$uusiotunnuslisa}
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
 					AND tilausrivi.suuntalava > 0
 					{$tuotenolisa}
+					{$tilrivlisa}
 					ORDER BY {$order} {$ascdesc}";
 		$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
 

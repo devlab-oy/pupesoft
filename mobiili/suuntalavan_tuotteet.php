@@ -10,6 +10,20 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (isset($submit) and trim($submit) != '') {
 
+	if ($submit == 'edit' and isset($selected_row) and trim($selected_row) != '' and isset($alusta_tunnus) and trim($alusta_tunnus) != '' and isset($liitostunnus) and trim($liitostunnus) != '') {
+
+		$data = array(
+			'selected_row' => (int) $selected_row,
+			'alusta_tunnus' => (int) $alusta_tunnus,
+			'liitostunnus' => (int) $liitostunnus
+		);
+
+		$url = http_build_query($data);
+
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
+		exit;
+	}
+
 	if ($submit == 'cancel') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
 		exit;
@@ -124,93 +138,102 @@ echo "
   // 		});
 	</script>
 
-	<body onload='setFocus();'>
-			<table border='0'>
-				<tr>
-					<td colspan='4'><h1>",t("Suuntalavan tuotteet", $browkieli),"</h1>
-						<form name='viivakoodiformi' method='post' action=''>
-							<table>
-								<tr>
-									<td colspan='5'>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
-										<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli),"</button>
-									</td>
-								</tr>
-								<tr>
-									<td colspan='5'>&nbsp;</td>
-								</tr>
-							</table>
-						</form>
-						<form name='hakuformi' method='post' action=''>
-						<table class='inner'>
-							<tr>
-								<th>&nbsp;</th>
-								<th nowrap>
-									<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuotenro", $browkieli),"</a>&nbsp;";
+	<table border='0' onload='setFocus();'>
+		<tr>
+			<td colspan='4'><h1>",t("Suuntalavan tuotteet", $browkieli),"</h1>
+				<form name='viivakoodiformi' method='post' action=''>
+					<table>
+						<tr>
+							<td colspan='5'>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
+								<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli),"</button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan='5'>&nbsp;</td>
+						</tr>
+					</table>
+				</form>
+				<form name='hakuformi' method='post' action=''>
+				<table>
+					<tr>
+						<th>&nbsp;</th>
+						<th nowrap>
+							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuotenro", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "							</th>
-								<th nowrap>
-									<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M‰‰r‰", $browkieli),"</a>&nbsp;";
+						<th nowrap>
+							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M‰‰r‰", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_maara == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "							</th>
-								<th nowrap>
-									<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks", $browkieli),"</a>&nbsp;";
+						<th nowrap>
+							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_yksikko == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "							</th>
-								<th nowrap>
-									<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Osoite", $browkieli),"</a>&nbsp;";
+						<th nowrap>
+							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Osoite", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_tuotepaikka == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "							</th>
-							</tr>";
+					</tr>";
 
-							$chk = count($tuotteet) == 1 ? " checked" : "";
+					$chk = count($tuotteet) == 1 ? " checked" : "";
 
-							foreach ($tuotteet as $tuote) {
-								echo "<tr id='{$tuote['tilriv_tunnus']}'>";
-								echo "<td><input type='radio' name='selected_row'{$chk} /></td>";
-								echo "<td class='selectable' nowrap>{$tuote['tuoteno']}</td>";
-								echo "<td class='selectable' nowrap>{$tuote['maara']}";
+					foreach ($tuotteet as $tuote) {
+						echo "<tr id='{$tuote['tilriv_tunnus']}'>";
+						echo "<td><input type='radio' name='selected_row' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
+						echo "<td class='selectable' nowrap>{$tuote['tuoteno']}</td>";
+						echo "<td class='selectable' nowrap>{$tuote['maara']}";
 
-								$onko_suoratoimitus_res = onko_suoratoimitus($tuote['tilriv_tunnus']);
+						if ($tuote['tuotekerroin'] != 1) echo "&nbsp;(",$tuote['maara'] * $tuote['tuotekerroin'],")";
 
-								if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
-									if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
-								}
+						$onko_suoratoimitus_res = onko_suoratoimitus($tuote['tilriv_tunnus']);
 
-								if ($tuote['tuotekerroin'] != 1) echo "&nbsp;(",$tuote['maara'] * $tuote['tuotekerroin'],")";
+						if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
+							if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
+						}
 
-								echo "</td>";
-								echo "<td class='selectable' nowrap>{$tuote['yks']}</td>";
-								echo "<td class='selectable' nowrap>{$tuote['osoite']}</td>";
-								echo "</tr>";
-							}
+						echo "</td>";
+						echo "<td class='selectable' nowrap>{$tuote['yks']}</td>";
+						echo "<td class='selectable' nowrap>{$tuote['osoite']}</td>";
+						echo "</tr>";
+					}
 
 echo "						<tr>
-								<td colspan='5'>&nbsp;</td>
-							</tr>
-							<tr>
-								<td colspan='5' class='menu' nowrap>
-									<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-								</td>
-							</tr>
-						</table>
-						</form>
-					</td>
-				</tr>
-				<tr>
-					<td colspan='4' class='back'>{$error['alusta']}</td>
-				</tr>";
-
-echo "		</table>
-			<input type='hidden' name='selected_row' id='selected_row' value='' />
-	</body>";
+						<td colspan='5'>&nbsp;</td>
+					</tr>
+					<tr>
+						<td nowrap>
+							<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='varalle' onclick='submit();'>",t("Varalle", $browkieli),"</button>
+						</td>
+						<td>
+							&nbsp;
+						</td>
+					</tr>
+				</table>
+				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td colspan='4' class='back'>{$error['alusta']}</td>
+		</tr>
+	</table>";
 
 require('inc/footer.inc');

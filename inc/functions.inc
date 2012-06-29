@@ -18261,3 +18261,53 @@ if (!function_exists('splittaa_tilausrivi')) {
 		return mysql_insert_id();
 	}
 }
+
+if (!function_exists('lisaa_tuotepaikka')) {
+	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '') {
+		global $kukarow;
+
+		$query = "	INSERT INTO tuotepaikat SET
+					yhtio     = '{$kukarow['yhtio']}',
+					tuoteno	  = '{$tuoteno}',
+					hyllyalue = '{$hyllyalue}',
+					hyllynro  = '{$hyllynro}',
+					hyllyvali = '{$hyllyvali}',
+					hyllytaso = '{$hyllytaso}',
+					oletus    = '{$oletus}'";
+		$result = pupe_query($query);
+
+		$query = "	INSERT INTO tapahtuma SET
+					yhtio 		= '{$kukarow['yhtio']}',
+					tuoteno 	= '{$tuoteno}',
+					kpl 		= 0,
+					kplhinta	= 0,
+					hinta 		= 0,
+					laji 		= 'uusipaikka',
+					hyllyalue 	= '{$hyllyalue}',
+					hyllynro 	= '{$hyllynro}',
+					hyllyvali 	= '{$hyllyvali}',
+					hyllytaso 	= '{$hyllytaso}',
+					selite 		= '".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()";
+		$result = pupe_query($query);
+	}
+}
+
+if (!function_exists('tarkista_varaston_hyllypaikka')) {
+	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
+		global $kukarow;
+
+		$query = "	SELECT tunnus
+					FROM varaston_hyllypaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND hyllyalue = '{$hyllyalue}'
+					AND hyllynro = '{$hyllynro}'
+					AND hyllyvali = '{$hyllyvali}'
+					AND hyllytaso = '{$hyllytaso}'
+					#AND varasto = '{$varasto}'";
+		$chk_res = pupe_query($query);
+
+		return mysql_num_rows($chk_res) == 0 ? false : true;
+	}
+}

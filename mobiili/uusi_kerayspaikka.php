@@ -31,6 +31,27 @@ if (isset($submit) and trim($submit) != '') {
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
 $row = mysql_fetch_assoc($res);
 
+$oletuspaikka_chk = "checked";
+
+$onko_suoratoimitus_res = onko_suoratoimitus($selected_row);
+
+if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
+	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
+}
+
+if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
+
+	$kaikki_ok = tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+
+	if ($kaikki_ok) {
+
+		$oletus = $oletuspaikka_chk != '' ? 'X' : '';
+
+		lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
+	}
+
+}
+
 echo "
 	<style type='text/css'>
 	<!--
@@ -75,7 +96,7 @@ echo "
 						<td nowrap>
 							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 						</td>
-						<td colspan='2'>",t("Tee tästä oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' checked='checked' /></td>
+						<td colspan='2'>",t("Tee tästä oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' checked='{$oletuspaikka_chk}' /></td>
 					</tr>
 					<tr><td>&nbsp;</td></tr>
 				</table>

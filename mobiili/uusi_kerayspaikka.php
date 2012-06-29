@@ -12,10 +12,6 @@ $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $selected_row = (int) $selected_row;
 
-$error = array(
-	'rivi' => ''
-);
-
 if (isset($submit) and trim($submit) != '') {
 
 	$data = array(
@@ -27,11 +23,7 @@ if (isset($submit) and trim($submit) != '') {
 	$url = http_build_query($data);
 
 	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-		exit;
-	}
-	elseif ($submit == 'new') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
 		exit;
 	}
 }
@@ -49,40 +41,41 @@ echo "
 
 	<table border='0'>
 		<tr>
-			<td><h1>",t("Vahvista ker‰yspaikka", $browkieli),"</h1>
-				<form name='vahvistaformi' method='post' action=''>
+			<td><h1>",t("Uusi ker‰yspaikka", $browkieli),"</h1>
+				<form name='uusipaikkaformi' method='post' action=''>
 				<table>
 					<tr>
 						<td>",t("Tuote", $browkieli),"</td>
-						<td colspan='2'>{$row['tuoteno']}</td>
+						<td colspan='3'>{$row['tuoteno']}</td>
 					</tr>
 					<tr>
 						<td>",t("Toim. Tuotekoodi", $browkieli),"</td>
-						<td colspan='2'>{$row['toim_tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("M‰‰r‰", $browkieli),"</td>
-						<td><input type='text' name='maara' value='' size='7' />
-						<td>{$row['varattu']} {$row['yksikko']}</td>
+						<td colspan='3'>{$row['toim_tuoteno']}</td>
 					</tr>
 					<tr>
 						<td>",t("Ker‰yspaikka", $browkieli),"</td>
-						<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
+						<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 					</tr>
 					<tr>
-						<td>",t("Koodi", $browkieli),"</td>
-						<td colspan='2'><input type='text' name='maara' value='' size='7' />
+						<td>",t("Alue", $browkieli),"</td>
+						<td>",t("Nro", $browkieli),"</td>
+						<td>",t("V‰li", $browkieli),"</td>
+						<td>",t("Taso", $browkieli),"</td>
+					</tr>
+					<tr>
+						<td><input type='text' name='hyllyalue' value='' /></td>
+						<td><input type='text' name='hyllynro' value='' /></td>
+						<td><input type='text' name='hyllyvali' value='' /></td>
+						<td><input type='text' name='hyllytaso' value='' /></td>
 					</tr>
 					<tr>
 						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Vahvista", $browkieli),"</button>
+							<button name='submit' value='submit' onclick='submit();'>",t("Perusta", $browkieli),"</button>
 						</td>
 						<td nowrap>
 							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 						</td>
-						<td>
-							<button name='submit' value='new' onclick='submit();'>",t("Uusi ker‰yspaikka", $browkieli),"</button>
-						</td>
+						<td colspan='2'>",t("Tee t‰st‰ oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' checked='checked' /></td>
 					</tr>
 					<tr><td>&nbsp;</td></tr>
 				</table>

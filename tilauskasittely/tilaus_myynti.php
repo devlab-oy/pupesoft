@@ -1171,16 +1171,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$tarjous = $laskurow["tunnus"];
 		}
 
-		//	Tarkastetaan onko käytössä tarjousseuranta vai, jos on näitä muistutuksia ei kirjata..
-		$query = "	SELECT yhtio
-					FROM oikeu
-					WHERE yhtio	= '$kukarow[yhtio]'
-					and kuka	= '$kukarow[kuka]'
-					and nimi	= 'raportit/tilaushakukone.php'
-					and alanimi = 'TARJOUSHAKUKONE'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 0) {
+		if (tarkista_oikeus("crm/kuittaamattomat.php")) {
 
 			$mkk = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
 			$mhh = " 10:00:00";

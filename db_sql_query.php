@@ -15,20 +15,27 @@
 	}
 	else {
 
-		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-			<!--
-			function toggleAll(toggleBox) {
-				var currForm = toggleBox.form;
-				var isChecked = toggleBox.checked;
-				var nimi = toggleBox.name;
-				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
-						currForm.elements[elementIdx].checked = isChecked;
+		echo " <script language='javascript' type='text/javascript'>
+				function toggleAll(toggleBox) {
+					var currForm = toggleBox.form;
+					var isChecked = toggleBox.checked;
+					var nimi = toggleBox.name;
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+						    currForm.elements[elementIdx].checked = isChecked;
+						}
 					}
 				}
-			}
-			//-->
-			</script>";
+				</script>
+
+				<!-- Enabloidaan shiftillä checkboxien chekkaus //-->
+				<script src='inc/checkboxrange.js'></script>
+
+				<script language='javascript' type='text/javascript'>
+					$(document).ready(function(){
+						$(\".shift\").shiftcheckbox();
+					});
+				</script>";
 
 		echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
@@ -312,7 +319,7 @@ $order";
 				}
 			}
 
-			echo "<form name='sql' method='post' autocomplete='off'>";
+			echo "<form name='sql' class='sql' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='table' value='$table'>";
 			echo "<input type='hidden' name='rtee' value='AJA'>";
 			echo "<input type='hidden' name='edkysely' value='$kysely'>";
@@ -382,7 +389,8 @@ $order";
 
 				array_push($kala,"<tr>
 									<td>$row[0]</td>
-									<td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'><input type='checkbox' name='kentat[$row[0]]' value='$row[0]' $chk></td>
+									<td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'>
+									<input type='checkbox' class='shift' name='kentat[$row[0]]' value='$row[0]' $chk></td>
 									<td><select name='operaattori[$row[0]]'>
 										<option value=''></option>
 										<option value='on'	$sel[on]>=</option>

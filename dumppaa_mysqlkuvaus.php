@@ -40,8 +40,18 @@
 
 		$ulos = array();
 
-		///usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
-		$kala = exec("/usr/bin/mysqldump -u $dbuser --host=$dbhost --password=$dbpass $dbkanta --no-data", $ulos);
+		# /usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
+		if (file_exists("/usr/bin/mysqldump")) {
+			$mysql_dump_path = "/usr/bin/mysqldump";
+		}
+		elseif (file_exists("/usr/local/bin/mysqldump")) {
+			$mysql_dump_path = "/usr/local/bin/mysqldump";
+		}
+		else {
+			$mysql_dump_path = "mysqldump";
+		}
+
+		$kala = exec("$mysql_dump_path -u $dbuser --host=$dbhost --password=$dbpass $dbkanta --no-data", $ulos);
 
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 

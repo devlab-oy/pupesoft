@@ -101,6 +101,7 @@
 					}
 
 					$kysely  = "INSERT into tilausrivi ($fields) VALUES ($values)";
+
 					$insres  = pupe_query($kysely);
 					$utunnus = mysql_insert_id($link);
 
@@ -119,6 +120,7 @@
 								AND otunnus = '$kukarow[kesken]'
 								AND tunnus = '$uusitunnu'";
 					$updres = pupe_query($query);
+
 				}
 			}
 		}

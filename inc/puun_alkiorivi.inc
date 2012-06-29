@@ -65,7 +65,7 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
 		$vres = mysql_query($query) or pupe_error($query);
 		$vrow = mysql_fetch_array($vres);
 
-		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$apu['laji']}&liitos={$apu['liitos']}&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}' target='main'>".t('Valitse segmentit')."</a><br />\n";
+		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$apu['laji']}&liitos=".urlencode($apu['liitos'])."&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}' target='main'>".t('Valitse segmentit')."</a><br />\n";
 		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 	}
 

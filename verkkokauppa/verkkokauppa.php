@@ -1183,6 +1183,7 @@ if ($tee == "") {
 					<div class='menu' id='menu'>".menu()."</div>";
 
 	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
+	$tuotenimitys = mysql_real_escape_string(trim($_GET["tuotenimitys"]));
 
 	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") === FALSE and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 		$verkko = "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
@@ -1196,6 +1197,14 @@ if ($tee == "") {
 								$verkko
 								<script TYPE=\"text/javascript\" language=\"JavaScript\">
 								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=alkukoodilla&tuotehaku=$tuotenumero');
+								</script>
+								</div>";
+	}
+	elseif ($tuotenimitys != "") {
+		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
+								$verkko
+								<script TYPE=\"text/javascript\" language=\"JavaScript\">
+								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=nimi&tuotehaku=$tuotenimitys');
 								</script>
 								</div>";
 	}
@@ -1215,5 +1224,3 @@ if ($tee == "") {
 
 	echo "</body></html>";
 }
-
-?>

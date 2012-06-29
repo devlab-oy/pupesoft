@@ -2,56 +2,8 @@
 
 class pupeExcel {
 
-	/**
-    * Foldername for the Workbook
-    * @var string
-    */
-    var $_foldername;
-
-	/**
-    * Shared strings
-    * @var object
-    */
-    var $_sharedStrings;
-
-	/**
-    * Sheet data, rows and columns
-    * @var object
-    */
-    var $_sheetData;
-
-	/**
-    * Filename sheet data
-    * @var string
-    */
-    var $_sheetDataFile;
-
-	/**
-    * Filename shared strings
-    * @var string
-    */
-    var $_sharedStringsFile;
-
-	/**
-    * String count
-    * @var int
-    */
-    var $_stringCount;
-
-	/**
-    * Shared strings
-    * @var array
-    */
-    var $_sharedStringsList;
-
-	/**
-    * Celldata
-    * @var array
-    */
-    var $_cellData;
-
 	function __construct() {
-		
+
 		// Tehdään Excel dataa varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_data (
 					excelrivi int(11) default null,
@@ -64,11 +16,13 @@ class pupeExcel {
 
 		// Tehdään Excel stringejä varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_sharedstrings (
-					string varchar(256) default null,
-					id int(11) not null,
+					string text default null,
+					md5hash char(32) default null,
+					id int(11) not null AUTO_INCREMENT,
 					times_used int(11) not null,
-					primary key (id),
-					unique key string_index (string))";
+					PRIMARY KEY (id),
+					KEY stringind (string(256)),
+					UNIQUE KEY md5hash (md5hash))";
 		$result = pupe_query($query);
 
 		$query = "LOCK TABLES excel_data WRITE, excel_sharedstrings WRITE";
@@ -102,11 +56,11 @@ class pupeExcel {
 		$excelsarake++;
 
 		$query = "	INSERT INTO excel_data SET
-					excelrivi = $excelrivi,
+					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
-					type = 'N',
-					value = '$number',
-					style = '$style'";
+					type 		= 'N',
+					value 		= '$number',
+					style 		= '$style'";
 		$result = pupe_query($query);
 	}
 
@@ -116,19 +70,21 @@ class pupeExcel {
 		$excelrivi++;
 		$excelsarake++;
 
-		$string = xmlentities($string);
+		if ($string == "") $string = NULL;
+		else $string = xmlentities($string);
 
 		$query = "	INSERT INTO excel_data SET
-					excelrivi = $excelrivi,
+					excelrivi 	= $excelrivi,
 					excelsarake = $excelsarake,
-					type = 'S',
-					value = '$string',
-					style = '$style'";
+					type 		= 'S',
+					value 		= '$string',
+					style 		= '$style'";
 		$result = pupe_query($query);
 
 		$query = "	INSERT INTO excel_sharedstrings SET
-					string = '$string',
-					times_used = 1
+					string 		= '$string',
+					md5hash		= md5('$string'),
+					times_used 	= 1
 					ON DUPLICATE KEY UPDATE times_used = times_used + 1";
 		$result = pupe_query($query);
 	}
@@ -141,18 +97,15 @@ class pupeExcel {
 
 		global $pupe_root_polku;
 
-		unset($excelrivi);
-
 		// Luodaaan excel-tiedosto pupen templatesta
-		$foldername = md5(uniqid(rand(),true));		
+		$foldername = md5(uniqid(rand(),true));
 		exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$foldername");
 
-		$this->_foldername		  = $foldername;
-		$this->_sheetDataFile 	  = "/tmp/".$this->_foldername."/xl/worksheets/sheet1.xml";
-		$this->_sharedStringsFile = "/tmp/".$this->_foldername."/xl/sharedStrings.xml";
+		$sheetDataFile		= "/tmp/".$foldername."/xl/worksheets/sheet1.xml";
+		$sharedStringsFile	= "/tmp/".$foldername."/xl/sharedStrings.xml";
 
-		$this->_sheetData = simplexml_load_file($this->_sheetDataFile);
-		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
+		$sheetData 	   = simplexml_load_file($sheetDataFile);
+		$sharedStrings = simplexml_load_file($sharedStringsFile);
 
 		// Päivitetään exel dataan string_id:t
 		$query = "	UPDATE excel_data
@@ -162,34 +115,46 @@ class pupeExcel {
 		$result = pupe_query($query);
 
 		// Tehdään Shared Strings XML
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM excel_sharedstrings";
 		$result = pupe_query($query);
-	
+
+		$stringCount = 0;
+		$stringUniqueCount = mysql_num_rows($result);
+
 		while ($shared_row = mysql_fetch_assoc($result)) {
-			$si = $this->_sharedStrings->addChild("si", "");
-			$si->addChild("t", $shared_row["string"]);
+			$si = $sharedStrings->addChild("si", "");
+			$si->addChild("t", utf8_encode($shared_row["string"]));
+
+			$stringCount += $shared_row["times_used"];
 		}
 
-		// unlock
+		// UNLOCK
 		$query = "UNLOCK TABLES";
 		$result = pupe_query($query);
 
 		// Tehdään Excel taulukko XML
-		$query = "	SELECT *, max(excelsarake) cells, max(excelrivi) columns
+		$query = "	SELECT *
 					FROM excel_data
 					ORDER BY excelrivi, excelsarake";
 		$result = pupe_query($query);
 
+		$rowCount = mysql_num_rows($result);
+		$maxCell  = 0;
+
+		$edellinen_excelrivi = -1;
+
 		// Kirjoitetaan itse xml:ä
 		while ($data_row = mysql_fetch_assoc($result)) {
 
-			if (!isset($excelrivi) or $excelrivi != $edellinen_excelrivi) {
+			if ($data_row["excelrivi"] != $edellinen_excelrivi) {
 				// Create the line
-				$row = $this->_sheetData->sheetData->addChild('row');
+				$row = $sheetData->sheetData->addChild('row');
 				$row->addAttribute('r', $data_row["excelrivi"]);
-				$row->addAttribute('spans', "1:".$data_row["cells"]);
+				$row->addAttribute('spans', "1:2");
 				$row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
+
+				$maxCell = 2;
 			}
 
 			// Cell coordinates
@@ -220,28 +185,25 @@ class pupeExcel {
 				$this->setStyle($cell, $data_row["style"]);
 			}
 
-			$edellinen_excelrivi = $excelrivi;
+			$edellinen_excelrivi = $data_row["excelrivi"];
 		}
 
 		// Write dimension attribute
-		$maxRowIndex = count($this->_cellData);
-		$maxCellIndex = count(array_pop($this->_cellData));
+		$maxCellcoordinates = $this->columnChar($maxCell).$rowCount;
+		$sheetData->dimension->attributes()->ref = "A1:$maxCellcoordinates";
 
-		$maxCellcoordinates = $this->columnChar($maxCellIndex).$maxRowIndex;
-		$this->_sheetData->dimension->attributes()->ref = "A1:$maxCellcoordinates";
+		// Update the count and uniqueCount attributes in sharedStrings XML
+		$sharedStrings->attributes()->count = $stringCount;
+		$sharedStrings->attributes()->uniqueCount = $stringUniqueCount;
 
-		// Update the count and uniqueCount attributes
-		$this->_sharedStrings->attributes()->count = $this->_stringCount;
-		$this->_sharedStrings->attributes()->uniqueCount = $this->_stringUniqueCount++;;
-
-		file_put_contents($this->_sheetDataFile, trim(str_replace("\n", "\r\n", $this->_sheetData->asXML())));
-		file_put_contents($this->_sharedStringsFile, trim(str_replace("\n", "\r\n", $this->_sharedStrings->asXML())));
+		file_put_contents($sheetDataFile, trim(str_replace("\n", "\r\n", $sheetData->asXML())));
+		file_put_contents($sharedStringsFile, trim(str_replace("\n", "\r\n", $sharedStrings->asXML())));
 
 		$xlsxfile = md5(uniqid(rand(),true)).".xlsx";
 
-		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *;");
+		exec("cd /tmp/{$foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *;");
 
-		#rm -rf /tmp/{$this->_foldername};
+		#rm -rf /tmp/{$foldername};
 
 		return $xlsxfile;
 

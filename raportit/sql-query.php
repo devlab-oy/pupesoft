@@ -11,7 +11,11 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	ini_set('zlib.output_compression', 0);
+
 	require("../inc/parametrit.inc");
+
+	ini_set("memory_limit", "2G");
 
 	//Ja tässä laitetaan ne takas
 	$sqlhaku = $sqlapu;
@@ -51,6 +55,8 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 
+			require('inc/ProgressBar.class.php');
+
 			include('inc/pupeExcel.inc');
 
 			$worksheet 	 = new pupeExcel();
@@ -60,7 +66,13 @@
 			for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 			$excelrivi++;
 
+			$bar = new ProgressBar();
+			$bar->initialize(mysql_num_rows($result));
+
 			while ($row = mysql_fetch_array($result)) {
+
+				$bar->increase();
+
 				for ($i=0; $i<mysql_num_fields($result); $i++) {
 					if (mysql_field_type($result,$i) == 'real') {
 						$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
@@ -74,11 +86,11 @@
 
 			$excelnimi = $worksheet->close();
 
-			echo "<table>";
+			echo "<br><br><table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
+			echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";

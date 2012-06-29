@@ -230,6 +230,74 @@ if ($kasitellaan_tiedosto) {
 
 		fclose($file);
 	}
+	elseif ($ext == "XLSX") {
+		/** XLSX XML-tiedosto **/
+		$foldername = md5(uniqid(rand(),true));
+
+		function charColumn($string) {
+
+			$string = strrev($string);
+			$luku 	= 0;
+
+			for ($r = 0; $r < strlen($string); $r++) {
+				$luku += (ord($string{$r})-64) * pow(26, $r);
+			}
+
+			return $luku-1;
+		}
+
+		// Avataan XLSX Zippi
+		exec("cp $kasiteltava_tiedoto_path /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
+
+		$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
+		$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+		$sheetData		= simplexml_load_file($workSheetFile);
+		$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+		$sharedStringsArray = array();
+
+		foreach ($sharedStrings->si as $string) {
+			$sharedStringsArray[] = utf8_decode($string->t);
+		}
+
+		foreach ($sheetData->sheetData->row as $row) {
+
+			$rowIndex = ($row->attributes()->r)-1;
+
+			foreach ($row->c as $cell) {
+
+				if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+					$value = $sharedStringsArray[(int) $cell->v];
+				}
+				else {
+					$value = $cell->v;
+				}
+
+				$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+				$excelrivit[$rowIndex][$colIndex] = trim($value);
+				$colIndex++;
+			}
+		}
+
+		// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
+		foreach ($excelrivit as $rowIndex => $row) {
+			$edindex = 0;
+
+			foreach ($row as $colIndex => $column) {
+
+				if ($colIndex > 0 and $colIndex > $edindex+1) {
+					for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+						$excelrivit[$rowIndex][$inj] = "";
+					}
+				}
+
+				$edindex = $colIndex;
+			}
+		}
+
+	}
 	else {
 		/** PHPExcel kirjasto **/
 		require_once "PHPExcel/PHPExcel/IOFactory.php";

@@ -17,16 +17,14 @@ class pupeExcel {
 		// Tehd‰‰n Excel stringej‰ varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_sharedstrings (
 					string text default null,
-					md5hash char(32) default null,
 					id int(11) not null AUTO_INCREMENT,
 					times_used int(11) not null,
 					PRIMARY KEY (id),
-					KEY stringind (string(256)),
-					UNIQUE KEY md5hash (md5hash))";
+					UNIQUE KEY stringind (string(256)))";
 		$result = pupe_query($query);
 
-		$query = "LOCK TABLES excel_data WRITE, excel_sharedstrings WRITE";
-		$result = pupe_query($query);
+		#$query = "LOCK TABLES excel_data WRITE, excel_sharedstrings WRITE";
+		#$result = pupe_query($query);
 	}
 
 	function columnChar($n) {
@@ -83,7 +81,6 @@ class pupeExcel {
 
 		$query = "	INSERT INTO excel_sharedstrings SET
 					string 		= '$string',
-					md5hash		= md5('$string'),
 					times_used 	= 1
 					ON DUPLICATE KEY UPDATE times_used = times_used + 1";
 		$result = pupe_query($query);
@@ -110,7 +107,7 @@ class pupeExcel {
 		// P‰ivitet‰‰n exel dataan string_id:t
 		$query = "	UPDATE excel_data
 					JOIN excel_sharedstrings ON (excel_sharedstrings.string = excel_data.value)
-					SET excel_data.string_id = excel_sharedstrings.id
+					SET excel_data.string_id = (excel_sharedstrings.id-1)
 					WHERE excel_data.type = 'S'";
 		$result = pupe_query($query);
 
@@ -130,8 +127,8 @@ class pupeExcel {
 		}
 
 		// UNLOCK
-		$query = "UNLOCK TABLES";
-		$result = pupe_query($query);
+		#$query = "UNLOCK TABLES";
+		#$result = pupe_query($query);
 
 		// Tehd‰‰n Excel taulukko XML
 		$query = "	SELECT *

@@ -10,13 +10,13 @@ class pupeExcel {
 
 	/**
     * Shared strings
-    * @var string
+    * @var object
     */
     var $_sharedStrings;
 
 	/**
     * Sheet data, rows and columns
-    * @var string
+    * @var object
     */
     var $_sheetData;
 
@@ -33,29 +33,22 @@ class pupeExcel {
     var $_sharedStringsFile;
 
 	/**
-    * Last row
-    * @var array
-    */
-    var $_maxRow;
-
-	/**
-    * Rightmost cell per row
-    * @var array
-    */
-    var $_rowCellMaxIndex;
-
-	/**
     * String count
-    * @var array
+    * @var int
     */
     var $_stringCount;
 
 	/**
-    * Unique string count
+    * Shared strings
     * @var array
     */
-    var $_stringUniqueCount;
+    var $_sharedStringsList;
 
+	/**
+    * Celldata
+    * @var array
+    */
+    var $_cellData;
 
 	function __construct() {
 		global $pupe_root_polku;
@@ -70,10 +63,6 @@ class pupeExcel {
 		$this->_sharedStringsFile = "/tmp/".$this->_foldername."/xl/sharedStrings.xml";
 
 		$this->_sheetData = simplexml_load_file($this->_sheetDataFile);
-
-		$namespaces = $this->_sheetData->getDocNamespaces();
-		$this->_sheetData->registerXPathNamespace('__empty_ns', $namespaces['']);
-
 		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
 	}
 
@@ -85,75 +74,6 @@ class pupeExcel {
 		}
 
 		return $r;
-	}
-
-	function returnRow($excelrivi) {
-		// Create the line if it does not exist yet
-		$row = array_shift($this->_sheetData->xpath('/__empty_ns:worksheet/__empty_ns:sheetData/__empty_ns:row[@r="'.$excelrivi.'"]'));
-
-		if ($row === NULL) {
-			$row = $this->_sheetData->sheetData->addChild('row');
-			$row->addAttribute('r', $excelrivi);
-			$row->addAttribute('spans', "");
-			$row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-
-			$this->_rowCellMaxIndex[$excelrivi] = 0;
-
-			if ($excelrivi > $this->_maxRow) {
-				$this->_maxRow = $excelrivi;
-			}
-		}
-
-		return $row;
-	}
-
-	function returnCell($row, $excelrivi, $excelsarake) {
-
-		// Cell coordinates
-		$cellcoordinates = $this->columnChar($excelsarake).$excelrivi;
-
-		// Create the line if it does not exist yet
-		$cell = array_shift($row->xpath('c[@r="'.$cellcoordinates.'"]'));
-
-		if ($cell === NULL) {
-			$cell = $row->addChild("c");
-			$cell->addAttribute('r', $cellcoordinates);
-			$cell->addChild("v", "");
-
-			if ($excelsarake > $this->_rowCellMaxIndex[$excelrivi]) {
-				$row->attributes()->spans = "1:$excelsarake";
-				$this->_rowCellMaxIndex[$excelrivi] = $excelsarake;
-			}
-		}
-
-		return $cell;
-	}
-
-	function returnSharedString($string) {
-		// Check if this string is already in the shared strings xml
-		$index = 0;
-
-		foreach ($this->_sharedStrings->si as $sharedstring) {
-			// Return shared string index if the string is already in the xml
-			if ($string == $sharedstring->t) {
-				$this->_stringCount++;
-				return $index;
-			}
-
-			$index++;
-		}
-
-		// if shared string is not in the xml we add it and return its index
-		$si = $this->_sharedStrings->addChild("si", "");
-
-		if ($string == "") $string = NULL;
-
-		$si->addChild("t", utf8_encode($string));
-
-		$this->_stringCount++;
-		$this->_stringUniqueCount++;
-
-		return $index;
 	}
 
 	function setStyle($cell, $style) {
@@ -172,42 +92,22 @@ class pupeExcel {
 		$excelrivi++;
 		$excelsarake++;
 
-		// Row
-		$row = $this->returnRow($excelrivi);
-
-		// Cell
-		$cell = $this->returnCell($row, $excelrivi, $excelsarake);
-
-		// Add style attribute
-		$this->setStyle($cell, $style);
-
-		// Set cell value
-		$cell->v = (float) $number;
+		$this->_cellData[$excelrivi][$excelsarake] = array("NUMBER", $number, $style);
 	}
 
 	function writeString($excelrivi, $excelsarake, $string, $style = array()) {
-
-		// Fiilataan sharedStrings hommat kuntoon
-		$stringindex = $this->returnSharedString($string);
 
 		// Indeksit juoksee tässä maailmassa ykkösestä
 		$excelrivi++;
 		$excelsarake++;
 
-		// Row
-		$row = $this->returnRow($excelrivi);
+		$string = xmlentities(utf8_encode($string));
 
-		// Cell
-		$cell = $this->returnCell($row, $excelrivi, $excelsarake);
+		$this->_cellData[$excelrivi][$excelsarake] = array("STRING", $string, $style);
 
-		// Add style attribute
-		$this->setStyle($cell, $style);
-
-		// Add string attribute
-		$cell->addAttribute('t', 's');
-
-		// Set cell value
-		$cell->v = $stringindex;
+		// Shared strings array
+		$this->sharedStringsList[md5($string)] = $string;
+		$this->_stringCount++;
 	}
 
 	function write($excelrivi, $excelsarake, $string, $style = array()) {
@@ -216,9 +116,64 @@ class pupeExcel {
 
 	function close() {
 
-		// Write dimension
-		$maxCellcoordinates = $this->columnChar($this->_rowCellMaxIndex[$this->_maxRow]).$this->_maxRow;
+		$sharedStringsKeys = array();
+		$keyIndex = 0;
 
+		foreach ($this->sharedStringsList as $sharedstringkey => $sharedstring) {
+			// if shared string is not in the xml we add it and return its index
+			$si = $this->_sharedStrings->addChild("si", "");
+			if ($sharedstring == "") $sharedstring = NULL;
+			$si->addChild("t", $sharedstring);
+
+			$sharedStringsKeys[$sharedstringkey] = $keyIndex;
+			$keyIndex++;
+		}
+
+		// Kirjoitetaan itse xml:ä
+		foreach ($this->_cellData as $rowindex => $cells) {
+
+			// Create the line
+			$row = $this->_sheetData->sheetData->addChild('row');
+			$row->addAttribute('r', $rowindex);
+			$row->addAttribute('spans', "1:".count($cells));
+			$row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
+
+			foreach ($cells as $cellindex => $celldata) {
+
+				// Cell coordinates
+				$cellcoordinates = $this->columnChar($cellindex).$rowindex;
+
+				// Create the cell
+				$cell = $row->addChild("c");
+				$cell->addAttribute('r', $cellcoordinates);
+
+				if ($celldata[0] == "STRING") {
+					// Set cell value
+					$cell->addChild("v", $sharedStringsKeys[md5($celldata[1])]);
+
+					// Add style attribute
+					$this->setStyle($cell, $celldata[2]);
+
+					// Add string attribute
+					$cell->addAttribute('t', 's');
+
+				}
+				if ($celldata[0] == "NUMBER") {
+
+					// Set cell value
+					$cell->addChild("v", (float) $celldata[1]);
+
+					// Add style attribute
+					$this->setStyle($cell, $celldata[2]);
+				}
+			}
+		}
+
+		// Write dimension attribute
+		$maxRowIndex = count($this->_cellData);
+		$maxCellIndex = count(array_pop($this->_cellData));
+
+		$maxCellcoordinates = $this->columnChar($maxCellIndex).$maxRowIndex;
 		$this->_sheetData->dimension->attributes()->ref = "A1:$maxCellcoordinates";
 
 		// Update the count and uniqueCount attributes
@@ -230,8 +185,11 @@ class pupeExcel {
 
 		$xlsxfile = md5(uniqid(rand(),true)).".xlsx";
 
-		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$this->_foldername};");
-		
+		exec("cd /tmp/{$this->_foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *;");
+
+		#rm -rf /tmp/{$this->_foldername};
+
 		return $xlsxfile;
+
 	}
 }

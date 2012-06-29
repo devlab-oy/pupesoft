@@ -12,6 +12,10 @@ $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $selected_row = (int) $selected_row;
 
+$error = array(
+	'kerayspaikka' => ''
+);
+
 if (isset($submit) and trim($submit) != '') {
 
 	$data = array(
@@ -41,15 +45,20 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 
 if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
-	$kaikki_ok = tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+	$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
 
-	if ($kaikki_ok) {
+	if ($hyllyalue == '' and $hyllynro == '' and $hyllyvali == '' and $hyllytaso == '') {
+		$error['kerayspaikka'] = t("Hyllypaikka ei saa olla tyhjä", $browkieli).'.';
+	}
+	elseif ($kaikki_ok) {
 
 		$oletus = $oletuspaikka_chk != '' ? 'X' : '';
 
 		lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
 	}
-
+	else {
+		$error['kerayspaikka'] = t("Varaston keräyspaikkaa ei ole perustettu", $browkieli).'.';
+	}
 }
 
 echo "
@@ -100,7 +109,7 @@ echo "
 					</tr>
 					<tr><td>&nbsp;</td></tr>
 				</table>
-				<span class='error'>{$error['rivi']}</span>
+				<span class='error'>{$error['kerayspaikka']}</span>
 				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name='selected_row' value='{$selected_row}' />

@@ -13,7 +13,7 @@ $liitostunnus = (int) $liitostunnus;
 $selected_row = (int) $selected_row;
 
 $error = array(
-	'rivi' => ''
+	'vahvista' => ''
 );
 
 if (isset($submit) and trim($submit) != '') {
@@ -86,7 +86,7 @@ echo "
 					</tr>
 					<tr><td>&nbsp;</td></tr>
 				</table>
-				<span class='error'>{$error['rivi']}</span>
+				<span class='error'>{$error['vahvista']}</span>
 				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name='selected_row' value='{$selected_row}' />

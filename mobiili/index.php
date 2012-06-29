@@ -20,25 +20,25 @@ echo "<body>";
 echo "<h1>",t("P‰‰valikko", $browkieli),"</h1>";
 
 if (tarkista_oikeus("mobiili/siirto.php")) {
-	echo "<button value=''>Siirto</button>";
+	echo "<button value=''>",t("Siirto", $browkieli),"</button>";
 }
 
 if (tarkista_oikeus("mobiili/tulouta.php")) {
 	echo "<form name='tulouta' target='_top' action='tulouta.php' method='post'>";
-	echo "<input type='submit' value='Tulouta' />";
+	echo "<input type='submit' value='",t("Tulouta", $browkieli),"' />";
 	echo "</form>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
-	echo "<button value=''>Inventointi</button>";
+	echo "<button value=''>",t("Inventointi", $browkieli),"</button>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {
-	echo "<button value=''>Tuki</button>";
+	echo "<button value=''>",t("Tuki", $browkieli),"</button>";
 }
 
 echo "<form method='post' action='{$palvelin2}logout.php?location={$palvelin2}mobiili'>";
-echo "<input type='submit' value='Lopeta' />";
+echo "<input type='submit' value='",t("Lopeta", $browkieli),"' />";
 echo "</form>";
 echo "</body>";
 

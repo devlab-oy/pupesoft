@@ -131,8 +131,8 @@ echo "
 						<form name='viivakoodiformi' method='post' action=''>
 							<table>
 								<tr>
-									<td colspan='5'>",t("Viivakoodi", $browkieli),"&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
-										<button name='submit' value='submit' onclick='submit();'>OK</button>
+									<td colspan='5'>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
+										<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli),"</button>
 									</td>
 								</tr>
 								<tr>
@@ -197,8 +197,8 @@ echo "						<tr>
 							</tr>
 							<tr>
 								<td colspan='5' class='menu' nowrap>
-									<button name='submit' value='submit' onclick='submit();'>OK</button>
-									<button name='submit' value='cancel' onclick='submit();'>Lopeta</button>
+									<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 								</td>
 							</tr>
 						</table>
@@ -211,5 +211,6 @@ echo "						<tr>
 
 echo "		</table>
 			<input type='hidden' name='selected_row' id='selected_row' value='' />
-	</body>
-</html>";
+	</body>";
+
+require('inc/footer.inc');

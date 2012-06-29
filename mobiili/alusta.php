@@ -49,7 +49,7 @@ echo "
 	<style type='text/css'>
 	<!--
 		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
+		.error			{color: #ff6666;}
 	-->
 	</style>
 
@@ -72,8 +72,8 @@ echo "
 							</tr>
 							<tr>
 								<td>
-									<button name='submit' value='submit' onclick='submit();'>OK</button>
-									<button name='submit' value='cancel' onclick='submit();'>Lopeta</button>
+									<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli)," / ",t("Valitse", $browkieli),"</button>
+									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 								</td>
 							</tr>
 						</table>
@@ -106,6 +106,6 @@ if (isset($return) and count($return) > 0) {
 	echo "<input type='hidden' name='liitostunnus' value='{$return[0]['liitostunnus']}' />";
 }
 
-echo "		</table>
-		</form>
-	</body>";
+echo "</table></form></body>";
+
+require('inc/footer.inc');

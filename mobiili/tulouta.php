@@ -49,27 +49,30 @@ echo "
 							<tr>
 								<td>
 									<select name='tulotyyppi' size='4'>
-										<option value='suuntalava'>ASN / Suuntalava</option>
+										<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
 									</select>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<button value='wat'>Suuntalavat</button>
+									<button value='wat'>",t("Suuntalavat", $browkieli),"</button>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<button name='submit' value='submit' onclick='submit();'>OK</button>
-									<button name='submit' value='cancel' onclick='submit();'>Takaisin</button>
+									<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 								</td>
 							</tr>
 						</table>
 					</td>
 				</tr>
+				<tr><td>&nbsp;</td></tr>
 				<tr>
 					<td>{$error['tulotyyppi']}</td>
 				</tr>
 			</table>
 		</form>
 	</body>";
+
+require('inc/footer.inc');

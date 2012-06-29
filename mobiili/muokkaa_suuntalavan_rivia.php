@@ -29,14 +29,6 @@ if (isset($submit) and trim($submit) != '') {
 
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
 $row = mysql_fetch_assoc($res);
-	// $tuote['tilriv_tunnus'] = $row['tunnus'];
-	// $tuote['tuoteno'] = $row['tuoteno'];
-	// $tuote['toim_tuoteno'] = $row['toim_tuoteno'];
-	// $tuote['maara'] = $row['varattu'];
-	// $tuote['yks'] = $row['yksikko'];
-	// $tuote['osoite'] = "{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}";
-	// $tuote['tuotekerroin'] = $row['tuotekerroin'] != '' ? (float) $row['tuotekerroin'] : 1;
-
 
 echo "
 	<style type='text/css'>
@@ -51,7 +43,6 @@ echo "
 			<td><h1>",t("Muokkaa suuntalavan riviä", $browkieli),"</h1>
 				<form name='muokkaaformi' method='post' action=''>
 				<table>
-
 					<tr>
 						<td>",t("Suuntalava", $browkieli),"</td>
 						<td colspan='2'>{$alusta_tunnus}</td>

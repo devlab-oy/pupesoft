@@ -55,7 +55,7 @@
 			$virhetxt .= t("Alkuperämaa puuttuu tuotteelta")." <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrtuorow[tuoteno]</a>!<br>";
 			$virhe++;
 		}
-		elseif ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $intrtuorow["lahetysmaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
+		elseif ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
 			$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 			$virhe++;
 		}

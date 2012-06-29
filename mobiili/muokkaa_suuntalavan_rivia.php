@@ -37,13 +37,21 @@ $row = mysql_fetch_assoc($res);
 if (isset($submit) and trim($submit) == 'submit') {
 
 	if (!isset($maara)) {
-		$error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'!';
+		$error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'.';
 	}
 	elseif (!is_numeric($maara)) {
-		$error['rivi'] = t("M‰‰r‰ pit‰‰ olla numero", $browkieli).'!';
+		$error['rivi'] = t("M‰‰r‰ pit‰‰ olla numero", $browkieli).'.';
 	}
 	elseif ($maara < 1 or $maara >= $row['varattu']) {
-		$error['rivi'] = t("Sallitut m‰‰r‰t ovat", $browkieli).' 1 - '.($row['varattu'] - 1);
+		if ($row['varattu'] == 1) {
+			$error['rivi'] = t("Virheellinen m‰‰r‰", $browkieli).'.';
+		}
+		else {
+			$error['rivi'] = t("Sallitut m‰‰r‰t ovat", $browkieli).' 1 - '.($row['varattu'] - 1).'.';
+		}
+	}
+	else {
+		$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
 	}
 }
 

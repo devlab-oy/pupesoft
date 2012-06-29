@@ -410,54 +410,7 @@
 		$otunnus = $_POST['otunnus'];
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
 
-		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
-					FROM tilausrivi
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.tunnus = '{$tunnus}'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 0) return false;
-
-		$rivi = mysql_fetch_array($result);
-
-		mysql_data_seek($result, 0);
-
-		$query = "INSERT INTO tilausrivi SET ";
-
-		for ($i = 0; $i < mysql_num_fields($result) - 1; $i++) {
-			switch (mysql_field_name($result,$i)) {
-				case 'varattu':
-					$query .= " varattu = '{$uuden_rivin_kpl}',";
-					break;
-				case 'netto':
-
-					if ($yhtiorow['suuntalavat'] == 'S') {
-						$query .= " netto = 'X',";
-					}
-					else {
-						$query .= " netto = '".$rivi[mysql_field_name($result, $i)]."',";
-					}
-
-					break;
-				case 'laatija':
-					$query .= " laatija = '{$kukarow['kuka']}',";
-					break;
-				case 'laadittu':
-					$query .= " laadittu = now(),";
-					break;
-				case 'tunnus':
-					break;
-				default:
-					$query .= mysql_field_name($result, $i)." = '".$rivi[mysql_field_name($result, $i)]."',";
-			}
-		}
-
-		$query = substr($query, 0, -1);
-		$result = pupe_query($query);
-
-		$uuden_rivin_id = mysql_insert_id();
+		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, true);
 
 		$hinnat = laske_hinta($laskurow, $uuden_rivin_id);
 

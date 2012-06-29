@@ -51,19 +51,28 @@ class pupeExcel {
     var $_cellData;
 
 	function __construct() {
-		global $pupe_root_polku;
+		
+		// Tehdään Excel dataa varten temporary tietokantataulu
+		$query = "	CREATE temporary table excel_data (
+					excelrivi int(11) default null,
+					excelsarake int(11) default null,
+					type char(1) default null,
+					value varchar(256),
+					string_id int(11) default null,
+					style varchar(4) default null)";
+		$result = pupe_query($query);
 
-		$foldername = md5(uniqid(rand(),true));
+		// Tehdään Excel stringejä varten temporary tietokantataulu
+		$query = "	CREATE temporary table excel_sharedstrings (
+					string varchar(256) default null,
+					id int(11) not null,
+					times_used int(11) not null,
+					primary key (id),
+					unique key string_index (string))";
+		$result = pupe_query($query);
 
-		// Luodaaan excel-tiedosto pupen templatesta
-		exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$foldername");
-
-		$this->_foldername		  = $foldername;
-		$this->_sheetDataFile 	  = "/tmp/".$this->_foldername."/xl/worksheets/sheet1.xml";
-		$this->_sharedStringsFile = "/tmp/".$this->_foldername."/xl/sharedStrings.xml";
-
-		$this->_sheetData = simplexml_load_file($this->_sheetDataFile);
-		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
+		$query = "LOCK TABLES excel_data WRITE, excel_sharedstrings WRITE";
+		$result = pupe_query($query);
 	}
 
 	function columnChar($n) {
@@ -92,7 +101,13 @@ class pupeExcel {
 		$excelrivi++;
 		$excelsarake++;
 
-		$this->_cellData[$excelrivi][$excelsarake] = array("NUMBER", $number, $style);
+		$query = "	INSERT INTO excel_data SET
+					excelrivi = $excelrivi,
+					excelsarake = $excelsarake,
+					type = 'N',
+					value = '$number',
+					style = '$style'";
+		$result = pupe_query($query);
 	}
 
 	function writeString($excelrivi, $excelsarake, $string, $style = array()) {
@@ -101,13 +116,21 @@ class pupeExcel {
 		$excelrivi++;
 		$excelsarake++;
 
-		$string = xmlentities(utf8_encode($string));
+		$string = xmlentities($string);
 
-		$this->_cellData[$excelrivi][$excelsarake] = array("STRING", $string, $style);
+		$query = "	INSERT INTO excel_data SET
+					excelrivi = $excelrivi,
+					excelsarake = $excelsarake,
+					type = 'S',
+					value = '$string',
+					style = '$style'";
+		$result = pupe_query($query);
 
-		// Shared strings array
-		$this->sharedStringsList[md5($string)] = $string;
-		$this->_stringCount++;
+		$query = "	INSERT INTO excel_sharedstrings SET
+					string = '$string',
+					times_used = 1
+					ON DUPLICATE KEY UPDATE times_used = times_used + 1";
+		$result = pupe_query($query);
 	}
 
 	function write($excelrivi, $excelsarake, $string, $style = array()) {
@@ -116,57 +139,88 @@ class pupeExcel {
 
 	function close() {
 
-		$sharedStringsKeys = array();
-		$keyIndex = 0;
+		global $pupe_root_polku;
 
-		foreach ($this->sharedStringsList as $sharedstringkey => $sharedstring) {
-			// if shared string is not in the xml we add it and return its index
+		unset($excelrivi);
+
+		// Luodaaan excel-tiedosto pupen templatesta
+		$foldername = md5(uniqid(rand(),true));		
+		exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$foldername");
+
+		$this->_foldername		  = $foldername;
+		$this->_sheetDataFile 	  = "/tmp/".$this->_foldername."/xl/worksheets/sheet1.xml";
+		$this->_sharedStringsFile = "/tmp/".$this->_foldername."/xl/sharedStrings.xml";
+
+		$this->_sheetData = simplexml_load_file($this->_sheetDataFile);
+		$this->_sharedStrings = simplexml_load_file($this->_sharedStringsFile);
+
+		// Päivitetään exel dataan string_id:t
+		$query = "	UPDATE excel_data
+					JOIN excel_sharedstrings ON (excel_sharedstrings.string = excel_data.value)
+					SET excel_data.string_id = excel_sharedstrings.id
+					WHERE excel_data.type = 'S'";
+		$result = pupe_query($query);
+
+		// Tehdään Shared Strings XML
+		$query = "	SELECT * 
+					FROM excel_sharedstrings";
+		$result = pupe_query($query);
+	
+		while ($shared_row = mysql_fetch_assoc($result)) {
 			$si = $this->_sharedStrings->addChild("si", "");
-			if ($sharedstring == "") $sharedstring = NULL;
-			$si->addChild("t", $sharedstring);
-
-			$sharedStringsKeys[$sharedstringkey] = $keyIndex;
-			$keyIndex++;
+			$si->addChild("t", $shared_row["string"]);
 		}
 
+		// unlock
+		$query = "UNLOCK TABLES";
+		$result = pupe_query($query);
+
+		// Tehdään Excel taulukko XML
+		$query = "	SELECT *, max(excelsarake) cells, max(excelrivi) columns
+					FROM excel_data
+					ORDER BY excelrivi, excelsarake";
+		$result = pupe_query($query);
+
 		// Kirjoitetaan itse xml:ä
-		foreach ($this->_cellData as $rowindex => $cells) {
+		while ($data_row = mysql_fetch_assoc($result)) {
 
-			// Create the line
-			$row = $this->_sheetData->sheetData->addChild('row');
-			$row->addAttribute('r', $rowindex);
-			$row->addAttribute('spans', "1:".count($cells));
-			$row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-
-			foreach ($cells as $cellindex => $celldata) {
-
-				// Cell coordinates
-				$cellcoordinates = $this->columnChar($cellindex).$rowindex;
-
-				// Create the cell
-				$cell = $row->addChild("c");
-				$cell->addAttribute('r', $cellcoordinates);
-
-				if ($celldata[0] == "STRING") {
-					// Set cell value
-					$cell->addChild("v", $sharedStringsKeys[md5($celldata[1])]);
-
-					// Add style attribute
-					$this->setStyle($cell, $celldata[2]);
-
-					// Add string attribute
-					$cell->addAttribute('t', 's');
-
-				}
-				if ($celldata[0] == "NUMBER") {
-
-					// Set cell value
-					$cell->addChild("v", (float) $celldata[1]);
-
-					// Add style attribute
-					$this->setStyle($cell, $celldata[2]);
-				}
+			if (!isset($excelrivi) or $excelrivi != $edellinen_excelrivi) {
+				// Create the line
+				$row = $this->_sheetData->sheetData->addChild('row');
+				$row->addAttribute('r', $data_row["excelrivi"]);
+				$row->addAttribute('spans', "1:".$data_row["cells"]);
+				$row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
 			}
+
+			// Cell coordinates
+			$cellcoordinates = $this->columnChar($data_row["excelsarake"]).$data_row["excelrivi"];
+
+			// Create the cell
+			$cell = $row->addChild("c");
+			$cell->addAttribute('r', $cellcoordinates);
+
+			// String
+			if ($data_row["type"] == "S") {
+				// Set cell value
+				$cell->addChild("v", $data_row["string_id"]);
+
+				// Add style attribute
+				$this->setStyle($cell, $data_row["style"]);
+
+				// Add string attribute
+				$cell->addAttribute('t', 's');
+			}
+
+			// Number
+			if ($data_row["type"] == "N") {
+				// Set cell value
+				$cell->addChild("v", (float) $data_row["value"]);
+
+				// Add style attribute
+				$this->setStyle($cell, $data_row["style"]);
+			}
+
+			$edellinen_excelrivi = $excelrivi;
 		}
 
 		// Write dimension attribute

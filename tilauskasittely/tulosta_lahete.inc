@@ -1094,6 +1094,10 @@ if (!function_exists('kollirivi_lahete')) {
 
 			$page[$sivu] = $thispage;
 		}
+		
+		// vrt. ["1","2","3"] = ["a", "b", "c"]
+		// list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli);
+		
 		/*
 		$pdf = $params["pdf"];
 		$thispage = $params["thispage"];
@@ -1103,10 +1107,10 @@ if (!function_exists('kollirivi_lahete')) {
 		$x = 20;
 		$y = $kala;
 		
-		// Kysely kollin kokonaispainon selvittämiseksi
+		// Kyssely kollin kokonaispainon selvittämiseksi
 		// $tuoteno = $row['tuoteno'];
+		$tilausrivi_tunnus = $row['tilausrivi.tunnus'];
 		$sscc = $row['sscc_ulkoinen'];
-		
 		/*
 		JOIN kerayserat ON ( kerayserat.tilausrivi = tilausrivi.tunnus
 						AND kerayserat.yhtio = tilausrivi.yhtio)
@@ -1123,18 +1127,27 @@ if (!function_exists('kollirivi_lahete')) {
 										AND pakkaus.yhtio = kerayserat.yhtio)
 					JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
 										AND tuote.yhtio = tilausrivi.yhtio)
-                    WHERE kerayserat.sscc_ulkoinen	= '" . $sscc . "'";
+                    WHERE (kerayserat.sscc_ulkoinen	= '$sscc'
+						)/*AND tilausrivi.tunnus = '$tilausrivi_tunnus')*/";
 
 		$paino_result = pupe_query($query);
 
-		$paino = 0;
+		$paino = "";
+		//$paino = 0;
+		$paino = array();
+
 		while ($qrow = mysql_fetch_assoc($paino_result)) {
-			$paino += (float) $qrow["tuotemassa"] * (float) $qrow["kpl"];
+			if(!isset($pk_paino)) {
+				$pk_paino = (float) $qrow["pk_paino"];
+				//$paino += $pk_paino;
+			}
+			//$paino += (float) $qrow["tuotemassa"] * (float) $qrow["kpl"];
+			$paino[] = $qrow["tuotemassa"] . "\n";
 			//$paino += (float) $qrow["kpl"];
 			//$paino = gettype($paino);
 		}
 
-		$paino = round($paino, 1);
+		//$paino = round($paino, 1);
 
 		//$paino = mysql_fetch_assoc($paino_result);
 		//$paino = $paino['kollimassa'];
@@ -1142,7 +1155,7 @@ if (!function_exists('kollirivi_lahete')) {
 		//$kollimassa = round($kollimassa, 2);
 
 		$pdf->draw_text($x, $y, "Kolli: ".$row['pakkaus']." - ".$row['sscc_ulkoinen'].
-			"\t\tVAK-tiedot: Bruttopaino ". $paino ."kg sisältäen:", $thispage, $font);
+			"\t\tVAK-tiedot: Bruttopaino ". count($paino) ."kg(debug: kpl) sisältäen:", $thispage, $font);
 
 		$kala -= $rivinkorkeus;
 		$pdf->draw_line($x, $kala, $thispage, $rectparam);

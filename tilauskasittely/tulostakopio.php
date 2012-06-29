@@ -649,9 +649,8 @@
 		}
 
 		if ($toim == "KOONTILAHETE") {
-                    
-                    //myyntitilaus. Tulostetaan lähete.
-                    
+                   
+            //myyntitilaus. Tulostetaan lähete.
 			$joinlisa  = "JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
 							AND tilausrivi.yhtio = lasku.yhtio)
 						JOIN kerayserat ON (kerayserat.otunnus = tilausrivi.otunnus

@@ -10,24 +10,27 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (isset($submit) and trim($submit) != '') {
 
-	if ($submit == 'edit' and isset($selected_row) and trim($selected_row) != '' and isset($alusta_tunnus) and trim($alusta_tunnus) != '' and isset($liitostunnus) and trim($liitostunnus) != '') {
+	$data = array(
+		'selected_row' => (int) $selected_row,
+		'alusta_tunnus' => (int) $alusta_tunnus,
+		'liitostunnus' => (int) $liitostunnus
+	);
 
-		$data = array(
-			'selected_row' => (int) $selected_row,
-			'alusta_tunnus' => (int) $alusta_tunnus,
-			'liitostunnus' => (int) $liitostunnus
-		);
+	$url = http_build_query($data);
 
-		$url = http_build_query($data);
-
+	if ($submit == 'edit') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
 		exit;
 	}
-
-	if ($submit == 'cancel') {
+	elseif ($submit == 'cancel') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
 		exit;
 	}
+	elseif ($submit == 'submit') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
+		exit;
+	}
+
 }
 
 $sort_by_direction_tuoteno 		= (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
@@ -145,7 +148,7 @@ echo "
 					<table>
 						<tr>
 							<td colspan='5'>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
-								<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli),"</button>
+								<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi", $browkieli),"</button>
 							</td>
 						</tr>
 						<tr>

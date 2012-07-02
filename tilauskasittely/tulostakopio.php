@@ -1886,7 +1886,7 @@
 					'koontilahete'				=> $koontilahete
 					);
 
-				pupesoft_tulosta_lahete($params);
+				pupesoft_tulosta_koontilahete($params);
 
 				$tee = '';
 			}

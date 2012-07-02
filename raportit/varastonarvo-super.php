@@ -705,7 +705,7 @@
 					$vararvores = pupe_query($query);
 
 					while ($vararvorow = mysql_fetch_assoc($vararvores)) {
-						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"])*$vararvorow["era_kpl"];
+						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59")*$vararvorow["era_kpl"];
 						$bruttovaraston_arvo = $varaston_arvo;
 						$kpl += $vararvorow["era_kpl"]; // saldo
 					}
@@ -729,7 +729,7 @@
 
 					while ($vararvorow = mysql_fetch_assoc($vararvores)) {
 						//	Jos meillä on eräseurattu in-out arvoinen tuote, meidän pitää
-						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"]);
+						$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59");
 						$bruttovaraston_arvo = $varaston_arvo;
 						$kpl++; // saldo
 					}
@@ -1126,7 +1126,7 @@
 
 						while ($vararvorow = mysql_fetch_assoc($vararvores)) {
 
-							$sarjanumeronarvo = sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"]);
+							$sarjanumeronarvo = sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59");
 
 							$worksheet->writeString($excelrivi, $tuotesarake, $vararvorow["sarjanumero"]);
 							$worksheet->writeString($excelrivi, $tuotesarake+1, $vararvorow["nimitys"]);

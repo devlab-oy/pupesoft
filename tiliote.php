@@ -90,7 +90,7 @@
 
 		$tietue = fgets($fd);
 
-		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml") {
+		if (substr($tietue, 0, 9) == "<SOAP-ENV" or substr($tietue, 0, 5) == "<?xml" or substr($tietue, 0, 9) == "<Invoice>") {
 			// Finvoice verkkolasku
 			fclose($fd);
 

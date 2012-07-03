@@ -94,13 +94,13 @@
 			echo "</form>";
 		}
 
-			echo "<br><br>";
+		echo "<br><br>";
 
-			if ($kukarow["extranet"] != "") {
-				echo $yhtiorow["web_seuranta"];
-			}
+		if ($kukarow["extranet"] != "") {
+			echo $yhtiorow["web_seuranta"];
+		}
 
-		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
+		if ($kukarow['kuka'] == "admin" and isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 
 			echo "<font style='font-family: monospace; font-size: 9pt; white-space: nowrap;'>";
 

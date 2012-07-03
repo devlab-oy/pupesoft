@@ -16803,8 +16803,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 			$params_lahete["row"] = $row;
 
-			// Mikäli kolli on merkitty ja se vaihtuu, tulostetaan kollirivi
-			if ( ($sscc == "" or $row['sscc_ulkoinen'] ) and $row['sscc_ulkoinen'] != "0" ) {
+			// Mikäli kolli vaihtuu, tulostetaan kollirivi
+			if ( $params['koontilahete'] && ($sscc == "" || $sscc != $row['sscc_ulkoinen'] ) ) {
 				$params_lahete = kollirivi_lahete($params_lahete);
 			}
 			$params_lahete = rivi_lahete($params_lahete);

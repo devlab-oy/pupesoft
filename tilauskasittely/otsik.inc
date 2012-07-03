@@ -2794,13 +2794,17 @@
 		else {
 			// Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta
 			$query = "	UPDATE tilausrivi
-						SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
-						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and kerayspvm = '$vkerayspvm'";
+						SET kerayspvm = '{$kervv}-{$kerkk}-{$kerpp}'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$kukarow[kesken]'
+						and kerayspvm = '$vkerayspvm'";
 			$result = pupe_query($query);
 
 			$query = "	UPDATE tilausrivi
-						SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
-						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and toimaika = '$vtoimaika'";
+						SET toimaika = '{$toimvv}-{$toimkk}-{$toimpp}'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$kukarow[kesken]'
+						and toimaika = '$vtoimaika'";
 			$result = pupe_query($query);
 
 			$query = "UPDATE ";

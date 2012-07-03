@@ -16888,11 +16888,6 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$params_lahete = kuittaus_lahete($params_lahete);
 		}
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE and ($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
-			$komento = array($komento);
-			$komento[] = "asiakasemail".$laskurow['email'];
-		}
-
 		if (is_array($komento) and isset($komento["Lähete"])) $params_lahete["komento"] = $komento["Lähete"];
 
 		//tulostetaan sivu

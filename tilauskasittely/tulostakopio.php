@@ -630,7 +630,7 @@
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+		if ($toim == "LAHETE" or $toimi == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -648,8 +648,8 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 
+		/*
 		if ($toim == "KOONTILAHETE") {
-                   
             //myyntitilaus. Tulostetaan lähete.
 			$joinlisa  = "JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
 							AND tilausrivi.yhtio = lasku.yhtio)
@@ -675,6 +675,7 @@
 			# if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " USE INDEX (yhtio_tila_luontiaika) ";
 		}
+		*/
 
 		if ($toim == "KERAYSLISTA") {
 
@@ -1868,9 +1869,9 @@
 			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
 				
 				if ($toim == "KOONTILAHETE") {
-					$koontilahete = TRUE;
+					$koontilahete = true;
 				} else {
-					$koontilahete = FALSE;
+					$koontilahete = false;
 				}
 				
 				$params = array(

@@ -63,6 +63,9 @@
 
 	$forceta = FALSE;
 
+	// Napataan alkuperäinen kukarow
+	$tiliote_kukarow = $kukarow;
+
 	// katotaan onko faili uploadattu
 	if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$userfile	= $_FILES['userfile']['name'];
@@ -492,6 +495,9 @@
 	}
 
 	if (!$php_cli) {
+		// Palautetaan alkuperäinen kukarow
+		$kukarow = $tiliote_kukarow;
+
 		require("inc/footer.inc");
 	}
 

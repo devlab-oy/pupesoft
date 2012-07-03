@@ -215,7 +215,7 @@
 						$upd_res = pupe_query($query);
 
 						// Haetaan kerättävät rivit
-						$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+						$query = "	SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 									FROM kerayserat
 									WHERE yhtio 		= '{$kukarow['yhtio']}'
 									AND laatija 		= '{$kukarow['kuka']}'

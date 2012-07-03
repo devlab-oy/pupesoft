@@ -790,7 +790,11 @@
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 					if ($tilausrivirow['kpl'] > 0) {
-						$query = "SELECT * FROM tapahtuma WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$tilausrivirow['tunnus']}'";
+						$query = "	SELECT *
+									FROM tapahtuma
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'tulo'
+									AND rivitunnus = '{$tilausrivirow['tunnus']}'";
 						$tapahtuma_res = pupe_query($query);
 						$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
@@ -821,7 +825,11 @@
 						$uusires = pupe_query($kysely);
 						$tapahtuma_id = mysql_insert_id();
 
-						$query = "UPDATE tapahtuma SET kpl = '{$rtuoteno[$i]['kpl']}' WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$tilausrivirow['tunnus']}'";
+						$query = "	UPDATE tapahtuma
+									SET kpl = '{$rtuoteno[$i]['kpl']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'tulo'
+									AND rivitunnus = '{$tilausrivirow['tunnus']}'";
 						$upd_res = pupe_query($query);
 					}
 				}
@@ -1281,7 +1289,11 @@
 
 						// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 						if ($split_row['kpl'] > 0) {
-							$query = "SELECT * FROM tapahtuma WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$split_row['tunnus']}'";
+							$query = "	SELECT *
+										FROM tapahtuma
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'tulo'
+										AND rivitunnus = '{$split_row['tunnus']}'";
 							$tapahtuma_res = pupe_query($query);
 							$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
@@ -1313,7 +1325,11 @@
 							$uusires = pupe_query($kysely);
 							$tapahtuma_id = mysql_insert_id();
 
-							$query = "UPDATE tapahtuma SET kpl = '{$erotus}' WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$split_row['tunnus']}'";
+							$query = "	UPDATE tapahtuma
+										SET kpl = '{$erotus}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'tulo'
+										AND rivitunnus = '{$split_row['tunnus']}'";
 							$upd_res = pupe_query($query);
 						}
 					}

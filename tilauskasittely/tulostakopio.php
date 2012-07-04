@@ -630,7 +630,7 @@
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
-		if ($toim == "LAHETE" or $toimi == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+		if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 

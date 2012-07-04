@@ -112,7 +112,7 @@
 
 			$summa = 0;
 			$alvsumma=array();
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>$row[tilino]</td>";
 				echo "<td>$row[nimi]</td>";
@@ -134,7 +134,8 @@
 		$laskutiedot = "";
 
 		if ($laji == "myynti") {
-			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, vienti
+			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, lasku.vienti,
+						if (lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa
 						FROM lasku
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tapvm >= '$vv-$kk-$pp'
@@ -144,7 +145,7 @@
 		}
 
 		if ($laji == "osto") {
-			$query = "	SELECT lasku.tunnus, concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi
+			$query = "	SELECT lasku.tunnus, concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi, lasku.vienti
 						FROM lasku
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tapvm >= '$vv-$kk-$pp'
@@ -154,7 +155,7 @@
 		}
 
 		if ($laji == "tosite") {
-			$query = "	SELECT lasku.tunnus, group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi
+			$query = "	SELECT lasku.tunnus, group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi, lasku.vienti
 						FROM lasku
 						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -187,7 +188,7 @@
 							ORDER by jarjestys, selite";
 				$alv_result = mysql_query($query) or pupe_error($query);
 
-				while ($alv_row = mysql_fetch_array($alv_result)) {
+				while ($alv_row = mysql_fetch_assoc($alv_result)) {
 					echo "<th>".t("Alv")." $alv_row[selite]%</th>";
 				}
 
@@ -197,7 +198,9 @@
 
 				while ($row = mysql_fetch_array($result)) {
 
-					if(in_array($row["vienti"], array("", "A", "B", "C", "J"))) {
+				while ($row = mysql_fetch_assoc($result)) {
+
+					if (in_array($row["vienti"], array("", "A", "B", "C", "J"))) {
 						$row["vienti"] = t("Kotimaa");
 					}
 					elseif(in_array($row["vienti"], array("D", "E", "F", "K"))) {
@@ -222,7 +225,7 @@
 
 						$query = "SELECT ";
 
-						while ($alv_row = mysql_fetch_array($alv_result)) {
+						while ($alv_row = mysql_fetch_assoc($alv_result)) {
 							$query .= " sum(if(tilausrivi.alv=$alv_row[selite], rivihinta*(tilausrivi.alv/100), 0)) alv$alv_row[selite], ";
 						}
 
@@ -232,13 +235,13 @@
 									JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi!='D'
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$row[tunnus]'";
 						$alvres = mysql_query($query) or pupe_error($query);
-						$alvrow = mysql_fetch_array($alvres);
+						$alvrow = mysql_fetch_assoc($alvres);
 					}
 					else {
 
 						$query = "SELECT ";
 
-						while ($alv_row = mysql_fetch_array($alv_result)) {
+						while ($alv_row = mysql_fetch_assoc($alv_result)) {
 							$query .= " sum(if(t1.vero=$alv_row[selite], t2.summa, 0)) alv$alv_row[selite], ";
 						}
 
@@ -251,19 +254,27 @@
 									and t1.korjattu = ''
 									and t1.vero    != 0";
 						$alvres = mysql_query($query) or pupe_error($query);
-						$alvrow = mysql_fetch_array($alvres);
+						$alvrow = mysql_fetch_assoc($alvres);
 					}
 
 					// alvikannat alkuun
 					mysql_data_seek($alv_result, 0);
 
-					while ($alv_row = mysql_fetch_array($alv_result)) {
+					$alvit_logistiikka = 0;
+
+					while ($alv_row = mysql_fetch_assoc($alv_result)) {
 						$verokanta = $alv_row["selite"];
 						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv$verokanta"], 2, ',', ' ')."</td>";
 						$alvsumma[$verokanta] += $alvrow["alv$verokanta"];
+
+						$alvit_logistiikka += $alvrow["alv$verokanta"];
 					}
 
 					if ($laji == "myynti") {
+						if ($alvit_logistiikka > 0 and $row['maa'] != 'FI') {
+							echo "<td nowrap valign='top' class='back'><font class='error'>VIRHE: Verollinen lasku toimitettu ulkomaille!</font></td>";
+						}
+
 						echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("Näytä lasku")."</a></td>";
 					}
 					else {
@@ -283,9 +294,10 @@
 				// alvikannat alkuun
 				mysql_data_seek($alv_result, 0);
 
-				while ($alv_row = mysql_fetch_array($alv_result)) {
+				while ($alv_row = mysql_fetch_assoc($alv_result)) {
 					echo "<th style='text-align:right;' nowrap>".number_format($alvsumma[$alv_row["selite"]], 2, ',', ' ')."</th>";
 				}
+
 				echo "</tr>";
 				echo "</table>";
 			}

@@ -6,6 +6,10 @@ if (isset($_POST["tee"])) {
 	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
+if (isset($_POST['pvm_rajaustyyppi'])) {
+	$pvm_rajaustyyppi = $_POST['pvm_rajaustyyppi'];
+}
+
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 

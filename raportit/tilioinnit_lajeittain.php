@@ -196,8 +196,6 @@
 
 				$summa = 0;
 
-				while ($row = mysql_fetch_array($result)) {
-
 				while ($row = mysql_fetch_assoc($result)) {
 
 					if (in_array($row["vienti"], array("", "A", "B", "C", "J"))) {

@@ -631,7 +631,7 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<td class='back'>
-					<form method='post'>
+					<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -652,7 +652,7 @@
 					</td>";
 
 			echo "<td class='back'>
-					<form method='post'>
+					<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -676,7 +676,7 @@
 				}
 
 				echo "<td class='back'>
-						<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
+						<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
 						<input type='hidden' name='lopetus' value='$tilost_lopetus//from=LASKUTATILAUS'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
@@ -729,7 +729,7 @@
 			$sel = array();
 			$sel[$toim_nimitykset] = "CHECKED";
 
-			echo "<form method='post'>
+			echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 					<input type='hidden' name='toim' 				value = '$toim'>
 					<input type='hidden' name='lopetus' 			value = '$lopetus'>
 					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -757,7 +757,7 @@
 				}
 				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
-				echo "<form method='post'>
+				echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1054,7 +1054,7 @@
 
 
 							echo "	<td valign='top' class='back' nowrap>
-									<form method='post'>
+									<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 									<input type='hidden' name='toim' 				value = '$toim'>
 									<input type='hidden' name='lopetus' 			value = '$lopetus'>
 									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1067,7 +1067,7 @@
 
 							if ($saako_hyvaksya > 0) {
 								echo "<td valign='top' class='back'>
-										<form method='post'>
+										<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 										<input type='hidden' name='toim' 				value = '$toim'>
 										<input type='hidden' name='lopetus' 			value = '$lopetus'>
 										<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1098,7 +1098,7 @@
 
 									echo "</tr>";
 
-									echo "	<form name='tilaus' method='post' autocomplete='off'>
+									echo "	<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 			value = '$toim'>
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
@@ -1136,7 +1136,7 @@
 								}
 								elseif (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
 									echo "	<td class='back'>
-											<form name='tilaus' method='post' autocomplete='off'>
+											<form name='tilaus' method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' autocomplete='off'>
 											<input type='hidden' name='toim' 				value = '$toim'>
 											<input type='hidden' name='lopetus' 			value = '$lopetus'>
 											<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1244,7 +1244,7 @@
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
 					echo "	<td class='back'>
-							<form method='post'>
+							<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 							<input type='hidden' name='toim' 				value = '$toim'>
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1258,7 +1258,7 @@
 
 				if ($toim != "HAAMU") {
 					echo "	<td class='back''>
-							<form method='post'>
+							<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 							<input type='hidden' name='toim' 				value = '$toim'>
 							<input type='hidden' name='lopetus' 			value = '$lopetus'>
 							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1280,7 +1280,7 @@
 							}
 					</SCRIPT>";
 				echo "	<td class='back' align='right'>
-						<form method='post' onSubmit = 'return verify()'>
+						<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php' onSubmit = 'return verify()'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
@@ -1294,7 +1294,7 @@
 			}
 			elseif ($laskurow["tila"] == 'O') {
 				echo "	<td class='back' align='right'>
-						<form method='post'>
+						<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
 						<input type='hidden' name='toim' 				value = '$toim'>
 						<input type='hidden' name='lopetus' 			value = '$lopetus'>
 						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>

@@ -1,8 +1,5 @@
 <?php
 
-	// Laitetaan riittävästi muistia
-	ini_set("memory_limit", "5G");
-
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
 

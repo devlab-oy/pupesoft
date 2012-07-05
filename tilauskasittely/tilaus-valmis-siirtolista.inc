@@ -612,6 +612,32 @@
 				$params_kerayslista["komento"] = $komento;
 				print_pdf_kerayslista($params_kerayslista);
 
+				// jos halutaan MYÖS lähete
+				if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+					$lahetteen_tulostustapa_query = "	SELECT *
+														FROM lasku
+														WHERE yhtio = '{$kukarow["yhtio"]}'
+														AND tunnus in ($tilausnumeroita)";
+					$lahetteen_tulostustapa_result = pupe_query($lahetteen_tulostustapa_query);
+
+					// Loopataan kaikki keräyslistan tilaukset ja tulostetaan lähete
+					while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
+						$params = array(
+							'laskurow'					=> $lahetteen_tulostustapa_row,
+							'sellahetetyyppi' 			=> "",
+							'extranet_tilausvahvistus' 	=> "",
+							'naytetaanko_rivihinta'		=> "",
+							'tee'						=> "",
+							'toim'						=> $toim,
+							'komento' 					=> $komento,
+							'lahetekpl'					=> "",
+							'kieli' 					=> ""
+							);
+
+						pupesoft_tulosta_lahete($params);
+					}
+				}
+
 				if ($returnvalue != 0) {
 					echo "<font class='error'>$komento".t("Keräyslistan tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
 							".t("Käy tulostamassa lähete")." <a href='lahetteen_tulostusjono.php'>".t("tulostusjonosta")."</a>.</font><br>";

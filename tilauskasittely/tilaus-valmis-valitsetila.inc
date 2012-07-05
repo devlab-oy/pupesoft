@@ -313,6 +313,10 @@
 					and alatila in ('','A','F','U')";
 		$result = pupe_query($query);
 
+		// DEBUG, ei tulosta mit‰‰n vaikka tilaus onnistuneesti l‰pi :|
+		echo("### DEBUG ### " . implode(" ZZZ ", $yhtio_row));
+		error_log(debug_backtrace());
+
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
 			$tilausnumeroita = $laskurow["tunnus"];

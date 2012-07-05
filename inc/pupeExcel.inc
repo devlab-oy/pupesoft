@@ -191,11 +191,8 @@ class pupeExcel {
 
 		$xlsxfile = md5(uniqid(rand(),true)).".xlsx";
 
-		exec("cd /tmp/{$foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *;");
-
-		#rm -rf /tmp/{$foldername};
+		exec("cd /tmp/{$foldername}; find . -name .DS_Store -print0 | xargs -0 rm -rf; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$foldername};");
 
 		return $xlsxfile;
-
 	}
 }

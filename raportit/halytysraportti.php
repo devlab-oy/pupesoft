@@ -4,7 +4,7 @@
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	ini_set('zlib.output_compression', 0);
 
 	require("../inc/parametrit.inc");
@@ -471,8 +471,9 @@
 
 			///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 			$useslave = 1;
+			$usemastertoo = 1;
 
-			//Eli haetaan connect.inc uudestaan tässä
+			// Eli haetaan connect.inc uudestaan tässä
 			require("../inc/connect.inc");
 
 			//Yhtiövalinnat

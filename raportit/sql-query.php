@@ -1,7 +1,8 @@
 <?php
 
-	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	//* Tämä skripti käyttää slave-tietokantapalvelinta JA master kantaa *//
 	$useslave = 1;
+	$usemastertoo = 1;
 
 	//Tehdään tällanen replace jotta parametric.inc ei poista merkkejä
 	$sqlapu = $_POST["sqlhaku"];

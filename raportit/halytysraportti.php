@@ -4,6 +4,8 @@
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
+	
+	ini_set('zlib.output_compression', 0);
 
 	require("../inc/parametrit.inc");
 
@@ -646,8 +648,7 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							ORDER BY id, tuote.tuoteno
-							LIMIT 10";
+							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
 			else {
@@ -698,8 +699,7 @@
 							$lisaa
 							and tuote.ei_saldoa = ''
 							$varastot
-							order by id, tuote.tuoteno, varastopaikka
-							LIMIT 10";
+							order by id, tuote.tuoteno, varastopaikka";
 			}
 
 			$res = pupe_query($query);
@@ -753,6 +753,8 @@
 
 			flush();
 
+			require('inc/ProgressBar.class.php');
+
 			include('inc/pupeExcel.inc');
 
 			$worksheet 	 = new pupeExcel();
@@ -787,17 +789,11 @@
 			$excelrivi++;
 			$excelsarake = 0;
 
-			// arvioidaan kestoa
-			$ajat      = array();
-			$arvio     = array();
-			$timeparts = explode(" ",microtime());
-			$alkuaika  = $timeparts[1].substr($timeparts[0],1);
-			$joukko    = 100; //kuinka monta rivi‰ otetaan keskiarvoon
+			$bar = new ProgressBar();
+			$bar->initialize(mysql_num_rows($res));
 
 			while ($row = mysql_fetch_assoc($res)) {
-
-				$timeparts = explode(" ",microtime());
-				$alku      = $timeparts[1].substr($timeparts[0],1);
+				$bar->increase();
 
 				$lisa = "";
 
@@ -1920,42 +1916,16 @@
 					$excelrivi++;
 					$excelsarake = 0;
 				}
-
-				// tehd‰‰n arvio kauan t‰m‰ kest‰‰.. wau! :)
-				if (count($arvio)<=$joukko) {
-					$timeparts = explode(" ",microtime());
-					$endtime   = $timeparts[1].substr($timeparts[0],1);
-					$arvio[]   = round($endtime-$alkuaika,4);
-
-					if (count($arvio)==$joukko) {
-						$ka   = array_sum($arvio) / count($arvio);
-						$aika = round(mysql_num_rows($res) * $ka, 0);
-						echo t("Arvioitu ajon kesto")." $aika sec.<br>";
-						flush();
-					}
-					else {
-						$timeparts = explode(" ",microtime());
-						$alkuaika  = $timeparts[1].substr($timeparts[0],1);
-					}
-				}
-
-				$timeparts = explode(" ",microtime());
-				$loppu     = $timeparts[1].substr($timeparts[0],1);
-				$ajat[]    = round($loppu-$alku,4);
 			}
 
 			flush();
-
-			$timeparts = explode(" ",microtime());
-			$endtime   = $timeparts[1].substr($timeparts[0],1);
-			$total     = round($endtime-$starttime,0);
 
 			echo "<br>";
 
 			$excelnimi = $worksheet->close();
 
 			echo "<table>";
-			echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
+			echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
 			echo "<form method='post' class='multisubmit'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='H‰lytysraportti.xlsx'>";
@@ -1988,22 +1958,14 @@
 			echo "</table><br>";
 
 
-			//N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
+			// N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
 			unset($rivi);
 
-			foreach ($ajat as $aika) {
-				$yht+=$aika;
-			}
-
-			$yht=@round($yht/count($ajat),5);
-
-			echo t("Ajo kesti")." $total sec.</font> <font class='info'>($yht ".t("sec/tuoterivi").")</font><br><br>";
-
-			$osasto		= '';
-			$tuoryh		= '';
-			$ytunnus	= '';
-			$tuotemerkki= '';
-			$tee		= 'X';
+			$osasto		 = '';
+			$tuoryh		 = '';
+			$ytunnus	 = '';
+			$tuotemerkki = '';
+			$tee		 = 'X';
 		}
 
 		if ($tee == "" or $tee == "JATKA") {

@@ -9137,11 +9137,13 @@ if (!function_exists("t")) {
 
 		$useslave = (int) $useslave;
 
-		if (isset($slavedb)) {
-			if ($slavedb[$useslave] == '') $useslave = 0;
-		}
-		else {
-			$useslave = 0;
+		if ($useslave > 0) {
+			if (isset($slavedb)) {
+				if (isset($slavedb[$useslave]) and $slavedb[$useslave] == '') $useslave = 0;
+			}
+			else {
+				$useslave = 0;
+			}
 		}
 
 		if (trim($kieli) != '') {

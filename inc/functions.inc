@@ -5859,14 +5859,17 @@ if (!function_exists("size_readable")) {
 }
 
 if (!function_exists("sarjanumeron_ostohinta")) {
-	function sarjanumeron_ostohinta($kentta, $arvo, $eikululaskuja="") {
+	function sarjanumeron_ostohinta($kentta, $arvo, $eikululaskuja="", $pvm="") {
 		global $kukarow, $yhtiorow;
 
 		// Funktio laskee yhden kappaleen ostohinnan
 		$ostohinta = 0;
 
 		// Tuotteen ostohinta
-		$query = "	SELECT group_concat(distinct tilausrivi.tunnus) tunnukset, count(distinct tilausrivi.tunnus) tunnukset_kpl
+		$query = "	SELECT
+					group_concat(distinct tilausrivi.tunnus) tunnukset,
+					group_concat(distinct sarjanumeroseuranta.tunnus) sarjatunnukset,
+					count(distinct tilausrivi.tunnus) tunnukset_kpl
 					FROM sarjanumeroseuranta
 					JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -5904,7 +5907,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 							and sarjanumeroseuranta.$kentta = '$arvo'";
 				$keikkares = pupe_query($query);
 
-				while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
+				while ($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 					// Haetaan kaikki keikkaan liitettyjen laskujen summa
 					$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 								FROM lasku
@@ -5918,6 +5921,25 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 
 					$ostohinta	+= $kulukulurow["kulusumma"];
 				}
+			}
+
+			$pvmlisa = " now() ";
+
+			if ($pvm != "") {
+				$pvmlisa = " '$pvm' ";
+			}
+
+			// Onko tuotteen varastonarvoa muutettu käsin (epäkurantti.php)
+			$query = "	SELECT sum(arvomuutos) arvomuutos
+						FROM sarjanumeroseuranta_arvomuutos
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and sarjanumerotunnus IN ({$ostorow['sarjatunnukset']})
+						and luontiaika <= $pvmlisa";
+			$result = pupe_query($query);
+			$epakurrow = mysql_fetch_assoc($result);
+
+			if ($epakurrow['arvomuutos'] != 0) {
+				$ostohinta += $epakurrow['arvomuutos'];
 			}
 		}
 

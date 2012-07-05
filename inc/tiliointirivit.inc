@@ -174,7 +174,7 @@
 		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
 		$query = "	(SELECT distinct(tapvm) pvm
 					FROM tiliointi
-					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
+					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and tapvm >= '$yhtiorow[tilikausi_alku]')
 					UNION
 					(SELECT CURDATE() pvm)
 					UNION

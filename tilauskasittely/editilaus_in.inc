@@ -1354,8 +1354,8 @@ while ($tietue = fgets($fd)) {
 
 				$query = "	SELECT *
 							FROM tuote
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							and tuoteno = '{$tieto}'
+							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+							and tuote.tuoteno = '{$tieto}'
 							{$kieltolisa}";
 				$result = mysql_query($query) or die($query);
 
@@ -1365,11 +1365,20 @@ while ($tietue = fgets($fd)) {
 					$tuoteerrortxt .= " $tieto";
 					$tuoteerror = 1;
 				}
-				else {
+				else  {
 					$trow = mysql_fetch_array($result);
-					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
-					$tuoteno = $trow['tuoteno'];
-					$tuoteerror = 0; // tuote ok
+					if ($trow['panttitili'] == 'K') {
+						///* Lisätään tilaukselle dummytuote ja kommentti *///
+						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
+						$tuoteerrortxt .= " $tieto";
+						$tuoteno = $trow['tuoteno'];
+						$tuoteerror = 2;
+					}
+					else {
+						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+						$tuoteno = $trow['tuoteno'];
+						$tuoteerror = 0; // tuote ok
+					}
 				}
 			}
 			break;
@@ -1654,7 +1663,7 @@ while ($tietue = fgets($fd)) {
 					$edi_ulos .= "\n";
 
 				} // end jos tuote on löydetty oikein
-				else {
+				else if ($tuoteerror == 1) {
 					// tuotenumero ei löytynyt, tehdään dummyrivi..
 
 					// Tilausrivin systeemikommentti
@@ -1666,6 +1675,28 @@ while ($tietue = fgets($fd)) {
 								laadittu 	= now(),
 								yhtio 		= '$kukarow[yhtio]',
 								tuoteno 	= 'TUNTEMATON',
+								var			= 'P',
+								kpl 		= '0',
+								alv			= '23',
+								tilkpl 		= '$kpl',
+								otunnus 	= '$id',
+								tyyppi 		= '$editilaus_tyyppi',
+								kommentti 	= '$kommentti'";
+					$result = mysql_query($query) or die($query);
+					
+				} // end jos tuote on runko $tuoteerror == 2
+				else {
+					// tuote on runko, tehdään dummyrivi..
+
+					// Tilausrivin systeemikommentti
+					$kommentti .= t("Yritettiin tilata pelkkää runkoa").$tuoteerrortxt;
+
+					$query = "	INSERT into tilausrivi set
+								tilaajanrivinro = '$rivinumero',
+								laatija 	= 'edi',
+								laadittu 	= now(),
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tuoteno',
 								var			= 'P',
 								kpl 		= '0',
 								alv			= '23',

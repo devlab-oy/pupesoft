@@ -2,7 +2,18 @@
 
 class pupeExcel {
 
+	// Databaselink
+	var $_exceldblink;
+
 	function __construct() {
+		global $masterlink, $link;
+
+		if (isset($masterlink) and is_resource($masterlink)) {
+			$this->_exceldblink = $masterlink;
+		}
+		else {
+			$this->_exceldblink = $link;
+		}
 
 		// Tehdään Excel dataa varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_data (
@@ -12,7 +23,7 @@ class pupeExcel {
 					value varchar(256),
 					string_id int(11) default null,
 					style varchar(4) default null)";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Excel stringejä varten temporary tietokantataulu
 		$query = "	CREATE temporary table excel_sharedstrings (
@@ -21,7 +32,7 @@ class pupeExcel {
 					times_used int(11) not null,
 					PRIMARY KEY (id),
 					UNIQUE KEY stringind (string(256)))";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 	}
 
 	function columnChar($n) {
@@ -56,7 +67,7 @@ class pupeExcel {
 					type 		= 'N',
 					value 		= '$number',
 					style 		= '$style'";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 	}
 
 	function writeString($excelrivi, $excelsarake, $string, $style = array()) {
@@ -74,13 +85,13 @@ class pupeExcel {
 					type 		= 'S',
 					value 		= '$string',
 					style 		= '$style'";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 
 		$query = "	INSERT INTO excel_sharedstrings SET
 					string 		= '$string',
 					times_used 	= 1
 					ON DUPLICATE KEY UPDATE times_used = times_used + 1";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 	}
 
 	function write($excelrivi, $excelsarake, $string, $style = array()) {
@@ -106,12 +117,12 @@ class pupeExcel {
 					JOIN excel_sharedstrings ON (excel_sharedstrings.string = excel_data.value)
 					SET excel_data.string_id = (excel_sharedstrings.id-1)
 					WHERE excel_data.type = 'S'";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Shared Strings XML
 		$query = "	SELECT *
 					FROM excel_sharedstrings";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 
 		$stringCount = 0;
 		$stringUniqueCount = mysql_num_rows($result);
@@ -127,7 +138,7 @@ class pupeExcel {
 		$query = "	SELECT *
 					FROM excel_data
 					ORDER BY excelrivi, excelsarake";
-		$result = pupe_query($query);
+		$result = pupe_query($query, $this->_exceldblink);
 
 		$rowCount = mysql_num_rows($result);
 		$maxCell  = 0;

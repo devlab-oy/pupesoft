@@ -22,9 +22,6 @@ class pupeExcel {
 					PRIMARY KEY (id),
 					UNIQUE KEY stringind (string(256)))";
 		$result = pupe_query($query);
-
-		#$query = "LOCK TABLES excel_data WRITE, excel_sharedstrings WRITE";
-		#$result = pupe_query($query);
 	}
 
 	function columnChar($n) {
@@ -125,10 +122,6 @@ class pupeExcel {
 
 			$stringCount += $shared_row["times_used"];
 		}
-
-		// UNLOCK
-		#$query = "UNLOCK TABLES";
-		#$result = pupe_query($query);
 
 		// Tehd‰‰n Excel taulukko XML
 		$query = "	SELECT *

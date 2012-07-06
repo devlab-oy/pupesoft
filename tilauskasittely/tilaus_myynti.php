@@ -7155,8 +7155,8 @@ if ($tee == '') {
 			if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function ulkomaa_verify(){
-								msg = '".t("Olet toimittamassa ulkomailla sijaitsevasta varastosta tuotteita")." $ulkomaa_kaikkiyhteensa $yhtiorow[valkoodi]! ".t("Oletko varma, että tämä on fiksua")."?';
-								return confirm(msg);
+							msg = '".t("Olet toimittamassa ulkomailla sijaitsevasta varastosta tuotteita")." $ulkomaa_kaikkiyhteensa $yhtiorow[valkoodi]! ".t("Oletko varma, että tämä on fiksua")."?';
+							return confirm(msg);
 						}
 						</SCRIPT>";
 
@@ -7166,12 +7166,19 @@ if ($tee == '') {
 			if ($nayta_sostolisateksti == "TOTTA" and $kukarow["extranet"] == "") {
 				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function ostotilaus_verify(){
-								msg = '".t("Olet päivittämässä ostotilausta päivittämällä tätä myyntitilausta")."! ".t("Oletko varma, että haluat päivittää ostotilausta myös")."?';
-								return confirm(msg);
+							msg = '".t("Olet päivittämässä ostotilausta päivittämällä tätä myyntitilausta")."! ".t("Oletko varma, että haluat päivittää ostotilausta myös")."?';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 						</SCRIPT>";
 
-				$tilausjavalisa = "onSubmit = 'return ostotilaus_verify()'";
+				$tilausjavalisa = "onClick = 'return ostotilaus_verify()'";
 			}
 
 			echo "<td class='back' valign='top'>";
@@ -7254,7 +7261,7 @@ if ($tee == '') {
 			}
 			elseif ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U') {
 
-				echo "<form name='kaikkyht' method='post' action='{$palvelin2}tilauskasittely/tilaus_myynti.php' $javalisa $tilausjavalisa>
+				echo "<form name='kaikkyht' method='post' action='{$palvelin2}tilauskasittely/tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
@@ -7285,7 +7292,7 @@ if ($tee == '') {
 
 				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : "";
-					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."$lisateksti'> ";
+					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."$lisateksti' $tilausjavalisa> ";
 				}
 
 				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {

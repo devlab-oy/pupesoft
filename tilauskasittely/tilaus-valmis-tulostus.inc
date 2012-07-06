@@ -56,6 +56,7 @@
 					rahtisopimukset READ,
 					sanakirja WRITE,
 					sarjanumeroseuranta READ,
+					sarjanumeroseuranta_arvomuutos READ,
 					tilausrivi AS t2 READ,
 					tilausrivi AS t3 READ,
 					tilausrivi AS tilausrivi_myynti READ,

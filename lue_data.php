@@ -296,7 +296,6 @@ if ($kasitellaan_tiedosto) {
 				$edindex = $colIndex;
 			}
 		}
-
 	}
 	else {
 		/** PHPExcel kirjasto **/

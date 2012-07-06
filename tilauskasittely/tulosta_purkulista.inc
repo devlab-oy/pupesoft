@@ -357,14 +357,20 @@
 			$out .= chr(10).chr(13);
 
 			// RIVI 2
-			$out .= sprintf('%99s',		' ');
+			$out .= sprintf('%-99s',	$row["toim_tuoteno"]);
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= chr(10).chr(10).chr(13);
 		}
 
 		// 2 Form Feediä
 		$out .= chr(12).chr(12);
-
+		echo $out;
+		
+		$myFile = "/tmp/printfile.txt";
+		$fh = fopen($myFile, 'w') or die("can't open file");
+		fwrite($fh, $out);
+		
+		exit;
 		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {

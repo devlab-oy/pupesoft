@@ -96,7 +96,7 @@
 			$i = 1;
 
 			// Unikon laskuaineisto
-			if ($xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
+			if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
 
 				$vakio_alku = '<?xml version="1.0"?><LedgerJournal><LedgerJournalTable><LedgerJournalName>ORAO</LedgerJournalName><Name>Ostolaskut Unikosta</Name>';
 				$vakio_loppu = '</LedgerJournalTable></LedgerJournal>';
@@ -127,6 +127,13 @@
 				// Lisätään viimeiseen tiedostoon lopputagit
 				file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
 				$luotiinlaskuja++;
+			}
+			elseif (isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
+				// Teccom laskuaineisto
+
+				$path_parts = pathinfo($file);
+
+				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
 			}
 		}
 

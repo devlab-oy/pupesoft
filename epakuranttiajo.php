@@ -55,6 +55,9 @@
 					tuote.epakurantti50pvm,
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
+					if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
+					tuote.kehahin bruttokehahin,
+					tuote.luontiaika,
 					sum(tuotepaikat.saldo) saldo
 					FROM tuote
 					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
@@ -62,8 +65,9 @@
 					AND tuote.ei_saldoa = ''
 					AND tuote.epakurantti100pvm = '0000-00-00'
 					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
-					GROUP BY tuoteno, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm
-					HAVING saldo > 0";
+					GROUP BY 1,2,3,4,5,6,7,8
+					HAVING saldo > 0
+					ORDER BY tuoteno";
 		$epakurantti_result = mysql_query($query) or pupe_error($query);
 
 		if (!$php_cli) {
@@ -72,8 +76,12 @@
 			echo "<th>".t("Tuote")."</th>";
 			echo "<th>".t("Viimeisin saapuminen")."</th>";
 			echo "<th>".t("Viimeisin laskutus")."</th>";
-			echo "<th>".t("Aika viimeisimmästä tapahtumasta")."</th>";
+			echo "<th>".t("Viim. tapahtuma")."</th>";
 			echo "<th>".t("Epäkurattitaso")."</th>";
+			echo "<th>".t("Saldo")."</th>";
+			echo "<th>".t("Kehahin")."</th>";
+			echo "<th>".t("Varastonarvo")."</th>";
+			echo "<th>".t("Uusi varastonarvo")."</th>";
 
 			if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<th></th>";
@@ -81,6 +89,9 @@
 
 			echo "</tr>";
 		}
+
+		$vararvot_nyt = 0;
+		$vararvot_sit = 0;
 
 		while ($epakurantti_row = mysql_fetch_assoc($epakurantti_result)) {
 
@@ -104,13 +115,21 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND laji in ('tulo', 'valmistus')
 							AND tuoteno = '$epakurantti_row[tuoteno]'
+							AND selite not like '%alkusaldo%'
 							ORDER BY laadittu DESC
 							LIMIT 1;";
 				$tapres = mysql_query($query) or pupe_error($query);
 
 				if (!$tulorow = mysql_fetch_assoc($tapres)) {
-					// Jos ei löydy tuloa, laitetaan jotain vanhaa
-					$tulorow = array("laadittu" => "1970-01-01");
+
+					if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
+						// Jos ei löydy tuloa, laitetaan tuotteen luontiaika
+						$tulorow = array("laadittu" => substr($epakurantti_row["luontiaika"], 0, 10));
+					}
+					else {
+						// Jos ei löydy tuloa eikä tuotteen luontiaikaa, niin laitetaan jotain vanhaa
+						$tulorow = array("laadittu" => "1970-01-01");
+					}
 				}
 
 				// Haetaan tuotteen viimeisin laskutus
@@ -188,19 +207,38 @@
 
 				if ($mikataso > 0) {
 					echo "<tr>";
-					echo "<td>{$epakurantti_row['tuoteno']}</td>";
+					echo "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
 
 					if ($tulorow['laadittu'] == "1970-01-01") echo "<td></td>";
-					else echo "<td>{$tulorow['laadittu']}</td>";
+					else echo "<td>".tv1dateconv($tulorow['laadittu'])."</td>";
 
 					if ($laskutusrow['laadittu'] == "1970-01-01") echo "<td></td>";
-					else echo "<td>{$laskutusrow['laadittu']}</td>";
+					else echo "<td>".tv1dateconv($laskutusrow['laadittu'])."</td>";
 
-					if ($mikataso == 100) echo "<td>".t("Viimeinen tapahtuma on yli 30kk vanha")."</td>";
-					elseif ($mikataso == 50) echo "<td>".t("Viimeinen tapahtuma on yli 24kk vanha")."</td>";
-					elseif ($mikataso == 25) echo "<td>".t("Viimeinen tapahtuma on yli 18kk vanha")."</td>";
+					if ($mikataso == 100) echo "<td>".t("Yli 30kk sitten")."</td>";
+					elseif ($mikataso == 50) echo "<td>".t("Yli 24kk sitten")."</td>";
+					elseif ($mikataso == 25) echo "<td>".t("Yli 18kk sitten")."</td>";
 
-					echo "<td>{$mikataso}%</td>";
+					echo "<td align='right'>{$mikataso}%</td>";
+
+					echo "<td align='right'>{$epakurantti_row['saldo']}</td>";
+					echo "<td align='right'>".round($epakurantti_row['kehahin'],2)."</td>";
+
+					$vararvo_nyt = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
+
+					echo "<td align='right'>{$vararvo_nyt}</td>";
+
+					if ($mikataso == 100) {
+						$vararvo_sit = 0;
+					}
+					elseif ($mikataso == 50) {
+						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.5*$epakurantti_row['saldo'], 2);
+					}
+					elseif ($mikataso == 25) {
+						$vararvo_sit = round($epakurantti_row['bruttokehahin']*0.75*$epakurantti_row['saldo'], 2);
+					}
+
+					echo "<td align='right'>{$vararvo_sit}</td>";
 
 					if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 						echo "<td>$viesti</td>";
@@ -208,12 +246,37 @@
 
 					echo "</tr>";
 
+					$vararvot_nyt += $vararvo_nyt;
+					$vararvot_sit += $vararvo_sit;
+
 					$epa_tuotemaara++;
 				}
 			}
 		}
 
 		if (!$php_cli and $epa_tuotemaara > 0) {
+
+				echo "<tr>";
+				echo "<td class='tumma' colspan='7'>".t("Yhteensä").":</td>";
+				echo "<td class='tumma' align='right'>$vararvot_nyt</td>";
+				echo "<td class='tumma' align='right'>$vararvot_sit</td>";
+
+				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
+					echo "<td class='tumma'></td>";
+				}
+
+				echo "</tr>";
+
+				echo "<tr>";
+				echo "<td class='tumma' colspan='8'>".t("Epäkuranttimuutos yhteensä").":</td>";
+				echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
+
+				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
+					echo "<td class='tumma'></td>";
+				}
+
+				echo "</tr>";
+
 			echo "</table>";
 
 			echo "<br><form name = 'valinta' method='post'>";

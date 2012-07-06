@@ -56,6 +56,7 @@
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
 
+
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 	js_openFormInNewWindow();
 
@@ -108,7 +109,7 @@
 						require("inc/verkkolasku-in-finvoice.inc");
 						$kumpivoice = "FINVOICE";
 					}
-					elseif (strpos($file, "_invoice") !== false){
+					elseif (strpos($file, "teccominvoice") !== false){
 						require("inc/verkkolasku-in-teccom.inc");
 						$kumpivoice = "TECCOM";
 					}
@@ -134,6 +135,16 @@
 						$laskuttajan_maa 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@e3207')));
 
 						$laskuttajan_tilino 	= utf8_decode(array_shift($xml->xpath('Group2/FII[@e3035="BF"]/@eC078.3194')));
+					}
+					elseif ($kumpivoice == "TECCOM") {
+						$laskuttajan_osoite 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->Street1);
+						$laskuttajan_postitp 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
+						$laskuttajan_postino 	= utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
+						$laskuttajan_maa 		= utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
+ 						$laskuttajan_tilino		= $lasku_toimittaja["ultilno"];
+						$laskuttajan_ovt		= $lasku_toimittaja["ovt_tunnus"];
+						$laskuttajan_vat		= $lasku_toimittaja["ytunnus"];
+						
 					}
 					elseif ($kumpivoice = "FINVOICE") {
 						$laskuttajan_osoite 	= utf8_decode($xml->SellerPartyDetails->SellerPostalAddressDetails->SellerStreetName);

@@ -54,7 +54,8 @@
 
 	$query  = "	SELECT tunnus, nimitys
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vares = pupe_query($query);
 
 	echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht‰‰n').")</th>";

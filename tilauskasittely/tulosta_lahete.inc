@@ -204,8 +204,12 @@ if (!function_exists('alku_lahete')) {
 				}
 				else {
 					$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli), 				$thispage, $pieni);
-					$pdf->draw_text(310, 782, $laskurow["tunnusnippu"]."/".$laskurow["tunnus"],	$thispage, $boldi);
+					$pdf->draw_text(310, 782, $laskurow["tunnusnippu"]." / ".$laskurow["tunnus"],	$thispage, $boldi);
 				}
+			}
+			elseif ($laskurow["vanhatunnus"] > 0 and $laskurow["vanhatunnus"] != $laskurow["tunnus"]) {
+				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli), 				$thispage, $pieni);
+				$pdf->draw_text(310, 782, $laskurow["vanhatunnus"]." / ".$laskurow["tunnus"],	$thispage, $boldi);
 			}
 			else {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
@@ -467,6 +471,9 @@ if (!function_exists('alku_lahete')) {
 			if (trim($laskurow['comments']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 			}
+			if (trim($laskurow['ohjausmerkki']) != '') {
+				$komm .= "\n".t("Ohjausmerkki", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['ohjausmerkki']), 90, "\n###");
+			}
 		}
 
 		if ($yhtiorow["vak_kasittely"] != "" and $tyyppi != "TILAUSVAHVISTUS") {
@@ -564,9 +571,9 @@ if (!function_exists('alku_lahete')) {
 
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_custom.inc") {
 			# viivakoodi
-			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
+			$data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
+			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 
 			$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 		}
@@ -755,7 +762,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
+			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 		}
 
 		$kala = 715;
@@ -3522,6 +3529,22 @@ if (!function_exists('print_pdf_lahete')) {
 						echo t("Lähete tulostuu")."...<br>";
 
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
+
+						if ($laskurow["tunnusnippu"] > 0) {
+							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= $laskurow["tunnusnippu"]." / ".$laskurow["tunnus"].".\n\n";
+						}
+						elseif ($laskurow["vanhatunnus"] > 0 and $laskurow["vanhatunnus"] != $laskurow["tunnus"]) {
+							$content_body .= t("Tilausnumero/toimitus", $kieli).": ";
+							$content_body .= $laskurow["vanhatunnus"]." / ".$laskurow["tunnus"].".\n\n";
+						}
+						else {
+							$content_body .= t("Tilausnumero", $kieli).": ";
+							$content_body .= $laskurow["tunnus"].".\n\n";
+						}
+
+						$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
+						$content_body .= $yhtiorow["nimi"]."\n";
 					}
 
 					$newfilename = str_replace(" ", "_", $kutsu);

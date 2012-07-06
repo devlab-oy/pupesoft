@@ -493,7 +493,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		// katsotaan valitut varastot
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio in ($yhtiot)";
+					WHERE yhtio in ($yhtiot)
+					ORDER BY yhtio, tyyppi, nimitys";
 		$vtresult = pupe_query($query);
 
 		while ($vrow = mysql_fetch_array($vtresult)) {
@@ -998,7 +999,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio in ($yhtiot)
-				ORDER BY yhtio, nimitys";
+				ORDER BY yhtio, tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 
 	$vlask = 0;

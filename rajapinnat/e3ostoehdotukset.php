@@ -9,6 +9,8 @@
 
 	if ($php_cli) {
 
+		date_default_timezone_set('Europe/Helsinki');
+
 		if (!isset($argv[1]) or $argv[1] == '') {
 			echo "Anna yhtiö!!!\n";
 			die;
@@ -29,28 +31,9 @@
 		//Pupeasennuksen root
 		$pupe_root_polku = dirname(dirname(__FILE__));
 
-		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-		$yhtiores = pupe_query($query);
+		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
-		if (mysql_num_rows($yhtiores) == 1) {
-			$yhtiorow = mysql_fetch_assoc($yhtiores);
-
-			// haetaan yhtiön parametrit
-			$query = "  SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio = '$yhtiorow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_assoc($result);
-
-				// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-				}
-			}
-		}
-		else {
+		if ($yhtiorow["yhtio"] == "") {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 
@@ -87,8 +70,9 @@
 		echo "<font class='head'>".t("E3-ostoehdotuksen sisäänluku")."</font><hr>";
 	}
 
+	// jos meillä on lock-file ja se on alle 5 minuuttia vanha
 	if (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") < 900) {
-		echo "E3-ostoehdotuksen sisäänluku käynnissä, odota hetki!";
+		#echo "E3-ostoehdotuksen sisäänluku käynnissä, odota hetki!";
 	}
 	elseif (file_exists("/tmp/##e3ehdotukset.lock") and mktime()-filemtime("/tmp/##e3ehdotukset.lock") >= 900) {
 		echo "VIRHE: E3-ostoehdotuksen sisäänluku jumissa! Ota yhteys tekniseen tukeen!!!";

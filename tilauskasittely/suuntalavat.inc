@@ -1,7 +1,6 @@
 <?php
-
 	$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		$laskurow = mysql_fetch_assoc($result);
@@ -37,9 +36,11 @@
 						'kaytettavyys' => '',
 						'terminaalialue' => '',
 						'korkeus' => '',
-						'paino' => '');
+						'paino' => '',
+						'usea_keraysvyohyke' => '',
+						);
 
-	if (!isset($sscc)) $sscc = 0;
+	if (!isset($sscc)) $sscc = '';
 	if (!isset($alkuhyllyalue)) $alkuhyllyalue = '';
 	if (!isset($alkuhyllynro)) $alkuhyllynro = '';
 	if (!isset($alkuhyllyvali)) $alkuhyllyvali = '';
@@ -58,24 +59,70 @@
 	if (!isset($suuntalavan_tunnus)) $suuntalavan_tunnus = '';
 	if (!isset($usea_keraysvyohyke)) $usea_keraysvyohyke = '';
 
+
 	if ($tee == 'peruutettu') {
 		$query = "	UPDATE suuntalavat SET
 					tila = '',
 					paino = 0
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
-		$tila_res = mysql_query($query) or pupe_error($query);
+		$tila_res = pupe_query($query);
 
 		$tee = '';
 		$suuntalavan_tunnus = '';
 	}
 
 	if ($tee == 'poista') {
+
+		$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) saapumiset
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$saapumiset_res = pupe_query($query);
+		$saapumiset_row = mysql_fetch_assoc($saapumiset_res);
+
+		$query = "	UPDATE tilausrivi SET
+					suuntalava = 0
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'O'
+					AND suuntalava = '{$suuntalavan_tunnus}'
+					AND uusiotunnus IN ({$saapumiset_row['saapumiset']})";
+		$poista_result = pupe_query($query);
+
 		$query = "DELETE FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-		$poista_result = mysql_query($query) or pupe_error($query);
+		$poista_result = pupe_query($query);
+
+		$query = "DELETE FROM suuntalavat_saapuminen WHERE yhtio = '{$kukarow['yhtio']}' AND suuntalava = '{$suuntalavan_tunnus}'";
+		$poista_result = pupe_query($query);
 
 		$tee = '';
 		$suuntalavan_tunnus = '';
+	}
+
+	if ($tee == 'imaiserivit') {
+
+		$query = "	UPDATE tilausrivi
+					SET suuntalava = '{$suuntalavan_tunnus}'
+					WHERE yhtio 	 = '{$kukarow['yhtio']}'
+					AND uusiotunnus  = '{$otunnus}'
+					AND tyyppi 		 = 'O'
+					AND suuntalava   = 0
+					AND varattu 	<> 0
+					AND kpl			 = 0";
+		$tila_res = pupe_query($query);
+
+		$paivmaara = mysql_affected_rows();
+
+		echo "<br><br>".t("Suuntalavaan liitettiin %s riviä keikalta", "", $paivmaara)."!<br><br>";
+
+		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
+			$tee = 'EIHALUTANAYTTAAMITAAN';
+			$suuntalavan_tunnus = '';
+		}
+		else {
+			$tee = '';
+			$suuntalavan_tunnus = '';
+		}
 	}
 
 	if ($tee == 'siirtovalmis') {
@@ -84,10 +131,10 @@
 					FROM suuntalavat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
-		$sscc_chk_res = mysql_query($query) or pupe_error($query);
+		$sscc_chk_res = pupe_query($query);
 		$sscc_chk_row = mysql_fetch_assoc($sscc_chk_res);
 
-		if ($sscc_chk_row['sscc'] == "") {
+		if ($sscc_chk_row['sscc'] == '' or $sscc_chk_row['sscc'] == '0') {
 			echo "<font class='error'>",t("VIRHE: SSCC-koodi puuttuu"),"!</font><br /><br />";
 		}
 		else {
@@ -101,12 +148,13 @@
 							AND tilausrivi.uusiotunnus = '{$otunnus}'
 							AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 							AND tilausrivi.tyyppi = 'O'";
-				$paino_res = mysql_query($query) or pupe_error($query);
+				$paino_res = pupe_query($query);
 				$paino_row = mysql_fetch_assoc($paino_res);
+
 
 				if ($paino_row['paino'] > 0) {
 					$query = "UPDATE suuntalavat SET paino = '{$paino_row['paino']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-					$update_res = mysql_query($query) or pupe_error($query);
+					$update_res = pupe_query($query);
 				}
 			}
 
@@ -114,11 +162,17 @@
 						tila = 'S'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$suuntalavan_tunnus}'";
-			$tila_res = mysql_query($query) or pupe_error($query);
+			$tila_res = pupe_query($query);
 		}
 
-		$tee = '';
-		$suuntalavan_tunnus = '';
+		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
+			$tee = 'EIHALUTANAYTTAAMITAAN';
+			$suuntalavan_tunnus = '';
+		}
+		else {
+			$tee = '';
+			$suuntalavan_tunnus = '';
+		}
 	}
 
 	if ($tee == 'purettu') {
@@ -126,7 +180,7 @@
 					tila = 'P'
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
-		$tila_res = mysql_query($query) or pupe_error($query);
+		$tila_res = pupe_query($query);
 
 		$tee = '';
 		$suuntalavan_tunnus = '';
@@ -135,7 +189,6 @@
 	if ($tee == 'lisaa') {
 
 		$tee = '';
-
 		$error = " <img src='../pics/lullacons/stop.png' title='".t("Virhe")."' alt='".t("Virhe")."' />";
 
 		if (trim($sscc) == '') {
@@ -182,31 +235,27 @@
 			$paino = str_replace(",", ".", $paino);
 			$korkeus = str_replace(",", ".", $korkeus);
 
-			if ($kaytettavyys == 'Y') {
-				$keikkatunnus = $otunnus;
-			}
-			else {
-				$keikkatunnus = 0;
-			}
-
 			if (trim($suuntalavan_tunnus) != '') {
 
-				$query = "SELECT keraysvyohyke FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-				$keraysvyohyke_chk_res = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT keraysvyohyke
+							FROM suuntalavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$suuntalavan_tunnus}'";
+				$keraysvyohyke_chk_res = pupe_query($query);
 				$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
 
 				// jos vaihdetaan keräysvyöhykettä, nollataan suuntalavat kohdistetuilta tilausriveiltä johon suuntalava kuuluu
 				// tämän jälkeen koitetaan päivittää suuntalavan tunnus uudestaan käyttäen apuna uutta valittua keräysvyöhykettä
 				if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
 
-					$query = "	UPDATE tilausrivi
-								SET tilausrivi.suuntalava = 0
+					$query = "	UPDATE tilausrivi SET 
+								tilausrivi.suuntalava = 0
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$otunnus}'
 								AND tilausrivi.tyyppi = 'O'
 								AND tilausrivi.kpl = 0
 								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-					$suuntalava_upd_res = mysql_query($query) or pupe_error($query);
+					$suuntalava_upd_res = pupe_query($query);
 
 					if (trim($automaattinen_paivitys) == 'K') {
 						$query = "	UPDATE tilausrivi
@@ -217,61 +266,70 @@
 									AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 									AND tilausrivi.kpl = 0
 									AND tilausrivi.tyyppi = 'O'";
-						$keraysvyohyke_upd_res = mysql_query($query) or pupe_error($query);
+						$keraysvyohyke_upd_res = pupe_query($query);
 					}
 				}
 
 				$query = "	UPDATE suuntalavat SET
-							sscc = '{$sscc}',
-							keikkatunnus = '{$keikkatunnus}',
-							alkuhyllyalue = '{$alkuhyllyalue}',
-							alkuhyllynro = '{$alkuhyllynro}',
-							alkuhyllyvali = '{$alkuhyllyvali}',
-							alkuhyllytaso = '{$alkuhyllytaso}',
-							loppuhyllyalue = '{$loppuhyllyalue}',
-							loppuhyllynro = '{$loppuhyllynro}',
-							loppuhyllyvali = '{$loppuhyllyvali}',
-							loppuhyllytaso = '{$loppuhyllytaso}',
-							tyyppi = '{$tyyppi}',
-							keraysvyohyke = '{$keraysvyohyke}',
-							kaytettavyys = '{$kaytettavyys}',
-							terminaalialue = '{$terminaalialue}',
-							korkeus = '{$korkeus}',
-							paino = '{$paino}',
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()
+							sscc 				= '{$sscc}',
+							alkuhyllyalue 		= '{$alkuhyllyalue}',
+							alkuhyllynro 		= '{$alkuhyllynro}',
+							alkuhyllyvali 		= '{$alkuhyllyvali}',
+							alkuhyllytaso 		= '{$alkuhyllytaso}',
+							loppuhyllyalue 		= '{$loppuhyllyalue}',
+							loppuhyllynro 		= '{$loppuhyllynro}',
+							loppuhyllyvali 		= '{$loppuhyllyvali}',
+							loppuhyllytaso 		= '{$loppuhyllytaso}',
+							tyyppi 				= '{$tyyppi}',
+							keraysvyohyke 		= '{$keraysvyohyke}',
+							kaytettavyys 		= '{$kaytettavyys}',
+							terminaalialue 		= '{$terminaalialue}',
+							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+							korkeus 			= '{$korkeus}',
+							paino 				= '{$paino}',
+							muuttaja 			= '{$kukarow['kuka']}',
+							muutospvm 			= now()
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$suuntalavan_tunnus}'";
-				$update_result = mysql_query($query) or pupe_error($query);
+							AND tunnus 	= '{$suuntalavan_tunnus}'";
+				$update_result = pupe_query($query);
 			}
 			else {
 
 				$query = "	INSERT INTO suuntalavat SET
+							yhtio 				= '{$kukarow['yhtio']}',
+							tila 				= '',
+							sscc 				= '{$sscc}',
+							alkuhyllyalue 		= '{$alkuhyllyalue}',
+							alkuhyllynro 		= '{$alkuhyllynro}',
+							alkuhyllyvali 		= '{$alkuhyllyvali}',
+							alkuhyllytaso 		= '{$alkuhyllytaso}',
+							loppuhyllyalue		= '{$loppuhyllyalue}',
+							loppuhyllynro 		= '{$loppuhyllynro}',
+							loppuhyllyvali 		= '{$loppuhyllyvali}',
+							loppuhyllytaso 		= '{$loppuhyllytaso}',
+							tyyppi 				= '{$tyyppi}',
+							keraysvyohyke 		= '{$keraysvyohyke}',
+							kaytettavyys 		= '{$kaytettavyys}',
+							terminaalialue 		= '{$terminaalialue}',
+							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+							korkeus 			= '{$korkeus}',
+							paino 				= '{$paino}',
+							laatija 			= '{$kukarow['kuka']}',
+							luontiaika 			= now(),
+							muuttaja 			= '{$kukarow['kuka']}',
+							muutospvm 			= now()";
+				$insert_result = pupe_query($query);
+				$uusi_suuntalavan_tunnus = mysql_insert_id();
+
+				$query = "	INSERT INTO suuntalavat_saapuminen SET
 							yhtio = '{$kukarow['yhtio']}',
-							tila = '',
-							sscc = '{$sscc}',
-							keikkatunnus = '{$keikkatunnus}',
-							alkuhyllyalue = '{$alkuhyllyalue}',
-							alkuhyllynro = '{$alkuhyllynro}',
-							alkuhyllyvali = '{$alkuhyllyvali}',
-							alkuhyllytaso = '{$alkuhyllytaso}',
-							loppuhyllyalue = '{$loppuhyllyalue}',
-							loppuhyllynro = '{$loppuhyllynro}',
-							loppuhyllyvali = '{$loppuhyllyvali}',
-							loppuhyllytaso = '{$loppuhyllytaso}',
-							tyyppi = '{$tyyppi}',
-							keraysvyohyke = '{$keraysvyohyke}',
-							usea_keraysvyohyke = '{$usea_keraysvyohyke}',
-							kaytettavyys = '{$kaytettavyys}',
-							terminaalialue = '{$terminaalialue}',
-							korkeus = '{$korkeus}',
-							paino = '{$paino}',
+							suuntalava = '{$uusi_suuntalavan_tunnus}',
+							saapuminen = '{$otunnus}',
 							laatija = '{$kukarow['kuka']}',
 							luontiaika = now(),
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()";
-				$insert_result = mysql_query($query) or pupe_error($query);
-				$uusi_suuntalavan_tunnus = mysql_insert_id();
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'";
+				$insert_result = pupe_query($query);
 
 				// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
 				if (trim($automaattinen_paivitys) == 'K') {
@@ -283,7 +341,7 @@
 								AND tilausrivi.suuntalava = 0
 								AND tilausrivi.kpl = 0
 								AND tilausrivi.tyyppi = 'O'";
-					$tilausrivi_res = mysql_query($query) or pupe_error($query);
+					$tilausrivi_res = pupe_query($query);
 				}
 			}
 
@@ -298,22 +356,23 @@
 							AND tilausrivi.uusiotunnus = '{$otunnus}'
 							AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 							AND tilausrivi.tyyppi = 'O'";
-				$paino_res = mysql_query($query) or pupe_error($query);
+				$paino_res = pupe_query($query);
 				$paino_row = mysql_fetch_assoc($paino_res);
+
 
 				if ($paino_row['paino'] > 0) {
 					$query = "UPDATE suuntalavat SET paino = '{$paino_row['paino']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-					$update_res = mysql_query($query) or pupe_error($query);
+					$update_res = pupe_query($query);
 				}
 			}
 
 			$suuntalavan_tunnus = '';
 		}
-		
+
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
-			$tee = "eihalutamitäänkäyttöliittymääpliis";
+			$tee = "eihalutamitankayttoliittymaapliis";
 		}
-		
+
 	}
 
 	if ($tee == 'vie_koko_suuntalava') {
@@ -328,7 +387,7 @@
 						AND tyyppi = 'O'
 						AND suuntalava = '{$suuntalavan_tunnus}'
 						AND kpl = 0";
-			$hyllyalue_chk_res = mysql_query($query) or pupe_error($query);
+			$hyllyalue_chk_res = pupe_query($query);
 			$hyllyalue_chk_row = mysql_fetch_assoc($hyllyalue_chk_res);
 
 			$query = "	SELECT suuntalavat.korkeus, pakkaus.leveys, pakkaus.syvyys, (suuntalavat.paino + pakkaus.paino) massa, keraysvyohyke.varasto, keraysvyohyke.tunnus as ker_tunnus
@@ -337,7 +396,7 @@
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
 						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
 						AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
-			$pakkaus_res = mysql_query($query) or pupe_error($query);
+			$pakkaus_res = pupe_query($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 
 			$suuntalavan_tilavuus = $pakkaus_row['leveys'] * $pakkaus_row['korkeus'] * $pakkaus_row['syvyys'];
@@ -374,7 +433,7 @@
 						HAVING paljon_mahtuu_kpl >= 1
 						ORDER BY 1,2,3,4,5,6,7
 						LIMIT 5";
-			$loput_res = mysql_query($query) or pupe_error($query);
+			$loput_res = pupe_query($query);
 
 			if (mysql_num_rows($loput_res) > 0) {
 				echo "<font class='ok'>",t("Suuntalava mahtuu hyllypaikalle"),"</font>&nbsp;&nbsp;";
@@ -433,6 +492,7 @@
 		echo "</form>";
 	}
 
+
 	if ($tee == 'uusi') {
 
 		echo "<form method='post'>";
@@ -442,8 +502,12 @@
 		echo "<input type='hidden' name='tee' value='lisaa' />";
 
 		if (is_numeric($suuntalavan_tunnus)) {
-			$query = "SELECT * FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-			$suuntalavat_result = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT suuntalavat.* 
+						FROM suuntalavat 
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}' 
+						AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
+			$suuntalavat_result = pupe_query($query);
 			$suuntalavat_row = mysql_fetch_assoc($suuntalavat_result);
 
 			echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
@@ -461,6 +525,7 @@
 			$keraysvyohyke = $suuntalavat_row['keraysvyohyke'];
 			$kaytettavyys = $suuntalavat_row['kaytettavyys'];
 			$terminaalialue = $suuntalavat_row['terminaalialue'];
+			$usea_keraysvyohyke = $suuntalavat_row['usea_keraysvyohyke'];
 			$korkeus = $suuntalavat_row['korkeus'];
 			$paino = $suuntalavat_row['paino'];
 		}
@@ -470,16 +535,18 @@
 
 		echo "<table>";
 		echo "<tr><th colspan='2'>",t("Uusi suuntalava"),"</th></tr>";
-		echo "<tr><th>SSCC-",t("koodi"),"</th><td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi täytyy olla vähintää 7 merkkiä pitkä"),".</font></td></tr>";
+		echo "<tr><th>SSCC-",t("koodi"),"</th>";
+		echo "<td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi täytyy olla vähintää 7 merkkiä pitkä"),".</font></td></tr>";
 		echo "<tr><th>",t("Varastopaikkaväli alku"),"</th><td><input type='text' name='alkuhyllyalue' size='6' maxlength='5' value='{$alkuhyllyalue}' />{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
 		echo "<tr><th>",t("Varastopaikkaväli loppu"),"</th><td><input type='text' name='loppuhyllyalue' size='6' maxlength='5' value='{$loppuhyllyalue}' />{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
 
 		$query = "	SELECT *
 					FROM pakkaus
 					WHERE yhtio = '{$kukarow['yhtio']}'";
-		$pakkaus_result = mysql_query($query) or pupe_error($query);
+		$pakkaus_result = pupe_query($query);
 
-		echo "<tr><th>",t("Tyyppi"),"</th><td><select name='tyyppi'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Tyyppi"),"</th>";
+		echo "<td><select name='tyyppi'><option value=''>",t("Valitse"),"</option>";
 
 		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
 			$sel = $tyyppi == $pakkaus_row['tunnus'] ? ' selected' : '';
@@ -489,10 +556,11 @@
 
 		echo "</select>{$virheviesti['tyyppi']}</td></tr>";
 
-		echo "<tr><th>",t("Keräysvyöhyke"),"</th><td><select name='keraysvyohyke'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Keräysvyöhyke"),"</th>";
+		echo "<td><select name='keraysvyohyke'><option value=''>",t("Valitse"),"</option>";
 
 		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
-		$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+		$keraysvyohyke_result = pupe_query($query);
 
 		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 			$sel = $keraysvyohyke == $keraysvyohyke_row['tunnus'] ? ' selected' : '';
@@ -503,14 +571,17 @@
 		echo "</select>{$virheviesti['keraysvyohyke']}</td></tr>";
 
 		$sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
-		// $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
+		$sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
-		echo "<tr><th>",t("Käytettävyys"),"</th><td><select name='kaytettavyys'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Käytettävyys"),"</th>";
+		echo "<td><select name='kaytettavyys'>";
+		// echo "<option value=''>",t("Valitse"),"</option>";
 		echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
-		// echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
+		echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
 		echo "</select>{$virheviesti['kaytettavyys']}</td></tr>";
 
-		echo "<tr><th>",t("Terminaalialue"),"</th><td><select name='terminaalialue'><option value=''>",t("Valitse"),"</option>";
+		echo "<tr><th>",t("Terminaalialue"),"</th>";
+		echo "<td><select name='terminaalialue'><option value=''>",t("Valitse"),"</option>";
 
 		$terminaalialue_result = t_avainsana("TERMINAALIALUE");
 
@@ -521,6 +592,20 @@
 		}
 
 		echo "</select>{$virheviesti['terminaalialue']}</td></tr>";
+
+		if ($usea_keraysvyohyke != "") {
+			$sel_sp = "SELECTED";
+		}
+		else {
+			$sel_sp = "";
+		}
+
+		echo "<tr><th>".t("Sallitaanko suuntalavalle useilta %s erivyöhykkeiltä tuotteita",$kieli,'<br>')."</th>";
+		echo "<td><select name='usea_keraysvyohyke'>";
+		echo "<option value='' $sel_sp>".t("Ei Sallita")."</option>";
+		echo "<option value='K' $sel_sp>".t("Sallitaan")."</option>";
+		echo "</select>";
+		echo "</td></tr>";
 
 		echo "<tr><th>",t("Korkeus"),"</th><td><input type='text' name='korkeus' value='{$korkeus}' />{$virheviesti['korkeus']}</td></tr>";
 		echo "<tr><th>",t("Paino"),"</th><td><input type='text' name='paino' value='{$paino}' />{$virheviesti['paino']}<br/><font class='info'>",t("Paino lasketaan automaattisesti tuotteiden takaa, jos paino jätetään nollaksi"),".</font></td></tr>";
@@ -547,7 +632,7 @@
 					AND tyyppi = 'O'
 					AND kpl = 0
 					AND suuntalava = '{$suuntalavan_tunnus}'";
-		$voidaanko_poistaa_result = mysql_query($query) or pupe_error($query);
+		$voidaanko_poistaa_result = pupe_query($query);
 		$voidaanko_poistaa_row = mysql_fetch_assoc($voidaanko_poistaa_result);
 
 		if (trim($voidaanko_poistaa_row['tunnukset']) == '') {
@@ -588,9 +673,18 @@
 
 	if ($tee == '') {
 
-		echo "<table>";
-		echo "<tr><th>",t("Saapuminen"),"</th><td>{$laskurow['laskunro']}</td><th>",t("Nimi"),"</th><td>{$laskurow['nimi']}</td></tr>";
-		echo "</table>";
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("saapuminen")."</th>";
+		echo "<th>".t("ytunnus")."</th>";
+		echo "<th>".t("nimi")."</th>";
+		echo "</tr>";
+		echo "<tr>
+				<td>$laskurow[laskunro]</td>
+				<td>$laskurow[ytunnus]</td>
+				<td>$laskurow[nimi]</td>
+				</tr>";
+		echo "</table><br>";
 
 		echo "<br />";
 
@@ -618,15 +712,23 @@
 		echo "<br /><br />";
 
 		echo "<table>";
-		echo "<tr><th>SSCC-",t("koodi"),"</th><th>",t("Varastopaikkaväli"),"</th><th>",t("Tyyppi"),"</th><th>",t("Keräysvyohyke"),"</th><th>",t("Käytettavyys"),"</th><th>",t("Terminaalialue"),"</th><th>",t("Korkeus"),"</th><th>",t("Paino"),"</th><th>",t("Tila"),"</th></tr>";
+		echo "<tr><th>SSCC-",t("koodi"),"</th>";
+		echo "<th>",t("Varastopaikkaväli"),"</th>";
+		echo "<th>",t("Tyyppi"),"</th>";
+		echo "<th>",t("Keräysvyohyke"),"</th>";
+		echo "<th>",t("Käytettavyys"),"</th>";
+		echo "<th>",t("Terminaalialue"),"</th>";
+		echo "<th>",t("Korkeus"),"</th>";
+		echo "<th>",t("Paino"),"</th>";
+		echo "<th>",t("Tila"),"</th></tr>";
 
-		$query = "	SELECT *, if(kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(tila = '', 0, if(tila = 'S', 1, 2)) sorttaus
+		$query = "	SELECT suuntalavat.*, if(suuntalavat.kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(suuntalavat.tila = '', 0, if(suuntalavat.tila = 'S', 1, 2)) sorttaus
 					FROM suuntalavat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila != 'P'
-					AND ((kaytettavyys = 'Y' AND keikkatunnus = '{$otunnus}') OR (kaytettavyys = 'L'))
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+					AND suuntalavat.tila != 'P'
 					ORDER BY sorttaus";
-		$suuntalavat_result = mysql_query($query) or pupe_error($query);
+		$suuntalavat_result = pupe_query($query);
 
 		while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_result)) {
 			echo "<tr>";
@@ -649,15 +751,18 @@
 						FROM pakkaus
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$suuntalavat_row['tyyppi']}'";
-			$pakkaus_result = mysql_query($query) or pupe_error($query);
+			$pakkaus_result = pupe_query($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
 			echo t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV");
 			echo "</td>";
 			echo "<td>";
 
-			$query = "SELECT nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavat_row['keraysvyohyke']}'";
-			$keraysvyohyke_res = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT nimitys
+						FROM keraysvyohyke
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$suuntalavat_row['keraysvyohyke']}'";
+			$keraysvyohyke_res = pupe_query($query);
 			$keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res);
 
 			echo $keraysvyohyke_row['nimitys'];
@@ -682,6 +787,7 @@
 					echo "<input type='hidden' name='keikkaid' value='{$laskurow['laskunro']}'>";
 					echo "<input type='hidden' name='tunnus' value='{$laskurow['tunnus']}'>";
 					echo "<input type='hidden' name='laskunro' value='{$laskurow['laskunro']}'>";
+					echo "<input type='hidden' name='valitut_lavat' value='{$suuntalavat_row['tunnus']}'>";
 					echo "<input type='hidden' name='nappikeikalle' value='menossa'>";
 					echo "<input type='submit' value='",t("Tulosta purkulista"),"' />";
 					echo "</form>";
@@ -713,8 +819,9 @@
 								AND tilausrivi.suuntalava = '{$suuntalavat_row['tunnus']}'
 								AND tilausrivi.tyyppi = 'O'
 								AND kpl = 0";
-					$onko_viety_varastoon_result = mysql_query($query) or pupe_error($query);
+					$onko_viety_varastoon_result = pupe_query($query);
 					$onko_viety_varastoon_row = mysql_fetch_assoc($onko_viety_varastoon_result);
+
 
 					if (trim($onko_viety_varastoon_row['tunnukset']) == '' and trim($onko_viety_varastoon_row['tunnukset']) != null) {
 						echo "<br /><form method='post'>";
@@ -738,6 +845,16 @@
 						echo "<input type='submit' value='",t("Peruuta / Tyhjennä suuntalava"),"' />";
 						echo "</form>";
 					}
+
+					echo "<br><form method='post'>";
+					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+					echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
+					echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+					echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+					echo "<input type='hidden' name='tee' value='imaiserivit' />";
+					echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+					echo "<input type='submit' value='",t("Liitä kaikki suuntalavattomat rivit tähän suuntalavaan"),"' />";
+					echo "</form>";
 				}
 				elseif ($suuntalavat_row['tila'] == 'P') {
 					echo "<font class='ok'>",t("Purettu"),"!</font>";
@@ -753,6 +870,16 @@
 				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
 				echo "<input type='submit' value='",t("Siirtovalmis"),"' />";
 				echo "</form>";
+
+				echo "<br><form method='post'>";
+				echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+				echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
+				echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+				echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+				echo "<input type='hidden' name='tee' value='imaiserivit' />";
+				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+				echo "<input type='submit' value='",t("Liitä kaikki suuntalavattomat rivit tähän suuntalavaan"),"' />";
+				echo "</form>";
 			}
 
 			echo "</td>";
@@ -764,14 +891,7 @@
 
 		if ($toiminto != "") {
 			echo "<hr>";
-			echo "<form method='post'>";
-			echo "<input type='hidden' name='toiminto' value=''>";
-			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
-			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
-			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
-			echo "</form>";
-
-			echo "&nbsp;<form action='?indexvas=1' method='post'>";
+			echo "<form action='?indexvas=1' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 			echo "<input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>";
 			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
@@ -780,8 +900,7 @@
 			echo "<input type='hidden' name='laskunro' value='{$laskurow['laskunro']}'>";
 			echo "<input type='hidden' name='nappikeikalle' value='menossa'>";
 			echo "<input type='hidden' name='toiminto' value='kohdista'>";
-			echo "<input type='submit' value='",t("Kohdista rivejä"),"'>";
+			echo "<input type='submit' value='",t("Takaisin saapumiselle"),"'>";
 			echo "</form>";
 		}
-
 	}

@@ -1040,6 +1040,31 @@ while ($tietue = fgets($fd)) {
 					$maksaja = "K";
 				}
 
+				$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$arow['luokka']}'", "", "", "selitetark_3");
+
+				// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+				if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
+				// Oletuksena näin
+				$ohjausmerkki = $lopviesti;
+
+				if ($tilaustyyppilisa == 2) {
+					$ohjausmerkki = 'VARASTOTÄYDENNYS';
+				}
+				elseif (trim($ohjausmerkki) != "") {
+					$_ohjausmerkki = $ohjausmerkki;
+			 		$_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
+			 		$_ohjausmerkki = strtolower($_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("ä", "Ä"), "a", $_ohjausmerkki);
+					$_ohjausmerkki = str_replace(array("ö", "Ö"), "o", $_ohjausmerkki);
+
+					// FRSTTT = varastotayd joka on minimissään se mikä hyväksytään varastotäydennys tekstinä
+			 		if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
+						$ohjausmerkki 	  = 'VARASTOTÄYDENNYS';
+						$tilaustyyppilisa = 2;
+					}
+				}
+
 				// Lisätään otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1055,7 +1080,7 @@ while ($tietue = fgets($fd)) {
 							erpcm								= '',
 							hinta								= '$editilaus_loppuhinta',
 							huolitsija 							= '',
-							hyvaksynnanmuutos 					= '',
+							hyvaksynnanmuutos 					= '{$arow['luokka']}',
 							jakelu 								= '',
 							jaksotettu							= '',
 							jtkielto							= '$arow[jtkielto]',
@@ -1079,6 +1104,7 @@ while ($tietue = fgets($fd)) {
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
+							ohjausmerkki						= '{$ohjausmerkki}',
 							olmapvm								= '',
 							osatoimitus							= '',
 							osoite 			   					= '$arow[osoite]',
@@ -1086,6 +1112,7 @@ while ($tietue = fgets($fd)) {
 							piiri								= '$arow[piiri]',
 							postino 		   					= '$arow[postino]',
 							postitp 		   					= '$arow[postitp]',
+							prioriteettinro						= '{$prioriteettinro}',
 							rahtivapaa							= '$editilaus_rahtivapaa',
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
@@ -1198,7 +1225,7 @@ while ($tietue = fgets($fd)) {
 				$Xresult = pupe_query($query);
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
-				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
+				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
 
 					$asnokonflikti = "";
 
@@ -1230,7 +1257,7 @@ while ($tietue = fgets($fd)) {
 						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
 						$mail .= "--$bound--\n";
 
-						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+						#$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
 					}
 				}
 			}
@@ -1914,7 +1941,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
-	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	#$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {
 	echo "\n";

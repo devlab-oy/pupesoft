@@ -1368,11 +1368,23 @@ while ($tietue = fgets($fd)) {
 				else  {
 					$trow = mysql_fetch_array($result);
 					if ($trow['panttitili'] == 'K') {
-						///* Lis‰t‰‰n tilaukselle dummytuote ja kommentti *///
-						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
-						$tuoteerrortxt .= " $tieto";
-						$tuoteno = $trow['tuoteno'];
-						$tuoteerror = 2;
+						$query = "	SELECT * 
+									from tuoteperhe 
+									where tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+									and tuoteperhe.tuoteno = '{$trow["tuoteno"]}'
+									and tuoteperhe.ohita_kerays = 'o'";
+						if (mysql_num_rows($result) != 0) {
+							///* Lis‰t‰‰n tilaukselle dummytuote ja kommentti *///
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
+							$tuoteerrortxt .= " $tieto";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 2;
+						}
+						else {
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 0; // tuote ok
+						}
 					}
 					else {
 						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";

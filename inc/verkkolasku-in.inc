@@ -80,6 +80,7 @@
 			echo "31: ".$ostaja_asiakkaantiedot["postitp"]."\n";
 			echo "32: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
 			echo "33: ".$laskuttajan_valkoodi."\n";
+			echo "34: ".$laskun_toimitunnus."\n";
 
 			N‰m‰ muuttujat ovat valinnaisia:
 
@@ -323,8 +324,23 @@
 			$laskuttajan_vat  = trim($laskuttajan_vat);
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
 			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
+			$laskun_toimitunnus = (int) $laskun_toimitunnus;
 
-			if ($laskuttajan_ovt != "") {
+			if ($laskun_toimitunnus > 0) {
+				// 0 etsit‰‰n toimittaja tunnuksella
+				$query  = "	SELECT *
+							FROM toimi
+							WHERE tunnus = '{$laskun_toimitunnus}'
+							and yhtio = '$yhtio'
+							and tyyppi != 'P'";
+				$result = pupe_query($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_assoc($result);
+				}
+			}
+
+			if (!isset($trow) and $laskuttajan_ovt != "") {
 				// 1 etsit‰‰n toimittaja ovttunnuksella
 				$query  = "	SELECT *
 							FROM toimi

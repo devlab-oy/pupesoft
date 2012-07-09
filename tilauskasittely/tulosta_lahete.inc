@@ -3540,7 +3540,7 @@ if (!function_exists('print_pdf_lahete')) {
 										"body"			=> $content_body,
 										"attachements"	=> array(0 	=> array(
 																	"filename"		=> $liite,
-																	"newfilename"	=> $newfilename,
+																	"newfilename"	=> $newfilename.".pdf",
 																	"ctype"			=> "pdf"),
 										)
 									);

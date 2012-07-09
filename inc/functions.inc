@@ -17693,8 +17693,6 @@ if (!function_exists("pupesoft_sahkoposti")) {
 			if ($attachement_newfilename != "") {
 				$attachement_name = basename($attachement_newfilename);
 			}
-			// Lis‰t‰‰n extensioni filenameen
-			$attachement_name .= ".$attachement_ctype";
 
 			// Boundin j‰lkeen aina rivinvaihto
 			$content .= "\n";

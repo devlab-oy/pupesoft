@@ -361,16 +361,13 @@
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= chr(10).chr(10).chr(13);
 		}
+		
+		// Rivinvaihto alkuun, jotta printit osuvat tarroille
+		$out = chr(10).chr(13).$out;
 
-		// 2 Form Feediä
+		// Form Feedi kahdesti, jotta ei tarvitse rullata käsin
 		$out .= chr(12).chr(12);
-		echo $out;
-		
-		$myFile = "/tmp/printfile.txt";
-		$fh = fopen($myFile, 'w') or die("can't open file");
-		fwrite($fh, $out);
-		
-		exit;
+
 		lpr($out, NULL, $komento["Purkulista"]);
 	}
 	else {

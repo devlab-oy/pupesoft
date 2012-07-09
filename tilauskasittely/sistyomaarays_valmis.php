@@ -26,7 +26,20 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE, avainsana as avainsana_kieli READ, tili WRITE";
+			$query = "	LOCK TABLES lasku WRITE,
+						tapahtuma WRITE,
+						tiliointi WRITE,
+						tilausrivi WRITE,
+						tilausrivi as tilausrivi2 WRITE,
+						sanakirja WRITE,
+						tilausrivi as tilausrivi_osto READ,
+						tuote READ,
+						sarjanumeroseuranta WRITE,
+						sarjanumeroseuranta_arvomuutos READ,
+						tuotepaikat WRITE,
+						tilausrivin_lisatiedot WRITE,
+						avainsana as avainsana_kieli READ,
+						tili WRITE";
 			$locre = pupe_query($query);
 
 			$query = "	SELECT *
@@ -337,7 +350,7 @@
 									$minnerow  = mysql_fetch_assoc($sarjares);
 								}
 
-								$kehahin_query = "	SELECT 
+								$kehahin_query = "	SELECT
 													round(if (tuote.epakurantti100pvm = '0000-00-00',
 															if (tuote.epakurantti75pvm = '0000-00-00',
 																if (tuote.epakurantti50pvm = '0000-00-00',
@@ -606,8 +619,8 @@
 
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and tila	= 'S' 
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tila	= 'S'
 					and alatila = 'C'
 					$haku
 					order by luontiaika desc";

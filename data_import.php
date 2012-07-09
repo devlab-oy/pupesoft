@@ -73,7 +73,7 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (!is_executable("/usr/bin/ssconvert") and ($kasitellaan_tiedosto_tyyppi == "XLSX" or $kasitellaan_tiedosto_tyyppi == "XLS")) {
+			if (!is_executable("/usr/bin/ssconvert") and $kasitellaan_tiedosto_tyyppi == "XLS") {
 				echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
@@ -89,17 +89,12 @@
 			}
 
 			// Tehdään Excel -> CSV konversio
-			if ($kasitellaan_tiedosto === TRUE and ($kasitellaan_tiedosto_tyyppi == "XLS" or $kasitellaan_tiedosto_tyyppi == "XLSX")) {
+			if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLS") {
 
 				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
 
 				/** Määritellään importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentoriviltä: ssconvert --list-importers **/
-				if ($kasitellaan_tiedosto_tyyppi == "XLSX") {
-					$import_type = "--import-type=Gnumeric_Excel:xlsx";
-				}
-				else {
-					$import_type = "--import-type=Gnumeric_Excel:excel";
-				}
+				$import_type = "--import-type=Gnumeric_Excel:excel";
 
 				$return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
 
@@ -116,6 +111,97 @@
 
 				// Otetaan uusi file muuttujaan
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
+			}
+
+			// Tehdään XLSX -> CSV konversio
+			if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLSX") {
+
+				/** XLSX XML-tiedosto **/
+				$foldername = md5(uniqid(rand(),true));
+
+				function charColumn($string) {
+
+					$string = strrev($string);
+					$luku 	= 0;
+
+					for ($r = 0; $r < strlen($string); $r++) {
+						$luku += (ord($string{$r})-64) * pow(26, $r);
+					}
+
+					return $luku-1;
+				}
+
+				// Avataan XLSX Zippi
+				exec("cp $kasiteltava_tiedosto_path /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
+
+				$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
+				$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+				$sheetData		= simplexml_load_file($workSheetFile);
+				$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+				$sharedStringsArray = array();
+
+				foreach ($sharedStrings->si as $string) {
+					$sharedStringsArray[] = utf8_decode($string->t);
+				}
+
+				foreach ($sheetData->sheetData->row as $row) {
+
+					$rowIndex = ($row->attributes()->r)-1;
+
+					foreach ($row->c as $cell) {
+
+						if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+							$value = $sharedStringsArray[(int) $cell->v];
+						}
+						else {
+							$value = $cell->v;
+						}
+
+						$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+						$excelrivit[$rowIndex][$colIndex] = trim($value);
+						$colIndex++;
+					}
+				}
+
+				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
+
+				$fh = fopen($kasiteltava_tiedosto_path_csv, "w");
+
+				// XLSX failisssa ei ole ollenkaan tyhjiä soluja, injisoidaan ne tässä...
+				foreach ($excelrivit as $rowIndex => $row) {
+					$edindex = 0;
+
+					foreach ($row as $colIndex => $column) {
+
+						if ($colIndex > 0 and $colIndex > $edindex+1) {
+							for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+								$excelrivit[$rowIndex][$inj] = "";
+							}
+						}
+
+						$edindex = $colIndex;
+					}
+
+					ksort($excelrivit[$rowIndex]);
+
+					fwrite($fh, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+				}
+
+				fclose($fh);
+
+
+
+
+				// Poistetaan orig uploadfile
+				exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
+				unset($kasiteltava_tiedosto_path);
+
+				// Otetaan uusi file muuttujaan
+				$kasiteltava_tiedosto_path   = $kasiteltava_tiedosto_path_csv;
+				$kasitellaan_tiedosto_tyyppi = "DATAIMPORT";
 			}
 
 			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
@@ -205,7 +291,6 @@
 		else {
 			echo "<font class='error'>".t("Dataa ei käsitelty")."!</font><br><br>\n";
 		}
-
 	}
 
 	// Katsotaan onko käyttäjällä tiedostoja käsittelyssä

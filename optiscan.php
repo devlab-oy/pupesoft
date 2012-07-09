@@ -215,7 +215,7 @@
 						$upd_res = pupe_query($query);
 
 						// Haetaan kerättävät rivit
-						$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+						$query = "	SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 									FROM kerayserat
 									WHERE yhtio 		= '{$kukarow['yhtio']}'
 									AND laatija 		= '{$kukarow['kuka']}'
@@ -326,7 +326,7 @@
 		$yhtiorow = hae_yhtion_parametrit("artr");
 		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$nro = mysql_real_escape_string(trim($sisalto[3]));
+		$nro = (int) trim($sisalto[3]);
 		$printer_id = (int) trim($sisalto[4]);
 
 		$query = "	SELECT tunnus
@@ -339,10 +339,14 @@
 
 		$reittietikettitulostin = $row['tunnus'];
 
+		$query = "LOCK TABLES kerayserat WRITE";
+		$lock_res = pupe_query($query);
+
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro 	= '{$nro}'";
+					AND nro 	= {$nro}
+					AND tila   != 'Ö'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -350,31 +354,40 @@
 		}
 
 		if (trim($response) == '') {
-			// Tarkistetaan, ettei ole dupllikaattierä joka on jo jollain toisella tyypillä keräyksessä
+			// Tarkistetaan, ettei ole duplikaattierä joka on jo jollain toisella tyypillä keräyksessä
 			// Sama tilaus ja sama tilausnumero, mutta eri keräyserä ==> FAIL
 			$duplikaatti = 0;
+			$riveja_tot  = mysql_num_rows($result);
 
 			while ($row = mysql_fetch_assoc($result)) {
 				$query = "	SELECT *
 							FROM kerayserat
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
-							AND nro			< '{$nro}'
+							AND nro			< {$nro}
 							AND tilausrivi	= '{$row['tilausrivi']}'
 							AND otunnus		= '{$row['otunnus']}'";
 				$dupl_res = pupe_query($query);
 
-				if (mysql_num_rows($dupl_res) > 0) $duplikaatti++;
+				if (mysql_num_rows($dupl_res) > 0) {
+					// Päivitetään duplikaattirivi Ö-tilaan
+					$query = "	UPDATE kerayserat
+								SET tila = 'Ö'
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND nro			= {$nro}
+								AND tilausrivi	= '{$row['tilausrivi']}'
+								AND otunnus		= '{$row['otunnus']}'";
+					$upd_res = pupe_query($query);
+
+					$duplikaatti++;
+				}
 			}
 		}
 
-		if ($duplikaatti > 0) {
-			// Päivitetään duoplikaattierä Ö-tilaan
-			$query = "	UPDATE kerayserat
-						SET tila = 'Ö'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND nro 	= '{$nro}'";
-			$upd_res = pupe_query($query);
+		$query = "UNLOCK TABLES";
+		$lock_res = pupe_query($query);
 
+		// Jos kaikki rivit oli duplikaatteja
+		if ($duplikaatti > 0 and $riveja_tot == $duplikaatti) {
 			$response = "1, Ei printattavaa\r\n\r\n";
 		}
 

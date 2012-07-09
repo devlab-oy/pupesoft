@@ -121,7 +121,23 @@
 	}
 
 	// lukitaan tableja
-	$query = "LOCK TABLES tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi write, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, avainsana READ, tili READ, asiakas READ";
+	$query = "	LOCK TABLES tuotepaikat WRITE,
+				tapahtuma WRITE,
+				lasku WRITE,
+				tiliointi WRITE,
+				sanakirja WRITE,
+				tuote READ,
+				tilausrivi WRITE,
+				tuotteen_avainsanat READ,
+				sarjanumeroseuranta WRITE,
+				sarjanumeroseuranta_arvomuutos READ,
+				tilausrivi as tilausrivi_myynti READ,
+				tilausrivi as tilausrivi_osto READ,
+				tuotepaikat as tt READ,
+				avainsana as avainsana_kieli READ,
+				avainsana READ,
+				tili READ,
+				asiakas READ";
 	$result = pupe_query($query);
 
 	//tuotteen varastostatus

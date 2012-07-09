@@ -141,7 +141,7 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet";
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
 
 			if ($kukarow["yhtio"] != "artr") {
 				$query .= "	FROM lasku use index (yhtio_tila_mapvm)
@@ -205,7 +205,7 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
 						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -246,7 +246,7 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
 						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -670,10 +670,17 @@
 			//PGP-encryptaus labeli
 			$label  = '';
 			$label .= "lähettäjä: $yhtiorow[nimi]\r\n";
-			$label .= "sisältö: vientitullaus/sisäkaupantilasto\r\n";
+
+			if ($tapa == "tuonti") {
+				$label .= "sisältö: sisäkaupantilasto\r\n";
+			}
+			else {
+				$label .= "sisältö: vientitullaus\r\n";
+			}
+
 			$label .= "kieli: ASCII\r\n";
-			$label .= "jakso: $vv$kk\r\n";
-			$label .= "koko aineiston tietuemäärä: $lask-1\r\n";
+			$label .= "jakso: $vuosi$kuuka\r\n";
+			$label .= "koko aineiston tietuemäärä: ".($lask-1)."\r\n";
 			$label .= "koko aineiston vienti-, verotus- tai laskutusarvo: $arvoyht\r\n";
 
 			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// tämä on tullin virallinen avain

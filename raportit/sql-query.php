@@ -1,7 +1,8 @@
 <?php
 
-	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	//* Tämä skripti käyttää slave-tietokantapalvelinta JA master kantaa *//
 	$useslave = 1;
+	$usemastertoo = 1;
 
 	//Tehdään tällanen replace jotta parametric.inc ei poista merkkejä
 	$sqlapu = $_POST["sqlhaku"];
@@ -11,7 +12,11 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	ini_set('zlib.output_compression', 0);
+
 	require("../inc/parametrit.inc");
+
+	ini_set("memory_limit", "2G");
 
 	//Ja tässä laitetaan ne takas
 	$sqlhaku = $sqlapu;
@@ -51,61 +56,45 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 
-			if (mysql_num_rows($result) < 65000) {
+			require('inc/ProgressBar.class.php');
 
-				if(include('Spreadsheet/Excel/Writer.php')) {
+			include('inc/pupeExcel.inc');
 
-					//keksitään failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
 
-					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$workbook->setVersion(8);
-					$worksheet = $workbook->addWorksheet('Sheet 1');
+			for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+			$excelrivi++;
 
-					$format_bold = $workbook->addFormat();
-					$format_bold->setBold();
+			$bar = new ProgressBar();
+			$bar->initialize(mysql_num_rows($result));
 
-					$excelrivi = 0;
-				}
+			while ($row = mysql_fetch_array($result)) {
 
-				if(isset($workbook)) {
-					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-					$excelrivi++;
-				}
+				$bar->increase();
 
-				while ($row = mysql_fetch_array($result)) {
-					for ($i=0; $i<mysql_num_fields($result); $i++) {
-						if (mysql_field_type($result,$i) == 'real') {
-							if(isset($workbook)) {
-								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
-							}
-						}
-						else {
-							if(isset($workbook)) {
-								$worksheet->writeString($excelrivi, $i, $row[$i]);
-							}
-						}
+				for ($i=0; $i<mysql_num_fields($result); $i++) {
+					if (mysql_field_type($result,$i) == 'real') {
+						$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 					}
-					$excelrivi++;
+					else {
+						$worksheet->writeString($excelrivi, $i, $row[$i]);
+					}
 				}
-
-				if(isset($workbook)) {
-
-					// We need to explicitly close the workbook
-					$workbook->close();
-
-					echo "<table>";
-					echo "<tr><th>".t("Tallenna tulos").":</th>";
-					echo "<form method='post' class='multisubmit'>";
-					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-					echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
-					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-					echo "</table><br>";
-				}
+				$excelrivi++;
 			}
+
+			$excelnimi = $worksheet->close();
+
+			echo "<br><br><table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
 
 			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 

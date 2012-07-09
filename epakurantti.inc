@@ -37,14 +37,15 @@
 							tuote.kehahin * 0.25),
 						0),
 					6) kehahin_nyt,
+					tuote.sarjanumeroseuranta,
 					sum(tuotepaikat.saldo) saldo
 					FROM tuote
 					LEFT JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 					AND tuote.tuoteno = '$tuoteno'
-					GROUP by 1,2,3,4,5,6,7,8,9,10,11";
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$result = pupe_query($query);
+		$tuoterow = mysql_fetch_assoc($result);
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>";
@@ -52,8 +53,101 @@
 			echo "</font><br>";
 			$tee = "";
 		}
+		elseif ($tuoterow["sarjanumeroseuranta"] == 'S' or $tuoterow["sarjanumeroseuranta"] == 'U' or $tuoterow["sarjanumeroseuranta"] == 'G') {
+
+			$sarjanumerolisa = "";
+
+			if (isset($sarjatunnus) and $sarjatunnus > 0) {
+				$sarjanumerolisa = " and sarjanumeroseuranta.tunnus = {$sarjatunnus} ";
+			}
+
+			$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
+						tilausrivi_osto.tunnus osto_rivitunnus,
+						tilausrivi_osto.perheid2 osto_perheid2,
+						tilausrivi_osto.nimitys nimitys,
+						lasku_myynti.nimi myynimi
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.laskutettuaika != '0000-00-00'
+						LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+						LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+						LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+						and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
+						and sarjanumeroseuranta.myyntirivitunnus != -1
+						and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+						$sarjanumerolisa";
+			$sarjares = pupe_query($query);
+
+			if (isset($sarjatunnus) and $sarjatunnus > 0) {
+				$sarjarow = mysql_fetch_assoc($sarjares);
+			}
+			elseif (!isset($sarjatunnus) or $sarjatunnus == 0) {
+				echo "<font class='message'>".t("Valitse sarjanumero")."</font><hr>";
+				echo "<table>";
+				echo "<tr><th>".t("Nimitys")."</th>";
+				echo "<th>".t("Sarjanumero")."</th>";
+				echo "<th>".t("Varastopaikka")."</th>";
+				echo "<th>".t("Ostohinta")."</th>";
+				echo "<th>".t("Varattu asiakaalle")."</th></tr>";
+
+				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+
+					$fnlina1 = "";
+
+					if (($sarjarow["siirtorivitunnus"] > 0) or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
+
+						if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
+							$ztun = $sarjarow["osto_perheid2"];
+						}
+						else {
+							$ztun = $sarjarow["siirtorivitunnus"];
+						}
+
+						$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero, tyyppi, otunnus
+									FROM tilausrivi
+									LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+									WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+						$siires = pupe_query($query);
+						$siirow = mysql_fetch_assoc($siires);
+
+						if ($siirow["tyyppi"] == "O") {
+							// pultattu kiinni johonkin
+							$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+						}
+						elseif ($siirow["tyyppi"] == "G") {
+							// jos tämä on jollain siirtolistalla
+							$fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
+						}
+					}
+
+					echo "<tr>
+							<td>$sarjarow[nimitys]</td>
+							<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
+							<td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td>
+							<td align='right'>";
+					echo sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]));
+					echo "</td><td>$sarjarow[myynimi] $fnlina1</td>";
+
+					echo "<td>";
+
+					echo "<form method='post' autocomplete='off'>";
+					echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
+					echo "<input type='hidden' name='sarjanro' value='{$sarjarow['sarjanumero']}'>";
+					echo "<input type='hidden' name='sarjatunnus' value='{$sarjarow['sarjatunnus']}'>";
+					echo "<input type='hidden' name='tee' value='vahvista'>";
+					echo "<input type='submit' value='".t("Valitse")."'>";
+					echo "</form>";
+
+					echo "</td>";
+					echo "</tr>";
+				}
+
+				echo "</table><br>";
+
+				$tee = 'STOP';
+			}
+		}
 		else {
-			$tuoterow = mysql_fetch_assoc($result);
 
 			$nykyinen_keskihankintahinta = $tuoterow["kehahin_nyt"];
 			$tuotteen_saldo = $tuoterow["saldo"];
@@ -177,7 +271,7 @@
 		}
 
 		// ei voida laittaa täysepäkurantiksi jos tuote on jo täysepäkurantti
-		if (($tee == 'paalle')      and ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
+		if (($tee == 'paalle') and ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
 			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote väärässä tilassa!")." ".t("Ei voida laittaa täysiepäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
@@ -365,9 +459,129 @@
 
 		if (!isset($php_cli) or !$php_cli) {
 			echo "<font class='message'>";
+			echo t("Tuote")." $tuoteno ok! <br>";
+		}
+
+		echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
+
+		if (!isset($php_cli) or !$php_cli) {
+			echo "</font><br><br>";
+		}
+	}
+
+	// Tehdään oikeellisuustarkistukset
+	if ($tee == "sarjanro_paalle") {
+
+		if ($sarjarow["osto_rivitunnus"] == 0) {
+			echo "<font class='error'>".t("VIRHE: Sarjanumeroa ei löydy!")."</font><br>";
+			$tee = "";
+		}
+
+		$nykyinenarvo = sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]);
+
+		if (!is_numeric($uusiarvo)) {
+			echo "<font class='error'>".t("VIRHE: Sarjanumeron uusi arvo ei ole numeerinen!")."</font><br>";
+			$tee = "";
+		}
+
+		$uusiarvo = (float) $uusiarvo;
+
+		$keskihankintahinta_muutos = round($uusiarvo-$nykyinenarvo, 6);
+		$varaston_muutos = $keskihankintahinta_muutos;
+
+		// Tehdään selkokielinen selite
+		$epakurantti_selite = mysql_real_escape_string("Epäkuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".$epakurantti_selite);
+	}
+
+	// Päivitetään sarjanumero
+	if ($tee == "sarjanro_paalle") {
+
+		///* Tehdään tapahtuma *///
+		$query = "	INSERT into sarjanumeroseuranta_arvomuutos set
+					yhtio   			= '$kukarow[yhtio]',
+					sarjanumerotunnus 	= '$sarjatunnus',
+					arvomuutos   		= round($keskihankintahinta_muutos, 6),
+					selite  			= '$epakurantti_selite',
+					laatija    			= '$kukarow[kuka]',
+					luontiaika 			= now()";
+		$result = pupe_query($query);
+
+		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
+		$tapahtumaid = mysql_insert_id();
+
+		///* Kirjanpito *///
+		if ($varaston_muutos <> 0) {
+
+			if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
+				$query = "	INSERT into lasku set
+							yhtio      = '$kukarow[yhtio]',
+							tapvm      = now(),
+							tila       = 'X',
+							alatila    = 'E',
+							viite      = '$tapahtumaid',
+							laatija    = '$kukarow[kuka]',
+							luontiaika = now()";
+				$result = pupe_query($query);
+				$laskuid = mysql_insert_id($link);
+			}
+
+			if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
+				$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
+			}
+			else {
+				$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+			}
+
+			// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+			$kustp_ins 		= $tuoterow["kustp"];
+			$kohde_ins 		= $tuoterow["kohde"];
+			$projekti_ins 	= $tuoterow["projekti"];
+
+			// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+
+			// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+
+			$query = "	INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$laskuid',
+						tilino   = '$yhtiorow[varasto]',
+						kustp    = '{$kustp_ins}',
+						kohde	 = '{$kohde_ins}',
+						projekti = '{$projekti_ins}',
+						tapvm    = now(),
+						summa    = $varaston_muutos,
+						vero     = 0,
+						lukko    = '',
+						selite   = '$epakurantti_selite',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = pupe_query($query);
+
+			$query = "	INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$laskuid',
+						tilino   = '$varastonmuutos_tili',
+						kustp    = '{$kustp_ins}',
+						kohde	 = '{$kohde_ins}',
+						projekti = '{$projekti_ins}',
+						tapvm    = now(),
+						summa    = $varaston_muutos * -1,
+						vero     = 0,
+						lukko    = '',
+						selite   = '$epakurantti_selite',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = pupe_query($query);
+		}
+
+		if (!isset($php_cli) or !$php_cli) {
+			echo "<font class='message'>";
 			echo t("Tuote")." $tuoteno ok!<br>";
 			echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].<br>";
 			echo "</font><br>";
 		}
 	}
+
 ?>

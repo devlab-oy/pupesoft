@@ -113,8 +113,9 @@
 		$laskun_tilausviite = implode(",",$rivi);
 	}
 
-	$laskun_asiakkaan_tilausnumero = "";
-	$kauttalaskutus = "";
+	$laskun_asiakkaan_tilausnumero 	= "";
+	$kauttalaskutus 				= "";
+	$laskun_toimitunnus				= 0;
 
 	$toim_asiakkaantiedot = array();
 	$toim_asiakkaantiedot["toim_ovttunnus"] = "";
@@ -404,7 +405,7 @@
 							/*
 							 * Runkotuotteet
 							 * =============
-							 * 
+							 *
 							 * bx runkoarvo = BOSCH
 							 * zcwr = ZF
 							 * core value = GKN

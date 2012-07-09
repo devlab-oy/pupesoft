@@ -125,9 +125,9 @@
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "keikka") {
 			$query = "	(SELECT
 						tuote.tullinimike1,
-						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
+						ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
+						if (lasku.maa_maara='', if (lasku.toim_maa='', if(varastopaikat.maa is null or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa), lasku.toim_maa), lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
@@ -141,14 +141,17 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet";
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
 
 			if ($kukarow["yhtio"] != "artr") {
 				$query .= "	FROM lasku use index (yhtio_tila_mapvm)
+							JOIN toimi ON (lasku.yhtio=toimi.yhtio and lasku.liitostunnus=toimi.tunnus)
 							JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 							LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-							LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+							LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
 							WHERE lasku.kohdistettu = 'X'
 							and lasku.tila = 'K'
 							and lasku.vanhatunnus = 0
@@ -160,9 +163,12 @@
 			else {
 				$query .= "	FROM tilausrivi
 							JOIN lasku ON (tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and lasku.tila = 'K' and lasku.vanhatunnus = 0 and lasku.kauppatapahtuman_luonne != '999')
+							JOIN toimi ON (lasku.yhtio=toimi.yhtio and lasku.liitostunnus=toimi.tunnus)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 							LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-							LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+							LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
+							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi = 'O'
 							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
@@ -199,12 +205,12 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
 						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 						LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-						LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
 						WHERE lasku.tila = 'L'
 						and lasku.alatila = 'X'
 						and lasku.kauppatapahtuman_luonne != '999'
@@ -240,7 +246,7 @@
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
+						group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
 						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -430,6 +436,7 @@
 
 				$row["paino"] 		+= $lisavarrow["paino"];
 				$row["rivihinta"] 	+= $lisavarrow["rivihinta"];
+
 			}
 
 			// 3. Nimiketietue
@@ -512,6 +519,7 @@
 					if ($tapa == "tuonti") {
 						$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
 						$worksheet->write($excelrivi, 4, $row["maalahetys"]);
+
 					}
 					else {
 						$worksheet->write($excelrivi, 5, $row["maamaara"]);

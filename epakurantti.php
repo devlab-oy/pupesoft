@@ -12,7 +12,31 @@
 		// tarvitaan $kukarow, $tuoteno ja jos halutaan muuttaa ni $tee jossa on paalle, puolipaalle tai pois
 		require ("epakurantti.inc");
 
-		if ($tee == 'vahvista') {
+		if ($tee == 'vahvista' and isset($sarjatunnus) and $sarjatunnus > 0) {
+
+			echo "<form method='post'>";
+			echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
+			echo "<input type='hidden' name='sarjanro' value='{$sarjanro}'>";
+			echo "<input type='hidden' name='sarjatunnus' value='{$sarjatunnus}'>";
+			echo "<input type='hidden' name = 'tee' value='sarjanro_paalle'>";
+
+			echo "<table>";
+			echo "<tr><th>".t("Tuote")            			."</th><td>$tuoterow[tuoteno]</td></tr>";
+			echo "<tr><th>".t("Sarjanumero")				."</th><td>$sarjanro</td>";
+			echo "<tr><th>".t("Varastonarvo nyt")			."</th><td>";
+			echo sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjatunnus));
+			echo "</td></tr>";
+			echo "<tr><th>".t("Uusi varastonarvo")			."</th><td>";
+			echo "<input type='text' name='uusiarvo' size='10'>";
+			echo "</td></tr>";
+			echo "<tr><th>".t("Selite")			."</th><td>";
+			echo "<input type='text' name='epakurantti_selite' size='35'></td></tr>";
+			echo "</table><br><br>";
+			echo "<input type='submit' value='".t("Muuta varastonarvoa")."'>";
+			echo "</form><br>";
+
+		}
+		elseif ($tee == 'vahvista') {
 
 			echo "<table>";
 			echo "<tr><th>".t("Tuote")            			."</th><td>$tuoterow[tuoteno]</td></tr>";
@@ -63,7 +87,7 @@
 				echo "<input type='hidden' name = 'tee' value='pois'>";
 				echo "<input type='submit' value='".t("Aktivoidaan kurantiksi")."'></form>";
 			}
-			
+
 			// voidaan aktivoida
 			if (($tuoterow['epakurantti25pvm'] != '0000-00-00') or ($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
 				echo "<form method='post'>";
@@ -73,7 +97,7 @@
 			}
 
 		}
-		else {
+		elseif ($tee != "STOP") {
 			$tee = "";
 		}
 	}

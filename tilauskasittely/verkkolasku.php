@@ -317,6 +317,7 @@
 						rahtimaksut READ,
 						sanakirja WRITE,
 						sarjanumeroseuranta WRITE,
+						sarjanumeroseuranta_arvomuutos READ,
 						tapahtuma WRITE,
 						tilausrivi as t READ,
 						tilausrivi as t2 WRITE,

@@ -90,6 +90,9 @@
 
 	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
+	# siivotaan yli 7 p‰iv‰‰ vanhat aineistot
+	system("find /home/e3_rajapinta/ -mtime +7 -delete");
+
 	// Teh‰‰n uysi dirikka
 	system("mkdir $path");
 

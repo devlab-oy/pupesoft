@@ -99,13 +99,7 @@ if ($laskuntyyppi != "K") {
 }
 
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
-
-	if ($pvm_rajaustyyppi == "luopvm") {
-		$ehto .= " and lasku.luontiaika >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.luontiaika <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
-	} 
-	else {
-		$ehto .= " and lasku.tapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.tapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
-	}
+	$ehto .= " and lasku.tapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.tapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
 
 	if ($index == "") $index = " use index (yhtio_tila_tapvm) ";
 }
@@ -255,20 +249,6 @@ echo "<option value = 'W' {$sel['W']}>".t("Viestill‰")."</option>";
 echo "<option value = 'K' {$sel['K']}>".t("Kommentilla")."</option>";
 echo "<option value = 'L' {$sel['L']}>".t("Laskunumerolla")."</option>";
 echo "</select></td></tr>";
-
-$sel = array_fill_keys(array($pvm_rajaustyyppi), " selected") + array_fill_keys(array('tappvm', 'luopvm'), '');
-
-echo "<tr>
-		<th>
-			<label for='paivarajaus_kentta'>".t("P‰iv‰rajaus")."</label>
-		</th>
-      	<td>
-			<select name='pvm_rajaustyyppi' id='paivarajaus_kentta'>
-				<option value='tappvm' {$sel['tappvm']}>".t("Tapahtumap‰iv‰m‰‰r‰")."</option>
-				<option value='luopvm' {$sel['luopvm']}>".t("Luontip‰iv‰m‰‰r‰")."</option>
-			</select>
-		</td>
-	</tr>";
 
 echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";

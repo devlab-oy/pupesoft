@@ -1227,6 +1227,7 @@
 											JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 											and tilausrivi.tyyppi = 'L'
+											and tilausrivi.var not in ('P','J')
 											and tilausrivi.otunnus in ($otsikot)";
 								$listilre = pupe_query($query);
 								$listilro = mysql_fetch_assoc($listilre);

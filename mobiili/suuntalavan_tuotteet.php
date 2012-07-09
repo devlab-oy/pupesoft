@@ -30,6 +30,10 @@ if (isset($submit) and trim($submit) != '') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
 		exit;
 	}
+	elseif ($submit == 'varalle') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
+		exit;
+	}
 
 }
 

@@ -18318,8 +18318,13 @@ if (!function_exists('lisaa_tuotepaikka')) {
 }
 
 if (!function_exists('tarkista_varaston_hyllypaikka')) {
-	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
+	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $varmistuskoodi = '') {
 		global $kukarow;
+
+		$query_lisa = '';
+		if ($varmistuskoodi != '') {
+			$query_lisa = "AND varmistuskoodi = '{$varmistuskoodi}'";
+		}
 
 		$query = "	SELECT tunnus
 					FROM varaston_hyllypaikat
@@ -18328,6 +18333,7 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 					AND hyllynro = '{$hyllynro}'
 					AND hyllyvali = '{$hyllyvali}'
 					AND hyllytaso = '{$hyllytaso}'
+					$query_lisa
 					#AND varasto = '{$varasto}'";
 		$chk_res = pupe_query($query);
 

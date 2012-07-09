@@ -582,9 +582,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			// Salitaan VAIN YKSI submitti per sivu! Bye bye tuplaklikkaajat...
 			echo "<script language='javascript' type='text/javascript'>
 				var submitattu = false;
+				var skippaa_tama_submitti = false;
 
 				$(document).ready(function(){
 					$('form').submit(function(){
+
+						if (skippaa_tama_submitti) {
+							skippaa_tama_submitti = true;
+							return true;
+						}
 
 						// Erikseen speksattu, etta saa submitata useita kertoja
 						if ($(this).attr('class') == 'multisubmit') {

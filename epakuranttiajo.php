@@ -301,7 +301,7 @@
 
 					if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 						echo "<td>$viesti</td>";
-						$worksheet->writeNumber($excelrivi, $excelsarake++, $viesti);
+						$worksheet->writeString($excelrivi, $excelsarake++, strip_tags($viesti));
 					}
 
 					echo "</tr>";

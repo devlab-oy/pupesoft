@@ -3,7 +3,17 @@
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
 
+		if (isset($_POST["tee"])) {
+			if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		}
+
 		require ("inc/parametrit.inc");
+
+		if (isset($tee) and $tee == "lataa_tiedosto") {
+			readfile("/tmp/".$tmpfilenimi);
+			exit;
+		}
 
 		echo "<font class='head'>".t("Epäkuranttiajo")."</font><hr>";
 
@@ -71,6 +81,14 @@
 		$epakurantti_result = mysql_query($query) or pupe_error($query);
 
 		if (!$php_cli) {
+
+			include('inc/pupeExcel.inc');
+
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
+			$excelsarake = 0;
+
 			echo "<br><table>";
 			echo "<tr>";
 			echo "<th>".t("Tuote")."</th>";
@@ -83,11 +101,23 @@
 			echo "<th>".t("Varastonarvo")."</th>";
 			echo "<th>".t("Uusi varastonarvo")."</th>";
 
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tuote"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin saapuminen"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Viimeisin laskutus"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Viim. tapahtuma"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Epäkurattitaso"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Uusi varastonarvo"), $format_bold);
+
 			if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 				echo "<th></th>";
 			}
 
 			echo "</tr>";
+			$excelrivi++;
+			$excelsarake = 0;
 		}
 
 		$vararvot_nyt = 0;
@@ -208,25 +238,52 @@
 				if ($mikataso > 0) {
 					echo "<tr>";
 					echo "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($epakurantti_row['tuoteno'])."'>{$epakurantti_row['tuoteno']}</a></td>";
+					$worksheet->writeString($excelrivi, $excelsarake++, $epakurantti_row['tuoteno']);
 
-					if ($tulorow['laadittu'] == "1970-01-01") echo "<td></td>";
-					else echo "<td>".tv1dateconv($tulorow['laadittu'])."</td>";
+					if ($tulorow['laadittu'] == "1970-01-01") {
+						echo "<td></td>";
+						$worksheet->writeString($excelrivi, $excelsarake++, "");
+					}
+					else {
+						echo "<td>".tv1dateconv($tulorow['laadittu'])."</td>";
+						$worksheet->writeDate($excelrivi, $excelsarake++, $tulorow['laadittu']);
+					}
 
-					if ($laskutusrow['laadittu'] == "1970-01-01") echo "<td></td>";
-					else echo "<td>".tv1dateconv($laskutusrow['laadittu'])."</td>";
+					if ($laskutusrow['laadittu'] == "1970-01-01") {
+						echo "<td></td>";
+						$worksheet->writeString($excelrivi, $excelsarake++, "");
+					}
+					else {
+						echo "<td>".tv1dateconv($laskutusrow['laadittu'])."</td>";
+						$worksheet->writeDate($excelrivi, $excelsarake++, $laskutusrow['laadittu']);
+					}
 
-					if ($mikataso == 100) echo "<td>".t("Yli 30kk sitten")."</td>";
-					elseif ($mikataso == 50) echo "<td>".t("Yli 24kk sitten")."</td>";
-					elseif ($mikataso == 25) echo "<td>".t("Yli 18kk sitten")."</td>";
+					if ($mikataso == 100) {
+						echo "<td>".t("Yli 30kk sitten")."</td>";
+						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 30kk sitten"));
+					}
+					elseif ($mikataso == 50) {
+						echo "<td>".t("Yli 24kk sitten")."</td>";
+						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 24kk sitten"));
+					}
+					elseif ($mikataso == 25) {
+						echo "<td>".t("Yli 18kk sitten")."</td>";
+						$worksheet->writeString($excelrivi, $excelsarake++, t("Yli 18kk sitten"));
+					}
 
 					echo "<td align='right'>{$mikataso}%</td>";
+					$worksheet->writeString($excelrivi, $excelsarake++, $mikataso."%");
 
 					echo "<td align='right'>{$epakurantti_row['saldo']}</td>";
+					$worksheet->writeNumber($excelrivi, $excelsarake++, $epakurantti_row['saldo']);
+
 					echo "<td align='right'>".round($epakurantti_row['kehahin'],2)."</td>";
+					$worksheet->writeNumber($excelrivi, $excelsarake++, round($epakurantti_row['kehahin'],2));
 
 					$vararvo_nyt = round($epakurantti_row['kehahin']*$epakurantti_row['saldo'], 2);
 
 					echo "<td align='right'>{$vararvo_nyt}</td>";
+					$worksheet->writeNumber($excelrivi, $excelsarake++, $vararvo_nyt);
 
 					if ($mikataso == 100) {
 						$vararvo_sit = 0;
@@ -239,12 +296,18 @@
 					}
 
 					echo "<td align='right'>{$vararvo_sit}</td>";
+					$worksheet->writeNumber($excelrivi, $excelsarake++, $vararvo_sit);
+
 
 					if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 						echo "<td>$viesti</td>";
+						$worksheet->writeNumber($excelrivi, $excelsarake++, $viesti);
 					}
 
 					echo "</tr>";
+
+					$excelrivi++;
+					$excelsarake = 0;
 
 					$vararvot_nyt += $vararvo_nyt;
 					$vararvot_sit += $vararvo_sit;
@@ -258,18 +321,27 @@
 
 				echo "<tr>";
 				echo "<td class='tumma' colspan='7'>".t("Yhteensä").":</td>";
+				$worksheet->writeString($excelrivi, 6, t("Yhteensä"));
+
 				echo "<td class='tumma' align='right'>$vararvot_nyt</td>";
+				$worksheet->writeNumber($excelrivi, 7, $vararvot_nyt);
+
 				echo "<td class='tumma' align='right'>$vararvot_sit</td>";
+				$worksheet->writeNumber($excelrivi, 8, $vararvot_sit);
 
 				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 					echo "<td class='tumma'></td>";
 				}
 
 				echo "</tr>";
+				$excelrivi++;
 
 				echo "<tr>";
 				echo "<td class='tumma' colspan='8'>".t("Epäkuranttimuutos yhteensä").":</td>";
+				$worksheet->writeString($excelrivi, 6, t("Epäkuranttimuutos yhteensä"));
+
 				echo "<td class='tumma' align='right'>",($vararvot_sit-$vararvot_nyt),"</td>";
+				$worksheet->writeNumber($excelrivi, 8, ($vararvot_sit-$vararvot_nyt));
 
 				if (isset($ajo_tee) and $ajo_tee == "EPAKURANTOI") {
 					echo "<td class='tumma'></td>";
@@ -279,7 +351,18 @@
 
 			echo "</table>";
 
-			echo "<br><form name = 'valinta' method='post'>";
+			$excelnimi = $worksheet->close();
+
+			echo "<br><br><table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Epakurantit.xlsx'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna excel")."'></td></tr></form>";
+			echo "</table><br>";
+
+			echo "<br><br><form name = 'valinta' method='post'>";
 			echo "<input type = 'hidden' name = 'ajo_tee' value = 'EPAKURANTOI'>";
 			echo "<input type = 'submit' value = '".t("Tee epäkuranttiuspäivitykset")."'>";
 			echo "</form><br>";

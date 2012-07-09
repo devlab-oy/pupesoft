@@ -459,9 +459,13 @@
 
 		if (!isset($php_cli) or !$php_cli) {
 			echo "<font class='message'>";
-			echo t("Tuote")." $tuoteno ok!<br>";
-			echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].<br>";
-			echo "</font><br>";
+			echo t("Tuote")." $tuoteno ok! <br>";
+		}
+
+		echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
+
+		if (!isset($php_cli) or !$php_cli) {
+			echo "</font><br><br>";
 		}
 	}
 

@@ -670,10 +670,17 @@
 			//PGP-encryptaus labeli
 			$label  = '';
 			$label .= "lähettäjä: $yhtiorow[nimi]\r\n";
-			$label .= "sisältö: vientitullaus/sisäkaupantilasto\r\n";
+
+			if ($tapa == "tuonti") {
+				$label .= "sisältö: sisäkaupantilasto\r\n";
+			}
+			else {
+				$label .= "sisältö: vientitullaus\r\n";
+			}
+
 			$label .= "kieli: ASCII\r\n";
-			$label .= "jakso: $vv$kk\r\n";
-			$label .= "koko aineiston tietuemäärä: $lask-1\r\n";
+			$label .= "jakso: $vuosi$kuuka\r\n";
+			$label .= "koko aineiston tietuemäärä: ".($lask-1)."\r\n";
 			$label .= "koko aineiston vienti-, verotus- tai laskutusarvo: $arvoyht\r\n";
 
 			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// tämä on tullin virallinen avain

@@ -153,10 +153,11 @@ if (!function_exists("pupesoft_login")) {
 		}
 		else {
 			$return['error'] = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
+
+			// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+			error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 		}
 
-		// Kirjataan epäonnistunut kirjautuminen virhelokiin...
-		error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 
 		if ($usea == 1) {
 			$query = "	SELECT yhtio.nimi, yhtio.yhtio, IF(yhtio.jarjestys = 0, 9999, yhtio.jarjestys) jarj

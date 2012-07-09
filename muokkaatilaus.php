@@ -1286,7 +1286,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
-						and lasku.alatila in ('A','')
+						and lasku.alatila in ('A','', 'J', 'T', 'U')
 						$haku
 						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc

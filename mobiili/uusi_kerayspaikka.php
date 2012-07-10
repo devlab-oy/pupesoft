@@ -46,7 +46,7 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
 	$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
-
+	var_dump($kaikki_ok);
 	if ($hyllyalue == '' and $hyllynro == '' and $hyllyvali == '' and $hyllytaso == '') {
 		$error['kerayspaikka'] = t("Hyllypaikka ei saa olla tyhjä", $browkieli).'.';
 	}
@@ -54,7 +54,13 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
 		$oletus = $oletuspaikka_chk != '' ? 'X' : '';
 
-		lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
+		#lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
+		#lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus);
+
+		$hylly = implode(",", array($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso));
+
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}&hylly=$hylly'>";
+		exit;
 	}
 	else {
 		$error['kerayspaikka'] = t("Varaston keräyspaikkaa ei ole perustettu", $browkieli).'.';
@@ -117,5 +123,6 @@ echo "
 			</td>
 		</tr>
 	</table>";
+var_dump($_REQUEST);
 
 require('inc/footer.inc');

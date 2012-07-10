@@ -1293,6 +1293,11 @@ if (!function_exists('rivi_lahete')) {
 			}
 		}
 
+        // Koontilähetteelle mikä alkuperöinen toimitus on ollut kyseessä
+        if (isset($koontilahete) and $koontilahete) {
+            $row["kommentti"] = t("Toimitus", $kieli).": $row[otunnus] ".$row["kommentti"];
+        }
+
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 

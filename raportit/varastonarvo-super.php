@@ -190,7 +190,10 @@
 		elseif (isset($summaustaso) and $summaustaso == "TRY") {
 			$sel4 = "SELECTED";
 		}
-
+		elseif (isset($summaustaso) and $summaustaso == "TRYS") {
+			$sel5 = "SELECTED";
+		}
+		
 		echo "<tr>";
 		echo "<th>".t("Summaustaso").":</th>";
 
@@ -200,6 +203,7 @@
 				<option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
 				<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
 				<option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
+				<option value='TRYS' $sel5>".t("Varastonarvo tuoteryhmittäin (saldo)")."</option>
 				</select>
 				</td>";
 		echo "</tr>";
@@ -361,7 +365,7 @@
 		if (!empty($varastot)) {
 			$varastontunnukset = " AND varastopaikat.tunnus IN (".implode(",", $varastot).")";
 
-			if ($summaustaso == "T" or $summaustaso == "TRY") {
+			if ($summaustaso == "T" or $summaustaso == "TRY" or $summaustaso == "TRYS") {
 				$order_lisa = "osasto, try, $order_extra";
 			}
 			else {
@@ -449,7 +453,7 @@
 		$varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 		$varastolisa2 = " tmp_tuotepaikat.varastonnimi, tmp_tuotepaikat.varastotunnus, ";
 
-		if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+		if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TRYS") {
 			$varastolisa1 = "";
 			$varastolisa2 = "";
 		}
@@ -457,6 +461,9 @@
 		if (!$php_cli) {
 			force_echo("Haetaan käsiteltävien tuotteiden varastopaikat historiasta.");
 		}
+
+		$varastolisa1 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tuote.tuoteno ,'\'')) tuotteet, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
+		$lisa_grouppaus_muuttuja = " group by variaatiotieto23 ";
 
 		// haetaan kaikki distinct tuotepaikat ja tehdään temp table (tämä näyttää epätehokkaalta, mutta on testattu ja tämä _on_ nopein tapa joinata ja tehdä asia)
 		$query = "	(SELECT DISTINCT
@@ -476,6 +483,7 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
+					, t1.tuoteno
 					$paikka_lisa1
 					$jarjestys_sel
 					FROM tapahtuma USE INDEX (yhtio_laadittu_hyllyalue_hyllynro)
@@ -487,7 +495,8 @@
 					$jarjestys_join
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
-					$where_lisa)
+					$where_lisa
+					$lisa_grouppaus_muuttuja)
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa1
@@ -506,6 +515,7 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
+					, t1.tuoteno
 					$paikka_lisa2
 					$jarjestys_sel
 					FROM tuotepaikat USE INDEX (tuote_index)
@@ -516,9 +526,13 @@
 											$varastontunnukset)
 					$jarjestys_join
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					$where_lisa)
+					$where_lisa
+					$lisa_grouppaus_muuttuja
+					)					
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
+
+		echo $query ."<br /><br />";
 
 		$elements = mysql_num_rows($result);
 
@@ -526,7 +540,7 @@
 			echo t("Tuotteita/tuotepaikkoja"),": $elements<br>";
 		}
 
-		if ($summaustaso == 'TRY') {
+		if ($summaustaso == 'TRY' or $summaustaso == "TRYS") {
 			$query  = " SELECT distinct selite, selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -583,7 +597,7 @@
 		if (isset($workbook)) {
 			$excelsarake = 0;
 
-			if ($summaustaso != "T" and $summaustaso != "TRY") {
+			if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TRYS") {
 				$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
 				$excelsarake++;
 			}
@@ -649,10 +663,10 @@
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
 			if ($elements > 0) {
-				require_once ('inc/ProgressBar.class.php');
-
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				// require_once ('inc/ProgressBar.class.php');
+				// 
+				// $bar = new ProgressBar();
+				// $bar->initialize($elements); // print the empty bar
 			}
 		}
 
@@ -663,15 +677,15 @@
 			$bruttovaraston_arvo = 0;
 			$lask++;
 
-			if (!$php_cli) {
-				$bar->increase();
-			}
+			// if (!$php_cli) {
+			// 	$bar->increase();
+			// }
 
-			if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+			if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TRYS") {
 				$mistavarastosta = $varastontunnukset;
 			}
 			else {
-				$mistavarastosta = " and varastopaikat.tunnus = '$row[varastotunnus]' ";
+				$mistavarastosta = " and varastopaikat.tunnus in ($row[varastotunnus]) ";
 			}
 
 			// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
@@ -759,11 +773,11 @@
 													and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 													$mistavarastosta)
 							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.tuoteno = '$row[tuoteno]'
+							and tuotepaikat.tuoteno in ({$row["tuotteet"]})
 							$summaus_lisa";
 				$vararvores = pupe_query($query);
 				$vararvorow = mysql_fetch_assoc($vararvores);
-
+query_dump($query);
 				$kpl = (float) $vararvorow["saldo"];
 				$varaston_arvo = (float) $vararvorow["varasto"];
 				$bruttovaraston_arvo = (float) $vararvorow["bruttovarasto"];
@@ -1033,7 +1047,7 @@
 
 				if (isset($workbook)) {
 
-					if ($summaustaso != "T" and $summaustaso != "TRY") {
+					if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TRYS") {
 						$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
 						$excelsarake++;
 					}
@@ -1138,7 +1152,7 @@
 					$excelsarake = 0;
 				}
 
-				if ($summaustaso == 'TRY') {
+				if ($summaustaso == 'TRY' or $summaustaso == "TRYS") {
 					$tryosind = "$row[osasto] - ".$osasto_array[$row["osasto"]]."###$row[try] - ".$try_array[$row["try"]];
 
 					if (!isset($varastot2[$tryosind])) {
@@ -1168,7 +1182,7 @@
 			echo "<table>";
 			echo "<tr>";
 
-			if ($summaustaso == 'TRY') {
+			if ($summaustaso == 'TRY' or $summaustaso == "TRYS") {
 				echo "<th>".t("Osasto")."</th>";
 				echo "<th>".t("Ryhmä")."</th>";
 			}
@@ -1184,7 +1198,7 @@
 			foreach ($varastot2 AS $varasto => $arvot) {
 				echo "<tr>";
 
-				if ($summaustaso == 'TRY') {
+				if ($summaustaso == 'TRY' or $summaustaso == "TRYS") {
 					list($osai, $tryi) = explode("###", $varasto);
 					echo "<td>$osai</td>";
 					echo "<td>$tryi</td>";
@@ -1209,7 +1223,7 @@
 
 			$cspan = 2;
 
-			if ($summaustaso == 'TRY') {
+			if ($summaustaso == 'TRY' or $summaustaso == "TRYS") {
 				$cspan = 3;
 			}
 

@@ -1262,7 +1262,7 @@
 				$ulos .= "</body></html>";
 
 				// korvataan poikkeama-meili keräysvahvistuksella
-				if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow["kerayspoikkeama"] == 0) {
+				if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1527,6 +1527,11 @@
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
+						// Nollataan tämä:
+						$komento		= "";
+						$oslapp			= "";
+						$vakadr_komento = "";
+
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
 							$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$vakadr_tulostin'";
@@ -1553,9 +1558,37 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
 
-							if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
+							$koontilahete = FALSE;
+
+							// onko koontivahvistus käytössä?
+							if ($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) {
+
+								$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
+
+								// Onko kaikki rivit kerätty?
+								$query = "	SELECT lasku.tunnus
+											FROM lasku
+											JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+											JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+											WHERE lasku.yhtio	  = '$kukarow[yhtio]'
+											AND lasku.vanhatunnus = '$hakutunnus'";
+								$vanhat_res = pupe_query($query);
+
+								// kaikki rivit kerätty!
+								if (mysql_num_rows($vanhat_res) == 0) {
+									$koontilahete = TRUE;
+								}
+							}
+
+							if ($koontilahete and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
+								$komento = "asiakasemail".$laskurow['email'];
+							}
+							elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
 								$komento = array($komento);
 								$komento[] = "asiakasemail".$laskurow['email'];
 							}
@@ -1569,7 +1602,8 @@
 								'toim'						=> $toim,
 								'komento' 					=> $komento,
 								'lahetekpl'					=> $lahetekpl,
-								'kieli' 					=> $kieli
+								'kieli' 					=> $kieli,
+								'koontilahete'				=> $koontilahete,
 								);
 
 							pupesoft_tulosta_lahete($params);

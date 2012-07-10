@@ -16600,7 +16600,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		// Aloitellaan lähetteen teko
-		if ($params['koontilahete']) {
+		if (isset($params['koontilahete']) and $params['koontilahete']) {
 			$params_lahete['koontilahete'] = TRUE;
 		}
 		else {

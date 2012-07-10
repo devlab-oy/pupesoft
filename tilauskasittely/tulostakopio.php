@@ -107,7 +107,7 @@
 	}
 	if ($toim == "SIIRTOLISTA") {
 		$fuse = t("Siirtolista");
-	}	
+	}
 	if ($toim == "VALMISTUS") {
 		$fuse = t("Valmistus");
 	}
@@ -647,35 +647,6 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-
-		/*
-		if ($toim == "KOONTILAHETE") {
-            //myyntitilaus. Tulostetaan lähete.
-			$joinlisa  = "JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
-							AND tilausrivi.yhtio = lasku.yhtio)
-						JOIN kerayserat ON (kerayserat.otunnus = tilausrivi.otunnus
-							AND kerayserat.yhtio = tilausrivi.yhtio)
-						JOIN pakkaus ON (pakkaus.tunnus = kerayserat.pakkaus
-							AND pakkaus.yhtio = kerayserat.yhtio)";
-
-			$jarj = "kerayserat.sscc_ulkoinen, lasku.tunnus DESC";
-
-			$where1 .= " lasku.tila IN ('L','N','V','G') ";
-
-			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
-				$where2 .= $wherenimi;
-			}
-			elseif ($asiakasid > 0) {
-				$where2 .= " AND lasku.liitostunnus  = '$asiakasid'";
-			}
-
-			$where3 .= " AND lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
-
-			# if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = " USE INDEX (yhtio_tila_luontiaika) ";
-		}
-		*/
 
 		if ($toim == "KERAYSLISTA") {
 
@@ -1867,13 +1838,14 @@
 			}
 
 			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
-				
+
 				if ($toim == "KOONTILAHETE") {
-					$koontilahete = true;
-				} else {
-					$koontilahete = false;
+					$koontilahete = TRUE;
 				}
-				
+				else {
+					$koontilahete = FALSE;
+				}
+
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> $sellahetetyyppi,
@@ -1884,7 +1856,7 @@
 					'komento' 					=> $komento,
 					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli,
-					'koontilahete'				=> $koontilahete
+					'koontilahete'				=> $koontilahete,
 					);
 
 				pupesoft_tulosta_lahete($params);

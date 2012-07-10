@@ -990,8 +990,9 @@
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
 
-		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta ei l‰hetet‰")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus l‰hetet‰‰n asiakkaalle")."</option>";
+		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta/s‰hkˆist‰ l‰hetett‰ ei l‰hetet‰")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k' $sel[k]>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -13,6 +13,7 @@
 
 	$tuoteno = isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
 	$tee = isset($tee) ? trim($tee) : "";
+	$varaston_muutos = 0;
 
 	// Katsotaan löytyykö tuote
 	if ($tuoteno != "") {
@@ -48,9 +49,7 @@
 		$tuoterow = mysql_fetch_assoc($result);
 
 		if (mysql_num_rows($result) != 1) {
-			echo "<font class='error'>";
-			printf (t("Tuote %s ei löydy!"), $tuoteno);
-			echo "</font><br>";
+			echo "<font class='error'>".t("Tuote %s ei löydy!", "", $tuoteno)."</font><br>";
 			$tee = "";
 		}
 		elseif ($tuoterow["sarjanumeroseuranta"] == 'S' or $tuoterow["sarjanumeroseuranta"] == 'U' or $tuoterow["sarjanumeroseuranta"] == 'G') {
@@ -275,7 +274,6 @@
 			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote väärässä tilassa!")." ".t("Ei voida laittaa täysiepäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
-
 	}
 
 	// Päivitetään tuote
@@ -390,71 +388,158 @@
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
 		$tapahtumaid = mysql_insert_id();
 
-		///* Kirjanpito *///
-		if ($varaston_muutos <> 0) {
+		if (!isset($php_cli) or !$php_cli) {
+			echo "<font class='message'>";
+			echo t("Tuote")." $tuoteno ok! <br>";
+		}
 
-			if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
-				$query = "	INSERT into lasku set
-							yhtio      = '$kukarow[yhtio]',
-							tapvm      = now(),
-							tila       = 'X',
-							alatila    = 'E',
-							viite      = '$tapahtumaid',
-							laatija    = '$kukarow[kuka]',
-							luontiaika = now()";
-				$result = pupe_query($query);
-				$laskuid = mysql_insert_id($link);
-			}
+		echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
 
-			if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
-				$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
-			}
-			else {
-				$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
-			}
+		if (!isset($php_cli) or !$php_cli) {
+			echo "</font><br><br>";
+		}
+	}
 
-			// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
-			$kustp_ins 		= $tuoterow["kustp"];
-			$kohde_ins 		= $tuoterow["kohde"];
-			$projekti_ins 	= $tuoterow["projekti"];
+    // Tehdään oikeellisuustarkistukset
+    if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
-			// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+    	if ($tuoterow['epakurantti25pvm'] != '0000-00-00' or $tuoterow['epakurantti50pvm'] != '0000-00-00' or $tuoterow['epakurantti75pvm'] != '0000-00-00' or $tuoterow['epakurantti100pvm'] != '0000-00-00') {
+            echo "<font class='error'>".t("VIRHE: Tuote on epäkurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
+            $tee = "vahvista";
+		}
 
-			// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+		if (!is_numeric($uusiarvo)) {
+			echo "<font class='error'>".t("VIRHE: Uusi keskihankintahinta ei ole numeerinen")."!</font><br>";
+			$tee = "vahvista";
+			$uusiarvo = "";
+		}
 
-			$query = "	INSERT into tiliointi set
-						yhtio    = '$kukarow[yhtio]',
-						ltunnus  = '$laskuid',
-						tilino   = '$yhtiorow[varasto]',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
-						tapvm    = now(),
-						summa    = $varaston_muutos,
-						vero     = 0,
-						lukko    = '',
-						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
-						laadittu = now()";
-			$result = pupe_query($query);
+		if (is_numeric($uusiarvo) and $uusiarvo < 0) {
+			echo "<font class='error'>".t("VIRHE: Uusi keskihankintahinta ei voi olla negatiivinen")."!</font><br>";
+			$tee = "vahvista";
+			$uusiarvo = "";
+		}
 
-			$query = "	INSERT into tiliointi set
-						yhtio    = '$kukarow[yhtio]',
-						ltunnus  = '$laskuid',
-						tilino   = '$varastonmuutos_tili',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
-						tapvm    = now(),
-						summa    = $varaston_muutos * -1,
-						vero     = 0,
-						lukko    = '',
-						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
-						laadittu = now()";
-			$result = pupe_query($query);
+		if (trim($oma_selite) == "") {
+			echo "<font class='error'>".t("VIRHE: Selite on syötettävä")."!</font><br>";
+			$tee = "vahvista";
+		}
+
+		if (is_numeric($uusiarvo) and $uusiarvo == $tuoterow["kehahin"]) {
+			echo "<font class='error'>".t("VIRHE: Tuotteella on jo tämä keskihankintahinta")."!</font><br>";
+			$tee = "vahvista";
+		}
+
+        $nykyinen_keskihankintahinta = $tuoterow["kehahin"];
+		$tuotteen_saldo = $tuoterow["saldo"];
+
+		// Tehdään selkokielinen selite
+		$epakurantti_selite = t("Keskihankintahinnan muutos").": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("päivitetään")." ";
+
+        $uusi_keskihankintahinta = (float) $uusiarvo;
+
+		// Lasketaan keskihankintahinnan muutos
+		$keskihankintahinta_muutos = abs($nykyinen_keskihankintahinta - $uusi_keskihankintahinta);
+
+		// Lasketaan varastonmuutos
+		$uusi_varastonarvo = $tuotteen_saldo * $uusi_keskihankintahinta;
+		$nykyinen_varastonarvo = $tuotteen_saldo * $nykyinen_keskihankintahinta;
+		$varaston_muutos = round($nykyinen_varastonarvo - $uusi_varastonarvo, 2) * -1;
+
+		// Selitteen loppu
+		$epakurantti_selite .= ". ".t("Kehahin ennen muutosta").": $nykyinen_keskihankintahinta ";
+		$epakurantti_selite .= t("Uusi kehahin").": $uusi_keskihankintahinta ";
+		$epakurantti_selite .= t("Saldo").": $tuotteen_saldo ";
+		$epakurantti_selite .= t("Varastonmuutos").": $varaston_muutos";
+
+        $epakurantti_selite = mysql_real_escape_string($epakurantti_selite." ".t("Selite").": ".$oma_selite);
+    }
+
+    // vaihdetaan tuotteen kehahinta
+    if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
+
+        $query = "LOCK TABLES tuotepaikat WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tili READ";
+    	$lock = pupe_query($query);
+
+        $query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tuoteno = '$tuoterow[tuoteno]'
+					AND saldo != 0";
+		$paikatres = pupe_query($query);
+
+		$luontiaika1 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y")));
+		$luontiaika2 = date("Y-m-d H:i:s", mktime(date("H"), date("i"), date("s")+1, date("m"), date("d"), date("Y")));
+
+		while ($paikatrow = mysql_fetch_assoc($paikatres)) {
+
+		    $miinus = $paikatrow['saldo']*-1;
+
+            // Poistetaan saldo vanhalla keharilla
+		    $query = "	INSERT into tapahtuma set
+    					yhtio   	= '$kukarow[yhtio]',
+    					tuoteno 	= '$tuoterow[tuoteno]',
+    					laji    	= 'tulo',
+    					kpl     	= {$miinus},
+    					hinta   	= {$tuoterow['kehahin']},
+    					kplhinta	= {$tuoterow['kehahin']},
+    					selite  	= '{$epakurantti_selite}',
+    					hyllyalue   = '{$paikatrow['hyllyalue']}',
+    					hyllynro    = '{$paikatrow['hyllynro']}',
+    					hyllyvali   = '{$paikatrow['hyllyvali']}',
+    					hyllytaso   = '{$paikatrow['hyllytaso']}',
+    					laatija    	= '$kukarow[kuka]',
+    					laadittu 	= '$luontiaika1'";
+    		$result = pupe_query($query);
+		}
+
+		// vaihdetaan kehari tuotteelle
+		$query = "	UPDATE tuote SET
+					kehahin     = '{$uusi_keskihankintahinta}',
+					muutospvm   = '$luontiaika1',
+					muuttaja    = '$kukarow[kuka]'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoterow[tuoteno]'";
+		$result = pupe_query($query);
+
+        // Lisätään keharinmuutostapahtuma
+	    $query = "	INSERT into tapahtuma set
+					yhtio   	= '$kukarow[yhtio]',
+					tuoteno 	= '$tuoterow[tuoteno]',
+					laji    	= 'arvomuutos',
+					kpl     	= 0,
+					hinta   	= {$uusi_keskihankintahinta},
+					kplhinta	= {$uusi_keskihankintahinta},
+					selite  	= '{$epakurantti_selite}',
+					laatija    	= '$kukarow[kuka]',
+					laadittu 	= '$luontiaika1'";
+		$result = pupe_query($query);
+
+        // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
+		$tapahtumaid = mysql_insert_id();
+
+		mysql_data_seek($paikatres, 0);
+
+		while ($paikatrow = mysql_fetch_assoc($paikatres)) {
+
+		    $plussa = $paikatrow['saldo'];
+
+    		// Lisätään saldo uudella keharilla
+		    $query = "	INSERT into tapahtuma set
+    					yhtio   	= '$kukarow[yhtio]',
+    					tuoteno 	= '$tuoterow[tuoteno]',
+    					laji    	= 'tulo',
+    					kpl     	= {$plussa},
+    					hinta   	= {$uusi_keskihankintahinta},
+    					kplhinta	= {$uusi_keskihankintahinta},
+    					selite  	= '{$epakurantti_selite}',
+    					hyllyalue   = '{$paikatrow['hyllyalue']}',
+    					hyllynro    = '{$paikatrow['hyllynro']}',
+    					hyllyvali   = '{$paikatrow['hyllyvali']}',
+    					hyllytaso   = '{$paikatrow['hyllytaso']}',
+    					laatija    	= '$kukarow[kuka]',
+    					laadittu 	= '$luontiaika2'";
+    		$result = pupe_query($query);
 		}
 
 		if (!isset($php_cli) or !$php_cli) {
@@ -467,7 +552,10 @@
 		if (!isset($php_cli) or !$php_cli) {
 			echo "</font><br><br>";
 		}
-	}
+
+		$query = "UNLOCK TABLES";
+    	$lock = pupe_query($query);
+    }
 
 	// Tehdään oikeellisuustarkistukset
 	if ($tee == "sarjanro_paalle") {
@@ -484,13 +572,23 @@
 			$tee = "";
 		}
 
+		if (trim($oma_selite)) {
+			echo "<font class='error'>".t("VIRHE: Selite on syötettävä")."!</font><br>";
+			$tee = "";
+		}
+
+		if (is_numeric($uusiarvo) and $uusiarvo < 0) {
+			echo "<font class='error'>".t("VIRHE: Sarjanumeron uusi arvo ei voi olla negatiivinen!")."</font><br>";
+			$tee = "";
+		}
+
 		$uusiarvo = (float) $uusiarvo;
 
 		$keskihankintahinta_muutos = round($uusiarvo-$nykyinenarvo, 6);
-		$varaston_muutos = $keskihankintahinta_muutos;
+		$varaston_muutos = round($keskihankintahinta_muutos, 2);
 
 		// Tehdään selkokielinen selite
-		$epakurantti_selite = mysql_real_escape_string("Epäkuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".$epakurantti_selite);
+		$epakurantti_selite = mysql_real_escape_string("Epäkuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("Selite").": ".$oma_selite);
 	}
 
 	// Päivitetään sarjanumero
@@ -509,79 +607,84 @@
 		// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
 		$tapahtumaid = mysql_insert_id();
 
-		///* Kirjanpito *///
-		if ($varaston_muutos <> 0) {
-
-			if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
-				$query = "	INSERT into lasku set
-							yhtio      = '$kukarow[yhtio]',
-							tapvm      = now(),
-							tila       = 'X',
-							alatila    = 'E',
-							viite      = '$tapahtumaid',
-							laatija    = '$kukarow[kuka]',
-							luontiaika = now()";
-				$result = pupe_query($query);
-				$laskuid = mysql_insert_id($link);
-			}
-
-			if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
-				$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
-			}
-			else {
-				$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
-			}
-
-			// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
-			$kustp_ins 		= $tuoterow["kustp"];
-			$kohde_ins 		= $tuoterow["kohde"];
-			$projekti_ins 	= $tuoterow["projekti"];
-
-			// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
-
-			// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
-
-			$query = "	INSERT into tiliointi set
-						yhtio    = '$kukarow[yhtio]',
-						ltunnus  = '$laskuid',
-						tilino   = '$yhtiorow[varasto]',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
-						tapvm    = now(),
-						summa    = $varaston_muutos,
-						vero     = 0,
-						lukko    = '',
-						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
-						laadittu = now()";
-			$result = pupe_query($query);
-
-			$query = "	INSERT into tiliointi set
-						yhtio    = '$kukarow[yhtio]',
-						ltunnus  = '$laskuid',
-						tilino   = '$varastonmuutos_tili',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
-						tapvm    = now(),
-						summa    = $varaston_muutos * -1,
-						vero     = 0,
-						lukko    = '',
-						selite   = '$epakurantti_selite',
-						laatija  = '$kukarow[kuka]',
-						laadittu = now()";
-			$result = pupe_query($query);
-		}
-
 		if (!isset($php_cli) or !$php_cli) {
 			echo "<font class='message'>";
-			echo t("Tuote")." $tuoteno ok!<br>";
-			echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].<br>";
-			echo "</font><br>";
+			echo t("Tuote")." $tuoteno ok! <br>";
 		}
+
+		echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
+
+		if (!isset($php_cli) or !$php_cli) {
+			echo "</font><br><br>";
+		}
+	}
+
+    //Tehdäänkö kirjaus kirjnapitoon?
+	if ($varaston_muutos != 0 and ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru" or $tee == "vaihda_kehahin" or $tee == "sarjanro_paalle")) {
+
+        ///* Kirjanpito *///
+		if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
+			$query = "	INSERT into lasku set
+						yhtio      = '$kukarow[yhtio]',
+						tapvm      = now(),
+						tila       = 'X',
+						alatila    = 'E',
+						viite      = '$tapahtumaid',
+						laatija    = '$kukarow[kuka]',
+						luontiaika = now()";
+			$result = pupe_query($query);
+			$laskuid = mysql_insert_id($link);
+		}
+
+		if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
+			$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
+		}
+		else {
+			$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+		}
+
+		// Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
+		$kustp_ins 		= $tuoterow["kustp"];
+		$kohde_ins 		= $tuoterow["kohde"];
+		$projekti_ins 	= $tuoterow["projekti"];
+
+		// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili, $kustp_ins, $kohde_ins, $projekti_ins);
+
+		// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+
+		$query = "	INSERT into tiliointi set
+					yhtio    = '$kukarow[yhtio]',
+					ltunnus  = '$laskuid',
+					tilino   = '$yhtiorow[varasto]',
+					kustp    = '{$kustp_ins}',
+					kohde	 = '{$kohde_ins}',
+					projekti = '{$projekti_ins}',
+					tapvm    = now(),
+					summa    = $varaston_muutos,
+					vero     = 0,
+					lukko    = '',
+					selite   = '$epakurantti_selite',
+					laatija  = '$kukarow[kuka]',
+					laadittu = now()";
+		$result = pupe_query($query);
+
+		$query = "	INSERT into tiliointi set
+					yhtio    = '$kukarow[yhtio]',
+					ltunnus  = '$laskuid',
+					tilino   = '$varastonmuutos_tili',
+					kustp    = '{$kustp_ins}',
+					kohde	 = '{$kohde_ins}',
+					projekti = '{$projekti_ins}',
+					tapvm    = now(),
+					summa    = $varaston_muutos * -1,
+					vero     = 0,
+					lukko    = '',
+					selite   = '$epakurantti_selite',
+					laatija  = '$kukarow[kuka]',
+					laadittu = now()";
+		$result = pupe_query($query);
 	}
 
 ?>

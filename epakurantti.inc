@@ -509,7 +509,7 @@
 					laji    	= 'arvomuutos',
 					kpl     	= 0,
 					hinta   	= {$uusi_keskihankintahinta},
-					kplhinta	= {$uusi_keskihankintahinta},
+					kplhinta	= {$tuoterow['kehahin']},
 					selite  	= '{$epakurantti_selite}',
 					laatija    	= '$kukarow[kuka]',
 					laadittu 	= '$luontiaika1'";

@@ -31,6 +31,9 @@
 				$tee = '';
 			}
 		}
+		else {
+			$tee = '';
+		}
 	}
 
 	if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
@@ -188,7 +191,7 @@
 	}
 
 	if ($tee == '') {
-		echo "<table><tr><th>".t("Valitse tuote")."</th><td>";
+		echo "<br><table><tr><th>".t("Valitse tuote")."</th><td>";
 		echo "<form name='epaku' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='toim' value='{$toim}'>";
 		echo "<input type='text' name='tuoteno'>";
@@ -198,22 +201,24 @@
 		echo "</form>";
 		echo "</td></tr></table>";
 
-
 		if ($toim == "VAIHDAKEHAHIN") {
-
-
 			echo "<br><br><form method='post' enctype='multipart/form-data'>";
 			echo "<input type='hidden' name='toim' value='{$toim}'>";
 			echo "<input type='hidden' name='tee' value='tiedostosta'>";
-			echo "<table>";
-			echo "	<tr><th>".t("Valitse tiedosto").":</th>
-					<td><input name='userfile' type='file'></td></tr>";
+
+			echo "<br><br>
+					<font class='head'>".t("Lue tuotteet tiedostosta")."</font><hr>
+					<table>
+					<tr><th colspan='3'>".t("Tiedostomuoto").":</th></tr>
+					<tr>";
+			echo "<td>".t("Tuoteno")."</td><td>".t("Keskihankintahinta")."</td><td>".t("Selite")."</td>";
+			echo "</tr>";
+			echo "<tr><td class='back'><br></td></tr>";
+			echo "<tr><th>".t("Valitse tiedosto").":</th>
+					<td colspan='2'><input name='userfile' type='file'></td></tr>";
 
 			echo "</table>";
-
-
-			echo "<br><br><input type='submit' value='".t("Valitse")."'>
-					</form>";
+			echo "<br><br><input type='submit' value='".t("Valitse")."'></form>";
 		}
 
 		// kursorinohjausta

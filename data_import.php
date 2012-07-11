@@ -73,7 +73,7 @@
 				$kasitellaan_tiedosto = FALSE;
 			}
 
-			if (!is_executable("/usr/bin/ssconvert") and ($kasitellaan_tiedosto_tyyppi == "XLSX" or $kasitellaan_tiedosto_tyyppi == "XLS")) {
+			if (!is_executable("/usr/bin/ssconvert") and $kasitellaan_tiedosto_tyyppi == "XLS") {
 				echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>\n";
 				$kasitellaan_tiedosto = FALSE;
 			}
@@ -89,17 +89,12 @@
 			}
 
 			// Tehdään Excel -> CSV konversio
-			if ($kasitellaan_tiedosto === TRUE and ($kasitellaan_tiedosto_tyyppi == "XLS" or $kasitellaan_tiedosto_tyyppi == "XLSX")) {
+			if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLS") {
 
 				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
 
 				/** Määritellään importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentoriviltä: ssconvert --list-importers **/
-				if ($kasitellaan_tiedosto_tyyppi == "XLSX") {
-					$import_type = "--import-type=Gnumeric_Excel:xlsx";
-				}
-				else {
-					$import_type = "--import-type=Gnumeric_Excel:excel";
-				}
+				$import_type = "--import-type=Gnumeric_Excel:excel";
 
 				$return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
 
@@ -116,6 +111,23 @@
 
 				// Otetaan uusi file muuttujaan
 				$kasiteltava_tiedosto_path = $kasiteltava_tiedosto_path_csv;
+			}
+
+			// Tehdään XLSX -> CSV konversio
+			if ($kasitellaan_tiedosto === TRUE and $kasitellaan_tiedosto_tyyppi == "XLSX") {
+
+				// Tallennetaan XLSX faili CSV muotoon
+				$kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
+
+				// pupeFileReader palauttaa tidostonimen
+				$kasiteltava_tiedosto_path_csv = pupeFileReader($kasiteltava_tiedosto_path, "XLSX", $kasiteltava_tiedosto_path_csv);
+
+				// Poistetaan orig uploadfile
+				unset($kasiteltava_tiedosto_path);
+
+				// Otetaan uusi file muuttujaan
+				$kasiteltava_tiedosto_path   = $kasiteltava_tiedosto_path_csv;
+				$kasitellaan_tiedosto_tyyppi = "DATAIMPORT";
 			}
 
 			// Generoidaan uusi käyttäjäkohtainen filenimi datain -hakemistoon. Konversion jälkeen filename on muotoa: lue-data#username#yhtio#taulu#randombit#alkuperainen_filename#jarjestys.DATAIMPORT
@@ -205,7 +217,6 @@
 		else {
 			echo "<font class='error'>".t("Dataa ei käsitelty")."!</font><br><br>\n";
 		}
-
 	}
 
 	// Katsotaan onko käyttäjällä tiedostoja käsittelyssä

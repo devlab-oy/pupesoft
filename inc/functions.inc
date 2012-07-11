@@ -15047,10 +15047,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 }
 
 if (!function_exists("pupeFileReader")) {
-	function pupeFileReader($file, $extension = "") {
+	function pupeFileReader($file, $extension = "", $saveintocsvfile = "") {
 
         /** Laitetaan rivit arrayseen **/
     	$excelrivit = array();
+
+        // Jos halutaan tehdä esim XLSX to CSV konversio
+        if ($saveintocsvfile != "") {
+            // Aina temppiin
+            $saveintocsvfile = "/tmp/".basename($saveintocsvfile);
+
+            // Avataan file
+            $savefile = fopen($saveintocsvfile, "w");
+        }
 
         if ($extension == "DATAIMPORT") {
         	/** Ladataan CSV file **/
@@ -15156,7 +15165,17 @@ if (!function_exists("pupeFileReader")) {
 
         			$edindex = $colIndex;
         		}
+
+                // Laitetaan solut vielä indeksien mukaan järjestykseen jotta implode toimisi
+        		ksort($excelrivit[$rowIndex]);
+
+        		if (isset($savefile)) {
+        		    fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+        		}
         	}
+
+        	// Poistetaan zipppi ja purettu zippi
+        	exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
         }
         else {
         	/** PHPExcel kirjasto **/
@@ -15198,8 +15217,15 @@ if (!function_exists("pupeFileReader")) {
         	unset($objReader);
         	unset($objPHPExcel);
         }
-        
-         return $excelrivit;
+
+        if (isset($savefile)) {
+            fclose($savefile);
+
+            return $saveintocsvfile;
+        }
+        else {
+            return $excelrivit;
+        }
     }
 }
 

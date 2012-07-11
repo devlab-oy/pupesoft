@@ -27,8 +27,14 @@ if (isset($submit) and trim($submit) != '') {
 		exit;
 	}
 	elseif ($submit == 'submit') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-		exit;
+		# Jos ei ole valikoitu rivit‰, ei tehd‰ mit‰‰n.
+		if (isset($_POST['selected_row'])) {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
+			exit;
+		}
+		else {
+			$error['tuotteet'] = t("Rivi‰ ei ole valittu", $browkieli).'.';
+		}
 	}
 	elseif ($submit == 'varalle') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
@@ -233,13 +239,11 @@ echo "						<tr>
 						</td>
 					</tr>
 				</table>
+				<span class='error'>{$error['tuotteet']}</span>
 				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				</form>
 			</td>
-		</tr>
-		<tr>
-			<td colspan='4' class='back'>{$error['alusta']}</td>
 		</tr>
 	</table>";
 

@@ -636,7 +636,7 @@
 			$laskuid = mysql_insert_id($link);
 		}
 
-		if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
+		if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
 			$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
 		}
 		else {

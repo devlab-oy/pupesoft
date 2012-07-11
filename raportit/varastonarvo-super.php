@@ -462,12 +462,16 @@
 			force_echo("Haetaan k‰sitelt‰vien tuotteiden varastopaikat historiasta.");
 		}
 
-		$varastolisa1 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tuote.tuoteno ,'\'')) tuotteet, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
-		$lisa_grouppaus_muuttuja = " group by variaatiotieto23 ";
 
+		if($summaustaso == "TRYS") {
+			$varastolisa1 = "group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
+			$lisa_grouppaus_muuttuja = " group by variaatiotieto23 ";			
+		}
 		// haetaan kaikki distinct tuotepaikat ja tehd‰‰n temp table (t‰m‰ n‰ytt‰‰ ep‰tehokkaalta, mutta on testattu ja t‰m‰ _on_ nopein tapa joinata ja tehd‰ asia)
 		$query = "	(SELECT DISTINCT
 					$varastolisa1
+					t1.selite variaatiotieto23,
+					group_concat(distinct concat('\'', tuote.tuoteno ,'\'')) tuotteet,
 					tapahtuma.yhtio,
 					tapahtuma.tuoteno,
 					tuote.try,
@@ -483,7 +487,6 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
-					, t1.tuoteno
 					$paikka_lisa1
 					$jarjestys_sel
 					FROM tapahtuma USE INDEX (yhtio_laadittu_hyllyalue_hyllynro)
@@ -500,6 +503,8 @@
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa1
+					t1.selite variaatiotieto23,
+					group_concat(distinct concat('\'', tuote.tuoteno ,'\'')) tuotteet,
 					tuotepaikat.yhtio,
 					tuotepaikat.tuoteno,
 					tuote.try,
@@ -515,7 +520,6 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
-					, t1.tuoteno
 					$paikka_lisa2
 					$jarjestys_sel
 					FROM tuotepaikat USE INDEX (tuote_index)
@@ -663,10 +667,9 @@
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
 			if ($elements > 0) {
-				// require_once ('inc/ProgressBar.class.php');
-				// 
-				// $bar = new ProgressBar();
-				// $bar->initialize($elements); // print the empty bar
+				#require_once ('inc/ProgressBar.class.php');
+				#$bar = new ProgressBar();
+				#$bar->initialize($elements); // print the empty bar
 			}
 		}
 
@@ -677,9 +680,9 @@
 			$bruttovaraston_arvo = 0;
 			$lask++;
 
-			// if (!$php_cli) {
-			// 	$bar->increase();
-			// }
+			#if (!$php_cli) {
+			#	$bar->increase();
+			#}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TRYS") {
 				$mistavarastosta = $varastontunnukset;
@@ -773,8 +776,13 @@
 													and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 													$mistavarastosta)
 							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.tuoteno in ({$row["tuotteet"]})
+							and tuotepaikat.tuoteno in ({$row[tuotteet]})
 							$summaus_lisa";
+
+				if($summaustaso != "TRYS") {
+					$query = str_ireplace("and tuotepaikat.tuoteno in ({$row["tuotteet"]})", "and tuotepaikat.tuoteno = '$row[tuoteno]'", $query);
+				}
+
 				$vararvores = pupe_query($query);
 				$vararvorow = mysql_fetch_assoc($vararvores);
 query_dump($query);

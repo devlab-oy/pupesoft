@@ -192,7 +192,7 @@
 			// Lasketaan varastonmuutos
 			$uusi_varastonarvo = $tuotteen_saldo * $uusi_keskihankintahinta;
 			$nykyinen_varastonarvo = $tuotteen_saldo * $nykyinen_keskihankintahinta;
-			$varaston_muutos = round($nykyinen_varastonarvo - $uusi_varastonarvo, 2) * -1;
+			$varaston_muutos = round(($nykyinen_varastonarvo - $uusi_varastonarvo) * -1, 2);
 
 			// Selitteen loppu
 			$epakurantti_selite .= ". ".t("Alkup. kehahin").": $brutto_keskihankintahinta ";
@@ -402,6 +402,8 @@
 
     // Tehdään oikeellisuustarkistukset
     if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
+        // Pilkut pisteiks
+    	$uusiarvo = str_replace(",", ".", $uusiarvo);
 
     	if ($tuoterow['epakurantti25pvm'] != '0000-00-00' or $tuoterow['epakurantti50pvm'] != '0000-00-00' or $tuoterow['epakurantti75pvm'] != '0000-00-00' or $tuoterow['epakurantti100pvm'] != '0000-00-00') {
             echo "<font class='error'>".t("VIRHE: Tuote on epäkurantti. Keskihankintahintaa ei voida vaihtaa")."!</font><br>";
@@ -436,7 +438,7 @@
 		// Tehdään selkokielinen selite
 		$epakurantti_selite = t("Keskihankintahinnan muutos").": ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("päivitetään")." ";
 
-        $uusi_keskihankintahinta = (float) $uusiarvo;
+        $uusi_keskihankintahinta = round($uusiarvo, 6);
 
 		// Lasketaan keskihankintahinnan muutos
 		$keskihankintahinta_muutos = abs($nykyinen_keskihankintahinta - $uusi_keskihankintahinta);
@@ -444,7 +446,7 @@
 		// Lasketaan varastonmuutos
 		$uusi_varastonarvo = $tuotteen_saldo * $uusi_keskihankintahinta;
 		$nykyinen_varastonarvo = $tuotteen_saldo * $nykyinen_keskihankintahinta;
-		$varaston_muutos = round($nykyinen_varastonarvo - $uusi_varastonarvo, 2) * -1;
+		$varaston_muutos = round(($nykyinen_varastonarvo - $uusi_varastonarvo) * -1, 2);
 
 		// Selitteen loppu
 		$epakurantti_selite .= ". ".t("Kehahin ennen muutosta").": $nykyinen_keskihankintahinta ";
@@ -473,7 +475,7 @@
 
 		while ($paikatrow = mysql_fetch_assoc($paikatres)) {
 
-		    $miinus = $paikatrow['saldo']*-1;
+		    $miinus = $paikatrow['saldo'] * -1;
 
             // Poistetaan saldo vanhalla keharilla
 		    $query = "	INSERT into tapahtuma set
@@ -559,6 +561,8 @@
 
 	// Tehdään oikeellisuustarkistukset
 	if ($tee == "sarjanro_paalle") {
+        // Pilkut pisteiks
+    	$uusiarvo = str_replace(",", ".", $uusiarvo);
 
 		if ($sarjarow["osto_rivitunnus"] == 0) {
 			echo "<font class='error'>".t("VIRHE: Sarjanumeroa ei löydy!")."</font><br>";

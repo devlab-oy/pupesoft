@@ -614,16 +614,8 @@
 
 				// jos halutaan MYÖS lähete
 				if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
-					$lahetteen_tulostustapa_query = "	SELECT *
-														FROM lasku
-														WHERE yhtio = '{$kukarow["yhtio"]}'
-														AND tunnus in ($tilausnumeroita)";
-					$lahetteen_tulostustapa_result = pupe_query($lahetteen_tulostustapa_query);
-
-					// Loopataan kaikki keräyslistan tilaukset ja tulostetaan lähete
-					while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
-						$params = array(
-							'laskurow'					=> $lahetteen_tulostustapa_row,
+					$params = array(
+							'laskurow'					=> $laskurow,
 							'sellahetetyyppi' 			=> "",
 							'extranet_tilausvahvistus' 	=> "",
 							'naytetaanko_rivihinta'		=> "",
@@ -634,8 +626,7 @@
 							'kieli' 					=> ""
 							);
 
-						pupesoft_tulosta_lahete($params);
-					}
+				    pupesoft_tulosta_lahete($params);
 				}
 
 				if ($returnvalue != 0) {

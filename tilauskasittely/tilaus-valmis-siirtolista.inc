@@ -612,6 +612,23 @@
 				$params_kerayslista["komento"] = $komento;
 				print_pdf_kerayslista($params_kerayslista);
 
+				// jos halutaan MYÖS lähete
+				if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+					$params = array(
+							'laskurow'					=> $laskurow,
+							'sellahetetyyppi' 			=> "",
+							'extranet_tilausvahvistus' 	=> "",
+							'naytetaanko_rivihinta'		=> "",
+							'tee'						=> "",
+							'toim'						=> $toim,
+							'komento' 					=> $komento,
+							'lahetekpl'					=> "",
+							'kieli' 					=> ""
+							);
+
+				    pupesoft_tulosta_lahete($params);
+				}
+
 				if ($returnvalue != 0) {
 					echo "<font class='error'>$komento".t("Keräyslistan tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
 							".t("Käy tulostamassa lähete")." <a href='lahetteen_tulostusjono.php'>".t("tulostusjonosta")."</a>.</font><br>";

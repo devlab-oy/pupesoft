@@ -270,34 +270,34 @@
 				echo "<tr>
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</th>
 					<td colspan='2'></td></tr>";
-					
+
 				echo "<tr>
 					<th>$asiakasrow[maa]</th><td colspan='2'><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid=$asiakasid&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
-					
-					
+
+
 				$as_tunnus = explode(",", $tunnukset);
-				
+
 				foreach ($as_tunnus as $astun) {
 					$query  = "	SELECT kentta01
 						        FROM kalenteri
 						        WHERE yhtio = '$kukarow[yhtio]'
-						        AND tyyppi  = 'Myyntireskontraviesti' 
+						        AND tyyppi  = 'Myyntireskontraviesti'
 						        AND liitostunnus = '$astun'
 						        AND yhtio   = '$kukarow[yhtio]'
-								ORDER BY tunnus desc 
+								ORDER BY tunnus desc
 								LIMIT 1";
 					$amres = pupe_query($query);
-				
+
 					if (mysql_num_rows($amres) > 0) {
 						$amrow = mysql_fetch_assoc($amres);
-                
+
 						echo "<tr>
 							<th>".t("Reskontraviesti")."</th><td colspan='2'>$amrow[kentta01]</td>
 							</tr>";
 					}
 				}
-				
+
 				echo "<tr><td colspan='3' class='back'><br></td></tr>";
 
 				if (!isset($vv)) $vv = date("Y");
@@ -368,8 +368,8 @@
 				echo "</tr></table><br>";
 
 				//avoimet laskut
-				$kentat = 'laskunro, tapvm, erpcm, summa, kapvm, kasumma, mapvm, ika, viikorkoeur, olmapvm, tunnus';
-				$kentankoko = array(8,8,8,10,8,8,8,4,4,8);
+				$kentat = 'laskunro, tapvm, erpcm, summa, avoinsumma, kapvm, kasumma, mapvm, ika, korko, olmapvm, tunnus';
+				$kentankoko = array(7,8,8,10,10,8,8,8,4,5,8);
 
 				$lisa = "";
 				$havlisa = "";
@@ -381,15 +381,24 @@
 					// tarkastetaan onko hakukentässä jotakin
 					if (strlen($haku[$i]) > 0) {
 						if (trim($array[$i]) == "ika") {
-							$havlisa = " HAVING abs(ika)='$haku[$i]'";
+							$havlisa .= " and abs(ika) = '$haku[$i]'";
+						}
+						elseif (trim($array[$i]) == "avoinsumma" OR trim($array[$i]) == "korko") {
+							$havlisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
 						}
 						else {
-							$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+							$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
 						}
 
-						$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+						$ulisa .= "&haku[".$i."] = ".$haku[$i];
 					}
 				}
+
+				if ($havlisa != "") {
+					$havlisa = "HAVING ".substr($havlisa, 5);
+				}
+
+
 				if (strlen($ojarj) > 0) {
 					$jarjestys = $array[$ojarj];
 				}
@@ -430,8 +439,10 @@
                 }
 
 				$query = "	SELECT laskunro, tapvm, erpcm,
-							summa-pyoristys-saldo_maksettu summa,
-							summa_valuutassa-pyoristys_valuutassa-saldo_maksettu_valuutassa summa_valuutassa,
+							summa loppusumma,
+							summa_valuutassa loppusumma_valuutassa,
+							if(mapvm!='0000-00-00', 0, summa-saldo_maksettu) avoinsumma,
+							if(mapvm!='0000-00-00', 0, summa_valuutassa-saldo_maksettu_valuutassa) avoinsumma_valuutassa,
 							kapvm, kasumma, kasumma_valuutassa, mapvm,
 							TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm) ika,
 							round((viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
@@ -519,24 +530,27 @@
 				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
 				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
 				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Avoinsaldo")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=10&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 
 				echo "<td class='back'></td></tr>";
 				echo "<tr>";
 
-				for ($i = 0; $i < mysql_num_fields($result)-6; $i++) {
+				for ($i = 0; $i < mysql_num_fields($result)-7; $i++) {
 					echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 				}
 
-				echo "<td></td><td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+				echo "<td></td><td class='back'></td><td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
 
-				$summa = 0;
+				$totaali = array();
+                $avoimet = array();
+ 				$korkoja = 0;
 
 				// haetaan kaikki yrityksen rahatilit mysql muodossa
 				$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
@@ -547,20 +561,29 @@
 				$ratire = pupe_query($query);
 				$ratiro = mysql_fetch_array($ratire);
 
-				while ($maksurow = mysql_fetch_array ($result)) {
+				while ($maksurow = mysql_fetch_array($result)) {
 
 					echo "<tr class='aktiivi'>";
 					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
 
 					echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
 					echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";
+					echo "<td align='right'>$maksurow[loppusumma] {$yhtiorow['valkoodi']}";
 
-					if ($maksurow["saldo_maksettu"] != 0 and $maksurow["mapvm"] == "0000-00-00") {
-						$maksurow["summa"] .= "*";
+					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+						echo "<br />{$maksurow['loppusumma_valuutassa']} {$maksurow['valkoodi']}";
 					}
-					echo "<td align='right'>$maksurow[summa] {$yhtiorow['valkoodi']}";
-					if ($maksurow['summa_valuutassa'] != 0 and $maksurow['summa'] != $maksurow['summa_valuutassa']) {
-						echo "<br />{$maksurow['summa_valuutassa']} {$maksurow['valkoodi']}";
+
+					echo "</td>";
+
+					echo "<td align='right'>";
+
+					if ($maksurow["avoinsumma"] != 0) {
+						echo "$maksurow[avoinsumma] {$yhtiorow['valkoodi']}";
+
+						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+							echo "<br />{$maksurow['avoinsumma_valuutassa']} {$maksurow['valkoodi']}";
+						}
 					}
 
 					echo "</td>";
@@ -570,7 +593,8 @@
 
 					if ($maksurow["kasumma"] != 0) {
 						echo "<td align='right'>$maksurow[kasumma]";
-						if ($maksurow['kasumma_valuutassa'] != 0 and $maksurow['kasumma'] != $maksurow['kasumma_valuutassa']) {
+
+						if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
 							echo "<br />" . $maksurow['kasumma_valuutassa'] . ' ' . $maksurow['valkoodi'];
 						}
 						echo "</td>";
@@ -617,30 +641,47 @@
 					echo "</td>";
 
 					echo "<td class='back'></td></tr>";
-					if ($maksurow['valkoodi'] == $yhtiorow['valkoodi'])
-						$totaali[$maksurow['valkoodi']] += $maksurow['summa'];
-					else
-						$totaali[$maksurow['valkoodi']] += $maksurow['summa_valuutassa'];
-					$summa += $maksurow['summa'];
-				}
 
-				echo "<tr><th colspan='3'>".t("Yhteensä")."</th><th style='text-align:right'>";
-
-				if (count($totaali) == 1 and isset($totaali[$yhtiorow['valkoodi']])) {
-					echo $totaali[$yhtiorow['valkoodi']];
-					echo " ".$yhtiorow["valkoodi"];
-				}
-				else {
-					if (count($totaali) > 0) {
-						foreach ($totaali as $valuutta => $valsumma) {
-							printf("%.2f",$valsumma);
-							echo " $valuutta<br>";
-						}
+					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($maksurow['valkoodi'])) {
+						$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma_valuutassa'];
+						$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma_valuutassa'];
 					}
-					echo "$summa $yhtiorow[valkoodi]";
+					else {
+						$totaali[$maksurow['valkoodi']] += $maksurow['loppusumma'];
+						$avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
+					}
+
+					$korkoja += $maksurow['korko'];
 				}
-				echo "</th><th colspan='7'></th></tr>";
-				echo "</table>";
+
+				echo "<tr><th colspan='3'>".t("Yhteensä")."</th>";
+				echo "<th style='text-align:right'>";
+
+				if (count($totaali) > 0) {
+					foreach ($totaali as $valuutta => $valsumma) {
+						echo sprintf('%.2f', $valsumma)." $valuutta<br>";
+					}
+				}
+				echo "</th>";
+
+				echo "<th style='text-align:right'>";
+
+				if (count($avoimet) > 0) {
+					foreach ($avoimet as $valuutta => $valsumma) {
+						echo sprintf('%.2f', $valsumma)." $valuutta<br>";
+					}
+				}
+				echo "</th>";
+
+				echo "<th colspan='4'></th>";
+
+				echo "<th style='text-align:right'>";
+				echo sprintf('%.2f', $korkoja)."<br>";
+				echo "</th>";
+
+				echo "<th colspan='2'></th>";
+
+				echo "</tr></table>";
 				echo "</form>";
 				echo "<script LANGUAGE='JavaScript'>document.forms[0][0].focus()</script>";
 			}

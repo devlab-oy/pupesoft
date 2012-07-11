@@ -462,8 +462,8 @@
 				// Tulostetaan keräyslista
 				require_once ("tulosta_lahete_kerayslista.inc");
 
-				//hatetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				// Haetaan asiakkaan tiedot
+				$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$riresult = mysql_query($query) or pupe_error($query);

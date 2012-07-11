@@ -316,6 +316,7 @@
 						rahtimaksut READ,
 						sanakirja WRITE,
 						sarjanumeroseuranta WRITE,
+						sarjanumeroseuranta_arvomuutos READ,
 						tapahtuma WRITE,
 						tilausrivi as t READ,
 						tilausrivi as t2 WRITE,
@@ -1215,21 +1216,27 @@
 							$aslisakulrow = mysql_fetch_assoc($aslisakulres);
 
 							if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['laskutuslisa'] == '') {
+
+								$query_ale_lisa = generoi_alekentta('M');
+
+								// Prosentuaalinen laskutuslisä
+								// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa! Jos on verottomat hinnat niin lisäprossa lasketaan verottomasta summasta, jos on verolliset hinnat niin lasketaan verollisesta summasta)
+								$query = "  SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
+											FROM tilausrivi
+											JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+											and tilausrivi.tyyppi = 'L'
+											and tilausrivi.var not in ('P','J')
+											and tilausrivi.otunnus in ($otsikot)";
+								$listilre = pupe_query($query);
+								$listilro = mysql_fetch_assoc($listilre);
+
+								// Jos tilauksen loppusumma on nolla, niin ei myöskään lisätä laskutuslisää
+								if ($listilro["laskun_loppusumma"] == 0) {
+									continue;
+								}
+
 								if ($yhtiorow["laskutuslisa_tyyppi"] == 'L' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'N') {
-
-									$query_ale_lisa = generoi_alekentta('M');
-
-									// Prosentuaalinen laskutuslisä
-									// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa! Jos on verottomat hinnat niin lisäprossa lasketaan verottomasta summasta, jos on verolliset hinnat niin lasketaan verollisesta summasta)
-									$query = "  SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
-												FROM tilausrivi
-												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-												and tilausrivi.tyyppi = 'L'
-												and tilausrivi.otunnus in ($otsikot)";
-									$listilre = pupe_query($query);
-									$listilro = mysql_fetch_assoc($listilre);
-
 									$hinta = $listilro["laskun_loppusumma"] * $yhtiorow["laskutuslisa"] / 100;
 								}
 								else {
@@ -1317,9 +1324,6 @@
 										$tulos_ulos .= t("Lisättiin lisäkuluja")." $laskurow[tunnus]: $lkhinta $alemuuttuja $laskurow[valkoodi]<br>\n";
 									}
 								}
-							}
-							else {
-								$tulos_ulos .= t("Lisäkulua ei voitu lisätä")." $laskurow[tunnus]!<br>\n";
 							}
 						}
 					}

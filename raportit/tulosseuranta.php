@@ -139,7 +139,8 @@
 							AND tiliointi.tilino in ({$row["tilit"]})
 							AND tiliointi.tapvm >= '$tilikausi_alku'
 							AND tiliointi.tapvm < '$alku_pvm'
-							AND tiliointi.korjattu = ''";
+							AND tiliointi.korjattu = ''
+							$lisa";
 				$kumulatiivinen_result = pupe_query($query);
 				$kumulatiivinen_row = mysql_fetch_assoc($kumulatiivinen_result);
 				$row["summa"] += $kumulatiivinen_row["summa"];

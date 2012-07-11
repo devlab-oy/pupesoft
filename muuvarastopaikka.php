@@ -5,7 +5,18 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ, asiakas READ";
+		$query  = "	LOCK TABLE tuotepaikat WRITE,
+					tapahtuma WRITE,
+					sanakirja WRITE,
+					tilausrivin_lisatiedot WRITE,
+					tuote READ,
+					varastopaikat READ,
+					tilausrivi READ,
+					tilausrivi as tilausrivi_osto READ,
+					sarjanumeroseuranta WRITE,
+					sarjanumeroseuranta_arvomuutos READ,
+					lasku READ,
+					asiakas READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {

@@ -1585,7 +1585,7 @@
 				$laskurow = mysql_fetch_assoc($result);
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus = '$laskurow[liitostunnus]'
 							and yhtio = '$kukarow[yhtio]'";
@@ -1782,7 +1782,6 @@
 			}
 
 			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
-
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> $sellahetetyyppi,
@@ -1790,8 +1789,8 @@
 					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
 					'tee'						=> $tee,
 					'toim'						=> $toim,
-					'query_ale_lisa' 			=> $query_ale_lisa,
 					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli
 					);
 
@@ -1838,7 +1837,7 @@
 				$tilausnumeroita = $otunnus;
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);

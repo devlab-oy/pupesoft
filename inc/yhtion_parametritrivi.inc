@@ -1874,8 +1874,8 @@
 		$sel[$apu] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		$ulos .= "<option value='' $sel>".t("Ei")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰")."</option>";
+		$ulos .= "<option value='' $sel>".t("Ei. Korvaava tuote lis‰t‰‰n myyntitilaukselle automaattisesti.")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰. Korvaava tuote lis‰t‰‰n myyntitilauksella vain jos myyj‰ hyv‰ksyy korvaavan tuotteen.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

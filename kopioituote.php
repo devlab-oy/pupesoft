@@ -153,36 +153,41 @@
 
 				if (mysql_num_rows($stresult) != 0 ) {
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
-						// tehd‰‰n vanhoista tuotteen_toimittajista 1:1 kopio...
-						$query = "INSERT into tuotteen_toimittajat set ";
+
+						$query_fields = "";
 
 						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
 							if (mysql_field_name($stresult,$i) == 'yhtio') {
-								$query .= "yhtio='$kukarow[yhtio]',";
+								$query_fields .= "yhtio='$kukarow[yhtio]',";
 							}
 							// tuotenumeroksi tietenkin uustuoteno
 							elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
-								$query .= "tuoteno='$uustuoteno',";
+								$query_fields .= "tuoteno='$uustuoteno',";
 							}
 							// laatijaksi klikkaaja
 							elseif (mysql_field_name($stresult,$i) == 'laatija') {
-								$query .= "laatija='$kukarow[kuka]',";
+								$query_fields .= "laatija='$kukarow[kuka]',";
 							}
 							// muuttajaksi klikkaaja
 							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query .= "muuttaja='$kukarow[kuka]',";
+								$query_fields .= "muuttaja='$kukarow[kuka]',";
 							}
 							// luontiaika
 							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
-								$query .= mysql_field_name($stresult,$i)."=now(),";
+								$query_fields .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
 							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
-								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+								$query_fields .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 							}
 						}
-						$query = substr($query,0,-1);
+
+						// Tehd‰‰n vanhoista tuotteen_toimittajista 1:1 kopio...
+						$query  = "INSERT into tuotteen_toimittajat set ";
+						$query .= substr($query_fields, 0, -1);
+						$query .= " ON DUPLICATE KEY UPDATE ";
+						$query .= substr($query_fields, 0, -1);
 
 						$astresult = pupe_query($query);
 						$id2 = mysql_insert_id();
@@ -195,6 +200,7 @@
 				$query = "	SELECT *
 							FROM puun_alkio
 							WHERE yhtio = '$hakyhtio'
+							and laji    = 'tuote'
 							and liitos  = '$tuoteno'";
 				$stresult = pupe_query($query);
 
@@ -202,37 +208,41 @@
 
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
 
-						// tehd‰‰n vanhasta alkiosta kopio...
-						$query = "INSERT into puun_alkio set ";
+						$query_fields = "";
 
 						for ($i = 0; $i < mysql_num_fields($stresult); $i++) {
 
 							if (mysql_field_name($stresult,$i) == 'yhtio') {
-								$query .= "yhtio='$kukarow[yhtio]',";
+								$query_fields .= "yhtio='$kukarow[yhtio]',";
 							}
 							// liitokseksi tietenkin uustuoteno
 							elseif (mysql_field_name($stresult,$i) == 'liitos') {
-								$query .= "liitos='$uustuoteno',";
+								$query_fields .= "liitos='$uustuoteno',";
 							}
 							// laatijaksi klikkaaja
 							elseif (mysql_field_name($stresult,$i) == 'laatija') {
-								$query .= "laatija='$kukarow[kuka]',";
+								$query_fields .= "laatija='$kukarow[kuka]',";
 							}
 							// muuttajaksi klikkaaja
 							elseif (mysql_field_name($stresult,$i) == 'muuttaja') {
-								$query .= "muuttaja='$kukarow[kuka]',";
+								$query_fields .= "muuttaja='$kukarow[kuka]',";
 							}
 							// luontiaika
 							elseif (mysql_field_name($stresult,$i) == 'luontiaika' or mysql_field_name($stresult,$i) == 'muutospvm') {
-								$query .= mysql_field_name($stresult,$i)."=now(),";
+								$query_fields .= mysql_field_name($stresult,$i)."=now(),";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
 							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
-								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+								$query_fields .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 							}
 						}
 
-						$query = substr($query,0,-1);
+						// Tehd‰‰n vanhasta alkiosta kopio...
+						$query = "INSERT into puun_alkio set ";
+						$query .= substr($query_fields, 0, -1);
+						$query .= " ON DUPLICATE KEY UPDATE ";
+						$query .= substr($query_fields, 0, -1);
+
 						$puunalkio_result = pupe_query($query);
 
 						$id2 = mysql_insert_id();

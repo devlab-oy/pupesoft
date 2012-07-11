@@ -203,6 +203,7 @@
 									where tunnus in ($tilausnumeroita)
 									and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa)
 									and yhtio	= '$kukarow[yhtio]'
+									ORDER BY clearing DESC
 									LIMIT 1";
 					$result   = mysql_query($query) or pupe_error($query);
 

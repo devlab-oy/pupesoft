@@ -23,7 +23,13 @@
 			$tila_row = mysql_fetch_assoc($tila_result);
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE, avainsana as avainsana_kieli READ";
+			$query = "	LOCK TABLES lasku WRITE,
+						tilausrivi WRITE,
+						rahtikirjat WRITE,
+						tuote WRITE,
+						sarjanumeroseuranta WRITE,
+						sarjanumeroseuranta_arvomuutos READ,
+						avainsana as avainsana_kieli READ";
 			$locre = pupe_query($query);
 
 			if ($tila_row['tila'] == "C") {
@@ -45,8 +51,8 @@
 								AND tunnus = '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
@@ -79,8 +85,8 @@
 								AND tunnus = '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
@@ -108,8 +114,8 @@
 								AND tunnus 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 
-					$query = "	DELETE FROM rahtikirjat 
-								WHERE yhtio 	= '{$kukarow['yhtio']}' 
+					$query = "	DELETE FROM rahtikirjat
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
 								AND otsikkonro 	= '{$tunnus}'";
 					$tila_result = pupe_query($query);
 				}
@@ -170,8 +176,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 			}
@@ -207,8 +213,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 			}
@@ -230,8 +236,8 @@
 							AND tunnus 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
-				$query = "	DELETE FROM rahtikirjat 
-							WHERE yhtio 	= '{$kukarow['yhtio']}' 
+				$query = "	DELETE FROM rahtikirjat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND otsikkonro 	= '{$tunnus}'";
 				$tila_result = pupe_query($query);
 
@@ -252,9 +258,9 @@
 			           $tunken = "ostorivitunnus";
 			       }
 
-			       $query = "	UPDATE sarjanumeroseuranta SET 
-			       				{$tunken} = 0 
-			       				WHERE yhtio = '{$kukarow['yhtio']}' 
+			       $query = "	UPDATE sarjanumeroseuranta SET
+			       				{$tunken} = 0
+			       				WHERE yhtio = '{$kukarow['yhtio']}'
 			       				AND {$tunken} = '{$srow['tunnus']}'";
 			       $sarjares = pupe_query($query);
 				}
@@ -307,7 +313,7 @@
 					if ($yhtiorow['reklamaation_kasittely'] == 'U') {
 						if (in_array($tila_row["alatila"], array('B','C'))) {
 							echo "<option value = '2'>",t("Reklamaatio odottaa tuotteita"),"</option>";
-						}		
+						}
 						if ($tila_row["alatila"] == "C") {
 							echo "<option value = '3'>",t("Reklamaatio vastaanotettu"),"</option>";
 						}

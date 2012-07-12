@@ -463,16 +463,13 @@
 		}
 
 		if ($summaustaso == "TRYS" or $summaustaso == "TRY") {
-			$varastolisa1 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tapahtuma.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
-			$varastolisa3 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
-			$lisa_grouppaus_muuttuja = " group by variaatiotieto23 ";
+			$varastolisa1 = "t1.selite avainsana_selite, group_concat(distinct concat('\'', tapahtuma.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
+			$varastolisa3 = "t1.selite avainsana_selite, group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
+			$avainsana_grouppaus = " group by avainsana_selite ";
 		}
 		else {
 			$varastolisa1 = "concat('\'', tapahtuma.tuoteno ,'\'') tuoteno, ";
 			$varastolisa3 = "concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno, ";
-			
-			#$varastolisa1 = 'tapahtuma.tuoteno, ';
-			#$varastolisa3 = 'tuotepaikat.tuoteno, ';
 		}
 
 		// haetaan kaikki distinct tuotepaikat ja tehdään temp table (tämä näyttää epätehokkaalta, mutta on testattu ja tämä _on_ nopein tapa joinata ja tehdä asia)
@@ -504,7 +501,7 @@
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
 					$where_lisa
-					$lisa_grouppaus_muuttuja)
+					$avainsana_grouppaus)
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa3
@@ -533,7 +530,7 @@
 					$jarjestys_join
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					$where_lisa
-					$lisa_grouppaus_muuttuja
+					$avainsana_grouppaus
 					)					
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
@@ -942,7 +939,7 @@
 						$query = "	SELECT hinta
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
 									WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno = ($row[tuoteno])
+									and tuoteno in ($row[tuoteno])
 									and laadittu <= '$vv-$kk-$pp 23:59:59'
 									and laji NOT IN ('poistettupaikka','uusipaikka')
 									ORDER BY laadittu desc, tunnus desc
@@ -961,7 +958,7 @@
 							$query = "	SELECT hinta
 										FROM tapahtuma use index (yhtio_tuote_laadittu)
 										WHERE yhtio = '$kukarow[yhtio]'
-										and tuoteno = in ($row[tuoteno])
+										and tuoteno in ($row[tuoteno])
 										and laadittu > '$vv-$kk-$pp 23:59:59'
 										and laji NOT IN ('poistettupaikka','uusipaikka')
 										ORDER BY laadittu, tunnus

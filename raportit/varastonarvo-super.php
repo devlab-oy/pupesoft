@@ -685,7 +685,12 @@
 				$mistavarastosta = $varastontunnukset;
 			}
 			else {
-				$mistavarastosta = " and varastopaikat.tunnus in ($row[varastotunnus]) ";
+				if(strlen($row['varastotunnus']) > 0) {
+					$mistavarastosta = " and varastopaikat.tunnus in ($row[varastotunnus]) ";	
+				}
+				else {
+					$mistavarastosta = " and varastopaikat.tunnus = $row[varastotunnus] ";
+				}
 			}
 
 			// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)

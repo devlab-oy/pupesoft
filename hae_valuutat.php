@@ -4,7 +4,15 @@
 
 	echo "<font class='head'>".t("Valuuttakurssien päivitys")."<hr></font>";
 
-	$xml = @simplexml_load_file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+	$ch  = curl_init();
+	curl_setopt ($ch, CURLOPT_URL, "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+	$xml = curl_exec ($ch);
+
+	$xml = @simplexml_load_string($xml);
 
 	if ($xml !== FALSE) {
 

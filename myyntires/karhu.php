@@ -180,12 +180,10 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$karhuttavat = array();
-		$karhuttavat_asiakkaat = array();
 		unset($pdf);
 
 		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
-			$karhuttavat_asiakkaat[] = "'".$karhuttavarow["ytunnus"]."'";
 		}
 
 		if ($karhuakaikki != "") {

@@ -272,17 +272,17 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
-
-	if ($karhuttavat_asiakkaat[0] != "") {
+	
+	if ($asiakastiedot[ytunnus] != "") {
 		$query  = "	SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(pvmalku,10) paivamaara
 			        FROM asiakas
 					JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
 					LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
 			        WHERE asiakas.yhtio = '$kukarow[yhtio]'
-		        	AND asiakas.ytunnus IN  ({$karhuttavat_asiakkaat[0]})
+		        	AND asiakas.ytunnus IN  ('{$asiakastiedot[ytunnus]}')
 					ORDER BY kalenteri.tunnus desc";
 		$amres = pupe_query($query);
-
+		
 		while ($amrow = mysql_fetch_assoc($amres)) {
 			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
 		}

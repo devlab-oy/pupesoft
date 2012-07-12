@@ -651,7 +651,12 @@
 
 						switch ($fieldname) {
 							case 'varattu':
-								$values .= ", '{$kappaleerotus}'";
+								if ($tilausrivirow['kpl'] == 0) {
+									$values .= ", '{$kappaleerotus}'";
+								}
+								else {
+									$values .= ", '0'";
+								}
 								break;
 							case 'kpl':
 								if ($tilausrivirow['kpl'] == 0) {

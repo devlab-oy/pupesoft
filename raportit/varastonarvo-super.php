@@ -462,14 +462,17 @@
 			force_echo("Haetaan k‰sitelt‰vien tuotteiden varastopaikat historiasta.");
 		}
 
-		if ($summaustaso == "TRYS") {
+		if ($summaustaso == "TRYS" or $summaustaso == "TRY") {
 			$varastolisa1 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tapahtuma.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
 			$varastolisa3 = "t1.selite variaatiotieto23, group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
 			$lisa_grouppaus_muuttuja = " group by variaatiotieto23 ";
 		}
 		else {
-			$varastolisa1 = "concat('\'', tapahtuma.tuoteno ,'\'') tuoteno,";
-			$varastolisa3 = "concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno,";
+			$varastolisa1 = "concat('\'', tapahtuma.tuoteno ,'\'') tuoteno, ";
+			$varastolisa3 = "concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno, ";
+			
+			#$varastolisa1 = 'tapahtuma.tuoteno, ';
+			#$varastolisa3 = 'tuotepaikat.tuoteno, ';
 		}
 
 		// haetaan kaikki distinct tuotepaikat ja tehd‰‰n temp table (t‰m‰ n‰ytt‰‰ ep‰tehokkaalta, mutta on testattu ja t‰m‰ _on_ nopein tapa joinata ja tehd‰ asia)

@@ -685,12 +685,7 @@
 				$mistavarastosta = $varastontunnukset;
 			}
 			else {
-				if(strlen($row['varastotunnus']) > 0) {
-					$mistavarastosta = " and varastopaikat.tunnus in ($row[varastotunnus]) ";	
-				}
-				else {
-					$mistavarastosta = " and varastopaikat.tunnus = $row[varastotunnus] ";
-				}
+				$mistavarastosta = " and varastopaikat.tunnus = '$row[varastotunnus]' ";
 			}
 
 			// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
@@ -767,11 +762,6 @@
 					$summaus_lisa = "";
 				}
 
-/*
-				if(!isset($row['tuotteet']) or strlen($row['tuotteet']) <= 0) {
-					$row['tuotteet'] = "''";
-				}
-*/
 				$query = "	SELECT
 							sum(tuotepaikat.saldo) saldo,
 							sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,

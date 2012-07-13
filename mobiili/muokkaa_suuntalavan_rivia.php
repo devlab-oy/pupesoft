@@ -51,7 +51,13 @@ if (isset($submit) and trim($submit) == 'submit') {
 		}
 	}
 	else {
+		# P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
+		$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
 		$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
+
+		# Redirect alustaan vai suuntalavan_tuotteet
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+		exit;
 	}
 }
 

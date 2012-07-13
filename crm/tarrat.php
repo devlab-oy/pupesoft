@@ -136,6 +136,8 @@
 				if ($as_yht_tiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
 					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, t("Titteli"), $format_bold);
+					$excelsarake++;
 				}
 
 				$worksheet->writeString($excelrivi, $excelsarake, t("Osoite"), $format_bold);
@@ -205,6 +207,8 @@
 
 				if ($as_yht_tiedot == 'on') {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_nimi"]);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_titteli"]);
 					$excelsarake++;
 				}
 

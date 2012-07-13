@@ -1701,6 +1701,7 @@
 		$puu_alekerr	= array();
 		$puu_ein 		= array();
 		$puu_var		= array();
+		$puu_ohita_kerays = array();
 
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
@@ -1780,12 +1781,13 @@
 			}
 
 			foreach ($perhearray as $perherow) {
-				$puu_tuoteno[]	= $perherow["tuoteno"];
-				$puu_kpl[] 		= $toimittamatta*$perherow["kerroin"];
-				$puu_hintake[]	= $perherow["hintakerroin"];
-				$puu_alekerr[]	= $perherow["alekerroin"];
-				$puu_ein[] 		= $perherow["ei_nayteta"];
-				$puu_var[]		= $var;
+				$puu_tuoteno[]		= $perherow["tuoteno"];
+				$puu_kpl[] 			= $toimittamatta*$perherow["kerroin"];
+				$puu_hintake[]		= $perherow["hintakerroin"];
+				$puu_alekerr[]		= $perherow["alekerroin"];
+				$puu_ein[] 			= $perherow["ei_nayteta"];
+				$puu_var[]			= $var;
+				$puu_ohita_kerays[] = $perherow['ohita_kerays'];
 			}
 		}
 
@@ -2349,9 +2351,10 @@
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET
 							positio = if (positio = '', '$trivtyrow[selite]', positio),
-							toimittajan_tunnus	= '$toimittajan_tunnus',
-							muutospvm			= now(),
-							muuttaja			= '$kukarow[kuka]'
+							toimittajan_tunnus		= '$toimittajan_tunnus',
+							muutospvm				= now(),
+							muuttaja				= '$kukarow[kuka]',
+							ohita_kerays			= '$puu_ohita_kerays[$i]'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}
 							WHERE yhtio			 = '$kukarow[yhtio]'
@@ -2366,18 +2369,19 @@
 					$jarjestys = 0;
 				}
 				$query = "	INSERT INTO tilausrivin_lisatiedot
-							SET yhtio			= '$kukarow[yhtio]',
-							positio 			= '$trivtyrow[selite]',
-							toimittajan_tunnus	= '$toimittajan_tunnus',
-							tilausrivitunnus	= '$lisatty_tun',
-							jarjestys			= '$jarjestys',
-							vanha_otunnus		= '$kukarow[kesken]',
-							ei_nayteta			= '$puu_ein[$i]',
-							luontiaika			= now(),
-							laatija 			= '$kukarow[kuka]'
+							SET yhtio				= '$kukarow[yhtio]',
+							positio 				= '$trivtyrow[selite]',
+							toimittajan_tunnus		= '$toimittajan_tunnus',
+							tilausrivitunnus		= '$lisatty_tun',
+							jarjestys				= '$jarjestys',
+							vanha_otunnus			= '$kukarow[kesken]',
+							ei_nayteta				= '$puu_ein[$i]',
+							luontiaika				= now(),
+							laatija 				= '$kukarow[kuka]',
+							ohita_kerays			= '$puu_ohita_kerays[$i]'
 							{$tlisatied_lisa}
 							{$tlisatied_lisa2}";
-
+							
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
 					$query .= " , osto_vai_hyvitys='O' ";
 				}

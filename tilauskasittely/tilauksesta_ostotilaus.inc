@@ -39,6 +39,7 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.tyyppi != 'D'
+						and tilausrivin_lisatiedot.ohita_kerays = ''
 						$vars
 						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0)
 						ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";

@@ -152,6 +152,7 @@
 										ale1		= '$ale[ale1]',
 										ale2		= '$ale[ale2]',
 										ale3		= '$ale[ale3]',
+										laatija 	= 'E3',
 										laadittu	= now(),
 										hyllyalue	= '$tuote_row[hyllyalue]',
 										hyllynro	= '$tuote_row[hyllynro]',

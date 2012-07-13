@@ -649,9 +649,9 @@
 				require('tilauskasittely/keraa.php');
 
 				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) {
-					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {							
-						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ]/", " ", $laheteprintterinimi);
-													
+					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {
+						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi);
+
 						$response = "{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta {$laheteprintterinimi},0,\r\n\r\n";
 					}
 					else {

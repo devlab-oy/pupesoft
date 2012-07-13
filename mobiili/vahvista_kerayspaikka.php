@@ -40,30 +40,38 @@ if (isset($submit) and trim($submit) != '') {
 	}
 	elseif ($submit == 'submit') {
 
-		# Tarkista varmistuskoodi
+		# Tarkistetaan varmistuskoodi
 		if(!empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 			echo "varmistuskoodi OK<br>";
+
+			# Jos m‰‰r‰‰ pienennet‰‰n, niin splitataan ( $maara < $row['varattu'])
+			if($maara < $row['varattu']) {
+				echo "SPLITATAAN";
+				# P‰ivitet‰‰n alkuper‰isen rivin kpl
+				# $ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
+				# Splitataan rivi
+				# $uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
+			}
+			# Jos nostetaan niin tehd‰‰n insertti erotukselle..
+			elseif($maara > $row['varattu']) {
+				# Herjataan varmistuskysymys
+				# alert("Oleteko varma!....")
+				echo "Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?";
+			}
+			# M‰‰r‰t samat
+			else {
+				echo "EI SPLITATA";
+				# Kaikki OK
+				# Vahvista ker‰ys
+
+			}
 		}
+		# V‰‰r‰ varmistuskoodi
 		else {
 			$error['vahvista'] =  "V‰‰r‰ varmistuskoodi";
 		}
 
-		# Jos m‰‰r‰‰ pienennet‰‰n, niin splitataan ( $maara < $row['varattu'])
-		if($maara < $row['varattu']) {
-			echo "SPLITATAAN";
-		}
-		elseif($maara > $row['varattu']) {
-			# Herjataan varmistuskysymys
-			echo "Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?";
-		}
-		else {
-			echo "EI SPLITATA";
-			# Kaikki OK
-			# Vahvista ker‰ys
-
-		}
 		$debug = $_POST;
-		# Jos nostetaan niin tehd‰‰n insertti erotukselle..
 	}
 }
 

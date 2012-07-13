@@ -24,9 +24,13 @@ if (isset($submit) and trim($submit) != '') {
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
 			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $koodi);
 
-			# Jos hyllypaikka ok
+			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
 				echo "hyllypaikka ok";
+				#
+				$saapuminen = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
+				#
+				vie_varastoon($saapuminen, $suuntalavan_tunnus);
 			}
 			else {
 				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";

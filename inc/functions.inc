@@ -18399,3 +18399,64 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 		}
 	}
 }
+
+/**
+*
+*/
+if (!function_exists('vie_varastoon')) {
+	function vie_varastoon($saapumisen_tunnus) {
+		global $kukarow, $yhtiorow;
+
+		// t‰m‰n keikan voi vied‰ saldoille...
+		$otunnus = $saapumisen_tunnus;
+
+		$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$otunnus'";
+		$result = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+
+		# Setataan parametrit varastoon.incille
+		#extract(params)
+		$toimittajaid = $laskurow['liitostunnus'];
+		$toiminto = "kalkyyli";
+		$tee = "varastoon";
+		$koko_suuntalava = 'X';
+		$vietiinko_koko_suuntalava = 'joo';
+		#$mobiili_keikka = "yes";
+
+		// vied‰‰n varastoon...
+		require ("tilauskasittely/varastoon.inc");
+	}
+}
+
+/**
+* P‰ivitt‰‰ suuntalavan tuotteiden hyllypaikat
+*/
+function paivita_hyllypaikat($suuntalavan_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
+	global $kukarow;
+
+	$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+				FROM suuntalavat_saapuminen
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND suuntalava = '{$suuntalavan_tunnus}'";
+	$uusiotunnus_chk_res = pupe_query($query);
+	$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+	$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
+	$query = "	UPDATE tilausrivi
+				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+				JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+				SET tilausrivi.hyllyalue = '{$hyllyalue}',
+				tilausrivi.hyllynro = '{$hyllynro}',
+				tilausrivi.hyllyvali = '{$hyllyvali}',
+				tilausrivi.hyllytaso = '{$hyllytaso}'
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND {$uusiotunnuslisa}
+				AND tilausrivi.tyyppi = 'O'
+				AND tilausrivi.kpl = 0
+				AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+	$koko_suuntalava_result = pupe_query($query);
+
+	# palautetaan saapumisen tunnus
+	return $uusiotunnus_chk_row['keikkatunnus'];
+}

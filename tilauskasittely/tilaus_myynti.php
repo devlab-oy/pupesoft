@@ -174,6 +174,16 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
 	exit;
 }
 
+if ($tee == 'DELKESKEN') {
+	if (tarkista_oikeus("kayttajat.php", "", "1")) {
+		$query = "UPDATE kuka SET kesken = 0 WHERE kuka = '{$selkuka}' and yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("keskenoleva tilaus vapautettu"),"!</b><br><br>";
+		$tee = "";
+	}
+}
+
 // aktivoidaan saatu id
 if ($tee == 'AKTIVOI') {
 	// katsotaan onko muilla aktiivisena
@@ -187,7 +197,15 @@ if ($tee == 'AKTIVOI') {
 	}
 
 	if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
-		echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi]. ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
+		echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi] ($row[kuka]). ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
+
+		if (tarkista_oikeus("kayttajat.php", "", "1")) {
+			echo "<br><form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+				<input type='hidden' name='selkuka' value='{$row['kuka']}'>
+				<input type='hidden' name='tee' value='DELKESKEN'>
+				<input type='submit' value='* ",t("Vapauta käyttäjän")," $row[nimi] ($row[kuka]). ",t("keskenoleva tilaus")," *'>
+				</form>";
+		}
 
 		// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
 		$query = "UPDATE kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";

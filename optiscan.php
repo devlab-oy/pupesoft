@@ -648,8 +648,19 @@
 
 				require('tilauskasittely/keraa.php');
 
-				// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
-				$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
+				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) {
+					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {							
+						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ]/", " ", $laheteprintterinimi);
+													
+						$response = "{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta {$laheteprintterinimi},0,\r\n\r\n";
+					}
+					else {
+						$response = "{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta,0,\r\n\r\n";
+					}
+				}
+				else {
+					$response = "Lähetteitä ei tulosteta,0,\r\n\r\n";
+				}
 			}
 		}
 	}

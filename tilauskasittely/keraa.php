@@ -1523,7 +1523,9 @@
 								and lasku.alatila in ('C','D')";
 					$lasresult = pupe_query($query);
 
-					$tilausnumeroita_backup = $tilausnumeroita;
+					$tilausnumeroita_backup 	= $tilausnumeroita;
+					$lahete_tulostus_paperille 	= 0;
+					$laheteprintterinimi 		= "";
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
@@ -1548,6 +1550,8 @@
 							$kirres  = pupe_query($query);
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$komento = $kirrow['komento'];
+
+							$laheteprintterinimi = $kirrow["kirjoitin"];
 						}
 
 						if ($valittu_oslapp_tulostin != "") {
@@ -1577,9 +1581,13 @@
 											AND lasku.vanhatunnus = '$hakutunnus'";
 								$vanhat_res = pupe_query($query);
 
-								// kaikki rivit kerätty!
 								if (mysql_num_rows($vanhat_res) == 0) {
+									// Kaikki rivit kerätty! Tulostetaan koontilahete
 									$koontilahete = TRUE;
+								}
+								else {
+									// Tällä asiakkaalla on koontiläheteprosessi päällä, mutta kaikki rivit ei oo vielä kerätty, joten ei tulosteta mittään
+									$komento = "";
 								}
 							}
 
@@ -1589,24 +1597,41 @@
 							}
 							elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
 								// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
-								$komento = array($komento);
+								if ($komento != "") $komento = array($komento);
+								else $komento = array();
+
 								$komento[] = "asiakasemail".$laskurow['email'];
 							}
 
-							$params = array(
-								'laskurow'					=> $laskurow,
-								'sellahetetyyppi' 			=> $sellahetetyyppi,
-								'extranet_tilausvahvistus' 	=> "",
-								'naytetaanko_rivihinta'		=> "",
-								'tee'						=> $tee,
-								'toim'						=> $toim,
-								'komento' 					=> $komento,
-								'lahetekpl'					=> $lahetekpl,
-								'kieli' 					=> $kieli,
-								'koontilahete'				=> $koontilahete,
-								);
+							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
-							pupesoft_tulosta_lahete($params);
+								// Lasketaan kuinka monta lähetettä tulostuu paperille (muuttujat valuu optiscan.php:seen)
+								if (is_array($komento)) {
+									foreach ($komento as $paprulleko) {
+										if ($paprulleko != 'email' and substr($paprulleko,0,12) != 'asiakasemail') {
+											$lahete_tulostus_paperille++;
+										}
+									}
+								}
+								elseif ($komento != 'email' and substr($komento,0,12) != 'asiakasemail') {
+									$lahete_tulostus_paperille++;
+								}
+
+								$params = array(
+									'laskurow'					=> $laskurow,
+									'sellahetetyyppi' 			=> $sellahetetyyppi,
+									'extranet_tilausvahvistus' 	=> "",
+									'naytetaanko_rivihinta'		=> "",
+									'tee'						=> $tee,
+									'toim'						=> $toim,
+									'komento' 					=> $komento,
+									'lahetekpl'					=> $lahetekpl,
+									'kieli' 					=> $kieli,
+									'koontilahete'				=> $koontilahete,
+									);
+
+								pupesoft_tulosta_lahete($params);
+							}
 						}
 
 						if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {

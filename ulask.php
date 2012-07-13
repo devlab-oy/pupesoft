@@ -244,7 +244,7 @@ if ($tee == 'VIIVA') {
 		$versio = substr($nimi,0,1);
 		$tee2	= "";
 
-		if( $versio == '2' ){
+		if ($versio == '2') {
 			$tilino = substr($nimi,1,14);
 			$summa  = substr($nimi,15,8) / 100;
 			$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
@@ -252,7 +252,7 @@ if ($tee == 'VIIVA') {
 			$erk    = substr($nimi,45,2);
 			$erp    = substr($nimi,47,2);
 		}
-		elseif( $versio == '4' ){
+		elseif ($versio == '4') {
 			$tilino	= substr($nimi,1,16);
 			$summa	= substr($nimi,17,8) / 100;
 			$viite 	= ltrim(substr($nimi,28,20),"0"); // etunollat pois
@@ -260,7 +260,7 @@ if ($tee == 'VIIVA') {
 			$erk 	= substr($nimi,50,2);
 			$erp 	= substr($nimi,52,2);
 		}
-		elseif( $versio == '5' ){
+		elseif ($versio == '5') {
 			$tilino	= substr($nimi,1,16);
 			$summa	= substr($nimi,17,8) / 100;
 			$viite 	= "RF".substr($nimi,25,2).ltrim(substr($nimi,27,21),"0"); // Tarkistenumeron jälkeen tulevat täytenollat pois
@@ -271,13 +271,13 @@ if ($tee == 'VIIVA') {
 
 		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			if($versio=='2'){
+			if ($versio == '2'){
 				$pankkitili = $tilino;
 				require("inc/pankkitilinoikeellisuus.php");
 				$tilino = $pankkitili;
 				$hakuehto = "tilinumero";
 			}
-			else{
+			else {
 				$hakuehto = "ultilno";
 				$tilino = tarkista_iban("FI".$tilino);
 			}
@@ -799,8 +799,11 @@ if ($tee == 'I') {
 			// Vaaditaan isot kirjaimet
 			$trow['ultilno'] = strtoupper($trow['ultilno']);
 
+			if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+			else $ibanmaa = $trow['maa'];
+
 			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($trow['maa']) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
+			if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
 				$errormsg .= "<font class='error'>".t("Virheellinen IBAN!")."</font><br>";
 				$tee = 'E';
 			}

@@ -19,6 +19,7 @@ $error = array(
 if (isset($submit) and trim($submit) != '') {
 
 	if ($submit == 'submit') {
+		# Koodi ei saa olla tyhjä!
 		if ($koodi != '') {
 
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
@@ -26,11 +27,26 @@ if (isset($submit) and trim($submit) != '') {
 
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
-				echo "hyllypaikka ok";
-				#
-				$saapuminen = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
-				#
-				vie_varastoon($saapuminen, $suuntalavan_tunnus);
+
+				# Haetaan saapumiset?
+				$saapumiset = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
+				$saapumiset = explode(',', $saapumiset);
+
+				# Hylly arrayksi...
+				$hylly = array(
+					"hyllyalue" => $hyllyalue,
+					"hyllynro" => $hyllynro,
+					"hyllyvali" => $hyllyvali,
+					"hyllytaso" => $hyllytaso);
+
+				# Viedään varastoon keikka kerrallaan.
+				foreach($saapumiset as $saapuminen) {
+					echo "Viedään varastoon keikka ".$saapuminen;
+					vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
+				}
+
+				# Tarkistetaan menikö kaikki ok?
+
 			}
 			else {
 				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";

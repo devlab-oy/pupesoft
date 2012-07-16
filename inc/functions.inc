@@ -18402,9 +18402,11 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 
 /**
 *
+* $param $saapuminen
+* $param Array [hyllyalue, hyllynro, hyllyvali, hyllytaso]
 */
 if (!function_exists('vie_varastoon')) {
-	function vie_varastoon($saapumisen_tunnus) {
+	function vie_varastoon($saapumisen_tunnus, $suuntalavan_tunnus, $hylly) {
 		global $kukarow, $yhtiorow;
 
 		// tämän keikan voi viedä saldoille...
@@ -18419,6 +18421,13 @@ if (!function_exists('vie_varastoon')) {
 		$toimittajaid = $laskurow['liitostunnus'];
 		$toiminto = "kalkyyli";
 		$tee = "varastoon";
+
+		# TODO: korjaa
+		$hyllyalue 	= $hylly['hyllyalue'];
+		$hyllynro 	= $hylly['hyllynro'];
+		$hyllyvali 	= $hylly['hyllyvali'];
+		$hyllytaso 	= $hylly['hyllytaso'];
+
 		$koko_suuntalava = 'X';
 		$vietiinko_koko_suuntalava = 'joo';
 		#$mobiili_keikka = "yes";

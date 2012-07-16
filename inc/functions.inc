@@ -18440,32 +18440,129 @@ if (!function_exists('vie_varastoon')) {
 /**
 * Päivittää suuntalavan tuotteiden hyllypaikat
 */
-function paivita_hyllypaikat($suuntalavan_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
-	global $kukarow;
+if (!function_exists('paivita_hyllypaikat')) {
+	function paivita_hyllypaikat($suuntalavan_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
+		global $kukarow;
 
-	$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
-				FROM suuntalavat_saapuminen
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND suuntalava = '{$suuntalavan_tunnus}'";
-	$uusiotunnus_chk_res = pupe_query($query);
-	$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+		# haetaan kaikki saapumisten tunnukset
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-	$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
-	$query = "	UPDATE tilausrivi
-				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
-				JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-				SET tilausrivi.hyllyalue = '{$hyllyalue}',
-				tilausrivi.hyllynro = '{$hyllynro}',
-				tilausrivi.hyllyvali = '{$hyllyvali}',
-				tilausrivi.hyllytaso = '{$hyllytaso}'
-				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND {$uusiotunnuslisa}
-				AND tilausrivi.tyyppi = 'O'
-				AND tilausrivi.kpl = 0
-				AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-	$koko_suuntalava_result = pupe_query($query);
+		$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
+					FROM tilausrivi
+					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND {$uusiotunnuslisa}
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
+					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+		$koko_suuntalava_result = pupe_query($query);
 
-	# palautetaan saapumisen tunnus
-	return $uusiotunnus_chk_row['keikkatunnus'];
+		if (mysql_num_rows($koko_suuntalava_result) > 0) {
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+						SET tilausrivi.hyllyalue = '{$hyllyalue}',
+						tilausrivi.hyllynro = '{$hyllynro}',
+						tilausrivi.hyllyvali = '{$hyllyvali}',
+						tilausrivi.hyllytaso = '{$hyllytaso}'
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND {$uusiotunnuslisa}
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.kpl = 0
+						AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+			$paivitetty = pupe_query($query);
+
+		}
+		return mysql_num_rows($koko_suuntalava_result);
+	}
+}
+
+/**
+* Tarkistaa saako saapumisen viedä varastoon
+*
+* @param $saapumisen_tunnus
+* @param $palautus
+* @return integer  	0 = ei virheitä, 1 = virhe
+*/
+if (!function_exists('saako_vieda_varastoon')) {
+	function saako_vieda_varastoon($saapumisen_tunnus, $toiminto, $palautus='') {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT nimi
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kesken  = '$saapumisen_tunnus'";
+		$result = pupe_query($query);
+
+		$varastoerror = 0;
+
+		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+			if ($palautus != '') {
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+			}
+			$varastoerror = 1;
+		}
+		elseif (mysql_num_rows($result) != 0){
+			while ($rivi = mysql_fetch_array($result)) {
+				if ($palautus != '') {
+					echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".sprintf(t("Käyttäjällä %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+				}
+			}
+			$varastoerror = 1;
+		}
+
+	 	if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND uusiotunnus = '{$otunnus}'
+						AND tyyppi = 'O'
+						AND kpl = 0
+						AND suuntalava != 0";
+			$suuntalavat_chk_result = pupe_query($query);
+			$suuntalavat_chk_row = mysql_fetch_assoc($suuntalavat_chk_result);
+
+			if (trim($suuntalavat_chk_row['suuntalavat']) == '') {
+				echo "<font class='error'>",t("VIRHE: Saapumista ei voi viedä varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
+				$varastoerror = 1;
+			}
+		}
+
+
+		return $varastoerror;
+	}
+}
+
+/**
+ * Haetaan saapumiset suuntalavan tunnuksen mukaan
+ * @param $suuntalavan_tunnus
+ * @return Array $saapumiset
+ */
+if (!function_exists('hae_saapumiset')) {
+	function hae_saapumiset($suuntalava_tunnus) {
+		global $kukarow;
+
+		$query = "	SELECT saapuminen
+					FROM suuntalavat_saapuminen
+					WHERE suuntalava='{$suuntalava_tunnus}'
+					AND yhtio='{$kukarow['yhtio']}'";
+		echo $query;
+		$result = pupe_query($query);
+
+		$saapumiset = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			$saapumiset[] = $row['saapuminen'];
+		}
+
+		return $saapumiset;
+	}
 }

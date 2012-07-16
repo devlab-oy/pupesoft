@@ -19,7 +19,7 @@ $error = array(
 if (isset($submit) and trim($submit) != '') {
 
 	if ($submit == 'submit') {
-		# Koodi ei saa olla tyhjä!
+		# Koodi ei saa ocibindbyname()lla tyhjä!
 		if ($koodi != '') {
 
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
@@ -29,24 +29,37 @@ if (isset($submit) and trim($submit) != '') {
 			if ($kaikki_ok) {
 
 				# Haetaan saapumiset?
-				$saapumiset = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
-				$saapumiset = explode(',', $saapumiset);
+				$saapumiset = hae_saapumiset($alusta_tunnus);
 
-				# Hylly arrayksi...
-				$hylly = array(
-					"hyllyalue" => $hyllyalue,
-					"hyllynro" => $hyllynro,
-					"hyllyvali" => $hyllyvali,
-					"hyllytaso" => $hyllytaso);
+				# Päivitetään hyllypaikat
+				$paivitetyt_rivit = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
+				echo "SAAPUMINEN : ".var_dump($paivitetyt_rivit);
 
-				# Viedään varastoon keikka kerrallaan.
-				foreach($saapumiset as $saapuminen) {
-					echo "Viedään varastoon keikka ".$saapuminen;
-					vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
+				if ($paivitetyt_rivit > 0) {
+					# Hylly arrayksi...
+					$hylly = array(
+						"hyllyalue" => $hyllyalue,
+						"hyllynro" => $hyllynro,
+						"hyllyvali" => $hyllyvali,
+						"hyllytaso" => $hyllytaso);
+
+					# Viedään varastoon keikka kerrallaan.
+					foreach($saapumiset as $saapuminen) {
+						# Saako keikan viedä varastoon
+						if (saako_vieda_varastoon($saapuminen, 'kalkyyli') == 1) {
+							# Ei saa viedä varastoon, skipataan?
+							echo "<br>Saapumista ei voi viedä varastoon. ({$saapuminen})";
+							continue;
+						} else {
+							echo "<br>Viedään varastoon saapuminen: ".$saapuminen;
+							echo "<br>	vie_varastoon({$saapuminen}, {$alusta_tunnus}, ${hylly});";
+							vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
+						}
+					}
 				}
-
-				# Tarkistetaan menikö kaikki ok?
-
+				else {
+					$error['varalle'] = "Yhtään tuotetta ei löytynyt suuntalavalta";
+				}
 			}
 			else {
 				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";

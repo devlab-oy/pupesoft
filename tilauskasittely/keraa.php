@@ -1262,7 +1262,7 @@
 				$ulos .= "</body></html>";
 
 				// korvataan poikkeama-meili keräysvahvistuksella
-				if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow["kerayspoikkeama"] == 0) {
+				if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1523,9 +1523,16 @@
 								and lasku.alatila in ('C','D')";
 					$lasresult = pupe_query($query);
 
-					$tilausnumeroita_backup = $tilausnumeroita;
+					$tilausnumeroita_backup 	= $tilausnumeroita;
+					$lahete_tulostus_paperille 	= 0;
+					$laheteprintterinimi 		= "";
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
+
+						// Nollataan tämä:
+						$komento		= "";
+						$oslapp			= "";
+						$vakadr_komento = "";
 
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
@@ -1543,6 +1550,8 @@
 							$kirres  = pupe_query($query);
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$komento = $kirrow['komento'];
+
+							$laheteprintterinimi = $kirrow["kirjoitin"];
 						}
 
 						if ($valittu_oslapp_tulostin != "") {
@@ -1553,26 +1562,76 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
 
-							if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
-								$komento = array($komento);
+							$koontilahete = FALSE;
+
+							// onko koontivahvistus käytössä?
+							if ($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) {
+
+								$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
+
+								// Onko kaikki rivit kerätty?
+								$query = "	SELECT lasku.tunnus
+											FROM lasku
+											JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+											JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+											WHERE lasku.yhtio	  = '$kukarow[yhtio]'
+											AND lasku.vanhatunnus = '$hakutunnus'";
+								$vanhat_res = pupe_query($query);
+
+								if (mysql_num_rows($vanhat_res) == 0) {
+									// Kaikki rivit kerätty! Tulostetaan koontilahete
+									$koontilahete = TRUE;
+								}
+								else {
+									// Tällä asiakkaalla on koontiläheteprosessi päällä, mutta kaikki rivit ei oo vielä kerätty, joten ei tulosteta mittään
+									$komento = "";
+								}
+							}
+
+							if ($koontilahete and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
+								$komento = "asiakasemail".$laskurow['email'];
+							}
+							elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
+								if ($komento != "") $komento = array($komento);
+								else $komento = array();
+
 								$komento[] = "asiakasemail".$laskurow['email'];
 							}
 
-							$params = array(
-								'laskurow'					=> $laskurow,
-								'sellahetetyyppi' 			=> $sellahetetyyppi,
-								'extranet_tilausvahvistus' 	=> "",
-								'naytetaanko_rivihinta'		=> "",
-								'tee'						=> $tee,
-								'toim'						=> $toim,
-								'komento' 					=> $komento,
-								'lahetekpl'					=> $lahetekpl,
-								'kieli' 					=> $kieli
-								);
+							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
-							pupesoft_tulosta_lahete($params);
+								// Lasketaan kuinka monta lähetettä tulostuu paperille (muuttujat valuu optiscan.php:seen)
+								if (is_array($komento)) {
+									foreach ($komento as $paprulleko) {
+										if ($paprulleko != 'email' and substr($paprulleko,0,12) != 'asiakasemail') {
+											$lahete_tulostus_paperille++;
+										}
+									}
+								}
+								elseif ($komento != 'email' and substr($komento,0,12) != 'asiakasemail') {
+									$lahete_tulostus_paperille++;
+								}
+
+								$params = array(
+									'laskurow'					=> $laskurow,
+									'sellahetetyyppi' 			=> $sellahetetyyppi,
+									'extranet_tilausvahvistus' 	=> "",
+									'naytetaanko_rivihinta'		=> "",
+									'tee'						=> $tee,
+									'toim'						=> $toim,
+									'komento' 					=> $komento,
+									'lahetekpl'					=> $lahetekpl,
+									'kieli' 					=> $kieli,
+									'koontilahete'				=> $koontilahete,
+									);
+
+								pupesoft_tulosta_lahete($params);
+							}
 						}
 
 						if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {

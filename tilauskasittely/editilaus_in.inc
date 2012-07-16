@@ -1354,8 +1354,8 @@ while ($tietue = fgets($fd)) {
 
 				$query = "	SELECT *
 							FROM tuote
-							WHERE yhtio = '{$kukarow["yhtio"]}'
-							and tuoteno = '{$tieto}'
+							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+							and tuote.tuoteno = '{$tieto}'
 							{$kieltolisa}";
 				$result = mysql_query($query) or die($query);
 
@@ -1365,11 +1365,36 @@ while ($tietue = fgets($fd)) {
 					$tuoteerrortxt .= " $tieto";
 					$tuoteerror = 1;
 				}
-				else {
-					$trow = mysql_fetch_array($result);
-					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
-					$tuoteno = $trow['tuoteno'];
-					$tuoteerror = 0; // tuote ok
+				else  {
+					$trow = mysql_fetch_assoc($result);
+
+					if ($trow['panttitili'] == 'K') {
+						$query = "	SELECT *
+									from tuoteperhe
+									where tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+									and tuoteperhe.tuoteno = '{$trow["tuoteno"]}'
+									and tuoteperhe.ohita_kerays != ''";
+						$result = mysql_query($query) or die($query);
+
+                        // Runkotuotteita ei saa tilata suoraan!
+						if (mysql_num_rows($result) != 0) {
+							///* Lisätään tilaukselle kommentti *///
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
+							$tuoteerrortxt .= " $tieto";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 2;
+						}
+						else {
+							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+							$tuoteno = $trow['tuoteno'];
+							$tuoteerror = 0; // tuote ok
+						}
+					}
+					else {
+						$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+						$tuoteno = $trow['tuoteno'];
+						$tuoteerror = 0; // tuote ok
+					}
 				}
 			}
 			break;
@@ -1655,17 +1680,24 @@ while ($tietue = fgets($fd)) {
 
 				} // end jos tuote on löydetty oikein
 				else {
-					// tuotenumero ei löytynyt, tehdään dummyrivi..
 
-					// Tilausrivin systeemikommentti
-					$kommentti .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+					if ($tuoteerror == 2)  {
+					    // Tilausrivin systeemikommentti
+    					$kommentti   .= t("Yritettiin tilata pelkkää runkoa").$tuoteerrortxt;
+    					$virhetuoteno = $tuoteno;
+					}
+					else {
+					    // Tilausrivin systeemikommentti
+    					$kommentti   .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+    					$virhetuoteno = "TUNTEMATON";
+					}
 
 					$query = "	INSERT into tilausrivi set
 								tilaajanrivinro = '$rivinumero',
 								laatija 	= 'edi',
 								laadittu 	= now(),
 								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= 'TUNTEMATON',
+								tuoteno 	= '$virhetuoteno',
 								var			= 'P',
 								kpl 		= '0',
 								alv			= '23',

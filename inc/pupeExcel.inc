@@ -22,7 +22,7 @@ class pupeExcel {
 					type char(1) default null,
 					value varchar(256),
 					string_id int(11) default null,
-					style varchar(4) default null)";
+					style text default null)";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		// Tehdään Excel stringejä varten temporary tietokantataulu
@@ -46,9 +46,37 @@ class pupeExcel {
 	}
 
 	function setStyle($cell, $style) {
-		if (isset($style["bold"]) and $style["bold"]) {
-			#$cell->addAttribute('s', '1');
+		if (isset($style["date"]) and $style["date"]) {
+			// s=1 viittaa styles.zml failin ykkös-styleen
+			$cell->addAttribute('s', '1');
 		}
+
+		if (isset($style["bold"]) and $style["bold"]) {
+			// s=2 viittaa styles.zml failin kakkos-styleen
+			$cell->addAttribute('s', '2');
+		}
+	}
+
+	function writeDate($excelrivi, $excelsarake, $date, $style = array()) {
+
+		if ((string) $date == "") {
+			return;
+		}
+
+		// Indeksit juoksee tässä maailmassa ykkösestä
+		$excelrivi++;
+		$excelsarake++;
+
+		// Hardcoodataan style
+		$style = array("date" => TRUE);
+
+		$query = "	INSERT INTO excel_data SET
+					excelrivi 	= $excelrivi,
+					excelsarake = $excelsarake,
+					type 		= 'D',
+					value 		= '$date',
+					style 		= '".mysql_real_escape_string(serialize($style))."'";
+		$result = pupe_query($query, $this->_exceldblink);
 	}
 
 	function writeNumber($excelrivi, $excelsarake, $number, $style = array()) {
@@ -66,7 +94,7 @@ class pupeExcel {
 					excelsarake = $excelsarake,
 					type 		= 'N',
 					value 		= '$number',
-					style 		= '$style'";
+					style 		= '".mysql_real_escape_string(serialize($style))."'";
 		$result = pupe_query($query, $this->_exceldblink);
 	}
 
@@ -84,7 +112,7 @@ class pupeExcel {
 					excelsarake = $excelsarake,
 					type 		= 'S',
 					value 		= '$string',
-					style 		= '$style'";
+					style 		= '".mysql_real_escape_string(serialize($style))."'";
 		$result = pupe_query($query, $this->_exceldblink);
 
 		$query = "	INSERT INTO excel_sharedstrings SET
@@ -165,6 +193,9 @@ class pupeExcel {
 			$cell = $row->addChild("c");
 			$cell->addAttribute('r', $cellcoordinates);
 
+			// Unserialize style-array
+			$data_row["style"] = unserialize($data_row["style"]);
+
 			// String
 			if ($data_row["type"] == "S") {
 				// Set cell value
@@ -181,6 +212,21 @@ class pupeExcel {
 			if ($data_row["type"] == "N") {
 				// Set cell value
 				$cell->addChild("v", (float) $data_row["value"]);
+
+				// Add style attribute
+				$this->setStyle($cell, $data_row["style"]);
+			}
+
+			// Date yyyy-mm-dd
+			if ($data_row["type"] == "D") {
+				list($vv, $kk, $pp) = explode("-", substr($data_row["value"], 0, 10));
+
+				// Excelissä päivämäärät lasketaan päivissä päivästä 1.1.1900
+				// 25569 päivää -> 1.1.1900 - 1.1.1970
+				$dateExcel = (mktime(0, 0, 0, $kk, $pp, $vv)/86400)+25569+1;
+
+				// Set cell value
+				$cell->addChild("v", (int) $dateExcel);
 
 				// Add style attribute
 				$this->setStyle($cell, $data_row["style"]);

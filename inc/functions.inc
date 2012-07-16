@@ -3325,7 +3325,7 @@ if (!function_exists("alehinta")) {
 		// haetaan asiakkaan segmentit
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 	   				FROM puun_alkio
-					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+						JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
 	   				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
 	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
 					AND puun_alkio.laji    = 'asiakas'
@@ -13168,7 +13168,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			mysql_data_seek($riresult1, 0);
 		}
 
-		if (mysql_num_rows($riresult2) > 0) {
+		if (mysql_num_rows($riresult1) > 1 and mysql_num_rows($riresult2) > 0) {
 			while ($row = mysql_fetch_assoc($riresult2)) {
 
 				$query = "	SELECT *
@@ -16593,7 +16593,7 @@ if (!function_exists("pupesoft_lahetetyyppi")) {
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND laji = 'LAHETETYYPPI'
-					ORDER BY jarjestys, selite
+						ORDER BY jarjestys, selite
 					LIMIT 1";
 		$result = pupe_query($query);
 		$lahetetyyppi = mysql_fetch_assoc($result);
@@ -16617,7 +16617,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		//hatetaan asiakkaan l‰hetetyyppi
 		$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 					FROM asiakas
-					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					WHERE tunnus = '$laskurow[liitostunnus]' and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 		$asrow = mysql_fetch_assoc($result);
 
@@ -16651,6 +16651,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		// katotaan miten halutaan sortattavan
 		// haetaan asiakkaan tietojen takaa sorttaustiedot
+
 		$order_sorttaus = '';
 
 		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
@@ -16681,8 +16682,39 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
 		$query_ale_lisa = generoi_alekentta('M');
 
+		// Koontil‰hetteen lis‰valinnat ja -ehdot
+		if (isset($params['koontilahete']) and $params['koontilahete']) {
+
+			$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
+
+			// Hetaan kaikki alkuper‰isen tilauksen rivit
+			$query = " 	SELECT GROUP_CONCAT(tunnus) tunnukset
+						FROM lasku use index (yhtio_vanhatunnus)
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and vanhatunnus = '$hakutunnus'";
+			$koontires = pupe_query($query);
+			$koontirow = mysql_fetch_assoc($koontires);
+
+			if ($koontirow['tunnukset'] != "") {
+			    $otunnus = $koontirow['tunnukset'];
+			}
+			else {
+			    $otunnus = $laskurow["tunnus"];
+			}
+
+			$koontiselect	= " kerayserat.sscc, kerayserat.sscc_ulkoinen, pakkaus.pakkaus,";
+			$koontijoin 	= " JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
+			 					LEFT JOIN pakkaus ON (kerayserat.pakkaus = pakkaus.tunnus)";
+			$koontisort 	= " kerayserat.sscc_ulkoinen, ";
+		}
+		else {
+			$koontiselect 	= "";
+			$koontijoin 	= "";
+			$koontisort 	= "";
+		}
+
 		//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
-		$query = "  SELECT tilausrivi.*,
+		$query = "  SELECT $koontiselect tilausrivi.*,
 					round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 					$sorttauskentta,
@@ -16691,14 +16723,15 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.sarjanumeroseuranta
 					FROM tilausrivi
+					$koontijoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					WHERE tilausrivi.otunnus = '$otunnus'
-					and tilausrivi.yhtio = '$kukarow[yhtio]'
+				    WHERE tilausrivi.otunnus in ($otunnus)
+					AND tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
-					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-					ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+					AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+					ORDER BY $koontisort jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = pupe_query($query);
 
 		$params_lahete = array(
@@ -16748,18 +16781,37 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		// Aloitellaan l‰hetteen teko
+		if (isset($params['koontilahete']) and $params['koontilahete']) {
+			$params_lahete['koontilahete'] = TRUE;
+		}
+		else {
+			$params_lahete['koontilahete'] = FALSE;
+		}
+
 		$params_lahete = alku_lahete($params_lahete);
 
 		// Piirret‰‰n rivit
 		mysql_data_seek($riresult,0);
 
+        $sscc = "";
+
 		while ($row = mysql_fetch_assoc($riresult)) {
+
 			$params_lahete["row"] = $row;
+
+			// Mik‰li kolli vaihtuu, tulostetaan kollirivi
+			if ($params['koontilahete'] and ($sscc == "" or $sscc != $row['sscc'])) {
+				$params_lahete = kollirivi_lahete($params_lahete);
+				$params_lahete['kala'] = $params_lahete['kala'] -= 10;
+				$params_lahete = rivi_otsikot_lahete($params_lahete);
+			}
+
 			$params_lahete = rivi_lahete($params_lahete);
+			$sscc = $row['sscc'];
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet
-		if ($yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
+		if (!$params_lahete['koontilahete'] and $yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
 			$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 						FROM lasku use index (yhtio_vanhatunnus)
 						WHERE yhtio		= '$kukarow[yhtio]'
@@ -16840,6 +16892,189 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		//tulostetaan sivu
 		print_pdf_lahete($params_lahete);
 	}
+}
+
+if (!function_exists("pupeFileReader")) {
+	function pupeFileReader($file, $extension = "", $saveintocsvfile = "") {
+
+        /** Laitetaan rivit arrayseen **/
+    	$excelrivit = array();
+
+        // Jos halutaan tehd‰ esim XLSX to CSV konversio
+        if ($saveintocsvfile != "") {
+            // Aina temppiin
+            $saveintocsvfile = "/tmp/".basename($saveintocsvfile);
+
+            // Avataan file
+            $savefile = fopen($saveintocsvfile, "w");
+        }
+
+        if ($extension == "DATAIMPORT") {
+        	/** Ladataan CSV file **/
+        	$file = fopen($file,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+
+        	while ($rivi = fgets($file)) {
+        		/** Luetaan CSV rivi tiedostosta **/
+
+        		// Katsotaan onko UTF-8 muodossa
+        		if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
+        			$rivi = str_getcsv(utf8_decode($rivi));
+        		}
+        		else {
+        			$rivi = str_getcsv($rivi);
+        		}
+
+        		$excelrivit[] = $rivi;
+        	}
+
+        	fclose($file);
+        }
+        elseif ($extension == "TXT" or $extension == "CSV") {
+        	/** Ladataan Tab eroteltu teksti file **/
+        	$file = fopen($file,"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+
+        	$rowIndex = 0;
+
+        	while ($rivi = fgets($file)) {
+        		// luetaan rivi tiedostosta..
+        		$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+
+        		for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
+        			$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
+        		}
+
+        		$rowIndex++;
+        	}
+
+        	fclose($file);
+        }
+        elseif ($extension == "XLSX") {
+        	/** XLSX XML-tiedosto **/
+        	$foldername = md5(uniqid(rand(),true));
+
+        	function charColumn($string) {
+
+        		$string = strrev($string);
+        		$luku 	= 0;
+
+        		for ($r = 0; $r < strlen($string); $r++) {
+        			$luku += (ord($string{$r})-64) * pow(26, $r);
+        		}
+
+        		return $luku-1;
+        	}
+
+        	// Avataan XLSX Zippi
+        	exec("cp $file /tmp/$foldername.zip; unzip /tmp/$foldername.zip -d /tmp/$foldername;");
+
+        	$workSheetFile		= "/tmp/$foldername/xl/worksheets/sheet1.xml";
+        	$sharedStringsFile	= "/tmp/$foldername/xl/sharedStrings.xml";
+
+        	$sheetData		= simplexml_load_file($workSheetFile);
+        	$sharedStrings	= simplexml_load_file($sharedStringsFile);
+
+        	$sharedStringsArray = array();
+
+        	foreach ($sharedStrings->si as $string) {
+        		$sharedStringsArray[] = utf8_decode($string->t);
+        	}
+
+        	foreach ($sheetData->sheetData->row as $row) {
+
+        		$rowIndex = ($row->attributes()->r)-1;
+
+        		foreach ($row->c as $cell) {
+
+        			if (isset($cell->attributes()->t) and $cell->attributes()->t == "s") {
+        				$value = $sharedStringsArray[(int) $cell->v];
+        			}
+        			else {
+        				$value = $cell->v;
+        			}
+
+        			$colIndex = charColumn(str_replace(($rowIndex+1), "", (string) $cell->attributes()->r));
+
+        			$excelrivit[$rowIndex][$colIndex] = trim($value);
+        			$colIndex++;
+        		}
+        	}
+
+        	// XLSX failisssa ei ole ollenkaan tyhji‰ soluja, injisoidaan ne t‰ss‰...
+        	foreach ($excelrivit as $rowIndex => $row) {
+        		$edindex = 0;
+
+        		foreach ($row as $colIndex => $column) {
+
+        			if ($colIndex > 0 and $colIndex > $edindex+1) {
+        				for ($inj = $edindex+1; $inj < $colIndex; $inj++) {
+        					$excelrivit[$rowIndex][$inj] = "";
+        				}
+        			}
+
+        			$edindex = $colIndex;
+        		}
+
+                // Laitetaan solut viel‰ indeksien mukaan j‰rjestykseen jotta implode toimisi
+        		ksort($excelrivit[$rowIndex]);
+
+        		if (isset($savefile)) {
+        		    fwrite($savefile, "\"".implode("\",\"", $excelrivit[$rowIndex])."\"\n");
+        		}
+        	}
+
+        	// Poistetaan zipppi ja purettu zippi
+        	exec("rm -f /tmp/$foldername.zip; rm -rf /tmp/$foldername;");
+        }
+        else {
+        	/** PHPExcel kirjasto **/
+        	require_once "PHPExcel/PHPExcel/IOFactory.php";
+
+        	/** Tunnistetaan tiedostomuoto **/
+        	$inputFileType = PHPExcel_IOFactory::identify($file);
+
+        	/** Luodaan readeri **/
+        	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+        	/** Ladataan vain solujen datat (ei formatointeja jne) **/
+        	$objReader->setReadDataOnly(true);
+
+        	/** Ladataan vain eka sheet **/
+        	$objReader->setLoadSheetsOnly(0);
+
+        	/** Ladataan file halutuilla parametreilla **/
+        	$objPHPExcel = $objReader->load($file);
+
+        	/** Aktivoidaan eka sheetti**/
+        	$objPHPExcel->setActiveSheetIndex(0);
+
+        	/** Loopataan tiedoston rivit **/
+        	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+        	    $cellIterator = $row->getCellIterator();
+        	    $cellIterator->setIterateOnlyExistingCells(false);
+
+        		$rowIndex = ($row->getRowIndex())-1;
+
+        	    foreach ($cellIterator as $cell) {
+        	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+        			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+        	    }
+        	}
+
+        	/** Tuhotaan excel oliot **/
+        	unset($objReader);
+        	unset($objPHPExcel);
+        }
+
+        if (isset($savefile)) {
+            fclose($savefile);
+
+            return $saveintocsvfile;
+        }
+        else {
+            return $excelrivit;
+        }
+    }
 }
 
 if (!function_exists("kustannuspaikka_kohde_projekti")) {
@@ -17874,8 +18109,6 @@ if (!function_exists("pupesoft_sahkoposti")) {
 			if ($attachement_newfilename != "") {
 				$attachement_name = basename($attachement_newfilename);
 			}
-			// Lis‰t‰‰n extensioni filenameen
-			$attachement_name .= ".$attachement_ctype";
 
 			// Boundin j‰lkeen aina rivinvaihto
 			$content .= "\n";
@@ -18023,7 +18256,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 			return $kaytettavat_tilausrivit;
 		}
 
-		echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
+		#echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
 
 		while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 
@@ -18035,7 +18268,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 							AND laji = 'asn'
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
 							AND status = 'X'";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res = pupe_query($query);
 
 				// tilausrivi ei saa olla jo kohdistettu
@@ -18044,11 +18277,11 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laji = 'tec'
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res2 = pupe_query($query);
 
 				if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
-					echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+					#echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 				}
 				else {
@@ -18066,7 +18299,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) != 0) {
-							echo "Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+							#echo "Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 						}
 					}
@@ -18079,11 +18312,11 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laji = 'tec'
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res = pupe_query($query);
 
 				if (mysql_num_rows($chk_res) == 0) {
-					echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
+					#echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
 					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 				}
 			}

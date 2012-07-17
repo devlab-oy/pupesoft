@@ -3,6 +3,9 @@
 // tarvitaan $laskurow array, jossa on meidän keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
+# Muuttuja kun viedään tilausrivi kerrallaan.
+$varastoon_tilausurivirajaus = "";
+
 if ($toiminto == "kalkyyli" and $tee == "" and $kauttalaskutus == '') {
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
@@ -121,6 +124,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
+	# Viedään vain yksi rivi varastoon
+	if ($vie_vain_tama_tunnus_varastoon != 0) {
+		$varastoon_tilausurivirajaus = "AND tilausrivi.tunnus = $vie_vain_tama_tunnus_varastoon";
+	}
+
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
 		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
@@ -148,6 +156,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
+				$varastoon_tilausurivirajaus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
@@ -1110,7 +1119,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	echo "</td></tr>";
 }
 
-if ($kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<tr>";
 }
 
@@ -1134,7 +1143,7 @@ if ($tee == "") {
 
 	echo "<td class='back' colspan='2'><input type='submit' value='".t("Päivitä")."'></td>";
 }
-elseif ($kauttalaskutus == '') {
+elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<td class='back' colspan='2'></td>";
 }
 
@@ -1158,7 +1167,7 @@ elseif ($tv_kaytossa and $kauttalaskutus == '') {
 	echo "<th></th>";
 }
 
-if ($kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "</tr>";
 	echo "</table></form><br>";
 }
@@ -1201,18 +1210,23 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-		// päivitetään suuntalava puretuksi
-		$query = "	UPDATE tilausrivi
-					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
-					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-		 			SET suuntalavat.tila = 'P'
-					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-					AND tilausrivi.netto 		= ''
-					AND tilausrivi.kpl 		   != 0
-					AND tilausrivi.tyyppi 		= 'O'
-					AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
-		$netto_suuntalava_result = pupe_query($query);
+		# Jos viedään yksi rivi kerrallaan, ei suuntalavaa merkata puretuksi
+		# Jos kyseessä on viimeinen tuote, merkataan puretuksi.
+		if ($vie_vain_tama_tunnus_varastoon == 0) {
+
+			// päivitetään suuntalava puretuksi
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+			 			SET suuntalavat.tila = 'P'
+						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
+						AND tilausrivi.netto 		= ''
+						AND tilausrivi.kpl 		   != 0
+						AND tilausrivi.tyyppi 		= 'O'
+						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
+			$netto_suuntalava_result = pupe_query($query);
+		}
 
 		// AINA EI SIIS OSUTA TÄHÄN, JOS JÄMÄRIVEJÄ EI OLE
 		// JOS JÄMÄRIVEJÄ (= SPLITTAANTUNEET) JÄÄ SUUNTALAVALLE
@@ -1304,4 +1318,3 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "</form>";
 }
 
-?>

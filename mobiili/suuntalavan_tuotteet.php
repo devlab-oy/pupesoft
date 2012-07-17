@@ -18,23 +18,23 @@ if (isset($submit) and trim($submit) != '') {
 
 	$url = http_build_query($data);
 
-	if ($submit == 'edit') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
-		exit;
+	# edit ja submit tarvitsee valitun rivin.
+	if (!isset($_POST['selected_row'])) {
+		$error['tuotteet'] = t("Rivi‰ ei ole valittu", $browkieli).'.';
 	}
-	elseif ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
-		exit;
-	}
-	elseif ($submit == 'submit') {
-		# Jos ei ole valikoitu rivit‰, ei tehd‰ mit‰‰n.
-		if (isset($_POST['selected_row'])) {
+	else {
+		if ($submit == 'edit') {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=muokkaa_suuntalavan_rivia.php?{$url}'>";
+			exit;
+		}
+		elseif ($submit == 'submit') {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
 			exit;
 		}
-		else {
-			$error['tuotteet'] = t("Rivi‰ ei ole valittu", $browkieli).'.';
-		}
+	}
+	if ($submit == 'cancel') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
+		exit;
 	}
 	elseif ($submit == 'varalle') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
@@ -73,8 +73,16 @@ if (isset($alusta_tunnus)) {
 
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc, $tuoteno);
 
-	$i = 0;
+	if (mysql_num_rows($res) == 0) {
+		# T‰m‰ suuntalava on tyhj‰
+		# Merkataan puretuksi ja palataan alustan valintaan
+		# suuntalava_puretuksi($suuntalava);
+		echo "Suuntalavalla ei yht‰‰n tuotetta";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
+		exit;
+	}
 
+	$i = 0;
 	while ($row = mysql_fetch_assoc($res)) {
 		$tuotteet[$i]['tilriv_tunnus'] = $row['tunnus'];
 		$tuotteet[$i]['tuoteno'] = $row['tuoteno'];

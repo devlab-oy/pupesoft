@@ -10,7 +10,7 @@ elseif (@include_once("inc/parametrit.inc"));
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = (int) $selected_row;
+$selected_row = 0;
 
 $error = array(
 	'varalle' => ''

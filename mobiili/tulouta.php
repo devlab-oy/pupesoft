@@ -53,11 +53,13 @@ echo "
 									</select>
 								</td>
 							</tr>
+							<!--
 							<tr>
 								<td>
 									<button value='wat'>",t("Suuntalavat", $browkieli),"</button>
 								</td>
 							</tr>
+							-->
 							<tr>
 								<td>
 									<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>

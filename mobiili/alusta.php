@@ -4,6 +4,7 @@ $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
 $mobile = true;
+$valinta = "Etsi";
 
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
@@ -27,6 +28,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
 	if ($submit == 'submit' and $alusta == $alusta_chk and trim($alusta_tunnus) != '' and trim($liitostunnus) != '') {
 
+
 		$alusta_tunnus = (int) $alusta_tunnus;
 		$liitostunnus = (int) $liitostunnus;
 
@@ -38,6 +40,8 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
 	if ($submit == 'submit') {
 		$return = etsi_suuntalava_sscc(trim($alusta));
+
+		$valinta = "Valitse";
 
 		if (count($return) == 0) {
 			$error['alusta'] = "<font class='error'>".t("Alustaa ei löytynyt").".</font>";
@@ -72,7 +76,7 @@ echo "
 							</tr>
 							<tr>
 								<td>
-									<button name='submit' value='submit' onclick='submit();'>",t("Etsi", $browkieli)," / ",t("Valitse", $browkieli),"</button>
+									<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
 									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 								</td>
 							</tr>

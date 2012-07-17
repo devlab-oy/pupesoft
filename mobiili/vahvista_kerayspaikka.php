@@ -63,15 +63,29 @@ if (isset($submit) and trim($submit) != '') {
 				echo "EI SPLITATA";
 				# Kaikki OK
 				# Vahvista ker‰ys
+				$hylly = array(
+					"hyllyalue" => $row['hyllyalue'],
+					"hyllynro" 	=> $row['hyllynro'],
+					"hyllyvali" => $row['hyllyvali'],
+					"hyllytaso" => $row['hyllytaso']);
 
+				$saapuminen = hae_saapumiset($alusta_tunnus);
+				echo $saapuminen[0];
+				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
+
+				# Jos tuotteita j‰lell‰, menn‰‰jn takaisin suuntalavan tuotteet sivulle
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavan_tuotteet.php?{$url}'>";
+
+				# Jos oli viimeinen tuote, palataan alusta sivulle
+				#
+				exit;
 			}
+
 		}
 		# V‰‰r‰ varmistuskoodi
 		else {
 			$error['vahvista'] =  "V‰‰r‰ varmistuskoodi";
 		}
-
-		$debug = $_POST;
 	}
 }
 
@@ -141,6 +155,5 @@ echo "
 	</table>";
 
 echo "<pre>";
-var_dump($debug);
 
 require('inc/footer.inc');

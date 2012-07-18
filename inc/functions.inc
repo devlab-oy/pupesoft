@@ -9691,7 +9691,9 @@ if (!function_exists("jt_toimita")) {
 			$from_varastoon_inc   = "varastoon.inc";
 		}
 
-		require('jtselaus.php');
+		if (!@include('jtselaus.php')) {
+			require('tilauskasittely/jtselaus.php');
+		}
 	}
 }
 
@@ -18566,8 +18568,9 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 					AND hyllynro = '{$hyllynro}'
 					AND hyllyvali = '{$hyllyvali}'
 					AND hyllytaso = '{$hyllytaso}'
-					$query_lisa
-					#AND varasto = '{$varasto}'";
+					$query_lisa";
+					# Noticet pois
+					##AND varasto = '{$varasto}'";
 		$chk_res = pupe_query($query);
 
 		return mysql_num_rows($chk_res) == 0 ? false : true;

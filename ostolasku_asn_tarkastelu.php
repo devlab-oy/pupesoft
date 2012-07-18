@@ -1231,7 +1231,8 @@
 							AND (tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
 							{$tilaajanrivinrolisa}
 							{$tuotenolisa}
-							{$kpllisa})
+							{$kpllisa}
+						)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND (lasku.tila = 'O' OR (lasku.tila = 'K' AND lasku.alatila != 'X'))
@@ -1243,7 +1244,17 @@
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
-
+            
+				if ($row['uusiotunnus'] != '') {
+					$query = "	SELECT alatila
+								FROM lasku
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['uusiotunnus']}'";
+					$result_alatila_check = pupe_query($query);
+					$result_alatila_row = mysql_fetch_assoc($result_alatila_check);
+					if ($result_alatila_row['alatila'] == 'X') continue;
+				}
+				
 				$querylisa = $valitse == 'asn' ? " AND laji = 'asn' " : " AND laji = 'tec' ";
 
 				// katsotaan ettei riviä ole jo kohdistettu muuhun riviin

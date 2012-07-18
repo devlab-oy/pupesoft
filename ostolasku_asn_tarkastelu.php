@@ -257,6 +257,7 @@
 			$paketin_tunnukset 	= array();
 			$rtuoteno			= array();
 			$laskuttajan_toimittajanumero = "";
+			$lasku_manuaalisesti_check = 0;
 
 			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != ''";
 
@@ -507,6 +508,28 @@
 								$keikoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
 								$keikoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
 								$keikoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
+								
+								// jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edetä ja nollataan asn_sanomat.tilausrivi
+								$query = "	SELECT saapuminen.tunnus
+											FROM lasku AS saapuminen
+											JOIN lasku AS ostolaskuliitos ON (
+												saapuminen.yhtio = ostolaskuliitos.yhtio
+												AND saapuminen.laskunro = ostolaskuliitos.laskunro
+												AND ostolaskuliitos.tila = 'K'
+												AND ostolaskuliitos.vienti in ('C','F','I')
+											)
+											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
+											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'";
+								$saapres = pupe_query($query);
+								
+								if (mysql_num_rows($saapres) != 0) {
+									$lasku_manuaalisesti_check = 1;
+									$query = "	UPDATE asn_sanomat SET
+												tilausrivi = ''
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus	= '{$kollirow['tunnus']}'";
+									$upd_res = pupe_query($query);
+								}
 							}
 
 							$x++;
@@ -519,7 +542,7 @@
 				}
 			}
 
-			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check == 0) {
 
 				if ($tee == 'vahvistavakisinkolli' and !$tullaan_virhetarkistuksesta) {
 					$query = "	UPDATE asn_sanomat SET
@@ -572,7 +595,10 @@
 					// verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 				}
 			}
-
+			else if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
+				echo "<font class='message'>",t("Laskun rivejä oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan tämmöisten rivien liitos"),". ",t("Käsittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
+			}
+			
 			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
 
 				$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
@@ -1268,6 +1294,22 @@
 					$chkres = pupe_query($query);
 
 					if (mysql_num_rows($chkres) == 0) continue;
+				}
+
+				// katsotaan että rivi ei ole saapumisella johon on manuaalisesti pistetty vaihto-omaisuuslasku
+				if ($row['uusiotunnus'] != '') {
+					$query = "	SELECT saapuminen.tunnus
+								FROM lasku AS saapuminen
+								JOIN lasku AS ostolaskuliitos ON (
+									saapuminen.yhtio = ostolaskuliitos.yhtio
+									AND saapuminen.laskunro = ostolaskuliitos.laskunro
+									AND ostolaskuliitos.tila = 'K'
+									AND ostolaskuliitos.vienti in ('C','F','I')
+								)
+								WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
+								AND saapuminen.tunnus = '{$row['uusiotunnus']}'";
+					$chkres = pupe_query($query);
+					if (mysql_num_rows($chkres) != 0) continue;
 				}
 
 				echo "<tr>";

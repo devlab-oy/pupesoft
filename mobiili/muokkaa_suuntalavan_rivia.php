@@ -16,48 +16,51 @@ $error = array(
 	'rivi' => ''
 );
 
+# Haetaan suuntalavan tuotteet
+$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
+$row = mysql_fetch_assoc($res);
+
+# Jos on painettu nappia
 if (isset($submit) and trim($submit) != '') {
 
 	$data = array(
 		'alusta_tunnus' => $alusta_tunnus,
 		'liitostunnus' => $liitostunnus
 	);
-
 	$url = http_build_query($data);
 
+	# Takaisin nappi
 	if ($submit == 'cancel') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
 		exit;
 	}
-}
 
-$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
-$row = mysql_fetch_assoc($res);
+	# Pois suuntalavalta nappi
+	elseif ($submit == 'submit') {
 
-if (isset($submit) and trim($submit) == 'submit') {
-
-	if (!isset($maara)) {
-		$error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'.';
-	}
-	elseif (!is_numeric($maara)) {
-		$error['rivi'] = t("M‰‰r‰ pit‰‰ olla numero", $browkieli).'.';
-	}
-	elseif ($maara < 1 or $maara >= $row['varattu']) {
-		if ($row['varattu'] == 1) {
-			$error['rivi'] = t("Virheellinen m‰‰r‰", $browkieli).'.';
+		if (!isset($maara)) {
+			$error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'.';
+		}
+		elseif (!is_numeric($maara)) {
+			$error['rivi'] = t("M‰‰r‰ pit‰‰ olla numero", $browkieli).'.';
+		}
+		elseif ($maara < 1 or $maara >= $row['varattu']) {
+			if ($row['varattu'] == 1) {
+				$error['rivi'] = t("Virheellinen m‰‰r‰", $browkieli).'.';
+			}
+			else {
+				$error['rivi'] = t("Sallitut m‰‰r‰t ovat", $browkieli).' 1 - '.($row['varattu'] - 1).'.';
+			}
 		}
 		else {
-			$error['rivi'] = t("Sallitut m‰‰r‰t ovat", $browkieli).' 1 - '.($row['varattu'] - 1).'.';
-		}
-	}
-	else {
-		# P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
-		$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
-		$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
+			# P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
+			$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
+			$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
 
-		# Redirect alustaan vai suuntalavan_tuotteet
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-		exit;
+			# Redirect alustaan vai suuntalavan_tuotteet
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+			exit;
+		}
 	}
 }
 

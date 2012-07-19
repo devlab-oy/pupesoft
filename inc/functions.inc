@@ -18799,7 +18799,6 @@ if (!function_exists('hae_saapumiset')) {
 					FROM suuntalavat_saapuminen
 					WHERE suuntalava='{$suuntalava_tunnus}'
 					AND yhtio='{$kukarow['yhtio']}'";
-		echo $query;
 		$result = pupe_query($query);
 
 		$saapumiset = array();

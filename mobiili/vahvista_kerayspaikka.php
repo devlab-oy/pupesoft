@@ -1,4 +1,5 @@
 <?php
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -34,9 +35,6 @@ $row = mysql_fetch_assoc($res);
 
 # Haetaan saapumiset6881
 $saapumiset = hae_saapumiset($alusta_tunnus);
-echo "<pre>";
-var_dump($saapumiset);
-echo "</pre>";
 
 # Jos parametrina hylly, eli ollaan muutettu tuotteen ker‰yspaikkaa
 if(isset($hylly)) {
@@ -61,7 +59,7 @@ if (isset($submit) and trim($submit) != '') {
 	elseif ($submit == 'submit') {
 
 		# Tarkistetaan varmistuskoodi
-		if(!empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
+		if(is_numeric($maara) && !empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 			echo "varmistuskoodi ja hylly ok<br>";
 
 			# Hylly array
@@ -144,24 +142,21 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 		}
-		# V‰‰r‰ varmistuskoodi
+		# V‰‰r‰ varmistuskoodi tai maara
 		else {
-			$error['vahvista'] =  "V‰‰r‰ varmistuskoodi tai hyllypaikka";
+			$error['vahvista'] =  "V‰‰r‰ varmistuskoodi";
+			# jos m‰‰r‰ ei ole numero
+			if(!is_numeric($maara)) {
+				$error['vahvista'] .= "<br>M‰‰r‰n t‰ytyy olla numero";
+			}
 		}
 	}
 }
-
+include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
-
 	<table border='0'>
 		<tr>
-			<td><h1>",t("Vahvista ker‰yspaikka", $browkieli),"</h1>
+			<td><h1>",t("VAHVISTA KERƒYSPAIKKA", $browkieli),"</h1>
 				<form name='vahvistaformi' method='post' action=''>
 				<table>
 					<tr>
@@ -207,6 +202,4 @@ echo "
 		</tr>
 	</table>";
 
-echo "<pre>";
-
-require('inc/footer.inc');
+#require('inc/footer.inc');

@@ -1,0 +1,22 @@
+<style type='text/css'>
+body {
+	overflow:hidden;
+	width: 100%;
+	padding: 0px;
+	margin: 0px;
+	font-family: 'Arial';
+}
+table {
+	padding: 0px;
+	margin: 0px;
+	font-size: 0.95em;
+}
+button {
+	font-size: 1.05em;
+}
+	A, A:visited	{color: #c0c0c0; text-decoration:none;}
+	.error		{color: #ff6666;}
+h1 {
+	font-size: 1.8em;
+}
+</style>

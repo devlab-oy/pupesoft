@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -63,18 +63,13 @@ echo "
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
 	</head>
-
-<style type='text/css'>
-<!--
-	a, a:visited	{color: #c0c0c0; text-decoration:none;}
-	.error		{color: #ff6666;}
--->
-</style>
-
+";
+include("kasipaate.css");
+echo "
 <body>
 <table class='main' border='0'>
 <tr>
-<td><h1>",t("Sisäänkirjautuminen", $browkieli),"</h1>";
+<td><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 
@@ -135,4 +130,4 @@ else {
 echo "</td></tr></table>";
 echo "</body></html>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

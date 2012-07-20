@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -64,14 +64,8 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
-
 	<table border='0'>
 		<tr>
 			<td><h1>",t("Muokkaa suuntalavan riviä", $browkieli),"</h1>
@@ -117,4 +111,4 @@ echo "
 		</tr>
 	</table>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

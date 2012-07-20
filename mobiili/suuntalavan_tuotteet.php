@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -40,7 +40,6 @@ if (isset($submit) and trim($submit) != '') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
 		exit;
 	}
-
 }
 
 $sort_by_direction_tuoteno 		= (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
@@ -95,14 +94,9 @@ if (isset($alusta_tunnus)) {
 	}
 }
 
-echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
+include("kasipaate.css");
 
+echo "
   	<script type='text/javascript'>
 
 		function setFocus() {
@@ -159,9 +153,9 @@ echo "
   // 		});
 	</script>
 
-	<table border='0' onload='setFocus();'>
+	<table border='0'>
 		<tr>
-			<td colspan='4'><h1>",t("Suuntalavan tuotteet", $browkieli),"</h1>
+			<td colspan='4'><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1>
 				<form name='viivakoodiformi' method='post' action=''>
 					<table>
 						<tr>
@@ -229,6 +223,8 @@ echo "							</th>
 echo "						<tr>
 						<td colspan='5'>&nbsp;</td>
 					</tr>
+					</table>
+					<table>
 					<tr>
 						<td nowrap>
 							<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
@@ -247,12 +243,17 @@ echo "						<tr>
 						</td>
 					</tr>
 				</table>
-				<span class='error'>{$error['tuotteet']}</span>
-				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+				";
+
+if (isset($error)) {
+	echo "<span class='error'>{$error['tuotteet']}</span>";
+}
+
+echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				</form>
 			</td>
 		</tr>
 	</table>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

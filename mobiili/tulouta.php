@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -29,14 +29,8 @@ if (isset($submit) and trim($submit) == 'submit') {
 	if ($tulotyyppi == '') $error['tulotyyppi'] = "<font class='error'>".t("Valitse tulotyyppi")."!</font>";
 }
 
+include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
-
 	<body>
 		<form method='post' action=''>
 			<table border='0'>
@@ -77,4 +71,4 @@ echo "
 		</form>
 	</body>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

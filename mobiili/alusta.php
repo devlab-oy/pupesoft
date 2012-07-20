@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -44,19 +44,13 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 		$valinta = "Valitse";
 
 		if (count($return) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei löytynyt").".</font>";
+			$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn. Hae uudestaan.").".</font>";
 		}
 	}
 }
 
+include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error			{color: #ff6666;}
-	-->
-	</style>
-
 	<script type='text/javascript'>
 		function setFocus() {
 			if (document.getElementById('alusta')) document.getElementById('alusta').focus();
@@ -112,4 +106,4 @@ if (isset($return) and count($return) > 0) {
 
 echo "</table></form></body>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

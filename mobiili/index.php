@@ -1,5 +1,5 @@
 <?php
-
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
@@ -42,4 +42,4 @@ echo "<input type='submit' value='",t("Lopeta", $browkieli),"' />";
 echo "</form>";
 echo "</body>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

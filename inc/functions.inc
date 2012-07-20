@@ -18431,7 +18431,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					{$tuotenolisa}
 					{$tilrivlisa}
 					ORDER BY {$order} {$ascdesc}";
-		$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
+		$tavaraetiketti_res = pupe_query($query) or pupe_error($query);
 
 		return $tavaraetiketti_res;
 	}
@@ -18810,3 +18810,23 @@ if (!function_exists('hae_saapumiset')) {
 		return $saapumiset;
 	}
 }
+
+if (!function_exists('paivita_tilausrivin_hylly')) {
+	function paivita_tilausrivin_hylly($tilausrivi_tunnus, Array $hylly) {
+		global $kukarow;
+
+		$query = "	UPDATE tilausrivi SET
+					hyllyalue = '$hylly[hyllyalue]',
+					hyllynro = '$hylly[hyllynro]',
+					hyllyvali = '$hylly[hyllyvali]',
+					hyllytaso = '$hylly[hyllytaso]'
+ 					WHERE yhtio = '$kukarow[yhtio]'
+ 					and tunnus = '$tilausrivi_tunnus'";
+ 		echo $query;
+
+ 		$presult = pupe_query($query);
+
+ 		return mysql_affected_rows();
+	}
+}
+

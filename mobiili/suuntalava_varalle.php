@@ -8,9 +8,18 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+if (!isset($alusta_tunnus, $liitostunnus, $selected_row)) exit;
+
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $selected_row = 0;
+
+# Hylly
+// $hyllyalue = '';
+// $hyllynro = '';
+// $hyllyvali = '';
+// $hyllytaso = '';
+// $koodi = '';
 
 $error = array(
 	'varalle' => ''
@@ -19,7 +28,7 @@ $error = array(
 if (isset($submit) and trim($submit) != '') {
 
 	if ($submit == 'submit') {
-		# Koodi ei saa ocibindbyname()lla tyhjä!
+		# Koodi ei saa olla tyhjä!
 		if ($koodi != '') {
 
 			# Tarkistetaan hyllypaikka ja varmistuskoodi

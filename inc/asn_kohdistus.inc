@@ -553,7 +553,7 @@
 									try				= '{$split_row['try']}',
 									osasto			= '{$split_row['osasto']}',
 									nimitys			= '{$split_row['nimitys']}',
-									yksikko			= '{$split_row[yksikko]}',
+									yksikko			= '{$split_row['yksikko']}',
 									tilkpl			= '{$positiivinen_arvo}',
 									varattu			= '{$positiivinen_arvo}',
 									hinta			= '{$split_row['hinta']}',

@@ -16,29 +16,30 @@
 		echo "<br><br><font class='message'>".t("Lasku on liitetty saapumiseen, alv tiliöintejä ei voi muuttaa")."! ".t("Saapuminen").": $keikrow[nimi] / $keikrow[laskunro]</font>";
 	}
 
-	if (!isset($alv_tili))	$alv_tili = "";
-	if (!isset($iframe))	$iframe = "";
-	if (!isset($iframe_id))	$iframe_id = "";
-	if (!isset($jarj))		$jarj = "";
-	if (!isset($kk))		$kk = "";
-	if (!isset($laji))		$laji = "";
-	if (!isset($ok))		$ok = 0;
-	if (!isset($tiliulos))	$tiliulos = "";
-	if (!isset($tositenro))	$tositenro = "";
-	if (!isset($valkoodi))	$valkoodi = "";
-	if (!isset($viivatut))	$viivatut = "";
-	if (!isset($grouppaa))	$grouppaa = "";
-	if (!isset($virhe))		$virhe = "";
-	if (!isset($vv))		$vv = "";
-	if (!isset($yhtsum))	$yhtsum = "";
-	if (!isset($kustp))		$kustp = "";
-	if (!isset($kohde))		$kohde = "";
-	if (!isset($projekti))	$projekti = "";
+	if (!isset($alv_tili))			$alv_tili = "";
+	if (!isset($iframe))			$iframe = "";
+	if (!isset($iframe_id))			$iframe_id = "";
+	if (!isset($jarj))				$jarj = "";
+	if (!isset($kk))				$kk = "";
+	if (!isset($laji))				$laji = "";
+	if (!isset($ok))				$ok = 0;
+	if (!isset($tiliulos))			$tiliulos = "";
+	if (!isset($tositenro))			$tositenro = "";
+	if (!isset($valkoodi))			$valkoodi = "";
+	if (!isset($viivatut))			$viivatut = "";
+	if (!isset($grouppaa))			$grouppaa = "";
+	if (!isset($virhe))				$virhe = "";
+	if (!isset($vv))				$vv = "";
+	if (!isset($yhtsum))			$yhtsum = "";
+	if (!isset($kustp))				$kustp = "";
+	if (!isset($kohde))				$kohde = "";
+	if (!isset($projekti))			$projekti = "";
+	if (!isset($liitos)) 			$liitos = "";
+	if (!isset($liitostunnus)) 		$liitostunnus = 0;
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
-	if (!isset($liitos)) 	$liitos = "";
-	if (!isset($liitostunnus)) $liitostunnus = 0;
 
-	$grouppaa = "X";
+	// Otetaan yhtiön oletus jos ei olla submitattu....
+	if (!isset($viivatut_grouppaa_formi)) $grouppaa = $yhtiorow["tositteen_tilioinnit"];
 
 	echo "<br><br>";
 	echo "<table>";
@@ -263,6 +264,7 @@
 	}
 
 	$lisa = '';
+
 	if ($viivatut != 'on') {
 		$lisa = " and tiliointi.korjattu = ''";
 	}
@@ -275,32 +277,40 @@
 	$tila_chk_res = pupe_query($query);
 	$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
+    if ($grouppaa != '' and $viivatut == '') {
+        $summaselect = "	group_concat(DISTINCT tiliointi.selite) selite,
+							group_concat(tiliointi.tunnus) tunnus,
+		                	sum(tiliointi.summa) summa,
+		                	sum(tiliointi.summa_valuutassa) summa_valuutassa,
+							count(tiliointi.tunnus) tunnuksia ";
+
+		$grouppaus = " GROUP BY 1,2,3,4,5,6,7,8,9 ";
+    }
+    else {
+        $summaselect = "	tiliointi.korjattu,
+							ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
+							tiliointi.korjausaika,
+							tiliointi.laatija laatija,
+							tiliointi.laadittu laadittu,
+							ifnull(la.nimi, tiliointi.laatija) laatija_nimi,
+							tiliointi.selite selite,
+							tiliointi.tunnus tunnus,
+		                	tiliointi.summa summa,
+		                	tiliointi.summa_valuutassa summa_valuutassa ";
+		$grouppaus = "";
+    }
+
 	$query = "	SELECT
 				tiliointi.tilino tilino,
 				tili.nimi tilinimi,
 				concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
 				tiliointi.vero vero,
 				tiliointi.tapvm,
-				tiliointi.selite selite,
 				tiliointi.liitos,
 				tiliointi.liitostunnus,
 				tiliointi.valkoodi,
-
-				tiliointi.korjattu,
-				ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
-				tiliointi.korjausaika,
-				tiliointi.laatija laatija,
-				tiliointi.laadittu laadittu,
-				ifnull(la.nimi, tiliointi.laatija) laatija_nimi,
 				tiliointi.lukko,
-				
-				#tiliointi.tunnus tunnus,
-				#tiliointi.summa summa,
-				#tiliointi.summa_valuutassa summa_valuutassa
-				
-				group_concat(tiliointi.tunnus) tunnus,
-				sum(tiliointi.summa) summa,
-				sum(tiliointi.summa_valuutassa) summa_valuutassa
+				$summaselect
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
@@ -311,7 +321,7 @@
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.ltunnus = '$tunnus'
 				$lisa
-				GROUP BY 1,2,3,4,5,6,7,8,9
+				$grouppaus
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 	$result = pupe_query($query);
 
@@ -319,14 +329,13 @@
 		echo "<br><br><font class='message'>".t("Laskulla ei ole vielä tiliöintirivejä")."</font><br><br>";
 	}
 
-	echo "$query<br>";
-
 	$maara = mysql_num_rows($result);
 
 	while ($trow = mysql_fetch_assoc($result)) {
 
 		$class = "";
-		if ($trow["korjattu"] != '') {
+
+		if ($grouppaus == "" and $trow["korjattu"] != '') {
 			$class = "tumma";
 		}
 
@@ -378,7 +387,10 @@
 		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
 		$tiliointi_pvm = strtotime($trow['tapvm']);
 
-		if ((mysql_num_rows($keikres) == 0 or $trow["vero"] == 0) and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["korjattu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
+		if ($grouppaus != "" and $trow["tunnuksia"] > 1) {
+			echo "<td>".t("Tiivistetty")."</td>";
+		}
+		elseif ((mysql_num_rows($keikres) == 0 or $trow["vero"] == 0) and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["korjattu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
 			//Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos lasku on liitetty keikkaan ja rivillä on veroa
@@ -398,14 +410,14 @@
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 					<input type='hidden' name = 'jarj' value = '$jarj'>
 					<input type='Submit' value = '".t("Muuta")."'>
-					</td></tr></form>"; // Tuossa tarkkana
+					</td></tr></form>";
 		}
 		else {
 			if ($maara > 1) {
 
 				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
 					echo "<td class='$class'>";
-					//Rivi on poistettu
+					// Rivi on poistettu
 					if ($trow['korjattu'] != '') {
 						echo "<img src=pics/lullacons/mini-trash.png>";
 					}
@@ -423,7 +435,7 @@
 			}
 		}
 
-		if ($trow['korjattu'] == '') {
+		if (!isset($trow['korjattu']) or $trow['korjattu'] == '') {
 			$yhtsum += $trow['summa']; //Riviä ei ole poistettu
 		}
 	}
@@ -438,13 +450,20 @@
 		$ok    = 1;
 	}
 
-	if ($viivatut == 'on') {
+	if ($viivatut != '') {
 		$viivatut = 'checked';
 		$colspan = '3';
 	}
 	else {
 		$viivatut = '';
 		$colspan = '2';
+	}
+
+	if ($grouppaa != '') {
+		$grouppaa = 'checked';
+	}
+	else {
+		$grouppaa = '';
 	}
 
 	echo "<tr>";
@@ -454,6 +473,7 @@
 	echo "<td colspan='$colspan'>";
 
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'>
+			<input type='hidden' name = 'viivatut_grouppaa_formi' value = 'JOO'>
 			<input type='hidden' name = 'laji' value = '$laji'>
 			<input type='hidden' name = 'vv' value = '$vv'>
 			<input type='hidden' name = 'kk' value = '$kk'>
@@ -464,8 +484,8 @@
 			<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
 			<input type='hidden' name = 'jarj' value = '$jarj'>";
 
-	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ";
-	echo t('Näytä poistetut');
+	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ".t('Näytä poistetut')."<br>";
+	echo "<input type='checkbox' name='grouppaa' onclick='submit();' $grouppaa> ".t('Tiivistetty näkymä');
 	echo "</form>";
 	echo "</td>";
 

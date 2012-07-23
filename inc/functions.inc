@@ -18524,6 +18524,12 @@ if (!function_exists('lisaa_tuotepaikka')) {
 	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '') {
 		global $kukarow;
 
+		# Isot kirjaimet
+		$hyllyalue 	= strtoupper($hyllyalue);
+		$hyllynro 	= strtoupper($hyllynro);
+		$hyllyvali 	= strtoupper($hyllyvali);
+		$hyllytaso 	= strtoupper($hyllytaso);
+
 		$query = "	INSERT INTO tuotepaikat SET
 					yhtio     = '{$kukarow['yhtio']}',
 					tuoteno	  = '{$tuoteno}',
@@ -18531,7 +18537,9 @@ if (!function_exists('lisaa_tuotepaikka')) {
 					hyllynro  = '{$hyllynro}',
 					hyllyvali = '{$hyllyvali}',
 					hyllytaso = '{$hyllytaso}',
-					oletus    = '{$oletus}'";
+					oletus    = '{$oletus}',
+					laatija	  = '{$kukarow['kuka']}',
+					luontiaika= now()";
 		$result = pupe_query($query);
 
 		$query = "	INSERT INTO tapahtuma SET
@@ -18814,6 +18822,12 @@ if (!function_exists('hae_saapumiset')) {
 if (!function_exists('paivita_tilausrivin_hylly')) {
 	function paivita_tilausrivin_hylly($tilausrivi_tunnus, Array $hylly) {
 		global $kukarow;
+
+		# Isot kirjaimet
+		$hylly['hyllyalue']	= strtoupper($hylly['hyllyalue']);
+		$hylly['hyllynro'] 	= strtoupper($hylly['hyllynro']);
+		$hylly['hyllyvali'] = strtoupper($hylly['hyllyvali']);
+		$hylly['hyllytaso'] = strtoupper($hylly['hyllytaso']);
 
 		$query = "	UPDATE tilausrivi SET
 					hyllyalue = '$hylly[hyllyalue]',

@@ -682,9 +682,27 @@ if ($tee == 'P') {
 		$alv_tili = $alv_tili_row['alv_tili'];
 	}
 
-	$summa_kuuluva = etsi_kuuluvat_tilioinnit($ptunnus);
+	// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
+	$query = "	SELECT sum(summa) summa
+				FROM tiliointi
+				WHERE aputunnus = '$ptunnus'
+				AND yhtio 		= '$kukarow[yhtio]'
+				AND korjattu 	= ''
+				GROUP BY aputunnus";
+	$result = pupe_query($query);
 
-	$summa += $summa_kuuluva;
+	if (mysql_num_rows($result) != 0) {
+		$summarow = mysql_fetch_assoc($result);
+		$summa += $summarow["summa"];
+
+		$query = "	UPDATE tiliointi SET
+					korjattu = '$kukarow[kuka]',
+					korjausaika = now()
+					WHERE aputunnus = '$ptunnus'
+					and yhtio 		= '$kukarow[yhtio]'
+					and korjattu 	= ''";
+		$result = pupe_query($query);
+	}
 
 	$query = "	UPDATE tiliointi SET
 				korjattu = '$kukarow[kuka]',

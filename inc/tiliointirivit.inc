@@ -3,7 +3,11 @@
 	// Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
 
 	// Onko tosite liitetty keikkaan
-	$query = "SELECT nimi, laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
+	$query = "	SELECT nimi, laskunro
+				from lasku
+				where yhtio		= '$kukarow[yhtio]'
+				and tila		= 'K'
+				and vanhatunnus	= '$tunnus'";
 	$keikres = pupe_query($query);
 
 	if (mysql_num_rows($keikres) > 0) {
@@ -23,6 +27,7 @@
 	if (!isset($tositenro))	$tositenro = "";
 	if (!isset($valkoodi))	$valkoodi = "";
 	if (!isset($viivatut))	$viivatut = "";
+	if (!isset($grouppaa))	$grouppaa = "";
 	if (!isset($virhe))		$virhe = "";
 	if (!isset($vv))		$vv = "";
 	if (!isset($yhtsum))	$yhtsum = "";
@@ -32,6 +37,8 @@
 	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 	if (!isset($liitos)) 	$liitos = "";
 	if (!isset($liitostunnus)) $liitostunnus = 0;
+
+	$grouppaa = "X";
 
 	echo "<br><br>";
 	echo "<table>";
@@ -134,6 +141,7 @@
 				<input type='hidden' name = 'tee' value = 'U'>
 				<input type='hidden' name = 'tunnus' value = '$tunnus'>
 				<input type='hidden' name = 'viivatut' value = '$viivatut'>
+				<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
 				<input type='hidden' name = 'laji' value = '$laji'>
 				<input type='hidden' name = 'tositenro' value = '$tositenro'>
 				<input type='hidden' name = 'vv' value = '$vv'>
@@ -203,10 +211,10 @@
 		echo "</td>";
 
 		echo "<td valign='top'>";
-		
+
 		// Ei rikota rivinvaihtoja
 		$selite = str_ireplace("<br>", "(br)", $selite);
-		
+
 		echo "<input type='text' name='selite' value = '$selite'>";
 
 		if ($trow['tila'] == 'X' and trim($liitos) != '' and $liitostunnus > 0) {
@@ -260,21 +268,39 @@
 	}
 
 	// tarkistetaan mikä tila otsikolla on
-	$query = "SELECT tila FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus}'";
+	$query = "	SELECT tila
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus  = '{$tunnus}'";
 	$tila_chk_res = pupe_query($query);
 	$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
-	$query = "	SELECT *,
-				concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
+	$query = "	SELECT
+				tiliointi.tilino tilino,
 				tili.nimi tilinimi,
+				concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
+				tiliointi.vero vero,
+				tiliointi.tapvm,
 				tiliointi.selite selite,
+				tiliointi.liitos,
+				tiliointi.liitostunnus,
+				tiliointi.valkoodi,
+
+				tiliointi.korjattu,
+				ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
+				tiliointi.korjausaika,
 				tiliointi.laatija laatija,
 				tiliointi.laadittu laadittu,
-				tiliointi.tunnus tunnus,
 				ifnull(la.nimi, tiliointi.laatija) laatija_nimi,
-				ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi,
-				tiliointi.liitos,
-				tiliointi.liitostunnus
+				tiliointi.lukko,
+				
+				#tiliointi.tunnus tunnus,
+				#tiliointi.summa summa,
+				#tiliointi.summa_valuutassa summa_valuutassa
+				
+				group_concat(tiliointi.tunnus) tunnus,
+				sum(tiliointi.summa) summa,
+				sum(tiliointi.summa_valuutassa) summa_valuutassa
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
@@ -285,6 +311,7 @@
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.ltunnus = '$tunnus'
 				$lisa
+				GROUP BY 1,2,3,4,5,6,7,8,9
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 	$result = pupe_query($query);
 
@@ -292,9 +319,11 @@
 		echo "<br><br><font class='message'>".t("Laskulla ei ole vielä tiliöintirivejä")."</font><br><br>";
 	}
 
+	echo "$query<br>";
+
 	$maara = mysql_num_rows($result);
 
-	while ($trow = mysql_fetch_assoc ($result)) {
+	while ($trow = mysql_fetch_assoc($result)) {
 
 		$class = "";
 		if ($trow["korjattu"] != '') {
@@ -333,7 +362,6 @@
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
 			echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
-
 		}
 
 		echo "</td>";
@@ -345,7 +373,6 @@
 			}
 			echo "</td>";
 		}
-
 
 		$tilikausi_loppu = strtotime($yhtiorow['tilikausi_loppu']);
 		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
@@ -362,6 +389,7 @@
 					<input type='hidden' name='tee' value = 'P'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
 					<input type='hidden' name='viivatut' value = '$viivatut'>
+					<input type='hidden' name = 'grouppaa' value = '$grouppaa'>
 					<input type='hidden' name='laji' value = '$laji'>
 					<input type='hidden' name='vv' value = '$vv'>
 					<input type='hidden' name='kk' value = '$kk'>

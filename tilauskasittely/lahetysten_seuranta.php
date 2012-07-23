@@ -62,17 +62,18 @@
 	echo "<tr><th>",t("Tilausnumero"),"</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
 	echo "<th>",t("SSCC"),"</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
 	echo "<tr><th>",t("Tuotenumero"),"</th><td><input type='text' name='tuotenumero' value='{$tuotenumero}' /></td>";
-	echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td colspan='3' style='vertical-align:middle;'>";
+	echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td style='text-align:right; vertical-align:middle;'>";
 	echo "<input type='text' name='ppalku' value='{$ppalku}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkalku' value='{$kkalku}' size='3' />&nbsp;";
-	echo "<input type='text' name='vvalku' value='{$vvalku}' size='5' />&nbsp;-&nbsp;";
+	echo "<input type='text' name='vvalku' value='{$vvalku}' size='5' />&nbsp;-</td><td colspan='2' >&nbsp;";
 	echo "<input type='text' name='pploppu' value='{$pploppu}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkloppu' value='{$kkloppu}' size='3' />&nbsp;";
-	echo "<input type='text' name='vvloppu' value='{$vvloppu}' size='5' />&nbsp;-&nbsp;";
+	echo "<input type='text' name='vvloppu' value='{$vvloppu}' size='5' />";
 	echo "<input type='hidden' name='tee' value='hae' />";
-	echo "<input type='submit' value='",t("Hae"),"' />";
 	echo "</td></tr>";
-	echo "</table>";
+	echo "</table><br>";
+	
+	echo "<input type='submit' value='",t("Hae"),"' />";
 	echo "</form>";
 
 	if ($tee == 'hae') {

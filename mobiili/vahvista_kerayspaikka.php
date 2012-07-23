@@ -60,7 +60,6 @@ if (isset($submit) and trim($submit) != '') {
 
 		# Tarkistetaan varmistuskoodi
 		if(is_numeric($maara) && !empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
-			echo "varmistuskoodi ja hylly ok<br>";
 
 			# Hylly array
 			$hylly = array(
@@ -71,73 +70,57 @@ if (isset($submit) and trim($submit) != '') {
 
 			# Jos m‰‰r‰‰ pienennet‰‰n, niin splitataan ( $maara < $row['varattu'])
 			if($maara < $row['varattu']) {
-				echo "SPLITATAAN";
 				# P‰ivitet‰‰n alkuper‰isen rivin kpl
 				$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
 
 				# Splitataan rivi, $pois_suuntalavalta = false
 				$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, false);
 
-				echo "<br>Uuden rivin id: ".$uuden_rivin_id;
-
-				# Splitattu rivi hyllyyn
-				# Kaikki OK
-				# Vahvista ker‰ys
-
+				# Haetaabn saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
-				echo "vied‰‰n varastoon saapuminen: ".$saapuminen[0];
-				echo "<br>{$alusta_tunnus}";
-				var_dump($hylly);
-				echo "<br>uuden_rivin_id: ".$uuden_rivin_id;
 
 				# Vied‰‰n splitattu rivi varastoon
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $uuden_rivin_id);
 
 				# Palataan suuntalavan_tuotteet sivulle
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavan_tuotteet.php?{$url}'>";
-
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+				exit;
 			}
 			# Jos nostetaan niin tehd‰‰n insertti erotukselle..
 			elseif($maara > $row['varattu']) {
-				# Herjataan varmistuskysymys
-				# alert("Oleteko varma!....")
-				echo "Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?";
+				# TODO: Varmistuskysymys
+				# "Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?"
 
 				# Tehd‰‰n insertti erotukselle
 				$kopioitu_tilausrivi = kopioi_tilausrivi($selected_row);
-				echo "Kopioitu: ".$kopioitu_tilausrivi;
 
 				# P‰ivit‰ kopioidun kpl (maara - varattu)
 				paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
 
+				# Haetaan saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
 
-				# Vied‰‰n molemmat rivit hyllyyn
+				# Vied‰‰n rivit hyllyyn
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
-				echo "<br>Vietiin varastoon rivi: ".$selected_row;
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $kopioitu_tilausrivi);
-				echo "<br>Vietiin varastoon rivi: ".$selected_row;
+
+				# Palataan suuntalavan_tuotteet sivulle
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+				exit;
 			}
 			# M‰‰r‰t samat
 			else {
-				echo "EI SPLITATA";
-				# Kaikki OK
-				# Vahvista ker‰ys
-
+				# Haetaan saaoynuset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
-
-				echo "vied‰‰n varastoon saapuminen: ".$saapuminen[0];
-				echo "<br>{$alusta_tunnus}";
-				var_dump($hylly);
 
 				# Vied‰‰n varastoon
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
 
-				# Jos tuotteita j‰lell‰, menn‰‰jn takaisin suuntalavan tuotteet sivulle
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavan_tuotteet.php?{$url}'>";
+				# Jos tuotteita j‰lell‰, menn‰‰n takaisin suuntalavan tuotteet sivulle
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
 
 				# Jos oli viimeinen tuote, palataan alusta sivulle
-				#
+				# ###
 				exit;
 			}
 
@@ -180,6 +163,8 @@ echo "
 						<td>",t("Koodi", $browkieli),"</td>
 						<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 					</tr>
+					</table>
+					<table>
 					<tr>
 						<td nowrap>
 							<button name='submit' value='submit' onclick='submit();'>",t("Vahvista", $browkieli),"</button>

@@ -1,4 +1,5 @@
 <?php
+echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -13,13 +14,6 @@ if (!isset($alusta_tunnus, $liitostunnus, $selected_row)) exit;
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $selected_row = 0;
-
-# Hylly
-// $hyllyalue = '';
-// $hyllynro = '';
-// $hyllyvali = '';
-// $hyllytaso = '';
-// $koodi = '';
 
 $error = array(
 	'varalle' => ''
@@ -87,14 +81,8 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
-
 	<table border='0'>
 		<tr>
 			<td><h1>",t("Suuntalavavaralle", $browkieli),"</h1>
@@ -106,14 +94,16 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("Alue", $browkieli),"</td>
-						<td>",t("Nro", $browkieli),"</td>
-						<td>",t("Väli", $browkieli),"</td>
-						<td>",t("Taso", $browkieli),"</td>
+						<td><input type='text' name='hyllyalue' value='{$hyllyalue}' /></td>
 					</tr>
 					<tr>
-						<td><input type='text' name='hyllyalue' value='{$hyllyalue}' /></td>
+						<td>",t("Nro", $browkieli),"</td>
 						<td><input type='text' name='hyllynro' value='{$hyllynro}' /></td>
+					<tr>
+						<td>",t("Väli", $browkieli),"</td>
 						<td><input type='text' name='hyllyvali' value='{$hyllyvali}' /></td>
+					<tr>
+						<td>",t("Taso", $browkieli),"</td>
 						<td><input type='text' name='hyllytaso' value='{$hyllytaso}' /></td>
 					</tr>
 					<tr>
@@ -139,4 +129,4 @@ echo "
 		</tr>
 	</table>";
 
-require('inc/footer.inc');
+#require('inc/footer.inc');

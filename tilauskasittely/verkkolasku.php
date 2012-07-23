@@ -1233,7 +1233,7 @@
 								$listilro = mysql_fetch_assoc($listilre);
 
 								// Jos tilauksen loppusumma on nolla, niin ei myöskään lisätä laskutuslisää
-								if ($listilro["laskun_loppusumma"] == 0) {
+								if ($listilro["laskun_loppusumma"] == 0 or ($listilro["laskun_loppusumma"] < 0)) {
 									continue;
 								}
 

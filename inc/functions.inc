@@ -18844,3 +18844,57 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 	}
 }
 
+/**
+*/
+if (!function_exists('paivita_oletuspaikka')) {
+	function paivita_oletuspaikka($tuoteno, Array $hylly) {
+		global $kukarow;
+
+		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
+		# ostorivienvarastopaikat.inc, rivi 281
+		$query = "	UPDATE tuotepaikat
+					SET oletus 		= '',
+					muuttaja		= '$kukarow[kuka]',
+					muutospvm		= now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Asetetaan uusi oletuspaikka
+		# ostorivienvarastopaikat.inc, rivi 289
+		$query = "	UPDATE tuotepaikat
+					SET oletus 	= 'X',
+					muuttaja	= '$kukarow[kuka]',
+					muutospvm	= now()
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and tuoteno 	= '$tuoteno'
+					and hyllyalue	= '$hylly[hyllyalue]'
+					and hyllynro	= '$hylly[hyllynro]'
+					and hyllyvali	= '$hylly[hyllyvali]'
+					and hyllytaso	= '$hylly[hyllytaso]'
+					LIMIT 1";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Haetaan tuotepaikat missä oletus ei ole '', eli nykyiset oletuspaikat
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and oletus != ''";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Jos oletuspaikkaa ei löytynyt, asetetaan ensimmäinen oletuspaikaksi.
+		if (mysql_num_rows($upresult) == 0) {
+			$query = "	UPDATE tuotepaikat
+						SET oletus 	= 'X',
+						muuttaja	= '$kukarow[kuka]',
+						muutospvm	= now()
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tuoteno'
+						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
+			$upresult = mysql_query($query) or pupe_error($query);
+		}
+		##
+		return 1;
+	}
+}

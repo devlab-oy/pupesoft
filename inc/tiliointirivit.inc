@@ -278,7 +278,8 @@
 	$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
     if ($grouppaa != '' and $viivatut == '') {
-        $summaselect = "	group_concat(DISTINCT tiliointi.selite) selite,
+        $summaselect = "	max(tiliointi.korjattu) korjattu,
+							group_concat(DISTINCT tiliointi.selite) selite,
 							group_concat(tiliointi.tunnus) tunnus,
 		                	sum(tiliointi.summa) summa,
 		                	sum(tiliointi.summa_valuutassa) summa_valuutassa,
@@ -435,7 +436,7 @@
 			}
 		}
 
-		if (!isset($trow['korjattu']) or $trow['korjattu'] == '') {
+		if ($trow['korjattu'] == '') {
 			$yhtsum += $trow['summa']; //Riviä ei ole poistettu
 		}
 	}

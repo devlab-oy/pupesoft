@@ -1687,7 +1687,7 @@
 				echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 
-			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Vahvista väkisin"),"' /></th></tr>";
+			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
 
 			echo "</table>";
 			echo "</form>";

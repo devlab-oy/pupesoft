@@ -512,15 +512,9 @@
 								// jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edetä ja nollataan asn_sanomat.tilausrivi
 								$query = "	SELECT saapuminen.tunnus
 											FROM lasku AS saapuminen
-											JOIN lasku AS ostolaskuliitos ON (
-												saapuminen.yhtio = ostolaskuliitos.yhtio
-												AND saapuminen.laskunro = ostolaskuliitos.laskunro
-												AND ostolaskuliitos.tila = 'K'
-												AND ostolaskuliitos.vienti in ('C','F','I')
-												AND ostolaskuliitos.vanhatunnus > 0
-											)
 											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
-											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'";
+											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'
+											AND saapuminen.tapvm = '0000-00-00'";
 								$saapres = pupe_query($query);
 								
 								if (mysql_num_rows($saapres) != 0) {
@@ -1297,19 +1291,13 @@
 					if (mysql_num_rows($chkres) == 0) continue;
 				}
 
-				// katsotaan että rivi ei ole saapumisella johon on manuaalisesti pistetty vaihto-omaisuuslasku
+				// katsotaan että rivi ei ole saapumisella johon on liitetty vaihto-omaisuuslasku
 				if ($row['uusiotunnus'] != '') {
 					$query = "	SELECT saapuminen.tunnus
 								FROM lasku AS saapuminen
-								JOIN lasku AS ostolaskuliitos ON (
-									saapuminen.yhtio = ostolaskuliitos.yhtio
-									AND saapuminen.laskunro = ostolaskuliitos.laskunro
-									AND ostolaskuliitos.tila = 'K'
-									AND ostolaskuliitos.vienti in ('C','F','I')
-									AND ostolaskuliitos.vanhatunnus > 0
-								)
 								WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
-								AND saapuminen.tunnus = '{$row['uusiotunnus']}'";
+								AND saapuminen.tunnus = '{$row['uusiotunnus']}'
+								AND saapuminen.tapvm = '0000-00-00'";
 					$chkres = pupe_query($query);
 					if (mysql_num_rows($chkres) != 0) continue;
 				}

@@ -56,8 +56,6 @@ echo "
 			if (document.getElementById('alusta')) document.getElementById('alusta').focus();
 		}
 	</script>
-
-	<body onload='setFocus();'>
 		<form method='post' action=''>
 			<table border='0'>
 				<tr>
@@ -71,7 +69,7 @@ echo "
 							<tr>
 								<td>
 									<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
-									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+									<button name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 								</td>
 							</tr>
 						</table>

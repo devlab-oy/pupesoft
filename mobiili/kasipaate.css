@@ -1,11 +1,15 @@
 <style type='text/css'>
 body {
-	overflow:hidden;
-	width: 100%;
 	padding: 0px;
 	margin: 0px;
 	font-family: 'Arial';
+	font-size: 1.3em;
 }
+
+input {
+	font-size: 1.2em;
+}
+
 table {
 	padding: 0px;
 	margin: 0px;
@@ -19,4 +23,5 @@ button {
 h1 {
 	font-size: 1.8em;
 }
+
 </style>

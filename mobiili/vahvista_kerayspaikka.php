@@ -152,7 +152,7 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("M‰‰r‰", $browkieli),"</td>
-						<td><input type='text' name='maara' value='' size='7' />
+						<td><input type='number' name='maara' value='' size='7' />
 						<td>{$row['varattu']} {$row['yksikko']}</td>
 					</tr>
 					<tr>
@@ -161,7 +161,7 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("Koodi", $browkieli),"</td>
-						<td colspan='2'><input type='text' name='koodi' value='' size='7' />
+						<td colspan='2'><input type='number' name='koodi' value='' size='7' />
 					</tr>
 					</table>
 					<table>

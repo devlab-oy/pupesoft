@@ -46,14 +46,12 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 
 if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
-	# Tarkista että hyllypaikka on olemmassa
-	$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
-	$kaikki_ok = true;
-
+	# Ei saa olla tyhjiä kenttiä
 	if ($hyllyalue == '' and $hyllynro == '' and $hyllyvali == '' and $hyllytaso == '') {
 		$error['kerayspaikka'] = t("Hyllypaikka ei saa olla tyhjä", $browkieli).'.';
 	}
-	elseif ($kaikki_ok) {
+	elseif ($hylly_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+		echo "Hylly ok: ".$hylly_ok."<br>";
 
 		$oletus = $oletuspaikka != '' ? 'X' : '';
 
@@ -72,6 +70,8 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 										AND hyllyvali='$hyllyvali'
 										AND hyllytaso='$hyllytaso'";
 		$oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
+
+		echo "Onko tuotteen oma paikka? ".mysql_num_rows($oma_paikka)."<br>";
 
 		# Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
 		if (mysql_num_rows($oma_paikka) == 0) {
@@ -93,8 +93,8 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 		echo "päivitetään tilausrivin hyllypaikka";
 
 		# Palataan edelliselle sivulle
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-		exit;
+		#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
+		#exit;
 	}
 	else {
 		$error['kerayspaikka'] = t("Varaston tuotepaikkaa ei ole perustettu", $browkieli).'.';
@@ -103,13 +103,6 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
 include("kasipaate.css");
 echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>
-
 	<table border='0'>
 		<tr>
 			<td><h1>",t("UUSI KERÄYSPAIKKA", $browkieli),"</h1>

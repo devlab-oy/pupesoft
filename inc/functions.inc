@@ -18079,23 +18079,6 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 
 		while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 
-			// tilausrivi ei saa olla saapumisella johon on liitetty manuaalisesti vaihto-omaisuuslasku
-			$lasku_manuaalisesti = 0;
-			if ($tilausrivirow['uusiotunnus'] > 0) {
-				$query = "	SELECT saapuminen.tunnus
-							FROM lasku AS saapuminen
-							JOIN lasku AS ostolaskuliitos ON (
-								saapuminen.yhtio = ostolaskuliitos.yhtio
-								AND saapuminen.laskunro = ostolaskuliitos.laskunro
-								AND ostolaskuliitos.tila = 'K'
-								AND ostolaskuliitos.vienti in ('C','F','I')
-							)
-							WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
-							AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'";
-				$chk_res3 = pupe_query($query);
-				$lasku_manuaalisesti = mysql_num_rows($chk_res3);
-			}
-
 			if ($tilausrivirow['asn_sanomat'] == 'K') {
 				// tilausrivi pit‰‰ olla jo kohdistettu
 				$query = "	SELECT tunnus
@@ -18115,8 +18098,8 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res2 = pupe_query($query);
-				
-				if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0 and $lasku_manuaalisesti == 0) {
+
+				if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
 					#echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 				}
@@ -18151,7 +18134,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res = pupe_query($query);
 
-				if (mysql_num_rows($chk_res) == 0 and $lasku_manuaalisesti == 0) {
+				if (mysql_num_rows($chk_res) == 0) {
 					#echo "lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (L)<br><br>";
 					$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 				}

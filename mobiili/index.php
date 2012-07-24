@@ -8,16 +8,10 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-echo "
-	<style type='text/css'>
-	<!--
-		A, A:visited	{color: #c0c0c0; text-decoration:none;}
-		.error		{color: #ff6666;}
-	-->
-	</style>";
+include("kasipaate.css");
 
 echo "<body>";
-echo "<h1>",t("Päävalikko", $browkieli),"</h1>";
+echo "<h1>",t("PÄÄVALIKKO", $browkieli),"</h1>";
 
 if (tarkista_oikeus("mobiili/siirto.php")) {
 	echo "<button value=''>",t("Siirto", $browkieli),"</button>";

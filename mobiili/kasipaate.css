@@ -7,21 +7,28 @@ body {
 }
 
 input {
-	font-size: 1.2em;
+	font-size: 1em;
 }
 
 table {
 	padding: 0px;
 	margin: 0px;
-	font-size: 0.95em;
+	font-size: 0.90em;
 }
+
 button {
 	font-size: 1.05em;
 }
 	A, A:visited	{color: #c0c0c0; text-decoration:none;}
 	.error		{color: #ff6666;}
 h1 {
-	font-size: 1.8em;
+	margin: 0;
+	padding: 0;
+	font-size: 1.3em;
+}
+
+form {
+	margin: 0;
 }
 
 </style>

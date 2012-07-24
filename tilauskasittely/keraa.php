@@ -1105,7 +1105,7 @@
 		if ($muuttuiko == 'kylsemuuttu') {
 			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-				$query = "	SELECT lasku.*, asiakas.email, asiakas.lahete_email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
+				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
 							FROM lasku
 							JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
@@ -1187,17 +1187,8 @@
 				}
 
 				// Lähetetään keräyspoikkeama asiakkaalle
-				if (($laskurow["email"] != '' or $laskurow['lahete_email'] != '') and $laskurow["kerayspoikkeama"] == 0) {
-
-					// Tarkastetaan, halutaanko lähettää sähköposti vaihtoehtoiseen, lahete_email-kentässä määriteltyyn sähköpostiosoitteeseen
-					if(isset($laskurow['lahete_email']) && $laskurow['lahete_email']  != '') {
-						$email = $laskurow['lahete_email'];
-					}
-					else {
-						$email = $laskurow["email"];
-					}
-					
-					$boob = mail($email, mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
+					$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
 
@@ -1461,7 +1452,7 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, asiakas.email
+					$query = "	SELECT lasku.*, asiakas.email, asiakas.lahete_email
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.tunnus in ($tilausnumeroita)

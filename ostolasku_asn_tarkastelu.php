@@ -360,7 +360,7 @@
 									$laskures	= pupe_query($laskuselect);
 									$laskurow	= mysql_fetch_assoc($laskures);
 
-									list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
+									list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
 
 									$lisainsert = "	INSERT INTO tilausrivi SET
 													yhtio			= '{$kukarow['yhtio']}',
@@ -375,6 +375,9 @@
 													yksikko			= '{$lapsitieto['yksikko']}',
 													tilkpl			= '{$isa_chk_row['tilkpl']}',
 													varattu			= '{$isa_chk_row['varattu']}',
+													ale1			= '{$ale['ale1']}',
+													ale2			= '{$ale['ale2']}',
+													ale3			= '{$ale['ale3']}',
 													kpl				= '{$isa_chk_row['kpl']}',
 													hinta			= '{$hinta}',
 													laatija			= 'lapset',

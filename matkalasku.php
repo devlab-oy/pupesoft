@@ -331,7 +331,7 @@ if ($tee != "") {
 						if (($ylitunnit > 10 and $paivat == 0) or ($ylitunnit > 6 and $paivat > 0)) {
 							$paivat++;
 						}
-						elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) and $trow["vienti"] == "FI") {
+						elseif (($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) {
 
 							//	Tarkastetaan että päivärahalle on puolipäiväraha
 							$query = "	SELECT *
@@ -343,7 +343,7 @@ if ($tee != "") {
 							$tres2 = pupe_query($query);
 
 							if (mysql_num_rows($tres2) != 1) {
-								$errori .= "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu. Puolipäivärahaa ei voitu lisätä")."!</font><br>";
+								$errori .= "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu. Puolipäivärahaa ei voitu lisätä")."! P$tuoteno</font><br>";
 							}
 							else {
 								$trow2 = mysql_fetch_assoc($tres2);

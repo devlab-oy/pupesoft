@@ -25,9 +25,7 @@ $data = array(
 $url = http_build_query($data);
 
 # Virheet
-$error = array(
-	'vahvista' => ''
-);
+$error = array();
 
 # Haetaan suuntalavan tuotteet
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
@@ -57,7 +55,13 @@ if (isset($submit) and trim($submit) != '') {
 		exit;
 	}
 	elseif ($submit == 'submit') {
-
+		# Tarkistetaan ett‰ m‰‰r‰ on syˆtetty ja numero
+		if (!is_numeric($maara)) {
+			$error['maara'] = "M‰‰r‰n t‰ytyy olla numero";
+		}
+		if (empty($koodi) || !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
+			$error['koodi'] = "Varmistuskoodi on v‰‰rin";
+		}
 		# Tarkistetaan varmistuskoodi
 		if(is_numeric($maara) && !empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 
@@ -76,7 +80,7 @@ if (isset($submit) and trim($submit) != '') {
 				# Splitataan rivi, $pois_suuntalavalta = false
 				$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, false);
 
-				# Haetaabn saapumiset
+				# Haetaan saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
 
 				# Vied‰‰n splitattu rivi varastoon
@@ -125,14 +129,6 @@ if (isset($submit) and trim($submit) != '') {
 			}
 
 		}
-		# V‰‰r‰ varmistuskoodi tai maara
-		else {
-			$error['vahvista'] =  "V‰‰r‰ varmistuskoodi";
-			# jos m‰‰r‰ ei ole numero
-			if(!is_numeric($maara)) {
-				$error['vahvista'] .= "<br>M‰‰r‰n t‰ytyy olla numero";
-			}
-		}
 	}
 }
 include("kasipaate.css");
@@ -152,7 +148,7 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("M‰‰r‰", $browkieli),"</td>
-						<td><input type='number' name='maara' value='' size='7' />
+						<td><input type='text' name='maara' value='' size='7' />
 						<td>{$row['varattu']} {$row['yksikko']}</td>
 					</tr>
 					<tr>
@@ -161,7 +157,7 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("Koodi", $browkieli),"</td>
-						<td colspan='2'><input type='number' name='koodi' value='' size='7' />
+						<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 					</tr>
 					</table>
 					<table>
@@ -177,9 +173,15 @@ echo "
 						</td>
 					</tr>
 					<tr><td>&nbsp;</td></tr>
-				</table>
-				<span class='error'>{$error['vahvista']}</span>
-				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+				</table>";
+				if (isset($error)) {
+					echo "<span class='error'>";
+					foreach($error as $key => $virhe) {
+						echo "{$virhe}<br>";
+					}
+					echo "</span>";
+				}
+echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name='selected_row' value='{$selected_row}' />
 				</form>

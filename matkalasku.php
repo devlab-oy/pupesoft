@@ -253,6 +253,8 @@ if ($tee != "") {
 				$tuoteno_array 	= array();
 				$kpl_array 		= array();
 				$hinta_array 	= array();
+				$nimitys_array 	= array();
+				$varri_array 	= array();
 				$errori 		= "";
 
 				if ($tyyppi == "A") {
@@ -338,6 +340,8 @@ if ($tee != "") {
 						$puolipaivat = 0;
 						$ylitunnit 	 = 0;
 						$tunnit 	 = 0;
+						$selite 	 = "";
+						$varri		 = "1"; // Kotimaan kokop‰iv‰raha oletuksena
 
 						// Montako tuntia on oltu matkalla?
 						$tunnit = ($loppu - $alku) / 3600;
@@ -383,12 +387,17 @@ if ($tee != "") {
 								$tuoteno_array[1]	= $trow2["tuoteno"];
 								$kpl_array[1]		= $osapaivat;
 								$hinta_array[1]		= $trow2["myyntihinta"];
+								$nimitys_array[1]	= $trow2["nimitys"];
+								$varri_array[1] 	= "2";	 // Kotimaan osap‰iv‰raha
 
-								$selite .= "<br>$trow2[tuoteno] - $trow2[nimitys] $osapaivat kpl · {$trow2['myyntihinta']}";
+								$selite .= "<br>$trow2[tuoteno] - $trow2[nimitys] $osapaivat kpl · ".(float) $trow2['myyntihinta'];
 							}
 						}
 						// Ulkomaanmatkat
 						elseif ($trow["vienti"] != "FI") {
+
+							// Ulkomaan kokop‰iv‰raha
+							$varri = "3";
 
 							if ($ylitunnit > 6 and $ylitunnit < 10 and $paivat == 0) {
 								/*
@@ -411,6 +420,10 @@ if ($tee != "") {
 
 								// Otetaan korvaukseksi kotimaan osap‰iv‰rahan hinta
 								$trow["myyntihinta"] = $trow2["myyntihinta"];
+								$trow["nimitys"] .= " (".t("Matka-aika alle 10 tuntia, osap‰iv‰korvaus.").")";
+
+								// Ulkomaan osap‰iv‰raha
+								$varri = "4";
 
 								$paivat++;
 							}
@@ -433,8 +446,10 @@ if ($tee != "") {
 								$tuoteno_array[1]	= $trow["tuoteno"];
 								$kpl_array[1]		= $puolipaivat;
 								$hinta_array[1]		= round($trow["myyntihinta"]/2, 2);
+								$nimitys_array[1]	= $trow["nimitys"]." (".t("Puolitettu korvaus.").")";
+								$varri_array[1] 	= "5";	 // Ulkomaan puolip‰iv‰raha
 
-								$selite .= "<br>$trow[tuoteno] - $trow[nimitys] $osapaivat kpl · ".round($trow["myyntihinta"]/2, 2);
+								$selite .= "<br>$trow[tuoteno] - $trow[nimitys] $puolipaivat kpl · ".(float) round($trow["myyntihinta"]/2, 2);
 							}
 						}
 
@@ -447,12 +462,13 @@ if ($tee != "") {
 							$tuoteno_array[0] 	= $tuoteno;
 							$kpl_array[0] 		= $paivat;
 							$hinta_array[0] 	= $trow["myyntihinta"];
-							$selite 			= "$trow[tuoteno] - $trow[nimitys] $paivat kpl · {$trow["myyntihinta"]}";
+							$nimitys_array[0]	= $trow["nimitys"];
+							$varri_array[0]		= $varri;
+
+							$selite 			= trim("$trow[tuoteno] - $trow[nimitys] $paivat kpl · ".(float) $trow["myyntihinta"].$selite);
 						}
 
 						$selite .= "<br>Ajalla: $alkupp.$alkukk.$alkuvv klo. $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv klo. $loppuhh:$loppumm";
-
-						#echo "SAATIIN p‰ivarahoja: $paivat, osap‰iv‰rahoja: $osapaivat ja puolip‰iv‰rahoja: $puolipaivat<br>";
 					}
 					else {
 						$errori .= "<font class='error'>".t("VIRHE: P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
@@ -480,14 +496,17 @@ if ($tee != "") {
 					$tuoteno_array[0]	= $trow["tuoteno"];
 					$kpl_array[0]		= $kpl;
 					$hinta_array[0]		= $hinta;
-					$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl · $hinta";
+					$nimitys_array[0]	= $trow["nimitys"];
+					$varri_array[0]		= 0;
+
+					$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl · ".(float) $hinta;
 				}
 
 				//	poistetan return carriage ja newline -> <br>
 				$kommentti = str_replace("\n","<br>", str_replace("\r","", $kommentti));
-				
+
 				if ($kommentti != "") {
-					$selite .="<br><i>$kommentti</i>";
+					$selite .= "<br><i>$kommentti</i>";
 				}
 
 				//	Lis‰t‰‰n annetut rivit
@@ -516,6 +535,8 @@ if ($tee != "") {
 							$kpl 		= str_replace(",", ".", $kpl_array[$indeksi]);
 							$hinta 		= str_replace(",", ".", $hinta_array[$indeksi]);
 							$rivihinta 	= round($kpl*$hinta, $yhtiorow['hintapyoristys']);
+							$nimitys	= $nimitys_array[$indeksi];
+							$var		= $varri_array[$indeksi];
 
 							//	Ratkaistaan alv..
 							if ($tyyppi == "B") {
@@ -566,13 +587,13 @@ if ($tee != "") {
 										tyyppi 		= 'M',
 										toimaika 	= '',
 										kommentti 	= '".mysql_real_escape_string($kommentti)."',
-										var 		= '',
+										var 		= '$var',
 										try			= '$trow[try]',
 										osasto		= '$trow[osasto]',
 										perheid		= '$perheid',
 										perheid2	= '$perheid2',
 										tunnus 		= '$rivitunnus',
-										nimitys 	= '$trow[nimitys]',
+										nimitys 	= '$nimitys',
 										kerattyaika = '$alkuaika',
 										toimitettuaika = '$loppuaika'";
 							$insres = pupe_query($query);

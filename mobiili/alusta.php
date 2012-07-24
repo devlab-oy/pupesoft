@@ -83,17 +83,16 @@ if (isset($return) and count($return) > 0) {
 
 	echo "<tr>";
 	echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
-	echo "<th nowrap>",t("Toim.nro", $browkieli),"</th>";
-	echo "<th nowrap>",t("Nimi", $browkieli),"</th>";
+	echo "<th nowrap>",t("Nimi", $browkieli),"<br>",t("Toim.nro", $browkieli),"</th>";
 	echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
 	echo "</tr>";
 
 	foreach ($return as $row) {
 		echo "<tr>";
-		echo "<td nowrap>{$row['saapuminen_nro']}</td>";
-		echo "<td nowrap>{$row['toimittajanro']}</td>";
-		echo "<td nowrap>{$row['nimi']}</td>";
-		echo "<td nowrap>{$row['varastossa']} / {$row['kohdistettu']}</td>";
+		echo "<td nowrap>{$row['saapuminen_nro']}";
+		echo "<td nowrap style='text-align: center'>{$row['nimi']}<br>";
+		echo "{$row['toimittajanro']}</td>";
+		echo "<td nowrap style='text-align: center'>{$row['varastossa']} / {$row['kohdistettu']}</td>";
 		echo "</tr>";
 	}
 

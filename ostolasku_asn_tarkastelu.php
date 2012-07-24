@@ -517,6 +517,7 @@
 												AND saapuminen.laskunro = ostolaskuliitos.laskunro
 												AND ostolaskuliitos.tila = 'K'
 												AND ostolaskuliitos.vienti in ('C','F','I')
+												AND ostolaskuliitos.vanhatunnus > 0
 											)
 											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
 											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'";
@@ -1305,6 +1306,7 @@
 									AND saapuminen.laskunro = ostolaskuliitos.laskunro
 									AND ostolaskuliitos.tila = 'K'
 									AND ostolaskuliitos.vienti in ('C','F','I')
+									AND ostolaskuliitos.vanhatunnus > 0
 								)
 								WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
 								AND saapuminen.tunnus = '{$row['uusiotunnus']}'";

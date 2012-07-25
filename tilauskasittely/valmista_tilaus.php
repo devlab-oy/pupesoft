@@ -332,14 +332,15 @@
 
 				$valmkpl = str_replace(',', '.', $valmkpl);
 
-				//Haetaan tilausrivi
+				//Haetaan valmisteet
 				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
 							FROM tilausrivi
 							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.perheid = '$rivitunnus'
 							and tilausrivi.tyyppi in ('W','M')
-							and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'";
+							and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
+							ORDER BY tilausrivi.tunnus";
 				$roxresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($roxresult) > 0) {
@@ -405,23 +406,22 @@
 								}
 							}
 
-							//käytetään tilausriveillä olevia tuotteita
+							// Haetaan käytettävät raaka-aineet
 							$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa, tuote.sarjanumeroseuranta
 										FROM tilausrivi
 										JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 										and tilausrivi.otunnus = '$tilrivirow[otunnus]'
 										and tilausrivi.perheid = '$tilrivirow[perheid]'
-										and tilausrivi.tyyppi = 'V'
+										and tilausrivi.tyyppi  = 'V'
 										ORDER BY tilausrivi.tuoteno";
 							$perheresult = mysql_query($query) or pupe_error($query);
 
-							//jos tuoteperhe on olemassa
 							if (mysql_num_rows($perheresult) > 0) {
 								while ($perherow = mysql_fetch_assoc($perheresult)) {
 									if ($perherow["ei_saldoa"] == "") {
 
-										//Näin paljon haluamme käyttää raaka-ainetta
+										// Näin paljon haluamme käyttää raaka-ainetta
 										if ($kulukpllat[$perherow["tunnus"]] != 0) {
 											$varataankpl = $kulukpllat[$perherow["tunnus"]];
 										}
@@ -434,15 +434,17 @@
 											$tee = "VALMISTA";
 										}
 
-										//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
-										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
-											echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
+										// katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi (jos reseptissä on useampi valmiste, niin summataan $varataankpl $saldot_valm-muuttujaan kun loopataan toista tat kolmatta valmistetta)
+										if ((!isset($vakisinhyvaksy) or $vakisinhyvaksy == '') and (($tilrivirow['perheid2'] != -100 and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) or ($tilrivirow['perheid2'] == -100 and ($saldot_valm[$perherow["tuoteno"]]+$varataankpl) < $varataankpl))) {
+											echo "<font class='error'>".t("Saldo")." ".$saldot[$perherow["tuoteno"]]." ".t("ei riitä")."! ".t("Tuotetta")." $perherow[tuoteno] ".t("kulutetaan")." $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
 											$virheitaoli = "JOO";
 											$tee = "VALMISTA";
 										}
 
-										// Tän verran saldoa käytetään
-										$saldot_valm[$perherow["tuoteno"]] -= $varataankpl;
+										// Tän verran saldoa käytetään (jos reseptissä on useampi valmiste, niin raaka-aineet kulutetaan kuitenkin vain kerran)
+										if ($tilrivirow['perheid2'] != -100) {
+											$saldot_valm[$perherow["tuoteno"]] -= $varataankpl;
+										}
 
 										//	Tarkistetaan raaka-aineiden sarjanumerot
 										if ($perherow["sarjanumeroseuranta"] != "") {
@@ -482,7 +484,7 @@
 							}
 						}
 						elseif ($valmkpl > 0) {
-							echo "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font><br>";
+							echo "<font class='error'>".t("VIRHE: Syötit liian ison kappalemäärän")."!</font><br>";
 							$tee = "VALMISTA";
 						}
 					}

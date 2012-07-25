@@ -46,6 +46,7 @@
 	if (!isset($asiakas)) $asiakas = "";
 	if (!isset($paikkakunta)) $paikkakunta = "";
 	if (!isset($tilausnumero)) $tilausnumero = "";
+	if (!isset($tuotesnumero)) $tuotesnumero = "";
 	if (!isset($ppalku)) $ppalku = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($kkalku)) $kkalku = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($vvalku)) $vvalku = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
@@ -60,17 +61,19 @@
 	echo "<th>",t("Paikkakunta"),"</th><td><input type='text' name='paikkakunta' value='{$paikkakunta}' /></td></tr>";
 	echo "<tr><th>",t("Tilausnumero"),"</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
 	echo "<th>",t("SSCC"),"</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
-	echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td colspan='3' style='vertical-align:middle;'>";
+	echo "<tr><th>",t("Tuotenumero"),"</th><td><input type='text' name='tuotenumero' value='{$tuotenumero}' /></td>";
+	echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td style='text-align:right; vertical-align:middle;'>";
 	echo "<input type='text' name='ppalku' value='{$ppalku}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkalku' value='{$kkalku}' size='3' />&nbsp;";
-	echo "<input type='text' name='vvalku' value='{$vvalku}' size='5' />&nbsp;-&nbsp;";
+	echo "<input type='text' name='vvalku' value='{$vvalku}' size='5' />&nbsp;-</td><td colspan='2' >&nbsp;";
 	echo "<input type='text' name='pploppu' value='{$pploppu}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkloppu' value='{$kkloppu}' size='3' />&nbsp;";
-	echo "<input type='text' name='vvloppu' value='{$vvloppu}' size='5' />&nbsp;-&nbsp;";
+	echo "<input type='text' name='vvloppu' value='{$vvloppu}' size='5' />";
 	echo "<input type='hidden' name='tee' value='hae' />";
-	echo "<input type='submit' value='",t("Hae"),"' />";
 	echo "</td></tr>";
-	echo "</table>";
+	echo "</table><br>";
+	
+	echo "<input type='submit' value='",t("Hae"),"' />";
 	echo "</form>";
 
 	if ($tee == 'hae') {
@@ -89,6 +92,7 @@
 		$nimilisa = trim($asiakas) != "" ? " AND (lasku.nimi LIKE ('%".mysql_real_escape_string($asiakas)."%') OR lasku.toim_nimi LIKE ('%".mysql_real_escape_string($asiakas)."%'))" : "";
 		$postitplisa = trim($paikkakunta) != "" ? " AND (lasku.postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%') OR lasku.toim_postitp LIKE ('%".mysql_real_escape_string($paikkakunta)."%'))" : "";
 		$tilauslisa = trim($tilausnumero) != "" ? " AND kerayserat.otunnus = '".mysql_real_escape_string($tilausnumero)."'" : "";
+		$tuotelisa = trim($tuotenumero) != "" ? " AND tuote.tuoteno = '".mysql_real_escape_string($tuotenumero)."'" : "";
 		$sscclisa = trim($sscc) != "" ? " AND (kerayserat.sscc LIKE ('%".mysql_real_escape_string($sscc)."%') OR kerayserat.sscc_ulkoinen LIKE ('%".mysql_real_escape_string($sscc)."%'))" : "";
 
 		if ($tilauslisa != "" or $sscclisa != "") {
@@ -133,7 +137,7 @@
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 							LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.sscc IN ({$row['sscc']})
 							GROUP BY 1,2,3,4,5,6,7

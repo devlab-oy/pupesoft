@@ -796,7 +796,9 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U'
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and lasku.tila = 'N' 
+						and lasku.alatila in ('U','T')
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -1286,7 +1288,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
-						and lasku.alatila in ('A','')
+						and lasku.alatila in ('A','','T','U')
 						$haku
 						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc

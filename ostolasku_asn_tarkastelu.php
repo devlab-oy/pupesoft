@@ -1217,47 +1217,53 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
-			$alatilalisa = $valitse == 'asn' ? " AND lasku.alatila != 'X' " : "";
-
-			$query = "	SELECT DISTINCT tilausrivi.tunnus,
+			// Ostotilaukset ja suoraan saapumiselle lis‰tyt, mutta ei saa olla saapumiselle kohdistettu
+			$query1 = "	SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
 						tilausrivi.otunnus,
 						tilausrivi.varattu,
 						tilausrivi.kpl,
 						tilausrivi.tilaajanrivinro,
-						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus,
-						IF(lasku.tila = 'O', lasku.laskunro, 0) AS onko_lasku
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (
-							tilausrivi.yhtio = lasku.yhtio
-							AND tilausrivi.tyyppi = 'O'
-							AND (tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
-							{$tilaajanrivinrolisa}
-							{$tuotenolisa}
-							{$kpllisa}
-						)
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND (lasku.tila = 'O' OR (lasku.tila = 'K' AND lasku.alatila != 'X'))
-						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
-						{$alatilalisa}
-						{$tilausnrolisa}
-						HAVING onko_lasku = 0
-						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila 		   in ('O','K')
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa}";
+
+			// Saapumiset, ei loppulasketut eik‰ sellaset joihin on jo vaihto-omaisuuslasku liitetty, pit‰‰ olla saapumiselle kohdistettu
+			$query2 = "	SELECT DISTINCT tilausrivi.tunnus,
+						tilausrivi.tuoteno,
+						tilausrivi.otunnus,
+						tilausrivi.varattu,
+						tilausrivi.kpl,
+						tilausrivi.tilaajanrivinro,
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila 			= 'K'
+						AND lasku.tapvm 		= '0000-00-00'
+						AND lasku.mapvm 		= '0000-00-00'
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa}";
+
+			if ($valitse == 'asn') {
+				$query = $query1." ORDER BY tunnus, uusiotunnus, laskutunnus";
+			}
+			else {
+				$query = "($query1) UNION ($query2) ORDER BY tunnus, uusiotunnus, laskutunnus";
+			}
+
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
-            
-				if ($row['uusiotunnus'] != '') {
-					$query = "	SELECT alatila
-								FROM lasku
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$row['uusiotunnus']}'";
-					$result_alatila_check = pupe_query($query);
-					$result_alatila_row = mysql_fetch_assoc($result_alatila_check);
-					if ($result_alatila_row['alatila'] == 'X') continue;
-				}
-				
+
 				$querylisa = $valitse == 'asn' ? " AND laji = 'asn' " : " AND laji = 'tec' ";
 
 				// katsotaan ettei rivi‰ ole jo kohdistettu muuhun riviin
@@ -1289,7 +1295,7 @@
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td align='right'>{$row['varattu']} / {$row['kpl']}</td>";
 
-				if ($row['uusiotunnus'] != '') {
+				if ($row['uusiotunnus'] > 0) {
 					$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['uusiotunnus']}'";
 					$keikkares = pupe_query($query);
 					$keikkarow = mysql_fetch_assoc($keikkares);
@@ -1298,16 +1304,16 @@
 
 				echo "<td align='right'>$row[uusiotunnus]</td>";
 
-				if ($row['uusiotunnus'] != '' and $row['kpl'] == 0 and $valitse == 'asn') {
+				if ($row['uusiotunnus'] > 0 and $row['kpl'] == 0 and $valitse == 'asn') {
 					echo "<td>",t("Rivi on kohdistettu"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
-				elseif ($valitse == 'asn' and $row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+				elseif ($valitse == 'asn' and $row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
 					echo "<td>",t("Viety varastoon"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
 				else {
-					if ($row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+					if ($row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
 						echo "<td>",t("Viety varastoon"),"</td>";
 					}
 					else {

@@ -576,7 +576,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -592,6 +592,9 @@
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
 											kpl 			= '{$lapsitieto['kpl']}',
+											ale1			= '{$ale['ale1']}',
+											ale2			= '{$ale['ale2']}',
+											ale3			= '{$ale['ale3']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
@@ -738,7 +741,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -754,6 +757,9 @@
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
 											kpl 			= '{$lapsitieto['kpl']}',
+											ale1			= '{$ale['ale1']}',
+											ale2			= '{$ale['ale2']}',
+											ale3			= '{$ale['ale3']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
@@ -928,10 +934,10 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND laji = 'asn'
 											AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'
-											AND status = ''";
+											AND status = 'X'";
 								$chk_res = pupe_query($query);
 
-								if (mysql_num_rows($chk_res) > 0) {
+								if (mysql_num_rows($chk_res) == 0) {
 									// echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 									// $virheet++;
 									continue;
@@ -1039,7 +1045,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1054,6 +1060,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
@@ -1115,7 +1124,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1130,6 +1139,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
@@ -1271,7 +1283,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1286,6 +1298,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',

@@ -3193,4 +3193,17 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'tositteen_tilioinnit') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Tositteella näytetään oletuksena kaikki tiliöintirivit")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Tositteella näytetään tiliöintirivit summattuna per tili/pvm/tarkenne")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

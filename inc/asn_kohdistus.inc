@@ -94,7 +94,7 @@
 								$laskures		= pupe_query($laskuselect);
 								$laskurow		= mysql_fetch_assoc($laskures);
 
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -109,6 +109,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
 												kommentti		= 'ASN-sanoma: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
@@ -553,7 +556,7 @@
 									try				= '{$split_row['try']}',
 									osasto			= '{$split_row['osasto']}',
 									nimitys			= '{$split_row['nimitys']}',
-									yksikko			= '{$split_row[yksikko]}',
+									yksikko			= '{$split_row['yksikko']}',
 									tilkpl			= '{$positiivinen_arvo}',
 									varattu			= '{$positiivinen_arvo}',
 									hinta			= '{$split_row['hinta']}',
@@ -671,7 +674,7 @@
 						$laskures	= pupe_query($laskuselect);
 						$laskurow	= mysql_fetch_assoc($laskures);
 
-						list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+						list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 						$lisainsert = "	INSERT INTO tilausrivi SET
 										yhtio			= '{$lapsitieto['yhtio']}',
@@ -686,6 +689,9 @@
 										yksikko			= '{$lapsitieto['yksikko']}',
 										tilkpl			= '{$lapsitieto['tilkpl']}',
 										varattu			= '{$lapsitieto['varattu']}',
+										ale1			= '{$ale['ale1']}',
+										ale2			= '{$ale['ale2']}',
+										ale3			= '{$ale['ale3']}',
 										hinta			= '{$hinta}',
 										laatija			= 'lapset',
 										kommentti		= 'ASN-sanoma: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',

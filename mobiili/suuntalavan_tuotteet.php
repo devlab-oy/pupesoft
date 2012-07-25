@@ -70,13 +70,17 @@ if (isset($alusta_tunnus)) {
 
 	# Haetaan eankoodilla
 	$eankoodi = (isset($viivakoodi) and trim($viivakoodi))  ? trim($viivakoodi) : "";
-
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc, "", "", $eankoodi);
 
-	# Jos tuotetta ei löyty tältä lavalta
-	if (mysql_num_rows($res) == 0) {
+	# Jos tuotetta ei löydy tältä lavalta
+	if (mysql_num_rows($res) == 0 && $eankoodi != '') {
 		$error['tuotteet'] = "Suuntalavalta ei löytynyt kyseistä tuotetta";
+		# Haetaan tuotteet uudelleen ilman eankoodia
 		$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc);
+	}
+	# Muuten tyhjä lava
+	elseif(mysql_num_rows($res) == 0) {
+		# TODO: Aseta puretuksi
 	}
 
 	$i = 0;
@@ -149,6 +153,9 @@ echo "
 		// 		}
 		// 	});
   // 		});
+		function varmista() {
+			return confirm('Muista tarkistaa suuntalavan sisältö!');
+		}
 	</script>
 
 	<table border='0'>
@@ -164,6 +171,25 @@ echo "
 					</table>
 				</form>
 				<form name='hakuformi' method='post' action=''>";
+echo "			</table>
+					<table>
+					<tr>
+						<td nowrap>
+							<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
+						</td>
+						<td nowrap>
+							<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle", $browkieli),"</button>
+						</td>
+					</tr>
+				</table>
+				";
+
 				if (isset($error)) {
 					echo "<span class='error'>{$error['tuotteet']}</span>";
 				}
@@ -218,24 +244,6 @@ echo "							</th>
 						echo "</tr>";
 					}
 
-echo "			</table>
-					<table>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='varalle' onclick='submit();'>",t("Varalle", $browkieli),"</button>
-						</td>
-					</tr>
-				</table>
-				";
 echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				</form>

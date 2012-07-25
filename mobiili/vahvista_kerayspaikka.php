@@ -92,9 +92,6 @@ if (isset($submit) and trim($submit) != '') {
 			}
 			# Jos nostetaan niin tehd‰‰n insertti erotukselle..
 			elseif($maara > $row['varattu']) {
-				# TODO: Varmistuskysymys
-				# "Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?"
-
 				# Tehd‰‰n insertti erotukselle
 				$kopioitu_tilausrivi = kopioi_tilausrivi($selected_row);
 
@@ -122,9 +119,6 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Jos tuotteita j‰lell‰, menn‰‰n takaisin suuntalavan tuotteet sivulle
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-
-				# Jos oli viimeinen tuote, palataan alusta sivulle
-				# ###
 				exit;
 			}
 
@@ -132,6 +126,18 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 include("kasipaate.css");
+echo "
+	<script type='text/javascript'>
+		function vahvista() {
+			var maara = document.getElementById('maara').value;
+			var row_varattu = parseInt(document.getElementById('row_varattu').innerHTML);
+			if(maara > row_varattu) {
+				return confirm('Olet tulouttamassa enemm‰n kuin rivill‰ alunperin oli. Oletko varma?');
+			}
+			else return true;
+		}
+	</script>
+";
 echo "
 	<table border='0'>
 		<tr>
@@ -148,8 +154,8 @@ echo "
 					</tr>
 					<tr>
 						<td>",t("M‰‰r‰", $browkieli),"</td>
-						<td><input type='text' name='maara' value='' size='7' />
-						<td>{$row['varattu']} {$row['yksikko']}</td>
+						<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' />
+						<td><span id='row_varattu'>{$row['varattu']}</span> {$row['yksikko']}</td>
 					</tr>
 					<tr>
 						<td>",t("Ker‰yspaikka", $browkieli),"</td>
@@ -163,7 +169,7 @@ echo "
 					<table>
 					<tr>
 						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Vahvista", $browkieli),"</button>
+							<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
 						</td>
 						<td nowrap>
 							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>

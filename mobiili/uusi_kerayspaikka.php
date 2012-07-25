@@ -36,7 +36,7 @@ if (isset($submit) and trim($submit) != '') {
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
 $row = mysql_fetch_assoc($res);
 
-$oletuspaikka_chk = "";
+$oletuspaikka_chk = "checked";
 
 $onko_suoratoimitus_res = onko_suoratoimitus($selected_row);
 
@@ -51,8 +51,6 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 		$error['kerayspaikka'] = t("Hyllypaikka ei saa olla tyhj‰", $browkieli).'.';
 	}
 	elseif ($hylly_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
-		echo "Hylly ok: ".$hylly_ok."<br>";
-
 		$oletus = $oletuspaikka != '' ? 'X' : '';
 
 		$hylly = array(
@@ -71,30 +69,24 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 										AND hyllytaso='$hyllytaso'";
 		$oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
 
-		echo "Onko tuotteen oma paikka? ".mysql_num_rows($oma_paikka)."<br>";
-
 		# Jos syˆtetty‰ paikkaa ei ole t‰m‰n tuotteen, lis‰t‰‰n uusi tuotepaikka
 		if (mysql_num_rows($oma_paikka) == 0) {
 			#lisaa_tuotepaikka($row['tuoteno'], $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], 'Saapumisessa', $oletus);
-			echo "lisaa_tuotepaikka!<br>";
 			lisaa_tuotepaikka($row['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Saapumisessa', $oletus);
 		}
 
 		# P‰ivitet‰‰n oletuspaikat jos tehd‰‰n t‰st‰ oletuspaikka
 		if($oletus != '') {
 			# Asetetaan oletuspaikka uusiksi
-			echo "Oletuspaikka uusiksi!";
 			$paivitetty_paikka = paivita_oletuspaikka($row['tuoteno'], $hylly);
-			echo "Paivitetty paikka: ".$paivitetty_paikka;
 		}
 
 		# Asetetaan tuotepaikka tilausriville
 		paivita_tilausrivin_hylly($selected_row, $hylly);
-		echo "p‰ivitet‰‰n tilausrivin hyllypaikka";
 
 		# Palataan edelliselle sivulle
-		#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-		#exit;
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
+		exit;
 	}
 	else {
 		$error['kerayspaikka'] = t("Varaston tuotepaikkaa ei ole perustettu", $browkieli).'.';
@@ -139,7 +131,7 @@ echo "
 					</table>
 					<table>
 					<tr>
-						<td colspan='2'>",t("Tee t‰st‰ oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' checked /></td>
+						<td colspan='2'>",t("Tee t‰st‰ oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
 					</tr>
 					<tr>
 						<td nowrap>

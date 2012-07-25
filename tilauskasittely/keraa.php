@@ -1515,7 +1515,7 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, asiakas.email, asiakas.keraysvahvistus_lahetys
+					$query = "	SELECT lasku.*, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.tunnus in ($tilausnumeroita)

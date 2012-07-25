@@ -155,7 +155,11 @@
                 </tr>
                 <tr>
                     <th>Due Date:</th>
-                    <td><xsl:value-of select="InvoiceDueDate/Date"/></td>
+                    <td>
+                        <xsl:call-template name="formatdate">
+                            <xsl:with-param name="datestr" select="InvoiceDueDate/Date"/>
+                        </xsl:call-template>
+                    </td>
                     <th colspan="2" />
                 </tr>
                 <tr>
@@ -221,7 +225,10 @@
         <tr>
             <td><xsl:value-of select="PositionNumber"/></td>
             <td>
-                <xsl:value-of select="ProductId/MakerCode"/> <xsl:value-of select="ProductId/ProductNumber"/><br />
+                <xsl:value-of select="ProductId/MakerCode"/>
+                <a title="Pupesoft tuotekysely" href="tuote.php?tuoteno={ProductId/ProductNumber}&amp;tyyppi=TOIMTUOTENO&amp;tee=Z">
+                    <xsl:value-of select="ProductId/ProductNumber"/>
+                </a><br />
                 <xsl:value-of select="ProductId/Ean"/><br />
                 <xsl:value-of select="ProductDescription"/>
             </td>
@@ -358,6 +365,15 @@
                     <td></td>
                     <td><xsl:value-of select="InvoiceTotals/InvoiceGrossValue/Amount"/></td>
                 </tr>
+
+                <xsl:for-each select="AllowOrCharge">
+                    <tr>
+                        <td>Additional charges:</td>
+                        <td><xsl:value-of select="AllowOrChargeDescription"/> (<xsl:value-of select="AllowOrChargeCode"/>)</td>
+                        <td><xsl:value-of select="Percent"/>%</td>
+                        <td><xsl:if test="AllowOrChargeIdentifier/@Value = 'Allow'">-</xsl:if><xsl:value-of select="Amount"/></td>
+                    </tr>
+                </xsl:for-each>
 
                 <xsl:apply-templates select="InvoiceTotals/PrepaidAmount"/>
                 <xsl:apply-templates select="InvoiceTotals/InvoiceAmountPayable"/>

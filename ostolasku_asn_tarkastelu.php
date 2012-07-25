@@ -257,6 +257,7 @@
 			$paketin_tunnukset 	= array();
 			$rtuoteno			= array();
 			$laskuttajan_toimittajanumero = "";
+			$lasku_manuaalisesti_check = 0;
 
 			$tilausrivilisa = $tee == 'vahvistavakisinkolli' ? "" : "AND tilausrivi != ''";
 
@@ -360,7 +361,7 @@
 									$laskures	= pupe_query($laskuselect);
 									$laskurow	= mysql_fetch_assoc($laskures);
 
-									list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
+									list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $isa_chk_row["tilkpl"]);
 
 									$lisainsert = "	INSERT INTO tilausrivi SET
 													yhtio			= '{$kukarow['yhtio']}',
@@ -375,6 +376,9 @@
 													yksikko			= '{$lapsitieto['yksikko']}',
 													tilkpl			= '{$isa_chk_row['tilkpl']}',
 													varattu			= '{$isa_chk_row['varattu']}',
+													ale1			= '{$ale['ale1']}',
+													ale2			= '{$ale['ale2']}',
+													ale3			= '{$ale['ale3']}',
 													kpl				= '{$isa_chk_row['kpl']}',
 													hinta			= '{$hinta}',
 													laatija			= 'lapset',
@@ -475,8 +479,6 @@
 									AND tunnus IN ({$kollirow['tilausrivi']})";
 						$tilausrivires = pupe_query($query);
 
-
-
 						while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 							if ($tilausrivirow['uusiotunnus'] == 0) {
 								// löytyi, ei ole keikalla
@@ -507,6 +509,24 @@
 								$keikoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
 								$keikoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
 								$keikoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
+
+								// jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edetä ja nollataan asn_sanomat.tilausrivi
+								$query = "	SELECT saapuminen.tunnus
+											FROM lasku AS saapuminen
+											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
+											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'
+											AND saapuminen.tapvm = '0000-00-00'";
+								$saapres = pupe_query($query);
+
+								if (mysql_num_rows($saapres) != 0) {
+									$lasku_manuaalisesti_check = 1;
+
+									$query = "	UPDATE asn_sanomat SET
+												tilausrivi = ''
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus	= '{$kollirow['tunnus']}'";
+									$upd_res = pupe_query($query);
+								}
 							}
 
 							$x++;
@@ -519,7 +539,7 @@
 				}
 			}
 
-			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "") {
+			if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check == 0) {
 
 				if ($tee == 'vahvistavakisinkolli' and !$tullaan_virhetarkistuksesta) {
 					$query = "	UPDATE asn_sanomat SET
@@ -571,6 +591,9 @@
 
 					// verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 				}
+			}
+			else if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
+				echo "<font class='message'>",t("Laskun rivejä oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan tämmöisten rivien liitos"),". ",t("Käsittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
 			}
 
 			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
@@ -1214,32 +1237,49 @@
 
 			$tuotenolisa = trim($tuoteno) != '' ? " and (tilausrivi.tuoteno like '".mysql_real_escape_string($tuoteno)."%' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_valeilla)."' or tilausrivi.tuoteno = '".mysql_real_escape_string($tuoteno_ilman_valeilla)."')" : '';
 
-			$alatilalisa = $valitse == 'asn' ? " AND lasku.alatila != 'X' " : "";
-
-			$query = "	SELECT DISTINCT tilausrivi.tunnus,
+			// Ostotilaukset ja suoraan saapumiselle lisätyt, mutta ei saa olla saapumiselle kohdistettu
+			$query1 = "	SELECT DISTINCT tilausrivi.tunnus,
 						tilausrivi.tuoteno,
 						tilausrivi.otunnus,
 						tilausrivi.varattu,
 						tilausrivi.kpl,
 						tilausrivi.tilaajanrivinro,
-						IF(tilausrivi.uusiotunnus = 0, '', tilausrivi.uusiotunnus) AS uusiotunnus,
-						IF(lasku.tila = 'O', lasku.laskunro, 0) AS onko_lasku
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
 						FROM lasku
-						JOIN tilausrivi ON (
-							tilausrivi.yhtio = lasku.yhtio
-							AND tilausrivi.tyyppi = 'O'
-							AND (tilausrivi.otunnus = lasku.tunnus OR tilausrivi.uusiotunnus = lasku.tunnus)
-							{$tilaajanrivinrolisa}
-							{$tuotenolisa}
-							{$kpllisa})
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND (lasku.tila = 'O' OR (lasku.tila = 'K' AND lasku.alatila != 'X'))
-						AND lasku.liitostunnus = '{$toimirow['tunnus']}'
-						{$alatilalisa}
-						{$tilausnrolisa}
-						HAVING onko_lasku = 0
-						ORDER BY tilausrivi.tunnus, tilausrivi.uusiotunnus, lasku.tunnus";
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila 		   in ('O','K')
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa}";
+
+			// Saapumiset, ei loppulasketut eikä sellaset joihin on jo vaihto-omaisuuslasku liitetty, pitää olla saapumiselle kohdistettu
+			$query2 = "	SELECT DISTINCT tilausrivi.tunnus,
+						tilausrivi.tuoteno,
+						tilausrivi.otunnus,
+						tilausrivi.varattu,
+						tilausrivi.kpl,
+						tilausrivi.tilaajanrivinro,
+						tilausrivi.uusiotunnus,
+						lasku.tunnus laskutunnus
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.uusiotunnus != 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						AND lasku.tila 			= 'K'
+						AND lasku.tapvm 		= '0000-00-00'
+						AND lasku.mapvm 		= '0000-00-00'
+						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
+						{$tilausnrolisa}";
+
+			if ($valitse == 'asn') {
+				$query = $query1." ORDER BY tunnus, uusiotunnus, laskutunnus";
+			}
+			else {
+				$query = "($query1) UNION ($query2) ORDER BY tunnus, uusiotunnus, laskutunnus";
+			}
+
 			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -1275,7 +1315,7 @@
 				echo "<td>{$row['tuoteno']}</td>";
 				echo "<td align='right'>{$row['varattu']} / {$row['kpl']}</td>";
 
-				if ($row['uusiotunnus'] != '') {
+				if ($row['uusiotunnus'] > 0) {
 					$query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['uusiotunnus']}'";
 					$keikkares = pupe_query($query);
 					$keikkarow = mysql_fetch_assoc($keikkares);
@@ -1284,16 +1324,16 @@
 
 				echo "<td align='right'>$row[uusiotunnus]</td>";
 
-				if ($row['uusiotunnus'] != '' and $row['kpl'] == 0 and $valitse == 'asn') {
+				if ($row['uusiotunnus'] > 0 and $row['kpl'] == 0 and $valitse == 'asn') {
 					echo "<td>",t("Rivi on kohdistettu"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
-				elseif ($valitse == 'asn' and $row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+				elseif ($valitse == 'asn' and $row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
 					echo "<td>",t("Viety varastoon"),"</td>";
 					echo "<td>&nbsp;</td>";
 				}
 				else {
-					if ($row['uusiotunnus'] != '' and $row['kpl'] != 0) {
+					if ($row['uusiotunnus'] > 0 and $row['kpl'] != 0) {
 						echo "<td>",t("Viety varastoon"),"</td>";
 					}
 					else {
@@ -1687,7 +1727,7 @@
 				echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 
-			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Vahvista väkisin"),"' /></th></tr>";
+			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
 
 			echo "</table>";
 			echo "</form>";

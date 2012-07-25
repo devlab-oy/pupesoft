@@ -209,8 +209,9 @@ if (!function_exists('alku_kerayslista')) {
 				$pdf->draw_text(310, 782, $kerayseran_numero,				$thispage, $boldi);
 			}
 			else {
-				$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 	$thispage, $pieni);
-				$pdf->draw_text(310, 782, $tilausnumeroita,					$thispage, $boldi);
+				list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
+				$pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli), 		$thispage, $pieni);
+				$pdf->draw_text(310, 782, $ff_string,							$thispage, $ff_font);
 			}
 
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
@@ -367,13 +368,45 @@ if (!function_exists('alku_kerayslista')) {
 			if (trim($laskurow['comments']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 70, "\n###");
 			}
-			
+
 			if (trim($laskurow['ohjausmerkki']) != '') {
 				$komm .= "\n".t("Ohjausmerkki", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['ohjausmerkki']), 70, "\n###");
 			}
 
 			if (trim($laskurow['sisviesti2']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
+			}
+
+			# Jos JT-tilaus niin tarkistetaan monta jälkitilausta on tehty.
+			if ($laskurow['clearing'] == 'JT-TILAUS') {
+
+				# vanha_otunnus on alkuperäinen tilausnumero
+				# Haetaan kaikkien tällä tilauksella olevien tilausrivien alkuperäiset tilausnumerot
+				$query = "	SELECT group_concat(DISTINCT tlt2.vanha_otunnus) alkuperaiset_tilaukset
+							FROM tilausrivi
+							JOIN tilausrivin_lisatiedot as tlt2 USE INDEX (tilausrivitunnus) ON (tlt2.yhtio = tilausrivi.yhtio AND tlt2.tilausrivitunnus = tilausrivi.tunnus)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus IN ($tilausnumeroita)
+							AND tilausrivi.tyyppi != 'D'";
+				$query_result = pupe_query($query);
+				$isa_tilaus = mysql_fetch_assoc($query_result);
+
+				# Lasketaan kuinka monta toimitettua tilausriviä löytyy per alkuperäinen tilaus
+				if ($isa_tilaus['alkuperaiset_tilaukset'] != NULL) {
+					$query = "	SELECT tlt2.vanha_otunnus, count(distinct DATE(tilausrivi.toimitettuaika))+1 as toimituksia
+								FROM tilausrivin_lisatiedot as tlt2
+								LEFT JOIN tilausrivi on (tilausrivi.tunnus = tlt2.tilausrivitunnus AND tilausrivi.tyyppi != 'D' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+								WHERE tlt2.yhtio = '{$kukarow['yhtio']}'
+								AND tlt2.vanha_otunnus IN ({$isa_tilaus['alkuperaiset_tilaukset']})
+								GROUP BY tlt2.vanha_otunnus
+								ORDER BY toimituksia";
+					$query_result = pupe_query($query);
+
+					// Jos yksikin tilaus jossa ei ole toimitettuja rivejä
+					while ($ensimmainen_toimitus_row = mysql_fetch_assoc($query_result)) {
+						$komm .= "\n{$ensimmainen_toimitus_row['toimituksia']}. ".t("toimitus tilauksesta")." {$ensimmainen_toimitus_row['vanha_otunnus']}";
+					}
+				}
 			}
 
 			// Jos keräyslistat/lähetteet tulostetaan heti, niin voidaan tulostaa JT tieto mukaan

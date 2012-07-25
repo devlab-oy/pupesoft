@@ -14,6 +14,7 @@ if ($livesearch_tee == "TILIHAKU") {
 function listdir($start_dir = '.') {
 
 	$files = array();
+	$ohitetut_laskut = array();
 
 	if (is_dir($start_dir)) {
 
@@ -29,16 +30,23 @@ function listdir($start_dir = '.') {
 				$files = array_merge($files, listdir($filepath));
 			}
 			else {
-				array_push($files, $filepath);
+				if(strstr($file, "skip_")) {
+					array_push($ohitetut_laskut, $filepath);
+				}
+				else {
+					array_push($files, $filepath);
+				}
 			}
 		}
 		closedir($fh);
+
+		# Sortataan laskut ja mergetet‰‰n skipattujen kanssa, skipatut siis viimeiseksi
 		sort($files);
+		$files = array_merge($files, $ohitetut_laskut);
 	}
 	else {
 		$files = false;
 	}
-
 	return $files;
 }
 
@@ -64,9 +72,11 @@ function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
 		$kesken_chk_res = pupe_query($query);
 
 		while ($kesken_chk_row = mysql_fetch_assoc($kesken_chk_res)) {
+			# Jos tiedosto on k‰ytt‰j‰ll‰ kesken
 			if ($path_parts['filename'] == $kukarow['kesken']) {
 				return array('kesken' => "$path_parts[basename]");
 			}
+			# Jos tiedosto on jollain muulla k‰ytt‰j‰ll‰ kesken
 			elseif ($path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
 		}
 
@@ -113,6 +123,51 @@ if (trim($muutparametrit) != '') {
 }
 
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
+
+# Ohitetaan lasku
+if ($tee == 'ohita_lasku') {
+	$ohitettava_lasku = realpath($skannatut_laskut_polku.$skannattu_lasku);
+	$path_parts = pathinfo($ohitettava_lasku);
+
+	# Nimet‰‰n ohitettu lasku "skip_" etuliitteell‰
+	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku."skip_".$kukarow['kesken'].".".$path_parts['extension'])) {
+		echo "Ei pystyt‰ nime‰m‰‰n tiedostoa.<br>";
+		exit;
+	}
+
+	// Haetaan seuraava lasku
+	$silent = 'ei n‰ytet‰ k‰yttˆliittym‰‰';
+	$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);
+
+	if ($skannattu_lasku !== FALSE) {
+		list($micro, $timestamp) = explode(" ", microtime());
+
+		$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
+
+		$query = "	UPDATE kuka SET
+					kesken = '$kukarow[kesken]'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kuka = '$kukarow[kuka]'";
+		$kesken_upd_res = pupe_query($query);
+
+		$path_parts = pathinfo($skannattu_lasku);
+
+		if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
+			echo t("Ei pystyt‰ nime‰m‰‰n tiedostoa")."<br>";
+		}
+
+		$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
+	}
+
+	else {
+		$skannattu_lasku = '';
+		$iframe = '';
+		$tultiin = '';
+		echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
+	}
+
+	$tee = "";
+}
 
 if ($tee == 'poistalasku') {
 
@@ -189,7 +244,7 @@ if ($tee == 'VIIVA') {
 		$versio = substr($nimi,0,1);
 		$tee2	= "";
 
-		if( $versio == '2' ){
+		if ($versio == '2') {
 			$tilino = substr($nimi,1,14);
 			$summa  = substr($nimi,15,8) / 100;
 			$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
@@ -197,7 +252,7 @@ if ($tee == 'VIIVA') {
 			$erk    = substr($nimi,45,2);
 			$erp    = substr($nimi,47,2);
 		}
-		elseif( $versio == '4' ){
+		elseif ($versio == '4') {
 			$tilino	= substr($nimi,1,16);
 			$summa	= substr($nimi,17,8) / 100;
 			$viite 	= ltrim(substr($nimi,28,20),"0"); // etunollat pois
@@ -205,7 +260,7 @@ if ($tee == 'VIIVA') {
 			$erk 	= substr($nimi,50,2);
 			$erp 	= substr($nimi,52,2);
 		}
-		elseif( $versio == '5' ){
+		elseif ($versio == '5') {
 			$tilino	= substr($nimi,1,16);
 			$summa	= substr($nimi,17,8) / 100;
 			$viite 	= "RF".substr($nimi,25,2).ltrim(substr($nimi,27,21),"0"); // Tarkistenumeron j‰lkeen tulevat t‰ytenollat pois
@@ -216,13 +271,13 @@ if ($tee == 'VIIVA') {
 
 		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			if($versio=='2'){
+			if ($versio == '2'){
 				$pankkitili = $tilino;
 				require("inc/pankkitilinoikeellisuus.php");
 				$tilino = $pankkitili;
 				$hakuehto = "tilinumero";
 			}
-			else{
+			else {
 				$hakuehto = "ultilno";
 				$tilino = tarkista_iban("FI".$tilino);
 			}
@@ -744,8 +799,11 @@ if ($tee == 'I') {
 			// Vaaditaan isot kirjaimet
 			$trow['ultilno'] = strtoupper($trow['ultilno']);
 
+			if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+			else $ibanmaa = $trow['maa'];
+
 			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($trow['maa']) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
+			if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
 				$errormsg .= "<font class='error'>".t("Virheellinen IBAN!")."</font><br>";
 				$tee = 'E';
 			}
@@ -2595,7 +2653,14 @@ if (strlen($tee) == 0) {
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
 		echo "<input type='hidden' name='tee' value='poistalasku'>";
-		echo "<input type='submit' value='poista skannattu lasku' name='Poista'/></form></td><tr></table>";
+		echo "<input type='submit' value='".t("Poista skannattu")." lasku' name='Poista'/></form></td>";
+
+		echo "<td class='back'>";
+		echo "<form method='post'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
+		echo "<input type='hidden' name='tee' value='ohita_lasku'>";
+		echo "<input type='submit' value='".t("Ohita lasku")."' name='ohita_lasku'/></form></td></tr></table>";
 
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 

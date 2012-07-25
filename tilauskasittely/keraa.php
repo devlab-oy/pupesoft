@@ -1262,7 +1262,7 @@
 				$ulos .= "</body></html>";
 
 				// korvataan poikkeama-meili keräysvahvistuksella
-				if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow["kerayspoikkeama"] == 0) {
+				if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1515,7 +1515,7 @@
 				if ($toim != 'VASTAANOTA_REKLAMAATIO') {
 					// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 					// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-					$query = "	SELECT lasku.*, asiakas.email, asiakas.keraysvahvistus_lahetys
+					$query = "	SELECT lasku.*, if(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email) email, asiakas.keraysvahvistus_lahetys
 								FROM lasku
 								LEFT JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.tunnus in ($tilausnumeroita)
@@ -1523,9 +1523,16 @@
 								and lasku.alatila in ('C','D')";
 					$lasresult = pupe_query($query);
 
-					$tilausnumeroita_backup = $tilausnumeroita;
+					$tilausnumeroita_backup 	= $tilausnumeroita;
+					$lahete_tulostus_paperille 	= 0;
+					$laheteprintterinimi 		= "";
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
+
+						// Nollataan tämä:
+						$komento		= "";
+						$oslapp			= "";
+						$vakadr_komento = "";
 
 						if ($yhtiorow["vak_erittely"] == "K" and $yhtiorow["kerayserat"] == "K" and $vakadrkpl > 0 and $vakadr_tulostin !='' and $toim == "") {
 							//haetaan lähetteen tulostuskomento
@@ -1543,6 +1550,8 @@
 							$kirres  = pupe_query($query);
 							$kirrow  = mysql_fetch_assoc($kirres);
 							$komento = $kirrow['komento'];
+
+							$laheteprintterinimi = $kirrow["kirjoitin"];
 						}
 
 						if ($valittu_oslapp_tulostin != "") {
@@ -1553,254 +1562,75 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "")) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
 
-							$otunnus = $laskurow["tunnus"];
+							$koontilahete = FALSE;
 
-							//hatetaan asiakkaan lähetetyyppi
-							$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
-										FROM asiakas
-										WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-							$result = pupe_query($query);
-							$asrow = mysql_fetch_assoc($result);
+							// onko koontivahvistus käytössä?
+							if ($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) {
 
-							$lahetetyyppi = "";
+								$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
 
-							if ($sellahetetyyppi != '') {
-								$lahetetyyppi = $sellahetetyyppi;
-							}
-							elseif ($asrow["lahetetyyppi"] != '') {
-								$lahetetyyppi = $asrow["lahetetyyppi"];
-							}
-							else {
-								//Haetaan yhtiön oletuslähetetyyppi
-								$query = "  SELECT selite
-											FROM avainsana
-											WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-											ORDER BY jarjestys, selite
-											LIMIT 1";
-								$vres = pupe_query($query);
-								$vrow = mysql_fetch_assoc($vres);
+								// Onko kaikki rivit kerätty?
+								$query = "	SELECT lasku.tunnus
+											FROM lasku
+											JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+											JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+											WHERE lasku.yhtio	  = '$kukarow[yhtio]'
+											AND lasku.vanhatunnus = '$hakutunnus'";
+								$vanhat_res = pupe_query($query);
 
-								if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-									$lahetetyyppi = $vrow["selite"];
-								}
-							}
-
-							require("tulosta_lahete.inc");
-
-							//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
-							if (function_exists("tulosta_lahete")) {
-								if ($vrow["selite"] != '') {
-									$tulostusversio = $vrow["selite"];
+								if (mysql_num_rows($vanhat_res) == 0) {
+									// Kaikki rivit kerätty! Tulostetaan koontilahete
+									$koontilahete = TRUE;
 								}
 								else {
-									$tulostusversio = $asrow["lahetetyyppi"];
+									// Tällä asiakkaalla on koontiläheteprosessi päällä, mutta kaikki rivit ei oo vielä kerätty, joten ei tulosteta mittään
+									$komento = "";
 								}
-
-								tulosta_lahete($otunnus, $komento["Lähete"], $kieli = "", $toim, $tee, $tulostusversio);
 							}
-							else {
-								// katotaan miten halutaan sortattavan
-								// haetaan asiakkaan tietojen takaa sorttaustiedot
-								$order_sorttaus = '';
 
-								$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
-														FROM asiakas
-														WHERE yhtio = '$kukarow[yhtio]'
-														and tunnus = '$laskurow[liitostunnus]'";
-								$asiakas_apu_res = pupe_query($asiakas_apu_query);
+							if ($koontilahete and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
+								$komento = "asiakasemail".$laskurow['email'];
+							}
+							elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
+								// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
+								if ($komento != "") $komento = array($komento);
+								else $komento = array();
 
-								if (mysql_num_rows($asiakas_apu_res) == 1) {
-									$asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
-									$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"] != "" ? $asiakas_apu_row["lahetteen_jarjestys"] : $yhtiorow["lahetteen_jarjestys"]);
-									$order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"] != "" ? $asiakas_apu_row["lahetteen_jarjestys_suunta"] : $yhtiorow["lahetteen_jarjestys_suunta"];
-								}
-								else {
-									$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
-									$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
-								}
+								$komento[] = "asiakasemail".$laskurow['email'];
+							}
 
-								if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-								else $pjat_sortlisa = "";
+							if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
-								if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
-									$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
-								}
-								else {
-									$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
-								}
-
-								$query_ale_lisa = generoi_alekentta('M');
-
-								//generoidaan lähetteelle ja keräyslistalle rivinumerot
-								$query = "  SELECT tilausrivi.*,
-											round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-											round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-											$sorttauskentta,
-											if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
-											if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-											if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-											tuote.sarjanumeroseuranta
-											FROM tilausrivi
-											JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-											JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-											LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-											WHERE tilausrivi.otunnus = '$otunnus'
-											and tilausrivi.yhtio = '$kukarow[yhtio]'
-											$tyyppilisa
-											and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-											ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-								$riresult = pupe_query($query);
-
-								$params_lahete = array(
-								'arvo'						=> 0,
-								'asrow'						=> $asrow,
-								'boldi'						=> $boldi,
-								'ei_otsikoita'				=> '',
-								'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
-								'iso'						=> $iso,
-								'jtid'						=> '',
-								'kala'						=> 0,
-								'kassa_ale'					=> '',
-								'kieli'						=> $kieli,
-								'lahetetyyppi'				=> $lahetetyyppi,
-								'laskurow'					=> $laskurow,
-								'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
-								'norm'						=> $norm,
-								'page'						=> NULL,
-								'pdf'						=> NULL,
-								'perheid'					=> 0,
-								'pieni'						=> $pieni,
-								'pieni_boldi'				=> $pieni_boldi,
-								'pitkattuotteet'			=> FALSE,
-								'rectparam'					=> $rectparam,
-								'riviresult'				=> $riresult,
-								'rivinkorkeus'				=> $rivinkorkeus,
-								'rivinumerot'				=> "",
-								'row'						=> NULL,
-								'sivu'						=> 1,
-								'summa'						=> 0,
-								'tee'						=> $tee,
-								'thispage'					=> NULL,
-								'toim'						=> $toim,
-								'tots'						=> 0,
-								'tuotenopituus'				=> '',
-								'nimityskohta'   			=> '',
-								'nimitysleveys'   		    => '',
-								'tyyppi'					=> '',
-								'useita'					=> '',
-								'yhteensamaara'				=> 0,
-								);
-
-								if ($laskurow["tila"] == "G") {
-									$params_lahete["tyyppi"] = "SIIRTOLISTA";
-								}
-
-								// Aloitellaan lähetteen teko
-								$params_lahete = alku_lahete($params_lahete);
-
-								// Piirretään rivit
-								mysql_data_seek($riresult,0);
-
-								while ($row = mysql_fetch_assoc($riresult)) {
-									$params_lahete["row"] = $row;
-									$params_lahete = rivi_lahete($params_lahete);
-								}
-
-								//Haetaan erikseen toimitettavat tuotteet
-								if ($yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
-									$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-												FROM lasku use index (yhtio_vanhatunnus)
-												WHERE yhtio		= '$kukarow[yhtio]'
-												and vanhatunnus = '$laskurow[vanhatunnus]'
-												and tunnus != '$laskurow[tunnus]'";
-									$perheresult = pupe_query($query);
-									$tunrow = mysql_fetch_assoc($perheresult);
-
-									//generoidaan lähetteelle ja keräyslistalle rivinumerot
-									if ($tunrow["tunnukset"] != "") {
-
-										$toimitettulisa = "";
-
-										if ($laskurow["clearing"] == "ENNAKKOTILAUS" or $laskurow["clearing"] == "JT-TILAUS") {
-											$toimitettulisa = " and tilausrivi.toimitettu = '' ";
-										}
-
-										$query_ale_lisa = generoi_alekentta('M');
-
-										$query = "  SELECT tilausrivi.*,
-													round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-													round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-													$sorttauskentta,
-													if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
-													if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-													if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-													tuote.sarjanumeroseuranta
-													FROM tilausrivi
-													JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-													JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-													LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-													WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
-													and tilausrivi.yhtio = '$kukarow[yhtio]'
-													$tyyppilisa
-													$toimitettulisa
-													and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-													ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-										$riresult = pupe_query($query);
-
-										while ($row = mysql_fetch_assoc($riresult)) {
-
-											if ($row['toimitettu'] == '') {
-												$row['kommentti'] .= "\n******* ".t("Toimitetaan erikseen",$kieli).". *******";
-											}
-											else {
-												$row['kommentti'] .= "\n******* ".t("Toimitettu erikseen tilauksella",$kieli)." ".$row['otunnus'].". *******";
-											}
-
-											$row['rivihinta'] 	= "";
-											$row['varattu'] 	= "";
-											$row['kpl']			= "";
-											$row['jt'] 			= "";
-											$row['d_erikseen'] 	= "JOO";
-
-											$params_lahete["row"] = $row;
-											$params_lahete = rivi_lahete($params_lahete);
+								// Lasketaan kuinka monta lähetettä tulostuu paperille (muuttujat valuu optiscan.php:seen)
+								if (is_array($komento)) {
+									foreach ($komento as $paprulleko) {
+										if ($paprulleko != 'email' and substr($paprulleko,0,12) != 'asiakasemail') {
+											$lahete_tulostus_paperille++;
 										}
 									}
 								}
-
-								// Loppulaatikot
-								$params_lahete["tots"] = 1;
-								$params_lahete = loppu_lahete($params_lahete);
-
-								//katotaan onko laskutus nouto
-								$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
-											FROM lasku
-											JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
-											JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-											WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$laskurow[tunnus]'
-											and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
-								$kures = pupe_query($query);
-
-								if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
-									$params_lahete = kuittaus_lahete($params_lahete);
+								elseif ($komento != 'email' and substr($komento,0,12) != 'asiakasemail') {
+									$lahete_tulostus_paperille++;
 								}
 
-								//tulostetaan sivu
-								if ($lahetekpl > 1 and $komento != "email") {
-									$komento .= " -#$lahetekpl ";
-								}
+								$params = array(
+									'laskurow'					=> $laskurow,
+									'sellahetetyyppi' 			=> $sellahetetyyppi,
+									'extranet_tilausvahvistus' 	=> "",
+									'naytetaanko_rivihinta'		=> "",
+									'tee'						=> $tee,
+									'toim'						=> $toim,
+									'komento' 					=> $komento,
+									'lahetekpl'					=> $lahetekpl,
+									'kieli' 					=> $kieli,
+									'koontilahete'				=> $koontilahete,
+									);
 
-								if (($yhtiorow["keraysvahvistus_lahetys"] == 'o' or $laskurow["keraysvahvistus_lahetys"] == 'o') and $laskurow["keraysvahvistus_lahetys"] != 'E' and $laskurow['email'] != "") {
-									$komento = array($komento);
-									$komento[] = "asiakasemail".$laskurow['email'];
-								}
-
-								$params_lahete["komento"] = $komento;
-
-								//tulostetaan sivu
-								print_pdf_lahete($params_lahete);
+								pupesoft_tulosta_lahete($params);
 							}
 						}
 
@@ -2946,19 +2776,15 @@
 					if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
 						echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
 
-						$query2 = "	SELECT lahetetyyppi
-									FROM lasku
-									JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
-						$vresult2 = pupe_query($query2);
-						$row2 = mysql_fetch_assoc($vresult2);
+						$lahetetyyppi = pupesoft_lahetetyyppi($id);
 
 						$vresult = t_avainsana("LAHETETYYPPI");
 
-						while ($row = mysql_fetch_assoc($vresult)) {
+						while($row = mysql_fetch_array($vresult)) {
 							$sel = "";
-							if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
-							echo "<option value='$row[selite]' {$sel}>$row[selitetark]</option>";
+							if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
+
+							echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 						}
 
 						echo "</select>";

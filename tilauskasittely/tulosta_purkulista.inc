@@ -187,7 +187,7 @@
 		$mitkalisa = "";
 	}
 
-	$otunnuslisa = "tilausrivi.otunnus = '{$otunnus}'";
+
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
 
@@ -206,9 +206,10 @@
 		$orderlisa = " suuntalavat.sscc, ";
 	}
 	else {
-		$selectlisa = "";
+		$otunnuslisa 	= "tilausrivi.uusiotunnus = '{$otunnus}'";
+		$selectlisa 	= "";
 		$suuntalavajoin = "";
-		$orderlisa = "";
+		$orderlisa 		= "";
 	}
 
 	if ($mista == "vastaanota" and $vainlistaus == '') {
@@ -363,12 +364,15 @@
 			$out .= chr(10).chr(13);
 
 			// RIVI 2
-			$out .= sprintf('%99s',		' ');
+			$out .= sprintf('%-99s',	$row["toim_tuoteno"]);
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= chr(10).chr(10).chr(13);
 		}
+		
+		// Rivinvaihto alkuun, jotta printit osuvat tarroille
+		$out = chr(10).chr(13).$out;
 
-		// 2 Form Feediä
+		// Form Feedi kahdesti, jotta ei tarvitse rullata käsin
 		$out .= chr(12).chr(12);
 
 		lpr($out, NULL, $komento["Purkulista"]);

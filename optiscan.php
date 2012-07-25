@@ -215,7 +215,7 @@
 						$upd_res = pupe_query($query);
 
 						// Haetaan kerättävät rivit
-						$query = "	SELECT min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+						$query = "	SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
 									FROM kerayserat
 									WHERE yhtio 		= '{$kukarow['yhtio']}'
 									AND laatija 		= '{$kukarow['kuka']}'
@@ -259,7 +259,7 @@
 						kerayserat.nro, tuote.kerayskommentti
 						{$orderby_select}
 						FROM tilausrivi
-						JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
+						JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.nro = {$kerattavat_rivit_row['nro']})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)
@@ -326,7 +326,7 @@
 		$yhtiorow = hae_yhtion_parametrit("artr");
 		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$nro = mysql_real_escape_string(trim($sisalto[3]));
+		$nro = (int) trim($sisalto[3]);
 		$printer_id = (int) trim($sisalto[4]);
 
 		$query = "	SELECT tunnus
@@ -339,13 +339,55 @@
 
 		$reittietikettitulostin = $row['tunnus'];
 
+		$query = "LOCK TABLES kerayserat WRITE";
+		$lock_res = pupe_query($query);
+
 		$query = "	SELECT *
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND nro = '{$nro}'";
+					AND nro 	= {$nro}
+					AND tila   != 'Ö'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
+			$response = "1, Ei printattavaa\r\n\r\n";
+		}
+
+		if (trim($response) == '') {
+			// Tarkistetaan, ettei ole duplikaattierä joka on jo jollain toisella tyypillä keräyksessä
+			// Sama tilaus ja sama tilausnumero, mutta eri keräyserä ==> FAIL
+			$duplikaatti = 0;
+			$riveja_tot  = mysql_num_rows($result);
+
+			while ($row = mysql_fetch_assoc($result)) {
+				$query = "	SELECT *
+							FROM kerayserat
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							AND nro			< {$nro}
+							AND tilausrivi	= '{$row['tilausrivi']}'
+							AND otunnus		= '{$row['otunnus']}'";
+				$dupl_res = pupe_query($query);
+
+				if (mysql_num_rows($dupl_res) > 0) {
+					// Päivitetään duplikaattirivi Ö-tilaan
+					$query = "	UPDATE kerayserat
+								SET tila = 'Ö'
+								WHERE yhtio 	= '{$kukarow['yhtio']}'
+								AND nro			= {$nro}
+								AND tilausrivi	= '{$row['tilausrivi']}'
+								AND otunnus		= '{$row['otunnus']}'";
+					$upd_res = pupe_query($query);
+
+					$duplikaatti++;
+				}
+			}
+		}
+
+		$query = "UNLOCK TABLES";
+		$lock_res = pupe_query($query);
+
+		// Jos kaikki rivit oli duplikaatteja
+		if ($duplikaatti > 0 and $riveja_tot == $duplikaatti) {
 			$response = "1, Ei printattavaa\r\n\r\n";
 		}
 
@@ -606,8 +648,19 @@
 
 				require('tilauskasittely/keraa.php');
 
-				// $response = "Dokumentit tulostuu kirjoittimelta {$dok},0,\r\n\r\n";
-				$response = "Dokumentit tulostuu kirjoittimelta,0,\r\n\r\n";
+				if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) {
+					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {
+						$laheteprintterinimi = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi);
+
+						$response = "{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta {$laheteprintterinimi},0,\r\n\r\n";
+					}
+					else {
+						$response = "{$lahete_tulostus_paperille} lähetettä tulostuu kirjoittimelta,0,\r\n\r\n";
+					}
+				}
+				else {
+					$response = "Lähetteitä ei tulosteta,0,\r\n\r\n";
+				}
 			}
 		}
 	}

@@ -832,7 +832,6 @@
 												case 'yhtio':
 												case 'tilausrivitunnus':
 												case 'tiliointirivitunnus':
-												case 'tilausrivilinkki':
 												case 'toimittajan_tunnus':
 												case 'luontiaika':
 												case 'laatija':

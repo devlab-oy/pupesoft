@@ -443,7 +443,7 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
-		if ($maarajaus != '') $lisa .= " and if(lasku.tila = 'U' and lasku.toim_maa!='', lasku.toim_maa, if(lasku.tila != 'U' and lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
+		if ($maarajaus != '') $lisa .= " and if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) = '$maarajaus'  ";
 
 		$asiakasjoini  = "";
 		$konsernijoini = "";
@@ -472,7 +472,10 @@
 
 		$query = "	SELECT CONCAT_WS(' ', tiliointi.tilino, tili.nimi) tili, tiliointi.tapvm, kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
 					tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
-					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso
+					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi, tili.alv_taso,
+					lasku.tapvm laskutapvm,
+					lasku.mapvm laskumapvm,
+					lasku.summa laskusumma
 					FROM tiliointi
 					LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 					LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -481,7 +484,7 @@
 					LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
 					$asiakasjoini
 					$konsernijoini
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 					and tiliointi.korjattu = ''
 					$lisa1
 					$lisa
@@ -612,7 +615,6 @@
 				}
 
 				if ($tee == 'P') {
-
 					if (!isset($workbook)) {
 						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 						echo "<td valign='top'>$trow[tili]</td>";
@@ -691,6 +693,27 @@
 					echo "<td valign='top' align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
 					echo "<td valign='top' align='right' class='back' nowrap>$trow[valkoodi]</td>";
 
+
+					if ($trow["xtilino"] == $yhtiorow['ostovelat'] or $trow["xtilino"] == $yhtiorow['konserniostovelat']) {
+
+						$virhe = "";
+
+						if ($trow["tapvm"] != $trow["laskutapvm"] and $trow["tapvm"] != $trow["laskumapvm"]) {
+							$virhe	.= "Ostovelkatiliöinnin päivämäärä virheellinen!";
+						}
+
+						if ($trow["tapvm"] == $trow["laskumapvm"] and $trow["summa"] != $trow["laskusumma"]) {
+							$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+						}
+
+						if ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa"] != ($trow["laskusumma"]*-1)) {
+							$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+						}
+
+						if ($virhe != "") echo "<td class='spec'><font class='error'>$virhe</font></td>";
+					}
+
+
 					if ($trow["alv_taso"] == "fi305" or $trow["alv_taso"] == "fi307") {
 						// Onko tosite liitetty keikkaan
 						$query = "SELECT nimi, laskunro, mapvm from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[ltunnus]'";
@@ -704,7 +727,7 @@
 							$keikres = pupe_query($query);
 							$keikrow2 = mysql_fetch_assoc($keikres);
 
-							echo "<td class='spec'>".t("Saapuminen").": $keikrow[laskunro], ".t("Pvm").": ".tv1dateconv($keikrow2["mapvm"])."</td>";
+							echo "<td class='spec' nowrap>".t("Saapuminen").": $keikrow[laskunro]<br>".t("Pvm").": ".tv1dateconv($keikrow2["mapvm"])."</td>";
 						}
 					}
 
@@ -718,8 +741,6 @@
 				if ($trow['valkoodi'] != '' and $trow['summa_valuutassa'] != '') {
 					$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];
 				}
-
-
 
 				$edtili = $trow["xtilino"];
 			}

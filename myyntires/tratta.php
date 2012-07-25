@@ -139,11 +139,9 @@ if ($tee == "ALOITATRATTAAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$tratattavat = array();
-		$tratattavat_asiakkaat = array();
 
 		while ($karhuttavarow = mysql_fetch_array($result)) {
 			$tratattavat[] = $karhuttavarow["tratattavat"];
-			$tratattavat_asiakkaat[] = "'".$karhuttavarow["ytunnus"]."'";
 		}
 		$tee = "TRATTAA";
 	}
@@ -179,7 +177,12 @@ if ($tee == 'TRATTAA')  {
 	//otetaan asiakastiedot ekalta laskulta
 	$asiakastiedot = mysql_fetch_array($result);
 
-	$query = "	SELECT *
+	$query = "	SELECT *,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimi, nimi) nimi,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_nimitark, nimitark) nimitark,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_osoite, osoite) osoite,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postino, postino) postino,
+				IF(laskutus_nimi != '' and (maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and maksukehotuksen_osoitetiedot = '')), laskutus_postitp, postitp) postitp
 				FROM asiakas
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$asiakastiedot[liitostunnus]'";
@@ -199,19 +202,18 @@ if ($tee == 'TRATTAA')  {
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
 	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
 
-	if ($tratattavat_asiakkaat[0] != "") {
-		$query  = "	SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(pvmalku,10) paivamaara
-			        FROM asiakas
-					JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
-					LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
-			        WHERE asiakas.yhtio = '$kukarow[yhtio]'
-		        	AND asiakas.ytunnus IN  ({$tratattavat_asiakkaat[0]})
-					ORDER BY kalenteri.tunnus desc";
-		$amres = pupe_query($query);
+	//Reskontraviestit
+	$query  = "	SELECT kalenteri.kentta01, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, left(kalenteri.pvmalku,10) paivamaara
+		        FROM asiakas
+				JOIN kalenteri ON (kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus AND kalenteri.tyyppi = 'Myyntireskontraviesti')
+				LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
+		        WHERE asiakas.yhtio = '$kukarow[yhtio]'
+	        	AND asiakas.ytunnus = '$asiakastiedot[ytunnus]'
+				ORDER BY kalenteri.tunnus desc";
+	$amres = pupe_query($query);
 
-		while ($amrow = mysql_fetch_assoc($amres)) {
-			echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
-		}
+	while ($amrow = mysql_fetch_assoc($amres)) {
+		echo "<tr><th>".t("Reskontraviesti")."</th><td>$amrow[kentta01] ($amrow[laatija] / $amrow[paivamaara])</td></tr>";
 	}
 
 	echo "</table>";

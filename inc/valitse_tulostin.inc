@@ -85,18 +85,13 @@
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><th>".t("Tulosta")."</th><td><select name='sellahetetyyppi'>";
 
-		$query2 = "	SELECT lahetetyyppi
-					FROM lasku
-					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";
-		$vresult2 = pupe_query($query2);
-		$row2 = mysql_fetch_array($vresult2);
+		$lahetetyyppi = pupesoft_lahetetyyppi($otunnus);
 
 		$vresult = t_avainsana("LAHETETYYPPI");
 
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
-			if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
+			if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
 
 			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}
@@ -110,12 +105,16 @@
 
 		$query2 = "	SELECT tilausvahvistus
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$otunnus'";
 		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2;
+		}
+		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
 		}
 		elseif (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
@@ -134,6 +133,9 @@
 		}
 		elseif (strpos($row2['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
+			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
@@ -163,6 +165,7 @@
 		echo "<option value = '4' $tvsel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
 		echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
 		echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
+		echo "<option value = '7' $tvsel[7]>".t("EAN tilausvahvistus")."</option>";
 		echo "</select></td></tr>";
 	}
 
@@ -382,7 +385,7 @@
 		}
 	}
 
-	if ($laskurow['kirjoitin'] == "edi") {
+	if (isset($laskurow) and $laskurow['kirjoitin'] == "edi") {
 		echo "<tr><td colspan='2' class='back'><font class='error'>".t("HUOM: EDI-tiedosto on jo kerran l‰hetetty toimittajalle")."!</font></td><tr>";
 	}
 

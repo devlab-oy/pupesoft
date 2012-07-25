@@ -990,8 +990,9 @@
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
 
-		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta ei l‰hetet‰")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus l‰hetet‰‰n asiakkaalle")."</option>";
+		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta/s‰hkˆist‰ l‰hetett‰ ei l‰hetet‰")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k' $sel[k]>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -1938,8 +1939,8 @@
 		$sel[$apu] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		$ulos .= "<option value='' $sel>".t("Ei")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰")."</option>";
+		$ulos .= "<option value='' $sel>".t("Ei. Korvaava tuote lis‰t‰‰n myyntitilaukselle automaattisesti.")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰. Korvaava tuote lis‰t‰‰n myyntitilauksella vain jos myyj‰ hyv‰ksyy korvaavan tuotteen.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3187,6 +3188,19 @@
 		$ulos .= "<option value = '1' {$sel[1]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit tili‰")."</option>";
 		$ulos .= "<option value = '2' {$sel[2]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit ja -kulut tilej‰")."</option>";
 		$ulos .= "<option value = '3' {$sel[3]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit, -kulut ja -tuoterivikohtaiset kulut tilej‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tositteen_tilioinnit') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Tositteella n‰ytet‰‰n oletuksena kaikki tiliˆintirivit")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Tositteella n‰ytet‰‰n tiliˆintirivit summattuna per tili/pvm/tarkenne")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -863,20 +863,17 @@
 					$lasresult = pupe_query($query);
 					$laskurow = mysql_fetch_assoc($lasresult);
 
-					if ($lahetekpl > 1 and $komento != "email") {
-						$komento .= " -#$lahetekpl ";
-					}
-
 					$params = array(
-						'laskurow' => $laskurow,
-						'sellahetetyyppi' => $sellahetetyyppi,
-						'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
-						'naytetaanko_rivihinta' => $naytetaanko_rivihinta,
-						'tee' => $tee,
-						'toim' => $toim,
-						'query_ale_lisa' => $query_ale_lisa,
-						'komento' => $komento
-					);
+						'laskurow'					=> $laskurow,
+						'sellahetetyyppi' 			=> $sellahetetyyppi,
+						'extranet_tilausvahvistus' 	=> "",
+						'naytetaanko_rivihinta'		=> "",
+						'tee'						=> $tee,
+						'toim'						=> $toim,
+						'komento' 					=> $komento,
+						'lahetekpl'					=> $lahetekpl,
+						'kieli' 					=> $kieli
+						);
 
 					pupesoft_tulosta_lahete($params);
 				}

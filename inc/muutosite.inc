@@ -119,15 +119,18 @@
 				$tili=$pankkitili;
 			}
 
+			if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+			else $ibanmaa = $trow['maa'];
+
 			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($trow['maa']) and tarkista_iban($ultilno) != $ultilno) {
+			if (tarkista_sepa($ibanmaa) and tarkista_iban($ultilno) != $ultilno) {
 				echo "<font class='error'>".t("Virheellinen IBAN!")." $ultilno</font><br>";
 				$tee = 'E';
 				$tila = '';
 			}
 
 			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($trow['maa']) and tarkista_bic($swift) === FALSE) {
+			if (tarkista_sepa($ibanmaa) and tarkista_bic($swift) === FALSE) {
 				echo "<font class='error'>".t("Virheellinen BIC!")." $swift</font><br>";
 				$tee = 'E';
 				$tila = '';
@@ -170,15 +173,18 @@
 			$pankki3 		= strtoupper($pankki3);
 			$pankki4 		= strtoupper($pankki4);
 
+            if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
+			else $ibanmaa = $trow['maa'];
+
 			// Jos SEPA-maa, tarkistetaan IBAN
-			if (tarkista_sepa($trow['maa']) and tarkista_iban($ultilno) != $ultilno) {
+			if (tarkista_sepa($ibanmaa) and tarkista_iban($ultilno) != $ultilno) {
 				echo "<font class='error'>".t("Virheellinen IBAN!")." $ultilno</font><br>";
 				$tee = 'E';
 				$tila = '';
 			}
 
 			// Jos SEPA-maa, tarkistetaan BIC
-			if (tarkista_sepa($trow['maa']) and tarkista_bic($swift) === FALSE) {
+			if (tarkista_sepa($ibanmaa) and tarkista_bic($swift) === FALSE) {
 				echo "<font class='error'>".t("Virheellinen BIC!")." $swift</font><br>";
 				$tee = 'E';
 				$tila = '';

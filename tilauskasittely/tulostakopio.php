@@ -53,7 +53,7 @@
 	if (!isset($vvl)) $vvl = date("Y");
 	if (!isset($ppl)) $ppl = date("d");
 
-	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
@@ -126,7 +126,7 @@
 	if ($toim == "SAD") {
 		$fuse = t("Sad-lomake");
 	}
-	if ($toim == "LAHETE") {
+	if ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
 		$fuse = t("Lähete");
 	}
 	if ($toim == "DGD") {
@@ -216,7 +216,7 @@
 
 	// Extranettaajat voivat ottaa kopioita omista laskuistaan ja lähetteistään
 	if ($kukarow["extranet"] != "") {
-		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
+		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
 			$query  = "	SELECT *
 						FROM asiakas
 						WHERE yhtio	= '$kukarow[yhtio]'
@@ -246,7 +246,7 @@
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
-				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
 					$konserni = $yhtiorow['konserni'];
 				}
 				require ("inc/asiakashaku.inc");
@@ -630,7 +630,7 @@
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
 
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+		if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -923,7 +923,7 @@
 
 			if ($kukarow["extranet"] == "") {
 
-				echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				echo " <script type=\"text/javascript\" language=\"JavaScript\">
 						<!--
 
 						function toggleAll(toggleBox) {
@@ -1140,61 +1140,61 @@
 				$komento["Ostotilaus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "PURKU") {
+                elseif ($toim == "PURKU") {
 			$tulostimet[0] = 'Purkulista';
 			if ($kappaleet > 0 and $komento["Purkulista"] != 'email') {
 				$komento["Purkulista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VASTAANOTETUT") {
+                elseif ($toim == "VASTAANOTETUT") {
 			$tulostimet[0] = 'Vastaanotetut';
 			if ($kappaleet > 0 and $komento["Vastaanotetut"] != 'email') {
 				$komento["Vastaanotetut"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VASTAANOTTORAPORTTI") {
+		elseif ($toim == "VASTAANOTTORAPORTTI") {
 			$tulostimet[0] = 'Vastaanottoraportti';
 			if ($kappaleet > 0 and $komento["Vastaanottoraportti"] != 'email') {
 				$komento["Vastaanottoraportti"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TARIFFI") {
+		elseif ($toim == "TARIFFI") {
 			$tulostimet[0] = 'Tariffilista';
 			if ($kappaleet > 0 and $komento["Tariffilista"] != 'email') {
 				$komento["Tariffilista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "LASKU") {
+		elseif ($toim == "LASKU") {
 			$tulostimet[0] = 'Lasku';
 			if ($kappaleet > 0 and $komento["Lasku"] != 'email') {
 				$komento["Lasku"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TUOTETARRA") {
+		elseif ($toim == "TUOTETARRA") {
 			$tulostimet[0] = 'Tuotetarrat';
 			if ($kappaleet > 0 and $komento["Tuotetarrat"] != 'email') {
 				$komento["Tuotetarrat"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TILAUSTUOTETARRA") {
+		elseif ($toim == "TILAUSTUOTETARRA") {
 			$tulostimet[0] = 'Tilauksen tuotetarrat';
 			if ($kappaleet > 0 and $komento["Tilauksen tuotetarrat"] != 'email') {
 				$komento["Tilauksen tuotetarrat"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "SIIRTOLISTA") {
+		elseif ($toim == "SIIRTOLISTA") {
 			$tulostimet[0] = 'Siirtolista';
 			if ($kappaleet > 0 and $komento["Siirtolista"] != 'email') {
 				$komento["Siirtolista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VALMISTUS") {
+		elseif ($toim == "VALMISTUS") {
 			$tulostimet[0] = 'Valmistus';
 			if ($kappaleet > 0 and $komento["Valmistus"] != 'email') {
 				$komento["Valmistus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "SAD") {
+		elseif ($toim == "SAD") {
 			$tulostimet[0] = 'SAD-lomake';
 
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
@@ -1211,109 +1211,109 @@
 				}
 			}
 		}
-		if ($toim == "LAHETE") {
+		elseif ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
 			$tulostimet[0] = 'Lähete';
 			if ($kappaleet > 0 and $komento["Lähete"] != 'email') {
 				$komento["Lähete"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "DGD") {
+		elseif ($toim == "DGD") {
 			$tulostimet[0] = 'DGD';
 			if ($kappaleet > 0 and $komento["DGD"] != 'email') {
 				$komento["DGD"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "PAKKALISTA") {
+		elseif ($toim == "PAKKALISTA") {
 			$tulostimet[0] = 'Pakkalista';
 			if ($kappaleet > 0 and $komento["pakkalista"] != 'email') {
 				$komento["Pakkalista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "KERAYSLISTA") {
+		elseif ($toim == "KERAYSLISTA") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "OSOITELAPPU") {
+		elseif ($toim == "OSOITELAPPU") {
 			$tulostimet[0] = 'Osoitelappu';
 			if ($kappaleet > 0 and $komento["Osoitelappu"] != 'email') {
 				$komento["Osoitelappu"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VIENTIERITTELY") {
+		elseif ($toim == "VIENTIERITTELY") {
 			$tulostimet[0] = 'Vientierittely';
 			if ($kappaleet > 0 and $komento["Vientierittely"] != 'email') {
 				$komento["Vientierittely"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "PROFORMA" and $komento["Lasku"] != 'email') {
+		elseif ($toim == "PROFORMA" and $komento["Lasku"] != 'email') {
 			$tulostimet[0] = 'Lasku';
 			if ($kappaleet > 0) {
 				$komento["Lasku"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TILAUSVAHVISTUS" and $komento["Lasku"] != 'email') {
+		elseif ($toim == "TILAUSVAHVISTUS" and $komento["Lasku"] != 'email') {
 			$tulostimet[0] = 'Tilausvahvistus';
 			if ($kappaleet > 0) {
 				$komento["Tilausvahvistus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "YLLAPITOSOPIMUS" and $komento["Lasku"] != 'email') {
+		elseif ($toim == "YLLAPITOSOPIMUS" and $komento["Lasku"] != 'email') {
 			$tulostimet[0] = 'Yllapitosopimus';
 			if ($kappaleet > 0) {
 				$komento["Yllapitosopimus"] .= " -# $kappaleet ";
 			}
 		}
-		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+			elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
 			}
 		}
-		if (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
+                elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
 			$tulostimet[0] = 'Myyntisopimus';
 			if ($kappaleet > 0) {
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
+                elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
 			$tulostimet[0] = 'Osamaksusopimus';
 			if ($kappaleet > 0) {
 				$komento["Osamaksusopimus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
+                elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
 			$tulostimet[0] = 'Luovutustodistus';
 			if ($kappaleet > 0) {
 				$komento["Luovutustodistus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
+                elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
 			$tulostimet[0] = 'Vakuutushakemus';
 			if ($kappaleet > 0) {
 				$komento["Vakuutushakemus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+                elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
 			$tulostimet[0] = 'Rekisteröinti_ilmoitus';
 			if ($kappaleet > 0) {
 				$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
 			}
 		}
-		if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
+                elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
 			if ($kappaleet > 0) {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "REKLAMAATIO") {
+                elseif ($toim == "REKLAMAATIO") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "VAKADR") {
+		elseif ($toim == "VAKADR") {
 			$tulostimet[0] = 'VAK_ADR';
 			if ($kappaleet > 0 and $komento["VAK_ADR"] != 'email') {
 				$komento["VAK_ADR"] .= " -# $kappaleet ";
@@ -1641,7 +1641,7 @@
 				$laskurow = mysql_fetch_assoc($result);
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus = '$laskurow[liitostunnus]'
 							and yhtio = '$kukarow[yhtio]'";
@@ -1837,7 +1837,14 @@
 				$tee = '';
 			}
 
-			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
+			if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
+
+				if ($toim == "KOONTILAHETE") {
+					$koontilahete = TRUE;
+				}
+				else {
+					$koontilahete = FALSE;
+				}
 
 				$params = array(
 					'laskurow'					=> $laskurow,
@@ -1846,9 +1853,10 @@
 					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
 					'tee'						=> $tee,
 					'toim'						=> $toim,
-					'query_ale_lisa' 			=> $query_ale_lisa,
 					'komento' 					=> $komento,
-					'kieli' 					=> $kieli
+					'lahetekpl'					=> "",
+					'kieli' 					=> $kieli,
+					'koontilahete'				=> $koontilahete,
 					);
 
 				pupesoft_tulosta_lahete($params);
@@ -1893,8 +1901,8 @@
 				$otunnus = $laskurow["tunnus"];
 				$tilausnumeroita = $otunnus;
 
-				// haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				//haetaan asiakkaan tiedot
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -2110,4 +2118,5 @@
 	if (@include("inc/footer.inc"));
 	elseif (@include("footer.inc"));
 	else exit;
+
 ?>

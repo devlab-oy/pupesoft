@@ -90,6 +90,9 @@
 
 	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
+	# siivotaan yli 7 p‰iv‰‰ vanhat aineistot
+	system("find /home/e3_rajapinta/ -mtime +7 -delete");
+
 	// Teh‰‰n uysi dirikka
 	system("mkdir $path");
 
@@ -261,7 +264,7 @@
 
 		while ($tuote = mysql_fetch_assoc($rested)) {
 
-			$query = "	SELECT toimi.herminator as toimittaja, toimi.tyyppi
+			$query = "	SELECT toimi.toimittajanro as toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
@@ -348,7 +351,7 @@
 
 			if ($xlto['kpl'] == 0 or $xlto['kpl'] < 0) continue;
 
-			$query = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
+			$query = "	SELECT toimi.toimittajanro AS toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
@@ -413,7 +416,7 @@
 			// mones t‰m‰ on
 			$row++;
 
-			$query = " SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
+			$query = " SELECT RPAD(toimi.toimittajanro,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
 					   FROM tuotteen_toimittajat
 					   JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 					   WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
@@ -435,7 +438,7 @@
 			if ($korvaavarows == 0) continue;
 			$korvaava = mysql_fetch_assoc($korvaavaresult);
 
-			$query2 = " SELECT RPAD(toimi.herminator,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
+			$query2 = " SELECT RPAD(toimi.toimittajanro,7,' ') AS toimittaja, toimi.tyyppi, RPAD(tuotteen_toimittajat.tunnus, 7, ' ') AS tutotunnus
 					   	FROM tuotteen_toimittajat
 					   	JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 					   	WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
@@ -478,10 +481,10 @@
 
 		echo "TULOSTETAAN XVNI...\n";
 
-		$qxvni = "	SELECT toimi.herminator AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
+		$qxvni = "	SELECT toimi.toimittajanro AS toimittaja, toimi.nimi nimi, SUBSTRING(toimi.nimi, 1, 18) lyhytnimi
 					FROM toimi
 					WHERE toimi.yhtio = '$yhtiorow[yhtio]'
-					AND toimi.herminator not in ('0','')
+					AND toimi.toimittajanro not in ('0','')
 					AND tyyppi = '' $toimirajaus
 					ORDER BY 1";
 		$resto = mysql_query($qxvni) or pupe_error($qxvni);
@@ -582,7 +585,7 @@
 
 		while ($xf04 = mysql_fetch_assoc($resto)) {
 
-			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno as ttuoteno, toimi.herminator AS toimittaja, toimi.tyyppi
+			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno as ttuoteno, toimi.toimittajanro AS toimittaja, toimi.tyyppi
 						FROM tuotteen_toimittajat
 						JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 						WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
@@ -680,7 +683,7 @@
 
 		while ($tuoterow = mysql_fetch_assoc($rests)) {
 
-			$toimittajaquery = "	SELECT toimi.herminator AS toimittaja, toimi.tyyppi
+			$toimittajaquery = "	SELECT toimi.toimittajanro AS toimittaja, toimi.tyyppi
 									FROM tuotteen_toimittajat
 									JOIN toimi on (toimi.yhtio=tuotteen_toimittajat.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus $toimirajaus)
 									WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'

@@ -166,9 +166,12 @@
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus
-										AND lasku.mapvm = '0000-00-00')
+										AND lasku.mapvm = '0000-00-00'
+										AND lasku.tapvm = '0000-00-00')
 						JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
-										AND lasku2.tunnus = tilausrivi.uusiotunnus)
+										AND lasku2.tunnus = tilausrivi.uusiotunnus
+										AND lasku2.mapvm = '0000-00-00'
+										AND lasku2.tapvm = '0000-00-00')
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
@@ -199,10 +202,13 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
-											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -233,9 +239,12 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
-											AND lasku2.tunnus = tilausrivi.uusiotunnus)
+											AND lasku2.tunnus = tilausrivi.uusiotunnus
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -266,10 +275,13 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
-											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%')
+											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -299,9 +311,12 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
-											AND lasku2.tunnus = tilausrivi.uusiotunnus)
+											AND lasku2.tunnus = tilausrivi.uusiotunnus
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -561,7 +576,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -577,6 +592,9 @@
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
 											kpl 			= '{$lapsitieto['kpl']}',
+											ale1			= '{$ale['ale1']}',
+											ale2			= '{$ale['ale2']}',
+											ale3			= '{$ale['ale3']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
@@ -651,7 +669,12 @@
 
 						switch ($fieldname) {
 							case 'varattu':
-								$values .= ", '{$kappaleerotus}'";
+								if ($tilausrivirow['kpl'] == 0) {
+									$values .= ", '{$kappaleerotus}'";
+								}
+								else {
+									$values .= ", '0'";
+								}
 								break;
 							case 'kpl':
 								if ($tilausrivirow['kpl'] == 0) {
@@ -718,7 +741,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -734,6 +757,9 @@
 											tilkpl			= '{$lapsitieto['tilkpl']}',
 											varattu			= '{$lapsitieto['varattu']}',
 											kpl 			= '{$lapsitieto['kpl']}',
+											ale1			= '{$ale['ale1']}',
+											ale2			= '{$ale['ale2']}',
+											ale3			= '{$ale['ale3']}',
 											hinta			= '{$hinta}',
 											laatija			= 'lapset',
 											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lisätään lapsituote: {$lapsitieto['tuoteno']}',
@@ -790,7 +816,11 @@
 
 					// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 					if ($tilausrivirow['kpl'] > 0) {
-						$query = "SELECT * FROM tapahtuma WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$tilausrivirow['tunnus']}'";
+						$query = "	SELECT *
+									FROM tapahtuma
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'tulo'
+									AND rivitunnus = '{$tilausrivirow['tunnus']}'";
 						$tapahtuma_res = pupe_query($query);
 						$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
@@ -821,7 +851,11 @@
 						$uusires = pupe_query($kysely);
 						$tapahtuma_id = mysql_insert_id();
 
-						$query = "UPDATE tapahtuma SET kpl = '{$rtuoteno[$i]['kpl']}' WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$tilausrivirow['tunnus']}'";
+						$query = "	UPDATE tapahtuma
+									SET kpl = '{$rtuoteno[$i]['kpl']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND laji = 'tulo'
+									AND rivitunnus = '{$tilausrivirow['tunnus']}'";
 						$upd_res = pupe_query($query);
 					}
 				}
@@ -862,7 +896,8 @@
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND (lasku.tunnus = tilausrivi.uusiotunnus OR lasku.tunnus = tilausrivi.otunnus)
-													AND lasku.mapvm = '0000-00-00')
+													AND lasku.mapvm = '0000-00-00'
+													AND lasku.tapvm = '0000-00-00')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -899,10 +934,10 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND laji = 'asn'
 											AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'
-											AND status = ''";
+											AND status = 'X'";
 								$chk_res = pupe_query($query);
 
-								if (mysql_num_rows($chk_res) > 0) {
+								if (mysql_num_rows($chk_res) == 0) {
 									// echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 									// $virheet++;
 									continue;
@@ -1010,7 +1045,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1025,6 +1060,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
@@ -1086,7 +1124,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1101,6 +1139,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
@@ -1242,7 +1283,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1257,6 +1298,9 @@
 												yksikko			= '{$lapsitieto['yksikko']}',
 												tilkpl			= '{$lapsitieto['tilkpl']}',
 												varattu			= '{$lapsitieto['varattu']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
 												kpl				= '{$lapsitieto['kpl']}',
 												hinta			= '{$hinta}',
 												laatija			= 'lapset',
@@ -1281,7 +1325,11 @@
 
 						// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 						if ($split_row['kpl'] > 0) {
-							$query = "SELECT * FROM tapahtuma WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$split_row['tunnus']}'";
+							$query = "	SELECT *
+										FROM tapahtuma
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'tulo'
+										AND rivitunnus = '{$split_row['tunnus']}'";
 							$tapahtuma_res = pupe_query($query);
 							$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
@@ -1313,7 +1361,11 @@
 							$uusires = pupe_query($kysely);
 							$tapahtuma_id = mysql_insert_id();
 
-							$query = "UPDATE tapahtuma SET kpl = '{$erotus}' WHERE yhtio = '{$kukarow['yhtio']}' AND rivitunnus = '{$split_row['tunnus']}'";
+							$query = "	UPDATE tapahtuma
+										SET kpl = '{$erotus}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji = 'tulo'
+										AND rivitunnus = '{$split_row['tunnus']}'";
 							$upd_res = pupe_query($query);
 						}
 					}

@@ -69,16 +69,14 @@ if (!function_exists('finvoice_otsik')) {
 				}
 			}
 
+			// Jos receiverintermediaattori puuttuu niin laitetaan APIX:n oma ovt tähän
 			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
 				$receiverintermediator = "003723327487";
 			}
 
-			if ($yhtiorow["verkkolasku_lah"] == "maventa" and $receiverintermediator == "") {
-				$receiverintermediator = "003721291126";
-			}
-
-			// jos tänne ei saada mitään arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
-			if ($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == "100") {
+			// Jos tänne ei saada mitään arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
+			// Maventa hanskaa myös tilanteen jossa intermediaattori puuttuu, joten ei mennä silloin tähän haaraan
+			if ($receiverpartyid == "" or ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] != "maventa") or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
 
 				if ($yhtiorow["verkkolasku_lah"] == "maventa") {

@@ -479,8 +479,6 @@
 									AND tunnus IN ({$kollirow['tilausrivi']})";
 						$tilausrivires = pupe_query($query);
 
-
-
 						while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 							if ($tilausrivirow['uusiotunnus'] == 0) {
 								// löytyi, ei ole keikalla
@@ -522,6 +520,7 @@
 
 								if (mysql_num_rows($saapres) != 0) {
 									$lasku_manuaalisesti_check = 1;
+
 									$query = "	UPDATE asn_sanomat SET
 												tilausrivi = ''
 												WHERE yhtio = '{$kukarow['yhtio']}'

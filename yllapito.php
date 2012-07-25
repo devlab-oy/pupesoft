@@ -893,6 +893,10 @@
 				$tarkkahaku = TRUE;
 				$hakuehto = " = '".substr($haku[$i], 1)."' ";
 			}
+			elseif ($array[$i] == "laskunro") {
+				$tarkkahaku = TRUE;
+				$hakuehto = " = '{$haku[$i]}' ";
+			}
 			else {
 				$tarkkahaku = FALSE;
 				$hakuehto = " like '%{$haku[$i]}%' ";

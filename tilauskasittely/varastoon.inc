@@ -1067,6 +1067,35 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 			else {
 				echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
 			}
+			
+			// tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivejä, joita ei ole käsitelty
+			if ($kulurow['ebid'] == 'TECCOM-INVOICE') {
+				// katotaa onko käsittelemättömiä rivejä
+				$query = "	SELECT toimittajanro
+							FROM toimi
+							WHERE yhtio  	= '$kukarow[yhtio]'
+							AND tunnus 		= '$kulurow[liitostunnus]'";
+				$toimittajanrores = pupe_query($query);
+				$toimittajanrorow = mysql_fetch_assoc($toimittajanrores);
+				
+				$query = "	SELECT status
+							FROM asn_sanomat
+							WHERE yhtio  			= '$kukarow[yhtio]'
+							AND toimittajanumero 	= '$toimittajanrorow[toimittajanro]'
+							AND asn_numero			= '$kulurow[laskunro]'
+							AND status 				= ''";
+				$asnsres = pupe_query($query);
+				
+				if (mysql_num_rows($asnsres) > 0) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio  			= '$kukarow[yhtio]'
+								AND toimittajanumero 	= '$toimittajanrorow[toimittajanro]'
+								AND asn_numero			= '$kulurow[laskunro]'
+								AND status 				= ''";
+					$asnsres = pupe_query($query);
+				}
+			}
 		}
 	}
 	else {

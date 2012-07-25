@@ -166,10 +166,12 @@
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 										AND lasku.tunnus = tilausrivi.otunnus
-										AND lasku.mapvm = '0000-00-00')
+										AND lasku.mapvm = '0000-00-00'
+										AND lasku.tapvm = '0000-00-00')
 						JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 										AND lasku2.tunnus = tilausrivi.uusiotunnus
-										AND lasku2.mapvm = '0000-00-00')
+										AND lasku2.mapvm = '0000-00-00'
+										AND lasku2.tapvm = '0000-00-00')
 						JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 										AND toimi.tunnus = lasku.liitostunnus
 										AND toimi.tunnus = '{$trow['tunnus']}'
@@ -200,11 +202,13 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
 											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
-											AND lasku2.mapvm = '0000-00-00')
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -235,10 +239,12 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.uusiotunnus
-											AND lasku2.mapvm = '0000-00-00')
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -269,11 +275,13 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.uusiotunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.otunnus
 											AND lasku2.comments LIKE '%{$rtuoteno[$i]['ostotilausnro']}%'
-											AND lasku2.mapvm = '0000-00-00')
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -303,10 +311,12 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.mapvm = '0000-00-00')
+											AND lasku.mapvm = '0000-00-00'
+											AND lasku.tapvm = '0000-00-00')
 							JOIN lasku lasku2 ON (lasku2.yhtio = tilausrivi.yhtio
 											AND lasku2.tunnus = tilausrivi.uusiotunnus
-											AND lasku2.mapvm = '0000-00-00')
+											AND lasku2.mapvm = '0000-00-00'
+											AND lasku2.tapvm = '0000-00-00')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.tunnus = '{$trow['tunnus']}'
@@ -886,7 +896,8 @@
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND (lasku.tunnus = tilausrivi.uusiotunnus OR lasku.tunnus = tilausrivi.otunnus)
-													AND lasku.mapvm = '0000-00-00')
+													AND lasku.mapvm = '0000-00-00'
+													AND lasku.tapvm = '0000-00-00')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'

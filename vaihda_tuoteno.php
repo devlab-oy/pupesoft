@@ -188,15 +188,36 @@ if ($error == 0 and $tee == "file") {
 		die ("<font class='error'><br>".t("Ei löydetty muutettavia paikkoja, ei uskalleta tehdä mitään")."!</font>");
 	}
 
-	$tyyppi = "(";
-
-	$query  = "SELECT distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
+	// Haetaan tilausrivien kaikki tyypit
+	$query  = "	SELECT group_concat(distinct concat('\'',tyyppi,'\'')) tyyppi
+				from tilausrivi
+				where yhtio = '$kukarow[yhtio]'";
 	$tyypitresult = pupe_query($query);
+	$tyypitrow = mysql_fetch_assoc($tyypitresult);
 
-	while ($tyypitrow = mysql_fetch_array($tyypitresult)) {
-		$tyyppi .= "'"."$tyypitrow[tyyppi]"."'".",";
-	}
-	$tyyppi = substr($tyyppi, 0, -1).")";
+	$tyyppi = $tyypitrow["tyyppi"];
+
+	// Haetaan tuoteperheiden kaikki tyypit
+	$query  = "	SELECT group_concat(distinct concat('\'',tyyppi,'\'')) tyyppi
+				from tuoteperhe
+				where yhtio = '$kukarow[yhtio]'";
+	$tyypitresult = pupe_query($query);
+	$tyypitrow = mysql_fetch_assoc($tyypitresult);
+
+	$perhetyyppi = $tyypitrow["tyyppi"];
+
+	// Haetaan tuotteen_avainsanat-taulus kaikki kielet
+	$query  = "	SELECT group_concat(distinct concat('\'',kieli,'\'')) kieli
+				from tuotteen_avainsanat
+				where yhtio = '$kukarow[yhtio]'";
+	$tyypitresult = pupe_query($query);
+	$tyypitrow = mysql_fetch_assoc($tyypitresult);
+
+	$kielet = $tyypitrow["kieli"];
+
+	if ($tyyppi == "") $tyyppi = "''";
+	if ($perhetyyppi == "") $perhetyyppi = "''";
+	if ($kielet == "") $kielet = "''";
 
 	echo "<font class='message'>".t("Nyt ollan kerätty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...</font><br>";
 	flush();
@@ -272,7 +293,7 @@ if ($error == 0 and $tee == "file") {
 										tuoteno	= '$uustuoteno'
 										WHERE
 										yhtio = '$kukarow[yhtio]'
-										and tyyppi in $tyyppi
+										and tyyppi in ($tyyppi)
 										and tuoteno	= '$vantuoteno'";
 							$result2 = pupe_query($query);
 						}
@@ -378,11 +399,33 @@ if ($error == 0 and $tee == "file") {
 								}
 							}
 
-							$query = "	UPDATE $taulu
-										SET $sarake	= '$uustuoteno'
-										WHERE yhtio = '$kukarow[yhtio]'
-										and $sarake	= '$vantuoteno'";
-							$result2 = pupe_query($query);
+							if ($taulu == 'tuoteperhe') {
+								$query = "	UPDATE $taulu
+											SET
+											$sarake	= '$uustuoteno'
+											WHERE
+											yhtio = '$kukarow[yhtio]'
+											and tyyppi in ($perhetyyppi)
+											and $sarake	= '$vantuoteno'";
+								$result2 = pupe_query($query);
+							}
+							elseif ($taulu == 'tuotteen_avainsanat') {
+								$query = "	UPDATE $taulu
+											SET
+											$sarake	= '$uustuoteno'
+											WHERE
+											yhtio = '$kukarow[yhtio]'
+											and kieli in ($kielet)
+											and $sarake	= '$vantuoteno'";
+								$result2 = pupe_query($query);
+							}
+							else {
+								$query = "	UPDATE $taulu
+											SET $sarake	= '$uustuoteno'
+											WHERE yhtio = '$kukarow[yhtio]'
+											and $sarake	= '$vantuoteno'";
+								$result2 = pupe_query($query);
+							}
 						}
 					}
 

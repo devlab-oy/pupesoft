@@ -1231,8 +1231,8 @@
 								$listilre = pupe_query($query);
 								$listilro = mysql_fetch_assoc($listilre);
 
-								// Jos tilauksen loppusumma on nolla, niin ei myöskään lisätä laskutuslisää
-								if ($listilro["laskun_loppusumma"] == 0) {
+								// Jos tilauksen loppusumma on negatiivinen tai nolla, niin ei myöskään lisätä laskutuslisää
+								if ($listilro["laskun_loppusumma"] <= 0) {
 									continue;
 								}
 

@@ -493,7 +493,12 @@
 					echo "<th>",t("Ei lokeroa"),"</th>";
 
 					$ei_pakkaamoa_sel = '';
-					if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
+
+					if ($toim == 'SIIRTOLISTA' and $tila == "G") {
+						$ei_pakkaamoa_sel = "checked";
+					}
+
+					if ($tila == 'N') {
 
 						if (mysql_num_rows($tilre) > 0) {
 							mysql_data_seek($tilre, 0);
@@ -505,7 +510,6 @@
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND selite = '$tilrow[toimitustapa]'";
 						$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
-
 						$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
 						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
@@ -1035,19 +1039,23 @@
 
 						$ei_pakkaamoa_sel = '';
 
-						if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
+						if ($toim == 'SIIRTOLISTA' and $tila == "G") {
+							$ei_pakkaamoa_sel = "checked";
+						}
+
+						if ($tila == 'N') {
 							$query = "	SELECT ei_pakkaamoa
 										FROM toimitustapa
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND selite = '$tilrow[toimitustapa]'";
+										AND selite  = '$tilrow[toimitustapa]'";
 							$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
-
 							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
 							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
 								$ei_pakkaamoa_sel = "checked";
 							}
 						}
+
 						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='$tilaus' $ei_pakkaamoa_sel>";
 						echo "<input type='hidden' name='ei_pakkaamoa_selected' id='ei_pakkaamoa_selected' value='$ei_pakkaamoa_sel'>";
 						echo "</$ero>";

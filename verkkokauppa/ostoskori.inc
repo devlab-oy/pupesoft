@@ -83,7 +83,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
 
 		global $kukarow, $yhtiorow;
 
-		$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {

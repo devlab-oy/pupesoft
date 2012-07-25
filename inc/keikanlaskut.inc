@@ -94,7 +94,8 @@
 				lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				lasku.alv,
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+				round(lasku.osto_rahti + lasku.osto_kulu + lasku.osto_rivi_kulu, 2) 'kulut'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -123,6 +124,7 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Summa valuutassa")."</th>";
 		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Kulut")."</th>";
 		echo "<th>".t("Veroton summa")."</th>";
 		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
@@ -161,7 +163,7 @@
 				$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
 			}
 
-			$trow["arvo"] = round((float) $trow["summaeur"] - (float) $alvisumma, 2);
+			$trow["arvo"] = round((float) $trow["summaeur"] - (float) $alvisumma - (float) $trow['kulut'], 2);
 
 			$vienti = $trow["vienti"];
 			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
@@ -182,6 +184,7 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["kulut"])." $yhtiorow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["arvo"])." $yhtiorow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>$trow[laskunro]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
@@ -214,6 +217,7 @@
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th></th>";
 		echo "<th style='text-align: right;'>".round($yhteesa_eive,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";

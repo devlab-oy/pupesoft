@@ -120,7 +120,10 @@
 		(mysql_field_name($result, $i) == "konsernisaamiset") or
 		(mysql_field_name($result, $i) == "konsernivelat") or
 		(mysql_field_name($result, $i) == "konserniostovelat") or
-		(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
+		(mysql_field_name($result, $i) == "konsernimyyntisaamiset") or
+		(mysql_field_name($result, $i) == "osto_rahti") or
+		(mysql_field_name($result, $i) == "osto_kulu") or
+		(mysql_field_name($result, $i) == "osto_rivi_kulu")) {
 
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];

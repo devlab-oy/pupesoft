@@ -164,7 +164,8 @@
 						$query = "	SELECT tunnus, nimi
 									FROM toimi
 									WHERE yhtio = '$yhtiorow[yhtio]'
-									and nimi like '%$siivottu%'";
+									and nimi like '%$siivottu%'
+									and tyyppi != 'P'";
 						$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
 					}
 

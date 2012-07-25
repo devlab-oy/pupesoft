@@ -185,93 +185,8 @@ if ($kasitellaan_tiedosto) {
 	if (isset($api_kentat) and count($api_kentat) > 0) {
 		$excelrivit = $api_kentat;
 	}
-	elseif ($ext == "DATAIMPORT") {
-		/** Ladataan CSV file **/
-		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		/** Laitetaan rivit arrayseen **/
-		$excelrivit = array();
-
-		while ($rivi = fgets($file)) {
-			/** Luetaan CSV rivi tiedostosta **/
-
-			// Katsotaan onko UTF-8 muodossa
-			if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
-				$rivi = str_getcsv(utf8_decode($rivi));
-			}
-			else {
-				$rivi = str_getcsv($rivi);
-			}
-
-			$excelrivit[] = $rivi;
-		}
-
-		fclose($file);
-	}
-	elseif ($ext == "TXT" or $ext == "CSV") {
-		/** Ladataan Tab eroteltu teksti file **/
-		$file = fopen($kasiteltava_tiedoto_path,"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		/** Laitetaan rivit arrayseen **/
-		$excelrivit = array();
-
-		$rowIndex = 0;
-
-		while ($rivi = fgets($file)) {
-			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
-
-			for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
-				$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
-			}
-
-			$rowIndex++;
-		}
-
-		fclose($file);
-	}
 	else {
-		/** PHPExcel kirjasto **/
-		require_once "PHPExcel/PHPExcel/IOFactory.php";
-
-		/** Tunnistetaan tiedostomuoto **/
-		$inputFileType = PHPExcel_IOFactory::identify($kasiteltava_tiedoto_path);
-
-		/** Luodaan readeri **/
-		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
-
-		/** Ladataan vain solujen datat (ei formatointeja jne) **/
-		$objReader->setReadDataOnly(true);
-
-		/** Ladataan vain eka sheet **/
-		$objReader->setLoadSheetsOnly(0);
-
-		/** Ladataan file halutuilla parametreilla **/
-		$objPHPExcel = $objReader->load($kasiteltava_tiedoto_path);
-
-		/** Laitetaan rivit arrayseen **/
-		$excelrivit = array();
-
-		/** Aktivoidaan eka sheetti**/
-		$objPHPExcel->setActiveSheetIndex(0);
-
-		/** Loopataan tiedoston rivit **/
-		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-		    $cellIterator = $row->getCellIterator();
-		    $cellIterator->setIterateOnlyExistingCells(false);
-
-			$rowIndex = ($row->getRowIndex())-1;
-
-		    foreach ($cellIterator as $cell) {
-		        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
-
-				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
-		    }
-		}
-
-		/** Tuhotaan excel oliot **/
-		unset($objReader);
-		unset($objPHPExcel);
+		$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 	}
 
 	/** Otetaan tiedoston otsikkorivi **/
@@ -466,6 +381,11 @@ if ($kasitellaan_tiedosto) {
 	}
 	exit;
 	*/
+
+	// REST-api ei salli etenemispalkkia
+	if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+		require('inc/ProgressBar.class.php');
+	}
 
 	$taulunrivit_keys = array_keys($taulunrivit);
 
@@ -670,7 +590,6 @@ if ($kasitellaan_tiedosto) {
 
 		// REST-api ei salli etenemispalkkia
 		if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
-			require('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$bar->initialize($max_rivit);
 		}

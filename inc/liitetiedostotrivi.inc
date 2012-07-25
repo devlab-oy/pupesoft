@@ -78,17 +78,22 @@
 			if ($lukitse_laji == "tuote") {
 				$kires = t_avainsana("LITETY");
 			}
-			elseif($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
+			elseif ($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
 				$liitemuok_ok = true;
-				
+
 				$kires = t_avainsana("TIL-LITETY", "", "ORDER BY selitetark_2 DESC, jarjestys, selite");
 			}
 
+			$natsasko = FALSE;
+
 			if (is_resource($kires)) {
 				while ($kirow = mysql_fetch_array($kires)) {
-					if ($kirow["selite"] == $trow[$i]) $select='SELECTED';
+					if ($kirow["selite"] == $trow[$i]) {
+						$select = 'SELECTED';
+						$natsasko = TRUE;
+					}
 					else $select = '';
-					
+
 					if ($kirow["selitetark_2"] == "PAKOLLINEN") {
 						$paklisa = "*";
 					}
@@ -101,6 +106,11 @@
 			}
 			else {
 				$ulos .= "<option value= ''>".t("Yleinen")."</option>";
+			}
+
+			// Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetään se selectöitynä
+			if (!$natsasko and $trow[$i] != "") {
+				$ulos .= "<option value= '$trow[$i]' SELECTED>$trow[$i]</option>";
 			}
 
 			$ulos .= "</select></td>";

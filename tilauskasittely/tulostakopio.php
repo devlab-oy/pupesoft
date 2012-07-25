@@ -816,8 +816,8 @@
 		}
 
 		if ($toim == "VASTAANOTTORAPORTTI") {
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus)";
-			$where5 = " AND tilausrivi.kpl !=0 ";
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')";
+			$where5 = " AND tilausrivi.kpl != 0 ";
 		}
 
 		if ($toim == "VAKADR") {
@@ -834,7 +834,7 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+			$joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
 						 JOIN kerayserat on (kerayserat.yhtio = tilausrivi.yhtio and kerayserat.tilausrivi = tilausrivi.tunnus)
 						 JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != '')";
 
@@ -1585,7 +1585,7 @@
 				$laskurow = mysql_fetch_assoc($result);
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus = '$laskurow[liitostunnus]'
 							and yhtio = '$kukarow[yhtio]'";
@@ -1612,6 +1612,7 @@
 							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 							WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi  != 'D'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
 							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -1781,7 +1782,6 @@
 			}
 
 			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
-
 				$params = array(
 					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' 			=> $sellahetetyyppi,
@@ -1789,8 +1789,8 @@
 					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
 					'tee'						=> $tee,
 					'toim'						=> $toim,
-					'query_ale_lisa' 			=> $query_ale_lisa,
 					'komento' 					=> $komento,
+					'lahetekpl'					=> "",
 					'kieli' 					=> $kieli
 					);
 
@@ -1837,7 +1837,7 @@
 				$tilausnumeroita = $otunnus;
 
 				//haetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = pupe_query($query);
@@ -1905,7 +1905,8 @@
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.otunnus = '$otunnus'
-							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.yhtio 	 = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi   != 'D'
 							$lisa1
 							$where_lisa
 							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";

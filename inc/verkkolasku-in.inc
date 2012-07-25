@@ -1177,6 +1177,16 @@
 					$vtontot_valuutassa 			= 0;
 					$maksimisumma 		 			= 0;
 
+					$osto_kulu	= (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : $osto_kulu;
+					$osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : $osto_rahti;
+					$osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : $osto_rivi_kulu;
+
+					$osto_kulu_alv	= (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : $osto_kulu_alv;
+					$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : $osto_rahti_alv;
+					$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : $osto_rivi_kulu_alv;
+
+					$laskun_kulut = array();
+
 					$kustp		= $oletuskust;
 					$kohde		= $oletuskohde;
 					$projekti	= $oletusprojekti;
@@ -1256,6 +1266,17 @@
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri????????
 							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $summa > 0) {
 								$summa = $summa * -1;
+							}
+
+							if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '') and ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') and ($osto_rahti != 0 or $osto_kulu != 0 or $osto_rivi_kulu != 0)) {
+
+								list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
+
+								foreach($_arr as $_k => $_v) {
+									if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
+
+									$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
+								}
 							}
 
 							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];
@@ -1349,6 +1370,25 @@
 						}
 
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
+					}
+
+					if (count($laskun_kulut) > 0) {
+
+						foreach ($laskun_kulut as $vero => $_array) {
+							foreach ($_array as $key => $value) {
+
+								if ($value == 0) continue;
+
+								$tili = $yhtiorow[$key];
+								$summa = $value;
+
+								// Laitetaan kustannuspaikaksi/kohteeksi/projektiksi aina ensimmäisen tiliöintirivin tiedot.
+								// Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
+								list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
+
+								require ("inc/teetiliointi.inc");
+							}
+						}
 					}
 
 	 				// Tuli pyöristyseroja

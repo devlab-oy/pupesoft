@@ -373,7 +373,7 @@
 
 					// Jos laskunumero on syötetty, lisätään se viestiin mukaan
 		            if ($nettorow['laskunro'] != 0 and $nettorow['laskunro'] != $nettorow['viesti']) {
-		                $nettorow['viesti'] = (trim($nettorow['viesti']) == "") ? $nettorow['laskunro'] : $nettorow['viesti']." ".$nettorow['laskunro'];
+		                $nettorow['viesti'] = (trim($nettorow['viesti']) == "") ? $nettorow['laskunro'] : trim($nettorow['viesti']." ".$nettorow['laskunro']);
 		            }
 
 					if ($nettorow["summa"] < 0) {
@@ -660,6 +660,10 @@
 						LIMIT 1";
 			$result = pupe_query($query);
 			$nettorow = mysql_fetch_assoc($result);
+
+			// Viesti ei saa olla tyhjä
+			$nettorow["viesti"] = (trim($nettorow["viesti"]) == "") ? $nettorow["laskunro"] : $nettorow["viesti"];
+			$nettorow["viesti"] = (trim($nettorow["viesti"]) == "") ? $nettorow["viite"] : $nettorow["viesti"];
 
 			$nettorow["viite"]		= '';						// Viitenroa ei sallita netotetulla tapahtumalla
 			$nettorow["alatila"]	= '';						// Ei käteisalennusta netotetulla tapahtumalla

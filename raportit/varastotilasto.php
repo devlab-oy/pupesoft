@@ -2,7 +2,7 @@
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -93,7 +93,8 @@
 					tuote.osasto,
 					tuote.try,
 					tuote.myyntihinta,
-					tuote.varmuus_varasto
+					tuote.varmuus_varasto,
+					tuote.kehahin
 					FROM tuote
 					{$toimittaja_join}
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
@@ -133,6 +134,7 @@
 			$varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
 			$varastotilasto_table .= "<th>".t("Nimitys")."</th>";
 			$varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
+			$varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
 			$varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
 			$varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
 			$varastotilasto_table .= "<th>".t("Tilattu m‰‰r‰")."</th>";
@@ -150,6 +152,7 @@
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu m‰‰r‰"));
@@ -241,6 +244,8 @@
 				$myyntirivi["myynti6kk"] = ((int) $myyntirivi["myynti6kk"] == 0) ? "" : $myyntirivi["myynti6kk"];
 				$myyntirivi["myynti3kk"] = ((int) $myyntirivi["myynti3kk"] == 0) ? "" : $myyntirivi["myynti3kk"];
 				$row["varmuus_varasto"] = ((int) $row["varmuus_varasto"] == 0) ? "" : $row["varmuus_varasto"];
+				$varastonarvo = round($saldo * $row["kehahin"], 2);
+				$varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
 				$varattu = ((int) $varattu == 0) ? "" : $varattu;
 				$saldo = ((int) $saldo == 0) ? "" : $saldo;
 
@@ -250,6 +255,7 @@
 				$varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				$varastotilasto_table .= "<td>$row[nimitys]</td>";
 				$varastotilasto_table .= "<td align='right'>$saldo</td>";
+				$varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
 				$varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
 				$varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
 				$varastotilasto_table .= "<td align='right'>$ostorivi[tulossa]</td>";
@@ -268,6 +274,7 @@
 					$worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
 					$worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+					$worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);

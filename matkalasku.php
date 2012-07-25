@@ -56,17 +56,31 @@ if ($tee == "UUSI") {
 		(tai hakusanalla päivärahat yyyy)
 	*/
 
-	$query = "	SELECT tuoteno
+	//	Tarkastetaan että päivärahat löytyy
+	$query = "	SELECT tuote.tuoteno
 				FROM tuote
 				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
-				and tuote.tuotetyyppi in ('A','B')
+				and tuote.tuotetyyppi = 'A'
+				and tuote.tuoteno like 'PR%'
 				and tuote.status != 'P'
 				and tuote.tilino != ''
 				LIMIT 1";
-	$result = pupe_query($query);
+	$result1 = pupe_query($query);
 
-	if (mysql_num_rows($result) == 0) {
+	//	Tarkastetaan että osapäivärahat löytyy
+	$query = "	SELECT tuote.tuoteno
+				FROM tuote
+				JOIN tili ON tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				and tuote.tuotetyyppi = 'A'
+				and tuote.tuoteno like 'PPR%'
+				and tuote.status != 'P'
+				and tuote.tilino != ''
+				LIMIT 1";
+	$result2 = pupe_query($query);
+
+	if (mysql_num_rows($result1) == 0 or mysql_num_rows($result2) == 0) {
 		echo "<font class='error'>".t("VIRHE: Viranomaistuotteet puuttuu")."!</font>";
 		$tee = "";
 	}
@@ -221,8 +235,8 @@ if ($tee != "") {
 
 				$query = "	SELECT *
 							from tuote
-							where yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tuoteno'
+							where yhtio 	= '$kukarow[yhtio]'
+							and tuoteno 	= '$tuoteno'
 							and tuotetyyppi = '$tyyppi'
 							and status != 'P'";
 				$tres = pupe_query($query);
@@ -235,23 +249,27 @@ if ($tee != "") {
 					$trow = mysql_fetch_assoc($tres);
 				}
 
-				$tyyppi = $trow["tuotetyyppi"];
-				$tuoteno_array = array();
-				$errori = "";
+				$tyyppi 		= $trow["tuotetyyppi"];
+				$tuoteno_array 	= array();
+				$kpl_array 		= array();
+				$hinta_array 	= array();
+				$nimitys_array 	= array();
+				$varri_array 	= array();
+				$errori 		= "";
 
 				if ($tyyppi == "A") {
 
-					list($alkupaiva, $alkuaika) = explode(" ", $alku);
+					list($alkupaiva, $alkuaika) 	= explode(" ", $alku);
 					list($alkuvv, $alkukk, $alkupp) = explode("-", $alkupaiva);
-					list($alkuhh, $alkumm) = explode(":", $alkuaika);
+					list($alkuhh, $alkumm) 			= explode(":", $alkuaika);
 
-					list($loppupaiva, $loppuaika) = explode(" ", $loppu);
-					list($loppuvv, $loppukk, $loppupp) = explode("-", $loppupaiva);
-					list($loppuhh, $loppumm) = explode(":", $loppuaika);
+					list($loppupaiva, $loppuaika) 		= explode(" ", $loppu);
+					list($loppuvv, $loppukk, $loppupp) 	= explode("-", $loppupaiva);
+					list($loppuhh, $loppumm) 			= explode(":", $loppuaika);
 
 					/*
 						Päivärahoilla ratkaistaan päivät
-						Samalla oletetaan että puolipäiväraha on aina P+tuoteno
+						Samalla oletetaan että osapäiväraha on aina P+tuoteno
 					*/
 
 					//	Lasketaan tunnit
@@ -268,7 +286,7 @@ if ($tee != "") {
 					$loppumm = sprintf("%02d", $loppumm);
 
 					if (($alkupp >= 1 and $alkupp <= 31) and ($alkukk >= 1 and $alkukk <= 12) and $alkuvv > 0 and ($alkuhh >= 0 and $alkuhh <= 24) and ($loppupp >= 1 and $loppupp <= 31) and ($loppukk >= 1 and $loppukk <= 12) and $loppuvv > 0 and ($loppuhh >= 0 and $loppuhh <= 24)) {
-						$alku = mktime($alkuhh, $alkumm, 0, $alkukk, $alkupp, $alkuvv);
+						$alku  = mktime($alkuhh, $alkumm, 0, $alkukk, $alkupp, $alkuvv);
 						$loppu = mktime($loppuhh, $loppumm, 0, $loppukk, $loppupp, $loppuvv);
 
 						//	Tarkastetaan että tällä välillä ei jo ole jotain arvoa
@@ -283,8 +301,8 @@ if ($tee != "") {
 									tilausrivi.kommentti kommentti
 									FROM lasku
 									LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-									LEFT JOIN tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi 	= 'M'
-									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotetyyppi IN ('A')
+									LEFT JOIN tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'M'
+									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi = 'A'
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and lasku.tilaustyyppi	= 'M'
 									and lasku.tila IN ('H','Y','M','P','Q')
@@ -317,67 +335,140 @@ if ($tee != "") {
 							$errori .= "<font class='error'>".t("VIRHE: Matkalaskua ei voi tehdä etukäteen!")."</font><br>";
 						}
 
-						$paivat = $puolipaivat = $ylitunnit = $tunnit = 0;
+						$paivat 	 = 0;
+						$osapaivat 	 = 0;
+						$puolipaivat = 0;
+						$ylitunnit 	 = 0;
+						$tunnit 	 = 0;
+						$selite 	 = "";
+						$varri		 = "1"; // Kotimaan kokopäiväraha oletuksena
 
-						//	montako tuntia on oltu matkalla?
+						// Montako tuntia on oltu matkalla?
 						$tunnit = ($loppu - $alku) / 3600;
 						$paivat = floor($tunnit / 24);
 
-						$alkuaika = "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
+						$alkuaika  = "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
 						$loppuaika = "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
 
 						$ylitunnit = $tunnit - ($paivat * 24);
 
-						if (($ylitunnit > 10 and $paivat == 0) or ($ylitunnit > 6 and $paivat > 0)) {
-							$paivat++;
-						}
-						elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) and $trow["vienti"] == "FI") {
+						// Kotimaan matkat
+						if ($trow["vienti"] == "FI") {
 
-							//	Tarkastetaan että päivärahalle on puolipäiväraha
-							$query = "	SELECT *
-										FROM tuote
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tuotetyyppi = '$tyyppi'
-										AND tuoteno = 'P$tuoteno'
-										AND status != 'P'";
-							$tres2 = pupe_query($query);
+							if (($ylitunnit > 10 and $paivat == 0) or ($ylitunnit > 6 and $paivat > 0)) {
+								/*
+								Työmatkan kestoaika yli 10 tuntia --> kokopäiväraha
+								Kun matkaan käytetty aika ylittää viimeisen täyden matkavuorokauden vähintään 6 tunnilla --> kokopäiväraha
+								*/
 
-							if (mysql_num_rows($tres2) != 1) {
-								$errori .= "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu. Puolipäivärahaa ei voitu lisätä")."!</font><br>";
+								$paivat++;
 							}
-							else {
+							elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit >= 2 and $paivat > 0))) {
+								/*
+								Työmatkan kestoaika yli 6 tuntia --> osapäiväraha
+								Kun matkaan käytetty aika ylittää viimeisen täyden matkavuorokauden vähintään 2 tunnilla --> osapäiväraha
+								*/
+
+								$tuoteno_osat = explode("-", $tuoteno);
+								$puolipaivatuoteno = "P".array_shift($tuoteno_osat)."-".array_pop($tuoteno_osat);
+
+								//	Haetaan osapäiväraha
+								$query = "	SELECT *
+											FROM tuote
+											WHERE yhtio 	= '$kukarow[yhtio]'
+											AND tuotetyyppi = '$tyyppi'
+											AND tuoteno 	= '$puolipaivatuoteno'
+											AND status 	   != 'P'";
+								$tres2 = pupe_query($query);
 								$trow2 = mysql_fetch_assoc($tres2);
+
+								$osapaivat++;
+
+								$tuoteno_array[1]	= $trow2["tuoteno"];
+								$kpl_array[1]		= $osapaivat;
+								$hinta_array[1]		= $trow2["myyntihinta"];
+								$nimitys_array[1]	= $trow2["nimitys"];
+								$varri_array[1] 	= "2";	 // Kotimaan osapäiväraha
+
+								$selite .= "<br>$trow2[tuoteno] - $trow2[nimitys] $osapaivat kpl á ".(float) $trow2['myyntihinta'];
+							}
+						}
+						// Ulkomaanmatkat
+						elseif ($trow["vienti"] != "FI") {
+
+							// Ulkomaan kokopäiväraha
+							$varri = "3";
+
+							if ($ylitunnit > 6 and $ylitunnit < 10 and $paivat == 0) {
+								/*
+								Mikäli työmatkaan käytetty kokonaisaika jää alle 10 tunnin, suoritetaan päiväraha kotimaan matkojen säännösten ja määrien mukaisesti.
+								Eli tässä tapauksessa: "Työmatkan kestoaika yli 6 tuntia --> osapäivärahakorvaus"
+								*/
+
+								$tuoteno_osat = explode("-", $tuoteno);
+								$puolipaivatuoteno = "P".array_shift($tuoteno_osat)."-".array_pop($tuoteno_osat);
+
+								//	Haetaan osapäivärahan hinta
+								$query = "	SELECT myyntihinta
+											FROM tuote
+											WHERE yhtio 	= '$kukarow[yhtio]'
+											AND tuotetyyppi = '$tyyppi'
+											AND tuoteno 	= '$puolipaivatuoteno'
+											AND status 	   != 'P'";
+								$tres2 = pupe_query($query);
+								$trow2 = mysql_fetch_assoc($tres2);
+
+								// Otetaan korvaukseksi kotimaan osapäivärahan hinta
+								$trow["myyntihinta"] = $trow2["myyntihinta"];
+								$trow["nimitys"] .= " (".t("Matka-aika alle 10 tuntia, osapäiväkorvaus.").")";
+
+								// Ulkomaan osapäiväraha
+								$varri = "4";
+
+								$paivat++;
+							}
+							elseif ($ylitunnit >= 10) {
+								/*
+								Jos työmatkaan käytetty aika ylittää viimeisen ulkomaan alueella tai sieltä lähteneessä laivassa tai lentokoneessa päättyneen täyden matkavuorokauden yli kymmenellä tunnilla,
+								palkansaajalla on oikeus viimeksi päättyneeltä matkavuorokaudelta maksettuun ulkomaanpäivärahaan.
+								*/
+
+								$paivat++;
+							}
+							elseif ($paivat > 0 and $ylitunnit >= 2 and $ylitunnit < 10) {
+								/*
+								Suomeen palattaessa palkansaajalla on oikeus puoleen viimeksi päättyneeltä matkavuorokaudelta maksetusta ulkomaanpäivärahasta,
+								jos työmatkaan käytetty aika ylittää viimeisen ulkomaan alueella tai sieltä lähteneessä laivassa tai lentokoneessa päättyneen täyden matkavuorokauden yli kahdella tunnilla.
+								*/
+
 								$puolipaivat++;
 
-								$tuoteno_array[$trow2["tuoteno"]]	=$trow2["tuoteno"];
-								$kpl_array[$trow2["tuoteno"]]		=$puolipaivat;
+								$tuoteno_array[1]	= $trow["tuoteno"];
+								$kpl_array[1]		= $puolipaivat;
+								$hinta_array[1]		= round($trow["myyntihinta"]/2, 2);
+								$nimitys_array[1]	= $trow["nimitys"]." (".t("Puolitettu korvaus.").")";
+								$varri_array[1] 	= "5";	 // Ulkomaan puolipäiväraha
 
-								$hinta = $trow2["myyntihinta"];
-								$hinta_array[$trow2["tuoteno"]]		= $hinta;
-
-								$selite .= "<br>$trow2[tuoteno] - $trow2[nimitys] $puolipaivat kpl á $hinta";
+								$selite .= "<br>$trow[tuoteno] - $trow[nimitys] $puolipaivat kpl á ".(float) round($trow["myyntihinta"]/2, 2);
 							}
 						}
-						elseif ($ylitunnit <= 10 and $trow["vienti"] != "FI" and $paivat == 0) {
-							$errori .= "<font class='error'>".t("VIRHE: Ulkomaanpäivärahalla on oltava vähintään 10 tuntia")."</font><br>";
-							//	Tänne pitäisi joskus koodata se puolikas ulkomaanpäiväraha..
-						}
-						elseif ($paivat == 0 and $puolipaivat == 0) {
+
+						if ($paivat == 0 and $osapaivat == 0 and $puolipaivat == 0) {
 							$errori .= "<font class='error'>".t("VIRHE: Liian lyhyt aikaväli")."</font><br>";
 						}
 
-						//	Lisätään myös saldoton isatuote jotta tiedämme mistä puolipäiväraha periytyy!
-						if ($paivat > 0 or $puolipaivat > 0) {
-							$tuoteno_array[$tuoteno] = $tuoteno;
-							$kpl_array[$tuoteno] = $paivat;
-							$hinta = $trow["myyntihinta"];
-							$hinta_array[$trow["tuoteno"]] = $hinta;
-							$selite = "$trow[tuoteno] - $trow[nimitys] $paivat kpl á $hinta";
+						//	Lisätään myös saldoton isatuote jotta tiedämme mistä osapäiväraha periytyy!
+						if ($paivat > 0 or $osapaivat > 0 or $puolipaivat > 0) {
+							$tuoteno_array[0] 	= $tuoteno;
+							$kpl_array[0] 		= $paivat;
+							$hinta_array[0] 	= $trow["myyntihinta"];
+							$nimitys_array[0]	= $trow["nimitys"];
+							$varri_array[0]		= $varri;
+
+							$selite 			= trim("$trow[tuoteno] - $trow[nimitys] $paivat kpl á ".(float) $trow["myyntihinta"].$selite);
 						}
 
 						$selite .= "<br>Ajalla: $alkupp.$alkukk.$alkuvv klo. $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv klo. $loppuhh:$loppumm";
-
-						//echo "SAATIIN päivarahoja: $paivat puolipäivärahoja: $puolipaivat<br>";
 					}
 					else {
 						$errori .= "<font class='error'>".t("VIRHE: Päivärahalle on annettava alku ja loppuaika")."</font><br>";
@@ -392,33 +483,40 @@ if ($tee != "") {
 						$errori .= "<font class='error'>".t("VIRHE: Kululle on annettava selite")."</font><br>";
 					}
 
-					if ($trow["myyntihinta"]>0) {
-						$hinta=$trow["myyntihinta"];
+					if ($trow["myyntihinta"] > 0) {
+						$hinta = $trow["myyntihinta"];
 					}
 
 					$hinta = str_replace ( ",", ".", $hinta);
+
 					if ($hinta <= 0) {
 						$errori .= "<font class='error'>".t("VIRHE: Kulun hinta puuttuu")."</font><br>";
 					}
 
-					$tuoteno_array[$trow["tuoteno"]] = $trow["tuoteno"];
-					$kpl_array[$trow["tuoteno"]] = $kpl;
-					$hinta_array[$trow["tuoteno"]] = $hinta;
-					$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á $hinta";
+					$tuoteno_array[0]	= $trow["tuoteno"];
+					$kpl_array[0]		= $kpl;
+					$hinta_array[0]		= $hinta;
+					$nimitys_array[0]	= $trow["nimitys"];
+					$varri_array[0]		= 0;
+
+					$selite = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á ".(float) $hinta;
 				}
 
 				//	poistetan return carriage ja newline -> <br>
-				$kommentti = str_replace("\n","<br>",str_replace("\r","",$kommentti));
+				$kommentti = str_replace("\n","<br>", str_replace("\r","", $kommentti));
+
 				if ($kommentti != "") {
-					$selite .="<br><i>$kommentti</i>";
+					$selite .= "<br><i>$kommentti</i>";
 				}
 
 				//	Lisätään annetut rivit
 				$perheid = $isatunnus = 0;
 
 				if ($errori == "") {
-					$tuoteno_array = array_reverse($tuoteno_array);
-					foreach($tuoteno_array as $lisaa_tuoteno) {
+
+					ksort($tuoteno_array);
+
+					foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
 
 						//	Haetaan tuotteen tiedot
 						$query = "	SELECT *
@@ -432,10 +530,13 @@ if ($tee != "") {
 						$tres = pupe_query($query);
 
 						if (mysql_num_rows($tres) == 1) {
-							$trow = mysql_fetch_assoc($tres);
-							$kpl = str_replace(",",".",$kpl_array[$trow["tuoteno"]]);
-							$hinta = str_replace(",",".",$hinta_array[$trow["tuoteno"]]);
-							$rivihinta = round($kpl*$hinta,$yhtiorow['hintapyoristys']);
+
+							$trow		= mysql_fetch_assoc($tres);
+							$kpl 		= str_replace(",", ".", $kpl_array[$indeksi]);
+							$hinta 		= str_replace(",", ".", $hinta_array[$indeksi]);
+							$rivihinta 	= round($kpl*$hinta, $yhtiorow['hintapyoristys']);
+							$nimitys	= $nimitys_array[$indeksi];
+							$var		= $varri_array[$indeksi];
 
 							//	Ratkaistaan alv..
 							if ($tyyppi == "B") {
@@ -445,7 +546,7 @@ if ($tee != "") {
 										$query = "	SELECT *
 													FROM tuotteen_alv
 													WHERE yhtio = '$kukarow[yhtio]'
-													AND maa = '$maa'
+													AND maa 	= '$maa'
 													AND tuoteno = '$tuoteno'
 													LIMIT 1";
 										$alhire = pupe_query($query);
@@ -486,13 +587,13 @@ if ($tee != "") {
 										tyyppi 		= 'M',
 										toimaika 	= '',
 										kommentti 	= '".mysql_real_escape_string($kommentti)."',
-										var 		= '',
+										var 		= '$var',
 										try			= '$trow[try]',
 										osasto		= '$trow[osasto]',
 										perheid		= '$perheid',
 										perheid2	= '$perheid2',
 										tunnus 		= '$rivitunnus',
-										nimitys 	= '$trow[nimitys]',
+										nimitys 	= '$nimitys',
 										kerattyaika = '$alkuaika',
 										toimitettuaika = '$loppuaika'";
 							$insres = pupe_query($query);
@@ -1345,7 +1446,7 @@ if ($tee == "MUOKKAA") {
 
 			if ($laskurow["tilaustyyppi"] == "M") {
 				echo "	<tr><th>".t("Viite")."</th>
-						<td><input type='text' size='30' name='viesti' value='$laskurow[viite]'></td></tr>";
+						<td><input type='text' size='30' name='viesti' value='$laskurow[viite]'><input type='submit' value='".t("Tallenna viite")."'></td></tr>";
 			}
 			else {
 				echo "	<tr><th>".t("Viite")."</th>
@@ -1389,7 +1490,7 @@ if ($tee == "MUOKKAA") {
 					</tr>
 					<th>".t("Liitteen kuvaus")."</th>
 					<td><input type='text' size='40' name='kuvaselite' value='$kuvaselite'></td>
-					<td class='back'><input type='submit' value='".t("Tallenna")."'</td>
+					<td class='back'><input type='submit' value='".t("Tallenna liite")."'></td>
 					</tr>
 					</table><br>";
 			echo "</form>";
@@ -1438,7 +1539,8 @@ if ($tee == "MUOKKAA") {
 						break;
 				}
 
-				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti
+				$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.vienti,
+							IF(tuote.vienti = '$yhtiorow[maa]' or tuote.nimitys like '%ateria%', 1, if(tuote.vienti != '', 2, 3)) sorttaus
 							FROM tuote
 							JOIN tili ON (tili.yhtio = tuote.yhtio and tili.tilino = tuote.tilino)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -1446,7 +1548,7 @@ if ($tee == "MUOKKAA") {
 							and tuote.status != 'P'
 							and tuote.tilino != ''
 							$lisat
-							ORDER BY tuote.vienti IN ('$yhtiorow[maa]') DESC, tuote.vienti ASC, tuote.nimitys";
+							ORDER BY sorttaus, tuote.nimitys";
 				$tres = pupe_query($query);
 				$valinta = "";
 
@@ -1509,6 +1611,27 @@ if ($tee == "MUOKKAA") {
 	else {
 		echo "	<tr><th>".t("Viite")."</th>
 				<td>$laskurow[viite]</td></tr>";
+
+		echo "<tr>";
+		echo "<th align='left'>".t("Liitteet")."</th>";
+
+		echo "<td>";
+
+		$query = "	SELECT *
+					from liitetiedostot
+					where yhtio = '$kukarow[yhtio]'
+					and liitos  = 'lasku'
+					and liitostunnus = '$tilausnumero'";
+		$liiteres = pupe_query($query);
+
+		if (mysql_num_rows($liiteres) > 0) {
+			while ($liiterow = mysql_fetch_assoc($liiteres)) {
+				echo "<a target='kuvaikkuna' href='".$palvelin2."view.php?id=$liiterow[tunnus]'>$liiterow[selite]</a>";
+				echo "<br>\n";
+			}
+		}
+
+		echo "</td></tr>";
 		echo "</table><br>";
 	}
 
@@ -1794,11 +1917,9 @@ if ($tee == "MUOKKAA") {
 	$query = "	SELECT tilausrivi.*, tuotetyyppi,
 				if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
 				concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka,
-				if(tilausrivi.perheid=0, tilausrivi.tunnus,
-				(select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
+				if(tilausrivi.perheid=0, tilausrivi.tunnus, (select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
 				if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe,
-				if(tilausrivi.perheid=0, 1,
-				(select count(*) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) montako,
+				if(tilausrivi.perheid=0, 1,	(select count(*) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) montako,
 				tiliointi.tilino tilino,
 				tilausrivin_lisatiedot.kulun_kohdemaa, kulun_kohdemaa
 				FROM tilausrivi use index(yhtio_otunnus)

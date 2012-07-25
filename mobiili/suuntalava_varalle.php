@@ -36,7 +36,6 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Päivitetään hyllypaikat
 				$paivitetyt_rivit = paivita_hyllypaikat($alusta_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso);
-				echo "SAAPUMINEN : ".var_dump($paivitetyt_rivit);
 
 				if ($paivitetyt_rivit > 0) {
 					# Hylly arrayksi...
@@ -49,15 +48,20 @@ if (isset($submit) and trim($submit) != '') {
 					# Viedään varastoon keikka kerrallaan.
 					foreach($saapumiset as $saapuminen) {
 						# Saako keikan viedä varastoon
-						if (saako_vieda_varastoon($saapuminen, 'kalkyyli') == 1) {
+						if (saako_vieda_varastoon($saapuminen, 'kalkyyli', 1) == 1) {
 							# Ei saa viedä varastoon, skipataan?
-							echo "<br>Saapumista ei voi viedä varastoon. ({$saapuminen})";
+							$varastovirhe = true;
 							continue;
 						} else {
-							echo "<br>Viedään varastoon saapuminen: ".$saapuminen;
-							echo "<br>	vie_varastoon({$saapuminen}, {$alusta_tunnus}, ${hylly});";
 							vie_varastoon($saapuminen, $alusta_tunnus, $hylly);
 						}
+					}
+					# Jos kaikki meni ok
+					if (isset($varastovirhe)) {
+						$error['varalle'] .= "Virhe varastoonviennissä";
+					} else {
+						echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
+						exit;
 					}
 				}
 				else {

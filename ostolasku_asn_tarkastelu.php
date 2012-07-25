@@ -511,7 +511,7 @@
 								$keikoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
 								$keikoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
 								$keikoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
-								
+
 								// jos tilausrivin saapumisella onkin jo vaihto-omaisuuslasku, ei edetä ja nollataan asn_sanomat.tilausrivi
 								$query = "	SELECT saapuminen.tunnus
 											FROM lasku AS saapuminen
@@ -519,7 +519,7 @@
 											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'
 											AND saapuminen.tapvm = '0000-00-00'";
 								$saapres = pupe_query($query);
-								
+
 								if (mysql_num_rows($saapres) != 0) {
 									$lasku_manuaalisesti_check = 1;
 									$query = "	UPDATE asn_sanomat SET
@@ -596,7 +596,7 @@
 			else if ($valitse != 'asn' and count($rtuoteno) > 0 and $laskuttajan_toimittajanumero != "" and $lasku_manuaalisesti_check != 0) {
 				echo "<font class='message'>",t("Laskun rivejä oli liitetty saapumiseen jossa oli jo vaihto-omaisuus lasku"),". ",t("Poistetaan tämmöisten rivien liitos"),". ",t("Käsittele lasku"), " $lasku ",t("uudestaan"),".</font><br /><br />";
 			}
-			
+
 			if ($valitse == 'asn' and count($paketin_rivit) > 0) {
 
 				$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
@@ -1309,17 +1309,6 @@
 					$chkres = pupe_query($query);
 
 					if (mysql_num_rows($chkres) == 0) continue;
-				}
-
-				// katsotaan että rivi ei ole saapumisella johon on liitetty vaihto-omaisuuslasku
-				if ($row['uusiotunnus'] != '') {
-					$query = "	SELECT saapuminen.tunnus
-								FROM lasku AS saapuminen
-								WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
-								AND saapuminen.tunnus = '{$row['uusiotunnus']}'
-								AND saapuminen.tapvm = '0000-00-00'";
-					$chkres = pupe_query($query);
-					if (mysql_num_rows($chkres) != 0) continue;
 				}
 
 				echo "<tr>";

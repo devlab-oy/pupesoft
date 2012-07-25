@@ -702,6 +702,11 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
+			# Lisätään asiakkaan tilausnumero kommenttikenttään
+			if ($tilrow['asiakkaan_tilausnumero'] != "") {
+				$tilrow["kommentti"] .= "|"."Asiakkaan tilausnumero: ".$tilrow['asiakkaan_tilausnumero'];
+			}
+
 			// Siivotaan myös lisäkommentti
 			$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 

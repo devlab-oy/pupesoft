@@ -25,7 +25,22 @@
 
 
 	// lukitaan tableja
-	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tilausrivi as tilausrivi_upd write, tuote read, tilausrivi read, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, tili READ";
+	$query = "	LOCK TABLES tuotepaikat WRITE,
+				tapahtuma WRITE,
+				lasku WRITE,
+				tiliointi WRITE,
+				sanakirja WRITE,
+				tilausrivi as tilausrivi_upd WRITE,
+				tuote READ,
+				tilausrivi READ,
+				tuotteen_avainsanat READ,
+				sarjanumeroseuranta WRITE,
+				sarjanumeroseuranta_arvomuutos READ,
+				tilausrivi as tilausrivi_myynti READ,
+				tilausrivi as tilausrivi_osto READ,
+				tuotepaikat as tt READ,
+				avainsana as avainsana_kieli READ,
+				tili READ";
 	$result = pupe_query($query);
 
 	//tuotteen varastostatus

@@ -24,14 +24,89 @@
 	$returnvalue	= 0;
 	$komento		= "";
 
-	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ, yhtio READ, tilausrivin_lisatiedot READ, hinnasto READ, puun_alkio READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, asiakashinta READ, asiakashinta AS ashin1 READ, asiakashinta AS ashin2 READ, asiakasalennus READ, asiakasalennus asale1 READ, asiakasalennus asale2 READ, perusalennus READ";
+	if (!isset($lukotetaan) or $lukotetaan) {
+		$query = "LOCK TABLES
+					asiakas READ,
+					asiakasalennus asale1 READ,
+					asiakasalennus asale2 READ,
+					asiakasalennus READ,
+					asiakashinta AS ashin1 READ,
+					asiakashinta AS ashin2 READ,
+					asiakashinta READ,
+					asiakaskommentti READ,
+					avainsana as a READ,
+					avainsana as avainsana_kieli READ,
+					avainsana as b READ,
+					avainsana WRITE,
+					dynaaminen_puu AS node READ,
+					dynaaminen_puu AS parent READ,
+					hinnasto READ,
+					kirjoittimet READ,
+					kuka WRITE,
+					lasku as vanha_lasku READ,
+					lasku WRITE,
+					liitetiedostot READ,
+					maat READ,
+					maksuehto READ,
+					pakkaamo WRITE,
+					pankkiyhteystiedot READ,
+					perusalennus READ,
+					puun_alkio READ,
+					rahtisopimukset AS rahtisopimukset2 READ,
+					rahtisopimukset READ,
+					sanakirja WRITE,
+					sarjanumeroseuranta READ,
+					sarjanumeroseuranta_arvomuutos READ,
+					tilausrivi AS t2 READ,
+					tilausrivi AS t3 READ,
+					tilausrivi AS tilausrivi_myynti READ,
+					tilausrivi AS tilausrivi_osto READ,
+					tilausrivi WRITE,
+					tilausrivin_lisatiedot AS tlt2 READ,
+					tilausrivin_lisatiedot WRITE,
+					toimitustapa READ,
+					tuote READ,
+					tuotepaikat READ,
+					tuoteperhe READ,
+					tuotteen_alv READ,
+					tuotteen_avainsanat READ,
+					tuotteen_toimittajat READ,
+					varaston_tulostimet as vanha_varaston_tulostimet READ,
+					varaston_tulostimet READ,
+					varastopaikat READ,
+					yhtio READ,
+					yhtion_parametrit READ,
+					yhtion_toimipaikat READ";
 
-	if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
-		$query .= ", keraysvyohyke READ, varaston_hyllypaikat AS vh READ, kerayserat READ";
+		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			$query .= ",asiakas AS asiakas1 READ,
+						asiakas AS asiakas2 READ,
+						kerayserat WRITE,
+						keraysvyohyke AS keraysvyohyke1 READ,
+						keraysvyohyke AS keraysvyohyke2 READ,
+						keraysvyohyke READ,
+						lahdot AS lahdot1 READ,
+						lahdot AS lahdot2 READ,
+						lahdot AS lahdot3 READ,
+						lahdot AS lahdot4 READ,
+						lahdot READ,
+						lasku AS lasku1 WRITE,
+						lasku AS lasku2 WRITE,
+						laskun_lisatiedot WRITE,
+						pakkaus READ,
+						tilausrivi AS tilausrivi1 READ,
+						tilausrivi AS tilausrivi2 READ,
+						toimitustapa AS toimitustapa1 READ,
+						toimitustapa AS toimitustapa2 READ,
+						tuote AS tuote1 READ,
+						tuote AS tuote2 READ,
+						varaston_hyllypaikat AS vh READ,
+						varaston_hyllypaikat AS vh1 READ,
+						varaston_hyllypaikat AS vh2 READ";
+		}
+
+		$res = mysql_query($query) or pupe_error($query);
 	}
-
-	$res   = mysql_query($query) or pupe_error($query);
 
 	if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
 		$queryc = "	SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
@@ -59,7 +134,7 @@
 		require_once ("tulosta_lahete_kerayslista.inc");
 
 		//haetaan asiakkaan tiedot
-		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);
@@ -168,7 +243,7 @@
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						WHERE tilausrivi.otunnus in ($tilausnumeroita)
 						and tilausrivi.yhtio   = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi  != 'D'
+						and tilausrivi.tyyppi != 'D'
 						$lisa1
 						$where_lisa
 						ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -290,6 +365,7 @@
 		if ($komento != "") {
 			//tulostetaan sivu
 			$params_kerayslista["komento"] = $komento;
+
 			print_pdf_kerayslista($params_kerayslista);
 
 			// jos halutaan MYÖS lähete
@@ -305,13 +381,15 @@
 					$params = array(
 						'laskurow'					=> $lahetteen_tulostustapa_row,
 						'sellahetetyyppi' 			=> "",
-						'extranet_tilausvahvistus'	=> "",
+						'extranet_tilausvahvistus' 	=> "",
 						'naytetaanko_rivihinta'		=> "",
 						'tee'						=> "",
 						'toim'						=> $toim,
-						'query_ale_lisa'			=> "",
-						'komento'					=> $komento
+						'komento' 					=> $komento,
+						'lahetekpl'					=> "",
+						'kieli' 					=> ""
 						);
+
 					pupesoft_tulosta_lahete($params);
 				}
 			}

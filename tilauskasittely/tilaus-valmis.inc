@@ -621,7 +621,7 @@ else {
 
 				// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
 				$query = "	UPDATE lasku
-							SET rahtivapaa = 'o',
+							SET rahtivapaa = 'O',
 							kohdistettu = 'K'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$laskurow[tunnus]'";

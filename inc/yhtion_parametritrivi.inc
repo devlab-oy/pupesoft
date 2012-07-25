@@ -1937,8 +1937,8 @@
 		$sel[$apu] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		$ulos .= "<option value='' $sel>".t("Ei")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰")."</option>";
+		$ulos .= "<option value='' $sel>".t("Ei. Korvaava tuote lis‰t‰‰n myyntitilaukselle automaattisesti.")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Kyll‰. Korvaava tuote lis‰t‰‰n myyntitilauksella vain jos myyj‰ hyv‰ksyy korvaavan tuotteen.")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3172,6 +3172,33 @@
 
 		$ulos .= "<option value = ''>".t("K‰ytet‰‰n asiakkaan virallista osoitetta")."</option>";
 		$ulos .= "<option value = 'K' $sel>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array_fill(1, 3, '');
+
+		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ vaihto-omaisuuslaskun kulutilej‰")."</option>";
+		$ulos .= "<option value = '1' {$sel[1]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit tili‰")."</option>";
+		$ulos .= "<option value = '2' {$sel[2]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit ja -kulut tilej‰")."</option>";
+		$ulos .= "<option value = '3' {$sel[3]}>".t("K‰ytet‰‰n vaihto-omaisuuslaskun rahdit, -kulut ja -tuoterivikohtaiset kulut tilej‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'tositteen_tilioinnit') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Tositteella n‰ytet‰‰n oletuksena kaikki tiliˆintirivit")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Tositteella n‰ytet‰‰n tiliˆintirivit summattuna per tili/pvm/tarkenne")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -68,7 +68,6 @@
 		mysql_field_name($result, $i) == "vientipaperit_palautettu" or
 		mysql_field_name($result, $i) == "pakkaamo" or
 		mysql_field_name($result, $i) == "jaksotettu" or
-		mysql_field_name($result, $i) == "factoringsiirtonumero" or
 		mysql_field_name($result, $i) == "tunnusnippu" or
 		mysql_field_name($result, $i) == "olmapvm" or
 		mysql_field_name($result, $i) == "varasto" or
@@ -95,6 +94,7 @@
 		mysql_field_name($result, $i) == "ytunnus" or
 		mysql_field_name($result, $i) == "verkkotunnus" or
 		mysql_field_name($result, $i) == "ovttunnus" or
+		mysql_field_name($result, $i) == "factoringsiirtonumero" or
 		mysql_field_name($result, $i) == "toim_ovttunnus") {
 
 		$tyyppi = 1;

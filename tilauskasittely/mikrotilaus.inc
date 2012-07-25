@@ -85,195 +85,260 @@
 			}
 
 			$filetyyppi = "";
-			$rivilask1 = 1;
+			$rivilask1 = 0;
 
+			# Tiedostosta p‰ivitys
 			foreach ($excelrivi as $rivi) {
+				$rivilask1++;
 
-				$tila 	 = '';
-				$valinta = '';
+				# tila==G, alatila==V
+				if ($toim == "MYYNTITILI" and $laskurow['tila'] == "G" and $laskurow['alatila'] == "V" and $laskurow['tilaustyyppi'] == 'M') {
+					$var = $rivi[7];
+					$tuoteno = $rivi[0];
+					$kpl = $rivi[1];
+					$rivitunnus = 0;
 
-				//Detektoidaan tiedostomuoto
-				if ($filetyyppi == ""
-					and stripos($rivi[0], "tuote") !== FALSE
-					and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-					and stripos($rivi[2], "p‰iv‰") !== FALSE
-					and stripos($rivi[3], "nimi") !== FALSE) {
-
-					$filetyyppi = "KAKKONEN";
-
-					$ind_Tuoteno 	= 0;
-					$ind_Maara 		= 1;
-					$ind_Arvioitu 	= 2;
-					$ind_Hinta 		= 4;
-					$ind_Ale 		= 5;
-					$ind_Netto 		= 6;
-					$ind_Var 		= 7;
-					$ind_Kommentti	= 8;
-
-					// Skipataan otsikot
-					continue;
-				}
-				elseif ($filetyyppi == ""
-					and stripos($rivi[0], "tuote") !== FALSE
-					and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
-					and stripos($rivi[2], "p‰iv‰") !== FALSE
-					and stripos($rivi[3], "hinta") !== FALSE) {
-
-					$filetyyppi = "YKSPISTEVITONEN";
-
-					$ind_Tuoteno 	= 0;
-					$ind_Maara 		= 1;
-					$ind_Arvioitu 	= 2;
-					$ind_Hinta 		= 3;
-					$ind_Ale 		= 4;
-					$ind_Netto 		= 5;
-					$ind_Var 		= 6;
-					$ind_Kommentti	= 7;
-
-					// Skipataan otsikot
-					continue;
-				}
-				elseif ($filetyyppi == "") {
-
-					$filetyyppi = "YKK÷NEN";
-
-					$ind_Tuoteno 	= 0;
-					$ind_Maara 		= 1;
-					$ind_Arvioitu 	= 2;
-					$ind_Hinta 		= 3;
-					$ind_Ale 		= 4;
-					$ind_Netto 		= 5;
-					$ind_Var 		= 6;
-					$ind_Kommentti	= 7;
-				}
-
-				$tuoteno = trim($rivi[$ind_Tuoteno]);
-				$kpl	 = str_replace(",", ".", $rivi[$ind_Maara]);
-
-				$toimaika			= "";
-				$kerayspvm			= "";
-				$hinta				= "";
-				$netto				= "";
-				$var				= "";
-				$alv				= "";
-				$paikka				= "";
-				$varasto 			= $laskurow["varasto"];
-				$rivitunnus			= "";
-				$korvaavakielto		= "";
-				$varataan_saldoa	= "";
-				$perhekielto		= "";
-				$jtkielto 		 	= $laskurow['jtkielto'];
-
-				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-					${'ale'.$alepostfix} = "";
-				}
-
-				if ($kukarow["extranet"] == "") {
-					$toimaika 	= $rivi[$ind_Arvioitu];
-					$hinta		= str_replace(",", ".", $rivi[$ind_Hinta]);
-					$ale1	  	= str_replace(",", ".", $rivi[$ind_Ale]);
-					$netto 	  	= strtoupper(trim($rivi[$ind_Netto]));
-					$var  		= strtoupper(trim($rivi[$ind_Var]));
-					$kommentti	= trim($rivi[$ind_Kommentti]);
-
-					if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-						echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. '$var'<br>";
-						$var = '';
+					# Tarkistukset, var ja kpl
+					if ($var != 'A' and $var != 'B'	) {
+						echo "<font class='error'>".t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: A tai B").". ".t("Rivill‰").": $rivilask1. '$var'"."</font><br><br>";
+						continue;
 					}
 
-					if ($netto != '' and $netto != 'N') {
-						echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. '$netto'<br>";
-						$netto = '';
-					}
-				}
+					$query = "	SELECT tunnus
+								FROM tilausrivi
+								WHERE yhtio='$kukarow[yhtio]'
+								AND tyyppi = 'G'
+								AND var = ''
+								AND otunnus='$kukarow[kesken]'
+								AND tuoteno='$tuoteno'";
 
-				if ($tuoteno != '' and $kpl != 0) {
+					$result = pupe_query($query);
 
-					// Tuotehaku ei toimi extranetin puolella
-					if (file_exists("../inc/tuotehaku.inc")) {
-						require ("../inc/tuotehaku.inc");
-					}
-
-					if ($mikrotila_tuotenumero == "koodilla") {
-						$query = "	SELECT *
-									FROM tuote
-									WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+					if (mysql_num_rows($result) == 1) {
+						$row = mysql_fetch_assoc($result);
+						$rivitunnus = $row['tunnus'];
 					}
 					else {
-						$query = "	SELECT *
-									FROM tuote
-									WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+						$query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio='$kukarow[yhtio]'
+									AND tyyppi = 'G'
+									AND var = ''
+									AND otunnus='$kukarow[kesken]'
+									AND tuoteno='$tuoteno'
+									AND kpl = '$kpl'";
+
+						$result = pupe_query($query);
+
+						if (mysql_num_rows($result) == 1) {
+							$row = mysql_fetch_assoc($result);
+							$rivitunnus = $row['tunnus'];
+						}
 					}
 
-					$rarresult = pupe_query($query);
+					if ($rivitunnus != 0) {
+						$tilatapa = "PAIVITA";
+						$myyntitilirivit = $var;
+						require("laskuta_myyntitilirivi.inc");
+					}
+					else {
+						echo "<font class='error'>".t("Tuotetta ei osattu valita")."</font><br>";
+					}
+				}
+				else {
 
-					if (mysql_num_rows($rarresult) == 1) {
+					$tila 	 = '';
+					$valinta = '';
 
-						$trow = mysql_fetch_array($rarresult);
+					//Detektoidaan tiedostomuoto
+					if ($filetyyppi == ""
+						and stripos($rivi[0], "tuote") !== FALSE
+						and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
+						and stripos($rivi[2], "p‰iv‰") !== FALSE
+						and stripos($rivi[3], "nimi") !== FALSE) {
 
-						$ohitus = 0;
-						if ($kukarow["extranet"] != "") {
-							$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
-							$asiakastempres = pupe_query($query);
-							$asiakastemprow = mysql_fetch_array($asiakastempres);
+						$filetyyppi = "KAKKONEN";
 
-							$temp_laskurowwi = array();
-							$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
-							$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
-							$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
-							$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+						$ind_Tuoteno 	= 0;
+						$ind_Maara 		= 1;
+						$ind_Arvioitu 	= 2;
+						$ind_Hinta 		= 4;
+						$ind_Ale 		= 5;
+						$ind_Netto 		= 6;
+						$ind_Var 		= 7;
+						$ind_Kommentti	= 8;
+
+						// Skipataan otsikot
+						continue;
+					}
+					elseif ($filetyyppi == ""
+						and stripos($rivi[0], "tuote") !== FALSE
+						and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
+						and stripos($rivi[2], "p‰iv‰") !== FALSE
+						and stripos($rivi[3], "hinta") !== FALSE) {
+
+						$filetyyppi = "YKSPISTEVITONEN";
+
+						$ind_Tuoteno 	= 0;
+						$ind_Maara 		= 1;
+						$ind_Arvioitu 	= 2;
+						$ind_Hinta 		= 3;
+						$ind_Ale 		= 4;
+						$ind_Netto 		= 5;
+						$ind_Var 		= 6;
+						$ind_Kommentti	= 7;
+
+						// Skipataan otsikot
+						continue;
+					}
+					elseif ($filetyyppi == "") {
+
+						$filetyyppi = "YKK÷NEN";
+
+						$ind_Tuoteno 	= 0;
+						$ind_Maara 		= 1;
+						$ind_Arvioitu 	= 2;
+						$ind_Hinta 		= 3;
+						$ind_Ale 		= 4;
+						$ind_Netto 		= 5;
+						$ind_Var 		= 6;
+						$ind_Kommentti	= 7;
+					}
+
+					$tuoteno = trim($rivi[$ind_Tuoteno]);
+					$kpl	 = str_replace(",", ".", $rivi[$ind_Maara]);
+
+					$toimaika			= "";
+					$kerayspvm			= "";
+					$hinta				= "";
+					$netto				= "";
+					$var				= "";
+					$alv				= "";
+					$paikka				= "";
+					$varasto 			= $laskurow["varasto"];
+					$rivitunnus			= "";
+					$korvaavakielto		= "";
+					$varataan_saldoa	= "";
+					$perhekielto		= "";
+					$jtkielto 		 	= $laskurow['jtkielto'];
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'ale'.$alepostfix} = "";
+					}
+
+					if ($kukarow["extranet"] == "") {
+						$toimaika 	= $rivi[$ind_Arvioitu];
+						$hinta		= str_replace(",", ".", $rivi[$ind_Hinta]);
+						$ale1	  	= str_replace(",", ".", $rivi[$ind_Ale]);
+						$netto 	  	= strtoupper(trim($rivi[$ind_Netto]));
+						$var  		= strtoupper(trim($rivi[$ind_Var]));
+						$kommentti	= trim($rivi[$ind_Kommentti]);
+
+						if ($toim == "MYYNTITILI") {
+							echo "KISSA";
+						}
+						else if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
+							echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. '$var'<br>";
+							$var = '';
+						}
+
+						if ($netto != '' and $netto != 'N') {
+							echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. '$netto'<br>";
+							$netto = '';
+						}
+					}
+
+					if ($tuoteno != '' and $kpl != 0) {
+
+						// Tuotehaku ei toimi extranetin puolella
+						if (file_exists("../inc/tuotehaku.inc")) {
+							require ("../inc/tuotehaku.inc");
+						}
+
+						if ($mikrotila_tuotenumero == "koodilla") {
+							$query = "	SELECT *
+										FROM tuote
+										WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+						}
+						else {
+							$query = "	SELECT *
+										FROM tuote
+										WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+						}
+
+						$rarresult = pupe_query($query);
+
+						if (mysql_num_rows($rarresult) == 1) {
+
+							$trow = mysql_fetch_array($rarresult);
+
+							$ohitus = 0;
+							if ($kukarow["extranet"] != "") {
+								$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+								$asiakastempres = pupe_query($query);
+								$asiakastemprow = mysql_fetch_array($asiakastempres);
+
+								$temp_laskurowwi = array();
+								$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+								$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+								$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+								$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 
 
-							$hinnat = alehinta($temp_laskurowwi, $trow, 1, '', '', '', "hintaperuste,aleperuste");
+								$hinnat = alehinta($temp_laskurowwi, $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-							$onko_asiakkaalla_alennuksia = FALSE;
+								$onko_asiakkaalla_alennuksia = FALSE;
 
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
-									$onko_asiakkaalla_alennuksia = TRUE;
-									break;
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+										$onko_asiakkaalla_alennuksia = TRUE;
+										break;
+									}
+								}
+
+								// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
+								if ($trow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
+									$ohitus = 1;
 								}
 							}
 
-							// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
-							if ($trow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
-								$ohitus = 1;
-							}
-						}
+							if ($ohitus == 0) {
+								$tuoteno = $trow["tuoteno"];
 
-						if ($ohitus == 0) {
-							$tuoteno = $trow["tuoteno"];
+								if ($toimaika == '') {
+									$toimaika = $laskurow["toimaika"];
+								}
 
-							if ($toimaika == '') {
-								$toimaika = $laskurow["toimaika"];
-							}
+								if ($hinta == 0) {
+									$hinta = "";
+								}
 
-							if ($hinta == 0) {
-								$hinta = "";
-							}
+								if ($laskurow["tilaustyyppi"] == "E") {
+									$varataan_saldoa = "EI";
+								}
+								else {
+									$varataan_saldoa = "";
+								}
 
-							if ($laskurow["tilaustyyppi"] == "E") {
-								$varataan_saldoa = "EI";
+								//lis‰t‰‰n rivi
+								if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
+									$tilatapa = "PAIVITA";
+									require("laskuta_myyntitilirivi.inc");
+								}
+								else {
+									require ("lisaarivi.inc");
+								}
 							}
 							else {
-								$varataan_saldoa = "";
+								echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
 							}
 
-							//lis‰t‰‰n rivi
-							require ("lisaarivi.inc");
 						}
 						else {
 							echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
 						}
-
-					}
-					else {
-						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
 					}
 				}
-
-
-				$rivilask1++;
 			}
 
 			$tuoteno	= '';

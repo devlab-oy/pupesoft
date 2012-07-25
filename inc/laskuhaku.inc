@@ -1,8 +1,13 @@
 <?php
 
-echo "<font class='head'>".t("Laskuhaku")."</font><hr>";
+echo "<font class='head'>",t("Laskuhaku"),"</font><hr>";
 
-if (!isset($tee)) $tee='';
+if (!isset($tee)) $tee = '';
+if (!isset($itila)) $itila = '';
+if (!isset($ialatila)) $ialatila = '';
+if (!isset($pvm)) $pvm = '';
+if (!isset($summa1)) $summa1 = '';
+if (!isset($summa2)) $summa2 = '';
 
 $index = "";
 $ehto  = "";
@@ -11,19 +16,19 @@ $jarj  = "";
 // Q = laskuja tilansa mukaan
 if ($tee == 'Q') {
 	$index = " use index (tila_index) ";
-	$ehto = " lasku.tila = '$itila' and lasku.alatila = '$ialatila' ";
+	$ehto = " lasku.tila = '{$itila}' and lasku.alatila = '{$ialatila}' ";
 	$jarj = " lasku.tapvm ";
 }
 
 // E = er‰‰ntyvi‰ laskuja pvm:n mukaan
 if ($tee == 'E') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.erpcm='$pvm' ";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.erpcm='{$pvm}' ";
 	$jarj = " lasku.summa ";
 }
 
 // M = maksettavia laskuja pvm:n mukaan
 if ($tee == 'M') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.olmapvm='$pvm' ";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.olmapvm='{$pvm}' ";
 	$jarj = " lasku.summa ";
 }
 
@@ -43,54 +48,67 @@ if ($tee == 'S') {
 	$jarj  = " lasku.tapvm desc ";
 
 	if (strlen($summa1) > 0 and strlen($summa2) == 0) {
-		$ehto .= " and lasku.summa in ($summa1, ".($summa1*-1).") ";
+		$ehto .= " and lasku.summa in ({$summa1}, ".($summa1*-1).") ";
 	}
 	elseif (strlen($summa1) > 0 and strlen($summa2) > 0) {
-		$ehto .= " and lasku.summa >= $summa1 and lasku.summa <= $summa2 ";
+		$ehto .= " and lasku.summa >= {$summa1} and lasku.summa <= {$summa2} ";
 		$jarj = " lasku.summa, lasku.tapvm";
 	}
 }
 
 // N = Etsit‰‰n nime‰ laskulta
 if ($tee == 'N') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.nimi like '%$summa1%'";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.nimi like '%{$summa1}%'";
 	$jarj = " lasku.nimi, lasku.tapvm desc";
 }
 
 // V = Etsit‰‰n viitett‰ laskulta
 if ($tee == 'V') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viite like '%$summa1%'";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viite like '%{$summa1}%'";
 	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // K = Etsit‰‰n kommenttia laskulta
 if ($tee == 'K') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.comments like '%$summa1%'";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.comments like '%{$summa1}%'";
 	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // W = Etsit‰‰n Viestill‰ laskulta
 if ($tee == 'W') {
-	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viesti like '%$summa1%'";
+	$ehto = " lasku.tila in ('H','Y','M','P','Q') and lasku.viesti like '%{$summa1}%'";
 	$jarj = " lasku.nimi, lasku.summa";
 }
 
 // T = Laskun tunnus
 if ($tee == 'T') {
-	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.tunnus = '$summa1'";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.tunnus = '{$summa1}'";
 	$jarj  = " lasku.nimi, lasku.summa";
 	$index = " use index (PRIMARY) ";
 }
 
 // L = Toimittajan laskunumero
 if ($tee == 'L') {
-	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.laskunro = '$summa1'";
+	$ehto  = " lasku.tila in ('H','Y','M','P','Q') and lasku.laskunro = '{$summa1}'";
 	$jarj  = " lasku.nimi, lasku.summa";
 	$index = " use index (yhtio_tila_laskunro) ";
 }
 
+if ($laskuntyyppi != "K") {
+	$ehto .= " AND lasku.tila = '$laskuntyyppi' ";
+}
+
 if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
-	$ehto .= " and lasku.tapvm >= '$alkuvv-$alkukk-$alkupp' and lasku.tapvm <= '$loppuvv-$loppukk-$loppupp' ";
+
+	if ($pvm_rajaustyyppi == "luopvm") {
+		$ehto .= " and lasku.luontiaika >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.luontiaika <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
+	}
+	elseif ($pvm_rajaustyyppi == "laspvm") {
+		$ehto .= " and lasku.lapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.lapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
+	}
+	else {
+		$ehto .= " and lasku.tapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}' and lasku.tapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}' ";
+	}
 
 	if ($index == "") $index = " use index (yhtio_tila_tapvm) ";
 }
@@ -98,6 +116,26 @@ if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or 
 echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
 echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
 echo "<table>";
+
+$sel = array_fill_keys(array($pvm_rajaustyyppi), " selected") + array_fill_keys(array('tappvm', 'luopvm', 'laspvm'), '');
+
+echo "<tr>
+		<th>
+			<label for='paivarajaus_kentta'>".t("P‰iv‰rajaus")."</label>
+		</th>
+      	<td>
+			<select name='pvm_rajaustyyppi' id='paivarajaus_kentta'>
+				<option value='tappvm' {$sel['tappvm']}>".t("Tapahtumap‰iv‰m‰‰r‰")."</option>";
+
+if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+    echo "<option value='laspvm' {$sel['laspvm']}>".t("Laskunp‰iv‰m‰‰r‰")."</option>";
+}
+
+
+echo "<option value='luopvm' {$sel['luopvm']}>".t("Luontip‰iv‰m‰‰r‰")."</option>
+		</select>
+		</td>
+	</tr>";
 
 echo "<tr><th valign='top'>".t("Alkupvm")."</th>";
 echo "<td><select name='alkuvv'>";
@@ -107,7 +145,8 @@ if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y", mktime(0, 0, 0, date("
 $sel[$alkuvv] = "SELECTED";
 
 for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-	echo "<option value='$i' $sel[$i]>$i</option>";
+	if (!isset($sel[$i])) $sel[$i] = "";
+	echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 }
 
 echo "</select>";
@@ -120,7 +159,10 @@ echo "<select name='alkukk'>";
 
 for ($i = 1; $i < 13; $i++) {
 	$val = $i < 10 ? '0'.$i : $i;
-	echo "<option value='$val' $sel[$val]>$val</option>";
+
+	if (!isset($sel[$val])) $sel[$val] = "";
+
+	echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 }
 
 echo "</select>";
@@ -133,13 +175,16 @@ echo "<select name='alkupp'>";
 
 for ($i = 1; $i < 32; $i++) {
 	$val = $i < 10 ? '0'.$i : $i;
-	echo "<option value='$val' $sel[$val]>$val</option>";
+
+	if (!isset($sel[$val])) $sel[$val] = "";
+
+	echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 }
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
 echo "<tr>
-	<th valign='top'>".t("Loppupvm")."</th>
+	<th valign='top'>",t("Loppupvm"),"</th>
 	<td><select name='loppuvv'>";
 
 $sel = array();
@@ -147,7 +192,10 @@ if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("y", mktime(0, 0, 0, (da
 $sel[$loppuvv] = "SELECTED";
 
 for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
-	echo "<option value='$i' $sel[$i]>$i</option>";
+
+	if (!isset($sel[$i])) $sel[$i] = "";
+
+	echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 }
 
 echo "</select>";
@@ -160,7 +208,10 @@ echo "<select name='loppukk'>";
 
 for ($i = 1; $i < 13; $i++) {
 	$val = $i < 10 ? '0'.$i : $i;
-	echo "<option value='$val' $sel[$val]>$val</option>";
+
+	if (!isset($sel[$val])) $sel[$val] = "";
+
+	echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 }
 
 echo "</select>";
@@ -173,7 +224,10 @@ echo "<select name='loppupp'>";
 
 for ($i = 1; $i < 32; $i++) {
 	$val = $i < 10 ? '0'.$i : $i;
-	echo "<option value='$val' $sel[$val]>$val</option>";
+
+	if (!isset($sel[$val])) $sel[$val] = "";
+
+	echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 }
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
@@ -199,20 +253,31 @@ if (mysql_num_rows($result) > 0) {
 	echo "</td></tr>";
 }
 
-$sel = array();
-$sel[$tee] = "SELECTED";
+$sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');
+
+echo "<tr><th>".t("Laskun tila")."</th>";
+echo "<td><select name = 'laskuntyyppi'>
+		<option {$sel['K']} value = 'K'>".t("Kaikki")."</option>
+		<option {$sel['H']} value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."</option>
+		<option {$sel['M']} value = 'M'>".t("Valmis maksatukseen")."</option>
+		<option {$sel['P']} value = 'P'>".t("Poiminnassa")."</option>
+		<option {$sel['Q']} value = 'Q'>".t("Odottaa suoritusta")."</option>
+		<option {$sel['Y']} value = 'Y'>".t("Maksettu")."</option>
+		</select></td>
+		</tr>";
+
+$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'N', 'V', 'W', 'K', 'L'), '');
 
 echo "<tr>";
 echo "<th>".t("Hakulaji")."</th>";
 echo "<td><select name = 'tee'>";
-echo "<option value = 'S' $sel[S]>".t("Summalla")."</option>";
-echo "<option value = 'N' $sel[N]>".t("Nimell‰")."</option>";
-echo "<option value = 'V' $sel[V]>".t("Viitteell‰")."</option>";
-echo "<option value = 'W' $sel[W]>".t("Viestill‰")."</option>";
-echo "<option value = 'K' $sel[K]>".t("Kommentilla")."</option>";
-echo "<option value = 'L' $sel[L]>".t("Laskunumerolla")."</option>";
+echo "<option value = 'S' {$sel['S']}>".t("Summalla")."</option>";
+echo "<option value = 'N' {$sel['N']}>".t("Nimell‰")."</option>";
+echo "<option value = 'V' {$sel['V']}>".t("Viitteell‰")."</option>";
+echo "<option value = 'W' {$sel['W']}>".t("Viestill‰")."</option>";
+echo "<option value = 'K' {$sel['K']}>".t("Kommentilla")."</option>";
+echo "<option value = 'L' {$sel['L']}>".t("Laskunumerolla")."</option>";
 echo "</select></td></tr>";
-
 echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
 echo "</tr>";
@@ -240,7 +305,7 @@ if ($tee != '') {
 		$tiliointilisa = '';
 	}
 
-	$query = "	SELECT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
+	$query = "	SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
 				lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
 				lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 			  	FROM lasku $index

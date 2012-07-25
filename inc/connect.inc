@@ -2,7 +2,7 @@
 
 require("salasanat.php");
 
-if(isset($useslave)) {
+if (isset($useslave)) {
 	$useslave = (int) $useslave;
 }
 else {
@@ -28,13 +28,22 @@ if ($useslave > 0) {
 	}
 }
 
+// Käytetään slave kantaa
 if ($useslave > 0) {
+	if ($usemastertoo > 0) {
+		// Tässä tapauksessa käytetään MYÖS master-kantaa
+		$masterlink = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+		mysql_select_db($dbkanta, $masterlink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
+		mysql_set_charset("latin1", $masterlink);
+		mysql_query("set group_concat_max_len=1000000", $masterlink);
+	}
+
 	$link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 }
 else {
 	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 }
 
-mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
-mysql_set_charset("latin1");
-mysql_query("set group_concat_max_len=1000000");
+mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
+mysql_set_charset("latin1", $link);
+mysql_query("set group_concat_max_len=1000000", $link);

@@ -36,6 +36,8 @@ if (!function_exists('alku_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
+		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
+
 		//PDF parametrit
 		if ($pdf === NULL) {
 			$pdf = new pdffile;
@@ -246,17 +248,26 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
 			}
 
-			if (($asrow["asiakasnro"] == "" or $asrow["asiakasnro"] == 0) and $laskurow["ytunnus"] != "") {
-				$asrow["asiakasnro"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
-			}
-
+			$asrow["ytunnus"] = tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]);
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, 						$rectparam);
 			$pdf->draw_rectangle(779, 420, 758, 580, $thispage, 						$rectparam);
-			$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
-			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 
+			if ($asrow["asiakasnro_aito"] == "" or $asrow["asiakasnro_aito"] == "0") {
+				$pdf->draw_text(310, 771, t("Ytunnus", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"], 							$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(310, 771, t("Ytunnus / Asiakasnumero", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"] ." / ". $asrow["asiakasnro_aito"], 			$thispage, $norm);
+			}
 			$pdf->draw_text(430, 771, t("Vastaanotettu", $kieli),						$thispage, $pieni);
-			$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"], "pitka"), 	$thispage, $norm);
+
+			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
+				$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"]), $thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(430, 761, tv1dateconv($laskurow["luontiaika"], "pitka"), $thispage, $norm);
+			}
 		}
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
@@ -300,8 +311,13 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(310, 740, $ff_string, 										$thispage, $ff_font);
 
 			$pdf->draw_text(430, 750, t("Käsittelyssä", $kieli), 						$thispage, $pieni);
-			$pdf->draw_text(430, 740, tv1dateconv($laskurow['h1time'], "pitka"), 		$thispage, $norm);
 
+			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
+				$pdf->draw_text(430, 740, tv1dateconv($laskurow['h1time']), $thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(430, 740, tv1dateconv($laskurow['h1time'], "pitka"), $thispage, $norm);
+			}
 			$pdf->draw_rectangle(737, 300, 716, 420, $thispage, $rectparam);
 			$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
 
@@ -320,22 +336,32 @@ if (!function_exists('alku_lahete')) {
 			}
 
 			$pdf->draw_text(430, 729, t("Päiväys", $kieli), 							$thispage, $pieni);
-			$pdf->draw_text(430, 719, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 
+			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
+				$pdf->draw_text(430, 719, tv1dateconv($kerarow["kerattyaika"]), $thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(430, 719, tv1dateconv($kerarow["kerattyaika"], "pitka"), $thispage, $norm);
+			}
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 
+			// Jos rahtivapaa
+			if($laskurow['rahtivapaa'] == 'o') {
+				$rahtivapaa = "Rahtivapaa";
+			}
+
 			if ($extranet_tilausvahvistus != 1) {
-				if ($laskurow["kohdistettu"] == "K") {
+				if ($laskurow["kohdistettu"] == "K" or $lahetetyyppi_avainsana == 1) {
 					// Käytetään LÄHETTÄJÄN rahtisopimusta, EI näytetä lähettäjän sopparinumeroa.
 					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
-					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),	 $thispage, $boldi);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'] . " {$rahtivapaa}", "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
 				}
 				else {
 					// Käytetään VASTAANOTTAJAN rahtisopimusta, näytetään sopparinumero.
 					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
 					$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
+					$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa']. " {$rahtivapaa}", "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
 				}
 			}
 
@@ -343,14 +369,51 @@ if (!function_exists('alku_lahete')) {
 			if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
 			else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
 
-			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 		$thispage, $pieni);
-			$pdf->draw_text(310, 677, $toimehto, 						$thispage, $norm);
+			if ($lahetetyyppi_avainsana == 1)
+			{
+				# Rahdinmaksaja
+				$pdf->draw_rectangle(695, 300, 674, 420, $thispage, $rectparam);
+				$pdf->draw_text(310, 687, t("Rahdinmaksaja", $kieli), $thispage, $pieni);
 
-			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
+				if ($laskurow['kohdistettu'] == 'K') {
+					$pdf->draw_text(310, 677, "Lähettäjä", $thispage, $norm);
+				} else $pdf->draw_text(310, 677, "Vastaanottaja", $thispage, $norm);
 
+				# Rahtisopimusnumero
+				if($laskurow['kohdistettu'] == 'K') {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"]);
+				}
+				else {
+					$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
+				}
+
+				$pdf->draw_rectangle(695, 420, 674, 580, $thispage, $rectparam);
+				$pdf->draw_text(430, 687, t("Rahtisopimusnumero", $kieli), $thispage, $pieni);
+				$pdf->draw_text(430, 677, $rahtirow["rahtisopimus"], $thispage, $norm);
+
+				# Haetaaan kerääjä
+				$keraaja_query = "	SELECT distinct kuka.nimi
+									FROM tilausrivi
+									JOIN kuka on (kuka.yhtio = tilausrivi.yhtio
+									AND kuka.kuka = tilausrivi.keratty)
+									WHERE tilausrivi.otunnus='$laskurow[tunnus]'
+									and tilausrivi.yhtio='$kukarow[yhtio]'";
+				$keraaja_result = pupe_query($keraaja_query);
+				$keraaja = mysql_fetch_assoc($keraaja_result);
+
+				$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
+				$pdf->draw_text(310, 666, t("Kerääjä", $kieli), $thispage, $pieni);
+				$pdf->draw_text(310, 656, ucfirst($keraaja["nimi"]), $thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 		$thispage, $pieni);
+				$pdf->draw_text(310, 677, $toimehto, 						$thispage, $norm);
+
+				$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
+			}
 			// maksuehto tekstinä jos on jokin muu kuin hinnaton maksuehto
 			// extranet tilausvahvistuksessa ei näytetä maksuehtoa (jos halutaan näyttää niin setataan muuttuja nollaksi)
-			if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc" and $extranet_tilausvahvistus != 1) {
+			if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc" and $extranet_tilausvahvistus != 1 and $lahetetyyppi_avainsana != 1) {
 				// haetaan maksuehdon tiedot
 				$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 				$masresult = pupe_query($query);
@@ -671,11 +734,24 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 			$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 			$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-			$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
-			$pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
-			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
-			$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 
+			if ($asrow["asiakasnro_aito"] == "" or $asrow["asiakasnro_aito"] == "0") {
+				$pdf->draw_text(310, 771, t("Ytunnus", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"], 							$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(310, 771, t("Ytunnus / Asiakasnumero", $kieli), 						$thispage, $pieni);
+				$pdf->draw_text(310, 761, $asrow["ytunnus"] ." / ". $asrow["asiakasnro_aito"], 			$thispage, $norm);
+			}
+			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
+			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
+			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
+			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
+				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
+			}
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);
@@ -1135,7 +1211,7 @@ if (!function_exists('rivi_lahete')) {
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		//hatetaan tuotteen myyntihinta
+		// Haetaan tuotteen myyntihinta
 		$query = "	SELECT *
                     FROM tuote
                     WHERE tuoteno	= '$row[tuoteno]'
@@ -2516,7 +2592,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(445-$oikpos, $kala, $row["varattu"], $thispage, $norm);
 
-			//hatetaan tuotteen myyntihinta
+			// Haetaan tuotteen myyntihinta
 			$query = "	SELECT *
 	                    FROM tuote
 	                    WHERE tuoteno	= '$row[tuoteno]'
@@ -3443,13 +3519,10 @@ if (!function_exists('print_pdf_lahete')) {
 						$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
 					}
 					else {
-						if (!isset($ei_echoa) or trim($ei_echoa) == '') {
-							echo t("Lähete tulostuu")."...<br>";
-						}
+						echo t("Lähete tulostuu")."...<br>";
 
 						$kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
 					}
-
 
 					$newfilename = str_replace(" ", "_", $kutsu);
 
@@ -3467,16 +3540,20 @@ if (!function_exists('print_pdf_lahete')) {
 										"body"			=> $content_body,
 										"attachements"	=> array(0 	=> array(
 																	"filename"		=> $liite,
-																	"newfilename"	=> $newfilename,
+																	"newfilename"	=> $newfilename.".pdf",
 																	"ctype"			=> "pdf"),
 										)
 									);
 
 					pupesoft_sahkoposti($parametri);
-
 				}
 				elseif ($komento != '' and $komento != 'edi') {
 					echo t("Lähete tulostuu")."...<br>";
+
+					if ($lahetekpl > 1) {
+						$komento .= " -#$lahetekpl ";
+					}
+
 					$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 				}
 			}

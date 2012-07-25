@@ -25,9 +25,6 @@ if ($vstk == 'Asiakaskäynti') {
 	$sel22 = "CHECKED";
 }
 
-//echo "<li><a href='$PHP_SELF?tee=VALITSE_TIEDOSTO'>".t("Sisäänlue suunnitelma-/asiakaskäyntitiedosto")."</a>";
-//echo "<br><li><a href='$PHP_SELF?tee=laheta&kausi=$kausi&vstk=$vstk'>".t("Vie asiakastietopaketti sähköpostiisi")."</a><br><br>";
-
 print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 		<!--
 
@@ -45,20 +42,6 @@ print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 
 		//-->
 		</script>";
-
-
-
-if ($tee == 'laheta') {
-
-	echo "<br><br><font class='message'>".t("Asiakastietopakettit lähetetty sähköpostiisi")."!</font><br><br><br>";
-
-	require("laheta_asiakastietopaketti.inc");
-
-	$tee = "";
-
-}
-
-
 
 if ($tee == '') {
 
@@ -187,7 +170,7 @@ if ($tee == '') {
 				and oikeu.nimi		= 'crm/viikkosuunnitelma.php'
 				and kuka.tunnus <> '$kukarow[tunnus]'
 				ORDER BY kuka.nimi";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	while ($row = mysql_fetch_array($result)) {
 		$checked = '';
@@ -219,7 +202,7 @@ if ($tee == '') {
 
 	if (trim($konserni) != '') {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$yhtiot = array();
 
 		while ($row = mysql_fetch_array($result)) {
@@ -252,7 +235,7 @@ if ($tee == '') {
 					and kalenteri.tapa     = '$vstk'
 					and kalenteri.tyyppi in ('kalenteri','memo')
 					order by pvmalku, kalenteri.tunnus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 

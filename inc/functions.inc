@@ -18366,7 +18366,7 @@ if (!function_exists('etsi_suuntalava_sscc')) {
 }
 
 if (!function_exists("suuntalavan_tuotteet")) {
-	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "", $tilriv = 0) {
+	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "", $tilriv = 0, $eankoodi = "") {
 		global $kukarow;
 
 		if (is_array($suuntalavat) and count($suuntalavat) > 0) {
@@ -18403,9 +18403,12 @@ if (!function_exists("suuntalavan_tuotteet")) {
 
 		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
 
+		# Haku tuotenumerolla
 		$tuoteno = mysql_real_escape_string($tuoteno);
-
 		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
+		# Haku eankoodilla
+		$eankoodi = mysql_real_escape_string($eankoodi);
+		$eankoodilisa = trim($eankoodi) != "" ? "and tuote.eankoodi = '{$eankoodi}'" : "";
 
 		$tilriv = (int) $tilriv;
 
@@ -18429,6 +18432,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 					AND tilausrivi.kpl = 0
 					AND tilausrivi.suuntalava > 0
 					{$tuotenolisa}
+					{$eankoodilisa}
 					{$tilrivlisa}
 					ORDER BY {$order} {$ascdesc}";
 		$tavaraetiketti_res = pupe_query($query) or pupe_error($query);

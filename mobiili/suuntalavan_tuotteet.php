@@ -19,7 +19,7 @@ if (isset($submit) and trim($submit) != '') {
 	$url = http_build_query($data);
 
 	# edit ja submit tarvitsee valitun rivin.
-	if (!isset($_POST['selected_row'])) {
+	if (!isset($_POST['selected_row']) and $viivakoodi == '') {
 		$error['tuotteet'] = t("Riviä ei ole valittu", $browkieli).'.';
 	}
 	else {
@@ -68,17 +68,15 @@ if (isset($alusta_tunnus)) {
 		$ascdesc = $sort_by_direction_tuotepaikka;
 	}
 
-	$tuoteno = (isset($viivakoodi) and trim($viivakoodi))  ? trim($viivakoodi) : "";
+	# Haetaan eankoodilla
+	$eankoodi = (isset($viivakoodi) and trim($viivakoodi))  ? trim($viivakoodi) : "";
 
-	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc, $tuoteno);
+	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc, "", "", $eankoodi);
 
+	# Jos tuotetta ei löyty tältä lavalta
 	if (mysql_num_rows($res) == 0) {
-		# Tämä suuntalava on tyhjä
-		# Merkataan puretuksi ja palataan alustan valintaan
-		# suuntalava_puretuksi($suuntalava);
-		echo "Suuntalavalla ei yhtään tuotetta";
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
-		exit;
+		$error['tuotteet'] = "Suuntalavalta ei löytynyt kyseistä tuotetta";
+		$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc);
 	}
 
 	$i = 0;
@@ -155,20 +153,21 @@ echo "
 
 	<table border='0'>
 		<tr>
-			<td colspan='4'><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1>
+			<td><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1>
 				<form name='viivakoodiformi' method='post' action=''>
 					<table>
 						<tr>
-							<td colspan='5'>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />&nbsp;
+							<td>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 								<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi", $browkieli),"</button>
 							</td>
 						</tr>
-						<tr>
-							<td colspan='5'>&nbsp;</td>
-						</tr>
 					</table>
 				</form>
-				<form name='hakuformi' method='post' action=''>
+				<form name='hakuformi' method='post' action=''>";
+				if (isset($error)) {
+					echo "<span class='error'>{$error['tuotteet']}</span>";
+				}
+				echo"
 				<table>
 					<tr>
 						<th>&nbsp;</th>
@@ -197,7 +196,6 @@ echo $sort_by_direction_tuotepaikka == 'asc' ? "<img src='{$palvelin2}pics/lulla
 
 echo "							</th>
 					</tr>";
-
 					$chk = count($tuotteet) == 1 ? " checked" : "";
 
 					foreach ($tuotteet as $tuote) {
@@ -220,10 +218,7 @@ echo "							</th>
 						echo "</tr>";
 					}
 
-echo "						<tr>
-						<td colspan='5'>&nbsp;</td>
-					</tr>
-					</table>
+echo "			</table>
 					<table>
 					<tr>
 						<td nowrap>
@@ -238,17 +233,9 @@ echo "						<tr>
 						<td nowrap>
 							<button name='submit' value='varalle' onclick='submit();'>",t("Varalle", $browkieli),"</button>
 						</td>
-						<td>
-							&nbsp;
-						</td>
 					</tr>
 				</table>
 				";
-
-if (isset($error)) {
-	echo "<span class='error'>{$error['tuotteet']}</span>";
-}
-
 echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 				</form>

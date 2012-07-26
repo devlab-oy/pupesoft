@@ -62,7 +62,7 @@ if (isset($submit) and trim($submit) != '') {
 			$error['koodi'] = "Varmistuskoodi on v‰‰rin";
 		}
 		# Tarkistetaan varmistuskoodi
-		if(is_numeric($maara) && !empty($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
+		if(is_numeric($maara) && is_numeric($koodi) && tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 
 			# Hylly array
 			$hylly = array(

@@ -18840,7 +18840,6 @@ if (!function_exists('paivita_tilausrivin_hylly')) {
 					hyllytaso = '$hylly[hyllytaso]'
  					WHERE yhtio = '$kukarow[yhtio]'
  					and tunnus = '$tilausrivi_tunnus'";
- 		echo $query;
 
  		$presult = pupe_query($query);
 

@@ -98,22 +98,22 @@ if (!function_exists('finvoice_otsik')) {
 				fputs ($tootfinvoice, "<eb:MessageHeader xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\" SOAP-ENV:mustUnderstand=\"1\" eb:version=\"2.0\">\r\n");
 
 				fputs ($tootfinvoice, "<eb:From>\r\n");
-				xml_add("eb:PartyId", $senderpartyid ,								$tootfinvoice);
+				xml_add("eb:PartyId", $senderpartyid,								$tootfinvoice);
 				xml_add("eb:Role", "Sender", 										$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:From>\r\n");
 
 				fputs ($tootfinvoice, "<eb:From>\r\n");
-				xml_add("eb:PartyId", $senderintermediator ,						$tootfinvoice);
+				xml_add("eb:PartyId", $senderintermediator,							$tootfinvoice);
 				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:From>\r\n");
 
 				fputs ($tootfinvoice, "<eb:To>\r\n");
-				xml_add("eb:PartyId", $receiverpartyid ,							$tootfinvoice);
+				xml_add("eb:PartyId", $receiverpartyid,								$tootfinvoice);
 				xml_add("eb:Role", "Receiver",										$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:To>\r\n");
 
 				fputs ($tootfinvoice, "<eb:To>\r\n");
-				xml_add("eb:PartyId", $receiverintermediator ,						$tootfinvoice);
+				xml_add("eb:PartyId", $receiverintermediator,						$tootfinvoice);
 				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:To>\r\n");
 
@@ -122,7 +122,7 @@ if (!function_exists('finvoice_otsik')) {
 				xml_add("eb:Service", "Routing",									$tootfinvoice); //	Ei ilmeisesti juuri merkittävä
 				xml_add("eb:Action", "ProcessInvoice",								$tootfinvoice);
 				fputs ($tootfinvoice, "<eb:MessageData>\r\n");
-				xml_add("eb:MessageId", $mid									, 	$tootfinvoice);
+				xml_add("eb:MessageId", $mid,									 	$tootfinvoice);
 				xml_add("eb:Timestamp", date("Y-m-d")."T".date("H:i:s")."+02", 		$tootfinvoice);
 				fputs ($tootfinvoice, "<eb:RefToMessageId/>\r\n");
 				fputs ($tootfinvoice, "</eb:MessageData>\r\n");

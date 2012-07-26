@@ -554,6 +554,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			echo "<html>\n";
 			echo "<head>\n";
+			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
+			if ($mobile) echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>\n";
 			echo "<meta http-equiv='cache-control' content='no-cache'>\n";
 			echo "<meta http-equiv='pragma' content='no-cache'>\n";
 			echo "<meta http-equiv='expires' content='-1'>\n";

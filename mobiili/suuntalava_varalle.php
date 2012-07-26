@@ -1,5 +1,4 @@
 <?php
-echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -89,7 +88,7 @@ include("kasipaate.css");
 echo "
 	<table border='0'>
 		<tr>
-			<td><h1>",t("Suuntalavavaralle", $browkieli),"</h1>
+			<td><h1>",t("SUUNTALAVAVARALLE", $browkieli),"</h1>
 				<form name='varalleformi' method='post' action=''>
 				<table>
 					<tr>

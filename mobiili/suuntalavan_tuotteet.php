@@ -240,6 +240,34 @@ echo "							</th>
 
 						echo "</td>";
 						echo "<td class='selectable' nowrap>{$tuote['yks']}</td>";
+
+						# Jos oletuspaikat on setattu niin ollaan tultu alustalta ja asetetaan tilausrivien
+						# tuotepaikat oletuspaikoiksi.
+						if ($oletuspaikat) {
+
+							# P‰ivitet‰‰n tilausriveille oletuspaikat.
+							$oletus_query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+												FROM tuotepaikat
+												WHERE tuoteno='{$tuote['tuoteno']}'
+												AND oletus='X'
+												AND yhtio='{$yhtiorow['yhtio']}'";
+							$oletus_result = mysql_query($oletus_query);
+							$oletus = mysql_fetch_assoc($oletus_result);
+
+							$hylly = array(
+									'hyllyalue' => $oletus['hyllyalue'],
+									'hyllynro'	=> $oletus['hyllynro'],
+									'hyllyvali' => $oletus['hyllyvali'],
+									'hyllytaso' => $oletus['hyllytaso']
+								);
+
+							# Jos tilausrivill‰ oleva hyllypaikka ei ole tuotteen oletuspaikka
+							# p‰ivitet‰‰n tilausrivin hyllypaikka oletuspaikaksi.
+							if ($tuote['osoite'] != implode(" ", $hylly)) {
+								paivita_tilausrivin_hylly($tuote['tilriv_tunnus'], $hylly);
+								$tuote['osoite'] = implode(" ", $hylly);
+							}
+						}
 						echo "<td class='selectable' nowrap>{$tuote['osoite']}</td>";
 						echo "</tr>";
 					}

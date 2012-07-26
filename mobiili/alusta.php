@@ -34,7 +34,7 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
 		$url = "?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
 
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php{$url}'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php{$url}&oletuspaikat=true'>";
 		exit;
 	}
 

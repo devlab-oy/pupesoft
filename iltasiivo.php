@@ -170,7 +170,7 @@
 		$laskuri = 0;
 
 		// Arkistoidaan tulostetut ostotilaukset joilla ei ole yhtään tulossa olevaa kamaa
-		$query = "	SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus
+		$query = "	SELECT distinct lasku.tunnus laskutunnus
 					FROM lasku
 					LEFT JOIN tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.varattu != 0
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -189,16 +189,18 @@
 
 		$laskuri = 0;
 
-		// Arkistoidaan tulostetut saapumiset joilla ei ole yhtään liitettyä riviä eikä yhtään laskuja liitetty
-		$query = "	SELECT tilausrivi.tunnus, liitosotsikko.tunnus, lasku.tunnus laskutunnus, lasku.laskunro
+		// Arkistoidaan saapumiset joilla ei ole yhtään liitettyä riviä eikä yhtään laskuja liitetty
+		$query = "	SELECT distinct lasku.tunnus laskutunnus
 					FROM lasku
 					LEFT JOIN lasku liitosotsikko ON liitosotsikko.yhtio = lasku.yhtio and liitosotsikko.tila=lasku.tila and liitosotsikko.laskunro = lasku.laskunro and liitosotsikko.vanhatunnus > 0
 					LEFT JOIN tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O'
+					LEFT JOIN tilausrivi suoraan_keikalle on suoraan_keikalle.yhtio = lasku.yhtio and suoraan_keikalle.otunnus = lasku.tunnus and suoraan_keikalle.tyyppi = 'O'
 					WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
 					AND lasku.tila 		  = 'K'
 					AND lasku.mapvm		  = '0000-00-00'
 					AND lasku.vanhatunnus = 0
 					AND tilausrivi.tunnus is null
+					AND suoraan_keikalle.tunnus is null
 					AND liitosotsikko.tunnus is null";
 		$result = mysql_query($query) or die($query);
 

@@ -869,7 +869,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 		echo "<font class='head'>".t("Toimittajan keskeneräiset saapumiset")."</font><hr>";
 
-		pupe_DataTables(array(array($pupe_DataTables, 9, 9)));
+		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false)));
 
 		echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 		echo "<thead>";
@@ -967,11 +967,11 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 							AND lasku.laskunro    = '$row[laskunro]'";
 				$volasresult = pupe_query($query);
 
-				echo "<div id='div_lasku_$row[laskunro]' class='popup'>";
+				$laskujen_tiedot .= "<div id='div_lasku_$row[laskunro]' class='popup'>";
 				while ($volasrow = mysql_fetch_assoc($volasresult)) {
-					echo t("Lasku")." $volasrow[nimi] ($volasrow[summa] $volasrow[valkoodi]) ".t("hyväksyttävänä käyttäjällä")." $volasrow[kukanimi]<br>";
+					$laskujen_tiedot .= t("Lasku")." $volasrow[nimi] ($volasrow[summa] $volasrow[valkoodi]) ".t("hyväksyttävänä käyttäjällä")." $volasrow[kukanimi]<br>";
 				}
-				echo "</div>";
+				$laskujen_tiedot .= "</div>";
 			}
 
 			if ($llrow["volasku"] > 0) {

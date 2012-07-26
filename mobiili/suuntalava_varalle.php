@@ -84,6 +84,13 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
+# Haetaan SSCC
+$sscc_query = mysql_query("	SELECT sscc
+							FROM suuntalavat
+							WHERE tunnus='{$alusta_tunnus}'
+							AND yhtio='{$kukarow['yhtio']}'");
+$sscc = mysql_fetch_assoc($sscc_query);
+
 include("kasipaate.css");
 echo "
 	<table border='0'>
@@ -93,7 +100,7 @@ echo "
 				<table>
 					<tr>
 						<td>",t("Suuntalava", $browkieli),"</td>
-						<td colspan='3'>{$alusta_tunnus}</td>
+						<td colspan='3'>{$sscc['sscc']}</td>
 					</tr>
 					<tr>
 						<td>",t("Alue", $browkieli),"</td>

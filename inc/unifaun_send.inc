@@ -495,7 +495,7 @@ class Unifaun {
 				#$uni_shi_val->addAttribute('n', "shpid");
 
 
-				if ($yhtiorow['kerayserat'] == 'K') {
+				if ($this->yhtiorow['kerayserat'] == 'K') {
 					$pakkausid = chr(64+$this->postirow['pakkausid']);
 				}
 				else {
@@ -507,7 +507,7 @@ class Unifaun {
 				$uni_shi_val->addAttribute('n', "freetext1");
 
 				# kollilaji
-				if ($yhtiorow['kerayserat'] == 'K') {
+				if ($this->yhtiorow['kerayserat'] == 'K') {
 					$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus']." / ".$this->postirow['rivimaara'];
 				}
 				else {

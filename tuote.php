@@ -55,12 +55,12 @@
 		if (mysql_num_rows($result) > 0) {
 			$trow = mysql_fetch_assoc ($result);
 			$tuoteno = $trow['tuoteno'];
-			$tee='Z';
+			$tee = 'Z';
 		}
 		else {
 			$varaosavirhe = t("Yhtään tuotetta ei löytynyt")."!";
 			$tuoteno = '';
-			$tee='Y';
+			$tee = 'Y';
 		}
 	}
 
@@ -674,13 +674,14 @@
 			echo "<td></td>";
 			echo "</tr>";
 
-			echo "</table>";
+			echo "</table><br>";
 
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);
 
 			if ($liitteet != "") {
-				echo "$liitteet";
+				echo "<font class='message'>".t("Liitetiedostot")."</font><hr>";
+				echo "$liitteet<br><br>";
 			}
 
 			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
@@ -731,99 +732,9 @@
 				}
 				echo "<br>";
 			}
-			elseif ($liitteet != "") {
-				echo "<br>";
-			}
 
-			//korvaavat tuotteet
-			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$korvaresult = pupe_query($query);
-
-			if (mysql_num_rows($korvaresult) > 0) {
-				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Korvaavat tuotteet")."</font><hr>";
-
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>".t("Tuotenumero")."</th>";
-				echo "<th>".t("Myytävissä")."</th>";
-				echo "</tr>";
-
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($korvaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM korvaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$korva2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($korva2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-
-					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
-					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
-					echo "</tr>";
-				}
-
-				echo "</table><br>";
-			}
-
-			//vastaavat tuotteet
-			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
-			$vastaresult = pupe_query($query);
-
-			if (mysql_num_rows($vastaresult) > 0) {
-				// Varastosaldot ja paikat
-				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
-
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>".t("Tuotenumero")."</th>";
-				echo "<th>".t("Myytävissä")."</th>";
-				echo "</tr>";
-
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_assoc($vastaresult);
-				$id		= $row['id'];
-
-				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
-				$vasta2result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($vasta2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-
-					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
-					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
-					echo "</tr>";
-				}
-
-				echo "</table><br>";
-			}
-
-			//Tuotemuutoksia halutaan näyttää, mikäli niitä on.
-			$lista = hae_tuotemuutokset($tuoteno);
-
-			if (count($lista) > 0) {
-				// tuotemuutoksia.
-				echo "<font class='message'>".t("Tuotenumeromuutoksia")."</font><hr>";
-
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>".t("Vanha tuotenumero")."</th>";
-				echo "<th>".t("Muutospvm")."</th>";
-				echo "<th>".t("Muuttaja")."</th>";
-				echo "</tr>";
-
-				foreach ($lista as $muuttunut_tuote) {
-					echo "<tr>";
-					echo "<td>{$muuttunut_tuote["tuoteno"]}</td>";
-					echo "<td>".tv1dateconv($muuttunut_tuote['muutospvm'], 'X')."</td>";
-					echo "<td>{$muuttunut_tuote["kuka"]}</td>";
-					echo "</tr>";
-				}
-				echo "</table><br>";
-			}
+			// Saldot, korvaavat ja vastaavat
+			echo "<table><tr><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
 
 			if ($tuoterow["ei_saldoa"] == '') {
 
@@ -967,8 +878,106 @@
 						<th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>
 						</tr>";
 
-				echo "</table><br>";
+				echo "</table>";
 			}
+
+			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+
+			//korvaavat tuotteet
+			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+			$korvaresult = pupe_query($query);
+
+			if (mysql_num_rows($korvaresult) > 0) {
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Korvaavat tuotteet")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Tuotenumero")."</th>";
+				echo "<th>".t("Myytävissä")."</th>";
+				echo "</tr>";
+
+				// tuote löytyi, joten haetaan sen id...
+				$row    = mysql_fetch_assoc($korvaresult);
+				$id		= $row['id'];
+
+				$query = "SELECT * FROM korvaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+				$korva2result = pupe_query($query);
+
+				while ($row = mysql_fetch_assoc($korva2result)) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+					echo "<tr>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+					echo "</tr>";
+				}
+
+				echo "</table>";
+			}
+
+			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+
+			//vastaavat tuotteet
+			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
+			$vastaresult = pupe_query($query);
+
+			if (mysql_num_rows($vastaresult) > 0) {
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Tuotenumero")."</th>";
+				echo "<th>".t("Myytävissä")."</th>";
+				echo "</tr>";
+
+				// tuote löytyi, joten haetaan sen id...
+				$row    = mysql_fetch_assoc($vastaresult);
+				$id		= $row['id'];
+
+				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+				$vasta2result = pupe_query($query);
+
+				while ($row = mysql_fetch_assoc($vasta2result)) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+					echo "<tr>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+					echo "</tr>";
+				}
+
+				echo "</table>";
+			}
+
+			echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+
+			//Tuotemuutoksia halutaan näyttää, mikäli niitä on.
+			$lista = hae_tuotemuutokset($tuoteno);
+
+			if (count($lista) > 0) {
+				// tuotemuutoksia.
+				echo "<font class='message'>".t("Tuotenumeromuutoksia")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Vanha tuotenumero")."</th>";
+				echo "<th>".t("Muutospvm")."</th>";
+				echo "<th>".t("Muuttaja")."</th>";
+				echo "</tr>";
+
+				foreach ($lista as $muuttunut_tuote) {
+					echo "<tr>";
+					echo "<td>{$muuttunut_tuote["tuoteno"]}</td>";
+					echo "<td>".tv1dateconv($muuttunut_tuote['muutospvm'], 'X')."</td>";
+					echo "<td>{$muuttunut_tuote["kuka"]}</td>";
+					echo "</tr>";
+				}
+				echo "</table>";
+			}
+
+			echo "</td></tr></table><br>";
 
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,

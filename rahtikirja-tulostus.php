@@ -49,8 +49,8 @@
 		$toitarow = mysql_fetch_assoc($toitares);
 
 		// Ollaan tässä skriptissä tulostamassa erärahtikirjoja
-		// Unifaun keississä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat) and $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+		// Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
 			$tee = "close_with_printer";
 		}
 	}
@@ -222,7 +222,7 @@
 			$mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
 			$mergeid_arr[$mergeid] = $mergeid;
 
-			echo "Tulostetaan rahtikirja: $row[ytunnus].$row[toim_osoite].$row[toim_postino].$row[toim_postitp]<br>";
+			echo t("Tulostetaan rahtikirja").": $row[ytunnus].$row[toim_osoite].$row[toim_postino].$row[toim_postitp]<br>";
 		}
 
 		$query = "	SELECT unifaun_nimi

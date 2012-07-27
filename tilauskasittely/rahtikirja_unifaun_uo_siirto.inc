@@ -5,9 +5,9 @@
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
-	if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+	if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
 
-		require("inc/unifaun_send.inc");
+		require_once("inc/unifaun_send.inc");
 
 		if ($phpnimi == "rahtikirja_custom.php") {
 			$postirow = $osoitelappurow;
@@ -21,7 +21,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 						order by tunnus
 						limit 1";
 			$tempr = mysql_query($query) or pupe_error($query);
-			$postirow = mysql_fetch_array($tempr);
+			$postirow = mysql_fetch_assoc($tempr);
 		}
 
 		// Maksuehdon tiedot

@@ -59,7 +59,7 @@ echo "
 <html>
 	<head>
 	<title>Login</title>
-
+	<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
 	</head>

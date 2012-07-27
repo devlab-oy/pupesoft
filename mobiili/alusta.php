@@ -59,7 +59,7 @@ echo "
 		<form method='post' action=''>
 			<table border='0'>
 				<tr>
-					<td colspan='4'><h1>",t("Alusta", $browkieli),"</h1>
+					<td colspan='4'><h1>",t("ALUSTA", $browkieli),"</h1>
 						<table>
 							<tr>
 								<td>
@@ -77,25 +77,26 @@ echo "
 				</tr>
 				<tr>
 					<td colspan='4' class='back'>{$error['alusta']}</td>
-				</tr>";
+				</tr></table>";
 
 if (isset($return) and count($return) > 0) {
 
-	echo "<tr>";
-	echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
-	echo "<th nowrap>",t("Nimi", $browkieli),"<br>",t("Toim.nro", $browkieli),"</th>";
-	echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
-	echo "</tr>";
+	echo "<table>";
 
 	foreach ($return as $row) {
 		echo "<tr>";
+		echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
 		echo "<td nowrap>{$row['saapuminen_nro']}";
-		echo "<td nowrap style='text-align: center'>{$row['nimi']}<br>";
+		echo "</tr><tr>";
+		echo "<th nowrap>",t("Nimi", $browkieli),"<br>",t("Toim.nro", $browkieli),"</th>";
+		echo "<td nowrap>{$row['nimi']}<br>";
 		echo "{$row['toimittajanro']}</td>";
-		echo "<td nowrap style='text-align: center'>{$row['varastossa']} / {$row['kohdistettu']}</td>";
+		echo "</tr><tr>";
+		echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
+		echo "<td nowrap>{$row['varastossa']} / {$row['kohdistettu']}</td>";
 		echo "</tr>";
+		echo "<tr><td colspan=2><hr></td></tr>";
 	}
-
 	echo "<input type='hidden' name='alusta_chk' value='{$alusta}' />";
 	echo "<input type='hidden' name='alusta_tunnus' value='{$return[0]['suuntalava']}' />";
 	echo "<input type='hidden' name='liitostunnus' value='{$return[0]['liitostunnus']}' />";

@@ -35,7 +35,7 @@ echo "
 		<form method='post' action=''>
 			<table border='0'>
 				<tr>
-					<td><h1>",t("Tulouta", $browkieli),"</h1>
+					<td><h1>",t("TULOUTA", $browkieli),"</h1>
 						<table>
 							<tr>
 								<td>",t("Tulotyyppi", $browkieli),"</td>

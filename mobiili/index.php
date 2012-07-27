@@ -8,6 +8,9 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+# Index.php ei sisällytä parametrit incistä headereita
+echo "<meta name='viewport' content='width=156,height=154, user-scalable=no'/>\n";
+
 include("kasipaate.css");
 
 echo "<body>";

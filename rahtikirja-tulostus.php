@@ -168,8 +168,45 @@
 
 		if (isset($vain_tulostus) and $vain_tulostus != '') $vain_tulostus = $print['kirjoitin'];
 
-		$query = "LOCK TABLES liitetiedostot READ, rahdinkuljettajat READ, pakkaus READ, pakkauskoodit READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, vak READ, rahtikirjanumero WRITE";
-		$res   = pupe_query($query);
+		$query = "	LOCK TABLES liitetiedostot READ,
+ 					rahdinkuljettajat READ,
+				 	pakkaus READ,
+					pakkauskoodit READ,
+					rahtikirjat WRITE,
+					tilausrivi WRITE,
+					tapahtuma WRITE,
+					tuote WRITE,
+					lasku WRITE,
+					tiliointi WRITE,
+					tuotepaikat WRITE,
+					sanakirja WRITE,
+					rahtisopimukset READ,
+					rahtimaksut READ,
+					maksuehto READ,
+					varastopaikat READ,
+					kirjoittimet READ,
+					asiakas READ,
+					kuka READ,
+					avainsana READ,
+					avainsana as a READ,
+					avainsana as b READ,
+					pankkiyhteystiedot READ,
+					yhtion_toimipaikat READ,
+					yhtion_parametrit READ,
+					tuotteen_alv READ,
+					maat READ,
+					etaisyydet READ,
+					laskun_lisatiedot READ,
+					yhteyshenkilo READ,
+					toimitustapa READ,
+					avainsana as avainsana_kieli READ,
+					varaston_tulostimet READ,
+					dynaaminen_puu AS node READ,
+					dynaaminen_puu AS parent READ,
+					puun_alkio READ,
+					vak READ,
+					rahtikirjanumero WRITE";
+		$res = pupe_query($query);
 
 		if ($jv == 'vainjv') {
 			if (!isset($nayta_pdf)) echo t("Vain jälkivaatimukset").".";
@@ -198,11 +235,11 @@
 	// Kutsutaan unifaunin _closeWithPrinter-metodia
 	if ($tee == 'close_with_printer') {
 
-		require("inc/unifaun_send.inc");
+		require_once("inc/unifaun_send.inc");
 
-		$query = "	SELECT distinct lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus
+		$query = "	SELECT lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus, group_concat(DISTINCT rahtikirjat.tunnus) ratunnarit
 					FROM rahtikirjat
-					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G')
+					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G'))
 					$ltun_querylisa
 					$vainvakilliset
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -213,6 +250,7 @@
 					AND rahtikirjat.toimitustapa	= '$toimitustapa'
 					AND rahtikirjat.tulostuspaikka	= '$varasto'
 					$jvehto
+					GROUP BY 1,2,3,4,5,6,7,8
 					ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 		$rakir_res = pupe_query($query);
 
@@ -223,6 +261,27 @@
 			$mergeid_arr[$mergeid] = $mergeid;
 
 			echo t("Tulostetaan rahtikirja").": $row[ytunnus].$row[toim_osoite].$row[toim_postino].$row[toim_postitp]<br>";
+
+			// merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun erätulostuksen kollitarra
+			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				$query = "	UPDATE tilausrivi
+							SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+							WHERE otunnus  = '$row[tunnus]'
+							AND yhtio 	   = '$kukarow[yhtio]'
+							AND var not in ('P','J')
+							AND keratty    != ''
+							AND toimitettu  = ''
+							AND tyyppi 	 	= 'L'";
+				$ures  = pupe_query($query);
+
+
+				$query = "	UPDATE rahtikirjat
+							SET tulostettu = now()
+							WHERE tunnus  IN ($row[ratunnarit])
+							AND yhtio 	   = '$kukarow[yhtio]'
+							AND tulostettu = '0000-00-00 00:00:00'";
+				$ures  = pupe_query($query);
+			}
 		}
 
 		$query = "	SELECT unifaun_nimi
@@ -244,6 +303,12 @@
 			$unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
 			$unifaun->ftpSend();
 		}
+
+		// poistetaan lukko
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+
+		echo "<br>";
 
 		$tee = '';
 	}
@@ -357,14 +422,14 @@
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
 			$query = "	SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 						FROM rahtikirjat
-						join lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
+						JOIN LASKU on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 				$query .= " and lasku.alatila = 'B' ";
 			}
 
 			$query .= " $ltun_querylisa)
-						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+						LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 						WHERE rahtikirjat.yhtio			= '$kukarow[yhtio]' ";
 
 			// Jos keräyserät ja lähdöt on päällä, niin Unifaun 'hetitulostus' tilaukset merkataan tässä toimitetuiksi ja siksi näin
@@ -728,7 +793,7 @@
 				}
 
 				// Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
-				if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+				if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
 					$query = "	SELECT asiakkaan_tilausnumero
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -834,8 +899,7 @@
 		}
 
 		if (!isset($nayta_pdf)) echo "<br>";
-
-	} // end tee==tulosta
+	}
 
 	if (!isset($tee)) {
 		$tee = '';
@@ -979,7 +1043,7 @@
 		if (mysql_num_rows($result) > 0) {
 			echo "<table><tr><td>";
 
-			echo "<table><tr><td valign='top'>",t("Etsi numerolla"),":</td>";
+			echo "<table><tr><th valign='top'>",t("Etsi numerolla"),":</th>";
 			echo "<form method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
 			echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='",t("Etsi"),"'>&nbsp;<input type='submit' id='resetti' name='resetti' value='",t("Tyhjennä"),"'></td>";
 			echo "</form>";
@@ -989,7 +1053,7 @@
 			echo "<input type='hidden' name='tee' value='tulosta'>";
 			echo "<input type='hidden' name='edOpt' id='edOpt' value=''>";
 
-			echo "<tr><td>",t("Valitse toimitustapa"),":</td>";
+			echo "<tr><th>",t("Valitse toimitustapa"),":</th>";
 			echo "<td valign='top'><select name='toimitustapa_varasto' id='toimitustapa_varasto' onchange=\"untoggleAll(this);document.getElementById('sel_rahtikirjat').style.display='none';document.getElementById('sel_td').className='back';document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+this.value.substr(this.value.indexOf('!!!!!')+5)).index;\">";
 
 			$toimitustapa_lask_tun = '';
@@ -1013,19 +1077,19 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			echo "<tr><td>".t("Tulosta kaikki rahtikirjat").":</td>";
+			echo "<tr><th>".t("Tulosta kaikki rahtikirjat").":</th>";
 			echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
 
-			echo "<tr><td>".t("Tulosta vain jälkivaatimukset").":</td>";
+			echo "<tr><th>".t("Tulosta vain jälkivaatimukset").":</th>";
 			echo "<td><input type='radio' name='jv' value='vainjv'></td></tr>";
 
-			echo "<tr><td>".t("Älä tulosta jälkivaatimuksia").":</td>";
+			echo "<tr><th>".t("Älä tulosta jälkivaatimuksia").":</th>";
 			echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 
-			echo "<tr><td>".t("Tulosta vain rahtikirjoja joilla on VAK-koodeja").":</td>";
+			echo "<tr><th>".t("Tulosta vain rahtikirjoja joilla on VAK-koodeja").":</th>";
 			echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
-			echo "<tr><td>".t("Valitse jälkivaatimuslaskujen tulostuspaikka").":</td>";
+			echo "<tr><th>".t("Valitse jälkivaatimuslaskujen tulostuspaikka").":</th>";
 			echo "<td><select id='kirjoitin' name='laskukomento'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
@@ -1050,7 +1114,7 @@
 
 			echo "</select></td></tr>";
 
-			echo "<tr><td>",t("Valitse tulostin"),":</td>";
+			echo "<tr><th>",t("Valitse tulostin"),":</th>";
 			echo "<td><select name='komento'>";
 			echo "<option value='' SELECTED>",t("Oletustulostimelle"),"</option>";
 
@@ -1062,7 +1126,7 @@
 
 			echo "</select></td></tr>";
 
-			echo "<tr><td>",t("Tulosta osoitelaput"),"</td>";
+			echo "<tr><th>",t("Tulosta osoitelaput"),"</th>";
 
 
 			mysql_data_seek($kires, 0);

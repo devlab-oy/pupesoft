@@ -169,39 +169,33 @@
 			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
 			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
-
-				$query = "	SELECT *
+				
+				$query = "	SELECT suuntalavat.*
 							FROM suuntalavat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND keikkatunnus != 0
-							AND keikkatunnus LIKE '%{$otunnus}%'
-							AND tila = ''
-							AND sscc = '".t("Suoratoimitus")."'";
+							JOIN suuntalavat_saapuminen ON (
+								suuntalavat.yhtio = suuntalavat_saapuminen.yhtio
+								AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'
+								AND suuntalavat_saapuminen.saapuminen != 0
+								AND suuntalavat.tunnus = suuntalavat_saapuminen.suuntalava)
+							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+							AND suuntalavat.tila = ''
+							AND suuntalavat.sscc = 'Suoratoimitus'";
 				$chk_suuntalava_res = pupe_query($query);
 				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
 
 				if (mysql_num_rows($chk_suuntalava_res) == 0) {
-
-					$query = "	SELECT keraysvyohyke.terminaalialue, tuote.keraysvyohyke
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus = '{$valittutunnus}'";
-					$info_res = pupe_query($query);
-					$info_row = mysql_fetch_assoc($info_res);
-
+					
 					$suuntalavan_tunnus = "";
 
 					// Tehd‰‰n uusi suuntalava
 					$tee = "lisaa";
 					// $otunnus = $keikan_tunnus;
-					$sscc = t("Suoratoimitus");
+					$sscc = "Suoratoimitus";
 					$tyyppi = 0;
-					$keraysvyohyke = $info_row['keraysvyohyke'];
+					$keraysvyohyke = "Suoratoimitus";
 					$usea_keraysvyohyke = 'K';
 					$kaytettavyys = "Y";
-					$terminaalialue = $info_row['terminaalialue'];
+					$terminaalialue = "Suoratoimitus";
 					$korkeus = 0;
 					$paino = 0;
 					$alkuhyllyalue = "";
@@ -212,7 +206,7 @@
 					$loppuhyllynro = "";
 					$loppuhyllyvali = "";
 					$loppuhyllytaso = "";
-					$automaattinen_paivitys = "";
+					$automaattinen_paivitys = "S";
 					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
 					require ("../tilauskasittely/suuntalavat.inc");

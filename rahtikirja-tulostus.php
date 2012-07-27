@@ -50,7 +50,7 @@
 
 		// Ollaan tässä skriptissä tulostamassa erärahtikirjoja
 		// Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
 			$tee = "close_with_printer";
 		}
 	}
@@ -1151,7 +1151,7 @@
 			echo "</table>";
 
 			echo "<br>";
-			echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"'>";
+			echo "<input type='submit' name='tulosta_rahtikirjat_nappulatsukka' value='",t("Tulosta rahtikirjat"),"'>";
 			echo "</form>";
 		}
 		else {

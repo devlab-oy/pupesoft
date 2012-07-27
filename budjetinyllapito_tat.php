@@ -253,33 +253,23 @@
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = strtoupper($path_parts['extension']);
 
-		if ($ext != "XLS") {
-			die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
+		$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+
+		if ($retval !== TRUE) {
+			die ("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
 		}
 
 		if ($_FILES['userfile']['size'] == 0) {
 			die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 		}
 
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
-
-		echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br></font>";
+		$excelrivit = pupeFileReader($_FILES['userfile']['tmp_name'], $ext);
 
 		$headers	 		= array();
 		$budj_taulunrivit 	= array();
 		$liitostunnukset 	= "";
 
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$headers[] = trim($data->sheets[0]['cells'][0][$excej]);
-		}
+		$headers = array_shift($excelrivit);
 
 		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
 			if ($headers[$excej] != "") {
@@ -308,23 +298,23 @@
 
 		$insert_rivimaara = 0;
 
-		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+		foreach ($excelrivit as $rivinro => $rivi) {
 
-			$liitun = $data->sheets[0]['cells'][$excei][0];
+			$liitun = $rivi[0];
 			$liitostunnukset .= "'$liitun',";
 
 			if ($tuoteryhmittain != "") {
-				$try = $data->sheets[0]['cells'][$excei][$lukualku-1];
+				$try = $rivi[$lukualku-1];
 			}
 
 			for ($excej = $lukualku; $excej < count($headers); $excej++) {
 				$kasiind = str_replace("-", "", $headers[$excej]);
 
 				if ($tuoteryhmittain != "") {
-					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
+					$budj_taulunrivit[$liitun][$kasiind][$try] = (isset($rivi[$excej])) ? trim($rivi[$excej]) : "";
 				}
 				else {
-					$budj_taulunrivit[$liitun][$kasiind][] = (isset($data->sheets[0]['cells'][$excei][$excej])) ? trim($data->sheets[0]['cells'][$excei][$excej]) : "";
+					$budj_taulunrivit[$liitun][$kasiind][] = (isset($rivi[$excej])) ? trim($rivi[$excej]) : "";
 				}
 
 				$insert_rivimaara++;
@@ -947,27 +937,15 @@
 			echo "<font class='error'>".t("VIRHE: Et voi valita useita osastoja ja tuoteryhmi‰ kerrallaan")."</font>";
 			$tee = "";
 		}
-
-		if (!@include('Spreadsheet/Excel/Writer.php')) {
-			echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
-			$tee = "";
-		}
 	}
 
 	// Ajetaan raportti
 	if ($tee == "AJA_RAPORTTI") {
 
-		//keksit‰‰n failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+		include('inc/pupeExcel.inc');
 
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$workbook->setVersion(8);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
+		$worksheet 	 = new pupeExcel();
+		$format_bold = array("bold" => TRUE);
 
 		$excelrivi		= 0;
 		$excelsarake	= 0;
@@ -1279,19 +1257,19 @@
 
 		if ($rivimaara < $maxrivimaara) echo "</table>";
 
-		$workbook->close();
+		$excelnimi = $worksheet->close();
 
 		echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna budjettiluvut"),"' />";
 		echo "</form>";
 
-		echo "<br><br><font class='message'>Budjettiluvut Excel muodossa</font><br>";
+		echo "<br><br><font class='message'>".t("Budjettiluvut Excel muodossa")."</font><br>";
 
 		echo "<hr>";
 
 		echo "<form method='post' class='multisubmit'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi_$toim.xls'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi_$toim.xlsx'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<input type='submit' value='",t("Hae tiedosto"),"'>";
 		echo "</form>";

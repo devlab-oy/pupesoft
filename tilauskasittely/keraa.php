@@ -1957,8 +1957,17 @@
 
 			$result = pupe_query($query);
 
-			//piirret‰‰n taulukko...
-			if (mysql_num_rows($result) > 0) {
+			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
+				$row = mysql_fetch_assoc($result);
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					$id = $row[keraysera];
+				}
+				else {
+					$id = $row[tunnus];
+				}
+			}
+			else if (mysql_num_rows($result) > 1) {
+				//piirret‰‰n taulukko...
 				echo "<br><table>";
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') {

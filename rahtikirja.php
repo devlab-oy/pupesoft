@@ -763,6 +763,11 @@
 
 					$toimitustapa_varasto = $toimitustapa."!!!!".$kukarow['yhtio']."!!!!".$tulostuspaikka;
 					$tee				  = "tulosta";
+					
+					// triggeröidään tämä, niin ei tulosteta liikaa rahtikirjoja
+					if ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+						$sel_ltun = explode(",", $tunnukset);
+					}
 
 					require ("rahtikirja-tulostus.php");
 

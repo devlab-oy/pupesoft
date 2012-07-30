@@ -497,8 +497,7 @@
 					$jarjestys_join
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
-					$where_lisa
-					$avainsana_grouppaus)
+					$where_lisa)
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa1
@@ -527,8 +526,7 @@
 											$varastontunnukset)
 					$jarjestys_join
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					$where_lisa
-					$avainsana_grouppaus)
+					$where_lisa)
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
 
@@ -661,9 +659,9 @@
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
 			if ($elements > 0) {
-				#require_once ('inc/ProgressBar.class.php');
-				#$bar = new ProgressBar();
-				#$bar->initialize($elements); // print the empty bar
+				require_once ('inc/ProgressBar.class.php');
+				$bar = new ProgressBar();
+				$bar->initialize($elements); // print the empty bar
 			}
 		}
 
@@ -684,7 +682,7 @@
 			if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
 
 			if (!$php_cli) {
-				#$bar->increase();
+				$bar->increase();
 			}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY') {

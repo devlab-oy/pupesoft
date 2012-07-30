@@ -257,7 +257,7 @@
 		echo "</td><td class='back' valign='top'>".t('Saat kaikki varastot jos et valitse mitään').".</td></tr>";
 
 		echo "<tr>";
-		echo "<th>Syötä vvvv-kk-pp:</th>";
+		echo "<th>".t("Syötä vvvv-kk-pp").":</th>";
 		echo "<td><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
 		echo "</tr>";
 
@@ -297,7 +297,7 @@
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 0) {
-				echo "<b>Käyttäjän yritys ei löydy! ($kukarow[yhtio])";
+				echo "<b>".t("Käyttäjän yritys ei löydy")."! ($kukarow[yhtio])";
 				exit;
 			}
 
@@ -468,27 +468,10 @@
 			force_echo("Haetaan käsiteltävien tuotteiden varastopaikat historiasta.");
 		}
 
-
-		$variaatiolisa1 = " concat('\'', tapahtuma.tuoteno ,'\'') tuoteno, ";
-		$variaatiolisa2 = " concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno, ";
-
-		// Summataan per variaatio
-		if ($variaatiosummaus != "") {
-			$variaatiolisa1 = " group_concat(distinct concat('\'', tapahtuma.tuoteno ,'\'')) tuoteno, ";
-			$variaatiolisa2 = " group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, ";
-
-			if ($varastolisa1 != "") {
-				$avainsana_grouppaus = " group by varastonnimi, varastotunnus, variaatio ";
-			}
-			else {
-				$avainsana_grouppaus = " group by variaatio ";
-			}		
-		}
-
 		// haetaan kaikki distinct tuotepaikat ja tapahtumat
 		$query = "	(SELECT DISTINCT
 					$varastolisa1
-					$variaatiolisa1
+					tapahtuma.tuoteno,
 					tapahtuma.yhtio,
 					tuote.try,
 					tuote.osasto,
@@ -519,7 +502,7 @@
 					UNION DISTINCT
 					(SELECT DISTINCT
 					$varastolisa1
-					$variaatiolisa2
+					tuotepaikat.tuoteno,
 					tuotepaikat.yhtio,
 					tuote.try,
 					tuote.osasto,
@@ -678,21 +661,30 @@
 			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
 			if ($elements > 0) {
-				require_once ('inc/ProgressBar.class.php');
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				#require_once ('inc/ProgressBar.class.php');
+				#$bar = new ProgressBar();
+				#$bar->initialize($elements); // print the empty bar
 			}
 		}
 
+		$variaatiosum_kpl 					= 0;
+		$variaatiosum_varaston_arvo 		= 0;
+		$variaatiosum_bruttovaraston_arvo 	= 0;
+		$variaatiosum_muutoshinta 			= 0;
+		$variaatiosum_bmuutoshinta 			= 0;
+		$variaatiosum_row					= array();
+
 		while ($row = mysql_fetch_assoc($result)) {
 
-			$kpl = 0;
-			$varaston_arvo = 0;
+			$kpl 				 = 0;
+			$varaston_arvo 		 = 0;
 			$bruttovaraston_arvo = 0;
 			$lask++;
 
+			if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
+
 			if (!$php_cli) {
-				$bar->increase();
+				#$bar->increase();
 			}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY') {
@@ -787,7 +779,7 @@
 													and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 													$mistavarastosta)
 							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.tuoteno in ({$row['tuoteno']})
+							and tuotepaikat.tuoteno = '{$row['tuoteno']}'
 							$summaus_lisa";
 
 				$vararvores = pupe_query($query);
@@ -826,7 +818,7 @@
 												and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
 												$mistavarastosta)
 			 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-			 			and tapahtuma.tuoteno in ($row[tuoteno])
+			 			and tapahtuma.tuoteno = '{$row['tuoteno']}'
 			 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
 						$summaus_lisa
 						GROUP BY tapahtuma.laadittu
@@ -853,7 +845,7 @@
 			$query = "	SELECT sum($muutoskpl * hinta) muutoshinta
 			 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 			 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-			 			and tapahtuma.tuoteno in ($row[tuoteno])
+			 			and tapahtuma.tuoteno = '{$row['tuoteno']}'
 			 			and tapahtuma.laadittu >= '$uusintapahtuma'
 						and tapahtuma.laji = 'Epäkurantti'";
 			$epares = pupe_query($query);
@@ -873,7 +865,7 @@
 						$query = "	SELECT sum($muutoskpl * hinta) muutoshinta
 						 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 						 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-						 			and tapahtuma.tuoteno in ($row[tuoteno])
+						 			and tapahtuma.tuoteno = '{$row['tuoteno']}'
 						 			and tapahtuma.laadittu >= '$muutosrow[laadittu]'
 									and tapahtuma.laadittu < '$edlaadittu'
 									and tapahtuma.laji = 'Epäkurantti'";
@@ -898,34 +890,73 @@
 				}
 			}
 
-			if ($tyyppi == "C") {
-				$ok = "GO";
+			$eitodgo 			= FALSE;
+			$ok 	 			= FALSE;
+			$ed_variaatio_next 	= $row['variaatio'];
+
+			// Summataan per variaatio
+			if ($variaatiosummaus != "" and $row['variaatio'] == $ed_variaatio) {
+				$variaatiosum_kpl 					+= $kpl;
+				$variaatiosum_varaston_arvo 		+= $varaston_arvo;
+				$variaatiosum_bruttovaraston_arvo 	+= $bruttovaraston_arvo;
+				$variaatiosum_muutoshinta 			+= $muutoshinta;
+				$variaatiosum_bmuutoshinta 			+= $bmuutoshinta;
+				$variaatiosum_row					 = $row;
+
+				echo "PELLEKALA: $kpl, $row[variaatio], $row[tuoteno]<br>";
+
+				$eitodgo = TRUE;
 			}
-			elseif ($tyyppi == "A" and $muutoskpl != 0) {
-				$ok = "GO";
-			}
-			elseif ($tyyppi == "B" and $muutoskpl == 0) {
-				$ok = "GO";
-			}
-			elseif ($tyyppi == "D" and $muutoskpl < 0) {
-				$ok = "GO";
-			}
-			else {
-				$ok = "NO-GO";
+			elseif ($variaatiosummaus != "" and $row['variaatio'] != $ed_variaatio) {
+				$kpl					= $variaatiosum_kpl;
+				$varaston_arvo			= $variaatiosum_varaston_arvo;
+				$bruttovaraston_arvo	= $variaatiosum_bruttovaraston_arvo;
+				$muutoshinta			= $variaatiosum_muutoshinta;
+				$bmuutoshinta			= $variaatiosum_bmuutoshinta;
+				$row					= $variaatiosum_row;
+
+				echo "KALAPELLE: $kpl, $row[variaatio], $row[tuoteno]<br>";
+
+				$variaatiosum_kpl 					= 0;
+				$variaatiosum_varaston_arvo 		= 0;
+				$variaatiosum_bruttovaraston_arvo 	= 0;
+				$variaatiosum_muutoshinta 			= 0;
+				$variaatiosum_bmuutoshinta 			= 0;
+				$variaatiosum_row					= array();
 			}
 
-			if ($muutoshinta < $alaraja and $alaraja != '') {
-				$ok = "NO-GO";
+			$ed_variaatio = $ed_variaatio_next;
+
+			if (!$eitodgo) {
+				if ($tyyppi == "C") {
+					$ok = TRUE;
+				}
+				elseif ($tyyppi == "A" and $muutoskpl != 0) {
+					$ok = TRUE;
+				}
+				elseif ($tyyppi == "B" and $muutoskpl == 0) {
+					$ok = TRUE;
+				}
+				elseif ($tyyppi == "D" and $muutoskpl < 0) {
+					$ok = TRUE;
+				}
+				else {
+					$ok = FALSE;
+				}
+
+				if ($muutoshinta < $alaraja and $alaraja != '') {
+					$ok = FALSE;
+				}
+
+				if ($muutoshinta > $ylaraja and $ylaraja != '') {
+					$ok = FALSE;
+				}
 			}
 
-			if ($muutoshinta > $ylaraja and $ylaraja != '') {
-				$ok = "NO-GO";
-			}
-
-			if ($ok == "GO") {
+			if ($ok == TRUE) {
 				// summataan varastonarvoa
-				$varvo += $muutoshinta;
-				$bvarvo += $bmuutoshinta;
+				$varvo   += $muutoshinta;
+				$bvarvo  += $bmuutoshinta;
 				$kehalisa = "";
 
 				// sarjanumerollisilla tuotteilla ei ole keskihankintahintaa
@@ -952,7 +983,7 @@
 						$query = "	SELECT hinta
 									FROM tapahtuma use index (yhtio_tuote_laadittu)
 									WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno in ($row[tuoteno])
+									and tuoteno = '{$row['tuoteno']}'
 									and laadittu <= '$vv-$kk-$pp 23:59:59'
 									and laji NOT IN ('poistettupaikka','uusipaikka')
 									ORDER BY laadittu desc, tunnus desc
@@ -971,7 +1002,7 @@
 							$query = "	SELECT hinta
 										FROM tapahtuma use index (yhtio_tuote_laadittu)
 										WHERE yhtio = '$kukarow[yhtio]'
-										and tuoteno in ($row[tuoteno])
+										and tuoteno = '{$row['tuoteno']}'
 										and laadittu > '$vv-$kk-$pp 23:59:59'
 										and laji NOT IN ('poistettupaikka','uusipaikka')
 										ORDER BY laadittu, tunnus
@@ -1016,7 +1047,7 @@
 													$mistavarastosta)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi in ('L','V')
-							and tilausrivi.tuoteno in ($row[tuoteno])
+							and tilausrivi.tuoteno = '{$row['tuoteno']}'
 							and tilausrivi.laskutettuaika <= '$vv-$kk-$pp'
 							and tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
 							$summaus_lisa";
@@ -1027,7 +1058,7 @@
 				$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							WHERE yhtio  = '$kukarow[yhtio]'
-							and tuoteno  in ($row[tuoteno])
+							and tuoteno  = '{$row['tuoteno']}'
 							and laadittu > '{$xmyyrow['laskutettuaika']}'
 							and laji 	 = 'laskutus'";
 				$xmyyres = pupe_query($query);
@@ -1037,7 +1068,7 @@
 				$query = "	SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							WHERE yhtio  = '$kukarow[yhtio]'
-							and tuoteno  in ($row[tuoteno])
+							and tuoteno  = '{$row['tuoteno']}'
 							and laadittu > '{$xmyyrow['laskutettuaika']}'
 							and laji 	 = 'kulutus'";
 				$xmyyres = pupe_query($query);
@@ -1145,7 +1176,7 @@
 									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
 									LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
 									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-									and sarjanumeroseuranta.tuoteno in ($row[tuoteno])
+									and sarjanumeroseuranta.tuoteno = '{$row['tuoteno']}'
 									and sarjanumeroseuranta.myyntirivitunnus != -1
 									$summaus_lisa
 									and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00' or tilausrivi_myynti.laskutettuaika > '$vv-$kk-$pp')

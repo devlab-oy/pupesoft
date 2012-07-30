@@ -124,9 +124,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
 
-	# Vied‰‰n vain yksi rivi varastoon
-	if ($vie_vain_tama_tunnus_varastoon != 0) {
-		$varastoon_tilausurivirajaus = "AND tilausrivi.tunnus = $vie_vain_tama_tunnus_varastoon";
+	# Jos tilausrivi ei ole nolla, vied‰‰n vain yksi rivi varastoon.
+	if ($tilausrivi != 0) {
+		$varastoon_tilausurivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -1076,7 +1076,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 			else {
 				echo "<font class='error'>".t("En lˆyt‰nyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
 			}
-			
+
 			// tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivej‰, joita ei ole k‰sitelty
 			if ($kulurow['ebid'] == 'TECCOM-INVOICE') {
 				// katotaa onko k‰sittelem‰ttˆmi‰ rivej‰
@@ -1086,7 +1086,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							AND tunnus 		= '$kulurow[liitostunnus]'";
 				$toimittajanrores = pupe_query($query);
 				$toimittajanrorow = mysql_fetch_assoc($toimittajanrores);
-				
+
 				$query = "	SELECT status
 							FROM asn_sanomat
 							WHERE yhtio  			= '$kukarow[yhtio]'
@@ -1094,7 +1094,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							AND asn_numero			= '$kulurow[laskunro]'
 							AND status 				= ''";
 				$asnsres = pupe_query($query);
-				
+
 				if (mysql_num_rows($asnsres) > 0) {
 					$query = "	UPDATE asn_sanomat SET
 								status = 'X'
@@ -1239,9 +1239,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-		# Jos vied‰‰n yksi rivi kerrallaan, ei suuntalavaa merkata puretuksi
-		# Jos kyseess‰ on viimeinen tuote, merkataan puretuksi.
-		if ($vie_vain_tama_tunnus_varastoon == 0) {
+		# Ei merkata lavaa puretuksi jos vied‰‰n rivi kerrallaan
+		if ($tilausrivi == 0) {
 
 			// p‰ivitet‰‰n suuntalava puretuksi
 			$query = "	UPDATE tilausrivi

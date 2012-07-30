@@ -18655,12 +18655,8 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 * @param $tilausrivi
 */
 if (!function_exists('vie_varastoon')) {
-	function vie_varastoon($saapumisen_tunnus, $suuntalavan_tunnus, $hylly, $selected_row = 0) {
+	function vie_varastoon($saapumisen_tunnus, $suuntalavan_tunnus, $hylly, $tilausrivi = 0) {
 		global $kukarow, $yhtiorow;
-
-		# Jos funktiolle annettiin parametrinta tilausrivi,
-		# vied‰‰n varastoon vain kyseinen rivi
-		$vie_vain_tama_tunnus_varastoon = $selected_row;
 
 		// t‰m‰n keikan voi vied‰ saldoille...
 		$otunnus = $saapumisen_tunnus;
@@ -18682,7 +18678,7 @@ if (!function_exists('vie_varastoon')) {
 		$hyllytaso 	= $hylly['hyllytaso'];
 
 		# Koko suuntalava varastoon
-		if($vie_vain_tama_tunnus_varastoon == 0) {
+		if($tilausrivi == 0) {
 			$koko_suuntalava = 'X';
 			$vietiinko_koko_suuntalava = 'joo';
 		}

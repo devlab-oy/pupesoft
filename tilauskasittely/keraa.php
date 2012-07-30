@@ -1957,6 +1957,7 @@
 
 			$result = pupe_query($query);
 
+			//jos haetaan numerolla ja lˆydet‰‰n yksi osuma, siirryt‰‰n suoraan ker‰‰m‰‰n
 			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
 				$row = mysql_fetch_assoc($result);
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
@@ -1966,7 +1967,7 @@
 					$id = $row[tunnus];
 				}
 			}
-			else if (mysql_num_rows($result) > 1) {
+			else if (mysql_num_rows($result) > 0) {
 				//piirret‰‰n taulukko...
 				echo "<br><table>";
 				echo "<tr>";

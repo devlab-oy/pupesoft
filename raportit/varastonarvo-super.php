@@ -451,11 +451,10 @@
 
 		################## Varaston tiedot ##################
 		$varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
-		$varastolisa2 = " tmp_tuotepaikat.varastonnimi, tmp_tuotepaikat.varastotunnus, ";
 
 		if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TRYS") {
 			$varastolisa1 = "";
-			$varastolisa3 = "";
+			$varastolisa2 = "";
 		}
 
 		if (!$php_cli) {
@@ -464,12 +463,12 @@
 
 		if ($summaustaso == "TRYS" or $summaustaso == "TRY") {
 			$varastolisa1 = "t1.selite avainsana_selite, group_concat(distinct concat('\'', tapahtuma.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
-			$varastolisa3 = "t1.selite avainsana_selite, group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
+			$varastolisa2 = "t1.selite avainsana_selite, group_concat(distinct concat('\'', tuotepaikat.tuoteno ,'\'')) tuoteno, group_concat(distinct varastopaikat.nimitys) varastonnimi, group_concat(distinct varastopaikat.tunnus) varastotunnus,";
 			$avainsana_grouppaus = " group by avainsana_selite ";
 		}
 		else {
 			$varastolisa1 = "concat('\'', tapahtuma.tuoteno ,'\'') tuoteno, ";
-			$varastolisa3 = "concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno, ";
+			$varastolisa2 = "concat('\'', tuotepaikat.tuoteno ,'\'') tuoteno, ";
 		}
 
 		// haetaan kaikki distinct tuotepaikat ja tehd‰‰n temp table (t‰m‰ n‰ytt‰‰ ep‰tehokkaalta, mutta on testattu ja t‰m‰ _on_ nopein tapa joinata ja tehd‰ asia)
@@ -504,7 +503,7 @@
 					$avainsana_grouppaus)
 					UNION DISTINCT
 					(SELECT DISTINCT
-					$varastolisa3
+					$varastolisa2
 					tuotepaikat.yhtio,
 					tuote.try,
 					tuote.osasto,

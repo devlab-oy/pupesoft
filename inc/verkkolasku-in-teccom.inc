@@ -90,6 +90,14 @@
 		}
 	}
 
+	// BehrHella case
+	if (isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeCode)
+		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeCode == 'ZF03'
+		and isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount)
+		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount != 0) {
+		$osto_rahti = (float) $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount;
+	}
+
 	$laskun_alv = 0;
 
 	if (isset($xml->InvoiceSummary->Tax->Percent) and $xml->InvoiceSummary->Tax->Percent != 0) {

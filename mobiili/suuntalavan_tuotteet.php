@@ -80,7 +80,17 @@ if (isset($alusta_tunnus)) {
 	}
 	# Muuten tyhjä lava
 	elseif(mysql_num_rows($res) == 0) {
-		# TODO: Aseta puretuksi
+		echo "Suuntalava on purettu!<br>";
+
+		# Merkataan puretuksi
+		$query = "UPDATE suuntalavat SET suuntalavat.tila = 'P' WHERE tunnus = '{$suuntalavan_tunnus}' AND yhtio = '{$kukarow['yhtio']}'";
+		$purettu_result = pupe_query($query);
+
+		if (mysql_affected_rows() == 0) {
+			echo "VIRHE: Suuntalavaa ei purettu";
+		}
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
+		exit;
 	}
 
 	$i = 0;

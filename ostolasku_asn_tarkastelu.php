@@ -924,6 +924,7 @@
 			// otetaan ostotilausrivin kpl määrä, splitataan ja mennää eteenpäin...
 			// Tämä pitää sitten jollain tavalla muuttaa paremmaksi, tämä on versio 1.0
 
+			$kaytettavat_tunnukset = array();
 			$kaytettava_kappalemaara_yhteensa = 0;
 			$splitattava_tilausrivi = 0;
 
@@ -941,12 +942,14 @@
 
 			foreach ($tunnukset as $tmp_tunn) {
 				if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
+					$kaytettavat_tunnukset[] = $tmp_tunn;
 					$kaytettava_kappalemaara_yhteensa += $ostotilauksella_kpl[$tmp_tunn];
 					$splitattava_tilausrivi = $tmp_tunn;
 				}
 			}
 
 			echo "kpl_maara_ostolla_yhteensa $kaytettava_kappalemaara_yhteensa<br>";
+			echo "<pre>",var_dump($kaytettavat_tunnukset),"</pre>";
 
 			if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
 				$error = t("Valitse vähintään")." {$asn_row_haku['kappalemaara']}!";
@@ -1038,6 +1041,8 @@
 				$kolli = $row['paketintunniste'];
 
 				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+
+				$tunnukset = array_intersect_key($tunnukset, $kaytettavat_tunnukset);
 
 				$query = "	UPDATE asn_sanomat SET
 							tilausrivi = '".implode(",", $tunnukset)."',

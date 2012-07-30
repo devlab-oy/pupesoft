@@ -285,11 +285,13 @@
 					// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
 					if (strpos($kollirow['tilausrivi'], ",") !== false) {
 						foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
-							$paketin_rivit[] = $tunnus;
+							$tunnus = trim($tunnus);
+
+							if ($tunnus != '') $paketin_rivit[] = $tunnus;
 						}
 					}
 					else {
-						$paketin_rivit[] = $kollirow['tilausrivi'];
+						if ($kollirow['tilausrivi'] != '') $paketin_rivit[] = $kollirow['tilausrivi'];
 					}
 
 					// Haetaan tuotteen lapset jotka ovat runkoveloituksia

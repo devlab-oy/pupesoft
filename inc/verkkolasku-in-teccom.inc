@@ -95,7 +95,7 @@
 		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeCode == 'ZF03'
 		and isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount)
 		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount != 0) {
-		$osto_rahti = (float) $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount;
+		$osto_rahti = (float) str_replace(",", ".", $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount);
 	}
 
 	$laskun_alv = 0;

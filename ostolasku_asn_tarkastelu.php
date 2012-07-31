@@ -950,9 +950,6 @@
 				}
 			}
 
-			echo "kpl_maara_ostolla_yhteensa $kaytettava_kappalemaara_yhteensa<br>";
-			echo "<pre>",var_dump($kaytettavat_tunnukset),"</pre>";
-
 			if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
 				$error = t("Valitse vähintään")." {$asn_row_haku['kappalemaara']}!";
 				$tee = 'etsi';
@@ -1012,6 +1009,9 @@
 								tilkpl		= '$erotus',
 								varattu		= '$erotus',
 								hinta		= '$ostotilausrivirow[hinta]',
+								ale1		= '$ostotilausrivirow[ale1]',
+								ale2		= '$ostotilausrivirow[ale2]',
+								ale3		= '$ostotilausrivirow[ale3]',
 								laatija		= '$ostotilausrivirow[laatija]',
 								laadittu	= '$ostotilausrivirow[laadittu]',
 								hyllyalue	= '$ostotilausrivirow[hyllyalue]',

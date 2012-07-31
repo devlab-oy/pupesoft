@@ -966,6 +966,27 @@ if ($tee == 'P' or $tee == 'E') {
 
 				$(function() {
 
+					var maara = $('#maara').val();
+
+					for (var i = 1; i < maara; i++) {
+						$('#tiliointirivi_'+i).show();
+						$('#tiliointirivi_hr_'+i).show();
+					}
+
+					$('#lisaa_uusi_tiliointirivi').on('click', function(event) {
+						event.preventDefault();
+
+						var maara = $('#maara').val();
+
+						$('#tiliointirivi_hr_'+maara).show();
+
+						maara++;
+
+						$('#tiliointirivi_'+maara).show();
+
+						$('#maara').val(maara);
+					});
+
 					$('#summa, #osto_rahti, #osto_kulu, #osto_rivi_kulu').on('keyup', function() {
 
 						var summa_echotus = $('#summa').val(),
@@ -1600,9 +1621,9 @@ if ($tee == 'P' or $tee == 'E') {
 					<th style='text-align:right;'>".t("Vero")."</th>
 				</tr>";
 
-		for ($i=1; $i<$maara; $i++) {
+		for ($i = 1; $i < 50; $i++) {
 
-			echo "<tr><td valign='top'>";
+			echo "<tr id='tiliointirivi_{$i}' style='display:none;'><td valign='top'>";
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
@@ -1709,9 +1730,11 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "</td></tr>";
 
 			if ($maara > 1 and $i+1 != $maara) {
-				echo "<tr><td colspan='4'><hr></td></tr>";
+				echo "<tr id='tiliointirivi_hr_{$i}' style='display:none;'><td colspan='4'><hr></td></tr>";
 			}
 		}
+
+		echo "<tr><td colspan='4'><button id='lisaa_uusi_tiliointirivi'>",t("Lisää tiliöintirivi"),"</button></td></tr>";
 
 		echo "</table>";
 
@@ -1735,7 +1758,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "<br>
 		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
-		<input type = 'hidden' name = 'maara' value = '$maara'>
+		<input type = 'hidden' name = 'maara' id='maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."' tabindex='-1'></form>";
 
 } // end if tee = 'P'

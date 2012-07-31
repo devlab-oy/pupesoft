@@ -578,33 +578,45 @@
 							$laskurow	= mysql_fetch_assoc($laskures);
 							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
-							$lisainsert = "	INSERT INTO tilausrivi SET
-											yhtio			= '{$lapsitieto['yhtio']}',
-											tyyppi			= '{$lapsitieto['tyyppi']}',
-											toimaika		= '{$lapsitieto['toimaika']}',
-											kerayspvm		= '{$lapsitieto['kerayspvm']}',
-											otunnus			= '{$lapsitieto['otunnus']}',
-											tuoteno			= '{$lapsitieto['tuoteno']}',
-											try				= '{$lapsitieto['try']}',
-											osasto			= '{$lapsitieto['osasto']}',
-											nimitys			= '{$lapsitieto['nimitys']}',
-											yksikko			= '{$lapsitieto['yksikko']}',
-											tilkpl			= '{$lapsitieto['tilkpl']}',
-											varattu			= '{$lapsitieto['varattu']}',
-											kpl 			= '{$lapsitieto['kpl']}',
-											ale1			= '{$ale['ale1']}',
-											ale2			= '{$ale['ale2']}',
-											ale3			= '{$ale['ale3']}',
-											hinta			= '{$hinta}',
-											laatija			= 'lapset',
-											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-											laadittu		=  now(),
-											hyllyalue		= '{$lapsitieto['hyllyalue']}',
-											hyllynro		= '{$lapsitieto['hyllynro']}',
-											hyllytaso		= '{$lapsitieto['hyllytaso']}',
-											hyllyvali		= '{$lapsitieto['hyllyvali']}',
-											perheid			= '{$lapsitieto['tunnus']}'";
-							$inskres = pupe_query($lisainsert);
+							$query = "	SELECT tunnus
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND perheid = '{$lapsitieto['tunnus']}'
+										AND tuoteno = '{$lapsitieto['tuoteno']}'
+										AND kpl = '{$lapsitieto['kpl']}'
+										AND varattu = '{$lapsitieto['varattu']}'";
+							$loytyiko_lapsi_res = pupe_query($query);
+
+							if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+								$lisainsert = "	INSERT INTO tilausrivi SET
+												yhtio			= '{$lapsitieto['yhtio']}',
+												tyyppi			= '{$lapsitieto['tyyppi']}',
+												toimaika		= '{$lapsitieto['toimaika']}',
+												kerayspvm		= '{$lapsitieto['kerayspvm']}',
+												otunnus			= '{$lapsitieto['otunnus']}',
+												tuoteno			= '{$lapsitieto['tuoteno']}',
+												try				= '{$lapsitieto['try']}',
+												osasto			= '{$lapsitieto['osasto']}',
+												nimitys			= '{$lapsitieto['nimitys']}',
+												yksikko			= '{$lapsitieto['yksikko']}',
+												tilkpl			= '{$lapsitieto['tilkpl']}',
+												varattu			= '{$lapsitieto['varattu']}',
+												kpl 			= '{$lapsitieto['kpl']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
+												hinta			= '{$hinta}',
+												laatija			= 'lapset',
+												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+												laadittu		=  now(),
+												hyllyalue		= '{$lapsitieto['hyllyalue']}',
+												hyllynro		= '{$lapsitieto['hyllynro']}',
+												hyllytaso		= '{$lapsitieto['hyllytaso']}',
+												hyllyvali		= '{$lapsitieto['hyllyvali']}',
+												perheid			= '{$lapsitieto['tunnus']}'";
+								$inskres = pupe_query($lisainsert);
+							}
 
 							// p‰ivitet‰‰n is‰
 							$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
@@ -743,33 +755,45 @@
 							$laskurow	= mysql_fetch_assoc($laskures);
 							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
-							$lisainsert = "	INSERT INTO tilausrivi SET
-											yhtio			= '{$lapsitieto['yhtio']}',
-											tyyppi			= '{$lapsitieto['tyyppi']}',
-											toimaika		= '{$lapsitieto['toimaika']}',
-											kerayspvm		= '{$lapsitieto['kerayspvm']}',
-											otunnus			= '{$lapsitieto['otunnus']}',
-											tuoteno			= '{$lapsitieto['tuoteno']}',
-											try				= '{$lapsitieto['try']}',
-											osasto			= '{$lapsitieto['osasto']}',
-											nimitys			= '{$lapsitieto['nimitys']}',
-											yksikko			= '{$lapsitieto['yksikko']}',
-											tilkpl			= '{$lapsitieto['tilkpl']}',
-											varattu			= '{$lapsitieto['varattu']}',
-											kpl 			= '{$lapsitieto['kpl']}',
-											ale1			= '{$ale['ale1']}',
-											ale2			= '{$ale['ale2']}',
-											ale3			= '{$ale['ale3']}',
-											hinta			= '{$hinta}',
-											laatija			= 'lapset',
-											kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-											laadittu		=  now(),
-											hyllyalue		= '{$lapsitieto['hyllyalue']}',
-											hyllynro		= '{$lapsitieto['hyllynro']}',
-											hyllytaso		= '{$lapsitieto['hyllytaso']}',
-											hyllyvali		= '{$lapsitieto['hyllyvali']}',
-											perheid			= '{$lapsitieto['tunnus']}'";
-							$inskres = pupe_query($lisainsert);
+							$query = "	SELECT tunnus
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND perheid = '{$lapsitieto['tunnus']}'
+										AND tuoteno = '{$lapsitieto['tuoteno']}'
+										AND kpl = '{$lapsitieto['kpl']}'
+										AND varattu = '{$lapsitieto['varattu']}'";
+							$loytyiko_lapsi_res = pupe_query($query);
+
+							if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+								$lisainsert = "	INSERT INTO tilausrivi SET
+												yhtio			= '{$lapsitieto['yhtio']}',
+												tyyppi			= '{$lapsitieto['tyyppi']}',
+												toimaika		= '{$lapsitieto['toimaika']}',
+												kerayspvm		= '{$lapsitieto['kerayspvm']}',
+												otunnus			= '{$lapsitieto['otunnus']}',
+												tuoteno			= '{$lapsitieto['tuoteno']}',
+												try				= '{$lapsitieto['try']}',
+												osasto			= '{$lapsitieto['osasto']}',
+												nimitys			= '{$lapsitieto['nimitys']}',
+												yksikko			= '{$lapsitieto['yksikko']}',
+												tilkpl			= '{$lapsitieto['tilkpl']}',
+												varattu			= '{$lapsitieto['varattu']}',
+												kpl 			= '{$lapsitieto['kpl']}',
+												ale1			= '{$ale['ale1']}',
+												ale2			= '{$ale['ale2']}',
+												ale3			= '{$ale['ale3']}',
+												hinta			= '{$hinta}',
+												laatija			= 'lapset',
+												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+												laadittu		=  now(),
+												hyllyalue		= '{$lapsitieto['hyllyalue']}',
+												hyllynro		= '{$lapsitieto['hyllynro']}',
+												hyllytaso		= '{$lapsitieto['hyllytaso']}',
+												hyllyvali		= '{$lapsitieto['hyllyvali']}',
+												perheid			= '{$lapsitieto['tunnus']}'";
+								$inskres = pupe_query($lisainsert);
+							}
 
 							// p‰ivitet‰‰n is‰
 							$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
@@ -1047,34 +1071,45 @@
 								$laskurow	= mysql_fetch_assoc($laskures);
 								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
-								$lisainsert = "	INSERT INTO tilausrivi SET
-												yhtio			= '{$lapsitieto['yhtio']}',
-												tyyppi			= '{$lapsitieto['tyyppi']}',
-												toimaika		= '{$lapsitieto['toimaika']}',
-												kerayspvm		= '{$lapsitieto['kerayspvm']}',
-												otunnus			= '{$lapsitieto['otunnus']}',
-												tuoteno			= '{$lapsitieto['tuoteno']}',
-												try				= '{$lapsitieto['try']}',
-												osasto			= '{$lapsitieto['osasto']}',
-												nimitys			= '{$lapsitieto['nimitys']}',
-												yksikko			= '{$lapsitieto['yksikko']}',
-												tilkpl			= '{$lapsitieto['tilkpl']}',
-												varattu			= '{$lapsitieto['varattu']}',
-												ale1			= '{$ale['ale1']}',
-												ale2			= '{$ale['ale2']}',
-												ale3			= '{$ale['ale3']}',
-												kpl				= '{$lapsitieto['kpl']}',
-												hinta			= '{$hinta}',
-												laatija			= 'lapset',
-												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-												laadittu		=  now(),
-												hyllyalue		= '{$lapsitieto['hyllyalue']}',
-												hyllynro		= '{$lapsitieto['hyllynro']}',
-												hyllytaso		= '{$lapsitieto['hyllytaso']}',
-												hyllyvali		= '{$lapsitieto['hyllyvali']}',
-												perheid			= '{$lapsitieto['tunnus']}'";
-								#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
-								$inskres = pupe_query($lisainsert);
+								$query = "	SELECT tunnus
+											FROM tilausrivi
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND perheid = '{$lapsitieto['tunnus']}'
+											AND tuoteno = '{$lapsitieto['tuoteno']}'
+											AND kpl = '{$lapsitieto['kpl']}'
+											AND varattu = '{$lapsitieto['varattu']}'";
+								$loytyiko_lapsi_res = pupe_query($query);
+
+								if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+									$lisainsert = "	INSERT INTO tilausrivi SET
+													yhtio			= '{$lapsitieto['yhtio']}',
+													tyyppi			= '{$lapsitieto['tyyppi']}',
+													toimaika		= '{$lapsitieto['toimaika']}',
+													kerayspvm		= '{$lapsitieto['kerayspvm']}',
+													otunnus			= '{$lapsitieto['otunnus']}',
+													tuoteno			= '{$lapsitieto['tuoteno']}',
+													try				= '{$lapsitieto['try']}',
+													osasto			= '{$lapsitieto['osasto']}',
+													nimitys			= '{$lapsitieto['nimitys']}',
+													yksikko			= '{$lapsitieto['yksikko']}',
+													tilkpl			= '{$lapsitieto['tilkpl']}',
+													varattu			= '{$lapsitieto['varattu']}',
+													ale1			= '{$ale['ale1']}',
+													ale2			= '{$ale['ale2']}',
+													ale3			= '{$ale['ale3']}',
+													kpl				= '{$lapsitieto['kpl']}',
+													hinta			= '{$hinta}',
+													laatija			= 'lapset',
+													kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+													laadittu		=  now(),
+													hyllyalue		= '{$lapsitieto['hyllyalue']}',
+													hyllynro		= '{$lapsitieto['hyllynro']}',
+													hyllytaso		= '{$lapsitieto['hyllytaso']}',
+													hyllyvali		= '{$lapsitieto['hyllyvali']}',
+													perheid			= '{$lapsitieto['tunnus']}'";
+									#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
+									$inskres = pupe_query($lisainsert);
+								}
 
 								// p‰ivitet‰‰n is‰
 								$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
@@ -1126,34 +1161,46 @@
 								$laskurow	= mysql_fetch_assoc($laskures);
 								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
-								$lisainsert = "	INSERT INTO tilausrivi SET
-												yhtio			= '{$lapsitieto['yhtio']}',
-												tyyppi			= '{$lapsitieto['tyyppi']}',
-												toimaika		= '{$lapsitieto['toimaika']}',
-												kerayspvm		= '{$lapsitieto['kerayspvm']}',
-												otunnus			= '{$lapsitieto['otunnus']}',
-												tuoteno			= '{$lapsitieto['tuoteno']}',
-												try				= '{$lapsitieto['try']}',
-												osasto			= '{$lapsitieto['osasto']}',
-												nimitys			= '{$lapsitieto['nimitys']}',
-												yksikko			= '{$lapsitieto['yksikko']}',
-												tilkpl			= '{$lapsitieto['tilkpl']}',
-												varattu			= '{$lapsitieto['varattu']}',
-												ale1			= '{$ale['ale1']}',
-												ale2			= '{$ale['ale2']}',
-												ale3			= '{$ale['ale3']}',
-												kpl				= '{$lapsitieto['kpl']}',
-												hinta			= '{$hinta}',
-												laatija			= 'lapset',
-												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-												laadittu		=  now(),
-												hyllyalue		= '{$lapsitieto['hyllyalue']}',
-												hyllynro		= '{$lapsitieto['hyllynro']}',
-												hyllytaso		= '{$lapsitieto['hyllytaso']}',
-												hyllyvali		= '{$lapsitieto['hyllyvali']}',
-												perheid			= '{$lapsitieto['tunnus']}'";
-								#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
-								$inskres = pupe_query($lisainsert);
+								$query = "	SELECT tunnus
+											FROM tilausrivi
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND perheid = '{$lapsitieto['tunnus']}'
+											AND tuoteno = '{$lapsitieto['tuoteno']}'
+											AND kpl = '{$lapsitieto['kpl']}'
+											AND varattu = '{$lapsitieto['varattu']}'";
+								$loytyiko_lapsi_res = pupe_query($query);
+
+								if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+									$lisainsert = "	INSERT INTO tilausrivi SET
+													yhtio			= '{$lapsitieto['yhtio']}',
+													tyyppi			= '{$lapsitieto['tyyppi']}',
+													toimaika		= '{$lapsitieto['toimaika']}',
+													kerayspvm		= '{$lapsitieto['kerayspvm']}',
+													otunnus			= '{$lapsitieto['otunnus']}',
+													tuoteno			= '{$lapsitieto['tuoteno']}',
+													try				= '{$lapsitieto['try']}',
+													osasto			= '{$lapsitieto['osasto']}',
+													nimitys			= '{$lapsitieto['nimitys']}',
+													yksikko			= '{$lapsitieto['yksikko']}',
+													tilkpl			= '{$lapsitieto['tilkpl']}',
+													varattu			= '{$lapsitieto['varattu']}',
+													ale1			= '{$ale['ale1']}',
+													ale2			= '{$ale['ale2']}',
+													ale3			= '{$ale['ale3']}',
+													kpl				= '{$lapsitieto['kpl']}',
+													hinta			= '{$hinta}',
+													laatija			= 'lapset',
+													kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+													laadittu		=  now(),
+													hyllyalue		= '{$lapsitieto['hyllyalue']}',
+													hyllynro		= '{$lapsitieto['hyllynro']}',
+													hyllytaso		= '{$lapsitieto['hyllytaso']}',
+													hyllyvali		= '{$lapsitieto['hyllyvali']}',
+													perheid			= '{$lapsitieto['tunnus']}'";
+									#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
+									$inskres = pupe_query($lisainsert);
+								}
 
 								// p‰ivitet‰‰n is‰
 								$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
@@ -1285,34 +1332,46 @@
 								$laskurow	= mysql_fetch_assoc($laskures);
 								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
 
-								$lisainsert = "	INSERT INTO tilausrivi SET
-												yhtio			= '{$lapsitieto['yhtio']}',
-												tyyppi			= '{$lapsitieto['tyyppi']}',
-												toimaika		= '{$lapsitieto['toimaika']}',
-												kerayspvm		= '{$lapsitieto['kerayspvm']}',
-												otunnus			= '{$lapsitieto['otunnus']}',
-												tuoteno			= '{$lapsitieto['tuoteno']}',
-												try				= '{$lapsitieto['try']}',
-												osasto			= '{$lapsitieto['osasto']}',
-												nimitys			= '{$lapsitieto['nimitys']}',
-												yksikko			= '{$lapsitieto['yksikko']}',
-												tilkpl			= '{$lapsitieto['tilkpl']}',
-												varattu			= '{$lapsitieto['varattu']}',
-												ale1			= '{$ale['ale1']}',
-												ale2			= '{$ale['ale2']}',
-												ale3			= '{$ale['ale3']}',
-												kpl				= '{$lapsitieto['kpl']}',
-												hinta			= '{$hinta}',
-												laatija			= 'lapset',
-												kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
-												laadittu		=  now(),
-												hyllyalue		= '{$lapsitieto['hyllyalue']}',
-												hyllynro		= '{$lapsitieto['hyllynro']}',
-												hyllytaso		= '{$lapsitieto['hyllytaso']}',
-												hyllyvali		= '{$lapsitieto['hyllyvali']}',
-												perheid			= '{$lapsitieto['tunnus']}'";
-								#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
-								$inskres = pupe_query($lisainsert);
+								$query = "	SELECT tunnus
+											FROM tilausrivi
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND perheid = '{$lapsitieto['tunnus']}'
+											AND tuoteno = '{$lapsitieto['tuoteno']}'
+											AND kpl = '{$lapsitieto['kpl']}'
+											AND varattu = '{$lapsitieto['varattu']}'";
+								$loytyiko_lapsi_res = pupe_query($query);
+
+								if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+									$lisainsert = "	INSERT INTO tilausrivi SET
+													yhtio			= '{$lapsitieto['yhtio']}',
+													tyyppi			= '{$lapsitieto['tyyppi']}',
+													toimaika		= '{$lapsitieto['toimaika']}',
+													kerayspvm		= '{$lapsitieto['kerayspvm']}',
+													otunnus			= '{$lapsitieto['otunnus']}',
+													tuoteno			= '{$lapsitieto['tuoteno']}',
+													try				= '{$lapsitieto['try']}',
+													osasto			= '{$lapsitieto['osasto']}',
+													nimitys			= '{$lapsitieto['nimitys']}',
+													yksikko			= '{$lapsitieto['yksikko']}',
+													tilkpl			= '{$lapsitieto['tilkpl']}',
+													varattu			= '{$lapsitieto['varattu']}',
+													ale1			= '{$ale['ale1']}',
+													ale2			= '{$ale['ale2']}',
+													ale3			= '{$ale['ale3']}',
+													kpl				= '{$lapsitieto['kpl']}',
+													hinta			= '{$hinta}',
+													laatija			= 'lapset',
+													kommentti		= 'TECCOM-lasku: TL:{$lapsitieto['tunnus']} tuotteelle: {$lapsitieto['isatuoteno']} lis‰t‰‰n lapsituote: {$lapsitieto['tuoteno']}',
+													laadittu		=  now(),
+													hyllyalue		= '{$lapsitieto['hyllyalue']}',
+													hyllynro		= '{$lapsitieto['hyllynro']}',
+													hyllytaso		= '{$lapsitieto['hyllytaso']}',
+													hyllyvali		= '{$lapsitieto['hyllyvali']}',
+													perheid			= '{$lapsitieto['tunnus']}'";
+									#echo "<pre>",str_replace("\t", "", $lisainsert),"</pre>";
+									$inskres = pupe_query($lisainsert);
+								}
 
 								// p‰ivitet‰‰n is‰
 								$updateisa = "	UPDATE tilausrivi SET

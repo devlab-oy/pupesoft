@@ -50,34 +50,24 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 }
 
 include("kasipaate.css");
-echo "
-	<script type='text/javascript'>
-		function setFocus() {
-			if (document.getElementById('alusta')) document.getElementById('alusta').focus();
-		}
-	</script>
-		<form method='post' action=''>
-			<table border='0'>
-				<tr>
-					<td colspan='4'><h1>",t("ALUSTA", $browkieli),"</h1>
-						<table>
-							<tr>
-								<td>
-									<input type='text' id='alusta' name='alusta' value='{$alusta}' />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
-									<button name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td colspan='4' class='back'>{$error['alusta']}</td>
-				</tr></table>";
+
+echo "<div class='header'><h1>",t("ALUSTA", $browkieli),"</h1></div>";
+
+echo "<div class='main'>
+	<form method='post' action=''>
+	<table>
+		<tr>
+			<th>ALUSTA</th>
+		</tr>
+		<tr>
+			<td>
+			<input type='text' id='alusta' name='alusta' value='{$alusta}' />
+			</td>
+		</tr>
+		<tr>
+			<td colspan='4' class='back'>{$error['alusta']}</td>
+		</tr>
+	</table>";
 
 if (isset($return) and count($return) > 0) {
 
@@ -102,6 +92,13 @@ if (isset($return) and count($return) > 0) {
 	echo "<input type='hidden' name='liitostunnus' value='{$return[0]['liitostunnus']}' />";
 }
 
-echo "</table></form></body>";
+echo "</table>";
+echo "</div>";
+
+echo "<div class='controls'>
+	<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
+	<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	</form>
+</div>";
 
 #require('inc/footer.inc');

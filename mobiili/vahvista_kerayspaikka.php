@@ -110,7 +110,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 			# Määrät samat
 			else {
-				# Haetaan saaoynuset
+				# Haetaan saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
 
 				# Viedään varastoon
@@ -125,6 +125,7 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 include("kasipaate.css");
+
 echo "
 	<script type='text/javascript'>
 		function vahvista() {
@@ -137,61 +138,54 @@ echo "
 		}
 	</script>
 ";
-echo "
-	<table border='0'>
-		<tr>
-			<td><h1>",t("VAHVISTA KERÄYSPAIKKA", $browkieli),"</h1>
-				<form name='vahvistaformi' method='post' action=''>
-				<table>
-					<tr>
-						<td>",t("Tuote", $browkieli),"</td>
-						<td colspan='2'>{$row['tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("Toim. Tuotekoodi", $browkieli),"</td>
-						<td colspan='2'>{$row['toim_tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("Määrä", $browkieli),"</td>
-						<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' />
-						<td><span id='row_varattu'>{$row['varattu']}</span> {$row['yksikko']}</td>
-					</tr>
-					<tr>
-						<td>",t("Keräyspaikka", $browkieli),"</td>
-						<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
-					</tr>
-					<tr>
-						<td>",t("Koodi", $browkieli),"</td>
-						<td colspan='2'><input type='text' name='koodi' value='' size='7' />
-					</tr>
-					</table>
-					<table>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-						<td>
-							<button name='submit' value='new'>",t("Uusi keräyspaikka", $browkieli),"</button>
-						</td>
-					</tr>
-					<tr><td>&nbsp;</td></tr>
-				</table>";
-				if (isset($error)) {
-					echo "<span class='error'>";
-					foreach($error as $key => $virhe) {
-						echo "{$virhe}<br>";
-					}
-					echo "</span>";
-				}
-echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-				<input type='hidden' name='selected_row' value='{$selected_row}' />
-				</form>
-			</td>
-		</tr>
-	</table>";
+
+echo "<div class='header'><h1>",t("VAHVISTA KERÄYSPAIKKA", $browkieli),"</h1></div>";
+
+if (isset($error)) {
+	echo "<span class='error'>";
+	foreach($error as $key => $virhe) {
+		echo "{$virhe}<br>";
+	}
+	echo "</span>";
+}
+
+echo "<div class='main'>
+<form name='vahvistaformi' method='post' action=''>
+<table>
+	<tr>
+		<th>",t("Tuote", $browkieli),"</th>
+		<td colspan='2'>{$row['tuoteno']}</td>
+	</tr>
+	<tr>
+		<th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+		<td colspan='2'>{$row['toim_tuoteno']}</td>
+	</tr>
+	<tr>
+		<th>",t("Määrä", $browkieli),"</th>
+		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' />
+		<td><span id='row_varattu'>{$row['varattu']}</span> {$row['yksikko']}</td>
+	</tr>
+	<tr>
+		<th>",t("Keräyspaikka", $browkieli),"</th>
+		<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
+	</tr>
+	<tr>
+		<th>",t("Koodi", $browkieli),"</th>
+		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
+	</tr>
+</table>
+
+</div>";
+
+echo "<div class='controls'>
+	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
+	<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka", $browkieli),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+
+	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+	<input type='hidden' name='selected_row' value='{$selected_row}' />
+</form>
+";
 
 #require('inc/footer.inc');

@@ -42,7 +42,7 @@ if (isset($submit) and trim($submit) != '') {
 			$error['rivi'] = t("Syˆt‰ m‰‰r‰", $browkieli).'.';
 		}
 		elseif (!is_numeric($maara)) {
-			$error['rivi'] = t("M‰‰r‰ pit‰‰ olla numero", $browkieli).'.';
+			$error['rivi'] = t("M‰‰r‰n pit‰‰ olla numero", $browkieli).'.';
 		}
 		elseif ($maara < 1 or $maara >= $row['varattu']) {
 			if ($row['varattu'] == 1) {
@@ -65,50 +65,41 @@ if (isset($submit) and trim($submit) != '') {
 }
 
 include("kasipaate.css");
-echo "
-	<table border='0'>
-		<tr>
-			<td><h1>",t("Muokkaa suuntalavan rivi‰", $browkieli),"</h1>
-				<form name='muokkaaformi' method='post' action=''>
-				<table>
-					<tr>
-						<td>",t("Suuntalava", $browkieli),"</td>
-						<td colspan='2'>{$alusta_tunnus}</td>
-					</tr>
-					<tr><td colspan='3'>&nbsp;</td></tr>
-					<tr>
-						<td>",t("Tuote", $browkieli),"</td>
-						<td colspan='2'>{$row['tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("Toim. Tuotekoodi", $browkieli),"</td>
-						<td colspan='2'>{$row['toim_tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("M‰‰r‰", $browkieli),"</td>
-						<td><input type='text' name='maara' value='' size='7' />
-						<td>{$row['varattu']} {$row['yksikko']}</td>
-					</tr>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Pois suuntalavalta", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-						<td>
-							&nbsp;
-						</td>
-					</tr>
-					<tr><td>&nbsp;</td></tr>
-				</table>
-				<span class='error'>{$error['rivi']}</span>
-				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-				<input type='hidden' name='selected_row' value='{$selected_row}' />
-				</form>
-			</td>
-		</tr>
-	</table>";
+
+echo "<div class='header'><h1>",t("MUOKKAA SUUNTALAVAN RIVIƒ", $browkieli),"</h1></div>";
+
+echo "<div class='main'>
+
+<form name='muokkaaformi' method='post' action=''>
+<table>
+	<tr>
+		<th>",t("Suuntalava", $browkieli),"</th>
+		<td colspan='2'>{$alusta_tunnus}</td>
+	</tr>
+	<tr><td colspan='3'>&nbsp;</td></tr>
+	<tr>
+		<th>",t("Tuote", $browkieli),"</th>
+		<td colspan='2'>{$row['tuoteno']}</td>
+	</tr>
+	<tr>
+		<th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+		<td colspan='2'>{$row['toim_tuoteno']}</td>
+	</tr>
+	<tr>
+		<th>",t("M‰‰r‰", $browkieli),"</th>
+		<td><input type='text' name='maara' value='' size='7' />
+		<td>{$row['varattu']} {$row['yksikko']}</td>
+	</tr>
+</table>
+<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+<input type='hidden' name='selected_row' value='{$selected_row}' />
+<span class='error'>{$error['rivi']}</span>
+</div>";
+
+echo "<div class='controls'>
+	<button name='submit' value='submit' onclick='submit();'>",t("Pois suuntalavalta", $browkieli),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+</div>";
 
 #require('inc/footer.inc');

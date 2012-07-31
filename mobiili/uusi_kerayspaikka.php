@@ -1,5 +1,4 @@
 <?php
-echo "<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>";
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -94,62 +93,52 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 }
 
 include("kasipaate.css");
-echo "
-	<table border='0'>
+
+echo "<div class='header'><h1>",t("UUSI KERÄYSPAIKKA", $browkieli),"</h1></div>";
+echo "<span class='error'>{$error['kerayspaikka']}</span>";
+
+echo "<div class='main'>
+
+<form name='uusipaikkaformi' method='post' action=''>
+	<table>
 		<tr>
-			<td><h1>",t("UUSI KERÄYSPAIKKA", $browkieli),"</h1>
-				<form name='uusipaikkaformi' method='post' action=''>
-				<table>
-					<tr>
-						<td>",t("Tuote", $browkieli),"</td>
-						<td colspan='3'>{$row['tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("Toim. Tuotekoodi", $browkieli),"</td>
-						<td colspan='3'>{$row['toim_tuoteno']}</td>
-					</tr>
-					<tr>
-						<td>",t("Keräyspaikka", $browkieli),"</td>
-						<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
-					</tr>
-					<tr>
-						<td>",t("Alue", $browkieli),"</td>
-						<td><input type='text' name='hyllyalue' value='' /></td>
-					</tr>
-					<tr>
-						<td>",t("Nro", $browkieli),"</td>
-						<td><input type='text' name='hyllynro' value='' /></td>
-					</tr>
-						<td>",t("Väli", $browkieli),"</td>
-						<td><input type='text' name='hyllyvali' value='' /></td>
-					<tr>
-					</tr>
-					<tr>
-						<td>",t("Taso", $browkieli),"</td>
-						<td><input type='text' name='hyllytaso' value='' /></td>
-					</tr>
-					</table>
-					<table>
-					<tr>
-						<td colspan='2'>",t("Tee tästä oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
-					</tr>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Perusta", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-					</tr>
-					<tr><td>&nbsp;</td></tr>
-				</table>
-				<span class='error'>{$error['kerayspaikka']}</span>
-				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-				<input type='hidden' name='selected_row' value='{$selected_row}' />
-				</form>
-			</td>
+			<th>",t("Tuote", $browkieli),"</th>
+			<td colspan='3'>{$row['tuoteno']}</td>
 		</tr>
-	</table>";
+		<tr>
+			<th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+			<td colspan='3'>{$row['toim_tuoteno']}</td>
+		</tr>
+		<tr>
+			<th>",t("Keräyspaikka", $browkieli),"</th>
+			<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
+		</tr>
+		<tr>
+			<th>",t("Alue", $browkieli),"</th>
+			<td><input type='text' name='hyllyalue' value='' /></td>
+		</tr>
+		<tr>
+			<th>",t("Nro", $browkieli),"</td>
+			<td><input type='text' name='hyllynro' value='' /></th>
+		</tr>
+			<th>",t("Väli", $browkieli),"</th>
+			<td><input type='text' name='hyllyvali' value='' /></td>
+		</tr>
+		<tr>
+			<th>",t("Taso", $browkieli),"</td>
+			<td><input type='text' name='hyllytaso' value='' /></th>
+		</tr>
+	</table>
+
+	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+	<input type='hidden' name='selected_row' value='{$selected_row}' />
+</div>";
+
+echo "<div class='controls'>
+	<button name='submit' value='submit' onclick='submit();'>",t("Perusta", $browkieli),"</button>
+	<button id='takaisin' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	</form>
+</div>";
 
 #require('inc/footer.inc');

@@ -92,51 +92,54 @@ $sscc_query = mysql_query("	SELECT sscc
 $sscc = mysql_fetch_assoc($sscc_query);
 
 include("kasipaate.css");
-echo "
-	<table border='0'>
+
+echo "<div class='header'><h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
+
+echo "<div class='main'>
+
+	<form name='varalleformi' method='post' action=''>
+	<table>
 		<tr>
-			<td><h1>",t("SUUNTALAVAVARALLE", $browkieli),"</h1>
-				<form name='varalleformi' method='post' action=''>
-				<table>
-					<tr>
-						<td>",t("Suuntalava", $browkieli),"</td>
-						<td colspan='3'>{$sscc['sscc']}</td>
-					</tr>
-					<tr>
-						<td>",t("Alue", $browkieli),"</td>
-						<td><input type='text' name='hyllyalue' value='{$hyllyalue}' /></td>
-					</tr>
-					<tr>
-						<td>",t("Nro", $browkieli),"</td>
-						<td><input type='text' name='hyllynro' value='{$hyllynro}' /></td>
-					<tr>
-						<td>",t("Väli", $browkieli),"</td>
-						<td><input type='text' name='hyllyvali' value='{$hyllyvali}' /></td>
-					<tr>
-						<td>",t("Taso", $browkieli),"</td>
-						<td><input type='text' name='hyllytaso' value='{$hyllytaso}' /></td>
-					</tr>
-					<tr>
-						<td>",t("Koodi", $browkieli),"</td>
-						<td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
-					</tr>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("OK", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-					</tr>
-					<tr><td>&nbsp;</td></tr>
-				</table>
-				<span class='error'>{$error['varalle']}</span>
-				<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-				<input type='hidden' name='selected_row' value='{$selected_row}' />
-				</form>
+			<th>",t("Suuntalava", $browkieli),"</th>
+			<td colspan='3'>{$sscc['sscc']}</td>
+		</tr>
+		<tr>
+			<th>",t("Alue", $browkieli),"</th>
+			<td><input type='text' name='hyllyalue' value='{$hyllyalue}' /></td>
+		</tr>
+		<tr>
+			<th>",t("Nro", $browkieli),"</th>
+			<td><input type='text' name='hyllynro' value='{$hyllynro}' /></td>
+		<tr>
+			<th>",t("Väli", $browkieli),"</th>
+			<td><input type='text' name='hyllyvali' value='{$hyllyvali}' /></td>
+		<tr>
+			<th>",t("Taso", $browkieli),"</th>
+			<td><input type='text' name='hyllytaso' value='{$hyllytaso}' /></td>
+		</tr>
+		<tr>
+			<th>",t("Koodi", $browkieli),"</th>
+			<td colspan='2'><input type='text' name='koodi' value='{$koodi}' size='7' />
+		</tr>
+	</table>
+	</div>
+
+	<div class='controls'>
+		<tr>
+			<td nowrap>
+				<button name='submit' value='submit' onclick='submit();'>",t("OK", $browkieli),"</button>
+			</td>
+			<td nowrap>
+				<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 			</td>
 		</tr>
-	</table>";
+	</div>
+
+	<span class='error'>{$error['varalle']}</span>
+	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+	<input type='hidden' name='selected_row' value='{$selected_row}' />
+	</form>
+</div>";
 
 #require('inc/footer.inc');

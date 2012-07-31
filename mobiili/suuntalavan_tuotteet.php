@@ -109,185 +109,120 @@ if (isset($alusta_tunnus)) {
 
 include("kasipaate.css");
 
-echo "
-  	<script type='text/javascript'>
+echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1></div>";
 
-		function setFocus() {
-			if (document.getElementById('viivakoodi')) document.getElementById('viivakoodi').focus();
-		}
-
-		// window.document.hakuformi.viivakoodi.focus();
-
-		// $.expr[':'].containsi = function(a,i,m) {
-		//     return $(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
-		// };
-
-  // 		$(function() {
-
-		// 	var highlight_row = function() {
-		// 		$('td.tumma').removeClass('tumma');
-
-		// 		var parent = $(this).parent();
-		// 		parent.children().toggleClass('tumma');
-
-		// 		$('#selected_row').val(parent.attr('id'));
-		// 	}
-
-		// 	var highlight_rows = function() {
-		// 		$(this).parent().children('td.selectable').addClass('tumma').show();
-		// 	}
-
-		// 	$('td.selectable').on('click', highlight_row);
-
-		// 	$('td.selectable').bind('rows', highlight_rows);
-
-		// 	$('#viivakoodi').on('keyup', function(e) {
-		// 		if ((e.keyCode > 47 && e.keyCode < 58) ||†(e.keyCode > 64 && e.keyCode < 91) ||†(e.keyCode > 96 && e.keyCode < 123) || e.keyCode == 8) {
-
-		// 			var viivakoodi = $(this).val();
-
-		// 			if (viivakoodi == '') {
-		// 				$('td.selectable').removeClass('tumma').show();
-		// 				$('#selected_row').val('');
-		// 			}
-		// 			else {
-		// 				$('td.tumma').removeClass('tumma');
-
-		// 				$('td.selectable').hide();
-
-		// 				$('td.selectable:containsi(\"'+viivakoodi+'\")').trigger('rows');
-
-		// 				if ($('td.selectable:containsi(\"'+viivakoodi+'\")').parent().length > 1) {
-		// 					$('#selected_row').val('');
-		// 				}
-		// 			}
-		// 		}
-		// 	});
-  // 		});
-		function varmista() {
-			return confirm('Muista tarkistaa suuntalavan sis‰ltˆ!');
-		}
-	</script>
-
-	<table border='0'>
+echo "<form name='viivakoodiformi' method='post' action=''>
+	<table>
 		<tr>
-			<td><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1>
-				<form name='viivakoodiformi' method='post' action=''>
-					<table>
-						<tr>
-							<td>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
-								<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi", $browkieli),"</button>
-							</td>
-						</tr>
-					</table>
-				</form>
-				<form name='hakuformi' method='post' action=''>";
-echo "			</table>
-					<table>
-					<tr>
-						<td nowrap>
-							<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
-						</td>
-						<td nowrap>
-							<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle", $browkieli),"</button>
-						</td>
-					</tr>
-				</table>
-				";
+			<td>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
+			</td>
+			<td>
+				<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi", $browkieli),"</button>
+			</td>
+		</tr>
+	</table>
+	</form>";
 
-				if (isset($error)) {
-					echo "<span class='error'>{$error['tuotteet']}</span>";
-				}
-				echo"
-				<table>
-					<tr>
-						<th>&nbsp;</th>
-						<th nowrap>
-							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuotenro", $browkieli),"</a>&nbsp;";
+echo "
+<form name='hakuformi' method='post' action=''>
+
+<div class='controls'>
+	<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+	<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
+	<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle", $browkieli),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+</div>";
+
+if (isset($error)) {
+	echo "<span class='error'>{$error['tuotteet']}</span>";
+}
+
+echo "<div class='main'>
+	<table>
+
+<tr>
+<th>&nbsp;</th>
+<th nowrap>
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuote", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
-echo "							</th>
-						<th nowrap>
-							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M‰‰r‰", $browkieli),"</a>&nbsp;";
+echo "</th>
+<th nowrap>
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("M‰‰r‰", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_maara == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
-echo "							</th>
-						<th nowrap>
-							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks", $browkieli),"</a>&nbsp;";
+echo "</th>
+<th nowrap>
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_yksikko == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
-echo "							</th>
-						<th nowrap>
-							<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Osoite", $browkieli),"</a>&nbsp;";
+echo "</th>
+<th nowrap>
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Hylly", $browkieli),"</a>&nbsp;";
 
 echo $sort_by_direction_tuotepaikka == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
-echo "							</th>
-					</tr>";
-					$chk = count($tuotteet) == 1 ? " checked" : "";
+echo "</th>
+</tr>";
 
-					foreach ($tuotteet as $tuote) {
-						echo "<tr id='{$tuote['tilriv_tunnus']}'>";
-						echo "<td><input type='radio' name='selected_row' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
-						echo "<td class='selectable' nowrap>{$tuote['tuoteno']}</td>";
-						echo "<td class='selectable' nowrap>{$tuote['maara']}";
+	$chk = count($tuotteet) == 1 ? " checked" : "";
 
-						if ($tuote['tuotekerroin'] != 1) echo "&nbsp;(",$tuote['maara'] * $tuote['tuotekerroin'],")";
+	foreach ($tuotteet as $tuote) {
+		echo "<tr id='{$tuote['tilriv_tunnus']}'>";
+		echo "<td><input class='radio' type='radio' name='selected_row' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
+		echo "<td nowrap>{$tuote['tuoteno']}</td>";
+		echo "<td nowrap>{$tuote['maara']}";
 
-						$onko_suoratoimitus_res = onko_suoratoimitus($tuote['tilriv_tunnus']);
+		if ($tuote['tuotekerroin'] != 1) echo "&nbsp;(",$tuote['maara'] * $tuote['tuotekerroin'],")";
 
-						if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
-							if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
-						}
+		$onko_suoratoimitus_res = onko_suoratoimitus($tuote['tilriv_tunnus']);
 
-						echo "</td>";
-						echo "<td class='selectable' nowrap>{$tuote['yks']}</td>";
+		if ($row = mysql_fetch_assoc($onko_suoratoimitus_res)) {
+			if ($row["suoraan_laskutukseen"] == "") echo "&nbsp;",t("JT");
+		}
 
-						# Jos oletuspaikat on setattu niin ollaan tultu alustalta ja asetetaan tilausrivien
-						# tuotepaikat oletuspaikoiksi.
-						if ($oletuspaikat) {
+		echo "</td>";
+		echo "<td nowrap>{$tuote['yks']}</td>";
 
-							# P‰ivitet‰‰n tilausriveille oletuspaikat.
-							$oletus_query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-												FROM tuotepaikat
-												WHERE tuoteno='{$tuote['tuoteno']}'
-												AND oletus='X'
-												AND yhtio='{$yhtiorow['yhtio']}'";
-							$oletus_result = mysql_query($oletus_query);
-							$oletus = mysql_fetch_assoc($oletus_result);
+		# Jos oletuspaikat on setattu niin ollaan tultu alustalta ja asetetaan tilausrivien
+		# tuotepaikat oletuspaikoiksi.
+		if ($oletuspaikat) {
 
-							$hylly = array(
-									'hyllyalue' => $oletus['hyllyalue'],
-									'hyllynro'	=> $oletus['hyllynro'],
-									'hyllyvali' => $oletus['hyllyvali'],
-									'hyllytaso' => $oletus['hyllytaso']
-								);
+			# P‰ivitet‰‰n tilausriveille oletuspaikat.
+			$oletus_query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+								FROM tuotepaikat
+								WHERE tuoteno='{$tuote['tuoteno']}'
+								AND oletus='X'
+								AND yhtio='{$yhtiorow['yhtio']}'";
+			$oletus_result = mysql_query($oletus_query);
+			$oletus = mysql_fetch_assoc($oletus_result);
 
-							# Jos tilausrivill‰ oleva hyllypaikka ei ole tuotteen oletuspaikka
-							# p‰ivitet‰‰n tilausrivin hyllypaikka oletuspaikaksi.
-							if ($tuote['osoite'] != implode(" ", $hylly)) {
-								paivita_tilausrivin_hylly($tuote['tilriv_tunnus'], $hylly);
-								$tuote['osoite'] = implode(" ", $hylly);
-							}
-						}
-						echo "<td class='selectable' nowrap>{$tuote['osoite']}</td>";
-						echo "</tr>";
-					}
+			$hylly = array(
+					'hyllyalue' => $oletus['hyllyalue'],
+					'hyllynro'	=> $oletus['hyllynro'],
+					'hyllyvali' => $oletus['hyllyvali'],
+					'hyllytaso' => $oletus['hyllytaso']
+				);
 
-echo "			<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
-				<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-				</form>
-			</td>
-		</tr>
-	</table>";
+			# Jos tilausrivill‰ oleva hyllypaikka ei ole tuotteen oletuspaikka
+			# p‰ivitet‰‰n tilausrivin hyllypaikka oletuspaikaksi.
+			if ($tuote['osoite'] != implode(" ", $hylly)) {
+				paivita_tilausrivin_hylly($tuote['tilriv_tunnus'], $hylly);
+				$tuote['osoite'] = implode(" ", $hylly);
+			}
+		}
+		echo "<td nowrap>{$tuote['osoite']}</td>";
+		echo "</tr>";
+// 					}
+	}
+echo "
+	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+	</form>
+</table>
+</div>";
 
 #require('inc/footer.inc');

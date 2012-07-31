@@ -30,45 +30,34 @@ if (isset($submit) and trim($submit) == 'submit') {
 }
 
 include("kasipaate.css");
-echo "
-	<body>
-		<form method='post' action=''>
-			<table border='0'>
-				<tr>
-					<td><h1>",t("TULOUTA", $browkieli),"</h1>
-						<table>
-							<tr>
-								<td>",t("Tulotyyppi", $browkieli),"</td>
-							</tr>
-							<tr>
-								<td>
-									<select name='tulotyyppi' size='4'>
-										<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
-									</select>
-								</td>
-							</tr>
-							<!--
-							<tr>
-								<td>
-									<button value='wat'>",t("Suuntalavat", $browkieli),"</button>
-								</td>
-							</tr>
-							-->
-							<tr>
-								<td>
-									<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-									<button name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr><td>&nbsp;</td></tr>
-				<tr>
-					<td>{$error['tulotyyppi']}</td>
-				</tr>
-			</table>
-		</form>
-	</body>";
+
+echo "<div class='header'><h1>TULOUTA</h1></div>";
+
+echo "<div class='main'>
+
+	<form method='post' action=''>
+	<table>
+		<tr>
+			<th>",t("TULOTYYPPI", $browkieli),"</th>
+		</tr>
+		<tr>
+			<td>
+				<select name='tulotyyppi' size='4'>
+					<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{$error['tulotyyppi']}</td>
+		</tr>
+	</table>
+
+</div>";
+
+echo "<div class='controls'>
+	<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	</form>
+</div>";
 
 #require('inc/footer.inc');

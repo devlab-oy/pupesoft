@@ -90,15 +90,6 @@
 		}
 	}
 
-	// BehrHella case
-	if (isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeDescription)
-		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeDescription == 'Freight'
-		and isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount)
-		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount != 0) {
-
-		$osto_rahti = (float) str_replace(",", ".", $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount);
-	}
-
 	$laskun_alv = 0;
 
 	if (isset($xml->InvoiceSummary->Tax->Percent) and $xml->InvoiceSummary->Tax->Percent != 0) {
@@ -313,7 +304,7 @@
 					$chk_sum = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount) - (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount);
 
 					if ($chk_sum > 0) {
-						$osto_rivi_kulu += $chk_sum;
+						$osto_rahti += $chk_sum;
 						$rtuoteno[$i]['rivihinta'] -= $chk_sum;
 					}
 				}

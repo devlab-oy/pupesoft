@@ -180,7 +180,7 @@
 			}
 		}
 		else {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$query = "	SELECT keraysjarjestys
 							FROM keraysvyohyke
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -197,8 +197,6 @@
 				else {
 					$sorttauskentta = 'vh.indeksi as sorttauskentta';
 				}
-
-				$tyyppi = 'KERAYSERA';
 			}
 			else {
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
@@ -214,8 +212,8 @@
 			}
 		}
 
-		//keräyslistan rivit
-		if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		// keräyslistan rivit
+		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 			$query = "	SELECT tilausrivi.*,
 						tuote.sarjanumeroseuranta,
 						kerayserat.kpl as tilkpl,
@@ -255,8 +253,8 @@
 
 		$kal = 1;
 
-		while ($row = mysql_fetch_array($riresult)) {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		while ($row = mysql_fetch_assoc($riresult)) {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$rivinumerot[$row["ker_tunnus"]] = $kal;
 			}
 			else {
@@ -265,7 +263,7 @@
 			$kal++;
 		}
 
-		mysql_data_seek($riresult,0);
+		mysql_data_seek($riresult, 0);
 
 		if (!isset($kieli)) $kieli = "";
 		if (!isset($toim)) $toim = "";
@@ -449,8 +447,10 @@
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
 
-	// poistetaan lukot
-	$query = "UNLOCK TABLES";
-	$res   = mysql_query($query) or pupe_error($query);
+	if (!isset($lukotetaan) or $lukotetaan) {
+		// poistetaan lukot
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+	}
 
 ?>

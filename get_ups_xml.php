@@ -5,7 +5,6 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
-	require 'inc/salasanat.php';
 	require 'inc/connect.inc';
 	require 'inc/functions.inc';
 

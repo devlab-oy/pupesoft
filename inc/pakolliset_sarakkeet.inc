@@ -334,14 +334,27 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "toimitustavan_lahdot":
+			case "lahdot":
 				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
-				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "AKTIIVI", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE");
+				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "rahtikirjanumero":
 				$pakolliset = array("RAHTIKIRJANRO");
 				$wherelliset = array();
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "pakkauskoodit":
+				$pakolliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
+				$wherelliset = array("PAKKAUS", "RAHDINKULJETTAJA", "KOODI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "rahdinkuljettajat":
+				$pakolliset = array("NIMI", "KOODI");
+				$wherelliset = array("NIMI", "KOODI", "NEUTRAALI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");

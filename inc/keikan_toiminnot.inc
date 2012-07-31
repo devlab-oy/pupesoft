@@ -109,6 +109,36 @@
 						AND tunnus = '{$tunnus}'";
 			$update_res = pupe_query($query);
 
+			$query = "	SELECT uusiotunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$otunnus_fetch_res = pupe_query($query);
+			$otunnus_fetch_row = mysql_fetch_assoc($otunnus_fetch_res);
+
+			$uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
+
+			if ($suuntalava != 0) {
+				$query = "	SELECT saapuminen
+							FROM suuntalavat_saapuminen
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND suuntalava = '{$suuntalava}' 
+							AND saapuminen = '{$uusiotunnus}'";
+				$fetch_res = pupe_query($query);
+
+				if (mysql_num_rows($fetch_res) == 0) {
+					$query = "	INSERT INTO suuntalavat_saapuminen SET
+								yhtio = '{$kukarow['yhtio']}',
+								suuntalava = '{$suuntalava}',
+								saapuminen = '{$uusiotunnus}',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					$insert_res = pupe_query($query);
+				}
+			}
+
 			echo json_encode('ok');
 		}
 	}
@@ -136,42 +166,36 @@
 		if ($yhtiorow['suuntalavat'] == 'S') {
 
 			$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
-			$suoratoimitusrivi = $_POST['suoratoimitusrivi'];
+			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
 			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
-
-				$query = "	SELECT *
+				
+				$query = "	SELECT suuntalavat.*
 							FROM suuntalavat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND keikkatunnus != 0
-							AND keikkatunnus IN ({$valittuotunnus}, {$otunnus})
-							AND tila = ''
-							AND sscc = '".t("Suoratoimitus")."'";
+							JOIN suuntalavat_saapuminen ON (
+								suuntalavat.yhtio = suuntalavat_saapuminen.yhtio
+								AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'
+								AND suuntalavat_saapuminen.saapuminen != 0
+								AND suuntalavat.tunnus = suuntalavat_saapuminen.suuntalava)
+							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+							AND suuntalavat.tila = ''
+							AND suuntalavat.sscc = 'Suoratoimitus'";
 				$chk_suuntalava_res = pupe_query($query);
 				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
 
 				if (mysql_num_rows($chk_suuntalava_res) == 0) {
-
-					$query = "	SELECT keraysvyohyke.terminaalialue, tuote.keraysvyohyke
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus = '{$valittutunnus}'";
-					$info_res = pupe_query($query);
-					$info_row = mysql_fetch_assoc($info_res);
-
+					
 					$suuntalavan_tunnus = "";
 
 					// Tehdään uusi suuntalava
 					$tee = "lisaa";
 					// $otunnus = $keikan_tunnus;
-					$sscc = t("Suoratoimitus");
+					$sscc = "Suoratoimitus";
 					$tyyppi = 0;
-					$keraysvyohyke = $info_row['keraysvyohyke'];
+					$keraysvyohyke = "Suoratoimitus";
 					$usea_keraysvyohyke = 'K';
 					$kaytettavyys = "Y";
-					$terminaalialue = $info_row['terminaalialue'];
+					$terminaalialue = "Suoratoimitus";
 					$korkeus = 0;
 					$paino = 0;
 					$alkuhyllyalue = "";
@@ -182,7 +206,7 @@
 					$loppuhyllynro = "";
 					$loppuhyllyvali = "";
 					$loppuhyllytaso = "";
-					$automaattinen_paivitys = "";
+					$automaattinen_paivitys = "S";
 					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
 					require ("../tilauskasittely/suuntalavat.inc");
@@ -220,8 +244,10 @@
 			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 		}
 
+		// poistetaan myös netto = X, jos räplätään ruksia
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
-					uusiotunnus = '{$otunnus}'
+					uusiotunnus = '{$otunnus}',
+					netto = ''
 					$updatelisa
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
@@ -246,16 +272,32 @@
 		// Tuotteet päivitetään kohdistuksissa automaattisesti oikeille suuntalavoille, mikäli sellainen on jo perustettu (suuntalavan määriteltyjen varastopaikkojen sekä keräysvyöhykkeen mukaan)
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
 			if ($suuntalavan_tunnus > 0) {
+
+				$otunnus = trim($otunnus);
+
 				$data['suuntalava'] = $suuntalavan_tunnus;
 
-				$query = "	SELECT sscc
+				$query = "	SELECT suuntalavat.sscc, IFNULL(suuntalavat_saapuminen.saapuminen, '') AS saapuminen
 							FROM suuntalavat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$suuntalavan_tunnus}'";
+							LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+							AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
 				$sscc_fetch_res = pupe_query($query);
 				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
 
 				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
+
+				if ((int) $suuntalavan_tunnus != 0 and $sscc_fetch_row['saapuminen'] == '') {
+					$query = "	INSERT INTO suuntalavat_saapuminen SET
+								yhtio = '{$kukarow['yhtio']}',
+								suuntalava = '{$suuntalavan_tunnus}',
+								saapuminen = '{$otunnus}',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = '{$kukarow['kuka']}'";
+					$insert_res = pupe_query($query);
+				}
 			}
 			else {
 				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti
@@ -344,6 +386,11 @@
 						and tuoteno = '{$rivi['tuoteno']}'
 						and {$tunken} = '{$tunnus}'";
 			$sarjares = pupe_query($query);
+		}
+
+		if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
 		}
 
 		$hinnat = laske_hinta($laskurow, $tunnus);

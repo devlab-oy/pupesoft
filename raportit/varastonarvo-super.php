@@ -210,7 +210,7 @@
 				$sel = 'checked';
 			}
 
-			echo "<br><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("variaatiosummaus");
+			echo "<br><br><input type='checkbox' name='variaatiosummaus' value='ON' $sel/>".t("Näytä tuotteet variaation, värin ja koon mukaan");
 		}
 
 		echo "</td>";
@@ -920,7 +920,7 @@
 					$variaatiosum_bruttovaraston_arvo 	+= $bruttovaraston_arvo;
 					$variaatiosum_muutoshinta 			+= $muutoshinta;
 					$variaatiosum_bmuutoshinta 			+= $bmuutoshinta;
-					$variaatiosum_koot[strtoupper($row['kokonimi'])] = $muutoskpl;
+					$variaatiosum_koot[strtoupper($row['kokonimi'])] += $muutoskpl;
 					$variaatiosum_row					 = $row;
 
 					$eitodgo = TRUE;
@@ -1178,7 +1178,6 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
 				$excelsarake++;
-
 
 				foreach ($kaikkikoot as $kokonimi => $koko) {
 

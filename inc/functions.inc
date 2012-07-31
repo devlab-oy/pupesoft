@@ -9432,7 +9432,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 			return;
 		}
 
-		if ($kieli == "") $kieli = $kukarow["kieli"];
+		if ($kieli == "" and isset($kukarow["kieli"])) $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus

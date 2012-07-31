@@ -285,11 +285,13 @@
 					// Otetaan ASN-sanomalta tilausrivi(e)n tunnus ja laitetaan $paketin_rivit muuttujaan
 					if (strpos($kollirow['tilausrivi'], ",") !== false) {
 						foreach (explode(",", $kollirow['tilausrivi']) as $tunnus) {
-							$paketin_rivit[] = $tunnus;
+							$tunnus = trim($tunnus);
+
+							if ($tunnus != '') $paketin_rivit[] = $tunnus;
 						}
 					}
 					else {
-						$paketin_rivit[] = $kollirow['tilausrivi'];
+						if ($kollirow['tilausrivi'] != '') $paketin_rivit[] = $kollirow['tilausrivi'];
 					}
 
 					// Haetaan tuotteen lapset jotka ovat runkoveloituksia
@@ -920,32 +922,13 @@
 			$tunnukset = array_map('intval', $tunnukset);
 			$poista_tilausrivi = array_map('intval', $poista_tilausrivi);
 			$ostotilauksella_tilaajanrivinro = array_map('intval',$ostotilauksella_tilaajanrivinro);
+
 			// otetaan ostotilausrivin kpl m‰‰r‰, splitataan ja menn‰‰ eteenp‰in...
 			// T‰m‰ pit‰‰ sitten jollain tavalla muuttaa paremmaksi, t‰m‰ on versio 1.0
-			$kpl_maara_ostolla = $ostotilauksella_kpl[$tunnukset[0]];
 
-			// haetaan ostotilauksen rivitiedot kyseiselle riville.
-			$query = "	SELECT *
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tunnukset[0]}'";
-			$ostores = pupe_query($query);
-			$ostotilausrivirow = mysql_fetch_assoc($ostores);
-
-			$query = "	SELECT liitostunnus
-						FROM lasku
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$ostotilausrivirow['otunnus']}'";
-			$liit_res = pupe_query($query);
-			$liit_row = mysql_fetch_assoc($liit_res);
-
-			$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
-						FROM tuotteen_toimittajat
-						JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P' AND tuote.tuoteno = '{$tuoteno}')
-						WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-						AND tuotteen_toimittajat.liitostunnus = '{$liit_row['liitostunnus']}'";
-			$tuoteno_res = pupe_query($query);
-			$tuoteno_row = mysql_fetch_assoc($tuoteno_res);
+			$kaytettavat_tunnukset = array();
+			$kaytettava_kappalemaara_yhteensa = 0;
+			$splitattava_tilausrivi = 0;
 
 			$_tunn = $valitse == 'asn' ? $asn_rivi : $rivitunnus;
 			$lajilisa = $valitse == 'asn' ? "and laji = 'asn'" : "and laji = 'tec'";
@@ -959,78 +942,122 @@
 			$hakures = pupe_query($hakuquery);
 			$asn_row_haku = mysql_fetch_assoc($hakures);
 
-			$asn_kpl_tilaukselta = $asn_row_haku["kappalemaara"];
-			$erotus = $kpl_maara_ostolla - $asn_kpl_tilaukselta;
+			foreach ($tunnukset as $tmp_tunn) {
+				if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
+					$kaytettavat_tunnukset[] = $tmp_tunn;
+					$kaytettava_kappalemaara_yhteensa += $ostotilauksella_kpl[$tmp_tunn];
+					$splitattava_tilausrivi = $tmp_tunn;
+				}
+			}
 
-			// tehd‰‰n splitti
-			if ($erotus != 0) {
+			if ($kaytettava_kappalemaara_yhteensa < $asn_row_haku['kappalemaara']) {
+				$error = t("Valitse v‰hint‰‰n")." {$asn_row_haku['kappalemaara']}!";
+				$tee = 'etsi';
+			}
+			else {
 
-				// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
-				$query = "	UPDATE tilausrivi SET
-							varattu = '{$asn_kpl_tilaukselta}',
-							tilkpl	= '{$asn_kpl_tilaukselta}'
+				// haetaan ostotilauksen rivitiedot kyseiselle riville.
+				$query = "	SELECT *
+							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$ostotilausrivirow['tunnus']}'";
-				$upres = pupe_query($query);
+							AND tunnus = '{$splitattava_tilausrivi}'";
+				$ostores = pupe_query($query);
+				$ostotilausrivirow = mysql_fetch_assoc($ostores);
 
-				// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-				$query = "	INSERT INTO tilausrivi SET
-							yhtio 		= '$ostotilausrivirow[yhtio]',
-							tyyppi		= '$ostotilausrivirow[tyyppi]',
-							toimaika	= '$ostotilausrivirow[toimaika]',
-							kerayspvm	= '$ostotilausrivirow[kerayspvm]',
-							otunnus		= '$ostotilausrivirow[otunnus]',
-							tuoteno		= '$ostotilausrivirow[tuoteno]',
-							try			= '$ostotilausrivirow[try]',
-							osasto		= '$ostotilausrivirow[osasto]',
-							nimitys		= '$ostotilausrivirow[nimitys]',
-							yksikko		= '$ostotilausrivirow[yksikko]',
-							tilkpl		= '$erotus',
-							varattu		= '$erotus',
-							hinta		= '$ostotilausrivirow[hinta]',
-							laatija		= '$ostotilausrivirow[laatija]',
-							laadittu	= '$ostotilausrivirow[laadittu]',
-							hyllyalue	= '$ostotilausrivirow[hyllyalue]',
-							hyllynro	= '$ostotilausrivirow[hyllynro]',
-							hyllytaso	= '$ostotilausrivirow[hyllytaso]',
-							hyllyvali	= '$ostotilausrivirow[hyllyvali]',
-							tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
-				$inskres = pupe_query($query);
+				$query = "	SELECT liitostunnus
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$ostotilausrivirow['otunnus']}'";
+				$liit_res = pupe_query($query);
+				$liit_row = mysql_fetch_assoc($liit_res);
+
+				$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
+							FROM tuotteen_toimittajat
+							JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P' AND tuote.tuoteno = '{$tuoteno}')
+							WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+							AND tuotteen_toimittajat.liitostunnus = '{$liit_row['liitostunnus']}'";
+				$tuoteno_res = pupe_query($query);
+				$tuoteno_row = mysql_fetch_assoc($tuoteno_res);
+
+				// tehd‰‰n splitti
+				if ($kaytettava_kappalemaara_yhteensa > $asn_row_haku['kappalemaara']) {
+
+					$erotus = abs($kaytettava_kappalemaara_yhteensa - $asn_row_haku['kappalemaara']);
+
+					$upd_kpl = $ostotilausrivirow['varattu'] - $erotus;
+
+					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+					$query = "	UPDATE tilausrivi SET
+								varattu = '{$upd_kpl}',
+								tilkpl	= '{$upd_kpl}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$ostotilausrivirow['tunnus']}'";
+					$upres = pupe_query($query);
+
+					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+					$query = "	INSERT INTO tilausrivi SET
+								yhtio 		= '$ostotilausrivirow[yhtio]',
+								tyyppi		= '$ostotilausrivirow[tyyppi]',
+								toimaika	= '$ostotilausrivirow[toimaika]',
+								kerayspvm	= '$ostotilausrivirow[kerayspvm]',
+								otunnus		= '$ostotilausrivirow[otunnus]',
+								tuoteno		= '$ostotilausrivirow[tuoteno]',
+								try			= '$ostotilausrivirow[try]',
+								osasto		= '$ostotilausrivirow[osasto]',
+								nimitys		= '$ostotilausrivirow[nimitys]',
+								yksikko		= '$ostotilausrivirow[yksikko]',
+								tilkpl		= '$erotus',
+								varattu		= '$erotus',
+								hinta		= '$ostotilausrivirow[hinta]',
+								ale1		= '$ostotilausrivirow[ale1]',
+								ale2		= '$ostotilausrivirow[ale2]',
+								ale3		= '$ostotilausrivirow[ale3]',
+								laatija		= '$ostotilausrivirow[laatija]',
+								laadittu	= '$ostotilausrivirow[laadittu]',
+								hyllyalue	= '$ostotilausrivirow[hyllyalue]',
+								hyllynro	= '$ostotilausrivirow[hyllynro]',
+								hyllytaso	= '$ostotilausrivirow[hyllytaso]',
+								hyllyvali	= '$ostotilausrivirow[hyllyvali]',
+								tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
+					$inskres = pupe_query($query);
+				}
+
+				// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
+				if ($poista_tilausrivi["0"] != 0) {
+
+					$updatequery2 = "	UPDATE tilausrivi SET
+										tilaajanrivinro = '{$poista_tilausrivi[0]}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$asn_row_haku['tilausnumero']}'
+										AND tunnus IN (".implode(",", $tunnukset).")";
+					pupe_query($updatequery2);
+				}
+
+				$query = "	SELECT paketintunniste, asn_numero
+							FROM asn_sanomat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$_tunn}'";
+				$res = pupe_query($query);
+				$row = mysql_fetch_assoc($res);
+
+				$kolli = $row['paketintunniste'];
+
+				$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
+
+				$tunnukset = array_intersect_key($tunnukset, $kaytettavat_tunnukset);
+
+				$query = "	UPDATE asn_sanomat SET
+							tilausrivi = '".implode(",", $tunnukset)."',
+							muuttaja = '{$kukarow['kuka']}',
+							muutospvm = now(),
+							tuoteno = '{$ostotilausrivirow['tuoteno']}'
+							{$toim_tuotenolisa}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$_tunn}'";
+				$updres = pupe_query($query);
+
+				$tee = 'nayta';
 			}
-
-			// p‰ivitet‰‰n t‰ss‰ vaiheessa tilaukselle tilaajanrivipositio t‰lle uudelle riville, mik‰li ollaan poistamassa samalla vanha.
-			if ($poista_tilausrivi["0"] != 0) {
-
-				$updatequery2 = "	UPDATE tilausrivi SET
-									tilaajanrivinro = '{$poista_tilausrivi[0]}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND otunnus = '{$asn_row_haku['tilausnumero']}'
-									AND tunnus = '".implode(",", $tunnukset)."'";
-				pupe_query($updatequery2);
-			}
-
-			$query = "	SELECT paketintunniste, asn_numero
-						FROM asn_sanomat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$_tunn}'";
-			$res = pupe_query($query);
-			$row = mysql_fetch_assoc($res);
-
-			$kolli = $row['paketintunniste'];
-
-			$toim_tuotenolisa = trim($tuoteno_row['toim_tuoteno']) != "" ? ", toim_tuoteno = '{$tuoteno_row['toim_tuoteno']}' " : "";
-
-			$query = "	UPDATE asn_sanomat SET
-						tilausrivi = '".implode(",", $tunnukset)."',
-						muuttaja = '{$kukarow['kuka']}',
-						muutospvm = now(),
-						tuoteno = '{$ostotilausrivirow['tuoteno']}'
-						{$toim_tuotenolisa}
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$_tunn}'";
-			$updres = pupe_query($query);
-
-			$tee = 'nayta';
 		}
 	}
 

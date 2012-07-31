@@ -1566,8 +1566,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "<tr><td colspan='2'>";
 
 	// Hoidetaan oletukset!
-
-	for ($i=1; $i<$maara; $i++) {
+	for ($i = 1; $i < 50; $i++) {
 		if ($i == 1 and strlen($itili[$i]) == 0) {
 			$itili[$i] = $oltil;
 		}
@@ -1699,7 +1698,6 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 
 			// Tehdään projektipopup
-
 			if (mysql_num_rows($vresult) > 0) {
 				$query = "	SELECT tunnus, nimi, koodi
 							FROM kustannuspaikka

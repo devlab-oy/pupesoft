@@ -24,12 +24,15 @@
 		require_once("../inc/functions.inc");
 		require_once("../inc/connect.inc");
 
+		ini_set("memory_limit", "2G");
+
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
 		$tyyppi 	  = "";
 		$email_osoite = "";
+		$pupe_root_polku = dirname(dirname(__FILE__));
 
 		$supertee = "RAPORTOI";
 	}
@@ -327,6 +330,13 @@
 			$epakur = 'kaikki';
 			$tyyppi = 'A';
 		}
+
+		// Setataan jos ei olla setattu
+		if (!isset($alaraja)) $alaraja = "";
+		if (!isset($kaikkikoot)) $kaikkikoot = "";
+		if (!isset($summaustaso)) $summaustaso = "";
+		if (!isset($variaatiosummaus)) $variaatiosummaus = "";
+		if (!isset($ylaraja)) $ylaraja = "";
 
 		################## Jos summaustaso on paikka, otetaan paikat mukaan selectiin ##################
 		$paikka_lisa1 = "";
@@ -1179,13 +1189,11 @@
 				$worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
 				$excelsarake++;
 
-				foreach ($kaikkikoot as $kokonimi => $koko) {
-
-					if (isset($koot[$kokonimi])) {
-						$worksheet->writeNumber($excelrivi, $excelsarake, $koot[$kokonimi]);
-					}
-
-					$excelsarake++;
+				if ($variaatiosummaus != "") {
+ 					foreach ($kaikkikoot as $kokonimi => $koko) {
+ 				        if (isset($koot[$kokonimi])) $worksheet->writeNumber($excelrivi, $excelsarake, $koot[$kokonimi]);
+ 				        $excelsarake++;
+ 					}
 				}
 
 				$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));

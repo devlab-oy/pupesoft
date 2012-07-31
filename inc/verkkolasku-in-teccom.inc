@@ -91,10 +91,11 @@
 	}
 
 	// BehrHella case
-	if (isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeCode)
-		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeCode == 'ZF03'
+	if (isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeDescription)
+		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->AllowOrChargeDescription == 'Freight'
 		and isset($xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount)
 		and $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount != 0) {
+
 		$osto_rahti = (float) str_replace(",", ".", $xml->InvoiceSummary->AllowOrChargeTotals->AllowOrCharge->Amount);
 	}
 

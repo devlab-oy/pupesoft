@@ -225,4 +225,22 @@ echo "
 </table>
 </div>";
 
+# Autofocus opera mobileen
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
+echo "<script type='text/javascript'>
+
+	function doFocus() {
+	        var focusElementId = 'viivakoodi'
+	        var textBox = document.getElementById(focusElementId);
+	        textBox.focus();
+	    }
+
+	function clickButton() {
+	   document.getElementById('myHiddenButton').click();
+	}
+
+   setTimeout('clickButton()', 1000)
+</script>
+";
+
 #require('inc/footer.inc');

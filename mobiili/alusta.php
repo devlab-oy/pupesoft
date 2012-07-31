@@ -71,7 +71,7 @@ echo "<div class='main'>
 
 if (isset($return) and count($return) > 0) {
 
-	echo "<table>";
+	echo "<table id='saapumiset'>";
 
 	foreach ($return as $row) {
 		echo "<tr>";
@@ -100,5 +100,26 @@ echo "<div class='controls'>
 	<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 	</form>
 </div>";
+
+# Autofocus opera mobileen
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
+echo "<script type='text/javascript'>
+
+	function doFocus() {
+	        var focusElementId = 'alusta';
+	        var textBox = document.getElementById(focusElementId);
+	        textBox.focus();
+	    }
+
+	function clickButton() {
+	   document.getElementById('myHiddenButton').click();
+	}
+
+	if(!document.getElementById('saapumiset')) {
+   		setTimeout('clickButton()', 10);
+	}
+
+</script>
+";
 
 #require('inc/footer.inc');

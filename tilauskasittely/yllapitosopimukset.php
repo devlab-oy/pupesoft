@@ -140,10 +140,10 @@
 			unset($to);
 
 			//	Korjataan kommentti
-			$from[]	= "/%ed/";
+			$from[]	= "/%ed/i";
 			$to[]	= tv1dateconv($ed_alku)." - ".tv1dateconv($ed_lopp);
 
-			$from[]	= "/%se/";
+			$from[]	= "/%se/i";
 			$to[]	= tv1dateconv($tapahtumapvm)." - ".tv1dateconv($se_lopp);
 
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja

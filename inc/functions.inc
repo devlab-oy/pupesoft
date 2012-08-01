@@ -16633,7 +16633,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			}
 
 			$params_lahete = rivi_lahete($params_lahete);
-			$sscc = $row['sscc'];
+			if ($params['koontilahete']) $sscc = $row['sscc'];
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet

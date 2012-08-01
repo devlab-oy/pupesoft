@@ -136,6 +136,93 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
+	$query = "	SELECT tuoteperhe.isatuoteno, tilausrivi.uusiotunnus,
+				tuoteperhe.tuoteno,
+				tuote.tuoteno, tuote.try,tuote.osasto,
+				tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
+				tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
+				tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
+				tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+				FROM tilausrivi
+				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+				JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+				JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
+				JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
+				WHERE {$uusiotunnuslisa}
+				and tilausrivi.varattu <> 0
+				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				and tilausrivi.tyyppi = 'O'
+				and tilausrivi.netto = ''
+				and tilausrivi.perheid != 0
+				ORDER BY tilausrivi.perheid, tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
+	$chk_res = pupe_query($query);
+
+	if (mysql_num_rows($chk_res) > 0) {
+
+		while ($chk_row = mysql_fetch_assoc($chk_res)) {
+
+			$query = "	SELECT tunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND perheid = '{$chk_row['tunnus']}'
+						AND tuoteno = '{$chk_row['tuoteno']}'
+						AND kpl = '{$chk_row['kpl']}'
+						AND varattu = '{$chk_row['varattu']}'
+						AND tyyppi = 'O'";
+			$loytyiko_lapsi_res = pupe_query($query);
+
+			if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+				list($chk_hinta,,$chk_ale,) = alehinta_osto($laskurow, $chk_row, $chk_row["tilkpl"]);
+
+				$lisainsert = "	INSERT INTO tilausrivi SET
+								yhtio			= '{$chk_row['yhtio']}',
+								tyyppi			= '{$chk_row['tyyppi']}',
+								toimaika		= '{$chk_row['toimaika']}',
+								kerayspvm		= '{$chk_row['kerayspvm']}',
+								otunnus			= '{$chk_row['otunnus']}',
+								tuoteno			= '{$chk_row['tuoteno']}',
+								try				= '{$chk_row['try']}',
+								osasto			= '{$chk_row['osasto']}',
+								nimitys			= '{$chk_row['nimitys']}',
+								yksikko			= '{$chk_row['yksikko']}',
+								tilkpl			= '{$chk_row['tilkpl']}',
+								varattu			= '{$chk_row['varattu']}',
+								kpl 			= '{$chk_row['kpl']}',
+								ale1			= '{$chk_ale['ale1']}',
+								ale2			= '{$chk_ale['ale2']}',
+								ale3			= '{$chk_ale['ale3']}',
+								hinta			= '{$chk_hinta}',
+								laatija			= 'tuloutus',
+								kommentti		= '',
+								laadittu		=  now(),
+								hyllyalue		= '{$chk_row['hyllyalue']}',
+								hyllynro		= '{$chk_row['hyllynro']}',
+								hyllytaso		= '{$chk_row['hyllytaso']}',
+								hyllyvali		= '{$chk_row['hyllyvali']}',
+								perheid			= '{$chk_row['tunnus']}',
+								suuntalava		= '{$chk_row['suuntalava']}',
+								uusiotunnus		= '{$chk_row['uusiotunnus']}'";
+				$inskres = pupe_query($lisainsert);
+
+				// päivitetään isä
+				$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
+				$updateres = pupe_query($updateisa);
+			}
+			else {
+
+				$loytyiko_lapsi_row = mysql_fetch_assoc($loytyiko_lapsi_res);
+
+				$query = "	UPDATE tilausrivi SET
+							uusiotunnus = '{$chk_row['uusiotunnus']}',
+							suuntalava = '{$chk_row['suuntalava']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$loytyiko_lapsi_row['tunnus']}'";
+				$updres = pupe_query($query);
+			}
+		}
+	}
+
 	// tavallinen laskenta.. VARATTU PITÄÄ OLLA > 0 ja netto-kenttä tyhjä!
 	// jos nettokentässä on jotain niin tätä riviä ei haluttu vielä viedä varastoon
 	$query = "	SELECT tilausrivi.*

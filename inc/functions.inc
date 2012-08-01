@@ -18676,7 +18676,7 @@ if (!function_exists('vie_varastoon')) {
 		$hyllytaso 	= $hylly['hyllytaso'];
 
 		# Koko suuntalava varastoon
-		if($tilausrivi == 0) {
+		if ($tilausrivi == 0) {
 			$koko_suuntalava = 'X';
 			$vietiinko_koko_suuntalava = 'joo';
 		}

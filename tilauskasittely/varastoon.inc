@@ -4,7 +4,7 @@
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
 # Muuttuja kun vied‰‰n tilausrivi kerrallaan.
-$varastoon_tilausurivirajaus = "";
+$varastoon_tilausrivirajaus = "";
 
 if ($toiminto == "kalkyyli" and $tee == "" and $kauttalaskutus == '') {
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
@@ -125,8 +125,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	$suuntalavajoin = "";
 
 	# Jos tilausrivi ei ole nolla, vied‰‰n vain yksi rivi varastoon.
-	if ($tilausrivi != 0) {
-		$varastoon_tilausurivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
+	if ($tilausrivi > 0) {
+		$varastoon_tilausrivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
 	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
@@ -156,7 +156,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
-				$varastoon_tilausurivirajaus
+				$varastoon_tilausrivirajaus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {

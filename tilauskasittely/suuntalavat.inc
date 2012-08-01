@@ -257,12 +257,23 @@
 								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
 					$suuntalava_upd_res = pupe_query($query);
 
-					if (trim($automaattinen_paivitys) == 'K') {
+					if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+
+						if (trim($automaattinen_paivitys) == 'K') {
+							$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
+							$valittutunnuslisa = "";
+						}
+						else {
+							$tuotejoini = "";
+							$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
+						}
+						
 						$query = "	UPDATE tilausrivi
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke_chk_row['keraysvyohyke']}')
+									$tuotejoini
 									SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.uusiotunnus = '{$otunnus}'
+									$valittutunnuslisa
 									AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 									AND tilausrivi.kpl = 0
 									AND tilausrivi.tyyppi = 'O'";
@@ -332,12 +343,23 @@
 				$insert_result = pupe_query($query);
 
 				// p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
-				if (trim($automaattinen_paivitys) == 'K') {
+				if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+
+					if (trim($automaattinen_paivitys) == 'K') {
+						$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
+						$valittutunnuslisa = "";
+					}
+					else {
+						$tuotejoini = "";
+						$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
+					}
+					
 					$query = "	UPDATE tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+								$tuotejoini
 								SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$otunnus}'
+								$valittutunnuslisa
 								AND tilausrivi.suuntalava = 0
 								AND tilausrivi.kpl = 0
 								AND tilausrivi.tyyppi = 'O'";

@@ -718,7 +718,7 @@
 
 									$query .= ", varattu = '".$maara[$apui]."'";
 
-									if ($poikkeama_kasittely[$apui] != "") {
+									if (isset($poikkeama_kasittely[$apui]) and $poikkeama_kasittely[$apui] != "") {
 
 										if ($maara[$apui] == 0) {
 											// Mit‰tˆid‰‰n nollarivi koska poikkeamalle kuitenkin tehd‰‰n jotain fiksua
@@ -742,7 +742,7 @@
 								}
 							}
 
-							if ($poikkeama_kasittely[$apui] != "" and $rotunnus != 0) {
+							if (isset($poikkeama_kasittely[$apui]) and $poikkeama_kasittely[$apui] != "" and $rotunnus != 0) {
 								// K‰ytt‰j‰n valitsemia poikkeamak‰sittelys‰‰ntˆj‰
 								if ($poikkeama_kasittely[$apui] == "PU") {
 
@@ -1266,6 +1266,8 @@
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
+				$boob = "";
+
 				// L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
 					$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
@@ -1312,9 +1314,13 @@
 
 				// Jos tilauksella oli yht‰‰n ker‰‰m‰tˆnt‰ rivi‰
 				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, lasku.alatila,
+							lasku.toimitustavan_lahto,
+							lasku.ytunnus,
+							lasku.toim_osoite,
+							lasku.toim_postino,
+							lasku.toim_postitp,
 							toimitustapa.rahtikirja,
 							toimitustapa.tulostustapa,
-							toimitustapa.rahtikirja,
 							toimitustapa.nouto,
 							lasku.varasto,
 							lasku.toimitustapa,
@@ -1472,6 +1478,37 @@
 							$ker_res = pupe_query($query_ker);
 						}
 
+						if ($laskurow['tulostustapa'] == 'E' and
+							(($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
+							($laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != ""))) {
+
+							// Katotaan j‰‰kˆ meille t‰ss‰ vaiheessa tyhji‰ kolleja?
+							$query = "	SELECT pakkausnro, sscc_ulkoinen, sum(kpl_keratty) kplkeratty
+										FROM kerayserat
+										WHERE yhtio 		= '{$kukarow['yhtio']}'
+										AND nro 			= '$id'
+										AND otunnus 		= '{$laskurow['tunnus']}'
+										AND tila 			= 'K'
+										AND sscc_ulkoinen  != '0'
+										GROUP BY 1,2
+										HAVING kplkeratty = 0";
+							$keraysera_res = pupe_query($query);
+
+							while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
+								if ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+								}
+								elseif ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+								}
+
+								$mergeid = md5($laskurow["toimitustavan_lahto"].$laskurow["ytunnus"].$laskurow["toim_osoite"].$laskurow["toim_postino"].$laskurow["toim_postitp"]);
+
+								$unifaun->_discardParcel($mergeid, $keraysera_row['sscc_ulkoinen']);
+								$unifaun->ftpSend();
+							}
+						}
+
 						// jos kyseess‰ on toimitustapa jonka rahtikirja on hetitulostus
 						if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
 							// p‰ivitet‰‰n ker‰yser‰n tila "Rahtikirja tulostettu"-tilaan
@@ -1616,6 +1653,9 @@
 								elseif ($komento != 'email' and substr($komento,0,12) != 'asiakasemail') {
 									$lahete_tulostus_paperille++;
 								}
+
+								$sellahetetyyppi = (!isset($sellahetetyyppi)) ? "" : $sellahetetyyppi;
+								$kieli = (!isset($kieli)) ? "" : $kieli;
 
 								$params = array(
 									'laskurow'					=> $laskurow,
@@ -1957,8 +1997,18 @@
 
 			$result = pupe_query($query);
 
-			//piirret‰‰n taulukko...
-			if (mysql_num_rows($result) > 0) {
+			//jos haetaan numerolla ja lˆydet‰‰n yksi osuma, siirryt‰‰n suoraan ker‰‰m‰‰n
+			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
+				$row = mysql_fetch_assoc($result);
+				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+					$id = $row[keraysera];
+				}
+				else {
+					$id = $row[tunnus];
+				}
+			}
+			else if (mysql_num_rows($result) > 0) {
+				//piirret‰‰n taulukko...
 				echo "<br><table>";
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') {

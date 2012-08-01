@@ -9611,7 +9611,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 			return;
 		}
 
-		if ($kieli == "") $kieli = $kukarow["kieli"];
+		if ($kieli == "" and isset($kukarow["kieli"])) $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
@@ -12661,7 +12661,14 @@ if (!function_exists("pupe_DataTables")) {
 					var sarake = $(\"thead input\").index(this);
 
 					// fnFilter toistaiseksi vain ekalle tablelle
-					datatablesit[0].fnFilter( arvo, sarake );
+
+					// Onko regular expressioni?
+					if (arvo.indexOf(\"|\") > -1) {
+						datatablesit[0].fnFilter( arvo, sarake, true, false );
+					}
+					else {
+						datatablesit[0].fnFilter( arvo, sarake, false, true );
+					}
 
 					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
 					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
@@ -16807,7 +16814,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			}
 
 			$params_lahete = rivi_lahete($params_lahete);
-			$sscc = $row['sscc'];
+			if ($params['koontilahete']) $sscc = $row['sscc'];
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet

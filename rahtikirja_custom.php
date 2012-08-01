@@ -299,7 +299,8 @@ if (!$asiakasid) {
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER by kirjoitin";
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
 			$kirre = pupe_query($query);
 
 			echo "<br><br>".t("Uusimmat tyhjät rahtikirjat").":<br>";
@@ -489,6 +490,7 @@ else {
     $query = "	SELECT *
 				from kirjoittimet
 				where yhtio = '$kukarow[yhtio]'
+				AND komento != 'EDI'
 				ORDER BY kirjoitin";
 	$kires = pupe_query($query);
 
@@ -659,10 +661,10 @@ function pupe_rahtikirja_fetch($otsikkonro) {
  *
  */
 function pupe_varasto_fetch_all() {
-	$query = sprintf("SELECT tunnus, nimitys
-				FROM varastopaikat
-				WHERE yhtio = '%s'
-				ORDER BY nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
+	$query = sprintf("	SELECT tunnus, nimitys
+						FROM varastopaikat
+						WHERE yhtio = '%s'
+						ORDER BY tyyppi, nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
 
 	$result = pupe_query($query);
 

@@ -77,16 +77,23 @@ if ($korjataan != '') {
 		$error = '';
 
 		if ($uusipaikka[$id] == 'uusi' and $hyllyalue[$id] != '') {
+
 			$hyllyalue[$id] = strtoupper($hyllyalue[$id]);
-			if ($hyllynro[$id]=='') $hyllynro[$id]='0';
-			if ($hyllyvali[$id]=='') $hyllyvali[$id]='0';
-			if ($hyllytaso[$id]=='') $hyllytaso[$id]='0';
+			if ($hyllynro[$id]  == '') $hyllynro[$id]  = '0';
+			if ($hyllyvali[$id] == '') $hyllyvali[$id] = '0';
+			if ($hyllytaso[$id] == '') $hyllytaso[$id] = '0';
 
 			$kuuluuko = kuuluukovarastoon($hyllyalue[$id], $hyllynro[$id], $tuvarasto);
 
 			if ($kuuluuko > 0) {
-				$query	="SELECT * FROM tuotepaikat WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno[$id]' and oletus!=''";
-				$oleresult = mysql_query($query) or pupe_error($query);
+
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno[$id]'
+							and oletus != ''";
+				$oleresult = pupe_query($query);
+
 				if (mysql_num_rows($oleresult) == 0) {
 					$oletus = 'X';
 				}
@@ -105,7 +112,7 @@ if ($korjataan != '') {
 							tilausmaara	= '$tilattava[$id]',
 							laatija 	= '$kukarow[kuka]',
 							luontiaika 	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// tehdään tapahtuma
 				$query = "	INSERT into tapahtuma set
@@ -122,14 +129,15 @@ if ($korjataan != '') {
 							selite 		= '".t("Lisättiin tuotepaikka")." $hyllyalue[$id] $hyllynro[$id] $hyllyvali[$id] $hyllytaso[$id]',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= now()";
-				$korjres = mysql_query($query) or pupe_error($query);
+				$korjres = pupe_query($query);
 			}
 			else {
 				$error ="<font class='error'>".t("Antamasi varastopaikka ei ole käsiteltävässä varastossa")."</font>";
 			}
 		}
 
-		$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
+		$query = "	SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) hyllypaikka,
 					tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tuotepaikat.tilausmaara, tuotepaikat.tunnus,
 					concat(rpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(tuotepaikat.hyllynro ,5,' ')) ihmepaikka
 					FROM tuotepaikat, varastopaikat, tuote
@@ -141,7 +149,7 @@ if ($korjataan != '') {
 					and tuotepaikat.tuoteno = '$tuoteno[$id]'
 					and varastopaikat.tunnus = '$tuvarasto'
 					order by 1";
-		$result2 = mysql_query($query) or pupe_error($query);
+		$result2 = pupe_query($query);
 
 		if (mysql_num_rows($result2) == 0) {
 			$korj++;
@@ -151,11 +159,14 @@ if ($korjataan != '') {
 			}
 			echo "<tr><td>$id $tuoteno[$id]</td>";
 
-			$query = "SELECT tuoteno, nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]'";
-			$nimresult = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT tuoteno, nimitys
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tuoteno[$id]'";
+			$nimresult = pupe_query($query);
 
 			if (mysql_num_rows($nimresult) == 1) {
-				$nimrow = mysql_fetch_array($nimresult);
+				$nimrow = mysql_fetch_assoc($nimresult);
 
 				if ($error == '') {
 					$error = t("Paikkaa ei löytynyt tästä varastosta, anna uusi paikka");
@@ -181,6 +192,7 @@ if ($korjataan != '') {
 			else {
 				echo "<td></td><td></td><td></td><td>".t("TUOTENUMERO EI LÖYDY")."!!!</td><td></td>";
 			}
+
 			echo "</tr>";
 		}
 		elseif (mysql_num_rows($result2) > 1) {
@@ -193,11 +205,15 @@ if ($korjataan != '') {
 
 				echo "<tr><td>$id $tuoteno[$id]</td>";
 
-				$query = "SELECT tuoteno, nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]' LIMIT 1";
-				$nimresult = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT tuoteno, nimitys
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno[$id]'
+							LIMIT 1";
+				$nimresult = pupe_query($query);
 
 				if (mysql_num_rows($nimresult) == 1) {
-					$nimrow = mysql_fetch_array($nimresult);
+					$nimrow = mysql_fetch_assoc($nimresult);
 
 					echo "<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td>
 							<td align='right'>$halytysraja[$id]</td>
@@ -206,9 +222,10 @@ if ($korjataan != '') {
 
 					echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa")."";
 
-					while ($varow = mysql_fetch_array($result2)) {
+					while ($varow = mysql_fetch_assoc($result2)) {
 						$sel='';
 						if ($varow['tunnus'] == $rivipaikka[$id]) $sel = 'selected';
+
 						echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
 					}
 					echo "</select></td>";
@@ -221,9 +238,12 @@ if ($korjataan != '') {
 			else {
 				echo "<input type='hidden' name='rivipaikka[$id]' value='$rivipaikka[$id]'>";
 
-				$query = "UPDATE tuotepaikat SET halytysraja = '$halytysraja[$id]', tilausmaara = '$tilattava[$id]' where yhtio = '$kukarow[yhtio]' and tunnus = '$rivipaikka[$id]'";
-				$updresult = mysql_query($query) or pupe_error($query);
-
+				$query = "	UPDATE tuotepaikat
+							SET halytysraja = '$halytysraja[$id]',
+							tilausmaara = '$tilattava[$id]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus  = '$rivipaikka[$id]'";
+				$updresult = pupe_query($query);
 			}
 			echo "	<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 					<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
@@ -231,15 +251,19 @@ if ($korjataan != '') {
 					<input type='hidden' name='uusipaikka[$id]' value=''>";
 		}
 		elseif (mysql_num_rows($result2) == 1) {
-			$varow = mysql_fetch_array($result2);
+			$varow = mysql_fetch_assoc($result2);
 
 			echo "	<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 					<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
 					<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 					<input type='hidden' name='uusipaikka[$id]' value=''>";
 
-			$query = "UPDATE tuotepaikat SET halytysraja = '$halytysraja[$id]', tilausmaara = '$tilattava[$id]' where yhtio = '$kukarow[yhtio]' and tunnus = '$varow[tunnus]'";
-			$updresult = mysql_query($query) or pupe_error($query);
+			$query = "	UPDATE tuotepaikat
+						SET halytysraja = '$halytysraja[$id]',
+						tilausmaara = '$tilattava[$id]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$varow[tunnus]'";
+			$updresult = pupe_query($query);
 		}
 	}
 
@@ -268,7 +292,7 @@ if ($korjataan != '') {
 else {
 	echo "<font class='message'>".t("Tiedostomuoto").":</font><br>
 			<table>
-			<tr><th colspan='3'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
+			<tr><th colspan='3'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 			<tr><td>".t("Tuoteno")."</td><td>".t("Hälytysraja")."</td><td>".t("Tilausmäärä")."</td></tr>
 			</table>
 			<br>";
@@ -277,33 +301,35 @@ else {
 			echo "<tr><td>".t("Valitse varasto:")."</td>
 				<td><select name='tuvarasto'>";
 
-			$query = "	SELECT tunnus, nimitys
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER BY nimitys";
-			$result = mysql_query($query) or pupe_error($query);
+	$query = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
+	$result = pupe_query($query);
 
-			echo "<option value=''>".t("Ei valittu")."</option>";
+	echo "<option value=''>".t("Ei valittu")."</option>";
 
-			while($varselrow = mysql_fetch_array($result)){
-				$sel = '';
-				if (($varselrow[0] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($varselrow[0], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
-					$sel = 'selected';
-					$tuvarasto = $varselrow[0];
-				}
-				echo "<option value='$varselrow[0]' $sel>$varselrow[1]</option>";
-			}
-			echo	"</select></td></tr>";
+	while ($varselrow = mysql_fetch_assoc($result)){
+		$sel = '';
 
-			echo	"<input type='hidden' name='tee' value='file'>
+		if (($varselrow["tunnus"] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($varselrow["tunnus"], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
+			$sel = 'selected';
+			$tuvarasto = $varselrow["tunnus"];
+		}
 
-			<tr><td>".t("Valitse tiedosto").":</td>
-				<td><input name='userfile' type='file'></td>
-				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
-			</tr>
+		echo "<option value='$varselrow[tunnus]' $sel>$varselrow[nimitys]</option>";
+	}
 
-			</table>
-			</form>";
+	echo "</select></td></tr>";
+
+	echo "<input type='hidden' name='tee' value='file'>
+
+	<tr><th>".t("Valitse tiedosto").":</th>
+		<td><input name='userfile' type='file'></td>
+		<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
+	</tr>
+	</table>
+	</form>";
 }
 
 require ("inc/footer.inc");

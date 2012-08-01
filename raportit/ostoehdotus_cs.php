@@ -976,7 +976,7 @@
 	$query = "	SELECT *
 				FROM varastopaikat
 				WHERE yhtio in ($yhtiot)
-				ORDER BY yhtio, nimitys";
+				ORDER BY yhtio, tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 
 	$vlask = 0;

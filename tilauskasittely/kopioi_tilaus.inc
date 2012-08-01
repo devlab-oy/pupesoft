@@ -61,7 +61,7 @@ if (!function_exists("kopioi_tilaus")) {
 			//	Muokkaukset
 			if (is_array($muokkaa_lasku[$field])) {
 				if ($muokkaa_lasku[$field]["from"] != "" and $muokkaa_lasku[$field]["to"] != "") {
-					$monistarow[$i] = preg_replace("/".$muokkaa_lasku[$field]['from']."/i", $muokkaa_lasku[$field]["to"], $monistarow[$i]);
+					$monistarow[$i] = preg_replace("/{$muokkaa_lasku[$field]['from']}/i", $muokkaa_lasku[$field]["to"], $monistarow[$i]);
 				}
 			}
 
@@ -114,7 +114,7 @@ if (!function_exists("kopioi_tilaus")) {
 					//	Muokkaukset
 					if (is_array($muokkaa_rivi[$field])) {
 						if ($muokkaa_rivi[$field]["from"] != "" and $muokkaa_rivi[$field]["to"] != "") {
-							$rivirow[$i] = preg_replace("/".$muokkaa_rivi[$field]['from']."/i", $muokkaa_rivi[$field]["to"], $rivirow[$i]);
+							$rivirow[$i] = preg_replace("/{$muokkaa_rivi[$field]['from']}/i", $muokkaa_rivi[$field]["to"], $rivirow[$i]);
 						}
 					}
 

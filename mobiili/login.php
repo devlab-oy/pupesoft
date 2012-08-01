@@ -130,4 +130,4 @@ else {
 echo "</td></tr></table>";
 echo "</body></html>";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

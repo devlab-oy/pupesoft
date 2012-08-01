@@ -142,4 +142,4 @@ echo "<div class='main'>
 	</form>
 </div>";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

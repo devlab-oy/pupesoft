@@ -102,4 +102,4 @@ echo "<div class='controls'>
 	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 </div>";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

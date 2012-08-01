@@ -122,4 +122,4 @@ echo "<script type='text/javascript'>
 </script>
 ";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

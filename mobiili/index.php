@@ -39,4 +39,4 @@ echo "<input type='submit' value='",t("Lopeta", $browkieli),"' />";
 echo "</form>";
 echo "</body>";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

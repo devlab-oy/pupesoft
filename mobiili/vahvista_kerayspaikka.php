@@ -188,4 +188,4 @@ echo "<div class='controls'>
 </form>
 ";
 
-#require('inc/footer.inc');
+require('inc/footer.inc');

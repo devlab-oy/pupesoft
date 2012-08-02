@@ -326,12 +326,10 @@ class Unifaun {
 					// Jos sopparinumero puuttuu
 					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 
-						if ($this->toitarow['virallinen_selite'] == "KKSTD") 	 $rahtisopimusnro = 999999;
-						elseif ($this->toitarow['virallinen_selite'] == "TPSTD" or
-							$this->toitarow['virallinen_selite'] == "IT09" or
-							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
+						if ($this->toitarow['virallinen_selite'] == "KKSTD") $rahtisopimusnro = 999999;
+						elseif ($this->toitarow['virallinen_selite'] == "TPSTD" or $this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") $rahtisopimusnro = 123456;
 						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
-						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
+						elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
 						else $rahtisopimusnro = 123;
 					}
 

@@ -326,8 +326,8 @@ class Unifaun {
 					// Jos sopparinumero puuttuu
 					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 
-						if ($this->toitarow['virallinen_selite'] == "KKSTD" or
-							$this->toitarow['virallinen_selite'] == "TPSTD" or
+						if ($this->toitarow['virallinen_selite'] == "KKSTD") 	 $rahtisopimusnro = 999999;
+						elseif ($this->toitarow['virallinen_selite'] == "TPSTD" or
 							$this->toitarow['virallinen_selite'] == "IT09" or
 							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
 						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;

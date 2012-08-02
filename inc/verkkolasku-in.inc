@@ -493,53 +493,6 @@
 					$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
 				}
 
-				// katotaan pitääks vaihtaa oletus_vientiä
-				if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {
-
-					// katotaan löydettäskö tälle vähän ostorivejä
-					$chkriviok = 0;
-
-					for ($i=0; $i<count($rtuoteno); $i++) {
-
-						$ostotunnus = (int) $rtuoteno[$i]["tilaajanrivinro"];
-
-						// ei tehdä turhaa hakua jos meillä ei ole tullu rivitunnusta
-						if ($ostotunnus != 0) {
-							$chkquery = "	SELECT *
-											FROM tilausrivi
-											where yhtio = '$yhtio' and
-											tunnus = '$ostotunnus' and
-											tyyppi = 'O'";
-							$checkostot = pupe_query($chkquery);
-
-							if (mysql_num_rows($checkostot) == 1) {
-								$chkriviok++;
-							}
-						}
-					}
-
-					// löydettiin mätchi ostoriveiltä, laitetaan vaihto-omaisuus täppi päälle
-					if ($chkriviok != 0 ) {
-						if (strtoupper($trow["maa"]) == strtoupper($yhtiorow["maa"])) {
-							// kyseessä kotimaa
-							$trow['oletus_vienti'] = 'C';
-						}
-						else {
-							$chkquery = "SELECT * from maat where koodi = '$trow[maa]' and eu != ''";
-							$checkostot = pupe_query($chkquery);
-
-							if (mysql_num_rows($checkostot) != 0) {
-								// kyseessä EU
-								$trow['oletus_vienti'] = 'F';
-							}
-							else {
-								// kyseessä EI-EU
-								$trow['oletus_vienti'] = 'I';
-							}
-						}
-					}
-				}
-
 				$ytunnus = $trow["ytunnus"];
 				$verkapunimi = $trow["nimi"];
 

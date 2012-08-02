@@ -291,10 +291,11 @@ if (!function_exists('finvoice_otsik')) {
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 
-			fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
-			xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35, 1);
-			xml_add("InvoiceRecipientIntermediatorAddress",				  	$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11, 8);
-			fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
+			#fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
+			#xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35, 1);
+			#xml_add("InvoiceRecipientIntermediatorAddress",				$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11, 8);
+			#fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
+
 			fputs($tootfinvoice, "</SellerInformationDetails>\r\n");
 
 			#fputs($tootfinvoice, "<InvoiceSenderPartyDetails>\r\n");

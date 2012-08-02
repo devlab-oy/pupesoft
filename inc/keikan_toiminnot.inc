@@ -169,7 +169,7 @@
 			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
 			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
-				
+
 				$query = "	SELECT suuntalavat.*
 							FROM suuntalavat
 							JOIN suuntalavat_saapuminen ON (
@@ -184,7 +184,7 @@
 				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
 
 				if (mysql_num_rows($chk_suuntalava_res) == 0) {
-					
+
 					$suuntalavan_tunnus = "";
 
 					// Tehd‰‰n uusi suuntalava

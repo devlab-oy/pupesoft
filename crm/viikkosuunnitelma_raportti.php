@@ -3,7 +3,18 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
 require("../inc/parametrit.inc");
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+	readfile("/tmp/".$tmpfilenimi);
+	exit;
+}
+
 
 echo "<font class='head'>".t("Viikkosuunnitelma")."</font><hr>";
 
@@ -239,11 +250,54 @@ if ($tee == '') {
 
 		if (mysql_num_rows($result) > 0) {
 
-			echo "<tr><th>".t("Edustaja")."</th><th>".t("Yhtio")."</th><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Asiakasno")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
+			include('inc/pupeExcel.inc');
+
+			$worksheet 	 = new pupeExcel();
+			$format_bold = array("bold" => TRUE);
+			$excelrivi 	 = 0;
+
+			echo "<tr>
+					<th>".t("Edustaja")."</th>
+					<th>".t("Yhtio")."</th>
+					<th>".t("Paikka")."</th>
+					<th>".t("Postino")."</th>
+					<th>".t("Asiakas")."</th>
+					<th>".t("Asiakasno")."</th>
+					<th>".t("Nimi")."</th>
+					<th>".t("Pvm")."</th>";
+
+
+			$excelsarake = 0;
+			$worksheet->write($excelrivi, $excelsarake, t("Edustaja"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Yhtio"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Paikka"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Postino"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Asiakas"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Asiakasno"),	$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Nimi"),		$format_bold);
+			$worksheet->write($excelrivi, $excelsarake++, t("Pvm"), 		$format_bold);
 
 			if ($vstk == "Asiakaskäynti") {
-				echo "<th>".t("Kampanjat")."</th><th>".t("PvmKäyty")."</th><th>".t("Km")."</th><th>".t("Lähtö")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
+				echo "<th>".t("Kampanjat")."</th>
+						<th>".t("PvmKäyty")."</th>
+						<th>".t("Km")."</th>
+						<th>".t("Lähtö")."</th>
+						<th>".t("Paluu")."</th>
+						<th>".t("PvRaha")."</th>
+						<th>".t("Kommentit")."</th>";
+
+				$worksheet->write($excelrivi, $excelsarake++, t("Kampanjat"),	$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("PvmKäyty"),	$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Km"),			$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Lähtö"),		$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Paluu"),		$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("PvRaha"),		$format_bold);
+				$worksheet->write($excelrivi, $excelsarake++, t("Kommentit"),	$format_bold);
+
 			}
+
+			echo "</tr>";
+			$excelrivi++;
 
 			while ($row=mysql_fetch_array($result)) {
 				echo "<tr>
@@ -256,6 +310,17 @@ if ($tee == '') {
 						<td><a href='asiakasmemo.php?ytunnus=$row[ytunnus]'>$row[nimi]</a></td>
 						<td>$row[pvmalku]</td>";
 
+				$excelsarake = 0;
+				$worksheet->write($excelrivi, $excelsarake, $row["kukanimi"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["postitp"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["postino"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["ytunnus"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["asiakasno"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["nimi"]);
+				$worksheet->write($excelrivi, $excelsarake++, $row["pvmalku"]);
+
+
 				if ($vstk == "Asiakaskäynti") {
 					echo "	<td>$row[kentta02]</td>
 							<td>$row[pvmalku]</td>
@@ -264,18 +329,36 @@ if ($tee == '') {
 							<td>$row[aikaloppu]</td>
 							<td>$row[kentta04]</td>
 							<td>$row[kentta01]</td>";
+
+					$worksheet->write($excelrivi, $excelsarake++, $row["kentta02"]);
+					$worksheet->write($excelrivi, $excelsarake++, $row["pvmalku"]);
+					$worksheet->write($excelrivi, $excelsarake++, $row["kentta03"]);
+					$worksheet->write($excelrivi, $excelsarake++, $row["aikaalku"]);
+					$worksheet->write($excelrivi, $excelsarake++, $row["aikaloppu"]);
+					$worksheet->write($excelrivi, $excelsarake++, $row["kentta04"])        ;
+					$worksheet->write($excelrivi, $excelsarake++, $row["kentta01"]);
 				}
 
 				echo "</tr>";
+				$excelrivi++;
 			}
 		}
 	}
 
 	echo "</table>";
+
+	$excelnimi = $worksheet->close();
+
+	echo "<br><br><table>";
+	echo "<tr><th>".t("Tallenna tulos").":</th>";
+	echo "<form method='post' class='multisubmit'>";
+	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+	echo "<input type='hidden' name='kaunisnimi' value='Edustajaraportti.xlsx'>";
+	echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+	echo "</table><br>";
 }
 
-
 require("../inc/footer.inc");
-
 
 ?>

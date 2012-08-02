@@ -175,17 +175,16 @@ if(!function_exists("tuotetarkista")) {
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
 			if (isset($t[$i])) {
 				// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
-
+				if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "" or trim(strtoupper($trow["tuotetyyppi"])) == "N") {
-						if ($poistolukko != "" and ($t[$i] == 'R' or $t[$i] == 'K'or $t[$i] == 'M')) {
+						if ($poistolukko != "" and ($t[$i] == 'R' or $t[$i] == 'K' or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
 						}
 					}
-					else {
-						if ($poistolukko != "") {
-							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
-						}
+					elseif ($poistolukko != "") {
+						$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
 					}
+				}
 
 				$tem_tuotetyyppi = $t[$i];
 			}

@@ -1325,26 +1325,14 @@
 
 								if (!isset($ei_oteta_kulua_pois) or !$ei_oteta_kulua_pois) {
 
-									echo "summa: $summa<br>";
-									echo "osto_rahti: $osto_rahti<br>";
-									echo "vero: $vero<br>";
-
 									$summa_vero_chk = $summa * (1 + ($vero / 100));
-
-									echo "summa_vero_chk1: $summa_vero_chk<br>";
 
 									list($summa, $_arr) = ostolaskun_kulujen_tiliointi($omasumma, $summa_vero_chk, $osto_rahti, $osto_kulu, $osto_rivi_kulu);
 
-									echo "<pre>",var_dump($_arr),"</pre>";
-
 									$summa_vero_chk = $summa * (1 + ($vero / 100));
-									echo "summa_vero_chk2: $summa_vero_chk<br>";
 									$summa_vero_chk = $summa_vero_chk - $summa;
-									echo "summa_vero_chk3: $summa_vero_chk<br>";
 
 									$summa = $summa - $summa_vero_chk;
-
-									echo "summa2: $summa<br>";
 
 									foreach($_arr as $_k => $_v) {
 										if (!isset($laskun_kulut[${"{$_k}_alv"}][$_k])) $laskun_kulut[${"{$_k}_alv"}][$_k] = 0;
@@ -1354,7 +1342,6 @@
 										$laskun_kulut[${"{$_k}_alv"}][$_k] += $_v;
 										$totsumma += $_v;
 									}
-									echo "<pre>",var_dump($laskun_kulut),"</pre>";
 								}
 							}
 

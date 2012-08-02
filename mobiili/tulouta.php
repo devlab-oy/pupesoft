@@ -13,20 +13,29 @@ if (isset($submit) and trim($submit) == 'cancel') {
 	exit;
 }
 
-$error = array(
-	'tulotyyppi' => '',
-);
+$errors = array();
 
 if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim($tulotyyppi) != '') {
 
-	if ($tulotyyppi == 'suuntalava') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
-		exit;
+	switch($tulotyyppi) {
+		case 'suuntalava':
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>"; exit;
+			break;
+		case 'ostotilaus':
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit;
+			break;
+		default:
+			echo "Virheet tänne";
+			break;
 	}
+	// if ($tulotyyppi == 'suuntalava') {
+	// 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
+	// 	exit;
+	// }
 }
 
 if (isset($submit) and trim($submit) == 'submit') {
-	if ($tulotyyppi == '') $error['tulotyyppi'] = "<font class='error'>".t("Valitse tulotyyppi")."!</font>";
+	if ($tulotyyppi == '') $errors['tulotyyppi'] = t("Valitse tulotyyppi");
 }
 
 include("kasipaate.css");
@@ -44,11 +53,9 @@ echo "<div class='main'>
 			<td>
 				<select name='tulotyyppi' size='4'>
 					<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
+					<option value='ostotilaus'>",t("Ostotilaus", $browkieli),"</option>
 				</select>
 			</td>
-		</tr>
-		<tr>
-			<td>{$error['tulotyyppi']}</td>
 		</tr>
 	</table>
 
@@ -59,5 +66,11 @@ echo "<div class='controls'>
 	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 	</form>
 </div>";
+
+echo "<div class='error'>";
+foreach($errors as $virhe => $selite) {
+	echo strtoupper($virhe).": ".$selite."<br>";
+}
+echo "</div>";
 
 require('inc/footer.inc');

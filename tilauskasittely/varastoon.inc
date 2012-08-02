@@ -136,6 +136,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 	}
 
+	// Satula-Runko case
 	$query = "	SELECT tuoteperhe.isatuoteno, tilausrivi.uusiotunnus,
 				tuoteperhe.tuoteno,
 				tuote.tuoteno, tuote.try,tuote.osasto,

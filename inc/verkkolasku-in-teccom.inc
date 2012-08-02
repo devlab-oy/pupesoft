@@ -305,7 +305,6 @@
 
 					if ($chk_sum > 0) {
 						$osto_rahti += $chk_sum;
-						$rtuoteno[$i]['rivihinta'] -= $chk_sum;
 					}
 				}
 

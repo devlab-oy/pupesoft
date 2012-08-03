@@ -143,12 +143,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 				tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 				tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
-				tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali, tilausrivi.toimitettuaika
+				tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali, tilausrivi.toimitettuaika
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 				JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
-				JOIN tuotepaikat ON (tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus !='')
 				WHERE {$uusiotunnuslisa}
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -222,11 +221,27 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				$paikka_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($paikka_chk_res) == 0) {
+
+					$oletuspaikka_lapsi = '';
+
+					// tarkistetaan onko lapsituotteella oletuspaikkaa
+					$query = "	SELECT *
+								FROM tuotepaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$chk_row['tuoteno']}'
+								AND oletus != ''
+								LIMIT 1";
+					$paikka_chk_res2 = pupe_query($query);
+
+					if (mysql_num_rows($paikka_chk_res2) == 0) {
+						$oletuspaikka_lapsi = 'X';
+					}
+
 					// lis‰t‰‰n paikka
 					$query = "	INSERT INTO tuotepaikat SET
 		 						yhtio			= '{$kukarow['yhtio']}',
 					 			tuoteno     	= '{$chk_row['tuoteno']}',
-					 			oletus      	= '',
+					 			oletus      	= '{$oletuspaikka_lapsi}',
 			   		 			saldo       	= '{$chk_row['varattu']}',
 								saldo_varattu 	= '{$chk_row['varattu']}',
 			   		 			saldoaika   	= now(),

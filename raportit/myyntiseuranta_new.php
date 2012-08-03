@@ -1028,7 +1028,6 @@
 						$tuotegroups++;
 					}
 					//** Tuotegrouppaukset loppu **//
-
 					//** Laskugrouppaukset start **//
 					if ($mukaan == "laskumyyja") {
 						$group .= ",lasku.myyja";
@@ -1244,7 +1243,7 @@
 				if (isset($tuotteet_lista) and $tuotteet_lista != '') {
 					$tuotteet = explode("\n", $tuotteet_lista);
 					$tuoterajaus = "";
-					foreach($tuotteet as $tuote) {
+					foreach ($tuotteet as $tuote) {
 						if (trim($tuote) != '') {
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
@@ -1635,15 +1634,13 @@
 					$query .= $tilauslisa3;
 					$query .= "\nFROM lasku use index (yhtio_tila_tapvm)
 								JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
-								JOIN tilausrivi use index ({$index}) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi}
-								JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+								JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
+								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
 								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-								LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
+								LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
 								{$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
-								{$lisa_dynaaminen["tuote"]}
-								{$lisa_dynaaminen["asiakas"]}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";

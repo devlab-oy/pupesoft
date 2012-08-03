@@ -4318,8 +4318,12 @@ if ($tee == '') {
 					$kentta = 'kpl';
 				}
 
-				echo "<br>
-					<table>
+				echo "<br>";
+				echo "<table>";
+				echo "<tr><td class='back'>";
+
+
+				echo "<table>
 					<tr class='aktiivi'>$jarjlisa<th colspan='2'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</th></tr>
 					<tr class='aktiivi'>$jarjlisa<th>",t("Tuoteno"),"</th><td>{$tuote['tuoteno']}</td></tr>
 					<tr class='aktiivi'>$jarjlisa<th>".t("Hinta")."</th><td align='right'>".hintapyoristys($tuote['myyntihinta'])." $yhtiorow[valkoodi]</td></tr>";
@@ -4394,7 +4398,7 @@ if ($tee == '') {
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin hinta")."</th><td align='right'>".hintapyoristys($viimhinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						echo "<tr class='aktiivi'>{$jarjlisa}<th>".t("Viimeisin alennus")."{$alepostfix}</th><td align='right'>{$viimhinta["ale{$alepostfix}"]} %</td></tr>";
+						echo "<tr class='aktiivi'>{$jarjlisa}<th>".t("Viimeisin alennus")."{$alepostfix}</th><td align='right'>",$viimhinta["ale{$alepostfix}"]," %</td></tr>";
 					}
 
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus=$viimhinta[tunnus]&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$viimhinta[otunnus]</a></td></tr>";
@@ -4438,6 +4442,51 @@ if ($tee == '') {
 				}
 
 				echo "</table>";
+				echo "</td>";
+
+				if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
+					$query = "	SELECT *
+								FROM tapahtuma
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$tuote['tuoteno']}'
+								AND laji = 'laskutus'
+								ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
+								LIMIT 5";
+					$tapahtuma_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+
+						echo "<td class='back'>";
+
+						echo "<table>";
+						echo "<tr>";
+						echo "<th>",t("Laatija"),"</th>";
+						echo "<th>",t("Pvm"),"</th>";
+						echo "<th>",t("Tyyppi"),"</th>";
+						echo "<th>",t("M‰‰r‰"),"</th>";
+						echo "<th>",t("Kplhinta"),"</th>";
+						echo "<th>",t("Selite"),"</th>";
+						echo "</tr>";
+
+						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
+							echo "<tr>";
+							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
+							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
+							echo "<td>{$tapahtuma_chk_row['laji']}</td>";
+							echo "<td>{$tapahtuma_chk_row['kpl']}</td>";
+							echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+							echo "<td>{$tapahtuma_chk_row['selite']}</td>";
+							echo "</tr>";
+						}
+
+						echo "</table>";
+					}
+				}
+
+				echo "</td>";
+				echo "</tr>";
+				echo "</table>";
+
 			}
 		}
 	} #end if erkoisceisi

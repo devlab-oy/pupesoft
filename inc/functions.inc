@@ -1,5 +1,184 @@
 <?php
 
+if (!function_exists("pupesoft_login")) {
+	function pupesoft_login($params) {
+
+		$user = $params['user'];
+		$salasana = $params['salasana'];
+		$salamd5 = $params['salamd5'];
+		$mikayhtio = $params['mikayhtio'];
+		$uusi1 = $params['uusi1'];
+		$uusi2 = $params['uusi2'];
+		$yhtio = $params['yhtio'];
+		$browkieli = $params['browkieli'];
+		$palvelin = $params['palvelin'];
+		$palvelin2 = $params['palvelin2'];
+		$mobile = $params['mobile'];
+
+		$session = "";
+		$usea 	 = 0;
+
+		$return = array(
+			'status' => false,
+			'error' => '',
+			'message' => ''
+		);
+
+		srand((double) microtime() * 1000000);
+
+		$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
+					FROM kuka
+					JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
+					where kuka.kuka		= '{$user}'
+					and kuka.extranet 	= ''
+					GROUP BY 1,2,3,4";
+		$result = mysql_query($query) or pupe_error($query);
+		$krow = mysql_fetch_assoc($result);
+
+		if (isset($salamd5) and $salamd5 != '') $vertaa = $salamd5;
+		elseif (isset($salasana) and $salasana == '') $vertaa = $salasana;
+		else $vertaa = md5(trim($salasana));
+
+		if (mysql_num_rows($result) > 0 and $vertaa == $krow['salasana']) {
+
+			// jos meillä on vaan kaks yhtiotä ja ollaan tulossa firman vaihdosta, vaihdetaan suoraan toiseen
+			if (mysql_num_rows($result) == 2 and isset($mikayhtio) and $mikayhtio != "") {
+
+				mysql_data_seek($result,0); // ressu alkuun
+
+				while ($vaihdarow = mysql_fetch_assoc($result)) {
+
+					if ($mikayhtio != $vaihdarow["yhtio"]) {
+						$krow = $vaihdarow;
+						$yhtio = $vaihdarow["yhtio"];
+						$usea = 0;
+					}
+				}
+			}
+
+			// Onko monta sopivaa käyttäjätietuetta == samalla henkilöllä monta yritystä!
+			if (mysql_num_rows($result) > 1) {
+				$usea = 1;
+			}
+
+			if (isset($uusi1) and strlen(trim($uusi1)) > 0) {
+				if (trim($uusi1) != trim($uusi2)) {
+					$return['error'] = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
+					$err = 1;
+					$usea = 0;
+				}
+				elseif (strlen(trim($uusi1)) < 6) {
+					$return['error'] = t("Uusi salasanasi on liian lyhyt").". ".t("Salasanan pitää olla vähintään 6 merkkiä pitkä").". ".t("Salasanaasi ei vaihdettu")."! ";
+					$err = 1;
+					$usea = 0;
+				}
+				elseif (stristr($uusi1, $krow["kuka"])) {
+					$return['error'] = t("Salasanasi ei saa sisältää käyttäjätunnustasi").". ".t("Salasanaasi ei vaihdettu")."!";
+					$err = 1;
+					$usea = 0;
+				}
+				else {
+					$uusi1 = md5(trim($uusi1));
+
+					$query = "	UPDATE kuka
+								SET salasana = '{$uusi1}'
+								WHERE kuka = '{$user}'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$vertaa = trim($uusi1);
+					$salasana = trim($uusi2);
+
+					// Käytetään error-indexiä tämän viestin välittämiseen
+					$return['error'] = t("Salasanasi vaihdettiin onnistuneesti")."!";
+				}
+			}
+
+			// Kaikki ok!
+			if (!isset($err) or $err != 1) {
+
+				// Pitääkö vielä kysyä yritystä???
+				if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
+
+					for ($i = 0; $i < 25; $i++) {
+						$session = $session . chr(rand(65,90)) ;
+					}
+
+					$query = "	UPDATE kuka
+								SET session = '{$session}',
+								lastlogin = now()
+								WHERE kuka = '{$user}'";
+
+					if (isset($yhtio) and strlen($yhtio) > 0) $query .= " and yhtio = '{$yhtio}'";
+					else $query .= " and yhtio = '{$krow['yhtio']}'";
+
+					$result = mysql_query($query) or pupe_error($query);
+
+					$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
+
+					if ($bool === FALSE) {
+						$return['error'] = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";
+					}
+					else {
+
+						// katsotaan onko käyttäjällä oletus_ohjelma.. jos on mennään suoraan siihen.
+						$query = "	SELECT oletus_ohjelma
+									FROM kuka
+									WHERE session = '{$session}'";
+						$result = mysql_query($query) or pupe_error($query);
+						$row = mysql_fetch_assoc($result);
+
+						if ($row["oletus_ohjelma"] != "") {
+
+							$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
+
+							if ($mobile) {
+								$palvelin2 .= "mobiili/index.php";
+							}
+							else {
+								$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
+
+								if ($oletus_ohjelman_osat[2] != "") {
+									$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
+								}
+							}
+						}
+
+						echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}'>";
+						exit;
+					}
+				}
+			}
+		}
+		else {
+			$return['error'] = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
+
+			// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+			error_log ("user {$user}: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
+		}
+
+
+		if ($usea == 1) {
+			$query = "	SELECT yhtio.nimi, yhtio.yhtio, IF(yhtio.jarjestys = 0, 9999, yhtio.jarjestys) jarj
+						FROM kuka
+						JOIN yhtio ON yhtio.yhtio = kuka.yhtio
+						WHERE kuka.kuka	= '{$user}'
+						AND kuka.extranet = ''
+						ORDER BY jarj, yhtio.nimi";
+			$result = pupe_query($query);
+
+			while ($yrow = mysql_fetch_assoc($result)) {
+				$return['usea'][$yrow['yhtio']] = $yrow['nimi'];
+			}
+		}
+
+		$return['usea_yhtio'] = $usea;
+		$return['vertaa'] = $vertaa;
+		$return['salasana'] = $salasana;
+
+		return $return;
+	}
+}
+
 if (!function_exists("pupe_query")) {
 	function pupe_query($query, $link = NULL) {
 
@@ -9510,7 +9689,9 @@ if (!function_exists("jt_toimita")) {
 			$from_varastoon_inc   = "varastoon.inc";
 		}
 
-		require('jtselaus.php');
+		if (!@include('jtselaus.php')) {
+			require('tilauskasittely/jtselaus.php');
+		}
 	}
 }
 
@@ -18149,5 +18330,575 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		}
 
 		return $kaytettavat_tilausrivit;
+	}
+}
+
+if (!function_exists('etsi_suuntalava_sscc')) {
+	function etsi_suuntalava_sscc($sscc) {
+		global $kukarow;
+
+		$sscc = mysql_real_escape_string($sscc);
+
+		$query = "	SELECT suuntalavat.tunnus as suuntalava,
+					suuntalavat_saapuminen.saapuminen,
+					lasku.laskunro AS saapuminen_nro,
+					toimi.tunnus AS liitostunnus,
+					toimi.toimittajanro,
+					toimi.nimi,
+					SUM(IF((tilausrivi.uusiotunnus != 0 AND tilausrivi.kpl != 0), 1, 0)) AS varastossa,
+					SUM(IF((tilausrivi.uusiotunnus != 0 AND tilausrivi.kpl = 0), 1, 0)) AS kohdistettu
+					FROM suuntalavat
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+					JOIN lasku ON (lasku.yhtio = suuntalavat_saapuminen.yhtio AND lasku.tunnus = suuntalavat_saapuminen.saapuminen AND lasku.tila = 'K')
+					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
+					LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'O')
+					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+					AND suuntalavat.sscc = '{$sscc}'
+					AND suuntalavat.tila = 'S'
+					GROUP BY 1,2,3,4,5,6";
+		$result = pupe_query($query);
+
+		$return = array();
+
+		if (mysql_num_rows($result) > 0) {
+			while ($row = mysql_fetch_assoc($result)) {
+				$return[] = $row;
+			}
+		}
+
+		return $return;
+	}
+}
+
+if (!function_exists("suuntalavan_tuotteet")) {
+	function suuntalavan_tuotteet($suuntalavat, $liitostunnus, $order = "", $ascdesc = "", $tuoteno = "", $tilriv = 0, $eankoodi = "") {
+		global $kukarow;
+
+		if (is_array($suuntalavat) and count($suuntalavat) > 0) {
+			$suuntalavalisa = " AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") ";
+			$suuntalava_implode = implode(",", $suuntalavat);
+		}
+		else {
+			echo "<font class='error'>",t("VIRHE: Et valinnut suuntalavaa"),"!</font>";
+			require('../inc/footer.inc');
+			exit;
+		}
+
+		$ascdesc = $ascdesc != "" ? mysql_real_escape_string($ascdesc) : "";
+
+		if ($order == "tuotepaikka") {
+			$order = "hyllypaikka";
+		}
+		elseif ($order == "maara") {
+			$order = "siskpl";
+		}
+		elseif ($order == "yksikko") {
+			$order = "tilausrivi.yksikko";
+		}
+		else {
+			$order = "suuntalavat.sscc, tilausrivi.tuoteno";
+		}
+
+		$query = "	SELECT GROUP_CONCAT(DISTINCT saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava IN ({$suuntalava_implode})";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
+		# Haku tuotenumerolla
+		$tuoteno = mysql_real_escape_string($tuoteno);
+		$tuotenolisa = trim($tuoteno) != "" ? "and tilausrivi.tuoteno = '{$tuoteno}'" : "";
+		# Haku eankoodilla
+		$eankoodi = mysql_real_escape_string($eankoodi);
+		$eankoodilisa = trim($eankoodi) != "" ? "and tuote.eankoodi = '{$eankoodi}'" : "";
+
+		$tilriv = (int) $tilriv;
+
+		$tilrivlisa = trim($tilriv) != 0 ? " and tilausrivi.tunnus = '{$tilriv}'" : "";
+
+		$query = "	SELECT tilausrivi.*,
+					suuntalavat.sscc,
+					tuotteen_toimittajat.toim_tuoteno,
+					tilausrivi.varattu + tilausrivi.kpl siskpl,
+					tuote.eankoodi,
+					IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) AS tuotekerroin,
+					CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) AS hyllypaikka
+					FROM tilausrivi
+					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$liitostunnus}')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND {$uusiotunnuslisa}
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
+					AND tilausrivi.suuntalava > 0
+					{$tuotenolisa}
+					{$eankoodilisa}
+					{$tilrivlisa}
+					ORDER BY {$order} {$ascdesc}";
+		$tavaraetiketti_res = pupe_query($query) or pupe_error($query);
+
+		return $tavaraetiketti_res;
+	}
+}
+
+if (!function_exists('onko_suoratoimitus')) {
+	function onko_suoratoimitus($rivitunnus) {
+		global $kukarow;
+
+		$rivitunnus = (int) $rivitunnus;
+
+	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
+	   				FROM tilausrivin_lisatiedot
+	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+	   				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '{$rivitunnus}'";
+		$varastoon_result = pupe_query($query);
+
+		return $varastoon_result;
+	}
+}
+
+if (!function_exists('splittaa_tilausrivi')) {
+	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $netto = false, $pois_suuntalavalta = false) {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
+					FROM tilausrivi
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.tunnus = '{$tunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) return false;
+
+		$rivi = mysql_fetch_array($result);
+
+		mysql_data_seek($result, 0);
+
+		$query = "INSERT INTO tilausrivi SET ";
+
+		for ($i = 0; $i < mysql_num_fields($result) - 1; $i++) {
+			switch (mysql_field_name($result,$i)) {
+				case 'varattu':
+					$query .= " varattu = '{$uuden_rivin_kpl}',";
+					break;
+				case 'netto':
+
+					if ($yhtiorow['suuntalavat'] == 'S' and $netto) {
+						$query .= " netto = 'X',";
+					}
+					else {
+						$query .= " netto = '".$rivi[mysql_field_name($result, $i)]."',";
+					}
+
+					break;
+				case 'laatija':
+					$query .= " laatija = '{$kukarow['kuka']}',";
+					break;
+				case 'laadittu':
+					$query .= " laadittu = now(),";
+					break;
+				case 'tunnus':
+					break;
+				case 'suuntalava':
+
+					if ($pois_suuntalavalta) {
+						$query .= " suuntalava = 0,";
+					}
+					else {
+						$query .= " suuntalava = '".$rivi[mysql_field_name($result, $i)]."',";
+					}
+
+					break;
+				default:
+					$query .= mysql_field_name($result, $i)." = '".$rivi[mysql_field_name($result, $i)]."',";
+			}
+		}
+
+		$query = substr($query, 0, -1);
+		$result = pupe_query($query);
+
+		return mysql_insert_id();
+	}
+}
+
+if (!function_exists('lisaa_tuotepaikka')) {
+	function lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $viesti, $oletus = '') {
+		global $kukarow;
+
+		# Isot kirjaimet
+		$hyllyalue 	= strtoupper($hyllyalue);
+		$hyllynro 	= strtoupper($hyllynro);
+		$hyllyvali 	= strtoupper($hyllyvali);
+		$hyllytaso 	= strtoupper($hyllytaso);
+
+		$query = "	INSERT INTO tuotepaikat SET
+					yhtio     = '{$kukarow['yhtio']}',
+					tuoteno	  = '{$tuoteno}',
+					hyllyalue = '{$hyllyalue}',
+					hyllynro  = '{$hyllynro}',
+					hyllyvali = '{$hyllyvali}',
+					hyllytaso = '{$hyllytaso}',
+					oletus    = '{$oletus}',
+					laatija	  = '{$kukarow['kuka']}',
+					luontiaika= now()";
+		$result = pupe_query($query);
+
+		$query = "	INSERT INTO tapahtuma SET
+					yhtio 		= '{$kukarow['yhtio']}',
+					tuoteno 	= '{$tuoteno}',
+					kpl 		= 0,
+					kplhinta	= 0,
+					hinta 		= 0,
+					laji 		= 'uusipaikka',
+					hyllyalue 	= '{$hyllyalue}',
+					hyllynro 	= '{$hyllynro}',
+					hyllyvali 	= '{$hyllyvali}',
+					hyllytaso 	= '{$hyllytaso}',
+					selite 		= '".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}',
+					laatija 	= '{$kukarow['kuka']}',
+					laadittu 	= now()";
+		$result = pupe_query($query);
+	}
+}
+
+if (!function_exists('tarkista_varaston_hyllypaikka')) {
+	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $varmistuskoodi = '') {
+		global $kukarow;
+
+		$query_lisa = '';
+		if ($varmistuskoodi != '') {
+			$query_lisa = "AND varmistuskoodi = '{$varmistuskoodi}'";
+		}
+
+		$query = "	SELECT tunnus
+					FROM varaston_hyllypaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND hyllyalue = '{$hyllyalue}'
+					AND hyllynro = '{$hyllynro}'
+					AND hyllyvali = '{$hyllyvali}'
+					AND hyllytaso = '{$hyllytaso}'
+					$query_lisa";
+					# Noticet pois
+					##AND varasto = '{$varasto}'";
+		$chk_res = pupe_query($query);
+
+		return mysql_num_rows($chk_res) == 0 ? false : true;
+	}
+}
+
+/**
+ * Päivittää tilausrivin kpl määrän
+ *
+ * @param int $tunnus 	Tilausrivin tunnus
+ * @param int $kpl
+ * @return bool
+ */
+if (!function_exists('paivita_tilausrivin_kpl')) {
+	function paivita_tilausrivin_kpl($tunnus, $kpl) {
+		global $kukarow, $yhtiorow;
+
+		# Haetaan tilausriviltä...
+		$query  = "	SELECT kpl, varattu, tuoteno
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+		$result = pupe_query($query);
+		$rivi	= mysql_fetch_assoc($result);
+
+		# jos tätä riviä ei ole vielä viety varastoon niin päivitetään varattu kenttää
+		if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
+			$query = "	UPDATE tilausrivi
+						set varattu = '{$kpl}'
+						where yhtio = '{$kukarow['yhtio']}'
+						and tunnus = '{$tunnus}'
+						and varattu <> '{$kpl}'";
+			$result = pupe_query($query);
+		}
+
+		if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
+			$query = "	DELETE FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and tunnus = '{$tunnus}'
+						and tyyppi = 'O'";
+			$result = pupe_query($query);
+
+			# Nollataan sarjanumero
+			if ($rivi["varattu"] > 0) {
+				$tunken = "ostorivitunnus";
+			}
+			else {
+				$tunken = "myyntirivitunnus";
+			}
+
+			$query = "	UPDATE sarjanumeroseuranta
+						SET {$tunken} = 0
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and tuoteno = '{$rivi['tuoteno']}'
+						and {$tunken} = '{$tunnus}'";
+			$sarjares = pupe_query($query);
+		}
+
+		# Jos kpl nollassa ja suuntalavat == 'S'
+		if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
+		}
+	}
+}
+
+/**
+*
+* @param $saapuminen
+* @param Array [hyllyalue, hyllynro, hyllyvali, hyllytaso]
+* @param $tilausrivi
+*/
+if (!function_exists('vie_varastoon')) {
+	function vie_varastoon($saapumisen_tunnus, $suuntalavan_tunnus, $hylly, $tilausrivi = 0) {
+		global $kukarow, $yhtiorow;
+
+		// tämän keikan voi viedä saldoille...
+		$otunnus = $saapumisen_tunnus;
+
+		$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$otunnus'";
+		$result = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+
+		# Setataan parametrit varastoon.incille
+		#extract(params)
+		$toimittajaid = $laskurow['liitostunnus'];
+		$toiminto = "kalkyyli";
+		$tee = "varastoon";
+
+		# TODO: korjaa
+		$hyllyalue 	= $hylly['hyllyalue'];
+		$hyllynro 	= $hylly['hyllynro'];
+		$hyllyvali 	= $hylly['hyllyvali'];
+		$hyllytaso 	= $hylly['hyllytaso'];
+
+		# Koko suuntalava varastoon
+		if ($tilausrivi == 0) {
+			$koko_suuntalava = 'X';
+			$vietiinko_koko_suuntalava = 'joo';
+		}
+
+		$mobiili_keikka = "yes";
+
+		// viedään varastoon...
+		require ("tilauskasittely/varastoon.inc");
+	}
+}
+
+/**
+* Päivittää suuntalavan tuotteiden hyllypaikat
+*/
+if (!function_exists('paivita_hyllypaikat')) {
+	function paivita_hyllypaikat($suuntalavan_tunnus, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) {
+		global $kukarow;
+
+		# haetaan kaikki saapumisten tunnukset
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava = '{$suuntalavan_tunnus}'";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
+		$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
+					FROM tilausrivi
+					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND {$uusiotunnuslisa}
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
+					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+		$koko_suuntalava_result = pupe_query($query);
+
+		if (mysql_num_rows($koko_suuntalava_result) > 0) {
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
+						SET tilausrivi.hyllyalue = '{$hyllyalue}',
+						tilausrivi.hyllynro = '{$hyllynro}',
+						tilausrivi.hyllyvali = '{$hyllyvali}',
+						tilausrivi.hyllytaso = '{$hyllytaso}'
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND {$uusiotunnuslisa}
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.kpl = 0
+						AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+			$paivitetty = pupe_query($query);
+
+		}
+		return mysql_num_rows($koko_suuntalava_result);
+	}
+}
+
+/**
+* Tarkistaa saako saapumisen viedä varastoon
+*
+* @param $saapumisen_tunnus
+* @param $palautus
+* @return integer  	0 = ei virheitä, 1 = virhe
+*/
+if (!function_exists('saako_vieda_varastoon')) {
+	function saako_vieda_varastoon($saapumisen_tunnus, $toiminto, $palautus='') {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT nimi
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kesken  = '$saapumisen_tunnus'";
+		$result = pupe_query($query);
+
+		$varastoerror = 0;
+
+		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+			if ($palautus != '') {
+				echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+			}
+			$varastoerror = 1;
+		}
+		elseif (mysql_num_rows($result) != 0){
+			while ($rivi = mysql_fetch_array($result)) {
+				if ($palautus != '') {
+					echo "<font class='error'>".t("VIRHE: Saapumista ei voi viedä varastoon.")." ".sprintf(t("Käyttäjällä %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+				}
+			}
+			$varastoerror = 1;
+		}
+
+	 	if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND uusiotunnus = '{$otunnus}'
+						AND tyyppi = 'O'
+						AND kpl = 0
+						AND suuntalava != 0";
+			$suuntalavat_chk_result = pupe_query($query);
+			$suuntalavat_chk_row = mysql_fetch_assoc($suuntalavat_chk_result);
+
+			if (trim($suuntalavat_chk_row['suuntalavat']) == '') {
+				echo "<font class='error'>",t("VIRHE: Saapumista ei voi viedä varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
+				$varastoerror = 1;
+			}
+		}
+
+
+		return $varastoerror;
+	}
+}
+
+/**
+ * Haetaan saapumiset suuntalavan tunnuksen mukaan
+ * @param $suuntalavan_tunnus
+ * @return Array $saapumiset
+ */
+if (!function_exists('hae_saapumiset')) {
+	function hae_saapumiset($suuntalava_tunnus) {
+		global $kukarow;
+
+		$query = "	SELECT saapuminen
+					FROM suuntalavat_saapuminen
+					WHERE suuntalava='{$suuntalava_tunnus}'
+					AND yhtio='{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
+
+		$saapumiset = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			$saapumiset[] = $row['saapuminen'];
+		}
+
+		return $saapumiset;
+	}
+}
+
+if (!function_exists('paivita_tilausrivin_hylly')) {
+	function paivita_tilausrivin_hylly($tilausrivi_tunnus, Array $hylly) {
+		global $kukarow;
+
+		# Isot kirjaimet
+		$hylly['hyllyalue']	= strtoupper($hylly['hyllyalue']);
+		$hylly['hyllynro'] 	= strtoupper($hylly['hyllynro']);
+		$hylly['hyllyvali'] = strtoupper($hylly['hyllyvali']);
+		$hylly['hyllytaso'] = strtoupper($hylly['hyllytaso']);
+
+		$query = "	UPDATE tilausrivi SET
+					hyllyalue = '$hylly[hyllyalue]',
+					hyllynro = '$hylly[hyllynro]',
+					hyllyvali = '$hylly[hyllyvali]',
+					hyllytaso = '$hylly[hyllytaso]'
+ 					WHERE yhtio = '$kukarow[yhtio]'
+ 					and tunnus = '$tilausrivi_tunnus'";
+
+ 		$presult = pupe_query($query);
+
+ 		return mysql_affected_rows();
+	}
+}
+
+/**
+*/
+if (!function_exists('paivita_oletuspaikka')) {
+	function paivita_oletuspaikka($tuoteno, Array $hylly) {
+		global $kukarow;
+
+		# Poistetaan kaikilta tuotteen tuotepaikoilta oletus
+		# ostorivienvarastopaikat.inc, rivi 281
+		$query = "	UPDATE tuotepaikat
+					SET oletus 		= '',
+					muuttaja		= '$kukarow[kuka]',
+					muutospvm		= now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Asetetaan uusi oletuspaikka
+		# ostorivienvarastopaikat.inc, rivi 289
+		$query = "	UPDATE tuotepaikat
+					SET oletus 	= 'X',
+					muuttaja	= '$kukarow[kuka]',
+					muutospvm	= now()
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and tuoteno 	= '$tuoteno'
+					and hyllyalue	= '$hylly[hyllyalue]'
+					and hyllynro	= '$hylly[hyllynro]'
+					and hyllyvali	= '$hylly[hyllyvali]'
+					and hyllytaso	= '$hylly[hyllytaso]'
+					LIMIT 1";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Haetaan tuotepaikat missä oletus ei ole '', eli nykyiset oletuspaikat
+		$query = "	SELECT *
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and oletus != ''";
+		$upresult = mysql_query($query) or pupe_error($query);
+
+		# Jos oletuspaikkaa ei löytynyt, asetetaan ensimmäinen oletuspaikaksi.
+		if (mysql_num_rows($upresult) == 0) {
+			$query = "	UPDATE tuotepaikat
+						SET oletus 	= 'X',
+						muuttaja	= '$kukarow[kuka]',
+						muutospvm	= now()
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tuoteno'
+						ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
+			$upresult = mysql_query($query) or pupe_error($query);
+		}
+		##
+		return 1;
 	}
 }

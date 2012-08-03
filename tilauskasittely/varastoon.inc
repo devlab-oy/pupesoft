@@ -143,7 +143,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
 				tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
 				tilausrivi.otunnus,tilausrivi.perheid,tilausrivi.tilkpl, tilausrivi.varattu, tilausrivi.kpl,
-				tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+				tilausrivi.tunnus,tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali, tilausrivi.toimitettuaika
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 				JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
@@ -155,7 +155,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
 				and tilausrivi.perheid != 0
-				ORDER BY tilausrivi.perheid, tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
+				ORDER BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 	$chk_res = pupe_query($query);
 
 	if (mysql_num_rows($chk_res) > 0) {
@@ -174,7 +174,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 			if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
 
-				list($chk_hinta,,$chk_ale,) = alehinta_osto($laskurow, $chk_row, $chk_row["tilkpl"]);
+				list($chk_hinta,,$chk_ale,) = alehinta_osto($laskurow, $chk_row, $chk_row["varattu"]);
 
 				$lisainsert = "	INSERT INTO tilausrivi SET
 								yhtio			= '{$chk_row['yhtio']}',
@@ -209,6 +209,61 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				// p‰ivitet‰‰n is‰
 				$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
 				$updateres = pupe_query($updateisa);
+
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$chk_row['tuoteno']}'
+							AND hyllyalue = '{$chk_row['hyllyalue']}'
+							AND hyllynro = '{$chk_row['hyllynro']}'
+							AND hyllytaso = '{$chk_row['hyllytaso']}'
+							AND hyllyvali = '{$chk_row['hyllyvali']}'
+							LIMIT 1";
+				$paikka_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($paikka_chk_res) == 0) {
+					// lis‰t‰‰n paikka
+					$query = "	INSERT INTO tuotepaikat SET
+		 						yhtio			= '{$kukarow['yhtio']}',
+					 			tuoteno     	= '{$chk_row['tuoteno']}',
+					 			oletus      	= '',
+			   		 			saldo       	= '{$chk_row['varattu']}',
+								saldo_varattu 	= '{$chk_row['varattu']}',
+			   		 			saldoaika   	= now(),
+								hyllyalue   	= '{$chk_row['hyllyalue']}',
+								hyllynro    	= '{$chk_row['hyllynro']}',
+								hyllytaso   	= '{$chk_row['hyllytaso']}',
+								hyllyvali   	= '{$chk_row['hyllyvali']}',
+								tyyppi 			= '',
+								laatija			= '{$kukarow['kuka']}',
+								luontiaika		= now()";
+					$result = pupe_query($query);
+
+					// Varastoonvientip‰iv‰
+					if ($chk_row["toimitettuaika"] == "0000-00-00 00:00:00") {
+						$varastoonvientipva = date("Y-m-d H:i:s");
+					}
+					else {
+						$varastoonvientipva = $chk_row["toimitettuaika"];
+					}
+
+					// tehd‰‰n tapahtuma
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '{$kukarow['yhtio']}',
+								tuoteno 	= '{$chk_row['tuoteno']}',
+								kpl 		= '0',
+								kplhinta	= '0',
+								hinta 		= '0',
+								laji 		= 'uusipaikka',
+								hyllyalue  	= '{$chk_row['hyllyalue']}',
+								hyllynro   	= '{$chk_row['hyllynro']}',
+								hyllytaso  	= '{$chk_row['hyllytaso']}',
+								hyllyvali  	= '{$chk_row['hyllyvali']}',
+								selite 		= '".t("Lis‰ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
+								laatija 	= '{$kukarow['kuka']}',
+								laadittu 	= date_sub('{$varastoonvientipva}', interval 1 SECOND)";
+					$result = pupe_query($query);
+				}
 			}
 			else {
 

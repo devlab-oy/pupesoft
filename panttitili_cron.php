@@ -46,8 +46,9 @@
 
 			$query_insert_lisa = '';
 
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				$query_insert_lisa .= " ale{$postfix} = '{$pantti_row['ale{$postfix}']}', ";
+			// nollataan ale2 ja ale3 kentät ja laitetaan INSERT ale1 100%
+			for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$query_insert_lisa .= " ale{$postfix} = 0, ";
 			}
 
 			$pantti_row['kpl'] *= -1;
@@ -74,6 +75,7 @@
 						rivihinta = 0,
 						rivihinta_valuutassa = 0,
 						erikoisale = '{$pantti_row['erikoisale']}',
+						ale1 = 100,
 						{$query_insert_lisa}
 						kate = 0,
 						kommentti = '',

@@ -534,41 +534,13 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$suuntalavan_hyllyvali = mysql_real_escape_string($suuntalavan_hyllyvali);
 		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
 
-		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
-					FROM suuntalavat_saapuminen
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND suuntalava = '{$suuntalavan_tunnus}'";
-		$uusiotunnus_chk_res = pupe_query($query);
-		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+		$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
+												$suuntalavan_hyllyalue,
+												$suuntalavan_hyllynro,
+												$suuntalavan_hyllyvali,
+												$suuntalavan_hyllytaso);
 
-		$uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
-
-		$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
-					FROM tilausrivi
-					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
-					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND {$uusiotunnuslisa}
-					AND tilausrivi.tyyppi = 'O'
-					AND tilausrivi.kpl = 0
-					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-		$koko_suuntalava_result = pupe_query($query);
-
-		if (mysql_num_rows($koko_suuntalava_result) > 0) {
-			$query = "	UPDATE tilausrivi
-						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
-						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus)
-						SET tilausrivi.hyllyalue = '{$suuntalavan_hyllyalue}',
-						tilausrivi.hyllynro = '{$suuntalavan_hyllynro}',
-						tilausrivi.hyllyvali = '{$suuntalavan_hyllyvali}',
-						tilausrivi.hyllytaso = '{$suuntalavan_hyllytaso}'
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND {$uusiotunnuslisa}
-						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.kpl = 0
-						AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-			$koko_suuntalava_result = pupe_query($query);
-
+		if ($paivitetyt_rivit > 0) {
 			echo "<br />",t("P‰ivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
 			$vietiinko_koko_suuntalava = 'joo';
 		}
@@ -585,41 +557,8 @@ if ($toiminto == 'tulosta_sscc') {
 
 // tehd‰‰n errorichekkej‰ jos on varastoonvienti kyseess‰
 if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
-	$query = "	SELECT nimi
-				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]'
-				and kesken  = '$otunnus'";
-	$result = pupe_query($query);
 
-	$varastoerror = 0;
-
-	if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
-		echo "<font class='error'>".t("VIRHE: Saapumista ei voi vied‰ varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
-		$varastoerror = 1;
-	}
-	elseif (mysql_num_rows($result) != 0){
-		while ($rivi = mysql_fetch_assoc($result)) {
-			echo "<font class='error'>".t("VIRHE: Saapumista ei voi vied‰ varastoon.")." ".sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
-		}
-		$varastoerror = 1;
-	}
-
- 	if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S') {
-		$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
-					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND uusiotunnus = '{$otunnus}'
-					AND tyyppi = 'O'
-					AND kpl = 0
-					AND suuntalava != 0";
-		$suuntalavat_chk_result = pupe_query($query);
-		$suuntalavat_chk_row = mysql_fetch_assoc($suuntalavat_chk_result);
-
-		if (trim($suuntalavat_chk_row['suuntalavat']) == '') {
-			echo "<font class='error'>",t("VIRHE: Saapumista ei voi vied‰ varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
-			$varastoerror = 1;
-		}
-	}
+	$varastoerror = saako_vieda_varastoon($otunnus, $toiminto, 'echota_virheet');
 
 	if ($varastoerror != 0) {
 		echo "<br><form method='post'>";

@@ -336,8 +336,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		if (@include_once("login.php"));
+		if ($mobile and include_once("mobiili/login.php"));
+		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
+
 	}
 
 	exit;
@@ -377,6 +379,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "Your browser does not seem to support cookies.";
 			}
 			else {
+				$palvelin2 = $mobile ? $palvelin2.'mobiili/' : $palvelin2;
 				echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 			}
 			exit;
@@ -551,6 +554,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 			echo "<html>\n";
 			echo "<head>\n";
+			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
+			if ($mobile) echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 			echo "<meta http-equiv='cache-control' content='no-cache'>\n";
 			echo "<meta http-equiv='pragma' content='no-cache'>\n";
 			echo "<meta http-equiv='expires' content='-1'>\n";

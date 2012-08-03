@@ -4464,7 +4464,7 @@ if ($tee == '') {
 						echo "<th>",t("Pvm"),"</th>";
 						echo "<th>",t("Tyyppi"),"</th>";
 						echo "<th>",t("M‰‰r‰"),"</th>";
-						if (isset($super_oikeudet)) echo "<th>",t("Kplhinta"),"</th>";
+						if (tarkista_oikeus("tuote.php")) echo "<th>",t("Kplhinta"),"</th>";
 						echo "<th>",t("Selite"),"</th>";
 						echo "</tr>";
 
@@ -4475,9 +4475,9 @@ if ($tee == '') {
 							echo "<td>{$tapahtuma_chk_row['laji']}</td>";
 							echo "<td>{$tapahtuma_chk_row['kpl']}</td>";
 
-							if (isset($super_oikeudet)) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+							if (tarkista_oikeus("tuote.php")) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
 
-							if (!isset($super_oikeudet)) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
+							if (!tarkista_oikeus("tuote.php")) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
 							else $stripattu_selite = $tapahtuma_chk_row['selite'];
 
 							echo "<td>{$stripattu_selite}</td>";

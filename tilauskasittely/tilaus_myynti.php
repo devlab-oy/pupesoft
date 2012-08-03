@@ -4464,18 +4464,23 @@ if ($tee == '') {
 						echo "<th>",t("Pvm"),"</th>";
 						echo "<th>",t("Tyyppi"),"</th>";
 						echo "<th>",t("M‰‰r‰"),"</th>";
-						echo "<th>",t("Kplhinta"),"</th>";
+						if (isset($super_oikeudet)) echo "<th>",t("Kplhinta"),"</th>";
 						echo "<th>",t("Selite"),"</th>";
 						echo "</tr>";
 
 						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
-							echo "<tr>";
+							echo "<tr class='aktiivi'>";
 							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
 							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
 							echo "<td>{$tapahtuma_chk_row['laji']}</td>";
 							echo "<td>{$tapahtuma_chk_row['kpl']}</td>";
-							echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
-							echo "<td>{$tapahtuma_chk_row['selite']}</td>";
+
+							if (isset($super_oikeudet)) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+
+							if (!isset($super_oikeudet)) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
+							else $stripattu_selite = $tapahtuma_chk_row['selite'];
+
+							echo "<td>{$stripattu_selite}</td>";
 							echo "</tr>";
 						}
 

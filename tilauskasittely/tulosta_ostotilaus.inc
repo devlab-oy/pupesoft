@@ -622,6 +622,7 @@
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi	!= 'D'
+							and tilausrivi.varattu 	> 0
 							ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			}
 			else {
@@ -635,6 +636,7 @@
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi	!= 'D'
+							and tilausrivi.varattu 	> 0
 							ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			}
 		}

@@ -567,7 +567,8 @@
 								AND perheid = '{$lapsitieto['tunnus']}'
 								AND tuoteno = '{$lapsitieto['tuoteno']}'
 								AND kpl = '{$lapsitieto['kpl']}'
-								AND varattu = '{$lapsitieto['varattu']}'";
+								AND varattu = '{$lapsitieto['varattu']}'
+								AND tyyppi = 'O'";
 					$loytyiko_lapsi_res = pupe_query($query);
 
 					if (mysql_num_rows($loytyiko_lapsi_res) == 0) {

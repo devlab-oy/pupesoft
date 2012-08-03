@@ -8,8 +8,10 @@ $valinta = "Etsi";
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+if(!isset($errors)) $errors = array();
+
 # Rajataan sallitut get parametrit
-$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus');
+$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi');
 
 # Rakkentaan parametreistä url_taulukko
 $url_array = array();
@@ -31,6 +33,9 @@ if (isset($submit)) {
         case 'lopeta':
             # TODO: tämän pitäis palata ostotilaus.php:lle
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
+            break;
+        case 'suuntalavalle':
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
             break;
         default:
             $errors['virhe'] = "Error";

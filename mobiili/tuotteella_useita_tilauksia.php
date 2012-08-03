@@ -9,10 +9,12 @@ $valinta = "Etsi";
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
+if(!isset($errors)) $errors = array();
+
 # Rajataan sallitut get parametrit
 $sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus');
 
-# Rakkentaan parametreist‰ url_taulukko
+# Rakkenetaan parametreist‰ url_taulukko
 $url_array = array();
 foreach($sallitut_parametrit as $parametri) {
 	if(!empty($$parametri)) {
@@ -40,6 +42,10 @@ if ($ostotilaus == '' and $tuotenumero == '' and $viivakoodi == '') {
 	echo "jotain tartteis syˆtt‰‰";
 	exit;
 }
+
+if (!isset($ostotilaus)) $ostotilaus = '';
+if (!isset($tuotenumero)) $tuotenumero = '';
+if (!isset($viivakoodi)) $viivakoodi = '';
 
 $params = array();
 if ($ostotilaus != '') 	$params[] = "tilausrivi.otunnus = '{$ostotilaus}'";
@@ -88,9 +94,9 @@ if ($haku_osumat == 0) {
 #-> suoraan hyllytys.php sivulle
 elseif ($haku_osumat == 1) {
 	echo "Yks osuma, menn‰‰n hyllytykseen...";
+	#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php";
+	#exit();
 }
-
-# Useita tilauksia
 
 ### UI ###
 include("kasipaate.css");
@@ -132,15 +138,19 @@ while($row = mysql_fetch_assoc($result)) {
 		<td>{$row['hylly']}</td>
 	";
 
-	$oletuspaikka_query = "SELECT concat_ws('-',hyllyalue,hyllynro,
-				hyllyvali,hyllytaso) as hylly from tuotepaikat where tuoteno='{$row['tuoteno']}' and oletus='X' and yhtio='{$kukarow['yhtio']}'";
-	$oletuspaikka = pupe_query($oletuspaikka_query);
-	$oletuspaikka = mysql_fetch_assoc($oletuspaikka);
-	#echo "<td>(".$oletuspaikka['hylly'].")</td>";
+	# TODO: listaus p‰ivitett‰v‰ nykyisill‰ oletuspaikoilla
+	// $oletuspaikka_query = "	SELECT concat_ws('-',hyllyalue,hyllynro, hyllyvali,hyllytaso) as hylly
+	// 						FROM tuotepaikat
+	// 						WHERE tuoteno='{$row['tuoteno']}'
+	// 						and oletus='X'
+	// 						and yhtio='{$kukarow['yhtio']}'";
+	// $oletuspaikka = pupe_query($oletuspaikka_query);
+	// $oletuspaikka = mysql_fetch_assoc($oletuspaikka);
+	// echo "<td>(".$oletuspaikka['hylly'].")</td>";
 
 	# Linkki eteenp‰in vahvista_ker‰yspaikka n‰kym‰‰n.
 	# Ainakin t‰lle tulleet parametrit, viivakoodi, tuotenumero ja ostotilaus.
-	#
+
 	# Pakolliset tiedot vahvista_ker‰yspaikka n‰kym‰lle
 	# $tilausrivi
 	# T‰n parametrit riippuu mill‰ t‰h‰n sivulle on tultu?

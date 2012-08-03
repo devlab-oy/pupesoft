@@ -9,29 +9,31 @@ $valinta = "Etsi";
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-# Jos haulla ei löytyny mitään, ollaan palattu tähän virhe parametrilla.
+if(!isset($errors)) $errors = array();
+
+# Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
-	$error['ostotilaus'] = "Ei löytynyt. Hae uudestaan.";
+	$errors['virhe'] = "Ei löytynyt. Hae uudestaan.";
 }
 
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
-			# TODO: Tarkistus, yksi kenttä vähintään syötetty
+			# Haettu vähintään yhdellä kentällä
 			if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['ostotilaus'])) {
-				$error['ostotilaus'] = "Vähintään yksi kenttä on syötettävä";
+				$errors['ostotilaus'] = "Vähintään yksi kenttä on syötettävä";
 				break;
 			}
+			# Rakennetaan parametrit kentistä
 			$url = http_build_query($data);
 
-			#echo "tuotteella_useita_tilauksia.php?{$url}";
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?{$url}'>"; exit();
 			break;
 		case 'cancel':
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>"; exit();
 		   	break;
 		default:
-			echo "Virhe";
+			$errors['virhe'] = "Yllättävä virhe";
 			break;
 	}
 }
@@ -66,4 +68,8 @@ echo "<div class='controls'>
 </form>
 </div>";
 
-echo "<span class='error'>{$error['ostotilaus']}</span>";
+echo "<div class='error'>";
+    foreach($errors as $virhe => $selite) {
+        echo strtoupper($virhe).": ".$selite."<br>";
+    }
+echo "</div>";

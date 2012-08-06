@@ -31,16 +31,17 @@
 			$result = pupe_query($query);
 			$myytilrow = mysql_fetch_assoc($result);
 
-			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
-			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+			//otetaan ensin vain lisävarusteettomat tuotteet, lisävarusteperheiden isät tai rungolliset tuotteet
+			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuoteperhe.isatuoteno
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.tyyppi != 'D'
 						$vars
-						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0)
+						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0 or (tuoteperhe.isatuoteno != '' and tilausrivi.perheid != 0 and tilausrivi.perheid != tilausrivi.tunnus))
 						ORDER BY tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 			$result = pupe_query($query);
 
@@ -217,7 +218,7 @@
 						$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tuoteperhe.isatuoteno
 									FROM tilausrivi
 									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.tyyppi != 'D'
@@ -229,7 +230,7 @@
 
 						while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
 
-							if ($tilrivirow['perheid'] != $perheid) $perheid = 0;
+							if ($perheid == 0 or $tilrivirow['perheid'] != $perheid) $perheid = $tilrivirow['perheid'];
 
 							// haetaan oletuspaikan tiedot niin laitetaan se riville
 							$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and oletus!=''";

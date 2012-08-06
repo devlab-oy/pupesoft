@@ -267,9 +267,6 @@
 		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<br><br>$query<br><br>";
-
-
 		$nim     = "";
 		$lask    = 1;
 		$arvoyht = 0;

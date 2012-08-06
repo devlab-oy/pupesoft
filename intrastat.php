@@ -136,8 +136,8 @@
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
-						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
-						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0, 1, 0)), round(sum(tilausrivi.kpl * tuote.tuotemassa), 0), if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1)) as paino,
+						round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+						round(sum(tilausrivi.kpl * if(tuote.tuotemassa > 0, tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -201,7 +201,7 @@
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
 						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
-						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0, 1, 0)), round(sum(tilausrivi.kpl * tuote.tuotemassa), 0), if (round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
+						round(sum(tilausrivi.kpl * if(tuote.tuotemassa > 0, tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -242,7 +242,7 @@
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
 						round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
-						if (count(tilausrivi.tunnus) = sum(if (tuote.tuotemassa > 0,1,0)), round(sum(tilausrivi.kpl*tuote.tuotemassa),0),if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
+						round(sum(tilausrivi.kpl * if(tuote.tuotemassa > 0, tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -266,6 +266,9 @@
 
 		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<br><br>$query<br><br>";
+
 
 		$nim     = "";
 		$lask    = 1;
@@ -397,6 +400,8 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
+			if ($row["paino"] < 1) $row["paino"] = 1;
+
 			// tehdään tarkistukset	vai jos EI OLE käyttäjän valitsemaa maata
 			if ($kayttajan_valinta_maa == "") {
 				require ("inc/intrastat_tarkistukset.inc");
@@ -461,7 +466,6 @@
 			$nim .= sprintf ('%-15.15s',	"");																								//ilmoitajan viite...
 			$nim .= sprintf ('%-3.3s',		"WT");																								//määräntarkennin 1
 			$nim .= sprintf ('%-3.3s',		"KGM");																								//paljouden lajikoodi
-			if ($row["paino"] == 0) $row["paino"] = 1;
 			$nim .= sprintf ('%010d', 		$row["paino"]);																						//nettopaino
 			$nim .= sprintf ('%-3.3s',		"AAE");																								//määräntarkennin 2, muu paljous
 

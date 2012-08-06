@@ -209,77 +209,6 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				// p‰ivitet‰‰n is‰
 				$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$chk_row['tunnus']}'";
 				$updateres = pupe_query($updateisa);
-
-				$query = "	SELECT *
-							FROM tuotepaikat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tuoteno = '{$chk_row['tuoteno']}'
-							AND hyllyalue = '{$chk_row['hyllyalue']}'
-							AND hyllynro = '{$chk_row['hyllynro']}'
-							AND hyllytaso = '{$chk_row['hyllytaso']}'
-							AND hyllyvali = '{$chk_row['hyllyvali']}'
-							LIMIT 1";
-				$paikka_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($paikka_chk_res) == 0) {
-
-					$oletuspaikka_lapsi = '';
-
-					// tarkistetaan onko lapsituotteella oletuspaikkaa
-					$query = "	SELECT *
-								FROM tuotepaikat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tuoteno = '{$chk_row['tuoteno']}'
-								AND oletus != ''
-								LIMIT 1";
-					$paikka_chk_res2 = pupe_query($query);
-
-					if (mysql_num_rows($paikka_chk_res2) == 0) {
-						$oletuspaikka_lapsi = 'X';
-					}
-
-					// lis‰t‰‰n paikka
-					$query = "	INSERT INTO tuotepaikat SET
-		 						yhtio			= '{$kukarow['yhtio']}',
-					 			tuoteno     	= '{$chk_row['tuoteno']}',
-					 			oletus      	= '{$oletuspaikka_lapsi}',
-			   		 			saldo       	= '{$chk_row['varattu']}',
-								saldo_varattu 	= '{$chk_row['varattu']}',
-			   		 			saldoaika   	= now(),
-								hyllyalue   	= '{$chk_row['hyllyalue']}',
-								hyllynro    	= '{$chk_row['hyllynro']}',
-								hyllytaso   	= '{$chk_row['hyllytaso']}',
-								hyllyvali   	= '{$chk_row['hyllyvali']}',
-								tyyppi 			= '',
-								laatija			= '{$kukarow['kuka']}',
-								luontiaika		= now()";
-					$result = pupe_query($query);
-
-					// Varastoonvientip‰iv‰
-					if ($chk_row["toimitettuaika"] == "0000-00-00 00:00:00") {
-						$varastoonvientipva = date("Y-m-d H:i:s");
-					}
-					else {
-						$varastoonvientipva = $chk_row["toimitettuaika"];
-					}
-
-					// tehd‰‰n tapahtuma
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '{$kukarow['yhtio']}',
-								tuoteno 	= '{$chk_row['tuoteno']}',
-								kpl 		= '0',
-								kplhinta	= '0',
-								hinta 		= '0',
-								laji 		= 'uusipaikka',
-								hyllyalue  	= '{$chk_row['hyllyalue']}',
-								hyllynro   	= '{$chk_row['hyllynro']}',
-								hyllytaso  	= '{$chk_row['hyllytaso']}',
-								hyllyvali  	= '{$chk_row['hyllyvali']}',
-								selite 		= '".t("Lis‰ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
-								laatija 	= '{$kukarow['kuka']}',
-								laadittu 	= date_sub('{$varastoonvientipva}', interval 1 SECOND)";
-					$result = pupe_query($query);
-				}
 			}
 			else {
 
@@ -287,10 +216,117 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 				$query = "	UPDATE tilausrivi SET
 							uusiotunnus = '{$chk_row['uusiotunnus']}',
-							suuntalava = '{$chk_row['suuntalava']}'
+							suuntalava = '{$chk_row['suuntalava']}',
+							hyllyalue = '{$chk_row['hyllyalue']}',
+							hyllynro = '{$chk_row['hyllynro']}',
+							hyllytaso = '{$chk_row['hyllytaso']}',
+							hyllyvali = '{$chk_row['hyllyvali']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$loytyiko_lapsi_row['tunnus']}'";
 				$updres = pupe_query($query);
+			}
+
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$chk_row['tuoteno']}'
+						AND hyllyalue = '{$chk_row['hyllyalue']}'
+						AND hyllynro = '{$chk_row['hyllynro']}'
+						AND hyllytaso = '{$chk_row['hyllytaso']}'
+						AND hyllyvali = '{$chk_row['hyllyvali']}'
+						LIMIT 1";
+			$paikka_chk_res = pupe_query($query);
+
+			if (mysql_num_rows($paikka_chk_res) == 0) {
+
+				$oletuspaikka_lapsi = '';
+
+				// tarkistetaan onko lapsituotteella oletuspaikkaa
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$chk_row['tuoteno']}'
+							AND oletus != ''
+							LIMIT 1";
+				$paikka_chk_res2 = pupe_query($query);
+
+				if (mysql_num_rows($paikka_chk_res2) == 0) {
+					$oletuspaikka_lapsi = 'X';
+				}
+
+				// lis‰t‰‰n paikka
+				$query = "	INSERT INTO tuotepaikat SET
+	 						yhtio			= '{$kukarow['yhtio']}',
+				 			tuoteno     	= '{$chk_row['tuoteno']}',
+				 			oletus      	= '{$oletuspaikka_lapsi}',
+		   		 			saldo       	= '{$chk_row['varattu']}',
+							saldo_varattu 	= '{$chk_row['varattu']}',
+		   		 			saldoaika   	= now(),
+							hyllyalue   	= '{$chk_row['hyllyalue']}',
+							hyllynro    	= '{$chk_row['hyllynro']}',
+							hyllytaso   	= '{$chk_row['hyllytaso']}',
+							hyllyvali   	= '{$chk_row['hyllyvali']}',
+							tyyppi 			= '',
+							laatija			= '{$kukarow['kuka']}',
+							luontiaika		= now()";
+				$result = pupe_query($query);
+
+				// Varastoonvientip‰iv‰
+				if ($chk_row["toimitettuaika"] == "0000-00-00 00:00:00") {
+					$varastoonvientipva = date("Y-m-d H:i:s");
+				}
+				else {
+					$varastoonvientipva = $chk_row["toimitettuaika"];
+				}
+
+				// tehd‰‰n tapahtuma
+				$query = "	INSERT into tapahtuma set
+							yhtio 		= '{$kukarow['yhtio']}',
+							tuoteno 	= '{$chk_row['tuoteno']}',
+							kpl 		= '0',
+							kplhinta	= '0',
+							hinta 		= '0',
+							laji 		= 'uusipaikka',
+							hyllyalue  	= '{$chk_row['hyllyalue']}',
+							hyllynro   	= '{$chk_row['hyllynro']}',
+							hyllytaso  	= '{$chk_row['hyllytaso']}',
+							hyllyvali  	= '{$chk_row['hyllyvali']}',
+							selite 		= '".t("Lis‰ttiin tuotepaikka")." {$chk_row['hyllyalue']} {$chk_row['hyllynro']} {$chk_row['hyllyvali']} {$chk_row['hyllytaso']}',
+							laatija 	= '{$kukarow['kuka']}',
+							laadittu 	= date_sub('{$varastoonvientipva}', interval 1 SECOND)";
+				$result = pupe_query($query);
+			}
+
+			// Katsotaan onko t‰m‰ tuotepaikka is‰tuotteen oletuspaikka
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$chk_row['isatuoteno']}'
+						AND hyllyalue = '{$chk_row['hyllyalue']}'
+						AND hyllynro = '{$chk_row['hyllynro']}'
+						AND hyllytaso = '{$chk_row['hyllytaso']}'
+						AND hyllyvali = '{$chk_row['hyllyvali']}'
+						AND oletus != ''
+						LIMIT 1";
+			$paikka_chk_res = pupe_query($query);
+
+			if (mysql_num_rows($paikka_chk_res) == 1) {
+
+				$query = "	UPDATE tuotepaikat SET
+							oletus = ''
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$chk_row['tuoteno']}'";
+				$paikka_chk_res = pupe_query($query);
+
+				$query = "	UPDATE tuotepaikat SET
+							oletus = 'X'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$chk_row['tuoteno']}'
+							AND hyllyalue = '{$chk_row['hyllyalue']}'
+							AND hyllynro = '{$chk_row['hyllynro']}'
+							AND hyllytaso = '{$chk_row['hyllytaso']}'
+							AND hyllyvali = '{$chk_row['hyllyvali']}'";
+				$paikka_chk_res = pupe_query($query);
 			}
 		}
 	}

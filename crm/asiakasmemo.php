@@ -20,6 +20,7 @@
 			echo "<tr>
 					<th>".t("Asiakas").":</th>
 					<form method = 'post'>
+					<input type='hidden' name='toim' value='$toim'>
 					<td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
 					</tr>";
@@ -35,7 +36,7 @@
 		}
 	}
 
-	$asmemo_lopetus = "{$palvelin2}crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid";
+	$asmemo_lopetus = "{$palvelin2}crm/asiakasmemo.php////toim=$toim//ytunnus=$ytunnus//asiakasid=$asiakasid";
 
 	if ($lopetus != "") {
 		// Lisätään tämä lopetuslinkkiin
@@ -123,6 +124,7 @@
 
 			echo "<table>";
 			echo "<form method='POST'>
+					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='tee' value='LISAAASANALYYSI'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
@@ -395,6 +397,7 @@
 				$result = pupe_query($query);
 
 				$yhenkilo = "<form method='POST'>
+							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -561,7 +564,8 @@
 				echo "</tr>";
 				echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
 				echo "<form method='POST'>";
-				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
+				echo "<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='asiakasid' value='$asiakasid'>
 						<input type='hidden' name='tee' value='paivita_tila'>";
@@ -597,6 +601,7 @@
 				echo "<table width='620'>";
 
 				echo "	<form method='POST' enctype='multipart/form-data'>
+						<input type='hidden' name='toim' 		value='$toim'>
 						<input type='hidden' name='tee' 		value='UUSIMEMO'>
 						<input type='hidden' name='korjaus' 	value='$tunnus'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
@@ -798,6 +803,7 @@
 
 				echo "	<td colspan='3' align='right' class='back'>
 						<form method='POST'>
+						<input type='hidden' name='toim' 		value='$toim'>
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
@@ -863,7 +869,7 @@
 								<th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>";
 
 						if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
-							echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
+							echo "<th><a href='$PHP_SELF?toim=$toim&tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
 						}
 						else {
 							echo "<th></th>";
@@ -890,6 +896,7 @@
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
 						echo "<form method='POST'>";
+						echo "<input type='hidden' name='toim' value='$toim'>";
 						echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
 						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
 						echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
@@ -934,11 +941,11 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
 				if ($naytapoistetut == "") {
 					echo "<br>";
-					echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
+					echo "<a href='$PHP_SELF?toim=$toim&naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
 				}
 				else {
 					echo "<br>";
-					echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot"). "</a>";
+					echo "<a href='$PHP_SELF?toim=$toim&naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot"). "</a>";
 				}
 			}
 		}

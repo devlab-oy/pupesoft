@@ -52,6 +52,24 @@
 		require ("inc/connect.inc");
 
 		if ($lopetus == "") {
+			
+			if (isset($muutparametrit)) {
+				foreach (explode("##", $muutparametrit) as $muutparametri) {
+					list($a, $b) = explode("=", $muutparametri);
+
+
+					if (strpos($a, "[") !== FALSE) {
+						$i = substr($a, strpos($a, "[")+1, strpos($a, "]")-(strpos($a, "[")+1));
+						$a = substr($a, 0, strpos($a, "["));
+
+						${$a}[$i] = $b;
+					}
+					else {
+						${$a} = $b;
+					}
+				}
+			}			
+			
 			//Käyttöliittymä
 			if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -230,6 +248,8 @@
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
+			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
+
 
 			echo "<table>
 				<tr>
@@ -486,6 +506,12 @@
 			echo "</select></td><td></td>
 			</tr>";
 
+			echo "<tr>
+			<th>",t("Näytä asiakaskäynnit"),"</th>";
+			echo "<td><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td><td></td>
+			<td class='back'>".t("Toimii vain jos listaat asiakkaittain")."</td>
+			</tr>";
+
 			echo "</table><br>";
 
 			// päivämäärärajaus
@@ -624,24 +650,7 @@
 			}
 			else {
 				$asiakasrajaus = "";
-			}
-
-			if (isset($muutparametrit)) {
-				foreach (explode("##", $muutparametrit) as $muutparametri) {
-					list($a, $b) = explode("=", $muutparametri);
-
-
-					if (strpos($a, "[") !== FALSE) {
-						$i = substr($a, strpos($a, "[")+1, strpos($a, "]")-(strpos($a, "[")+1));
-						$a = substr($a, 0, strpos($a, "["));
-
-						${$a}[$i] = $b;
-					}
-					else {
-						${$a} = $b;
-					}
-				}
-			}
+			}			
 
 			// tutkaillaan saadut muuttujat
 			$ytunnus	= trim($ytunnus);
@@ -866,7 +875,7 @@
 					if ($mukaan == "ytunnus") {
 						$group  .= ",asiakas.tunnus";
 
-						if ($osoitetarrat != "") $select .= "asiakas.tunnus astunnus, ";
+						if ($osoitetarrat != "" or $asiakaskaynnit != "") $select .= "asiakas.tunnus astunnus, ";
 
 						if ($ytunnus_mistatiedot != "") {
 							$etuliite = "lasku";
@@ -1283,6 +1292,18 @@
 					$nettokatelisaed  = "";
 				}
 
+				if ($asiakaskaynnit != "") {
+					$select .= "(SELECT count(*) kaynnit
+								FROM kalenteri
+								WHERE kalenteri.yhtio 		= asiakas.yhtio
+								AND kalenteri.liitostunnus 	= asiakas.tunnus
+								and kalenteri.tapa 	 	 	= 'Asiakaskäynti'
+								and kalenteri.tyyppi	   in ('kalenteri','memo')
+								and ((kalenteri.pvmalku  >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmalku  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+									 (kalenteri.pvmloppu >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+									 (kalenteri.pvmalku  <= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu >= '{$vvl}-{$kkl}-{$ppl} 23:59:59'))) asiakaskaynnit,";
+				}
+
 				if ($eiOstSarjanumeroita != "") {
 					$lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'\n";
 				}
@@ -1646,10 +1667,10 @@
 								and lasku.tila in ({$tila})";
 
 					//yritetään saada kaikki tarvittavat laskut mukaan
-					$lalku  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva));
-					$lloppu = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
-					$lalku_ed  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
-					$lloppu_ed = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
+					$lalku  	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva));
+					$lloppu 	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
+					$lalku_ed	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
+					$lloppu_ed	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
 
 					if ($ajotapa == 'tilausjaauki') {
 						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')

@@ -10754,7 +10754,7 @@ if (!function_exists("tarkista_iban")) {
 		global $yhtiorow;
 
 		if ($yhtiorow["maa"] != "FI") {
-			return TRUE;
+			return $tilino;
 		}
 
 		// Calculating and validating IBAN checksums:

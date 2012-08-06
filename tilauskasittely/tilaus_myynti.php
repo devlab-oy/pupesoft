@@ -4380,9 +4380,10 @@ if ($tee == '') {
 				$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 				//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
-				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
+				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus, lasku_ux.tunnus AS ux_tunnus, lasku_ux.laskunro AS ux_laskunro
 							FROM tilausrivi use index(yhtio_tyyppi_tuoteno_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
+							LEFT JOIN lasku AS lasku_ux ON (lasku_ux.yhtio = lasku.yhtio AND lasku_ux.tila = 'U' AND lasku_ux.alatila = 'X' AND lasku_ux.liitostunnus = '{$laskurow['liitostunnus']}' AND lasku_ux.laskunro = lasku.laskunro)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi  = 'L'
 							and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
@@ -4402,6 +4403,7 @@ if ($tee == '') {
 					}
 
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus=$viimhinta[tunnus]&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$viimhinta[otunnus]</a></td></tr>";
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Lasku")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus={$viimhinta['ux_tunnus']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$viimhinta['ux_laskunro']}</a></td></tr>";
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta["laskutettuaika"])."</td></tr>";
 				}
 
@@ -4445,11 +4447,13 @@ if ($tee == '') {
 				echo "</td>";
 
 				if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
-					$query = "	SELECT *
+					$query = "	SELECT tapahtuma.*
 								FROM tapahtuma
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tuoteno = '{$tuote['tuoteno']}'
-								AND laji = 'laskutus'
+								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
+								WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+								AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
+								AND tapahtuma.laji = 'laskutus'
 								ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
 								LIMIT 5";
 					$tapahtuma_chk_res = pupe_query($query);

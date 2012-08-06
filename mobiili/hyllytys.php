@@ -21,28 +21,6 @@ foreach($sallitut_parametrit as $parametri) {
     }
 }
 
-# Kontrolleri
-if (isset($submit)) {
-    switch($submit) {
-        case 'ok':
-            echo "OK";
-            var_dump($_POST);
-            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php'>"; exit();
-            #exit;
-            break;
-        case 'lopeta':
-            # TODO: t‰m‰n pit‰is palata ostotilaus.php:lle
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
-            break;
-        case 'suuntalavalle':
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
-            break;
-        default:
-            $errors['virhe'] = "Error";
-            break;
-    }
-}
-
 /*
 * Ostotilausten_kohdistus rivi 847 - 895...
 */
@@ -58,9 +36,52 @@ $query = "  SELECT
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
-
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
+
+
+# Kontrolleri
+if (isset($submit)) {
+    switch($submit) {
+        case 'ok':
+            echo "OK";
+            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?selected_row={$tilausrivi}&alusta_tunnus={$dummy_lava}&liitostunnus=6690653'>"; exit();
+            break;
+        case 'lopeta':
+            # TODO: t‰m‰n pit‰is palata ostotilaus.php:lle
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
+            break;
+        case 'suuntalavalle':
+            if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
+                $errors['m‰‰r‰'] = "Hyllytetyn m‰‰r‰n on oltava numero";
+                break;
+            }
+            # Jos hyllytetty‰ m‰‰r‰‰ ollaan pienennetty
+            if ($hyllytetty < $row['tilkpl']) {
+                echo "Hyllytety m‰‰r‰ on pienempi kuin tilattujen (splitataan rivi)";
+                # Poikkeuksena asetetaan tilausrivin.varattu hyllytetyksi m‰‰r‰ksi
+                # mik‰ on pienempi kuin alkuper‰isen rivin tilkpl.
+                # P‰ivitet‰‰n kopioitava rivi.
+                $poikkeukset = array("tilausrivi.varattu" => $hyllytetty);
+                $uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
+            }
+            # Jos hyllytetty‰ m‰‰r‰‰ ollaan nostettu
+            elseif ($hyllytetty > $row['tilkpl']) {
+                echo "Hyllytetty m‰‰r‰ on suurempi kuin tilattujen (insertti erotukselle)";
+                $poikkeukset = array("tilausrivi.varattu" => $hyllytetty);
+                $uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
+            }
+            else {
+                echo "Hyllytetty ja tilattujen m‰‰r‰ on sama";
+            }
+            # Jos hyllytetty m‰‰r‰ on sama kuin tilattu
+            #echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
+            break;
+        default:
+            $errors['virhe'] = "Error";
+            break;
+    }
+}
 
 ######## UI ##########
 include("kasipaate.css");

@@ -78,7 +78,60 @@ if (isset($submit)) {
 
             break;
         case 'ok':
-            echo "OK";
+            # keikan_toiminnot (91-144)
+            # Tarkistetaan onko suuntalava siirtovalmis
+            $query = "  SELECT tila
+                        FROM suuntalavat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$suuntalava}'";
+            $tila_chk_res = pupe_query($query);
+            $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
+
+            if ($tila_chk_row['tila'] == 'S') {
+                $errors['suuntalava'] = "Suuntalavan tila on S";
+            }
+            else {
+                # Päivitetään tilausrivin suuntalava
+                $query = "  UPDATE tilausrivi SET
+                            suuntalava = '{$suuntalava}'
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus = '{$selected_row}'";
+                $update_res = pupe_query($query);
+
+                $query = "  SELECT uusiotunnus
+                            FROM tilausrivi
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus = '{$selected_row}'";
+                $otunnus_fetch_res = pupe_query($query);
+                $otunnus_fetch_row = mysql_fetch_assoc($otunnus_fetch_res);
+
+                $uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
+
+                if ($suuntalava != 0) {
+                    $query = "  SELECT saapuminen
+                                FROM suuntalavat_saapuminen
+                                WHERE yhtio = '{$kukarow['yhtio']}'
+                                AND suuntalava = '{$suuntalava}'
+                                AND saapuminen = '{$uusiotunnus}'";
+                    $fetch_res = pupe_query($query);
+
+                    if (mysql_num_rows($fetch_res) == 0) {
+                        $query = "  INSERT INTO suuntalavat_saapuminen SET
+                                    yhtio = '{$kukarow['yhtio']}',
+                                    suuntalava = '{$suuntalava}',
+                                    saapuminen = '{$uusiotunnus}',
+                                    laatija = '{$kukarow['kuka']}',
+                                    luontiaika = now(),
+                                    muutospvm = now(),
+                                    muuttaja = '{$kukarow['kuka']}'";
+                        $insert_res = pupe_query($query);
+                    }
+                }
+                ###
+
+                # Kaikki ok
+                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?'>"; exit();
+            }
             break;
         case 'lopeta':
             echo "lopeta";
@@ -115,6 +168,7 @@ echo "<div class='main'>
 <form method='post' action=''>
 <table>
     <tr>
+        <th></th>
         <th>Suuntalavan nro</th>
         <th>Ker.vyöhyk.</th>
         <th>Rivejä</th>
@@ -124,13 +178,12 @@ echo "<div class='main'>
 
 while($row = mysql_fetch_assoc($suuntalavat_res)) {
 
-    # Ei osu
-    #if ($rivirow['suuntalava'] > 0 and $row['tunnus'] != $rivirow['suuntalava'] and $row['kaytettavyys'] != 'L' and $row['tila'] != '') {
-    #    continue;
-    #}
-    #if ($row['tila'] == 'P' and $rivirow["varastossa_kpl"] == 0) continue;
-    #if ($sscc != '' and $row['sscc'] != $sscc) continue;
-    #if($row['tila'] == 'S') continue;
+    if ($rivirow['suuntalava'] > 0 and $row['tunnus'] != $rivirow['suuntalava'] and $row['kaytettavyys'] != 'L' and $row['tila'] != '') {
+        continue;
+    }
+    if($row['tila'] == 'S') continue;
+    if ($row['tila'] == 'P' and $rivirow["varastossa_kpl"] == 0) continue;
+    if ($sscc != '' and $row['sscc'] != $sscc) continue;
 
     $pakkaus_query = "select pakkaus from pakkaus where tunnus='{$row['tyyppi']}'";
     $tyyppi = mysql_fetch_assoc(pupe_query($pakkaus_query));
@@ -138,14 +191,23 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     $keraysvyohyke_query = "select nimitys from keraysvyohyke where tunnus='{$row['keraysvyohyke']}'";
     $keraysvyohyke = mysql_fetch_assoc(pupe_query($keraysvyohyke_query));
 
+    # Haetaan suuntalavan tilausrivit, HIDAS query
+    // if ($disabled == '') {
+    //     $rivit_query = "SELECT count(*) rivit FROM tilausrivi WHERE suuntalava='{$row['tunnus']}' and yhtio='{$kukarow['yhtio']}'";
+    //     #echo $rivit_query;
+    //     $rivit = mysql_fetch_assoc(pupe_query($rivit_query));
+    // }
     echo "<tr>
-        <td>{$row['sscc']}</td>
+        <td><input class='radio' id='selected_row' type='radio' name='selected_row' value='{$tilausrivi['tunnus']}' />
+        <td><label for='selected_row'>{$row['sscc']}</label></td>
         <td>{$keraysvyohyke['nimitys']}</td>
-        <td>{rivit}</td>
-        <td>{$tyyppi['pakkaus']}</td>
+        <td>{$rivit['rivit']}</td>
+        <td><label for='selected_row'>{$tyyppi['pakkaus']}</label></td>
+        <td>{$row['tila']}</td>
+        <td>{$rivirow['varastossa_kpl']}</td>
+        <td><input type='hidden' name='suuntalava' value='{$row['tunnus']}' /></td>
     </tr>";
 }
-
 echo "</table></div>";
 
 echo "<div class='controls'>
@@ -160,7 +222,3 @@ echo "<div class='error'>";
         echo strtoupper($virhe).": ".$selite;
     }
 echo "</div>";
-
-echo "<pre>";
-    var_dump($suuntalavat);
-echo "</pre>";

@@ -418,7 +418,7 @@ if ($toiminto == "tulosta") {
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Tavaraetiketti";
 
-				$valitut_lavat .= $check_row["suuntalavat"];
+				$valitut_lavat = trim($valitut_lavat) != "" ? $valitut_lavat.",".$check_row["suuntalavat"] : $check_row["suuntalavat"];
 			}
 		}
 

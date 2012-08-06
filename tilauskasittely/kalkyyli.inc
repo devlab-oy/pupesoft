@@ -16,7 +16,7 @@ else {
 
 list(,,$kohok,,,,$lisok,,$sarjanrook,,,,,$varok) = tsekit($laskurow,0);
 
-if ($vietiinko_koko_suuntalava == 'joo' or ($sarjanrook == 1 and $varok == 1)) {
+if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 
 	if ($tee == "varastoon") {
 		require ("varastoon.inc");

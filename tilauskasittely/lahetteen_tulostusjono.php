@@ -11,8 +11,8 @@
 		exit;
 	}
 
-	$logistiikka_yhtio = '';
-	$logistiikka_yhtiolisa = '';
+	$logistiikka_yhtio 		= '';
+	$logistiikka_yhtiolisa 	= '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
@@ -93,7 +93,7 @@
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
 
-		require ("raportit/naytatilaus.inc");
+		require ("raportit/naytatilaus.inc");		
 		echo "<br><br><br>";
 		$tee2 = $vanha_tee2;
 
@@ -116,7 +116,7 @@
 
 				// JOS haluat debuggia niin n‰yt‰ alert-boxi,
 				// mik‰li se ei tule n‰kyviin, niin input-kentiss‰ on jotain h‰ikk‰‰
-			//	alert(submitid+' '+tuoteno+' '+toimittaja+' '+maara);
+				// alert(submitid+' '+tuoteno+' '+toimittaja+' '+maara);
 
 				$.post('{$_SERVER['SCRIPT_NAME']}',
 					{ 	tee: 'TILAA_AJAX',
@@ -270,7 +270,7 @@
 
 							require("tilaus-valmis-tulostus.inc");
 
-							$toim			= $toim_bck;
+							$toim = $toim_bck;
 						}
 					}
 					else {
@@ -525,8 +525,9 @@
 
 				//haetaan ker‰yslistan oletustulostin
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon'";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
 				$kirjoitin = $prirow['printteri0'];
@@ -676,7 +677,7 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 
-		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+		echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
 		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
@@ -730,7 +731,7 @@
 
 		echo "</td>";
 
-		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+		echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
 		$query = "	SELECT clearing, count(*) kpl
 					FROM lasku
@@ -761,7 +762,7 @@
 
 		echo "</select></td></tr>";
 
-		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+		echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
 
 		$query = "	SELECT toimitustapa.selite, count(*) kpl, MIN(toimitustapa.tunnus) tunnus
 					FROM toimitustapa
@@ -779,12 +780,12 @@
 			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
 
-		echo "</select></td><td></td><td></td>";
+		echo "</select></td><th></th><td></td>";
 
 		$sel=array();
 		$sel[$karajaus] = "selected";
 
-		echo "<tr><td>".t("Ker‰ysaikarajaus:")."</td>
+		echo "<tr><th>".t("Ker‰ysaikarajaus:")."</th>
 				<td>
 					<select name='karajaus' onchange='submit()'>
 						<option value='1'  $sel[1]>".t("Huominen")."</option>
@@ -796,7 +797,7 @@
 					</select>
 
 				</td>";
-		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+		echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";
 
 		echo "</table>";

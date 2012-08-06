@@ -8,7 +8,7 @@
 
 				list($hh, $mm, $loput) = explode(":", $t[$i]);
 
-				if (strpos($t[$i], " ") !== FALSE or !is_numeric($hh) or !is_numeric($mm) or $loput != "") {
+				if (strpos($t[$i], " ") !== FALSE or !is_numeric($hh) or !is_numeric($mm)) {
 					$virhe[$i] .= t("Anna kellonaika muodossa hh:mm")."!";
 				}
 				elseif ($hh > 23 or $mm > 59 or $hh < 0 or $mm < 0) {
@@ -36,6 +36,14 @@
 				}
 			}
 
+			if (mysql_field_name($result, $i) == "varasto") {
+				if (trim($t[$i]) == "") {
+					$virhe[$i] .= t("Varasto puuttuu")."!";
+				}
+				else {
+					$t[$i] = (int) $t[$i];
+				}
+			}
 		}
 	}
 

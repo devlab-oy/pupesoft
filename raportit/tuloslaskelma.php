@@ -92,7 +92,7 @@
 
 				enable_ajax();
 
-				echo "<br><font class='error'>".t("HUOM")."!  ".t("Sinulla on ".mysql_num_rows($result)." tiliä joilta puuttuu tai on virheellinen $sisulk_txt taso")."!<br>".t("Jos näillä tileillä on tapahtumia, niin tapahtumat eivät näy laskelmassa").".</font><br><a href=\"javascript:toggleGroup('eee')\">".t("Näytä / Piilota")." ".t("tilit")."</a><br><br>";
+				echo "<br><font class='error'>".t("HUOM")."!  ".t("Sinulla on %s tiliä joilta puuttuu tai on virheellinen %s taso", "", mysql_num_rows($result), $sisulk_txt)."!<br>".t("Jos näillä tileillä on tapahtumia, niin tapahtumat eivät näy laskelmassa").".</font><br><a href=\"javascript:toggleGroup('eee')\">".t("Näytä / Piilota")." ".t("tilit")."</a><br><br>";
 
 				if ($toim_tee != "") {
 					echo "<div id='eee' style='display:block'>";

@@ -120,8 +120,15 @@
 						if (!$php_cli)  {
 							echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
 						}
-
-						rename($laskut."/".$file, $errlaskut."/".$file);
+						$alku = $loppu = "";
+						list($alku,$loppu) = explode("####",$laskuvirhe);
+						
+						if (trim($loppu) == "ASN") {
+							// ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
+						}
+						else {
+							rename($laskut."/".$file, $errlaskut."/".$file);
+						}
 					}
 				}
 			}

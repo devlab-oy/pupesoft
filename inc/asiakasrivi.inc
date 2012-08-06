@@ -1122,8 +1122,9 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value=''>".t("Käytetään yhtiön oletusta")."</option>";
-		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta ei lähetetä")."</option>";
-		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus lähetetään asiakkaalle")."</option>";
+		$ulos .= "<option value='E' $sel[E]>".t("Keräysvahvistusta/sähköisetä lähetettä ei lähetetä")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
+		$ulos .= "<option value='k' $sel[k]>".t("Keräysvahvistus/sähkoinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus on kerätty")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

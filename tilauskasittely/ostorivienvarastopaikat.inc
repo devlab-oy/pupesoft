@@ -1,6 +1,10 @@
 <?php
 
-$query  = "select * from lasku where tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]' and tila = 'K'";
+$query  = "	SELECT *
+			from lasku
+			where tunnus = '$otunnus'
+			and yhtio 	 = '$kukarow[yhtio]'
+			and tila 	 = 'K'";
 
 $result = mysql_query($query) or pupe_error($query);
 
@@ -23,8 +27,8 @@ if ($tee == "valmis") {
 
 		$query = "	SELECT *
 					FROM tilausrivi
-					WHERE (tunnus='$tunnus' or perheid2='$tunnus') 
-					and yhtio='$kukarow[yhtio]' 
+					WHERE (tunnus='$tunnus' or perheid2='$tunnus')
+					and yhtio='$kukarow[yhtio]'
 					and tyyppi='O' and uusiotunnus='$otunnus'
 					ORDER BY tunnus";
 		$perheresult = mysql_query($query) or pupe_error($query);
@@ -40,7 +44,7 @@ if ($tee == "valmis") {
 
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
 				if($tilausrivirow["perheid2"] != $tilausrivirow["tunnus"] and $tilausrivirow["perheid2"] > 0 and !isset($rivivarasto[$tilausrivirow["tunnus"]])) {
-					
+
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 								from tuotepaikat
 								WHERE yhtio		= '$kukarow[yhtio]'
@@ -51,13 +55,13 @@ if ($tee == "valmis") {
 								and tuoteno		= '$tilausrivirow[tuoteno]'";
 					$result = mysql_query($query) or pupe_error($query);
 					//echo "FAIJALTA: $tilausrivirow[tuoteno] $query<br><br>";
-					
+
 					//	Lisätään nämä paikka arrayhin
 					$t1[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t1"];
 					$t2[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t2"];
 					$t3[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t3"];
 					$t4[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t4"];
-					
+
 				}
 				elseif (($rivivarasto[$tunnus] != 'x') and ($rivivarasto[$tunnus] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
 
@@ -82,9 +86,9 @@ if ($tee == "valmis") {
 
 						// JÄMÄHAARA
 						if ($paljon_pitaa_mahtua_muualle != 'kaikki') {
-							$update_query = "	UPDATE tilausrivi SET 
-												varattu = '{$montako_tuotetta_mahtuu}' 
-												WHERE yhtio = '{$kukarow['yhtio']}' 
+							$update_query = "	UPDATE tilausrivi SET
+												varattu = '{$montako_tuotetta_mahtuu}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tunnus = '{$tilausrivirow['tunnus']}'";
 							$update_res = mysql_query($update_query) or pupe_error($update_query);
 
@@ -136,7 +140,7 @@ if ($tee == "valmis") {
 						$result = mysql_query($query) or pupe_error($query);
 					}
 
-					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";					
+					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";
 				}
 				else {
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -187,7 +191,7 @@ if ($tee == "valmis") {
 								$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
 											values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 								$insre = mysql_query($query) or pupe_error($query);
-								
+
 								$uusipaikka = mysql_insert_id();
 
 								$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -224,8 +228,8 @@ if ($tee == "valmis") {
 						}
 					}
 					elseif($t3[$tilausrivirow["tunnus"]] == '' or $t4[$tilausrivirow["tunnus"]] == '') {
-						echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("on annettava täydellinen varastopaikka")."!<br>";						
-					}					
+						echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("on annettava täydellinen varastopaikka")."!<br>";
+					}
 					else {
 						echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!<br>";
 					}
@@ -239,7 +243,7 @@ if ($tee == "valmis") {
 					$faijanmesta[$tilausrivirow["perheid2"]]["t1"] = $paikkarow["hyllyalue"];
 					$faijanmesta[$tilausrivirow["perheid2"]]["t2"] = $paikkarow["hyllynro"];
 					$faijanmesta[$tilausrivirow["perheid2"]]["t3"] = $paikkarow["hyllyvali"];
-					$faijanmesta[$tilausrivirow["perheid2"]]["t4"] = $paikkarow["hyllytaso"];															
+					$faijanmesta[$tilausrivirow["perheid2"]]["t4"] = $paikkarow["hyllytaso"];
 				}
 
 				// Päivitetäään tilausrivi
@@ -260,11 +264,11 @@ if ($tee == "valmis") {
 
 				if ($trow["sarjanumeroseuranta"] != '') {
 					$query = "	UPDATE sarjanumeroseuranta
-								SET hyllyalue	= '$paikkarow[hyllyalue]', 
-								hyllynro		= '$paikkarow[hyllynro]', 
-								hyllyvali		= '$paikkarow[hyllyvali]', 
+								SET hyllyalue	= '$paikkarow[hyllyalue]',
+								hyllynro		= '$paikkarow[hyllynro]',
+								hyllyvali		= '$paikkarow[hyllyvali]',
 								hyllytaso		= '$paikkarow[hyllytaso]',
-								muuttaja		= '$kukarow[kuka]', 
+								muuttaja		= '$kukarow[kuka]',
 								muutospvm		= now()
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and tuoteno 		= '$tilausrivirow[tuoteno]'
@@ -276,7 +280,7 @@ if ($tee == "valmis") {
 				if ($oletusbox[$tunnus]!= '' and $virheita == 0) {
 					$query = "	UPDATE tuotepaikat
 								SET oletus 		= '',
-								muuttaja		= '$kukarow[kuka]', 
+								muuttaja		= '$kukarow[kuka]',
 								muutospvm		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$paikkarow[tuoteno]'";
@@ -284,7 +288,7 @@ if ($tee == "valmis") {
 
 					$query = "	UPDATE tuotepaikat
 								SET oletus 	= 'X',
-								muuttaja	= '$kukarow[kuka]', 
+								muuttaja	= '$kukarow[kuka]',
 								muutospvm	= now()
 								WHERE yhtio 	= '$kukarow[yhtio]'
 								and tuoteno 	= '$paikkarow[tuoteno]'
@@ -305,7 +309,7 @@ if ($tee == "valmis") {
 					if (mysql_num_rows($upresult) == 0) {
 						$query = "	UPDATE tuotepaikat
 									SET oletus 	= 'X',
-									muuttaja	= '$kukarow[kuka]', 
+									muuttaja	= '$kukarow[kuka]',
 									muutospvm	= now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$paikkarow[tuoteno]'
@@ -362,23 +366,33 @@ if ($tee == "") {
 		}
 	}
 
-	echo "<table>
-		<tr>
-			<th>".t("Saapuminen")."</th><td>$laskurow[laskunro]</td>
-			<th>".t("Nimi")."</th><td>$laskurow[nimi]</td>
-		</tr>";
+	echo "<br><table>";
+	echo "<tr>";
+	echo "<th>".t("saapuminen")."</th>";
+	echo "<th>".t("ytunnus")."</th>";
+	echo "<th>".t("nimi")."</th>";
+	echo "</tr>";
+	echo "<tr>
+			<td>$laskurow[laskunro]</td>
+			<td>$laskurow[ytunnus]</td>
+			<td>$laskurow[nimi]</td>
+			</tr>";
+	echo "</table><br>";
 
 	echo "	<form method='post'>";
 	echo "	<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "	<input type='hidden' name='toiminto' value='varastopaikat'>
 			<input type='hidden' name='otunnus' value='$otunnus'>";
 
-	echo "<tr><th>".t("Saavuta saapuminen").":</th>
+	echo "<table><tr><th>".t("Saavuta saapuminen").":</th>
 			<td><select name='varasto' onchange = 'submit()'>
 			<option value='x' $selx>".t("Tuotteiden oletuspaikoille")."</option>
 			<option value='y' $sely>".t("Rivellä oleville paikoille")."</option>";
 
-	$query  = "SELECT * FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$query  = "	SELECT *
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tyyppi, nimitys";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {
@@ -389,7 +403,7 @@ if ($tee == "") {
 
 	echo "</select></td>";
 	echo "</form>";
-	
+
 	if ($varasto == 'y') {
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -398,20 +412,20 @@ if ($tee == "") {
 			<input type='hidden' name='otunnus' value='$otunnus'>
 			<input type='hidden' name='taytapaikat' value='jees'>";
 
-		echo "<td colspan='2'><input type='submit' value='".t("Täytä paikkakentät")."'></td>";
+		echo "<td class='back'><input type='submit' value='".t("Täytä paikkakentät")."'></td>";
 		echo "</form>";
 	}
-	
+
 	echo "</tr>";
 	echo "</table><br>";
 
 	// otsikko valmis
 
 	//haetaan ostorivit
-	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, 
+	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2,
 				tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
-				tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, tuote.keraysvyohyke, 
-				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, 
+				tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, tuote.keraysvyohyke,
+				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu,
 				(select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
 				FROM tilausrivi
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
@@ -457,7 +471,7 @@ if ($tee == "") {
 					}
 				}
 			</script> ";
-			
+
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
@@ -475,7 +489,7 @@ if ($tee == "") {
 
 				//-->
 				</script>";
-				
+
 
 
 		//hakukentät
@@ -508,7 +522,7 @@ if ($tee == "") {
 			//Missä tuotetta on?
 			$query  = "	SELECT *
 						FROM tuotepaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$rivirow[tuoteno]'
 						ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
 			$paikkares = mysql_query($query) or pupe_error($query);
@@ -523,18 +537,18 @@ if ($tee == "") {
 
 					$query  = "	SELECT tunnus
 								FROM varastopaikat
-								WHERE yhtio='$kukarow[yhtio]'
-								and alkuhyllyalue<='$paikkarow[hyllyalue]'
-								and loppuhyllyalue>='$paikkarow[hyllyalue]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and alkuhyllyalue <= '$paikkarow[hyllyalue]'
+								and loppuhyllyalue >= '$paikkarow[hyllyalue]'";
 					$vares = mysql_query($query) or pupe_error($query);
 					$varow = mysql_fetch_array($vares);
 
 					$sel = "";
-					
+
 					// Valkataan oletuspaikka tässä vaiheessa jos ei viedä tiettyyn varastoon
 					if(!is_numeric($varasto) and $paikkarow['oletus'] != '') {
 						$sel = 'selected';
-					}					
+					}
 
 					if (is_numeric($varasto) and $varow['tunnus'] == $varasto) {
 						$sel = 'selected';
@@ -547,7 +561,7 @@ if ($tee == "") {
 					}
 
 					$ole = "";
-					
+
 					if ($paikkarow['oletus'] != '') {
 						$ole = "(".t("oletus").")";
 
@@ -557,9 +571,9 @@ if ($tee == "") {
 								$virheviesti = "<br /><font class='error'>".t("Tuotteen mitta-/painotiedot ovat virheelliset")."!</font>";
 							}
 							else {
-								$query = "	SELECT * 
-											FROM varaston_hyllypaikat 
-											WHERE yhtio = '{$kukarow['yhtio']}' 
+								$query = "	SELECT *
+											FROM varaston_hyllypaikat
+											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND hyllyalue = '{$paikkarow['hyllyalue']}'
 											AND hyllynro = '{$paikkarow['hyllynro']}'
 											AND hyllyvali = '{$paikkarow['hyllyvali']}'
@@ -599,15 +613,15 @@ if ($tee == "") {
 													ABS(ORD(LEFT('{$paikkarow['hyllyalue']}', 1)) - ORD(LEFT(varaston_hyllypaikat.hyllyalue, 1))) etaisyys,
 													(varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) tilavuus,
 													floor(((varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) / {$tuotteen_tilavuus})) paljon_mahtuu_kpl,
-													varaston_hyllypaikat.hyllyalue, 
-													varaston_hyllypaikat.hyllynro, 
-													varaston_hyllypaikat.hyllyvali, 
-													varaston_hyllypaikat.hyllytaso, 
+													varaston_hyllypaikat.hyllyalue,
+													varaston_hyllypaikat.hyllynro,
+													varaston_hyllypaikat.hyllyvali,
+													varaston_hyllypaikat.hyllytaso,
 													tuotepaikat.tunnus
 													FROM varaston_hyllypaikat
-													JOIN tuotepaikat ON (tuotepaikat.yhtio = varaston_hyllypaikat.yhtio 
-																		AND tuotepaikat.saldo = 0 
-																		AND tuotepaikat.hyllyalue = varaston_hyllypaikat.hyllyalue 
+													JOIN tuotepaikat ON (tuotepaikat.yhtio = varaston_hyllypaikat.yhtio
+																		AND tuotepaikat.saldo = 0
+																		AND tuotepaikat.hyllyalue = varaston_hyllypaikat.hyllyalue
 																		AND tuotepaikat.hyllynro = varaston_hyllypaikat.hyllynro
 																		AND tuotepaikat.hyllyvali = varaston_hyllypaikat.hyllyvali
 																		AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
@@ -651,16 +665,16 @@ if ($tee == "") {
 					}
 
 					$riv = "";
-					
+
 					if($rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
 						$riv = "(".t("rivillä").")";
 					}
 
 					echo "<option value='$paikkarow[tunnus]' $sel>$paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] $ole $riv</option>";
 				}
-				
+
 				echo "</select>{$virheviesti}</td>";
-				
+
 				echo "<td>".t("Oletus").":<input type='checkbox' id='oletusbox_{$rivirow["tunnus"]}' name='oletusbox[$rivirow[tunnus]]'></td>";
 			}
 			else {
@@ -668,10 +682,10 @@ if ($tee == "") {
 				if ($rivirow["r1"] != "") {
 					echo " (".t("rivillä")." $rivirow[r1]-$rivirow[r2]-$rivirow[r3]-$rivirow[r4])";
 				}
-				
+
 				echo "<td></td>";
 			}
-			
+
 			if ($varasto == 'y' and $taytapaikat == 'jees') {
 				$rivlla1 = $rivirow["r1"];
 				$rivlla2 = $rivirow["r2"];
@@ -689,7 +703,7 @@ if ($tee == "") {
 		echo "<td colspan='4' class='back'></td>";
 		echo "<td colspan='1' class='back'>Ruksaa kaikki:";
 		echo "<input type='checkbox' name='chbox' onclick='toggleAll(this)'></td>";
-		
+
 		echo "</tr><tr>";
 		echo "<td colspan='3' class='back'></td>";
 		echo "<td colspan='2' align='right' class='back'>".t("Täytä kaikki kentät").":</td>";
@@ -699,11 +713,11 @@ if ($tee == "") {
 		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
 		echo "</tr>";
 		echo "</table>";
-		
+
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
-		
+
 		echo "<br><input type='submit' name='Laheta' value='".t("Päivitä varastopaikat")."'>";
 		echo "</form>";
 
@@ -715,16 +729,15 @@ if ($tee == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-		
+
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
-		
+
 		echo "<input type='submit' value='".t("Takaisin saapumiselle")."'>";
 		echo "</form>";
 	}
-
 }
 
 ?>

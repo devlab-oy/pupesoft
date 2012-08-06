@@ -360,13 +360,13 @@
 	if (isset($lisa_dynaaminen_liitokset) and count($lisa_dynaaminen_liitokset) > 0) {
 		foreach ($lisa_dynaaminen_liitokset as $d_param => $d_liitokset) {
 			if ($d_liitokset != "") {
-				if ($param == "tuote") {
+				if ($d_param == "tuote") {
 					$lisa .= " and tuote.tuoteno in ($d_liitokset) ";
 				}
-				elseif ($param == "asiakas") {
+				elseif ($d_param == "asiakas") {
 					$lisa .= " and asiakas.tunnus in ($d_liitokset) ";
 				}
-				elseif ($param == "kuka") {
+				elseif ($d_param == "kuka") {
 					$lisa .= " and kuka.kuka in ($d_liitokset) ";
 				}
 			}

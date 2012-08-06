@@ -387,7 +387,8 @@ if ($toiminto == "tulosta") {
 
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus != '') {
 
-			$valitut_lavat = "";
+			$on_jo_lava = trim($valitut_lavat) != "" ? true : false;
+			$valitut_lavat = $on_jo_lava ? $valitut_lavat : "";
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
 						FROM tilausrivi
@@ -402,7 +403,7 @@ if ($toiminto == "tulosta") {
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Vastaanottoraportti";
 
-				$valitut_lavat .= $check_row["suuntalavat"];
+				$valitut_lavat = $on_jo_lava ? $valitut_lavat : $check_row["suuntalavat"];
 			}
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
@@ -418,7 +419,9 @@ if ($toiminto == "tulosta") {
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Tavaraetiketti";
 
-				$valitut_lavat .= $check_row["suuntalavat"];
+				if (!$on_jo_lava) {
+					$valitut_lavat = trim($valitut_lavat) != "" ? $valitut_lavat.",".$check_row["suuntalavat"] : $check_row["suuntalavat"];
+				}
 			}
 		}
 

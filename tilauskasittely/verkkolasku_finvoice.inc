@@ -605,7 +605,11 @@ if (!function_exists('finvoice_rivi')) {
 			}
 
 			#xml_add("RowIdentifierUrlText", 													"",								$tootfinvoice);
-			xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 						vlas_dateconv($tilrow['laadittu']), 		$tootfinvoice);
+
+			if ((int) str_replace("-", "", substr($lasrow['luontiaika'], 0, 10)) < (int) str_replace("-", "", substr($tilrow['toimitettuaika'], 0, 10))) {
+				xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 					vlas_dateconv($lasrow['luontiaika']), 		$tootfinvoice);
+			}
+
 			#xml_add("OriginalInvoiceNumber", 													"", 							$tootfinvoice);
 			xml_add("RowDeliveryIdentifier", 													$tilrow['otunnus'],				$tootfinvoice);
 			#xml_add("RowDeliveryIdentifierUrlText", 											"", 							$tootfinvoice);

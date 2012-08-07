@@ -28,7 +28,7 @@
 				}
 			}
 			function verify3(tili) {
-				msg = 'Haluatko todella poistaa suorituksen? Suorituksen summa siirret‰‰n tilille '+tili;
+				msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirret‰‰n tilille")." '+tili;
 
 				if (confirm(msg)) {
 					return true;

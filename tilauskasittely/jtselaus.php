@@ -1118,8 +1118,6 @@
 									echo "	<script type='text/javascript' language='JavaScript'>
 											<!--
 												function update_params(KORVATTAVA, KORVAAVA, TILRIVTUNNUS) {
-													//alert(KORVATTAVA + ' ' + KORVAAVA + ' ' + TILRIVTUNNUS);
-
 													document.getElementById('korvattava_tilriv').value = TILRIVTUNNUS;
 													document.getElementById('korvattava').value = KORVATTAVA;
 													document.getElementById('korvaava').value = KORVAAVA;
@@ -2182,7 +2180,14 @@
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify(){
 						msg = '".t("Haluatko todella toimittaa kaikki selkeät ennakkorivit?")."?';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 					</SCRIPT>";
 		}
@@ -2190,7 +2195,14 @@
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify(){
 						msg = '".t("Haluatko todella toimittaa kaikki selkeät JT-Rivit?")."?';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 					</SCRIPT>";
 		}

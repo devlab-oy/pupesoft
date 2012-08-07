@@ -7313,7 +7313,14 @@ if ($tee == '') {
 				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function ulkomaa_verify(){
 							msg = '".t("Olet toimittamassa ulkomailla sijaitsevasta varastosta tuotteita")." $ulkomaa_kaikkiyhteensa $yhtiorow[valkoodi]! ".t("Oletko varma, että tämä on fiksua")."?';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 						</SCRIPT>";
 
@@ -7553,8 +7560,15 @@ if ($tee == '') {
 		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
-								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
-								return confirm(msg);
+							msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 				</SCRIPT>";
 

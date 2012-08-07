@@ -30,7 +30,7 @@ $error = array();
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
 $row = mysql_fetch_assoc($res);
 
-# Haetaan saapumiset6881
+# Haetaan saapumiset
 $saapumiset = hae_saapumiset($alusta_tunnus);
 
 # Jos parametrina hylly, eli ollaan muutettu tuotteen ker‰yspaikkaa
@@ -46,7 +46,13 @@ if(isset($hylly)) {
 if (isset($submit) and trim($submit) != '') {
 
 	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+		if (isset($ostotilaus)) {
+			# $ostotilaus ja $tilausrivi
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$selected_row}'>";
+		}
+		else {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+		}
 		exit;
 	}
 	elseif ($submit == 'new') {
@@ -112,12 +118,12 @@ if (isset($submit) and trim($submit) != '') {
 			else {
 				# Haetaan saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
-
-				# Vied‰‰n varastoon
+				var_dump($saapuminen);
+				# Vied‰‰n vie_varastoon
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
 
 				# Jos tuotteita j‰lell‰, menn‰‰n takaisin suuntalavan tuotteet sivulle
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet.php?{$url}'>";
 				exit;
 			}
 
@@ -149,6 +155,15 @@ if (isset($error)) {
 	echo "</span>";
 }
 
+# Asetetaan m‰‰r‰ varattu kent‰n arvoksi jos sit‰ ei ole setattu
+$maara = (empty($maara)) ? $row['varattu'] : $maara;
+
+# Jos ollaan tultu ostotilaukselta, on n‰kym‰ hieman erilainen kuin asn-tuloutuksessa
+if(isset($ostotilaus)) {
+	# Piilotetaan uusi ker‰yspaikka nappi ja m‰‰r‰ kentt‰
+	$piilotettu = "hidden";
+}
+
 echo "<div class='main'>
 <form name='vahvistaformi' method='post' action=''>
 <table>
@@ -162,7 +177,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th>",t("M‰‰r‰", $browkieli),"</th>
-		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' />
+		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $piilotettu/></td>
 		<td><span id='row_varattu'>{$row['varattu']}</span> {$row['yksikko']}</td>
 	</tr>
 	<tr>
@@ -179,7 +194,7 @@ echo "<div class='main'>
 
 echo "<div class='controls'>
 	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
-	<button class='right' name='submit' value='new'>",t("Uusi ker‰yspaikka", $browkieli),"</button>
+	<button class='right' $piilotettu name='submit' value='new'>",t("Uusi ker‰yspaikka", $browkieli),"</button>
 	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

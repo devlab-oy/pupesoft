@@ -93,9 +93,11 @@ if ($haku_osumat == 0) {
 # Yksi osuma
 #-> suoraan hyllytys.php sivulle
 elseif ($haku_osumat == 1) {
-	echo "Yks osuma, menn‰‰n hyllytykseen...";
-	#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php";
-	#exit();
+
+	$row = mysql_fetch_assoc($result);
+	$url_array['tilausrivi'] = $row['tunnus'];
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
+	exit();
 }
 
 ### UI ###

@@ -882,7 +882,14 @@ if ($tee == 'P' or $tee == 'E') {
 					if (Number(laskunumero) > 0) {
 						if (laskunumero in oc(laskunumerot)) {
 							var msg = '".t("Oletko varma, että haluat syöttää tämän laskun? Toimittajalle on perustettu lasku samalla numerolla viimeisen vuoden sisällä.")."';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 
@@ -912,7 +919,14 @@ if ($tee == 'P' or $tee == 'E') {
 
 						if (erapvm_ero > 365 || erapvm_ero < -365) {
 							var msg = '".t("Oletko varma, että haluat syöttää eräpäivän yli vuoden menneisyyteen/tulevaisuuteen?")."';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 
@@ -932,34 +946,59 @@ if ($tee == 'P' or $tee == 'E') {
 
 					if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 						var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")."';
+						alert(msg);
 
-						if (alert(msg)) {
-							return false;
-						}
-						else {
-							return false;
-						}
+						skippaa_tama_submitti = true;
+						return false;
 					}
 
 					if (ero >= 30) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 30pv menneisyyteen?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 					if (ero <= -14) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 14pv tulevaisuuteen?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 
 					if (vv < dateTallaHet.getFullYear()) {
 						if (5 < dateTallaHet.getDate()) {
 							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 					else if (vv == dateTallaHet.getFullYear()) {
 						if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
 							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 				}
@@ -1732,7 +1771,7 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 		}
 
-		echo "<tr><td colspan='4'><button id='lisaa_uusi_tiliointirivi'>",t("Lisää tiliöintirivi"),"</button></td></tr>";
+		echo "<tr><td colspan='4'><a href='#' id='lisaa_uusi_tiliointirivi'>",t("Lisää tiliöintirivi"),"</a></td></tr>";
 
 		echo "</table>";
 

@@ -568,12 +568,10 @@
 						}
 
 						if (msg != '') {
-							if (alert(msg)) {
-								return false;
-							}
-							else {
-								return false;
-							}
+							alert(msg);
+
+							skippaa_tama_submitti = true;
+							return false;
 						}
 
 						if (ero >= 2) {
@@ -582,7 +580,13 @@
 						}
 
 						if (naytetaanko_herja == true) {
-							return confirm(msg);
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 				</SCRIPT>";

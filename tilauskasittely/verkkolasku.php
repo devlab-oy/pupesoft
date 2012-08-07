@@ -3038,27 +3038,28 @@
 
 							if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 								var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")."';
+								alert(msg);
 
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								skippaa_tama_submitti = true;
+								return false;
 							}
 							if (ero >= 2) {
 								var msg = '".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
-								return confirm(msg);
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 							if (ero < 0) {
 								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+								alert(msg);
 
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								skippaa_tama_submitti = true;
+								return false;
 							}
 						}
 					</SCRIPT>";

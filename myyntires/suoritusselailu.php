@@ -7,15 +7,36 @@
 	echo "	<script language=javascript>
 			function verify1() {
 				msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirretään yhtiön selvittelytilille").".';
-				return confirm(msg);
+
+				if (confirm(msg)) {
+					return true;
+				}
+				else {
+					skippaa_tama_submitti = true;
+					return false;
+				}
 			}
 			function verify2() {
 				msg = '".t("Haluatko todella poistaa suorituksen? Käsinsyötetyn suorituksen summa poistetaan kirjanpidosta").".';
-				return confirm(msg);
+
+				if (confirm(msg)) {
+					return true;
+				}
+				else {
+					skippaa_tama_submitti = true;
+					return false;
+				}
 			}
 			function verify3(tili) {
 				msg = 'Haluatko todella poistaa suorituksen? Suorituksen summa siirretään tilille '+tili;
-				return confirm(msg);
+
+				if (confirm(msg)) {
+					return true;
+				}
+				else {
+					skippaa_tama_submitti = true;
+					return false;
+				}
 			}
 			</script>";
 

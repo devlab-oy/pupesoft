@@ -919,6 +919,11 @@ if ($kasitellaan_tiedosto) {
 			// jos ei ole puuttuva tieto etsit‰‰n rivi‰
 			if ($tila != 'ohita') {
 
+				// Lis‰t‰‰n hardkoodattu lis‰ehto, ett‰ saldon pit‰‰ olla nolla
+				if ($table_mysql == 'tuotepaikat' and $rivi[$postoiminto] == 'POISTA') {
+					$valinta .= " and saldo = 0 ";
+				}
+
 				if (in_array($table_mysql, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri")) and (!in_array("LIITOSTUNNUS", $taulunotsikot[$taulu]) or (in_array("LIITOSTUNNUS", $taulunotsikot[$taulu]) and $rivi[array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])] == ""))) {
 
 					if ((in_array("YTUNNUS", $taulunotsikot[$taulu]) and ($table_mysql == "yhteyshenkilo" or $table_mysql == "asiakkaan_avainsanat")) or (in_array("ASIAKAS", $taulunotsikot[$taulu]) and $table_mysql == "kalenteri")) {
@@ -1187,7 +1192,7 @@ if ($kasitellaan_tiedosto) {
 							$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
 						}
 
-						if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS') {
+						if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS' and $rivi[$postoiminto] != 'POISTA') {
 							// $tuoteno pit‰s olla jo aktivoitu ylh‰‰ll‰
 							// haetaan tuotteen varastopaikkainfo
 							$tpque = "	SELECT sum(if (oletus='X',1,0)) oletus, sum(if (oletus='X',0,1)) regular

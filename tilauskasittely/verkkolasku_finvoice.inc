@@ -606,8 +606,8 @@ if (!function_exists('finvoice_rivi')) {
 
 			#xml_add("RowIdentifierUrlText", 													"",								$tootfinvoice);
 
-			if ((int) str_replace("-", "", substr($lasrow['luontiaika'], 0, 10)) < (int) str_replace("-", "", substr($tilrow['toimitettuaika'], 0, 10))) {
-				xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 					vlas_dateconv($lasrow['luontiaika']), 		$tootfinvoice);
+			if ((int) str_replace("-", "", substr($tilrow['tilauspaiva'], 0, 10)) < (int) str_replace("-", "", substr($tilrow['toimitettuaika'], 0, 10))) {
+				xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 					vlas_dateconv($tilrow['tilauspaiva']), 		$tootfinvoice);
 			}
 
 			#xml_add("OriginalInvoiceNumber", 													"", 							$tootfinvoice);

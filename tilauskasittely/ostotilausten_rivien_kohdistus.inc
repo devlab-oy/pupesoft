@@ -1765,11 +1765,11 @@ if ($tila == '') {
 
 		if ($sarjarow["sarjanumeroseuranta"] != "") {
 			if ($rivirow["siskpl"] < 0) {
-				$tunken = "myyntirivitunnus";
+				$tunken = "sarjanumeroseuranta.myyntirivitunnus";
 				$tunind = "yhtio_myyntirivi";
 			}
 			else {
-				$tunken = "ostorivitunnus";
+				$tunken = "sarjanumeroseuranta.ostorivitunnus";
 				$tunind = "yhtio_ostorivi";
 			}
 
@@ -1784,10 +1784,11 @@ if ($tila == '') {
 				$snro	 = t("S:nro");
 			}
 			else {
-				$query = "	SELECT sum(abs(era_kpl)) kpl, min(sarjanumero) sarjanumero
+				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl*if(tilausrivi.tunnus is not null, if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt > 0 or tilausrivi.tyyppi = 'O', 1, -1), 1)) kpl, min(sarjanumeroseuranta.sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$rivirow[tuoteno]'
+							LEFT JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 							and $tunken = '$rivirow[rivitunnus]'";
 
 				$snro_ok = t("E:nro ok");

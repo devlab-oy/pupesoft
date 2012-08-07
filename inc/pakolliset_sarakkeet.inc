@@ -59,7 +59,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				else {
 					$pakolliset = array("YTUNNUS");
 				}
+
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+
+				if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+					$kielletyt[] = "LUOTTORAJA";
+				}
 				break;
 			case "toimi" :
 				$pakolliset = array("YTUNNUS");

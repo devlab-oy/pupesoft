@@ -38,8 +38,24 @@
 			// printin korkeus 73mm
 			// leveys 105mm
 
+			$sscc_koodi = false;
+
+			if (isset($sscc_kopio) and trim($sscc_kopio) != '' and isset($suuntalavan_tunnus) and trim($suuntalavan_tunnus) != '' and trim($suuntalavan_tunnus) != 0) {
+
+				$suuntalavan_tunnus = (int) $suuntalavan_tunnus;
+
+				$query = "	SELECT sscc
+							FROM suuntalavat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$suuntalavan_tunnus}'";
+				$sscc_fetch_res = pupe_error($query);
+				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
+
+				$sscc_koodi = $sscc_fetch_row['sscc'];
+			}
+
 			for ($i = 0; $i < $kappalemaara; $i++) {
-				$sscc = tulosta_sscc($komento);
+				$sscc = tulosta_sscc($komento, $sscc_koodi);
 			}
 
 			// poistetaan lukko
@@ -66,6 +82,8 @@
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
 		echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 		echo "<input type='hidden' name='tee' value='tulosta_sscc' />";
+		echo "<input type='hidden' name='sscc_kopio' value='{$sscc_kopio}' />";
+		echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
 		echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/keikka.php////tee=//toimittajaid={$toimittajaid}//toiminto=suuntalavat//otunnus={$otunnus}//ytunnus={$laskurow['ytunnus']}//suuntalavan_tunnus='>";
 
 		echo "<table>";

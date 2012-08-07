@@ -643,7 +643,17 @@
 		echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Lisää suuntalava"),"' /></td></tr>";
 		echo "</table>";
 		echo "</form>";
-		echo "<br />";
+
+		echo "<form method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+		echo "<input type='hidden' name='toiminto' value='tulosta_sscc'>";
+		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+		echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+		echo "<input type='hidden' name='tee' value='' />";
+		echo "<input type='hidden' name='sscc_kopio' value='X' />";
+		echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
+		echo "<input type='submit' value='",t("Tulosta SSCC-koodin kopio"),"' />";
+		echo "</form>";
 
 		echo "<br />";
 
@@ -726,6 +736,7 @@
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
 		echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 		echo "<input type='hidden' name='tee' value='' />";
+		echo "<input type='hidden' name='sscc_kopio' value='' />";
 		echo "<input type='hidden' name='suuntalavan_tunnus' value='' />";
 		echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/keikka.php////tee=//toimittajaid={$toimittajaid}//toiminto=suuntalavat//otunnus={$otunnus}//ytunnus={$laskurow['ytunnus']}//suuntalavan_tunnus='>";
 		echo "<input type='submit' value='",t("Tulosta SSCC-koodi"),"' />";

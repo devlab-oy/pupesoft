@@ -4383,7 +4383,7 @@ if ($tee == '') {
 				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus, lasku_ux.tunnus AS ux_tunnus, lasku_ux.laskunro AS ux_laskunro
 							FROM tilausrivi use index(yhtio_tyyppi_tuoteno_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
-							LEFT JOIN lasku AS lasku_ux ON (lasku_ux.yhtio = lasku.yhtio AND lasku_ux.tila = 'U' AND lasku_ux.alatila = 'X' AND lasku_ux.liitostunnus = '{$laskurow['liitostunnus']}' AND lasku_ux.laskunro = lasku.laskunro)
+							LEFT JOIN lasku AS lasku_ux ON (lasku_ux.yhtio = lasku.yhtio AND lasku_ux.tila = 'U' AND lasku_ux.alatila = 'X' AND lasku_ux.tunnus = tilausrivi.uusiotunnus)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi  = 'L'
 							and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
@@ -4472,6 +4472,8 @@ if ($tee == '') {
 						echo "<th>",t("Selite"),"</th>";
 						echo "</tr>";
 
+						$oikeus_chk = tarkista_oikeus("tuote.php");
+
 						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
 							echo "<tr class='aktiivi'>";
 							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
@@ -4479,9 +4481,9 @@ if ($tee == '') {
 							echo "<td>{$tapahtuma_chk_row['laji']}</td>";
 							echo "<td>{$tapahtuma_chk_row['kpl']}</td>";
 
-							if (tarkista_oikeus("tuote.php")) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+							if ($oikeus_chk) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
 
-							if (!tarkista_oikeus("tuote.php")) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
+							if (!$oikeus_chk) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
 							else $stripattu_selite = $tapahtuma_chk_row['selite'];
 
 							echo "<td>{$stripattu_selite}</td>";

@@ -116,8 +116,8 @@
 	elseif ($tilaus_on_jo != '') {
 		$query  = "	SELECT *
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' 
-					AND tunnus = '$kukarow[kesken]' 
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$kukarow[kesken]'
 					AND tila IN ('N', 'L', 'E', 'G')";
 		$result = pupe_query($query);
 
@@ -678,10 +678,10 @@
 		$toimittajalisa = "";
 		$tilausrivilisa = "";
 
-		if ($jt_huomioi_pvm != '') {
-			$tilausrivilisa .= ' and lasku.kerayspvm <= now() ';
+		if ($jt_huomioi_pvm != "") {
+			$laskulisa .= " and lasku.kerayspvm <= now() ";
 		}
-		
+
 		if ($toimittaja != '') {
 			$toimittajalisa .= " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid') ";
 		}

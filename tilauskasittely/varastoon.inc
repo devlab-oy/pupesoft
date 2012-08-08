@@ -1188,25 +1188,26 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 				$varastosta[$v] = $v;
 			}
 		}
-		
+
+		// Jos JT-rivejä saa toimittaa vain, mikäli keräyspäivä on vanhempi kuin tämä päivä
 		if ($yhtiorow['automaattinen_jt_toimitus'] == "A") {
-			$jt_huomioi_pvm = true;
+			$jt_huomioi_pvm = "X";
 		}
 		else {
-			$jt_huomioi_pvm = '';			
+			$jt_huomioi_pvm = "";
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA", $jt_huomioi_pvm);
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
 		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) or in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))) {
-			jt_toimita("", "", "", "", "", "dummy", "TOIMITA", $jt_huomioi_pvm);
+			jt_toimita("", "", "", "", "", "dummy", "TOIMITA", '', '', $jt_huomioi_pvm);
 		}
 	}
 }

@@ -12556,16 +12556,6 @@ if (!function_exists("pupe_DataTables")) {
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 
-										if (data.suuntalava != null && data.suuntalava > 0) {
-
-											if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
-												$('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).attr('selected', 'selected');
-											}
-											else {
-												$('#suuntalava_'+rivi_ja_otsikko[0]+' option:last').after('<option id=\"option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
-											}
-										}
-
 										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
 										var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
 
@@ -12575,7 +12565,17 @@ if (!function_exists("pupe_DataTables")) {
 
 											$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
 											$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
-											$('.'+key+' td').addClass('tumma');
+											$('#tr_'+key+' td').addClass('tumma');
+
+											if (data.suuntalava != null && data.suuntalava > 0) {
+
+												if ($('#option_'+key+'_'+data.suuntalava).length > 0) {
+													$('#option_'+key+'_'+data.suuntalava).attr('selected', true);
+												}
+												else {
+													$('#suuntalava_'+key+' option:last').after('<option id=\"option_'+key+'_'+data.suuntalava+'\" value=\"'+data.suuntalava+'\" selected>'+data.suuntalava_sscc+'</option>');
+												}
+											}
 										}
 
 										if (summa_jaljella != 0) {
@@ -12618,9 +12618,6 @@ if (!function_exists("pupe_DataTables")) {
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 
-										$('#suuntalava_'+rivi_ja_otsikko[0]+' option:first').attr('selected', 'selected');
-										//$('#suuntalavan_sscc_'+rivi_ja_otsikko[0]).html('');
-
 										var summa_kohdistettu = parseFloat($('#kohdistettu_summa').html());
 										var summa_jaljella = parseFloat($('#laskunsumma_jaljella').html());
 
@@ -12630,7 +12627,9 @@ if (!function_exists("pupe_DataTables")) {
 
 											$('#hinnat_'+key).html(data.uudet_hinnat[key]['rivihinta']+'<br>'+data.uudet_hinnat[key]['alerivihinta']);
 											$('#alerivihintaalkuperainen_'+key).val(data.uudet_hinnat[key]['alerivihinta']);
-											$('.'+key+' td').removeClass('tumma');
+											$('#tr_'+key+' td').removeClass('tumma');
+
+											$('#suuntalava_'+key+' option:first').attr('selected', true);
 										}
 
 										if (summa_jaljella != 0) {
@@ -12649,7 +12648,7 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								);
 
-								$(this).attr('checked', '');
+								$(this).removeAttr('checked');
 							}
 						});
 					});

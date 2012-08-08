@@ -291,11 +291,20 @@
 					if (error == true) {
 						msg = '".t("Tietueiden täytyy sisältää vain numeroita").".';
 						alert(msg);
+
+						skippaa_tama_submitti = true;
 						return false;
 					}
 					else {
 						msg = '".t("Oletko varma?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				}
 			-->

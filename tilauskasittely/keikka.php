@@ -530,7 +530,7 @@ if ($ytunnus == "" and $keikka != "") {
 	$keikka = (int) $keikka;
 
 	$query = "	SELECT ytunnus, liitostunnus, laskunro
-				FROM lasku USE INDEX (tila_index)
+				FROM lasku USE INDEX (yhtio_tila_laskunro)
 				WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 				and lasku.tila 			= 'K'
 				and lasku.alatila 		= ''
@@ -557,26 +557,39 @@ if ($ytunnus == "" and $ostotil != "") {
 
 	$query = "	SELECT lasku.ytunnus, lasku.liitostunnus, group_concat(lasku.laskunro) laskunro
 				FROM tilausrivi
-				JOIN lasku USE INDEX (tila_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and lasku.tila = 'K' and lasku.alatila = '' and lasku.vanhatunnus = 0)
+				JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and lasku.tila = 'K' and lasku.alatila = '' and lasku.vanhatunnus = 0)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 			 	and tilausrivi.otunnus = $ostotil
 				and tilausrivi.tyyppi = 'O'";
 	$keikkahaku_res = pupe_query($query);
+	$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
 
-	if (mysql_num_rows($keikkahaku_res) > 0) {
-		$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
+	if ($keikkahaku_row['laskunro'] != '') {
+		$keikkarajaus = $keikkahaku_row["laskunro"];
+		$ytunnus 	  = $keikkahaku_row["ytunnus"];
+		$toimittajaid = $keikkahaku_row["liitostunnus"];
+	}
+	else {
+		// Napataan kuitenkin toimittajan keikat auki
+		$query = "	SELECT lasku.ytunnus, lasku.liitostunnus
+					FROM tilausrivi
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila = 'O')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				 	and tilausrivi.otunnus = $ostotil
+					and tilausrivi.tyyppi = 'O'
+					LIMIT 1";
+		$keikkahaku_res = pupe_query($query);
 
-		if ($keikkahaku_row['laskunro'] != '') {
-			$keikkarajaus = $keikkahaku_row["laskunro"];
+		if (mysql_num_rows($keikkahaku_res) > 0) {
+
+			echo "<font class='error'>".t("HUOM: Haettua ostotilausta ei löytynyt saapumisilta. Näytetään toimittajan kaikki avoimet saapumiset")."!</font><br><br>";
+
+			$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
+
 			$ytunnus 	  = $keikkahaku_row["ytunnus"];
 			$toimittajaid = $keikkahaku_row["liitostunnus"];
 		}
-		else {
-			$ostotil = "";
-			$keikka  = "";
-		}
-	}
-	else {
+
 		$ostotil = "";
 		$keikka  = "";
 	}
@@ -585,8 +598,8 @@ if ($ytunnus == "" and $ostotil != "") {
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
 if ($ytunnus != "" or $toimittajaid != "") {
 	$keikkamonta = 0;
-	$hakutunnus = $ytunnus;
-	$hakuid		= $toimittajaid;
+	$hakutunnus  = $ytunnus;
+	$hakuid		 = $toimittajaid;
 
 	require ("../inc/kevyt_toimittajahaku.inc");
 
@@ -717,7 +730,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				ORDER BY nimi, nimitark, ytunnus";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) != 0) {
+	if (mysql_num_rows($result) > 0) {
 
 		echo "<br><font class='head'>".t("Keskeneräiset saapumiset")."</font><hr>";
 
@@ -866,9 +879,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				ORDER BY lasku.laskunro DESC";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) > 0) {
+	echo "<font class='head'>".t("Toimittajan keskeneräiset saapumiset")."</font><hr>";
 
-		echo "<font class='head'>".t("Toimittajan keskeneräiset saapumiset")."</font><hr>";
+	if (mysql_num_rows($result) > 0) {
 
 		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false)));
 
@@ -1078,6 +1091,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 					});
 					</script>";
 		}
+	}
+	else {
+		echo "<br>".t("Toimittajalla ei ole keskeneräisiä saapumisia")."!";
 	}
 }
 

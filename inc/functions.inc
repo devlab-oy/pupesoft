@@ -8758,7 +8758,6 @@ if (!function_exists("hae_rahtimaksu")) {
 					AND ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
 					ORDER BY kmloppu DESC, kmalku DESC
 					LIMIT 1";
-		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$rares = pupe_query($query);
 
 		if (mysql_num_rows($rares) == 1) {
@@ -8770,7 +8769,6 @@ if (!function_exists("hae_rahtimaksu")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND selite = '$laskurow[toimitustapa]'
 						AND rahti_tuotenumero != ''";
-			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$rahti_tuoteno_result = pupe_query($query);
 
 			$ale_kaikki_array = array();
@@ -8778,38 +8776,18 @@ if (!function_exists("hae_rahtimaksu")) {
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				// $query = "	SELECT alennus, alennuslaji
-				// 			FROM asiakasalennus
-				// 			WHERE yhtio = '$kukarow[yhtio]'
-				// 			AND asiakas = '$laskurow[liitostunnus]'
-				// 			AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				// $rahti_alennus_result = pupe_query($query);
-
-				// if (mysql_num_rows($rahti_alennus_result) > 0) {
-				// 	while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
-				// 		$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
-				// 	}
-				// }
-
 				$query = "	SELECT *
 							FROM tuote
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
-				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$tres = pupe_query($query);
 				$trow = mysql_fetch_assoc($tres);
 
-				// alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="")
-				// list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
 				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
 
 				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
 					$hirow['rahtihinta'] = $lis_hinta;
 				}
-
-				echo "lis_hinta: $lis_hinta<br>";
-				echo "<pre>",var_dump($ale_kaikki_array),"</pre>";
-
 			}
 
 			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale_kaikki_array);

@@ -1105,9 +1105,6 @@
 								list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 							}
 
-							// list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
-							// list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', $alehinta_alv);
-
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

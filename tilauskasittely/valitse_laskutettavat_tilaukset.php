@@ -617,19 +617,21 @@
 						$rahtihinta = 0;
 					}
 
-					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-					$rhire = pupe_query($query);
-					$trow  = mysql_fetch_array($rhire);
+					// $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+					// $rhire = pupe_query($query);
+					// $trow  = mysql_fetch_array($rhire);
 
-					$netto = count($rahtihinta_ale) > 0 ? '' : 'N';
+					// $netto = count($rahtihinta_ale) > 0 ? '' : 'N';
 
-					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
-					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
+					// list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
+					// list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
 
-					$lis_ale_kaikki['erikoisale'] = $row['erikoisale'];
-					$lis_ale_kaikki['netto'] = $netto;
+					// $lis_ale_kaikki['erikoisale'] = $row['erikoisale'];
+					// $lis_ale_kaikki['netto'] = $netto;
 
-					$hinta *= generoi_alekentta_php($lis_ale_kaikki, 'M', 'kerto');
+					// $hinta *= generoi_alekentta_php($lis_ale_kaikki, 'M', 'kerto');
+
+					$hinta = $rahtihinta;
 
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";

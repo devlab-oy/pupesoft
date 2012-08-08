@@ -8758,6 +8758,7 @@ if (!function_exists("hae_rahtimaksu")) {
 					AND ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
 					ORDER BY kmloppu DESC, kmalku DESC
 					LIMIT 1";
+		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$rares = pupe_query($query);
 
 		if (mysql_num_rows($rares) == 1) {
@@ -8769,6 +8770,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND selite = '$laskurow[toimitustapa]'
 						AND rahti_tuotenumero != ''";
+			echo "<pre>",str_replace("\t", "", $query),"</pre>";
 			$rahti_tuoteno_result = pupe_query($query);
 
 			$ale_kaikki_array = array();
@@ -8793,12 +8795,16 @@ if (!function_exists("hae_rahtimaksu")) {
 							FROM tuote
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$tres = pupe_query($query);
 				$trow = mysql_fetch_assoc($tres);
 
 				// alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="")
 				// list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
 				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
+
+				echo "lis_hinta: $lis_hinta<br>";
+				echo "<pre>",var_dump($ale_kaikki_array),"</pre>";
 
 				$hirow['rahtihinta'] = $lis_hinta;
 			}

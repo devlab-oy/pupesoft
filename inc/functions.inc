@@ -8803,10 +8803,13 @@ if (!function_exists("hae_rahtimaksu")) {
 				// list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
 				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
 
+				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
+					$hirow['rahtihinta'] = $lis_hinta;
+				}
+
 				echo "lis_hinta: $lis_hinta<br>";
 				echo "<pre>",var_dump($ale_kaikki_array),"</pre>";
 
-				$hirow['rahtihinta'] = $lis_hinta;
 			}
 
 			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale_kaikki_array);

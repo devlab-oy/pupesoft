@@ -114,10 +114,6 @@
 				var toimittaja 	= $(\"#toimittaja_\"+osat[1]).val();
 				var maara 		= $(\"#maara_\"+osat[1]).val();
 
-				// JOS haluat debuggia niin n‰yt‰ alert-boxi,
-				// mik‰li se ei tule n‰kyviin, niin input-kentiss‰ on jotain h‰ikk‰‰
-			//	alert(submitid+' '+tuoteno+' '+toimittaja+' '+maara);
-
 				$.post('{$_SERVER['SCRIPT_NAME']}',
 					{ 	tee: 'TILAA_AJAX',
 						tuoteno: tuoteno,

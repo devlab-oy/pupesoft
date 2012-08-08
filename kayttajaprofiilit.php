@@ -198,8 +198,15 @@
 
 	echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify(){
-						msg = '".t("Haluatko todella poistaa tämän profiilin ja käyttäjiltä oikeudet tähän profiiliin?")."';
-						return confirm(msg);
+					msg = '".t("Haluatko todella poistaa tämän profiilin ja käyttäjiltä oikeudet tähän profiiliin?")."';
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 		</SCRIPT>";
 

@@ -52,7 +52,7 @@
 	 	// Nyt me selataan
 		if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?' or substr($tuoteno,0,1) == "@") and trim(strlen($tuoteno)) >= 2) {
 
-			$lisa1 		= "";
+			$th_lisa1	= "";
 			$ulos  		= "";
 			$poislisa	= "";
 			$kieltolisa	= "";
@@ -67,16 +67,16 @@
 				$tresult = pupe_query($query);
 
 				while ($toimirivi = mysql_fetch_assoc($tresult)) {
-					$lisa1 .= "'$toimirivi[tuoteno]',";
+					$th_lisa1 .= "'$toimirivi[tuoteno]',";
 				}
 
-				if ($lisa1 != "") {
-					$lisa1 = "and tuote.tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
+				if ($th_lisa1 != "") {
+					$th_lisa1 = "and tuote.tuoteno in (".substr($th_lisa1,0,-1).")"; // vika pilkku pois
 				}
 			}
 			elseif (substr($tuoteno, -2) == '**') {
 				// Tuoteryhmä
-				$lisa1 = " and tuote.try = '$tuoteno' ";
+				$th_lisa1 = " and tuote.try = '$tuoteno' ";
 			}
 			elseif (substr($tuoteno,0,1) == '*') {
 				// Jos eka merkki on tähti etsitään teksteistä
@@ -84,19 +84,19 @@
 				$sanat = explode(" ", $tuoteno);
 
 				foreach ($sanat as $sana) {
-					$lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
+					$th_lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
 				}
 			}
 			elseif (substr($tuoteno,-1) == '*') {
 				// Jos vika merkki on tähti niin etsitään osittainen tuotenumero
 				$tuoteno = substr($tuoteno,0,-1);
 
-				$lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
+				$th_lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 			}
 			elseif (substr($tuoteno,0,1) == '@') {
 				// Jos ensimmäinen merkki on AT-merkki niin etsitään kyseisellä tuotenumero
 				$tuoteno = substr($tuoteno,1);
-				$lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
+				$th_lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
 			}
 
 			$yhtiot 	= "";
@@ -195,7 +195,7 @@
 						FROM tuote use index (tuoteno, nimitys)
 						WHERE tuote.$yhtiot
 						$kieltolisa
-						$lisa1
+						$th_lisa1
 						$poislisa
 						ORDER BY tuote.tuoteno
 						LIMIT 201";
@@ -392,13 +392,13 @@
 			///* Konffaa lukija näin: prefiksiksi #-merkki ja suffiksiksi RETURN*///
 			if (substr($tuoteno,0,1) == '#') {
 
-				$lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
+				$th_lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
 
 				$query = "	SELECT tuote.tuoteno
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-							$lisa1";
+							$th_lisa1";
 				$tresult = pupe_query($query);
 
 				if (mysql_num_rows($tresult) > 1) {

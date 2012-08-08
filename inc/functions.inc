@@ -8797,7 +8797,8 @@ if (!function_exists("hae_rahtimaksu")) {
 				$trow = mysql_fetch_assoc($tres);
 
 				// alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="")
-				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
+				// list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
+				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
 
 				$hirow['rahtihinta'] = $lis_hinta;
 			}

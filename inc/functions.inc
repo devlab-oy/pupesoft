@@ -8776,18 +8776,30 @@ if (!function_exists("hae_rahtimaksu")) {
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakas = '$laskurow[liitostunnus]'
-							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				$rahti_alennus_result = pupe_query($query);
+				// $query = "	SELECT alennus, alennuslaji
+				// 			FROM asiakasalennus
+				// 			WHERE yhtio = '$kukarow[yhtio]'
+				// 			AND asiakas = '$laskurow[liitostunnus]'
+				// 			AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
+				// $rahti_alennus_result = pupe_query($query);
 
-				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
-						$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
-					}
-				}
+				// if (mysql_num_rows($rahti_alennus_result) > 0) {
+				// 	while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
+				// 		$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
+				// 	}
+				// }
+
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+				$tres = pupe_query($query);
+				$trow = mysql_fetch_assoc($tres);
+
+				// alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="")
+				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', $hirow['rahtihinta'], '');
+
+				$hirow['rahtihinta'] = $lis_hinta;
 			}
 
 			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale_kaikki_array);

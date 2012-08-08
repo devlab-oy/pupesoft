@@ -1087,7 +1087,6 @@
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND selite = '$laskurow[toimitustapa]'
 										AND rahti_tuotenumero != ''";
-							echo "<pre>",str_replace("\t", "", $query),"</pre>";
 							$rahti_tuoteno_result = pupe_query($query);
 
 							if (mysql_num_rows($rahti_tuoteno_result) > 0) {
@@ -1097,7 +1096,6 @@
 											FROM tuote
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
-								echo "<pre>",str_replace("\t", "", $query),"</pre>";
 								$tres_chk = pupe_query($query);
 								$trow_chk = mysql_fetch_assoc($tres_chk);
 

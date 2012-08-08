@@ -4447,10 +4447,13 @@ if ($tee == '') {
 				echo "</td>";
 
 				if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
-					$query = "	SELECT tapahtuma.*
+					$query = "	SELECT tapahtuma.*,
+								if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
+								tilausrivi.alv
 								FROM tapahtuma
 								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
 								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
+								LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
 								WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
 								AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
 								AND tapahtuma.laji = 'laskutus'
@@ -4468,25 +4471,29 @@ if ($tee == '') {
 						echo "<tr>";
 						echo "<th>",t("Laatija"),"</th>";
 						echo "<th>",t("Pvm"),"</th>";
-						echo "<th>",t("Tyyppi"),"</th>";
 						echo "<th>",t("M‰‰r‰"),"</th>";
-						if ($oikeus_chk) echo "<th>",t("Kplhinta"),"</th>";
-						echo "<th>",t("Selite"),"</th>";
+						if ($oikeus_chk) {
+							echo "<th>",t("Kplhinta"),"</th>";
+							echo "<th>",t("Rivihinta"),"</th>";
+						}
 						echo "</tr>";
 
 						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
 							echo "<tr class='aktiivi'>";
 							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
 							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
-							echo "<td>{$tapahtuma_chk_row['laji']}</td>";
-							echo "<td>{$tapahtuma_chk_row['kpl']}</td>";
+							echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)."</td>";
 
-							if ($oikeus_chk) echo "<td>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+							if ($oikeus_chk) {
 
-							if (!$oikeus_chk) $stripattu_selite = preg_replace('/ \(.*\) \[.*\]/', "", $tapahtuma_chk_row['selite']);
-							else $stripattu_selite = $tapahtuma_chk_row['selite'];
+								// Onko verolliset hinnat?
+								if ($yhtiorow["alv_kasittely"] == "") {
+									$tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+								}
 
-							echo "<td>{$stripattu_selite}</td>";
+								echo "<td align='right'>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+								echo "<td align='right'>",hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1)),"</td>";
+							}
 							echo "</tr>";
 						}
 

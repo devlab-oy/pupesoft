@@ -4325,8 +4325,12 @@ if ($tee == '') {
 					$kentta = 'kpl';
 				}
 
-				echo "<br>
-					<table>
+				echo "<br>";
+				echo "<table>";
+				echo "<tr><td class='back'>";
+
+
+				echo "<table>
 					<tr class='aktiivi'>$jarjlisa<th colspan='2'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</th></tr>
 					<tr class='aktiivi'>$jarjlisa<th>",t("Tuoteno"),"</th><td>{$tuote['tuoteno']}</td></tr>
 					<tr class='aktiivi'>$jarjlisa<th>".t("Hinta")."</th><td align='right'>".hintapyoristys($tuote['myyntihinta'])." $yhtiorow[valkoodi]</td></tr>";
@@ -4383,9 +4387,10 @@ if ($tee == '') {
 				$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 				//haetaan viimeisin hinta mill‰ asiakas on tuotetta ostanut
-				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
+				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus, lasku_ux.tunnus AS ux_tunnus, lasku_ux.laskunro AS ux_laskunro
 							FROM tilausrivi use index(yhtio_tyyppi_tuoteno_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
+							JOIN lasku AS lasku_ux ON (lasku_ux.yhtio = lasku.yhtio AND lasku_ux.tunnus = tilausrivi.uusiotunnus)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi  = 'L'
 							and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
@@ -4401,10 +4406,11 @@ if ($tee == '') {
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin hinta")."</th><td align='right'>".hintapyoristys($viimhinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						echo "<tr class='aktiivi'>{$jarjlisa}<th>".t("Viimeisin alennus")."{$alepostfix}</th><td align='right'>{$viimhinta["ale{$alepostfix}"]} %</td></tr>";
+						echo "<tr class='aktiivi'>{$jarjlisa}<th>".t("Viimeisin alennus")."{$alepostfix}</th><td align='right'>",$viimhinta["ale{$alepostfix}"]," %</td></tr>";
 					}
 
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus=$viimhinta[tunnus]&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$viimhinta[otunnus]</a></td></tr>";
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Lasku")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus={$viimhinta['ux_tunnus']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$viimhinta['ux_laskunro']}</a></td></tr>";
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta["laskutettuaika"])."</td></tr>";
 				}
 
@@ -4445,6 +4451,67 @@ if ($tee == '') {
 				}
 
 				echo "</table>";
+				echo "</td>";
+
+				if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
+					$query = "	SELECT tapahtuma.*,
+								if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
+								tilausrivi.alv
+								FROM tapahtuma
+								JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
+								LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+								WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+								AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
+								AND tapahtuma.laji = 'laskutus'
+								ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
+								LIMIT 5";
+					$tapahtuma_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+
+						$oikeus_chk = tarkista_oikeus("tuote.php");
+
+						echo "<td class='back'>";
+
+						echo "<table>";
+						echo "<tr>";
+						echo "<th>",t("Laatija"),"</th>";
+						echo "<th>",t("Pvm"),"</th>";
+						echo "<th>",t("M‰‰r‰"),"</th>";
+						if ($oikeus_chk) {
+							echo "<th>",t("Kplhinta"),"</th>";
+							echo "<th>",t("Rivihinta"),"</th>";
+						}
+						echo "</tr>";
+
+						while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
+							echo "<tr class='aktiivi'>";
+							echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
+							echo "<td>",tv1dateconv($tapahtuma_chk_row['laadittu']),"</td>";
+							echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)."</td>";
+
+							if ($oikeus_chk) {
+
+								// Onko verolliset hinnat?
+								if ($yhtiorow["alv_kasittely"] == "") {
+									$tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+								}
+
+								echo "<td align='right'>",hintapyoristys($tapahtuma_chk_row['kplhinta']),"</td>";
+								echo "<td align='right'>",hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1)),"</td>";
+							}
+							echo "</tr>";
+						}
+
+						echo "</table>";
+					}
+				}
+
+				echo "</td>";
+				echo "</tr>";
+				echo "</table>";
+
 			}
 		}
 	} #end if erkoisceisi

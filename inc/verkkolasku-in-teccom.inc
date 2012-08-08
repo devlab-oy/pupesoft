@@ -304,8 +304,7 @@
 					$chk_sum = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount) - (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount);
 
 					if ($chk_sum > 0) {
-						$osto_rivi_kulu += $chk_sum;
-						$rtuoteno[$i]['rivihinta'] -= $chk_sum;
+						$osto_rahti += $chk_sum;
 					}
 				}
 

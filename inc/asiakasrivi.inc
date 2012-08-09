@@ -1144,3 +1144,21 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'kerayserat') {
+
+		if ($yhtiorow['kerayserat'] == 'A') {
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$sel = trim($trow[$i]) == 'A' ? ' selected' : '';
+
+			$ulos .= "<option value = ''>".t("Keräyseriä ei käytetä")."</option>";
+			$ulos .= "<option value = 'A'{$sel}>".t("Keräyserät käytössä")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
+	}

@@ -16817,7 +16817,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 
 		// Haetaan erikseen toimitettavat tuotteet
-		if (!$params_lahete['koontilahete'] and $yhtiorow['kerayserat'] != 'K' and $laskurow["vanhatunnus"] > 0) {
+		if (!$params_lahete['koontilahete'] and $yhtiorow['kerayserat'] == '' and $laskurow["vanhatunnus"] > 0) {
 			$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 						FROM lasku use index (yhtio_vanhatunnus)
 						WHERE yhtio		= '$kukarow[yhtio]'
@@ -17550,7 +17550,7 @@ if (!function_exists('tulosta_vakadr_erittely')) {
 	function tulosta_vakadr_erittely($laskun_tunnus, $vakadr_komento, $tee) {
 		global $yhtiorow, $kukarow, $kieli;
 
-		if ($yhtiorow["kerayserat"] != "K") {
+		if ($yhtiorow["kerayserat"] == "") {
 			echo t("Keräyserät pitää olla käytössä, ei tulosteta VAK-erittelyä");
 			return;
 		}

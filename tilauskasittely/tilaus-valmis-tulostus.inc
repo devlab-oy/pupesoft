@@ -206,7 +206,7 @@
 		$asrow = mysql_fetch_array($riresult);
 
 		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
-			tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
+			$kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
 		}
 
 		$query = "	SELECT ulkoinen_jarjestelma
@@ -282,7 +282,11 @@
 		}
 
 		// keräyslistan rivit
-		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		if (($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
+
+			if ($yhtiorow['kerayserat'] == 'K') $vhlisa = "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)";
+			else $vhlisa = "";
+
 			$query = "	SELECT tilausrivi.*,
 						tuote.sarjanumeroseuranta,
 						kerayserat.kpl as tilkpl,
@@ -293,7 +297,7 @@
 						FROM kerayserat
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+						{$vhlisa}
 						WHERE kerayserat.otunnus IN ({$tilausnumeroita})
 						AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 						ORDER BY sorttauskentta";

@@ -18993,6 +18993,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		reset($kerayseran_rivit);
 
 		$pakkausnro = 1;
+		$keraysera_nro = $laskurow['kerayslista'] != 0 ? $laskurow['kerayslista'] : $laskurow['tunnus'];
 
 		foreach ($kerayseran_rivit as $rivi) {
 
@@ -19033,8 +19034,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			}
 			else {
 
-				$keraysera_nro = $laskurow['kerayslista'] != 0 ? $laskurow['kerayslista'] : $laskurow['tunnus'];
-
 				$query = "	INSERT INTO kerayserat SET
 							yhtio = '{$kukarow['yhtio']}',
 							nro = {$keraysera_nro},
@@ -19059,5 +19058,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 			$pakkausnro++;
 		}
+
+		return $keraysera_nro;
 	}
 }

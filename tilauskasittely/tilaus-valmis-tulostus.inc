@@ -78,10 +78,14 @@
 					yhtion_parametrit READ,
 					yhtion_toimipaikat READ";
 
+		if ($yhtiorow['kerayserat'] != '') {
+			$query .= ",pakkaus READ,
+						kerayserat WRITE";
+		}
+
 		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 			$query .= ",asiakas AS asiakas1 READ,
 						asiakas AS asiakas2 READ,
-						kerayserat WRITE,
 						keraysvyohyke AS keraysvyohyke1 READ,
 						keraysvyohyke AS keraysvyohyke2 READ,
 						keraysvyohyke READ,
@@ -93,7 +97,6 @@
 						lasku AS lasku1 WRITE,
 						lasku AS lasku2 WRITE,
 						laskun_lisatiedot WRITE,
-						pakkaus READ,
 						tilausrivi AS tilausrivi1 READ,
 						tilausrivi AS tilausrivi2 READ,
 						toimitustapa AS toimitustapa1 READ,
@@ -203,106 +206,7 @@
 		$asrow = mysql_fetch_array($riresult);
 
 		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
-
-			if (!function_exists('tee_keraysera_painon_perusteella')) {
-				function tee_keraysera_painon_perusteella($tilausnumeroita, $_pakkaus = 0) {
-
-					$_pakkaus = (int) $_pakkaus;
-
-					$pakkaukset = array();
-
-					if ($_pakkaus == 0) {
-						// valitaan sopiva pakkaus painon perusteella
-						$query = "	SELECT SUM(tuote.tuotemassa * tilausrivi.varattu) AS paino
-									FROM tilausrivi
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.var NOT IN ('J','P')
-									AND tilausrivi.otunnus IN ($tilausnumeroita)";
-						$paino_chk_res = pupe_query($query);
-						$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
-					}
-
-					$pakkaus_wherelisa = $_pakkaus != 0 ? "AND tunnus = '{$_pakkaus}'" : "AND minimi_paino >= '{$paino_chk_row['paino']}'";
-
-					// katsotaan mitä pakkauksia voidaan käyttää
-					$query = "	SELECT *
-								FROM pakkaus
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								{$pakkaus_wherelisa}
-								ORDER BY paino ASC
-								LIMIT 1";
-					$pakkausres = pupe_query($query);
-					$pakkausrow = mysql_fetch_assoc($pakkausres);
-
-					$valittu_pakkaus = $pakkausrow['tunnus'];
-
-					$pakkaukset_paino = $pakkausrow['paino'];
-
-					$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa * tilausrivi.varattu AS paino
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.var NOT IN ('J','P')
-								AND tilausrivi.otunnus IN ($tilausnumeroita)";
-					$keraysera_res = pupe_query($query);
-
-					$kaytetty_paino = 0;
-					$pakkausnro = 1;
-
-					if ($_pakkaus == 0) {
-						// otetaan uusi keräyserän numero
-						$query = "	SELECT IFNULL(MAX(nro), 0) + 1 AS nro
-									FROM kerayserat
-									WHERE yhtio = '{$kukarow['yhtio']}'";
-						$keraysera_nro_res = pupe_query($query);
-						$keraysera_nro_row = mysql_fetch_assoc($keraysera_nro_res);
-
-						$keraysera = $keraysera_nro_row['nro'];
-					}
-
-					while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
-
-						if (($kaytetty_paino + $keraysera_row['paino']) > $pakkaukset_paino) {
-							$kaytetty_paino = 0;
-							$pakkausnro++;
-						}
-
-						if ($_pakkaus != 0) {
-							$query = "	UPDATE kerayserat SET
-										pakkaus = '{$valittu_pakkaus}',
-										pakkausnro = '{$pakkausnro}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi = '{$keraysera_row['tunnus']}'";
-							$upd_res = pupe_query($query);
-						}
-						else {
-							$query = "	INSERT INTO kerayserat SET
-										yhtio = '{$kukarow['yhtio']}',
-										nro = {$keraysera},
-										keraysvyohyke = 0,
-										tila = '',
-										sscc = 0,
-										sscc_ulkoinen = '',
-										otunnus = '{$keraysera_row['otunnus']}',
-										tilausrivi = '{$keraysera_row['tunnus']}',
-										pakkaus = '{$valittu_pakkaus}',
-										pakkausnro = '{$pakkausnro}',
-										kpl = '{$keraysera_row['varattu']}',
-										kpl_keratty = 0,
-										keratty = '',
-										kerattyaika = '0000-00-00 00:00:00',
-										laatija = '{$kukarow['kuka']}',
-										luontiaika = now(),
-										muutospvm = now(),
-										muuttaja = ''";
-							$keraysera_ins = pupe_query($query);
-						}
-
-						$kaytetty_paino += $keraysera_row['paino'];
-					}
-				}
-			}
+			tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
 		}
 
 		$query = "	SELECT ulkoinen_jarjestelma

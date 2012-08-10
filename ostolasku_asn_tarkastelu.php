@@ -651,11 +651,34 @@
 
 		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnro}'";
 		$res = pupe_query($query);
-
+		
+		$laskuloytyi = 0;
+		
 		if (mysql_num_rows($res) > 0) {
+			$laskuloytyi = 1;
+		}
+		else {
+			$query = "	SELECT tunnus
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toimittajanro = '{$toimittaja}'
+						AND tyyppi != 'P'
+						ORDER BY tunnus DESC";
+			$toimires = pupe_query($query);
+			$toimirow = mysql_fetch_assoc($toimires);
+			
+			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tila = 'O' AND alatila = 'A' AND liitostunnus = '{$toimirow['tunnus']}' ORDER BY tunnus DESC LIMIT 1";
+			$res = pupe_query($query);
 
+			if (mysql_num_rows($res) == 1) {
+				$laskuloytyi = 1;
+			}
+		}
+		
+		if ($laskuloytyi == 1) {
 			$laskurow = mysql_fetch_assoc($res);
-
+			$tilausnro = $laskurow['tunnus'];
+			
 			if ($laskurow['alatila'] == 'X') {
 				$error = t("Tilaus").' '.$tilausnro.' '.t("ei ole sopiva")."!";
 				$tee = 'etsi';

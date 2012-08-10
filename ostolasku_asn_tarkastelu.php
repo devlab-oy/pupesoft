@@ -1661,11 +1661,11 @@
 			echo "<td class='back'>&nbsp;</td>";
 			echo "</tr>";
 
-			$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}' AND tila = 'H'";
+			$query = "SELECT liitostunnus, tunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}' AND tila in ('H','Y','M','P','Q')";
 			$laskures = pupe_query($query);
-
+			
 			if (mysql_num_rows($laskures) == 0) {
-				$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}' AND tila = 'H'";
+				$query = "SELECT liitostunnus, tunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}' AND tila in ('H','Y','M','P','Q')";
 				$laskures = pupe_query($query);
 			}
 
@@ -1780,6 +1780,8 @@
 			}
 
 			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
+
+			echo ebid($laskurow['tunnus']);
 
 			echo "</table>";
 			echo "</form>";

@@ -1816,6 +1816,7 @@
 								toimi.postitp,
 								toimi.maa,
 								toimi.swift,
+								asn_sanomat.saapumispvm,
 								asn_sanomat.asn_numero,
 								asn_sanomat.paketintunniste,
 								asn_sanomat.toimittajanumero,
@@ -1842,6 +1843,7 @@
 			echo "<th>",t("Swift"),"</th>";
 			echo "<th>",t("ASN sanomanumero"),"</th>";
 			echo "<th>",t("ASN kollinumero"),"</th>";
+			echo "<th>",t("Saapumispvm"),"</th>";
 			echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
 			echo "</tr>";
 
@@ -1860,7 +1862,7 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -1880,6 +1882,7 @@
 				echo "<td>{$row['swift']}</td>";
 				echo "<td align='right'>{$row['asn_numero']}</td>";
 				echo "<td>{$row['paketintunniste']}</td>";
+				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
@@ -1909,6 +1912,7 @@
 								toimi.postitp,
 								toimi.maa,
 								toimi.swift,
+								asn_sanomat.saapumispvm,
 								asn_sanomat.asn_numero as tilausnumero,
 								asn_sanomat.paketintunniste,
 								asn_sanomat.toimittajanumero,
@@ -1934,6 +1938,7 @@
 			echo "<th>",t("Osoite"),"</th>";
 			echo "<th>",t("Swift"),"</th>";
 			echo "<th>",t("Ostolaskunro"),"</th>";
+			echo "<th>",t("Saapumispvm"),"</th>";
 			echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
 			echo "</tr>";
 
@@ -1946,7 +1951,7 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 					}
 
 					echo "<tr><td colspan='7' class='back'>&nbsp;</td></tr>";
@@ -1957,7 +1962,8 @@
 				echo "<td>{$row['nimi']}</td>";
 				echo "<td>{$row['osoite']} {$row['postino']} {$row['postitp']} {$row['maa']}</td>";
 				echo "<td>{$row['swift']}</td>";
-				echo "<td>{$row['tilausnumero']}</td>";
+				echo "<td>{$row['tilausnumero']}</td>";	
+				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";

@@ -779,7 +779,7 @@
 		}
 
 		echo "<select name='budjetointi_taso' onchange='submit()';>";
-		echo "<option value = 'kuukausittain'>".t("Kuukausittain aikavälillä")."</option>";
+		echo "<option value = 'kuukausittain'>".t("Kuukausittain")."</option>";
 		echo "<option value = 'joka_kk_sama' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
 		echo "<option value = 'summa_jaetaan' $btcheck2>".t("Budjettiluku jaetaan kuukausille tasan")."</option>";
 		echo "</select>";

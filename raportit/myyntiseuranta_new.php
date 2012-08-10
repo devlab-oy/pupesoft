@@ -52,7 +52,7 @@
 		require ("inc/connect.inc");
 
 		if ($lopetus == "") {
-			
+
 			if (isset($muutparametrit)) {
 				foreach (explode("##", $muutparametrit) as $muutparametri) {
 					list($a, $b) = explode("=", $muutparametri);
@@ -68,8 +68,8 @@
 						${$a} = $b;
 					}
 				}
-			}			
-			
+			}
+
 			//Käyttöliittymä
 			if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -211,6 +211,7 @@
 			$naytaennakkochk 		= "";
 			$sel_asbu				= "";
 			$sel_asbury				= "";
+			$sel_asbuos				= "";
 			$sel_tubu				= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
@@ -501,6 +502,7 @@
 			<th>",t("Näytä budjetti"),"</th>";
 			echo "<td><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
 			echo "<option value='asbu' {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
+			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
 			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhmäbudjetti"),"</option>";
 			echo "<option value='tubu' {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
 			echo "</select></td><td></td>
@@ -650,7 +652,7 @@
 			}
 			else {
 				$asiakasrajaus = "";
-			}			
+			}
 
 			// tutkaillaan saadut muuttujat
 			$ytunnus	= trim($ytunnus);
@@ -819,6 +821,7 @@
 				$asiakasgroups = 0;
 				$tuotegroups   = 0;
 				$turyhgroups   = 0;
+				$tuosagroups   = 0;
 				$laskugroups   = 0;
 				$muutgroups    = 0;
 
@@ -932,7 +935,7 @@
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";
 						$order  .= "tuote.osasto,";
 						$gluku++;
-						$tuotegroups++;
+						$tuosagroups++;
 					}
 
 					if ($mukaan == "try") {
@@ -1330,17 +1333,17 @@
 				}
 
 				// Onnistuuko budjettivertailu
-				if ($vertailubu == "asbu" or $vertailubu == "asbury") {
+				if ($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") {
 					// Näytetään asiakasbudjetti:
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
-					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0) {
+					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0 or $tuosagroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyviä ryhmittelyjä ei voida valita kun näytetään asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan (paitsi tuoteryhmän mukaan kun valitaan asbury)
-					if ($vertailubu == "asbu" and $turyhgroups > 0) {
+					if ($vertailubu == "asbu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyviä ryhmittelyjä ei voida valita kun näytetään asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
@@ -1838,7 +1841,7 @@
 								}
 							}
 
-							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
+							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
 
 								$kka = sprintf("%02d", $kka);
 								$kkl = sprintf("%02d", $kkl);
@@ -1851,14 +1854,20 @@
 									$budj_taulu = "budjetti_asiakas";
 									$bulisa = " and asiakkaan_tunnus in ({$row['asiakaslista']}) ";
 
-									if ($vertailubu == "asbu") {
-										$bulisa .= " and try = '' ";
+									if ($vertailubu == "asbuos" and $tuosagroups > 0) {
+										$bulisa .= " and osasto = '{$row['osasto']}' ";
+									}
+									elseif ($vertailubu == "asbuos") {
+										$bulisa .= " and osasto != '' ";
 									}
 									elseif ($vertailubu == "asbury" and $turyhgroups > 0) {
 										$bulisa .= " and try = '{$row['try']}' ";
 									}
-									else {
+									elseif ($vertailubu == "asbury") {
 										$bulisa .= " and try != '' ";
+									}
+									else {
+										$bulisa .= " and try = '' and osasto = '' ";
 									}
 								}
 
@@ -1870,7 +1879,6 @@
 											and kausi 			   <= '{$lopu_kausi}'
 											{$bulisa}
 											and dyna_puu_tunnus		= ''
-											and osasto				= ''
 											GROUP BY kausi";
 								$budj_r = pupe_query($budj_q);
 

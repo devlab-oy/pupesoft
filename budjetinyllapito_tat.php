@@ -148,58 +148,58 @@
 
 			if ($rivimaara < $maxrivimaara) echo "<td>";
 
-			if (is_array($ostryrow)) {
-				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostryrow["selite"]}]' value='{$nro}' size='8'></td>";
-			}
-			elseif ($ohitus != "") {
+			if ($ohitus != "") {
 				// mikäli muutat "poikkeus" tai "poikkeus_haku" nimityksiä tai arvoja tai lisäät haaroja, niin muuta/lisää ne myös kohtaan riville 258
 				// jossa käsitellään ne arrayn luonnissa
 				// ÄLÄ MUUTA "<input type='text' class = '{$row[$budj_sarak]}'"
 				// Mikäli teet muutoksia niin muuta myös jqueryyn riville noin 17
-
+				if ($nro != "") $nro = $nro*$org_sar;
+				
 				if ($grouppaus != "") {
 					if ($haen == "try" and $passaan == "yksi"){
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["try"]}][{$ik}][]' value='' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
 					}
 					elseif ($haen == "osasto" and $passaan == "yksi") {
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
 					}
 					elseif ($haen == "try" and $passaan == "kaksi") {
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='' size='8'>";
+						echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='8'>";
 						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
 						echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
 					}
 				}
-				else {
-					echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+				else {					
+					echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 				}
 
 				for ($a = 1; $a < $org_sar; $a++) {
 					$ik = $rajataulu[$a];
+
 					if ($grouppaus != "") {
 						if ($haen == "try" and $passaan == "yksi"){
-							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+							echo "<input type='hidden' id = '{$row[$budj_sarak]}{$ostry_ind}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 						}
 						elseif ($haen == "osasto" and $passaan == "yksi") {
-							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
+							echo "<br>input type='hidden' id = '{$row[$budj_sarak]}{$ostry_ind}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'
+							<input type='hidden' id = '{$row[$budj_sarak]}{$ostry_ind}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 						}
 						elseif ($haen == "try" and $passaan == "kaksi") {
-							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+							echo "<input type='hidden' id = '{$row[$budj_sarak]}{$ostry_ind}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 						}
 					}
 					else {
-						echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='hidden' id = '{$row[$budj_sarak]}{$ostry_ind}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 					}
 				}
 
 				echo "</td>";
 			}
 			else {
-				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][$ostry_ind]' value='{$nro}' size='8'>";
 			}
 
 			if ($rivimaara < $maxrivimaara) echo "</td>";
@@ -250,7 +250,7 @@
 		exit;
 	}
 
-	// Ollaan uploadttu Excel
+	// Ollaan uploadattu Excel
 	if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $budjetointi_taso != "kuukausittain" and $toim == "TUOTE") {
 		echo "<font class='error'>".t("Tiedostoja voidaan ajaa sisään vain kuukausittain aikavälillä")."!</font><br><br>";
 		$tee = "";
@@ -367,7 +367,7 @@
 	if ($tee == "TALLENNA_BUDJETTI") {
 
 		// Jos halutaan, että syötetty arvo jaetaan tasan valitulle ryhmälle, niin lasketaan rajattujen kuukausien lukumäärä
-		if (($budj_kohtelu == "euro" or $budj_kohtelu == "maara") and $budjetointi_taso == "summa_jaetaan") {
+		if ($budjetointi_taso == "summa_jaetaan") {
 
 			$alkaakk = substr($kausi_alku, 0, 4).substr($kausi_alku, 5, 2);
 			$loppuukk = substr($kausi_loppu, 0, 4).substr($kausi_loppu, 5, 2);
@@ -503,7 +503,12 @@
 
 						if ($budjetointi_taso == "summa_jaetaan") {
 							// Jaetaan syötty luku kuukausien ja tuotteiden määrän mukaan
-							$solu = $solu / ($kuukausien_maara * $sarakkeiden_lukumaara);
+							if (isset($poikkeus) and $poikkeus == "totta") {
+								$solu = round($solu / ($kuukausien_maara * $sarakkeiden_lukumaara), 2);
+							}
+							else {
+								$solu = round($solu / $kuukausien_maara, 2);
+							}
 						}
 
 						// Toimittaja ja asiakasbudjetti tehdään aina euroissa
@@ -513,15 +518,10 @@
 						// Tuotebudjetissa on muitakin vaihtoehtoja
 						elseif ($toim == "TUOTE") {
 
-							// Budjettiluvun voi syöttää eri tasoilla. osastotryttainja on: kuukausittain, joka_kk_sama ja summa_jaetaan
+							// Budjettiluvun voi syöttää eri tasoilla. budjetointitasoja on: kuukausittain, joka_kk_sama ja summa_jaetaan
 							// Kuukausittain tarkoittaa, että jokaisen kauden arvo on syötetty erikseen
 							// Joka_kk_sama tarkoittaa, että jokaiselle kaudelle on annettu sama arvo
-							// Summa_jaetaan tarkoittaa, että syötetty arvo jaetaan rajattujen kuukausien ja tuotteiden määrän kesken
-
-							if ($budjetointi_taso != "kuukausittain" and $budjetointi_taso != "joka_kk_sama") {
-								// Virheellinen osastotryttain, ei tehdä mitään
-								$update_vai_insert = "";
-							}
+							// Summa_jaetaan tarkoittaa, että syötetty arvo jaetaan rajattujen kuukausien
 
 							// Kohtelu tarkoittaa, minkätyyppistä lukua syötetään. Kohteluita on: euro, maara ja indeksi
 							if ($budj_kohtelu == "euro") {
@@ -1100,7 +1100,7 @@
 						toimi.ytunnus asiakasnro,
 						toimi.nimi,
 						toimi.nimitark,
-						'' toim_nimi, # Nämä vaan sen takia, ettei tule noticeja tablen piirtämissessä (toimittaja query pitää olla sama kun asiakasquory alla)
+						'' toim_nimi, # Nämä vaan sen takia, ettei tule noticeja tablen piirtämissessä (toimittaja query pitää olla sama kun asiakasquery alla)
 						'' toim_nimitark
 						FROM toimi
 						WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
@@ -1278,7 +1278,9 @@
 				}
 			}
 			else {
-				piirra_budj_rivi($row, '', 'OHITA', $ohituksen_alkuperaiset_sarakkeet);
+				while ($row = mysql_fetch_assoc($result)) {
+					piirra_budj_rivi($row, '', 'OHITA', $ohituksen_alkuperaiset_sarakkeet);
+				}
 			}
 		}
 		elseif (isset($onko_ilman_budjettia) and $onko_ilman_budjettia != "") {
@@ -1323,7 +1325,9 @@
 				}
 			}
 			else {
-				piirra_budj_rivi($row);
+				while ($row = mysql_fetch_assoc($result)) {
+					piirra_budj_rivi($row);
+				}
 			}
 		}
 

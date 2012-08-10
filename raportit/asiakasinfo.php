@@ -293,7 +293,7 @@ if ($asiakasid > 0) {
 
 	if (($rajaus == "" or $rajaus == "MYYNTI") and $asiakas_yhtio == $kukarow["yhtio"]) {
 		// tehd‰‰n asiakkaan ostot kausittain, sek‰ pylv‰‰t niihin...
-		echo "<br><font class='message'>".t("Myynti kausittain viimeiset 24 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>/<font class='katepros'>".t("asiakask‰ynnit")."</font>)</font>";
+		echo "<br><font class='message'>".t("Myynti kausittain viimeiset 24 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>/<font class='katepros'>".t("budjetti")."</font>/<font class='katepros'>".t("asiakask‰ynnit")."</font>)</font>";
 		echo "<hr>";
 
 		// 24 kk sitten
@@ -326,25 +326,49 @@ if ($asiakasid > 0) {
 		$vuosi		= date("Y");
 		$maxkay		= 0;
 		$kayarray	= array();
-		
+		$budarray	= array();
+
 		for ($i = 1; $i <= 24; $i++) {
 
 			$kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
-			
+
+			// Ketaan asiakask‰ynnit
 			$query = "	SELECT count(*) kaynnit
 						FROM kalenteri
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND liitostunnus = '$asiakasid'
+						AND liitostunnus = '{$asiakasid}'
 						and tapa 	 	 = 'Asiakask‰ynti'
 						and tyyppi	 	 in ('kalenteri','memo')
 						and ((left(pvmalku,7) = '$vuosi-$kuukausi') or (left(pvmalku,7) < '$vuosi-$kuukausi' and left(pvmloppu,7) >= '$vuosi-$kuukausi'))";
 			$result = pupe_query($query);
 			$askarow = mysql_fetch_assoc($result);
-			
+
 			if ($askarow['kaynnit'] > $maxkay) $maxkay = $askarow['kaynnit'];
-			
+
 			$kayarray["$vuosi/$kuukausi"] = $askarow;
+
+			// Haetaan asiakasbudjetti
+			// Lˆytyykˆ kokonaisbudjetti
+			$budj_q = "	SELECT
+						sum(if(osasto = '' and try = '', summa, 0)) kokonaisbudjetti,
+						sum(if(osasto != '', summa, 0)) osastobudjetti,
+						sum(if(try != '', summa, 0)) trybudjetti
+						FROM budjetti_asiakas
+						WHERE yhtio 		 = '$kukarow[yhtio]'
+						and kausi			 = '$vuosi$kuukausi'
+						and asiakkaan_tunnus = '$asiakasid'";
+			$budj_r = pupe_query($budj_q);
+			$budjro = mysql_fetch_assoc($budj_r);
+
+			$paras_budjetti_array = array($budjro["kokonaisbudjetti"], $budjro["osastobudjetti"], $budjro["trybudjetti"]);
+			sort($paras_budjetti_array);
 			
+			$paras_budjetti = round(array_pop($paras_budjetti_array), 0);
+
+			if ($paras_budjetti > $maxeur) $maxeur = $paras_budjetti;
+
+			$budarray["$vuosi/$kuukausi"] = $paras_budjetti;
+
 			if ($kuukausi == 01) {
 				$kuukausi = 12;
 				$vuosi--;
@@ -365,20 +389,23 @@ if ($asiakasid > 0) {
 
 			$kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
-			$sumrow  = $sumarray["$vuosi/$kuukausi"];
-			$askarow = $kayarray["$vuosi/$kuukausi"];
-			
+			$sumrow   = $sumarray["$vuosi/$kuukausi"];
+			$askarow  = $kayarray["$vuosi/$kuukausi"];
+			$budjetti = $budarray["$vuosi/$kuukausi"];
+
 			if ($col==1) echo "<tr>\n";
 
 			// lasketaan pylv‰iden korkeus
 			if ($maxeur > 0) {
-				$hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
-				$hkate    = round(50*$sumrow['kate']/$maxeur,0);
-				$hkatepro = round($sumrow['katepro']/2,0);
+				$hmyynti  = round(50*$sumrow['myynti'] / $maxeur, 0);
+				$hkate    = round(50*$sumrow['kate'] / $maxeur, 0);
+				$hkatepro = round($sumrow['katepro'] / 2, 0);
+				$hbudj	  = round(50*$budjetti / $maxeur, 0);
+
 				if ($hkatepro>60) $hkatepro = 60;
 			}
 			else {
-				$hmyynti = $hkate = $hkatepro = 0;
+				$hmyynti = $hkate = $hkatepro = $hbudj = 0;
 			}
 
 			if ($maxkay > 0) {
@@ -387,14 +414,16 @@ if ($asiakasid > 0) {
 			else {
 				$haskay = 0;
 			}
-
+			
+			$budjetti = ($budjetti == 0) ? "" : $budjetti;
 			$askarow["kaynnit"] = ($askarow["kaynnit"] == 0) ? "" : $askarow["kaynnit"];
-			$sumrow["katepro"]  = ($sumrow["katepro"] == 0) ? "" : $sumrow["katepro"]."%";
+			$sumrow["katepro"]  = ($sumrow["katepro"] == 0) ? "" : round($sumrow["katepro"], 0)."%";
 
 			$pylvaat = "<table style='padding:0px;margin:0px;'><tr>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro]'></td>
+			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/yellow.png' height='$hbudj' width='12' alt='".t("budjetti")." $budjetti'></td>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/red.png' height='$haskay' width='12' alt='".t("asiakask‰ynnit")." $askarow[kaynnit]'></td>
 			</tr></table>";
 
@@ -405,6 +434,7 @@ if ($asiakasid > 0) {
 			echo "<tr><td nowrap align='right'><font class='myynti'>$sumrow[myynti]<br></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='kate'>$sumrow[kate]<br></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='katepros'>$sumrow[katepro]<br></font></td></tr>";
+			echo "<tr><td nowrap align='right'><font class='katepros'>$budjetti<br></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='katepros'>$askarow[kaynnit]<br></font></td></tr>";
 			echo "</table>";
 			echo "</td>\n";
@@ -456,18 +486,22 @@ if ($asiakasid > 0) {
 		// alkukuukauden tiedot 12 kk sitten
 		$ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 
-		$query = "	SELECT osasto, try, round(sum(rivihinta),0) myynti, round(sum(tilausrivi.kate),0) kate, round(sum(kpl),0) kpl, round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
-					from lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
-					where lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.liitostunnus = '$asiakasid'
-					and lasku.tila = 'U'
-					and lasku.alatila = 'X'
-					and lasku.tapvm >= '$ayy'
-					and tilausrivi.yhtio = lasku.yhtio
-					and tilausrivi.uusiotunnus = lasku.tunnus
-					group by 1,2
-					having myynti <> 0 or kate <> 0
-					order by osasto+0, try+0";
+		$query = "	SELECT osasto, try,
+					round(sum(rivihinta),0) myynti,
+					round(sum(tilausrivi.kate),0) kate,
+					round(sum(kpl),0) kpl,
+					round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
+					FROM lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
+					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+					AND lasku.liitostunnus 	= '$asiakasid'
+					AND lasku.tila 			= 'U'
+					AND lasku.alatila 		= 'X'
+					AND lasku.tapvm 	   >= '$ayy'
+					AND tilausrivi.yhtio 	= lasku.yhtio
+					AND tilausrivi.uusiotunnus = lasku.tunnus
+					GROUP BY 1,2
+					HAVING myynti <> 0 OR kate <> 0
+					ORDER BY osasto+0, try+0";
 		$result = pupe_query($query);
 
 		$col=1;

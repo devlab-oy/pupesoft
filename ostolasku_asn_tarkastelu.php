@@ -1939,7 +1939,7 @@
 
 			$ed_toimittaja = '';
 			$ed_tilausnumero = '';
-			$naytetaanko_toimittajabutton = true;
+			$naytetaanko_toimittajabutton = false;
 
 			while ($row = mysql_fetch_assoc($result)) {
 

@@ -199,6 +199,8 @@ if ($asiakasid > 0) {
 		$GLOBALS['eta_yhtio'] = "";
 	}
 
+	$katteet_naytetaan = ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "") ? true : false;
+
 	if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
 		$asiakas_yhtio = $GLOBALS['eta_yhtio'];
 
@@ -270,10 +272,6 @@ if ($asiakasid > 0) {
 	echo "<td valign='top'>$asiakasrow[toim_nimi]<br>$asiakasrow[toim_osoite]<br>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td>";
 	echo "</tr></table><br><br>";
 
-	// hardcoodataan v‰rej‰
-	// $cmyynti = "#ccccff";
-	// $ckate   = "#ff9955";
-	// $ckatepr = "#00dd00";
 	$maxcol  = 12; // montako columnia n‰yttˆ on
 
 	if ($lopetus == "" and $kukarow["extranet"] == "") {
@@ -293,7 +291,12 @@ if ($asiakasid > 0) {
 
 	if (($rajaus == "" or $rajaus == "MYYNTI") and $asiakas_yhtio == $kukarow["yhtio"]) {
 		// tehd‰‰n asiakkaan ostot kausittain, sek‰ pylv‰‰t niihin...
-		echo "<br><font class='message'>".t("Myynti kausittain viimeiset 24 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>/<font class='katepros'>".t("budjetti")."</font>/<font class='katepros'>".t("asiakask‰ynnit")."</font>)</font>";
+		echo "<br><font class='message'>".t("Myynti kausittain viimeiset 24 kk")." (".t("myynti");
+
+		if ($katteet_naytetaan) echo "/".t("kate");
+		if ($katteet_naytetaan) echo "/".t("kateprosentti");
+
+		echo "/".t("budjetti")."/".t("asiakask‰ynnit").")</font>";
 		echo "<hr>";
 
 		// 24 kk sitten
@@ -317,7 +320,7 @@ if ($asiakasid > 0) {
 
 		while ($sumrow = mysql_fetch_assoc($result)) {
 			if ($sumrow['myynti'] > $maxeur) $maxeur = $sumrow['myynti'];
-			if ($sumrow['kate']   > $maxeur) $maxeur = $sumrow['kate'];
+			if ($katteet_naytetaan and $sumrow['kate'] > $maxeur) $maxeur = $sumrow['kate'];
 
 			$sumarray[$sumrow['kausi']] = $sumrow;
 		}
@@ -362,7 +365,7 @@ if ($asiakasid > 0) {
 
 			$paras_budjetti_array = array($budjro["kokonaisbudjetti"], $budjro["osastobudjetti"], $budjro["trybudjetti"]);
 			sort($paras_budjetti_array);
-			
+
 			$paras_budjetti = round(array_pop($paras_budjetti_array), 0);
 
 			if ($paras_budjetti > $maxeur) $maxeur = $paras_budjetti;
@@ -414,16 +417,16 @@ if ($asiakasid > 0) {
 			else {
 				$haskay = 0;
 			}
-			
+
 			$budjetti = ($budjetti == 0) ? "" : $budjetti;
 			$askarow["kaynnit"] = ($askarow["kaynnit"] == 0) ? "" : $askarow["kaynnit"];
 			$sumrow["katepro"]  = ($sumrow["katepro"] == 0) ? "" : round($sumrow["katepro"], 0)."%";
 
 			$pylvaat = "<table style='padding:0px;margin:0px;'><tr>
-			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
-			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
-			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro]'></td>
-			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/yellow.png' height='$hbudj' width='12' alt='".t("budjetti")." $budjetti'></td>
+			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>";
+			if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>";
+			if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro]'></td>";
+			$pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/yellow.png' height='$hbudj' width='12' alt='".t("budjetti")." $budjetti'></td>
 			<td style='padding:0px;margin:0px;vertical-align:bottom;' class='back'><img src='{$palvelin2}pics/red.png' height='$haskay' width='12' alt='".t("asiakask‰ynnit")." $askarow[kaynnit]'></td>
 			</tr></table>";
 
@@ -432,8 +435,8 @@ if ($asiakasid > 0) {
 			echo "<tr><td nowrap align='center' style='padding:0px;margin:0px;vertical-align:bottom;height:55px;' class='back'>$pylvaat</td></tr>";
 			echo "<tr><th nowrap align='right'>$vuosi/$kuukausi<br></th></tr>";
 			echo "<tr><td nowrap align='right'><font class='myynti'>$sumrow[myynti]<br></font></td></tr>";
-			echo "<tr><td nowrap align='right'><font class='kate'>$sumrow[kate]<br></font></td></tr>";
-			echo "<tr><td nowrap align='right'><font class='katepros'>$sumrow[katepro]<br></font></td></tr>";
+			if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='kate'>$sumrow[kate]<br></font></td></tr>";
+			if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='katepros'>$sumrow[katepro]<br></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='katepros'>$budjetti<br></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='katepros'>$askarow[kaynnit]<br></font></td></tr>";
 			echo "</table>";
@@ -465,7 +468,10 @@ if ($asiakasid > 0) {
 
 
 		// tehd‰‰n asiakkaan ostot tuoteryhmitt‰in... vikat 12 kk
-		echo "<br><font class='message'>".t("Myynti osastoittain tuoteryhmitt‰in viimeiset 12 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>)</font>";
+		echo "<br><font class='message'>".t("Myynti osastoittain tuoteryhmitt‰in viimeiset 12 kk")." (".t("myynti")."/".t("m‰‰r‰");
+		if ($katteet_naytetaan) echo "/".t("kate");
+		if ($katteet_naytetaan) echo "/".t("kateprosentti");
+		echo ")</font>";
 		echo "<hr>";
 
 		echo "<form method='post'>";
@@ -536,11 +542,11 @@ if ($asiakasid > 0) {
 
 
 			echo "<table width='100%'>";
-			echo "<tr><th nowrap align='right'><a href='tuorymyynnit.php?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&try=$sumrow[try]&osasto=$sumrow[osasto]'>$ostry</a></th></tr>";
+			echo "<tr><th nowrap align='right'><a href='tuorymyynnit.php?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&try=$sumrow[try]&osasto=$sumrow[osasto]&lopetus=$lopetus'>$ostry</a></th></tr>";
 			echo "<tr><td nowrap align='right'><font class='myynti'>$sumrow[myynti] $yhtiorow[valkoodi]</font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='myynti'>$sumrow[kpl] ".t("kpl")."</font></td></tr>";
-			echo "<tr><td nowrap align='right'><font class='kate'>$sumrow[kate]   $yhtiorow[valkoodi]</font></td></tr>";
-			echo "<tr><td nowrap align='right'><font class='katepros'>$sumrow[katepro] %</font></td></tr>";
+			if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='kate'>$sumrow[kate]   $yhtiorow[valkoodi]</font></td></tr>";
+			if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='katepros'>$sumrow[katepro] %</font></td></tr>";
 			echo "</table>";
 
 			echo "</td>\n";
@@ -595,6 +601,9 @@ if ($asiakasid > 0) {
 			$kkl 			= date("m");
 			$vvl 			= date("Y");
 			$ppl 			= date("d");
+
+			if (!$katteet_naytetaan) $piilota_nettokate = "ON";
+			if (!$katteet_naytetaan) $piilota_kate = "ON";
 
 			//	Huijataan myyntiseurantaa
 			if ($lopetus == "") $lopetus = "block";

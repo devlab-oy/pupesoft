@@ -448,7 +448,7 @@
 
 			$ale_query_lisa = generoi_alekentta('M');
 
-			$tyyppilisa = ($toim != "EDUSTAJA") ? "	and tilausrivi.tyyppi in ('L','E','O','G','V','W','M') " : " and tilausrivi.tyyppi = 'G' ";
+			$tyyppilisa = ($toim == "EDUSTAJA") ? "	and tilausrivi.tyyppi in ('L','E','O','G','V','W','M') " : " and tilausrivi.tyyppi = 'G' ";
 
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
@@ -596,7 +596,8 @@
 
 			if ($historia == "") $historia=1;
 			$chk[$historia] = "SELECTED";
-
+			
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 
@@ -635,7 +636,9 @@
 				$maara = "LIMIT 2500";
 				$ehto = "";
 			}
-
+			
+			$lajilisa = ($toim == "EDUSTAJA") ? "" : " and tapahtuma.laji = 'siirto' ";
+			
 			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
@@ -644,37 +647,26 @@
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 						and tapahtuma.tuoteno = '$tuoteno'
 						and tapahtuma.laadittu > '0000-00-00 00:00:00'
-						and tapahtuma.laji = 'siirto'
-						$ehto
+						{$lajilisa}
+						{$ehto}
 						ORDER BY tapahtuma.laadittu desc $maara";
 			$qresult = pupe_query($query);
 
-			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
-
 			while ($prow = mysql_fetch_assoc ($qresult)) {
-
-				$vararvo_nyt -= $prow["arvo"];
-
-				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
-					echo "<tr>";
-					echo "<td nowrap>$prow[kuka]</td>";
-					echo "<td nowrap>";
-
-
-
-					echo t("$prow[laji]");
-
-
-					echo "</td>";
-
-					echo "<td nowrap align='right'>$prow[kpl]</td>";
-					echo "<td>$prow[selite]</td>";
-					echo "</tr>";
-				}
+				echo "<tr>";
+				echo "<td nowrap>$prow[kuka]</td>";
+				echo "<td nowrap>";
+				echo t("$prow[laji]");
+				echo "</td>";
+				echo "<td nowrap align='right'>$prow[kpl]</td>";
+				
+				$selite = preg_replace("/(\([0-9\.]*\)|\[[0-9\.]*\])/", "", $prow["selite"]);
+				
+				echo "<td>$selite</td>";
+				echo "</tr>";
 			}
+			
 			echo "</table>";
-
-
 		}
 		else {
 			echo "<font class='message'>".t("Yhtään tuotetta ei löytynyt")."!<br></font>";
@@ -684,6 +676,7 @@
 
 	if ($tee == "Y") {
 			echo "<form method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<table><tr>";
 			echo "<th>".t("Valitse tuotenumero").":</th>";

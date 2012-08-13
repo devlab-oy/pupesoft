@@ -1226,7 +1226,7 @@
 						$sel4 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>",t("Katteet n‰ytet‰‰n tilauksentekovaiheessa"),":</th>
+					echo "<tr><th align='left'>",t("Katteet n‰ytet‰‰n tilauksentekovaiheessa ja CRM:ss‰"),":</th>
 							<td><select name='naytetaan_katteet_tilauksella'>
 							<option value=''  {$sel1}>",t("Oletus"),"</option>
 							<option value='Y' {$sel2}>",t("Kate n‰ytet‰‰n"),"</option>

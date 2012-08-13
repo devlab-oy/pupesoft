@@ -521,7 +521,8 @@
 											AND saapuminen.mapvm = '0000-00-00'";
 								$saapres = pupe_query($query);
 
-								if (mysql_num_rows($saapres) != 1) {
+								// Jos ei löydy laskua, irrotetaan kohdistus
+								if (mysql_num_rows($saapres) == 0) {
 									$lasku_manuaalisesti_check = 1;
 
 									$query = "	UPDATE asn_sanomat SET
@@ -650,11 +651,14 @@
 
 		$tilausnro = (int) $tilausnro;
 
-		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnro}'";
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausnro}'";
 		$res = pupe_query($query);
-		
+
 		$laskuloytyi = 0;
-		
+
 		if (mysql_num_rows($res) > 0) {
 			$laskuloytyi = 1;
 		}
@@ -664,22 +668,33 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND toimittajanro = '{$toimittaja}'
 						AND tyyppi != 'P'
-						ORDER BY tunnus DESC";
+						ORDER BY tunnus DESC
+						LIMIT 1";
 			$toimires = pupe_query($query);
-			$toimirow = mysql_fetch_assoc($toimires);
-			
-			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tila = 'O' AND alatila = 'A' AND liitostunnus = '{$toimirow['tunnus']}' ORDER BY tunnus DESC LIMIT 1";
-			$res = pupe_query($query);
 
-			if (mysql_num_rows($res) == 1) {
-				$laskuloytyi = 1;
+			if (mysql_num_rows($toimires) == 1) {
+				$toimirow = mysql_fetch_assoc($toimires);
+
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'O'
+							AND alatila = 'A'
+							AND liitostunnus = '{$toimirow['tunnus']}'
+							ORDER BY tunnus
+							DESC LIMIT 1";
+				$res = pupe_query($query);
+
+				if (mysql_num_rows($res) == 1) {
+					$laskuloytyi = 1;
+				}
 			}
 		}
-		
+
 		if ($laskuloytyi == 1) {
 			$laskurow = mysql_fetch_assoc($res);
 			$tilausnro = $laskurow['tunnus'];
-			
+
 			if ($laskurow['alatila'] == 'X') {
 				$error = t("Tilaus").' '.$tilausnro.' '.t("ei ole sopiva")."!";
 				$tee = 'etsi';
@@ -1662,11 +1677,19 @@
 			echo "<td class='back'>&nbsp;</td>";
 			echo "</tr>";
 
-			$query = "SELECT liitostunnus, tunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}' AND tila in ('H','Y','M','P','Q')";
+			$query = "	SELECT liitostunnus, tunnus 
+						FROM lasku 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND laskunro = '{$lasku}' 
+						AND tila in ('H','Y','M','P','Q')";
 			$laskures = pupe_query($query);
-			
+
 			if (mysql_num_rows($laskures) == 0) {
-				$query = "SELECT liitostunnus, tunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}' AND tila in ('H','Y','M','P','Q')";
+				$query = "	SELECT liitostunnus, tunnus 
+							FROM lasku 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND comments = '{$lasku}' 
+							AND tila in ('H','Y','M','P','Q')";
 				$laskures = pupe_query($query);
 			}
 
@@ -1963,7 +1986,7 @@
 				echo "<td>{$row['nimi']}</td>";
 				echo "<td>{$row['osoite']} {$row['postino']} {$row['postitp']} {$row['maa']}</td>";
 				echo "<td>{$row['swift']}</td>";
-				echo "<td>{$row['tilausnumero']}</td>";	
+				echo "<td>{$row['tilausnumero']}</td>";
 				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";

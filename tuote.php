@@ -1041,8 +1041,12 @@
 								$keikka = " / ".$jtrow["keikkanro"];
 							}
 						}
-
-						$merkki = "+";
+						if ($jtrow["kpl"] > 0) {
+							$merkki = "+";
+						}
+						else {
+							$merkki = "-";
+						}
 					}
 					elseif ($jtrow["tyyppi"] == "E") {
 						$tyyppi = t("Ennakkotilaus");

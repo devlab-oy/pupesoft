@@ -320,7 +320,6 @@ if ($tee == '') {
 				$worksheet->write($excelrivi, $excelsarake++, $row["nimi"]);
 				$worksheet->write($excelrivi, $excelsarake++, $row["pvmalku"]);
 
-
 				if ($vstk == "Asiakaskäynti") {
 					echo "	<td>$row[kentta02]</td>
 							<td>$row[pvmalku]</td>
@@ -342,23 +341,24 @@ if ($tee == '') {
 				echo "</tr>";
 				$excelrivi++;
 			}
+
+			$excelnimi = $worksheet->close();
 		}
 	}
 
 	echo "</table>";
 
-	$excelnimi = $worksheet->close();
-
-	echo "<br><br><table>";
-	echo "<tr><th>".t("Tallenna tulos").":</th>";
-	echo "<form method='post' class='multisubmit'>";
-	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-	echo "<input type='hidden' name='kaunisnimi' value='Edustajaraportti.xlsx'>";
-	echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-	echo "</table><br>";
+	if (isset($excelnimi)) {
+		echo "<br><br><table>";
+		echo "<tr><th>".t("Tallenna tulos").":</th>";
+		echo "<form method='post' class='multisubmit'>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+		echo "<input type='hidden' name='kaunisnimi' value='Edustajaraportti.xlsx'>";
+		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+		echo "</table><br>";
+	}
 }
 
-require("../inc/footer.inc");
+require("inc/footer.inc");
 
-?>

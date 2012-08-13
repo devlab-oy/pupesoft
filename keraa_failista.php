@@ -41,8 +41,6 @@
 			else $kerattavat[$tilaus][$tuote] += $kpl;
 		}
 
-		$lask = 0;
-
 		foreach ($kerattavat as $tilaus => $tuotteet) {
 
 			// Nollataan muuttujat
@@ -64,9 +62,6 @@
 				continue;
 			}
 			else {
-				$lask++;
-				if ($lask > 5) exit;
-
 				$tilausrow = mysql_fetch_assoc($result);
 			}
 

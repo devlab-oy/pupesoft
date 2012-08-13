@@ -28,6 +28,7 @@
 	if(!isset($maa)) 		 			$maa = "";
 	if(!isset($pkrow))              	$pkrow = array();
 	if(!isset($suoratoimit))        	$suoratoimit = "";
+	if(!isset($jt_huomioi_pvm))        	$jt_huomioi_pvm = "";
 	if(!isset($tee))                	$tee = "";
 	if(!isset($tilaus)) 	 			$tilaus = "";
 	if(!isset($tilausnumero))       	$tilausnumero = "";
@@ -52,7 +53,7 @@
 
 	// JT-selaus p‰ivitysoikeus, joko JT-selaus p‰ivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivej‰
 	$jtselaus_paivitys_oikeus = FALSE;
-	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and $yhtiorow["automaattinen_jt_toimitus"] == "J")) {
+	if ($oikeurow['paivitys'] == '1' or (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") !== FALSE and in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A')) )) {
 		$jtselaus_paivitys_oikeus = TRUE;
 	}
 
@@ -115,7 +116,9 @@
 	elseif ($tilaus_on_jo != '') {
 		$query  = "	SELECT *
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]' and tila IN ('N', 'L', 'E', 'G')";
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$kukarow[kesken]'
+					AND tila IN ('N', 'L', 'E', 'G')";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -674,6 +677,10 @@
 		$laskulisa      = "";
 		$toimittajalisa = "";
 		$tilausrivilisa = "";
+
+		if ($jt_huomioi_pvm != "") {
+			$laskulisa .= " and lasku.kerayspvm <= now() ";
+		}
 
 		if ($toimittaja != '') {
 			$toimittajalisa .= " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$toimittajaid') ";
@@ -2213,6 +2220,13 @@
 		echo "	<tr>
 				<th>".t("N‰yt‰ vain suoratoimitusrivit")."</th>
 				<td><input type='checkbox' name='suoratoimit' $sel></td>
+				</tr>";
+
+		if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
+
+		echo "	<tr>
+				<th>".t("Huomioi p‰iv‰m‰‰r‰t j‰lkitilauksissa")."</th>
+				<td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
 				</tr>";
 
 		echo "</table>

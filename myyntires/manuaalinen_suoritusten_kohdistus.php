@@ -1762,6 +1762,8 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 			if ((maara==0) == true) {
 				alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mitään kohdistettavaa ei löydy, klikkaa menusta Manuaalikohdistus päästäksesi takaisin alkuun")."');
+
+				skippaa_tama_submitti = true;
 				return false;
 			}
 
@@ -1777,20 +1779,19 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 				var alennusprosentti = Math.round(100*(1-(suoritus_summa/kokolasku)));
 
 				if (jaljella < 0 && document.forms[3].pyoristys_virhe_ok.checked == true) {
-					if (confirm('".t("Haluatko varmasti antaa")." '+alennusprosentti+'% ".t("alennuksen")."?\\n".t("Alennus").": '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\n".t("HUOM: Alennus kirjataan kassa-alennukseen")."!')==1) {
+					if (confirm('".t("Haluatko varmasti antaa")." '+alennusprosentti+'% ".t("alennuksen")."?\\n".t("Alennus").": '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\n".t("HUOM: Alennus kirjataan kassa-alennukseen")."!')) {
 						return true;
 					}
 					else {
+						skippaa_tama_submitti = true;
 						return false;
 					}
 				}
 				else if (jaljella < 0) {
-					if (confirm('".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."')==1) {
-						return false;
-					}
-					else {
-						return false;
-					}
+					alert('".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."');
+
+					skippaa_tama_submitti = true;
+					return false;
 				}
 			}
 			return true;

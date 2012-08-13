@@ -9410,7 +9410,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 			return;
 		}
 
-		if ($kieli == "") $kieli = $kukarow["kieli"];
+		if ($kieli == "" and isset($kukarow["kieli"])) $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
@@ -9453,7 +9453,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 }
 
 if (!function_exists("jt_toimita")) {
-	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '') {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
 
 		if (!is_array($jtrivit)) $jtrivit = array();
@@ -9473,6 +9473,7 @@ if (!function_exists("jt_toimita")) {
 			$suoratoimitus_rivit  = array();
 			$suoratoimitus_paikat = array();
 			$from_varastoon_inc   = "";
+			$jt_huomioi_pvm		  = $huomioi_pvm;
 		}
 		else {
 			$asiakasno 			  = "";
@@ -9486,6 +9487,7 @@ if (!function_exists("jt_toimita")) {
 			$suoratoimitus_rivit  = $jtrivit;
 			$suoratoimitus_paikat = $jtrivit_paikat;
 			$from_varastoon_inc   = "varastoon.inc";
+			$jt_huomioi_pvm		  = $huomioi_pvm;
 		}
 
 		require('jtselaus.php');
@@ -10754,7 +10756,7 @@ if (!function_exists("tarkista_iban")) {
 		global $yhtiorow;
 
 		if ($yhtiorow["maa"] != "FI") {
-			return TRUE;
+			return $tilino;
 		}
 
 		// Calculating and validating IBAN checksums:
@@ -12424,7 +12426,14 @@ if (!function_exists("pupe_DataTables")) {
 					var sarake = $(\"thead input\").index(this);
 
 					// fnFilter toistaiseksi vain ekalle tablelle
-					datatablesit[0].fnFilter( arvo, sarake );
+
+					// Onko regular expressioni?
+					if (arvo.indexOf(\"|\") > -1) {
+						datatablesit[0].fnFilter( arvo, sarake, true, false );
+					}
+					else {
+						datatablesit[0].fnFilter( arvo, sarake, false, true );
+					}
 
 					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
 					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {

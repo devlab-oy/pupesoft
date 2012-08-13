@@ -889,6 +889,10 @@
 				$tarkkahaku = TRUE;
 				$hakuehto = " = '".substr($haku[$i], 1)."' ";
 			}
+			elseif ($array[$i] == "laskunro") {
+				$tarkkahaku = TRUE;
+				$hakuehto = " = '{$haku[$i]}' ";
+			}
 			else {
 				$tarkkahaku = FALSE;
 				$hakuehto = " like '%{$haku[$i]}%' ";
@@ -1029,7 +1033,14 @@
 
 				function verifyMulti(){
 					msg = '".t("Haluatko todella poistaa tietueet?")."';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 
 				//-->
@@ -1352,8 +1363,15 @@
 		if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
-								msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
-								return confirm(msg);
+							msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 				</SCRIPT>";
 
@@ -1776,8 +1794,15 @@
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 							function verify(){
-									msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
-									return confirm(msg);
+								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 					</SCRIPT>";
 

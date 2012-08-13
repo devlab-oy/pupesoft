@@ -162,7 +162,14 @@
 				<!--
 					function verify() {
 						msg = '".t("Oletko varma?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				-->
 				</script>";
@@ -547,7 +554,14 @@
 		echo "	<script language=javascript>
 				function lahetys_verify(pitaako_varmistaa) {
 					msg = pitaako_varmistaa;
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 			</script>";
 
@@ -786,8 +800,8 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila = 'N' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'N'
 						and lasku.alatila in ('U','T')
 						$haku
 						order by lasku.luontiaika desc

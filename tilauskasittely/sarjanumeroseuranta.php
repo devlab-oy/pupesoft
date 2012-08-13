@@ -1059,7 +1059,14 @@
 	echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify(){
 					msg = '".t("Haluatko todella poistaa tämän sarjanumeron")."?';
-					return confirm(msg);
+					
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 			</SCRIPT>";
 

@@ -517,10 +517,12 @@
 											FROM lasku AS saapuminen
 											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
 											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'
-											AND saapuminen.tapvm = '0000-00-00'";
+											AND saapuminen.tapvm = '0000-00-00'
+											AND saapuminen.mapvm = '0000-00-00'";
 								$saapres = pupe_query($query);
 
-								if (mysql_num_rows($saapres) != 0) {
+								// Jos ei lˆydy laskua, irrotetaan kohdistus
+								if (mysql_num_rows($saapres) == 0) {
 									$lasku_manuaalisesti_check = 1;
 
 									$query = "	UPDATE asn_sanomat SET
@@ -649,12 +651,49 @@
 
 		$tilausnro = (int) $tilausnro;
 
-		$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnro}'";
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilausnro}'";
 		$res = pupe_query($query);
 
-		if (mysql_num_rows($res) > 0) {
+		$laskuloytyi = 0;
 
+		if (mysql_num_rows($res) > 0) {
+			$laskuloytyi = 1;
+		}
+		else {
+			$query = "	SELECT tunnus
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toimittajanro = '{$toimittaja}'
+						AND tyyppi != 'P'
+						ORDER BY tunnus DESC
+						LIMIT 1";
+			$toimires = pupe_query($query);
+
+			if (mysql_num_rows($toimires) == 1) {
+				$toimirow = mysql_fetch_assoc($toimires);
+
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'O'
+							AND alatila = 'A'
+							AND liitostunnus = '{$toimirow['tunnus']}'
+							ORDER BY tunnus
+							DESC LIMIT 1";
+				$res = pupe_query($query);
+
+				if (mysql_num_rows($res) == 1) {
+					$laskuloytyi = 1;
+				}
+			}
+		}
+
+		if ($laskuloytyi == 1) {
 			$laskurow = mysql_fetch_assoc($res);
+			$tilausnro = $laskurow['tunnus'];
 
 			if ($laskurow['alatila'] == 'X') {
 				$error = t("Tilaus").' '.$tilausnro.' '.t("ei ole sopiva")."!";
@@ -1638,11 +1677,19 @@
 			echo "<td class='back'>&nbsp;</td>";
 			echo "</tr>";
 
-			$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND laskunro = '{$lasku}' AND tila = 'H'";
+			$query = "	SELECT liitostunnus, tunnus 
+						FROM lasku 
+						WHERE yhtio = '{$kukarow['yhtio']}' 
+						AND laskunro = '{$lasku}' 
+						AND tila in ('H','Y','M','P','Q')";
 			$laskures = pupe_query($query);
 
 			if (mysql_num_rows($laskures) == 0) {
-				$query = "SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND comments = '{$lasku}' AND tila = 'H'";
+				$query = "	SELECT liitostunnus, tunnus 
+							FROM lasku 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND comments = '{$lasku}' 
+							AND tila in ('H','Y','M','P','Q')";
 				$laskures = pupe_query($query);
 			}
 
@@ -1758,6 +1805,8 @@
 
 			echo "<tr><th colspan='9'><input type='button' class='vahvistavakisinbutton' value='",t("Aja automaattikohdistus uudestaan kaikille riveille"),"' /></th></tr>";
 
+			echo ebid($laskurow['tunnus']);
+
 			echo "</table>";
 			echo "</form>";
 		}
@@ -1791,6 +1840,7 @@
 								toimi.postitp,
 								toimi.maa,
 								toimi.swift,
+								asn_sanomat.saapumispvm,
 								asn_sanomat.asn_numero,
 								asn_sanomat.paketintunniste,
 								asn_sanomat.toimittajanumero,
@@ -1817,6 +1867,7 @@
 			echo "<th>",t("Swift"),"</th>";
 			echo "<th>",t("ASN sanomanumero"),"</th>";
 			echo "<th>",t("ASN kollinumero"),"</th>";
+			echo "<th>",t("Saapumispvm"),"</th>";
 			echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
 			echo "</tr>";
 
@@ -1835,7 +1886,7 @@
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 					}
 
 					echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
@@ -1855,6 +1906,7 @@
 				echo "<td>{$row['swift']}</td>";
 				echo "<td align='right'>{$row['asn_numero']}</td>";
 				echo "<td>{$row['paketintunniste']}</td>";
+				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'><input type='button' class='kollibutton' id='{$row['paketintunniste']}##{$row['asn_numero']}##{$row['toimittajanumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";
@@ -1884,6 +1936,7 @@
 								toimi.postitp,
 								toimi.maa,
 								toimi.swift,
+								asn_sanomat.saapumispvm,
 								asn_sanomat.asn_numero as tilausnumero,
 								asn_sanomat.paketintunniste,
 								asn_sanomat.toimittajanumero,
@@ -1909,19 +1962,20 @@
 			echo "<th>",t("Osoite"),"</th>";
 			echo "<th>",t("Swift"),"</th>";
 			echo "<th>",t("Ostolaskunro"),"</th>";
+			echo "<th>",t("Saapumispvm"),"</th>";
 			echo "<th>",t("Rivim‰‰r‰"),"<br />",t("ok")," / ",t("kaikki"),"</th>";
 			echo "</tr>";
 
 			$ed_toimittaja = '';
 			$ed_tilausnumero = '';
-			$naytetaanko_toimittajabutton = true;
+			$naytetaanko_toimittajabutton = false;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
 				if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
 
 					if ($naytetaanko_toimittajabutton) {
-						echo "<tr><th colspan='6'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						echo "<tr><th colspan='7'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 					}
 
 					echo "<tr><td colspan='7' class='back'>&nbsp;</td></tr>";
@@ -1933,6 +1987,7 @@
 				echo "<td>{$row['osoite']} {$row['postino']} {$row['postitp']} {$row['maa']}</td>";
 				echo "<td>{$row['swift']}</td>";
 				echo "<td>{$row['tilausnumero']}</td>";
+				echo "<td>".tv1dateconv($row['saapumispvm'])."</td>";
 				echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 				echo "<td class='back'><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 				echo "</tr>";

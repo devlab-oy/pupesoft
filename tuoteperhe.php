@@ -35,7 +35,7 @@
 	}
 
 	if ($tee == "KOPIOI") {
-		
+
 		if ($kop_isatuo == "") {
 				echo "<br><br>";
 				echo "<table>";
@@ -336,7 +336,7 @@
 
 	if ($tee == 'POISTA') {
 		$isatuoteno = trim($isatuoteno);
-		
+
 		// Varmistetaan, että faktat ei mene rikki
 		$query = "	SELECT
 					group_concat(distinct if(fakta = '', null, fakta)) fakta,
@@ -399,7 +399,7 @@
 	if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 		$lisa = "";
 		$tchk = "";
-		
+
 		$isatuoteno = trim($isatuoteno);
 		$hakutuoteno = trim($hakutuoteno);
 
@@ -614,8 +614,9 @@
 							LIMIT 1";
 				$ressu = pupe_query($query);
 				$faktarow = mysql_fetch_array($ressu);
+				$fakta = str_replace("\\n", "\n", $faktarow["fakta"]);
 
-				echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
+				echo "<td><textarea cols='35' rows='7' name='fakta'>$fakta</textarea></td>";
 
 				if ($toim == "RESEPTI") {
 
@@ -629,10 +630,11 @@
 								LIMIT 1";
 					$ressu = pupe_query($query);
 					$faktarow = mysql_fetch_array($ressu);
+					$fakta = str_replace("\\n", "\n", $faktarow["fakta2"]);
 
 					echo "</tr><tr>";
 					echo "<th>".t("Yhdistämisen lisätiedot").": </th></tr>";
-					echo "<td><textarea cols='35' rows='4' name='fakta2'>$faktarow[fakta2]</textarea></td>";
+					echo "<td><textarea cols='35' rows='4' name='fakta2'>$fakta</textarea></td>";
 				}
 				echo "<td class='back'>
 					  <input type='submit' value='".t("Tallenna")."'>

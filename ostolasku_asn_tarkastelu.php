@@ -517,10 +517,11 @@
 											FROM lasku AS saapuminen
 											WHERE saapuminen.yhtio = '{$kukarow['yhtio']}'
 											AND saapuminen.tunnus = '{$tilausrivirow['uusiotunnus']}'
-											AND saapuminen.tapvm = '0000-00-00'";
+											AND saapuminen.tapvm = '0000-00-00'
+											AND saapuminen.mapvm = '0000-00-00'";
 								$saapres = pupe_query($query);
 
-								if (mysql_num_rows($saapres) != 0) {
+								if (mysql_num_rows($saapres) != 1) {
 									$lasku_manuaalisesti_check = 1;
 
 									$query = "	UPDATE asn_sanomat SET

@@ -18936,6 +18936,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 		$valittu_pakkaus = $pakkausrow['tunnus'];
 		$pakkaukset_paino = $pakkausrow['paino'];
+		$pakkauksen_kaytetty_paino = 0;
+		$pakkausnro = 0;
 
 		// katsotaan tarvitaanko jakaa tilausrivejä myyntierällä
 		$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era
@@ -18957,6 +18959,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'];
 
+			if ($pakkausnro == 0 or ($kerayseran_paino + $pakkauksen_kaytetty_paino > $pakkaukset_paino)) $pakkausnro++;
+
 			while ($kerayseran_paino > $pakkaukset_paino) {
 				$keraysera_kpl -= $kerayseran_rivit[$i]['data']['myynti_era'];
 				$kerayseran_paino -= $kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'];
@@ -18966,6 +18970,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 			$kerayseran_rivit[$i]['data']['upd_varattu'] = $jaljella == 0 ? 0 : $keraysera_kpl;
 			$kerayseran_rivit[$i]['data']['paino'] = $kerayseran_rivit[$i]['data']['tuotemassa'] * $keraysera_kpl;
+
+			$kerayseran_rivit[$i]['data']['pakkausnro'] = $pakkausnro;
+
+			$pakkauksen_kaytetty_paino += $kerayseran_rivit[$i]['data']['paino'];
 
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
 
@@ -18992,7 +19000,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 		reset($kerayseran_rivit);
 
-		$pakkausnro = 1;
 		$keraysera_nro = $laskurow['kerayslista'] != 0 ? $laskurow['kerayslista'] : $laskurow['tunnus'];
 
 		foreach ($kerayseran_rivit as $rivi) {
@@ -19027,7 +19034,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			if ($_pakkaus != 0) {
 				$query = "	UPDATE kerayserat SET
 							pakkaus = '{$valittu_pakkaus}',
-							pakkausnro = '{$pakkausnro}'
+							pakkausnro = '{$rivi['data']['pakkausnro']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi = '{$rivi['data']['tunnus']}'";
 				$upd_res = pupe_query($query);
@@ -19044,7 +19051,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							otunnus = '{$rivi['data']['otunnus']}',
 							tilausrivi = '{$rivi['data']['tunnus']}',
 							pakkaus = '{$valittu_pakkaus}',
-							pakkausnro = '{$pakkausnro}',
+							pakkausnro = '{$rivi['data']['pakkausnro']}',
 							kpl = '{$kappalemaara}',
 							kpl_keratty = 0,
 							keratty = '',
@@ -19055,8 +19062,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muuttaja = ''";
 				$keraysera_ins = pupe_query($query);
 			}
-
-			$pakkausnro++;
 		}
 
 		return $keraysera_nro;

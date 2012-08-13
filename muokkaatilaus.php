@@ -528,16 +528,6 @@
 
 			$toimaikalisa = "";
 
-			if ($yhtiorow["tilauksen_seuranta"] !="") {
-				$seuranta = " seuranta, ";
-				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
-			}
-
-			if ($yhtiorow["tilauksen_kohteet"] != "") {
-				$kohde = " asiakkaan_kohde.kohde kohde, ";
-				$kohdelisa = "LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde";
-			}
-
 			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and $toim != "TARJOUS") {
 				$toimaikalisa = ' lasku.toimaika, ';
 			}

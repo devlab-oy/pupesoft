@@ -214,19 +214,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
-
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('P', 'M', 'N'), '');
-
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
-		$ulos .= "<option value = 'P' $sel[P]>".t("Pituus positiolta, is‰tuotteen hinta korjataan")."</option>";
-		$ulos .= "<option value = 'M' $sel[M]>".t("Manuaalisesti syˆtett‰v‰ pituus, is‰tuotteen m‰‰r‰‰ ei korjata")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Manuaalisesti syˆtett‰v‰ m‰‰r‰, is‰n m‰‰r‰‰ korjataan")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
  		$sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');

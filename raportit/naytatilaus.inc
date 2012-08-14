@@ -138,34 +138,6 @@
 
 	echo "</tr>";
 
-	//	Haetaan kohdetiedot
-	$query = "	SELECT concat_ws(' - ', asiakkaan_kohde.tunnus, asiakkaan_kohde.kohde) kohde, seuranta,
-				yhteyshenkilo.nimi yhteyshenkilo,
-				kuka.nimi projektipaallikko
-				FROM laskun_lisatiedot
-				LEFT JOIN asiakkaan_kohde ON laskun_lisatiedot.yhtio=asiakkaan_kohde.yhtio and laskun_lisatiedot.asiakkaan_kohde=asiakkaan_kohde.tunnus
-				LEFT JOIN yhteyshenkilo ON laskun_lisatiedot.yhtio=yhteyshenkilo.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
-				LEFT JOIN kuka ON laskun_lisatiedot.yhtio=kuka.yhtio and laskun_lisatiedot.projektipaallikko=kuka.kuka
-				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and laskun_lisatiedot.otunnus='$laskurow[tunnus]' and seuranta!=''";
-	$lisares=pupe_query($query);
-
-	if (mysql_num_rows($lisares) > 0) {
-		$lisarow = mysql_fetch_assoc($lisares);
-
-		echo "<tr>
-				<th>".t("Seuranta")."</th>
-				<th colspan='2'>".t("Kohde")."</th>
-				<th colspan='2'>".t("Yhteyshenkilo")."</th>
-				<th colspan='2'>".t("Projektipaallikko")."</th>
-			</tr>
-			<tr>
-				<td>$lisarow[seuranta]</td>
-				<td colspan='2'>$lisarow[kohde]</td>
-				<td colspan='2'>$lisarow[yhteyshenkilo]</td>
-				<td colspan='2'>$lisarow[projektipaallikko]</td>
-			</tr>";
-	}
-
 	echo "<tr>
 			<th>".t("Tilausnumero")."</th>
 			<th colspan='2'>".t("Tila")."</th>
@@ -871,7 +843,7 @@
 		echo "<table>";
 		echo "<tr><th>#</th>";
 
-		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T") {
 
 			$trivityyppi_result = t_avainsana("TRIVITYYPPI");
 
@@ -1219,7 +1191,7 @@
 				$borderlask--;
 			}
 
-			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 
 				echo "<td $class valign='top'>";
 
@@ -1231,17 +1203,6 @@
 						$sel = "";
 						if ($trrow["selite"]==$row["positio"]) echo "$trrow[selitetark]";
 					}
-				}
-
-				if ($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"] > 0) {
-					$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]' and tunnus = '$row[asiakkaan_positio]'";
-					$posres = pupe_query($posq);
-					$posrow = mysql_fetch_assoc($posres);
-
-					echo "$posrow[tunnus] - $posrow[positio]";
-				}
-				elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
-					echo "<font class='info'>".t("Kohdetta ei valittu")."</font>";
 				}
 
 				echo "</td>";
@@ -1611,7 +1572,7 @@
 				if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 					$cspan++;
 				}
-				if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+				if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 					$cspan++;
 				}
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -1649,7 +1610,7 @@
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 				$colspan++;
 			}
-			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T")) {
 				$colspan++;
 			}
 			if ($kukarow["extranet"] != "") {

@@ -162,7 +162,14 @@
 				<!--
 					function verify() {
 						msg = '".t("Oletko varma?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				-->
 				</script>";
@@ -521,16 +528,6 @@
 
 			$toimaikalisa = "";
 
-			if ($yhtiorow["tilauksen_seuranta"] !="") {
-				$seuranta = " seuranta, ";
-				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
-			}
-
-			if ($yhtiorow["tilauksen_kohteet"] != "") {
-				$kohde = " asiakkaan_kohde.kohde kohde, ";
-				$kohdelisa = "LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde";
-			}
-
 			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and $toim != "TARJOUS") {
 				$toimaikalisa = ' lasku.toimaika, ';
 			}
@@ -557,7 +554,14 @@
 		echo "	<script language=javascript>
 				function lahetys_verify(pitaako_varmistaa) {
 					msg = pitaako_varmistaa;
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 			</script>";
 
@@ -796,8 +800,8 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila = 'N' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'N'
 						and lasku.alatila in ('U','T')
 						$haku
 						order by lasku.luontiaika desc

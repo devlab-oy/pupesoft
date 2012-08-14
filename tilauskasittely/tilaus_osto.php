@@ -1285,8 +1285,15 @@
 			if ($eimitatoi != "EISAA" and $kukarow["mitatoi_tilauksia"] == "") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 							function verify(){
-									msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
-									return confirm(msg);
+								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 					</SCRIPT>";
 				echo "	<td class='back' align='right'>

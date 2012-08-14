@@ -196,10 +196,10 @@ if (!function_exists("tsekit")) {
 		while ($toimrow = mysql_fetch_assoc($toimresult)) {
 
 			if ($toimrow["kpl"] < 0) {
-				$tunken = "myyntirivitunnus";
+				$tunken = "sarjanumeroseuranta.myyntirivitunnus";
 			}
 			else {
-				$tunken = "ostorivitunnus";
+				$tunken = "sarjanumeroseuranta.ostorivitunnus";
 			}
 
 			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
@@ -210,10 +210,11 @@ if (!function_exists("tsekit")) {
 							and $tunken = '$toimrow[tunnus]'";
 			}
 			else {
-				$query = "	SELECT sum(abs(era_kpl)) kpl, min(sarjanumero) sarjanumero
+				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl*if(tilausrivi.tunnus is not null, if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt > 0 or tilausrivi.tyyppi = 'O', 1, -1), 1)) kpl, min(sarjanumeroseuranta.sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$toimrow[tuoteno]'
+							LEFT JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno = '$toimrow[tuoteno]'
 							and $tunken = '$toimrow[tunnus]'";
 			}
 			$sarjares = pupe_query($query);
@@ -387,7 +388,8 @@ if ($toiminto == "tulosta") {
 
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus != '') {
 
-			$valitut_lavat = "";
+			$on_jo_lava = trim($valitut_lavat) != "" ? true : false;
+			$valitut_lavat = $on_jo_lava ? $valitut_lavat : "";
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
 						FROM tilausrivi
@@ -402,7 +404,7 @@ if ($toiminto == "tulosta") {
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Vastaanottoraportti";
 
-				$valitut_lavat .= $check_row["suuntalavat"];
+				$valitut_lavat = $on_jo_lava ? $valitut_lavat : $check_row["suuntalavat"];
 			}
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset, group_concat(suuntalava) suuntalavat
@@ -418,7 +420,9 @@ if ($toiminto == "tulosta") {
 			if (trim($check_row['tunnukset']) != '') {
 				$tulostimet[] = "Tavaraetiketti";
 
-				$valitut_lavat .= $check_row["suuntalavat"];
+				if (!$on_jo_lava) {
+					$valitut_lavat = trim($valitut_lavat) != "" ? $valitut_lavat.",".$check_row["suuntalavat"] : $check_row["suuntalavat"];
+				}
 			}
 		}
 
@@ -596,7 +600,7 @@ if ($ytunnus == "" and $keikka != "") {
 	$keikka = (int) $keikka;
 
 	$query = "	SELECT ytunnus, liitostunnus, laskunro
-				FROM lasku USE INDEX (tila_index)
+				FROM lasku USE INDEX (yhtio_tila_laskunro)
 				WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 				and lasku.tila 			= 'K'
 				and lasku.alatila 		= ''
@@ -623,26 +627,39 @@ if ($ytunnus == "" and $ostotil != "") {
 
 	$query = "	SELECT lasku.ytunnus, lasku.liitostunnus, group_concat(lasku.laskunro) laskunro
 				FROM tilausrivi
-				JOIN lasku USE INDEX (tila_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and lasku.tila = 'K' and lasku.alatila = '' and lasku.vanhatunnus = 0)
+				JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and lasku.tila = 'K' and lasku.alatila = '' and lasku.vanhatunnus = 0)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 			 	and tilausrivi.otunnus = $ostotil
 				and tilausrivi.tyyppi = 'O'";
 	$keikkahaku_res = pupe_query($query);
+	$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
 
-	if (mysql_num_rows($keikkahaku_res) > 0) {
-		$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
+	if ($keikkahaku_row['laskunro'] != '') {
+		$keikkarajaus = $keikkahaku_row["laskunro"];
+		$ytunnus 	  = $keikkahaku_row["ytunnus"];
+		$toimittajaid = $keikkahaku_row["liitostunnus"];
+	}
+	else {
+		// Napataan kuitenkin toimittajan keikat auki
+		$query = "	SELECT lasku.ytunnus, lasku.liitostunnus
+					FROM tilausrivi
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila = 'O')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				 	and tilausrivi.otunnus = $ostotil
+					and tilausrivi.tyyppi = 'O'
+					LIMIT 1";
+		$keikkahaku_res = pupe_query($query);
 
-		if ($keikkahaku_row['laskunro'] != '') {
-			$keikkarajaus = $keikkahaku_row["laskunro"];
+		if (mysql_num_rows($keikkahaku_res) > 0) {
+
+			echo "<font class='error'>".t("HUOM: Haettua ostotilausta ei löytynyt saapumisilta. Näytetään toimittajan kaikki avoimet saapumiset")."!</font><br><br>";
+
+			$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
+
 			$ytunnus 	  = $keikkahaku_row["ytunnus"];
 			$toimittajaid = $keikkahaku_row["liitostunnus"];
 		}
-		else {
-			$ostotil = "";
-			$keikka  = "";
-		}
-	}
-	else {
+
 		$ostotil = "";
 		$keikka  = "";
 	}
@@ -784,7 +801,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				ORDER BY nimi, nimitark, ytunnus";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) != 0) {
+	if (mysql_num_rows($result) > 0) {
 
 		echo "<br><font class='head'>".t("Keskeneräiset saapumiset")."</font><hr>";
 
@@ -933,9 +950,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				ORDER BY lasku.laskunro DESC";
 	$result = pupe_query($query);
 
-	if (mysql_num_rows($result) > 0) {
+	echo "<font class='head'>".t("Toimittajan keskeneräiset saapumiset")."</font><hr>";
 
-		echo "<font class='head'>".t("Toimittajan keskeneräiset saapumiset")."</font><hr>";
+	if (mysql_num_rows($result) > 0) {
 
 		pupe_DataTables(array(array($pupe_DataTables, 9, 9, false)));
 
@@ -1146,6 +1163,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 					});
 					</script>";
 		}
+	}
+	else {
+		echo "<br>".t("Toimittajalla ei ole keskeneräisiä saapumisia")."!";
 	}
 }
 

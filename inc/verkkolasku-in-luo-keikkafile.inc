@@ -1704,7 +1704,7 @@
 							toim_tuoteno = '{$pointteri1['tuoteno']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri1['insert_id']}'";
-				echo "<pre>",str_replace("\t", "", $update),"</pre>";
+				#echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
 
 				if ($hinta_chk_row['suuntalava'] != 0) {

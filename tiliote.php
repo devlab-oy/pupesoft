@@ -54,7 +54,14 @@
 				<!--
 					function verify() {
 						msg = '".t("Oletko varma?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				-->
 				</script>";

@@ -353,8 +353,10 @@ if (!function_exists('alku_lahete')) {
 			}
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 
+			$rahtivapaa = "";
+
 			// Jos rahtivapaa
-			if($laskurow['rahtivapaa'] == 'o') {
+			if ($laskurow['rahtivapaa'] == 'o') {
 				$rahtivapaa = "Rahtivapaa";
 			}
 
@@ -1825,7 +1827,6 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -1987,7 +1988,6 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2077,7 +2077,6 @@ if (!function_exists('rivi_custom_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		// Luodaan palautettavat
@@ -2163,7 +2162,6 @@ if (!function_exists('rivi_brutto_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2192,6 +2190,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
 		extract($params);
 
 		$lisarivi = 0;
+
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
 		if (trim($row["perhe_kommentti1"]) != '') {
@@ -2373,7 +2372,6 @@ if (!function_exists('rivi_eialeja_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2491,7 +2489,6 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($row["myyntihinta_maara"] > 1) {
@@ -2635,7 +2632,6 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		// Luodaan palautettavat
@@ -2762,7 +2758,6 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($kala > $alakala) $kala = $alakala;
@@ -2841,7 +2836,6 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		// tutkitaan onko tuotteelle kommentti
@@ -2969,7 +2963,6 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 			}
 
 			$kala = $kala - 5;
-			$lisarivi++;
 		}
 
 		if ($kala > $alakala) $kala = $alakala;

@@ -3,6 +3,9 @@
 // tarvitaan $laskurow array, jossa on meidän keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
+# Muuttuja kun viedään tilausrivi kerrallaan.
+$varastoon_tilausrivirajaus = "";
+
 if ($toiminto == "kalkyyli" and $tee == "" and $kauttalaskutus == '') {
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
@@ -120,6 +123,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
 	$uusiotunnuslisa = "tilausrivi.uusiotunnus = '{$laskurow['tunnus']}'";
 	$suuntalavajoin = "";
+
+	# Jos tilausrivi ei ole nolla, viedään vain yksi rivi varastoon.
+	if ($tilausrivi > 0) {
+		$varastoon_tilausrivirajaus = "AND tilausrivi.tunnus = $tilausrivi";
+	}
 
 	if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 
@@ -343,6 +351,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
+				$varastoon_tilausrivirajaus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
@@ -1262,7 +1271,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 			else {
 				echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
 			}
-			
+
 			// tarkistetaan onko lasku Teccom-lasku ja onko laskulla asn_sanomat -taulussa rivejä, joita ei ole käsitelty
 			if ($kulurow['ebid'] == 'TECCOM-INVOICE') {
 				// katotaa onko käsittelemättömiä rivejä
@@ -1272,7 +1281,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							AND tunnus 		= '$kulurow[liitostunnus]'";
 				$toimittajanrores = pupe_query($query);
 				$toimittajanrorow = mysql_fetch_assoc($toimittajanrores);
-				
+
 				$query = "	SELECT status
 							FROM asn_sanomat
 							WHERE yhtio  			= '$kukarow[yhtio]'
@@ -1280,7 +1289,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							AND asn_numero			= '$kulurow[laskunro]'
 							AND status 				= ''";
 				$asnsres = pupe_query($query);
-				
+
 				if (mysql_num_rows($asnsres) > 0) {
 					$query = "	UPDATE asn_sanomat SET
 								status = 'X'
@@ -1334,7 +1343,7 @@ if ($toiminto == "kalkyyli" and $tee == "") {
 	echo "</td></tr>";
 }
 
-if ($kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<tr>";
 }
 
@@ -1358,7 +1367,7 @@ if ($tee == "") {
 
 	echo "<td class='back' colspan='2'><input type='submit' value='".t("Päivitä")."'></td>";
 }
-elseif ($kauttalaskutus == '') {
+elseif ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "<td class='back' colspan='2'></td>";
 }
 
@@ -1382,7 +1391,7 @@ elseif ($tv_kaytossa and $kauttalaskutus == '') {
 	echo "<th></th>";
 }
 
-if ($kauttalaskutus == '') {
+if ($mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "</tr>";
 	echo "</table></form><br>";
 }
@@ -1425,18 +1434,22 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 		$uusiotunnus_chk_res = pupe_query($query);
 		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-		// päivitetään suuntalava puretuksi
-		$query = "	UPDATE tilausrivi
-					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
-					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-		 			SET suuntalavat.tila = 'P'
-					WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
-					AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-					AND tilausrivi.netto 		= ''
-					AND tilausrivi.kpl 		   != 0
-					AND tilausrivi.tyyppi 		= 'O'
-					AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
-		$netto_suuntalava_result = pupe_query($query);
+		# Ei merkata lavaa puretuksi jos viedään rivi kerrallaan
+		if ($tilausrivi == 0) {
+
+			// päivitetään suuntalava puretuksi
+			$query = "	UPDATE tilausrivi
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava)
+						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+			 			SET suuntalavat.tila = 'P'
+						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
+						AND tilausrivi.netto 		= ''
+						AND tilausrivi.kpl 		   != 0
+						AND tilausrivi.tyyppi 		= 'O'
+						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
+			$netto_suuntalava_result = pupe_query($query);
+		}
 
 		// AINA EI SIIS OSUTA TÄHÄN, JOS JÄMÄRIVEJÄ EI OLE
 		// JOS JÄMÄRIVEJÄ (= SPLITTAANTUNEET) JÄÄ SUUNTALAVALLE
@@ -1483,7 +1496,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 				and alanimi = ''";
 	$jtoikeudetres = pupe_query($query);
 
-	if ((mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") or $yhtiorow["automaattinen_jt_toimitus"] == 'J')  {
+	if ((mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") or
+		in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))) {
 
 		$jtoikeudetrow = mysql_fetch_assoc($jtoikeudetres);
 		$mista = 'varastoon.inc';
@@ -1497,17 +1511,25 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			}
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','S','V')) and count($jtrivit) > 0) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA");
+		// Jos JT-rivejä saa toimittaa vain, mikäli keräyspäivä on vanhempi kuin tämä päivä
+		if ($yhtiorow['automaattinen_jt_toimitus'] == "A") {
+			$jt_huomioi_pvm = "X";
+		}
+		else {
+			$jt_huomioi_pvm = "";
 		}
 
-		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J'))) {
-			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA");
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A','S','V')) and count($jtrivit) > 0) {
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
+		}
+
+		if (in_array($yhtiorow["automaattinen_jt_toimitus"], array('K','T','J','A'))) {
+			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, "", "", "tosi_automaaginen", "JATKA", '', '', $jt_huomioi_pvm);
 		}
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!
-		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','J','S','V'))) or $yhtiorow["automaattinen_jt_toimitus"] == 'J') {
-			jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
+		if (($jtoikeudetrow["paivitys"] == 1 and in_array($yhtiorow["automaattinen_jt_toimitus"], array('T','S','V'))) or in_array($yhtiorow["automaattinen_jt_toimitus"], array('J', 'A'))) {
+			jt_toimita("", "", "", "", "", "dummy", "TOIMITA", '', '', $jt_huomioi_pvm);
 		}
 	}
 }
@@ -1528,4 +1550,3 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '') {
 	echo "</form>";
 }
 
-?>

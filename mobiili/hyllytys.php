@@ -29,7 +29,7 @@ $query = "  SELECT
             tilausrivi.tuoteno,
             round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),2) ulkkpl,
             tuotteen_toimittajat.toim_tuoteno,
-            concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali) as kerayspaikka,
+            concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as kerayspaikka,
             tilausrivi.varattu,
             tilausrivi.yksikko,
             tilausrivi.suuntalava,

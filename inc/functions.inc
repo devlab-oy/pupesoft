@@ -18945,7 +18945,8 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.var NOT IN ('J','P')
-					AND tilausrivi.otunnus IN ($tilausnumeroita)";
+					AND tilausrivi.otunnus IN ($tilausnumeroita)
+					ORDER BY tilausrivi.tunnus";
 		$keraysera_res = pupe_query($query);
 
 		$kerayseran_rivit = array();
@@ -19016,30 +19017,6 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 				$rivi['data']['tunnus'] = $tun;
 				$kappalemaara = $uusikpl;
-			}
-			elseif ($rivi['data']['upd_varattu'] != 0 and $rivi['data']['varattu'] != $rivi['data']['upd_varattu']) {
-
-				$query = "	UPDATE tilausrivi SET
-							varattu = '{$rivi['data']['upd_varattu']}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$rivi['data']['tunnus']}'";
-				$upd_res = pupe_query($query);
-
-				$kappalemaara = $rivi['data']['upd_varattu'];
-			}
-			else {
-				$kappalemaara = $rivi['data']['varattu'];
-			}
-
-			if ($_pakkaus != 0) {
-				$query = "	UPDATE kerayserat SET
-							pakkaus = '{$valittu_pakkaus}',
-							pakkausnro = '{$rivi['data']['pakkausnro']}'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi = '{$rivi['data']['tunnus']}'";
-				$upd_res = pupe_query($query);
-			}
-			else {
 
 				$query = "	INSERT INTO kerayserat SET
 							yhtio = '{$kukarow['yhtio']}',
@@ -19061,6 +19038,59 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 							muutospvm = now(),
 							muuttaja = ''";
 				$keraysera_ins = pupe_query($query);
+
+			}
+			elseif ($rivi['data']['upd_varattu'] != 0 and $rivi['data']['varattu'] != $rivi['data']['upd_varattu']) {
+
+				$query = "	UPDATE tilausrivi SET
+							varattu = '{$rivi['data']['upd_varattu']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$rivi['data']['tunnus']}'";
+				$upd_res = pupe_query($query);
+
+				$kappalemaara = $rivi['data']['upd_varattu'];
+
+				$query = "	UPDATE kerayserat SET
+							kpl = {$rivi['data']['upd_varattu']},
+							pakkaus = '{$valittu_pakkaus}',
+							pakkausnro = '{$rivi['data']['pakkausnro']}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi = '{$rivi['data']['tunnus']}'";
+				$upd_res = pupe_query($query);
+			}
+			else {
+				$kappalemaara = $rivi['data']['varattu'];
+
+				if ($_pakkaus != 0) {
+					$query = "	UPDATE kerayserat SET
+								pakkaus = '{$valittu_pakkaus}',
+								pakkausnro = '{$rivi['data']['pakkausnro']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi = '{$rivi['data']['tunnus']}'";
+					$upd_res = pupe_query($query);
+				}
+				else {
+					$query = "	INSERT INTO kerayserat SET
+								yhtio = '{$kukarow['yhtio']}',
+								nro = {$keraysera_nro},
+								keraysvyohyke = 0,
+								tila = '',
+								sscc = 0,
+								sscc_ulkoinen = '',
+								otunnus = '{$rivi['data']['otunnus']}',
+								tilausrivi = '{$rivi['data']['tunnus']}',
+								pakkaus = '{$valittu_pakkaus}',
+								pakkausnro = '{$rivi['data']['pakkausnro']}',
+								kpl = '{$kappalemaara}',
+								kpl_keratty = 0,
+								keratty = '',
+								kerattyaika = '0000-00-00 00:00:00',
+								laatija = '{$kukarow['kuka']}',
+								luontiaika = now(),
+								muutospvm = now(),
+								muuttaja = ''";
+					$keraysera_ins = pupe_query($query);
+				}
 			}
 		}
 

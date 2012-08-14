@@ -38,6 +38,10 @@ if (isset($submit)) {
 	}
 }
 
+# Tarkistetaan onko k‰ytt‰j‰ll‰ mit‰‰n kesken
+$kesken_query = "SELECT kesken FROM kuka WHERE kuka='{$kukarow['kuka']}' AND yhtio='{$kukarow['yhtio']}'";
+$kesken = mysql_fetch_assoc(pupe_query($kesken_query));
+
 ### UI ###
 include("kasipaate.css");
 

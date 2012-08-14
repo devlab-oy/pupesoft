@@ -14,7 +14,7 @@ if(!isset($errors)) $errors = array();
 # Rajataan sallitut get parametrit
 $sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus');
 
-# Rakkenetaan parametreist‰ url_taulukko
+# Rakennetaan parametreist‰ url_taulukko
 $url_array = array();
 foreach($sallitut_parametrit as $parametri) {
 	if(!empty($$parametri)) {
@@ -38,21 +38,21 @@ if (isset($submit)) {
 	}
 }
 
-if ($ostotilaus == '' and $tuotenumero == '' and $viivakoodi == '') {
-	echo "jotain tartteis syˆtt‰‰";
-	exit;
+# Joku parametri tarvii olla setattu.
+if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
+
+	if ($viivakoodi != '') 	$params[] = "tilausrivi.eankoodi = '{$viivakoodi}'";
+	if ($tuotenumero != '') $params[] = "tilausrivi.tuoteno = '{$tuotenumero}'";
+	if ($ostotilaus != '') 	$params[] = "tilausrivi.otunnus = '{$ostotilaus}'";
+
+	$query_lisa = implode($params, " AND ");
+
 }
-
-if (!isset($ostotilaus)) $ostotilaus = '';
-if (!isset($tuotenumero)) $tuotenumero = '';
-if (!isset($viivakoodi)) $viivakoodi = '';
-
-$params = array();
-if ($ostotilaus != '') 	$params[] = "tilausrivi.otunnus = '{$ostotilaus}'";
-if ($tuotenumero != '') $params[] = "tilausrivi.tuoteno = '{$tuotenumero}'";
-if ($viivakoodi != '') 	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
-
-$query_lisa = implode($params, " AND ");
+else {
+	echo "Parametrivirhe";
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
+	exit();
+}
 
 # Haetaan tilaukset
 $query = "	SELECT
@@ -83,22 +83,53 @@ $query = "	SELECT
 			LIMIT 100";
 
 $result = pupe_query($query);
-$haku_osumat = mysql_num_rows($result);
+
+# Tarkistetaan onko k‰ytt‰j‰ll‰ kesken olevia ostotilauksia
+$kesken_query = "	SELECT kuka.kesken FROM lasku
+					JOIN kuka ON lasku.tunnus=kuka.kesken
+					WHERE kuka='{$kukarow['kuka']}'
+					and kuka.yhtio='{$kukarow['yhtio']}'
+					and lasku.tila='K';";
+$kesken_result = mysql_fetch_assoc(pupe_query($kesken_query));
+
+# Jos saapuminen on kesken niin k‰ytet‰‰n sit‰
+if ($kesken_result['kesken'] != 0) {
+	echo "K‰ytt‰j‰ll‰ on saapuminen kesken: {$kesken_result['kesken']}";
+	$saapuminen = $kesken_result['kesken'];
+}
+# Muuten tehd‰‰n uusi
+else {
+	# Haetaan toimittajan tiedot
+	$row = mysql_fetch_assoc($result);
+	$toim_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+	$toimittajarow = mysql_fetch_assoc(pupe_query($toim_query));
+
+	# Tehd‰‰n uusi saapuminen
+	$saapuminen = uusi_saapuminen($toimittajarow);
+
+	# Asetetaan uusi saapuminen k‰ytt‰j‰lle kesken olevaksi
+	$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+	$updated = pupe_query($update_kuka);
+}
+
+$url_array['saapuminen'] = $saapuminen;
+
+$tilausten_lukumaara = mysql_num_rows($result);
 
 # Ei osumia, palataan ostotilaus sivulle
-if ($haku_osumat == 0) {
+if ($tilausten_lukumaara == 0) {
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?virhe'>";
 	exit();
 }
-# Yksi osuma
-#-> suoraan hyllytys.php sivulle
-elseif ($haku_osumat == 1) {
+# Jos vain yksi osuma, menn‰‰n suoraan hyllytys sivulle
+elseif ($tilausten_lukumaara == 1) {
 
 	$row = mysql_fetch_assoc($result);
 	$url_array['tilausrivi'] = $row['tunnus'];
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
 	exit();
 }
+
 
 ### UI ###
 include("kasipaate.css");
@@ -123,6 +154,7 @@ echo "
 </tr>";
 
 # Loopataan ostotilaukset
+mysql_data_seek($result, 0);
 while($row = mysql_fetch_assoc($result)) {
 
 	echo "<tr>";

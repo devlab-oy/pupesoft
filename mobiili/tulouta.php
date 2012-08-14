@@ -38,6 +38,16 @@ if (isset($submit) and trim($submit) == 'submit') {
 	if ($tulotyyppi == '') $errors['tulotyyppi'] = t("Valitse tulotyyppi");
 }
 
+# Tarkistetaan onko käyttäjällä kesken olevia tilauksia
+$kesken_query = "	SELECT kuka.kesken FROM lasku
+					JOIN kuka ON lasku.tunnus=kuka.kesken
+					WHERE kuka='{$kukarow['kuka']}'
+					and kuka.yhtio='{$kukarow['yhtio']}'
+					and lasku.tila='K';";
+$kesken = mysql_fetch_assoc(pupe_query($kesken_query));
+
+$kesken = ($kesken['kesken'] == 0) ? "" : "({$kesken['kesken']})";
+
 include("kasipaate.css");
 
 echo "<div class='header'><h1>TULOUTA</h1></div>";
@@ -53,7 +63,7 @@ echo "<div class='main'>
 			<td>
 				<select name='tulotyyppi' size='4'>
 					<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
-					<option value='ostotilaus'>",t("Ostotilaus", $browkieli),"</option>
+					<option value='ostotilaus'>",t("Ostotilaus", $browkieli)," ".$kesken."</option>
 				</select>
 			</td>
 		</tr>

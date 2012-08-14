@@ -20,7 +20,7 @@
 		$kirjoitin = trim($kirjoitin);
 
 		$query = "	SELECT komento
-					FROM kirjoittimet 
+					FROM kirjoittimet
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$kirjoitin}'
 					ORDER BY kirjoitin";
@@ -62,9 +62,10 @@
 			$query = "UNLOCK TABLES";
 			$res   = mysql_query($query) or pupe_error($query);
 
-			$tee = $lopetus = '';
+			$lopetus = '';
+			$tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
 
-			echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": $sscc</font><br /><br />";
+			echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": {$sscc}</font><br /><br />";
 
 			require('suuntalavat.inc');
 			require('inc/footer.inc');
@@ -98,8 +99,8 @@
 		echo "<tr><th>",t("Valitse tulostin"),"</th><td><select name='kirjoitin'>";
 		echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-		$query = "	SELECT * 
-					FROM kirjoittimet 
+		$query = "	SELECT *
+					FROM kirjoittimet
 					WHERE yhtio  = '{$kukarow['yhtio']}'
 					AND komento != 'email'
 					AND komento != 'edi'

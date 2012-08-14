@@ -1108,10 +1108,13 @@
 
 						if ($keraysvirhe == 0 and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $otsikkorivi['kerayserat'] == 'A'))) {
 
+							$kerattylisa = (trim($maara[$apui]) == '' or $maara[$apui] < 0) ? ", kpl_keratty = kpl" : ", kpl_keratty = '{$maara[$apui]}'";
+
 							$pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
 
 							$query_ins = "	UPDATE kerayserat SET
 											pakkausnro = '{$pakkauskirjain}'
+											{$kerattylisa}
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivi = '{$kerivi[$i]}'";
 							$keraysera_ins_res = pupe_query($query_ins);

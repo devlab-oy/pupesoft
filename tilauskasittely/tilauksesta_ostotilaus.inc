@@ -218,7 +218,7 @@
 						$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tuoteperhe.isatuoteno
 									FROM tilausrivi
 									LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+									LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
 									where tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.tyyppi != 'D'
@@ -230,7 +230,7 @@
 
 						while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
 
-							if ($perheid == 0 or $tilrivirow['perheid'] != $perheid) $perheid = $tilrivirow['perheid'];
+							if ($tilrivirow['perheid'] == 0) $perheid = 0;
 
 							// haetaan oletuspaikan tiedot niin laitetaan se riville
 							$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and oletus!=''";
@@ -386,4 +386,3 @@
 			return $tilauksesta_ostotilaus;
 		}
 	}
-?>

@@ -16065,3 +16065,27 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 		return $summa;
 	}
 }
+
+if (!function_exists('triangulation')) {
+	function triangulation($tunnukset) {
+		global $kukarow, $yhtiorow;
+
+		# Katsotaan onko kyseessä kolmikantakauppa
+		$query = "	SELECT lasku.tunnus, lasku.toim_maa
+					FROM tilausrivi
+					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio
+						AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
+						AND t3.tyyppi = 'O')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+						AND lasku.tunnus = t3.otunnus
+						AND lasku.toim_maa != '$yhtiorow[maa]')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.otunnus IN ($tunnukset)";
+		$result = pupe_query($query);
+
+		return mysql_num_rows($result) > 0 ? "VAT 0% Triangulation.\n" : "";
+	}
+}

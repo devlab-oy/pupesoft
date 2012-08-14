@@ -174,10 +174,8 @@
 	}
 	if ($lasrow["vienti"] == 'E') {
 
-		$triangulation_chk = triangulation($tunnukset);
-
-		if ($triangulation_chk != "") {
-			$lisa_comments .= $triangulation_chk;
+		if ($lasrow['kolmikantakauppa'] == "K") {
+			$lisa_comments .= "VAT 0% Triangulation.\n";
 		}
 		else {
 			//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..

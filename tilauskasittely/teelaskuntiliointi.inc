@@ -9,6 +9,7 @@ $query = "	SELECT tilausrivi.alv alv,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_eu, '') != '', 				tuotteen_alv.tilino_eu, 				if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 				yhtion_toimipaikat.tilino_eu, 				if(ifnull(tuote.tilino_eu, '') != '', 				tuote.tilino_eu, 				if(ifnull(asiakas.tilino_eu, '') != '', 				asiakas.tilino_eu, 				if(ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 				yhtion_toimipaikat.tilino_eu, 				yhtio.myynti_eu))))) tilino_eu,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_ei_eu, '') != '', 			tuotteen_alv.tilino_ei_eu, 				if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_ei_eu, '') != '', 			yhtion_toimipaikat.tilino_ei_eu, 			if(ifnull(tuote.tilino_ei_eu, '') != '',			tuote.tilino_ei_eu, 			if(ifnull(asiakas.tilino_ei_eu, '') != '', 				asiakas.tilino_ei_eu, 			if(ifnull(yhtion_toimipaikat.tilino_ei_eu, '') != '', 			yhtion_toimipaikat.tilino_ei_eu, 			yhtio.myynti_ei_eu))))) tilino_ei_eu,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_kaanteinen, '') != '',		tuotteen_alv.tilino_kaanteinen,			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_kaanteinen, '') != '',		yhtion_toimipaikat.tilino_kaanteinen,		if(ifnull(tuote.tilino_kaanteinen, '') != '',		tuote.tilino_kaanteinen,		if(ifnull(asiakas.tilino_kaanteinen, '') != '',			asiakas.tilino_kaanteinen,		if(ifnull(yhtion_toimipaikat.tilino_kaanteinen, '') != '',		yhtion_toimipaikat.tilino_kaanteinen,		yhtio.myynti_kaanteinen))))) tilino_kaanteinen,
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_triang, '') != '',			tuotteen_alv.tilino_triang,				if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_triang, '') != '',			yhtion_toimipaikat.tilino_triang,			if(ifnull(tuote.tilino_triang, '') != '',			tuote.tilino_triang,			if(ifnull(asiakas.tilino_triang, '') != '',				asiakas.tilino_triang,			if(ifnull(yhtion_toimipaikat.tilino_triang, '') != '',			yhtion_toimipaikat.tilino_triang,			yhtio.tilino_triang))))) tilino_triang,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, 0) > 0, 						tuotteen_alv.kustp, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					if(ifnull(tuote.kustp, 0) > 0, 						tuote.kustp, 					if(ifnull(asiakas.kustannuspaikka, 0) > 0, 				asiakas.kustannuspaikka, 		if(ifnull(yhtion_toimipaikat.kustp, 0) > 0, 					yhtion_toimipaikat.kustp, 					yhtio.myynti_kustp))))) kustp,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, 0) > 0, 						tuotteen_alv.kohde, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					if(ifnull(tuote.kohde, 0) > 0, 						tuote.kohde, 					if(ifnull(asiakas.kohde, 0) > 0, 						asiakas.kohde, 					if(ifnull(yhtion_toimipaikat.kohde, 0) > 0, 					yhtion_toimipaikat.kohde, 					yhtio.myynti_kohde))))) kohde,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, 0) > 0, 					tuotteen_alv.projekti, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				if(ifnull(tuote.projekti, 0) > 0, 					tuote.projekti, 				if(ifnull(asiakas.projekti, 0) > 0, 					asiakas.projekti, 				if(ifnull(yhtion_toimipaikat.projekti, 0) > 0, 					yhtion_toimipaikat.projekti, 				yhtio.myynti_projekti))))) projekti,
@@ -33,7 +34,7 @@ $query = "	SELECT tilausrivi.alv alv,
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			AND tilausrivi.tyyppi		 = 'L'
 			AND tilausrivi.yhtio		 = '$kukarow[yhtio]'
-			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
+			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {
@@ -61,6 +62,7 @@ else {
 		$tilino_eu						= 0;
 		$tilino_ei_eu					= 0;
 		$tilino_kaanteinen				= 0;
+		$tilino_triang					= 0;
 		$onkokaanteinen					= ""; // apumuuttuja, että tiedetään onko käänteinen alvillisuus
 
 		// kustannuspaikkaa, kohde ja projekti
@@ -136,6 +138,7 @@ else {
 			$tilino_eu 			= (int) $xrow['tilino_eu'];
 			$tilino_ei_eu 		= (int) $xrow['tilino_ei_eu'];
 			$tilino_kaanteinen	= (int) $xrow['tilino_kaanteinen'];
+			$tilino_triang		= (int) $xrow['tilino_triang'];
 
 			$tiliointisumma = $marginaali_kate;
 			$tiliointisumma_valuutassa = round($marginaali_kate / $lasku['vienti_kurssi'], 2); //Myynnin marginaali valuutassa (paras arvaus on kääntää kurssilla)
@@ -157,6 +160,7 @@ else {
 			$tilino_eu 			= (int) $xrow['osto_marginaali'];
 			$tilino_ei_eu		= (int) $xrow['osto_marginaali'];
 			$tilino_kaanteinen	= (int) $xrow['osto_marginaali'];
+			$tilino_triang		= (int) $xrow['osto_marginaali'];
 
 			$tiliointisumma 			= $xrow['summa'];
 			$tiliointisumma_valuutassa	= $xrow['summa_valuutassa'];
@@ -173,6 +177,7 @@ else {
 			$tilino_eu 			= (int) $xrow['tilino_eu'];
 			$tilino_ei_eu 		= (int) $xrow['tilino_ei_eu'];
 			$tilino_kaanteinen	= (int) $xrow['tilino_kaanteinen'];
+			$tilino_triang		= (int) $xrow['tilino_triang'];
 
 			$tiliointisumma = $xrow['summa'];
 			$tiliointisumma_valuutassa = $xrow['summa_valuutassa'];
@@ -194,6 +199,11 @@ else {
 		// Valitaan myyntitili käänteisen verotuksen mukaan
 		if ($onkokaanteinen == "kylla") {
 			$tilino = $tilino_kaanteinen;
+		}
+
+		// Katsotaan onko kyseessä kolmikauppa
+		if ($lasku['kolmikantakauppa'] == "K") {
+			$tilino = $tilino_triang;
 		}
 
 		// Tiliöidään myynti
@@ -551,5 +561,3 @@ else {
 if ($tulos_ulos == "" and $silent == "") {
 	echo $tulos_ulos_tiliointi;
 }
-
-?>

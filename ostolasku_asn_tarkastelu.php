@@ -233,7 +233,7 @@
 								status = 'X'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND asn_numero = '{$lasku}'
-								AND status != 'E'";
+								AND status not in ('E', 'D')";
 					$upd_res = pupe_query($query);
 
 					$automaattikohdistukseen = false;
@@ -264,7 +264,7 @@
 			$query = "	SELECT *
 						FROM asn_sanomat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND status != 'E'
+						AND status not in ('E', 'D')
 						{$tilausrivilisa}
 						{$wherelisa}";
 			$kollires = pupe_query($query);
@@ -552,7 +552,7 @@
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND laji = 'tec'
 								AND asn_numero = '{$lasku}'
-								AND status != 'E'";
+								AND status not in ('E', 'D')";
 					$upd_res = pupe_query($query);
 				}
 
@@ -580,7 +580,7 @@
 
 					if ($virheet == 0) {
 
-						$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status != 'E' {$wherelisa}";
+						$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND status not in ('E','D') {$wherelisa}";
 						$kollires = pupe_query($query);
 
 						while ($kollirow = mysql_fetch_assoc($kollires)) {
@@ -623,7 +623,7 @@
 		$kolli = mysql_real_escape_string($kolli);
 		$wherelisa = "AND paketintunniste = '{$kolli}'";
 
-		$query = "SELECT * from asn_sanomat where yhtio = '{$kukarow["yhtio"]}' {$wherelisa}";
+		$query = "SELECT * from asn_sanomat where yhtio = '{$kukarow["yhtio"]}' and status != 'D' {$wherelisa}";
 		$kollires = pupe_query($query);
 		$rivi = mysql_fetch_assoc($kollires);
 
@@ -1851,6 +1851,7 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'asn'
+						AND asn_sanomat.status != 'D'
 						GROUP BY asn_sanomat.paketintunniste, asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 						ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 			$result = pupe_query($query);
@@ -1946,7 +1947,7 @@
 						JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
 						WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
 						AND asn_sanomat.laji = 'tec'
-						AND asn_sanomat.status NOT IN ('X', 'E')
+						AND asn_sanomat.status NOT IN ('X', 'E', 'D')
 						GROUP BY asn_sanomat.asn_numero, asn_sanomat.toimittajanumero, toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift
 						ORDER BY toimi.nimi, toimi.ytunnus";
 			$result = pupe_query($query);

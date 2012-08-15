@@ -142,6 +142,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>				".t("Laskun vakioviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL")	$ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>	".t("Tilausvahvistuksen vakioviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")	$ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>		".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LITETY") 			$ulos .= "<option value='LITETY' $avain_sel[LITETY]>						".t("Liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") 		$ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">			".t("Tilauksen liitetiedostotyyppi")."</option>";
@@ -383,7 +384,7 @@
 		$jatko = 0;
 	}
 
-	if ($avain_sel['VAKIOVIESTI'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+	if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and mysql_field_name($result, $i) == "selite") {
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
@@ -500,5 +501,3 @@
 			$trow[$i] = $ajarjestys;
 		}
 	}
-
-?>

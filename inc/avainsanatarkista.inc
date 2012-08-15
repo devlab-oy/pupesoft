@@ -49,7 +49,7 @@ if(!function_exists("avainsanatarkista")) {
 				$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
 			}
 
-			if ($tem_laji == 'VAKIOVIESTI' and trim($tem_selite) == '') {
+			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
 
@@ -80,7 +80,7 @@ if(!function_exists("avainsanatarkista")) {
 		if (mysql_field_name($result, $i) == "selitetark") {
 			$tem_selitetark = trim($t[$i]);
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}
 
@@ -128,5 +128,3 @@ if(!function_exists("avainsanatarkista")) {
 		}
 	}
 }
-
-?>

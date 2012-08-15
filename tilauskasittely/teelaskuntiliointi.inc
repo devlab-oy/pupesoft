@@ -202,7 +202,7 @@ else {
 		}
 
 		// Katsotaan onko kyseessä kolmikauppa
-		if ($lasku['kolmikantakauppa'] == "K") {
+		if ($lasku['kolmikantakauppa'] == "K" and $tilino_triang != 0) {
 			$tilino = $tilino_triang;
 		}
 

@@ -1495,7 +1495,7 @@
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		// saadaan luoda keikka vain, jos tulee pelkk‰ lasku (eli toimittajan takana on asn_sanomat = 'L')
-		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0 and $trow['asn_sanomat'] == 'L') {
+		if ($virheet == 0 and count($ostoilla) > 0 and count($keikoilla) == 0 and ($trow['asn_sanomat'] == 'L' or ($trow['asn_sanomat'] == 'K' and $tullaan_virhetarkistuksesta))) {
 
 			#echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
 
@@ -2018,6 +2018,7 @@
 			require("tilauskasittely/kululaskut.inc");
 		}
 		else {
+			$virheet++;
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
 		}
 	}

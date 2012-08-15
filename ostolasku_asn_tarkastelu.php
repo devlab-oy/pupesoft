@@ -1035,6 +1035,8 @@
 								AND tunnus = '{$ostotilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
 
+					$insertlisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$erotus}'," : "varattu = '{$erotus}',";
+
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
 								yhtio 		= '$ostotilausrivirow[yhtio]',
@@ -1048,7 +1050,7 @@
 								nimitys		= '$ostotilausrivirow[nimitys]',
 								yksikko		= '$ostotilausrivirow[yksikko]',
 								tilkpl		= '$erotus',
-								varattu		= '$erotus',
+								{$insertlisa}
 								hinta		= '$ostotilausrivirow[hinta]',
 								ale1		= '$ostotilausrivirow[ale1]',
 								ale2		= '$ostotilausrivirow[ale2]',

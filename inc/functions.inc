@@ -16080,10 +16080,10 @@ if (!function_exists('triangulation')) {
 						AND t3.tyyppi = 'O')
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = t3.otunnus
-						AND lasku.toim_maa != '$yhtiorow[maa]')
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND lasku.toim_maa != '{$yhtiorow['maa']}')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.otunnus IN ($tunnukset)";
+					AND tilausrivi.otunnus IN ({$tunnukset})";
 		$result = pupe_query($query);
 
 		return mysql_num_rows($result) > 0 ? "VAT 0% Triangulation.\n" : "";

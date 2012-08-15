@@ -376,6 +376,13 @@
 							AND tunnus = '{$otunnus}'";
 				$upd_res = pupe_query($query);
 			}
+			else {
+				$query = "	UPDATE lasku SET
+							kolmikantakauppa = ''
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$otunnus}'";
+				$upd_res = pupe_query($query);
+			}
 
 			return $tilauksesta_ostotilaus;
 		}

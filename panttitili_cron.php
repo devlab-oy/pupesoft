@@ -78,7 +78,7 @@
 						ale1 = 100,
 						{$query_insert_lisa}
 						kate = 0,
-						kommentti = '',
+						kommentti = '".("Panttituotteen hyvitys palauttamattomista panteista")."',
 						laatija = 'cron',
 						laadittu = now(),
 						keratty = 'cron',
@@ -146,7 +146,7 @@
 						erikoisale = '{$pantti_row['erikoisale']}',
 						{$query_insert_lisa}
 						kate = 0,
-						kommentti = '',
+						kommentti = '".("Panttituotteen veloitus palauttamattomista panteista")."',
 						laatija = 'cron',
 						laadittu = now(),
 						keratty = 'cron',

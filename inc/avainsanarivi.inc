@@ -389,6 +389,23 @@
 		$jatko = 0;
 	}
 
+	// Tuoteryhmiss‰ voidaan antaa oletusker‰ysprioriteetti selitetark_4 kentt‰‰n
+	if ($avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_4") {
+
+		$vresult = t_avainsana("ASIAKASLUOKKA");
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei ker‰ysprioriteetti‰")."</option>";
+
+		while ($row = mysql_fetch_assoc($vresult)) {
+			$sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+			$ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
+		}
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "SELECTED" or $avain_sel["TYOM_TYOSTATUS"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {

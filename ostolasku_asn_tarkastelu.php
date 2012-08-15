@@ -1038,31 +1038,35 @@
 					$insertlisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$erotus}'," : "varattu = '{$erotus}',";
 
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-					$query = "	INSERT INTO tilausrivi SET
-								yhtio 		= '$ostotilausrivirow[yhtio]',
-								tyyppi		= '$ostotilausrivirow[tyyppi]',
-								toimaika	= '$ostotilausrivirow[toimaika]',
-								kerayspvm	= '$ostotilausrivirow[kerayspvm]',
-								otunnus		= '$ostotilausrivirow[otunnus]',
-								tuoteno		= '$ostotilausrivirow[tuoteno]',
-								try			= '$ostotilausrivirow[try]',
-								osasto		= '$ostotilausrivirow[osasto]',
-								nimitys		= '$ostotilausrivirow[nimitys]',
-								yksikko		= '$ostotilausrivirow[yksikko]',
-								tilkpl		= '$erotus',
-								{$insertlisa}
-								hinta		= '$ostotilausrivirow[hinta]',
-								ale1		= '$ostotilausrivirow[ale1]',
-								ale2		= '$ostotilausrivirow[ale2]',
-								ale3		= '$ostotilausrivirow[ale3]',
-								laatija		= '$ostotilausrivirow[laatija]',
-								laadittu	= '$ostotilausrivirow[laadittu]',
-								hyllyalue	= '$ostotilausrivirow[hyllyalue]',
-								hyllynro	= '$ostotilausrivirow[hyllynro]',
-								hyllytaso	= '$ostotilausrivirow[hyllytaso]',
-								hyllyvali	= '$ostotilausrivirow[hyllyvali]',
-								tilaajanrivinro = '$ostotilausrivirow[tilaajanrivinro]'";
-					$inskres = pupe_query($query);
+					$fields = "yhtio";
+					$values = "'{$kukarow['yhtio']}'";
+
+					// Ei monisteta tunnusta
+					for ($ii = 1; $ii < mysql_num_fields($ostores) - 1; $ii++) {
+
+						$fieldname = mysql_field_name($ostores,$ii);
+
+						$fields .= ", ".$fieldname;
+
+						switch ($fieldname) {
+							case 'varattu':
+								if ($ostotilausrivirow['kpl'] == 0) $values .= ", '{$erotus}'";
+								else $values .= ", 0";
+								break;
+							case 'kpl':
+								if ($ostotilausrivirow['kpl'] != 0) $values .= ", '{$erotus}'";
+								else $values .= ", 0";
+								break;
+							case 'tilkpl':
+								$values .= ", '{$erotus}'";
+								break;
+							default:
+								$values .= ", '".$ostotilausrivirow[$fieldname]."'";
+						}
+					}
+
+					$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+					$uusires = pupe_query($kysely);
 					$tilausrivi_id = mysql_insert_id();
 
 					if ($ostotilausrivirow['kpl'] != 0) {

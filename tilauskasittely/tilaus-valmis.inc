@@ -171,9 +171,9 @@ else {
 
 		$keraysprioriteetti_query = "	SELECT avainsana.selitetark_4
 										FROM tilausrivi
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio 
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
 											AND tuote.tuoteno = tilausrivi.tuoteno)
-										JOIN avainsana ON (avainsana.yhtio = tilausrivi.yhtio 
+										JOIN avainsana ON (avainsana.yhtio = tilausrivi.yhtio
 											AND avainsana.laji = 'TRY'
 											AND avainsana.selitetark_4 != ''
 											AND avainsana.selite = tuote.try)
@@ -187,9 +187,9 @@ else {
 		// p‰ivitet‰‰n prioriteetti laskulle
 		if (mysql_num_rows($keraysprioriteetti_res) == 1) {
 			$keraysprioriteetti_row = mysql_fetch_assoc($keraysprioriteetti_res);
-			$keraysprioriteetti_query  = "	UPDATE lasku SET 
-											hyvaksynnanmuutos = {$keraysprioriteetti_row["selitetark_4"]} 
-											WHERE yhtio = '{$kukarow["yhtio"]}' 
+			$keraysprioriteetti_query  = "	UPDATE lasku SET
+											hyvaksynnanmuutos = '{$keraysprioriteetti_row["selitetark_4"]}'
+											WHERE yhtio = '{$kukarow["yhtio"]}'
 											AND tunnus = '{$laskurow["tunnus"]}'";
 			$keraysprioriteetti_res = pupe_query($keraysprioriteetti_query);
 		}

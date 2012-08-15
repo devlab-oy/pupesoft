@@ -59,7 +59,7 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 
 	# Ei saa olla tyhjiä kenttiä
-	if ($hyllyalue == '' and $hyllynro == '' and $hyllyvali == '' and $hyllytaso == '') {
+	if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
 		$error['kerayspaikka'] = t("Hyllypaikka ei saa olla tyhjä", $browkieli).'.';
 	}
 	elseif ($hylly_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
@@ -140,6 +140,9 @@ echo "<div class='main'>
 		<tr>
 			<th>",t("Taso", $browkieli),"</td>
 			<td><input type='text' name='hyllytaso' value='' /></th>
+		</tr>
+		<tr>
+			<td colspan='2'>",t("Tee tästä oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
 		</tr>
 	</table>
 

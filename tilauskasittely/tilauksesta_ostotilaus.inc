@@ -366,23 +366,13 @@
 			}
 
 			// Katsotaan oliko kolmikantakauppaa
-			$triangulation_chk = triangulation($otunnus);
+			$triangulation = triangulation($otunnus) != "" ? "K" : "";
 
-			if ($triangulation_chk != "") {
-
-				$query = "	UPDATE lasku SET
-							kolmikantakauppa = 'K'
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$otunnus}'";
-				$upd_res = pupe_query($query);
-			}
-			else {
-				$query = "	UPDATE lasku SET
-							kolmikantakauppa = ''
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$otunnus}'";
-				$upd_res = pupe_query($query);
-			}
+			$query = "	UPDATE lasku SET
+						kolmikantakauppa = '{$triangulation}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$otunnus}'";
+			$upd_res = pupe_query($query);
 
 			return $tilauksesta_ostotilaus;
 		}

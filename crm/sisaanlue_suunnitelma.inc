@@ -2,54 +2,42 @@
 
 if ($tee == "FILE") {
 	if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-		$timeparts = explode(" ",microtime());
-		$starttime = $timeparts[1].substr($timeparts[0],1);
 
-		$path_parts = pathinfo($_FILES['userfile']['name']);
-		$name	= strtoupper($path_parts['filename']);
-		$ext	= strtoupper($path_parts['extension']);
+		/** Käsiteltävän filen nimi **/
+		$kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
-		if ($ext != "TXT" and $ext != "CSV") {
-			die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
-		}
+		$excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
-		if ($_FILES['userfile']['size']==0) {
-			die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-		}
+		// Otsikkorivi veks
+		$null = array_shift($excelrivit);
 
-		$file=fopen($_FILES['userfile']['tmp_name'],"r") or die ("".t("Tiedoston avaus epäonnistui")."!");
+		foreach ($excelrivit as $rivinumero => $rivi) {
 
-		// luetaan tiedosto alusta loppuun...
-		//ekalla rivillä on otsikot joten luetaan se tässä pois
-		$rivi = fgets($file, 4096);
+			$rivinumero+=2;
 
-		$rivi = fgets($file, 4096);
+			$tila	 = '';
+			$valinta = '';
 
-		$lask = 1;
+			$asiakasnro = $rivi[1];
+			$ytunnus 	= $rivi[2];
 
-		while (!feof($file)) {
-
-			$tila='';
-			$valinta='';
-
-			// luetaan rivi tiedostosta..
-			$poista	  = array("'", "\\","\"");
-			$rivi	  = str_replace($poista,"",$rivi);
-			$rivi	  = explode("\t", trim($rivi));
-
-			$asiakas 	= $rivi[2];
-			$yhtio   	= $rivi[3];
+			$yhtio   	= $rivi[5];
 
 			$suunpvm 	= "";
 			$suun 		= "";
-			if (strpos(trim($rivi[5]), "/") !== FALSE) {
-				$suun = explode("/", trim($rivi[5]));
+
+			if (is_numeric($rivi[9])) {
+				// Excelissä päivämäärät lasketaan päivissä päivästä 1.1.1900
+				$suun = explode("-", date("d-m-Y", (($rivi[9]-25569) * 86400)));
 			}
-			if (strpos(trim($rivi[5]), ".") !== FALSE) {
-				$suun = explode(".", trim($rivi[5]));
+			elseif (strpos(trim($rivi[9]), "/") !== FALSE) {
+				$suun = explode("/", trim($rivi[9]));
+			}
+			elseif (strpos(trim($rivi[9]), ".") !== FALSE) {
+				$suun = explode(".", trim($rivi[9]));
 			}
 
-			if((int) $suun[2] < 1000) {
+			if ((int) $suun[2] < 1000) {
 				$suun[2] += 2000;
 			}
 
@@ -57,18 +45,23 @@ if ($tee == "FILE") {
 				$suunpvm = sprintf('%04d',$suun[2])."-".sprintf('%02d',$suun[1])."-".sprintf('%02d',$suun[0]);
 			}
 
-			$kampanjat 	= $rivi[6];
+			$kampanjat 	= $rivi[10];
 
 			$kaytypvm 	= "";
 			$kayty		= "";
-			if (strpos(trim($rivi[5]), "/")  !== FALSE) {
-				$kayty = explode("/", trim($rivi[7]));
+
+			if (is_numeric($rivi[11])) {
+				// Excelissä päivämäärät lasketaan päivissä päivästä 1.1.1900
+				$kayty = explode("-", date("d-m-Y", (($rivi[11]-25569) * 86400)));
 			}
-			if (strpos(trim($rivi[5]), ".")  !== FALSE) {
-				$kayty = explode(".", trim($rivi[7]));
+			elseif (strpos(trim($rivi[11]), "/") !== FALSE) {
+				$kayty = explode("/", trim($rivi[11]));
+			}
+			elseif (strpos(trim($rivi[11]), ".") !== FALSE) {
+				$kayty = explode(".", trim($rivi[11]));
 			}
 
-			if((int) $kayty[2] < 1000) {
+			if ((int) $kayty[2] < 1000) {
 				$kayty[2] += 2000;
 			}
 
@@ -76,9 +69,8 @@ if ($tee == "FILE") {
 				$kaytypvm = sprintf('%04d',$kayty[2])."-".sprintf('%02d',$kayty[1])."-".sprintf('%02d',$kayty[0]);
 			}
 
-			$kilsat = $rivi[8];
-
-			$lahto = $rivi[9];
+			$kilsat = $rivi[12];
+			$lahto  = $rivi[13];
 
 			if (strlen($lahto) == 1 or strlen($lahto) == 2) {
 				$lahto = sprintf('%02d',$lahto).":00:00";
@@ -93,8 +85,8 @@ if ($tee == "FILE") {
 				$lahto = sprintf('%02d',substr($lahto,0,2)).":".sprintf('%02d',substr($lahto,3,2)).":".sprintf('%02d',substr($lahto,6,2));
 			}
 
+			$paluu = $rivi[14];
 
-			$paluu = $rivi[10];
 			if (strlen($paluu) == 1 or strlen($paluu) == 2) {
 				$paluu = sprintf('%02d',$paluu).":00:00";
 			}
@@ -108,8 +100,8 @@ if ($tee == "FILE") {
 				$paluu = sprintf('%02d',substr($paluu,0,2)).":".sprintf('%02d',substr($paluu,3,2)).":".sprintf('%02d',substr($paluu,6,2));
 			}
 
-			$pvrahat	= $rivi[11];
-			$kommentit	= $rivi[12];
+			$pvrahat	= $rivi[15];
+			$kommentit	= $rivi[16];
 
 			$virhe = 0;
 
@@ -121,7 +113,7 @@ if ($tee == "FILE") {
 				}
 			}
 			elseif (trim($kaytypvm) == '') {
-				echo "VIRHE: Rivillä $lask. ".t("Päivämäärä puuttui tai se oli virheellinen")."!<br>";
+				echo "VIRHE: Rivillä $rivinumero. ".t("Päivämäärä puuttui tai se oli virheellinen")."!<br>";
 				$virhe = 1;
 			}
 
@@ -130,7 +122,7 @@ if ($tee == "FILE") {
 				$kpvm  = $kaytypvm;
 			}
 			elseif (trim($suunpvm) == '') {
-				echo "VIRHE: Rivillä $lask. ".t("Päivämäärä puuttui tai se oli virheellinen")."!<br>";
+				echo "VIRHE: Rivillä $rivinumero. ".t("Päivämäärä puuttui tai se oli virheellinen")."!<br>";
 				$virhe = 1;
 			}
 
@@ -141,32 +133,34 @@ if ($tee == "FILE") {
 				$paluu = "00:00:00";
 			}
 
-			$query = "	SELECT yhtio
+			$query = "	SELECT yhtio, tunnus, ytunnus
 						FROM asiakas
-						WHERE
-						yhtio 			= '$yhtio'
-						and ytunnus 	= '$asiakas'";
-			$result = mysql_query($query) or pupe_error($query);
+						WHERE yhtio 	= '$yhtio'
+						and asiakasnro  = '$asiakasnro'
+						and ytunnus 	= '$ytunnus'";
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
-				echo t("VIRHE: Rivillä")." $lask. ".t("Asiakasta ei löydy")."!<br>";
+				echo t("VIRHE: Rivillä")." $rivinumero. ".t("Asiakasta ei löydy")."! $query<br>";
 				$virhe = 1;
 			}
-
-
+			else {
+				$asiakasrow = mysql_fetch_assoc($result);
+			}
 
 			if ($virhe == 0) {
 				$query = "	SELECT yhtio
 							FROM kalenteri
 							WHERE
-							yhtio 			= '$yhtio'
-							and kuka 		= '$kukarow[kuka]'
-							and pvmalku 	= '$kpvm $lahto'
-							and pvmloppu 	= '$kpvm $paluu'
-							and asiakas 	= '$asiakas'
-							and tapa 		= '$kumpi'
-							and tyyppi		= 'kalenteri'";
-				$result = mysql_query($query) or pupe_error($query);
+							yhtio 			 = '$yhtio'
+							and kuka 		 = '$kukarow[kuka]'
+							and pvmalku 	 = '$kpvm $lahto'
+							and pvmloppu 	 = '$kpvm $paluu'
+							and asiakas 	 = '$asiakasrow[ytunnus]'
+							and liitostunnus = '$asiakasrow[tunnus]'
+							and tapa 		 = '$kumpi'
+							and tyyppi		 = 'kalenteri'";
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0) {
 
@@ -179,10 +173,11 @@ if ($tee == "FILE") {
 									and kuka 				= '$kukarow[kuka]'
 									and left(pvmalku,10) 	= '$suunpvm'
 									and left(pvmloppu,10) 	= '$suunpvm'
-									and asiakas 			= '$asiakas'
+									and asiakas 	 		= '$asiakasrow[ytunnus]'
+									and liitostunnus 		= '$asiakasrow[tunnus]'
 									and tapa 				= 'Viikkosuunnitelma'
 									and tyyppi				= 'kalenteri'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) != 0) {
 
@@ -193,65 +188,62 @@ if ($tee == "FILE") {
 										tyyppi 		= 'memo'
 										WHERE yhtio = '$yhtio'
 										and tunnus 	= '$prow[tunnus]'";
-							$result = mysql_query($query) or pupe_error($query);
-
-
+							$result = pupe_query($query);
 						}
 					}
 
 					$query = "	INSERT INTO kalenteri
 								SET
-								yhtio 		= '$yhtio',
-								kuka 		= '$kukarow[kuka]',
-								pvmalku 	= '$kpvm $lahto',
-								pvmloppu 	= '$kpvm $paluu',
-								asiakas 	= '$asiakas',
-								kentta01 	= '$kommentit',
-								tapa 		= '$kumpi',
-								kentta02	= '$kampanjat',
-								kentta03	= '$kilsat',
-								kentta04	= '$pvrahat',
-								kokopaiva	= 'x',
-								tyyppi 		= 'kalenteri'";
-					$result = mysql_query($query) or pupe_error($query);
+								yhtio 		 = '$yhtio',
+								kuka 		 = '$kukarow[kuka]',
+								pvmalku 	 = '$kpvm $lahto',
+								pvmloppu 	 = '$kpvm $paluu',
+								asiakas 	 = '$asiakasrow[ytunnus]',
+								liitostunnus = '$asiakasrow[tunnus]',
+								kentta01 	 = '$kommentit',
+								tapa 		 = '$kumpi',
+								kentta02	 = '$kampanjat',
+								kentta03	 = '$kilsat',
+								kentta04	 = '$pvrahat',
+								kokopaiva	 = 'x',
+								tyyppi 		 = 'kalenteri'";
+					$result = pupe_query($query);
 				}
 				elseif ($kumpi == "Asiakaskäynti") {
 					$query = "	UPDATE kalenteri
 								SET
-								yhtio 		= '$yhtio',
-								kuka 		= '$kukarow[kuka]',
-								pvmalku 	= '$kpvm $lahto',
-								pvmloppu 	= '$kpvm $paluu',
-								asiakas 	= '$asiakas',
-								kentta01 	= '$kommentit',
-								tapa 		= '$kumpi',
-								kentta02	= '$kampanjat',
-								kentta03	= '$kilsat',
-								kentta04	= '$pvrahat',
-								tyyppi 		= 'kalenteri'
-								WHERE yhtio = '$yhtio'
-								and kuka 	= '$kukarow[kuka]'
-								and pvmalku = '$kpvm $lahto'
-								and pvmloppu= '$kpvm $paluu'
-								and asiakas = '$asiakas'
-								and tapa 	= '$kumpi'
-								and tyyppi	= 'kalenteri'";
-					$result = mysql_query($query) or pupe_error($query);
+								yhtio 		 = '$yhtio',
+								kuka 		 = '$kukarow[kuka]',
+								pvmalku 	 = '$kpvm $lahto',
+								pvmloppu 	 = '$kpvm $paluu',
+								asiakas 	 = '$asiakasrow[ytunnus]',
+								liitostunnus = '$asiakasrow[tunnus]',
+								kentta01 	 = '$kommentit',
+								tapa 		 = '$kumpi',
+								kentta02	 = '$kampanjat',
+								kentta03	 = '$kilsat',
+								kentta04	 = '$pvrahat',
+								tyyppi 		 = 'kalenteri'
+								WHERE yhtio  	 = '$yhtio'
+								and kuka 	 	 = '$kukarow[kuka]'
+								and pvmalku  	 = '$kpvm $lahto'
+								and pvmloppu 	 = '$kpvm $paluu'
+								and asiakas 	 = '$asiakasrow[ytunnus]'
+								and liitostunnus = '$asiakasrow[tunnus]'
+								and tapa 	 	 = '$kumpi'
+								and tyyppi	 	 = 'kalenteri'";
+					$result = pupe_query($query);
 				}
 				else {
-					echo "".t("VIRHE: Rivillä")." $lask. ".t("Tieto on jo viikkosuunnitelmassasi")."!<br>";
+					echo t("VIRHE: Rivillä")." $rivinumero. ".t("Tieto on jo viikkosuunnitelmassasi")."!<br>";
 				}
 			}
-
-			$lask++;
-
-			$rivi = fgets($file, 4096);
-		} // end while eof
+		}
 
 		if ($kumpi != '') {
 
 			$kaladate = explode('-', $suunpvm);
-			$kausi = $kaladate[0].sprintf('%02d',date("W", mktime(0, 0, 0, $kaladate[1], $kaladate[2], $kaladate[0])));
+			$kausi 	  = $kaladate[0].sprintf('%02d',date("W", mktime(0, 0, 0, $kaladate[1], $kaladate[2], $kaladate[0])));
 
 			$vstk = $kumpi;
 
@@ -263,12 +255,7 @@ if ($tee == "FILE") {
 			}
 		}
 
-
-
-		fclose($file);
-
 		$tee = "";
-
 	}
 	else {
 		$tee = "";
@@ -284,14 +271,28 @@ if ($tee == 'VALITSE_TIEDOSTO') {
 			<input type='hidden' name='vstk' value='$vstk'>
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>";
 
-
 	echo "	<table>
-			<tr><th colspan='5'>".t("Suunnitelma")."</th><th colspan='7'>".t("Toteutuneet")."</th></tr>
-			<tr><td>".t("Paikka")."</td><td>".t("Asiakas")."</td><td>".t("Yhtiöt")."</td><td>".t("Nimi")."</td><td>".t("Pvm")."</td>
-			<td>".t("Kampanjat")."</td><td>".t("PvmKäyty")."</td><td>".t("Km")."</td><td>".t("Lähtö")."</td><td>".t("Paluu")."</td><td>".t("PvRaha")."</td><td>".t("Kommentit")."</td>
+			<tr><th colspan='10'>".t("Suunnitelma")."</th><th colspan='7'>".t("Toteutuneet")."</th></tr>
+			<tr>
+				<td>".t("Asiakas")."</td>
+				<td>".t("Asiakasnumero")."</td>
+				<td>".t("Ytunnus")."</td>
+				<td>".t("Postitp")."</td>
+				<td>".t("Postino")."</td>
+				<td>".t("Yhtiöt")."</td>
+				<td>".t("Myyjä")."</td>
+				<td>".t("Email")."</td>
+				<td>".t("Puhelin")."</td>
+				<td>".t("Pvm")."</td>
+				<td>".t("Kampanjat")."</td>
+				<td>".t("PvmKäyty")."</td>
+				<td>".t("Km")."</td>
+				<td>".t("Lähtö")."</td>
+				<td>".t("Paluu")."</td>
+				<td>".t("PvRaha")."</td>
+				<td>".t("Kommentit")."</td>
 			</tr>
 			</table>";
-
 
 	echo "	<br>
 			<table>

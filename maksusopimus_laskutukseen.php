@@ -523,7 +523,13 @@
 
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(msg){
-							return confirm(msg);
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					</SCRIPT>";
 

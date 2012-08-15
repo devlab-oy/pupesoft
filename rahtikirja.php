@@ -1641,7 +1641,6 @@
 							$('#valitse_ruksatut_rahtikirjat').click(function(){
 								$('input[name^=\"kaikkicheckit\"]').each(function(){
 									if ($(this).is(':checked')) {
-										//alert(index);
 										var value = $(this).val() + ',' + $('#kaikki_ruksatut_tunnukset').val();
 
 										$('#kaikki_ruksatut_tunnukset').val(value);

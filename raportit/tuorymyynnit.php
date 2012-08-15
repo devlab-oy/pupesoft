@@ -53,37 +53,46 @@ if ($ytunnus!='' and $try!='') {
 	$ckatepr = "#00dd00";
 	$maxcol  = 12; // montako columnia näyttö on
 
+
+	$katteet_naytetaan = ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "") ? true : false;
+
 	// tehdään asiakkaan ostot tuoteryhmästä
-	echo "<br><font class='message'>".t("Osasto")." $osasto ".t("tuoteryhmä")." $try ".t("myynti kausittain viimeiset 24 kk")." (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
+	echo "<br><font class='message'>".t("Osasto")." $osasto ".t("tuoteryhmä")." $try ".t("myynti kausittain viimeiset 24 kk")." (<font color='$cmyynti'>".t("myynti")."</font>";
+
+	if ($katteet_naytetaan) echo "/<font color='$ckate'>".t("kate")."</font>";
+	if ($katteet_naytetaan) echo "/<font color='$ckatepr'>".t("kateprosentti")."</font>";
+
+	echo ")</font><hr>";
 
 	// alkukuukauden tiedot 24 kk sitten
 	$ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
 
-	$query  = "select
-	date_format(lasku.tapvm,'%Y/%m') kausi,
-	round(sum(rivihinta),0) myynti,
-	round(sum(tilausrivi.kate),0) kate,
-	round(sum(tilausrivi.kpl),0) kpl,
-	round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
-	from lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
-	where
-	lasku.yhtio='$kukarow[yhtio]' and
-	lasku.tila='U' and
-	lasku.alatila='X' and
-	lasku.tapvm>='$ayy' and
-	lasku.liitostunnus='$asiakasid' and
-	try='$try' and
-	osasto='$osasto' and
-	tilausrivi.uusiotunnus=lasku.tunnus and
-	tilausrivi.yhtio=lasku.yhtio
-	group by 1 having myynti<>0 or kate<>0";
+	$query  = "	SELECT
+				date_format(lasku.tapvm,'%Y/%m') kausi,
+				round(sum(rivihinta),0) myynti,
+				round(sum(tilausrivi.kate),0) kate,
+				round(sum(tilausrivi.kpl),0) kpl,
+				round(sum(tilausrivi.kate)/sum(rivihinta)*100,1) katepro
+				from lasku use index (yhtio_tila_liitostunnus_tapvm), tilausrivi use index (uusiotunnus_index)
+				where lasku.yhtio	= '$kukarow[yhtio]'
+				and lasku.tila			= 'U'
+				and lasku.alatila		= 'X'
+				and lasku.tapvm			>= '$ayy'
+				and lasku.liitostunnus	= '$asiakasid'
+				and tilausrivi.try		= '$try'
+				and tilausrivi.osasto	= '$osasto'
+				and tilausrivi.uusiotunnus = lasku.tunnus
+				and tilausrivi.yhtio = lasku.yhtio
+				group by 1
+				having myynti <> 0 or kate <> 0";
 	$result = mysql_query($query) or pupe_error($query);
 
 	// otetaan suurin myynti talteen
 	$maxeur=0;
+
 	while ($sumrow = mysql_fetch_array($result)) {
-		if ($sumrow['myynti']>$maxeur) $maxeur=$sumrow['myynti'];
-		if ($sumrow['kate']>$maxeur) $maxeur=$sumrow['kate'];
+		if ($sumrow['myynti'] > $maxeur) $maxeur = $sumrow['myynti'];
+		if ($katteet_naytetaan and $sumrow['kate'] > $maxeur) $maxeur = $sumrow['kate'];
 	}
 
 	// ja kelataan resultti alkuun
@@ -109,10 +118,12 @@ if ($ytunnus!='' and $try!='') {
 		}
 
 		$pylvaat = "<table style='padding:0px;margin:0px;'><tr>
-		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti] $yhtiorow[valkoodi]'></td>
-		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate] $yhtiorow[valkoodi]'></td>
-		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("kateprosentti")." $sumrow[katepro] %'></td>
-		</tr></table>";
+		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti] $yhtiorow[valkoodi]'></td>";
+
+		if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate] $yhtiorow[valkoodi]'></td>";
+		if ($katteet_naytetaan) $pylvaat .= "<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("kateprosentti")." $sumrow[katepro] %'></td>";
+
+		$pylvaat .= "</tr></table>";
 
 		if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
 		echo "<td valign='bottom' class='back'>";
@@ -122,8 +133,8 @@ if ($ytunnus!='' and $try!='') {
 		echo "<tr><td nowrap align='right'><font class='info'>$sumrow[kausi]</font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[myynti] $yhtiorow[valkoodi]</font></font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[kpl] ".t("kpl")."</font></font></td></tr>";
-		echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[kate]   $yhtiorow[valkoodi]</font></font></td></tr>";
-		echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[katepro] %</font></font></td></tr>";
+		if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[kate]   $yhtiorow[valkoodi]</font></font></td></tr>";
+		if ($katteet_naytetaan) echo "<tr><td nowrap align='right'><font class='info'><font>$sumrow[katepro] %</font></font></td></tr>";
 		echo "</table>";
 
 		echo "</td>\n";
@@ -145,8 +156,9 @@ if ($ytunnus!='' and $try!='') {
 
 	echo "</table>";
 
-	echo "<br><form action='asiakasinfo.php' method='post'>";
+	echo "<br><form action='asiakasinfo.php?lopetus=$lopetus' method='post'>";
 	echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+	echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 	echo "<input type='submit' value='".t("Asiakkaan perustiedot")."'>";
 }
 

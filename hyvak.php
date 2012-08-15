@@ -1004,7 +1004,14 @@
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 							msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					</SCRIPT>";
 		}
@@ -1715,7 +1722,14 @@
 		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify() {
 					msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 				</SCRIPT>";
 	}

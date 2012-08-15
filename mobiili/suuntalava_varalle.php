@@ -8,11 +8,11 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-if (!isset($alusta_tunnus, $liitostunnus, $selected_row)) exit;
+if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = 0;
+$tilausrivi = 0;
 
 $error = array(
 	'varalle' => ''
@@ -138,7 +138,7 @@ echo "<div class='main'>
 	<span class='error'>{$error['varalle']}</span>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-	<input type='hidden' name='selected_row' value='{$selected_row}' />
+	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
 	</form>
 </div>";
 

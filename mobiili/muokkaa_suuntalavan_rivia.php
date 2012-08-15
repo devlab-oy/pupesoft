@@ -10,14 +10,14 @@ elseif (@include_once("inc/parametrit.inc"));
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = (int) $selected_row;
+$tilausrivi = (int) $tilausrivi;
 
 $error = array(
 	'rivi' => ''
 );
 
 # Haetaan suuntalavan tuotteet
-$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
+$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 $row = mysql_fetch_assoc($res);
 
 # Jos on painettu nappia
@@ -54,8 +54,8 @@ if (isset($submit) and trim($submit) != '') {
 		}
 		else {
 			# P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
-			$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
-			$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, true);
+			$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
+			$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, false, true);
 
 			# Redirect alustaan vai suuntalavan_tuotteet
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -93,7 +93,7 @@ echo "<div class='main'>
 </table>
 <input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 <input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-<input type='hidden' name='selected_row' value='{$selected_row}' />
+<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
 <span class='error'>{$error['rivi']}</span>
 </div>";
 

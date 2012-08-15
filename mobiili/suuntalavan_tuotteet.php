@@ -11,7 +11,7 @@ elseif (@include_once("inc/parametrit.inc"));
 if (isset($submit) and trim($submit) != '') {
 
 	$data = array(
-		'selected_row' => (int) $selected_row,
+		'tilausrivi' => (int) $tilausrivi,
 		'alusta_tunnus' => (int) $alusta_tunnus,
 		'liitostunnus' => (int) $liitostunnus
 	);
@@ -19,7 +19,7 @@ if (isset($submit) and trim($submit) != '') {
 	$url = http_build_query($data);
 
 	# edit ja submit tarvitsee valitun rivin.
-	if (!isset($_POST['selected_row']) and $viivakoodi == '') {
+	if (!isset($_POST['tilausrivi']) and $viivakoodi == '') {
 		$error['tuotteet'] = t("Riviä ei ole valittu", $browkieli).'.';
 	}
 	else {
@@ -172,7 +172,7 @@ echo "</th>
 
 	foreach ($tuotteet as $tuote) {
 		echo "<tr id='{$tuote['tilriv_tunnus']}'>";
-		echo "<td><input class='radio' type='radio' name='selected_row' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
+		echo "<td><input class='radio' type='radio' name='tilausrivi' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
 		echo "<td nowrap>{$tuote['tuoteno']}</td>";
 		echo "<td nowrap>{$tuote['maara']}";
 

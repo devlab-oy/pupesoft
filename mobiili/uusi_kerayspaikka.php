@@ -10,7 +10,7 @@ elseif (@include_once("inc/parametrit.inc"));
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = (int) $selected_row;
+$tilausrivi = (int) $tilausrivi;
 
 $error = array(
 	'kerayspaikka' => ''
@@ -21,7 +21,7 @@ if (isset($submit) and trim($submit) != '') {
 	$data = array(
 		'alusta_tunnus' => $alusta_tunnus,
 		'liitostunnus' => $liitostunnus,
-		'selected_row' => $selected_row
+		'tilausrivi' => $tilausrivi
 	);
 
 	$url = http_build_query($data);
@@ -32,12 +32,25 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
-$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
-$row = mysql_fetch_assoc($res);
+# Jos suuntalava tiedet‰‰n
+if (!empty($alusta_tunnus)) {
+	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
+	$row = mysql_fetch_assoc($res);
+}
+else {
+	$query = "	SELECT
+				tilausrivi.*,
+				tuotteen_toimittajat.toim_tuoteno
+				FROM tilausrivi
+				LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+				WHERE tilausrivi.tunnus='{$tilausrivi}'
+				AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+	$row = mysql_fetch_assoc(pupe_query($query));
+}
 
 $oletuspaikka_chk = "checked";
 
-$onko_suoratoimitus_res = onko_suoratoimitus($selected_row);
+$onko_suoratoimitus_res = onko_suoratoimitus($tilausrivi);
 
 if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
@@ -81,7 +94,7 @@ if (isset($submit) and trim($submit) != '' and $submit == 'submit') {
 		}
 
 		# Asetetaan tuotepaikka tilausriville
-		paivita_tilausrivin_hylly($selected_row, $hylly);
+		paivita_tilausrivin_hylly($tilausrivi, $hylly);
 
 		# Palataan edelliselle sivulle
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
@@ -132,7 +145,7 @@ echo "<div class='main'>
 
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-	<input type='hidden' name='selected_row' value='{$selected_row}' />
+	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
 </div>";
 
 echo "<div class='controls'>

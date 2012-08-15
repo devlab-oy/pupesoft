@@ -10,7 +10,7 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 # Rajataan sallitut get parametrit
-$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi');
+$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi', 'saapuminen');
 
 # Rakkentaan parametreistä url_taulukko
 $url_array = array();
@@ -23,20 +23,25 @@ foreach($sallitut_parametrit as $parametri) {
 /* ostotilausten_kohdistus.inc rivit 1541-1567
 * Haetaan "sopivat" suuntalavat
 */
-
-#### Testausta
+# TODO: Jos rivi on splitattu, niin laitetaanko molemmat samalle suuntalavalle
 $query = "select * from tilausrivi where tunnus='{$tilausrivi}'";
 $tilausrivi = pupe_query($query);
 $tilausrivi = mysql_fetch_assoc($tilausrivi);
+#echo "<pre>";
+#var_dump($tilausrivi);
+#exit();
 
 # $otunnus = tilausrivi.tunnus vai .uusiotunnus?
-$otunnus = $tilausrivi['tunnus'];
+# $otunnus = $tilausrivi['tunnus'];
 # $rivirow['suuntalava'] = tilausrivi.suuntalava?
-$rivirow['suuntalava'] = $tilausrivi['suuntalava'];
+# $rivirow['suuntalava'] = $tilausrivi['suuntalava'];
+
 # $rivirow['keraysvyohyke'] = tuote.kerahyvyohyke
 $rivirow['keraysvyohyke'] = 5;
 # $rivirow['varastossa_kpl'] = tilausrivi.kpl
 $rivirow['varastossa_kpl'] = $tilausrivi['kpl'];
+
+# Etsitään sopivat suuntalavat
 $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
             FROM suuntalavat
             JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
@@ -69,76 +74,51 @@ $suuntalavat_res = pupe_query($query);
 if (isset($submit)) {
     switch($submit) {
         case 'hae':
-
-            # echo "haetaan sscc: $sscc";
             $suuntalavat = etsi_suuntalava_sscc($sscc);
             if(count($suuntalavat) == 0) {
                 $errors['virhe'] = "Ei löytynyt sopivaa suuntalavaa. Hae uudestaan";
             }
-
             break;
         case 'ok':
-            # keikan_toiminnot (91-144)
-            # Tarkistetaan onko suuntalava siirtovalmis
-            $query = "  SELECT tila
-                        FROM suuntalavat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$suuntalava}'";
-            $tila_chk_res = pupe_query($query);
-            $tila_chk_row = mysql_fetch_assoc($tila_chk_res);
+            # 26525174###6690659 ($tilausrivi###$ostotilaus)
+            $valittu = $tilausrivi."###".$ostotilaus;
 
-            if ($tila_chk_row['tila'] == 'S') {
-                $errors['suuntalava'] = "Suuntalavan tila on S";
-            }
-            else {
-                # Päivitetään tilausrivin suuntalava
-                $query = "  UPDATE tilausrivi SET
-                            suuntalava = '{$suuntalava}'
-                            WHERE yhtio = '{$kukarow['yhtio']}'
-                            AND tunnus = '{$selected_row}'";
-                $update_res = pupe_query($query);
+            # Kohdista rivi
+            $query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
+            $result   = pupe_query($query);
+            $laskurow = mysql_fetch_array($result);
 
-                $query = "  SELECT uusiotunnus
-                            FROM tilausrivi
-                            WHERE yhtio = '{$kukarow['yhtio']}'
-                            AND tunnus = '{$selected_row}'";
-                $otunnus_fetch_res = pupe_query($query);
-                $otunnus_fetch_row = mysql_fetch_assoc($otunnus_fetch_res);
+            require("../inc/keikan_toiminnot.inc");
+            $kohdista_status = kohdista_rivi($laskurow, $tilausrivi['tunnus'], $ostotilaus, $saapuminen, $suuntalava);
 
-                $uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
+            echo "kohdista_rivi({$tilausrivi['tunnus']}, $ostotilaus, $saapuminen, $suuntalava, $suoratoimitusrivi)";
+            echo "<br>Kohdista_status: ";
+            var_dump($kohdista_status);
 
-                if ($suuntalava != 0) {
-                    $query = "  SELECT saapuminen
-                                FROM suuntalavat_saapuminen
-                                WHERE yhtio = '{$kukarow['yhtio']}'
-                                AND suuntalava = '{$suuntalava}'
-                                AND saapuminen = '{$uusiotunnus}'";
-                    $fetch_res = pupe_query($query);
-
-                    if (mysql_num_rows($fetch_res) == 0) {
-                        $query = "  INSERT INTO suuntalavat_saapuminen SET
-                                    yhtio = '{$kukarow['yhtio']}',
-                                    suuntalava = '{$suuntalava}',
-                                    saapuminen = '{$uusiotunnus}',
-                                    laatija = '{$kukarow['kuka']}',
-                                    luontiaika = now(),
-                                    muutospvm = now(),
-                                    muuttaja = '{$kukarow['kuka']}'";
-                        $insert_res = pupe_query($query);
-                    }
-                }
-                ###
-
-                # Kaikki ok
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?'>"; exit();
-            }
+            # Kaikki ok
+            # echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?'>"; exit();
             break;
         case 'lopeta':
             echo "lopeta";
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
             break;
         case 'suuntalavalle':
-            echo "suuntalavalle";
+            // echo "varmistus";
+            // echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=varmistus.php?".http_build_query($url_array)."'>"; exit();
+            // break;
+            $varmistus = true;
+            break;
+        case 'hyllytyskierrokselle':
+            echo "hyllytyskierros";
+            if(is_numeric($korkeus)) echo " korkeus ok";
+            break;
+        case 'hyllyyn':
+            echo "suoraan hyllyyn";
+            if(is_numeric($korkeus)) echo " korkeus ok";
+            break;
+        case 'takaisin':
+            #echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
+            $varmistus = false;
             break;
         default:
             echo "VIRHE";
@@ -147,6 +127,12 @@ if (isset($submit)) {
 }
 
 include("kasipaate.css");
+
+# Varmistuskysymys
+if ($varmistus) {
+    include('varmistus.php');
+    exit();
+}
 
 echo "<div class='header'><h1>",t("SUUNTALAVALLE", $browkieli), "</h1></div>";
 
@@ -165,7 +151,7 @@ echo "<div class='main'>
 </table>
 </form>
 
-<form method='post' action=''>
+<form name='kissa' method='post' action=''>
 <table>
     <tr>
         <th></th>
@@ -198,14 +184,14 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     //     $rivit = mysql_fetch_assoc(pupe_query($rivit_query));
     // }
     echo "<tr>
-        <td><input class='radio' id='selected_row' type='radio' name='selected_row' value='{$tilausrivi['tunnus']}' />
-        <td><label for='selected_row'>{$row['sscc']}</label></td>
+        <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
+        <td>{$row['sscc']}</td>
         <td>{$keraysvyohyke['nimitys']}</td>
         <td>{$rivit['rivit']}</td>
-        <td><label for='selected_row'>{$tyyppi['pakkaus']}</label></td>
+        <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
         <td>{$rivirow['varastossa_kpl']}</td>
-        <td><input type='hidden' name='suuntalava' value='{$row['tunnus']}' /></td>
+        <td><input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' /></td>
     </tr>";
 }
 echo "</table></div>";
@@ -222,3 +208,7 @@ echo "<div class='error'>";
         echo strtoupper($virhe).": ".$selite;
     }
 echo "</div>";
+
+echo "<pre>";
+var_dump($tilausrivi);
+echo "</pre>";

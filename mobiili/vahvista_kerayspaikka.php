@@ -9,17 +9,17 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 # N‰m‰ on pakollisia
-if (!isset($alusta_tunnus, $liitostunnus, $selected_row)) exit;
+if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = (int) $selected_row;
+$tilausrivi = (int) $tilausrivi;
 
 # Urlin rakennus
 $data = array(
 	'alusta_tunnus' => $alusta_tunnus,
 	'liitostunnus' => $liitostunnus,
-	'selected_row' => $selected_row
+	'tilausrivi' => $tilausrivi
 );
 $url = http_build_query($data);
 
@@ -27,7 +27,7 @@ $url = http_build_query($data);
 $error = array();
 
 # Haetaan suuntalavan tuotteet
-$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $selected_row);
+$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 $row = mysql_fetch_assoc($res);
 
 # Haetaan saapumiset
@@ -48,7 +48,7 @@ if (isset($submit) and trim($submit) != '') {
 	if ($submit == 'cancel') {
 		if (isset($ostotilaus)) {
 			# $ostotilaus ja $tilausrivi
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$selected_row}'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}'>";
 		}
 		else {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -80,10 +80,10 @@ if (isset($submit) and trim($submit) != '') {
 			# Jos m‰‰r‰‰ pienennet‰‰n, niin splitataan ( $maara < $row['varattu'])
 			if($maara < $row['varattu']) {
 				# P‰ivitet‰‰n alkuper‰isen rivin kpl
-				$ok = paivita_tilausrivin_kpl($selected_row, ($row['varattu'] - $maara));
+				$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
 
 				# Splitataan rivi, $pois_suuntalavalta = false
-				$uuden_rivin_id = splittaa_tilausrivi($selected_row, $maara, false, false);
+				$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, false, false);
 
 				# Haetaan saapumiset
 				$saapuminen = hae_saapumiset($alusta_tunnus);
@@ -98,7 +98,7 @@ if (isset($submit) and trim($submit) != '') {
 			# Jos nostetaan niin tehd‰‰n insertti erotukselle..
 			elseif($maara > $row['varattu']) {
 				# Tehd‰‰n insertti erotukselle
-				$kopioitu_tilausrivi = kopioi_tilausrivi($selected_row);
+				$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
 
 				# P‰ivit‰ kopioidun kpl (maara - varattu)
 				paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
@@ -107,7 +107,7 @@ if (isset($submit) and trim($submit) != '') {
 				$saapuminen = hae_saapumiset($alusta_tunnus);
 
 				# Vied‰‰n rivit hyllyyn
-				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
+				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $tilausrivi);
 				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $kopioitu_tilausrivi);
 
 				# Palataan suuntalavan_tuotteet sivulle
@@ -120,7 +120,7 @@ if (isset($submit) and trim($submit) != '') {
 				$saapuminen = hae_saapumiset($alusta_tunnus);
 				var_dump($saapuminen);
 				# Vied‰‰n vie_varastoon
-				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $selected_row);
+				vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $tilausrivi);
 
 				# Jos tuotteita j‰lell‰, menn‰‰n takaisin suuntalavan tuotteet sivulle
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet.php?{$url}'>";
@@ -199,7 +199,7 @@ echo "<div class='controls'>
 
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-	<input type='hidden' name='selected_row' value='{$selected_row}' />
+	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
 </form>
 ";
 

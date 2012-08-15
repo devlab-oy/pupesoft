@@ -1381,6 +1381,22 @@ if (!function_exists('rivi_lahete')) {
 			$row["kommentti"] .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
 		}
 
+		// Haetaan avainsanoista vakioviesti
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kieli = '{$kieli}'
+					AND laji = 'VAKIOVIESTI_TIL'
+					ORDER BY jarjestys
+					LIMIT 1";
+		$vakioviesti_result = pupe_query($query);
+
+		if (mysql_num_rows($vakioviesti_result) == 1) {
+			$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
+
+			$row["kommentti"] .= "\n{$vakioviesti_row['selite']}";
+		}
+
 		//Haetan sarjanumeron tiedot
 		if ($row["sarjanumeroseuranta"] != "") {
 			if ($tyyppi == "SIIRTOLISTA") {
@@ -3563,5 +3579,3 @@ if (!function_exists('print_pdf_lahete')) {
 		system("rm -f $pdffilenimi");
 	}
 }
-
-?>

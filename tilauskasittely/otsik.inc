@@ -1945,12 +1945,13 @@
 				if (mysql_num_rows($labels) > 0) {
 
 					echo "<tr>";
-					echo "<td>",t("Väri"),":</td>";
+					echo "<td>",t("Luokitus"),":</td>";
 					echo "<td><select name='label' id='label' style='max-width: 300px'>";
+					echo "<option value=''>".t("Ei valintaa")."</option>";
 
 					while ($labelrow = mysql_fetch_assoc($labels)) {
-						$sel = $srow['label'] == $labelrow['selite'] ? " selected" : "";
-						echo "<option class='kids' style='background-color:red;' value='{$labelrow['selite']}'{$sel}>{$labelrow['selitetark']}</option>";
+						$sel = $srow['label'] == $labelrow['tunnus'] ? " selected" : "";
+						echo "<option value='{$labelrow['tunnus']}'{$sel}>{$labelrow['selitetark']}</option>";
 					}
 
 					echo "</select></td>";

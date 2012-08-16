@@ -190,6 +190,21 @@
 							(abc_aputaulu.luokka <= '{$abcrajaus}' OR abc_aputaulu.luokka_osasto <= '{$abcrajaus}' OR abc_aputaulu.luokka_try <= '{$abcrajaus}'))";
 			}
 
+			if (count($keraysvyohyke) > 1) {
+
+				// ensimmäinen alkio on 'default' ja se otetaan pois
+				array_shift($keraysvyohyke);
+
+				$keraysvyohykelisa = "	JOIN varaston_hyllypaikat AS vh ON (
+											vh.yhtio = tuotepaikat.yhtio AND
+											vh.hyllyalue = tuotepaikat.hyllyalue AND
+											vh.hyllynro = tuotepaikat.hyllynro AND
+											vh.hyllytaso = tuotepaikat.hyllytaso AND
+											vh.hyllyvali = tuotepaikat.hyllyvali AND
+											vh.keraysvyohyke IN (".implode(",", $keraysvyohyke)."))
+										JOIN keraysvyohyke ON (keraysvyohyke.yhtio = vh.yhtio AND keraysvyohyke.tunnus = vh.keraysvyohyke)";
+			}
+
 			if ($toimittaja != "") {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT CONCAT('\'',tuoteno,'\'')) tuotteet
 							FROM tuotteen_toimittajat
@@ -221,10 +236,11 @@
 			}
 
 			// Katotaan kohdepaikkojen tarvetta
-			$query = "	SELECT tuotepaikat.*, tuotepaikat.halytysraja, CONCAT_WS('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
+			$query = "	SELECT tuotepaikat.*, tuotepaikat.halytysraja, CONCAT_WS('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) hyllypaikka, tuote.nimitys
 						FROM tuotepaikat
 						JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno {$lisa})
 						{$abcjoin}
+						{$keraysvyohykelisa}
 						WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
 						AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
 						AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
@@ -233,7 +249,6 @@
 						{$kohdepaikkalisa}
 						ORDER BY tuotepaikat.tuoteno";
 			$resultti = pupe_query($query);
-			$luku = mysql_num_rows($result);
 
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;

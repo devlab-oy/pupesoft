@@ -2435,7 +2435,7 @@
 								ORDER BY paino ASC";
 					$pakkausres = pupe_query($query);
 
-					if (mysql_num_rows($pakkausres)) {
+					if (mysql_num_rows($pakkausres) > 0) {
 						echo "<br />";
 						echo "<table><tr>";
 						echo "<th>",t("Pakkaus"),"</th>";
@@ -2528,6 +2528,8 @@
 				echo "</tr>";
 
 				$i = 0;
+				$oslappkpl 	= 0;
+				$kerayserat_paalla = false;
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -2842,6 +2844,9 @@
 
 							$pakkauskirjain = chr(64+$keraysera_row['pakkausnro']);
 
+							$oslappkpl++;
+							$kerayserat_paalla = true;
+
 							echo "<td><input type='text' size='4' name='keraysera_pakkaus[{$row['tunnus']}]' value='{$pakkauskirjain}' /></td>";
 						}
 
@@ -2903,11 +2908,10 @@
 
 				// Jos kyseessä ei ole valmistus tulostetaan virallinen lähete
 				$sel 		= "SELECTED";
-				$oslappkpl 	= 0;
 				$lahetekpl  = 0;
 
 				if ($toim != 'VALMISTUS' and $otsik_row["tila"] != 'V') {
-					$oslappkpl 	= $yhtiorow["oletus_oslappkpl"];
+					$oslappkpl 	= !$kerayserat_paalla ? $yhtiorow["oletus_oslappkpl"] : $oslappkpl;
 					$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 					$vakadrkpl	= $yhtiorow["oletus_lahetekpl"];
 				}

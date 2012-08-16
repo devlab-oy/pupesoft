@@ -2468,14 +2468,8 @@
 				$rahti_rahtikirjanro = " AND rahtikirjanro in ({$tunnukset}) ";
 			}
 			else {
-				if ($id == 'dummy') {
-					$rahti_otsikot = " AND otsikkonro = 0 ";
-					$rahti_rahtikirjanro = " AND rahtikirjanro = '0' ";
-				}
-				else {
-					$rahti_otsikot = " AND otsikkonro = {$id} ";
-					$rahti_rahtikirjanro = " AND rahtikirjanro = '{$rakirno}' ";
-				}
+				$rahti_otsikot = " AND otsikkonro = {$id} ";
+				$rahti_rahtikirjanro = " AND rahtikirjanro = '{$rakirno}' ";
 			}
 
 			$query = "	SELECT kollit, kilot, kuutiot, lavametri, pakkauskuvaustark, '' AS pakkausnro, pakkaus
@@ -2487,21 +2481,26 @@
 			$rarrr = pupe_query($query);
 
 			if (mysql_num_rows($rarrr) == 0) {
+
+				$querytunlisa = strpos($tunnukset, ',') !== FALSE ? $tunnukset : $otsik['tunnus'];
+
 				$query = "	SELECT pakkaus.pakkaus,
 							pakkaus.pakkauskuvaus,
 							pakkaus.oma_paino,
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
+							kerayserat.otunnus,
 							IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
 							#SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) as kuutiot,
-							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							#SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
-							AND kerayserat.otunnus 	= '{$otsik['tunnus']}'
-							GROUP BY 1,2,3,4,5,6
+							AND kerayserat.otunnus 	IN ({$querytunlisa})
+							#GROUP BY 1,2,3,4,5,6
 							ORDER BY kerayserat.pakkausnro";
 			}
 
@@ -2522,7 +2521,9 @@
 
 				echo "<tr>";
 
-				echo "<td class='back'>";
+				$echotuslisa = strpos($tunnukset, ',') !== FALSE ? $keraysera_row['otunnus'].': ' : "";
+
+				echo "<td>{$echotuslisa}";
 				echo $keraysera_row['pakkausnro'] != '' ? chr(64+$keraysera_row['pakkausnro']) : "";
 				echo "</td>";
 
@@ -2571,6 +2572,8 @@
 				$i++;
 			}
 		}
+
+		$oslappkpl_keraysera = $i;
 
 		$query  = "	SELECT *
 					FROM pakkaus
@@ -2625,7 +2628,7 @@
 			echo "<tr>";
 
 			if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
-				echo "<td class='back'>&nbsp;</td>";
+				echo "<td>&nbsp;</td>";
 			}
 
 			echo "<td>";
@@ -2824,7 +2827,7 @@
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
 			}
 
-			$oslappkpl = $yhtiorow['oletus_rahtikirja_oslappkpl'];
+			$oslappkpl = $oslappkpl_keraysera != 0 ? $oslappkpl_keraysera : $yhtiorow['oletus_rahtikirja_oslappkpl'];
 			$termoslappkpl = 0;
 
 			echo "<tr><th>".t("Osoitelappu").":</th><td>";

@@ -1939,6 +1939,27 @@
 			}
 			echo "</tr>";
 
+			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
+				$labels = t_avainsana("LABEL");
+
+				if (mysql_num_rows($labels) > 0) {
+
+					echo "<tr>";
+					echo "<td>",t("Luokitus"),":</td>";
+					echo "<td><select name='label' id='label' style='max-width: 300px'>";
+					echo "<option value=''>".t("Ei valintaa")."</option>";
+
+					while ($labelrow = mysql_fetch_assoc($labels)) {
+						$sel = $srow['label'] == $labelrow['tunnus'] ? " selected" : "";
+						echo "<option value='{$labelrow['tunnus']}'{$sel}>{$labelrow['selitetark']}</option>";
+					}
+
+					echo "</select></td>";
+
+					echo "<td></td><td></td>";
+				}
+			}
+
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "<tr>";
 			}
@@ -2945,6 +2966,8 @@
 			$voimaika_pp = "00";
 		}
 
+		$label = !isset($label) ? "" : $label;
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
@@ -2972,6 +2995,7 @@
 					kohdistettu 						= '$maksaja',
 					kuljetus 							= '$kuljetus',
 					kuljetusmuoto						= '',
+					label								= '{$label}',
 					laskutusvkopv 						= '$laskutusvkopv',
 					liitostunnus						= '$liitostunnus',
 					maa 								= '$maa',

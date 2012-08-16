@@ -1939,22 +1939,24 @@
 			}
 			echo "</tr>";
 
-			$labels = t_avainsana("LABEL");
+			if ($toim == "") {
+				$labels = t_avainsana("LABEL");
 
-			if (mysql_num_rows($labels) > 0) {
+				if (mysql_num_rows($labels) > 0) {
 
-				echo "<tr>";
-				echo "<td>",t("Väri"),":</td>";
-				echo "<td><select name='label' id='label' style='max-width: 300px'>";
+					echo "<tr>";
+					echo "<td>",t("Väri"),":</td>";
+					echo "<td><select name='label' id='label' style='max-width: 300px'>";
 
-				while ($labelrow = mysql_fetch_assoc($labels)) {
-					$sel = $srow['label'] == $labelrow['selite'] ? " selected" : "";
-					echo "<option class='kids' style='background-color:red;' value='{$labelrow['selite']}'{$sel}>{$labelrow['selitetark']}</option>";
+					while ($labelrow = mysql_fetch_assoc($labels)) {
+						$sel = $srow['label'] == $labelrow['selite'] ? " selected" : "";
+						echo "<option class='kids' style='background-color:red;' value='{$labelrow['selite']}'{$sel}>{$labelrow['selitetark']}</option>";
+					}
+
+					echo "</select></td>";
+
+					echo "<td></td><td></td>";
 				}
-
-				echo "</select></td>";
-
-				echo "<td></td><td></td>";
 			}
 
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {

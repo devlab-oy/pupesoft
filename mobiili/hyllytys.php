@@ -11,7 +11,7 @@ elseif (@include_once("inc/parametrit.inc"));
 if(!isset($errors)) $errors = array();
 
 # Rajataan sallitut get parametrit
-$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi');
+$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi', 'saapuminen');
 
 # Rakkentaan parametreist‰ url_taulukko
 $url_array = array();
@@ -47,9 +47,6 @@ $row = mysql_fetch_assoc($result);
 if (isset($submit)) {
     switch($submit) {
         case 'ok':
-            echo "OK";
-
-            # TODO: Miten suuntalava, jos lavaa ei ole?
 
             # M‰‰r‰‰ pienennet‰‰n
             if ($hyllytetty < $row['tilkpl']) {
@@ -61,8 +58,12 @@ if (isset($submit)) {
             else {
 
             }
+            # TEMP lava (suuntalavat.tunnus = '8460')
+            #$row['suuntalava'] = '8460';
+
             # Parametrit $alusta_tunnus=tilausrivi.suuntalava & lasku.liitostunnus=liitostunnus
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&selected_row={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'lopeta':
             # TODO: t‰m‰n pit‰is palata ostotilaus.php:lle
@@ -105,14 +106,12 @@ if (isset($submit)) {
                 echo "Hyllytetty ja tilattujen m‰‰r‰ on sama";
 
                 # Lis‰t‰‰n rivi suuntalavalle
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
+                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
             }
             break;
         case 'kerayspaikka':
-            echo "uusi ker‰yspaikka";
-
-            # Parametrit $alusta_tunnus, $liitostunnus, $selected_row
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=uusi_kerayspaikka.php?'>"; exit();
+            # Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?".http_build_query($url_array)."'>"; exit();
             break;
         default:
             $errors['virhe'] = "Error";
@@ -129,9 +128,7 @@ echo "<h1>",t("HYLLYTYS", $browkieli)."</h1>";
 echo "</div>";
 
 # Main
-echo "<div class='main'>";
-
-echo "
+echo "<div class='main'>
 <form method='post' action=''>
 <table>
     <tr>
@@ -162,9 +159,7 @@ echo "
         <td>{$ostotilaus}</td>
     </tr>
 </table>
-";
-
-echo "</div>";
+</div>";
 
 # Napit
 echo "
@@ -173,6 +168,7 @@ echo "
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERƒYSPAIKKA", $browkieli),"</button>
 <button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='lopeta' onclick='submit();'>",t("LOPETA", $browkieli),"</button>
+<a class='right' href='uusi_kerayspaikka.php?".http_build_query($url_array)."'>KERƒYSPAIKKA</a>
 </div>
 </form>";
 

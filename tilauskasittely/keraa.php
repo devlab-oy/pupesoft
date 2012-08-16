@@ -2529,7 +2529,6 @@
 
 				$i = 0;
 				$oslappkpl 	= 0;
-				$kerayserat_paalla = false;
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -2844,8 +2843,7 @@
 
 							$pakkauskirjain = chr(64+$keraysera_row['pakkausnro']);
 
-							$oslappkpl++;
-							$kerayserat_paalla = true;
+							$oslappkpl = $yhtiorow["oletus_oslappkpl"] != 0 ? ($oslappkpl + 1) : 0;
 
 							echo "<td><input type='text' size='4' name='keraysera_pakkaus[{$row['tunnus']}]' value='{$pakkauskirjain}' /></td>";
 						}
@@ -2911,7 +2909,7 @@
 				$lahetekpl  = 0;
 
 				if ($toim != 'VALMISTUS' and $otsik_row["tila"] != 'V') {
-					$oslappkpl 	= !$kerayserat_paalla ? $yhtiorow["oletus_oslappkpl"] : $oslappkpl;
+					$oslappkpl 	= $oslappkpl != 0 ? $oslappkpl : $yhtiorow["oletus_oslappkpl"];
 					$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 					$vakadrkpl	= $yhtiorow["oletus_lahetekpl"];
 				}

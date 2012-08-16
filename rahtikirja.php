@@ -2573,7 +2573,7 @@
 			}
 		}
 
-		$oslappkpl_keraysera = $i;
+		$oslappkpl_keraysera = ($yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and $i != 0) ? $i : $yhtiorow['oletus_rahtikirja_oslappkpl'];
 
 		$query  = "	SELECT *
 					FROM pakkaus

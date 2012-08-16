@@ -1939,7 +1939,7 @@
 			}
 			echo "</tr>";
 
-			if ($toim == "") {
+			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
 				$labels = t_avainsana("LABEL");
 
 				if (mysql_num_rows($labels) > 0) {

@@ -36,6 +36,19 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'LABEL') {
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa #123 tai #112233");
+				}
+				elseif ($tem_selite{0} != '#') {
+					$virhe[$i] = t("Selitteen ensimm‰inen kirjain pit‰‰ olla #");
+				}
+				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
+					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰").' '.strlen($tem_selite);
+				}
+			}
+
+
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla
 				$t[$i] = round((float) str_replace(",", ".", $tem_selite), 2);

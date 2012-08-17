@@ -4790,6 +4790,20 @@ if ($tee == '') {
 
 			while ($row = mysql_fetch_assoc($result)) {
 
+				// Tuoteperheen lapset, jotka on merkitty puutteeksi
+				if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
+					list(, , $extranet_saldo_tarkistus) = saldo_myytavissa($row['tuoteno']);
+					if ($extranet_saldo_tarkistus > 0) {
+						$extranet_tarkistus_teksti = "<br /><br />".t("Myyt‰viss‰").": <font class='ok'>".t("Kyll‰")."</font>";
+					}
+					else {
+						$extranet_tarkistus_teksti = "<br /><br />".t("Myyt‰viss‰").": <font class='error'>".t("Ei")."</font>";
+					}
+				}
+				else {
+					$extranet_tarkistus_teksti = "";
+				}
+
 				$vastaavattuotteet = 0;
 
 				if (strpos($row['sorttauskentta'], '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷') !== FALSE) {
@@ -5232,7 +5246,7 @@ if ($tee == '') {
 
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."</td>";
+					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {

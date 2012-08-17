@@ -123,7 +123,8 @@
 		(mysql_field_name($result, $i) == "konsernimyyntisaamiset") or
 		(mysql_field_name($result, $i) == "osto_rahti") or
 		(mysql_field_name($result, $i) == "osto_kulu") or
-		(mysql_field_name($result, $i) == "osto_rivi_kulu")) {
+		(mysql_field_name($result, $i) == "osto_rivi_kulu") or
+		(mysql_field_name($result, $i) == "tilino_triang")) {
 
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];
@@ -264,5 +265,3 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-
-?>

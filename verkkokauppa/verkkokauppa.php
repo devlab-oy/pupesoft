@@ -104,6 +104,7 @@ echo "	<script type='text/javascript'>
 				}
 
 				if (osasto != '') {
+					sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+osasto, \"\", false);
 					sndReq(\"T_\"+osasto, \"verkkokauppa.php?tee=menu&osasto=\"+osasto, \"P_\"+osasto, false, false);
 				}
 

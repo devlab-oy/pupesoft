@@ -122,6 +122,8 @@
 				$query_insert_lisa .= " ale{$postfix} = '{$pantti_row['ale{$postfix}']}', ";
 			}
 
+			 $kommenttilisa = "(" . t("tilausnro") . ": " . $pantti_row['myyntitilausnro'] . ", " . t("tilauspvm") . ": " . $pantti_row['myyntipvm'] . ")";
+
 			$query = "	INSERT INTO tilausrivi SET
 						yhtio = '{$kukarow['yhtio']}',
 						tyyppi = 'L',
@@ -146,7 +148,7 @@
 						erikoisale = '{$pantti_row['erikoisale']}',
 						{$query_insert_lisa}
 						kate = 0,
-						kommentti = '".("Panttituotteen veloitus palauttamattomista panteista")."',
+						kommentti = '".t("Panttituotteen veloitus palauttamattomista panteista")." $kommenttilisa',
 						laatija = 'cron',
 						laadittu = now(),
 						keratty = 'cron',

@@ -1025,11 +1025,19 @@
 
 					$upd_kpl = ($ostotilausrivirow['varattu'] + $ostotilausrivirow['kpl']) - $erotus;
 
+					$yks_rivihinta = 0;
+
+					if ($ostotilausrivirow['kpl'] != 0) {
+						$yks_rivihinta = $ostotilausrivirow['rivihinta'] ;
+					}
+
 					$updatelisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$upd_kpl}'," : "varattu = '{$upd_kpl}',";
+					$rivihintalisa = $yks_rivihinta != 0 ? "rivihinta = '".($yks_rivihinta * $upd_kpl)."'," : "";
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
 								{$updatelisa}
+								{$rivihintalisa}
 								tilkpl	= '{$upd_kpl}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$ostotilausrivirow['tunnus']}'";
@@ -1059,6 +1067,10 @@
 								break;
 							case 'tilkpl':
 								$values .= ", '{$erotus}'";
+								break;
+							case 'rivihinta':
+								if ($yks_rivihinta != 0) $values .= ", '".($yks_rivihinta * $erotus)."'";
+								else $values .= ", 0";
 								break;
 							default:
 								$values .= ", '".$ostotilausrivirow[$fieldname]."'";

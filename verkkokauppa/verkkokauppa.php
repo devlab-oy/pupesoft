@@ -83,6 +83,38 @@ if ($livesearch_tee == "TUOTEHAKU") {
 	exit;
 }
 
+echo "<input type='hidden' id='osasto' value='{$osasto}' />";
+echo "<input type='hidden' id='tuoteryhma' value='{$try}' />";
+
+echo "	<script type='text/javascript'>
+
+			$(function() {
+
+				var osasto = '';
+				var tuoteryhma = '';
+
+				if ($('#osasto')) {
+					osasto = $('#osasto').val();
+					$('#osasto').val('');
+				}
+
+				if ($('#tuoteryhma')) {
+					tuoteryhma = $('#tuoteryhma').val();
+					$('#tuoteryhma').val('');
+				}
+
+				if (osasto != '') {
+					sndReq(\"T_\"+osasto, \"verkkokauppa.php?tee=menu&osasto=\"+osasto, \"P_\"+osasto, false, false);
+				}
+
+				if (osasto != '' && tuoteryhma != '') {
+					sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki=', '', false);
+				}
+
+			});
+
+		</script>";
+
 if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
 
 if (!function_exists("tilaus")) {

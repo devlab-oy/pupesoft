@@ -25,7 +25,7 @@ foreach($sallitut_parametrit as $parametri) {
 * Ostotilausten_kohdistus rivi 847 - 895...
 */
 $query = "  SELECT
-            tilausrivi.tilkpl,
+            tilausrivi.varattu+tilausrivi.kpl siskpl,
             tilausrivi.tuoteno,
             round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),2) ulkkpl,
             tuotteen_toimittajat.toim_tuoteno,
@@ -46,29 +46,35 @@ $row = mysql_fetch_assoc($result);
 # Kontrolleri
 if (isset($submit)) {
     switch($submit) {
-        case 'ok':
-
-            # M‰‰r‰‰ pienennet‰‰n
-            if ($hyllytetty < $row['tilkpl']) {
-            }
-            # M‰‰r‰‰ nostetaan
-            elseif ($hyllytetty > $row['tilkpl']) {
-            }
-            # Tilattu == Hyllytetty
-            else {
-
-            }
-            # TEMP lava (suuntalavat.tunnus = '8460')
-            #$row['suuntalava'] = '8460';
-
-            # Parametrit $alusta_tunnus=tilausrivi.suuntalava & lasku.liitostunnus=liitostunnus
-            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
-            break;
         case 'lopeta':
             # TODO: t‰m‰n pit‰is palata ostotilaus.php:lle
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
             #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
+            break;
+        case 'ok':
+            # M‰‰r‰‰ pienennet‰‰n
+            if ($hyllytetty < $row['siskpl']) {
+                echo "m‰‰r‰‰ pienennettiin";
+
+                # Splitataan rivi, $pois_suuntalavalta = false
+                $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
+                # P‰ivitet‰‰n vanhan kpl
+                $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
+
+                # Varastoon viet‰v‰ rivi
+                $url_array['tilausrivi'] = $uuden_rivin_id;
+            }
+            # M‰‰r‰‰ nostetaan
+            elseif ($hyllytetty > $row['siskpl']) {
+                echo "m‰‰r‰‰ nostettiin";
+            }
+            # Tilattu == Hyllytetty
+            else {
+            }
+
+            # Parametrit $alusta_tunnus=tilausrivi.suuntalava & lasku.liitostunnus=liitostunnus
+            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
@@ -76,30 +82,29 @@ if (isset($submit)) {
                 break;
             }
             # M‰‰r‰‰ pienennet‰‰n
-            if ($hyllytetty < $row['tilkpl']) {
+            if ($hyllytetty < $row['siskpl']) {
                 echo "Hyllytety m‰‰r‰ on pienempi kuin tilattujen (splitataan rivi)";
 
-                # Poikkeuksena asetetaan tilausrivin.varattu hyllytetyksi m‰‰r‰ksi
-                # mik‰ on pienempi kuin alkuper‰isen rivin tilkpl.
-                # P‰ivitet‰‰n kopioitava rivi.
+                # Splitataan rivi, $pois_suuntalavalta = false
+                $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
+                # P‰ivitet‰‰n vanhan kpl
+                $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
 
-                #$poikkeukset = array("tilausrivi.varattu" => $hyllytetty);
-                #$uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
+                # Suuntalavalle menev‰ rivi
+                $url_array['tilausrivi'] = $uuden_rivin_id;
 
-                #$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty);
-
-                # TODO: Lis‰t‰‰n (splitattu vai alkuper‰inen) rivi suuntalavalle
-                # suuntalavalle.php?ostotilaus=6690653&tilausrivi=26525168
+                # Lis‰t‰‰n rivi suuntalavalle
+                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
             }
             # M‰‰r‰‰ nostetaan
-            elseif ($hyllytetty > $row['tilkpl']) {
+            elseif ($hyllytetty > $row['siskpl']) {
                 echo "Hyllytetty m‰‰r‰ on suurempi kuin tilattujen (insertti erotukselle)";
 
-                #$poikkeukset = array("tilausrivi.varattu" => $hyllytetty);
-                #$uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
+                $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$row['siskpl']));
+                $uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
 
                 # TODO: Lis‰t‰‰n uusi rivi (hyllytetty - maara) ja vied‰‰n molemmat suuntalavalle
-                # suuntalavalle.php?ostotilaus=6690653&tilausrivi=26525168,1234567
+                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
             }
             # Tilattu == Hyllytetty
             else {
@@ -133,12 +138,12 @@ echo "<div class='main'>
 <table>
     <tr>
         <th>Tilattu m‰‰r‰</th>
-        <td>{$row['tilkpl']}</td>
+        <td>{$row['siskpl']}</td>
         <td>({$row['ulkkpl']})</td>
     </tr>
     <tr>
         <th>Hyllytetty m‰‰r‰</th>
-        <td><input type='text' name='hyllytetty' value='{$row['tilkpl']}'></input></td>
+        <td><input type='text' name='hyllytetty' value='{$row['siskpl']}'></input></td>
         <td>(?)</td>
     </tr>
     <tr>

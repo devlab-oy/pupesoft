@@ -30,11 +30,11 @@
 
 		$tilausnumero = luo_myyntitilausotsikko('RIVISYOTTO', $panttitili_row['asiakas']);
 
-		$query = "	SELECT tuoteno, hinta, alv, erikoisale, SUM(kpl) AS kpl
+		$query = "	SELECT myyntipvm, tuoteno, hinta, alv, erikoisale, SUM(kpl) AS kpl
 					FROM panttitili
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus IN ({$panttitili_row['tunnukset']})
-					GROUP BY 1,2,3,4
+					GROUP BY 1,2,3,4,5
 					ORDER BY myyntipvm ASC";
 		$pantti_res = pupe_query($query);
 

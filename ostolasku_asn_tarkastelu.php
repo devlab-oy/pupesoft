@@ -1028,7 +1028,7 @@
 					$yks_rivihinta = 0;
 
 					if ($ostotilausrivirow['kpl'] != 0) {
-						$yks_rivihinta = $ostotilausrivirow['rivihinta'] ;
+						$yks_rivihinta = $ostotilausrivirow['rivihinta'] / $ostotilausrivirow['kpl'];
 					}
 
 					$updatelisa = $ostotilausrivirow['kpl'] != 0 ? "kpl = '{$upd_kpl}'," : "varattu = '{$upd_kpl}',";

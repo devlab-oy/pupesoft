@@ -136,8 +136,6 @@
 
 	if ($tee == 'etsi_saapuminen' and $saapuminen != "") {
 
-		$saapuminen = (int) $saapuminen;
-
 		$query = "	SELECT suuntalavat.*, IF(suuntalavat.kaytettavyys = 'Y', '".t("Yksityinen")."', '".t("Yleinen")."') kaytettavyys,
 					laskun_lisatiedot.laskutus_nimi,
 					laskun_lisatiedot.laskutus_nimitark,

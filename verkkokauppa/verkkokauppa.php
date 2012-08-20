@@ -98,6 +98,8 @@ echo "	<script type='text/javascript'>
 					if ($('#T_'+target_ja_id[1]).is(':visible')) {
 						$(this).removeClass('selected');
 						$('a[id^=\"T_'+target_ja_id[1]+'_\"]').removeClass('selected');
+
+						sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+target_ja_id[1], \"\", false);
 					}
 					else {
 						$(this).addClass('selected');

@@ -16,6 +16,8 @@ if (isset($virhe)) {
 	$errors['virhe'] = "Ei löytynyt. Hae uudestaan.";
 }
 
+$data['kesken'] = $kesken;
+
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
@@ -37,10 +39,6 @@ if (isset($submit)) {
 			break;
 	}
 }
-
-# Tarkistetaan onko käyttäjällä mitään kesken
-$kesken_query = "SELECT kesken FROM kuka WHERE kuka='{$kukarow['kuka']}' AND yhtio='{$kukarow['yhtio']}'";
-$kesken = mysql_fetch_assoc(pupe_query($kesken_query));
 
 ### UI ###
 include("kasipaate.css");
@@ -77,3 +75,5 @@ echo "<div class='error'>";
         echo strtoupper($virhe).": ".$selite."<br>";
     }
 echo "</div>";
+
+if (isset($kesken)) echo "Käyttäjällä saapuminen: {$kesken} kesken.";

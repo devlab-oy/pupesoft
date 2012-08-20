@@ -53,8 +53,8 @@ else {
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
 	exit();
 }
-
 # Haetaan tilaukset
+# TODO: Toimittajarajaus
 $query = "	SELECT
 			tilausrivi.tunnus,
 			tilausrivi.otunnus,
@@ -72,7 +72,7 @@ $query = "	SELECT
 			JOIN tuote ON tuote.yhtio=tilausrivi.yhtio
 				AND tuote.tuoteno=tilausrivi.tuoteno
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+				AND tuotteen_toimittajat.tuoteno=tuote.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
 			$query_lisa
@@ -81,8 +81,14 @@ $query = "	SELECT
 			AND tilausrivi.uusiotunnus=0
 			order by tilausrivi.otunnus
 			LIMIT 100";
-
 $result = pupe_query($query);
+$tilausten_lukumaara = mysql_num_rows($result);
+
+# Ei osumia, palataan ostotilaus sivulle
+if ($tilausten_lukumaara == 0) {
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?virhe'>";
+	exit();
+}
 
 # Tarkistetaan onko k‰ytt‰j‰ll‰ kesken olevia ostotilauksia
 $kesken_query = "	SELECT kuka.kesken FROM lasku
@@ -92,12 +98,12 @@ $kesken_query = "	SELECT kuka.kesken FROM lasku
 					and lasku.tila='K';";
 $kesken_result = mysql_fetch_assoc(pupe_query($kesken_query));
 
-# Jos saapuminen on kesken niin k‰ytet‰‰n sit‰
+# Jos saapuminen on kesken niin k‰ytet‰‰n sit‰, tai tehd‰‰n uusi saapuminen
 if ($kesken_result['kesken'] != 0) {
 	echo "K‰ytt‰j‰ll‰ on saapuminen kesken: {$kesken_result['kesken']}";
+
 	$saapuminen = $kesken_result['kesken'];
 }
-# Muuten tehd‰‰n uusi
 else {
 	# Haetaan toimittajan tiedot
 	$row = mysql_fetch_assoc($result);
@@ -114,22 +120,17 @@ else {
 
 $url_array['saapuminen'] = $saapuminen;
 
-$tilausten_lukumaara = mysql_num_rows($result);
+# Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen
+if ($tilausten_lukumaara == 1) {
 
-# Ei osumia, palataan ostotilaus sivulle
-if ($tilausten_lukumaara == 0) {
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?virhe'>";
-	exit();
-}
-# Jos vain yksi osuma, menn‰‰n suoraan hyllytys sivulle
-elseif ($tilausten_lukumaara == 1) {
-
-	$row = mysql_fetch_assoc($result);
-	$url_array['tilausrivi'] = $row['tunnus'];
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
-	exit();
+	#$row = mysql_fetch_assoc($result);
+	#$url_array['tilausrivi'] = $row['tunnus'];
+	#echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=hyllytys.php?".http_build_query($url_array)."'>";
+	#exit();
 }
 
+# Result alkuun
+mysql_data_seek($result, 0);
 
 ### UI ###
 include("kasipaate.css");
@@ -154,7 +155,6 @@ echo "
 </tr>";
 
 # Loopataan ostotilaukset
-mysql_data_seek($result, 0);
 while($row = mysql_fetch_assoc($result)) {
 
 	echo "<tr>";
@@ -167,8 +167,9 @@ while($row = mysql_fetch_assoc($result)) {
 		echo "<td>{$row['tuoteno']}</td>";
 	}
 	echo "
-		<td>{$row['tilkpl']} (".
-			($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")</td>
+		<td>".($row['varattu']+$row['kpl']).
+			"(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].")
+		</td>
 		<td>{$row['hylly']}</td>
 	";
 

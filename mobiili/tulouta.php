@@ -15,6 +15,17 @@ if (isset($submit) and trim($submit) == 'cancel') {
 
 $errors = array();
 
+# Tarkistetaan onko käyttäjällä kesken olevia tilauksia
+$kesken_query = "	SELECT kuka.kesken FROM lasku
+					JOIN kuka ON lasku.tunnus=kuka.kesken
+					WHERE kuka='{$kukarow['kuka']}'
+					and kuka.yhtio='{$kukarow['yhtio']}'
+					and lasku.tila='K';";
+$kesken = mysql_fetch_assoc(pupe_query($kesken_query));
+
+$data = array('kesken' => $kesken['kesken']);
+$url = http_build_query($data);
+
 if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim($tulotyyppi) != '') {
 
 	switch($tulotyyppi) {
@@ -22,7 +33,7 @@ if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>"; exit;
 			break;
 		case 'ostotilaus':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit;
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?$url'>"; exit;
 			break;
 		default:
 			echo "Virheet tänne";
@@ -37,14 +48,6 @@ if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim
 if (isset($submit) and trim($submit) == 'submit') {
 	if ($tulotyyppi == '') $errors['tulotyyppi'] = t("Valitse tulotyyppi");
 }
-
-# Tarkistetaan onko käyttäjällä kesken olevia tilauksia
-$kesken_query = "	SELECT kuka.kesken FROM lasku
-					JOIN kuka ON lasku.tunnus=kuka.kesken
-					WHERE kuka='{$kukarow['kuka']}'
-					and kuka.yhtio='{$kukarow['yhtio']}'
-					and lasku.tila='K';";
-$kesken = mysql_fetch_assoc(pupe_query($kesken_query));
 
 $kesken = ($kesken['kesken'] == 0) ? "" : "({$kesken['kesken']})";
 

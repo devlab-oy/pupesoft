@@ -605,6 +605,8 @@
 					// p‰ivitet‰‰n is‰
 					$updateisa = "UPDATE tilausrivi SET perheid = tunnus WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilausrivirow['tunnus']}'";
 					$updateres = pupe_query($updateisa);
+
+					$tilausrivirow['perheid'] = $tilausrivirow['tunnus'];
 				}
 
 				// jos ei splitata, p‰ivitet‰‰n hinta ja kohdistetaan.
@@ -702,6 +704,69 @@
 					$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
 					$uusires = pupe_query($kysely);
 					$tilausrivi_id = mysql_insert_id();
+
+					// katsotaan onko tuoteperheen is‰tuote
+					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
+
+						// etsit‰‰n lapset ja splitataan ne is‰n mukaan
+						$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND perheid = '{$tilausrivirow['perheid']}' AND tunnus != '{$tilausrivirow['perheid']}'";
+						$lapsi_chk_res = pupe_query($query);
+
+						$tunnukset_talteen = array();
+
+						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+
+							// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+							$fields = "yhtio";
+							$values = "'{$kukarow['yhtio']}'";
+
+							// Ei monisteta tunnusta
+							for ($ii = 1; $ii < mysql_num_fields($lapsi_chk_res) - 1; $ii++) {
+
+								$fieldname = mysql_field_name($lapsi_chk_res,$ii);
+
+								if ($fieldname == 'tunnus') continue;
+
+								$fields .= ", ".$fieldname;
+
+								switch ($fieldname) {
+									case 'varattu':
+										if ($tilausrivirow['kpl'] == 0) {
+											$values .= ", '{$kappaleerotus}'";
+										}
+										else {
+											$values .= ", '0'";
+										}
+										break;
+									case 'kpl':
+										if ($tilausrivirow['kpl'] == 0) {
+											$values .= ", '".$tilausrivirow[$fieldname]."'";
+										}
+										else {
+											$values .= ", '{$kappaleerotus}'";
+										}
+										break;
+									case 'perheid':
+										$values .= ", '{$tilausrivi_id}'";
+										break;
+									default:
+										$values .= ", '".$tilausrivirow[$fieldname]."'";
+								}
+							}
+
+							$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+							$uusires = pupe_query($kysely);
+							$lapsi_uusi_id = mysql_insert_id();
+
+							$tunnukset_talteen[] = $lapsi_uusi_id;
+						}
+
+						$query = "	UPDATE tilausrivi SET
+									perheid = '{$tilausrivi_id}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tilausrivi_id}'";
+						$upd_res = pupe_query($query);
+					}
 
 					$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
 					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";

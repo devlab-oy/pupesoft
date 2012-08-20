@@ -15,7 +15,8 @@ $tilausrivi = (int) $tilausrivi;
 $data = array(
 	'alusta_tunnus' => $alusta_tunnus,
 	'liitostunnus' => $liitostunnus,
-	'tilausrivi' => $tilausrivi
+	'tilausrivi' => $tilausrivi,
+	'ostotilaus' => $ostotilaus
 );
 $url = http_build_query($data);
 

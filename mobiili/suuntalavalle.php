@@ -12,6 +12,8 @@ elseif (@include_once("inc/parametrit.inc"));
 # Rajataan sallitut get parametrit
 $sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi', 'saapuminen');
 
+$errors = array();
+
 # Rakkentaan parametreist‰ url_taulukko
 $url_array = array();
 foreach($sallitut_parametrit as $parametri) {
@@ -23,7 +25,8 @@ foreach($sallitut_parametrit as $parametri) {
 /* ostotilausten_kohdistus.inc rivit 1541-1567
 * Haetaan "sopivat" suuntalavat
 */
-# TODO: Jos rivi on splitattu, niin laitetaanko molemmat samalle suuntalavalle
+# TODO: Jos useampi tilausrivi, eli splitattu, niin laitetaanko molemmat suuntalavalle
+#$query = "SELECT * FROM tilausrivi WHERE tunnus IN ({$tilausrivi})";
 $query = "select * from tilausrivi where tunnus='{$tilausrivi}'";
 $tilausrivi = pupe_query($query);
 $tilausrivi = mysql_fetch_assoc($tilausrivi);
@@ -80,20 +83,15 @@ if (isset($submit)) {
             }
             break;
         case 'ok':
-            # 26525174###6690659 ($tilausrivi###$ostotilaus)
-            $valittu = $tilausrivi."###".$ostotilaus;
 
-            # Kohdista rivi
+            # Kohdista rivi(t)
             $query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
             $result   = pupe_query($query);
             $laskurow = mysql_fetch_array($result);
 
-            require("../inc/keikan_toiminnot.inc");
+            require("../inc/keikan_toiminnot.inc"); # T‰‰ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
             $kohdista_status = kohdista_rivi($laskurow, $tilausrivi['tunnus'], $ostotilaus, $saapuminen, $suuntalava);
-
-            echo "kohdista_rivi({$tilausrivi['tunnus']}, $ostotilaus, $saapuminen, $suuntalava, $suoratoimitusrivi)";
-            echo "<br>Kohdista_status: ";
-            var_dump($kohdista_status);
+            exit();
 
             # Kaikki ok
             # echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?'>"; exit();
@@ -208,7 +206,3 @@ echo "<div class='error'>";
         echo strtoupper($virhe).": ".$selite;
     }
 echo "</div>";
-
-echo "<pre>";
-var_dump($tilausrivi);
-echo "</pre>";

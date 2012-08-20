@@ -26,7 +26,7 @@ $url = http_build_query($data);
 # Haetaan suuntalavan tuotteet
 if (!empty($alusta_tunnus)) {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
-	$row = mysql_fetch_assoc($res);
+	if (!$row = mysql_fetch_assoc($res)) exit("Virhe: suuntalavan_tuotteet()");
 }
 # Ilman suuntalavaa
 else {
@@ -131,11 +131,39 @@ if (isset($submit) and trim($submit) != '') {
 				}
 				# M‰‰r‰t samat
 				else {
+
 					# Ostotilausten tuloutus, jos vied‰‰n varastoon ilman suuntalavaa
 					if ($alusta_tunnus == 0) {
 
 						# TODO: luodaan v‰liaikanen suuntalava
-						$alusta_tunnus = 'xxxx';
+						$tee = "eihalutamitankayttoliittymaapliis";
+						$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+						$otunnus = $saapuminen;
+						echo "OK painettu<br>";
+						require ("../tilauskasittely/suuntalavat.inc");
+
+						$params = array(
+								'sscc' => 'TEMP',
+								'tyyppi' => 0,
+								'keraysvyohyke' => 'TEMP',
+								'usea_keraysvyohyke' => 'K',
+								'kaytettavyys' => 'Y',
+								'terminaalialue' => 'TEMP',
+								'korkeus' => 0,
+								'paino' => 0,
+								'alkuhyllyalue' => "",
+								'alkuhyllynro' => "",
+								'alkuhyllyvali' => "",
+								'alkuhyllytaso' => "",
+								'loppuhyllyalue' => "",
+								'loppuhyllynro' => "",
+								'loppuhyllyvali' => "",
+								'loppuhyllytaso' => "",
+								'suuntalavat_ei_kayttoliittymaa' => "KYLLA",
+								'valittutunnus' => $tilausrivi
+							);
+
+						$alusta_tunnus = lisaa_suuntalava($saapuminen, $params);
 
 						# Saapumisen tiedot
 						$query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
@@ -145,16 +173,29 @@ if (isset($submit) and trim($submit) != '') {
 						# Kohdistetaan rivi
 						require("../inc/keikan_toiminnot.inc");
 						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $ostotilaus, $saapuminen, $alusta_tunnus);
+						var_dump($kohdista_status);
 
 						# Suuntalava siirtovalmiiksi
 						$otunnus = $saapuminen;
 						$suuntalavan_tunnus = $alusta_tunnus;
 						$tee = 'siirtovalmis';
 						$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+						echo "suuntalavan tunnus: ".$suuntalavan_tunnus;
 						require ("../tilauskasittely/suuntalavat.inc");
 
 						# Vied‰‰n varastoon
 						vie_varastoon($saapuminen, $alusta_tunnus, $hylly, $tilausrivi);
+
+						$query = "	UPDATE suuntalavat SET
+									tila = 'P'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$alusta_tunnus}'";
+						$tila_res = pupe_query($query);
+
+						# palataan hyllytys sivulle
+						echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
+						exit();
+
 					}
 					# Suuntalava varastoon
 					else {

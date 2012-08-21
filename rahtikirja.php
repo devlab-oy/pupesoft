@@ -2501,7 +2501,7 @@
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
 							AND kerayserat.otunnus 	IN ({$querytunlisa})
 							#GROUP BY 1,2,3,4,5,6
-							ORDER BY kerayserat.pakkausnro";
+							ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 			}
 
 			$keraysera_res = pupe_query($query);

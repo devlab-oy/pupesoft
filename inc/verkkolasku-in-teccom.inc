@@ -457,6 +457,7 @@
 									$rtuoteno[$x]["nimitys"]			= $child_chk_row['nimitys'];
 									$rtuoteno[$x]['status']				= '';
 									$rtuoteno[$x]["alv"] 				= 0; // Oletetaan aina ALV 0%
+									$rtuoteno[$x]["lapsi"]				= "yes";
 									$ealvi[$x] 							= 0; // Oletetaan aina ALV 0%
 								}
 							}

@@ -2444,7 +2444,10 @@
 						echo "<option value=''>",t("Valitse pakkaus kaikille riveille"),"</option>";
 
 						while ($pakkausrow = mysql_fetch_assoc($pakkausres)) {
-							echo "<option value='{$pakkausrow['tunnus']}'>{$pakkausrow['pakkaus']} {$pakkausrow['pakkauskuvaus']}</option>";
+
+							$sel = (isset($pakkaukset_kaikille) and $pakkaukset_kaikille == $pakkausrow['tunnus']) ? " selected" : "";
+
+							echo "<option value='{$pakkausrow['tunnus']}'{$sel}>{$pakkausrow['pakkaus']} {$pakkausrow['pakkauskuvaus']}</option>";
 						}
 
 						echo "</select></td>";

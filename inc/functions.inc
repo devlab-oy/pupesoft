@@ -13609,7 +13609,12 @@ if (!function_exists("kopioi_tilausrivi")) {
 						$rvalues .= "'$kukarow[kuka]',";
 						break;
 					case 'laadittu':
-						$rvalues .= "now(),";
+						if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+							$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+						}
+						else {
+							$rvalues .= "now(),";
+						}
 						break;
 					default:
 						$rvalues .= "'";

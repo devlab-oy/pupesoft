@@ -18965,7 +18965,10 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
 			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'];
 
-			if ($pakkausnro == 0 or ($kerayseran_paino + $pakkauksen_kaytetty_paino > $pakkaukset_paino)) $pakkausnro++;
+			if ($pakkausnro == 0 or ($kerayseran_paino + $pakkauksen_kaytetty_paino > $pakkaukset_paino)) {
+				$pakkauksen_kaytetty_paino = 0;
+				$pakkausnro++;
+			}
 
 			while ($kerayseran_paino > $pakkaukset_paino) {
 				$keraysera_kpl -= $kerayseran_rivit[$i]['data']['myynti_era'];

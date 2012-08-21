@@ -717,6 +717,8 @@
 						$viestirar = pupe_query($query);
 						$viestirarrow = mysql_fetch_assoc($viestirar);
 
+						$oslappkpl = $kollityht;
+
 						if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
 							$tiedot = "toimitusta";
 						}

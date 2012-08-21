@@ -161,6 +161,8 @@
 
 			$kaytettavat_tilausrivit = array();
 
+			$isalisa = (isset($rtuoteno[$i]["isa_olemassa"]) and trim($rtuoteno[$i]["isa_olemassa"]) != "") ? "and tilausrivi.perheid = '".(int) $rtuoteno[$i]["isa_olemassa"]."' and tilausrivi.perheid != tilausrivi.tunnus" : "";
+
 			// tiukka 1
 			$query = "	SELECT tilausrivi.*, toimi.asn_sanomat
 						FROM tilausrivi
@@ -187,6 +189,7 @@
 						AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 						AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 						AND tilausrivi.uusiotunnus != 0
+						{$isalisa}
 						ORDER BY laadittu ASC";
 			$kokeillaan = pupe_query($query);
 
@@ -223,6 +226,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
 							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -259,6 +263,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus != 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -295,6 +300,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -330,6 +336,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus != 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -361,6 +368,7 @@
 							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -394,6 +402,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.tilaajanrivinro = '{$rtuoteno[$i]['tilaajanrivinro']}'
 							AND tilausrivi.uusiotunnus = 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -424,6 +433,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.otunnus LIKE '%{$rtuoteno[$i]['ostotilausnro']}'
 							AND tilausrivi.uusiotunnus = 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -456,6 +466,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 				$kokeillaan = pupe_query($query);
 
@@ -485,6 +496,7 @@
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
+							{$isalisa}
 							ORDER BY laadittu ASC";
 
 				if (mysql_num_rows($kokeillaan) > 0) {
@@ -680,6 +692,8 @@
 						$lapsi_chk_res = pupe_query($query);
 
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+
+							if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 							$poikkeukset = array(
 								'varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
@@ -1053,6 +1067,8 @@
 							$lapsi_chk_res = pupe_query($query);
 
 							while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+
+								if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 								$poikkeukset = array(
 									'varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),

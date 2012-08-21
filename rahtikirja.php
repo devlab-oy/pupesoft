@@ -892,23 +892,13 @@
 
 					$tunnus = $laskurow["tunnus"];
 
-					$oslaput_email = 1;
-
-					if ($oslappkpl > 0 and $oslappkpl != '' and $oslapp != 'email') {
-						$oslapp .= " -#$oslappkpl ";
+					if ($toimitustaparow['osoitelappu'] == 'intrade') {
+						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
-					elseif ($oslappkpl > 0 and $oslappkpl != '' and $oslapp == 'email') {
-						$oslaput_email = $oslappkpl;
+					else {
+						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
 
-					for ($i = 0; $i < $oslaput_email; $i++) {
-						if ($toimitustaparow['osoitelappu'] == 'intrade') {
-							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-						}
-						else {
-							require ("tilauskasittely/osoitelappu_pdf.inc");
-						}
-					}
 					unset($tunnus);
 				}
 			}

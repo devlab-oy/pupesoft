@@ -721,6 +721,7 @@
 
 						if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
 							$tiedot = "toimitusta";
+							$toimitustaparow = $toitarow;
 						}
 
 						if ($toitarow['osoitelappu'] == 'intrade') {

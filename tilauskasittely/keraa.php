@@ -1775,10 +1775,6 @@
 						if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 							$tunnus = $laskurow["tunnus"];
 
-							if ($oslappkpl > 1) {
-								$oslapp .= " -#$oslappkpl ";
-							}
-
 							$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
 							$oslares = pupe_query($query);
 							$oslarow = mysql_fetch_assoc($oslares);

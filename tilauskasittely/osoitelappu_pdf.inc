@@ -91,14 +91,12 @@ if ($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_vastaanottovaras
 }
 
 
-$prikomento = explode('-#', $oslapp);
-
 // haetaan printterin osoitetiedot
 $query = "	SELECT *
-			from kirjoittimet
-			where yhtio = '$kukarow[yhtio]'
-			and trim(komento) like concat(trim('$prikomento[0]'),'%')
-			and nimi != ''";
+			FROM kirjoittimet
+			WHERE yhtio = '{$kukarow['yhtio']}'
+			AND TRIM(komento) LIKE CONCAT(TRIM('{$oslapp}'),'%')
+			AND nimi != ''";
 $pres  = pupe_query($query);
 $print = mysql_fetch_assoc($pres);
 
@@ -109,41 +107,6 @@ if ($print["nimi"] != "") {
 	$laskurow["yhtio_postino"] = $print["postino"];
 	$laskurow["yhtio_postitp"] = $print["postitp"];
 }
-
-if (!function_exists('tarkiste')) {
-	function tarkiste($sscc) {
-		$kerroin = 3; // kerroin aluks 3
-		$summa   = 0; // summa nolla tietty
-
-		// loopataan luvut oikeelta vasemmalle
-		for ($i = 16; $i >= 0; $i--) {
-			$summa += $kerroin * (ord($sscc{$i})-48); // lisätään summaan ko. luku * kerroin (tää hanskaa kirjaimet )
-			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-		}
-
-		$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mikä pitää lisätä, että päästään seuraavaan tasakymmeneen
-
-		return $sscc;
-	}
-}
-
-// tehdään SSCC :
-// (00)
-// 1
-// ytunnus (8)
-// lähetenro (6)
-// kollityht (2)
-// tarkiste (1)
-
-$apu_kollityht = $kollityht;
-if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
-
-$sscc = 1;
-$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-$sscc .= sprintf('%02.02d', $apu_kollityht);
-$loppu = tarkiste($sscc);
-$sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 require_once("pdflib/phppdflib.class.php");
@@ -175,9 +138,21 @@ $iso["font"] = "Helvetica-Bold";
 $huge["height"] = 20;
 $huge["font"] = "Helvetica-Bold";
 
-$tulostakolli = 1; // tulostetaan aina yksi kappale???
+for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
-for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
+	// tehdään SSCC :
+	// (00)
+	// 1
+	// ytunnus (8)
+	// lähetenro (6)
+	// kollityht (2)
+	// tarkiste (1)
+	$sscc = 1;
+	$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
+	$sscc .= sprintf('%02.02d', $tulostuskpl);
+	$loppu = tarkiste($sscc);
+	$sscc = $sscc.$loppu;
 
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
@@ -536,5 +511,3 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
 system("rm -f $pdffilenimi");
 $pdffilenimi='';
 $tilausnumeroita="";
-
-?>

@@ -18902,6 +18902,23 @@ if (!function_exists('paivita_oletuspaikka')) {
 	}
 }
 
+if (!function_exists('tarkiste')) {
+	function tarkiste($sscc) {
+		$kerroin = 3; // kerroin aluks 3
+		$summa   = 0; // summa nolla tietty
+
+		// loopataan luvut oikeelta vasemmalle
+		for ($i = 16; $i >= 0; $i--) {
+			$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+		}
+
+		$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+
+		return $sscc;
+	}
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
 	function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
 

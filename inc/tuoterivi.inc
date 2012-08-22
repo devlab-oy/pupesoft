@@ -54,7 +54,8 @@
 		mysql_field_name($result, $i) == "tilino_ei_eu" or
 		mysql_field_name($result, $i) == "tilino_kaanteinen" or
 		mysql_field_name($result, $i) == "tilino_marginaali" or
-		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
+		mysql_field_name($result, $i) == "tilino_osto_marginaali" or
+		mysql_field_name($result, $i) == "tilino_triang") {
 
 		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
 		$jatko = 0;
@@ -210,19 +211,6 @@
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' $sela>".t("Normaalik‰sittely")."</option>";
 		$ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava rivikommentti")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
-
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('P', 'M', 'N'), '');
-
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
-		$ulos .= "<option value = 'P' $sel[P]>".t("Pituus positiolta, is‰tuotteen hinta korjataan")."</option>";
-		$ulos .= "<option value = 'M' $sel[M]>".t("Manuaalisesti syˆtett‰v‰ pituus, is‰tuotteen m‰‰r‰‰ ei korjata")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Manuaalisesti syˆtett‰v‰ m‰‰r‰, is‰n m‰‰r‰‰ korjataan")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -633,7 +633,7 @@ if ($silent == "") {
 
 	if(!isset($hakutapa) and !isset($tee_kululaskut) and $keikanalatila == "") {
 		$hakutapa 		= "N";
-		$haku 			= substr($laskurow["nimi"], 0, 6);
+		$haku 			= substr($laskurow["nimi"], 0, 25);
 		$tee_kululaskut = "haku";
 	}
 

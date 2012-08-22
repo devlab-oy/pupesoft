@@ -211,22 +211,6 @@
 			}
 		}
 
-		//	Jos meillä on tilauksien seuranta käytössä ja svnStatus on ok meillä on oltava sopiva seuranta
-		if ($yhtiorow["tilauksen_seuranta"] != "" and $seuranta == "" and in_array($toim, array("TARJOUS", "PROJEKTI"))) {
-			echo "<font class='error'>".t("VIRHE: Anna tilaukselle seuranta")."!</font><br>";
-			$tee = "OTSIK";
-			$tila = "";
-			unset($jatka);
-		}
-
-		//	Jos meillä on tilauksien seuranta käytössä ja svnStatus on ok meillä on oltava sopiva seuranta
-		if ($yhtiorow["tilauksen_kohteet"] == "K" and $asiakkaan_kohde == "" and in_array($toim, array("PROJEKTI", "TARJOUS"))) {
-			echo "<font class='error'>".t("VIRHE: Anna kohde")."!</font><br>";
-			$tee = "OTSIK";
-			$tila = "";
-			unset($jatka);
-		}
-
 		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {
 			echo "<font class='error'>".t("VIRHE: Anna tilaukselle yhteyshenkilö")."!</font><br>";
 			$tee = "OTSIK";
@@ -1504,30 +1488,7 @@
 
 			}
 
-			if ($yhtiorow["tilauksen_kohteet"] == "K") {
-				$query = "	SELECT tunnus, kohde
-							FROM asiakkaan_kohde
-							WHERE yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]'
-							ORDER BY tunnus desc";
-				$kohderesult = pupe_query($query);
-
-				echo "<td>".t("Kohde").":</td>
-					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde'>";
-
-				echo "<option value=''>".t("Asiakkaalla ei ole kohdetta")."</option>";
-
-				while ($row = mysql_fetch_assoc($kohderesult)) {
-					$sel = "";
-					if ($row["tunnus"] == $srow["asiakkaan_kohde"]) {
-						$sel = 'selected';
-					}
-					echo "<option value='$row[tunnus]' $sel>$row[tunnus] - $row[kohde]</option>";
-				}
-				echo "</select>";
-				echo "</td></tr>";
-
-			}
-			elseif ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
+			if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
 				//	Fiksataan HTML
 				echo "<td></td><td></td></tr>";
 			}
@@ -1661,7 +1622,7 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						$varastot_lisa_query
-						ORDER BY tyyppi, nimitys";
+						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 
 			while ($varow = mysql_fetch_assoc($vares)) {
@@ -1920,27 +1881,6 @@
 					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
 					</select></td></tr>";
 
-			if ($yhtiorow["tilauksen_seuranta"] == "K") {
-				//seuranta
-				$mryresult = t_avainsana("SEURANTA");
-
-				echo "<tr><td>".t("Seuranta")."</td><td><select name='seuranta'><option value=''>".t("Valitse")."</option>";
-
-				while($row = mysql_fetch_assoc($mryresult)) {
-					$sel = "";
-					if ($row["selite"] == $srow["seuranta"]) {
-						$sel = 'selected';
-					}
-					echo "<option value='$row[selite]' $sel>$row[selite] - $row[selite]</option>";
-				}
-				echo "</select></td>";
-
-				$rchk = "";
-				if ($srow["rivihintoja_ei_nayteta"] != '') $rchk = 'CHECKED';
-				echo "<td>".t("Rivihintoja ei näytetä")."</td><td><input type='checkbox' value='X' name='rivihintoja_ei_nayteta' $rchk></td>";
-				echo "</tr>";
-			}
-
 			echo "<tr>";
 
 			//laskun valuuttakoodi
@@ -2000,6 +1940,27 @@
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
 			echo "</tr>";
+
+			if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
+				$labels = t_avainsana("LABEL");
+
+				if (mysql_num_rows($labels) > 0) {
+
+					echo "<tr>";
+					echo "<td>",t("Luokitus"),":</td>";
+					echo "<td><select name='label' id='label' style='max-width: 300px'>";
+					echo "<option value=''>".t("Ei valintaa")."</option>";
+
+					while ($labelrow = mysql_fetch_assoc($labels)) {
+						$sel = $srow['label'] == $labelrow['tunnus'] ? " selected" : "";
+						echo "<option value='{$labelrow['tunnus']}'{$sel}>{$labelrow['selitetark']}</option>";
+					}
+
+					echo "</select></td>";
+
+					echo "<td></td><td></td>";
+				}
+			}
 
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "<tr>";
@@ -2488,19 +2449,7 @@
 
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
-			if ($yhtiorow["tilauksen_kohteet"] == "K") {
-				if ($toim == "TARJOUS") {
-					if ($kukarow["kesken"] == 0) {
-						$saateres = t_avainsana("saate");
-						$saaterow = mysql_fetch_assoc($saateres);
-						$srow["saate"] = $saaterow["selite"];
-					}
-					echo "<tr><td>".t("Saateteksti")." :</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td>".t("tarjous")."</td></tr>";
-				}
-			}
-			else {
-				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
-			}
+			echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
@@ -3028,6 +2977,8 @@
 		// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
+		$label = !isset($label) ? "" : $label;
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
@@ -3056,6 +3007,7 @@
 					kohdistettu 						= '$maksaja',
 					kuljetus 							= '$kuljetus',
 					kuljetusmuoto						= '',
+					label								= '{$label}',
 					laskutusvkopv 						= '$laskutusvkopv',
 					liitostunnus						= '$liitostunnus',
 					maa 								= '$maa',
@@ -3454,7 +3406,6 @@
 							tunnusnippu_tarjous			= '$tunnusnippu_tarjous',
 							rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 							kasinsyotetty_viite			= '$kasinsyotetty_viite',
-							asiakkaan_kohde				= '$asiakkaan_kohde',
 							kantaasiakastunnus			= '$kantaasiakastunnus',
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
@@ -3477,9 +3428,6 @@
 				paivita_toimitukset($kukarow["kesken"], $originaali);
 			}
 
-			if (in_array($toim, array("TARJOUS", "PROJEKTI")) and $yhtiorow["dokumentaatiohallinta"] != "") {
-				svnOpenNew($kukarow["kesken"], $toim);
-			}
 		}
 	}
 

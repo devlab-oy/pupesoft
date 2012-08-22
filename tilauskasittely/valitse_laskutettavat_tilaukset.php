@@ -497,11 +497,11 @@
 			$maksu_positiot = array();
 
 			while ($row = mysql_fetch_assoc($res)) {
-				
+
 				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
 					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>Lasku:</font></td><td class='back' colspan='3'><hr></td></tr>";
 				}
-				
+
 				// jos yksikin on käteinen niin kaikki on käteistä (se hoidetaan jo ylhäällä)
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
@@ -984,12 +984,10 @@
 							}
 
 							if (msg != '') {
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								alert(msg);
+
+								skippaa_tama_submitti = true;
+								return false;
 							}
 
 							if (laskutusviikonpaiva > 0 && laskutusviikonpaiva < 9 ) {
@@ -1015,7 +1013,13 @@
 							}
 
 							if (naytetaanko_herja == true) {
-								return confirm(msg);
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 						}
 					</SCRIPT>";
@@ -1077,7 +1081,7 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1220,4 +1224,3 @@
 	}
 
 	require ("../inc/footer.inc");
-?>

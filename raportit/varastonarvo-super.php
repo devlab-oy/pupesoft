@@ -1355,38 +1355,38 @@
 				echo "<font class='error'>",t("Huom. Bruttovarastonarvo on arvio"),"!</font><br/><br/>";
 			}
 		}
-	}
 
-	$excelnimi = $worksheet->close();
+		$excelnimi = $worksheet->close();
 
-	if (!$php_cli) {
-		echo "<form method='post' class='multisubmit'>";
-		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-		echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xlsx'>";
-		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-		echo "<table>";
-		echo "<tr><th>".t("Tallenna Excel-aineisto").":</th>";
-		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
-		echo "</table><br>";
-		echo "</form>";
-	}
-	else {
-		$komento = 'email';
+		if (!$php_cli) {
+			echo "<form method='post' class='multisubmit'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xlsx'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna Excel-aineisto").":</th>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+			echo "</table><br>";
+			echo "</form>";
+		}
+		else {
+			$komento = 'email';
 
-		// itse print komento...
-		$liite = "/tmp/Varastonarvo_$vv-$kk-$pp.xlsx";
+			// itse print komento...
+			$liite = "/tmp/Varastonarvo_$vv-$kk-$pp.xlsx";
 
-		rename("/tmp/".$excelnimi, $liite);
+			rename("/tmp/".$excelnimi, $liite);
 
-		$kutsu = t("Varastonarvoraportti")." $vv-$kk-$pp";
+			$kutsu = t("Varastonarvoraportti")." $vv-$kk-$pp";
 
-		$ctype = "excel";
-		$kukarow["eposti"] = $email_osoite;
+			$ctype = "excel";
+			$kukarow["eposti"] = $email_osoite;
 
-		require("../inc/sahkoposti.inc");
+			require("../inc/sahkoposti.inc");
 
-		//poistetaan tmp file samantien kuleksimasta...
-		system("rm -f /tmp/$excelnimi");
+			//poistetaan tmp file samantien kuleksimasta...
+			system("rm -f /tmp/$excelnimi");
+		}
 	}
 
 	if (!$php_cli) {

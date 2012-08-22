@@ -482,6 +482,22 @@ if (!function_exists('alku_lahete')) {
 			}
 		}
 
+		// Haetaan avainsanoista vakioviesti
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND kieli = '{$kieli}'
+					AND laji = 'VAKIOVIESTI_TIL'
+					ORDER BY jarjestys
+					LIMIT 1";
+		$vakioviesti_result = pupe_query($query);
+
+		if (mysql_num_rows($vakioviesti_result) == 1) {
+			$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
+
+			$komm .= "\n".t("Viesti", $kieli).":###".$vakioviesti_row['selite'];
+		}
+
 		if ($yhtiorow["vak_kasittely"] != "" and $tyyppi != "TILAUSVAHVISTUS") {
 
 			$vaktiedot = "";
@@ -3666,5 +3682,3 @@ if (!function_exists('print_pdf_lahete')) {
 		system("rm -f $pdffilenimi");
 	}
 }
-
-?>

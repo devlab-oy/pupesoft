@@ -236,7 +236,7 @@
 		// tuotteen toimittajatiedot
 		if ($tuoterow["ei_saldoa"] == '') {
 			$query = "	SELECT tuotteen_toimittajat.*,
-						toimi.ytunnus, toimi.nimi, toimi.nimitark,
+						toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.oletus_valkoodi,
 						if (jarjestys = 0, 9999, jarjestys) sorttaus
 						FROM tuotteen_toimittajat
 						LEFT JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
@@ -530,7 +530,14 @@
 
 			echo "</th>";
 			echo "<th>".t("Netto/Ovh")."</th>";
-			echo "<th>".t("Ostohinta")." / ".t("Alennus")."</th>";
+			echo "<th>".t("Ostohinta")." / ";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+				if ($alepostfix > 1) echo " ";
+
+				echo t("Ale{$alepostfix}");
+			}
+
 			echo "<th>".t("Kehahinta")."</th>";
 			echo "<th>".t("Vihahinta")." ".tv1dateconv($tuoterow["vihapvm"])."</th>";
 			echo "</tr>";
@@ -546,7 +553,35 @@
 			echo "<td valign='top' align='right'>";
 
 			foreach ($ttrow as $tt_rivi) {
-				echo hintapyoristys($tt_rivi["ostohinta"],6,TRUE)." {$tt_rivi["valuutta"]} / {$tt_rivi["alennus"]}%<br>";
+
+				$query = "	SELECT *
+							FROM valuu
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND nimi = '{$tt_rivi['oletus_valkoodi']}'
+							ORDER BY tunnus DESC
+							LIMIT 1";
+				$kurssi_chk_res = pupe_query($query);
+				$kurssi_chk_row = mysql_fetch_assoc($kurssi_chk_res);
+
+				$_laskurow = array(
+					'liitostunnus' 	=> $tt_rivi['liitostunnus'],
+					'valkoodi' 		=> $tt_rivi['oletus_valkoodi'],
+					'ytunnus' 		=> $tt_rivi['ytunnus'],
+					'vienti_kurssi' => $kurssi_chk_row['kurssi']
+				);
+
+				list($_hinta, $_netto, $_ale, $_valuutta) = alehinta_osto ($_laskurow, $tuoterow, 1, '', '', array());
+
+				echo "<span style='font-weight:bold;'>",hintapyoristys($_hinta, 6, TRUE)," {$_valuutta}</span> / ";
+
+				foreach ($_ale as $key => $val) {
+
+					if ($key{3} > $yhtiorow['oston_alekentat']) continue;
+
+					echo "{$val}% ";
+				}
+
+				echo "<br />";
 			}
 			echo "</td>";
 			echo "<td valign='top' align='right' style='font-weight:bold;'>".hintapyoristys($tuoterow["kehahin"], 6, TRUE);
@@ -1041,8 +1076,12 @@
 								$keikka = " / ".$jtrow["keikkanro"];
 							}
 						}
-
-						$merkki = "+";
+						if ($jtrow["kpl"] > 0) {
+							$merkki = "+";
+						}
+						else {
+							$merkki = "-";
+						}
 					}
 					elseif ($jtrow["tyyppi"] == "E") {
 						$tyyppi = t("Ennakkotilaus");

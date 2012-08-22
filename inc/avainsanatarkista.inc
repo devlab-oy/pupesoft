@@ -36,6 +36,19 @@ if(!function_exists("avainsanatarkista")) {
 				$seliteerrori = 1;
 			}
 
+			if ($tem_laji == 'LABEL') {
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen ja se pitää olla muodossa #123 tai #112233");
+				}
+				elseif ($tem_selite{0} != '#') {
+					$virhe[$i] = t("Selitteen ensimmäinen kirjain pitää olla #");
+				}
+				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
+					$virhe[$i] = t("Selite täytyy olla 4 tai 7 merkkiä pitkä").' '.strlen($tem_selite);
+				}
+			}
+
+
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pitää olla pisteellä, ei pilkulla
 				$t[$i] = round((float) str_replace(",", ".", $tem_selite), 2);
@@ -45,11 +58,15 @@ if(!function_exists("avainsanatarkista")) {
 				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on kolme merkkiä")."!";
 			}
 
+			if (strlen($tem_selite) > 1 and $tem_laji == 'ASIAKASLUOKKA') {
+				$virhe[$i] = t("Selite on liian pitkä, maksimipituus on yksi merkki")."!";
+			}
+
 			if (!is_numeric($tem_selite) and in_array($tem_laji, array("TRY", "OSASTO", "PIIRI", "VALMISTUSLINJA"))) {
 				$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
 			}
 
-			if ($tem_laji == 'VAKIOVIESTI' and trim($tem_selite) == '') {
+			if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
 				$virhe[$i] = t("Selite on pakollinen");
 			}
 
@@ -80,7 +97,7 @@ if(!function_exists("avainsanatarkista")) {
 		if (mysql_field_name($result, $i) == "selitetark") {
 			$tem_selitetark = trim($t[$i]);
 
-			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI') {
+			if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL') {
 				$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
 			}
 
@@ -128,5 +145,3 @@ if(!function_exists("avainsanatarkista")) {
 		}
 	}
 }
-
-?>

@@ -28,6 +28,7 @@
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	$chk = "";
+
 	if (trim($konserni) != '') {
 		$chk = "CHECKED";
 	}
@@ -50,6 +51,7 @@
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
 			if ($array[$i] == "asiakas.nimi") {
 				$lisa .= " and (asiakas.nimi like '%".$haku[$i]."%' or asiakas.toim_nimi like '%".$haku[$i]."%')";
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
 			else {
 				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
@@ -66,7 +68,7 @@
 
 	if (trim($konserni) != '') {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$konsernit = "";
 
 		while ($row = mysql_fetch_array($result)) {
@@ -116,7 +118,7 @@
 	}
 
 	$query .= "$ryhma ORDER BY $jarjestys $limit";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
 		// K‰yd‰‰n lista l‰pi kertaalleen
@@ -125,9 +127,9 @@
 								SET tila = '$astila_vaihto'
 								WHERE tunnus = '$trow[tunnus]'
 								AND yhtio = '$yhtiorow[yhtio]'";
-			$result_update = mysql_query($query_update) or pupe_error($query_update);
+			$result_update = pupe_query($query_update);
 		}
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	if ($tee == 'laheta' or $tee == 'lahetalista') {

@@ -288,7 +288,6 @@
 						asiakashinta as ashin1 READ,
 						asiakashinta as ashin2 READ,
 						asiakaskommentti READ,
-						asiakkaan_positio READ,
 						avainsana as a READ,
 						avainsana as avainsana_kieli READ,
 						avainsana as b READ,
@@ -1167,7 +1166,7 @@
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
 								$laskutuslisa_tyyppi_ehto
-								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1353,7 +1352,7 @@
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
-								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1593,7 +1592,7 @@
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pitää olla tyhjää muuten ei laskuteta
 				$query  = " SELECT
 							if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1606,13 +1605,13 @@
 							and lasku.tila      = 'L'
 							and lasku.viite     = ''
 							$lasklisa
-							GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
 							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 							$ketjutus_group
-							ORDER BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							ORDER BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -2164,6 +2163,7 @@
 										lasku.vienti_kurssi,
 										lasku.viesti laskuviesti,
 										lasku.asiakkaan_tilausnumero,
+										lasku.luontiaika tilauspaiva,
 										if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 										if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 										if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -2194,7 +2194,7 @@
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 										and tilausrivi.kpl != 0
 										and tilausrivi.otunnus in ($tunnukset)
-										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
+										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 										ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$tilres = pupe_query($query);
 
@@ -3066,27 +3066,28 @@
 
 							if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 								var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")."';
+								alert(msg);
 
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								skippaa_tama_submitti = true;
+								return false;
 							}
 							if (ero >= 2) {
 								var msg = '".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
-								return confirm(msg);
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 							if (ero < 0) {
 								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+								alert(msg);
 
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								skippaa_tama_submitti = true;
+								return false;
 							}
 						}
 					</SCRIPT>";
@@ -3162,5 +3163,3 @@
 	if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 		require("inc/footer.inc");
 	}
-
-?>

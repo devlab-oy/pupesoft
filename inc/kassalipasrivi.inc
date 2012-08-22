@@ -63,4 +63,25 @@
 			$jatko = 0;
 		}
 	}
-?>
+
+	if (mysql_field_name($result, $i) == "toimipaikka") {
+		if ($ulosarray[$i] != '') {
+			$ulos = $ulosarray[$i];
+			$jatko = 0;
+		}
+		else {
+			$ulos = "<td><select name='{$nimi}'><option value='0'>".t("Ei toimipaikkaa")."</option>";
+			$query = "	SELECT tunnus, ovtlisa, postitp, nimi
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY nimi, ovtlisa, postitp";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			while ($vrow = mysql_fetch_assoc($vresult)) {
+				$sel = $trow[$i] == $vrow['tunnus'] ? " selected" : "";
+				$ulos .= "<option value = '{$vrow['tunnus']}'{$sel}>{$vrow['nimi']} {$vrow['ovtlisa']} {$vrow['postitp']}</option>";
+			}
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+	}

@@ -3234,7 +3234,7 @@ if ($tee == '') {
 
 		while ($lapsi = mysql_fetch_assoc($lapsires)) {
 			//	P‰ivitet‰‰n positio
-			$query = "	UPDATE tilausrivin_lisatiedot SET 
+			$query = "	UPDATE tilausrivin_lisatiedot SET
 						positio = '$positio',
 						muutospvm = now(),
 						muuttaja = '{$kukarow["kuka"]}'
@@ -3248,7 +3248,7 @@ if ($tee == '') {
 		$positio 	= "";
 		$lisaalisa 	= "";
 	}
-	
+
 	if ($kukarow["extranet"] == "" and $tila == "LISLISAV") {
 		//P‰ivitet‰‰n is‰n perheid jotta voidaan lis‰t‰ lis‰‰ lis‰varusteita
 		if ($spessuceissi == "OK") {
@@ -7103,9 +7103,12 @@ if ($tee == '') {
 								<select name='kertakassa'>
 								<option value='EI_KASSAMYYNTIA'>".t("Ei kassamyynti‰")."</option>";
 
+						$kassalipaslisa = $kukarow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$kukarow['toimipaikka']})" : "";
+
 						$query = "	SELECT *
 									FROM kassalipas
 									WHERE yhtio = '$kukarow[yhtio]'
+									{$kassalipaslisa}
 									ORDER BY nimi";
 						$vares = pupe_query($query);
 
@@ -7245,5 +7248,3 @@ if ($tee == '') {
 if (@include("inc/footer.inc"));
 elseif (@include("footer.inc"));
 else exit;
-
-?>

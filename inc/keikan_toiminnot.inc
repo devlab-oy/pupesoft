@@ -1,11 +1,13 @@
 <?php
 
-	$keikan_otunnus = (int) $_POST['keikan_otunnus'];
+	if (isset($_POST['ajax_toiminto'])) {
+		$keikan_otunnus = (int) $_POST['keikan_otunnus'];
 
-	// haetaan keikkaotsikon tiedot
-	$query    = "SELECT * FROM lasku WHERE tunnus = '{$keikan_otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_array($result);
+		// haetaan keikkaotsikon tiedot
+		$query    = "SELECT * FROM lasku WHERE tunnus = '{$keikan_otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
+		$result   = pupe_query($query);
+		$laskurow = mysql_fetch_array($result);
+	}
 
 	function laske_hinta($laskurow, $tunnus) {
 		global $kukarow, $yhtiorow;

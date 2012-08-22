@@ -59,8 +59,8 @@ if (isset($submit) and trim($submit) != '') {
 		case 'cancel':
 			# TODO: Riippuen mist‰ ollaan tultu, mihin menn‰‰n
 			# Ostotilaus -> hyllytykseen
-			if (isset($ostotilaus)) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}'>";
+			if (isset($edellinen)) {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>";
 			}
 			# Asn-tuloutus -> suuntalava
 			else {
@@ -112,20 +112,17 @@ if (isset($submit) and trim($submit) != '') {
 				}
 
 				# Onko suuntalavaa?
-				if ($alusta_tunnus == 0) {
+				if ($alusta_tunnus == 0 && !empty($saapuminen)) {
+
 					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
 					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikanen lava.
-					echo "Ei oo suuntalavaa<br>";
-					echo "@alusta_tunnus = tee_suuntalava($saapuminen, @params) <br>";
-
-					# Luodaan v‰liaikanen suuntalava
 					$tee = "eihalutamitankayttoliittymaapliis";
 					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 					$otunnus = $saapuminen;
 					require ("../tilauskasittely/suuntalavat.inc");
 
-					# 8 ekaa merkki‰ timestamp+kuka hash
-					$hash = substr(sha1(time().$kukarow['kuka']), 0,8);
+					# Suuntalavalle nimi, temp_timestamp+kuka hash
+					$hash = "temp_".substr(sha1(time().$kukarow['kuka']), 0,8);
 
 					$params = array(
 							'sscc' => $hash,
@@ -149,7 +146,6 @@ if (isset($submit) and trim($submit) != '') {
 						);
 
 					$alusta_tunnus = lisaa_suuntalava($saapuminen, $params);
-					echo "Suuntalava luotu: {$alusta_tunnus}";
 
 					# Saapumisen tiedot
 					$query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
@@ -159,8 +155,7 @@ if (isset($submit) and trim($submit) != '') {
 					# Ei voi kohdistaa ennen kuin tilausrivi on splitattu
 					require("../inc/keikan_toiminnot.inc");
 					foreach($tilausrivit as $tilausrivi) {
-						echo "kohdistetaan rivi {$tilausrivi}<br>";
-						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $ostotilaus, $saapuminen, $alusta_tunnus);
+						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $row['otunnus'], $saapuminen, $alusta_tunnus);
 					}
 
 					# Suuntalava siirtovalmiiksi
@@ -183,13 +178,11 @@ if (isset($submit) and trim($submit) != '') {
 				$saapumiset = hae_saapumiset($alusta_tunnus);
 
 				foreach($tilausrivit as $rivi) {
-					echo "vied‰‰n varastoon rivi {$rivi}<br>";
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 				}
 
-				# Redirectit ostotilaukseen tai
-				echo "<br>redirect johonkin...";
-				#echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
+				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
 			}
 			break;
 		default:
@@ -263,17 +256,17 @@ echo "<div class='main'>
 		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 	</tr>
 </table>
-
 </div>";
 
 echo "<div class='controls'>
 	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
 	<button class='right' $piilotettu name='submit' value='new'>",t("Uusi ker‰yspaikka", $browkieli),"</button>
 	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-
+	<a class='takaisin' href='hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>Takaisin</a>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
+	<input type='hidden' name='saapuminen' value='{$saapuminen}' />
 </form>
 ";
 

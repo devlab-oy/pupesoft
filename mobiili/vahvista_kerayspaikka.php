@@ -69,7 +69,6 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 			break;
 		case 'new':
-			# TODO: T‰t‰ linkki‰ ei pit‰is olla osotilausten tuloutuksessa
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>";
 			exit;
 			break;
@@ -84,7 +83,95 @@ if (isset($submit) and trim($submit) != '') {
 			}
 			# Jos ei virheit‰
 			if(count($errors) == 0) {
+				$tilausrivit = array();
 
+				# Tarkastetaan m‰‰r‰t, eli tarviiko tilausrivia splittailla tai kopioida
+				if ($maara < $row['varattu']) {
+					echo "M‰‰r‰‰ on pienennetty <br>";
+					echo "splittaa_tilausrivi()<br>";
+
+					# P‰ivitet‰‰n alkuper‰isen rivin kpl
+					$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
+					# Splitataan rivi, $pois_suuntalavalta = false
+					$tilausrivit[] = splittaa_tilausrivi($tilausrivi, $maara, false, false);
+				}
+				elseif ($maara == $row['varattu']) {
+					echo "M‰‰r‰‰ on sama <br>";
+					$tilausrivit[] = $tilausrivi;
+				}
+				else {
+					echo "M‰‰r‰‰ on nostettu <br>";
+					echo "splittaa_tilausrivi()<br>";
+
+					# Tehd‰‰n insertti erotukselle
+					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
+					# P‰ivit‰ kopioidun kpl (maara - varattu)
+					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
+
+					$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
+				}
+
+				# Onko suuntalavaa?
+				if ($alusta_tunnus == 0) {
+					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
+					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikanen lava.
+					echo "Ei oo suuntalavaa<br>";
+					echo "@alusta_tunnus = tee_suuntalava($saapuminen, @params) <br>";
+
+					# Luodaan v‰liaikanen suuntalava
+					$tee = "eihalutamitankayttoliittymaapliis";
+					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+					$otunnus = $saapuminen;
+					require ("../tilauskasittely/suuntalavat.inc");
+
+					# 8 ekaa merkki‰ timestamp+kuka hash
+					$hash = substr(sha1(time().$kukarow['kuka']), 0,8);
+
+					$params = array(
+							'sscc' => $hash,
+							'tyyppi' => 0,
+							'keraysvyohyke' => $hash,
+							'usea_keraysvyohyke' => 'K',
+							'kaytettavyys' => 'Y',
+							'terminaalialue' => $hash,
+							'korkeus' => 0,
+							'paino' => 0,
+							'alkuhyllyalue' => "",
+							'alkuhyllynro' => "",
+							'alkuhyllyvali' => "",
+							'alkuhyllytaso' => "",
+							'loppuhyllyalue' => "",
+							'loppuhyllynro' => "",
+							'loppuhyllyvali' => "",
+							'loppuhyllytaso' => "",
+							'suuntalavat_ei_kayttoliittymaa' => "KYLLA",
+							'valittutunnus' => $tilausrivi
+						);
+
+					$alusta_tunnus = lisaa_suuntalava($saapuminen, $params);
+					echo "Suuntalava luotu: {$alusta_tunnus}";
+
+					# Saapumisen tiedot
+					$query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
+					$result   = pupe_query($query);
+					$laskurow = mysql_fetch_array($result);
+
+					# Ei voi kohdistaa ennen kuin tilausrivi on splitattu
+					require("../inc/keikan_toiminnot.inc");
+					foreach($tilausrivit as $tilausrivi) {
+						echo "kohdistetaan rivi {$tilausrivi}<br>";
+						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $ostotilaus, $saapuminen, $alusta_tunnus);
+					}
+
+					# Suuntalava siirtovalmiiksi
+					$otunnus = $saapuminen;
+					$suuntalavan_tunnus = $alusta_tunnus;
+					$tee = 'siirtovalmis';
+					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+					require ("../tilauskasittely/suuntalavat.inc");
+				}
+
+				# Kun splittaukset ja alustat on selvitelty, voidaan kamat vied‰ varastoon.
 				# Hylly array
 				$hylly = array(
 					"hyllyalue" => $row['hyllyalue'],
@@ -92,125 +179,17 @@ if (isset($submit) and trim($submit) != '') {
 					"hyllyvali" => $row['hyllyvali'],
 					"hyllytaso" => $row['hyllytaso']);
 
-				# Jos m‰‰r‰‰ pienennet‰‰n, niin splitataan ( $maara < $row['varattu'])
-				if($maara < $row['varattu']) {
-					# P‰ivitet‰‰n alkuper‰isen rivin kpl
-					$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
+				# Saapumiset
+				$saapumiset = hae_saapumiset($alusta_tunnus);
 
-					# Splitataan rivi, $pois_suuntalavalta = false
-					$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, false, false);
-
-					# Haetaan saapumiset
-					$saapuminen = hae_saapumiset($alusta_tunnus);
-
-					# Vied‰‰n splitattu rivi varastoon
-					vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $uuden_rivin_id);
-
-					# Palataan suuntalavan_tuotteet sivulle
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-					exit;
-				}
-				# Jos nostetaan niin tehd‰‰n insertti erotukselle..
-				elseif($maara > $row['varattu']) {
-					# Tehd‰‰n insertti erotukselle
-					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
-
-					# P‰ivit‰ kopioidun kpl (maara - varattu)
-					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
-
-					# Haetaan saapumiset
-					$saapuminen = hae_saapumiset($alusta_tunnus);
-
-					# Vied‰‰n rivit hyllyyn
-					vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $tilausrivi);
-					vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $kopioitu_tilausrivi);
-
-					# Palataan suuntalavan_tuotteet sivulle
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-					exit;
-				}
-				# M‰‰r‰t samat
-				else {
-
-					# Ostotilausten tuloutus, jos vied‰‰n varastoon ilman suuntalavaa
-					if ($alusta_tunnus == 0) {
-
-						# TODO: luodaan v‰liaikanen suuntalava
-						$tee = "eihalutamitankayttoliittymaapliis";
-						$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-						$otunnus = $saapuminen;
-						echo "OK painettu<br>";
-						require ("../tilauskasittely/suuntalavat.inc");
-
-						$params = array(
-								'sscc' => 'TEMP',
-								'tyyppi' => 0,
-								'keraysvyohyke' => 'TEMP',
-								'usea_keraysvyohyke' => 'K',
-								'kaytettavyys' => 'Y',
-								'terminaalialue' => 'TEMP',
-								'korkeus' => 0,
-								'paino' => 0,
-								'alkuhyllyalue' => "",
-								'alkuhyllynro' => "",
-								'alkuhyllyvali' => "",
-								'alkuhyllytaso' => "",
-								'loppuhyllyalue' => "",
-								'loppuhyllynro' => "",
-								'loppuhyllyvali' => "",
-								'loppuhyllytaso' => "",
-								'suuntalavat_ei_kayttoliittymaa' => "KYLLA",
-								'valittutunnus' => $tilausrivi
-							);
-
-						$alusta_tunnus = lisaa_suuntalava($saapuminen, $params);
-
-						# Saapumisen tiedot
-						$query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
-						$result   = pupe_query($query);
-						$laskurow = mysql_fetch_array($result);
-
-						# Kohdistetaan rivi
-						require("../inc/keikan_toiminnot.inc");
-						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $ostotilaus, $saapuminen, $alusta_tunnus);
-						var_dump($kohdista_status);
-
-						# Suuntalava siirtovalmiiksi
-						$otunnus = $saapuminen;
-						$suuntalavan_tunnus = $alusta_tunnus;
-						$tee = 'siirtovalmis';
-						$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-						echo "suuntalavan tunnus: ".$suuntalavan_tunnus;
-						require ("../tilauskasittely/suuntalavat.inc");
-
-						# Vied‰‰n varastoon
-						vie_varastoon($saapuminen, $alusta_tunnus, $hylly, $tilausrivi);
-
-						$query = "	UPDATE suuntalavat SET
-									tila = 'P'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$alusta_tunnus}'";
-						$tila_res = pupe_query($query);
-
-						# palataan hyllytys sivulle
-						echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
-						exit();
-
-					}
-					# Suuntalava varastoon
-					else {
-						# Haetaan saapumiset
-						$saapuminen = hae_saapumiset($alusta_tunnus);
-
-						# Vied‰‰n varastoon
-						vie_varastoon($saapuminen[0], $alusta_tunnus, $hylly, $tilausrivi);
-					}
-
-					# Jos tuotteita j‰lell‰, menn‰‰n takaisin suuntalavan tuotteet sivulle
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet.php?{$url}'>";
-					exit();
+				foreach($tilausrivit as $rivi) {
+					echo "vied‰‰n varastoon rivi {$rivi}<br>";
+					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 				}
 
+				# Redirectit ostotilaukseen tai
+				echo "<br>redirect johonkin...";
+				#echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
 			}
 			break;
 		default:
@@ -219,6 +198,20 @@ if (isset($submit) and trim($submit) != '') {
 	}
 
 }
+
+# Asetetaan m‰‰r‰ varattu kent‰n arvoksi jos sit‰ ei ole setattu
+$maara = (empty($maara)) ? $row['varattu'] : $maara;
+
+# Jos ollaan tultu ostotilausten tuloutuksesta, on n‰kym‰ hieman erilainen kuin asn-tuloutuksessa
+if (isset($ostotilaus)) {
+	$disabled = "readonly";
+	$hidden = "hidden";
+}
+
+if (isset($hyllytetty)) {
+	$maara = $hyllytetty;
+}
+
 include("kasipaate.css");
 
 echo "
@@ -245,12 +238,6 @@ if (isset($errors)) {
 	echo "</span>";
 }
 
-# Asetetaan m‰‰r‰ varattu kent‰n arvoksi jos sit‰ ei ole setattu
-$maara = (empty($maara)) ? $row['varattu'] : $maara;
-
-# Jos ollaan tultu ostotilaukselta, on n‰kym‰ hieman erilainen kuin asn-tuloutuksessa
-$piilotettu = (isset($ostotilaus)) ? $piilotettu = "hidden" : "";
-
 echo "<div class='main'>
 <form name='vahvistaformi' method='post' action=''>
 <table>
@@ -264,8 +251,8 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th>",t("M‰‰r‰", $browkieli),"</th>
-		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $piilotettu/></td>
-		<td><span id='row_varattu'>{$row['varattu']}</span> {$row['yksikko']}</td>
+		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/></td>
+		<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
 	</tr>
 	<tr>
 		<th>",t("Ker‰yspaikka", $browkieli),"</th>

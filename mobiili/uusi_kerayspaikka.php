@@ -44,9 +44,11 @@ if (isset($submit) and trim($submit) != '') {
 
 	switch ($submit) {
 		case 'cancel':
-			#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>";
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-			exit;
+			if($edellinen == 'hyllytys') {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
+			} else {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit();
+			}
 			break;
 
 		case 'submit':
@@ -94,8 +96,11 @@ if (isset($submit) and trim($submit) != '') {
 				paivita_tilausrivin_hylly($tilausrivi, $hylly);
 
 				# Palataan edelliselle sivulle
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-				exit;
+				if($edellinen == 'hyllytys') {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
+				} else {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit;
+				}
 			}
 
 			break;

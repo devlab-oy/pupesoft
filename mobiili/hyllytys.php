@@ -13,13 +13,15 @@ if(!isset($errors)) $errors = array();
 # Rajataan sallitut get parametrit
 $sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi', 'saapuminen');
 
-# Rakkentaan parametreistä url_taulukko
+# Rakkenetaan parametreistä url_taulukko
 $url_array = array();
 foreach($sallitut_parametrit as $parametri) {
     if(!empty($$parametri)) {
         $url_array[$parametri] = $$parametri;
     }
 }
+
+$url_array['edellinen'] = 'hyllytys';
 
 /*
 * Ostotilausten_kohdistus rivi 847 - 895...
@@ -38,10 +40,15 @@ $query = "  SELECT
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
             WHERE tilausrivi.tunnus='{$tilausrivi}'
-            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'
+            AND lasku.tunnus='{$ostotilaus}'";
 
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
+
+if (!$row) {
+    exit("Virhe, riviä ei löydy");
+}
 
 # Kontrolleri
 if (isset($submit)) {
@@ -51,22 +58,22 @@ if (isset($submit)) {
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
             #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
             break;
-        case 'ok':
+        case 'ok': # Vahvista keräyspaikka
             # Määrää pienennetään
             if ($hyllytetty < $row['siskpl']) {
-                echo "määrää pienennettiin";
-
                 # Splitataan rivi, $pois_suuntalavalta = false
-                $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
+                #$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
                 # Päivitetään vanhan kpl
-                $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
+                #$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
 
                 # Varastoon vietävä rivi
-                $url_array['tilausrivi'] = $uuden_rivin_id;
+                #$url_array['tilausrivi'] = $uuden_rivin_id;
             }
             # Määrää nostetaan
             elseif ($hyllytetty > $row['siskpl']) {
-                echo "määrää nostettiin";
+                #echo "splitataan rivi";
+                # Miten molemmat rivit vahvista_kerayspaikka.php:lle?
+
             }
             # Tilattu == Hyllytetty
             else {
@@ -134,7 +141,7 @@ echo "</div>";
 
 # Main
 echo "<div class='main'>
-<form method='post' action=''>
+<form name='f1' method='post' action=''>
 <table>
     <tr>
         <th>Tilattu määrä</th>
@@ -166,14 +173,15 @@ echo "<div class='main'>
 </table>
 </div>";
 
+if ($row['suuntalava'] == 0) echo "Suuntalava puuttuu";
+
 # Napit
 echo "
 <div class='controls'>
-<button name='submit' class='left' id='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>
+<input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?edellinen=hyllytys&ostotilaus=$ostotilaus&saapuminen=$saapuminen&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA", $browkieli),"</button>
 <button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
-<button name='submit' class='right' id='submit' value='lopeta' onclick='submit();'>",t("LOPETA", $browkieli),"</button>
-<a class='right' href='uusi_kerayspaikka.php?".http_build_query($url_array)."'>KERÄYSPAIKKA</a>
+<button name='submit' class='right' id='submit' value='lopeta' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>
 </div>
 </form>";
 
@@ -182,8 +190,3 @@ echo "<div class='error'>";
         echo strtoupper($virhe).": ".$selite;
     }
 echo "</div>";
-
-// echo "<br><br><hr><pre>";
-// var_dump($_GET);
-// echo "<pre>";
-// echo $query;

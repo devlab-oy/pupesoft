@@ -14179,13 +14179,15 @@ if (!function_exists("splittaa_tilaus")) {
 
 		foreach ($otunnukset as $otun) {
 
-			$query = "	SELECT *
+			// Ei katsota saldottomia tuotteita tässä kohtaa, koska niitä ei ole keräyserässäkään
+			$query = "	SELECT tilausrivi.*
 						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$otun}'
-						AND var NOT IN ('P','J')
-						AND tyyppi != 'D'
-						AND varattu > 0";
+						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa != 'o')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$otun}'
+						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.tyyppi != 'D'
+						AND tilausrivi.varattu > 0";
 			$tilausrivires = pupe_query($query);
 
 			while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {

@@ -13,7 +13,7 @@ if(!isset($errors)) $errors = array();
 
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
-	$errors['virhe'] = "Ei löytynyt. Hae uudestaan.";
+	$errors[] = "Ei löytynyt. Hae uudestaan.";
 }
 
 $data['kesken'] = $kesken;
@@ -23,7 +23,7 @@ if (isset($submit)) {
 		case 'ok':
 			# Haettu vähintään yhdellä kentällä
 			if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['ostotilaus'])) {
-				$errors['ostotilaus'] = "Vähintään yksi kenttä on syötettävä";
+				$errors[] = "Vähintään yksi kenttä on syötettävä";
 				break;
 			}
 			# Rakennetaan parametrit kentistä
@@ -31,11 +31,11 @@ if (isset($submit)) {
 
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?{$url}'>"; exit();
 			break;
-		case 'cancel':
+		case 'takaisin':
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>"; exit();
 		   	break;
 		default:
-			$errors['virhe'] = "Yllättävä virhe";
+			$errors[] = "Yllättävä virhe";
 			break;
 	}
 }
@@ -66,13 +66,13 @@ echo "<div class='main'>
 
 echo "<div class='controls'>
 	<button name='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>
-	<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button class='right' name='submit' id='takaisin' value='takaisin' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 </form>
 </div>";
 
 echo "<div class='error'>";
-    foreach($errors as $virhe => $selite) {
-        echo strtoupper($virhe).": ".$selite."<br>";
+    foreach($errors as $error) {
+        echo $error."<br>";
     }
 echo "</div>";
 

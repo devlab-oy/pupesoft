@@ -65,11 +65,7 @@
 		global $kukarow;
 
 		# Pakolliset parametrit
-		/*
-		otunnus
-		sscc, tyyppi, keraysvyohyke, kaytettavyys, terminaalialue, korkeus, paino
-		*/
-		if (empty($otunnus)) echo "Virhe: lisaa_suuntalava(), otunnus puuttuu."; exit();
+		if (empty($otunnus)) exit("Virhe: lisaa_suuntalava(), otunnus puuttuu.");
 
 		# Sallitut parametrit
 		$sallitut_parametrit = array(
@@ -87,8 +83,6 @@
 
 		# Array muuttujiksi
 		extract($params);
-
-		### FUNKTIOITU ###
 
 		# Pilkut pisteiksi
 		$paino = str_replace(",", ".", $paino);

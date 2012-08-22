@@ -673,9 +673,9 @@
 					$kappaleerotus = $tilausrivirow["varattu"] - $rtuoteno[$i]["kpl"];
 
 					$poikkeukset = array(
-						'varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
-						'kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
-						'luontiaika' => $tilausrivirow['luontiaika'],
+						'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+						'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
+						'tilausrivi.luontiaika' => $tilausrivirow['luontiaika'],
 					);
 
 					$tilausrivi_id = kopioi_tilausrivi($tilausrivirow['tunnus'], $poikkeukset);
@@ -696,10 +696,10 @@
 							if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 							$poikkeukset = array(
-								'varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
-								'kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
-								'perheid' => $tilausrivi_id,
-								'luontiaika' => $lapsi_chk_row['luontiaika'],
+								'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+								'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
+								'tilausrivi.perheid' => $tilausrivi_id,
+								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 							);
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
@@ -1046,11 +1046,11 @@
 
 						// Päivitetään alkuperäiselle riville "ylimääräinen" ja uudelle splitille "erotus"
 						$poikkeukset = array(
-							'varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
-							'tilkpl' => $positiivinen_arvo,
-							'kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
-							'kommentti' => "TECCOM-laskulla 2: {$laskun_numero}. Tehtiin puuttuva tilausrivi määrälle {$positiivinen_arvo} tuotteelle {$split_row['tuoteno']}",
-							'laatija' => "split",
+							'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
+							'tilausrivi.tilkpl' => $positiivinen_arvo,
+							'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
+							'tilausrivi.kommentti' => "TECCOM-laskulla 2: {$laskun_numero}. Tehtiin puuttuva tilausrivi määrälle {$positiivinen_arvo} tuotteelle {$split_row['tuoteno']}",
+							'tilausrivi.laatija' => "split",
 						);
 
 						$tilausrivi_id = kopioi_tilausrivi($split_row['tunnus'], $poikkeukset);
@@ -1071,10 +1071,10 @@
 								if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 								$poikkeukset = array(
-									'varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
-									'kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
-									'perheid' => $tilausrivi_id,
-									'luontiaika' => $lapsi_chk_row['luontiaika'],
+									'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
+									'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
+									'tilausrivi.perheid' => $tilausrivi_id,
+									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 								);
 
 								$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);

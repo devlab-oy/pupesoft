@@ -59,8 +59,8 @@ if (isset($submit) and trim($submit) != '') {
 		case 'cancel':
 			# TODO: Riippuen mistä ollaan tultu, mihin mennään
 			# Ostotilaus -> hyllytykseen
-			if (isset($edellinen)) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>";
+			if (isset($hyllytys)) {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>";
 			}
 			# Asn-tuloutus -> suuntalava
 			else {

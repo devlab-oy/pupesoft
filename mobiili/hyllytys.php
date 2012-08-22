@@ -106,7 +106,7 @@ if (isset($submit)) {
                 echo "Hyllytetty ja tilattujen määrä on sama";
 
                 # Lisätään rivi suuntalavalle
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
+                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>"; exit();
             }
             break;
         case 'kerayspaikka':
@@ -118,6 +118,8 @@ if (isset($submit)) {
             break;
     }
 }
+
+$suuntalava = $row['suuntalava'] ? : "Ei ole";
 
 ######## UI ##########
 include("kasipaate.css");
@@ -157,16 +159,24 @@ echo "<div class='main'>
     <tr>
         <th>Ostotilaus</th>
         <td>{$ostotilaus}</td>
+        <td><input type='hidden' name='ostotilaus' value='$ostotilaus'></td>
+    </tr>
+    <tr>
+        <th>Saapuminen</th>
+        <td>$saapuminen</td>
+        <td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
+    </tr>
+    <tr>
+        <th>Suuntalava</th>
+        <td>$suuntalava</td>
     </tr>
 </table>
 </div>";
 
-if ($row['suuntalava'] == 0) echo "Suuntalava puuttuu";
-
 # Napit
 echo "
 <div class='controls'>
-<input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?edellinen=hyllytys&ostotilaus=$ostotilaus&saapuminen=$saapuminen&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
+<input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA", $browkieli),"</button>
 <button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>

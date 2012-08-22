@@ -28,7 +28,7 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 		}
 		elseif ($submit == 'submit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
 			exit;
 		}
 	}

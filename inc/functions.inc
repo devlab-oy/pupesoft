@@ -10020,7 +10020,7 @@ if (!function_exists("viivakoodi")) {
 		$image = tempnam("/tmp", "image-");
 
 		// Tehdään viivakoodi PostScript
-		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\"");
+		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\" -c");
 
 		// Ghostscript konversioon yksikkö kuntoon
 		$leveys = round($leveys * 3.03);

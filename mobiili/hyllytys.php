@@ -8,24 +8,14 @@ $valinta = "Etsi";
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-if(!isset($errors)) $errors = array();
+if (!isset($errors)) $errors = array();
 
-# Rajataan sallitut get parametrit
-$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus', 'tilausrivi', 'saapuminen');
-
-# Rakkenetaan parametreist‰ url_taulukko
-$url_array = array();
-foreach($sallitut_parametrit as $parametri) {
-    if(!empty($$parametri)) {
-        $url_array[$parametri] = $$parametri;
-    }
+if (empty($ostotilaus) or empty($tilausrivi) or empty($saapuminen)) {
+    exit("Virheelliset parametrit");
 }
 
-$url_array['edellinen'] = 'hyllytys';
-
-/*
-* Ostotilausten_kohdistus rivi 847 - 895...
-*/
+# Haetaan tilausrivin ja laskun tiedot
+/* Ostotilausten_kohdistus rivi 847 - 895 */
 $query = "  SELECT
             tilausrivi.varattu+tilausrivi.kpl siskpl,
             tilausrivi.tuoteno,
@@ -42,7 +32,6 @@ $query = "  SELECT
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'
             AND lasku.tunnus='{$ostotilaus}'";
-
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
@@ -52,11 +41,10 @@ if (!$row) {
 
 # Kontrolleri
 if (isset($submit)) {
+
     switch($submit) {
-        case 'lopeta':
-            # TODO: t‰m‰n pit‰is palata ostotilaus.php:lle
+        case 'takaisin':
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
-            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?".http_build_query($url_array)."'>"; exit();
             break;
         case 'ok': # Vahvista ker‰yspaikka
             # M‰‰r‰‰ pienennet‰‰n
@@ -85,7 +73,7 @@ if (isset($submit)) {
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
-                $errors['m‰‰r‰'] = "Hyllytetyn m‰‰r‰n on oltava numero";
+                $errors[] = "Hyllytetyn m‰‰r‰n on oltava numero";
                 break;
             }
             # M‰‰r‰‰ pienennet‰‰n
@@ -126,7 +114,7 @@ if (isset($submit)) {
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?".http_build_query($url_array)."'>"; exit();
             break;
         default:
-            $errors['virhe'] = "Error";
+            $errors[] = "Error";
             break;
     }
 }
@@ -181,12 +169,12 @@ echo "
 <input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?edellinen=hyllytys&ostotilaus=$ostotilaus&saapuminen=$saapuminen&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERƒYSPAIKKA", $browkieli),"</button>
 <button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
-<button name='submit' class='right' id='submit' value='lopeta' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>
+<button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>
 </div>
 </form>";
 
 echo "<div class='error'>";
-    foreach($errors as $virhe => $selite) {
-        echo strtoupper($virhe).": ".$selite;
+    foreach($errors as $virhe) {
+        echo $virhe."<br>";
     }
 echo "</div>";

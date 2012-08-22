@@ -134,11 +134,14 @@ echo "	<script type='text/javascript'>
 					if ($('#T_'+osasto).is(':visible')) $('#P_'+osasto).removeClass('selected');
 					else $('#P_'+osasto).addClass('selected');
 
-					sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+osasto, \"\", false);
+					if (tuoteryhma == '') {
+						sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+osasto, \"\", false);
+					}
+
 					sndReq(\"T_\"+osasto, \"verkkokauppa.php?tee=menu&osasto=\"+osasto, \"P_\"+osasto, false, false);
 				}
 
-				if (osasto != '' && tuoteryhma != '') {
+				if (tuoteryhma != '') {
 
 					sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki=', '', false);
 

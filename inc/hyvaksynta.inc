@@ -133,8 +133,6 @@ if ($tee == 'T') {
 				ORDER BY erpcm";
 	$result = mysql_query($query) or pupe_error($query);
 
-
-
 	echo "<table><tr>";
 	echo "<th>".t("Tapvm")."</th>";
 	echo "<th>".t("Kapvm")."</th>";

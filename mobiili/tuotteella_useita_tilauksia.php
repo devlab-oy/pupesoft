@@ -1,4 +1,5 @@
 <?php
+# Vaatii ostotilauksen ja tilausrivin tunnukset
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -49,40 +50,57 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
 }
 else {
+	# T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
 	echo "Parametrivirhe";
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
 	exit();
 }
-# Haetaan tilaukset
-# TODO: Toimittajarajaus
+
+# Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
+$keskeneraiset_query = "SELECT kuka.kesken FROM lasku
+						JOIN kuka ON lasku.tunnus=kuka.kesken
+						WHERE kuka='{$kukarow['kuka']}'
+						and kuka.yhtio='{$kukarow['yhtio']}'
+						and lasku.tila='K'";
+$keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
+
+$liitostunnus_lisa = '';
+
+# Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
+if ($keskeneraiset['kesken'] != 0) {
+	$saapuminen = $keskeneraiset['kesken'];
+	# query_rajaus
+	$query = "SELECT * FROM lasku where tunnus='{$saapuminen}'";
+	$laskurow = mysql_fetch_assoc(pupe_query($query));
+	$liitostunnus_lisa = "and lasku.liitostunnus='{$laskurow['liitostunnus']}'";
+}
+
+# Haetaan ostotilaukset
 $query = "	SELECT
+			lasku.tunnus as ostotilaus,
+			lasku.liitostunnus,
 			tilausrivi.tunnus,
 			tilausrivi.otunnus,
 			tilausrivi.tuoteno,
 			tilausrivi.varattu,
 			tilausrivi.kpl,
 			tilausrivi.tilkpl,
+			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
 			tuotteen_toimittajat.tuotekerroin,
-			tuotteen_toimittajat.liitostunnus,
-			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,
-						tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly
-			FROM tilausrivi
-			JOIN lasku ON lasku.yhtio=tilausrivi.yhtio
-				AND lasku.tunnus=tilausrivi.otunnus
-			JOIN tuote ON tuote.yhtio=tilausrivi.yhtio
-				AND tuote.tuoteno=tilausrivi.tuoteno
+			tuotteen_toimittajat.liitostunnus
+			FROM lasku
+			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O' AND tilausrivi.uusiotunnus=0
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-				AND tuotteen_toimittajat.tuoteno=tuote.tuoteno
+				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 			WHERE
 			$query_lisa
-			AND tilausrivi.yhtio='{$kukarow['yhtio']}'
-			AND tilausrivi.tyyppi='O'
-			AND tilausrivi.uusiotunnus=0
-			order by tilausrivi.otunnus
-			LIMIT 100";
+			$liitostunnus_lisa
+			AND lasku.yhtio='{$kukarow['yhtio']}'
+		";
 $result = pupe_query($query);
 $tilausten_lukumaara = mysql_num_rows($result);
+$tilaukset = mysql_fetch_assoc($result);
 
 # Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
@@ -90,39 +108,27 @@ if ($tilausten_lukumaara == 0) {
 	exit();
 }
 
-# Tarkistetaan onko k‰ytt‰j‰ll‰ kesken olevia ostotilauksia
-$kesken_query = "	SELECT kuka.kesken FROM lasku
-					JOIN kuka ON lasku.tunnus=kuka.kesken
-					WHERE kuka='{$kukarow['kuka']}'
-					and kuka.yhtio='{$kukarow['yhtio']}'
-					and lasku.tila='K';";
-$kesken_result = mysql_fetch_assoc(pupe_query($kesken_query));
+# Jos kuka.kesken ei ole saapuminen, tehd‰‰n uusi saapuminen haettujen ostotilausten
+# mukaan oikealle toimittajalle
+if ($keskeneraiset['kesken'] == 0) {
 
-# Jos saapuminen on kesken niin k‰ytet‰‰n sit‰, tai tehd‰‰n uusi saapuminen
-if ($kesken_result['kesken'] != 0) {
-	echo "K‰ytt‰j‰ll‰ on saapuminen kesken: {$kesken_result['kesken']}";
-
-	$saapuminen = $kesken_result['kesken'];
-}
-else {
 	# Haetaan toimittajan tiedot
-	$row = mysql_fetch_assoc($result);
-	$toim_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
-	$toimittajarow = mysql_fetch_assoc(pupe_query($toim_query));
+	$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$tilaukset['liitostunnus']}'";
+	$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
 	# Tehd‰‰n uusi saapuminen
-	$saapuminen = uusi_saapuminen($toimittajarow);
+	$saapuminen = uusi_saapuminen($toimittaja);
 
 	# Asetetaan uusi saapuminen k‰ytt‰j‰lle kesken olevaksi
 	$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$updated = pupe_query($update_kuka);
 }
 
+# Saapuminen selvill‰
 $url_array['saapuminen'] = $saapuminen;
 
 # Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen
 if ($tilausten_lukumaara == 1) {
-
 	#$row = mysql_fetch_assoc($result);
 	#$url_array['tilausrivi'] = $row['tunnus'];
 	#echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=hyllytys.php?".http_build_query($url_array)."'>";
@@ -173,24 +179,9 @@ while($row = mysql_fetch_assoc($result)) {
 		<td>{$row['hylly']}</td>
 	";
 
-	# TODO: listaus p‰ivitett‰v‰ nykyisill‰ oletuspaikoilla
-	// $oletuspaikka_query = "	SELECT concat_ws('-',hyllyalue,hyllynro, hyllyvali,hyllytaso) as hylly
-	// 						FROM tuotepaikat
-	// 						WHERE tuoteno='{$row['tuoteno']}'
-	// 						and oletus='X'
-	// 						and yhtio='{$kukarow['yhtio']}'";
-	// $oletuspaikka = pupe_query($oletuspaikka_query);
-	// $oletuspaikka = mysql_fetch_assoc($oletuspaikka);
-	// echo "<td>(".$oletuspaikka['hylly'].")</td>";
-
-	# Linkki eteenp‰in vahvista_ker‰yspaikka n‰kym‰‰n.
-	# Ainakin t‰lle tulleet parametrit, viivakoodi, tuotenumero ja ostotilaus.
-
-	# Pakolliset tiedot vahvista_ker‰yspaikka n‰kym‰lle
-	# $tilausrivi
-	# T‰n parametrit riippuu mill‰ t‰h‰n sivulle on tultu?
-	# (tuotenumero|eankoodi) (ostotilaus) (ostotilaus ja (tuotenumero ja/tai eankoodi))
 	$url_array['tilausrivi'] = $row['tunnus'];
+	$url_array['ostotilaus'] = $row['ostotilaus'];
+
 	echo "<td><a href='hyllytys.php?".http_build_query($url_array)."'>Valkkaa</a></td>";
 	echo "<tr>";
 }

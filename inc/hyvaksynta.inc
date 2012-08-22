@@ -132,9 +132,9 @@ if ($tee == 'T') {
 				and tila in ('H','Y','M','P','Q')
 				ORDER BY erpcm";
 	$result = mysql_query($query) or pupe_error($query);
-	
-	
-	
+
+
+
 	echo "<table><tr>";
 	echo "<th>".t("Tapvm")."</th>";
 	echo "<th>".t("Kapvm")."</th>";
@@ -144,7 +144,7 @@ if ($tee == 'T') {
 	echo "<th>".t("Laskunro")."</th>";
 	echo "<th>".t("Yhtiön valuutassa")."</th>";
 	echo "<th>".t("Laskun valuutassa")."</th>";
-	echo "<th>".t("Kustannuspaikka")."</th>";
+	echo "<th>".t("Kustp")."</th>";
 	echo "<th>".t("EBID")."</th>";
 	echo "<th>".t("Siirrä")."</th>";
 	echo "</tr>";
@@ -169,34 +169,33 @@ if ($tee == 'T') {
 			echo "<$erotin></$erotin>";
 		}
 
-			
 		echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
 		echo "<$erotin>$trow[nimi]</$erotin>";
 		echo "<$erotin>$trow[postitp]</$erotin>";
 		echo "<$erotin>$trow[laskunro]</$erotin>";
 		echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
 		echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
-		
-		// kustannuspaikka näkyviin asiakkaan toiveesta..
-		$kustpq = "	SELECT kustp,
-						(SELECT DISTINCT nimi
-						FROM kustannuspaikka
-						WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2
-					FROM tiliointi
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND ltunnus = '$trow[tunnus]'
-					and kustp != 0
-					and korjattu = ''
-					ORDER BY tiliointi.tunnus LIMIT 1";
 
+		// Selvitetään laskun kustannuspaikat
+		$kustpq = "	SELECT tiliointi.kustp, kustannuspaikka.nimi
+					FROM tiliointi
+					JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					AND tiliointi.ltunnus = '$trow[tunnus]'
+					and tiliointi.kustp != 0
+					and tiliointi.korjattu = ''
+					ORDER BY tiliointi.tunnus LIMIT 1";
 		$kustpres = pupe_query($kustpq);
-		$kustprivi = mysql_fetch_assoc($kustpres);
-		if (trim($kustprivi['kustp2']) =='') {
-			echo "<td>".t("Kustannuspaikkaa ei ole syötetty")."</td>";
+
+		$kustannuspaikan_nimi = "";
+
+		if (mysql_num_rows($kustpres) == 1) {
+			$kustprivi = mysql_fetch_assoc($kustpres);
+			$kustannuspaikan_nimi = $kustprivi["nimi"];
 		}
-		else {
-			echo "<td>".$kustprivi['kustp2']."</td>";
-		}
+
+		echo "<td>$kustannuspaikan_nimi</td>";
+
 		// tehdään lasku linkki
 		echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
 
@@ -207,7 +206,7 @@ if ($tee == 'T') {
 				<input type = 'submit' value = '".t("Siirrä")."'>
 				</$erotin>
 				</form></tr>";
-				
+
 	}
 	echo "</table><br>";
 }

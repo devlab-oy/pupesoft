@@ -111,7 +111,7 @@ if (isset($submit)) {
             break;
         case 'kerayspaikka':
             # Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?".http_build_query($url_array)."'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?hyllytys&ostotilaus={$ostotilaus}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}'>"; exit();
             break;
         default:
             $errors[] = "Error";

@@ -13312,17 +13312,22 @@ if (!function_exists("palauta_vak_tiedot")) {
 }
 
 if (!function_exists('tulosta_sscc')) {
-	function tulosta_sscc($komento) {
+	function tulosta_sscc($komento, $sscc_kopio = false) {
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT selite
-					FROM avainsana
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji	= 'SSCC'";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		if ($sscc_kopio) {
+			$sscc = $sscc_kopio;
+		}
+		else {
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 
-		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+		}
 
 		$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
 
@@ -13367,30 +13372,32 @@ if (!function_exists('tulosta_sscc')) {
 			$line = exec(" echo \"$sivu\" | $komento");
 		}
 
-		if (trim($row['selite']) == '') {
-			$query = "	INSERT INTO avainsana SET
-						yhtio = '{$kukarow['yhtio']}',
-						perhe 			= '',
-						kieli = '{$kukarow['kieli']}',
-						laji = 'SSCC',
-						nakyvyys = '',
-						selite = '{$sscc}',
-						selitetark = '',
-						selitetark_2 = '',
-						selitetark_3 = '',
-						jarjestys = 0,
-						laatija = '{$kukarow['kuka']}',
-						luontiaika = now(),
-						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'";
-			$insert_res = pupe_query($query);
-		}
-		else {
-			$query = "	UPDATE avainsana
-						SET selite = '{$sscc}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji	= 'SSCC'";
-			$update_res = pupe_query($query);
+		if (!$sscc_kopio) {
+			if (trim($row['selite']) == '') {
+				$query = "	INSERT INTO avainsana SET
+							yhtio 			= '{$kukarow['yhtio']}',
+							perhe 			= '',
+							kieli 			= '{$kukarow['kieli']}',
+							laji 			= 'SSCC',
+							nakyvyys 		= '',
+							selite 			= '{$sscc}',
+							selitetark 		= '',
+							selitetark_2 	= '',
+							selitetark_3 	= '',
+							jarjestys 		= 0,
+							laatija 		= '{$kukarow['kuka']}',
+							luontiaika 		= now(),
+							muutospvm 		= now(),
+							muuttaja 		= '{$kukarow['kuka']}'";
+				$insert_res = pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE avainsana
+							SET selite = '{$sscc}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji	= 'SSCC'";
+				$update_res = pupe_query($query);
+			}
 		}
 
 		return $sscc;

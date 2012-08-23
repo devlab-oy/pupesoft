@@ -248,7 +248,7 @@
 				// tämän jälkeen koitetaan päivittää suuntalavan tunnus uudestaan käyttäen apuna uutta valittua keräysvyöhykettä
 				if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
 
-					$query = "	UPDATE tilausrivi SET 
+					$query = "	UPDATE tilausrivi SET
 								tilausrivi.suuntalava = 0
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$otunnus}'
@@ -267,7 +267,7 @@
 							$tuotejoini = "";
 							$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
 						}
-						
+
 						$query = "	UPDATE tilausrivi
 									$tuotejoini
 									SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
@@ -353,7 +353,7 @@
 						$tuotejoini = "";
 						$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
 					}
-					
+
 					$query = "	UPDATE tilausrivi
 								$tuotejoini
 								SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
@@ -523,17 +523,20 @@
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
 		echo "<input type='hidden' name='tee' value='lisaa' />";
 
+		$inserted_suuntalava = false;
+
 		if (is_numeric($suuntalavan_tunnus)) {
-			$query = "	SELECT suuntalavat.* 
-						FROM suuntalavat 
+			$query = "	SELECT suuntalavat.*
+						FROM suuntalavat
 						JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
-						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}' 
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
 						AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
 			$suuntalavat_result = pupe_query($query);
 			$suuntalavat_row = mysql_fetch_assoc($suuntalavat_result);
 
 			echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
 
+			$inserted_suuntalava = true;
 			$sscc = $suuntalavat_row['sscc'];
 			$alkuhyllyalue = $suuntalavat_row['alkuhyllyalue'];
 			$alkuhyllynro = $suuntalavat_row['alkuhyllynro'];
@@ -643,7 +646,19 @@
 		echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Lisää suuntalava"),"' /></td></tr>";
 		echo "</table>";
 		echo "</form>";
-		echo "<br />";
+
+		if ($inserted_suuntalava != '') {
+			echo "<form method='post'>";
+			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+			echo "<input type='hidden' name='toiminto' value='tulosta_sscc'>";
+			echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+			echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+			echo "<input type='hidden' name='tee' value='' />";
+			echo "<input type='hidden' name='sscc_kopio' value='X' />";
+			echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
+			echo "<input type='submit' value='",t("Tulosta SSCC-koodin kopio"),"' />";
+			echo "</form>";
+		}
 
 		echo "<br />";
 
@@ -657,7 +672,7 @@
 		$voidaanko_poistaa_result = pupe_query($query);
 		$voidaanko_poistaa_row = mysql_fetch_assoc($voidaanko_poistaa_result);
 
-		if (trim($voidaanko_poistaa_row['tunnukset']) == '') {
+		if (trim($voidaanko_poistaa_row['tunnukset']) == '' and $inserted_suuntalava != '') {
 			echo "<form method='post'>";
 			echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
 			echo "<input type='hidden' name='tee' value='poista'>";
@@ -726,6 +741,7 @@
 		echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
 		echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 		echo "<input type='hidden' name='tee' value='' />";
+		echo "<input type='hidden' name='sscc_kopio' value='' />";
 		echo "<input type='hidden' name='suuntalavan_tunnus' value='' />";
 		echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/keikka.php////tee=//toimittajaid={$toimittajaid}//toiminto=suuntalavat//otunnus={$otunnus}//ytunnus={$laskurow['ytunnus']}//suuntalavan_tunnus='>";
 		echo "<input type='submit' value='",t("Tulosta SSCC-koodi"),"' />";

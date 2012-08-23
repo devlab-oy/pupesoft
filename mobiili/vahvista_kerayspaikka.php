@@ -181,8 +181,15 @@ if (isset($submit) and trim($submit) != '') {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 				}
 
+				# TODO: Jos temppi lava niin merkataan suoraan puretuksi
+
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
+				if (isset($hyllytys)) {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
+				}
+				else {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet?{$url}'>";
+				}
 			}
 			break;
 		default:
@@ -259,10 +266,12 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>
-	<button class='right' $piilotettu name='submit' value='new'>",t("Uusi keräyspaikka", $browkieli),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-	<a class='takaisin' href='hyllytys.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>Takaisin</a>
+	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>";
+
+# Jos hyllytyksestä niin tämä piiloon
+if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka", $browkieli),"</button>";
+
+echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />

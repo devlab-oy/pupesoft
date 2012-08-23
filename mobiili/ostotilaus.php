@@ -16,8 +16,6 @@ if (isset($virhe)) {
 	$errors[] = "Ei löytynyt. Hae uudestaan.";
 }
 
-$data['kesken'] = $kesken;
-
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
@@ -75,5 +73,3 @@ echo "<div class='error'>";
         echo $error."<br>";
     }
 echo "</div>";
-
-if (isset($kesken)) echo "Käyttäjällä saapuminen: {$kesken} kesken.";

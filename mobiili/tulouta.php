@@ -23,8 +23,8 @@ $kesken_query = "	SELECT kuka.kesken FROM lasku
 					and lasku.tila='K';";
 $kesken = mysql_fetch_assoc(pupe_query($kesken_query));
 
-$data = array('kesken' => $kesken['kesken']);
-$url = http_build_query($data);
+#$data = array('kesken' => $kesken['kesken']);
+#$url = http_build_query($data);
 
 if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim($tulotyyppi) != '') {
 
@@ -33,16 +33,12 @@ if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>"; exit;
 			break;
 		case 'ostotilaus':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?$url'>"; exit;
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit;
 			break;
 		default:
 			echo "Virheet tänne";
 			break;
 	}
-	// if ($tulotyyppi == 'suuntalava') {
-	// 	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
-	// 	exit;
-	// }
 }
 
 if (isset($submit) and trim($submit) == 'submit') {

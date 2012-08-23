@@ -759,11 +759,13 @@
 
 					$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
 					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
+					$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
 								{$splitlisa}
 								{$splitlisa2}
+								{$rivihintalisa}
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
@@ -991,6 +993,7 @@
 									$values .= ", now()";
 									break;
 								case 'kpl':
+								case 'rivihinta':
 									$values .= ", 0";
 									break;
 								case 'laskutettuaika':
@@ -1134,6 +1137,7 @@
 
 						$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
 						$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
+						$rivihintalisa = $split_row['kpl'] != 0 ? " rivihinta = '".(($split_row['rivihinta'] / $split_row['kpl']) * $erotus)."', " : " rivihinta = 0, ";
 
 						$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
 
@@ -1141,6 +1145,7 @@
 						$query = "	UPDATE tilausrivi SET
 									{$splitlisa}
 									{$splitlisa2}
+									{$rivihintalisa}
 									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
@@ -1321,7 +1326,7 @@
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		// saadaan luoda keikka vain, jos tulee pelkk‰ lasku (eli toimittajan takana on asn_sanomat = 'L')
-		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0 and $trow['asn_sanomat'] == 'L') {
+		if ($virheet == 0 and count($ostoilla) > 0 and count($keikoilla) == 0 and ($trow['asn_sanomat'] == 'L' or ($trow['asn_sanomat'] == 'K' and $tullaan_virhetarkistuksesta))) {
 
 			#echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
 
@@ -1844,6 +1849,7 @@
 			require("tilauskasittely/kululaskut.inc");
 		}
 		else {
+			$virheet++;
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
 		}
 	}

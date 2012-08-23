@@ -383,6 +383,15 @@
 				}
 			}
 
+			// Katsotaan oliko kolmikantakauppaa
+			$triangulation = triangulation($otunnus) != "" ? "K" : "";
+
+			$query = "	UPDATE lasku SET
+						kolmikantakauppa = '{$triangulation}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$otunnus}'";
+			$upd_res = pupe_query($query);
+
 			return $tilauksesta_ostotilaus;
 		}
 	}

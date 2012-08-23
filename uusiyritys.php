@@ -777,7 +777,8 @@
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='MAKSUEHTOKV'>".t("Maksuehdon kieliversio")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkilön rooli")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkilön suoramarkkinointitiedot")."</td></tr>
-				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI'>".t("Vakioviesti")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI'>".t("Laskun vakioviesti")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI_TIL'>".t("Tilausvahvistuksen vakioviesti")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LITETY'>".t("Liitetiedostotyyppi")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TIL-LITETY'>".t("Tilauksen liitetiedostotyyppi")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='JAKELULISTA'>".t("Email jakelulista")."</td></tr>
@@ -887,4 +888,3 @@
 	}
 
 	require("inc/footer.inc");
-?>

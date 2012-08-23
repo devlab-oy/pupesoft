@@ -10254,7 +10254,7 @@ if (!function_exists("viivakoodi")) {
 		$image = tempnam("/tmp", "image-");
 
 		// Tehdään viivakoodi PostScript
-		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\"");
+		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\" -c");
 
 		// Ghostscript konversioon yksikkö kuntoon
 		$leveys = round($leveys * 3.03);
@@ -17891,16 +17891,14 @@ if (!function_exists("erolista")) {
 				$kala -= 35;
 			}
 
-			$kuluproslisa = $toimirow['oletus_kulupros'] != 0 ? " * ((100 - {$toimirow['oletus_kulupros']}) / 100) " : "";
-
 			$query = "	SELECT tuoteno,
 						nimitys,
-						IF(ale1 = 0, '', ale1) ale1,
-						IF(ale2 = 0, '', ale2) ale2,
-						IF(ale3 = 0, '', ale3) ale3,
+						ale1,
+						ale2,
+						ale3,
 						hinta,
-						(rivihinta {$kuluproslisa}) AS rivihinta,
-						varattu + kpl AS kpl
+						varattu + kpl AS kpl,
+						laatija
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus IN ({$row['tilausrivi']})
@@ -17914,9 +17912,11 @@ if (!function_exists("erolista")) {
 			$kplero = $row['kappalemaara'];
 
 			while ($rivirow = mysql_fetch_assoc($rivires)) {
+				
+				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
 
-				$hintaero = round($row['hinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']);
-				$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta'], $yhtiorow['hintapyoristys']);
+				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
+				$rivihintaero = round($row['rivihinta'] - $rivirow['rivihinta'], 2);
 				$kplero = round($kplero - $rivirow['kpl'], 0);
 
 				if ($hintaero == 0 and $rivihintaero == 0) continue;
@@ -17924,9 +17924,20 @@ if (!function_exists("erolista")) {
 				if (!$nimi_kerran) {
 					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 				}
+				
+				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekemään ylimääräisiä rivejä, on laatijana 'extraa'. Näytetään tässä tämmöset rivit käyttäjälle.
+				$extraa = "";
+				if ($rivirow['laatija'] == 'extraa') $extraa = " enemmän kuin tilattu!";
+
+				if ($rivirow['ale1'] == 0) $rivirow['ale1'] = "";
+				if ($rivirow['ale2'] == 0) $rivirow['ale2'] = "";
+				if ($rivirow['ale3'] == 0) $rivirow['ale3'] = "";
+				if ($row['ale1'] == 0) $row['ale1'] = "";
+				if ($row['ale2'] == 0) $row['ale2'] = "";
+				if ($row['ale3'] == 0) $row['ale3'] = "";
 
 				// $pdf->draw_text(150, $kala, $rivirow['kpl'], $thispage, $norm);
-				$pdf->draw_text(220, $kala - $rivinkorkeus, $rivirow['kpl'], $thispage, $norm);
+				$pdf->draw_text(220, $kala - $rivinkorkeus, $rivirow['kpl'] . $extraa, $thispage, $norm);
 
 				if ($valitse != 'asn') {
 					$pdf->draw_text(360, $kala - $rivinkorkeus, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);

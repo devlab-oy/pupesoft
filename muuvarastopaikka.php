@@ -785,6 +785,18 @@
 						$select_varasto = (int) $select_varasto;
 
 						$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
+
+						if ($kaikki_ok) {
+
+							$query = "	SELECT varastotunniste
+										FROM varastopaikat
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$select_varasto}'";
+							$varastotunniste_chk_res = pupe_query($query);
+							$varastotunniste_chk_row = mysql_fetch_assoc($varastotunniste_chk_res);
+
+							if ($varastotunniste_chk_row['varastotunniste'] != '') $ahyllyalue = $varastotunniste_chk_row['varastotunniste'].$ahyllyalue;
+						}
 					}
 				}
 

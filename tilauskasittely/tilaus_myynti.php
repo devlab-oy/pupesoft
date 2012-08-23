@@ -3234,7 +3234,7 @@ if ($tee == '') {
 
 		while ($lapsi = mysql_fetch_assoc($lapsires)) {
 			//	P‰ivitet‰‰n positio
-			$query = "	UPDATE tilausrivin_lisatiedot SET 
+			$query = "	UPDATE tilausrivin_lisatiedot SET
 						positio = '$positio',
 						muutospvm = now(),
 						muuttaja = '{$kukarow["kuka"]}'
@@ -3248,7 +3248,7 @@ if ($tee == '') {
 		$positio 	= "";
 		$lisaalisa 	= "";
 	}
-	
+
 	if ($kukarow["extranet"] == "" and $tila == "LISLISAV") {
 		//P‰ivitet‰‰n is‰n perheid jotta voidaan lis‰t‰ lis‰‰ lis‰varusteita
 		if ($spessuceissi == "OK") {
@@ -4783,6 +4783,34 @@ if ($tee == '') {
 
 			while ($row = mysql_fetch_assoc($result)) {
 
+				// Tuoteperheen lapset, jotka on merkitty puutteeksi
+				if ($kukarow['extranet'] != '' and $row['tunnus'] != $row['perheid'] and strtoupper($row['var']) == 'P' and $row['perheid'] != 0) {
+
+					list(, , $extranet_saldo_tarkistus) = saldo_myytavissa($row['tuoteno']);
+
+					if ($extranet_saldo_tarkistus > 0) {
+						$extranet_tarkistus_teksti = "<br /><br />".t("Myyt‰viss‰").": <font class='ok'>".t("Kyll‰")."</font>
+
+						&nbsp;<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
+								<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+								<input type='hidden' name='mista' value='{$mista}'>
+								<input type='hidden' name='tee' value='{$tee}'>
+								<input type='hidden' name='toim' value='{$toim}'>
+								<input type='hidden' name='lopetus' value='{$lopetus}'>
+								<input type='hidden' name='projektilla' value='{$projektilla}'>
+								<input type='hidden' name='tiedot_laskulta' value='{$tiedot_laskulta}'>
+								<input type='hidden' name='tuoteno' value='{$row['tuoteno']}' />
+								<input type='text' size='5' name='kpl' value='' /> <input type='submit' value='".t("Lis‰‰ tilaukselle")."' /></form>";
+
+					}
+					else {
+						$extranet_tarkistus_teksti = "<br /><br />".t("Myyt‰viss‰").": <font class='error'>".t("Ei")."</font>";
+					}
+				}
+				else {
+					$extranet_tarkistus_teksti = "";
+				}
+
 				$vastaavattuotteet = 0;
 
 				if (strpos($row['sorttauskentta'], '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷') !== FALSE) {
@@ -5225,7 +5253,7 @@ if ($tee == '') {
 
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."</td>";
+					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
@@ -7231,5 +7259,3 @@ if ($tee == '') {
 if (@include("inc/footer.inc"));
 elseif (@include("footer.inc"));
 else exit;
-
-?>

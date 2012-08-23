@@ -14182,7 +14182,7 @@ if (!function_exists("splittaa_tilaus")) {
 			// Ei katsota saldottomia tuotteita t‰ss‰ kohtaa, koska niit‰ ei ole ker‰yser‰ss‰k‰‰n
 			$query = "	SELECT tilausrivi.*
 						FROM tilausrivi
-						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa != 'o')
+						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$otun}'
 						AND tilausrivi.var NOT IN ('P','J')

@@ -766,7 +766,6 @@
 
 		if ($saldo === FALSE) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
-				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 
 				$kaikki_ok = true;
 
@@ -1220,4 +1219,3 @@
 	if ($kutsuja == '') {
 		require "inc/footer.inc";
 	}
-?>

@@ -16,7 +16,8 @@ $data = array(
 	'alusta_tunnus' => $alusta_tunnus,
 	'liitostunnus' => $liitostunnus,
 	'tilausrivi' => $tilausrivi,
-	'ostotilaus' => $ostotilaus
+	'ostotilaus' => $ostotilaus,
+	'saapuminen' => $saapuminen
 );
 $url = http_build_query($data);
 
@@ -44,7 +45,7 @@ if (isset($submit) and trim($submit) != '') {
 
 	switch ($submit) {
 		case 'cancel':
-			if($edellinen == 'hyllytys') {
+			if (isset($hyllytys)) {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
 			} else {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit();
@@ -96,7 +97,7 @@ if (isset($submit) and trim($submit) != '') {
 				paivita_tilausrivin_hylly($tilausrivi, $hylly);
 
 				# Palataan edelliselle sivulle
-				if($edellinen == 'hyllytys') {
+				if(isset($hyllytys)) {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
 				} else {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit;

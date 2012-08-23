@@ -142,6 +142,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>				".t("Laskun vakioviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL")	$ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>	".t("Tilausvahvistuksen vakioviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")	$ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>		".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LITETY") 			$ulos .= "<option value='LITETY' $avain_sel[LITETY]>						".t("Liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") 		$ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">			".t("Tilauksen liitetiedostotyyppi")."</option>";
@@ -157,6 +158,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") 		$ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>					".t("Puuterivin kommentti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Yll‰pitosopimuksen rivien kent‰t")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LABEL") 			$ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>						".t("Myyntitilauksen luokitus")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -383,8 +385,25 @@
 		$jatko = 0;
 	}
 
-	if ($avain_sel['VAKIOVIESTI'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+	if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and mysql_field_name($result, $i) == "selite") {
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
+		$jatko = 0;
+	}
+
+	// Tuoteryhmiss‰ voidaan antaa oletusker‰ysprioriteetti selitetark_4 kentt‰‰n
+	if ($avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_4") {
+
+		$vresult = t_avainsana("ASIAKASLUOKKA");
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei ker‰ysprioriteetti‰")."</option>";
+
+		while ($row = mysql_fetch_assoc($vresult)) {
+			$sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+			$ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
+		}
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 
@@ -500,5 +519,3 @@
 			$trow[$i] = $ajarjestys;
 		}
 	}
-
-?>

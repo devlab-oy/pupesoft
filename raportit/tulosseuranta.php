@@ -100,7 +100,52 @@
 	// Tehd‰‰n raportti
 	if ($tee == "raportoi") {
 
+		// T‰h‰n arrayseen ker‰t‰‰n raportti
+		$tulosseuranta = array();
+
 		echo "<br><br>";
+
+		// Katostaan halutaanko hakea myynti/varastonmuutos myynnin puolelta
+		$query = "	SELECT *
+					FROM taso
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND tyyppi = 'B'
+					AND summattava_taso LIKE '%myynti%'
+					AND summattava_taso LIKE '%varastonmuutos%'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+
+			if ($lisa != "") {
+				$myyntitilaus_rajaus = "AND lasku.tunnus in (	SELECT distinct ltunnus
+										FROM tiliointi
+										WHERE tiliointi.yhtio = lasku.yhtio
+										AND tiliointi.tapvm >= '$alku_pvm'
+										AND tiliointi.tapvm <= '$loppu_pvm'
+										AND tiliointi.korjattu = ''
+										$lisa)";
+			}
+			else {
+				$myyntitilaus_rajaus = "";
+			}
+
+			// Haetaan myynti/kate myyntitilauksilta
+			$query = "	SELECT sum(lasku.summa) summa, sum(lasku.kate) kate
+						FROM lasku
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						AND lasku.tila = 'U'
+						AND lasku.alatila = 'X'
+						AND lasku.tapvm >= '$alku_pvm'
+						AND lasku.tapvm <= '$loppu_pvm'
+						$myyntitilaus_rajaus";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+
+			$tulosseuranta["myynti"]["summa"] = $row["summa"];
+			$tulosseuranta["myynti"]["nimi"]  = "Myynti";
+			$tulosseuranta["varastonmuutos"]["summa"] = ($row["summa"] - $row["kate"]) * -1;
+			$tulosseuranta["varastonmuutos"]["nimi"]  = "Varastonmuutos";
+		}
 
 		// Haetaan kaikki tulosseurannan tasot sek‰ katsotaan lˆytyykˆ niille kirjauksia
 		$query = "	SELECT taso.taso,
@@ -125,9 +170,6 @@
 					GROUP BY taso.taso, taso.nimi, taso.summattava_taso, taso.kerroin, taso.jakaja, taso.kumulatiivinen
 					ORDER BY taso.taso+1";
 		$result = pupe_query($query);
-
-		// T‰h‰n arrayseen ker‰t‰‰n raportti
-		$tulosseuranta = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
 

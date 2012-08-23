@@ -148,10 +148,9 @@ echo "<div class='main'>
 # Napit
 echo "
 <div class='controls'>
-<input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
-<input type='submit' class='left' value='UUSI_SUUNTALAVALLE' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\" />
+<button type='submit' class='left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK", $browkieli),"</button>
+<button type='submit' class='left' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERÄYSPAIKKA", $browkieli),"</button>
-<button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>
 </div>
 </form>";

@@ -17919,7 +17919,7 @@ if (!function_exists("erolista")) {
 			$kplero = $row['kappalemaara'];
 
 			while ($rivirow = mysql_fetch_assoc($rivires)) {
-				
+
 				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
 
 				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
@@ -17931,7 +17931,7 @@ if (!function_exists("erolista")) {
 				if (!$nimi_kerran) {
 					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 				}
-				
+
 				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekem‰‰n ylim‰‰r‰isi‰ rivej‰, on laatijana 'extraa'. N‰ytet‰‰n t‰ss‰ t‰mmˆset rivit k‰ytt‰j‰lle.
 				$extraa = "";
 				if ($rivirow['laatija'] == 'extraa') $extraa = " enemm‰n kuin tilattu!";
@@ -18545,8 +18545,19 @@ if (!function_exists('splittaa_tilausrivi')) {
 
 		$query = substr($query, 0, -1);
 		$result = pupe_query($query);
+		$uusi_id = mysql_insert_id();
 
-		return mysql_insert_id();
+		// jos splitattava tilausrivi oli tuoteperheen is‰, pit‰‰ splitatulle tilausriville p‰ivitt‰‰ perheid kuntoon
+		if ($rivi['perheid'] != 0 and $rivi['tunnus'] == $rivi['perheid']) {
+
+			$query = "	UPDATE tilausrivi SET
+						perheid = tunnus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$uusi_id}'";
+			$upd_res = pupe_query($query);
+		}
+
+		return $uusi_id;
 	}
 }
 

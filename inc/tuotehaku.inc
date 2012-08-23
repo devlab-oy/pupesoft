@@ -228,7 +228,8 @@
 									(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 									tuote.sarjanumeroseuranta,
 									tuote.status,
-									IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,									(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+									IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
+									(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 									FROM korvaavat
 									JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
 									WHERE korvaavat.yhtio = '$mrow[yhtio]'

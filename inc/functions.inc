@@ -8979,17 +8979,17 @@ if (!function_exists("hae_rahtimaksu")) {
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakas = '$laskurow[liitostunnus]'
-							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				$rahti_alennus_result = pupe_query($query);
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+				$tres = pupe_query($query);
+				$trow = mysql_fetch_assoc($tres);
 
-				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
-						$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
-					}
+				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
+
+				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
+					$hirow['rahtihinta'] = $lis_hinta;
 				}
 			}
 
@@ -13312,17 +13312,22 @@ if (!function_exists("palauta_vak_tiedot")) {
 }
 
 if (!function_exists('tulosta_sscc')) {
-	function tulosta_sscc($komento) {
+	function tulosta_sscc($komento, $sscc_kopio = false) {
 		global $kukarow, $yhtiorow;
 
-		$query = "	SELECT selite
-					FROM avainsana
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji	= 'SSCC'";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
+		if ($sscc_kopio) {
+			$sscc = $sscc_kopio;
+		}
+		else {
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 
-		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+			$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+		}
 
 		$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
 
@@ -13367,30 +13372,32 @@ if (!function_exists('tulosta_sscc')) {
 			$line = exec(" echo \"$sivu\" | $komento");
 		}
 
-		if (trim($row['selite']) == '') {
-			$query = "	INSERT INTO avainsana SET
-						yhtio = '{$kukarow['yhtio']}',
-						perhe 			= '',
-						kieli = '{$kukarow['kieli']}',
-						laji = 'SSCC',
-						nakyvyys = '',
-						selite = '{$sscc}',
-						selitetark = '',
-						selitetark_2 = '',
-						selitetark_3 = '',
-						jarjestys = 0,
-						laatija = '{$kukarow['kuka']}',
-						luontiaika = now(),
-						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'";
-			$insert_res = pupe_query($query);
-		}
-		else {
-			$query = "	UPDATE avainsana
-						SET selite = '{$sscc}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND laji	= 'SSCC'";
-			$update_res = pupe_query($query);
+		if (!$sscc_kopio) {
+			if (trim($row['selite']) == '') {
+				$query = "	INSERT INTO avainsana SET
+							yhtio 			= '{$kukarow['yhtio']}',
+							perhe 			= '',
+							kieli 			= '{$kukarow['kieli']}',
+							laji 			= 'SSCC',
+							nakyvyys 		= '',
+							selite 			= '{$sscc}',
+							selitetark 		= '',
+							selitetark_2 	= '',
+							selitetark_3 	= '',
+							jarjestys 		= 0,
+							laatija 		= '{$kukarow['kuka']}',
+							luontiaika 		= now(),
+							muutospvm 		= now(),
+							muuttaja 		= '{$kukarow['kuka']}'";
+				$insert_res = pupe_query($query);
+			}
+			else {
+				$query = "	UPDATE avainsana
+							SET selite = '{$sscc}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND laji	= 'SSCC'";
+				$update_res = pupe_query($query);
+			}
 		}
 
 		return $sscc;
@@ -14179,13 +14186,15 @@ if (!function_exists("splittaa_tilaus")) {
 
 		foreach ($otunnukset as $otun) {
 
-			$query = "	SELECT *
+			// Ei katsota saldottomia tuotteita tässä kohtaa, koska niitä ei ole keräyserässäkään
+			$query = "	SELECT tilausrivi.*
 						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus = '{$otun}'
-						AND var NOT IN ('P','J')
-						AND tyyppi != 'D'
-						AND varattu > 0";
+						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$otun}'
+						AND tilausrivi.var NOT IN ('P','J')
+						AND tilausrivi.tyyppi != 'D'
+						AND tilausrivi.varattu > 0";
 			$tilausrivires = pupe_query($query);
 
 			while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {

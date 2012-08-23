@@ -13,7 +13,8 @@
 		mysql_field_name($result, $i) == "tilino_ei_eu" or
 		mysql_field_name($result, $i) == "tilino_kaanteinen" or
 		mysql_field_name($result, $i) == "tilino_marginaali" or
-		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
+		mysql_field_name($result, $i) == "tilino_osto_marginaali" or
+		mysql_field_name($result, $i) == "tilino_triang") {
 
 		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
 		$jatko = 0;

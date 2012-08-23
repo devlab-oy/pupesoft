@@ -174,6 +174,36 @@ elseif ($laskurow["tila"] == 'T') {
 else {
 	// T‰ss‰ on normaalit tilaukset
 
+	// Jos meill‰ ei ole ker‰ysprioriteettia t‰ll‰ tilauksella,
+	// katsotaan onko t‰lle prioriteetti tuoteryhm‰n takaa.
+	if ($laskurow["hyvaksynnanmuutos"] == "") {
+
+		$keraysprioriteetti_query = "	SELECT avainsana.selitetark_4
+										FROM tilausrivi
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+											AND tuote.tuoteno = tilausrivi.tuoteno)
+										JOIN avainsana ON (avainsana.yhtio = tilausrivi.yhtio
+											AND avainsana.laji = 'TRY'
+											AND avainsana.selitetark_4 != ''
+											AND avainsana.selite = tuote.try)
+										WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+										AND tilausrivi.otunnus = '{$laskurow["tunnus"]}'
+										AND tilausrivi.var NOT IN ('P','J')
+										ORDER by avainsana.selitetark_4 ASC
+										LIMIT 1";
+		$keraysprioriteetti_res = pupe_query($keraysprioriteetti_query);
+
+		// p‰ivitet‰‰n prioriteetti laskulle
+		if (mysql_num_rows($keraysprioriteetti_res) == 1) {
+			$keraysprioriteetti_row = mysql_fetch_assoc($keraysprioriteetti_res);
+			$keraysprioriteetti_query  = "	UPDATE lasku SET
+											hyvaksynnanmuutos = '{$keraysprioriteetti_row["selitetark_4"]}'
+											WHERE yhtio = '{$kukarow["yhtio"]}'
+											AND tunnus = '{$laskurow["tunnus"]}'";
+			$keraysprioriteetti_res = pupe_query($keraysprioriteetti_query);
+		}
+	}
+
 	// katotaan ollaanko valittu joku poikkeava kassalipas
 	if ($kertakassa != '') {
 

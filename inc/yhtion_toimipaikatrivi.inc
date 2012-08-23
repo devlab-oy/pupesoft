@@ -34,7 +34,8 @@
 		(mysql_field_name($result, $i) == "tilino_marginaali") or
 		(mysql_field_name($result, $i) == "tilino_kaanteinen") or
 		(mysql_field_name($result, $i) == "tilino_osto_marginaali") or
-		(mysql_field_name($result, $i) == "toim_alv")) {
+		(mysql_field_name($result, $i) == "toim_alv") or
+		(mysql_field_name($result, $i) == "tilino_triang")) {
 
 		if ($ulosarray[$i] != '') {
 			$ulos = $ulosarray[$i];
@@ -110,4 +111,3 @@
 		$jatko = 0;
 
 	}
-?>

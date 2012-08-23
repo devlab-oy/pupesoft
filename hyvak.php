@@ -1661,6 +1661,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND ltunnus = '$trow[tunnus]'
 						and kustp != 0
+						and korjattu = ''
 						ORDER BY tiliointi.tunnus LIMIT 1";
 
 			$kustpres = pupe_query($kustpq);

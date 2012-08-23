@@ -69,45 +69,17 @@ if (isset($submit)) {
 
             # Parametrit $alusta_tunnus=tilausrivi.suuntalava & lasku.liitostunnus=liitostunnus
             #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
             if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
                 $errors[] = "Hyllytetyn m‰‰r‰n on oltava numero";
                 break;
             }
-            # M‰‰r‰‰ pienennet‰‰n
-            if ($hyllytetty < $row['siskpl']) {
-                echo "Hyllytety m‰‰r‰ on pienempi kuin tilattujen (splitataan rivi)";
 
-                # Splitataan rivi, $pois_suuntalavalta = false
-                $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
-                # P‰ivitet‰‰n vanhan kpl
-                $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
+            # Lis‰t‰‰n rivi suuntalavalle
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>"; exit();
 
-                # Suuntalavalle menev‰ rivi
-                $url_array['tilausrivi'] = $uuden_rivin_id;
-
-                # Lis‰t‰‰n rivi suuntalavalle
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
-            }
-            # M‰‰r‰‰ nostetaan
-            elseif ($hyllytetty > $row['siskpl']) {
-                echo "Hyllytetty m‰‰r‰ on suurempi kuin tilattujen (insertti erotukselle)";
-
-                $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$row['siskpl']));
-                $uuden_rivin_id = kopioi_tilausrivi($tilausrivi, $poikkeukset);
-
-                # TODO: Lis‰t‰‰n uusi rivi (hyllytetty - maara) ja vied‰‰n molemmat suuntalavalle
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
-            }
-            # Tilattu == Hyllytetty
-            else {
-                echo "Hyllytetty ja tilattujen m‰‰r‰ on sama";
-
-                # Lis‰t‰‰n rivi suuntalavalle
-                echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>"; exit();
-            }
             break;
         case 'kerayspaikka':
             # Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
@@ -177,6 +149,7 @@ echo "<div class='main'>
 echo "
 <div class='controls'>
 <input type='submit' class='left' value='OK' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\" />
+<input type='submit' class='left' value='UUSI_SUUNTALAVALLE' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\" />
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERƒYSPAIKKA", $browkieli),"</button>
 <button name='submit' class='left' id='submit' value='suuntalavalle' onclick='submit();'>",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>

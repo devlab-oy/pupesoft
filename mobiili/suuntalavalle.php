@@ -19,14 +19,13 @@ $errors = array();
 /* ostotilausten_kohdistus.inc rivit 1541-1567
 * Haetaan "sopivat" suuntalavat
 */
-# TODO: Jos useampi tilausrivi, eli splitattu, niin laitetaanko molemmat suuntalavalle
-#$query = "SELECT * FROM tilausrivi WHERE tunnus IN ({$tilausrivi})";
 $query = "  SELECT tuote.keraysvyohyke, tilausrivi.*
             FROM tilausrivi
             JOIN tuote ON tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
-            WHERE tilausrivi.tunnus='{$tilausrivi}'";
-$tilausrivi = pupe_query($query);
-$tilausrivi = mysql_fetch_assoc($tilausrivi);
+            WHERE tilausrivi.tunnus = '{$tilausrivi}'
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+$result = pupe_query($query);
+$tilausrivi = mysql_fetch_assoc($result);
 
 # Etsitään sopivat suuntalavat
 $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
@@ -63,21 +62,46 @@ if (isset($submit)) {
         case 'hae':
             $suuntalavat = etsi_suuntalava_sscc($sscc);
             if(count($suuntalavat) == 0) {
-                $errors['virhe'] = "Ei löytynyt sopivaa suuntalavaa. Hae uudestaan";
+                $errors[] = "Ei löytynyt sopivaa suuntalavaa. Hae uudestaan";
             }
             break;
         case 'ok':
+            if(empty($suuntalava)) {
+                $errors[] = "Valitse suuntalava.";
+                break;
+            }
+
             # Kohdista rivi(t)
             $query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
             $result   = pupe_query($query);
             $laskurow = mysql_fetch_array($result);
 
             require("../inc/keikan_toiminnot.inc"); # Tää koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
-            $kohdista_status = kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+
+            if ($hyllytetty < $tilausrivi['varattu']) {
+                # Päivitetään alkuperäisen rivin kpl
+                $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
+
+                $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, false, false);
+
+                kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+            }
+            else if ($hyllytetty >$tilausrivi['varattu']) {
+                $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$tilausrivi['varattu']));
+                $uusi_tilausrivi = kopioi_tilausrivi($tilausrivi['tunnus'], $poikkeukset);
+
+                # Kohdistetaan molemmat rivit
+                kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+                kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+            }
+            else {
+                kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+            }
 
             # Kaikki ok
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
             break;
+
         case 'lopeta':
             $url = array (
                         'ostotilaus' => $tilausrivi['otunnus'],
@@ -101,7 +125,7 @@ if (isset($submit)) {
             if(is_numeric($korkeus)) echo " korkeus ok";
             break;
         case 'takaisin':
-            #echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
             $varmistus = false;
             break;
         default:
@@ -135,7 +159,7 @@ echo "<div class='main'>
 </table>
 </form>
 
-<form name='kissa' method='post' action=''>
+<form method='post' action=''>
 <table>
     <tr>
         <th></th>
@@ -173,7 +197,7 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
         <td>{rivit}</td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
-        <td><input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' /></td>
+        <td><input type='text' name='hyllytetty' value='{$hyllytetty}' /></td>
     </tr>";
 }
 echo "</table></div>";
@@ -186,7 +210,7 @@ echo "<div class='controls'>
 </form>
 ";
 echo "<div class='error'>";
-    foreach($errors as $virhe => $selite) {
-        echo strtoupper($virhe).": ".$selite;
+    foreach($errors as $error) {
+        echo $error."</br>";
     }
 echo "</div>";

@@ -8776,17 +8776,17 @@ if (!function_exists("hae_rahtimaksu")) {
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakas = '$laskurow[liitostunnus]'
-							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				$rahti_alennus_result = pupe_query($query);
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+				$tres = pupe_query($query);
+				$trow = mysql_fetch_assoc($tres);
 
-				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
-						$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
-					}
+				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
+
+				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
+					$hirow['rahtihinta'] = $lis_hinta;
 				}
 			}
 

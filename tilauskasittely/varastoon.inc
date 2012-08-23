@@ -783,6 +783,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
 					and varattu != 0
+					and netto = ''
 					and (tunnus = '$tilrivirow[tunnus]' or perheid = '$tilrivirow[tunnus]')";
 		$varastoon_result = pupe_query($query);
 

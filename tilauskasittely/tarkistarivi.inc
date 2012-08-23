@@ -64,7 +64,12 @@
 
 		if ($chk_row['panttitili'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'REKLAMAATIO')) {
 			if ($row['varattu'] < 0) {
-				$varaosavirhe .= t("HUOM: Panttitilillinen tuote, tuote hyvitet‰‰n panttitililt‰")."<br>";
+				if ($row['var2'] == 'PANT') {
+					$varaosavirhe .= t("HUOM: Panttituote, hyvitet‰‰n p‰itt‰in alkuper‰inen panttiveloitus")."<br>";
+				}
+				else {
+					$varaosavirhe .= t("HUOM: Panttitilillinen tuote, tuote hyvitet‰‰n panttitililt‰")."<br>";
+				}
 			}
 			else {
 				if ($row['var2'] == 'PANT') {

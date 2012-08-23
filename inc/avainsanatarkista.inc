@@ -44,10 +44,18 @@ if(!function_exists("avainsanatarkista")) {
 					$virhe[$i] = t("Selitteen ensimm‰inen kirjain pit‰‰ olla #");
 				}
 				elseif (strlen($tem_selite) != 4 and strlen($tem_selite) != 7) {
-					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰").' '.strlen($tem_selite);
+					$virhe[$i] = t("Selite t‰ytyy olla 4 tai 7 merkki‰ pitk‰");
 				}
 			}
 
+			if ($tem_laji == 'VARASTOTUNNISTE') {
+				if (trim($tem_selite) == '') {
+					$virhe[$i] = t("Selite on pakollinen");
+				}
+				elseif (strlen($tem_selite) > 2) {
+					$virhe[$i] = t("Selite saa olla enint‰‰n 2 merkki‰ pitk‰");
+				}
+			}
 
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla

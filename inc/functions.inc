@@ -18579,6 +18579,13 @@ if (!function_exists('splittaa_tilausrivi')) {
 				$lapsen_uusi_kpl = $uuden_rivin_kpl * $lapsi_chk_row['kerroin'];
 
 				splittaa_tilausrivi($lapsi_chk_row['tunnus'], $lapsen_uusi_kpl, false, false, $uusi_id);
+
+				// p‰ivitet‰‰n splitattava lapsi
+				$query = "	UPDATE tilausrivi SET
+							varattu = varattu - {$lapsen_uusi_kpl}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$lapsi_chk_row['tunnus']}'";
+				$upd_res = pupe_query($query);
 			}
 		}
 

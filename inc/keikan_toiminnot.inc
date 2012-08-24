@@ -358,6 +358,15 @@
 
 		echo json_encode($data);
 	}
+	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_tuoteperhe_lapsi') {
+		$kpl 	 = str_replace(",",".", $_POST['kpl']);
+		$tunnus  = $_POST['tunnus'];
+		$otunnus = $_POST['otunnus'];
+
+		# Toiminta funktioitu
+		# p‰ivitet‰‰n lapset
+		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $kpl, $otunnus, true);
+	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
 		$tunnus = $_POST['tunnus'];
 		$otunnus = $_POST['otunnus'];

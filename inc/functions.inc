@@ -12365,6 +12365,16 @@ if (!function_exists("pupe_DataTables")) {
 									else {
 										$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
 
+										$.post('{$_SERVER['SCRIPT_NAME']}',
+											{ 	keikan_otunnus: otunnus,
+												otunnus: otunnus,
+												tunnus: tun,
+												ajax_toiminto: 'rivi_kpl_tuoteperhe_lapsi',
+												no_head: 'yes',
+												ohje: 'off',
+												uuden_rivin_kpl: uuden_rivin_kpl}
+										});
+
 										// P‰ivitet‰‰n 'Kohdistettu Summa'
 										if ($('#rivi_valitut_tunnukset_'+tun).is(':checked')) {
 											// V‰hennet‰‰n summista rivin alkuper‰inen arvo
@@ -18666,53 +18676,80 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
  * @return bool
  */
 if (!function_exists('paivita_tilausrivin_kpl')) {
-	function paivita_tilausrivin_kpl($tunnus, $kpl) {
+	function paivita_tilausrivin_kpl($tunnus, $kpl, $otunnus = 0, $paivita_lapset = false) {
 		global $kukarow, $yhtiorow;
 
-		# Haetaan tilausrivilt‰...
-		$query  = "	SELECT kpl, varattu, tuoteno
-					FROM tilausrivi
-					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-		$result = pupe_query($query);
-		$rivi	= mysql_fetch_assoc($result);
-
-		# jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon niin p‰ivitet‰‰n varattu kentt‰‰
-		if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
-			$query = "	UPDATE tilausrivi
-						set varattu = '{$kpl}'
-						where yhtio = '{$kukarow['yhtio']}'
-						and tunnus = '{$tunnus}'
-						and varattu <> '{$kpl}'";
+		if ($paivita_lapset) {
+			# Haetaan tilausrivilt‰...
+			$query  = "	SELECT tilausrivi.kpl, tilausrivi.varattu, tilausrivi.tuoteno, tuoteperhe.kerroin
+						JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi IN ('', 'P'))
+						FROM tilausrivi
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.otunnus = '{$otunnus}'
+						AND tilausrivi.perheid = '{$tunnus}'
+						AND tilausrivi.tunnus != '{$tunnus}'";
 			$result = pupe_query($query);
+			$rivi	= mysql_fetch_assoc($result);
+		}
+		else {
+			# Haetaan tilausrivilt‰...
+			$query  = "	SELECT kpl, varattu, tuoteno
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
+			$rivi	= mysql_fetch_assoc($result);
 		}
 
-		if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
-			$query = "	DELETE FROM tilausrivi
+		if ($paivita_lapset and $rivi['varattu'] != 0 and $rivi['varattu'] < ($kpl * $rivi['kerroin'])) {
+
+			$kpl = $kpl * $rivi['kerroin'];
+
+			$query = "	UPDATE tilausrivi SET
+						varattu = '{$kpl}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						and tunnus = '{$tunnus}'
-						and tyyppi = 'O'";
+						AND tunnus = '{$rivi['tunnus']}'";
 			$result = pupe_query($query);
-
-			# Nollataan sarjanumero
-			if ($rivi["varattu"] > 0) {
-				$tunken = "ostorivitunnus";
-			}
-			else {
-				$tunken = "myyntirivitunnus";
-			}
-
-			$query = "	UPDATE sarjanumeroseuranta
-						SET {$tunken} = 0
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						and tuoteno = '{$rivi['tuoteno']}'
-						and {$tunken} = '{$tunnus}'";
-			$sarjares = pupe_query($query);
 		}
+		else {
+			# jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon niin p‰ivitet‰‰n varattu kentt‰‰
+			if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
+				$query = "	UPDATE tilausrivi
+							set varattu = '{$kpl}'
+							where yhtio = '{$kukarow['yhtio']}'
+							and tunnus = '{$tunnus}'
+							and varattu <> '{$kpl}'";
+				$result = pupe_query($query);
+			}
 
-		# Jos kpl nollassa ja suuntalavat == 'S'
-		if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
-			$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-			$result = pupe_query($query);
+			if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
+				$query = "	DELETE FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tunnus = '{$tunnus}'
+							and tyyppi = 'O'";
+				$result = pupe_query($query);
+
+				# Nollataan sarjanumero
+				if ($rivi["varattu"] > 0) {
+					$tunken = "ostorivitunnus";
+				}
+				else {
+					$tunken = "myyntirivitunnus";
+				}
+
+				$query = "	UPDATE sarjanumeroseuranta
+							SET {$tunken} = 0
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tuoteno = '{$rivi['tuoteno']}'
+							and {$tunken} = '{$tunnus}'";
+				$sarjares = pupe_query($query);
+			}
+
+			# Jos kpl nollassa ja suuntalavat == 'S'
+			if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
+				$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+				$result = pupe_query($query);
+			}
 		}
 	}
 }

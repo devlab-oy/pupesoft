@@ -621,6 +621,8 @@
 					$query = "	SELECT *
 								FROM tilausrivi
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = 'O'
+								AND otunnus = '{$tilausrivirow['otunnus']}'
 								AND perheid = '{$tilausrivirow['perheid']}'
 								AND tunnus != '{$tilausrivirow['perheid']}'";
 					$lapsi_chk_res = pupe_query($query);

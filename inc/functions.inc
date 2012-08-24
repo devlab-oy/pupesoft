@@ -18540,7 +18540,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 					break;
 				case 'perheid':
 					if ($perheid) {
-						$query .= " perheid = '{$perheid}'";
+						$query .= " perheid = '{$perheid}',";
 					}
 					else {
 						$query .= " perheid = '".$rivi[mysql_field_name($result, $i)]."',";

@@ -266,7 +266,8 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND status not in ('E', 'D')
 						{$tilausrivilisa}
-						{$wherelisa}";
+						{$wherelisa}
+						ORDER BY asn_sanomat.tuoteno ASC";
 			$kollires = pupe_query($query);
 
 			$i = $x = 0;

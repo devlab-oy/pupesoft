@@ -18486,7 +18486,7 @@ if (!function_exists('onko_suoratoimitus')) {
 }
 
 if (!function_exists('splittaa_tilausrivi')) {
-	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $netto = false, $pois_suuntalavalta = false) {
+	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $netto = false, $pois_suuntalavalta = false, $perheid = false) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
@@ -18538,6 +18538,14 @@ if (!function_exists('splittaa_tilausrivi')) {
 					}
 
 					break;
+				case 'perheid':
+					if ($perheid) {
+						$query .= " perheid = '{$perheid}'";
+					}
+					else {
+						$query .= " perheid = '".$rivi[mysql_field_name($result, $i)]."',";
+					}
+					break;
 				default:
 					$query .= mysql_field_name($result, $i)." = '".$rivi[mysql_field_name($result, $i)]."',";
 			}
@@ -18555,6 +18563,22 @@ if (!function_exists('splittaa_tilausrivi')) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$uusi_id}'";
 			$upd_res = pupe_query($query);
+
+			$query = "	SELECT tilausrivi.tunnus, tuoteperhe.kerroin
+						FROM tilausrivi
+						JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi IN ('P',''))
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi = 'O'
+						AND perheid = '{$rivi['perheid']}'
+						AND tunnus != '{$rivi['perheid']}'";
+			$lapsi_chk_res = pupe_query($query);
+
+			while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+
+				$lapsen_uusi_kpl = $uuden_rivin_kpl * $lapsi_chk_row['kerroin'];
+
+				splittaa_tilausrivi($lapsi_chk_row['tunnus'], $lapsen_uusi_kpl, false, false, $uusi_id);
+			}
 		}
 
 		return $uusi_id;

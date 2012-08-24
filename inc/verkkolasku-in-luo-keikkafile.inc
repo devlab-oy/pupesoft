@@ -626,7 +626,10 @@
 					$lapsi_chk_res = pupe_query($query);
 
 					while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
-						if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
+						if ($rtuoteno[$i+1]["lapsi"] == "yes") {
+							$rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
+							break;
+						}
 					}
 				}
 

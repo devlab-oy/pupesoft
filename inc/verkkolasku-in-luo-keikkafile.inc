@@ -618,6 +618,8 @@
 				// jos ei splitata, p‰ivitet‰‰n hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
 
+					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus'] and $rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
+
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
 									keikkarivinhinta = '{$tilausrivirow['hinta']}',

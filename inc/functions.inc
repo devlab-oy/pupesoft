@@ -18567,10 +18567,11 @@ if (!function_exists('splittaa_tilausrivi')) {
 			$query = "	SELECT tilausrivi.tunnus, tuoteperhe.kerroin
 						FROM tilausrivi
 						JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi IN ('P',''))
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tyyppi = 'O'
-						AND perheid = '{$rivi['perheid']}'
-						AND tunnus != '{$rivi['perheid']}'";
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.otunnus = '{$rivi['otunnus']}'
+						AND tilausrivi.perheid = '{$rivi['perheid']}'
+						AND tilausrivi.tunnus != '{$rivi['perheid']}'";
 			$lapsi_chk_res = pupe_query($query);
 
 			while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {

@@ -12365,6 +12365,8 @@ if (!function_exists("pupe_DataTables")) {
 									else {
 										$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
 
+										var uuden_rivin_kpl = kpl - rivi_kpl_alkuperainen;
+
 										$.post('{$_SERVER['SCRIPT_NAME']}',
 											{ 	keikan_otunnus: otunnus,
 												otunnus: otunnus,
@@ -12372,8 +12374,15 @@ if (!function_exists("pupe_DataTables")) {
 												ajax_toiminto: 'rivi_kpl_tuoteperhe_lapsi',
 												no_head: 'yes',
 												ohje: 'off',
-												uuden_rivin_kpl: uuden_rivin_kpl}
-										});
+												uuden_rivin_kpl: uuden_rivin_kpl},
+											function(return_value) {
+												var data = $.parseJSON(return_value);
+
+												if (data.paivitetaanko) {
+													$('#refresh_screen_ajaxille').val('true');
+												}
+											}
+										);
 
 										// P‰ivitet‰‰n 'Kohdistettu Summa'
 										if ($('#rivi_valitut_tunnukset_'+tun).is(':checked')) {
@@ -12399,6 +12408,11 @@ if (!function_exists("pupe_DataTables")) {
 										}
 									}
 								}
+							}
+						}).ajaxComplete(function(){
+							if ($('#refresh_screen_ajaxille').val() == 'true') {
+								$('#refresh_screen_ajaxille').val('false');
+								var t = setTimeout('document.formi1.submit()', 1000);
 							}
 						});
 
@@ -18681,16 +18695,31 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 
 		if ($paivita_lapset) {
 			# Haetaan tilausrivilt‰...
-			$query  = "	SELECT tilausrivi.kpl, tilausrivi.varattu, tilausrivi.tuoteno, tuoteperhe.kerroin
-						JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi IN ('', 'P'))
+			$_query = "	SELECT tilausrivi.kpl, tilausrivi.varattu, tilausrivi.tuoteno, tuoteperhe.kerroin, tilausrivi.tunnus
 						FROM tilausrivi
+						JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi IN ('', 'P'))
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.tyyppi = 'O'
-						AND tilausrivi.otunnus = '{$otunnus}'
+						AND tilausrivi.uusiotunnus = '{$otunnus}'
 						AND tilausrivi.perheid = '{$tunnus}'
 						AND tilausrivi.tunnus != '{$tunnus}'";
-			$result = pupe_query($query);
-			$rivi	= mysql_fetch_assoc($result);
+			$result = pupe_query($_query);
+
+			$returni = false;
+
+			while ($rivi = mysql_fetch_assoc($result)) {
+				$kpl_ins = $kpl * $rivi['kerroin'];
+
+				$query = "	UPDATE tilausrivi SET
+							varattu = varattu + {$kpl_ins}
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$rivi['tunnus']}'";
+				$result = pupe_query($query);
+
+				$returni = true;
+			}
+
+			return $returni;
 		}
 		else {
 			# Haetaan tilausrivilt‰...
@@ -18701,17 +18730,8 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 			$rivi	= mysql_fetch_assoc($result);
 		}
 
-		if ($paivita_lapset and $rivi['varattu'] != 0 and $rivi['varattu'] < ($kpl * $rivi['kerroin'])) {
+		if (!$paivita_lapset) {
 
-			$kpl = $kpl * $rivi['kerroin'];
-
-			$query = "	UPDATE tilausrivi SET
-						varattu = '{$kpl}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$rivi['tunnus']}'";
-			$result = pupe_query($query);
-		}
-		else {
 			# jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon niin p‰ivitet‰‰n varattu kentt‰‰
 			if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
 				$query = "	UPDATE tilausrivi

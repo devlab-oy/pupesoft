@@ -594,7 +594,7 @@ if (!function_exists('rivi_lasku')) {
 			$kurssi = 1;
 		}
 
-		if ($yhtiorow['myynnin_alekentat'] > 1) {
+		if ($yhtiorow['myynnin_alekentat'] > 1 or $row['erikoisale'] > 0) {
 
 			$alekomm = "";
 

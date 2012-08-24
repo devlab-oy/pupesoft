@@ -615,10 +615,23 @@
 					$tilausrivirow['perheid'] = $tilausrivirow['tunnus'];
 				}
 
+				if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
+
+					// etsitään lapset ja splitataan ne isän mukaan
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND perheid = '{$tilausrivirow['perheid']}'
+								AND tunnus != '{$tilausrivirow['perheid']}'";
+					$lapsi_chk_res = pupe_query($query);
+
+					while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+						if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
+					}
+				}
+
 				// jos ei splitata, päivitetään hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $rtuoteno[$i]["kpl"]) {
-
-					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus'] and $rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 					$update_asn = "	UPDATE asn_sanomat SET
 									tilausrivi = '{$tilausrivirow['tunnus']}',
@@ -694,8 +707,6 @@
 						$lapsi_chk_res = pupe_query($query);
 
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
-
-							if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 							$poikkeukset = array(
 								'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
@@ -1072,8 +1083,6 @@
 							$lapsi_chk_res = pupe_query($query);
 
 							while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
-
-								if ($rtuoteno[$i+1]["lapsi"] == "yes") $rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 
 								$poikkeukset = array(
 									'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),

@@ -1780,7 +1780,7 @@
 						AND asn_sanomat.asn_numero LIKE '%{$lasku}'
 						AND asn_sanomat.laji = 'tec'
 						#AND asn_sanomat.tilausrivi != ''
-						ORDER BY asn_sanomat.tilausrivinpositio + 0 ASC";
+						ORDER BY asn_sanomat.tunnus ASC";
 			$result = pupe_query($query);
 
 			$ok = $virhe = 0;

@@ -38,6 +38,8 @@ if (isset($submit)) {
 	}
 }
 
+$ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
+
 ### UI ###
 include("kasipaate.css");
 
@@ -57,7 +59,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th><label for='ostotilaus'>Ostotilaus</label></th>
-		<td><input type='text' id='ostotilaus' name='data[ostotilaus]'/><td>
+		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
 	</tr>
 </table>
 </div>";

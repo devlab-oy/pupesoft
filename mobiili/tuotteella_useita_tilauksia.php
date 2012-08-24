@@ -12,26 +12,16 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
-# Rajataan sallitut get parametrit
-$sallitut_parametrit = array('viivakoodi', 'tuotenumero', 'ostotilaus');
-
-# Rakennetaan parametreistä url_taulukko
-$url_array = array();
-foreach($sallitut_parametrit as $parametri) {
-	if(!empty($$parametri)) {
-		$url_array[$parametri] = $$parametri;
-	}
-}
-
+# Submit
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
 			var_dump($_POST);
 			#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php'>"; exit();
 			#exit;
-			#break;
+			break;
 		case 'cancel':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus=$ostotilaus'>"; exit();
 		   	break;
 		default:
 			echo "Virhe";

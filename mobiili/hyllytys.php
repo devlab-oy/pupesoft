@@ -44,7 +44,7 @@ if (isset($submit)) {
 
     switch($submit) {
         case 'takaisin':
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>"; exit();
             break;
         case 'ok': # Vahvista ker‰yspaikka
             # M‰‰r‰‰ pienennet‰‰n

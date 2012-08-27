@@ -708,7 +708,7 @@ if ($tee == "") {
 
 					$varasto_chk = hae_varastotunniste($paikkarow['hyllyalue'], $paikkarow['hyllynro']);
 
-					if ($varasto_chk !== false and $varasto_chk != "") {
+					if ($varasto_chk) {
 						$paikkarow['hyllyalue'] = substr($paikkarow['hyllyalue'], 2);
 					}
 

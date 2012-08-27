@@ -18939,7 +18939,7 @@ if (!function_exists('hae_varastotunniste')) {
 			$varasto_chk_res = pupe_query($query);
 			$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
-			return $varasto_chk_row["varastotunniste"];
+			return $varasto_chk_row["varastotunniste"] != "" ? $varasto_chk_row["varastotunniste"] : false;
 		}
 
 		return false;

@@ -57,11 +57,11 @@
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheitä, teidään keikka ja suuntalava sekä kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 
-					if ($virheet == 0) {
+					if ($virheet == 0 and count($paketin_rivit) > 0) {
 						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 					}
 					else {
-						$virheet = 0;
+						$virheet++;
 						echo "VIRHE 1: Paketti hylatty. Toimittaja {$edellinen_toimittaja} ASN-sanoma {$edellinen_asn_numero} {$virhe} Paketti {$edellinen_paketinnumero} {$d}";
 					}
 					$paketin_rivit = array();

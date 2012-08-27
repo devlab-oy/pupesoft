@@ -476,6 +476,16 @@ if ($tee == "") {
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
+				$(function() {
+
+					$('#t5_kaikki').on('change', function() {
+						indx = $(this).find('option:selected')[0].index;
+						var _option = $('.t5_dropdown > option')[indx];
+						$(_option).attr('selected', true);
+					});
+
+				});
+
 				function toggleAll(toggleBox) {
 
 					var currForm = toggleBox.form;
@@ -702,7 +712,7 @@ if ($tee == "") {
 
 			echo "<td>";
 
-			$query = "	SELECT *
+			$query = "	SELECT varastotunniste, nimitys
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						ORDER BY nimitys";
@@ -710,13 +720,13 @@ if ($tee == "") {
 
 			if (mysql_num_rows($varasto_dropdown_res) > 0) {
 
-				echo "<select name='t5[{$rivirow['tunnus']}]'><option value=''>",t("Valitse varasto"),"</option>";
+				echo "<select class='t5_dropdown' name='t5[{$rivirow['tunnus']}]'><option value=''>",t("Valitse varasto"),"</option>";
 
 				while ($varasto_dropdown_row = mysql_fetch_assoc($varasto_dropdown_res)) {
 
-					$sel = (isset($rivlla5) and $varasto_dropdown_row['tunnus'] == $rivlla5) ? " selected" : "";
+					$sel = (isset($rivlla5) and $varasto_dropdown_row['varastotunniste'] == $rivlla5) ? " selected" : "";
 
-					echo "<option value='{$varasto_dropdown_row['tunnus']}'{$sel}>{$varasto_dropdown_row['nimitys']}</option>";
+					echo "<option value='{$varasto_dropdown_row['varastotunniste']}'{$sel}>{$varasto_dropdown_row['nimitys']}</option>";
 				}
 
 				echo "</select>";
@@ -740,7 +750,7 @@ if ($tee == "") {
 
 		echo "<td>";
 
-		$query = "	SELECT *
+		$query = "	SELECT nimitys, varastotunniste
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					ORDER BY nimitys";
@@ -748,10 +758,10 @@ if ($tee == "") {
 
 		if (mysql_num_rows($varasto_dropdown_res) > 0) {
 
-			echo "<select name='t5_kaikki'><option value=''>",t("Valitse varasto"),"</option>";
+			echo "<select name='t5_kaikki' id='t5_kaikki'><option value=''>",t("Valitse varasto"),"</option>";
 
 			while ($varasto_dropdown_row = mysql_fetch_assoc($varasto_dropdown_res)) {
-				echo "<option value='{$varasto_dropdown_row['tunnus']}'>{$varasto_dropdown_row['nimitys']}</option>";
+				echo "<option value='{$varasto_dropdown_row['varastotunniste']}'>{$varasto_dropdown_row['nimitys']}</option>";
 			}
 
 			echo "</select>";

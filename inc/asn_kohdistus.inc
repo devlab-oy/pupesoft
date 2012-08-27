@@ -61,7 +61,7 @@
 						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
 					}
 					else {
-						$virheet++;
+						$virheet = 0;
 						echo "VIRHE 1: Paketti hylatty. Toimittaja {$edellinen_toimittaja} ASN-sanoma {$edellinen_asn_numero} {$virhe} Paketti {$edellinen_paketinnumero} {$d}";
 					}
 					$paketin_rivit = array();

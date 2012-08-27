@@ -24,6 +24,7 @@ if ($tee == "valmis") {
 		$t2[$tunnus] = trim(strtoupper($t2[$tunnus]));
 		$t3[$tunnus] = trim(strtoupper($t3[$tunnus]));
 		$t4[$tunnus] = trim(strtoupper($t4[$tunnus]));
+		$t5[$tunnus] = trim(strtoupper($t5[$tunnus]));
 
 		$query = "	SELECT *
 					FROM tilausrivi
@@ -510,6 +511,7 @@ if ($tee == "") {
 		echo "<th>".t("Hyllynro")."</th>";
 		echo "<th>".t("Hyllyväli")."</th>";
 		echo "<th>".t("Hyllytaso")."</th>";
+		echo "<th>",t("Varasto"),"</th>";
 
 		while ($rivirow = mysql_fetch_array ($result)) {
 
@@ -697,6 +699,30 @@ if ($tee == "") {
 			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";
+
+			echo "<td>";
+
+			$query = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY nimitys";
+			$varasto_dropdown_res = pupe_query($query);
+
+			if (mysql_num_rows($varasto_dropdown_res) > 0) {
+
+				echo "<select name='t5[{$rivirow['tunnus']}]'><option value=''>",t("Valitse varasto"),"</option>";
+
+				while ($varasto_dropdown_row = mysql_fetch_assoc($varasto_dropdown_res)) {
+
+					$sel = (isset($rivlla5) and $varasto_dropdown_row['tunnus'] == $rivlla5) ? " selected" : "";
+
+					echo "<option value='{$varasto_dropdown_row['tunnus']}'{$sel}>{$varasto_dropdown_row['nimitys']}</option>";
+				}
+
+				echo "</select>";
+			}
+
+			echo "</td>";
 		}
 
 		echo "</tr><tr>";
@@ -711,6 +737,28 @@ if ($tee == "") {
 		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
 		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
 		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
+
+		echo "<td>";
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					ORDER BY nimitys";
+		$varasto_dropdown_res = pupe_query($query);
+
+		if (mysql_num_rows($varasto_dropdown_res) > 0) {
+
+			echo "<select name='t5_kaikki'><option value=''>",t("Valitse varasto"),"</option>";
+
+			while ($varasto_dropdown_row = mysql_fetch_assoc($varasto_dropdown_res)) {
+				echo "<option value='{$varasto_dropdown_row['tunnus']}'>{$varasto_dropdown_row['nimitys']}</option>";
+			}
+
+			echo "</select>";
+		}
+
+		echo "</td>";
+
 		echo "</tr>";
 		echo "</table>";
 
@@ -739,5 +787,3 @@ if ($tee == "") {
 		echo "</form>";
 	}
 }
-
-?>

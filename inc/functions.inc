@@ -17917,7 +17917,7 @@ if (!function_exists("erolista")) {
 			$kplero = $row['kappalemaara'];
 
 			while ($rivirow = mysql_fetch_assoc($rivires)) {
-				
+
 				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
 
 				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
@@ -17929,7 +17929,7 @@ if (!function_exists("erolista")) {
 				if (!$nimi_kerran) {
 					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 				}
-				
+
 				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekem‰‰n ylim‰‰r‰isi‰ rivej‰, on laatijana 'extraa'. N‰ytet‰‰n t‰ss‰ t‰mmˆset rivit k‰ytt‰j‰lle.
 				$extraa = "";
 				if ($rivirow['laatija'] == 'extraa') $extraa = " enemm‰n kuin tilattu!";
@@ -18982,7 +18982,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
 
 		// katsotaan tarvitaanko jakaa tilausrivej‰ myyntier‰ll‰
-		$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era, {$sorttauskentta}
+		$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era, {$sorttauskentta}
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -19000,28 +19000,35 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 		for ($i = 0; $i < count($kerayseran_rivit); $i++) {
 
 			$kerayseran_paino = $kerayseran_rivit[$i]['data']['paino'];
-			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'];
+			$jaljella = $kerayseran_rivit[$i]['data']['varattu'];
 
-			if ($pakkausnro == 0 or ($kerayseran_paino + $pakkauksen_kaytetty_paino > $pakkaukset_paino)) {
-				$pakkauksen_kaytetty_paino = 0;
-				$pakkausnro++;
-			}
+			while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
 
-			while ($kerayseran_paino > $pakkaukset_paino) {
-				$keraysera_kpl -= $kerayseran_rivit[$i]['data']['myynti_era'];
+				if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
+					$pakkauksen_kaytetty_paino = 0;
+					break;
+				}
+
+				$jaljella -= $kerayseran_rivit[$i]['data']['myynti_era'];
 				$kerayseran_paino -= $kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'];
+
+				$pakkauksen_kaytetty_paino += ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+
+				if ($jaljella <= 0) break;
 			}
 
-			$jaljella = $kerayseran_rivit[$i]['data']['varattu'] - $keraysera_kpl;
+			if ($pakkausnro == 0) $pakkausnro++;
+
+			$keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
 
 			$kerayseran_rivit[$i]['data']['upd_varattu'] = $jaljella == 0 ? 0 : $keraysera_kpl;
 			$kerayseran_rivit[$i]['data']['paino'] = $kerayseran_rivit[$i]['data']['tuotemassa'] * $keraysera_kpl;
 
 			$kerayseran_rivit[$i]['data']['pakkausnro'] = $pakkausnro;
 
-			$pakkauksen_kaytetty_paino += $kerayseran_rivit[$i]['data']['paino'];
-
 			if ($keraysera_kpl > 0 and $jaljella > 0) {
+
+				$pakkausnro++;
 
 				$uusi_row = $kerayseran_rivit[$i];
 				$uusi_row['data']['upd_varattu'] = 0;

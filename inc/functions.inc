@@ -17919,7 +17919,7 @@ if (!function_exists("erolista")) {
 			$kplero = $row['kappalemaara'];
 
 			while ($rivirow = mysql_fetch_assoc($rivires)) {
-				
+
 				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
 
 				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
@@ -17931,7 +17931,7 @@ if (!function_exists("erolista")) {
 				if (!$nimi_kerran) {
 					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 				}
-				
+
 				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekemään ylimääräisiä rivejä, on laatijana 'extraa'. Näytetään tässä tämmöset rivit käyttäjälle.
 				$extraa = "";
 				if ($rivirow['laatija'] == 'extraa') $extraa = " enemmän kuin tilattu!";
@@ -18921,6 +18921,28 @@ if (!function_exists('paivita_oletuspaikka')) {
 		}
 		##
 		return 1;
+	}
+}
+
+if (!function_exists('hae_varastotunniste')) {
+	function hae_varastotunniste($hyllyalue, $hyllynro) {
+		global $kukarow;
+
+		$varasto_chk = kuuluukovarastoon($hyllyalue, $hyllynro);
+
+		if ($varasto_chk > 0) {
+			$query = "	SELECT varastotunniste
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$varasto_chk}'
+						ORDER BY nimitys";
+			$varasto_chk_res = pupe_query($query);
+			$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
+
+			return $varasto_chk_row["varastotunniste"];
+		}
+
+		return false;
 	}
 }
 

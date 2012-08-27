@@ -1,5 +1,4 @@
 <?php
-# Vaatii ostotilauksen ja tilausrivin tunnukset
 
 $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
@@ -32,7 +31,7 @@ if (isset($submit)) {
 # Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
-	if ($viivakoodi != '') 	$params[] = "tilausrivi.eankoodi = '{$viivakoodi}'";
+	if ($viivakoodi != '') 	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
 	if ($tuotenumero != '') $params[] = "tilausrivi.tuoteno = '{$tuotenumero}'";
 	if ($ostotilaus != '') 	$params[] = "tilausrivi.otunnus = '{$ostotilaus}'";
 
@@ -59,7 +58,6 @@ $liitostunnus_lisa = '';
 # Jos kuka.kesken on saapuminen, käytetään sitä
 if ($keskeneraiset['kesken'] != 0) {
 	$saapuminen = $keskeneraiset['kesken'];
-	# query_rajaus
 	$query = "SELECT * FROM lasku where tunnus='{$saapuminen}'";
 	$laskurow = mysql_fetch_assoc(pupe_query($query));
 	$liitostunnus_lisa = "and lasku.liitostunnus='{$laskurow['liitostunnus']}'";
@@ -75,11 +73,13 @@ $query = "	SELECT
 			tilausrivi.varattu,
 			tilausrivi.kpl,
 			tilausrivi.tilkpl,
+			tilausrivi.uusiotunnus,
 			concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
 			tuotteen_toimittajat.tuotekerroin,
 			tuotteen_toimittajat.liitostunnus
 			FROM lasku
-			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O' AND tilausrivi.uusiotunnus=0
+			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O' AND tilausrivi.suuntalava=0 AND tilausrivi.varattu != 0
+			JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
@@ -106,6 +106,15 @@ if ($keskeneraiset['kesken'] == 0) {
 	$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$tilaukset['liitostunnus']}'";
 	$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
 
+	# Kaivetaan sopivaa saapumista
+	# kyseisen laatijan saapumiset, joissa ei-siirtovalmiita suuntalavoja
+	// $saapuminen_query = "	SELECT * FROM lasku
+	// 						WHERE tila='K'
+	// 						AND liitostunnus='{$tilaukset['liitostunnus']}'
+	// 						AND laatija='{$kukarow['kuka']}'
+	// 						ORDER BY tunnus DESC
+	// 						LIMIT 1";
+
 	# Tehdään uusi saapuminen
 	$saapuminen = uusi_saapuminen($toimittaja);
 
@@ -113,9 +122,6 @@ if ($keskeneraiset['kesken'] == 0) {
 	$update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
 	$updated = pupe_query($update_kuka);
 }
-
-# Saapuminen selvillä
-$url_array['saapuminen'] = $saapuminen;
 
 # Jos vain yksi osuma, mennään suoraan hyllytykseen
 if ($tilausten_lukumaara == 1) {
@@ -154,7 +160,6 @@ echo "
 while($row = mysql_fetch_assoc($result)) {
 
 	echo "<tr>";
-	#echo "<td>{$row['tunnus']}</td>";
 
 	if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 		echo "<td>{$row['otunnus']}</td>";
@@ -169,10 +174,14 @@ while($row = mysql_fetch_assoc($result)) {
 		<td>{$row['hylly']}</td>
 	";
 
-	$url_array['tilausrivi'] = $row['tunnus'];
 	$url_array['ostotilaus'] = $row['ostotilaus'];
+	$url_array['tilausrivi'] = $row['tunnus'];
+	$url_array['saapuminen'] = $saapuminen;
 
 	echo "<td><a href='hyllytys.php?".http_build_query($url_array)."'>Valkkaa</a></td>";
+	if ($row['uusiotunnus'] != 0 and $row['uusiotunnus'] != $saapuminen) {
+		echo "<td>Kohdistettu eri saapumiselle ({$row['uusiotunnus']}}</td>";
+	}
 	echo "<tr>";
 }
 

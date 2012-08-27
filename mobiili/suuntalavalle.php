@@ -27,6 +27,13 @@ $query = "  SELECT tuote.keraysvyohyke, tilausrivi.*
 $result = pupe_query($query);
 $tilausrivi = mysql_fetch_assoc($result);
 
+$alkuperainen_saapuminen = $saapuminen;
+
+# Käsitellään eri saapumista
+if (!empty($tilausrivi['uusiotunnus'])) {
+    $saapuminen = $tilausrivi['uusiotunnus'];
+}
+
 # Etsitään sopivat suuntalavat
 $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
             FROM suuntalavat
@@ -55,6 +62,7 @@ $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.t
             AND suuntalavat.tila IN ('', 'S', 'P')
             AND suuntalavat.kaytettavyys = 'L')
             ORDER BY sscc, tunnus";
+
 $suuntalavat_res = pupe_query($query);
 
 if (isset($submit)) {
@@ -106,15 +114,17 @@ if (isset($submit)) {
             $url = array (
                         'ostotilaus' => $tilausrivi['otunnus'],
                         'tilausrivi' => $tilausrivi['tunnus'],
-                        'saapuminen' => $saapuminen
+                        'saapuminen' => $alkuperainen_saapuminen
                     );
+
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."'>"; exit();
             break;
         case 'suuntalavalle':
-            // echo "varmistus";
-            // echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=varmistus.php?".http_build_query($url_array)."'>"; exit();
-            // break;
-            $varmistus = true;
+            if(empty($suuntalava)) {
+                $errors[] = "Valitse suuntalava.";
+                break;
+            }
+            echo "varmistus";
             break;
         case 'hyllytyskierrokselle':
             echo "hyllytyskierros";
@@ -124,10 +134,6 @@ if (isset($submit)) {
             echo "suoraan hyllyyn";
             if(is_numeric($korkeus)) echo " korkeus ok";
             break;
-        case 'takaisin':
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=suuntalavalle.php?".http_build_query($url_array)."'>"; exit();
-            $varmistus = false;
-            break;
         default:
             echo "VIRHE";
             break;
@@ -135,12 +141,6 @@ if (isset($submit)) {
 }
 
 include("kasipaate.css");
-
-# Varmistuskysymys
-if (isset($varmistus)) {
-    include('varmistus.php');
-    exit();
-}
 
 echo "<div class='header'><h1>",t("SUUNTALAVALLE", $browkieli), "</h1></div>";
 
@@ -198,10 +198,10 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
         <td><input type='text' name='hyllytetty' value='{$hyllytetty}' /></td>
+        <td><input type='text' name='saapuminen' value='{$alkuperainen_saapuminen}' /></td>
     </tr>";
 }
 echo "</table></div>";
-
 echo "<div class='controls'>
     <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>
     <button name='submit' id='submit' value='lopeta' onclick='submit();'>",t("Lopeta", $browkieli),"</button>

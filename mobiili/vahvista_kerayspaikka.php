@@ -49,6 +49,9 @@ if(isset($hylly)) {
 	$row['hyllytaso'] = $hylly[3];
 }
 
+# Alkuper‰inen saapuminen talteen
+$alkuperainen_saapuminen = $saapuminen;
+
 # Tullaan nappulasta
 if (isset($submit) and trim($submit) != '') {
 
@@ -85,6 +88,11 @@ if (isset($submit) and trim($submit) != '') {
 			if(count($errors) == 0) {
 				$tilausrivit = array();
 
+				# Jos rivi on jo kohdistettu eri saapumiselle
+				if (!empty($row['uusiotunnus'])) {
+					$saapuminen = $row['uusiotunnus'];
+				}
+
 				# Tarkastetaan m‰‰r‰t, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
 					echo "M‰‰r‰‰ on pienennetty <br>";
@@ -113,7 +121,7 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Onko suuntalavaa?
 				if ($alusta_tunnus == 0 && !empty($saapuminen)) {
-
+					$temppi_lava = true;
 					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
 					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikanen lava.
 					$tee = "eihalutamitankayttoliittymaapliis";
@@ -181,11 +189,18 @@ if (isset($submit) and trim($submit) != '') {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
 				}
 
-				# TODO: Jos temppi lava niin merkataan suoraan puretuksi
-
+				# Jos temppi lava niin merkataan suoraan puretuksi
+				if ($temppi_lava) {
+					$query = "	UPDATE suuntalavat SET
+								tila = 'P'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$alusta_tunnus}'";
+					echo $query;
+					$tila_res = pupe_query($query);
+				}
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?{$url}'>";
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
 				}
 				else {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet?{$url}'>";
@@ -262,6 +277,9 @@ echo "<div class='main'>
 		<th>",t("Koodi", $browkieli),"</th>
 		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 	</tr>
+	<tr>
+		<td>Alkup.<input type='text' name='saapuminen' value='{$saapuminen}' /></td>
+	</tr>
 </table>
 </div>";
 
@@ -275,7 +293,6 @@ echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
-	<input type='hidden' name='saapuminen' value='{$saapuminen}' />
 </form>
 ";
 

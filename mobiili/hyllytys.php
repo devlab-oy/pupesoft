@@ -25,6 +25,7 @@ $query = "  SELECT
             tilausrivi.varattu,
             tilausrivi.yksikko,
             tilausrivi.suuntalava,
+            tilausrivi.uusiotunnus,
             lasku.liitostunnus
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O'
@@ -46,29 +47,8 @@ if (isset($submit)) {
         case 'takaisin':
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}'>"; exit();
             break;
-        case 'ok': # Vahvista ker‰yspaikka
-            # M‰‰r‰‰ pienennet‰‰n
-            if ($hyllytetty < $row['siskpl']) {
-                # Splitataan rivi, $pois_suuntalavalta = false
-                #$uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $hyllytetty, false, false);
-                # P‰ivitet‰‰n vanhan kpl
-                #$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['siskpl'] - $hyllytetty));
-
-                # Varastoon viet‰v‰ rivi
-                #$url_array['tilausrivi'] = $uuden_rivin_id;
-            }
-            # M‰‰r‰‰ nostetaan
-            elseif ($hyllytetty > $row['siskpl']) {
-                #echo "splitataan rivi";
-                # Miten molemmat rivit vahvista_kerayspaikka.php:lle?
-
-            }
-            # Tilattu == Hyllytetty
-            else {
-            }
-
-            # Parametrit $alusta_tunnus=tilausrivi.suuntalava & lasku.liitostunnus=liitostunnus
-            #echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?ostotilaus={$ostotilaus}&tilausrivi={$tilausrivi}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+        case 'ok':
+            # Vahvista ker‰yspaikka
             echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
             break;
         case 'suuntalavalle':
@@ -135,9 +115,15 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>Saapuminen</th>
-        <td>$saapuminen</td>
-        <td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
-    </tr>
+        <td>$saapuminen</td>";
+
+if ($row['uusiotunnus'] != 0) {
+    echo "<td>Kohdistettu eri saapumiselle {$row['uusiotunnus']}</td>";
+}
+
+echo "<td><input type='text' name='saapuminen' value='$saapuminen'></td>";
+
+echo "</tr>
     <tr>
         <th>Suuntalava</th>
         <td>$suuntalava</td>
@@ -149,8 +135,8 @@ echo "<div class='main'>
 echo "
 <div class='controls'>
 <button type='submit' class='left' onclick=\"f1.action='vahvista_kerayspaikka.php?hyllytys&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}&tilausrivi={$tilausrivi}'\">",t("OK", $browkieli),"</button>
-<button type='submit' class='left' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='kerayspaikka' onclick='submit();'>",t("KERƒYSPAIKKA", $browkieli),"</button>
+<button type='submit' class='left' onclick=\"f1.action='suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'\">",t("SUUNTALAVALLE", $browkieli),"</button>
 <button name='submit' class='right' id='submit' value='takaisin' onclick='submit();'>",t("TAKAISIN", $browkieli),"</button>
 </div>
 </form>";

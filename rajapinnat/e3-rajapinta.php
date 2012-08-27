@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
@@ -65,7 +65,7 @@
 	// 1 = maanantai, 7 = sunnuntai
 	$weekday = date("N");
 	$weekday = $weekday-$ajopaiva;
-
+	
 	if ($weekday <= 0 OR $weekday == 6 OR $weekday == 7) {
 		// tällä hetkellä aineiston saa ainoastaan ma-pe päiviltä
 		echo "\n\nTätä skriptiä voi ajaa vain arkipäiviltä!\n\n";
@@ -88,7 +88,8 @@
 	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = '' ";
 	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
 
-	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
+	// $path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
+	$path = "/tmp/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
 	# siivotaan yli 7 päivää vanhat aineistot
 	system("find /home/e3_rajapinta/ -mtime +7 -delete");
@@ -401,7 +402,7 @@
 				   ) korvaavatuoteno
 				   FROM tuote
 				   JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
-				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
 				   HAVING tuote.tuoteno = korvaavatuoteno";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
@@ -673,7 +674,7 @@
 				) saldo
 				FROM tuote
 				LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-				WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+				WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
 				GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
 				HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rests = mysql_query($Q1) or pupe_error($Q1);
@@ -695,7 +696,7 @@
 
 			if ($toimirow['toimittaja'] == '' or $toimirow['tyyppi'] == 'P') continue;
 
-			//Jos ostoehdotus on kyllä, siirretään myyntilukuja. Muuten ei.
+			//Jos ostoehdotus on kyllä, siirretään myyntilukuja. Siirretään kaikkien tuotteiden myyntiluvut kuitenkin.
 			//Myynnit vaan "normaaleist" varastoist, tsekataa vaa varastopaikat-taulusta tyyppi '':stä myydyt
 			//Jos asiakkuuksilla palautetaan tavaraa (toimittajapalautus), ei oteta niitä palautuksia myyntilukuihin mukaan. Katotaan tää kauppatapahtuman luonteella
 			if ($tuoterow['ostoehdotus'] == '') {

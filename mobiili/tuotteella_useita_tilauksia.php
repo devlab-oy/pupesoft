@@ -15,9 +15,12 @@ if(!isset($errors)) $errors = array();
 if (isset($submit)) {
 	switch($submit) {
 		case 'ok':
-			var_dump($_POST);
-			#echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php'>"; exit();
-			#exit;
+			$url_array['ostotilaus'] = $ostotilaus;
+			$url_array['tilausrivi'] = $tilausrivi;
+			$url_array['saapuminen'] = $saapuminen;
+
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
+
 			break;
 		case 'cancel':
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus=$ostotilaus'>"; exit();
@@ -142,7 +145,7 @@ echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA", $browkieli), "<
 echo "<div class='main'>
 <form name='form1' method='post' action=''>
 <table>
-<tr>";
+<tr><th></th>";
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 	echo "<th>",t("Ostotilaus", $browkieli),"</th>";
@@ -160,7 +163,7 @@ echo "
 while($row = mysql_fetch_assoc($result)) {
 
 	echo "<tr>";
-
+	echo "<td><input class='radio' type='radio' name='tilausrivi' value='{$row['tunnus']}' /></td>";
 	if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
 		echo "<td>{$row['otunnus']}</td>";
 	}
@@ -178,10 +181,9 @@ while($row = mysql_fetch_assoc($result)) {
 	$url_array['tilausrivi'] = $row['tunnus'];
 	$url_array['saapuminen'] = $saapuminen;
 
-	echo "<td><a href='hyllytys.php?".http_build_query($url_array)."'>Valkkaa</a></td>";
-	if ($row['uusiotunnus'] != 0 and $row['uusiotunnus'] != $saapuminen) {
-		echo "<td>Kohdistettu eri saapumiselle ({$row['uusiotunnus']}}</td>";
-	}
+	echo "<input type='hidden' name='ostotilaus' value={$row['ostotilaus']}>";
+	echo "<input type='hidden' name='saapuminen' value={$saapuminen}>";
+
 	echo "<tr>";
 }
 

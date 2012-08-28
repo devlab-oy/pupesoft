@@ -76,7 +76,6 @@ echo "<div class='main'>
 		<th>",t("Suuntalava", $browkieli),"</th>
 		<td colspan='2'>{$alusta_tunnus}</td>
 	</tr>
-	<tr><td colspan='3'>&nbsp;</td></tr>
 	<tr>
 		<th>",t("Tuote", $browkieli),"</th>
 		<td colspan='2'>{$row['tuoteno']}</td>

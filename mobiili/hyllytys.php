@@ -121,7 +121,7 @@ if ($row['uusiotunnus'] != 0) {
     echo "<td>Kohdistettu eri saapumiselle {$row['uusiotunnus']}</td>";
 }
 
-echo "<td><input type='text' name='saapuminen' value='$saapuminen'></td>";
+echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>";
 
 echo "</tr>
     <tr>

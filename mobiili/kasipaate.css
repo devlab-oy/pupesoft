@@ -15,6 +15,9 @@ A, A:visited {
 }
 
 table {
+	/*width: 100%;
+	text-align: center;
+	*/
 	padding: 0px;
 	margin: 0px;
 	/*font-size: 0.90em;*/

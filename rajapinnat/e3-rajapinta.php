@@ -1,4 +1,4 @@
- <?php
+<?php
 
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
@@ -65,7 +65,7 @@
 	// 1 = maanantai, 7 = sunnuntai
 	$weekday = date("N");
 	$weekday = $weekday-$ajopaiva;
-	
+
 	if ($weekday <= 0 OR $weekday == 6 OR $weekday == 7) {
 		// tällä hetkellä aineiston saa ainoastaan ma-pe päiviltä
 		echo "\n\nTätä skriptiä voi ajaa vain arkipäiviltä!\n\n";
@@ -402,7 +402,7 @@
 				   ) korvaavatuoteno
 				   FROM tuote
 				   JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno AND date(korvaavat.luontiaika) = '$tanaan')
-				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
+				   WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset
 				   HAVING tuote.tuoteno = korvaavatuoteno";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
@@ -674,7 +674,7 @@
 				) saldo
 				FROM tuote
 				LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-				WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
+				WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset
 				GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
 				HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
 		$rests = mysql_query($Q1) or pupe_error($Q1);
@@ -824,7 +824,7 @@
 						FROM tuote use index (tuoteno_index)
 						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
 						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
+						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset
 						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
 						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";

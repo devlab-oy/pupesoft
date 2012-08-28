@@ -115,6 +115,8 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 						ORDER BY kirjoitin";
 			$kires = pupe_query($query);
 
+			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+
 			while ($kirow = mysql_fetch_assoc($kires)) {
 				$sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
 				echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";

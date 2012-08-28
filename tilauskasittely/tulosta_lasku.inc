@@ -1538,13 +1538,13 @@ if (!function_exists('loppu')) {
 			$onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
 
 			if ($onko_tili1_iban != "") {
-				$code = PalautaPankkiviivakoodi($onko_tili1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+				$code = PalautaPankkiviivakoodi($onko_tili1_iban, $laskurow['summa'], $erapaiva, $laskurow["viite"], 4);
 			}
 			elseif ($onko_iban1_iban != "") {
-				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $laskurow['summa'], $erapaiva, $laskurow["viite"], 4);
 			}
 			else {
-				$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"], 2);
+				$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $laskurow['summa'], $erapaiva, $laskurow["viite"], 2);
 			}
 
 			$font = 5;
@@ -2304,5 +2304,3 @@ if (!function_exists("tulosta_lasku")) {
 		unset($page_lasku);
 	}
 }
-
-?>

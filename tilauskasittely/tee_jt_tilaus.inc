@@ -194,15 +194,11 @@
 						$yhdlisa = "";
 					}
 
+					// Katso kohdistettu ja rahtivapaa IF ELSE alempaa otsikon luonnin yhteydess‰
 					if ($yhtiorow["jt_rahti"] == "B") {
-						// B = Ennakot/J‰lkitoimitukset ovat aina rahtivapaita
 						$kohdistettulisa = "and lasku.kohdistettu = 'K'";
 					}
 					else {
-						// Jos jt_rahti on C tai D, niin valutaan t‰nne
-						// C = Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu
-						// D = Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan (tilaus-valmis.inc hoitaa rahtikulun kuntoon)
-						// Else = Ennakko/J‰lkitoimitus on rahtivapaa, jos alkuper‰inen tilaus oli rahtivapaa
 						$kohdistettulisa = "and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
 					}
 

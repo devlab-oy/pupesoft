@@ -19005,7 +19005,14 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 			while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
 
 				if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
+
 					$pakkauksen_kaytetty_paino = 0;
+
+					if ($_pakkaus != 0) {
+						$pakkausnro++;
+						$pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era']);
+					}
+
 					break;
 				}
 

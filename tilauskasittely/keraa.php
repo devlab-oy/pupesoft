@@ -2439,6 +2439,16 @@
 
 						echo "<option value=''>",t("Valitse pakkaus kaikille riveille"),"</option>";
 
+						// kaikilla pitäisi olla sama pakkaus, joten pre-selectoidaan se
+						$query = "	SELECT pakkaus
+									FROM kerayserat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus IN ($tilausnumeroita)";
+						$ker_pak_chk_res = pupe_query($query);
+						$ker_pak_chk_row = mysql_fetch_assoc($ker_pak_chk_res);
+
+						if (!isset($pakkaukset_kaikille) and $ker_pak_chk_row['pakkaus'] != 0) $pakkaukset_kaikille = $ker_pak_chk_row['pakkaus'];
+
 						while ($pakkausrow = mysql_fetch_assoc($pakkausres)) {
 
 							$sel = (isset($pakkaukset_kaikille) and $pakkaukset_kaikille == $pakkausrow['tunnus']) ? " selected" : "";

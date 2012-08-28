@@ -2287,8 +2287,8 @@
 									$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 								}
 
-								// Laitetaan alennukset kommenttiin, koska laksulla on vain yksi alekenttä
-								if ($yhtiorow['myynnin_alekentat'] > 1) {
+								// Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä
+								if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0)  {
 
 									$alekomm = "";
 

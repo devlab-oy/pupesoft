@@ -131,16 +131,16 @@ if (!function_exists("pupesoft_login")) {
 
 							$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
 
-							if ($mobile) {
-								$palvelin2 .= "mobiili/index.php";
-							}
-							else {
-								$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
+							$palvelin2 .= "?goso={$oletus_ohjelman_osat[0]}&go={$oletus_ohjelman_osat[1]}";
 
-								if ($oletus_ohjelman_osat[2] != "") {
-									$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
-								}
+							if ($oletus_ohjelman_osat[2] != "") {
+								$palvelin2 .= "?toim={$oletus_ohjelman_osat[2]}";
 							}
+						}
+
+						# Jos logataan mobiilista
+						if ($mobile) {
+							$palvelin2 .= "/mobiili/index.php";
 						}
 
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}'>";

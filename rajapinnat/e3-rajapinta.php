@@ -88,8 +88,8 @@
 	$tuoterajaukset = " AND tuote.status != 'P' AND tuote.ei_saldoa = '' AND tuote.tuotetyyppi = '' ";
 	$toimirajaus 	= " AND toimi.oletus_vienti in ('C','F','I')";
 
-	// $path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
-	$path = "/tmp/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
+	$path = "/home/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
+	// $path = "/tmp/e3_rajapinta/e3siirto_siirto_".date("Ymd")."_$yhtiorow[yhtio]/";
 
 	# siivotaan yli 7 p‰iv‰‰ vanhat aineistot
 	system("find /home/e3_rajapinta/ -mtime +7 -delete");
@@ -824,7 +824,7 @@
 						FROM tuote use index (tuoteno_index)
 						LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio=tuote.yhtio AND abc_aputaulu.tyyppi='TM' AND tuote.tuoteno=abc_aputaulu.tuoteno)
 						LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
-						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
+						WHERE tuote.yhtio = '$yhtiorow[yhtio]' $tuoterajaukset 
 						GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
 						HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
 						ORDER BY 1";

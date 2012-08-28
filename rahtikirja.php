@@ -2474,23 +2474,19 @@
 
 				$querytunlisa = strpos($tunnukset, ',') !== FALSE ? $tunnukset : $otsik['tunnus'];
 
-				$query = "	SELECT pakkaus.pakkaus,
-							pakkaus.pakkauskuvaus,
-							pakkaus.oma_paino,
+				$query = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro,
+							pakkaus.pakkaus,
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
 							kerayserat.otunnus,
-							IF(pakkaus.puukotuskerroin is not null and pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1) puukotuskerroin,
-							#SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) as kuutiot,
-							#SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
-							(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
 							AND kerayserat.otunnus 	IN ({$querytunlisa})
-							#GROUP BY 1,2,3,4,5,6
+							GROUP BY 1,2,3,4,5,6
 							ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 			}
 

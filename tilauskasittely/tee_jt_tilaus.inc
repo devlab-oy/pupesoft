@@ -194,6 +194,16 @@
 						$yhdlisa = "";
 					}
 
+					if ($yhtiorow["jt_rahti"] == "B") {
+						// Ennakot/Jälkitoimitukset ovat aina rahtivapaita
+						$kohdistettulisa = "and lasku.kohdistettu = 'K'";
+					}
+					else {
+						// Jos jt_rahti on C tai D, niin valutaan tänne
+						// Ennakko/Jälkitoimitus on rahtivapaa, jos alkuperäinen tilaus oli rahtivapaa
+						$kohdistettulisa = "and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+					}
+
 					// Tarvitsemmeko uuden otsikon?
 					$query = "	SELECT lasku.*
 								FROM lasku
@@ -219,7 +229,6 @@
 								and lasku.vienti	 	= '$otsikkorivi[vienti]'
 								and lasku.alv		 	= '$otsikkorivi[alv]'
 								and lasku.ketjutus 		= '$otsikkorivi[ketjutus]'
-								and lasku.kohdistettu	= '$otsikkorivi[kohdistettu]'
 								and lasku.toimitusehto	= '$otsikkorivi[toimitusehto]'
 								and lasku.valkoodi 		= '$otsikkorivi[valkoodi]'
 								and lasku.vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
@@ -233,6 +242,7 @@
 								and laskun_lisatiedot.laskutus_postino 	= '$lisatiedot_row[laskutus_postino]'
 								and laskun_lisatiedot.laskutus_postitp 	= '$lisatiedot_row[laskutus_postitp]'
 								and laskun_lisatiedot.laskutus_maa 		= '$lisatiedot_row[laskutus_maa]'
+								{$kohdistettulisa}
 								$erpcmlisa1
 								$yhdlisa";
 					$stresult = pupe_query($query);
@@ -1049,4 +1059,3 @@
 			}
 		}
 	}
-?>

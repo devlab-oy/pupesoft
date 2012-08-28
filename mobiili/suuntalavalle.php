@@ -68,10 +68,6 @@ $suuntalavat_res = pupe_query($query);
 if (isset($submit)) {
     switch($submit) {
         case 'hae':
-            $suuntalavat = etsi_suuntalava_sscc($sscc);
-            if(count($suuntalavat) == 0) {
-                $errors[] = "Ei löytynyt sopivaa suuntalavaa. Hae uudestaan";
-            }
             break;
         case 'ok':
             if(empty($suuntalava)) {
@@ -150,7 +146,7 @@ echo "<div class='main'>
     <tr>
         <th><label for='sscc'>Hae suuntalava:</label></th>
         <td>
-            <input type='text' id='sscc' name='sscc' />
+            <input type='text' id='sscc' name='sscc' value='$hae'/>
         </td>
         <td>
             <button name='submit' value='hae' onclick='submit();'>",t("Etsi", $browkieli),"</button>
@@ -163,12 +159,13 @@ echo "<div class='main'>
 <table>
     <tr>
         <th></th>
-        <th>Suuntalavan nro</th>
+        <th>SSCC</th>
         <th>Ker.vyöhyk.</th>
         <th>Rivejä</th>
         <th>Tyyppi</th>
     </tr>";
 
+$loytyiko = false;
 while($row = mysql_fetch_assoc($suuntalavat_res)) {
 
     if ($tilausrivi['suuntalava'] > 0 and $row['tunnus'] != $tilausrivi['suuntalava'] and $row['kaytettavyys'] != 'L' and $row['tila'] != '') {
@@ -176,7 +173,10 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     }
     if($row['tila'] == 'S') continue;
     if ($row['tila'] == 'P' and $tilausrivi["varastossa_kpl"] == 0) continue;
-    if ($sscc != '' and $row['sscc'] != $sscc) continue;
+    #if ($sscc != '' and $row['sscc'] != $sscc) continue;
+    if (!empty($sscc) and stristr($row['sscc'], $sscc) == false) continue;
+
+    $loytyiko = true;
 
     $pakkaus_query = "select pakkaus from pakkaus where tunnus='{$row['tyyppi']}'";
     $tyyppi = mysql_fetch_assoc(pupe_query($pakkaus_query));
@@ -197,10 +197,13 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
         <td>{rivit}</td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
-        <td><input type='text' name='hyllytetty' value='{$hyllytetty}' /></td>
-        <td><input type='text' name='saapuminen' value='{$alkuperainen_saapuminen}' /></td>
+        <td><input type='hidden' name='hyllytetty' value='{$hyllytetty}' /></td>
+        <td><input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' /></td>
     </tr>";
 }
+
+if (!$loytyiko) $errors[] = "Suuntalavaa ei löytynyt";
+
 echo "</table></div>";
 echo "<div class='controls'>
     <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>

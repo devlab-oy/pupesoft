@@ -48,15 +48,6 @@ if(!function_exists("avainsanatarkista")) {
 				}
 			}
 
-			if ($tem_laji == 'VARASTOTUNNISTE') {
-				if (trim($tem_selite) == '') {
-					$virhe[$i] = t("Selite on pakollinen");
-				}
-				elseif (strlen($tem_selite) > 2) {
-					$virhe[$i] = t("Selite saa olla enint‰‰n 2 merkki‰ pitk‰");
-				}
-			}
-
 			if (strtoupper($tem_laji) == "ALVULK") {
 				//	ALV pit‰‰ olla pisteell‰, ei pilkulla
 				$t[$i] = round((float) str_replace(",", ".", $tem_selite), 2);

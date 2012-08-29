@@ -112,7 +112,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") 	$ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>		".t("Varaston terminaalialue")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SSCC")			 	$ulos .= "<option value='SSCC' $avain_sel[SSCC]>							".t("SSCC-koodi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV") 		$ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>					".t("Pakkaustiedon kieliversio")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOTUNNISTE")	$ulos .= "<option value='VARASTOTUNNISTE' $avain_sel[VARASTOTUNNISTE]>		".t("Varastotunniste")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";

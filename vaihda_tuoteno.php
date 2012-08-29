@@ -459,19 +459,22 @@ if ($error == 0 and $tee == "file") {
 
 						$loytyikorv = '';
 
-						$querykorvv  = "SELECT id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+						$querykorvv  = "SELECT id maxi, jarjestys from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 						$korvvresult = pupe_query($querykorvv);
+						$jarjestys = '2';
 
 						if (mysql_num_rows($korvvresult) != '0') {
 							$korvid = mysql_fetch_array($korvvresult);
 							//echo "löytyi korvid"."$korvid[maxi]"." $vantuoteno --> $uustuoteno<br>";
 							$loytyikorv = '1';
+							$jarjestys = $korvid['jarjestys'] + 1;
 						}
 
 						$query = "	INSERT INTO korvaavat
 									SET
 									tuoteno 	= '$vantuoteno',
 									id			= '$korvid[maxi]',
+									jarjestys	= '$jarjestys',
 									yhtio		= '$kukarow[yhtio]',
 									laatija 	= '$kukarow[kuka]',
 									luontiaika	= now(),
@@ -484,6 +487,7 @@ if ($error == 0 and $tee == "file") {
 										SET
 										tuoteno 	= '$uustuoteno',
 										id			= '$korvid[maxi]',
+										jarjestys	= '1',
 										yhtio		= '$kukarow[yhtio]',
 										laatija 	= '$kukarow[kuka]',
 										luontiaika	= now(),
@@ -491,6 +495,17 @@ if ($error == 0 and $tee == "file") {
 										muutospvm 	= now()";
 							$result4 = pupe_query($query);
 						}
+						
+						// päivitetään järjestykset muille paitsi "päätuotteelle", "vanhatuotteelle", nollille ja isommille järjestyksille kuin mikä on "vanhatuotteella"
+						$query = "	UPDATE korvaavat
+									SET jarjestys = jarjestys + 1
+									WHERE id	= '$korvid[maxi]'
+									AND yhtio	= '$kukarow[yhtio]'
+									AND jarjestys != 0
+									AND jarjestys >= '$jarjestys'
+									AND tuoteno != '$vantuoteno'
+									AND tuoteno != '$uustuoteno'";
+						$result4 = pupe_query($query);
 					}
 					$lask++;
 				}

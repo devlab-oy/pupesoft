@@ -103,7 +103,7 @@ if (isset($submit)) {
             }
 
             # Kaikki ok
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php'>"; exit();
+            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$tilausrivi['otunnus']}'>"; exit();
             break;
 
         case 'lopeta':

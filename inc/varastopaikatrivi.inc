@@ -176,22 +176,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "varastotunniste") {
-
-		$ulos = "<td><select name='{$nimi}'>";
-		$ulos .= "<option value = ''>".t("Valitse")."</option>";
-
-		$vresult = t_avainsana("VARASTOTUNNISTE");
-
-		while ($vrow = mysql_fetch_assoc($vresult)) {
-			$sel = $trow[$i] == $vrow['selite'] ? " selected" : "";
-			$ulos .= "<option value = '{$vrow['selite']}'{$sel}>{$vrow['selite']} - {$vrow['selitetark']}</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
 		$ulos = "<td>";
 

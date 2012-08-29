@@ -18950,6 +18950,10 @@ if (!function_exists('tee_hyllyalue_input')) {
 	function tee_hyllyalue_input($hyllyalue_key, $hyllyalue_value) {
 		global $kukarow, $yhtiorow;
 
+		/*
+		Funktioon liittyvä javascripti löytyy parametrit.inc riviltä 617
+		*/
+
 		$input_html = "";
 
 		if ($yhtiorow['varastontunniste'] != "") {
@@ -18960,7 +18964,7 @@ if (!function_exists('tee_hyllyalue_input')) {
 			$query = "	SELECT tunnus, nimitys, alkuhyllyalue
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						ORDER BY tyyppi, nimitys";
+						ORDER BY alkuhyllyalue";
 			$varastores = pupe_query($query);
 
 			while ($varastorow = mysql_fetch_assoc($varastores)) {
@@ -18969,7 +18973,7 @@ if (!function_exists('tee_hyllyalue_input')) {
 
 				$sel = $kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "";
 
-				$input_html .= "<option value='{$val}'{$sel}>{$varastorow['nimitys']}</option>";
+				$input_html .= "<option value='{$val}'{$sel}>{$varastorow['nimitys']} ({$val})</option>";
 			}
 
 			$input_html .= "</select>&nbsp;";

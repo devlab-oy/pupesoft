@@ -477,6 +477,15 @@
 
 								$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
+								// Päivitetään alkuperäiselle riville "ylimääräinen" ja uudelle splitille "erotus"
+								$query = "	UPDATE tilausrivi SET
+											varattu = '{$erotus}',
+											tilkpl	= '{$erotus}',
+											kommentti = CONCAT(kommentti,' Ennen splittausta {$lapsi_chk_row['tilkpl']} : kohdistettiin {$erotus}')
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$lapsi_chk_row['tunnus']}'";
+								$upres = pupe_query($query);
+
 								// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 								if ($lapsi_chk_row['kpl'] > 0) {
 									$query = "	SELECT *
@@ -608,6 +617,15 @@
 							);
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
+
+							// Päivitetään alkuperäiselle riville "ylimääräinen" ja uudelle splitille "erotus"
+							$query = "	UPDATE tilausrivi SET
+										varattu = '{$row['kappalemaara']}',
+										tilkpl	= '{$row['kappalemaara']}',
+										kommentti = CONCAT(kommentti,' Ennen splittausta {$lapsi_chk_row['tilkpl']} : kohdistettiin {$row['kappalemaara']}')
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$lapsi_chk_row['tunnus']}'";
+							$upres = pupe_query($query);
 
 							// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 							if ($lapsi_chk_row['kpl'] > 0) {

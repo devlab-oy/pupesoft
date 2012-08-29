@@ -443,7 +443,7 @@ if ($error == 0 and $tee == "file") {
 							$query = "	INSERT INTO tuote
 										SET
 										tuoteno 		= '$vantuoteno',
-										nimitys			= '-->--> $uustuoteno',
+										nimitys			= '". t("KORVAAVA TUOTENO") ." $uustuoteno',
 										osasto			= '999999',
 										try				= '999999',
 										alv				= '$alv',

@@ -673,12 +673,6 @@ if ($tee == "") {
 						$riv = "(".t("rivillä").")";
 					}
 
-					$varasto_chk = hae_varastotunniste($paikkarow['hyllyalue'], $paikkarow['hyllynro']);
-
-					if ($varasto_chk) {
-						$paikkarow['hyllyalue'] = substr($paikkarow['hyllyalue'], 2);
-					}
-
 					echo "<option value='$paikkarow[tunnus]' $sel>$paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] $ole $riv</option>";
 				}
 

@@ -18937,8 +18937,6 @@ if (!function_exists('tee_hyllyalue_input')) {
 		if ($yhtiorow['varastontunniste'] != "") {
 			$input_html .= "<select class='select_varastontunniste' id='{$hyllyalue_key}_select_varastontunniste' name='select_varastontunniste'>";
 
-			$input_html .= "<option value=''>".t("Valitse varasto")."</option>";
-
 			$query = "	SELECT tunnus, nimitys, alkuhyllyalue
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'

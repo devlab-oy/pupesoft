@@ -781,7 +781,6 @@
 
 				if ($yhtiorow['varastontunniste'] != '') {
 					if (!isset($select_varastontunniste) or trim($select_varastontunniste) == "") $kaikki_ok = false;
-					else $select_varastontunniste = (int) $select_varastontunniste;
 				}
 
 				if ($kaikki_ok) {

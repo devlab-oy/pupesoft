@@ -18924,28 +18924,6 @@ if (!function_exists('paivita_oletuspaikka')) {
 	}
 }
 
-if (!function_exists('hae_varastotunniste')) {
-	function hae_varastotunniste($hyllyalue, $hyllynro) {
-		global $kukarow;
-
-		$varasto_chk = kuuluukovarastoon($hyllyalue, $hyllynro);
-
-		if ($varasto_chk > 0) {
-			$query = "	SELECT varastotunniste
-						FROM varastopaikat
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$varasto_chk}'
-						ORDER BY nimitys";
-			$varasto_chk_res = pupe_query($query);
-			$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
-
-			return $varasto_chk_row["varastotunniste"] != "" ? $varasto_chk_row["varastotunniste"] : false;
-		}
-
-		return false;
-	}
-}
-
 if (!function_exists('tee_hyllyalue_input')) {
 	function tee_hyllyalue_input($hyllyalue_key, $hyllyalue_value) {
 		global $kukarow, $yhtiorow;

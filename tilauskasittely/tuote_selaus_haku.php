@@ -1955,7 +1955,7 @@
 										echo "<tr>";
 										echo "<td class='$vari' nowrap>";
 										echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
-										echo "<div id='div_$id2' class='popup' style='width: 300px'>($_hyllyalue-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
+										echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
 										echo "</td>";
 
 										echo "<td class='$vari' align='right' nowrap>";

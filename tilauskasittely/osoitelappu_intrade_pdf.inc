@@ -108,7 +108,58 @@ $iso["font"] = "Helvetica-Bold";
 $huge["height"] = 20;
 $huge["font"] = "Helvetica-Bold";
 
+$uniq_pakkaukset = array();
+
+if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
+
+	$kaikki_ok = true;
+
+	if ($yhtiorow['kerayserat'] == 'A') {
+
+		$query = "	SELECT kerayserat
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$laskurow['liitostunnus']}'
+					AND kerayserat = 'A'";
+		$asiakas_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($asiakas_chk_res) == 0) {
+			$kaikki_ok = false;
+		}
+	}
+
+	if ($kaikki_ok) {
+
+		$query = "	SELECT pakkausnro
+					FROM kerayserat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$laskurow['tunnus']}'
+					GROUP BY pakkausnro
+					ORDER BY pakkausnro ASC";
+		$pakkaus_chk_res = pupe_query($query);
+
+		$i = 1;
+
+		while ($pakkaus_chk_row = mysql_fetch_assoc($pakkaus_chk_res)) {
+			$uniq_pakkaukset[$i] = $pakkaus_chk_row['pakkausnro'];
+			$i++;
+		}
+
+		$oslappkpl = count($uniq_pakkaukset);
+	}
+}
+
+$kirjainlisa = '';
+
 for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
+
+	if (count($uniq_pakkaukset) == 0) {
+		$uniq_merkki = $tulostuskpl;
+	}
+	else {
+		$uniq_merkki = $uniq_pakkaukset[$tulostuskpl];
+		$kirjainlisa = " ".chr(64+$uniq_merkki);
+	}
 
 	// tehdään SSCC :
 	// (00)
@@ -120,7 +171,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 	$sscc = 1;
 	$sscc .= sprintf("%-08.08s",$yhtiorow["ean"]);
 	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-	$sscc .= sprintf('%02.02d', $tulostuskpl);
+	$sscc .= sprintf('%02.02d', $uniq_merkki);
 	$loppu = tarkiste($sscc);
 	$sscc = $sscc.$loppu;
 

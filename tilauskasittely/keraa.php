@@ -3062,7 +3062,37 @@
 						echo "<option value='$kirrow[tunnus]'{$sel}>$kirrow[kirjoitin]</option>";
 					}
 
-					echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+					echo "</select> ".t("Kpl").": ";
+
+					$oslappkpl_hidden = 0;
+					$disabled = '';
+
+					if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
+
+						if ($yhtiorow['kerayserat'] == 'A') {
+
+							$query = "	SELECT kerayserat
+										FROM asiakas
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$otsik_row['liitostunnus']}'
+										AND kerayserat = 'A'";
+							$asiakas_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($asiakas_chk_res) != 0) {
+								$oslappkpl_hidden = 1;
+								$oslappkpl = '';
+								$disabled = 'disabled';
+							}
+						}
+					}
+
+					echo "<input type='text' size='4' name='oslappkpl' value='$oslappkpl' {$disabled}>";
+
+					if ($oslappkpl_hidden != 0) {
+						echo "<input type='hidden' name='oslappkpl' value='{$oslappkpl_hidden}' />";
+					}
+
+					echo "</th>";
 
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 						echo "<th></th>";

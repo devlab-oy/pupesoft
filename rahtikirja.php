@@ -2830,7 +2830,37 @@
 			}
 			mysql_data_seek($kirre, 0);
 
-			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></td></tr>";
+			echo "</select> ".t("Kpl").": ";
+
+			$oslappkpl_hidden = 0;
+			$disabled = '';
+
+			if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
+
+				if ($yhtiorow['kerayserat'] == 'A') {
+
+					$query = "	SELECT kerayserat
+								FROM asiakas
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$otsik['liitostunnus']}'
+								AND kerayserat = 'A'";
+					$asiakas_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($asiakas_chk_res) != 0) {
+						$oslappkpl_hidden = 1;
+						$oslappkpl = '';
+						$disabled = 'disabled';
+					}
+				}
+			}
+
+			echo "<input type='text' size='4' name='oslappkpl' value='$oslappkpl' {$disabled} />";
+
+			if ($oslappkpl_hidden != 0) {
+				echo "<input type='hidden' name='oslappkpl' value='{$oslappkpl_hidden}' />";
+			}
+
+			echo "</td></tr>";
 
 			if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
 				echo "<tr><th>".t("Terminaaliosoitelappu").":</th><td>";

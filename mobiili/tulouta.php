@@ -47,8 +47,6 @@ if (isset($submit) and trim($submit) == 'submit') {
 
 $kesken = ($kesken['kesken'] == 0) ? "" : "({$kesken['kesken']})";
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>TULOUTA</h1></div>";
 
 echo "<div class='main'>

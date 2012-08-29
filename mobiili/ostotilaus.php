@@ -41,7 +41,6 @@ if (isset($submit)) {
 $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 
 ### UI ###
-include("kasipaate.css");
 
 echo "
 <div class='header'><h1>",t("OSTOTILAUS"),"</h1></div>";

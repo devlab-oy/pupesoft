@@ -49,8 +49,6 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 	}
 }
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("ALUSTA", $browkieli),"</h1></div>";
 
 echo "<div class='main'>

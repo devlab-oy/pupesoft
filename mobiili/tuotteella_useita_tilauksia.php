@@ -138,8 +138,6 @@ if ($tilausten_lukumaara == 1) {
 mysql_data_seek($result, 0);
 
 ### UI ###
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA", $browkieli), "</h1></div>";
 
 echo "<div class='main'>

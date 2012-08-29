@@ -107,8 +107,6 @@ if (isset($alusta_tunnus)) {
 	}
 }
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action=''>

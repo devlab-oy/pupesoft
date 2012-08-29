@@ -10,9 +10,7 @@ elseif (@include_once("inc/parametrit.inc"));
 
 # Index.php ei sisällytä parametrit incistä headereita
 echo "<meta name='viewport' content='width=314,height=309, user-scalable=no,minimum-scale=1, maximum-scale=1, target-densitydpi=device-dpi'/>\n";
-
-include("kasipaate.css");
-
+echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
 echo "<h1>",t("PÄÄVALIKKO", $browkieli),"</h1>";
 

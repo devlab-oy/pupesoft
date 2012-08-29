@@ -62,9 +62,10 @@ echo "
 	<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+	<link rel='stylesheet' type='text/css' href='kasipaate.css' />
 	</head>
 ";
-include("kasipaate.css");
+
 echo "
 <body>
 <table class='main' border='0'>

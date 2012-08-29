@@ -227,8 +227,6 @@ if (isset($hyllytetty)) {
 	$maara = $hyllytetty;
 }
 
-include("kasipaate.css");
-
 echo "
 	<script type='text/javascript'>
 		function vahvista() {

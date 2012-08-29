@@ -136,8 +136,6 @@ if (isset($submit)) {
     }
 }
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("SUUNTALAVALLE", $browkieli), "</h1></div>";
 
 echo "<div class='main'>

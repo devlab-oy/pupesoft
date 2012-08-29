@@ -1,7 +1,6 @@
-<style type='text/css'>
 body {
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 	font-family: 'Arial';
 	font-size: 1em;
 }
@@ -18,8 +17,8 @@ table {
 	/*width: 100%;
 	text-align: center;
 	*/
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 	/*font-size: 0.90em;*/
 }
 
@@ -54,10 +53,13 @@ select {
 .controls {
 	float:left;
 	width: 100%;
-	background-color: #f5f5	ff;
+	background-color: #f5f5ff;
 	font-size: 1.2em;
 }
-
+.numero {
+	font-size: 1.3em;
+	width: 60px;
+}
 input {
 	font-size: 1em;
 	width: 100px;
@@ -94,5 +96,3 @@ button {
 th {
 	text-align: left;
 }
-
-</style>

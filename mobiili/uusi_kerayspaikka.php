@@ -118,9 +118,6 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 }
 
 ####
-
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("UUSI KERÄYSPAIKKA", $browkieli),"</h1></div>";
 
 # Virheet

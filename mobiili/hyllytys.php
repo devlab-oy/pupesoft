@@ -74,8 +74,6 @@ if (isset($submit)) {
 $suuntalava = $row['suuntalava'] ? : "Ei ole";
 
 ######## UI ##########
-include("kasipaate.css");
-
 # Otsikko
 echo "<div class='header'>";
 echo "<h1>",t("HYLLYTYS", $browkieli)."</h1>";
@@ -92,7 +90,7 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>Hyllytetty m‰‰r‰</th>
-        <td><input type='text' name='hyllytetty' value='{$row['siskpl']}'></input></td>
+        <td><input class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}'></input></td>
         <td>(?)</td>
     </tr>
     <tr>

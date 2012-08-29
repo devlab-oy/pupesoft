@@ -64,8 +64,6 @@ if (isset($submit) and trim($submit) != '') {
 	}
 }
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("MUOKKAA SUUNTALAVAN RIVIÄ", $browkieli),"</h1></div>";
 
 echo "<div class='main'>

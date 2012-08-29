@@ -91,8 +91,6 @@ $sscc_query = mysql_query("	SELECT sscc
 							AND yhtio='{$kukarow['yhtio']}'");
 $sscc = mysql_fetch_assoc($sscc_query);
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
 echo "<div class='main'>

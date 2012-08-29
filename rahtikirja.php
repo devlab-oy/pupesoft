@@ -2835,7 +2835,9 @@
 			$oslappkpl_hidden = 0;
 			$disabled = '';
 
-			if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
+			if ($yhtiorow['oletus_rahtikirja_oslappkpl'] > 0 and ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A')) {
+
+				$kaikki_ok = true;
 
 				if ($yhtiorow['kerayserat'] == 'A') {
 
@@ -2846,11 +2848,13 @@
 								AND kerayserat = 'A'";
 					$asiakas_chk_res = pupe_query($query);
 
-					if (mysql_num_rows($asiakas_chk_res) != 0) {
-						$oslappkpl_hidden = 1;
-						$oslappkpl = '';
-						$disabled = 'disabled';
-					}
+					if (mysql_num_rows($asiakas_chk_res) == 0) $kaikki_ok = false;
+				}
+
+				if ($kaikki_ok) {
+					$oslappkpl_hidden = 1;
+					$oslappkpl = '';
+					$disabled = 'disabled';
 				}
 			}
 

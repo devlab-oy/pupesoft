@@ -697,7 +697,6 @@ if ($tee == "") {
 			}
 
 			echo "<td>",tee_hyllyalue_input("t1[{$rivirow['tunnus']}]", $rivlla1),"</td>";
-			// echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$rivlla1' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";

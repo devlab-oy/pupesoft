@@ -33,16 +33,16 @@
 	echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>";
-	echo "<td>	<input type='text' size='6' maxlength='5' name='ahyllyalue'>
-	<input type='text' size='6' maxlength='5' name='ahyllynro'>
-	<input type='text' size='6' maxlength='5' name='ahyllyvali'>
+	echo "<td>",tee_hyllyalue_input("ahyllyalue", '');
+	echo "	<input type='text' size='6' maxlength='5' name='ahyllynro'>
+			<input type='text' size='6' maxlength='5' name='ahyllyvali'>
 				<input type='text' size='6' maxlength='5' name='ahyllytaso'>";
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>";
-	echo "<td>	<input type='text' size='6' maxlength='5' name='lhyllyalue'>
-	<input type='text' size='6' maxlength='5' name='lhyllynro'>
-	<input type='text' size='6' maxlength='5' name='lhyllyvali'>
+	echo "<td>",tee_hyllyalue_input("lhyllyalue", '');
+	echo "	<input type='text' size='6' maxlength='5' name='lhyllynro'>
+			<input type='text' size='6' maxlength='5' name='lhyllyvali'>
 				<input type='text' size='6' maxlength='5' name='lhyllytaso'>";
 	echo "</td></tr>";
 

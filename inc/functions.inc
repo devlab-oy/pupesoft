@@ -18946,6 +18946,44 @@ if (!function_exists('hae_varastotunniste')) {
 	}
 }
 
+if (!function_exists('tee_hyllyalue_input')) {
+	function tee_hyllyalue_input($hyllyalue_key, $hyllyalue_value) {
+		global $kukarow, $yhtiorow;
+
+		$input_html = "";
+
+		if ($yhtiorow['varastontunniste'] != "") {
+			$input_html .= "<select class='select_varastontunniste' id='{$hyllyalue_key}_select_varastontunniste' name='select_varastontunniste'>";
+
+			$input_html .= "<option value=''>".t("Valitse varasto")."</option>";
+
+			$query = "	SELECT tunnus, nimitys, alkuhyllyalue
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY tyyppi, nimitys";
+			$varastores = pupe_query($query);
+
+			while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+				$val = substr($varastorow['alkuhyllyalue'], 0, $yhtiorow['varastontunniste']);
+
+				$sel = $kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "";
+
+				$input_html .= "<option value='{$val}'{$sel}>{$varastorow['nimitys']}</option>";
+			}
+
+			$input_html .= "</select>&nbsp;";
+		}
+
+		$maxlength = $yhtiorow['varastontunniste'] != "" ? (5 - $yhtiorow['varastontunniste']) : 5;
+		$size = $maxlength + 1;
+
+		$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
+							<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='' />";
+
+		return $input_html;
+	}
+}
 if (!function_exists('triangulation')) {
 	function triangulation($tunnukset) {
 		global $kukarow, $yhtiorow;

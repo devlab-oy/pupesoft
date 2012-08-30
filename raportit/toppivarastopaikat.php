@@ -124,14 +124,14 @@
 			<input type='text' name='vvl' value='$vvl' size='5'></td>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
-			<td>",tee_hyllyalue_input("ahyllyalue", '$ahyllyalue'),"
+			<td>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue),"
 			<input type='text' size='6' name='ahyllynro' value='$ahyllynro'>
 			<input type='text' size='6' name='ahyllyvali' value='$ahyllyvali'>
 			<input type='text' size='6' name='ahyllytaso' value='$ahyllytaso'>
 			</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
-			<td>",tee_hyllyalue_input("lhyllyalue", '$lhyllyalue'),"
+			<td>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue),"
 			<input type='text' size='6' name='lhyllynro' value='$lhyllynro'>
 			<input type='text' size='6' name='lhyllyvali' value='$lhyllyvali'>
 			<input type='text' size='6' name='lhyllytaso' value='$lhyllytaso'>

@@ -96,9 +96,6 @@ if (isset($submit) and trim($submit) != '') {
 
 				# Tarkastetaan m‰‰r‰t, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
-					echo "M‰‰r‰‰ on pienennetty <br>";
-					echo "splittaa_tilausrivi()<br>";
-
 					# Splitataan rivi
 					# Jos viimeinen rivi ja m‰‰r‰‰ pienennetty, pudotetaan toinen rivi pois lavalta.
 					# Koska viimeist‰ rivii viedess‰ vied‰‰n kaikkilavan rivit varastoon
@@ -114,13 +111,9 @@ if (isset($submit) and trim($submit) != '') {
 					$tilausrivit[] = $tilausrivi;
 				}
 				elseif ($maara == $row['varattu']) {
-					echo "M‰‰r‰‰ on sama <br>";
 					$tilausrivit[] = $tilausrivi;
 				}
 				else {
-					echo "M‰‰r‰‰ on nostettu <br>";
-					echo "splittaa_tilausrivi()<br>";
-
 					# Tehd‰‰n insertti erotukselle
 					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
 

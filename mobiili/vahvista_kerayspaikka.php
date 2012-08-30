@@ -98,10 +98,19 @@ if (isset($submit) and trim($submit) != '') {
 					echo "M‰‰r‰‰ on pienennetty <br>";
 					echo "splittaa_tilausrivi()<br>";
 
-					# P‰ivitet‰‰n alkuper‰isen rivin kpl
-					$ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
-					# Splitataan rivi, $pois_suuntalavalta = false
-					$tilausrivit[] = splittaa_tilausrivi($tilausrivi, $maara, false, false);
+					# Splitataan rivi
+					# Jos viimeinen rivi ja m‰‰r‰‰ pienennetty, pudotetaan toinen rivi pois lavalta.
+					# Koska viimeist‰ rivii viedess‰ vied‰‰n kaikkilavan rivit varastoon
+					if (isset($viimeinen)) {
+						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, true);
+					}
+					else {
+						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, false);
+					}
+
+					# Alkuper‰inen vied‰‰n varastoon, splitattu j‰‰ j‰ljelle
+					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
+					$tilausrivit[] = $tilausrivi;
 				}
 				elseif ($maara == $row['varattu']) {
 					echo "M‰‰r‰‰ on sama <br>";
@@ -113,6 +122,7 @@ if (isset($submit) and trim($submit) != '') {
 
 					# Tehd‰‰n insertti erotukselle
 					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
+
 					# P‰ivit‰ kopioidun kpl (maara - varattu)
 					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
 
@@ -163,8 +173,8 @@ if (isset($submit) and trim($submit) != '') {
 
 					# Ei voi kohdistaa ennen kuin tilausrivi on splitattu
 					require("../inc/keikan_toiminnot.inc");
-					foreach($tilausrivit as $tilausrivi) {
-						$kohdista_status = kohdista_rivi($laskurow, $tilausrivi, $row['otunnus'], $saapuminen, $alusta_tunnus);
+					foreach($tilausrivit as $rivi) {
+						$kohdista_status = kohdista_rivi($laskurow, $rivi, $row['otunnus'], $saapuminen, $alusta_tunnus);
 					}
 
 					# Suuntalava siirtovalmiiksi
@@ -186,10 +196,15 @@ if (isset($submit) and trim($submit) != '') {
 				# Saapumiset
 				$saapumiset = hae_saapumiset($alusta_tunnus);
 
-				foreach($tilausrivit as $rivi) {
-					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
+				# Viimeisell‰ rivill‰ vied‰‰n koko suuntalava, jolloin lava merkataan puretuksi
+				if(isset($viimeinen)) {
+					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
 				}
-
+				else {
+					foreach($tilausrivit as $rivi) {
+						vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly, $rivi);
+					}
+				}
 				# Jos temppi lava niin merkataan suoraan puretuksi
 				if ($temppi_lava) {
 					$query = "	UPDATE suuntalavat SET

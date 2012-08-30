@@ -26,10 +26,11 @@ $url = http_build_query($data);
 # Haetaan suuntalavan tuotteet
 if (!empty($alusta_tunnus)) {
 	$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
-	if (!$row = mysql_fetch_assoc($res)) exit("Virhe: suuntalavan_tuotteet()");
+	$row = mysql_fetch_assoc($res);
 }
-# Ilman suuntalavaa
-else {
+
+# Jos suuntalavan_tuotteet() ei löytäny mitään
+if(!$row) {
 	$query = "	SELECT
 				tilausrivi.*,
 				tuotteen_toimittajat.toim_tuoteno

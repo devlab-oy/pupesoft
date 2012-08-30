@@ -119,8 +119,9 @@ if (isset($submit) and trim($submit) != '') {
 					$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
 				}
 
-				# Onko suuntalavaa?
-				if ($alusta_tunnus == 0 && !empty($saapuminen)) {
+				$temppi_lava = false;
+				# Vied‰‰n varastoon temppi lavalla
+				if (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0)) {
 					$temppi_lava = true;
 					# Tarkottaa ett‰ on tultu ostotilauksen tuloutuksesta ilman ett‰ kyseisell‰
 					# tilauksella on suuntalavaa. Ratkaisuna tehd‰‰n v‰liaikanen lava.
@@ -195,7 +196,6 @@ if (isset($submit) and trim($submit) != '') {
 								tila = 'P'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$alusta_tunnus}'";
-					echo $query;
 					$tila_res = pupe_query($query);
 				}
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?

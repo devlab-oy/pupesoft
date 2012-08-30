@@ -28,8 +28,12 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 		}
 		elseif ($submit == 'submit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
-			exit;
+			var_dump($_POST);
+			if ($ainokainen) {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}&viimeinen'>";
+			}
+			else echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
+			exit();
 		}
 	}
 	if ($submit == 'cancel') {
@@ -82,14 +86,6 @@ if (isset($alusta_tunnus)) {
 	elseif(mysql_num_rows($res) == 0) {
 		echo "Suuntalava on tyhjä!<br>";
 
-		# Merkataan puretuksi
-		$query = "UPDATE suuntalavat SET suuntalavat.tila = 'P' WHERE tunnus = '{$alusta_tunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-		$purettu_result = pupe_query($query);
-
-		if (mysql_affected_rows() == 0) {
-			echo "VIRHE: Suuntalavaa ei purettu<br>";
-			echo mysql_error();
-		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 		exit;
 	}
@@ -216,6 +212,10 @@ echo "</th>
 		echo "</tr>";
 // 					}
 	}
+if (mysql_num_rows($res) == 1) {
+	echo "<input type='hidden' name='ainokainen' value='true' />";
+}
+
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />

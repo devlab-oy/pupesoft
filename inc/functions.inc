@@ -18932,7 +18932,7 @@ if (!function_exists('tee_hyllyalue_input')) {
 		Funktioon liittyvä javascripti löytyy parametrit.inc riviltä 617
 		*/
 
-		$input_html = "";
+		$input_html = $varastolisa = "";
 
 		if ($yhtiorow['varastontunniste'] != "") {
 			$input_html .= "<select class='select_varastontunniste' id='{$hyllyalue_key}_select_varastontunniste' name='select_varastontunniste'>";
@@ -18947,7 +18947,12 @@ if (!function_exists('tee_hyllyalue_input')) {
 
 				$val = substr($varastorow['alkuhyllyalue'], 0, $yhtiorow['varastontunniste']);
 
-				$sel = $kukarow['oletus_varasto'] == $varastorow['tunnus'] ? " selected" : "";
+				$sel = "";
+
+				if ((trim($hyllyalue_value) != "" and substr($hyllyalue_value, 0, $yhtiorow['varastontunniste']) == $varastorow['alkuhyllyalue']) or (trim($hyllyalue_value) == '' and $kukarow['oletus_varasto'] == $varastorow['tunnus'])) {
+					$varastolisa = $val;
+					$sel = " selected";
+				}
 
 				$input_html .= "<option value='{$val}'{$sel}>{$varastorow['nimitys']} ({$val})</option>";
 			}
@@ -18958,8 +18963,10 @@ if (!function_exists('tee_hyllyalue_input')) {
 		$maxlength = $yhtiorow['varastontunniste'] != "" ? (5 - $yhtiorow['varastontunniste']) : 5;
 		$size = $maxlength + 1;
 
+		$hyllyalue_value = substr($hyllyalue_value, $yhtiorow['varastontunniste']);
+
 		$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
-							<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='' />";
+							<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";
 
 		return $input_html;
 	}

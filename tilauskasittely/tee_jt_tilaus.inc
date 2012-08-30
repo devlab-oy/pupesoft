@@ -196,10 +196,25 @@
 
 					// Katso kohdistettu ja rahtivapaa IF ELSE alempaa otsikon luonnin yhteydess‰
 					if ($yhtiorow["jt_rahti"] == "B") {
-						$kohdistettulisa = "and lasku.kohdistettu = 'K'";
+						// Ennakot/J‰lkitoimitukset ovat aina rahtivapaita
+						// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+						$kohdistettulisa = " and lasku.kohdistettu = 'K'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = 'o'";
+					}
+					elseif ($yhtiorow["jt_rahti"] == "C") {
+						// Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = ''";
+					}
+					elseif ($yhtiorow["jt_rahti"] == "D") {
+						// Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan (tilaus-valmis.inc hoitaa rahtikulun kuntoon)
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = ''";
 					}
 					else {
-						$kohdistettulisa = "and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						// Ennakko/J‰lkitoimitus on rahtivapaa, jos alkuper‰inen tilaus oli rahtivapaa
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = '{$otsikkorivi['rahtivapaa']}'";
 					}
 
 					// Tarvitsemmeko uuden otsikon?
@@ -424,6 +439,8 @@
 							// riipastaan tarkoituksella tyhj‰‰, hoidetaan homma 'rahtivapaa' haarassa
 						}
 						elseif ($fieldname == 'rahtivapaa') {
+							// katso myˆs otsikon haku rivilt‰ 197
+
 							if ($yhtiorow["jt_rahti"] == "B") {
 								// Ennakot/J‰lkitoimitukset ovat aina rahtivapaita
 								// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella

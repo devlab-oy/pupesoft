@@ -130,12 +130,23 @@ if ($tilausten_lukumaara == 0) {
 	exit();
 }
 
-# Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen
+# Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
 if ($tilausten_lukumaara == 1) {
-	#$row = mysql_fetch_assoc($result);
-	#$url_array['tilausrivi'] = $row['tunnus'];
-	#echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=hyllytys.php?".http_build_query($url_array)."'>";
-	#exit();
+
+	if(empty($saapuminen)) {
+		# Haetaan toimittajan tiedot
+		$toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$tilaukset['liitostunnus']}'";
+		$toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
+
+		$saapuminen = uusi_saapuminen($toimittaja);
+	}
+
+	$url_array['tilausrivi'] = $tilaukset['tunnus'];
+	$url_array['ostotilaus'] = (empty($ostotilaus)) ? $tilaukset['otunnus'] : $ostotilaus;
+	$url_array['saapuminen'] = $saapuminen;
+
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
+	exit();
 }
 
 # Result alkuun

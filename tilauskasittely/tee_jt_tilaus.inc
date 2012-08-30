@@ -194,6 +194,29 @@
 						$yhdlisa = "";
 					}
 
+					// Katso kohdistettu ja rahtivapaa IF ELSE alempaa otsikon luonnin yhteydessä
+					if ($yhtiorow["jt_rahti"] == "B") {
+						// Ennakot/Jälkitoimitukset ovat aina rahtivapaita
+						// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
+						$kohdistettulisa = " and lasku.kohdistettu = 'K'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = 'o'";
+					}
+					elseif ($yhtiorow["jt_rahti"] == "C") {
+						// Ennakoihin/Jälkitoimituksiin lisätään aina rahtikulu
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = ''";
+					}
+					elseif ($yhtiorow["jt_rahti"] == "D") {
+						// Ennakot/Jälkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan (tilaus-valmis.inc hoitaa rahtikulun kuntoon)
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = ''";
+					}
+					else {
+						// Ennakko/Jälkitoimitus on rahtivapaa, jos alkuperäinen tilaus oli rahtivapaa
+						$kohdistettulisa = " and lasku.kohdistettu = '{$otsikkorivi["kohdistettu"]}'";
+						$kohdistettulisa .= " and lasku.rahtivapaa = '{$otsikkorivi['rahtivapaa']}'";
+					}
+
 					// Tarvitsemmeko uuden otsikon?
 					$query = "	SELECT lasku.*
 								FROM lasku
@@ -219,7 +242,6 @@
 								and lasku.vienti	 	= '$otsikkorivi[vienti]'
 								and lasku.alv		 	= '$otsikkorivi[alv]'
 								and lasku.ketjutus 		= '$otsikkorivi[ketjutus]'
-								and lasku.kohdistettu	= '$otsikkorivi[kohdistettu]'
 								and lasku.toimitusehto	= '$otsikkorivi[toimitusehto]'
 								and lasku.valkoodi 		= '$otsikkorivi[valkoodi]'
 								and lasku.vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
@@ -233,6 +255,7 @@
 								and laskun_lisatiedot.laskutus_postino 	= '$lisatiedot_row[laskutus_postino]'
 								and laskun_lisatiedot.laskutus_postitp 	= '$lisatiedot_row[laskutus_postitp]'
 								and laskun_lisatiedot.laskutus_maa 		= '$lisatiedot_row[laskutus_maa]'
+								{$kohdistettulisa}
 								$erpcmlisa1
 								$yhdlisa";
 					$stresult = pupe_query($query);
@@ -416,6 +439,8 @@
 							// riipastaan tarkoituksella tyhjää, hoidetaan homma 'rahtivapaa' haarassa
 						}
 						elseif ($fieldname == 'rahtivapaa') {
+							// katso myös otsikon haku riviltä 197
+
 							if ($yhtiorow["jt_rahti"] == "B") {
 								// Ennakot/Jälkitoimitukset ovat aina rahtivapaita
 								// Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
@@ -1049,4 +1074,3 @@
 			}
 		}
 	}
-?>

@@ -160,7 +160,7 @@
 		echo "<table>
 				<tr><th>".t("Minne varastopaikalle siirret‰‰n")."</th></tr>
 				<tr><td>
-				".t("Alue")." <input type = 'text' name = 'ahyllyalue' size = '5' maxlength='5' value = '$thyllyalue'>
+				".t("Alue")." ",tee_hyllyalue_input("ahyllyalue", $thyllyalue),"
 				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$thyllynro'>
 				".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$thyllyvali'>
 				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$thyllytaso'>
@@ -252,5 +252,3 @@
 	$formi = "formi";
 	$kentta = "varastopaikka";
 	require ("inc/footer.inc");
-
-?>

@@ -26,15 +26,15 @@
 	$uusean = '';
 
 	if ($updateean != '' and $uuseankoodi != '' and $tee != '' and $toim != 'YKS') {
-		$query = "	UPDATE tuote 
-					SET eankoodi = '$uuseankoodi' 
-					WHERE yhtio  = '$kukarow[yhtio]' 
+		$query = "	UPDATE tuote
+					SET eankoodi = '$uuseankoodi'
+					WHERE yhtio  = '$kukarow[yhtio]'
 					and tuoteno  = '$tuoteno'";
 		$resulteankoodi = mysql_query($query) or pupe_error($query);
 	}
 
 	$koodi = 'eankoodi';
-	
+
 	if ($toim == 'YKS') {
 		$koodi = 'tuoteno';
 	}
@@ -45,7 +45,7 @@
 			$tee = 'Y';
 			$varaosavirhe =  t("Sinun on annettava täydellinen osoiteväli")."<br>";
 		}
-		
+
 		$lisa = "";
 
 		if ($saldo == '1'){
@@ -283,7 +283,7 @@
 		echo "<table>";
 		echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen väliltä")."</center></th><tr>";
 		echo "<tr><th>".t("Alkuosoite")."</th>";
-		echo "<td><input type='text' name='ahyllyalue' size='5' maxlength='5' value='$ahyllyalue'>";
+		echo "<td>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue);
 		echo "-";
 		echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
 		echo "-";
@@ -292,7 +292,7 @@
 		echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
 
 		echo "<tr><th>".t("Loppuosoite")."</th>";
-		echo "<td><input type='text' name='lhyllyalue' size='5' maxlength='5' value='$lhyllyalue'>";
+		echo "<td>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue);
 		echo "-";
 		echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
 		echo "-";
@@ -333,5 +333,3 @@
 	}
 
 	require("inc/footer.inc");
-
-?>

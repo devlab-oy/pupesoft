@@ -497,7 +497,7 @@
 
 		echo "<table><tr>";
 		echo "<th>",t("Syötä suuntalavalle hyllypaikka"),"</th>";
-		echo "<td><input type='text' name='suuntalavan_hyllyalue' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllytaso' size='6' maxlength='5' value='' /></td>";
+		echo "<td>",tee_hyllyalue_input("suuntalavan_hyllyalue", '')," <input type='text' name='suuntalavan_hyllynro' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllyvali' size='6' maxlength='5' value='' /> <input type='text' name='suuntalavan_hyllytaso' size='6' maxlength='5' value='' /></td>";
 		echo "</tr></table>";
 
 		echo "<input type='submit' value='",t("Vie koko suuntalava varastoon"),"' />";
@@ -562,7 +562,7 @@
 		echo "<tr><th colspan='2'>",t("Uusi suuntalava"),"</th></tr>";
 		echo "<tr><th>SSCC-",t("koodi"),"</th>";
 		echo "<td><input type='text' name='sscc' id='sscc' value='{$sscc}' />{$virheviesti['sscc']}<br /><font class='info'>",t("SSCC-koodi täytyy olla vähintää 7 merkkiä pitkä"),".</font></td></tr>";
-		echo "<tr><th>",t("Varastopaikkaväli alku"),"</th><td><input type='text' name='alkuhyllyalue' size='6' maxlength='5' value='{$alkuhyllyalue}' />{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
+		echo "<tr><th>",t("Varastopaikkaväli alku"),"</th><td>",tee_hyllyalue_input("alkuhyllyalue", $alkuhyllyalue),"{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
 		echo "<tr><th>",t("Varastopaikkaväli loppu"),"</th><td><input type='text' name='loppuhyllyalue' size='6' maxlength='5' value='{$loppuhyllyalue}' />{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
 
 		$query = "	SELECT *

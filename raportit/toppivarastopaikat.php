@@ -124,14 +124,14 @@
 			<input type='text' name='vvl' value='$vvl' size='5'></td>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
-			<td><input type='text' size='6' name='ahyllyalue' value='$ahyllyalue'>
+			<td>",tee_hyllyalue_input("ahyllyalue", '$ahyllyalue'),"
 			<input type='text' size='6' name='ahyllynro' value='$ahyllynro'>
 			<input type='text' size='6' name='ahyllyvali' value='$ahyllyvali'>
 			<input type='text' size='6' name='ahyllytaso' value='$ahyllytaso'>
 			</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
-			<td><input type='text' size='6' name='lhyllyalue' value='$lhyllyalue'>
+			<td>",tee_hyllyalue_input("lhyllyalue", '$lhyllyalue'),"
 			<input type='text' size='6' name='lhyllynro' value='$lhyllynro'>
 			<input type='text' size='6' name='lhyllyvali' value='$lhyllyvali'>
 			<input type='text' size='6' name='lhyllytaso' value='$lhyllytaso'>
@@ -145,5 +145,3 @@
 	echo "<input type='submit' value='".t("Aja raportti")."'></form>";
 
 	require ("../inc/footer.inc");
-
-?>

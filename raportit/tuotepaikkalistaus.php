@@ -144,13 +144,13 @@
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 		echo "<tr><th>".t("Alkuhylly")." (".t("alue-nro-väli-taso")."):</th>";
-		echo "<td align='right'><input type='text' name='ahyllyalue' value='$ahyllyalue' size='5'></td>";
+		echo "<td align='right'>",tee_hyllyalue_input("ahyllyalue", $ahyllyalue),"</td>";
 		echo "<td><input type='text' name='ahyllynro' value='$ahyllynro' size='4'></td>";
 		echo "<td><input type='text' name='ahyllyvali' value='$ahyllyvali' size='4'></td>";
 		echo "<td><input type='text' name='ahyllytaso' value='$ahyllytaso' size='4'></td></tr>";
 
 		echo "<tr><th>".t("Loppuhylly")." (".t("alue-nro-väli-taso")."):</th>";
-		echo "<td align='right'><input type='text' name='lhyllyalue' value='$lhyllyalue' size='5'></td>";
+		echo "<td align='right'>",tee_hyllyalue_input("lhyllyalue", $lhyllyalue),"</td>";
 		echo "<td><input type='text' name='lhyllynro' value='$lhyllynro' size='4'></td>";
 		echo "<td><input type='text' name='lhyllyvali' value='$lhyllyvali' size='4'></td>";
 		echo "<td><input type='text' name='lhyllytaso' value='$lhyllytaso' size='4'></td></tr>";
@@ -171,5 +171,3 @@
 	}
 
 	require("../inc/footer.inc");
-
-?>

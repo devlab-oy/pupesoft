@@ -332,7 +332,7 @@
 
 
 				echo "<tr><td>".t("Tuotteet joilla ei ole paikkaa kohdevarastossa laitetaan tälle paikalle").":</td>";
-				echo "<td><input type='text' size='6' name='hyllyalue' value='$hyllyalue'></td>";
+				echo "<td>",tee_hyllyalue_input("hyllyalue", $hyllyalue),"</td>";
 				echo "<td><input type='text' size='5' name='hyllynro'  value='$hyllynro'></td>";
 				echo "<td><input type='text' size='5' name='hyllyvali' value='$hyllyvali'></td>";
 				echo "<td><input type='text' size='5' name='hyllytaso' value='$hyllytaso'></td></tr>";

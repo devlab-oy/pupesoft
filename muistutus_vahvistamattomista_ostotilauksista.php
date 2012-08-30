@@ -45,7 +45,7 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '')
 					JOIN kuka ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = lasku.laatija)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					JOIN kuka AS vastuuostaja ON (vastuuostaja.yhtio = tuote.yhtio AND vastuuostaja.myyja = tuote.ostajanro)
+					LEFT JOIN kuka AS vastuuostaja ON (vastuuostaja.yhtio = tuote.yhtio AND vastuuostaja.myyja = tuote.ostajanro)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'

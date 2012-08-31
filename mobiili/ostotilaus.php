@@ -41,7 +41,6 @@ if (isset($submit)) {
 $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 
 ### UI ###
-
 echo "
 <div class='header'><h1>",t("OSTOTILAUS"),"</h1></div>";
 
@@ -74,3 +73,22 @@ echo "<div class='error'>";
         echo $error."<br>";
     }
 echo "</div>";
+
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
+echo "<script type='text/javascript'>
+
+	function doFocus() {
+	        var focusElementId = 'viivakoodi';
+	        var textBox = document.getElementById(focusElementId);
+	        textBox.focus();
+	    }
+
+	function clickButton() {
+	   document.getElementById('myHiddenButton').click();
+	}
+
+	setTimeout('clickButton()', 1000);
+
+</script>
+";
+require('inc/footer.inc');

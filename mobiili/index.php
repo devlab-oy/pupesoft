@@ -9,10 +9,10 @@ if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
 # Index.php ei sisällytä parametrit incistä headereita
-echo "<meta name='viewport' content='width=314,height=309, user-scalable=no,minimum-scale=1, maximum-scale=1, target-densitydpi=device-dpi'/>\n";
+echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
-echo "<h1>",t("PÄÄVALIKKO", $browkieli),"</h1>";
+echo "<div class='header'><h1>",t("PÄÄVALIKKO", $browkieli),"</h1></div>";
 
 if (tarkista_oikeus("mobiili/siirto.php")) {
 	echo "<button value=''>",t("Siirto", $browkieli),"</button>";

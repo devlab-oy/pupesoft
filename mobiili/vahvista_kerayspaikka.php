@@ -207,6 +207,9 @@ if (isset($submit) and trim($submit) != '') {
 								AND tunnus = '{$alusta_tunnus}'";
 					$tila_res = pupe_query($query);
 				}
+
+				echo "Odota hetki...";
+
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
@@ -285,7 +288,7 @@ echo "<div class='main'>
 		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 	</tr>
 	<tr>
-		<td>Alkup.<input type='text' name='saapuminen' value='{$saapuminen}' /></td>
+		<td><input type='hidden' name='saapuminen' value='{$saapuminen}' /></td>
 	</tr>
 </table>
 </div>";

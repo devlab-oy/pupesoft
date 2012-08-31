@@ -114,7 +114,7 @@ echo "<script type='text/javascript'>
 	}
 
 	if(!document.getElementById('saapumiset')) {
-   		setTimeout('clickButton()', 10);
+   		setTimeout('clickButton()', 500);
 	}
 
 </script>

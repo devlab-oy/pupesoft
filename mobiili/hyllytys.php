@@ -21,6 +21,7 @@ $query = "  SELECT
             tilausrivi.tuoteno,
             round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),2) ulkkpl,
             tuotteen_toimittajat.toim_tuoteno,
+            tuotteen_toimittajat.tuotekerroin,
             concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) as kerayspaikka,
             tilausrivi.varattu,
             tilausrivi.yksikko,
@@ -90,8 +91,8 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>Hyllytetty m‰‰r‰</th>
-        <td><input class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}'></input></td>
-        <td>(?)</td>
+        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input></td>
+        <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
     </tr>
     <tr>
         <th>Tuote</th>
@@ -111,21 +112,7 @@ echo "<div class='main'>
         <td>{$ostotilaus}</td>
         <td><input type='hidden' name='ostotilaus' value='$ostotilaus'></td>
     </tr>
-    <tr>
-        <th>Saapuminen</th>
-        <td>$saapuminen</td>";
-
-if ($row['uusiotunnus'] != 0) {
-    echo "<td>Kohdistettu eri saapumiselle {$row['uusiotunnus']}</td>";
-}
-
-echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>";
-
-echo "</tr>
-    <tr>
-        <th>Suuntalava</th>
-        <td>$suuntalava</td>
-    </tr>
+    <td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
 </table>
 </div>";
 
@@ -144,3 +131,12 @@ echo "<div class='error'>";
         echo $virhe."<br>";
     }
 echo "</div>";
+
+echo "<script type='text/javascript'>
+    function update_label(numero) {
+        var hyllytetty = document.getElementById('numero').value;
+        var tuotekerroin = {$row['tuotekerroin']} * hyllytetty;
+        var label = document.getElementById('hylytetty_label');
+        label.innerHTML = tuotekerroin;
+    }
+</script>";

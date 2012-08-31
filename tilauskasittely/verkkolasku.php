@@ -1082,14 +1082,34 @@
 							$kommentti  = t("Rahtikirja").": $rahtikirjanrot";
 							$netto      = count($rahtihinta_ale) > 0 ? '' : 'N';
 
-							list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
-							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+							$query = "	SELECT rahti_tuotenumero
+										FROM toimitustapa
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '$laskurow[toimitustapa]'
+										AND rahti_tuotenumero != ''";
+							$rahti_tuoteno_result = pupe_query($query);
+
+							if (mysql_num_rows($rahti_tuoteno_result) > 0) {
+								$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
+
+								$query = "	SELECT *
+											FROM tuote
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+								$tres_chk = pupe_query($query);
+								$trow_chk = mysql_fetch_assoc($tres_chk);
+
+								list($rahinta, $alv) = alv($laskurow, $trow_chk, $hinta, '', '');
+							}
+							else {
+								list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+							}
 
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								$ale_lisa_insert_query_1 .= " ale{$alepostfix},";
-								$ale_lisa_insert_query_2 .= " '".$lis_ale_kaikki["ale{$alepostfix}"]."',";
+								$ale_lisa_insert_query_2 .= " '".$rahtihinta_ale["ale{$alepostfix}"]."',";
 							}
 
 							$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
@@ -2267,8 +2287,8 @@
 									$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 								}
 
-								// Laitetaan alennukset kommenttiin, koska laksulla on vain yksi alekenttä
-								if ($yhtiorow['myynnin_alekentat'] > 1) {
+								// Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä
+								if ($yhtiorow['myynnin_alekentat'] > 1 or $tilrow['erikoisale'] > 0)  {
 
 									$alekomm = "";
 

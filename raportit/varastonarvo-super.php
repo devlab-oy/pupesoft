@@ -710,7 +710,7 @@
 			if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
 			if (!isset($ed_vari)) $ed_vari = $row['vari'];
 
-			if (!$php_cli) {
+			if (!$php_cli and $elements > 0) {
 				$bar->increase();
 			}
 

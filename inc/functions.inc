@@ -140,7 +140,7 @@ if (!function_exists("pupesoft_login")) {
 
 						# Jos logataan mobiilista
 						if ($mobile) {
-							$palvelin2 .= "/mobiili/index.php";
+							$palvelin2 .= "mobiili/index.php";
 						}
 
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}'>";

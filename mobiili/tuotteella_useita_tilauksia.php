@@ -61,7 +61,8 @@ $query = "	SELECT
 			tuotteen_toimittajat.tuotekerroin,
 			tuotteen_toimittajat.liitostunnus
 			FROM lasku
-			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O' AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+			JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
+				AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
 			JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
 			JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
 				AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
@@ -69,6 +70,7 @@ $query = "	SELECT
 			WHERE
 			$query_lisa
 			$liitostunnus_lisa
+			AND lasku.alatila = 'A'
 			AND lasku.yhtio='{$kukarow['yhtio']}'
 		";
 $result = pupe_query($query);

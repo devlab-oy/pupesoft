@@ -14254,8 +14254,8 @@ if (!function_exists("splittaa_tilaus")) {
 				}
 
 				// rivi‰ ei kokonaan lis‰tty er‰‰n, splitataan ja siirret‰‰n loput se omalle tilaukselle
-				if (isset($lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) and $tilausrivirow['varattu'] != $lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) {
-					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Rivi‰ ei kokonaan lis‰tty er‰‰n, splitataan ja siirret‰‰n loput se omalle tilaukselle: $otun, $tilausrivirow[tunnus] ({$tilausrivirow['varattu']} != {$lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]})<br>";
+				if (isset($lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) and $tilausrivirow['varattu'] > $lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]) {
+					if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "Rivi‰ ei kokonaan lis‰tty er‰‰n, splitataan ja siirret‰‰n loput omalle tilaukselle: $otun, $tilausrivirow[tunnus] ({$tilausrivirow['varattu']} > {$lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']]})<br>";
 
 					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $lisatyt_tilausrivit[$otun][$tilausrivirow['tunnus']];
 				}
@@ -14914,8 +14914,8 @@ if (!function_exists("tee_keraysera")) {
 
 			// otunnukset tulevat group concatilla esim. 123,124,125
 			$query = "	SELECT vh.indeksi,
-						ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4) tilauksen_koko,
-						ROUND(tuote.tuotemassa * tilausrivi.varattu, 4) as tilauksen_paino,
+						ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)), 4) tilauksen_koko,
+						ROUND(tuote.tuotemassa * if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)), 4) as tilauksen_paino,
 						tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.tuoteno
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -15317,13 +15317,13 @@ if (!function_exists("tee_keraysera")) {
 			}
 
 			$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus,
-						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * tilausrivi.varattu, 4) as tuotteen_koko,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)), 4) as tuotteen_koko,
 						tilausrivi.tuoteno,
 						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
 						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
 						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
 						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
-						tilausrivi.varattu y_maara,
+						if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)) y_maara,
 						tuote.yksin_kerailyalustalle,
 						IF(tuote.yksin_kerailyalustalle = 'K', 3, IF(tuote.yksin_kerailyalustalle = 'E', 1, 2)) yksin_kerailyalustalle_sort,
 						tuote.tuotemassa y_paino,
@@ -15810,7 +15810,7 @@ if (!function_exists("tee_keraysera")) {
 							if ($kerayspakkauskoko > 1) {
 
 								$tuoterow['y_maara'] = (int) $tuoterow['y_maara'];
-								$kerayspakkauskoko = (int) $kerayspakkauskoko;
+								$kerayspakkauskoko   = (int) $kerayspakkauskoko;
 
 								if ($tuoterow['y_maara'] % $kerayspakkauskoko == 0) {
 									$lkm = $tuoterow['y_maara'] / $kerayspakkauskoko;

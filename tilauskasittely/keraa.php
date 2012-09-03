@@ -2663,7 +2663,25 @@
 						else {
 							if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 								echo "<span id='maaran_paivitys_{$row['tunnus']}'></span>";
-								echo "<input type='hidden' name='maara[$row[tunnus]]' id='maara_{$row['tunnus']}' value='' />";
+
+								$query = "	SELECT sum(kpl) kpl
+											FROM kerayserat
+											WHERE yhtio 	= '{$kukarow['yhtio']}'
+											AND nro 		= '$id'
+											AND tilausrivi 	= '{$row['tunnus']}'
+											ORDER BY pakkausnro ASC";
+								$keraysera_res = pupe_query($query);
+								$keraysera_row = mysql_fetch_assoc($keraysera_res);
+
+								// Katotaan jo t‰ss‰ vaiheessa onko er‰ss‰ eri m‰‰r‰ kuin tilausrivill‰.
+								// M‰‰r‰ voi olla eri, koska ker‰yseriin menee vain kokonaislukuja ja tilausrivill‰ voi olla desimaalilukuja
+								$erapoikkeamamaara = "";
+
+								if ($row["varattu"] != (float) $keraysera_row['kpl']) {
+									$erapoikkeamamaara = (float) $keraysera_row['kpl'];
+								}
+
+								echo "<input type='hidden' name='maara[$row[tunnus]]' id='maara_{$row['tunnus']}' value='$erapoikkeamamaara' />";
 							}
 							else {
 								if (!isset($maara[$i])) $maara[$i] = "";
@@ -2908,8 +2926,8 @@
 
 							echo "</td></tr>";
 						}
-
 					}
+
 					$i++;
 				}
 

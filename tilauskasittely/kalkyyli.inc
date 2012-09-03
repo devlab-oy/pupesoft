@@ -75,6 +75,60 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 			$tee = "";
 		}
 
+		if ($yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
+
+			if ($komento["Tavaraetiketti"] != '') {
+
+				$suuntalavat = array($suuntalavan_tunnus);
+
+				require('tulosta_tavaraetiketti.inc');
+			}
+
+			echo "<br />";
+			echo "<form method='post'>";
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+			echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
+			echo "<input type='hidden' name='tee' value=''>";
+			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+			echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
+
+			if (trim($suuntalavan_hyllypaikka) != '') {
+				echo "<input type='hidden' name='suuntalavan_hyllypaikka' value='{$suuntalavan_hyllypaikka}' />";
+			}
+			else {
+				echo "<input type='hidden' name='suuntalavan_hyllyalue' value='{$suuntalavan_hyllyalue}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllynro' value='{$suuntalavan_hyllynro}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllyvali' value='{$suuntalavan_hyllyvali}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllytaso' value='{$suuntalavan_hyllytaso}' />";
+			}
+
+			echo "<input type='hidden' name='koko_suuntalava' value='X' />";
+			echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
+
+			echo "<table><tr>";
+			echo "<th>",t("Tulosta tavaraetiketti"),"</th>";
+
+			echo "<td><select name='komento[Tavaraetiketti]'>";
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						ORDER BY kirjoitin";
+			$kires = pupe_query($query);
+
+			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+
+			while ($kirow = mysql_fetch_assoc($kires)) {
+				$sel = $kirow['tunnus'] == $kukarow['kirjoitin'] ? " selected" : "";
+				echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+			}
+
+			echo "</select></td>";
+			echo "<td class='back'><input type='submit' value='",t("Tulosta"),"' /></td>";
+
+			echo "</tr></table>";
+			echo "</form>";
+		}
+
 		require("varastoon.inc");
 
 		echo "<form method='post'>";
@@ -122,5 +176,3 @@ else {
 
 // poistetaan lock file
 unlink("/tmp/$kukarow[yhtio]-keikka.lock");
-
-?>

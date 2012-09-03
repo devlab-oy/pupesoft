@@ -2656,11 +2656,12 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel = array();
-		$sel[$trow[$i]] = " selected";
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('K' => '', 'P' => '', 'A' => '');
 
 		$ulos .= "<option value = ''>".t("Ker‰yseri‰ ei k‰ytet‰ ker‰yksess‰")."</option>";
-		$ulos .= "<option value = 'K'{$sel['K']}>".t("Ker‰yseri‰ k‰ytet‰‰n ker‰yksess‰")."</option>";
+		$ulos .= "<option value = 'K'{$sel['K']}>".t("K‰ytet‰‰n mittatietoihin perustuvia ker‰yseri‰")."</option>";
+		$ulos .= "<option value = 'P'{$sel['P']}>".t("K‰ytet‰‰n painoon perustuvia ker‰yseri‰")."</option>";
+		$ulos .= "<option value = 'A'{$sel['A']}>".t("K‰ytet‰‰n painoon perustuvia ker‰yseri‰, vain jos se on asiakkaan takana sallittu")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3144,4 +3145,16 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == 'saldotarkistus_tulostusjonossa') {
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('P' => '', 'JT' => '', 'PJ' => '');
+
+		$ulos .= "<option value = ''>".t("Ei tehd‰ saldotarkistusta")."</option>";
+		$ulos .= "<option value = 'P' {$sel['P']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n Puute rivit")."</option>";
+		$ulos .= "<option value = 'JT' {$sel['JT']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n JT rivit")."</option>";
+		$ulos .= "<option value = 'PJ' {$sel['PJ']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n Puute+JT rivit")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

@@ -250,9 +250,6 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 		$kirrow = mysql_fetch_assoc($kirres);
 		$oslapp = $kirrow['komento'];
 
-		// Tulostetaan osoitelappu
-		if ($oslapp != "email") $oslapp .= " -#$oslappkpl ";
-
 		if ($toitarow['osoitelappu'] == 'intrade') {
 			require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 		}
@@ -733,5 +730,3 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
 }
 
 require ("inc/footer.inc");
-
-?>

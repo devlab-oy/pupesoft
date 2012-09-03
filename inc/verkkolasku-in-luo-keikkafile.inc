@@ -1638,7 +1638,7 @@
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
-							uusiotunnus = '{$keikan_tunnus}',
+							uusiotunnus = '{$keikan_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				#echo "<pre>",str_replace("\t", "", $update),"</pre>";

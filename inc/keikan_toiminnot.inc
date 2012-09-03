@@ -167,7 +167,7 @@
 	    $vanhathinnat = array();
 
 	    $updquery = "   SELECT tunnus
-	                    FROM tilausrivi
+	                    FROM tilausrivi use index (yhtio_otunnus)
 	                    WHERE yhtio = '{$kukarow['yhtio']}'
 	                    AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 	                    AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";

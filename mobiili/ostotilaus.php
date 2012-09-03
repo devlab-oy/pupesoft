@@ -13,7 +13,7 @@ if(!isset($errors)) $errors = array();
 
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
-	$errors[] = "Ei löytynyt. Hae uudestaan.";
+	$errors[] = t("Ei löytynyt. Hae uudestaan.");
 }
 
 if (isset($submit)) {
@@ -21,7 +21,7 @@ if (isset($submit)) {
 		case 'ok':
 			# Haettu vähintään yhdellä kentällä
 			if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['ostotilaus'])) {
-				$errors[] = "Vähintään yksi kenttä on syötettävä";
+				$errors[] = t("Vähintään yksi kenttä on syötettävä");
 				break;
 			}
 			# Rakennetaan parametrit kentistä
@@ -33,7 +33,7 @@ if (isset($submit)) {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>"; exit();
 		   	break;
 		default:
-			$errors[] = "Yllättävä virhe";
+			$errors[] = t("Yllättävä virhe");
 			break;
 	}
 }
@@ -48,23 +48,23 @@ echo "<div class='main'>
 <form method='post' action=''>
 <table>
 	<tr>
-		<th><label for='viivakoodi'>Viivakoodi</label></th>
+		<th><label for='viivakoodi'>",t("Viivakoodi"),"</label></th>
 		<td><input type='text' id='viivakoodi' name='data[viivakoodi]' /><td>
 	</tr>
 	<tr>
-		<th><label for='tuotenumero'>Tuotenumero</label></th>
+		<th><label for='tuotenumero'>",t("Tuotenumero"),"</label></th>
 		<td><input type='text' id='tuotenumero' name='data[tuotenumero]'/><td>
 	</tr>
 	<tr>
-		<th><label for='ostotilaus'>Ostotilaus</label></th>
+		<th><label for='ostotilaus'>",t("Ostotilaus"),"</label></th>
 		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
 	</tr>
 </table>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>
-	<button class='right' name='submit' id='takaisin' value='takaisin' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
+	<button class='right' name='submit' id='takaisin' value='takaisin' onclick='submit();'>",t("Takaisin"),"</button>
 </form>
 </div>";
 

@@ -23,14 +23,14 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 }
 else {
 	# T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
-	echo "Parametrivirhe";
+	echo t("Parametrivirhe");
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
 	exit();
 }
 
 # Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
-						JOIN kuka ON lasku.tunnus=kuka.kesken
+						JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
 						WHERE kuka='{$kukarow['kuka']}'
 						and kuka.yhtio='{$kukarow['yhtio']}'
 						and lasku.tila='K'";
@@ -83,7 +83,7 @@ if (isset($submit)) {
 		case 'ok':
 
 			if(empty($tilausrivi)) {
-				$errors[] = "Valitse rivi";
+				$errors[] = t("Valitse rivi");
 				break;
 			}
 			# Jos kuka.kesken ei ole saapuminen, tehd‰‰n uusi saapuminen haettujen ostotilausten
@@ -155,7 +155,7 @@ if ($tilausten_lukumaara == 1) {
 mysql_data_seek($result, 0);
 
 ### UI ###
-echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA", $browkieli), "</h1></div>";
+echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
 <form name='form1' method='post' action=''>
@@ -163,15 +163,15 @@ echo "<div class='main'>
 <tr><th></th>";
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-	echo "<th>",t("Ostotilaus", $browkieli),"</th>";
+	echo "<th>",t("Ostotilaus"),"</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-	echo "<th>",t("Tuoteno", $browkieli), "</th>";
+	echo "<th>",t("Tuoteno"), "</th>";
 }
 
 echo "
-	<th>",t("Kpl (ulk.)", $browkieli),"</th>
-	<th>",t("Tuotepaikka", $browkieli),"</th>
+	<th>",t("Kpl (ulk.)"),"</th>
+	<th>",t("Tuotepaikka"),"</th>
 </tr>";
 
 # Loopataan ostotilaukset
@@ -204,8 +204,8 @@ echo "</table></div>";
 echo "Rivej‰: ".mysql_num_rows($result);
 
 echo "<div class='controls'>
-<button type='submit' name='submit' value='ok' onsubmit='false' onclick='return tarkista_saapuminen();'>",t("OK", $browkieli),"</button>
-<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+<button type='submit' name='submit' value='ok' onsubmit='false' onclick='return tarkista_saapuminen();'>",t("OK"),"</button>
+<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 </form>
 </div>";
 
@@ -221,7 +221,6 @@ echo "<script type='text/javascript'>
 		if (saapuminen == '') {
 			result = confirm('Huom, Keskener‰ist‰ saapumista ei lˆydy. Tuloutusta varten luodaan uusi saapuminen.');
 			if(result == true) {
-				console.log('tehd‰‰n uusi saapuminen');
 				return true;
 			}
 			else {

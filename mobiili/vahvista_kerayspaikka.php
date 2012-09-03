@@ -35,7 +35,7 @@ if(!$row) {
 				tilausrivi.*,
 				tuotteen_toimittajat.toim_tuoteno
 				FROM tilausrivi
-				LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+				LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
 				WHERE tilausrivi.tunnus='{$tilausrivi}'
 				AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
 	$row = mysql_fetch_assoc(pupe_query($query));
@@ -61,7 +61,6 @@ if (isset($submit) and trim($submit) != '') {
 
 	switch ($submit) {
 		case 'cancel':
-			# TODO: Riippuen mistä ollaan tultu, mihin mennään
 			# Ostotilaus -> hyllytykseen
 			if (isset($hyllytys)) {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>";
@@ -79,11 +78,11 @@ if (isset($submit) and trim($submit) != '') {
 		case 'submit':
 			# Tarkistetaan määrä
 			if (!is_numeric($maara) or $maara < 1) {
-				$errors[] = "Virheellinen määrä";
+				$errors[] = t("Virheellinen määrä");
 			}
 			# Tarkistetaan koodi
 			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
-				$errors[] = "Virheellinen varmistuskoodi";
+				$errors[] = t("Virheellinen varmistuskoodi");
 			}
 			# Jos ei virheitä
 			if(count($errors) == 0) {
@@ -208,7 +207,7 @@ if (isset($submit) and trim($submit) != '') {
 					$tila_res = pupe_query($query);
 				}
 
-				echo "Odota hetki...";
+				echo t("Odota hetki...");
 
 				# Redirectit ostotilaukseen tai suuntalavan_tuotteet?
 				if (isset($hyllytys)) {
@@ -220,7 +219,7 @@ if (isset($submit) and trim($submit) != '') {
 			}
 			break;
 		default:
-			$errors[] = "Odottamaton virhe";
+			$errors[] = t("Odottamaton virhe");
 			break;
 	}
 
@@ -252,7 +251,7 @@ echo "
 	</script>
 ";
 
-echo "<div class='header'><h1>",t("VAHVISTA KERÄYSPAIKKA", $browkieli),"</h1></div>";
+echo "<div class='header'><h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -267,24 +266,24 @@ echo "<div class='main'>
 <form name='vahvistaformi' method='post' action=''>
 <table>
 	<tr>
-		<th>",t("Tuote", $browkieli),"</th>
+		<th>",t("Tuote"),"</th>
 		<td colspan='2'>{$row['tuoteno']}</td>
 	</tr>
 	<tr>
-		<th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+		<th>",t("Toim. Tuotekoodi"),"</th>
 		<td colspan='2'>{$row['toim_tuoteno']}</td>
 	</tr>
 	<tr>
-		<th>",t("Määrä", $browkieli),"</th>
+		<th>",t("Määrä"),"</th>
 		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/></td>
 		<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
 	</tr>
 	<tr>
-		<th>",t("Keräyspaikka", $browkieli),"</th>
+		<th>",t("Keräyspaikka"),"</th>
 		<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 	</tr>
 	<tr>
-		<th>",t("Koodi", $browkieli),"</th>
+		<th>",t("Koodi"),"</th>
 		<td colspan='2'><input type='text' name='koodi' value='' size='7' />
 	</tr>
 	<tr>
@@ -294,12 +293,12 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista", $browkieli),"</button>";
+	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka", $browkieli),"</button>";
+if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
 
-echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />

@@ -71,7 +71,7 @@ if (isset($submit)) {
             break;
         case 'ok':
             if(empty($suuntalava)) {
-                $errors[] = "Valitse suuntalava.";
+                $errors[] = t("Valitse suuntalava.");
                 break;
             }
 
@@ -117,17 +117,15 @@ if (isset($submit)) {
             break;
         case 'suuntalavalle':
             if(empty($suuntalava)) {
-                $errors[] = "Valitse suuntalava.";
+                $errors[] = t("Valitse suuntalava.");
                 break;
             }
             echo "varmistus";
             break;
         case 'hyllytyskierrokselle':
-            echo "hyllytyskierros";
             if(is_numeric($korkeus)) echo " korkeus ok";
             break;
         case 'hyllyyn':
-            echo "suoraan hyllyyn";
             if(is_numeric($korkeus)) echo " korkeus ok";
             break;
         default:
@@ -136,18 +134,18 @@ if (isset($submit)) {
     }
 }
 
-echo "<div class='header'><h1>",t("SUUNTALAVALLE", $browkieli), "</h1></div>";
+echo "<div class='header'><h1>",t("SUUNTALAVALLE"), "</h1></div>";
 
 echo "<div class='main'>
 <form method='post' action=''>
 <table>
     <tr>
-        <th><label for='sscc'>Hae suuntalava:</label></th>
+        <th><label for='sscc'>",t("Hae suuntalava"),"</label></th>
         <td>
             <input type='text' id='sscc' name='sscc' value='$hae'/>
         </td>
         <td>
-            <button name='submit' value='hae' onclick='submit();'>",t("Etsi", $browkieli),"</button>
+            <button name='submit' value='hae' onclick='submit();'>",t("Etsi"),"</button>
         </td>
     </tr>
 </table>
@@ -157,10 +155,10 @@ echo "<div class='main'>
 <table>
     <tr>
         <th></th>
-        <th>SSCC</th>
-        <th>Ker.vyöhyk.</th>
-        <th>Rivejä</th>
-        <th>Tyyppi</th>
+        <th>",t("SSCC"),"</th>
+        <th>",t("Ker.vyöhyk."),"</th>
+        <th>",t("Rivejä"),"</th>
+        <th>",t("Tyyppi"),"</th>
     </tr>";
 
 $loytyiko = false;
@@ -176,24 +174,24 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
 
     $loytyiko = true;
 
-    $pakkaus_query = "select pakkaus from pakkaus where tunnus='{$row['tyyppi']}'";
+    $pakkaus_query = "SELECT pakkaus FROM pakkaus WHERE tunnus='{$row['tyyppi']}'";
     $tyyppi = mysql_fetch_assoc(pupe_query($pakkaus_query));
 
-    $keraysvyohyke_query = "select nimitys from keraysvyohyke where tunnus='{$row['keraysvyohyke']}'";
+    $keraysvyohyke_query = "SELECT nimitys FROM keraysvyohyke WHERE tunnus='{$row['keraysvyohyke']}'";
     $keraysvyohyke = mysql_fetch_assoc(pupe_query($keraysvyohyke_query));
 
-    # Haetaan suuntalavan tilausrivit, HIDAS query
-    // $query =    "   SELECT tilausrivi.*
-    //                 FROM tilausrivi
-    //                 JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = '') AND suuntalavat.tunnus = tilausrivi.suuntalava and suuntalavat.tunnus = {$row['tunnus']}
-    //                 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-    //                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-    //                 LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-    //                 WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-    //                 AND tilausrivi.tyyppi = 'O'
-    //                 AND tilausrivi.kpl = 0
-    //                 AND tilausrivi.suuntalava > 0;";
-    // $rivit = mysql_num_rows(pupe_query($query));
+    #Haetaan suuntalavan tilausrivit
+    $query =    "   SELECT tilausrivi.*
+                    FROM tilausrivi
+                    JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = '') AND suuntalavat.tunnus = tilausrivi.suuntalava and suuntalavat.tunnus = {$row['tunnus']}
+                    JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+                    JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                    LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+                    WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                    AND tilausrivi.tyyppi = 'O'
+                    AND tilausrivi.kpl = 0
+                    AND tilausrivi.suuntalava > 0;";
+    $rivit = mysql_num_rows(pupe_query($query));
 
     echo "<tr>
         <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
@@ -207,13 +205,13 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     </tr>";
 }
 
-if (!$loytyiko) $errors[] = "Suuntalavaa ei löytynyt";
+if (!$loytyiko) $errors[] = t("Suuntalavaa ei löytynyt");
 
 echo "</table></div>";
 echo "<div class='controls'>
-    <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK", $browkieli),"</button>
-    <button name='submit' id='submit' value='lopeta' onclick='submit();'>",t("Lopeta", $browkieli),"</button>
-    <button name='submit' id='submit' value='suuntalavalle' onclick='submit();'>",t("OK Valmis", $browkieli),"</button>
+    <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
+    <button name='submit' id='submit' value='lopeta' onclick='submit();'>",t("Lopeta"),"</button>
+    <button name='submit' id='submit' value='suuntalavalle' onclick='submit();'>",t("OK Valmis"),"</button>
 </div>
 </form>
 ";

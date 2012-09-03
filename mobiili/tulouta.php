@@ -17,7 +17,7 @@ $errors = array();
 
 # Tarkistetaan onko käyttäjällä kesken olevia tilauksia
 $kesken_query = "	SELECT kuka.kesken FROM lasku
-					JOIN kuka ON lasku.tunnus=kuka.kesken
+					JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
 					WHERE kuka='{$kukarow['kuka']}'
 					and kuka.yhtio='{$kukarow['yhtio']}'
 					and lasku.tila='K';";
@@ -54,13 +54,13 @@ echo "<div class='main'>
 	<form method='post' action=''>
 	<table>
 		<tr>
-			<th>",t("TULOTYYPPI", $browkieli),"</th>
+			<th>",t("TULOTYYPPI"),"</th>
 		</tr>
 		<tr>
 			<td>
 				<select name='tulotyyppi' size='4'>
-					<option value='suuntalava'>",t("ASN / Suuntalava", $browkieli),"</option>
-					<option value='ostotilaus'>",t("Ostotilaus", $browkieli)," ".$kesken."</option>
+					<option value='suuntalava'>",t("ASN / Suuntalava"),"</option>
+					<option value='ostotilaus'>",t("Ostotilaus")," ".$kesken."</option>
 				</select>
 			</td>
 		</tr>
@@ -69,8 +69,8 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 	</form>
 </div>";
 

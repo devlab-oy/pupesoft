@@ -35,7 +35,7 @@ else {
 				tilausrivi.*,
 				tuotteen_toimittajat.toim_tuoteno
 				FROM tilausrivi
-				LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+				LEFT JOIN tuotteen_toimittajat on (tuotteen_toimittajat.tuoteno=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
 				WHERE tilausrivi.tunnus='{$tilausrivi}'
 				AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
 	$row = mysql_fetch_assoc(pupe_query($query));
@@ -56,11 +56,11 @@ if (isset($submit) and trim($submit) != '') {
 
 			# Ei saa olla tyhjiä kenttiä
 			if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-				$errors[] = t("Hyllypaikka ei saa olla tyhjä", $browkieli).'.';
+				$errors[] = t("Hyllypaikka ei saa olla tyhjä").'.';
 			}
 			# Tarkistetaan että tuotepaikka on olemassa
 			if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
-				$errors[] = t("Varaston tuotepaikkaa ei ole perustettu", $browkieli).'.';
+				$errors[] = t("Varaston tuotepaikkaa ei ole perustettu").'.';
 			}
 			if (count($errors) == 0) {
 				$oletus = $oletuspaikka != '' ? 'X' : '';
@@ -118,7 +118,7 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 }
 
 ####
-echo "<div class='header'><h1>",t("UUSI KERÄYSPAIKKA", $browkieli),"</h1></div>";
+echo "<div class='header'><h1>",t("UUSI KERÄYSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -132,34 +132,34 @@ echo "<div class='main'>
 <form name='uusipaikkaformi' method='post' action=''>
 	<table>
 		<tr>
-			<th>",t("Tuote", $browkieli),"</th>
+			<th>",t("Tuote"),"</th>
 			<td colspan='3'>{$row['tuoteno']}</td>
 		</tr>
 		<tr>
-			<th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+			<th>",t("Toim. Tuotekoodi"),"</th>
 			<td colspan='3'>{$row['toim_tuoteno']}</td>
 		</tr>
 		<tr>
-			<th>",t("Keräyspaikka", $browkieli),"</th>
+			<th>",t("Keräyspaikka"),"</th>
 			<td colspan='3'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 		</tr>
 		<tr>
-			<th>",t("Alue", $browkieli),"</th>
+			<th>",t("Alue"),"</th>
 			<td><input type='text' name='hyllyalue' value='' /></td>
 		</tr>
 		<tr>
-			<th>",t("Nro", $browkieli),"</td>
+			<th>",t("Nro"),"</td>
 			<td><input type='text' name='hyllynro' value='' /></th>
 		</tr>
-			<th>",t("Väli", $browkieli),"</th>
+			<th>",t("Väli"),"</th>
 			<td><input type='text' name='hyllyvali' value='' /></td>
 		</tr>
 		<tr>
-			<th>",t("Taso", $browkieli),"</td>
+			<th>",t("Taso"),"</td>
 			<td><input type='text' name='hyllytaso' value='' /></th>
 		</tr>
 		<tr>
-			<td colspan='2'>",t("Tee tästä oletuspaikka", $browkieli)," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
+			<td colspan='2'>",t("Tee tästä oletuspaikka")," <input type='checkbox' name='oletuspaikka' $oletuspaikka_chk /></td>
 		</tr>
 	</table>
 
@@ -169,8 +169,8 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t("Perusta", $browkieli),"</button>
-	<button id='takaisin' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='submit' onclick='submit();'>",t("Perusta"),"</button>
+	<button id='takaisin' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 	</form>
 </div>";
 

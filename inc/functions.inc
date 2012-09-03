@@ -17919,7 +17919,7 @@ if (!function_exists("erolista")) {
 			$kplero = $row['kappalemaara'];
 
 			while ($rivirow = mysql_fetch_assoc($rivires)) {
-				
+
 				$rivirow['rivihinta'] = $row['keikkarivinhinta'] * $rivirow['kpl'] * ((100 - $rivirow['ale1']) / 100) * ((100 - $rivirow['ale2']) / 100) * ((100 - $rivirow['ale3']) / 100);
 
 				$hintaero = round($row['hinta'] - $rivirow['hinta'], 2);
@@ -17931,7 +17931,7 @@ if (!function_exists("erolista")) {
 				if (!$nimi_kerran) {
 					$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
 				}
-				
+
 				// jos verkkolasku-in-luo-keikkafile.inc tai asn_kohdistus.inc on joutunut tekem‰‰n ylim‰‰r‰isi‰ rivej‰, on laatijana 'extraa'. N‰ytet‰‰n t‰ss‰ t‰mmˆset rivit k‰ytt‰j‰lle.
 				$extraa = "";
 				if ($rivirow['laatija'] == 'extraa') $extraa = " enemm‰n kuin tilattu!";
@@ -18928,6 +18928,10 @@ if (!function_exists('uusi_saapuminen')) {
     function uusi_saapuminen($toimittajarow) {
         global $kukarow;
 
+        # Lock table
+        $lock_query = "LOCK TABLE lasku WRITE, valuu READ";
+        $re = pupe_query($lock_query);
+
         // haetaan seuraava vapaa keikkaid
         $query  = "SELECT max(laskunro) laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
         $result = pupe_query($query);
@@ -18966,7 +18970,13 @@ if (!function_exists('uusi_saapuminen')) {
                     laatija         = '$kukarow[kuka]'";
         $result = pupe_query($query);
 
-        return mysql_insert_id();
+        $return = mysql_insert_id();
+
+        # Unlock table
+        $lock_query = "UNLOCK TABLES";
+        $re = pupe_query($lock_query);
+
+        return $return;
     }
 }
 if (!function_exists('triangulation')) {

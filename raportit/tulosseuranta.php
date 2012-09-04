@@ -116,28 +116,20 @@
 
 		if (mysql_num_rows($result) != 0) {
 
-			if ($lisa != "") {
-				$myyntitilaus_rajaus = "AND lasku.tunnus in (	SELECT distinct ltunnus
-										FROM tiliointi
-										WHERE tiliointi.yhtio = lasku.yhtio
-										AND tiliointi.tapvm >= '$alku_pvm'
-										AND tiliointi.tapvm <= '$loppu_pvm'
-										AND tiliointi.korjattu = ''
-										$lisa)";
-			}
-			else {
-				$myyntitilaus_rajaus = "";
-			}
-
-			// Haetaan myynti/kate myyntitilauksilta
-			$query = "	SELECT sum(lasku.summa) summa, sum(lasku.kate) kate
+			// Haetaan myynti/kate tilausriveiltä
+			$query = "	SELECT sum(tilausrivi.rivihinta * (1 + (tilausrivi.alv / 100))) summa, sum(tilausrivi.kate) kate
 						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+							AND tilausrivi.uusiotunnus = lasku.tunnus
+							AND tilausrivi.tyyppi = 'L')
+						JOIN tuote AS tiliointi ON (tiliointi.yhtio = tilausrivi.yhtio
+							AND tiliointi.tuoteno = tilausrivi.tuoteno
+							$lisa)
 						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 						AND lasku.tila = 'U'
 						AND lasku.alatila = 'X'
 						AND lasku.tapvm >= '$alku_pvm'
-						AND lasku.tapvm <= '$loppu_pvm'
-						$myyntitilaus_rajaus";
+						AND lasku.tapvm <= '$loppu_pvm'";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 

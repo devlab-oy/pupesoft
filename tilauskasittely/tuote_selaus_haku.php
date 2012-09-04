@@ -254,7 +254,7 @@
 					$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
 					$paikka			 = "";
 
-					// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+					// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
 					if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 						$varataan_saldoa = "EI";
 					}

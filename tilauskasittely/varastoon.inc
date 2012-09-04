@@ -774,6 +774,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		// p‰ivitet‰‰n tilaus saapuneeksi varastoon
 		// p‰ivitet‰‰n myˆs tehdaslis‰varusteet saapuneiksi
 		// p‰ivitet‰‰n riville paikat jolle saldo loppupeleiss‰ meni (jos meni ok niin $millepakallemeni on tyhj‰)
+
+		// and (tunnus = '$tilrivirow[tunnus]' or perheid2 = '$tilrivirow[tunnus]')";
 		$query  = "	UPDATE tilausrivi set
 					kpl = varattu,
 					varattu = 0,
@@ -783,7 +785,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
 					and varattu != 0
-					and (tunnus = '$tilrivirow[tunnus]' or perheid = '$tilrivirow[tunnus]')";
+					and tunnus = '$tilrivirow[tunnus]'";
 		$varastoon_result = pupe_query($query);
 
 		$rivia++;

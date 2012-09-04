@@ -375,6 +375,18 @@
 
 		echo json_encode($data);
 	}
+	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_tuoteperhe_lapsi') {
+		$tunnus  = $_POST['tunnus'];
+		$otunnus = $_POST['otunnus'];
+		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
+
+		# Toiminta funktioitu
+		# päivitetään lapset
+		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, true);
+
+		echo json_encode(array('paivitetaanko' => $kaikki_ok));
+
+	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
 		$tunnus = $_POST['tunnus'];
 		$otunnus = $_POST['otunnus'];

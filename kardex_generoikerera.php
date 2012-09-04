@@ -53,7 +53,7 @@
 				require('inc/tallenna_keraysera.inc');
 
 				// Nämä tilaukset tallennettin keräyserään
-				if (count($lisatyt_tilaukset) > 0) {
+				if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
 					$otunnukset = implode(",", $lisatyt_tilaukset);
 					$kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
@@ -73,7 +73,7 @@
 			$query = "UNLOCK TABLES";
 			$result = pupe_query($query);
 
-			if (count($lisatyt_tilaukset) > 0) {
+			if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
 				$reittietikettitulostin = $gen_ker_row['printteri8'];
 

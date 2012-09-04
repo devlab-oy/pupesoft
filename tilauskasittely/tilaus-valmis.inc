@@ -1041,8 +1041,8 @@ else {
 				}
 			}
 
-			$kerayserat_select = $yhtiorow['kerayserat'] != '' ? "vh.keraysvyohyke, " : "";
-			$kerayserat_join = $yhtiorow['kerayserat'] != '' ? " LEFT JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
+			$kerayserat_select = $yhtiorow['kerayserat'] == 'K' ? "vh.keraysvyohyke, " : "";
+			$kerayserat_join = $yhtiorow['kerayserat'] == 'K' ? " LEFT JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
 
 			if ($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = ", tilausrivi.kerayspvm, sorttauskentta";
@@ -1051,7 +1051,7 @@ else {
 				$sorttaus = ", sorttauskentta";
 			}
 
-			if ($yhtiorow['kerayserat'] != '') {
+			if ($yhtiorow['kerayserat'] == 'K') {
 				$sorttaus = ", vh.keraysvyohyke {$sorttaus}";
 			}
 

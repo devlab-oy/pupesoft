@@ -646,7 +646,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
 if (!function_exists('rivi_kerayslista')) {
 	function rivi_kerayslista($params) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $asrow;
 
 		// Luodaan muuttujat
 		foreach ($params as $key => $val) {
@@ -786,14 +786,39 @@ if (!function_exists('rivi_kerayslista')) {
 					$pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
 					$kala -= $rivinkorkeus;
 
-					$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
-					$pdf->draw_text(23, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
-					list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 500, $pdf, $norm);
-					$pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
-					$kala -= $rivinkorkeus;
+					if (trim($row["perhe_kommentti2"]) != '') {
+						$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
+						$pdf->draw_text(23, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
+						list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 500, $pdf, $norm);
+						$pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
+						$kala -= $rivinkorkeus;
+					}
+
+					//jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+					if ($kala < 95) {
+
+						$sivu++;
+
+						// Luodaan palautettavat
+						$return = array();
+
+						foreach ($params as $key => $null) {
+							$return[$key] = ${$key};
+						}
+
+						$params = loppu_kerayslista($return);
+						$params = uusi_sivu_kerayslista($params);
+
+						// Luodaan muuttujat
+						foreach ($params as $key => $val) {
+							${$key} = $val;
+						}
+
+						$page[$sivu] = $thispage;
+					}
 				}
 
-				if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 					$pdf->draw_text(23,  $kala, $rivinumerot[$row["ker_tunnus"]],	$thispage, $pieni);
 				}
 				else {
@@ -1039,7 +1064,7 @@ if (!function_exists('rivi_kerayslista')) {
 				// Trimmataan uudestaan
 				$row["kommentti"] = trim($row["kommentti"]);
 
-				if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+				if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 					$pakkaus_kirjain = chr((64+$row['pakkausnro']));
 
 					$pdf->draw_text(42, $kala+5, $pakkaus_kirjain, $thispage, $iso_boldi);
@@ -1301,5 +1326,3 @@ if (!function_exists('print_pdf_kerayslista')) {
 		}
 	}
 }
-
-?>

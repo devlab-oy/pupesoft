@@ -694,12 +694,4 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 
-	if ($yhtiorow["dokumentaatiohallinta"] != "") {
-		/*
-			tehdään linkki dokumentaationhallintaan!
-			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
-		*/
-
-		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
-	}
 }

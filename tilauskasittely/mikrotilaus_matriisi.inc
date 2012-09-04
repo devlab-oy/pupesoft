@@ -196,12 +196,13 @@
 								$perhekielto		= "";
 								$jtkielto 		 	= $laskurow['jtkielto'];
 
-						        if ($laskurow["tilaustyyppi"] == "E") {
-						        	$varataan_saldoa = "EI";
-						        }
-						        else {
-						        	$varataan_saldoa = "";
-						        }
+						        // Ennakkotilaukset, Tarjoukset, Yll‰pitosopimukset ja Valmistukset eiv‰t tee saldotsekki‰
+								if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+									$varataan_saldoa = "EI";
+								}
+								else {
+									$varataan_saldoa = "";
+								}
 
 						        //lis‰t‰‰n rivi
 						        require ("lisaarivi.inc");

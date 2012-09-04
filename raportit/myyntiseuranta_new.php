@@ -52,6 +52,24 @@
 		require ("inc/connect.inc");
 
 		if ($lopetus == "") {
+
+			if (isset($muutparametrit)) {
+				foreach (explode("##", $muutparametrit) as $muutparametri) {
+					list($a, $b) = explode("=", $muutparametri);
+
+
+					if (strpos($a, "[") !== FALSE) {
+						$i = substr($a, strpos($a, "[")+1, strpos($a, "]")-(strpos($a, "[")+1));
+						$a = substr($a, 0, strpos($a, "["));
+
+						${$a}[$i] = $b;
+					}
+					else {
+						${$a} = $b;
+					}
+				}
+			}
+
 			//Käyttöliittymä
 			if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -193,6 +211,7 @@
 			$naytaennakkochk 		= "";
 			$sel_asbu				= "";
 			$sel_asbury				= "";
+			$sel_asbuos				= "";
 			$sel_tubu				= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
@@ -230,6 +249,8 @@
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
+			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
+
 
 			echo "<table>
 				<tr>
@@ -481,9 +502,16 @@
 			<th>",t("Näytä budjetti"),"</th>";
 			echo "<td><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
 			echo "<option value='asbu' {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
+			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
 			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhmäbudjetti"),"</option>";
 			echo "<option value='tubu' {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
 			echo "</select></td><td></td>
+			</tr>";
+
+			echo "<tr>
+			<th>",t("Näytä asiakaskäynnit"),"</th>";
+			echo "<td><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td><td></td>
+			<td class='back'>".t("Toimii vain jos listaat asiakkaittain")."</td>
 			</tr>";
 
 			echo "</table><br>";
@@ -624,23 +652,6 @@
 			}
 			else {
 				$asiakasrajaus = "";
-			}
-
-			if (isset($muutparametrit)) {
-				foreach (explode("##", $muutparametrit) as $muutparametri) {
-					list($a, $b) = explode("=", $muutparametri);
-
-
-					if (strpos($a, "[") !== FALSE) {
-						$i = substr($a, strpos($a, "[")+1, strpos($a, "]")-(strpos($a, "[")+1));
-						$a = substr($a, 0, strpos($a, "["));
-
-						${$a}[$i] = $b;
-					}
-					else {
-						${$a} = $b;
-					}
-				}
 			}
 
 			// tutkaillaan saadut muuttujat
@@ -810,6 +821,7 @@
 				$asiakasgroups = 0;
 				$tuotegroups   = 0;
 				$turyhgroups   = 0;
+				$tuosagroups   = 0;
 				$laskugroups   = 0;
 				$muutgroups    = 0;
 
@@ -866,7 +878,7 @@
 					if ($mukaan == "ytunnus") {
 						$group  .= ",asiakas.tunnus";
 
-						if ($osoitetarrat != "") $select .= "asiakas.tunnus astunnus, ";
+						if ($osoitetarrat != "" or $asiakaskaynnit != "") $select .= "asiakas.tunnus astunnus, ";
 
 						if ($ytunnus_mistatiedot != "") {
 							$etuliite = "lasku";
@@ -923,7 +935,7 @@
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";
 						$order  .= "tuote.osasto,";
 						$gluku++;
-						$tuotegroups++;
+						$tuosagroups++;
 					}
 
 					if ($mukaan == "try") {
@@ -1028,7 +1040,6 @@
 						$tuotegroups++;
 					}
 					//** Tuotegrouppaukset loppu **//
-
 					//** Laskugrouppaukset start **//
 					if ($mukaan == "laskumyyja") {
 						$group .= ",lasku.myyja";
@@ -1244,7 +1255,7 @@
 				if (isset($tuotteet_lista) and $tuotteet_lista != '') {
 					$tuotteet = explode("\n", $tuotteet_lista);
 					$tuoterajaus = "";
-					foreach($tuotteet as $tuote) {
+					foreach ($tuotteet as $tuote) {
 						if (trim($tuote) != '') {
 							$tuoterajaus .= "'".trim($tuote)."',";
 						}
@@ -1284,6 +1295,18 @@
 					$nettokatelisaed  = "";
 				}
 
+				if ($asiakaskaynnit != "") {
+					$select .= "(SELECT count(*) kaynnit
+								FROM kalenteri
+								WHERE kalenteri.yhtio 		= asiakas.yhtio
+								AND kalenteri.liitostunnus 	= asiakas.tunnus
+								and kalenteri.tapa 	 	 	= 'Asiakaskäynti'
+								and kalenteri.tyyppi	   in ('kalenteri','memo')
+								and ((kalenteri.pvmalku  >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmalku  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+									 (kalenteri.pvmloppu >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+									 (kalenteri.pvmalku  <= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu >= '{$vvl}-{$kkl}-{$ppl} 23:59:59'))) asiakaskaynnit,";
+				}
+
 				if ($eiOstSarjanumeroita != "") {
 					$lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'\n";
 				}
@@ -1310,17 +1333,17 @@
 				}
 
 				// Onnistuuko budjettivertailu
-				if ($vertailubu == "asbu" or $vertailubu == "asbury") {
+				if ($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") {
 					// Näytetään asiakasbudjetti:
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
-					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0) {
+					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0 or $tuosagroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyviä ryhmittelyjä ei voida valita kun näytetään asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan (paitsi tuoteryhmän mukaan kun valitaan asbury)
-					if ($vertailubu == "asbu" and $turyhgroups > 0) {
+					if ($vertailubu == "asbu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyviä ryhmittelyjä ei voida valita kun näytetään asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
@@ -1635,24 +1658,22 @@
 					$query .= $tilauslisa3;
 					$query .= "\nFROM lasku use index (yhtio_tila_tapvm)
 								JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
-								JOIN tilausrivi use index ({$index}) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi}
-								JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+								JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
+								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
 								JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
-								LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
+								LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite)
 								{$lisatiedot_join}
 								{$varasto_join}
 								{$kantaasiakas_join}
-								{$lisa_dynaaminen["tuote"]}
-								{$lisa_dynaaminen["asiakas"]}
 								{$lisa_parametri}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
 
 					//yritetään saada kaikki tarvittavat laskut mukaan
-					$lalku  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva));
-					$lloppu = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
-					$lalku_ed  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
-					$lloppu_ed = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
+					$lalku  	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva));
+					$lloppu 	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
+					$lalku_ed	= date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
+					$lloppu_ed	= date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
 
 					if ($ajotapa == 'tilausjaauki') {
 						$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
@@ -1820,7 +1841,7 @@
 								}
 							}
 
-							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
+							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
 
 								$kka = sprintf("%02d", $kka);
 								$kkl = sprintf("%02d", $kkl);
@@ -1833,14 +1854,20 @@
 									$budj_taulu = "budjetti_asiakas";
 									$bulisa = " and asiakkaan_tunnus in ({$row['asiakaslista']}) ";
 
-									if ($vertailubu == "asbu") {
-										$bulisa .= " and try = '' ";
+									if ($vertailubu == "asbuos" and $tuosagroups > 0) {
+										$bulisa .= " and osasto = '{$row['osasto']}' ";
+									}
+									elseif ($vertailubu == "asbuos") {
+										$bulisa .= " and osasto != '' ";
 									}
 									elseif ($vertailubu == "asbury" and $turyhgroups > 0) {
 										$bulisa .= " and try = '{$row['try']}' ";
 									}
-									else {
+									elseif ($vertailubu == "asbury") {
 										$bulisa .= " and try != '' ";
+									}
+									else {
+										$bulisa .= " and try = '' and osasto = '' ";
 									}
 								}
 
@@ -1852,7 +1879,6 @@
 											and kausi 			   <= '{$lopu_kausi}'
 											{$bulisa}
 											and dyna_puu_tunnus		= ''
-											and osasto				= ''
 											GROUP BY kausi";
 								$budj_r = pupe_query($budj_q);
 

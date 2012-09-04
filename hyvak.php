@@ -1004,7 +1004,14 @@
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 							msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
-							return confirm(msg);
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					</SCRIPT>";
 		}
@@ -1654,6 +1661,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND ltunnus = '$trow[tunnus]'
 						and kustp != 0
+						and korjattu = ''
 						ORDER BY tiliointi.tunnus LIMIT 1";
 
 			$kustpres = pupe_query($kustpq);
@@ -1715,7 +1723,14 @@
 		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify() {
 					msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 				</SCRIPT>";
 	}

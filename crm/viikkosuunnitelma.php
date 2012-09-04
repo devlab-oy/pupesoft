@@ -57,7 +57,6 @@ if ($tee == 'laheta') {
 	require("laheta_asiakastietopaketti.inc");
 
 	$tee = "";
-
 }
 
 
@@ -72,7 +71,7 @@ if ($kausi == "") {
 if ($tee == '') {
 
 	echo "<table>";
-	echo "<form method='POST'>";
+	echo "<form method='POST' action='$PHP_SELF'>";
 	echo "<tr><th colspan='3'>".t("Valitse viikko").":</th><th colspan='2'>".t("Näytä").":</th></tr>";
 
 	$edviikko = substr($kausi,4,2)-1;
@@ -113,7 +112,7 @@ if ($tee == '') {
 
 	$seviikko = sprintf('%02d',$seviikko);
 
-	echo "<td><a href='$PHP_SELF?kausi=$sevuosi$seviikko&vstk=$vstk'>Seuraava</a></td>";
+	echo "<td><a href='$PHP_SELF?kausi=$sevuosi$seviikko&vstk=$vstk'>".t("Seuraava")."</a></td>";
 
 	echo "	<td>".t("Viikkosuunnitelma")." <input type='radio' name='vstk' value='Viikkosuunnitelma' $sel1 onclick='submit()'></td>
 			<td>".t("Asiakaskäynnit")." <input type='radio' name='vstk' value='Asiakaskäynti' $sel2 onclick='submit()'></td></tr>";
@@ -125,16 +124,18 @@ if ($tee == '') {
 	viikonpaivat($kausi);
 
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$konsernit = "";
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$konsernit .= " '".$row["yhtio"]."' ,";
 	}
 	$konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
 
 
-	$query = "	SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi, left(kalenteri.pvmalku,10) pvmalku,
+	$query = "	SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi,
+				asiakas.myyjanro, asiakas.email, asiakas.puhelin,
+				left(kalenteri.pvmalku,10) pvmalku,
 				kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
 				FROM kalenteri, asiakas use index (ytunnus_index)
 				WHERE asiakas.yhtio=kalenteri.yhtio
@@ -146,32 +147,37 @@ if ($tee == '') {
 				and kalenteri.tapa     = '$vstk'
 				and kalenteri.tyyppi in ('kalenteri','memo')
 				order by kalenteri.tunnus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<table>";
-	echo "<tr><tr><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Asiakasno")."</th><th>".t("Yhtiö")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
+	echo "<tr><tr>
+		<th>".t("Asiakas")."</th>
+		<th>".t("Asiakasnumero")."</th>
+		<th>".t("Ytunnus")."</th>
+		<th>".t("Postitp")."</th>
+		<th>".t("Postino")."</th>
+		<th>".t("Yhtiöt")."</th>
+		<th>".t("Myyjä")."</th>
+		<th>".t("Email")."</th>
+		<th>".t("Puhelin")."</th>
+		<th>".t("Pvm")."</th>";
 
 	if ($vstk == "Asiakaskäynti") {
 		echo "<th>".t("Kampanjat")."</th><th>".t("PvmKäyty")."</th><th>".t("Km")."</th><th>".t("Lähtö")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
 	}
 
-
-	while ($row=mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>
+				<td><a href='asiakasmemo.php?ytunnus=$row[ytunnus]'>$row[nimi]</a></td>
+				<td>$row[asiakasnro]</td>
+				<td>$row[ytunnus]</td>
 				<td>$row[postitp]</td>
 				<td>$row[postino]</td>
-				<td>$row[ytunnus]</td>
-				<td>$row[asiakasno]</td>
-				<td>$row[yhtio]</td>";
-
-		if($kukarow["yhtio"] == $row["yhtio"]) {
-			echo "<td><a href='asiakasmemo.php?ytunnus=$row[ytunnus]'>$row[nimi]</a></td>";
-		}
-		else {
-			echo "<td>$row[nimi]</td>";
-		}
-
-		echo "<td>$row[pvmalku]</td>";
+				<td>$row[yhtio]</td>
+				<td>$row[myyjanro]</td>
+				<td>$row[email]</td>
+				<td>$row[puhelin]</td>
+				<td>$row[pvmalku]</td>";
 
 		if ($vstk == "Asiakaskäynti") {
 			echo "	<td>$row[kentta02]</td>

@@ -497,11 +497,11 @@
 			$maksu_positiot = array();
 
 			while ($row = mysql_fetch_assoc($res)) {
-				
+
 				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
 					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>Lasku:</font></td><td class='back' colspan='3'><hr></td></tr>";
 				}
-				
+
 				// jos yksikin on käteinen niin kaikki on käteistä (se hoidetaan jo ylhäällä)
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
@@ -617,19 +617,7 @@
 						$rahtihinta = 0;
 					}
 
-					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-					$rhire = pupe_query($query);
-					$trow  = mysql_fetch_array($rhire);
-
-					$netto = count($rahtihinta_ale) > 0 ? '' : 'N';
-
-					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
-					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
-
-					$lis_ale_kaikki['erikoisale'] = $row['erikoisale'];
-					$lis_ale_kaikki['netto'] = $netto;
-
-					$hinta *= generoi_alekentta_php($lis_ale_kaikki, 'M', 'kerto');
+					$hinta = $rahtihinta;
 
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
@@ -984,12 +972,10 @@
 							}
 
 							if (msg != '') {
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
+								alert(msg);
+
+								skippaa_tama_submitti = true;
+								return false;
 							}
 
 							if (laskutusviikonpaiva > 0 && laskutusviikonpaiva < 9 ) {
@@ -1015,7 +1001,13 @@
 							}
 
 							if (naytetaanko_herja == true) {
-								return confirm(msg);
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 						}
 					</SCRIPT>";
@@ -1077,7 +1069,7 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1220,4 +1212,3 @@
 	}
 
 	require ("../inc/footer.inc");
-?>

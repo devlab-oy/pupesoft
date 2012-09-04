@@ -583,10 +583,10 @@
         		}
 
 				echo "</select></form>";
-				echo "</td><td></td></tr>";
+				echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Näytä asiakasbudjetti")."</a></td></tr>";
 
 				if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
-					echo "<tr><td colspan='2'>Valittu yhteyshenkilö: $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
+					echo "<tr><td colspan='2'>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
 				}
 
 				echo "</table><br>";

@@ -140,10 +140,10 @@
 			unset($to);
 
 			//	Korjataan kommentti
-			$from[]	= "/%ed/";
+			$from[]	= "/%ed/i";
 			$to[]	= tv1dateconv($ed_alku)." - ".tv1dateconv($ed_lopp);
 
-			$from[]	= "/%se/";
+			$from[]	= "/%se/i";
 			$to[]	= tv1dateconv($tapahtumapvm)." - ".tv1dateconv($se_lopp);
 
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
@@ -568,12 +568,10 @@
 						}
 
 						if (msg != '') {
-							if (alert(msg)) {
-								return false;
-							}
-							else {
-								return false;
-							}
+							alert(msg);
+
+							skippaa_tama_submitti = true;
+							return false;
 						}
 
 						if (ero >= 2) {
@@ -582,7 +580,13 @@
 						}
 
 						if (naytetaanko_herja == true) {
-							return confirm(msg);
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 					}
 				</SCRIPT>";

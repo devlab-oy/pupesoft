@@ -516,7 +516,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				}
 				elseif (mysql_field_name($result, $i) == "tapvm") {
 					echo "<td>".tv1dateconv($trow[$kennimi])."</td>";
-				}
+				}	
+				elseif (mysql_field_name($result, $i) == "ytunnus") {
+						echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+					}
 				elseif (mysql_field_name($result, $i) == "tiliote" and $tee == 'KP') {
 					$pano = sprintf("%.2f",substr($trow[$kennimi],21,19) / 100);
 					$otto = sprintf("%.2f",substr($trow[$kennimi],48,19) / 100);

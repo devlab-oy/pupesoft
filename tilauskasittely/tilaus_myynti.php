@@ -758,6 +758,12 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 		}
 	}
 
+	// valmistusriveille var tyhjäksi, että osataan mitätöidä ne seuraavassa updatessa
+	if ($toim == 'VALMISTAVARASTOON' OR $toim == 'VALMISTAASIAKKAALLE') {
+		$query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
+		$result = pupe_query($query);
+	}
+
 	// poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
 	$result = pupe_query($query);
@@ -3747,7 +3753,7 @@ if ($tee == '') {
 
 			$varasto = $laskurow["varasto"];
 
-			// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+			// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
 			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}

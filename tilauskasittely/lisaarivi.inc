@@ -1918,6 +1918,11 @@
 							$var 	= "";
 							$varattu = $kpl;
 						}
+						// Valmistusrivit menee normaaleina
+						elseif ($rivityyppi == 'V' or $rivityyppi == 'W') {
+							$var = "";
+							$varattu = $kpl;
+						}
 						// Normaalisti kaikki menee puutteeksi.
 						else {
 							$var 	= "P";

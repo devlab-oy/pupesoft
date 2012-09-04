@@ -249,6 +249,7 @@
 								and lasku.eilahetetta	= '$isarivirow[suoraan_laskutukseen]'
 								and lasku.tunnusnippu	= '$otsikkorivi[tunnusnippu]'
 								and lasku.piiri			= '$otsikkorivi[piiri]'
+								and lasku.kolmikantakauppa = '{$otsikkorivi['kolmikantakauppa']}'
 								and laskun_lisatiedot.laskutus_nimi 	= '$lisatiedot_row[laskutus_nimi]'
 								and laskun_lisatiedot.laskutus_nimitark = '$lisatiedot_row[laskutus_nimitark]'
 								and laskun_lisatiedot.laskutus_osoite 	= '$lisatiedot_row[laskutus_osoite]'

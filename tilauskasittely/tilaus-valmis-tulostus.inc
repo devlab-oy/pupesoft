@@ -92,7 +92,6 @@
 						lahdot AS lahdot1 READ,
 						lahdot AS lahdot2 READ,
 						lahdot AS lahdot3 READ,
-						lahdot AS lahdot4 READ,
 						lahdot READ,
 						lasku AS lasku1 WRITE,
 						lasku AS lasku2 WRITE,

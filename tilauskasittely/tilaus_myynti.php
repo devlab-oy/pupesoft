@@ -3746,7 +3746,7 @@ if ($tee == '') {
 
 			$varasto = $laskurow["varasto"];
 
-			// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+			// Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
 			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}

@@ -11,7 +11,7 @@ elseif (@include_once("inc/parametrit.inc"));
 if (isset($submit) and trim($submit) != '') {
 
 	$data = array(
-		'selected_row' => (int) $selected_row,
+		'tilausrivi' => (int) $tilausrivi,
 		'alusta_tunnus' => (int) $alusta_tunnus,
 		'liitostunnus' => (int) $liitostunnus
 	);
@@ -19,8 +19,8 @@ if (isset($submit) and trim($submit) != '') {
 	$url = http_build_query($data);
 
 	# edit ja submit tarvitsee valitun rivin.
-	if (!isset($_POST['selected_row']) and $viivakoodi == '') {
-		$error['tuotteet'] = t("Riviä ei ole valittu", $browkieli).'.';
+	if (!isset($_POST['tilausrivi']) and $viivakoodi == '') {
+		$error['tuotteet'] = t("Riviä ei ole valittu").'.';
 	}
 	else {
 		if ($submit == 'edit') {
@@ -28,8 +28,11 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 		}
 		elseif ($submit == 'submit') {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>";
-			exit;
+			if ($ainokainen) {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}&viimeinen'>";
+			}
+			else echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
+			exit();
 		}
 	}
 	if ($submit == 'cancel') {
@@ -74,22 +77,14 @@ if (isset($alusta_tunnus)) {
 
 	# Jos tuotetta ei löydy tältä lavalta
 	if (mysql_num_rows($res) == 0 && $eankoodi != '') {
-		$error['tuotteet'] = "Suuntalavalta ei löytynyt kyseistä tuotetta";
+		$error['tuotteet'] = t("Suuntalavalta ei löytynyt kyseistä tuotetta");
 		# Haetaan tuotteet uudelleen ilman eankoodia
 		$res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, $orderby, $ascdesc);
 	}
 	# Muuten tyhjä lava
 	elseif(mysql_num_rows($res) == 0) {
-		echo "Suuntalava on tyhjä!<br>";
+		echo t("Suuntalava on tyhjä")."!<br/>";
 
-		# Merkataan puretuksi
-		$query = "UPDATE suuntalavat SET suuntalavat.tila = 'P' WHERE tunnus = '{$alusta_tunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-		$purettu_result = pupe_query($query);
-
-		if (mysql_affected_rows() == 0) {
-			echo "VIRHE: Suuntalavaa ei purettu<br>";
-			echo mysql_error();
-		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 		exit;
 	}
@@ -107,17 +102,15 @@ if (isset($alusta_tunnus)) {
 	}
 }
 
-include("kasipaate.css");
-
-echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET", $browkieli),"</h1></div>";
+echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action=''>
 	<table>
 		<tr>
-			<td>",t("Viivakoodi", $browkieli),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
+			<td>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 			</td>
 			<td>
-				<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi", $browkieli),"</button>
+				<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi"),"</button>
 			</td>
 		</tr>
 	</table>
@@ -127,10 +120,10 @@ echo "
 <form name='hakuformi' method='post' action=''>
 
 <div class='controls'>
-	<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse", $browkieli),"</button>
-	<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa", $browkieli),"</button>
-	<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle", $browkieli),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>
+	<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa"),"</button>
+	<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle"),"</button>
+	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 </div>";
 
 if (isset($error)) {
@@ -143,25 +136,25 @@ echo "<div class='main'>
 <tr>
 <th>&nbsp;</th>
 <th nowrap>
-<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuote", $browkieli),"</a>&nbsp;";
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuote"),"</a>&nbsp;";
 
 echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "</th>
 <th nowrap>
-<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("Määrä", $browkieli),"</a>&nbsp;";
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=maara&sort_by_direction_maara={$sort_by_direction_maara}'>",t("Määrä"),"</a>&nbsp;";
 
 echo $sort_by_direction_maara == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "</th>
 <th nowrap>
-<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks", $browkieli),"</a>&nbsp;";
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=yksikko&sort_by_direction_yksikko={$sort_by_direction_yksikko}'>",t("Yks"),"</a>&nbsp;";
 
 echo $sort_by_direction_yksikko == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
 echo "</th>
 <th nowrap>
-<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Hylly", $browkieli),"</a>&nbsp;";
+<a href='suuntalavan_tuotteet.php?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}&sort_by=tuotepaikka&sort_by_direction_tuotepaikka={$sort_by_direction_tuotepaikka}'>",t("Hylly"),"</a>&nbsp;";
 
 echo $sort_by_direction_tuotepaikka == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 
@@ -172,7 +165,7 @@ echo "</th>
 
 	foreach ($tuotteet as $tuote) {
 		echo "<tr id='{$tuote['tilriv_tunnus']}'>";
-		echo "<td><input class='radio' type='radio' name='selected_row' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
+		echo "<td><input class='radio' type='radio' name='tilausrivi' value='{$tuote['tilriv_tunnus']}'{$chk} /></td>";
 		echo "<td nowrap>{$tuote['tuoteno']}</td>";
 		echo "<td nowrap>{$tuote['maara']}";
 
@@ -218,6 +211,10 @@ echo "</th>
 		echo "</tr>";
 // 					}
 	}
+if (mysql_num_rows($res) == 1) {
+	echo "<input type='hidden' name='ainokainen' value='true' />";
+}
+
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />

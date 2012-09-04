@@ -59,17 +59,18 @@ echo "
 <html>
 	<head>
 	<title>Login</title>
-	<meta name='viewport' content='width=device-width,height=device-height, user-scalable=no'/>
+	<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+	<link rel='stylesheet' type='text/css' href='kasipaate.css' />
 	</head>
 ";
-include("kasipaate.css");
+
 echo "
 <body>
 <table class='main' border='0'>
 <tr>
-<td><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1>";
+<td><div class='header'><h1>",t("SISÄÄNKIRJAUTUMINEN", $browkieli),"</h1></div>";
 
 if (isset($return['usea_yhtio']) and $return['usea_yhtio'] == 1) {
 

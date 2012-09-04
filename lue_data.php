@@ -1945,6 +1945,36 @@ if ($kasitellaan_tiedosto) {
 						// Itse lue_datan p‰ivitysquery
 						$iresult = pupe_query($query);
 
+						// Tapahtumat tuotepaikoille kuntoon!
+						if (($rivi[$postoiminto] == 'POISTA' OR $rivi[$postoiminto] == 'LISAA') AND $table_mysql == 'tuotepaikat') {
+							if ($rivi[$postoiminto] == 'POISTA') {
+								$tapahtumaselite = t("Poistettiin tuotepaikka");
+								$tapahtumalaji = "poistettupaikka";
+							}
+							else {
+								$tapahtumaselite = t("Lis‰ttiin tuotepaikka");
+								$tapahtumalaji = "uusipaikka";
+							}
+							$tapahtumaselite .= " {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}";
+							
+							//Tehd‰‰n tapahtuma
+							$querytapahtuma = "	INSERT into tapahtuma set
+										yhtio 		= '$kukarow[yhtio]',
+										tuoteno 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("TUOTENO", $taulunotsikot["tuotepaikat"])]}',
+										kpl 		= '0',
+										kplhinta	= '0',
+										hinta 		= '0',
+										hyllyalue 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
+										hyllynro 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
+										hyllytaso 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
+										hyllyvali 	= '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}',
+										laji 		= '$tapahtumalaji',
+										selite 		= '$tapahtumaselite',
+										laatija 	= '$kukarow[kuka]',
+										laadittu 	= now()";
+							$resulttapahtuma = pupe_query($querytapahtuma);
+						}
+
 						// Synkronoidaan
 						if ($rivi[$postoiminto] == 'LISAA') {
 							$tunnus = mysql_insert_id();

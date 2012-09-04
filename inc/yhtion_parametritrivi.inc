@@ -760,6 +760,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("J‰lkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen")."</option>";
 		$ulos .= "<option value='J' $sel[J]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
+		$ulos .= "<option value='A' $sel[A]>".t("J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰ ker‰ysp‰iv‰n mukaisesti")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sek‰ myyntitilaukselta varastoon tilatut j‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydess‰")."</option>";
 		$ulos .= "</select></td>";
@@ -1385,48 +1386,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "tilauksen_seuranta") {
-
-		$sela = "";
-		$selb = "";
-
-		if ($trow[$i] == 'K') {
-			$selb = "selected";
-		}
-		else {
-			$sela = "selected";
-		}
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value='' $sela>".t("Ei tilauksen seurantaluokkia")."</option>
-					<option value='K' $selb>".t("Tilaukset lajitellaan seurantaluokkiin")."</option>
-				</select></td>";
-
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "tilauksen_kohteet") {
-
-		$sela = "";
-		$selb = "";
-
-		if ($trow[$i] == 'K') {
-			$selb = "selected";
-		}
-		else {
-			$sela = "selected";
-		}
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value='' $sela>".t("Tilauksille ei liitet‰ kohteita")."</option>
-					<option value='K' $selb>".t("Tilaukset liitet‰‰n asiakkaan kohde ja tilausriville positio")."</option>
-				</select></td>";
-
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "tarjouksen_voi_versioida") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1443,27 +1402,6 @@
 
 		$ulos .= "<option value=''  $sel1>".t("Tarjoksesta ei voi tehd‰ versioita")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Tarjouksesta voi tehd‰ versioita")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "dokumentaatiohallinta") {
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		elseif ($trow[$i] == "X") {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value=''  $sel1>".t("Dokumentaatiota ei luoda")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Dokumentaatio linkitet‰‰n projekteihin ja tarjouksiin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

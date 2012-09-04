@@ -383,34 +383,59 @@ if ($ytunnus != '' and $tee == "") {
 
 				if(dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 					var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen")."!';
+					alert(msg);
 
-					if(alert(msg)) {
-						return false;
-					}
-					else {
-						return false;
-					}
+					skippaa_tama_submitti = true;
+					return false;
 				}
 
 				if(ero >= 30) {
 					var msg = '".t("Oletko varma, että haluat päivätä laskun yli 30pv menneisyyteen")."?';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 				if(ero <= -14) {
 					var msg = '".t("Oletko varma, että haluat päivätä laskun yli 14pv tulevaisuuteen")."?';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 
 				if (vv < dateTallaHet.getFullYear()) {
 					if (5 < dateTallaHet.getDate()) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				}
 				else if (vv == dateTallaHet.getFullYear()) {
 					if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				}
 

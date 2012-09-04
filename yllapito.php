@@ -761,10 +761,6 @@
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
-			if (in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
-				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
-			}
-
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
 				//unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
 				if (strpos($lopetus, "yllapito.php") === FALSE) {
@@ -892,6 +888,10 @@
 			if ($haku[$i]{0} == "@") {
 				$tarkkahaku = TRUE;
 				$hakuehto = " = '".substr($haku[$i], 1)."' ";
+			}
+			elseif ($array[$i] == "laskunro") {
+				$tarkkahaku = TRUE;
+				$hakuehto = " = '{$haku[$i]}' ";
 			}
 			else {
 				$tarkkahaku = FALSE;
@@ -1033,7 +1033,14 @@
 
 				function verifyMulti(){
 					msg = '".t("Haluatko todella poistaa tietueet?")."';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 
 				//-->
@@ -1356,8 +1363,15 @@
 		if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
-								msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
-								return confirm(msg);
+							msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 				</SCRIPT>";
 
@@ -1648,7 +1662,7 @@
 			}
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito" and $from != "positioselain"))) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
 				$la_tunnus = $perhe;
@@ -1780,8 +1794,15 @@
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 							function verify(){
-									msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
-									return confirm(msg);
+								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 					</SCRIPT>";
 

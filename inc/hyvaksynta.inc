@@ -142,6 +142,7 @@ if ($tee == 'T') {
 	echo "<th>".t("Laskunro")."</th>";
 	echo "<th>".t("Yhtiön valuutassa")."</th>";
 	echo "<th>".t("Laskun valuutassa")."</th>";
+	echo "<th>".t("Kustp")."</th>";
 	echo "<th>".t("EBID")."</th>";
 	echo "<th>".t("Siirrä")."</th>";
 	echo "</tr>";
@@ -173,6 +174,26 @@ if ($tee == 'T') {
 		echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
 		echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
 
+		// Selvitetään laskun kustannuspaikat
+		$kustpq = "	SELECT tiliointi.kustp, kustannuspaikka.nimi
+					FROM tiliointi
+					JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					AND tiliointi.ltunnus = '$trow[tunnus]'
+					and tiliointi.kustp != 0
+					and tiliointi.korjattu = ''
+					ORDER BY tiliointi.tunnus LIMIT 1";
+		$kustpres = pupe_query($kustpq);
+
+		$kustannuspaikan_nimi = "";
+
+		if (mysql_num_rows($kustpres) == 1) {
+			$kustprivi = mysql_fetch_assoc($kustpres);
+			$kustannuspaikan_nimi = $kustprivi["nimi"];
+		}
+
+		echo "<td>$kustannuspaikan_nimi</td>";
+
 		// tehdään lasku linkki
 		echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
 
@@ -183,6 +204,7 @@ if ($tee == 'T') {
 				<input type = 'submit' value = '".t("Siirrä")."'>
 				</$erotin>
 				</form></tr>";
+
 	}
 	echo "</table><br>";
 }

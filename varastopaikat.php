@@ -228,10 +228,10 @@ if ($tee == 'edit') {
 // n‰ytet‰‰n kaikki yhtion varastopaikat...
 if ($tee == '') {
 
-	$query  = "	SELECT varastopaikat.*, 
-				concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) sorttaus 
-				FROM varastopaikat 
-				WHERE yhtio = '$kukarow[yhtio]' 
+	$query  = "	SELECT varastopaikat.*,
+				concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) sorttaus
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER by sorttaus";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -260,8 +260,15 @@ if ($tee == '') {
 
 		echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify(){
-							msg = '".t("Haluatko todella poistaa t‰m‰n tietueen?")."';
-							return confirm(msg);
+						msg = '".t("Haluatko todella poistaa t‰m‰n tietueen?")."';
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 			</SCRIPT>";
 

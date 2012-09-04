@@ -162,7 +162,14 @@
 				<!--
 					function verify() {
 						msg = '".t("Oletko varma?")."';
-						return confirm(msg);
+
+						if (confirm(msg)) {
+							return true;
+						}
+						else {
+							skippaa_tama_submitti = true;
+							return false;
+						}
 					}
 				-->
 				</script>";
@@ -521,16 +528,6 @@
 
 			$toimaikalisa = "";
 
-			if ($yhtiorow["tilauksen_seuranta"] !="") {
-				$seuranta = " seuranta, ";
-				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
-			}
-
-			if ($yhtiorow["tilauksen_kohteet"] != "") {
-				$kohde = " asiakkaan_kohde.kohde kohde, ";
-				$kohdelisa = "LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde";
-			}
-
 			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and $toim != "TARJOUS") {
 				$toimaikalisa = ' lasku.toimaika, ';
 			}
@@ -557,7 +554,14 @@
 		echo "	<script language=javascript>
 				function lahetys_verify(pitaako_varmistaa) {
 					msg = pitaako_varmistaa;
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 			</script>";
 
@@ -633,7 +637,7 @@
 
 			if ($kukarow['hinnat'] == 0) $query .= " round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo, round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa, ";
 
-			$query .= "	$toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi
+			$query .= "	$toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi, lasku.label
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -796,8 +800,8 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila = 'N' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'N'
 						and lasku.alatila in ('U','T')
 						$haku
 						order by lasku.luontiaika desc
@@ -1280,7 +1284,7 @@
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
 						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
-						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -1538,7 +1542,23 @@
 						}
 					}
 
-					echo "<tr class='aktiivi'>";
+					$label_color = "";
+
+					if (isset($row['label']) and $row['label'] != '') {
+						$label_query = "	SELECT selite
+											FROM avainsana
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = {$row['label']}
+											AND laji = 'label'";
+						$label_result = pupe_query($label_query);
+
+						if (mysql_num_rows($label_result) == 1) {
+							$label_row = mysql_fetch_assoc($label_result);
+							$label_color = "style = 'background-color: {$label_row['selite']};'";
+						}
+					}
+
+					echo "<tr class='aktiivi' {$label_color}>";
 
 					$zendesk_viesti = FALSE;
 					$ii = 0;

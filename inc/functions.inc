@@ -8776,17 +8776,17 @@ if (!function_exists("hae_rahtimaksu")) {
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				$query = "	SELECT alennus, alennuslaji
-							FROM asiakasalennus
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakas = '$laskurow[liitostunnus]'
-							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				$rahti_alennus_result = pupe_query($query);
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
+				$tres = pupe_query($query);
+				$trow = mysql_fetch_assoc($tres);
 
-				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
-						$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
-					}
+				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
+
+				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
+					$hirow['rahtihinta'] = $lis_hinta;
 				}
 			}
 
@@ -9410,7 +9410,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 			return;
 		}
 
-		if ($kieli == "") $kieli = $kukarow["kieli"];
+		if ($kieli == "" and isset($kukarow["kieli"])) $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
@@ -9453,7 +9453,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 }
 
 if (!function_exists("jt_toimita")) {
-	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '') {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '') {
 		global $yhtiorow, $kukarow, $oikeurow;
 
 		if (!is_array($jtrivit)) $jtrivit = array();
@@ -9473,6 +9473,7 @@ if (!function_exists("jt_toimita")) {
 			$suoratoimitus_rivit  = array();
 			$suoratoimitus_paikat = array();
 			$from_varastoon_inc   = "";
+			$jt_huomioi_pvm		  = $huomioi_pvm;
 		}
 		else {
 			$asiakasno 			  = "";
@@ -9486,6 +9487,7 @@ if (!function_exists("jt_toimita")) {
 			$suoratoimitus_rivit  = $jtrivit;
 			$suoratoimitus_paikat = $jtrivit_paikat;
 			$from_varastoon_inc   = "varastoon.inc";
+			$jt_huomioi_pvm		  = $huomioi_pvm;
 		}
 
 		require('jtselaus.php');
@@ -10018,7 +10020,7 @@ if (!function_exists("viivakoodi")) {
 		$image = tempnam("/tmp", "image-");
 
 		// Tehdään viivakoodi PostScript
-		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\"");
+		shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\" -c");
 
 		// Ghostscript konversioon yksikkö kuntoon
 		$leveys = round($leveys * 3.03);
@@ -10754,7 +10756,7 @@ if (!function_exists("tarkista_iban")) {
 		global $yhtiorow;
 
 		if ($yhtiorow["maa"] != "FI") {
-			return TRUE;
+			return $tilino;
 		}
 
 		// Calculating and validating IBAN checksums:
@@ -12424,7 +12426,14 @@ if (!function_exists("pupe_DataTables")) {
 					var sarake = $(\"thead input\").index(this);
 
 					// fnFilter toistaiseksi vain ekalle tablelle
-					datatablesit[0].fnFilter( arvo, sarake );
+
+					// Onko regular expressioni?
+					if (arvo.indexOf(\"|\") > -1) {
+						datatablesit[0].fnFilter( arvo, sarake, true, false );
+					}
+					else {
+						datatablesit[0].fnFilter( arvo, sarake, false, true );
+					}
 
 					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
 					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
@@ -16054,5 +16063,29 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 		}
 
 		return $summa;
+	}
+}
+
+if (!function_exists('triangulation')) {
+	function triangulation($tunnukset) {
+		global $kukarow, $yhtiorow;
+
+		# Katsotaan onko kyseessä kolmikantakauppa
+		$query = "	SELECT lasku.tunnus, lasku.toim_maa
+					FROM tilausrivi
+					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+						AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+					JOIN tilausrivi as t3 ON (t3.yhtio = tilausrivi.yhtio
+						AND t3.tunnus = tilausrivin_lisatiedot.tilausrivilinkki
+						AND t3.tyyppi = 'O')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+						AND lasku.tunnus = t3.otunnus
+						AND lasku.toim_maa != '{$yhtiorow['maa']}')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.otunnus IN ({$tunnukset})";
+		$result = pupe_query($query);
+
+		return mysql_num_rows($result) > 0 ? "VAT 0% Triangulation.\n" : "";
 	}
 }

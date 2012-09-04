@@ -69,16 +69,14 @@ if (!function_exists('finvoice_otsik')) {
 				}
 			}
 
+			// Jos receiverintermediaattori puuttuu niin laitetaan APIX:n oma ovt tähän
 			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
 				$receiverintermediator = "003723327487";
 			}
 
-			if ($yhtiorow["verkkolasku_lah"] == "maventa" and $receiverintermediator == "") {
-				$receiverintermediator = "003721291126";
-			}
-
-			// jos tänne ei saada mitään arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
-			if ($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == "100") {
+			// Jos tänne ei saada mitään arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
+			// Maventa hanskaa myös tilanteen jossa intermediaattori puuttuu, joten ei mennä silloin tähän haaraan
+			if ($receiverpartyid == "" or ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] != "maventa") or $lasrow["chn"] == "100") {
 				$receiverpartyid = $tulostuspalvelu;
 
 				if ($yhtiorow["verkkolasku_lah"] == "maventa") {
@@ -100,22 +98,22 @@ if (!function_exists('finvoice_otsik')) {
 				fputs ($tootfinvoice, "<eb:MessageHeader xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\" SOAP-ENV:mustUnderstand=\"1\" eb:version=\"2.0\">\r\n");
 
 				fputs ($tootfinvoice, "<eb:From>\r\n");
-				xml_add("eb:PartyId", $senderpartyid ,								$tootfinvoice);
+				xml_add("eb:PartyId", $senderpartyid,								$tootfinvoice);
 				xml_add("eb:Role", "Sender", 										$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:From>\r\n");
 
 				fputs ($tootfinvoice, "<eb:From>\r\n");
-				xml_add("eb:PartyId", $senderintermediator ,						$tootfinvoice);
+				xml_add("eb:PartyId", $senderintermediator,							$tootfinvoice);
 				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:From>\r\n");
 
 				fputs ($tootfinvoice, "<eb:To>\r\n");
-				xml_add("eb:PartyId", $receiverpartyid ,							$tootfinvoice);
+				xml_add("eb:PartyId", $receiverpartyid,								$tootfinvoice);
 				xml_add("eb:Role", "Receiver",										$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:To>\r\n");
 
 				fputs ($tootfinvoice, "<eb:To>\r\n");
-				xml_add("eb:PartyId", $receiverintermediator ,						$tootfinvoice);
+				xml_add("eb:PartyId", $receiverintermediator,						$tootfinvoice);
 				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
 				fputs ($tootfinvoice, "</eb:To>\r\n");
 
@@ -124,7 +122,7 @@ if (!function_exists('finvoice_otsik')) {
 				xml_add("eb:Service", "Routing",									$tootfinvoice); //	Ei ilmeisesti juuri merkittävä
 				xml_add("eb:Action", "ProcessInvoice",								$tootfinvoice);
 				fputs ($tootfinvoice, "<eb:MessageData>\r\n");
-				xml_add("eb:MessageId", $mid									, 	$tootfinvoice);
+				xml_add("eb:MessageId", $mid,									 	$tootfinvoice);
 				xml_add("eb:Timestamp", date("Y-m-d")."T".date("H:i:s")."+02", 		$tootfinvoice);
 				fputs ($tootfinvoice, "<eb:RefToMessageId/>\r\n");
 				fputs ($tootfinvoice, "</eb:MessageData>\r\n");
@@ -293,10 +291,11 @@ if (!function_exists('finvoice_otsik')) {
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 
-			fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
-			xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35, 1);
-			xml_add("InvoiceRecipientIntermediatorAddress",				  	$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11, 8);
-			fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
+			#fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
+			#xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35, 1);
+			#xml_add("InvoiceRecipientIntermediatorAddress",				$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11, 8);
+			#fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
+
 			fputs($tootfinvoice, "</SellerInformationDetails>\r\n");
 
 			#fputs($tootfinvoice, "<InvoiceSenderPartyDetails>\r\n");
@@ -606,7 +605,11 @@ if (!function_exists('finvoice_rivi')) {
 			}
 
 			#xml_add("RowIdentifierUrlText", 													"",								$tootfinvoice);
-			xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 						vlas_dateconv($tilrow['laadittu']), 		$tootfinvoice);
+
+			if ((int) str_replace("-", "", substr($tilrow['tilauspaiva'], 0, 10)) < (int) str_replace("-", "", substr($tilrow['toimitettuaika'], 0, 10))) {
+				xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 					vlas_dateconv($tilrow['tilauspaiva']), 		$tootfinvoice);
+			}
+
 			#xml_add("OriginalInvoiceNumber", 													"", 							$tootfinvoice);
 			xml_add("RowDeliveryIdentifier", 													$tilrow['otunnus'],				$tootfinvoice);
 			#xml_add("RowDeliveryIdentifierUrlText", 											"", 							$tootfinvoice);

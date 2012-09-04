@@ -83,7 +83,7 @@ if (isset($alusta_tunnus)) {
 	}
 	# Muuten tyhjä lava
 	elseif(mysql_num_rows($res) == 0) {
-		echo t("Suuntalava on tyhjä!<br>");
+		echo t("Suuntalava on tyhjä")."!<br/>";
 
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 		exit;

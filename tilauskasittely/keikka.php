@@ -867,43 +867,9 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 // perustetaan uusi keikka toimittajalle $ytunnus
 if ($toiminto == "uusi" and $toimittajaid > 0) {
-	// haetaan seuraava vapaa keikkaid
-	$query  = "SELECT max(laskunro) laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
-	$result = pupe_query($query);
-	$row    = mysql_fetch_assoc($result);
 
-	$id		= $row['laskunro']+1;
-
-	$query  = "SELECT kurssi from valuu where nimi='$toimittajarow[oletus_valkoodi]' and yhtio='$kukarow[yhtio]'";
-	$result = pupe_query($query);
-	$row    = mysql_fetch_assoc($result);
-	$kurssi = $row["kurssi"];
-
-	$maa_lahetys = $toimittajarow['maa_lahetys'] != '' ? $toimittajarow['maa_lahetys'] : $toimittajarow['maa'];
-
-	// meill‰ on $toimittajarow haettuna ylh‰‰ll‰
-	$query = "	INSERT into lasku set
-				yhtio        	= '$kukarow[yhtio]',
-				laskunro     	= '$id',
-				ytunnus	     	= '$toimittajarow[ytunnus]',
-				nimi         	= '$toimittajarow[nimi]',
-				valkoodi     	= '$toimittajarow[oletus_valkoodi]',
-				vienti       	= '$toimittajarow[oletus_vienti]',
-				vienti_kurssi	= '$kurssi',
-				toimitusehto 	= '$toimittajarow[toimitusehto]',
-				osoite       	= '$toimittajarow[osoite]',
-				postitp      	= '$toimittajarow[postitp]',
-				maa			 	= '$toimittajarow[maa]',
-				maa_lahetys 	= '$maa_lahetys',
-				kauppatapahtuman_luonne = '$toimittajarow[kauppatapahtuman_luonne]',
-				kuljetusmuoto 	= '$toimittajarow[kuljetusmuoto]',
-				rahti 			= '$toimittajarow[oletus_kulupros]',
-				swift        	= '$toimittajarow[swift]',
-				liitostunnus 	= '$toimittajarow[tunnus]',
-				tila         	= 'K',
-				luontiaika	 	= now(),
-				laatija		 	= '$kukarow[kuka]'";
-	$result = pupe_query($query);
+	# Toiminta funktioitu
+	$result = uusi_saapuminen($toimittajarow);
 
 	// selaukseen
 	$toiminto = "";

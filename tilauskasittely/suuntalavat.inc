@@ -59,6 +59,200 @@
 	if (!isset($suuntalavan_tunnus)) $suuntalavan_tunnus = '';
 	if (!isset($usea_keraysvyohyke)) $usea_keraysvyohyke = '';
 
+	# Funktiot
+	if (!function_exists('lisaa_suuntalava')) {
+		function lisaa_suuntalava($otunnus, Array $params) {
+		global $kukarow;
+
+		# Pakolliset parametrit
+		if (empty($otunnus)) exit("Virhe: lisaa_suuntalava(), otunnus puuttuu.");
+
+		# Sallitut parametrit
+		$sallitut_parametrit = array(
+				'sscc',
+				'alkuhyllyalue', 'alkuhyllynro', 'alkuhyllyvali', 'alkuhyllytaso',
+				'loppuhyllyalue', 'loppuhyllynro', 'loppuhyllyvali', 'loppuhyllynro', 'loppuhyllytaso',
+				'tyyppi', 'keraysvyohyke', 'usea_keraysvyohyke', 'kaytettavyys', 'terminaalialue',
+				'korkeus', 'paino', 'suuntalavan_tunnus'
+				);
+
+		# Parametri tyhjäksi jos sitä ei ole setattu
+		foreach($sallitut_parametrit as $sallittu) {
+			if (!isset($params[$sallittu])) $params[$sallittu] = '';
+		}
+
+		# Array muuttujiksi
+		extract($params);
+
+		# Pilkut pisteiksi
+		$paino = str_replace(",", ".", $paino);
+		$korkeus = str_replace(",", ".", $korkeus);
+
+		if (trim($suuntalavan_tunnus) != '') {
+
+			$query = "	SELECT keraysvyohyke
+						FROM suuntalavat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$suuntalavan_tunnus}'";
+
+			$keraysvyohyke_chk_res = pupe_query($query);
+			$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
+
+			// jos vaihdetaan keräysvyöhykettä, nollataan suuntalavat kohdistetuilta tilausriveiltä johon suuntalava kuuluu
+			// tämän jälkeen koitetaan päivittää suuntalavan tunnus uudestaan käyttäen apuna uutta valittua keräysvyöhykettä
+			if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
+
+				$query = "	UPDATE tilausrivi SET
+							tilausrivi.suuntalava = 0
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.uusiotunnus = '{$otunnus}'
+							AND tilausrivi.tyyppi = 'O'
+							AND tilausrivi.kpl = 0
+							AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+
+				$suuntalava_upd_res = pupe_query($query);
+
+				if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+
+					if (trim($automaattinen_paivitys) == 'K') {
+						$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
+						$valittutunnuslisa = "";
+					}
+					else {
+						$tuotejoini = "";
+						$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
+					}
+
+					$query = "	UPDATE tilausrivi
+								$tuotejoini
+								SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.uusiotunnus = '{$otunnus}'
+								$valittutunnuslisa
+								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+								AND tilausrivi.kpl = 0
+								AND tilausrivi.tyyppi = 'O'";
+
+					$keraysvyohyke_upd_res = pupe_query($query);
+				}
+			}
+
+			$query = "	UPDATE suuntalavat SET
+						sscc 				= '{$sscc}',
+						alkuhyllyalue 		= '{$alkuhyllyalue}',
+						alkuhyllynro 		= '{$alkuhyllynro}',
+						alkuhyllyvali 		= '{$alkuhyllyvali}',
+						alkuhyllytaso 		= '{$alkuhyllytaso}',
+						loppuhyllyalue 		= '{$loppuhyllyalue}',
+						loppuhyllynro 		= '{$loppuhyllynro}',
+						loppuhyllyvali 		= '{$loppuhyllyvali}',
+						loppuhyllytaso 		= '{$loppuhyllytaso}',
+						tyyppi 				= '{$tyyppi}',
+						keraysvyohyke 		= '{$keraysvyohyke}',
+						kaytettavyys 		= '{$kaytettavyys}',
+						terminaalialue 		= '{$terminaalialue}',
+						usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+						korkeus 			= '{$korkeus}',
+						paino 				= '{$paino}',
+						muuttaja 			= '{$kukarow['kuka']}',
+						muutospvm 			= now()
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus 	= '{$suuntalavan_tunnus}'";
+
+			$update_result = pupe_query($query);
+		}
+		else {
+
+			$query = "	INSERT INTO suuntalavat SET
+						yhtio 				= '{$kukarow['yhtio']}',
+						tila 				= '',
+						sscc 				= '{$sscc}',
+						alkuhyllyalue 		= '{$alkuhyllyalue}',
+						alkuhyllynro 		= '{$alkuhyllynro}',
+						alkuhyllyvali 		= '{$alkuhyllyvali}',
+						alkuhyllytaso 		= '{$alkuhyllytaso}',
+						loppuhyllyalue		= '{$loppuhyllyalue}',
+						loppuhyllynro 		= '{$loppuhyllynro}',
+						loppuhyllyvali 		= '{$loppuhyllyvali}',
+						loppuhyllytaso 		= '{$loppuhyllytaso}',
+						tyyppi 				= '{$tyyppi}',
+						keraysvyohyke 		= '{$keraysvyohyke}',
+						kaytettavyys 		= '{$kaytettavyys}',
+						terminaalialue 		= '{$terminaalialue}',
+						usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
+						korkeus 			= '{$korkeus}',
+						paino 				= '{$paino}',
+						laatija 			= '{$kukarow['kuka']}',
+						luontiaika 			= now(),
+						muuttaja 			= '{$kukarow['kuka']}',
+						muutospvm 			= now()";
+
+			$insert_result = pupe_query($query);
+			$uusi_suuntalavan_tunnus = mysql_insert_id();
+
+			$query = "	INSERT INTO suuntalavat_saapuminen SET
+						yhtio = '{$kukarow['yhtio']}',
+						suuntalava = '{$uusi_suuntalavan_tunnus}',
+						saapuminen = '{$otunnus}',
+						laatija = '{$kukarow['kuka']}',
+						luontiaika = now(),
+						muutospvm = now(),
+						muuttaja = '{$kukarow['kuka']}'";
+
+			$insert_result = pupe_query($query);
+
+			// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
+			if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
+
+				if (trim($automaattinen_paivitys) == 'K') {
+					$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
+					$valittutunnuslisa = "";
+				}
+				else {
+					$tuotejoini = "";
+					$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
+				}
+
+				$query = "	UPDATE tilausrivi
+							$tuotejoini
+							SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.uusiotunnus = '{$otunnus}'
+							$valittutunnuslisa
+							AND tilausrivi.suuntalava = 0
+							AND tilausrivi.kpl = 0
+							AND tilausrivi.tyyppi = 'O'";
+
+				$tilausrivi_res = pupe_query($query);
+			}
+		}
+
+		if ($paino == 0 and (trim($suuntalavan_tunnus) != '' or trim($uusi_suuntalavan_tunnus) != '')) {
+
+			$suuntalavan_tunnus = trim($uusi_suuntalavan_tunnus) != '' ? $uusi_suuntalavan_tunnus : $suuntalavan_tunnus;
+
+			$query = "	SELECT sum(tuote.tuotemassa) paino
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus = '{$otunnus}'
+						AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+						AND tilausrivi.tyyppi = 'O'";
+			$paino_res = pupe_query($query);
+			$paino_row = mysql_fetch_assoc($paino_res);
+
+
+			if ($paino_row['paino'] > 0) {
+				$query = "UPDATE suuntalavat SET paino = '{$paino_row['paino']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
+				$update_res = pupe_query($query);
+			}
+		}
+
+		$suuntalavan_tunnus = '';
+
+		return $uusi_suuntalavan_tunnus;
+		}
+	}
 
 	if ($tee == 'peruutettu') {
 		$query = "	UPDATE suuntalavat SET
@@ -232,163 +426,29 @@
 
 		if ($tee == '') {
 
-			$paino = str_replace(",", ".", $paino);
-			$korkeus = str_replace(",", ".", $korkeus);
+			# Tarvittavat parametrit arrayksi
+			$params = array(
+					'sscc' => $sscc,
+					'alkuhyllyalue' => $alkuhyllyalue,
+					'alkuhyllynro' => $alkuhyllynro,
+					'alkuhyllyvali' => $alkuhyllyvali,
+					'alkuhyllytaso' => $alkuhyllytaso,
+					'loppuhyllyalue' => $loppuhyllyalue,
+					'loppuhyllynro' => $loppuhyllynro,
+					'loppuhyllyvali' => $loppuhyllyvali,
+					'loppuhyllynro' => $loppuhyllynro,
+					'loppuhyllytaso' => $loppuhyllytaso,
+					'tyyppi' => $tyyppi,
+					'keraysvyohyke' => $keraysvyohyke,
+					'usea_keraysvyohyke' => $usea_keraysvyohyke,
+					'kaytettavyys' => $kaytettavyys,
+					'terminaalialue' => $terminaalialue,
+					'korkeus' => $korkeus,
+					'paino' => $paino,
+					'suuntalavan_tunnus' => $suuntalavan_tunnus
+				);
+			lisaa_suuntalava($otunnus, $params);
 
-			if (trim($suuntalavan_tunnus) != '') {
-
-				$query = "	SELECT keraysvyohyke
-							FROM suuntalavat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$suuntalavan_tunnus}'";
-				$keraysvyohyke_chk_res = pupe_query($query);
-				$keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res);
-
-				// jos vaihdetaan keräysvyöhykettä, nollataan suuntalavat kohdistetuilta tilausriveiltä johon suuntalava kuuluu
-				// tämän jälkeen koitetaan päivittää suuntalavan tunnus uudestaan käyttäen apuna uutta valittua keräysvyöhykettä
-				if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
-
-					$query = "	UPDATE tilausrivi SET
-								tilausrivi.suuntalava = 0
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.uusiotunnus = '{$otunnus}'
-								AND tilausrivi.tyyppi = 'O'
-								AND tilausrivi.kpl = 0
-								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-					$suuntalava_upd_res = pupe_query($query);
-
-					if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
-
-						if (trim($automaattinen_paivitys) == 'K') {
-							$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
-							$valittutunnuslisa = "";
-						}
-						else {
-							$tuotejoini = "";
-							$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
-						}
-
-						$query = "	UPDATE tilausrivi
-									$tuotejoini
-									SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
-									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.uusiotunnus = '{$otunnus}'
-									$valittutunnuslisa
-									AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
-									AND tilausrivi.kpl = 0
-									AND tilausrivi.tyyppi = 'O'";
-						$keraysvyohyke_upd_res = pupe_query($query);
-					}
-				}
-
-				$query = "	UPDATE suuntalavat SET
-							sscc 				= '{$sscc}',
-							alkuhyllyalue 		= '{$alkuhyllyalue}',
-							alkuhyllynro 		= '{$alkuhyllynro}',
-							alkuhyllyvali 		= '{$alkuhyllyvali}',
-							alkuhyllytaso 		= '{$alkuhyllytaso}',
-							loppuhyllyalue 		= '{$loppuhyllyalue}',
-							loppuhyllynro 		= '{$loppuhyllynro}',
-							loppuhyllyvali 		= '{$loppuhyllyvali}',
-							loppuhyllytaso 		= '{$loppuhyllytaso}',
-							tyyppi 				= '{$tyyppi}',
-							keraysvyohyke 		= '{$keraysvyohyke}',
-							kaytettavyys 		= '{$kaytettavyys}',
-							terminaalialue 		= '{$terminaalialue}',
-							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
-							korkeus 			= '{$korkeus}',
-							paino 				= '{$paino}',
-							muuttaja 			= '{$kukarow['kuka']}',
-							muutospvm 			= now()
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus 	= '{$suuntalavan_tunnus}'";
-				$update_result = pupe_query($query);
-			}
-			else {
-
-				$query = "	INSERT INTO suuntalavat SET
-							yhtio 				= '{$kukarow['yhtio']}',
-							tila 				= '',
-							sscc 				= '{$sscc}',
-							alkuhyllyalue 		= '{$alkuhyllyalue}',
-							alkuhyllynro 		= '{$alkuhyllynro}',
-							alkuhyllyvali 		= '{$alkuhyllyvali}',
-							alkuhyllytaso 		= '{$alkuhyllytaso}',
-							loppuhyllyalue		= '{$loppuhyllyalue}',
-							loppuhyllynro 		= '{$loppuhyllynro}',
-							loppuhyllyvali 		= '{$loppuhyllyvali}',
-							loppuhyllytaso 		= '{$loppuhyllytaso}',
-							tyyppi 				= '{$tyyppi}',
-							keraysvyohyke 		= '{$keraysvyohyke}',
-							kaytettavyys 		= '{$kaytettavyys}',
-							terminaalialue 		= '{$terminaalialue}',
-							usea_keraysvyohyke 	= '{$usea_keraysvyohyke}',
-							korkeus 			= '{$korkeus}',
-							paino 				= '{$paino}',
-							laatija 			= '{$kukarow['kuka']}',
-							luontiaika 			= now(),
-							muuttaja 			= '{$kukarow['kuka']}',
-							muutospvm 			= now()";
-				$insert_result = pupe_query($query);
-				$uusi_suuntalavan_tunnus = mysql_insert_id();
-
-				$query = "	INSERT INTO suuntalavat_saapuminen SET
-							yhtio = '{$kukarow['yhtio']}',
-							suuntalava = '{$uusi_suuntalavan_tunnus}',
-							saapuminen = '{$otunnus}',
-							laatija = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							muutospvm = now(),
-							muuttaja = '{$kukarow['kuka']}'";
-				$insert_result = pupe_query($query);
-
-				// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
-				if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
-
-					if (trim($automaattinen_paivitys) == 'K') {
-						$tuotejoini = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}') ";
-						$valittutunnuslisa = "";
-					}
-					else {
-						$tuotejoini = "";
-						$valittutunnuslisa = " AND tilausrivi.tunnus = '{$valittutunnus}'";
-					}
-
-					$query = "	UPDATE tilausrivi
-								$tuotejoini
-								SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.uusiotunnus = '{$otunnus}'
-								$valittutunnuslisa
-								AND tilausrivi.suuntalava = 0
-								AND tilausrivi.kpl = 0
-								AND tilausrivi.tyyppi = 'O'";
-					$tilausrivi_res = pupe_query($query);
-				}
-			}
-
-			if ($paino == 0 and (trim($suuntalavan_tunnus) != '' or trim($uusi_suuntalavan_tunnus) != '')) {
-
-				$suuntalavan_tunnus = trim($uusi_suuntalavan_tunnus) != '' ? $uusi_suuntalavan_tunnus : $suuntalavan_tunnus;
-
-				$query = "	SELECT sum(tuote.tuotemassa) paino
-							FROM tilausrivi
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.uusiotunnus = '{$otunnus}'
-							AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
-							AND tilausrivi.tyyppi = 'O'";
-				$paino_res = pupe_query($query);
-				$paino_row = mysql_fetch_assoc($paino_res);
-
-
-				if ($paino_row['paino'] > 0) {
-					$query = "UPDATE suuntalavat SET paino = '{$paino_row['paino']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-					$update_res = pupe_query($query);
-				}
-			}
-
-			$suuntalavan_tunnus = '';
 		}
 
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {

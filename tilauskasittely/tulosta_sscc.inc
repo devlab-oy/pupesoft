@@ -63,7 +63,7 @@
 			$res   = mysql_query($query) or pupe_error($query);
 
 			$lopetus = '';
-			$tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
+			$tee = (!isset($sscc_kopio) or $sscc_kopio == '') ? 'uusi' : '';
 
 			echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": {$sscc}</font><br /><br />";
 

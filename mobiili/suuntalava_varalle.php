@@ -8,11 +8,11 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-if (!isset($alusta_tunnus, $liitostunnus, $selected_row)) exit;
+if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
-$selected_row = 0;
+$tilausrivi = 0;
 
 $error = array(
 	'varalle' => ''
@@ -91,8 +91,6 @@ $sscc_query = mysql_query("	SELECT sscc
 							AND yhtio='{$kukarow['yhtio']}'");
 $sscc = mysql_fetch_assoc($sscc_query);
 
-include("kasipaate.css");
-
 echo "<div class='header'><h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
 echo "<div class='main'>
@@ -138,7 +136,7 @@ echo "<div class='main'>
 	<span class='error'>{$error['varalle']}</span>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
-	<input type='hidden' name='selected_row' value='{$selected_row}' />
+	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
 	</form>
 </div>";
 

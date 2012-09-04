@@ -717,17 +717,18 @@
 						$viestirar = pupe_query($query);
 						$viestirarrow = mysql_fetch_assoc($viestirar);
 
-						for ($s=1; $s <= $kollityht; $s++) {
-							if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
-								$tiedot = "toimitusta";
-							}
+						$oslappkpl = $kollityht;
 
-							if ($toitarow['osoitelappu'] == 'intrade') {
-								require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-							}
-							else {
-								require ("tilauskasittely/osoitelappu_pdf.inc");
-							}
+						if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
+							$tiedot = "toimitusta";
+							$toimitustaparow = $toitarow;
+						}
+
+						if ($toitarow['osoitelappu'] == 'intrade') {
+							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+						}
+						else {
+							require ("tilauskasittely/osoitelappu_pdf.inc");
 						}
 					}
 				}
@@ -1079,5 +1080,3 @@
 
 		require("inc/footer.inc");
 	}
-
-?>

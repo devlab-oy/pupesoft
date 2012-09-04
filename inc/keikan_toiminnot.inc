@@ -1,9 +1,13 @@
 <?php
 
-	// haetaan keikkaotsikon tiedot
-	$query    = "SELECT * FROM lasku WHERE tunnus = '{$keikan_otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_array($result);
+	if (isset($_POST['ajax_toiminto'])) {
+		$keikan_otunnus = (int) $_POST['keikan_otunnus'];
+
+		// haetaan keikkaotsikon tiedot
+		$query    = "SELECT * FROM lasku WHERE tunnus = '{$keikan_otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
+		$result   = pupe_query($query);
+		$laskurow = mysql_fetch_array($result);
+	}
 
 	function laske_hinta($laskurow, $tunnus) {
 		global $kukarow, $yhtiorow;
@@ -88,6 +92,156 @@
 		return $hintojen_haku_row;
 	}
 
+	/* Kohdista tilausrivi
+	*/
+	function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $suuntalavan_tunnus, $suoratoimitusrivi = '') {
+	    global $kukarow, $yhtiorow;
+
+	    $suuntalava_querylisa = '';
+
+	    if ($yhtiorow['suuntalavat'] == 'S') {
+
+	        if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
+
+	            $query = "  SELECT suuntalavat.*
+	                        FROM suuntalavat
+	                        JOIN suuntalavat_saapuminen ON (
+	                            suuntalavat.yhtio = suuntalavat_saapuminen.yhtio
+	                            AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'
+	                            AND suuntalavat_saapuminen.saapuminen != 0
+	                            AND suuntalavat.tunnus = suuntalavat_saapuminen.suuntalava)
+	                        WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+	                        AND suuntalavat.tila = ''
+	                        AND suuntalavat.sscc = 'Suoratoimitus'";
+	            $chk_suuntalava_res = pupe_query($query);
+	            $chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
+
+	            if (mysql_num_rows($chk_suuntalava_res) == 0) {
+
+	                $suuntalavan_tunnus = "";
+
+	                // Tehdään uusi suuntalava
+	                $tee = "lisaa";
+	                // $otunnus = $keikan_tunnus;
+	                $sscc = "Suoratoimitus";
+	                $tyyppi = 0;
+	                $keraysvyohyke = "Suoratoimitus";
+	                $usea_keraysvyohyke = 'K';
+	                $kaytettavyys = "Y";
+	                $terminaalialue = "Suoratoimitus";
+	                $korkeus = 0;
+	                $paino = 0;
+	                $alkuhyllyalue = "";
+	                $alkuhyllynro = "";
+	                $alkuhyllyvali = "";
+	                $alkuhyllytaso = "";
+	                $loppuhyllyalue = "";
+	                $loppuhyllynro = "";
+	                $loppuhyllyvali = "";
+	                $loppuhyllytaso = "";
+	                $automaattinen_paivitys = "S";
+	                $suuntalavat_ei_kayttoliittymaa = "KYLLA";
+
+	                require ("../tilauskasittely/suuntalavat.inc");
+
+	                $suuntalavan_tunnus = (int) $uusi_suuntalavan_tunnus;
+	            }
+	            else {
+	                $suuntalavan_tunnus = $chk_suuntalava_row['tunnus'];
+	            }
+	        }
+
+	        if ($suuntalavan_tunnus > 0) {
+	            $suuntalava_querylisa = ", suuntalava = $suuntalavan_tunnus ";
+	        }
+	        else {
+	            // toistaiseksi ei päivitetä suuntalavaa tilausriville kohdistuksen yhteydessä automaattisesti
+	            // $suuntalava = hae_suuntalava($otunnus, $valittutunnus);
+	            // $suuntalava_querylisa = ", suuntalava = $suuntalava ";
+	        }
+	    }
+
+	    $updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}' ";
+
+	    // Haetaan rivit ennen päivitystä
+	    $vanhathinnat = array();
+
+	    $updquery = "   SELECT tunnus
+	                    FROM tilausrivi use index (yhtio_otunnus)
+	                    WHERE yhtio = '{$kukarow['yhtio']}'
+	                    AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+	                    AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
+	    $selresult = pupe_query($updquery);
+
+	    while ($updrow = mysql_fetch_assoc($selresult)) {
+	        $vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
+	    }
+
+	    // poistetaan myös netto = X, jos räplätään ruksia
+	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
+	                uusiotunnus = '{$otunnus}',
+	                netto = ''
+	                $updatelisa
+	                WHERE yhtio = '{$kukarow['yhtio']}'
+	                AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
+	    $result = pupe_query($query);
+
+	    // Haetaan päivitetyt rivit
+	    $uudethinnat = array();
+	    mysql_data_seek($selresult, 0);
+
+	    while ($updrow = mysql_fetch_assoc($selresult)) {
+	        $uudethinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
+	    }
+
+	    $data = array(
+	        'vanhat_hinnat' => $vanhathinnat,
+	        'uudet_hinnat' => $uudethinnat,
+	        'suuntalava' => 0,
+	        'suuntalava_sscc' => ''
+	    );
+
+	    // Tuotteet päivitetään kohdistuksissa automaattisesti oikeille suuntalavoille, mikäli sellainen on jo perustettu (suuntalavan määriteltyjen varastopaikkojen sekä keräysvyöhykkeen mukaan)
+	    if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
+	        if ($suuntalavan_tunnus > 0) {
+
+	            $otunnus = trim($otunnus);
+
+	            $data['suuntalava'] = $suuntalavan_tunnus;
+
+	            $query = "  SELECT suuntalavat.sscc, IFNULL(suuntalavat_saapuminen.saapuminen, '') AS saapuminen
+	                        FROM suuntalavat
+	                        LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
+	                        WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+	                        AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
+	            $sscc_fetch_res = pupe_query($query);
+	            $sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
+
+	            $data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
+
+	            if ((int) $suuntalavan_tunnus != 0 and $sscc_fetch_row['saapuminen'] == '') {
+	                $query = "  INSERT INTO suuntalavat_saapuminen SET
+	                            yhtio = '{$kukarow['yhtio']}',
+	                            suuntalava = '{$suuntalavan_tunnus}',
+	                            saapuminen = '{$otunnus}',
+	                            laatija = '{$kukarow['kuka']}',
+	                            luontiaika = now(),
+	                            muutospvm = now(),
+	                            muuttaja = '{$kukarow['kuka']}'";
+	                $insert_res = pupe_query($query);
+	            }
+	        }
+	        else {
+	            // toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti
+	            // $data['suuntalava'] = $suuntalava;
+	            $data['suuntalava'] = 0;
+	        }
+	    }
+
+	    return $data;
+	}
+
 	if ($_POST['ajax_toiminto'] == 'suuntalava') {
 		$tunnus = mysql_real_escape_string($_POST['tunnus']);
 		$suuntalava = mysql_real_escape_string($_POST['suuntalava']);
@@ -157,154 +311,17 @@
 
 	}
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
+
+		# Valittu tilausrivi ja ostotilaus
 		list($valittutunnus, $valittuotunnus) = explode("###", $_POST['valittu']);
 
+		# saapuminen
 		$otunnus = (int) $_POST['otunnus'];
 
-		$suuntalava_querylisa = '';
+		$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
+		$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
 
-		if ($yhtiorow['suuntalavat'] == 'S') {
-
-			$suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
-			$suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
-
-			if (trim($suoratoimitusrivi) != "" and (trim($suuntalavan_tunnus) == "" or $suuntalavan_tunnus == 0)) {
-
-				$query = "	SELECT suuntalavat.*
-							FROM suuntalavat
-							JOIN suuntalavat_saapuminen ON (
-								suuntalavat.yhtio = suuntalavat_saapuminen.yhtio
-								AND suuntalavat_saapuminen.saapuminen = '{$otunnus}'
-								AND suuntalavat_saapuminen.saapuminen != 0
-								AND suuntalavat.tunnus = suuntalavat_saapuminen.suuntalava)
-							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-							AND suuntalavat.tila = ''
-							AND suuntalavat.sscc = 'Suoratoimitus'";
-				$chk_suuntalava_res = pupe_query($query);
-				$chk_suuntalava_row = mysql_fetch_assoc($chk_suuntalava_res);
-
-				if (mysql_num_rows($chk_suuntalava_res) == 0) {
-
-					$suuntalavan_tunnus = "";
-
-					// Tehdään uusi suuntalava
-					$tee = "lisaa";
-					// $otunnus = $keikan_tunnus;
-					$sscc = "Suoratoimitus";
-					$tyyppi = 0;
-					$keraysvyohyke = "Suoratoimitus";
-					$usea_keraysvyohyke = 'K';
-					$kaytettavyys = "Y";
-					$terminaalialue = "Suoratoimitus";
-					$korkeus = 0;
-					$paino = 0;
-					$alkuhyllyalue = "";
-					$alkuhyllynro = "";
-					$alkuhyllyvali = "";
-					$alkuhyllytaso = "";
-					$loppuhyllyalue = "";
-					$loppuhyllynro = "";
-					$loppuhyllyvali = "";
-					$loppuhyllytaso = "";
-					$automaattinen_paivitys = "S";
-					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-
-					require ("../tilauskasittely/suuntalavat.inc");
-
-					$suuntalavan_tunnus = (int) $uusi_suuntalavan_tunnus;
-				}
-				else {
-					$suuntalavan_tunnus = $chk_suuntalava_row['tunnus'];
-				}
-			}
-
-			if ($suuntalavan_tunnus > 0) {
-				$suuntalava_querylisa = ", suuntalava = $suuntalavan_tunnus ";
-			}
-			else {
-				// toistaiseksi ei päivitetä suuntalavaa tilausriville kohdistuksen yhteydessä automaattisesti
-				// $suuntalava = hae_suuntalava($otunnus, $valittutunnus);
-				// $suuntalava_querylisa = ", suuntalava = $suuntalava ";
-			}
-		}
-
-		$updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}' ";
-
-		// Haetaan rivit ennen päivitystä
-		$vanhathinnat = array();
-
-		$updquery = "	SELECT tunnus
-						FROM tilausrivi
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
-						AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
-		$selresult = pupe_query($updquery);
-
-		while ($updrow = mysql_fetch_assoc($selresult)) {
-			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
-		}
-
-		// poistetaan myös netto = X, jos räplätään ruksia
-		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
-					uusiotunnus = '{$otunnus}',
-					netto = ''
-					$updatelisa
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
-					AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
-		$result = pupe_query($query);
-
-		// Haetaan päivitetyt rivit
-		$uudethinnat = array();
-		mysql_data_seek($selresult, 0);
-
-		while ($updrow = mysql_fetch_assoc($selresult)) {
-			$uudethinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
-		}
-
-		$data = array(
-			'vanhat_hinnat' => $vanhathinnat,
-			'uudet_hinnat' => $uudethinnat,
-			'suuntalava' => 0,
-			'suuntalava_sscc' => ''
-		);
-
-		// Tuotteet päivitetään kohdistuksissa automaattisesti oikeille suuntalavoille, mikäli sellainen on jo perustettu (suuntalavan määriteltyjen varastopaikkojen sekä keräysvyöhykkeen mukaan)
-		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
-			if ($suuntalavan_tunnus > 0) {
-
-				$otunnus = trim($otunnus);
-
-				$data['suuntalava'] = $suuntalavan_tunnus;
-
-				$query = "	SELECT suuntalavat.sscc, IFNULL(suuntalavat_saapuminen.saapuminen, '') AS saapuminen
-							FROM suuntalavat
-							LEFT JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
-							WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
-							AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
-				$sscc_fetch_res = pupe_query($query);
-				$sscc_fetch_row = mysql_fetch_assoc($sscc_fetch_res);
-
-				$data['suuntalava_sscc'] = $sscc_fetch_row['sscc'];
-
-				if ((int) $suuntalavan_tunnus != 0 and $sscc_fetch_row['saapuminen'] == '') {
-					$query = "	INSERT INTO suuntalavat_saapuminen SET
-								yhtio = '{$kukarow['yhtio']}',
-								suuntalava = '{$suuntalavan_tunnus}',
-								saapuminen = '{$otunnus}',
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
-					$insert_res = pupe_query($query);
-				}
-			}
-			else {
-				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti
-				// $data['suuntalava'] = $suuntalava;
-				$data['suuntalava'] = 0;
-			}
-		}
+		$data = kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $suuntalavan_tunnus, $suoratoimitusrivi);
 
 		echo json_encode($data);
 	}
@@ -358,6 +375,18 @@
 
 		echo json_encode($data);
 	}
+	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_tuoteperhe_lapsi') {
+		$tunnus  = $_POST['tunnus'];
+		$otunnus = $_POST['otunnus'];
+		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
+
+		# Toiminta funktioitu
+		# päivitetään lapset
+		$kaikki_ok = paivita_tilausrivin_kpl($tunnus, $uuden_rivin_kpl, $otunnus, true);
+
+		echo json_encode(array('paivitetaanko' => $kaikki_ok));
+
+	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
 		$tunnus = $_POST['tunnus'];
 		$otunnus = $_POST['otunnus'];
@@ -377,4 +406,4 @@
 		echo json_encode($rivi);
 	}
 
-	exit;
+	if (isset($_POST['ajax_toiminto'])) exit;

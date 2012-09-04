@@ -13,7 +13,8 @@
 		mysql_field_name($result, $i) == "tilino_ei_eu" or
 		mysql_field_name($result, $i) == "tilino_kaanteinen" or
 		mysql_field_name($result, $i) == "tilino_marginaali" or
-		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
+		mysql_field_name($result, $i) == "tilino_osto_marginaali" or
+		mysql_field_name($result, $i) == "tilino_triang") {
 
 		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
 		$jatko = 0;
@@ -1143,4 +1144,22 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'kerayserat') {
+
+		if ($yhtiorow['kerayserat'] == 'A') {
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$sel = trim($trow[$i]) == 'A' ? ' selected' : '';
+
+			$ulos .= "<option value = ''>".t("Keräyseriä ei käytetä")."</option>";
+			$ulos .= "<option value = 'A'{$sel}>".t("Keräyserät käytössä")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
 	}

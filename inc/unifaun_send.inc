@@ -326,12 +326,10 @@ class Unifaun {
 					// Jos sopparinumero puuttuu
 					if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 
-						if ($this->toitarow['virallinen_selite'] == "KKSTD" or
-							$this->toitarow['virallinen_selite'] == "TPSTD" or
-							$this->toitarow['virallinen_selite'] == "IT09" or
-							$this->toitarow['virallinen_selite'] == "IT14") 	 $rahtisopimusnro = 123456;
+						if ($this->toitarow['virallinen_selite'] == "KKSTD") $rahtisopimusnro = 999999;
+						elseif ($this->toitarow['virallinen_selite'] == "TPSTD" or $this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") $rahtisopimusnro = 123456;
 						elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
-						elseif ($this->toitarow['virallinen_selite'] == "MH10")  $rahtisopimusnro = 12345678;
+						elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
 						else $rahtisopimusnro = 123;
 					}
 
@@ -538,9 +536,9 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', ""); # Number of EUR pallets in the shipment. Requires palletregno for sender and receiver.
 				#$uni_shi_val->addAttribute('n', "eurpallets");
 
-				$reference = utf8_encode(substr($this->postirow["viesti"], 0, 17));
-
 				# lähettäjän viite
+				$reference = utf8_encode(substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"])), 0, 17));
+
 				$uni_shi_val = $uni_shipment->addChild('val', $reference); # Shipment reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "reference");
 
@@ -550,7 +548,9 @@ class Unifaun {
 				}
 
 				# vastaanottajan viite
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($this->postirow["asiakkaan_tilausnumero"], 0, 17))); # Receiver's reference. Any contents. Max. 17 characters.
+				$reference = utf8_encode(substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["asiakkaan_tilausnumero"])), 0, 17));
+
+				$uni_shi_val = $uni_shipment->addChild('val', $reference); # Receiver's reference. Any contents. Max. 17 characters.
 				$uni_shi_val->addAttribute('n', "rcvreference");
 
 				#$uni_shi_val = $uni_shipment->addChild('val', "sisfreetext1"); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 5 lines available, sisfreetext1-5. Max. 30 characters/line.

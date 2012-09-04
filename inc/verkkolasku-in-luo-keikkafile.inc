@@ -576,7 +576,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["varattu"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -684,6 +684,15 @@
 									$values .= ", '{$kappaleerotus}'";
 								}
 								break;
+							case 'rivihinta':
+								if ($tilausrivirow['kpl'] == 0) {
+									$values .= ", '".$tilausrivirow[$fieldname]."'";
+								}
+								else {
+									$rivihintalisa = ($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $kappaleerotus;
+									$values .= ", '{$rivihintalisa}'";
+								}
+								break;
 							default:
 								$values .= ", '".$tilausrivirow[$fieldname]."'";
 						}
@@ -695,11 +704,13 @@
 
 					$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
 					$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
+					$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
 
 					// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 					$query = "	UPDATE tilausrivi SET
 								{$splitlisa}
 								{$splitlisa2}
+								{$rivihintalisa}
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
 					$upres = pupe_query($query);
@@ -741,7 +752,7 @@
 							$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 							$laskures	= pupe_query($laskuselect);
 							$laskurow	= mysql_fetch_assoc($laskures);
-							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+							list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["varattu"]);
 
 							$lisainsert = "	INSERT INTO tilausrivi SET
 											yhtio			= '{$lapsitieto['yhtio']}',
@@ -992,6 +1003,7 @@
 									$values .= ", now()";
 									break;
 								case 'kpl':
+								case 'rivihinta':
 									$values .= ", 0";
 									break;
 								case 'laskutettuaika':
@@ -1045,7 +1057,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["varattu"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1124,7 +1136,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["varattu"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1212,6 +1224,14 @@
 										$values .= ", '{$positiivinen_arvo}'";
 									}
 									break;
+								case 'rivihinta':
+									if ($split_row['kpl'] == 0) {
+										$values .= ", '0'";
+									}
+									else {
+										$values .= ", '".(($split_row['rivihinta'] / $split_row['kpl']) * $positiivinen_arvo)."'";
+									}
+									break;
 								case 'kommentti':
 									$values .= ", 'TECCOM-laskulla 2: {$laskun_numero}. Tehtiin puuttuva tilausrivi m‰‰r‰lle {$positiivinen_arvo} tuotteelle {$split_row['tuoteno']}'";
 									break;
@@ -1233,6 +1253,7 @@
 
 						$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
 						$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
+						$rivihintalisa = $split_row['kpl'] != 0 ? " rivihinta = '".(($split_row['rivihinta'] / $split_row['kpl']) * $erotus)."', " : " rivihinta = 0, ";
 
 						$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
 
@@ -1240,6 +1261,7 @@
 						$query = "	UPDATE tilausrivi SET
 									{$splitlisa}
 									{$splitlisa2}
+									{$rivihintalisa}
 									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
@@ -1283,7 +1305,7 @@
 								$laskuselect = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$lapsitieto['otunnus']}'";
 								$laskures	= pupe_query($laskuselect);
 								$laskurow	= mysql_fetch_assoc($laskures);
-								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["tilkpl"]);
+								list($hinta,,$ale,) = alehinta_osto($laskurow, $lapsitieto, $lapsitieto["varattu"]);
 
 								$lisainsert = "	INSERT INTO tilausrivi SET
 												yhtio			= '{$lapsitieto['yhtio']}',
@@ -1495,7 +1517,7 @@
 
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		// saadaan luoda keikka vain, jos tulee pelkk‰ lasku (eli toimittajan takana on asn_sanomat = 'L')
-		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0 and $trow['asn_sanomat'] == 'L') {
+		if ($virheet == 0 and count($ostoilla) > 0 and count($keikoilla) == 0 and ($trow['asn_sanomat'] == 'L' or ($trow['asn_sanomat'] == 'K' and $tullaan_virhetarkistuksesta))) {
 
 			#echo "Debug: kululaskut haara, count(ostoilla) > 0 and count(keikoilla) == 0 and virheet == 0<br><br>";
 
@@ -1616,7 +1638,7 @@
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
-							uusiotunnus = '{$keikan_tunnus}',
+							uusiotunnus = '{$keikan_tunnus}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
 				#echo "<pre>",str_replace("\t", "", $update),"</pre>";
@@ -1944,7 +1966,7 @@
 							toim_tuoteno = '{$pointteri1['tuoteno']}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri1['insert_id']}'";
-				echo "<pre>",str_replace("\t", "", $update),"</pre>";
+				#echo "<pre>",str_replace("\t", "", $update),"</pre>";
 				pupe_query($update);
 
 				if ($hinta_chk_row['suuntalava'] != 0) {
@@ -2018,6 +2040,7 @@
 			require("tilauskasittely/kululaskut.inc");
 		}
 		else {
+			$virheet++;
 			echo "Laskulla oli virheit‰, emme tehneet mit‰‰n.\n";
 		}
 	}

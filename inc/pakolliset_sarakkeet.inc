@@ -36,6 +36,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TUOTENO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO", "OLETUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "SALDO", "SALDO_VARATTU", "SALDOAIKA", "INVENTOINTIAIKA", "INVENTOINTIPOIKKEAMA", "INVENTOINTILISTA", "INVENTOINTILISTA_AIKA");
 				$joinattavat = array("TUOTENO" => "tuote");
+				$saakopoistaa = TRUE;
 				break;
 			case "budjetti" :
 				$pakolliset = array("KAUSI", "TASO", "SUMMA");
@@ -58,7 +59,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				else {
 					$pakolliset = array("YTUNNUS");
 				}
+
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+
+				if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+					$kielletyt[] = "LUOTTORAJA";
+				}
 				break;
 			case "toimi" :
 				$pakolliset = array("YTUNNUS");

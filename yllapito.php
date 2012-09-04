@@ -761,10 +761,6 @@
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
-			if (in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
-				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
-			}
-
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
 				//unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
 				if (strpos($lopetus, "yllapito.php") === FALSE) {
@@ -1045,7 +1041,14 @@
 
 				function verifyMulti(){
 					msg = '".t("Haluatko todella poistaa tietueet?")."';
-					return confirm(msg);
+
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 
 				//-->
@@ -1112,7 +1115,7 @@
 					<input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
 		}
 
-		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "toimitustavan_lahdot") {
+		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1285,6 +1288,7 @@
 				(($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
 				($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
 				($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
+				($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
 				($toim == "toimitustavan_lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
 
 				$fontlisa1 = "<font style='text-decoration: line-through'>";
@@ -1399,8 +1403,15 @@
 		if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
-								msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
-								return confirm(msg);
+							msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
+
+							if (confirm(msg)) {
+								return true;
+							}
+							else {
+								skippaa_tama_submitti = true;
+								return false;
+							}
 						}
 				</SCRIPT>";
 
@@ -1691,7 +1702,7 @@
 			}
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito" and $from != "positioselain"))) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
 			if (isset($perhe) and $perhe > 0) {
 				$la_tunnus = $perhe;
@@ -1831,8 +1842,15 @@
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 							function verify(){
-									msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
-									return confirm(msg);
+								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+
+								if (confirm(msg)) {
+									return true;
+								}
+								else {
+									skippaa_tama_submitti = true;
+									return false;
+								}
 							}
 					</SCRIPT>";
 

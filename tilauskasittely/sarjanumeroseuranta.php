@@ -641,11 +641,11 @@
 				}
 			}
 		}
-		elseif ($rivirow["varattu"] < count($sarjataan)) {
+		elseif (($rivirow["varattu"] < count($sarjataan) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) or (($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and ($rivirow["varattu"] == 0 or count($sarjataan) == 0))) {
 			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).". ".$rivirow["varattu"]." ".count($sarjataan)."</font><br><br>";
 		}
 
-		if ($rivirow["varattu"] >= count($sarjataan) and count($sarjataan) > 0 and $lisaysok == "OK") {
+		if ((($rivirow["varattu"] >= count($sarjataan) and count($sarjataan) > 0) or(($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and $rivirow["varattu"] > 0 and count($sarjataan) > 0)) and $lisaysok == "OK") {
 			foreach ($sarjataan as $sarjatun) {
 				if ($tunnuskentta == "ostorivitunnus") {
 					//Hanskataan sarjanumeron varastopaikkaa
@@ -1059,7 +1059,14 @@
 	echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify(){
 					msg = '".t("Haluatko todella poistaa t‰m‰n sarjanumeron")."?';
-					return confirm(msg);
+					
+					if (confirm(msg)) {
+						return true;
+					}
+					else {
+						skippaa_tama_submitti = true;
+						return false;
+					}
 				}
 			</SCRIPT>";
 

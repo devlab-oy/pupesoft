@@ -336,8 +336,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		if (@include_once("login.php"));
+		if ($mobile and include_once("mobiili/login.php"));
+		elseif (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
+
 	}
 
 	exit;
@@ -377,6 +379,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "Your browser does not seem to support cookies.";
 			}
 			else {
+				$palvelin2 = $mobile ? $palvelin2.'mobiili/' : $palvelin2;
 				echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 			}
 			exit;
@@ -555,7 +558,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			echo "<meta http-equiv='pragma' content='no-cache'>\n";
 			echo "<meta http-equiv='expires' content='-1'>\n";
 			echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
-
+			# Jos mobile on setattu, otetaan auto-zoom pois käytöstä
+			if ($mobile) {
+				echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
+				echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
+			}
 			if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
 				echo "<style type='text/css'>\n";
 				echo $css;
@@ -699,12 +706,4 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 
-	if ($yhtiorow["dokumentaatiohallinta"] != "") {
-		/*
-			tehdään linkki dokumentaationhallintaan!
-			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
-		*/
-
-		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
-	}
 }

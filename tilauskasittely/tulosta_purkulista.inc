@@ -368,9 +368,9 @@
 			$out .= sprintf('%-15.15s',	$row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]);
 			$out .= chr(10).chr(10).chr(13);
 		}
-		
-		// Rivinvaihto alkuun, jotta printit osuvat tarroille
-		$out = chr(10).chr(13).$out;
+
+		# Rivinvaihto alkuun, jotta printit osuvat tarroille
+		# $out = chr(10).chr(13).$out;
 
 		// Form Feedi kahdesti, jotta ei tarvitse rullata käsin
 		$out .= chr(12).chr(12);

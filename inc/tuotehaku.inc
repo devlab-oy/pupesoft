@@ -52,7 +52,7 @@
 	 	// Nyt me selataan
 		if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?' or substr($tuoteno,0,1) == "@") and trim(strlen($tuoteno)) >= 2) {
 
-			$lisa1 		= "";
+			$th_lisa1	= "";
 			$ulos  		= "";
 			$poislisa	= "";
 			$kieltolisa	= "";
@@ -67,16 +67,16 @@
 				$tresult = pupe_query($query);
 
 				while ($toimirivi = mysql_fetch_assoc($tresult)) {
-					$lisa1 .= "'$toimirivi[tuoteno]',";
+					$th_lisa1 .= "'$toimirivi[tuoteno]',";
 				}
 
-				if ($lisa1 != "") {
-					$lisa1 = "and tuote.tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
+				if ($th_lisa1 != "") {
+					$th_lisa1 = "and tuote.tuoteno in (".substr($th_lisa1,0,-1).")"; // vika pilkku pois
 				}
 			}
 			elseif (substr($tuoteno, -2) == '**') {
 				// Tuoteryhm‰
-				$lisa1 = " and tuote.try = '$tuoteno' ";
+				$th_lisa1 = " and tuote.try = '$tuoteno' ";
 			}
 			elseif (substr($tuoteno,0,1) == '*') {
 				// Jos eka merkki on t‰hti etsit‰‰n teksteist‰
@@ -84,19 +84,19 @@
 				$sanat = explode(" ", $tuoteno);
 
 				foreach ($sanat as $sana) {
-					$lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
+					$th_lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
 				}
 			}
 			elseif (substr($tuoteno,-1) == '*') {
 				// Jos vika merkki on t‰hti niin etsit‰‰n osittainen tuotenumero
 				$tuoteno = substr($tuoteno,0,-1);
 
-				$lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
+				$th_lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 			}
 			elseif (substr($tuoteno,0,1) == '@') {
 				// Jos ensimm‰inen merkki on AT-merkki niin etsit‰‰n kyseisell‰ tuotenumero
 				$tuoteno = substr($tuoteno,1);
-				$lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
+				$th_lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
 			}
 
 			$yhtiot 	= "";
@@ -191,11 +191,12 @@
 						(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 						tuote.sarjanumeroseuranta,
 						tuote.status,
+						IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
 						(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 						FROM tuote use index (tuoteno, nimitys)
 						WHERE tuote.$yhtiot
 						$kieltolisa
-						$lisa1
+						$th_lisa1
 						$poislisa
 						ORDER BY tuote.tuoteno
 						LIMIT 201";
@@ -227,6 +228,7 @@
 									(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 									tuote.sarjanumeroseuranta,
 									tuote.status,
+									IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
 									(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 									FROM korvaavat
 									JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
@@ -367,7 +369,9 @@
 						$ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
 					}
 
-					$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".t_tuotteen_avainsanat($trow, 'nimitys')." ($kokonaismyytavissa)</option>";
+					$epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("ep‰kurantti").")" : "";
+
+					$ulos .= "<option value='{$trow['tuoteno']}{$lisakala3}'>{$lisakala2} {$lisakala1} {$trow['tuoteno']} ".t_tuotteen_avainsanat($trow, 'nimitys')." ({$kokonaismyytavissa}){$epakuranttiteksti}</option>";
 
 					$edtuoteno = $trow["yhtio"].$trow["korvaavat"];
 					$edvariaatio = $parametritrivi["selite"];
@@ -392,13 +396,13 @@
 			///* Konffaa lukija n‰in: prefiksiksi #-merkki ja suffiksiksi RETURN*///
 			if (substr($tuoteno,0,1) == '#') {
 
-				$lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
+				$th_lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
 
 				$query = "	SELECT tuote.tuoteno
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-							$lisa1";
+							$th_lisa1";
 				$tresult = pupe_query($query);
 
 				if (mysql_num_rows($tresult) > 1) {
@@ -456,4 +460,3 @@
 			}
 		}
 	}
-?>

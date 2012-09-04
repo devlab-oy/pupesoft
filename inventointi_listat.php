@@ -486,7 +486,7 @@
 
 		$joinlisa = "";
 
-		if (isset($reservipaikka)) {
+		if (isset($reservipaikka) and $yhtiorow["varastopaikkojen_maarittely"] != '') {
 			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
 
 			$joinlisa = " JOIN varaston_hyllypaikat ON (

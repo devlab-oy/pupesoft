@@ -784,19 +784,7 @@
 
 						$select_varasto = (int) $select_varasto;
 
-						$query = "	SELECT tunnus
-									FROM varaston_hyllypaikat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND hyllyalue = '{$ahyllyalue}'
-									AND hyllynro = '{$ahyllynro}'
-									AND hyllyvali = '{$ahyllyvali}'
-									AND hyllytaso = '{$ahyllytaso}'
-									AND varasto = '{$select_varasto}'";
-						$chk_res = pupe_query($query);
-
-						if (mysql_num_rows($chk_res) == 0) {
-							$kaikki_ok = false;
-						}
+						$kaikki_ok = tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
 					}
 				}
 

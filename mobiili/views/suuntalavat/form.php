@@ -4,7 +4,7 @@
 </div>
 
 <div class='main'>
-<form method='POST' action=''>
+<form action='' method='post'>
 
 <!-- _form.php -->
 	<table>

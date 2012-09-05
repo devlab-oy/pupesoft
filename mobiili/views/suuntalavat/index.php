@@ -6,16 +6,13 @@
 
 <div class='main'>
 
-<form method='get' action='suuntalavat.php'>
-	<input type='hidden' name='tee' value='muokkaa'>
-	<table>
-		<tr>
-			<th><?= t("Hae suuntalava") ?>:</th>
-			<td><input type='text' name='hae'></td>
-			<td><input type='submit' value='Hae' /></td>
-		</tr>
-	</table>
-</form>
+	<div class='search'>
+		<form action='suuntalavat.php' method='get'>
+			<label for='hae'><?= t("Hae suuntalava") ?>:</label>
+			<input id='hae' name='hae' type='text' />
+			<input type='submit' value='Hae' />
+		</form>
+	</div>
 
 	<table>
 		<tr>
@@ -29,7 +26,7 @@
 		<?php foreach($suuntalavat as $lava): ?>
 		<tr>
 			<td><input type='radio' class='radio' /></td>
-			<td><a href='suuntalavat.php?tee=muokkaa&suuntalava=<?php echo $lava['tunnus'] ?>'><?php echo $lava['sscc'] ?></a></td>
+			<td><a href='suuntalavat.php?muokkaa=<?php echo $lava['tunnus'] ?>'><?php echo $lava['sscc'] ?></a></td>
 			<td><?= $lava['keraysvyohyke'] ?></td>
 			<td><?= $lava['rivit'] ?></td>
 			<td><?= $lava['tyyppi'] ?></td>

@@ -11,8 +11,9 @@ elseif (@include_once("inc/parametrit.inc"));
 if(!isset($errors)) $errors = array();
 if(!isset($tee)) $tee = '';
 
-#### VIEW ####
-if ($tee == 'uusi') {
+# Uusi suuntalava
+# form.php / uusi
+if (isset($uusi)) {
 	$title = "Uusi suuntalava";
 
 	# Haetaan tyypit
@@ -42,13 +43,14 @@ if ($tee == 'uusi') {
 		 	$errors[] = "Virheelliset parametrit";
 		}
 
+		# Jos ei virheitä luodaan uusi suuntalava
 		if(count($errors) == 0) {
-			# Tarvitaan saapuminen
-			$otunnus = "7180350";
+			# TODO: Suuntalavan luominen ilman saapumista
+			$otunnus = "";
 
 			$tee = "eihalutamitankayttoliittymaapliis";
 
-			# Lisää suuntalava
+			# TODO: SSCC:n generointi
 			$params = array(
 					'sscc' => "TEE",
 					'tyyppi' => $pakkaus,
@@ -72,7 +74,117 @@ if ($tee == 'uusi') {
 
 	include('views/suuntalavat/form.php');
 }
-else if ($tee == 'muokkaa' and !isset($suuntalava)) {
+# Päivitetään suuntalava
+# form.php / update
+else if (isset($muokkaa) and is_numeric($muokkaa)) {
+
+	# Tyyppi
+	$query = "	SELECT *
+				FROM pakkaus
+				WHERE yhtio = '{$kukarow['yhtio']}'";
+	$pakkaus_result = pupe_query($query);
+
+	while($rivi = mysql_fetch_assoc($pakkaus_result)) {
+		$pakkaukset[] = $rivi;
+	}
+
+	# Keräysvyöhyke
+	$keraysvyohyke_query = "SELECT tunnus, nimitys
+							FROM keraysvyohyke
+							WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+	$keraysvyohyke_result = pupe_query($keraysvyohyke_query);
+
+	while($rivi = mysql_fetch_assoc($keraysvyohyke_result)) {
+		$keraysvyohykkeet[] = $rivi;
+	}
+
+	# Jos suuntalavalle on ehditty listätä tuotteita, disabloidaan keräysvyöhyke ja hyllyalue
+	$query = "SELECT tunnus FROM tilausrivi WHERE suuntalava = '{$muokkaa}' and yhtio='artr'";
+	$result = pupe_query($query);
+	$disabled = (mysql_num_rows($result) != 0) ? ' disabled' : '';
+
+	# Suuntalavan tiedot
+	$query = "	SELECT
+				suuntalavat.*,
+				pakkaus.pakkaus,
+				pakkaus.tunnus as ptunnus
+				FROM suuntalavat
+				LEFT JOIN pakkaus on (pakkaus.tunnus=suuntalavat.tyyppi)
+				WHERE suuntalavat.tunnus='$muokkaa' and suuntalavat.yhtio='{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+	if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
+
+	echo "Alkuperäinen suuntalava:<pre>";
+	var_dump($suuntalava);
+	echo "</pre>";
+
+	# Suuntalavan päivitys
+	if ($submit) {
+
+		# Tarkistetaan parametrit
+		if(!isset($kaytettavyys) or !isset($terminaalialue) or !isset($sallitaanko)) {
+		 	$errors[] = "Virheelliset parametrit";
+		}
+
+		# Jos ei virheitä niin päivitetään suuntalava
+		if(count($errors) == 0) {
+			$params = array(
+					'suuntalavan_tunnus'	=> $suuntalava['tunnus'],
+					'sscc'					=> $suuntalava['sscc'],
+					'alkuhyllyalue'	 		=> '',
+					'alukuhyllynro'	 		=> '',
+					'alkuhyllyvali'	 		=> '',
+					'alkuhyllytaso'	 		=> '',
+					'loppuhyllyalue'		=> '',
+					'loppuhyllnro'	 		=> '',
+					'loppuhyllyvali'	 	=> '',
+					'loppuhyllytaso'	 	=> '',
+					'tyyppi'				=> $tyyppi,
+					'keraysvyohyke'	 		=> $keraysvyohyke,
+					'kaytettavyys'	 		=> $kaytettavyys,
+					'terminaalialue'	 	=> $terminaalialue,
+					'korkeus'	 			=> '',
+					'paino'					=> '',
+					'usea_keraysvyohyke'	=> $sallitaanko,
+					'hyllyalue'	 			=> $hyllyalue
+				);
+
+			# TODO: Saapumisen hallinta
+			#$otunnus = hae_saapumiset($suuntalava['tunnus']);
+
+			# Ei tarvita käyttöliittymää
+			$suuntalavat_ei_kayttoliittymaa = 'KYLLA';
+			$tee = "eihalutamitankayttoliittymaapliis";
+			$otunnus = '';
+
+			require ("../tilauskasittely/suuntalavat.inc");
+			echo "<br>Päivitetiin suuntalava lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
+			echo "<br>uusi suuntalava tunnus: ".lisaa_suuntalava($otunnus, $params);
+
+			# Takaisin suuntalavat listaan
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
+			exit();
+		}
+	}
+	include('views/suuntalavat/form.php');
+}
+# Suuntalava siirtovalmiiksi
+#
+else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
+	$title = t("Suuntalava siirtovalmiiksi");
+
+	#$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+	#$tee = 'siirtovalmis';
+	#$suuntalavan_tunnus = $suuntalava;
+	#require ("../tilauskasittely/suuntalavat.inc");
+
+	#include('views/suuntalavat/index.php');
+}
+
+# Lista suuntalavoista
+# index.php
+else {
+
 	$title = t("Suuntalavat");
 	$suuntalavat = array();
 
@@ -102,106 +214,6 @@ else if ($tee == 'muokkaa' and !isset($suuntalava)) {
 	}
 
 	include('views/suuntalavat/index.php');
-
-}
-# Päivitetään suuntalava
-else if ($tee == 'muokkaa' and isset($suuntalava)) {
-
-	# Tyyppi
-	$query = "	SELECT *
-				FROM pakkaus
-				WHERE yhtio = '{$kukarow['yhtio']}'";
-	$pakkaus_result = pupe_query($query);
-
-	while($rivi = mysql_fetch_assoc($pakkaus_result)) {
-		$pakkaukset[] = $rivi;
-	}
-
-	# Keräysvyöhyke
-	$keraysvyohyke_query = "SELECT tunnus, nimitys
-							FROM keraysvyohyke
-							WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
-	$keraysvyohyke_result = pupe_query($keraysvyohyke_query);
-
-	while($rivi = mysql_fetch_assoc($keraysvyohyke_result)) {
-		$keraysvyohykkeet[] = $rivi;
-	}
-
-	# Jos suuntalavalle on ehditty listätä tuotteita, disabloidaan keräysvyöhyke ja hyllyalue
-	$query = "SELECT tunnus FROM tilausrivi WHERE suuntalava = '{$suuntalava}'";
-	$result = pupe_query($query);
-	$disabled = (mysql_num_rows($result) != 0) ? ' disabled' : '';
-
-	# Suuntalavan tiedot
-	$query = "	SELECT
-				suuntalavat.*,
-				pakkaus.pakkaus,
-				pakkaus.tunnus as ptunnus
-				FROM suuntalavat
-				LEFT JOIN pakkaus on (pakkaus.tunnus=suuntalavat.tyyppi)
-				WHERE suuntalavat.tunnus='$suuntalava' and suuntalavat.yhtio='{$kukarow['yhtio']}'";
-	$result = pupe_query($query);
-	$suuntalava = mysql_fetch_assoc($result);
-
-	echo "Alkuperäinen suuntalava:<pre>";
-	var_dump($suuntalava);
-	echo "</pre>";
-
-	# Suuntalavan päivitys
-	if ($submit) {
-		# Tarkistetaan parametrit
-		if(!isset($kaytettavyys) or !isset($terminaalialue) or !isset($sallitaanko)) {
-		 	$errors[] = "Virheelliset parametrit";
-		}
-
-		if(count($errors) == 0) {
-			# Lisää suuntalava
-			$params = array(
-					'suuntalavan_tunnus' => $suuntalava['tunnus'],
-					'sscc' => $suuntalava['sscc'],
-					'alkuhyllyalue' => '',
-					'alukuhyllynro' => '',
-					'alkuhyllyvali' => '',
-					'alkuhyllytaso' => '',
-					'loppuhyllyalue' => '',
-					'loppuhyllnro' => '',
-					'loppuhyllyvali' => '',
-					'loppuhyllytaso' => '',
-					'tyyppi' => $tyyppi,
-					'keraysvyohyke' => $keraysvyohyke,
-					'kaytettavyys' => $kaytettavyys,
-					'terminaalialue' => $terminaalialue,
-					'korkeus' => '',
-					'paino' => '',
-					'usea_keraysvyohyke' => $sallitaanko,
-					'hyllyalue' => $hyllyalue
-				);
-			# Tarvitaan saapuminen
-			$otunnus = hae_saapumiset($suuntalava['tunnus']);
-
-			require ("../tilauskasittely/suuntalavat.inc");
-			echo "Päivitetiin suuntalava lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
-			echo "uusi suuntalava tunnus: ".lisaa_suuntalava($otunnus, $params);
-
-		}
-	}
-
-	include('views/suuntalavat/form.php');
-
-}
-else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
-	$title = t("Suuntalava siirtovalmiiksi");
-
-	#$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-	#$tee = 'siirtovalmis';
-	#$suuntalavan_tunnus = $suuntalava;
-	#require ("../tilauskasittely/suuntalavat.inc");
-
-	#include('views/suuntalavat/index.php');
-}
-else {
-	$title = "Suuntalavat";
-	include('views/suuntalavat/valikko.php');
 }
 
 # Virheet

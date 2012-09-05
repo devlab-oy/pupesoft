@@ -37,7 +37,8 @@ if (isset($uusi)) {
 	}
 
 	# Uuden suuntalavan luominen
-	if ($submit) {
+	if (isset($uusi) and $post=='OK') {
+
 		# Tarkistetaan parametrit
 		if(!isset($kaytettavyys) or !isset($terminaalialue) or !isset($sallitaanko)) {
 		 	$errors[] = "Virheelliset parametrit";
@@ -51,9 +52,10 @@ if (isset($uusi)) {
 			$tee = "eihalutamitankayttoliittymaapliis";
 
 			# TODO: SSCC:n generointi
+			$temp_sscc = "tmp_".substr(sha1(time()), 0, 6);
 			$params = array(
-					'sscc' => "TEE",
-					'tyyppi' => $pakkaus,
+					'sscc' => $temp_sscc,
+					'tyyppi' => $tyyppi,
 					'keraysvyohyke' => $keraysvyohyke,
 					'kaytettavyys' => $kaytettavyys,
 					'usea_keraysvyohyke' => $sallitaanko,
@@ -114,12 +116,8 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	$result = pupe_query($query);
 	if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
 
-	echo "Alkuperäinen suuntalava:<pre>";
-	var_dump($suuntalava);
-	echo "</pre>";
-
 	# Suuntalavan päivitys
-	if ($submit) {
+	if (isset($post) and is_numeric($muokkaa)) {
 
 		# Tarkistetaan parametrit
 		if(!isset($kaytettavyys) or !isset($terminaalialue) or !isset($sallitaanko)) {
@@ -128,6 +126,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 
 		# Jos ei virheitä niin päivitetään suuntalava
 		if(count($errors) == 0) {
+			# Tehdään uusi suuntalava
 			$params = array(
 					'suuntalavan_tunnus'	=> $suuntalava['tunnus'],
 					'sscc'					=> $suuntalava['sscc'],
@@ -140,7 +139,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 					'loppuhyllyvali'	 	=> '',
 					'loppuhyllytaso'	 	=> '',
 					'tyyppi'				=> $tyyppi,
-					'keraysvyohyke'	 		=> $keraysvyohyke,
+					'keraysvyohyke'	 		=> $keraysvyohyke = ($keraysvyohyke) ? : $suuntalava['keraysvyohyke'],
 					'kaytettavyys'	 		=> $kaytettavyys,
 					'terminaalialue'	 	=> $terminaalialue,
 					'korkeus'	 			=> '',
@@ -159,7 +158,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 
 			require ("../tilauskasittely/suuntalavat.inc");
 			echo "<br>Päivitetiin suuntalava lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
-			echo "<br>uusi suuntalava tunnus: ".lisaa_suuntalava($otunnus, $params);
+			lisaa_suuntalava($otunnus, $params);
 
 			# Takaisin suuntalavat listaan
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
@@ -167,7 +166,12 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 		}
 	}
 	include('views/suuntalavat/form.php');
+
+	echo "Alkuperäinen suuntalava:<pre>";
+	var_dump($suuntalava);
+	echo "</pre>";
 }
+
 # Suuntalava siirtovalmiiksi
 #
 else if ($tee == 'siirtovalmis' and isset($suuntalava)) {

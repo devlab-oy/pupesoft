@@ -2379,6 +2379,14 @@
 				}
 			}
 
+			$asiakas_join_lisa = "";
+
+			// Jos keräyserät käytössä, pitää hakea asiakkaankin tiedot (myyntipuolella toim="")
+			if ($yhtiorow['kerayserat'] != '' and $toim == "") {
+				$select_lisa .= "asiakas.kerayserat,";
+				$asiakas_join_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
+			}
+
 			$query = "	SELECT
 						concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 						tilausrivi.tuoteno puhdas_tuoteno,
@@ -2394,14 +2402,13 @@
 						tilausrivi.tunnus,
 						tilausrivi.var,
 						lasku.jtkielto,
-						asiakas.kerayserat,
 						$select_lisa
 						$sorttauskentta,
 						if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 						FROM tilausrivi
 						JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 						JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+						$asiakas_join_lisa
 						WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
 						and tilausrivi.otunnus in ($tilausnumeroita)
 						and tilausrivi.var in ('', 'H' $var_lisa)

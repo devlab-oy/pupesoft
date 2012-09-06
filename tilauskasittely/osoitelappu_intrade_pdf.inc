@@ -151,8 +151,6 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 
 $kirjainlisa = '';
 
-$oslappkpl = (!isset($oslappkpl) or $oslappkpl == 0) ? 1 : $oslappkpl;
-
 for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
 	if (count($uniq_pakkaukset) == 0) {

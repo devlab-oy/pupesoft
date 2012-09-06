@@ -175,11 +175,13 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 			$i++;
 		}
 
-		$oslappkpl = count($uniq_pakkaukset);
+		$oslappkpl = count($uniq_pakkaukset) > 0 ? count($uniq_pakkaukset) : $oslappkpl;
 	}
 }
 
 $kirjainlisa = '';
+
+$oslappkpl = (!isset($oslappkpl) or $oslappkpl == 0) ? 1 : $oslappkpl;
 
 for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 

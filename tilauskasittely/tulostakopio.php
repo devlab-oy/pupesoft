@@ -1238,7 +1238,7 @@
 		elseif ($toim == "OSOITELAPPU") {
 			$tulostimet[0] = 'Osoitelappu';
 			if ($kappaleet > 0 and $komento["Osoitelappu"] != 'email') {
-				$komento["Osoitelappu"] .= " -# $kappaleet ";
+				$oslappkpl = $kappaleet;
 			}
 		}
 		elseif ($toim == "VIENTIERITTELY") {
@@ -2118,5 +2118,3 @@
 	if (@include("inc/footer.inc"));
 	elseif (@include("footer.inc"));
 	else exit;
-
-?>

@@ -12748,7 +12748,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
+				$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,

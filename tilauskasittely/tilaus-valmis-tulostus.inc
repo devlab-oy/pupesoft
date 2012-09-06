@@ -155,34 +155,33 @@
 
 					if ($var_myytavissa > 0) {
 
-						if ($var_myytavissa >= $var_chk_row['varattu']) {
+						if ($var_myytavissa >= $var_chk_row['tilkpl']) {
 
 							$query = "	UPDATE tilausrivi SET
+										varattu = tilkpl,
 										var = ''
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$var_chk_row['tunnus']}'";
 							$upd_res = pupe_query($query);
-
-							echo t("Tuote")," {$var_chk_row['tuoteno']} ",t("oli Puute/JT rivi, päivitettiin tilkpl -> varattu "),"{$var_chk_row['tilkpl']}<br />";
 						}
 						else {
 
-							$uuden_rivin_varattu = $var_chk_row['varattu'] - $var_myytavissa;
+							$uuden_rivin_varattu = $var_chk_row['tilkpl'] - $var_myytavissa;
 
 							$poikkeukset = array(
-								'tilausrivi.varattu' => $uuden_rivin_varattu,
+								'tilausrivi.varattu' => 0,
+								'tilausrivi.tilkpl' => $uuden_rivin_varattu
 							);
 
 							kopioi_tilausrivi($var_chk_row['tunnus'], $poikkeukset);
 
 							$query = "	UPDATE tilausrivi SET
+										tilkpl = '{$var_myytavissa}',
 										varattu = '{$var_myytavissa}',
 										var = ''
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$var_chk_row['tunnus']}'";
 							$upd_res = pupe_query($query);
-
-							echo t("Tuote")," {$var_chk_row['tuoteno']} ",t("oli Puute/JT rivi"),". ",t("Tilausrivillä oli")," {$var_chk_row['tilkpl']}",t(", mutta myytävissä oli vain")," {$var_myytavissa}.<br />";
 						}
 					}
 				}

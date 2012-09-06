@@ -153,12 +153,11 @@
 
 					list($var_saldo, $var_hyllyssa, $var_myytavissa) = saldo_myytavissa($var_chk_row['tuoteno'], 'JTSPEC', 0, '', $var_chk_row['hyllyalue'], $var_chk_row['hyllynro'], $var_chk_row['hyllyvali'], $var_chk_row['hyllytaso']);
 
-					if ($var_myytavissa != 0) {
+					if ($var_myytavissa > 0) {
 
-						if ($var_myytavissa >= $var_chk_row['tilkpl']) {
+						if ($var_myytavissa >= $var_chk_row['varattu']) {
 
 							$query = "	UPDATE tilausrivi SET
-										varattu = tilkpl,
 										var = ''
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$var_chk_row['tunnus']}'";
@@ -168,7 +167,7 @@
 						}
 						else {
 
-							$uuden_rivin_varattu = $var_chk_row['tilkpl'] - $var_myytavissa;
+							$uuden_rivin_varattu = $var_chk_row['varattu'] - $var_myytavissa;
 
 							$poikkeukset = array(
 								'tilausrivi.varattu' => $uuden_rivin_varattu,

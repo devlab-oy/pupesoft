@@ -26,6 +26,9 @@
 	elseif ($naytatvale == 7) {
 		$lahetetyyppi = "tulosta_lahete_ean.inc";
 	}
+	elseif ($naytatvale == 8) {
+		$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
+	}
 	else {
 		$lahetetyyppi = "tulosta_lahete.inc";
 	}
@@ -220,4 +223,3 @@
 
 	//tulostetaan sivu
 	print_pdf_lahete($params_lahete);
-?>

@@ -109,6 +109,9 @@
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2;
 		}
+		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
+		}
 		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
 		}
@@ -375,4 +378,3 @@
 	//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
 	require("footer.inc");
 	exit;
-?>

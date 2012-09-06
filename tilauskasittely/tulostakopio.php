@@ -1237,9 +1237,6 @@
 		}
 		elseif ($toim == "OSOITELAPPU") {
 			$tulostimet[0] = 'Osoitelappu';
-			if ($kappaleet > 0 and $komento["Osoitelappu"] != 'email') {
-				$oslappkpl = $kappaleet;
-			}
 		}
 		elseif ($toim == "VIENTIERITTELY") {
 			$tulostimet[0] = 'Vientierittely';
@@ -2079,9 +2076,10 @@
 				$tee = '';
 			}
 
-			if ($toim == "OSOITELAPPU") {
+			if ($toim == "OSOITELAPPU" and $kappaleet > 0) {
 				$tunnus = $laskurow["tunnus"];
 				$oslapp = $komento["Osoitelappu"];
+				$oslappkpl = $kappaleet;
 
 				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku

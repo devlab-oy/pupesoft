@@ -857,7 +857,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 370, $kala+10, 420, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 420, $kala+10, 470, 	$thispage, $rectparam);
-			$pdf->draw_rectangle($kala+30, 470, $kala+10, 520, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 470, $kala+10, 580, 	$thispage, $rectparam);
 			$pdf->draw_text(25,  $kala+15, "#",					$thispage, $norm);
 
 			if ($pitkattuotteet) {
@@ -1583,7 +1583,7 @@ if (!function_exists('rivi_lahete')) {
 
 				$return = rivi_hinta_ale_lahete_ean($return);
 			}
-			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale") {
+			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 					$return["summa"] += $row['rivihinta'];

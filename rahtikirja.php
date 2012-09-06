@@ -920,25 +920,23 @@
 
 					$tunnus = $laskurow["tunnus"];
 
-					$oslaput_email = 1;
-
-					if ($termoslappkpl > 0 and $termoslappkpl != '' and $termoslapp != 'email') {
-						$termoslapp .= " -#$termoslappkpl ";
-					}
-					elseif ($termoslappkpl > 0 and $termoslappkpl != '' and $termoslapp == 'email') {
-						$oslaput_email = $termoslappkpl;
-					}
-
 					$tiedot = "toimitusta";
 
-					for ($i = 0; $i < $oslaput_email; $i++) {
-						if ($toimitustaparow['osoitelappu'] == 'intrade') {
-							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-						}
-						else {
-							require ("tilauskasittely/osoitelappu_pdf.inc");
-						}
+					$oslappkpl_tmp = $oslappkpl;
+					$oslappkpl = $termoslappkpl;
+
+					$oslapp_tmp = $oslapp;
+					$oslapp = $termoslapp;
+
+					if ($toimitustaparow['osoitelappu'] == 'intrade') {
+						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
+					else {
+						require ("tilauskasittely/osoitelappu_pdf.inc");
+					}
+
+					$oslappkpl = $oslappkpl_tmp;
+					$oslapp = $oslapp_tmp;
 					unset($tunnus);
 				}
 			}

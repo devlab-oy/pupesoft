@@ -1,6 +1,6 @@
 <!-- lista.php | index.php? , listaa suuntalavat (muokkaa suuntalava ja suuntalava siirtovalmiiksi) -->
 <div class='header'>
-	<a href='suuntalavat.php' class='left'>Takaisin</a>
+	<a href='tulouta.php' class='left'>Takaisin</a>
 	<h1><?php echo $title ?></h1>
 </div>
 
@@ -16,7 +16,6 @@
 
 	<table>
 		<tr>
-			<th></th>
 			<th><?= t("Suuntalavan nro") ?></th>
 			<th><?= t("Ker.vyöhyk.") ?></th>
 			<th><?= t("Rivejä") ?></th>
@@ -25,7 +24,6 @@
 
 		<?php foreach($suuntalavat as $lava): ?>
 		<tr>
-			<td><input type='radio' class='radio' /></td>
 			<td><a href='suuntalavat.php?muokkaa=<?php echo $lava['tunnus'] ?>'><?php echo $lava['sscc'] ?></a></td>
 			<td><?= $lava['keraysvyohyke'] ?></td>
 			<td><?= $lava['rivit'] ?></td>
@@ -37,7 +35,6 @@
 </div>
 
 <div class='controls'>
-	<input type='submit' name='submit' value='OK' />
-	<a href='suuntalavat.php'>Takaisin </a>
+	<!--<input type='submit' name='submit' value='OK' />-->
+	<a href='suuntalavat.php?uusi'>Uusi suuntalava</a>
 </div>
-

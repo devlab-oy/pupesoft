@@ -79,7 +79,7 @@ if (isset($uusi)) {
 # Päivitetään suuntalava
 # form.php / update
 else if (isset($muokkaa) and is_numeric($muokkaa)) {
-
+	$title = "Suuntalavan muokkaus";
 	# Tyyppi
 	$query = "	SELECT *
 				FROM pakkaus
@@ -130,14 +130,14 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 			$params = array(
 					'suuntalavan_tunnus'	=> $suuntalava['tunnus'],
 					'sscc'					=> $suuntalava['sscc'],
-					'alkuhyllyalue'	 		=> '',
-					'alukuhyllynro'	 		=> '',
-					'alkuhyllyvali'	 		=> '',
-					'alkuhyllytaso'	 		=> '',
-					'loppuhyllyalue'		=> '',
-					'loppuhyllnro'	 		=> '',
-					'loppuhyllyvali'	 	=> '',
-					'loppuhyllytaso'	 	=> '',
+					'alkuhyllyalue'	 		=> $alkuhyllyalue,
+					'alkuhyllynro'	 		=> $alkuhyllynro,
+					'alkuhyllyvali'	 		=> $alkuhyllyvali,
+					'alkuhyllytaso'	 		=> $alkuhyllytaso,
+					'loppuhyllyalue'		=> $loppuhyllyalue,
+					'loppuhyllynro'	 		=> $loppuhyllynro,
+					'loppuhyllyvali'	 	=> $loppuhyllyvali,
+					'loppuhyllytaso'	 	=> $loppuhyllytaso,
 					'tyyppi'				=> $tyyppi,
 					'keraysvyohyke'	 		=> $keraysvyohyke = ($keraysvyohyke) ? : $suuntalava['keraysvyohyke'],
 					'kaytettavyys'	 		=> $kaytettavyys,
@@ -177,12 +177,14 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
 	$title = t("Suuntalava siirtovalmiiksi");
 
-	#$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-	#$tee = 'siirtovalmis';
-	#$suuntalavan_tunnus = $suuntalava;
-	#require ("../tilauskasittely/suuntalavat.inc");
+	$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+	$tee = 'siirtovalmis';
+	$suuntalavan_tunnus = $suuntalava;
+	require ("../tilauskasittely/suuntalavat.inc");
 
-	#include('views/suuntalavat/index.php');
+	# Takaisin suuntalavat listaan
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
+	exit();
 }
 
 # Lista suuntalavoista
@@ -195,6 +197,7 @@ else {
 	$hakuehto = !empty($hae) ? "and suuntalavat.sscc = '".mysql_real_escape_string($hae)."'" : "";
 
 	# Haetaan 'validit' suuntalavat
+	# suuntalavat.tila=''
 	$query = "	SELECT
 				suuntalavat.sscc,
 				ifnull(keraysvyohyke.nimitys, '-') as keraysvyohyke,
@@ -206,7 +209,8 @@ else {
 				LEFT JOIN pakkaus on (pakkaus.tunnus = suuntalavat.tyyppi)
 				LEFT JOIN keraysvyohyke on (keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
 				WHERE suuntalavat.tila='' and suuntalavat.sscc!='Suoratoimitus' $hakuehto and suuntalavat.yhtio='{$kukarow['yhtio']}'
-				GROUP BY 1,2,3";
+				GROUP BY 1,2,3
+				ORDER BY suuntalavat.tunnus DESC";
 	$result = pupe_query($query);
 
 	while($rivi = mysql_fetch_assoc($result)) {

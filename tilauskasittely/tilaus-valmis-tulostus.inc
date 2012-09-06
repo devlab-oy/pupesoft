@@ -144,6 +144,7 @@
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus IN ($tilausnumeroita)
+						AND tilkpl > 0
 						{$var_wherelisa}";
 			$var_chk_res = pupe_query($query);
 

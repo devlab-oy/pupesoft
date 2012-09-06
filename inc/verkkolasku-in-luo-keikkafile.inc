@@ -707,9 +707,14 @@
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.tyyppi = 'L'";
 					$myynti_rivi_res = pupe_query($query);
-					$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
 
-					$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+					$myynti_tilausrivi_id_isa = 0;
+
+					if (mysql_num_rows($myynti_rivi_res) > 0) {
+						$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
+
+						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+					}
 
 					// katsotaan onko tuoteperheen isätuote
 					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
@@ -733,24 +738,29 @@
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
-							// etsitään ja splitataan myös myyntitilausrivi LAPSI
-							$query = "	SELECT tilausrivi.tunnus
-										FROM tilausrivi
-										JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.tyyppi = 'L'";
-							$myynti_rivi_res = pupe_query($query);
-							$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+							$myynti_tilausrivi_id_lapsi = 0;
 
-							$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+							if ($myynti_tilausrivi_id_isa != 0) {
+								// etsitään ja splitataan myös myyntitilausrivi LAPSI
+								$query = "	SELECT tilausrivi.tunnus
+											FROM tilausrivi
+											JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivi.tyyppi = 'L'";
+								$myynti_rivi_res = pupe_query($query);
+								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+
+								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+							}
 
 							// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 							if ($lapsi_chk_row['kpl'] > 0) {
 
 								$_arr = array(
-									$lapsi_chk_row['tunnus'] => $lapsi_uusi_id,
-									$myynti_rivi_row['tunnus'] => $myynti_tilausrivi_id_lapsi
+									$lapsi_chk_row['tunnus'] => $lapsi_uusi_id
 								);
+
+								if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
 								foreach ($_arr as $_ktunnus => $_vid) {
 									$query = "	SELECT *
@@ -803,6 +813,14 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$tilausrivi_id}'";
 						$upd_res = pupe_query($query);
+
+						if ($myynti_tilausrivi_id_isa != 0) {
+							$query = "	UPDATE tilausrivi SET
+										perheid = '{$myynti_tilausrivi_id_isa}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+							$upd_res = pupe_query($query);
+						}
 					}
 
 					$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
@@ -1122,9 +1140,14 @@
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'L'";
 						$myynti_rivi_res = pupe_query($query);
-						$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
 
-						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+						$myynti_tilausrivi_id_isa = 0;
+
+						if (mysql_num_rows($myynti_rivi_res) > 0) {
+							$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
+
+							$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+						}
 
 						// katsotaan onko tuoteperheen isätuote
 						if ($split_row['perheid'] == $split_row['tunnus']) {
@@ -1148,24 +1171,29 @@
 
 								$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
-								// etsitään ja splitataan myös myyntitilausrivi LAPSI
-								$query = "	SELECT tilausrivi.tunnus
-											FROM tilausrivi
-											JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
-											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-											AND tilausrivi.tyyppi = 'L'";
-								$myynti_rivi_res = pupe_query($query);
-								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+								$myynti_tilausrivi_id_lapsi = 0;
 
-								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+								if ($myynti_tilausrivi_id_isa != 0) {
+									// etsitään ja splitataan myös myyntitilausrivi LAPSI
+									$query = "	SELECT tilausrivi.tunnus
+												FROM tilausrivi
+												JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+												AND tilausrivi.tyyppi = 'L'";
+									$myynti_rivi_res = pupe_query($query);
+									$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+
+									$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+								}
 
 								// jos rivi on jo viety varastoon ja yllä splitattiin se rivi, korjataan tapahtumat
 								if ($lapsi_chk_row['kpl'] > 0) {
 
 									$_arr = array(
-										$lapsi_chk_row['tunnus'] => $lapsi_uusi_id,
-										$myynti_rivi_row['tunnus'] => $myynti_tilausrivi_id_lapsi
+										$lapsi_chk_row['tunnus'] => $lapsi_uusi_id
 									);
+
+									if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
 									foreach ($_arr as $_ktunnus => $_vid) {
 										$query = "	SELECT *
@@ -1218,6 +1246,14 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tilausrivi_id}'";
 							$upd_res = pupe_query($query);
+
+							if ($myynti_tilausrivi_id_isa != 0) {
+								$query = "	UPDATE tilausrivi SET
+											perheid = '{$myynti_tilausrivi_id_isa}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+								$upd_res = pupe_query($query);
+							}
 						}
 
 						$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";

@@ -453,6 +453,30 @@
 									tilaajanrivinro = '{$split_row['tilaajanrivinro']}'";
 						$inskres = pupe_query($query);
 
+						// etsit‰‰n ja splitataan myˆs myyntitilausrivi ISƒ
+						$query = "	SELECT tilausrivi.tunnus
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$split_row['tunnus']}')
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.tyyppi = 'L'";
+						$myynti_rivi_res = pupe_query($query);
+
+						$myynti_tilausrivi_id_isa = 0;
+
+						if (mysql_num_rows($myynti_rivi_res) > 0) {
+							$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
+
+							// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
+							$poikkeukset = array(
+								'tilausrivi.varattu' => ($split_row['kpl'] == 0 ? $positiivinen_arvo : 0),
+								'tilausrivi.tilkpl' => $positiivinen_arvo,
+								'tilausrivi.kpl' => ($split_row['kpl'] != 0 ? $positiivinen_arvo : 0),
+								'tilausrivi.laatija' => "split",
+							);
+
+							$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+						}
+
 						// katsotaan onko tuoteperheen is‰tuote
 						if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
 
@@ -477,6 +501,23 @@
 
 								$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
+								$myynti_tilausrivi_id_lapsi = 0;
+
+								if ($myynti_tilausrivi_id_isa != 0) {
+									// etsit‰‰n ja splitataan myˆs myyntitilausrivi LAPSI
+									$query = "	SELECT tilausrivi.tunnus
+												FROM tilausrivi
+												JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+												WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+												AND tilausrivi.tyyppi = 'L'";
+									$myynti_rivi_res = pupe_query($query);
+									$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+
+									$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
+
+									$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+								}
+
 								// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
 								$query = "	UPDATE tilausrivi SET
 											varattu = '{$erotus}',
@@ -488,47 +529,57 @@
 
 								// jos rivi on jo viety varastoon ja yll‰ splitattiin se rivi, korjataan tapahtumat
 								if ($lapsi_chk_row['kpl'] > 0) {
-									$query = "	SELECT *
-												FROM tapahtuma
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'tulo'
-												AND rivitunnus = '{$lapsi_chk_row['tunnus']}'";
-									$tapahtuma_res = pupe_query($query);
-									$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
-									// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-									$fields = "yhtio";
-									$values = "'{$kukarow['yhtio']}'";
+									$_arr = array(
+										$lapsi_chk_row['tunnus'] => $lapsi_uusi_id
+									);
 
-									// Ei monisteta tunnusta
-									for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
+									if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
-										$fieldname = mysql_field_name($tapahtuma_res,$ii);
+									foreach ($_arr as $_ktunnus => $_vid) {
 
-										$fields .= ", ".$fieldname;
+										$query = "	SELECT *
+													FROM tapahtuma
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND laji = 'tulo'
+													AND rivitunnus = '{$_ktunnus}'";
+										$tapahtuma_res = pupe_query($query);
+										$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
-										switch ($fieldname) {
-											case 'rivitunnus':
-												$values .= ", '{$lapsi_uusi_id}'";
-												break;
-											case 'kpl':
-												$values .= ", '{$positiivinen_arvo}'";
-												break;
-											default:
-												$values .= ", '".$tapahtuma_row[$fieldname]."'";
+										// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+										$fields = "yhtio";
+										$values = "'{$kukarow['yhtio']}'";
+
+										// Ei monisteta tunnusta
+										for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
+
+											$fieldname = mysql_field_name($tapahtuma_res,$ii);
+
+											$fields .= ", ".$fieldname;
+
+											switch ($fieldname) {
+												case 'rivitunnus':
+													$values .= ", '{$_vid}'";
+													break;
+												case 'kpl':
+													$values .= ", '{$positiivinen_arvo}'";
+													break;
+												default:
+													$values .= ", '".$tapahtuma_row[$fieldname]."'";
+											}
 										}
+
+										$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
+										$uusires = pupe_query($kysely);
+										$tapahtuma_id = mysql_insert_id();
+
+										$query = "	UPDATE tapahtuma
+													SET kpl = '{$erotus}'
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND laji = 'tulo'
+													AND rivitunnus = '{$_ktunnus}'";
+										$upd_res = pupe_query($query);
 									}
-
-									$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-									$uusires = pupe_query($kysely);
-									$tapahtuma_id = mysql_insert_id();
-
-									$query = "	UPDATE tapahtuma
-												SET kpl = '{$erotus}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND laji = 'tulo'
-												AND rivitunnus = '{$lapsi_chk_row['tunnus']}'";
-									$upd_res = pupe_query($query);
 								}
 							}
 
@@ -537,6 +588,14 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tilausrivi_id}'";
 							$upd_res = pupe_query($query);
+
+							if ($myynti_tilausrivi_id_isa != 0) {
+								$query = "	UPDATE tilausrivi SET
+											perheid = '{$myynti_tilausrivi_id_isa}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+								$upd_res = pupe_query($query);
+							}
 						}
 
 					}
@@ -594,6 +653,30 @@
 								tilaajanrivinro = '{$tilausrivirow['tilaajanrivinro']}'";
 					$inskres = pupe_query($query);
 
+					// etsit‰‰n ja splitataan myˆs myyntitilausrivi ISƒ
+					$query = "	SELECT tilausrivi.tunnus
+								FROM tilausrivi
+								JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$tilausrivirow['tunnus']}')
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tyyppi = 'L'";
+					$myynti_rivi_res = pupe_query($query);
+
+					$myynti_tilausrivi_id_isa = 0;
+
+					if (mysql_num_rows($myynti_rivi_res) > 0) {
+						$myynti_rivi_row_isa = mysql_fetch_assoc($myynti_rivi_res);
+
+						// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
+						$poikkeukset = array(
+							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+							'tilausrivi.tilkpl' => $kappaleerotus,
+							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
+							'tilausrivi.laatija' => "split",
+						);
+
+						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+					}
+
 					// katsotaan onko tuoteperheen is‰tuote
 					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
 
@@ -618,6 +701,23 @@
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
+							$myynti_tilausrivi_id_lapsi = 0;
+
+							if ($myynti_tilausrivi_id_isa != 0) {
+								// etsit‰‰n ja splitataan myˆs myyntitilausrivi LAPSI
+								$query = "	SELECT tilausrivi.tunnus
+											FROM tilausrivi
+											JOIN tilausrivin_lisatiedot AS tl ON (tl.yhtio = tilausrivi.yhtio AND tl.tilausrivitunnus = tilausrivi.tunnus AND tl.tilausrivilinkki = '{$lapsi_chk_row['tunnus']}')
+											WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivi.tyyppi = 'L'";
+								$myynti_rivi_res = pupe_query($query);
+								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
+
+								$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
+
+								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+							}
+
 							// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
 							$query = "	UPDATE tilausrivi SET
 										varattu = '{$row['kappalemaara']}',
@@ -629,47 +729,56 @@
 
 							// jos rivi on jo viety varastoon ja yll‰ splitattiin se rivi, korjataan tapahtumat
 							if ($lapsi_chk_row['kpl'] > 0) {
-								$query = "	SELECT *
-											FROM tapahtuma
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'tulo'
-											AND rivitunnus = '{$lapsi_chk_row['tunnus']}'";
-								$tapahtuma_res = pupe_query($query);
-								$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
-								// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
-								$fields = "yhtio";
-								$values = "'{$kukarow['yhtio']}'";
+								$_arr = array(
+									$lapsi_chk_row['tunnus'] => $lapsi_uusi_id
+								);
 
-								// Ei monisteta tunnusta
-								for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
+								if ($myynti_tilausrivi_id_lapsi != 0) $_arr[$myynti_rivi_row['tunnus']] = $myynti_tilausrivi_id_lapsi;
 
-									$fieldname = mysql_field_name($tapahtuma_res,$ii);
+								foreach ($_arr as $_ktunnus => $_vid) {
+									$query = "	SELECT *
+												FROM tapahtuma
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND laji = 'tulo'
+												AND rivitunnus = '{$_ktunnus}'";
+									$tapahtuma_res = pupe_query($query);
+									$tapahtuma_row = mysql_fetch_assoc($tapahtuma_res);
 
-									$fields .= ", ".$fieldname;
+									// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
+									$fields = "yhtio";
+									$values = "'{$kukarow['yhtio']}'";
 
-									switch ($fieldname) {
-										case 'rivitunnus':
-											$values .= ", '{$lapsi_uusi_id}'";
-											break;
-										case 'kpl':
-											$values .= ", '{$kappaleerotus}'";
-											break;
-										default:
-											$values .= ", '".$tapahtuma_row[$fieldname]."'";
+									// Ei monisteta tunnusta
+									for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
+
+										$fieldname = mysql_field_name($tapahtuma_res,$ii);
+
+										$fields .= ", ".$fieldname;
+
+										switch ($fieldname) {
+											case 'rivitunnus':
+												$values .= ", '{$_vid}'";
+												break;
+											case 'kpl':
+												$values .= ", '{$kappaleerotus}'";
+												break;
+											default:
+												$values .= ", '".$tapahtuma_row[$fieldname]."'";
+										}
 									}
+
+									$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
+									$uusires = pupe_query($kysely);
+									$tapahtuma_id = mysql_insert_id();
+
+									$query = "	UPDATE tapahtuma
+												SET kpl = '{$row['kappalemaara']}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND laji = 'tulo'
+												AND rivitunnus = '{$_ktunnus}'";
+									$upd_res = pupe_query($query);
 								}
-
-								$kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
-								$uusires = pupe_query($kysely);
-								$tapahtuma_id = mysql_insert_id();
-
-								$query = "	UPDATE tapahtuma
-											SET kpl = '{$row['kappalemaara']}'
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = 'tulo'
-											AND rivitunnus = '{$lapsi_chk_row['tunnus']}'";
-								$upd_res = pupe_query($query);
 							}
 						}
 
@@ -678,6 +787,14 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$tilausrivi_id}'";
 						$upd_res = pupe_query($query);
+
+						if ($myynti_tilausrivi_id_isa != 0) {
+							$query = "	UPDATE tilausrivi SET
+										perheid = '{$myynti_tilausrivi_id_isa}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+							$upd_res = pupe_query($query);
+						}
 					}
 				}
 

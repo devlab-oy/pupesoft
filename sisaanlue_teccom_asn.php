@@ -53,7 +53,7 @@
 		$pakettinumero 			 = $parameters["pakettinumero"];
 		$sscc					 = $parameters["sscc"];
 		$laatikkoind			 = $parameters["laatikkoind"];
-		
+
 		foreach ($xml_element as $key => $element) {
 
 			// Tämä on tuote-elementti
@@ -62,11 +62,11 @@
 				$tuote					= (string) $element->ProductId->ProductNumber;
 				$tuote					= utf8_decode(trim($tuote));
 				$tuote2					= (string) $element->ProductId->BuyerProductNumber;
-				$tuote2					= utf8_decode(trim($tuote2)); 
+				$tuote2					= utf8_decode(trim($tuote2));
 				$kpl					= (float) $element->DeliveredQuantity->Quantity;
 				$tilausrivinpositio		= (int) $element->OrderItemRef->BuyerOrderItemRef;
 				$tuotteelta_tilausno	= (int) $element->OrderRef->BuyerOrderNumber;
-				
+
 				if ($kpl > 0.0 and $tuote != "") {
 
 					$toinen_tuoteno = "";
@@ -171,18 +171,18 @@
 
 			// Tämä on paketti-elementti
 			if ($key == "Package") {
-				$paketti_nro++;				
+				$paketti_nro++;
 
 				$parameters = array(
 					"tavarantoimittajanumero" 	=> $tavarantoimittajanumero,
-					"asn_numero"				=> $asn_numero, 
-					"toimituspvm"				=> $toimituspvm, 
-					"vastaanottaja"				=> $vastaanottaja, 
-					"pakkauslista"				=> $pakkauslista, 
-					"pakettinumero"				=> $pakettinumero,	
+					"asn_numero"				=> $asn_numero,
+					"toimituspvm"				=> $toimituspvm,
+					"vastaanottaja"				=> $vastaanottaja,
+					"pakkauslista"				=> $pakkauslista,
+					"pakettinumero"				=> $pakettinumero,
 					);
-				
-				if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {	
+
+				if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {
 						$laatikko = (string) $element->PkgId->PkgIdentNumber;
 						$laatikko = utf8_decode($laatikko);
 						$koodi = $laatikko;
@@ -207,7 +207,7 @@
 				elseif ($tavarantoimittajanumero == "123441" and !isset($element->PkgId->PkgIdentNumber)) {
 					$parameters["laatikkoind"]	= $asn_numero;
 					$parameters["sscc"]			= $asn_numero;
-					
+
 				}
 				elseif ($tavarantoimittajanumero == "123007") {
 					// emme luekkaan tämän toimittajan PacketKind-arvoa, vaan generoidaan tietyistä arvoista.
@@ -227,7 +227,7 @@
 				loop_packet($element, $parameters);
 			}
 		}
-		
+
 		return $tunnus_liitetiedostoon;
 	}
 
@@ -273,7 +273,7 @@
 					}
 					elseif (strtoupper($tavarantoimittajanumero) == "LES-7") {
 						$tavarantoimittajanumero = "123080";
-					}				
+					}
 
 					$asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;
 					$asn_numero = utf8_decode($asn_numero);
@@ -308,14 +308,14 @@
 
 					$parameters = array(
 						"tavarantoimittajanumero" 	=> $tavarantoimittajanumero,
-						"asn_numero"				=> $asn_numero, 
-						"toimituspvm"				=> $toimituspvm, 
-						"vastaanottaja"				=> $vastaanottaja, 
-						"pakkauslista"				=> $pakkauslista, 
+						"asn_numero"				=> $asn_numero,
+						"toimituspvm"				=> $toimituspvm,
+						"vastaanottaja"				=> $vastaanottaja,
+						"pakkauslista"				=> $pakkauslista,
 						);
-					
+
 					// tässä kohdassa tarkistetaan että löytyykö ASN-sanoma jo kannasta, jos ei niin kutsutaan rekursiivista funkkaria.
-				
+
 					if ($tavarantoimittajanumero != "" and $asn_numero != "") {
 
 						$tarkinsert = " SELECT tunnus
@@ -332,7 +332,7 @@
 						else {
 							// loop_packet funktio tekee kaikki lisäykset asn-sanomatauluun ja palauttaa viimeisen lisätyn rivin mysql_id() joka laitetaan liitetiedostoon.
 							$tunnus_liitetiedostoon = loop_packet($xml, $parameters);
-						
+
 							$filesize = strlen($tiedosto_sisalto);
 
 							$tecquery = "	INSERT INTO liitetiedostot SET
@@ -368,11 +368,9 @@
 			}
 		}
 		require ("inc/asn_kohdistus.inc");
-		asn_kohdistus();
+		asn_kohdistus($tavarantoimittajanumero);
 
 	}
 	else {
 		echo "Hakemistoa $teccomkansio ei löydy\n";
 	}
-
-?>

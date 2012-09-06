@@ -1,7 +1,7 @@
 <?php
 
 	if (!function_exists("asn_kohdistus")) {
-		function asn_kohdistus() {
+		function asn_kohdistus($tavarantoimittajanumero = '') {
 			global $yhtiorow, $kukarow;
 
 			$php_cli = FALSE;
@@ -29,6 +29,8 @@
 			$virheet 			= 0;
 			$virhe 				= "";
 
+			$toimittajalisa = trim($tavarantoimittajanumero) != '' ? " AND toimittajanumero = '{$tavarantoimittajanumero}' " : "";
+
 			// Haetaan kaikki käsittelemättömät ASN-rivit
 			$query = "	SELECT *
 						FROM asn_sanomat
@@ -36,6 +38,7 @@
 						AND status = ''
 						AND tilausrivi = ''
 						AND laji = 'asn'
+						{$toimittajalisa}
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";
 			$result = pupe_query($query);
 

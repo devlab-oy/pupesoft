@@ -133,7 +133,7 @@
 				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
 			}
 		}
-
+		$yht = "";
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}

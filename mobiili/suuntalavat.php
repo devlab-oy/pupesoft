@@ -52,20 +52,30 @@ if (isset($uusi)) {
 			$tee = "eihalutamitankayttoliittymaapliis";
 
 			# TODO: SSCC:n generointi
-			$temp_sscc = "tmp_".substr(sha1(time()), 0, 6);
+			#$temp_sscc = "tmp_".substr(sha1(time()), 0, 6);
+
+			$uusi_sscc = tulosta_sscc('email');
+
 			$params = array(
-					'sscc' => $temp_sscc,
-					'tyyppi' => $tyyppi,
-					'keraysvyohyke' => $keraysvyohyke,
-					'kaytettavyys' => $kaytettavyys,
-					'usea_keraysvyohyke' => $sallitaanko,
-					'hyllyalue' => $hyllyalue,
-					'terminaalialue' => $terminaalialue
+					'sscc' 					=> $uusi_sscc,
+					'alkuhyllyalue'	 		=> $alkuhyllyalue,
+					'alkuhyllynro'	 		=> $alkuhyllynro,
+					'alkuhyllyvali'	 		=> $alkuhyllyvali,
+					'alkuhyllytaso'	 		=> $alkuhyllytaso,
+					'loppuhyllyalue'		=> $loppuhyllyalue,
+					'loppuhyllynro'	 		=> $loppuhyllynro,
+					'loppuhyllyvali'	 	=> $loppuhyllyvali,
+					'loppuhyllytaso'	 	=> $loppuhyllytaso,
+					'tyyppi' 				=> $tyyppi,
+					'keraysvyohyke'			=> $keraysvyohyke,
+					'kaytettavyys' 			=> $kaytettavyys,
+					'usea_keraysvyohyke' 	=> $sallitaanko,
+					'terminaalialue' 		=> $terminaalialue
 				);
 
 			require ("../tilauskasittely/suuntalavat.inc");
 
-			echo "lisaa_suuntalava(:saapuminen => $saapuminen, :params => $params)";
+			echo "lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
 			$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
 			echo "<br>Lisättiin lava! ".$uusi_suuntalava;
 			echo "<pre>";
@@ -80,6 +90,7 @@ if (isset($uusi)) {
 # form.php / update
 else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	$title = "Suuntalavan muokkaus";
+
 	# Tyyppi
 	$query = "	SELECT *
 				FROM pakkaus
@@ -172,8 +183,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	echo "</pre>";
 }
 
-# Suuntalava siirtovalmiiksi
-#
+# Suuntalava siirtovalmiiksi (normaali)
 else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
 	$title = t("Suuntalava siirtovalmiiksi");
 
@@ -182,7 +192,25 @@ else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
 	$suuntalavan_tunnus = $suuntalava;
 	require ("../tilauskasittely/suuntalavat.inc");
 
-	# Takaisin suuntalavat listaan
+	// # Takaisin suuntalavat listaan
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
+	exit();
+}
+# Suuntalava suoraan hyllyyn
+else if ($tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
+	$title = t("Suuntalava siirtovalmiiksi");
+	echo "Suuntalava {$suuntalava} laitetaan suoraan hyllyyn";
+
+	# Asetetaan käsittelytavaksi suoraan (H)yllyyn
+	$query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
+	$result = pupe_query($query);
+
+	# Suuntalava siirtovalmiiksi
+	$suuntalavat_ei_kayttoliittymaa = "KYLLA";
+	$tee = 'siirtovalmis';
+	$suuntalavan_tunnus = $suuntalava;
+	require ("../tilauskasittely/suuntalavat.inc");
+
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
 	exit();
 }

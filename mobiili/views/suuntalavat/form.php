@@ -9,6 +9,9 @@
 
 <!-- _form.php -->
 	<table>
+		<tr><th>Käsittelytapa</th>
+			<td><?= $suuntalava['kasittelytapa'] ?></td>
+		</tr>
 		<tr>
 			<th>Tyyppi</th>
 			<td>
@@ -104,7 +107,7 @@
 	<input type='submit' name='post' value='OK' >
 		<? if(isset($muokkaa)): ?>
 		<a href='suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (normaali)</a>
-		<a href='suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (suoraan hyllyyn)</a>
+		<a href='suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (suoraan hyllyyn)</a>
 		<? endif ?>
 </div>
 </form>

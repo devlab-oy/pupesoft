@@ -8,7 +8,7 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-# Nämä on pakollisia
+# Nï¿½mï¿½ on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 $alusta_tunnus = (int) $alusta_tunnus;
@@ -29,7 +29,7 @@ if (!empty($alusta_tunnus)) {
 	$row = mysql_fetch_assoc($res);
 }
 
-# Jos suuntalavan_tuotteet() ei löytäny mitään
+# Jos suuntalavan_tuotteet() ei lï¿½ytï¿½ny mitï¿½ï¿½n
 if(!$row) {
 	$query = "	SELECT
 				tilausrivi.*,
@@ -41,7 +41,7 @@ if(!$row) {
 	$row = mysql_fetch_assoc(pupe_query($query));
 }
 
-# Jos parametrina hylly, eli ollaan muutettu tuotteen keräyspaikkaa
+# Jos parametrina hylly, eli ollaan muutettu tuotteen kerï¿½yspaikkaa
 if(isset($hylly)) {
 	$hylly = explode(",", $hylly);
 	$row['hyllyalue'] = $hylly[0];
@@ -50,7 +50,7 @@ if(isset($hylly)) {
 	$row['hyllytaso'] = $hylly[3];
 }
 
-# Alkuperäinen saapuminen talteen
+# Alkuperï¿½inen saapuminen talteen
 $alkuperainen_saapuminen = $saapuminen;
 
 # Tullaan nappulasta
@@ -76,15 +76,15 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 			break;
 		case 'submit':
-			# Tarkistetaan määrä
+			# Tarkistetaan mï¿½ï¿½rï¿½
 			if (!is_numeric($maara) or $maara < 1) {
-				$errors[] = t("Virheellinen määrä");
+				$errors[] = t("Virheellinen mï¿½ï¿½rï¿½");
 			}
 			# Tarkistetaan koodi
 			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 				$errors[] = t("Virheellinen varmistuskoodi");
 			}
-			# Jos ei virheitä
+			# Jos ei virheitï¿½
 			if(count($errors) == 0) {
 				$tilausrivit = array();
 
@@ -93,11 +93,11 @@ if (isset($submit) and trim($submit) != '') {
 					$saapuminen = $row['uusiotunnus'];
 				}
 
-				# Tarkastetaan määrät, eli tarviiko tilausrivia splittailla tai kopioida
+				# Tarkastetaan mï¿½ï¿½rï¿½t, eli tarviiko tilausrivia splittailla tai kopioida
 				if ($maara < $row['varattu']) {
 					# Splitataan rivi
-					# Jos viimeinen rivi ja määrää pienennetty, pudotetaan toinen rivi pois lavalta.
-					# Koska viimeistä rivii viedessä viedään kaikkilavan rivit varastoon
+					# Jos viimeinen rivi ja mï¿½ï¿½rï¿½ï¿½ pienennetty, pudotetaan toinen rivi pois lavalta.
+					# Koska viimeistï¿½ rivii viedessï¿½ viedï¿½ï¿½n kaikkilavan rivit varastoon
 					if (isset($viimeinen)) {
 						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, true);
 					}
@@ -105,7 +105,7 @@ if (isset($submit) and trim($submit) != '') {
 						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, false);
 					}
 
-					# Alkuperäinen viedään varastoon, splitattu jää jäljelle
+					# Alkuperï¿½inen viedï¿½ï¿½n varastoon, splitattu jï¿½ï¿½ jï¿½ljelle
 					$ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
 					$tilausrivit[] = $tilausrivi;
 				}
@@ -113,21 +113,21 @@ if (isset($submit) and trim($submit) != '') {
 					$tilausrivit[] = $tilausrivi;
 				}
 				else {
-					# Tehdään insertti erotukselle
+					# Tehdï¿½ï¿½n insertti erotukselle
 					$kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
 
-					# Päivitä kopioidun kpl (maara - varattu)
+					# Pï¿½ivitï¿½ kopioidun kpl (maara - varattu)
 					paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
 
 					$tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
 				}
 
 				$temppi_lava = false;
-				# Viedään varastoon temppi lavalla
+				# Viedï¿½ï¿½n varastoon temppi lavalla
 				if (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0)) {
 					$temppi_lava = true;
-					# Tarkottaa että on tultu ostotilauksen tuloutuksesta ilman että kyseisellä
-					# tilauksella on suuntalavaa. Ratkaisuna tehdään väliaikanen lava.
+					# Tarkottaa ettï¿½ on tultu ostotilauksen tuloutuksesta ilman ettï¿½ kyseisellï¿½
+					# tilauksella on suuntalavaa. Ratkaisuna tehdï¿½ï¿½n vï¿½liaikanen lava.
 					$tee = "eihalutamitankayttoliittymaapliis";
 					$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 					$otunnus = $saapuminen;
@@ -178,7 +178,7 @@ if (isset($submit) and trim($submit) != '') {
 					require ("../tilauskasittely/suuntalavat.inc");
 				}
 
-				# Kun splittaukset ja alustat on selvitelty, voidaan kamat viedä varastoon.
+				# Kun splittaukset ja alustat on selvitelty, voidaan kamat viedï¿½ varastoon.
 				# Hylly array
 				$hylly = array(
 					"hyllyalue" => $row['hyllyalue'],
@@ -189,7 +189,7 @@ if (isset($submit) and trim($submit) != '') {
 				# Saapumiset
 				$saapumiset = hae_saapumiset($alusta_tunnus);
 
-				# Viimeisellä rivillä viedään koko suuntalava, jolloin lava merkataan puretuksi
+				# Viimeisellï¿½ rivillï¿½ viedï¿½ï¿½n koko suuntalava, jolloin lava merkataan puretuksi
 				if(isset($viimeinen)) {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
 				}
@@ -214,7 +214,7 @@ if (isset($submit) and trim($submit) != '') {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=ostotilaus.php?ostotilaus={$row['otunnus']}'>";
 				}
 				else {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet?{$url}'>";
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavan_tuotteet.php?{$url}'>";
 				}
 			}
 			break;
@@ -225,10 +225,10 @@ if (isset($submit) and trim($submit) != '') {
 
 }
 
-# Asetetaan määrä varattu kentän arvoksi jos sitä ei ole setattu
+# Asetetaan mï¿½ï¿½rï¿½ varattu kentï¿½n arvoksi jos sitï¿½ ei ole setattu
 $maara = (empty($maara)) ? $row['varattu'] : $maara;
 
-# Jos ollaan tultu ostotilausten tuloutuksesta, on näkymä hieman erilainen kuin asn-tuloutuksessa
+# Jos ollaan tultu ostotilausten tuloutuksesta, on nï¿½kymï¿½ hieman erilainen kuin asn-tuloutuksessa
 if (isset($ostotilaus)) {
 	$disabled = "readonly";
 	$hidden = "hidden";
@@ -244,14 +244,14 @@ echo "
 			var maara = document.getElementById('maara').value;
 			var row_varattu = parseInt(document.getElementById('row_varattu').innerHTML);
 			if(maara > row_varattu) {
-				return confirm('Olet tulouttamassa enemmän kuin rivillä alunperin oli. Oletko varma?');
+				return confirm('Olet tulouttamassa enemmï¿½n kuin rivillï¿½ alunperin oli. Oletko varma?');
 			}
 			else return true;
 		}
 	</script>
 ";
 
-echo "<div class='header'><h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
+echo "<div class='header'><h1>",t("VAHVISTA KERï¿½YSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -274,12 +274,12 @@ echo "<div class='main'>
 		<td colspan='2'>{$row['toim_tuoteno']}</td>
 	</tr>
 	<tr>
-		<th>",t("Määrä"),"</th>
+		<th>",t("Mï¿½ï¿½rï¿½"),"</th>
 		<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/></td>
 		<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
 	</tr>
 	<tr>
-		<th>",t("Keräyspaikka"),"</th>
+		<th>",t("Kerï¿½yspaikka"),"</th>
 		<td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
 	</tr>
 	<tr>
@@ -295,8 +295,8 @@ echo "<div class='main'>
 echo "<div class='controls'>
 	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
-# Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+# Jos hyllytyksestï¿½ niin tï¿½mï¿½ piiloon
+if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi kerï¿½yspaikka"),"</button>";
 
 echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

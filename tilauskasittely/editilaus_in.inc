@@ -1944,8 +1944,8 @@ while ($tietue = fgets($fd)) {
 }
 
 // l‰hetet‰‰n meili
-if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtiorow) and $yhtiorow["alert_email"] != "") {
-
+if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtiorow) and $yhtiorow["edi_email"] != "") {
+	
 	$edi_ulos = strip_tags($edi_ulos);
 
 	$bound   = uniqid(time()."_") ;
@@ -1973,7 +1973,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
-	#$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	$boob = mail($yhtiorow["edi_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {
 	echo "\n";

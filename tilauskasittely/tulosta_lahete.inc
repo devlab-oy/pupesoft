@@ -2030,8 +2030,11 @@ if (!function_exists('rivi_hinta_eiale_lahete_ean')) {
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], $thispage, $norm);
 
 		if (trim($naytetaanko_rivihinta) == '') {
-			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
-			$pdf->draw_text(518-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+
+			$rivihinta = $row['hinta'] * $row['tilkpl'];
+
+			$oikpos = $pdf->strlen(hintapyoristys($rivihinta), $norm);
+			$pdf->draw_text(518-$oikpos, $kala, hintapyoristys($rivihinta), $thispage, $norm);
 		}
 
 		if ($pitkattuotteet) {

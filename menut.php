@@ -97,7 +97,7 @@
 		}
 	}
 
-	if (isset($synkronoireferenssi) and count($syncyhtiot) > 0) {
+	if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
 		$ch  = curl_init();
 		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
@@ -223,10 +223,16 @@
 				}
 
 				//päivitettän käyttäjien oikeudet
+				if (isset($synkronoireferenssialapaivita)) {
+					$jarjestysupdate = "";
+				}
+				else {
+					$jarjestysupdate = ", jarjestys = '$jarj', jarjestys2 = '$jarj2'";
+				}
+				
 				$query = "	UPDATE oikeu
-							SET nimitys		= '$row[nimitys]',
-							jarjestys 		= '$jarj',
-							jarjestys2		= '$jarj2'
+							SET nimitys		= '$row[nimitys]'
+							$jarjestysupdate
 							WHERE yhtio 	= '$yhtio'
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
@@ -515,6 +521,7 @@
 		}
 
 		echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
+		echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
 
 		echo "</form>";
 

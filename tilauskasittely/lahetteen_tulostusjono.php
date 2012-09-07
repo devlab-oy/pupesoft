@@ -525,7 +525,7 @@
 							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
-				$kirjoitin = $prirow['printteri0'];
+				$kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
 				$varasto = $tul_varastoon;
 				$tilaus  = $tilaukset;
@@ -1022,7 +1022,7 @@
 								and tunnus = '$tilrow[varasto]'";
 					$prires = mysql_query($query) or pupe_error($query);
 					$prirow = mysql_fetch_array($prires);
-					$kirjoitin = $prirow['printteri0'];
+					$kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
 					$varasto = $tilrow["varasto"];
 					$tilaus  = $tilrow["otunnus"];
@@ -1202,5 +1202,4 @@
 		}
 	}
 
-	require ("../inc/footer.inc");
-?>
+	require ("inc/footer.inc");

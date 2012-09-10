@@ -110,7 +110,7 @@
 			$naytatvale = 2;
 		}
 		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
-			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
 		}
 		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus

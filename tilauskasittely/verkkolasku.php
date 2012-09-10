@@ -1350,31 +1350,17 @@
 				}
 
 				// Onko toimitustapoja joilla on kuljetusvakuutus päällä
-				$query = "  SELECT group_concat(selite SEPARATOR '\',\'') toimitustavat
+				$query = "  SELECT group_concat(selite) toimitustavat
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND kuljetusvakuutus_tuotenumero != ''
-							AND (kuljetusvakuutus > 0 or kuljetusvakuutus_tyyppi = 'F')
+							AND (kuljetusvakuutus_tuotenumero != '' or '$yhtiorow[kuljetusvakuutus_tuotenumero]' != '')
+							AND (kuljetusvakuutus > 0 or '$yhtiorow[kuljetusvakuutus]' > 0 or kuljetusvakuutus_tyyppi = 'F' or '$yhtiorow[kuljetusvakuutus_tyyppi]' = 'F')
 							AND kuljetusvakuutus_tyyppi not in ('','E')";
 				$kulvare = pupe_query($query);
 				$kulvaro = mysql_fetch_assoc($kulvare);
 
 				// katsotaan halutaanko tilauksille lisätä kuljetusvakuutus, joko yhtiön parametri päällä tai toimitustapojen takana päällä
 				if ($kulvaro["toimitustavat"] != "" or ($yhtiorow["kuljetusvakuutus_tuotenumero"] != "" and ($yhtiorow["kuljetusvakuutus"] > 0 or $yhtiorow["kuljetusvakuutus_tyyppi"] == 'F') and $yhtiorow["kuljetusvakuutus_tyyppi"] != "")) {
-
-					$selectlisa = $kulvaro['toimitustavat'] != "" ? " AND lasku.toimitustapa IN ('".$kulvaro['toimitustavat']."')" : "";
-
-					if ($yhtiorow['kuljetusvakuutus_koonti'] == 'L') {
-						$groupbylisa = "GROUP BY lasku.toimitustapa";
-					}
-					else {
-						$groupbylisa = "GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
-								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
-								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
-								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
-								{$ketjutus_group}";
-					}
 
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
@@ -1384,8 +1370,12 @@
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 								where lasku.yhtio = '{$kukarow['yhtio']}'
 								and lasku.tunnus in ({$tunnukset})
-								{$selectlisa}
-								{$groupbylisa}";
+								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
+								{$ketjutus_group}";
 					$result = pupe_query($query);
 
 					$yhdista = array();
@@ -1398,13 +1388,21 @@
 
 						$query_ale_lisa = generoi_alekentta('M');
 
+						if ($yhtiorow['kuljetusvakuutus_koonti'] == 'L') {
+							$selectlisa_kuljetusvakuutus = "GROUP_CONCAT(lasku.tunnus) AS tunnus,";
+							$groupbylisa_kuljetusvakuutus = "GROUP BY 1,2,3,4";
+						}
+						else {
+							$selectlisa_kuljetusvakuutus = "lasku.tunnus,";
+							$groupbylisa_kuljetusvakuutus = "GROUP BY 1,2,3,4,5";
+						}
+
 						// lasketaan tilauksen loppusumma (HUOM ei tarvitse huomioida veroa! Jos on verottomat hinnat niin lisäprossa lasketaan verottomasta summasta, jos on verolliset hinnat niin lasketaan verollisesta summasta)
-						$query = "  SELECT lasku.tunnus,
-									lasku.nimi,
-									lasku.toimitustapa,
+						$query = "  SELECT lasku.toimitustapa,
 									if (toimitustapa.kuljetusvakuutus_tyyppi != '', toimitustapa.kuljetusvakuutus_tyyppi, '$yhtiorow[kuljetusvakuutus_tyyppi]') kv_tyyppi,
 									if (toimitustapa.kuljetusvakuutus != '', toimitustapa.kuljetusvakuutus, '$yhtiorow[kuljetusvakuutus]') kv_kuljetusvakuutus,
 									if (toimitustapa.kuljetusvakuutus_tuotenumero != '', toimitustapa.kuljetusvakuutus_tuotenumero, '$yhtiorow[kuljetusvakuutus_tuotenumero]') kv_tuotenumero,
+									{$selectlisa_kuljetusvakuutus}
 									sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
 									FROM lasku
 									LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -1414,7 +1412,7 @@
 									JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.tunnus in ($otsikot)
-									GROUP BY 1,2,3,4,5,6
+									{$groupbylisa_kuljetusvakuutus}
 									ORDER BY lasku.tunnus";
 						$kvak_result = pupe_query($query);
 
@@ -1442,7 +1440,7 @@
 									$query = "  SELECT lasku.*
 												FROM lasku
 												WHERE lasku.yhtio = '$kukarow[yhtio]'
-												AND lasku.tunnus = '$row[tunnus]'";
+												AND lasku.tunnus IN ({$row['tunnus']})";
 									$otsre = pupe_query($query);
 									$laskurow = mysql_fetch_assoc($otsre);
 
@@ -1473,7 +1471,7 @@
 
 										for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 											if (isset($lis_ale["ale".$alepostfix])) {
-												$kv_ale *= (1 - $row["ale{$alepostfix}"] / 100);
+												$kv_ale *= (1 - $lis_ale["ale{$alepostfix}"] / 100);
 											}
 										}
 

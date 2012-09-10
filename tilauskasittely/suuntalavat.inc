@@ -1,14 +1,18 @@
 <?php
-	$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
-	$result = pupe_query($query);
+	# Voidaan tehdä uusi lava ilman otunnusta
+	if(!empty($otunnus)) {
 
-	if (mysql_num_rows($result) == 1) {
-		$laskurow = mysql_fetch_assoc($result);
-	}
-	else {
-		echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
-		require('../inc/footer.inc');
-		exit;
+		$query  = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}' AND tila = 'K'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$laskurow = mysql_fetch_assoc($result);
+		}
+		else {
+			echo "<font class='error'>",t("VIRHE: Tilausta ei enää löydy"),"!</font>";
+			require('../inc/footer.inc');
+			exit;
+		}
 	}
 
 	if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
@@ -64,8 +68,9 @@
 		function lisaa_suuntalava($otunnus, Array $params) {
 		global $kukarow;
 
-		# Pakolliset parametrit
-		if (empty($otunnus)) exit("Virhe: lisaa_suuntalava(), otunnus puuttuu.");
+		# Pakolliset parametrit, jos suuntalavan_tunnus on setattu tarvitaan otunnus. (päivitys)
+		# Uuden suuntalavan luonnissa ei otunnus ole pakollinen
+		if (!empty($suuntalavan_tunnus) and empty($otunnus)) exit("Virhe: lisaa_suuntalava(), otunnus puuttuu.");
 
 		# Sallitut parametrit
 		$sallitut_parametrit = array(
@@ -88,6 +93,7 @@
 		$paino = str_replace(",", ".", $paino);
 		$korkeus = str_replace(",", ".", $korkeus);
 
+		# Jos suuntalava on annettu (päivitetään)
 		if (trim($suuntalavan_tunnus) != '') {
 
 			$query = "	SELECT keraysvyohyke
@@ -190,16 +196,19 @@
 			$insert_result = pupe_query($query);
 			$uusi_suuntalavan_tunnus = mysql_insert_id();
 
-			$query = "	INSERT INTO suuntalavat_saapuminen SET
-						yhtio = '{$kukarow['yhtio']}',
-						suuntalava = '{$uusi_suuntalavan_tunnus}',
-						saapuminen = '{$otunnus}',
-						laatija = '{$kukarow['kuka']}',
-						luontiaika = now(),
-						muutospvm = now(),
-						muuttaja = '{$kukarow['kuka']}'";
+			# Jos tehdään uusi lava ilman saapumista, ei tehdä liitosta suuntalava_saapuminen tauluun
+			if($otunnus != '') {
+				$query = "	INSERT INTO suuntalavat_saapuminen SET
+							yhtio = '{$kukarow['yhtio']}',
+							suuntalava = '{$uusi_suuntalavan_tunnus}',
+							saapuminen = '{$otunnus}',
+							laatija = '{$kukarow['kuka']}',
+							luontiaika = now(),
+							muutospvm = now(),
+							muuttaja = '{$kukarow['kuka']}'";
 
-			$insert_result = pupe_query($query);
+				$insert_result = pupe_query($query);
+			}
 
 			// päivitetään suuntalava automaattisesti niille riveille mihin se mätsää
 			if (trim($automaattinen_paivitys) == 'K' OR trim($automaattinen_paivitys) == 'S') {
@@ -445,16 +454,16 @@
 					'terminaalialue' => $terminaalialue,
 					'korkeus' => $korkeus,
 					'paino' => $paino,
-					'suuntalavan_tunnus' => $suuntalavan_tunnus
+					'suuntalavan_tunnus' => $suuntalavan_tunnus,
+					'automaattinen_paivitys' => $automaattinen_paivitys
 				);
-			lisaa_suuntalava($otunnus, $params);
+			$uusi_suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
 
 		}
 
 		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
 			$tee = "eihalutamitankayttoliittymaapliis";
 		}
-
 	}
 
 	if ($tee == 'vie_koko_suuntalava') {
@@ -820,7 +829,9 @@
 		echo "<th>",t("Paino"),"</th>";
 		echo "<th>",t("Tila"),"</th></tr>";
 
-		$query = "	SELECT suuntalavat.*, if(suuntalavat.kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(suuntalavat.tila = '', 0, if(suuntalavat.tila = 'S', 1, 2)) sorttaus
+		$query = "	SELECT suuntalavat.*,
+					if(suuntalavat.kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys,
+					if(suuntalavat.tila = '', 0, if(suuntalavat.tila = 'S', 1, 2)) sorttaus
 					FROM suuntalavat
 					JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$otunnus}')
 					WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
@@ -875,6 +886,10 @@
 
 			if ($suuntalavat_row['tila'] != '') {
 				if ($suuntalavat_row['tila'] == 'S') {
+
+					# Jos lavan käsittelytapa on suoraan hyllyyn, disabloidaan vie varastoon nappi
+					$disabled = ($suuntalavat_row['kasittelytapa'] == 'H') ? "style='color: #888;' disabled" : "";
+
 					echo "<font class='ok'>",t("Siirtovalmis"),"!</font><br />";
 
 					echo "<form method='post'>";
@@ -897,7 +912,7 @@
 					echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
 					echo "<input type='hidden' name='tee' value='' />";
 					echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
-					echo "<input type='submit' value='",t("Vie varastoon"),"' />";
+					echo "<input type='submit' value='",t("Vie varastoon"),"' $disabled/>";
 					echo "</form>";
 
 					echo "<br /><form method='post'>";

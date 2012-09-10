@@ -100,6 +100,10 @@ if (isset($alusta_tunnus)) {
 
 		$i++;
 	}
+
+	$query = "SELECT kasittelytapa FROM suuntalavat where tunnus='{$alusta_tunnus}' and yhtio='{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+	$lava = mysql_fetch_assoc($result);
 }
 
 echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
@@ -119,9 +123,12 @@ echo "<form name='viivakoodiformi' method='post' action=''>
 echo "
 <form name='hakuformi' method='post' action=''>
 
-<div class='controls'>
-	<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>
-	<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa"),"</button>
+<div class='controls'>";
+
+if($lava['kasittelytapa'] == 'H') echo "<button class='left' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
+else echo "<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
+
+echo "<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa"),"</button>
 	<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle"),"</button>
 	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 </div>";

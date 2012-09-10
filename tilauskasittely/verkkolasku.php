@@ -1350,12 +1350,6 @@
 				}
 
 				// Onko toimitustapoja joilla on kuljetusvakuutus päällä
-				// $query = "  SELECT group_concat(selite) toimitustavat
-				// 			FROM toimitustapa
-				// 			WHERE yhtio = '$kukarow[yhtio]'
-				// 			AND (kuljetusvakuutus_tuotenumero != '' or '$yhtiorow[kuljetusvakuutus_tuotenumero]' != '')
-				// 			AND (kuljetusvakuutus > 0 or '$yhtiorow[kuljetusvakuutus]' > 0 or kuljetusvakuutus_tyyppi = 'F' or '$yhtiorow[kuljetusvakuutus_tyyppi]' = 'F')
-				// 			AND kuljetusvakuutus_tyyppi not in ('','E')";
 				$query = "  SELECT group_concat(selite SEPARATOR '\',\'') toimitustavat
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -1392,7 +1386,6 @@
 								and lasku.tunnus in ({$tunnukset})
 								{$selectlisa}
 								{$groupbylisa}";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$result = pupe_query($query);
 
 					$yhdista = array();

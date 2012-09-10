@@ -115,6 +115,9 @@
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}
+		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meillä on tilausvahvistuksessa kasi, niin tehdään EAN tilausvahvistus asiakashinnalla ja ei näytetä alennuksia
+		}
 		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
 			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
@@ -443,4 +446,3 @@
 		require("inc/footer.inc");
 		exit;
 	}
-?>

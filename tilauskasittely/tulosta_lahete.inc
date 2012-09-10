@@ -424,7 +424,7 @@ if (!function_exists('alku_lahete')) {
 				$pdf->draw_text(310, 656, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), 		$thispage, $boldi);
 			}
 
-			if ((str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean.inc") or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc")) {
+			if ((str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean.inc" or str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc")) {
 				if ($yhtiorow['alv_kasittely'] == '') {
 					$pdf->draw_text(310, 640, t("Hinnat sis‰lt‰v‰t arvonlis‰veron", $kieli).".", $thispage, $boldi);
 				}
@@ -837,6 +837,41 @@ if (!function_exists('rivi_otsikot_lahete')) {
 
 			if (trim($naytetaanko_rivihinta) == '') {
 				$pdf->draw_text(530, $kala+15, t("Rivihinta", $kieli),	$thispage, $norm);
+			}
+		}
+		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") {
+			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
+
+			//tuoteno ja nimitys sopivan leveiksi
+			$nimityskohta = (220 * $tuotenopituus + 90);
+			$nimitysleveys = 310 - $nimityskohta;
+
+			if ($pitkattuotteet) {
+				$pdf->draw_rectangle($kala+30, 40,  $kala+10, 320, 	$thispage, $rectparam);
+			}
+			else {
+				$pdf->draw_rectangle($kala+30, 40,  $kala+10, $nimityskohta-5, 	$thispage, $rectparam);
+				$pdf->draw_rectangle($kala+30, $nimityskohta-5, $kala+10, 320, 	$thispage, $rectparam);
+			}
+
+			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 370, $kala+10, 420, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 420, $kala+10, 580, 	$thispage, $rectparam);
+			$pdf->draw_text(25,  $kala+15, "#",					$thispage, $norm);
+
+			if ($pitkattuotteet) {
+				$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli)." / ".t("Tuotenimi", $kieli),	$thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(45, $kala+15, t("Tuotenumero", $kieli),				$thispage, $norm);
+				$pdf->draw_text($nimityskohta, $kala+15, t("Tuotenimi", $kieli),	$thispage, $norm);
+			}
+
+			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
+			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
+
+			if (trim($naytetaanko_rivihinta) == '') {
+				$pdf->draw_text(425, $kala+15, t("Rivihinta", $kieli),	$thispage, $norm);
 			}
 		}
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
@@ -1466,6 +1501,9 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean.inc") {
 				$returntest = rivi_hinta_ale_lahete_ean($returntest);
 			}
+			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") {
+				$returntest = rivi_hinta_eiale_lahete_ean($returntest);
+			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				$returntest = rivi_brutto_lahete($returntest);
 			}
@@ -1542,6 +1580,17 @@ if (!function_exists('rivi_lahete')) {
 				}
 
 				$return = rivi_hinta_ale_lahete_ean($return);
+			}
+			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") {
+				// tulosta_lahete.inc
+				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+					$return["summa"] += $row['rivihinta'];
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
+
+				$return = rivi_hinta_eiale_lahete_ean($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				// tulosta_lahete_brutto.inc
@@ -1848,6 +1897,145 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
 
 		$oikpos = $pdf->strlen($ff_string, $ff_font);
 		$pdf->draw_text(518-$oikpos, $kala, $ff_string, $thispage, $ff_font);
+
+		if ($pitkattuotteet) {
+			$kala = $kala - $rivinkorkeus+5;
+			$pdf->draw_text(45, $kala, $row["nimitys"], $thispage, $norm);
+		}
+		else {
+			if ($pdf->strlen($row["nimitys"], $norm) >= $nimitysleveys) {
+				$kala = $kala - $rivinkorkeus;
+			}
+
+			$pdf->draw_text($nimityskohta, $kala, $row["nimitys"], $thispage, $norm);
+		}
+
+		$kala = $kala - $rivinkorkeus;
+
+		// tutkitaan onko tuotteelle eankoodi
+		$eanquery = "	SELECT trim(eankoodi) eankoodi
+						from tuote
+						where yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$row[tuoteno]'";
+		$eanres = pupe_query($eanquery);
+		$eanrow = mysql_fetch_assoc($eanres);
+
+		$alakala = $kala;
+
+		// tarkista_ean13 on uusi, jos syˆtett‰v‰ EAN-koodi on viallinen, niin ei tehd‰ viivakoodi tulostusta PDF:lle
+		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+			#viivakoodi
+			$data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
+			$pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+
+			$alakala = $kala-17-$rivinkorkeus;
+		}
+
+		if ($row["kommentti"] != '') {
+
+			$row["kommentti"] = wordwrap($row["kommentti"], 90, "\n");
+
+			foreach (explode("\n", $row["kommentti"]) as $komm) {
+				$pdf->draw_text(45, $kala, $komm, $thispage, $norm);
+				$kala = $kala - $rivinkorkeus + 4;
+
+				// Kun kokeillaan mahtuuko rivi sivulle, niin otetaan vain kommentin eka rivi
+				if ($thispage == "TESTISIVU") break;
+
+				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+				if ($kala <= 70) {
+					$sivu++;
+
+					// Luodaan palautettavat
+					$return = compact(array_keys($params));
+
+					$return = loppu_lahete($return);
+					$params = uusi_sivu_lahete($return);
+
+					// Luodaan muuttujat
+					extract($params);
+
+					$page[$sivu] = $thispage;
+				}
+			}
+
+			$kala = $kala - 5;
+			$lisarivi++;
+		}
+
+		if ($row["myyntihinta_maara"] > 1) {
+
+			if ($kala == ($rivi_kala - $rivinkorkeus)) {
+				$kala = $kala - $rivinkorkeus + 5;
+			}
+
+			$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]*$row["myyntihinta_maara"]), $pieni);
+			$pdf->draw_text(465-$oikpos, ($rivi_kala-$rivinkorkeus+5), hintapyoristys($row["hinta"]*$row["myyntihinta_maara"]), $thispage, $pieni);
+			$pdf->draw_text(465, ($rivi_kala-$rivinkorkeus+5), " / $row[myyntihinta_maara] $omyks", $thispage, $pieni);
+		}
+
+		if ($kala > $alakala) $kala = $alakala;
+
+		// Luodaan palautettavat
+		$return = compact(array_keys($params));
+
+		return $return;
+	}
+}
+
+if (!function_exists('rivi_hinta_eiale_lahete_ean')) {
+	function rivi_hinta_eiale_lahete_ean($params) {
+		global $kukarow, $yhtiorow;
+
+		// Luodaan muuttujat
+		extract($params);
+
+		// Rivin eka rivi
+		$rivi_kala = $kala;
+
+		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
+
+		if (trim($row["perhe_kommentti1"]) != '') {
+			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
+			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
+			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
+			$kala -= $rivinkorkeus;
+
+			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
+			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
+			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
+			$kala -= $rivinkorkeus;
+		}
+
+		if ($pitkattuotteet) {
+			list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 270, $pdf, $norm);
+			$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
+		}
+		else {
+			list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+			$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
+		}
+
+		$oikpos = $pdf->strlen($row["tilkpl"], $norm);
+		$pdf->draw_text(353-$oikpos, $kala, $row["tilkpl"], $thispage, $norm);
+
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		$pdf->draw_text(355, $kala, $omyks, $thispage, $pieni);
+
+		$oikpos = $pdf->strlen($row["varattu"], $norm);
+		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], $thispage, $norm);
+
+		if (trim($naytetaanko_rivihinta) == '') {
+
+			$rivihinta = $row['hinta'] * $row['tilkpl'];
+
+			$oikpos = $pdf->strlen(hintapyoristys($rivihinta), $norm);
+			$pdf->draw_text(518-$oikpos, $kala, hintapyoristys($rivihinta), $thispage, $norm);
+		}
 
 		if ($pitkattuotteet) {
 			$kala = $kala - $rivinkorkeus+5;

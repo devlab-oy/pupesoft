@@ -9014,6 +9014,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 		}
+		elseif (strpos($laskurow['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
+		}
 		elseif (strpos($laskurow['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
 			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {

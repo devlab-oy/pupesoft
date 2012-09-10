@@ -2440,7 +2440,7 @@
 			echo "<th>&nbsp;</th>";
 		}
 
-		echo "<th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
+		echo "<th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='2'>".t("Pakkaus")."</th></tr>";
 
 		$i = 0;
 
@@ -2544,15 +2544,13 @@
 					elseif ($pak_row['pakkaus'] == $keraysera_row['pakkaus']) $sel = " selected";
 					else $sel = "";
 
-					echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']}</option>";
+					
+
+					echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 				}
 
 				echo "</select></td>";
-
-				echo "<td>&nbsp;</td>";
-
 				echo "<td><input type='text' size='10' name='pakkauskuvaustark[{$i}]' value='{$pakkauskuvaustark[$i]}'></td>";
-
 				echo "</tr>";
 
 				$i++;
@@ -2646,15 +2644,11 @@
 
 				$sel = $pak_row['pakkaus'] == $row['pakkaus'] ? " selected" : "";
 
-				echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
 			echo "</select></td>";
-
-			echo "<td>&nbsp;</td>";
-
 			echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]' value='$pakkauskuvaustark[$i]'></td>";
-
 			echo "</tr>";
 
 			$i++;

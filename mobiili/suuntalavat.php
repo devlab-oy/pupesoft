@@ -36,12 +36,30 @@ if (isset($uusi)) {
 		$keraysvyohykkeet[] = $rivi;
 	}
 
+	# Kirjoittimet
+	$query = "	SELECT *
+				FROM kirjoittimet
+				WHERE yhtio  = '{$kukarow['yhtio']}'
+				#AND komento != 'email'
+				AND komento != 'edi'
+				ORDER BY kirjoitin";
+	$kires = mysql_query($query) or pupe_error($query);
+
+	$kirjoittimet = array();
+	$kirjoittimet[] = array('tunnus' => '', 'kirjoitin' => 'ei kirjoitinta');
+	while($kirjoitin = mysql_fetch_assoc($kires)) {
+		$kirjoittimet[] = $kirjoitin;
+	}
+
 	# Uuden suuntalavan luominen
 	if (isset($uusi) and $post=='OK') {
 
 		# Tarkistetaan parametrit
 		if(!isset($kaytettavyys) or !isset($terminaalialue) or !isset($sallitaanko)) {
 		 	$errors[] = "Virheelliset parametrit";
+		}
+		if(empty($tulostin)) {
+			$errors[] = "Valitse kirjoitin";
 		}
 
 		# Jos ei virheitä luodaan uusi suuntalava
@@ -51,36 +69,50 @@ if (isset($uusi)) {
 
 			$tee = "eihalutamitankayttoliittymaapliis";
 
-			# TODO: SSCC:n generointi
-			#$temp_sscc = "tmp_".substr(sha1(time()), 0, 6);
+			# Kirjoittimen komento
+			$query = "	SELECT komento
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tulostin}'
+						ORDER BY kirjoitin";
+			$kires = mysql_query($query) or pupe_error($query);
+			$kirow = mysql_fetch_assoc($kires);
+			$komento = $kirow['komento'];
 
-			$uusi_sscc = tulosta_sscc('email');
+			if (!empty($komento)) {
+				$uusi_sscc = tulosta_sscc($komento);
+			}
 
-			$params = array(
-					'sscc' 					=> $uusi_sscc,
-					'alkuhyllyalue'	 		=> $alkuhyllyalue,
-					'alkuhyllynro'	 		=> $alkuhyllynro,
-					'alkuhyllyvali'	 		=> $alkuhyllyvali,
-					'alkuhyllytaso'	 		=> $alkuhyllytaso,
-					'loppuhyllyalue'		=> $loppuhyllyalue,
-					'loppuhyllynro'	 		=> $loppuhyllynro,
-					'loppuhyllyvali'	 	=> $loppuhyllyvali,
-					'loppuhyllytaso'	 	=> $loppuhyllytaso,
-					'tyyppi' 				=> $tyyppi,
-					'keraysvyohyke'			=> $keraysvyohyke,
-					'kaytettavyys' 			=> $kaytettavyys,
-					'usea_keraysvyohyke' 	=> $sallitaanko,
-					'terminaalialue' 		=> $terminaalialue
-				);
+			if (!empty($uusi_sscc)) {
+				#$temp_sscc = "tmp_".substr(sha1(time()), 0, 6);
+				# Suuntalavan parametrit
+				$params = array(
+						'sscc' 					=> $uusi_sscc,
+						'alkuhyllyalue'	 		=> $alkuhyllyalue,
+						'alkuhyllynro'	 		=> $alkuhyllynro,
+						'alkuhyllyvali'	 		=> $alkuhyllyvali,
+						'alkuhyllytaso'	 		=> $alkuhyllytaso,
+						'loppuhyllyalue'		=> $loppuhyllyalue,
+						'loppuhyllynro'	 		=> $loppuhyllynro,
+						'loppuhyllyvali'	 	=> $loppuhyllyvali,
+						'loppuhyllytaso'	 	=> $loppuhyllytaso,
+						'tyyppi' 				=> $tyyppi,
+						'keraysvyohyke'			=> $keraysvyohyke,
+						'kaytettavyys' 			=> $kaytettavyys,
+						'usea_keraysvyohyke' 	=> $sallitaanko,
+						'terminaalialue' 		=> $terminaalialue
+					);
 
-			require ("../tilauskasittely/suuntalavat.inc");
+				# Lisää suuntalava -funktio
+				require ("../tilauskasittely/suuntalavat.inc");
 
-			echo "lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
-			$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
-			echo "<br>Lisättiin lava! ".$uusi_suuntalava;
-			echo "<pre>";
-			var_dump($params);
-			echo "</pre>";
+				echo "lisaa_suuntalava(:saapuminen => $otunnus	, :params => $params)";
+				$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
+				echo "<br>Lisättiin lava! ".$uusi_suuntalava;
+				echo "<pre>";
+				var_dump($params);
+				echo "</pre>";
+			}
 		}
 	}
 
@@ -196,7 +228,7 @@ else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
 	exit();
 }
-# Suuntalava suoraan hyllyyn
+# Suuntalava siirtovalmiiksi (suoraan hyllyyn)
 else if ($tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
 	$title = t("Suuntalava siirtovalmiiksi");
 	echo "Suuntalava {$suuntalava} laitetaan suoraan hyllyyn";

@@ -9,8 +9,19 @@
 
 <!-- _form.php -->
 	<table>
-		<tr><th>Käsittelytapa</th>
-			<td><?= $suuntalava['kasittelytapa'] ?></td>
+		<tr>
+			<?php if(!isset($muokkaa)): ?>
+			<th>Valitse tulostin:</th>
+			<td>
+				<select name='tulostin'>
+					<?php
+						foreach($kirjoittimet as $kirjoitin) {
+							echo "<option value='{$kirjoitin['tunnus']}'>{$kirjoitin['kirjoitin']}</option>";
+						}
+					?>
+				</select>
+			</td>
+			<?php endif ?>
 		</tr>
 		<tr>
 			<th>Tyyppi</th>
@@ -91,7 +102,7 @@
 		<tr><th>Sallitaanko</th>
 			<?php
 				if (isset($suuntalava)) {
-					$checked = array(($suuntalava['usea_keraysvyohyke'] == 'K') 	? 'checked' : '',
+					$checked = array(($suuntalava['usea_keraysvyohyke'] == 'K') ? 'checked' : '',
 									 ($suuntalava['usea_keraysvyohyke'] == '') 	? 'checked' : '');
 				}
 				echo "<td><input type='radio' name='sallitaanko' id='kylla' value='K' {$checked[0]} /><label for='kylla'>Kyllä</label></td>";

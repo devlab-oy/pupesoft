@@ -2076,10 +2076,10 @@
 				$tee = '';
 			}
 
-			if ($toim == "OSOITELAPPU" and $kappaleet > 0) {
+			if ($toim == "OSOITELAPPU" and ($kappaleet > 0 or $tee == 'NAYTATILAUS')) {
 				$tunnus = $laskurow["tunnus"];
 				$oslapp = $komento["Osoitelappu"];
-				$oslappkpl = $kappaleet;
+				$oslappkpl = $tee == 'NAYTATILAUS' ? 1 : $kappaleet;
 
 				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku

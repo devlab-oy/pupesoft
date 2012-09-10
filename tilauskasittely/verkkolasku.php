@@ -1350,11 +1350,17 @@
 				}
 
 				// Onko toimitustapoja joilla on kuljetusvakuutus päällä
-				$query = "  SELECT group_concat(selite) toimitustavat
+				// $query = "  SELECT group_concat(selite) toimitustavat
+				// 			FROM toimitustapa
+				// 			WHERE yhtio = '$kukarow[yhtio]'
+				// 			AND (kuljetusvakuutus_tuotenumero != '' or '$yhtiorow[kuljetusvakuutus_tuotenumero]' != '')
+				// 			AND (kuljetusvakuutus > 0 or '$yhtiorow[kuljetusvakuutus]' > 0 or kuljetusvakuutus_tyyppi = 'F' or '$yhtiorow[kuljetusvakuutus_tyyppi]' = 'F')
+				// 			AND kuljetusvakuutus_tyyppi not in ('','E')";
+				$query = "  SELECT group_concat(selite SEPARATOR '\',\'') toimitustavat
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND (kuljetusvakuutus_tuotenumero != '' or '$yhtiorow[kuljetusvakuutus_tuotenumero]' != '')
-							AND (kuljetusvakuutus > 0 or '$yhtiorow[kuljetusvakuutus]' > 0 or kuljetusvakuutus_tyyppi = 'F' or '$yhtiorow[kuljetusvakuutus_tyyppi]' = 'F')
+							AND kuljetusvakuutus_tuotenumero != ''
+							AND (kuljetusvakuutus > 0 or kuljetusvakuutus_tyyppi = 'F')
 							AND kuljetusvakuutus_tyyppi not in ('','E')";
 				$kulvare = pupe_query($query);
 				$kulvaro = mysql_fetch_assoc($kulvare);
@@ -1362,20 +1368,31 @@
 				// katsotaan halutaanko tilauksille lisätä kuljetusvakuutus, joko yhtiön parametri päällä tai toimitustapojen takana päällä
 				if ($kulvaro["toimitustavat"] != "" or ($yhtiorow["kuljetusvakuutus_tuotenumero"] != "" and ($yhtiorow["kuljetusvakuutus"] > 0 or $yhtiorow["kuljetusvakuutus_tyyppi"] == 'F') and $yhtiorow["kuljetusvakuutus_tyyppi"] != "")) {
 
+					$selectlisa = $kulvaro['toimitustavat'] != "" ? " AND lasku.toimitustapa IN ('".$kulvaro['toimitustavat']."')" : "";
+
+					if ($yhtiorow['kuljetusvakuutus_koonti'] == 'L') {
+						$groupbylisa = "GROUP BY lasku.toimitustapa";
+					}
+					else {
+						$groupbylisa = "GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
+								{$ketjutus_group}";
+					}
+
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
 					$query = "  SELECT
 								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
 								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-								where lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.tunnus in ($tunnukset)
-								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
-								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
-								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
-								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
-								$ketjutus_group";
+								where lasku.yhtio = '{$kukarow['yhtio']}'
+								and lasku.tunnus in ({$tunnukset})
+								{$selectlisa}
+								{$groupbylisa}";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$result = pupe_query($query);
 
 					$yhdista = array();

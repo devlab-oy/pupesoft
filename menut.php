@@ -229,7 +229,7 @@
 				else {
 					$jarjestysupdate = ", jarjestys = '$jarj', jarjestys2 = '$jarj2'";
 				}
-				
+
 				$query = "	UPDATE oikeu
 							SET nimitys		= '$row[nimitys]'
 							$jarjestysupdate
@@ -294,7 +294,7 @@
 			$tunnus = '';
 		}
 
-		if ($tunnus != '')	{		// haetaan muutettavan rivin alkuperäiset tiedot
+		if ($tunnus != '')	{
 			$query  = "	SELECT *
 						FROM oikeu
 						WHERE tunnus='$tunnus'";
@@ -356,7 +356,7 @@
 	}
 
 	if ($tee == "MUUTA") {
-		echo "<form method='post'>	";
+		echo "<form method='post' action='menut.php'>";
 		echo "<input type='hidden' name='tee' value='PAIVITA'>";
 		echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 		echo "<input type='hidden' name='yht' value='$yht'>";
@@ -411,7 +411,7 @@
 				</form>";
 
 		if ($tunnus > 0) {
-			echo "<form method='post'>	";
+			echo "<form method='post' action='menut.php'>";
 			echo "<input type='hidden' name='tee' value='POISTA'>";
 			echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 			echo "<input type='hidden' name='yht' value='$yht'>";
@@ -462,7 +462,7 @@
 	}
 
 	if ($tee == "") {
-		echo "<form method='post'><table>";
+		echo "<form method='post' action='menut.php'><table>";
 
 		$query	= "	SELECT distinct yhtio, nimi
 					from yhtio
@@ -533,7 +533,7 @@
 			}
 			$yht = substr($yht,0,-1);
 
-			echo "<form method='post'>";
+			echo "<form method='post' action='menut.php'>";
 			echo "<input type='hidden' name='tee' value='MUUTA'>";
 			echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 			echo "<input type='hidden' name='sove' value='$sovellus'>";
@@ -590,7 +590,7 @@
 				}
 				else {
 
-					echo "<form method='post'>	";
+					echo "<form method='post' action='menut.php'>";
 					echo "<input type='hidden' name='tee' value='PAIVITAJARJETYS'>";
 					echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 					echo "<input type='hidden' name='yht' value='$yht'>";

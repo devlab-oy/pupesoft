@@ -10,9 +10,11 @@
 	// Synkronoidaan kahden firman menut
 	if (isset($synkronoi) and count($syncyhtiot) > 1) {
 
+		$yht = "";
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
+
 		$yht = substr($yht,0,-1);
 
 		if ($sovellus != '') {
@@ -133,6 +135,7 @@
 				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
 			}
 		}
+
 		$yht = "";
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";

@@ -1227,6 +1227,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 		if ($yhtiorow['reklamaation_kasittely'] == 'U') {
 			$oslapp = "email";
+			$oslappkpl = 1;
 			require("osoitelappu_pdf.inc");
 		}
 	}

@@ -1488,7 +1488,7 @@
 						$otsikko = t("Reittietiketti");
 						break;
 					case "printteri9":
-						$otsikko = t("Purkulista");
+						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
 						break;
 					default:
 						$otsikko = t(mysql_field_name($result, $i));

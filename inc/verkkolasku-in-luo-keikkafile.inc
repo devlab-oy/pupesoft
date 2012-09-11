@@ -193,7 +193,7 @@
 			if (mysql_num_rows($kokeillaan) > 0) {
 				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
@@ -229,7 +229,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -265,7 +265,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -301,7 +301,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -336,7 +336,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -367,7 +367,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -400,7 +400,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -430,7 +430,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -462,7 +462,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 			}
 
@@ -490,7 +490,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $osrow['ebid']);
 				}
 				else {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";

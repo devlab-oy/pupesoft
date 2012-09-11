@@ -21,11 +21,6 @@ if (isset($submit) and trim($submit) == 'submit' and trim($alusta) == '') {
 
 if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
-	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>";
-		exit;
-	}
-
 	if ($submit == 'submit' and $alusta == $alusta_chk and trim($alusta_tunnus) != '' and trim($liitostunnus) != '') {
 
 
@@ -49,7 +44,10 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 	}
 }
 
-echo "<div class='header'><h1>",t("ALUSTA", $browkieli),"</h1></div>";
+echo "<div class='header'>
+	<button onclick='window.location.href=\"tulouta.php\"' class='button left'><img src='back2.png'></button>
+	<h1>",t("ALUSTA", $browkieli),"</h1>
+</div>";
 
 echo "<div class='main'>
 	<form method='post' action=''>
@@ -94,8 +92,7 @@ echo "</table>";
 echo "</div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
-	<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='submit' class='button' onclick='submit();'>",t($valinta, $browkieli),"</button>
 	</form>
 </div>";
 

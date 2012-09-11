@@ -106,15 +106,6 @@ if (isset($submit)) {
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$tilausrivi['otunnus']}'>"; exit();
             break;
 
-        case 'lopeta':
-            $url = array (
-                        'ostotilaus' => $tilausrivi['otunnus'],
-                        'tilausrivi' => $tilausrivi['tunnus'],
-                        'saapuminen' => $alkuperainen_saapuminen
-                    );
-
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."'>"; exit();
-            break;
         case 'suuntalavalle':
             if(empty($suuntalava)) {
                 $errors[] = t("Valitse suuntalava.");
@@ -134,7 +125,15 @@ if (isset($submit)) {
     }
 }
 
-echo "<div class='header'><h1>",t("SUUNTALAVALLE"), "</h1></div>";
+$url = array (
+            'ostotilaus' => $tilausrivi['otunnus'],
+            'tilausrivi' => $tilausrivi['tunnus'],
+            'saapuminen' => $alkuperainen_saapuminen
+        );
+
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
 
 echo "<div class='main'>
 <form method='post' action=''>
@@ -145,7 +144,7 @@ echo "<div class='main'>
             <input type='text' id='sscc' name='sscc' value='$hae'/>
         </td>
         <td>
-            <button name='submit' value='hae' onclick='submit();'>",t("Etsi"),"</button>
+            <button name='submit' class='button' value='hae' onclick='submit();'>",t("Etsi"),"</button>
         </td>
     </tr>
 </table>
@@ -209,9 +208,8 @@ if (!$loytyiko) $errors[] = t("Suuntalavaa ei löytynyt");
 
 echo "</table></div>";
 echo "<div class='controls'>
-    <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
-    <button name='submit' id='submit' value='lopeta' onclick='submit();'>",t("Lopeta"),"</button>
-    <button name='submit' id='submit' value='suuntalavalle' onclick='submit();'>",t("OK Valmis"),"</button>
+    <button name='submit' class='button' id='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
+    <button name='submit' class='button' id='submit' value='suuntalavalle' onclick='submit();'>",t("OK Valmis"),"</button>
 </div>
 </form>
 ";

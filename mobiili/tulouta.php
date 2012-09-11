@@ -23,9 +23,6 @@ $kesken_query = "	SELECT kuka.kesken FROM lasku
 					and lasku.tila='K';";
 $kesken = mysql_fetch_assoc(pupe_query($kesken_query));
 
-#$data = array('kesken' => $kesken['kesken']);
-#$url = http_build_query($data);
-
 if (isset($submit) and trim($submit) == 'submit' and isset($tulotyyppi) and trim($tulotyyppi) != '') {
 
 	switch($tulotyyppi) {
@@ -47,30 +44,21 @@ if (isset($submit) and trim($submit) == 'submit') {
 
 $kesken = ($kesken['kesken'] == 0) ? "" : "({$kesken['kesken']})";
 
-echo "<div class='header'><h1>TULOUTA</h1></div>";
+echo "<div class='header'>
+<button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
+<h1>TULOUTA</h1></div>";
 
 echo "<div class='main'>
-
 	<form method='post' action=''>
-	<table>
-		<tr>
-			<th>",t("TULOTYYPPI"),"</th>
-		</tr>
-		<tr>
-			<td>
-				<select name='tulotyyppi' size='4'>
-					<option value='suuntalava'>",t("ASN / Suuntalava"),"</option>
-					<option value='ostotilaus'>",t("Ostotilaus")," ".$kesken."</option>
-				</select>
-			</td>
-		</tr>
-	</table>
-
+	<b>",t("TULOTYYPPI"),"</b>
+	<p>
+	<a href='alusta.php' class='btn'>",t("ASN / Suuntalava"),"</a><br>
+	<a href='ostotilaus.php' class='btn'>",t("Ostotilaus"),"</a><br>
+	</p>
+	<a href='suuntalavat.php' class='btn'>",t("Suuntalavat"),"</a><br>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
 	</form>
 </div>";
 

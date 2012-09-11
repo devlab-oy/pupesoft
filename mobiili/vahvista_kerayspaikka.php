@@ -60,17 +60,7 @@ if (isset($submit) and trim($submit) != '') {
 	$errors = array();
 
 	switch ($submit) {
-		case 'cancel':
-			# Ostotilaus -> hyllytykseen
-			if (isset($hyllytys)) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}'>";
-			}
-			# Asn-tuloutus -> suuntalava
-			else {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
-			}
-			exit;
-			break;
+
 		case 'new':
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?{$url}'>";
 			exit;
@@ -251,7 +241,16 @@ echo "
 	</script>
 ";
 
-echo "<div class='header'><h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
+# Asn-tuloutus -> suuntalava
+$paluu_url = "suuntalavan_tuotteet.php?$url";
+# Ostotilaus -> hyllytykseen
+if (isset($hyllytys)) {
+	$paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}";
+}
+
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -293,12 +292,12 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
+	<button name='submit' class='button' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+if (!isset($hyllytys)) echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
 
-echo "<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
+echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 	<input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
 	<input type='hidden' name='tilausrivi' value='{$tilausrivi}' />

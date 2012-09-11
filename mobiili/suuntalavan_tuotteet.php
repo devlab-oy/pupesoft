@@ -35,11 +35,8 @@ if (isset($submit) and trim($submit) != '') {
 			exit();
 		}
 	}
-	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=alusta.php'>";
-		exit;
-	}
-	elseif ($submit == 'varalle') {
+
+	if ($submit == 'varalle') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalava_varalle.php?{$url}'>";
 		exit;
 	}
@@ -106,7 +103,9 @@ if (isset($alusta_tunnus)) {
 	$lava = mysql_fetch_assoc($result);
 }
 
-echo "<div class='header'><h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action=''>
 	<table>
@@ -114,7 +113,7 @@ echo "<form name='viivakoodiformi' method='post' action=''>
 			<td>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
 			</td>
 			<td>
-				<button name='submit' value='viivakoodi' onclick='submit();'>",t("Etsi"),"</button>
+				<button name='submit' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
 			</td>
 		</tr>
 	</table>

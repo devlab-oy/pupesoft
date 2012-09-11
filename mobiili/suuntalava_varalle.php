@@ -75,13 +75,6 @@ if (isset($submit) and trim($submit) != '') {
 			$error['varalle'] = "Varmistukoodi ei voi olla tyhjä";
 		}
 	}
-	# Takaisin
-	elseif ($submit == 'cancel') {
-		$url = "?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
-
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php{$url}'>";
-		exit;
-	}
 }
 
 # Haetaan SSCC
@@ -91,7 +84,11 @@ $sscc_query = mysql_query("	SELECT sscc
 							AND yhtio='{$kukarow['yhtio']}'");
 $sscc = mysql_fetch_assoc($sscc_query);
 
-echo "<div class='header'><h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
+$url = "alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
+
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
 echo "<div class='main'>
 
@@ -123,14 +120,7 @@ echo "<div class='main'>
 	</div>
 
 	<div class='controls'>
-		<tr>
-			<td nowrap>
-				<button name='submit' value='submit' onclick='submit();'>",t("OK", $browkieli),"</button>
-			</td>
-			<td nowrap>
-				<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-			</td>
-		</tr>
+		<button name='submit' value='submit' class='button' onclick='submit();'>",t("OK", $browkieli),"</button>
 	</div>
 
 	<span class='error'>{$error['varalle']}</span>

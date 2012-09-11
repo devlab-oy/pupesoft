@@ -210,6 +210,17 @@
 			}
 		}
 
+		if (count($prio2) > 0) {
+			foreach ($prio2 as $tunnus => $prio) {
+				$query = "	UPDATE tuotepaikat
+							SET prio = '{$prio}',
+							muuttaja	= '{$kukarow['kuka']}',
+							muutospvm	= now()
+							WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
+
 		$ahyllyalue	= '';
 		$ahyllynro	= '';
 		$ahyllyvali	= '';
@@ -1098,7 +1109,17 @@
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>",t("Hyllyss‰"),"</th><th>",t("Myyt‰viss‰"),"</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
+		echo "<tr>";
+		echo "<th>",t("Varastopaikka"),"</th>";
+		echo "<th>",t("Saldo"),"</th>";
+		echo "<th>",t("Hyllyss‰"),"</th>";
+		echo "<th>",t("Myyt‰viss‰"),"</th>";
+		echo "<th>",t("Oletuspaikka"),"</th>";
+		echo "<th>",t("H‰lyraja"),"</th>";
+		echo "<th>",t("Tilausm‰‰r‰"),"</th>";
+		echo "<th>",t("Prio"),"</th>";
+		echo "<th>",t("Poista"),"</th>";
+		echo "</tr>";
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			$query = "	SELECT *
@@ -1126,10 +1147,11 @@
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
 					echo "<td><input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked></td>
 						<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'    value='$saldorow[halytysraja]'></td>
-						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>";
+						<td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
+						<td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]' value='{$saldorow['prio']}'></td>";
 				}
 				else {
-					echo "<td></td><td></td><td></td>";
+					echo "<td></td><td></td><td></td><td></td>";
 				}
 
 				// Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
@@ -1143,7 +1165,7 @@
 				echo "</tr>";
 			}
 		}
-		echo "<tr><td colspan='8'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
+		echo "<tr><td colspan='9'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
 
 		$ahyllyalue	= '';
 		$ahyllynro	= '';

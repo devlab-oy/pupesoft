@@ -234,7 +234,9 @@
 		echo "</select></td></tr>";
 	}
 
-	echo "<tr><th>".t("Kpl")."</th><td><input type='text' name='kappaleet' size='3'></td></tr>";
+	if (!isset($kappaleet)) $kappaleet = 1;
+
+	echo "<tr><th>".t("Kpl")."</th><td><input type='text' name='kappaleet' size='3' value='{$kappaleet}'></td></tr>";
 
 	echo "<tr><th>".t("Valitse kieli")."</th>";
 

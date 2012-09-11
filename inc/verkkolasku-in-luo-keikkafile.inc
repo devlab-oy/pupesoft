@@ -14,7 +14,7 @@
 
 	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
-	if ($osrow["ebid"] != "TECCOM-INVOICE") {
+	if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 		$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
 		$result = pupe_query($query);
 
@@ -91,7 +91,7 @@
 	for ($i = 0; $i < count($rtuoteno); $i++) {
 
 		// tehdään tää vaan jos meillä on rivinumero
-		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE") {
+		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 
 			$toim_tuoteno 	= $rtuoteno[$i]["tuoteno"];
 			$kpl			= (float) $rtuoteno[$i]["kpl"];
@@ -144,7 +144,7 @@
 				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
-		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and !$tullaan_virhetarkistuksesta) {
+		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == "MAVENTAXML") and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and !$tullaan_virhetarkistuksesta) {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
@@ -1452,7 +1452,7 @@
 				continue;
 			}
 		}
-		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE") {
+		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1508,7 +1508,7 @@
 	}
 
 	// Jos kyseessä on TecCom oastolasku
-	if ($osrow["ebid"] == "TECCOM-INVOICE") {
+	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') {
 
 		// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
 		// K = tulee asn-sanoma ja lasku

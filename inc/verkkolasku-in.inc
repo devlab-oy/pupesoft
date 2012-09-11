@@ -854,11 +854,14 @@
 					}
 
 					// katsotaan onko Teccom-lasku jo asn_sanomat-taulussa
-					if ($laskun_tyyppi == 'TECCOM-INVOICE') {
+					if ($laskun_tyyppi == 'TECCOM-INVOICE' or $ebid == 'MAVENTAXML') {
+
+						$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
+
 						$query = "	SELECT *
 									FROM asn_sanomat
 									WHERE yhtio 		 = '{$yhtio}'
-									AND laji 			 = 'tec'
+									AND laji 			 = '{$lajilisa}'
 									AND asn_numero 		 = '{$laskun_numero}'
 									AND toimittajanumero = '{$laskuttajan_toimittajanumero}'";
 						$duplikaattilasku_check_res = pupe_query($query);
@@ -1071,7 +1074,7 @@
 
 	 			// Tehdän pelkät oletustiliöinnit
 	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTA") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1265,7 +1268,7 @@
 							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri????????
-							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $summa > 0) {
+							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTA" and $summa > 0) {
 								$summa = $summa * -1;
 							}
 
@@ -1383,7 +1386,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and $laskun_tyyppi == "TECCOM-INVOICE" and $sanomantarkistin != 999 and !$onko_duplikaatti) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTA") and $sanomantarkistin != 999 and !$onko_duplikaatti) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
@@ -1419,6 +1422,8 @@
 							// osto_rahti = invoiceSummary rahti
 							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 
+							$lajilisa = $ebid == "MAVENTA" ? "mav" : "tec";
+
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',
 												hinta 				= '{$asn_hinta}',
@@ -1427,7 +1432,7 @@
 												kulu 				= '{$rtuoteno[$i]['kulu']}',
 												laatija 			= 'crond',
 												lahetyslistannro 	= '',
-												laji 				= 'tec',
+												laji 				= '{$lajilisa}',
 												lasku_ale1			= '{$rtuoteno[$i]['ale1']}',
 												lasku_ale2			= '{$rtuoteno[$i]['ale2']}',
 												lasku_ale3			= '{$rtuoteno[$i]['ale3']}',
@@ -1640,7 +1645,7 @@
 					$filename = array_pop(explode("/", $file));
 					$xmlstr   = mysql_real_escape_string($xmlstr);
 
-					if ($ebid == "FINVOICEXML") {
+					if ($ebid == "FINVOICEXML" or $ebid == 'MAVENTAXML') {
 						$kayttotarkoitus = 'FINVOICE';
 					}
 					elseif ($ebid == "TECCOM-INVOICE") {
@@ -1859,4 +1864,3 @@
 			}
 		}
 	}
-?>

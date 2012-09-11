@@ -17796,7 +17796,15 @@ if (!function_exists("erolista")) {
 
 		$lasku = str_replace(",", ", ", $lasku);
 
-		$lajilisa = $valitse == 'asn' ? 'asn' : 'tec';
+		if ($valitse == 'asn') {
+			$lajilisa = 'asn';
+		}
+		elseif ($valitse == 'maventa') {
+			$lajilisa = 'mav';
+		}
+		else {
+			$lajilisa = 'tec';
+		}
 
 		$rivihintalisa = $valitse != 'asn' ? ", round(kappalemaara * hinta * (1 - lasku_ale1 / 100) * (1 - lasku_ale2 / 100) * (1 - lasku_ale3 / 100),'{$yhtiorow['hintapyoristys']}') rivihinta" : "";
 
@@ -17960,8 +17968,7 @@ if (!function_exists("erolista")) {
 						laatija
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus IN ({$row['tilausrivi']})
-						#GROUP BY 1,2,3,4,5";
+						AND tunnus IN ({$row['tilausrivi']})";
 			$rivires = pupe_query($query);
 
 			$kala_orig = $kala;

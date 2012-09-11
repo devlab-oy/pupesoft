@@ -124,12 +124,11 @@ echo "
 
 <div class='controls'>";
 
-if($lava['kasittelytapa'] == 'H') echo "<button class='left' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
-else echo "<button class='left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
+if($lava['kasittelytapa'] == 'H') echo "<button class='button left' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
+else echo "<button class='button left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
 
-echo "<button name='submit' value='edit' onclick='submit();'>",t("Muokkaa"),"</button>
-	<button name='submit' value='varalle' onclick='return varmista();'>",t("Varalle"),"</button>
-	<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
+echo "<button name='submit' value='edit' class='button' onclick='submit();'>",t("Muokkaa"),"</button>
+	<button name='submit' value='varalle' class='button' onclick='return varmista();'>",t("Varalle"),"</button>
 </div>";
 
 if (isset($error)) {

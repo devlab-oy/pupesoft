@@ -18333,7 +18333,7 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 }
 
 if (!function_exists("teccom_kaytettavat_tilausrivit")) {
-	function teccom_kaytettavat_tilausrivit($checkres, $ebid) {
+	function teccom_kaytettavat_tilausrivit($checkres, $lajilisa) {
 
 		global $kukarow;
 
@@ -18344,8 +18344,6 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		}
 
 		#echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
-
-		$lajilisa = $ebid == 'MAVENTAXML' ? 'mav' : 'tec';
 
 		while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 

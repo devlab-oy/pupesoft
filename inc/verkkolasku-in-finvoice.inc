@@ -2,12 +2,18 @@
 
 $laskuformaatti 		= "FINVOICE";
 
+if (strpos($file, "maventa") !== false) {
+	$laskun_ebid = "MAVENTAXML";
+}
+else {
+	$laskun_ebid 			= "FINVOICEXML";
+}
+
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
-$laskun_ebid 			= "FINVOICEXML";
 $laskun_tapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_lapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
@@ -157,5 +163,3 @@ if (count($vattiedot) > 0) {
 		$i++;
 	}
 }
-
-?>

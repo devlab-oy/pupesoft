@@ -1074,7 +1074,7 @@
 
 	 			// Tehdän pelkät oletustiliöinnit
 	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTA") {
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE" and $laskun_tyyppi != "TECCOM-INVOICE" and $ebid != "MAVENTAXML") {
 
 					if ($oletustili > 0) {
 						$tili = $oletustili;
@@ -1268,7 +1268,7 @@
 							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri????????
-							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTA" and $summa > 0) {
+							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $ebid != "MAVENTAXML" and $summa > 0) {
 								$summa = $summa * -1;
 							}
 
@@ -1386,7 +1386,7 @@
 							}
 						}
 
-						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTA") and $sanomantarkistin != 999 and !$onko_duplikaatti) {
+						if ($rtuoteno[$i]["tuoteno"] != "" and ($laskun_tyyppi == "TECCOM-INVOICE" or $ebid == "MAVENTAXML") and $sanomantarkistin != 999 and !$onko_duplikaatti) {
 
 							if (!isset($rtuoteno[$i]['ale1'])) $rtuoteno[$i]['ale1'] = 0;
 							if (!isset($rtuoteno[$i]['ale2'])) $rtuoteno[$i]['ale2'] = 0;
@@ -1422,7 +1422,7 @@
 							// osto_rahti = invoiceSummary rahti
 							// osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
 
-							$lajilisa = $ebid == "MAVENTA" ? "mav" : "tec";
+							$lajilisa = $ebid == "MAVENTAXML" ? "mav" : "tec";
 
 							$insertquery = "	INSERT INTO asn_sanomat SET
 												asn_numero 			= '{$laskun_numero}',

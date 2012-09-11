@@ -18333,7 +18333,7 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 }
 
 if (!function_exists("teccom_kaytettavat_tilausrivit")) {
-	function teccom_kaytettavat_tilausrivit($checkres) {
+	function teccom_kaytettavat_tilausrivit($checkres, $ebid) {
 
 		global $kukarow;
 
@@ -18344,6 +18344,8 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 		}
 
 		#echo "Osumia querylla ".mysql_num_rows($checkres)."<br><br>";
+
+		$lajilisa = $ebid == 'MAVENTAXML' ? 'mav' : 'tec';
 
 		while ($tilausrivirow = mysql_fetch_assoc($checkres)) {
 
@@ -18362,7 +18364,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 				$query = "	SELECT tunnus
 							FROM asn_sanomat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji = 'tec'
+							AND laji = '{$lajilisa}'
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res2 = pupe_query($query);
@@ -18397,7 +18399,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 				$query = "	SELECT tunnus
 							FROM asn_sanomat
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND laji = 'tec'
+							AND laji = '{$lajilisa}'
 							AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
 				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$chk_res = pupe_query($query);

@@ -1131,7 +1131,7 @@
 
 	if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
-		if (!isset($kappaleet)) $kappaleet = 0;
+		if (!isset($kappaleet)) $kappaleet = 1;
 
 		//valitaan tulostin heti alkuun, jos se ei ole vielä valittu
 		if ($toim == "OSTO" or $toim == "HAAMU") {

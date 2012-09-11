@@ -1691,8 +1691,11 @@
 						$fres = pupe_query($query);
 						$frow = mysql_fetch_assoc($fres);
 
-						//Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
+						// Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
 						if ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'NORDEA' and $frow["viitetyyppi"] == '') {
+							$viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
+						}
+						elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'COLLECTOR' and $frow["viitetyyppi"] == '') {
 							$viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
 						}
 						elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'OKO' and $frow["viitetyyppi"] == '') {

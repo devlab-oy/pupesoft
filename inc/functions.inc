@@ -5938,7 +5938,7 @@ if (!function_exists('ebid')) {
 		$res = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($res);
 
-		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
+		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "MAVENTAXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
 			$ebid = $laskurow['ebid'];
 
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
@@ -9209,9 +9209,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		// LÄHETETÄÄN TILAUSVAHVISTUS
 		//
 		//
-		
+
 		$tuoteperheetyhdessa = FALSE;
-		
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}

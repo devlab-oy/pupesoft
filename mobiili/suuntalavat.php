@@ -109,9 +109,10 @@ if (isset($uusi)) {
 				echo "lisaa_suuntalava(:saapuminen => $otunnus	, :params => $params)";
 				$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
 				echo "<br>Lisättiin lava! ".$uusi_suuntalava;
-				echo "<pre>";
-				var_dump($params);
-				echo "</pre>";
+
+				# Takaisin suuntalavat listaan
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
+				exit();
 			}
 		}
 	}
@@ -209,10 +210,6 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 		}
 	}
 	include('views/suuntalavat/form.php');
-
-	echo "Alkuperäinen suuntalava:<pre>";
-	var_dump($suuntalava);
-	echo "</pre>";
 }
 
 # Suuntalava siirtovalmiiksi (normaali)

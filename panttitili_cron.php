@@ -16,6 +16,7 @@
 
 	$kukarow['yhtio'] = (string) $argv[1];
 	$kukarow['kuka'] = 'cron';
+	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	$query = "	SELECT asiakas, GROUP_CONCAT(tunnus) tunnukset
 				FROM panttitili

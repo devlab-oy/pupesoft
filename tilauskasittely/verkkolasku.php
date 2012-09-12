@@ -1389,7 +1389,7 @@
 						$query_ale_lisa = generoi_alekentta('M');
 
 						if ($yhtiorow['kuljetusvakuutus_koonti'] == 'L') {
-							$selectlisa_kuljetusvakuutus = "GROUP_CONCAT(lasku.tunnus) AS tunnus,";
+							$selectlisa_kuljetusvakuutus = "GROUP_CONCAT(DISTINCT lasku.tunnus) AS tunnus,";
 							$groupbylisa_kuljetusvakuutus = "GROUP BY 1,2,3,4";
 						}
 						else {
@@ -1436,7 +1436,7 @@
 
 									if ($kv_vaktuote == "") $kv_vaktuote = $row["kv_tuotenumero"];
 
-									//haetaan otsikon tiedot
+									// haetaan otsikon tiedot
 									$query = "  SELECT lasku.*
 												FROM lasku
 												WHERE lasku.yhtio = '$kukarow[yhtio]'

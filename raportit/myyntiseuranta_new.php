@@ -85,6 +85,11 @@
 
 			// t‰ss‰ on t‰m‰ "perusn‰kym‰" mik‰ tulisi olla kaikissa myynnin raportoinneissa..
 
+			// Jos ajetaan tilauksittain vaihdetaan aina ajotavaksi 'tilaus'
+			if (isset($ruksit[140]) and $ruksit[140] != "") {
+				$ajotapa = 'tilaus';
+			}
+
 			if ($ajotapa == "lasku") {
 				$chk1 = "SELECTED";
 			}
@@ -121,6 +126,8 @@
 			echo "</select></td>";
 
 			echo "</tr>";
+
+			$chk1 = $chk2 = $chk3 = $chk4 = $chk5 = $chk6 = '';
 
 			if ($ajotapanlisa == "summattuna") {
 				$chk1 = "SELECTED";
@@ -226,6 +233,7 @@
 			if ($ruksit[110]  != '') 		$ruk110chk 				= "CHECKED";
 			if ($ruksit[120] != '')			$ruk120chk 				= "CHECKED";
 			if ($ruksit[130] != '')			$ruk130chk 				= "CHECKED";
+			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
@@ -265,10 +273,13 @@
 				<td><input type='text' name='jarjestys[10]' size='2' value='{$jarjestys[10]}'></td>
 				<td><input type='checkbox' name='ruksit[10]' value='ytunnus' {$ruk10chk}></td>
 				<td><input type='text' name='ytunnus' value='{$ytunnus}'>
-				<select name='ytunnus_mistatiedot'>
+				<br>
+				<table><tr><td class='spec'>".t("Hae asiakastiedot").":</td><td><select name='ytunnus_mistatiedot'>
 				<option value=''>",t("Asiakasrekisterist‰"),"</option>
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
-				</select></td>
+				</select></td></tr>";
+				#<tr><td class='spec'>".t("N‰yt‰ laajat asiakastiedot").":</td><td><input type='checkbox' name='ytunnus_laajattiedot' value='laajat' {$ruk10chk}></td></tr>
+			echo "</table>
 				</tr>
 				<tr>
 				<th>",t("Listaa asiakasnumerolla"),"</th>
@@ -339,6 +350,13 @@
 				<td><input type='text' name='rajaus[130]' value='{$rajaus[130]}'></td>
 				</tr>
 				<tr>
+				<th>",t("Listaa tilauksittain"),"</th>
+				<td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
+				<td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
+				<td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
+				<td class='back'>",t("(Toimii vain jos ajotapa on Laskutetuista tilaukista)"),"</td>
+				</tr>
+				<tr>
 				<td class='back'><br></td>
 				</tr>
 				<tr><th valign='top'>",t("Tuotelista"),"<br>(",t("Rajaa n‰ill‰ tuotteilla"),")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
@@ -347,111 +365,92 @@
 				</tr>
 				<tr>
 				<th>",t("Piilota myynti"),"</th>
-				<td><input type='checkbox' name='piilota_myynti' {$piilota_myynti_sel}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piilota_myynti' {$piilota_myynti_sel}></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota nettokate"),"</th>
-				<td><input type='checkbox' name='piilota_nettokate' {$piilota_nettokate_sel}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piilota_nettokate' {$piilota_nettokate_sel}></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota kate"),"</th>
-				<td><input type='checkbox' name='piilota_kate' {$piilota_kate_sel}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piilota_kate' {$piilota_kate_sel}></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota kappaleet"),"</th>
-				<td><input type='checkbox' name='piilota_kappaleet' {$piilota_kappaleet_sel}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piilota_kappaleet' {$piilota_kappaleet_sel}></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota edellisen kauden sarakkeet"),"</th>
-				<td><input type='checkbox' name='piiloed' {$piiloedchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piiloed' {$piiloedchk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota v‰lisummat"),"</th>
-				<td><input type='checkbox' name='piiyhteensa' {$piychk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piiyhteensa' {$piychk}></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ nettokateprosentit"),"</th>
-				<td><input type='checkbox' name='nettokateprossat' {$nettokatchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='nettokateprossat' {$nettokatchk}></td>
 				<td class='back'>",t("(Toimii vain jos myynti ja nettokate n‰ytet‰‰n)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ kateprosentit"),"</th>
-				<td><input type='checkbox' name='kateprossat' {$katchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='kateprossat' {$katchk}></td>
 				<td class='back'>",t("(Toimii vain jos myynti ja kate n‰ytet‰‰n)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ tuotteiden nimitykset"),"</th>
-				<td><input type='checkbox' name='nimitykset' {$nimchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ sarjanumerot"),"</th>
-				<td><input type='checkbox' name='sarjanumerot' {$sarjachk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='sarjanumerot' {$sarjachk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ vain myydyt sarjanumerot"),"</th>
-				<td><input type='checkbox' name='eiOstSarjanumeroita' {$sarjachk2}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='eiOstSarjanumeroita' {$sarjachk2}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ varastonarvo"),"</th>
-				<td><input type='checkbox' name='varastonarvo' {$varvochk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='varastonarvo' {$varvochk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ tilausrivin kommentti"),"</th>
-				<td><input type='checkbox' name='tilrivikomm' {$tilrivikommchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='tilrivikomm' {$tilrivikommchk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("Tulosta myynti kuukausittain"),"</th>
-				<td><input type='checkbox' name='kuukausittain' {$kuuchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='kuukausittain' {$kuuchk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("Tulosta osoitetarrat"),"</th>
-				<td><input type='checkbox' name='osoitetarrat' {$tarchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='osoitetarrat' {$tarchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat asiakkaittain)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Raportti vain Exceliin"),"</th>
-				<td><input type='checkbox' name='vain_excel' {$vain_excelchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='vain_excel' {$vain_excelchk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("Piilota nollarivit"),"</th>
-				<td><input type='checkbox' name='piilotanollarivit' {$einollachk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='piilotanollarivit' {$einollachk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ myˆs ennakkolaskutus"),"</th>
-				<td><input type='checkbox' name='naytaennakko' {$naytaennakkochk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='naytaennakko' {$naytaennakkochk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ kaikki tuotetyypit"),"</th>
-				<td><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
@@ -459,7 +458,7 @@
 
 			$status_result = t_avainsana("S");
 
-			echo "<td><select name='status'><option value=''>",t("Kaikki"),"</option>";
+			echo "<td colspan='3'><select name='status'><option value=''>",t("Kaikki"),"</option>";
 
 			while ($statusrow = mysql_fetch_assoc($status_result)) {
 
@@ -470,13 +469,13 @@
 				echo "<option value='{$statusrow['selite']}'{$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
 			}
 
-			echo "</select></td><td></td></tr>";
+			echo "</select></td></tr>";
 
 			$vsel[$verkkokaupat] = "SELECTED";
 
 			echo "<tr>
 				<th>",t("Ohjelmamoduli"),"</th>
-				<td>
+				<td colspan='3'>
 				<select name='verkkokaupat'>
 				<option value=''>",t("Kaikki ohjelmamodulit"),"</option>
 				<option value='PUPESOFT'		{$vsel["PUPESOFT"]}>",t("Vain Pupesoft-tilauksia"),"</option>
@@ -488,29 +487,27 @@
 				<option value='FUTURSOFT'		{$vsel["FUTURSOFT"]}>",t("Vain Futursoft EDI-tilauksia"),"</option>
 				</select>
 				</td>
-				<td></td>
 				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>",t("N‰yt‰ laskun maksup‰iv‰m‰‰r‰"),"</th>
-				<td><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
-				<td></td>
+				<td colspan='3'><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
 			echo "<tr>
 			<th>",t("N‰yt‰ budjetti"),"</th>";
-			echo "<td><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
+			echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
 			echo "<option value='asbu' {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
 			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
 			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhm‰budjetti"),"</option>";
 			echo "<option value='tubu' {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
-			echo "</select></td><td></td>
+			echo "</select></td>
 			</tr>";
 
 			echo "<tr>
 			<th>",t("N‰yt‰ asiakask‰ynnit"),"</th>";
-			echo "<td><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td><td></td>
+			echo "<td colspan='3'><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td>
 			<td class='back'>".t("Toimii vain jos listaat asiakkaittain")."</td>
 			</tr>";
 
@@ -1171,6 +1168,19 @@
 						}
 					}
 					//**  Asiakkaan_tilausnumeroittain loppu **//
+
+					//**  Tilauksittain start **//
+					if ($mukaan == "tilauksittain") {
+						$group .= ",lasku.tunnus";
+						$select .= "lasku.tunnus tilausnumero, ";
+						$order  .= "tilausnumero,";
+						$gluku++;
+
+						if ($rajaus[$i] != "") {
+							$lisa .= " and lasku.tunnus = '{$rajaus[$i]}' ";
+						}
+					}
+					//**  Tilauksittain loppu **//
 				}
 
 				// N‰ytet‰‰n tilausrivin kommentit ja groupataan tilausriveitt‰in

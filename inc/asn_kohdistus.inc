@@ -136,7 +136,9 @@
 				$query = "	SELECT tilausrivi.*
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-											AND lasku.tunnus = tilausrivi.otunnus)
+											AND lasku.tunnus = tilausrivi.otunnus
+											AND lasku.tila = 'O' 
+											AND alatila in ('A','X'))
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -160,7 +162,9 @@
 					$query = "	SELECT tilausrivi.*
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-												AND lasku.tunnus = tilausrivi.otunnus)
+												AND lasku.tunnus = tilausrivi.otunnus
+												AND lasku.tila = 'O' 
+												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -185,7 +189,9 @@
 					$query = "	SELECT tilausrivi.*
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-												AND lasku.tunnus = tilausrivi.otunnus)
+												AND lasku.tunnus = tilausrivi.otunnus
+												AND lasku.tila = 'O' 
+												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -209,7 +215,9 @@
 					$query = "	SELECT tilausrivi.*
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-												AND lasku.tunnus = tilausrivi.otunnus)
+												AND lasku.tunnus = tilausrivi.otunnus
+												AND lasku.tila = 'O' 
+												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -234,7 +242,9 @@
 					$query = "	SELECT tilausrivi.*
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-												AND lasku.tunnus = tilausrivi.otunnus)
+												AND lasku.tunnus = tilausrivi.otunnus
+												AND lasku.tila = 'O' 
+												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -303,7 +313,9 @@
 						$query = "	SELECT tilausrivi.*
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-													AND lasku.tunnus = tilausrivi.otunnus)
+													AND lasku.tunnus = tilausrivi.otunnus
+													AND lasku.tila = 'O' 
+													AND alatila in ('A','X'))
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.toimittajanro = '{$row['toimittajanumero']}'

@@ -47,7 +47,7 @@
 
 			// nollataan ale2 ja ale3 kentät ja laitetaan INSERT ale1 100%
 			for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				$query_insert_lisa .= " ale{$postfix} = 0, ";
+				$query_insert_lisa .= " ale{$alepostfix} = 0, ";
 			}
 
 			$pantti_row['kpl'] *= -1;
@@ -118,7 +118,7 @@
 			$query_insert_lisa = '';
 
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				$query_insert_lisa .= " ale{$postfix} = '{$pantti_row['ale{$postfix}']}', ";
+				$query_insert_lisa .= " ale{$alepostfix} = '".$pantti_row["ale{$alepostfix}"]."', ";
 			}
 
 			 $kommenttilisa = "(" . t("tilausnro") . ": " . $pantti_row['myyntitilausnro'] . ", " . t("tilauspvm") . ": " . $pantti_row['myyntipvm'] . ")";

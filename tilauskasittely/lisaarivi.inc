@@ -782,7 +782,7 @@
 					$zzrow[$zzrowlask]["hyllynro"]		= $zrow["hyllynro"];
 					$zzrow[$zzrowlask]["hyllyvali"]		= $zrow["hyllyvali"];
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
-					$zzrow[$zzrowlask]["prio"]			= $zrow["prio"];
+					$zzrow[$zzrowlask]["prio"]			= $zrow["prio"] == 0 ? PHP_INT_MAX : $zrow["prio"];
 					$zzrow[$zzrowlask]['erikoistoimitus_alarajasumma']  = $zrow['erikoistoimitus_alarajasumma'];
 
 					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $myytavissa kappaletta<br>";
@@ -815,14 +815,41 @@
 					}
 				}
 
+				// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+				if (!function_exists('zzrowprio')) {
+					function zzrowprio($a, $b) {
+						if (strcmp($a["prio"], $b["prio"]) < 0) {
+							return -1;
+						}
+						elseif (strcmp($a["prio"], $b["prio"]) > 0) {
+							return 1;
+						}
+						elseif ($a["myytavissa"] < $b["myytavissa"]) {
+							return 1;
+						}
+						elseif ($a["myytavissa"] > $b["myytavissa"]) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
 						/*
+						- Sortataan varastopaikat prioriteetti j‰rkk‰‰n
 						- Pit‰iskˆ eka kattoa lˆytyykˆ kaikki joltain yhdelt‰ paikalta?
 						- Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo?
 						- Riitt‰‰kˆ jonkun toisen varaston saldo?
 						- Jos ei niin splitataan.
 						*/
+
+						// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+						usort($arr, "zzrowprio");
+
+						reset($arr);
 
 						$chk_yksi_paikka = FALSE;
 
@@ -873,6 +900,8 @@
 							}
 							else {
 
+								reset($arr);
+
 								// Riitt‰‰kˆ jonkun toisen varaston saldo?
 								$chk_distinct_varasto = array();
 
@@ -906,11 +935,19 @@
 									if ($varasto_set != '') {
 										reset($arr);
 
+										$var_temp = array();
+
 										foreach ($arr as $indx => $chk_row) {
 											if ($chk_row['varasto'] == $varasto_set) {
+												$var_temp[] = $chk_row;
 												unset($arr[$indx]);
-												array_unshift($arr, $chk_row);
 											}
+										}
+
+										if (count($var_temp) > 0) {
+											// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+											usort($var_temp, "zzrowprio");
+											$arr = array_merge($var_temp, $arr);
 										}
 									}
 								}
@@ -936,16 +973,17 @@
 				}
 
 				// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-				usort($oma_maa, "zzrowcmp");
+				if (count($oma_maa) > 0) usort($oma_maa, "zzrowcmp");
+
 				// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-				usort($muu_maa, "zzrowcmp");
+				if (count($muu_maa) > 0) usort($muu_maa, "zzrowcmp");
 
 				if ($yhtiorow['varaston_splittaus'] == 'K') {
 					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-					$oma_maa = chk_varaston_saldo($oma_maa, $kpl);
+					if (count($oma_maa) > 0) $oma_maa = chk_varaston_saldo($oma_maa, $kpl);
 
 					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-					$muu_maa = chk_varaston_saldo($muu_maa, $kpl);
+					if (count($muu_maa) > 0) $muu_maa = chk_varaston_saldo($muu_maa, $kpl);
 				}
 
 				// yhdistet‰‰n arrayt

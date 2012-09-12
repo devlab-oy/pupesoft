@@ -1177,7 +1177,7 @@
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and lasku.tunnus = '{$rajaus[$i]}' ";
+							$lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
 						}
 					}
 					//**  Tilauksittain loppu **//

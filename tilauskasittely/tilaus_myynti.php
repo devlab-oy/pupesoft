@@ -7123,9 +7123,12 @@ if ($tee == '') {
 								<select name='kertakassa'>
 								<option value='EI_KASSAMYYNTIA'>".t("Ei kassamyyntiä")."</option>";
 
+						$kassalipaslisa = $kukarow['toimipaikka'] != 0 ? "and toimipaikka IN (0, {$kukarow['toimipaikka']})" : "";
+
 						$query = "	SELECT *
 									FROM kassalipas
 									WHERE yhtio = '$kukarow[yhtio]'
+									{$kassalipaslisa}
 									ORDER BY nimi";
 						$vares = pupe_query($query);
 

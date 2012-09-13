@@ -9009,47 +9009,97 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		//
 		//
 
+		$tuoteperheetyhdessa = FALSE;
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 		}
+		elseif (strpos($laskurow['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
+		}
 		elseif (strpos($laskurow['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
 			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+			if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
 			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
 			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
 			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '1') !== FALSE) {
+			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		else {
 			$naytatvale = 1; // halutaan n‰h‰ alet
@@ -12580,7 +12630,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 // K‰sitell‰‰n XML-entiteetit
 if (!function_exists("xmlentities")) {
 	function xmlentities($string) {
-   		return str_replace(array('&', '"', "'", '<', '>', '¥', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string));
+   		return preg_replace("/[^\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '¥', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
 	}
 }
 
@@ -12701,7 +12751,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
+				$selec = "	if(lasku.toim_maa!='', lasku.toim_maa, if(lasku.maa != '', lasku.maa, '$yhtiorow[maa]')) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,

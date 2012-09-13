@@ -365,6 +365,17 @@
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+
+			// Katsotaan onko Zebra-tulostinta käytössä.
+			// Oletetaan että silloin merkistö ei ole 0
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND merkisto != 0";
+			$zebra_chk_res = pupe_query($query);
+
+			if (mysql_num_rows($zebra_chk_res) != 0) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+
 			echo "</select>";
 			echo "</td></tr>";
 		}

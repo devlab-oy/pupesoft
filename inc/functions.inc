@@ -9008,9 +9008,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		// LÄHETETÄÄN TILAUSVAHVISTUS
 		//
 		//
-		
+
 		$tuoteperheetyhdessa = FALSE;
-		
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}
@@ -16113,6 +16113,94 @@ if (!function_exists("etsi_kuuluvat_tilioinnit")) {
 		}
 
 		return $summa;
+	}
+}
+
+if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
+	function tulosta_tyomaaraystarra_zebra($otunnus, $komento, $tkpl) {
+
+		global $kukarow;
+
+		//Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+		//ja tarvitaan myös $otunnus ja $tkpl
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$otunnus}'";
+		$laskures = pupe_query($query);
+
+		// haetaan yhtiötiedot Pupesta
+		$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+
+		if (mysql_num_rows($laskures) == 1) {
+			$laskurow = mysql_fetch_assoc($laskures);
+
+			$nimitys = trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']);
+
+			// tässä tehdään aineisto jota Zebra tulostin tajuaa
+			/* Esimerkki
+			D15
+			N
+			B125,0,0,3,2,5,45,B,"HC3310CPT40H     "
+			A560,0,0,2,1,2,N,
+			A120,75,0,3,1,2,N,"PALL PROFILE STAR        ""  ""         0"
+			A120,115,0,3,1,2,N,"SUODATINPANOS            "
+			P1
+			*/
+
+			// Toimii ja suunniteltu mallille GX420t
+			// Tarrakoko 76 mm x 25 mm
+			$pituus = 50; // voidaan määrittää mistä kohdasta katkaistaan teksti.
+
+			if (strlen($nimitys) > $pituus ) {
+				if (strpos($nimitys, " ")) {
+					$nimipalat = explode(' ',$nimitys);
+
+					$merkkimaara = 0;
+					$nimitys = "";
+					$nimitys2 = "";
+
+					foreach ($nimipalat as $nimipala) {
+						if (strlen($nimitys)+strlen($nimipala) <= $pituus or $merkkimaara == 0) {
+							$nimitys .= $nimipala." ";
+						}
+						else {
+							$nimitys2 .= $nimipala." ";
+						}
+						$merkkimaara += strlen($nimipala);
+					}
+				}
+
+				$nimitys = substr($nimitys,0,$pituus);
+				$nimitys2 = substr($nimitys2,0,$pituus);
+			}
+
+			$sivu  = "^XA\n";		// vakio alku, pakollinen
+			$sivu .= "^LH50\n";	// offset vasemmasta
+			$sivu .= "^LT000\n";	// offset ylhäältä
+			$sivu .= "^FO85,20\n^ASN,20,12\n^FDTyömääräin: {$otunnus}\n^FS";
+			$sivu .= "^FO85,65\n^AQN,18,8\n^FD$nimitys\n^FS";
+			$sivu .= "^FO85,88\n^AQN,18,8\n^FD$nimitys2\n^FS";
+			$sivu .= "^MD10";  											// TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
+			$sivu .= "^PQ$tkpl";										// Tulostettavien lukumäärä
+			$sivu .= "^FO80,120\n^BCN,40,Y,N,N\n^FD$otunnus\n^FS";		// viivakoodi CODE-128
+			// $sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";	// Tulostetaan Firma
+
+			$sivu .= "\n^XZ";	// pakollinen lopetus
+
+			//keksitään uudelle failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$filenimi = "/tmp/Zebra-tyomaaraystarra-".md5(uniqid(mt_rand(), true)).".txt";
+			$fh = file_put_contents($filenimi, $sivu);
+
+			$line = exec("$komento $filenimi");
+			system("rm -f $filenimi");
+		}
+		else {
+			echo "<font class='error'>",t("Tilausta")," {$otunnus} ",t("ei löydy järjestelmästä"),"!!!<br></font>";
+		}
 	}
 }
 

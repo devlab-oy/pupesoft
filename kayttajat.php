@@ -1005,7 +1005,9 @@
 					echo "<tr><th align='left'>",t("Kassamyyjä / oletuskassalipas"),":</td>";
 					echo "<td><select name='kassamyyja'><option value=''>",t("Ei oletuskassalipasta"),"</option>";
 
-					$query = "SELECT * FROM kassalipas WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimi";
+					$kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
+
+					$query = "SELECT * FROM kassalipas WHERE yhtio = '{$kukarow['yhtio']}' {$kassalipaslisa} ORDER BY nimi";
 					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
@@ -1514,5 +1516,3 @@
 	}
 
 	require("inc/footer.inc");
-
-?>

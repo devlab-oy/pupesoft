@@ -97,7 +97,7 @@
 		if ($toim != "REKLAMAATIO") {
 
 			if ($tyomtyyppi == 'Z') {
-				tulosta_tyomaaraystarra_zebra($otunnus, $komento[$tulostimet[0]], $kappaleet);
+				tulosta_tyomaaraystarra_zebra($laskurow, $komento[$tulostimet[0]], $kappaleet);
 			}
 			else {
 				if ($toim == "SIIRTOTYOMAARAYS") {

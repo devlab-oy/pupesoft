@@ -87,7 +87,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
   		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
     }
 	else {
-		exec("mv -f \"$upfile1\" \"$upfilesgh\"");
+		exec("cp -f \"$upfile1\" \"$upfilesgh\"");
 		$error = 0;
     }
 

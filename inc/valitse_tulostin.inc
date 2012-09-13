@@ -115,6 +115,9 @@
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}
+		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meillä on tilausvahvistuksessa kasi, niin tehdään EAN tilausvahvistus asiakashinnalla ja ei näytetä alennuksia
+		}
 		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
 			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
@@ -352,6 +355,8 @@
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 
+		$seepra = false;
+
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
@@ -361,6 +366,8 @@
 			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
+
+			if ($kirow['merkisto'] != 0) $seepra = true;
 
 			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
@@ -379,6 +386,12 @@
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+
+			// Katsotaan onko Zebra-tulostinta käytössä.
+			// Oletetaan että silloin merkistö ei ole 0
+
+			if ($seepra) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+
 			echo "</select>";
 			echo "</td></tr>";
 		}
@@ -443,4 +456,3 @@
 		require("inc/footer.inc");
 		exit;
 	}
-?>

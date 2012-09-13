@@ -54,6 +54,7 @@
 	if (!isset($kkloppu)) $kkloppu = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($vvloppu)) $vvloppu = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 	if (!isset($tee)) $tee = "";
+	if (!isset($varasto)) $varasto = "";
 
 	echo "<form method='post'>";
 	echo "<table>";
@@ -62,6 +63,24 @@
 	echo "<tr><th>",t("Tilausnumero"),"</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
 	echo "<th>",t("SSCC"),"</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
 	echo "<tr><th>",t("Tuotenumero"),"</th><td><input type='text' name='tuotenumero' value='{$tuotenumero}' /></td>";
+
+	echo "<th>",t("Varasto"),"</th>";
+	echo "<td><select name='varasto'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	$query = "	SELECT *
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY nimitys";
+	$varasto_res = pupe_query($query);
+
+	while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
+		$sel = $varasto == $varasto_row['tunnus'] ? " selected" : "";
+		echo "<option value='{$varasto_row['tunnus']}'{$sel}>{$varasto_row['nimitys']}</option>";
+	}
+
+	echo "</select></td></tr>";
+
 	echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td style='text-align:right; vertical-align:middle;'>";
 	echo "<input type='text' name='ppalku' value='{$ppalku}' size='3' />&nbsp;";
 	echo "<input type='text' name='kkalku' value='{$kkalku}' size='3' />&nbsp;";
@@ -72,7 +91,7 @@
 	echo "<input type='hidden' name='tee' value='hae' />";
 	echo "</td></tr>";
 	echo "</table><br>";
-	
+
 	echo "<input type='submit' value='",t("Hae"),"' />";
 	echo "</form>";
 
@@ -94,6 +113,7 @@
 		$tilauslisa = trim($tilausnumero) != "" ? " AND kerayserat.otunnus = '".mysql_real_escape_string($tilausnumero)."'" : "";
 		$tuotelisa = trim($tuotenumero) != "" ? " AND tuote.tuoteno = '".mysql_real_escape_string($tuotenumero)."'" : "";
 		$sscclisa = trim($sscc) != "" ? " AND (kerayserat.sscc LIKE ('%".mysql_real_escape_string($sscc)."%') OR kerayserat.sscc_ulkoinen LIKE ('%".mysql_real_escape_string($sscc)."%'))" : "";
+		$varastolisa = trim($varasto) != "" ? " AND vh.varasto = '".(int) $varasto."' " : "";
 
 		if ($tilauslisa != "" or $sscclisa != "") {
 			$pvmlisa = "";
@@ -137,7 +157,13 @@
 							JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
 							LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+							JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio
+								{$varastolisa}
+								AND vh.hyllyalue = tilausrivi.hyllyalue
+								AND vh.hyllynro = tilausrivi.hyllynro
+								AND vh.hyllyvali = tilausrivi.hyllyvali
+								AND vh.hyllytaso = tilausrivi.hyllytaso)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuotelisa})
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.sscc IN ({$row['sscc']})
 							GROUP BY 1,2,3,4,5,6,7

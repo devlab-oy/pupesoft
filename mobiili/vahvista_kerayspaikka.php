@@ -84,6 +84,15 @@ if (isset($submit) and trim($submit) != '') {
 			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
 				$errors[] = t("Virheellinen varmistuskoodi");
 			}
+
+			# Setataan viimeinen muuttuja jos lavalla vain yksi rivi jäjellä
+			if (!empty($alusta_tunnus)) {
+				$query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
+				$rivit_result = pupe_query($query);
+				$rivit = mysql_num_rows($rivit_result);
+			}
+			$viimeinen = (isset($rivit) and $rivit == 1) ? true : false;
+
 			# Jos ei virheitä
 			if(count($errors) == 0) {
 				$tilausrivit = array();
@@ -98,7 +107,7 @@ if (isset($submit) and trim($submit) != '') {
 					# Splitataan rivi
 					# Jos viimeinen rivi ja määrää pienennetty, pudotetaan toinen rivi pois lavalta.
 					# Koska viimeistä rivii viedessä viedään kaikkilavan rivit varastoon
-					if (isset($viimeinen)) {
+					if ($viimeinen) {
 						splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), false, true);
 					}
 					else {
@@ -190,7 +199,7 @@ if (isset($submit) and trim($submit) != '') {
 				$saapumiset = hae_saapumiset($alusta_tunnus);
 
 				# Viimeisellä rivillä viedään koko suuntalava, jolloin lava merkataan puretuksi
-				if(isset($viimeinen)) {
+				if($viimeinen) {
 					vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
 				}
 				else {

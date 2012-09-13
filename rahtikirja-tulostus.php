@@ -705,7 +705,7 @@
 
 				// Tulostetaan osoitelappu
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
-					if ($valittu_rakiroslapp_tulostin != "" and $oslapp != '') {
+					if ($valittu_rakiroslapp_tulostin != "" and $oslapp != '' and $kollityht > 0) {
 
 						$rahtikirja_tulostus = "yep";
 						$tunnus = $lotsikot[0];

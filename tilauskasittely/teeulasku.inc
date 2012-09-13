@@ -518,6 +518,14 @@
 
 		//laitetaan välisumma vikallekin tilaukselle
 		if ($edtunnus != "") {
+
+			$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$edotunnus'";
+			$sumsresult = pupe_query($query);
+			$sumsrow	= mysql_fetch_assoc($sumsresult);
+
 			if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
 				$sumvieku = $sumsrow["vienti_kurssi"];
 			}

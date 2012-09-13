@@ -663,7 +663,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 6;
 		}
 		elseif ($toim == 'ENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, viesti tilausviite, $toimaikalisa alatila, tila, lasku.tunnus, tilausrivi.tyyppi trivityyppi, lasku.tilaustyyppi

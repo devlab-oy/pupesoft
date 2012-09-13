@@ -1527,6 +1527,9 @@
 					case "printteri8":
 						$otsikko = t("Reittietiketti");
 						break;
+					case "printteri9":
+						$otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
+						break;
 					default:
 						$otsikko = t(mysql_field_name($result, $i));
 				}
@@ -1988,5 +1991,3 @@
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");
 	}
-
-?>

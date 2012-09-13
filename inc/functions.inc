@@ -9209,11 +9209,14 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		// LÄHETETÄÄN TILAUSVAHVISTUS
 		//
 		//
-		
+
 		$tuoteperheetyhdessa = FALSE;
-		
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
+		}
+		elseif (strpos($laskurow['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meillä on tilausvahvistuksessa kasi, niin tehdään EAN tilausvahvistus asiakashinnalla ja ei näytetä alennuksia
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meillä on tilausvahvistuksessa seiska, niin tehdään EAN tilausvahvistus
@@ -12901,7 +12904,7 @@ if (!function_exists("seuraavat_lahtoajat")) {
 // Käsitellään XML-entiteetit
 if (!function_exists("xmlentities")) {
 	function xmlentities($string) {
-   		return str_replace(array('&', '"', "'", '<', '>', '´', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string));
+   		return preg_replace("/[^\x20-\xFF]/", "", str_replace(array('&', '"', "'", '<', '>', '´', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string)));
 	}
 }
 

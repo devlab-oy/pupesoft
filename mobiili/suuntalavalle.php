@@ -180,23 +180,23 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     $keraysvyohyke = mysql_fetch_assoc(pupe_query($keraysvyohyke_query));
 
     #Haetaan suuntalavan tilausrivit
-    $query =    "   SELECT tilausrivi.*
-                    FROM tilausrivi
-                    JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = '') AND suuntalavat.tunnus = tilausrivi.suuntalava and suuntalavat.tunnus = {$row['tunnus']}
-                    JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-                    JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                    LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-                    WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-                    AND tilausrivi.tyyppi = 'O'
-                    AND tilausrivi.kpl = 0
-                    AND tilausrivi.suuntalava > 0;";
-    $rivit = mysql_num_rows(pupe_query($query));
+    // $query =    "   SELECT tilausrivi.*
+    //                 FROM tilausrivi
+    //                 JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = '') AND suuntalavat.tunnus = tilausrivi.suuntalava and suuntalavat.tunnus = {$row['tunnus']}
+    //                 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
+    //                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+    //                 LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+    //                 WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+    //                 AND tilausrivi.tyyppi = 'O'
+    //                 AND tilausrivi.kpl = 0
+    //                 AND tilausrivi.suuntalava > 0;";
+    // $rivit = mysql_num_rows(pupe_query($query));
 
     echo "<tr>
         <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
         <td>{$row['sscc']}</td>
         <td>{$keraysvyohyke['nimitys']}</td>
-        <td>{$rivit}</td>
+        <td></td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
         <td><input type='hidden' name='hyllytetty' value='{$hyllytetty}' /></td>

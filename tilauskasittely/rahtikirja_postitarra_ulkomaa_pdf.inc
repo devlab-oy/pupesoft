@@ -117,7 +117,7 @@
 		$data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
 		$image = $pdf->jfif_embed($data);
 		$logoparam['scale'] = 0.105;
-		$pdf->image_place($image, 570, 70, $firstpage, $logoparam);
+		$pdf->image_place($image, 560, 70, $firstpage, $logoparam);
 
 		if (class_exists("Image_Barcode")) {
 			// L‰hetystunnus
@@ -152,8 +152,8 @@
 
 			$image = $pdf->jfif_embed($data);
 
-			$logoparam['scale'] = 122/282;
-			$pdf->image_place($image, 20, 225, $firstpage, $logoparam);
+			$logoparam['scale'] = 112/282;
+			$pdf->image_place($image, 30, 245, $firstpage, $logoparam);
 			system("rm -f $nimi");
 		}
 
@@ -306,9 +306,9 @@
 		$pdf->draw_text(70, 110,  "Time/Heure",	$firstpage, $pieni);
 		$pdf->draw_text(130, 110,  "Recipient's signature Signature du destinataire",	$firstpage, $pieni);
 
-		$pdf->draw_text(18, 10,   t("Itella Green - Carbon neutral delivery"),					$firstpage, $iso);
+		$pdf->draw_text(18, 20,   t("Itella Green - Carbon neutral delivery"),					$firstpage, $iso);
 
-		$pdf->draw_text(270, 10,  "9V".$toitarow['sopimusnro'],		$firstpage, $viivacourier);
+		$pdf->draw_text(270, 20,  "9V".$toitarow['sopimusnro'],		$firstpage, $viivacourier);
 
 		//l‰hetet‰‰n postin edisanoma
 		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {

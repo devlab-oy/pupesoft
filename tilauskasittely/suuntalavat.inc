@@ -447,7 +447,7 @@
 					'paino' => $paino,
 					'suuntalavan_tunnus' => $suuntalavan_tunnus
 				);
-			lisaa_suuntalava($otunnus, $params);
+			$uusi_suuntalavan_tunnus = lisaa_suuntalava($otunnus, $params);
 
 		}
 

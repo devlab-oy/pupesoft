@@ -2075,6 +2075,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kuljetusvakuutus_koonti") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == "L" ? " selected" : "";
+
+		$ulos .= "<option value = ''>".t("Kuljetusvakuutus muodostuu per tilaus")."</option>";
+		$ulos .= "<option value = 'L' {$sel}>".t("Kuljetusvakuutus muodostuu per lasku")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "viikkosuunnitelma") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

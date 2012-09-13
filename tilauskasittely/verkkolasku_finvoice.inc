@@ -219,7 +219,6 @@ if (!function_exists('finvoice_otsik')) {
 			//tästä lähtee Finvoice koodi
 			fputs($tootfinvoice, "<Finvoice Version=\"1.2\">\r\n");
 
-
 			if ($yhtiorow["verkkolasku_lah"] == "apix") {
 				fputs($tootfinvoice, "<MessageTransmissionDetails>\r\n");
 				fputs($tootfinvoice, "<MessageSenderDetails>\r\n");
@@ -323,10 +322,10 @@ if (!function_exists('finvoice_otsik')) {
 				$tarkrow = mysql_fetch_assoc($tarkres);
 
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
-				xml_add("InvoiceRecipientPartyIdentifier", 						"", 							$tootfinvoice, 35);
-				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), $tootfinvoice, 35, 1);
+				xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),							$tootfinvoice, 35);
+				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), 			$tootfinvoice, 35, 1);
 				if ($yhtiorow["verkkolasku_lah"] != "maventa") {
-					xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
+					xml_add("InvoiceRecipientOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),	$tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
 				}
 				fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
 				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
@@ -338,7 +337,7 @@ if (!function_exists('finvoice_otsik')) {
 				fputs($tootfinvoice, "</InvoiceRecipientPostalAddressDetails>\r\n");
 				fputs($tootfinvoice, "</InvoiceRecipientPartyDetails>\r\n");
 
-				xml_add("InvoiceRecipientOrganisationUnitNumber", 				"",								$tootfinvoice);
+				xml_add("InvoiceRecipientOrganisationUnitNumber", 				$lasrow['ovttunnus'],			$tootfinvoice);
 			}
 
 			#xml_add("InvoiceRecipientContactPersonName", 						"", 							$tootfinvoice);

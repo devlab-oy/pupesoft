@@ -19,20 +19,22 @@
 			$lisa = " LIMIT $toppi ";
 		}
 
-		$query = "	SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, tilausrivi.nimitys, count(*) kpl, sum(tilausrivi.kpl) tuokpl
-					FROM tilausrivi, tuotepaikat
-					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi='L'
-					and tilausrivi.laskutettuaika >='$vva-$kka-$ppa'
-					and tilausrivi.laskutettuaika <='$vvl-$kkl-$ppl'
+		$query = "	SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.saldo, tuotepaikat.tunnus paikkatun,
+					tuote.tuoteno, tuote.nimitys, count(tapahtuma.tunnus) kpl, sum(tapahtuma.kpl*-1) tuokpl
+					FROM tuotepaikat
+					JOIN tuote ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+					LEFT JOIN tapahtuma ON (tuotepaikat.yhtio = tapahtuma.yhtio
+						and tuotepaikat.tuoteno = tapahtuma.tuoteno
+						and tuotepaikat.hyllyalue = tapahtuma.hyllyalue
+						and tuotepaikat.hyllynro = tapahtuma.hyllynro
+						and tuotepaikat.hyllyvali = tapahtuma.hyllyvali
+						and tuotepaikat.hyllytaso = tapahtuma.hyllytaso
+						and tapahtuma.laji = 'laskutus'
+						and tapahtuma.laadittu >='$vva-$kka-$ppa'
+						and tapahtuma.laadittu <='$vvl-$kkl-$ppl')
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) >= '$apaikka'
 					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <= '$lpaikka'
-					and tuotepaikat.yhtio=tilausrivi.yhtio
-					and tuotepaikat.tuoteno=tilausrivi.tuoteno
-					and tuotepaikat.hyllyalue=tilausrivi.hyllyalue
-					and tuotepaikat.hyllynro=tilausrivi.hyllynro
-					and tuotepaikat.hyllyvali=tilausrivi.hyllyvali
-					and tuotepaikat.hyllytaso=tilausrivi.hyllytaso
 					GROUP BY 1,2,3,4,5,6,7,8
 					ORDER BY kpl desc, tuokpl desc
 					$lisa";
@@ -62,14 +64,10 @@
 			echo "<td>$row[tuoteno]</td>";
 			echo "<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 			echo "<td>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
-			echo "<td>$row[saldo]</td>";
-			echo "<td>$row[kpl]</td>";
-
-
-			$kplperpva = round($row["kpl"]/$pva,0);
-			echo "<td>$kplperpva</td>";
-
-			echo "<td>".round($row["tuokpl"]/$row["kpl"],0)."</td>";
+			echo "<td align='right'>$row[saldo]</td>";
+			echo "<td align='right'>$row[kpl]</td>";
+			echo "<td align='right'>".round($row["kpl"]/$pva)."</td>";
+			echo "<td align='right'>".round($row["tuokpl"]/$row["kpl"])."</td>";
 
 			echo "</tr>";
 
@@ -81,17 +79,17 @@
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 		$saldot = "";
-		foreach($saldolliset as $saldo) {
+		foreach ($saldolliset as $saldo) {
 			$saldot .= "$saldo,";
 		}
 		$saldot = substr($saldot,0,-1);
 
 		echo "<input type='hidden' name='saldot' value='$saldot'>";
+		echo "<input type='hidden' name='tulosta' value='JOO'>";
 		echo "<input type='hidden' name='tila' value='SIIVOUS'>";
 		echo "<input type='hidden' name='ei_inventointi' value='EI'>";
-		echo "<input type='submit' value='".t("Tulosta lista")."'></form><br><br>";
+		echo "<input type='submit' value='".t("Tulosta inventointilista")."'></form><br><br>";
 	}
-
 
 	//Käyttöliittymä
 	echo "<br>";

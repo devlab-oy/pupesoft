@@ -8,26 +8,36 @@
 	$result = pupe_query($query);
 	$asrow = mysql_fetch_assoc($result);
 
-	if ($naytatvale == 2) {
-		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-	}
-	elseif ($naytatvale == 3) {
-		$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
-	}
-	elseif ($naytatvale == 4) {
-		$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-	}
-	elseif ($naytatvale == 5) {
-		$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-	}
-	elseif ($naytatvale == 6) {
-		$lahetetyyppi = "tulosta_lahete_custom.inc";
-	}
-	elseif ($naytatvale == 7) {
-		$lahetetyyppi = "tulosta_lahete_ean.inc";
+	if ($tuoteperheetyhdessa) {
+		$lahetetyyppi = "perhe_";
 	}
 	else {
-		$lahetetyyppi = "tulosta_lahete.inc";
+		$lahetetyyppi = "";
+	}
+	
+	if ($naytatvale == 2) {
+		$lahetetyyppi .= "tulosta_lahete_eialeja.inc";
+	}
+	elseif ($naytatvale == 3) {
+		$lahetetyyppi .= "tulosta_lahete_eiale_eihinta.inc";
+	}
+	elseif ($naytatvale == 4) {
+		$lahetetyyppi .= "tulosta_lahete_eialehintoja.inc";
+	}
+	elseif ($naytatvale == 5) {
+		$lahetetyyppi .= "tulosta_lahete_hae_hinnat.inc";
+	}
+	elseif ($naytatvale == 6) {
+		$lahetetyyppi .= "tulosta_lahete_custom.inc";
+	}
+	elseif ($naytatvale == 7) {
+		$lahetetyyppi .= "tulosta_lahete_ean.inc";
+	}
+	elseif ($naytatvale == 8) {
+		$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
+	}
+	else {
+		$lahetetyyppi .= "tulosta_lahete.inc";
 	}
 
 	require("tulosta_lahete.inc");
@@ -220,4 +230,3 @@
 
 	//tulostetaan sivu
 	print_pdf_lahete($params_lahete);
-?>

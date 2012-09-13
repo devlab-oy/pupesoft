@@ -694,6 +694,7 @@
 
 					$poikkeukset = array(
 						'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+						'tilausrivi.tilkpl' => $kappaleerotus,
 						'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 						'tilausrivi.luontiaika' => $tilausrivirow['luontiaika'],
 					);
@@ -737,6 +738,7 @@
 
 							$poikkeukset = array(
 								'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+								'tilausrivi.tilkpl' => $kappaleerotus,
 								'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 								'tilausrivi.perheid' => $tilausrivi_id,
 								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],

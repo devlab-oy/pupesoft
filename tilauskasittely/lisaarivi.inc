@@ -803,10 +803,10 @@
 						elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
 							return -1;
 						}
-						elseif (strcmp($a["prio"], $b["prio"]) < 0) {
+						elseif ($a["prio"] < $b["prio"]) {
 							return -1;
 						}
-						elseif (strcmp($a["prio"], $b["prio"]) > 0) {
+						elseif ($a["prio"] > $b["prio"]) {
 							return 1;
 						}
 						elseif ($a["myytavissa"] < $b["myytavissa"]) {
@@ -824,10 +824,10 @@
 				// Sortataan varastopaikat prioriteetti järkkään
 				if (!function_exists('zzrowprio')) {
 					function zzrowprio($a, $b) {
-						if (strcmp($a["prio"], $b["prio"]) < 0) {
+						if ($a["prio"] < $b["prio"]) {
 							return -1;
 						}
-						elseif (strcmp($a["prio"], $b["prio"]) > 0) {
+						elseif ($a["prio"] > $b["prio"]) {
 							return 1;
 						}
 						elseif ($a["myytavissa"] < $b["myytavissa"]) {

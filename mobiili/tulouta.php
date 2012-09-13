@@ -52,10 +52,10 @@ echo "<div class='main'>
 	<form method='post' action=''>
 	<b>",t("TULOTYYPPI"),"</b>
 	<p>
-	<a href='alusta.php' class='btn'>",t("ASN / Suuntalava"),"</a><br>
-	<a href='ostotilaus.php' class='btn'>",t("Ostotilaus"),"</a><br>
+	<a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a><br>
+	<a href='ostotilaus.php' class='button'>",t("Ostotilaus"),"</a><br>
 	</p>
-	<a href='suuntalavat.php' class='btn'>",t("Suuntalavat"),"</a><br>
+	<a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a><br>
 </div>";
 
 echo "<div class='controls'>

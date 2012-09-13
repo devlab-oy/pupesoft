@@ -108,10 +108,10 @@ echo "<button onclick='window.location.href=\"alusta.php\"' class='button left'>
 echo "<h1>",t("SUUNTALAVAN TUOTTEET"),"</h1></div>";
 
 echo "<form name='viivakoodiformi' method='post' action=''>
-	<table>
+	<table class='search'>
 		<tr>
-			<td>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
-			</td>
+			<th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='viivakoodi' value='' />
+			</th>
 			<td>
 				<button name='submit' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button>
 			</td>
@@ -124,10 +124,11 @@ echo "
 
 <div class='controls'>";
 
-if($lava['kasittelytapa'] == 'H') echo "<button class='button left' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
-else echo "<button class='button left' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
+if($lava['kasittelytapa'] == 'H') echo "<button class='button' name='submit' value='submit' onclick='submit();' disabled>",t("Valitse"),"</button>";
+else echo "<button class='button' name='submit' value='submit' onclick='submit();'>",t("Valitse"),"</button>";
 
-echo "<button name='submit' value='edit' class='button' onclick='submit();'>",t("Muokkaa"),"</button>
+echo "
+	<button name='submit' value='edit' class='button' onclick='submit();'>",t("Muokkaa"),"</button>
 	<button name='submit' value='varalle' class='button' onclick='return varmista();'>",t("Varalle"),"</button>
 </div>";
 

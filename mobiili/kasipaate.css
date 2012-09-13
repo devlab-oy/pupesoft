@@ -20,7 +20,7 @@ a, a:visited {
 
 h1 {
 	margin: 0;
-	padding-top: 3px;
+	padding-top: 5px;
 	font-size: 1.2em;
 	font-weight: bold;
 }
@@ -42,7 +42,7 @@ li {
 	margin: 10px;
 }
 
-.search {
+.search  {
 	line-height: 5px;
 }
 
@@ -73,7 +73,7 @@ li {
 }
 
 .radio {
-	width: 8px;
+
 }
 
 .right {
@@ -87,7 +87,7 @@ li {
 }
 
 .button {
-	height: 25px;
+	height: 24px;
 	font-size: 1.15em;
 }
 

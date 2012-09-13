@@ -21,7 +21,7 @@
 		<tr>
 			<th><?= t("SSCC") ?></th>
 			<th><?= t("Ker.vyöhyk.") ?></th>
-			<th><?= t("Riv.") ?></th>
+			<th><?= t("Rivit") ?></th>
 			<th><?= t("Tyyppi") ?></th>
 		</tr>
 

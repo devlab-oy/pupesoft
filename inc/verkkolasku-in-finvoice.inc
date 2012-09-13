@@ -47,7 +47,7 @@ $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails-
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
 
-$laskuttajan_toimittajanumero = "";
+$laskuttajan_toimittajanumero = strpos($file, "maventa") !== false ?  $xml->SellerPartyDetails->SellerPartyIdentifier : "";
 
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;

@@ -20,11 +20,14 @@
 	echo "<font class=head>".t("Varastotilasto")." $vvl</font><hr>";
 
 	if ($ytunnus != '') {
-		$toimittajaid = "";
+
+		if ($valittuytunnus != "" and $valittuytunnus != $ytunnus) $toimittajaid = "";
+		
 		require ("inc/kevyt_toimittajahaku.inc");
 
-		if ($toimittajaid == "") {
-			exit;
+		// Toimittaja löytyi
+		if ($toimittajaid == 0) {
+			$tee = "";
 		}
 	}
 	else {
@@ -58,7 +61,9 @@
 	echo "<tr>";
 	echo "<th>".t("Toimittaja")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'> ";
-	echo "{$toimittajarow["nimi"]} {$toimittajarow["nimitark"]}";
+	echo "{$toimittajarow["nimi"]} {$toimittajarow["nimitark"]} {$toimittajarow["postitp"]}";
+	
+	echo "<input type='hidden' name='valittuytunnus' value='$ytunnus'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "</td>";
 	echo "</tr>";

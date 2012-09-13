@@ -1168,8 +1168,6 @@ if ($kasitellaan_tiedosto) {
 							}
 						}
 
-						$rivi[$r] = trim(addslashes($rivi[$r]));
-
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
 
 							//korvataan decimal kenttien pilkut pisteill‰...
@@ -1956,7 +1954,7 @@ if ($kasitellaan_tiedosto) {
 								$tapahtumalaji = "uusipaikka";
 							}
 							$tapahtumaselite .= " {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]} {$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}";
-							
+
 							//Tehd‰‰n tapahtuma
 							$querytapahtuma = "	INSERT into tapahtuma set
 										yhtio 		= '$kukarow[yhtio]',

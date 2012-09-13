@@ -1,6 +1,7 @@
 <?php
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	echo "<form method='post' action = '?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
@@ -106,47 +107,97 @@
 		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
+		$tuoteperheetyhdessa = FALSE;
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
-			$naytatvale = 2;
+			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+		}
+		elseif (strpos($row2['tilausvahvistus'], '8') !== FALSE) {
+			$naytatvale = 8; // jos meill‰ on tilausvahvistuksessa kasi, niin tehd‰‰n EAN tilausvahvistus asiakashinnalla ja ei n‰ytet‰ alennuksia
 		}
 		elseif (strpos($row2['tilausvahvistus'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
-			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
+			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '5') !== FALSE) {
 			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '4') !== FALSE) {
 			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '3') !== FALSE) {
 			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($row2['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+			if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '7') !== FALSE) {
 			$naytatvale = 7; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n EAN tilausvahvistus
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
 			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
 			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
 			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
 			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '1') !== FALSE) {
+			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], 'Y') !== FALSE) {
+				$tuoteperheetyhdessa = TRUE;
+			}
 		}
 		else {
 			$naytatvale = 1; // halutaan n‰h‰ alet
@@ -288,6 +339,8 @@
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 
+		$seepra = false;
+
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
@@ -297,6 +350,8 @@
 			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
+
+			if ($kirow['merkisto'] != 0) $seepra = true;
 
 			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
@@ -315,6 +370,12 @@
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+
+			// Katsotaan onko Zebra-tulostinta k‰ytˆss‰.
+			// Oletetaan ett‰ silloin merkistˆ ei ole 0
+
+			if ($seepra) echo "<option value = 'Z'>",t("Tyˆm‰‰r‰ystarra Zebra"),"</option>";
+
 			echo "</select>";
 			echo "</td></tr>";
 		}
@@ -375,4 +436,3 @@
 	//lopetetaan t‰h‰n, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
 	require("footer.inc");
 	exit;
-?>

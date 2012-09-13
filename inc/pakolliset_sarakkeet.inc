@@ -338,6 +338,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
 				$wherelliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "toimitustavan_lahdot":
 			case "lahdot":

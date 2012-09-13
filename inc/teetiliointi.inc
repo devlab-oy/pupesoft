@@ -79,7 +79,7 @@
 					AND summa 			 = '{$summa}'
 					AND summa_valuutassa = '{$summa_valuutassa}'
 					AND valkoodi 		 = '{$valkoodi}'
-					AND tapvm 			 = {$tapvmlisa},
+					AND tapvm 			 = {$tapvmlisa}
 					AND tosite 			 = '{$tositenro}'
 					AND vero 			 = '{$vero}'
 					AND selite 			 = '{$selite}'";

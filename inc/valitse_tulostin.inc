@@ -1,6 +1,7 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	echo "<form method='post' action = '?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
@@ -338,6 +339,8 @@
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 
+		$seepra = false;
+
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
@@ -347,6 +350,8 @@
 			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
+
+			if ($kirow['merkisto'] != 0) $seepra = true;
 
 			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
@@ -365,6 +370,12 @@
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+
+			// Katsotaan onko Zebra-tulostinta käytössä.
+			// Oletetaan että silloin merkistö ei ole 0
+
+			if ($seepra) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+
 			echo "</select>";
 			echo "</td></tr>";
 		}

@@ -137,7 +137,7 @@
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
-											AND lasku.tila = 'O' 
+											AND lasku.tila = 'O'
 											AND alatila in ('A','X'))
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
@@ -163,7 +163,7 @@
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
-												AND lasku.tila = 'O' 
+												AND lasku.tila = 'O'
 												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
@@ -190,7 +190,7 @@
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
-												AND lasku.tila = 'O' 
+												AND lasku.tila = 'O'
 												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
@@ -216,7 +216,7 @@
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
-												AND lasku.tila = 'O' 
+												AND lasku.tila = 'O'
 												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
@@ -243,7 +243,7 @@
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
-												AND lasku.tila = 'O' 
+												AND lasku.tila = 'O'
 												AND alatila in ('A','X'))
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
@@ -314,7 +314,7 @@
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND lasku.tunnus = tilausrivi.otunnus
-													AND lasku.tila = 'O' 
+													AND lasku.tila = 'O'
 													AND alatila in ('A','X'))
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
@@ -467,6 +467,7 @@
 									hyllyvali		= '{$split_row['hyllyvali']}',
 									tilaajanrivinro = '{$split_row['tilaajanrivinro']}'";
 						$inskres = pupe_query($query);
+						$tilausrivi_id = mysql_insert_id();
 
 						// etsit‰‰n ja splitataan myˆs myyntitilausrivi ISƒ
 						$query = "	SELECT tilausrivi.tunnus
@@ -490,12 +491,16 @@
 							);
 
 							$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+
+							$query = "	UPDATE tilausrivin_lisatiedot SET
+										tilausrivilinkki = '{$tilausrivi_id}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
+							$upres = pupe_query($query);
 						}
 
 						// katsotaan onko tuoteperheen is‰tuote
 						if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
-
-							$tilausrivi_id = mysql_insert_id();
 
 							// etsit‰‰n lapset ja splitataan ne is‰n mukaan
 							$query = "	SELECT *
@@ -509,6 +514,7 @@
 
 								$poikkeukset = array(
 									'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $positiivinen_arvo : 0),
+									'tilausrivi.tilkpl' => $positiivinen_arvo,
 									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $positiivinen_arvo : 0),
 									'tilausrivi.perheid' => $tilausrivi_id,
 									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
@@ -531,6 +537,12 @@
 									$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
 
 									$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+
+									$query = "	UPDATE tilausrivin_lisatiedot SET
+												tilausrivilinkki = '{$lapsi_uusi_id}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+									$upres = pupe_query($query);
 								}
 
 								// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
@@ -667,6 +679,7 @@
 								hyllyvali		= '{$tilausrivirow['hyllyvali']}',
 								tilaajanrivinro = '{$tilausrivirow['tilaajanrivinro']}'";
 					$inskres = pupe_query($query);
+					$tilausrivi_id = mysql_insert_id();
 
 					// etsit‰‰n ja splitataan myˆs myyntitilausrivi ISƒ
 					$query = "	SELECT tilausrivi.tunnus
@@ -683,19 +696,23 @@
 
 						// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
 						$poikkeukset = array(
-							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
-							'tilausrivi.tilkpl' => $kappaleerotus,
-							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
+							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $row['kappalemaara'] : 0),
+							'tilausrivi.tilkpl' => $row['kappalemaara'],
+							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $row['kappalemaara'] : 0),
 							'tilausrivi.laatija' => "split",
 						);
 
 						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+
+						$query = "	UPDATE tilausrivin_lisatiedot SET
+									tilausrivilinkki = '{$tilausrivi_id}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
+						$upres = pupe_query($query);
 					}
 
 					// katsotaan onko tuoteperheen is‰tuote
 					if ($tilausrivirow['perheid'] == $tilausrivirow['tunnus']) {
-
-						$tilausrivi_id = mysql_insert_id();
 
 						// etsit‰‰n lapset ja splitataan ne is‰n mukaan
 						$query = "	SELECT *
@@ -709,6 +726,7 @@
 
 							$poikkeukset = array(
 								'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+								'tilausrivi.tilkpl' => $kappaleerotus,
 								'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 								'tilausrivi.perheid' => $tilausrivi_id,
 								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
@@ -728,9 +746,21 @@
 								$myynti_rivi_res = pupe_query($query);
 								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
 
-								$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
+								$poikkeukset = array(
+									'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $row['kappalemaara'] : 0),
+									'tilausrivi.tilkpl' => $row['kappalemaara'],
+									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $row['kappalemaara'] : 0),
+									'tilausrivi.perheid' => $myynti_tilausrivi_id_isa,
+									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
+								);
 
 								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
+
+								$query = "	UPDATE tilausrivin_lisatiedot SET
+											tilausrivilinkki = '{$lapsi_uusi_id}'
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+								$upres = pupe_query($query);
 							}
 
 							// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"

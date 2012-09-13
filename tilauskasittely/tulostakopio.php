@@ -1576,9 +1576,11 @@
 
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 
+				require_once ("tyomaarays/tulosta_tyomaarays.inc");
+
 				if ($tyomtyyppi == 'Z') {
 					$kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
-					tulosta_tyomaaraystarra_zebra($laskurow['tunnus'], $komento["Työmääräys"], $kappaleet);
+					tulosta_tyomaaraystarra_zebra($laskurow, $komento["Työmääräys"], $kappaleet);
 				}
 				else {
 
@@ -1598,8 +1600,6 @@
 								and yhtio = '$kukarow[yhtio]'";
 					$result = pupe_query($query);
 					$asrow = mysql_fetch_assoc($result);
-
-					require_once ("tyomaarays/tulosta_tyomaarays.inc");
 
 					$sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
 					$order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];

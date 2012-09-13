@@ -1131,7 +1131,7 @@
 
 	if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
-		if (!isset($kappaleet)) $kappaleet = 1;
+		if (!isset($kappaleet)) $kappaleet = 0;
 
 		//valitaan tulostin heti alkuun, jos se ei ole vielä valittu
 		if ($toim == "OSTO" or $toim == "HAAMU") {
@@ -1140,13 +1140,13 @@
 				$komento["Ostotilaus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "PURKU") {
+		elseif ($toim == "PURKU") {
 			$tulostimet[0] = 'Purkulista';
 			if ($kappaleet > 0 and $komento["Purkulista"] != 'email') {
 				$komento["Purkulista"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "VASTAANOTETUT") {
+		elseif ($toim == "VASTAANOTETUT") {
 			$tulostimet[0] = 'Vastaanotetut';
 			if ($kappaleet > 0 and $komento["Vastaanotetut"] != 'email') {
 				$komento["Vastaanotetut"] .= " -# $kappaleet ";
@@ -1262,49 +1262,49 @@
 				$komento["Yllapitosopimus"] .= " -# $kappaleet ";
 			}
 		}
-			elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+		elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
 			}
 		}
-                elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
+		elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
 			$tulostimet[0] = 'Myyntisopimus';
 			if ($kappaleet > 0) {
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
+		elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
 			$tulostimet[0] = 'Osamaksusopimus';
 			if ($kappaleet > 0) {
 				$komento["Osamaksusopimus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
+		elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
 			$tulostimet[0] = 'Luovutustodistus';
 			if ($kappaleet > 0) {
 				$komento["Luovutustodistus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
+		elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
 			$tulostimet[0] = 'Vakuutushakemus';
 			if ($kappaleet > 0) {
 				$komento["Vakuutushakemus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+		elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
 			$tulostimet[0] = 'Rekisteröinti_ilmoitus';
 			if ($kappaleet > 0) {
 				$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
+		elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
 			if ($kappaleet > 0) {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "REKLAMAATIO") {
+		elseif ($toim == "REKLAMAATIO") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";

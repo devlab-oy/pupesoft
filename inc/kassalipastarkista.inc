@@ -61,7 +61,6 @@ if(!function_exists("kassalipastarkista")) {
 				}
 			}
 		}
-
 	}
 }
 

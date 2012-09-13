@@ -803,6 +803,12 @@
 						elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
 							return -1;
 						}
+						elseif (strcmp($a["prio"], $b["prio"]) < 0) {
+							return -1;
+						}
+						elseif (strcmp($a["prio"], $b["prio"]) > 0) {
+							return 1;
+						}
 						elseif ($a["myytavissa"] < $b["myytavissa"]) {
 							return 1;
 						}
@@ -845,11 +851,6 @@
 						- Riittääkö jonkun toisen varaston saldo?
 						- Jos ei niin splitataan.
 						*/
-
-						// Sortataan varastopaikat prioriteetti järkkään
-						usort($arr, "zzrowprio");
-
-						reset($arr);
 
 						$chk_yksi_paikka = FALSE;
 

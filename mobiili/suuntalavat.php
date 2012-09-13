@@ -160,6 +160,11 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	$result = pupe_query($query);
 	if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
 
+	$rivit_query = "SELECT * FROM tilausrivi WHERE suuntalava='{$suuntalava['tunnus']}'";
+	$rivit = mysql_num_rows(pupe_query($rivit_query));
+
+	$disable_siirtovalmis = ($rivit == 0) ? ' disabled' : '';
+
 	# Suuntalavan päivitys
 	if (isset($post) and is_numeric($muokkaa)) {
 
@@ -188,8 +193,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 					'terminaalialue'	 	=> $terminaalialue,
 					'korkeus'	 			=> '',
 					'paino'					=> '',
-					'usea_keraysvyohyke'	=> $sallitaanko,
-					'hyllyalue'	 			=> $hyllyalue
+					'usea_keraysvyohyke'	=> $sallitaanko
 				);
 
 			# TODO: Saapumisen hallinta

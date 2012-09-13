@@ -5,7 +5,7 @@
 </div>
 
 <div class='main'>
-<form action='' method='post'>
+<form action='' method='post' onsubmit='check_disabled();'>
 <!-- _form.php -->
 	<table>
 		<tr>
@@ -50,7 +50,7 @@
 							if (isset($suuntalava)) {
 								$sel = ($vyohyke['tunnus'] == $suuntalava['keraysvyohyke']) ? ' selected' : '';
 							}
-							echo "<option value='{$vyohyke['tunnus']}' $sel $disabled>";
+							echo "<option class='keraysvyohyke' value='{$vyohyke['tunnus']}' $sel $disabled>";
 							echo $vyohyke['nimitys'];
 							echo "</option>";
 						}
@@ -62,20 +62,20 @@
 			<th>Alkuhylly</th>
 
 			<td>
-				<input type='text' name='alkuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyalue'] ?>' <?= $disabled ?> >
-				<input type='text' name='alkuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllynro'] ?>' <?= $disabled ?> >
-				<input type='text' name='alkuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyvali'] ?>' <?= $disabled ?> >
-				<input type='text' name='alkuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllytaso'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyalue'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllynro'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyvali'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllytaso'] ?>' <?= $disabled ?> >
 			</td>
 		</tr>
 		<tr>
 			<th>Loppuhylly</th>
 
 			<td>
-				<input type='text' name='loppuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyalue'] ?>' <?= $disabled ?> >
-				<input type='text' name='loppuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllynro'] ?>' <?= $disabled ?> >
-				<input type='text' name='loppuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyvali'] ?>' <?= $disabled ?> >
-				<input type='text' name='loppuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllytaso'] ?>' <?= $disabled ?> ></td>
+				<input type='text' class='hylly' name='loppuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyalue'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllynro'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyvali'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllytaso'] ?>' <?= $disabled ?> ></td>
 			</tr>
 		</tr>
 		<tr>
@@ -123,8 +123,24 @@
 		<a href='suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (normaali)</a>
 		<a href='suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (suoraan hyllyyn)</a>
 		-->
-		<button onclick='window.location.href="suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right'>Siirtovalmis (normaali)</button>
-		<button onclick='window.location.href="suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right'>Siirtovalmis (suoraan hyllyyn)</button>
+		<button onclick='window.location.href="suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (normaali)</button>
+		<button onclick='window.location.href="suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (suoraan hyllyyn)</button>
 
 		<? endif ?>
 </div>
+
+<script type='text/javascript'>
+	function check_disabled() {
+		hyllyt = document.getElementsByClassName('hylly');
+
+		for(i=0; i < hyllyt.length; i++) {
+			hyllyt[i].disabled = false;
+		}
+
+		keraysvyohykkeet = document.getElementsByClassName('keraysvyohyke');
+
+		for(i=0; i < keraysvyohykkeet.length; i++) {
+			keraysvyohykkeet[i].disabled = false;
+		}
+	}
+</script>

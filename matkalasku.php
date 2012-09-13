@@ -2159,13 +2159,28 @@ if ($tee == "MUOKKAA") {
 	}
 
 	if ($lopetus == "") {
-		echo "	<form name='palaa' method='post'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='tee' value='VALMIS'>
-				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='submit' value='".t("Matkalasku valmis")."'>
-				</form>";
+		if ($laskurow["mapvm"] != "0000-00-00") {
+			echo "	<form name='palaa' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tee' value=''>";
+
+			if (isset($listaa_kayttaja)) {
+				echo "	<input type='hidden' name='listaa_kayttaja' value='$listaa_kayttaja'>";
+			}
+
+			echo "	<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='submit' value='".t("Valmis")."'>
+					</form>";
+		}
+		else {
+			echo "	<form name='palaa' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tee' value='VALMIS'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='submit' value='".t("Matkalasku valmis")."'>
+					</form>";
+		}
 	}
 
 	/*
@@ -2381,14 +2396,63 @@ if ($tee == "") {
 		echo "</table>";
 	}
 
+
+	echo "<br><br><font class='message'>".t("Vanhat matkalaskusi")."</font><hr>";
+
+	if ($toim == "SUPER") {
+
+		echo "<form method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='tee' value=''>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("Matkustaja")."</th>";
+		echo "<td>";
+
+		$query = "	SELECT toimi.nimi kayttaja, kuka.nimi kayttajanimi
+					FROM toimi
+		 			JOIN kuka ON kuka.yhtio=toimi.yhtio and kuka.kuka=toimi.nimi
+		 			WHERE toimi.yhtio='$kukarow[yhtio]'
+					and toimi.tyyppi='K'
+					ORDER BY kayttajanimi";
+		$result = pupe_query($query);
+
+		if (!isset($listaa_kayttaja)) $listaa_kayttaja = $kukarow["kuka"];
+
+
+		if (mysql_num_rows($result) > 0) {
+			echo "<select name = 'listaa_kayttaja' onchange='submit()'>";
+
+			while ($krow = mysql_fetch_assoc($result)) {
+				$valittu = "";
+
+				if ($krow["kayttaja"] == $listaa_kayttaja) {
+					$valittu = "selected";
+				}
+
+				echo "<option value = '$krow[kayttaja]' $valittu>$krow[kayttajanimi]</option>";
+			}
+
+ 			echo "</select>";
+		}
+
+		echo "</td>";
+		echo "</tr>";
+		echo "</table></form><br>";
+	}
+	else {
+		$listaa_kayttaja = $kukarow['kuka'];
+	}
+
 	$query = "	SELECT lasku.*,
 				laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 				WHERE lasku.yhtio 		 = '$kukarow[yhtio]'
 				and lasku.tila 		    IN ('H','Y','M','P','Q')
-				and lasku.mapvm 		 = '0000-00-00'
-				and lasku.toim_ovttunnus = '$kukarow[kuka]'
+				and lasku.toim_ovttunnus = '$listaa_kayttaja'
 				and lasku.h1time 		!= '0000-00-00 00:00:00'
 				and lasku.tilaustyyppi 	 = 'M'
 				ORDER BY luontiaika DESC";
@@ -2396,7 +2460,6 @@ if ($tee == "") {
 
 	if (mysql_num_rows($result)) {
 
-		echo "<br><br><font class='message'>".t("Vanhat matkalaskusi")."</font><hr>";
 		echo "<table><tr><th>".t("Laskunro")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><th>".t("Tila")."</th><tr>";
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -2411,6 +2474,7 @@ if ($tee == "") {
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+			echo "	<input type='hidden' name='listaa_kayttaja' value='$listaa_kayttaja'>";
 			echo "<tr>";
 			echo "<td>$row[laskunro]</td>";
 			echo "<td>$row[laskutus_nimi]</td>";

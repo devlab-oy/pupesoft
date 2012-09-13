@@ -338,6 +338,8 @@
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 
+		$seepra = false;
+
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
@@ -347,6 +349,8 @@
 			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
+
+			if ($kirow['merkisto'] != 0) $seepra = true;
 
 			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
@@ -368,13 +372,8 @@
 
 			// Katsotaan onko Zebra-tulostinta käytössä.
 			// Oletetaan että silloin merkistö ei ole 0
-			$query = "	SELECT *
-						FROM kirjoittimet
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND merkisto != 0";
-			$zebra_chk_res = pupe_query($query);
 
-			if (mysql_num_rows($zebra_chk_res) != 0) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+			if ($seepra) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
 
 			echo "</select>";
 			echo "</td></tr>";

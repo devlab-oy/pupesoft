@@ -16137,6 +16137,7 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 			$laskurow = mysql_fetch_assoc($laskures);
 
 			$nimitys = trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']);
+			$nimitys2 = "";
 
 			// t‰ss‰ tehd‰‰n aineisto jota Zebra tulostin tajuaa
 			/* Esimerkki
@@ -16159,7 +16160,6 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 
 					$merkkimaara = 0;
 					$nimitys = "";
-					$nimitys2 = "";
 
 					foreach ($nimipalat as $nimipala) {
 						if (strlen($nimitys)+strlen($nimipala) <= $pituus or $merkkimaara == 0) {
@@ -16173,7 +16173,7 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 				}
 
 				$nimitys = substr($nimitys,0,$pituus);
-				$nimitys2 = substr($nimitys2,0,$pituus);
+				$nimitys2 = $nimitys2 != "" ? substr($nimitys2,0,$pituus) : "";
 			}
 
 			$sivu  = "^XA\n";		// vakio alku, pakollinen

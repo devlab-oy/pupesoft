@@ -38,29 +38,40 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kustp") {
-		if ($ulosarray[$i] != '') {
-			$ulos=$ulosarray[$i];
-			$jatko = 0;
-		}
-		else {
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
-			$query = "	SELECT tunnus, nimi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]'
-						and kaytossa != 'E'
-						and tyyppi = 'K'
-						ORDER BY koodi+0, koodi, nimi";
-			$vresult = mysql_query($query) or pupe_error($query);
 
-			while ($vrow = mysql_fetch_array($vresult)) {
-				$sel = "";
-				if ($trow[$i] == $vrow[0]) {
-					$sel = "selected";
-				}
-				$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
+					ORDER BY koodi+0, koodi, nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
 			}
-			$ulos .= "</select></td>";
-			$jatko = 0;
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
 	}
-?>
+
+	if (mysql_field_name($result, $i) == "toimipaikka") {
+
+		$ulos = "<td><select name='{$nimi}'><option value='0'>".t("Ei toimipaikkaa")."</option>";
+		$query = "	SELECT tunnus, ovtlisa, postitp, nimi
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					ORDER BY nimi, ovtlisa, postitp";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel = $trow[$i] == $vrow['tunnus'] ? " selected" : "";
+			$ulos .= "<option value = '{$vrow['tunnus']}'{$sel}>{$vrow['nimi']} {$vrow['ovtlisa']} {$vrow['postitp']}</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

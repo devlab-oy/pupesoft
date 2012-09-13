@@ -16185,7 +16185,6 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 			$sivu .= "^MD10";  											// TUMMUUS, vakio on 8 mutta se ei riit‰ viivakoodille.
 			$sivu .= "^PQ$tkpl";										// Tulostettavien lukum‰‰r‰
 			$sivu .= "^FO80,120\n^BCN,40,Y,N,N\n^FD$otunnus\n^FS";		// viivakoodi CODE-128
-			// $sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";	// Tulostetaan Firma
 
 			$sivu .= "\n^XZ";	// pakollinen lopetus
 

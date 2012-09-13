@@ -497,6 +497,16 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
 							$upres = pupe_query($query);
+
+							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+							$query = "	UPDATE tilausrivi SET
+										varattu = '{$erotus}',
+										tilkpl	= '{$erotus}',
+										kommentti = CONCAT(kommentti,' ennen splittausta {$myynti_rivi_row_isa['tilkpl']} : {$myynti_rivi_row_isa['varattu']}, kohdistettiin {$erotus}')
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
+							$upres = pupe_query($query);
+
 						}
 
 						// katsotaan onko tuoteperheen is‰tuote
@@ -542,6 +552,15 @@
 												tilausrivilinkki = '{$lapsi_uusi_id}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+									$upres = pupe_query($query);
+
+									// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+									$query = "	UPDATE tilausrivi SET
+												varattu = '{$erotus}',
+												tilkpl	= '{$erotus}',
+												kommentti = CONCAT(kommentti,' ennen splittausta {$myynti_rivi_row['tilkpl']} : {$myynti_rivi_row['varattu']}, kohdistettiin {$erotus}')
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 									$upres = pupe_query($query);
 								}
 
@@ -696,13 +715,22 @@
 
 						// P‰ivitet‰‰n alkuper‰iselle riville "ylim‰‰r‰inen" ja uudelle splitille "erotus"
 						$poikkeukset = array(
-							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $row['kappalemaara'] : 0),
-							'tilausrivi.tilkpl' => $row['kappalemaara'],
-							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $row['kappalemaara'] : 0),
+							'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+							'tilausrivi.tilkpl' => $kappaleerotus,
+							'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 							'tilausrivi.laatija' => "split",
 						);
 
 						$myynti_tilausrivi_id_isa = kopioi_tilausrivi($myynti_rivi_row_isa['tunnus'], $poikkeukset);
+
+						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+						$query = "	UPDATE tilausrivi SET
+									varattu = '{$row['kappalemaara']}',
+									tilkpl	= '{$row['kappalemaara']}',
+									kommentti = CONCAT(kommentti,' ennen splittausta {$myynti_rivi_row_isa['tilkpl']} : {$myynti_rivi_row_isa['varattu']}, kohdistettiin {$row['kappalemaara']}')
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
+						$upres = pupe_query($query);
 
 						$query = "	UPDATE tilausrivin_lisatiedot SET
 									tilausrivilinkki = '{$tilausrivi_id}'
@@ -747,9 +775,9 @@
 								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
 
 								$poikkeukset = array(
-									'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $row['kappalemaara'] : 0),
-									'tilausrivi.tilkpl' => $row['kappalemaara'],
-									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $row['kappalemaara'] : 0),
+									'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
+									'tilausrivi.tilkpl' => $kappaleerotus,
+									'tilausrivi.kpl' => ($tilausrivirow['kpl'] != 0 ? $kappaleerotus : 0),
 									'tilausrivi.perheid' => $myynti_tilausrivi_id_isa,
 									'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 								);
@@ -760,6 +788,15 @@
 											tilausrivilinkki = '{$lapsi_uusi_id}'
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+								$upres = pupe_query($query);
+
+								// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+								$query = "	UPDATE tilausrivi SET
+											varattu = '{$row['kappalemaara']}',
+											tilkpl	= '{$row['kappalemaara']}',
+											kommentti = CONCAT(kommentti,' ennen splittausta {$myynti_rivi_row['tilkpl']} : {$myynti_rivi_row['varattu']}, kohdistettiin {$row['kappalemaara']}')
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 								$upres = pupe_query($query);
 							}
 

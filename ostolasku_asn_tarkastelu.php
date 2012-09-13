@@ -2047,7 +2047,7 @@
 						ORDER BY toimi.nimi, toimi.ytunnus";
 			$result = pupe_query($query);
 
-			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
+			echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse={$valitse}&tee=' id='formi'>";
 			echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
 			echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 			echo "<input type='hidden' id='lasku' name='lasku' value='' />";

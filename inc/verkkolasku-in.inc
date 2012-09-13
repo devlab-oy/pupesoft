@@ -471,24 +471,23 @@
 				}
 			}
 
+			if ($ebid == 'MAVENTAXML' and $laskuttajan_toimittajanumero != "") {
+				// Maventassa muuttujassa tulee ytunnus, haetaan sen avulla toimittajanumero
+				// v‰liviivat pois
+				$laskuttajan_toimittajanumero = str_replace("-", "", $laskuttajan_toimittajanumero);
+
+				$query = "	SELECT toimittajanro
+							FROM toimi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND ytunnus = '{$laskuttajan_toimittajanumero}'
+							AND tyyppi != 'P'";
+				$toimnro_chk_res = pupe_query($query);
+				$toimnro_chk_row = mysql_fetch_assoc($toimnro_chk_res);
+
+				$laskuttajan_toimittajanumero = $toimnro_chk_row['toimittajanro'];
+			}
+
 			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
-
-				if (strpos($file, "maventa") !== false) {
-
-					// Maventassa muuttujassa tulee ytunnus, haetaan sen avulla toimittajanumero
-					// v‰liviivat pois
-					$laskuttajan_toimittajanumero = str_replace("-", "", $laskuttajan_toimittajanumero);
-
-					$query = "	SELECT toimittajanro
-								FROM toimi
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND ytunnus = '{$laskuttajan_toimittajanumero}'
-								AND tyyppi != 'P'";
-					$toimnro_chk_res = pupe_query($query);
-					$toimnro_chk_row = mysql_fetch_assoc($toimnro_chk_res);
-
-					$laskuttajan_toimittajanumero = $toimnro_chk_row['toimittajanro'];
-				}
 
 				// 9 etsit‰‰n toimittaja teccomi-specific
 				$query = "	SELECT *

@@ -63,18 +63,19 @@
 			$worksheet 	 = new pupeExcel();
 			$format_bold = array("bold" => TRUE);
 			$excelrivi 	 = 0;
+			$sarakemaara = mysql_num_fields($result);
 
-			for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+			for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 			$excelrivi++;
 
 			$bar = new ProgressBar();
 			$bar->initialize(mysql_num_rows($result));
-
-			while ($row = mysql_fetch_array($result)) {
+			
+			while ($row = mysql_fetch_row($result)) {
 
 				$bar->increase();
 
-				for ($i=0; $i<mysql_num_fields($result); $i++) {
+				for ($i=0; $i < $sarakemaara; $i++) {
 					if (mysql_field_type($result,$i) == 'real') {
 						$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 					}
@@ -102,14 +103,14 @@
 
 			echo "<pre>";
 
-			for ($i=0; $i<mysql_num_fields($result); $i++) {
+			for ($i = 0; $i < $sarakemaara; $i++) {
 				echo mysql_field_name($result,$i)."\t";
 			}
 			echo "\n";
 
 			while ($row = mysql_fetch_array($result)) {
 
-				for ($i=0; $i<mysql_num_fields($result); $i++) {
+				for ($i=0; $i<$sarakemaara; $i++) {
 
 					// desimaaliluvuissa muutetaan pisteet pilkuiks...
 					if (mysql_field_type($result, $i) == 'real') {

@@ -939,10 +939,10 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$row[clearing]'";
 		$vares = pupe_query($query);
-		$varow = mysql_fetch_assoc($vares);
+		$varow2 = mysql_fetch_assoc($vares);
 
-		$lisa = " and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
-		$lisa .= " and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
+		$lisa = " and concat(rpad(upper('$varow2[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow2[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
+		$lisa .= " and concat(rpad(upper('$varow2[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow2[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
 
 		//siirtolistan rivit
 		$query = "	SELECT tilausrivi.nimitys,
@@ -1182,6 +1182,7 @@
 
 			while ($kirow = mysql_fetch_assoc($kires)) {
 				if (isset($listaus) and $kirow['tunnus'] == $listaus) $select='SELECTED';
+				elseif ($toim == '' and !isset($listaus) and $kirow['tunnus'] == $varow2['printteri9']) $select = 'selected';
 				else $select = '';
 
 				echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";

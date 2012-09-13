@@ -175,7 +175,7 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 			$i++;
 		}
 
-		$oslappkpl = count($uniq_pakkaukset);
+		$oslappkpl = count($uniq_pakkaukset) > 0 ? count($uniq_pakkaukset) : $oslappkpl;
 	}
 }
 

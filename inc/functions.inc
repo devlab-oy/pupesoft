@@ -9209,9 +9209,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		// LÄHETETÄÄN TILAUSVAHVISTUS
 		//
 		//
-		
+
 		$tuoteperheetyhdessa = FALSE;
-		
+
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}

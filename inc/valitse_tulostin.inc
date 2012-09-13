@@ -234,9 +234,7 @@
 		echo "</select></td></tr>";
 	}
 
-	if (!isset($kappaleet)) $kappaleet = 1;
-
-	echo "<tr><th>".t("Kpl")."</th><td><input type='text' name='kappaleet' size='3' value='{$kappaleet}'></td></tr>";
+	echo "<tr><th>".t("Kpl")."</th><td><input type='text' name='kappaleet' size='3'></td></tr>";
 
 	echo "<tr><th>".t("Valitse kieli")."</th>";
 
@@ -357,6 +355,8 @@
 						ORDER BY kirjoitin";
 		$kires = pupe_query($querykieli);
 
+		$seepra = false;
+
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
@@ -366,6 +366,8 @@
 			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
+
+			if ($kirow['merkisto'] != 0) $seepra = true;
 
 			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
@@ -384,6 +386,12 @@
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
 			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
+
+			// Katsotaan onko Zebra-tulostinta käytössä.
+			// Oletetaan että silloin merkistö ei ole 0
+
+			if ($seepra) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+
 			echo "</select>";
 			echo "</td></tr>";
 		}

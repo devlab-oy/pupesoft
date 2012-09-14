@@ -1266,18 +1266,6 @@
 
 					echo "</select></td></tr>";
 
-					$sel1 = "";
-
-					if ($krow['mitatoi_tilauksia'] != "") {
-						$sel1 = "SELECTED";
-					}
-
-					echo "<tr><th align='left'>",t("Tilausten mitätöiminen"),":</td>";
-					echo "<td><select name='mitatoi_tilauksia'>
-							<option value=''>",t("Käyttäjä saa mitätöidä tilauksia"),"</option>
-							<option value='X' {$sel1}>",t("Käyttäjä ei saa mitätöidä tilauksia"),"</option>";
-					echo "</select></td></tr>";
-
 					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 					if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
 
@@ -1297,6 +1285,16 @@
 						echo "</select></td></tr>";
 					}
 				}
+
+				$sel = array_fill_keys(array($krow['mitatoi_tilauksia']), " selected") + array_fill_keys(array('X','E'), '');
+
+				echo "<tr><th align='left'>",t("Tilausten mitätöiminen"),":</td>";
+				echo "<td><select name='mitatoi_tilauksia'>
+						<option value=''>",t("Käyttäjä saa mitätöidä tilauksia"),"</option>
+						<option value='X' {$sel['X']}>",t("Käyttäjä ei saa mitätöidä tilauksia"),"</option>
+						<option value='E' {$sel['E']}>",t("Käyttäjä ei saa laittaa valmiiksi eikä mitätöidä tilausta"),"</option>";
+				echo "</select></td></tr>";
+
 				$andextra = "";
 
 				if ($krow['extranet'] == "") {

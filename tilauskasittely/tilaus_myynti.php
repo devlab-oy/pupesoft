@@ -183,7 +183,8 @@ if ($tee == 'PAIVITA_SARJANUMERO') {
 				muuttaja = '{$kukarow['kuka']}',
 				muutospvm = now()
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND myyntirivitunnus = '{$rivitunnus}'";
+				AND myyntirivitunnus = '{$rivitunnus}'
+				AND tuoteno = '{$sarjanumero_dropdown_tuoteno}'";
 	$upd_res = pupe_query($query);
 
 	if ($sarjanumero_dropdown != 0) {
@@ -5477,6 +5478,7 @@ if ($tee == '') {
 								<input type='hidden' name='mista' value = '$mista'>
 								<input type='hidden' name='rivitunnus' value = '{$row['tunnus']}'>
 								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+								<input type='hidden' name='sarjanumero_dropdown_tuoteno' value='{$row['tuoteno']}' />
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tee' value = 'PAIVITA_SARJANUMERO'>
 								<select name='sarjanumero_dropdown' onchange='submit();'>

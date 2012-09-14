@@ -94,7 +94,6 @@ if (!isset($lisax)) 				$lisax = '';
 if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
 if (!isset($sarjanumero_dropdown)) 	$sarjanumero_dropdown = "";
-$voidaanko_piirtaa_extranet_sarjanumerot = true;
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -4947,11 +4946,9 @@ if ($tee == '') {
 
 				if ($row["var"] == "P") {
 					$class = " class='spec' ";
-					$voidaanko_piirtaa_extranet_sarjanumerot = false;
 				}
 				elseif ($row["var"] == "J") {
 					$class = " class='green' ";
-					$voidaanko_piirtaa_extranet_sarjanumerot = false;
 				}
 				elseif ($yhtiorow["puute_jt_oletus"] == "H") {
 					//	Tarkastetaan saldo ja informoidaan k‰ytt‰j‰‰
@@ -5455,7 +5452,7 @@ if ($tee == '') {
 					if ($kukarow['extranet'] != '') {
 
 						// jos rivill‰ on virhe, ei piirret‰ sarjanumero-dropdownia
-						if ($riviok == 0 and $voidaanko_piirtaa_extranet_sarjanumerot) {
+						if ($riviok == 0 and $row['var'] != 'J' and $row['var'] != 'P') {
 							$query = "	SELECT DISTINCT sarjanumeroseuranta.sarjanumero,
 										sarjanumeroseuranta.tunnus,
 										sarjanumeroseuranta.myyntirivitunnus

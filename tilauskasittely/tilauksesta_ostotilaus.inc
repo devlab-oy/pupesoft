@@ -141,7 +141,7 @@
 
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
-						$query = "	SELECT tunnus
+						$query = "	SELECT *
 									from lasku
 									where yhtio 		= '$kukarow[yhtio]'
 									and liitostunnus 	= '$tiltoi[tunnus]'
@@ -204,6 +204,14 @@
 										ytunnus				= '$tiltoi[ytunnus]'";
 							$updre = pupe_query($query);
 							$tunnus = (string) mysql_insert_id();
+							
+							// hintojen ja alennuksien hakuun tarvitaan laskurow, tehd‰‰n t‰ss‰ array kuntoon alehinta_osto() funktiota varten
+							$jtsro = array(
+								'liitostunnus' 	=> $tiltoi['tunnus'],
+								'valkoodi' 		=> $valkoodi,
+								'ytunnus' 		=> $tiltoi['ytunnus'],
+								'vienti_kurssi' => $vrow['kurssi']
+							);
 						}
 						else {
 							// tilaus lˆyty, otetaan tunnus
@@ -229,11 +237,6 @@
 							$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and oletus!=''";
 							$jtsre = pupe_query($query);
 							$jtstu = mysql_fetch_assoc($jtsre);
-
-							//haetaan tuotteen ostohinta
-							$query = "SELECT ostohinta, alennus from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]' and liitostunnus='$ttrow[liitostunnus]'";
-							$ossre = pupe_query($query);
-							$osstu = mysql_fetch_assoc($ossre);
 
 							// varattu m‰‰r‰‰ saa p‰ivitt‰‰ vaan jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''
 							$query =  "	SELECT tilausrivi.*
@@ -261,6 +264,12 @@
 							}
 							else {
 
+								// hintojen ja alennuksien hakuun tarvitaan tuoterow, tehd‰‰n t‰ss‰ array kuntoon alehinta_osto() funktiota varten
+								$tuote_row = array(
+									'tuoteno' 	=> $tilrivirow['tuoteno']
+								);
+
+								list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl']);	
 								// lis‰t‰‰n ostotilausrivi
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$jtstu[hyllyalue]',
@@ -278,10 +287,12 @@
 											kpl2			= 0,
 											tilkpl 			= '$tilrivirow[kpl]',
 											jt				= 0,
-											ale1 			= '$osstu[alennus]',
+											hinta			= '$hinta',
+											netto			= '$netto',
+											ale1			= '$ale[ale1]',
+											ale2			= '$ale[ale2]',
+											ale3			= '$ale[ale3]',
 											alv 			= '',
-											netto			= '',
-											hinta 			= '$osstu[ostohinta]',
 											kerayspvm 		= '$tilrivirow[kerayspvm]',
 											otunnus 		= '$tunnus',
 											tyyppi 			= 'O',

@@ -186,7 +186,7 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
         <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
         <td>{$row['sscc']}</td>
         <td>{$keraysvyohyke['nimitys']}</td>
-        <td>{$rivit}</td>
+        <td></td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
     </tr>";

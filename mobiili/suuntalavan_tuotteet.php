@@ -28,10 +28,7 @@ if (isset($submit) and trim($submit) != '') {
 			exit;
 		}
 		elseif ($submit == 'submit') {
-			if ($ainokainen) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}&viimeinen'>";
-			}
-			else echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?suuntalavan_tuotteet&{$url}'>";
 			exit();
 		}
 	}
@@ -80,7 +77,7 @@ if (isset($alusta_tunnus)) {
 	}
 	# Muuten tyhjä lava
 	elseif(mysql_num_rows($res) == 0) {
-		echo t("Suuntalava on tyhjä!<br>");
+		echo t("Suuntalava on tyhjä")."!<br/>";
 
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 		exit;
@@ -215,11 +212,7 @@ echo "</th>
 		}
 		echo "<td nowrap>{$tuote['osoite']}</td>";
 		echo "</tr>";
-// 					}
 	}
-if (mysql_num_rows($res) == 1) {
-	echo "<input type='hidden' name='ainokainen' value='true' />";
-}
 
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

@@ -10,9 +10,11 @@
 	// Synkronoidaan kahden firman menut
 	if (isset($synkronoi) and count($syncyhtiot) > 1) {
 
+		$yht = "";
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
+
 		$yht = substr($yht,0,-1);
 
 		if ($sovellus != '') {
@@ -97,7 +99,7 @@
 		}
 	}
 
-	if (isset($synkronoireferenssi) and count($syncyhtiot) > 0) {
+	if ((isset($synkronoireferenssi) OR isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
 		$ch  = curl_init();
 		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
@@ -134,6 +136,7 @@
 			}
 		}
 
+		$yht = "";
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
@@ -223,10 +226,16 @@
 				}
 
 				//päivitettän käyttäjien oikeudet
+				if (isset($synkronoireferenssialapaivita)) {
+					$jarjestysupdate = "";
+				}
+				else {
+					$jarjestysupdate = ", jarjestys = '$jarj', jarjestys2 = '$jarj2'";
+				}
+
 				$query = "	UPDATE oikeu
-							SET nimitys		= '$row[nimitys]',
-							jarjestys 		= '$jarj',
-							jarjestys2		= '$jarj2'
+							SET nimitys		= '$row[nimitys]'
+							$jarjestysupdate
 							WHERE yhtio 	= '$yhtio'
 							and sovellus	= '$row[sovellus]'
 							and nimi 		= '$row[nimi]'
@@ -288,7 +297,7 @@
 			$tunnus = '';
 		}
 
-		if ($tunnus != '')	{		// haetaan muutettavan rivin alkuperäiset tiedot
+		if ($tunnus != '')	{
 			$query  = "	SELECT *
 						FROM oikeu
 						WHERE tunnus='$tunnus'";
@@ -350,7 +359,7 @@
 	}
 
 	if ($tee == "MUUTA") {
-		echo "<form method='post'>	";
+		echo "<form method='post' action='menut.php'>";
 		echo "<input type='hidden' name='tee' value='PAIVITA'>";
 		echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 		echo "<input type='hidden' name='yht' value='$yht'>";
@@ -405,7 +414,7 @@
 				</form>";
 
 		if ($tunnus > 0) {
-			echo "<form method='post'>	";
+			echo "<form method='post' action='menut.php'>";
 			echo "<input type='hidden' name='tee' value='POISTA'>";
 			echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 			echo "<input type='hidden' name='yht' value='$yht'>";
@@ -456,7 +465,7 @@
 	}
 
 	if ($tee == "") {
-		echo "<form method='post'><table>";
+		echo "<form method='post' action='menut.php'><table>";
 
 		$query	= "	SELECT distinct yhtio, nimi
 					from yhtio
@@ -515,6 +524,7 @@
 		}
 
 		echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
+		echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
 
 		echo "</form>";
 
@@ -526,7 +536,7 @@
 			}
 			$yht = substr($yht,0,-1);
 
-			echo "<form method='post'>";
+			echo "<form method='post' action='menut.php'>";
 			echo "<input type='hidden' name='tee' value='MUUTA'>";
 			echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 			echo "<input type='hidden' name='sove' value='$sovellus'>";
@@ -583,7 +593,7 @@
 				}
 				else {
 
-					echo "<form method='post'>	";
+					echo "<form method='post' action='menut.php'>";
 					echo "<input type='hidden' name='tee' value='PAIVITAJARJETYS'>";
 					echo "<input type='hidden' name='sovellus' value='$sovellus'>";
 					echo "<input type='hidden' name='yht' value='$yht'>";

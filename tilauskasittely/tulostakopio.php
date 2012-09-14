@@ -1140,13 +1140,13 @@
 				$komento["Ostotilaus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "PURKU") {
+		elseif ($toim == "PURKU") {
 			$tulostimet[0] = 'Purkulista';
 			if ($kappaleet > 0 and $komento["Purkulista"] != 'email') {
 				$komento["Purkulista"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "VASTAANOTETUT") {
+		elseif ($toim == "VASTAANOTETUT") {
 			$tulostimet[0] = 'Vastaanotetut';
 			if ($kappaleet > 0 and $komento["Vastaanotetut"] != 'email') {
 				$komento["Vastaanotetut"] .= " -# $kappaleet ";
@@ -1237,9 +1237,6 @@
 		}
 		elseif ($toim == "OSOITELAPPU") {
 			$tulostimet[0] = 'Osoitelappu';
-			if ($kappaleet > 0 and $komento["Osoitelappu"] != 'email') {
-				$komento["Osoitelappu"] .= " -# $kappaleet ";
-			}
 		}
 		elseif ($toim == "VIENTIERITTELY") {
 			$tulostimet[0] = 'Vientierittely';
@@ -1265,49 +1262,49 @@
 				$komento["Yllapitosopimus"] .= " -# $kappaleet ";
 			}
 		}
-			elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+		elseif (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
 			}
 		}
-                elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
+		elseif (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
 			$tulostimet[0] = 'Myyntisopimus';
 			if ($kappaleet > 0) {
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
+		elseif ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
 			$tulostimet[0] = 'Osamaksusopimus';
 			if ($kappaleet > 0) {
 				$komento["Osamaksusopimus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
+		elseif ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
 			$tulostimet[0] = 'Luovutustodistus';
 			if ($kappaleet > 0) {
 				$komento["Luovutustodistus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
+		elseif ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
 			$tulostimet[0] = 'Vakuutushakemus';
 			if ($kappaleet > 0) {
 				$komento["Vakuutushakemus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+		elseif ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
 			$tulostimet[0] = 'Rekisteröinti_ilmoitus';
 			if ($kappaleet > 0) {
 				$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
 			}
 		}
-                elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
+		elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
 			if ($kappaleet > 0) {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-                elseif ($toim == "REKLAMAATIO") {
+		elseif ($toim == "REKLAMAATIO") {
 			$tulostimet[0] = 'Keräyslista';
 			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
@@ -1631,124 +1628,132 @@
 			}
 
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-				//Tehdään joini
-				$query = "  SELECT tyomaarays.*, lasku.*
-							FROM lasku
-							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.tunnus = '$laskurow[tunnus]'";
-				$result = pupe_query($query);
-				$laskurow = mysql_fetch_assoc($result);
-
-				//haetaan asiakkaan tiedot
-				$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
-							FROM asiakas
-							WHERE tunnus = '$laskurow[liitostunnus]'
-							and yhtio = '$kukarow[yhtio]'";
-				$result = pupe_query($query);
-				$asrow = mysql_fetch_assoc($result);
 
 				require_once ("tyomaarays/tulosta_tyomaarays.inc");
 
-				$sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
-				$order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];
-
-				if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-				else $pjat_sortlisa = "";
-
-				//työmääräyksen rivit
-				$query = "  SELECT tilausrivi.*,
-							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-							$sorttauskentta,
-							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-							if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-							tuote.sarjanumeroseuranta
-							FROM tilausrivi
-							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-							WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
-							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
-							and tilausrivi.tyyppi  != 'D'
-							and tilausrivi.yhtio 	= tuote.yhtio
-							and tilausrivi.tuoteno  = tuote.tuoteno
-							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-				$result = pupe_query($query);
-
-				//generoidaan rivinumerot
-				$rivinumerot = array();
-
-				$kal = 1;
-
-				while ($row = mysql_fetch_assoc($result)) {
-					$rivinumerot[$row["tunnus"]] = $kal;
-					$kal++;
-				}
-
-				mysql_data_seek($result,0);
-
-				if ($toim == "SIIRTOTYOMAARAYS") {
-					$tyyppi = "SISAINEN";
-				}
-				elseif ((isset($tyomtyyppi) and $tyomtyyppi == "O") or $kukarow['hinnat'] != 0) {
-					$tyyppi = "O";
-				}
-				elseif (isset($tyomtyyppi) and $tyomtyyppi == "P") {
-					$tyyppi = "P";
-				}
-				elseif (isset($tyomtyyppi) and $tyomtyyppi == "A") {
-					$tyyppi = "";
+				if ($tyomtyyppi == 'Z') {
+					$kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
+					tulosta_tyomaaraystarra_zebra($laskurow, $komento["Työmääräys"], $kappaleet);
 				}
 				else {
-					$tyyppi = $yhtiorow["tyomaaraystyyppi"];
+
+					//Tehdään joini
+					$query = "  SELECT tyomaarays.*, lasku.*
+								FROM lasku
+								LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								and lasku.tunnus = '$laskurow[tunnus]'";
+					$result = pupe_query($query);
+					$laskurow = mysql_fetch_assoc($result);
+
+					//haetaan asiakkaan tiedot
+					$query = "  SELECT luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+								FROM asiakas
+								WHERE tunnus = '$laskurow[liitostunnus]'
+								and yhtio = '$kukarow[yhtio]'";
+					$result = pupe_query($query);
+					$asrow = mysql_fetch_assoc($result);
+
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
+					$order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];
+
+					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+					else $pjat_sortlisa = "";
+
+					//työmääräyksen rivit
+					$query = "  SELECT tilausrivi.*,
+								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+								$sorttauskentta,
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+								if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+								tuote.sarjanumeroseuranta
+								FROM tilausrivi
+								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+								WHERE tilausrivi.otunnus = '{$laskurow["tunnus"]}'
+								and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+								and tilausrivi.tyyppi  != 'D'
+								and tilausrivi.yhtio 	= tuote.yhtio
+								and tilausrivi.tuoteno  = tuote.tuoteno
+								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+					$result = pupe_query($query);
+
+					//generoidaan rivinumerot
+					$rivinumerot = array();
+
+					$kal = 1;
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$rivinumerot[$row["tunnus"]] = $kal;
+						$kal++;
+					}
+
+					mysql_data_seek($result,0);
+
+					if ($toim == "SIIRTOTYOMAARAYS") {
+						$tyyppi = "SISAINEN";
+					}
+					elseif ((isset($tyomtyyppi) and $tyomtyyppi == "O") or $kukarow['hinnat'] != 0) {
+						$tyyppi = "O";
+					}
+					elseif (isset($tyomtyyppi) and $tyomtyyppi == "P") {
+						$tyyppi = "P";
+					}
+					elseif (isset($tyomtyyppi) and $tyomtyyppi == "A") {
+						$tyyppi = "";
+					}
+					else {
+						$tyyppi = $yhtiorow["tyomaaraystyyppi"];
+					}
+
+					$params_tyomaarays = array( "asrow"           => $asrow,
+												"boldi"           => $boldi,
+												"edtuotetyyppi"   => "",
+												"iso"             => $iso,
+												"kala"            => 0,
+												"kieli"           => $kieli,
+												"komento"		  => $komento["Työmääräys"],
+												"laskurow"        => $laskurow,
+												"lineparam"       => $lineparam,
+												"norm"            => $norm,
+												"page"            => NULL,
+												"pdf"             => NULL,
+												"perheid"         => 0,
+												"perheid2"        => 0,
+												"pieni"           => $pieni,
+												"pieni_boldi"     => $pieni_boldi,
+												"rectparam"       => $rectparam,
+												"returnvalue"     => 0,
+												"rivinkorkeus"    => $rivinkorkeus,
+												"rivinumerot"     => $rivinumerot,
+												"row"             => NULL,
+												"sivu"            => 1,
+												"tee"             => $tee,
+												"thispage"		  => NULL,
+												"toim"            => $toim,
+												"tots"			  => 0,
+												"tyyppi"          => $tyyppi,);
+
+					// Aloitellaan lomakkeen teko
+					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$params_tyomaarays["row"] = $row;
+						$params_tyomaarays = tyomaarays_rivi($params_tyomaarays);
+					}
+
+					if ($yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
+						$params_tyomaarays["tots"] = 1;
+						$params_tyomaarays = tyomaarays_loppu_lisarivit($params_tyomaarays);
+					}
+					else {
+						$params_tyomaarays["tots"] = 1;
+						$params_tyomaarays = tyomaarays_loppu($params_tyomaarays);
+					}
+
+					//tulostetaan sivu
+					tyomaarays_print_pdf($params_tyomaarays);
 				}
-
-				$params_tyomaarays = array( "asrow"           => $asrow,
-											"boldi"           => $boldi,
-											"edtuotetyyppi"   => "",
-											"iso"             => $iso,
-											"kala"            => 0,
-											"kieli"           => $kieli,
-											"komento"		  => $komento["Työmääräys"],
-											"laskurow"        => $laskurow,
-											"lineparam"       => $lineparam,
-											"norm"            => $norm,
-											"page"            => NULL,
-											"pdf"             => NULL,
-											"perheid"         => 0,
-											"perheid2"        => 0,
-											"pieni"           => $pieni,
-											"pieni_boldi"     => $pieni_boldi,
-											"rectparam"       => $rectparam,
-											"returnvalue"     => 0,
-											"rivinkorkeus"    => $rivinkorkeus,
-											"rivinumerot"     => $rivinumerot,
-											"row"             => NULL,
-											"sivu"            => 1,
-											"tee"             => $tee,
-											"thispage"		  => NULL,
-											"toim"            => $toim,
-											"tots"			  => 0,
-											"tyyppi"          => $tyyppi,);
-
-				// Aloitellaan lomakkeen teko
-				$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
-
-				while ($row = mysql_fetch_assoc($result)) {
-					$params_tyomaarays["row"] = $row;
-					$params_tyomaarays = tyomaarays_rivi($params_tyomaarays);
-				}
-
-				if ($yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
-					$params_tyomaarays["tots"] = 1;
-					$params_tyomaarays = tyomaarays_loppu_lisarivit($params_tyomaarays);
-				}
-				else {
-					$params_tyomaarays["tots"] = 1;
-					$params_tyomaarays = tyomaarays_loppu($params_tyomaarays);
-				}
-
-				//tulostetaan sivu
-				tyomaarays_print_pdf($params_tyomaarays);
 
 				$tee = '';
 			}
@@ -2082,6 +2087,8 @@
 			if ($toim == "OSOITELAPPU") {
 				$tunnus = $laskurow["tunnus"];
 				$oslapp = $komento["Osoitelappu"];
+				$kappaleet = $kappaleet == 0 ? 1 : $kappaleet;
+				$oslappkpl = $tee == 'NAYTATILAUS' ? 1 : $kappaleet;
 
 				$query = "  SELECT GROUP_CONCAT(DISTINCT if (tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku
@@ -2118,5 +2125,3 @@
 	if (@include("inc/footer.inc"));
 	elseif (@include("footer.inc"));
 	else exit;
-
-?>

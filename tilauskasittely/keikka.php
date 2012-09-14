@@ -1237,5 +1237,3 @@ document.getElementById('toimnapit').innerHTML = nappikeikka;
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("inc/footer.inc");
 }
-
-?>

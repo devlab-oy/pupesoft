@@ -186,7 +186,7 @@ if ($tee == 'PAIVITA_SARJANUMERO') {
 				AND myyntirivitunnus = '{$rivitunnus}'";
 	$upd_res = pupe_query($query);
 
-	if ($sarjanumero_dropdown != '') {
+	if ($sarjanumero_dropdown != 0) {
 		$query = "	UPDATE sarjanumeroseuranta SET
 					myyntirivitunnus = '{$rivitunnus}',
 					muuttaja = '{$kukarow['kuka']}',

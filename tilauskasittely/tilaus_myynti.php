@@ -93,6 +93,7 @@ if (!isset($omalle_tilaukselle)) 	$omalle_tilaukselle = '';
 if (!isset($lisax)) 				$lisax = '';
 if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
+if (!isset($sarjanumero_dropdown)) 	$sarjanumero_dropdown = "";
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -172,6 +173,24 @@ elseif (in_array($valitsetoimitus, array("ENNAKKO","TARJOUS","PIKATILAUS","RIVIS
 if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_REKLAMAATIO') or ($kukarow["extranet"] == "" and ($toim == "EXTRANET" or $toim == "EXTRANET_REKLAMAATIO"))) {
 	//aika j‰nn‰ homma jos t‰nne jouduttiin
 	exit;
+}
+
+if ($tee == 'PAIVITA_SARJANUMERO') {
+	$sarjanumero_dropdown = (int) $sarjanumero_dropdown;
+
+	$query = "	UPDATE sarjanumeroseuranta SET
+				myyntirivitunnus = 0
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND myyntirivitunnus = '{$rivitunnus}'";
+	$upd_res = pupe_query($query);
+
+	$query = "	UPDATE sarjanumeroseuranta SET
+				myyntirivitunnus = '{$rivitunnus}'
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND tunnus = '{$sarjanumero_dropdown}'";
+	$upd_res = pupe_query($query);
+
+	$tee = '';
 }
 
 if ($tee == 'DELKESKEN') {
@@ -5423,38 +5442,79 @@ if ($tee == '') {
 						$tunken2 = "myyntirivitunnus";
 					}
 
-					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
-						$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
-									FROM sarjanumeroseuranta
-									where yhtio	 = '$kukarow[yhtio]'
-									and tuoteno	 = '$row[tuoteno]'
-									and $tunken1 = '$row[tunnus]'";
+					if ($kukarow['extranet'] != '') {
 
-						$snro_ok = t("S:nro ok");
-						$snro	 = t("S:nro");
+						$query = "	SELECT DISTINCT sarjanumero, tunnus, myyntirivitunnus
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tuoteno = '{$row['tuoteno']}'
+									AND hyllyalue = '{$row['hyllyalue']}'
+									AND hyllynro = '{$row['hyllynro']}'
+									AND hyllyvali = '{$row['hyllyvali']}'
+									AND hyllytaso = '{$row['hyllytaso']}'
+									ORDER BY sarjanumero";
+						$sarjares = pupe_query($query);
+
+						echo "&nbsp;";
+						echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='sarjdd'>
+								<input type='hidden' name='toim' value='$toim'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
+								<input type='hidden' name='ruutulimit' value='$ruutulimit'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+								<input type='hidden' name='mista' value = '$mista'>
+								<input type='hidden' name='rivitunnus' value = '{$row['tunnus']}'>
+								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+								<input type='hidden' name='menutila' value='$menutila'>
+								<input type='hidden' name='tee' value = 'PAIVITA_SARJANUMERO'>
+								<select name='sarjanumero_dropdown' onchange='submit();'>";
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							if ($sarjanumero_dropdown == $sarjarow['tunnus']) $sel = ' selected';
+							elseif ($sel == '' and $sarjarow['myyntirivitunnus'] == $row['tunnus']) $sel = ' selected';
+							else $sel = '';
+
+							echo "<option value='{$sarjarow['tunnus']}'{$sel}>{$sarjarow['sarjanumero']}</option>";
+						}
+
+						echo "	</select>
+								</form>";
+
 					}
 					else {
-						$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
-									FROM sarjanumeroseuranta
-									where yhtio	 = '$kukarow[yhtio]'
-									and tuoteno	 = '$row[tuoteno]'
-									and $tunken1 = '$row[tunnus]'";
+						if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
+							$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
+										FROM sarjanumeroseuranta
+										where yhtio	 = '$kukarow[yhtio]'
+										and tuoteno	 = '$row[tuoteno]'
+										and $tunken1 = '$row[tunnus]'";
 
-						$snro_ok = t("E:nro ok");
-						$snro	 = t("E:nro");
-					}
-					$sarjares = pupe_query($query);
-					$sarjarow = mysql_fetch_assoc($sarjares);
+							$snro_ok = t("S:nro ok");
+							$snro	 = t("S:nro");
+						}
+						else {
+							$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+										FROM sarjanumeroseuranta
+										where yhtio	 = '$kukarow[yhtio]'
+										and tuoteno	 = '$row[tuoteno]'
+										and $tunken1 = '$row[tunnus]'";
 
-					if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>$snro_ok</font></a>)";
-					}
-					elseif ($muokkauslukko_rivi == "") {
-						echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$snro</a>)";
+							$snro_ok = t("E:nro ok");
+							$snro	 = t("E:nro");
+						}
+						$sarjares = pupe_query($query);
+						$sarjarow = mysql_fetch_assoc($sarjares);
 
-						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
-							$sarjapuuttuu++;
-							$tilausok++;
+						if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
+							echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>$snro_ok</font></a>)";
+						}
+						elseif ($muokkauslukko_rivi == "") {
+							echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$snro</a>)";
+
+							if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
+								$sarjapuuttuu++;
+								$tilausok++;
+							}
 						}
 					}
 				}
@@ -7109,9 +7169,9 @@ if ($tee == '') {
 					$laskelisa = "";
 				}
 
-				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
+				if ($kukarow['mitatoi_tilauksia'] != 'E') echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
-				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
+				if ($kukarow["extranet"] == "" and $kukarow['mitatoi_tilauksia'] != 'E' and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("P‰ivit‰ ostotilausta samalla") : "";
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."$lisateksti' $tilausjavalisa> ";
 				}

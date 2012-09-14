@@ -128,6 +128,10 @@ $url = array (
             'saapuminen' => $alkuperainen_saapuminen
         );
 
+if (!is_numeric($hyllytetty)) {
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."&virhe'>";
+}
+
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
 echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
@@ -186,7 +190,7 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
         <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
         <td>{$row['sscc']}</td>
         <td>{$keraysvyohyke['nimitys']}</td>
-        <td></td>
+        <td>{$rivit}</td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
     </tr>";

@@ -7153,7 +7153,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U') {
+			elseif ($kukarow['mitatoi_tilauksia'] != 'E' and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>
@@ -7182,7 +7182,7 @@ if ($tee == '') {
 					$laskelisa = "";
 				}
 
-				if ($kukarow['mitatoi_tilauksia'] != 'E') echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
+				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
 				if ($kukarow["extranet"] == "" and $kukarow['mitatoi_tilauksia'] != 'E' and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : "";

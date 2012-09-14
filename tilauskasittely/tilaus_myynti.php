@@ -7184,7 +7184,7 @@ if ($tee == '') {
 
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
-				if ($kukarow["extranet"] == "" and $kukarow['mitatoi_tilauksia'] != 'E' and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
+				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					$lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : "";
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."$lisateksti' $tilausjavalisa> ";
 				}

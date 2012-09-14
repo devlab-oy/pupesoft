@@ -5451,50 +5451,54 @@ if ($tee == '') {
 
 					if ($kukarow['extranet'] != '') {
 
-						$query = "	SELECT DISTINCT sarjanumeroseuranta.sarjanumero,
-									sarjanumeroseuranta.tunnus,
-									sarjanumeroseuranta.myyntirivitunnus
-									FROM sarjanumeroseuranta
-									JOIN tuotepaikat ON (tuotepaikat.yhtio = sarjanumeroseuranta.yhtio and tuotepaikat.tuoteno = sarjanumeroseuranta.tuoteno)
-									JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-									and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-									and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
-									WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
-									AND sarjanumeroseuranta.tuoteno = '{$row['tuoteno']}'
-									AND sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
-									AND sarjanumeroseuranta.hyllynro = tuotepaikat.hyllynro
-									AND sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
-									AND sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
-									ORDER BY sarjanumero";
-						$sarjares = pupe_query($query);
+						// jos rivillä on virhe, ei piirretä sarjanumero-dropdownia
+						if ($riviok == 0) {
+							$query = "	SELECT DISTINCT sarjanumeroseuranta.sarjanumero,
+										sarjanumeroseuranta.tunnus,
+										sarjanumeroseuranta.myyntirivitunnus
+										FROM sarjanumeroseuranta
+										JOIN tuotepaikat ON (tuotepaikat.yhtio = sarjanumeroseuranta.yhtio and tuotepaikat.tuoteno = sarjanumeroseuranta.tuoteno)
+										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+										and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+										and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
+										WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+										AND sarjanumeroseuranta.tuoteno = '{$row['tuoteno']}'
+										AND sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
+										AND sarjanumeroseuranta.hyllynro = tuotepaikat.hyllynro
+										AND sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
+										AND sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+										AND sarjanumeroseuranta.myyntirivitunnus IN (0, {$row['tunnus']})
+										ORDER BY sarjanumero";
+							$sarjares = pupe_query($query);
 
-						echo "&nbsp;";
-						echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='sarjdd'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='lopetus' value='$lopetus'>
-								<input type='hidden' name='ruutulimit' value='$ruutulimit'>
-								<input type='hidden' name='projektilla' value='$projektilla'>
-								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
-								<input type='hidden' name='mista' value = '$mista'>
-								<input type='hidden' name='rivitunnus' value = '{$row['tunnus']}'>
-								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
-								<input type='hidden' name='sarjanumero_dropdown_tuoteno' value='{$row['tuoteno']}' />
-								<input type='hidden' name='menutila' value='$menutila'>
-								<input type='hidden' name='tee' value = 'PAIVITA_SARJANUMERO'>
-								<select name='sarjanumero_dropdown' onchange='submit();'>
-								<option value=''>",t("Valitse sarjanumero"),"</option>";
+							echo "&nbsp;";
+							echo "	<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='sarjdd'>
+									<input type='hidden' name='toim' value='$toim'>
+									<input type='hidden' name='lopetus' value='$lopetus'>
+									<input type='hidden' name='ruutulimit' value='$ruutulimit'>
+									<input type='hidden' name='projektilla' value='$projektilla'>
+									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+									<input type='hidden' name='mista' value = '$mista'>
+									<input type='hidden' name='rivitunnus' value = '{$row['tunnus']}'>
+									<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+									<input type='hidden' name='sarjanumero_dropdown_tuoteno' value='{$row['tuoteno']}' />
+									<input type='hidden' name='menutila' value='$menutila'>
+									<input type='hidden' name='tee' value = 'PAIVITA_SARJANUMERO'>
+									<select name='sarjanumero_dropdown' onchange='submit();'>
+									<option value=''>",t("Valitse sarjanumero"),"</option>";
 
-						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
-							if ($sarjanumero_dropdown == $sarjarow['tunnus']) $sel = ' selected';
-							elseif ($sel == '' and $sarjarow['myyntirivitunnus'] == $row['tunnus']) $sel = ' selected';
-							else $sel = '';
+							while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+								$sel = '';
 
-							echo "<option value='{$sarjarow['tunnus']}'{$sel}>{$sarjarow['sarjanumero']}</option>";
+								if ($sarjanumero_dropdown == $sarjarow['tunnus']) $sel = ' selected';
+								elseif ($sel == '' and $sarjarow['myyntirivitunnus'] == $row['tunnus']) $sel = ' selected';
+
+								echo "<option value='{$sarjarow['tunnus']}'{$sel}>{$sarjarow['sarjanumero']}</option>";
+							}
+
+							echo "	</select>
+									</form>";
 						}
-
-						echo "	</select>
-								</form>";
-
 					}
 					else {
 						if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {

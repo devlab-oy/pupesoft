@@ -34,12 +34,20 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 	}
 
 	if ($submit == 'submit') {
-		$return = etsi_suuntalava_sscc(trim($alusta));
+		$query = "SELECT * FROM suuntalavat WHERE sscc='$alusta' AND yhtio='{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		$valinta = "Valitse";
+		if (mysql_num_rows($result) == 0) {
+			$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+		}
+		else {
+			$return = etsi_suuntalava_sscc(trim($alusta));
 
-		if (count($return) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn. Hae uudestaan.").".</font>";
+			$valinta = "Valitse";
+
+			if (count($return) == 0) {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn. Hae uudestaan.").".</font>";
+			}
 		}
 	}
 }

@@ -217,26 +217,17 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 }
 
 # Suuntalava siirtovalmiiksi (normaali)
-else if ($tee == 'siirtovalmis' and isset($suuntalava)) {
+else if ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
 	$title = t("Suuntalava siirtovalmiiksi");
 
-	$suuntalavat_ei_kayttoliittymaa = "KYLLA";
-	$tee = 'siirtovalmis';
-	$suuntalavan_tunnus = $suuntalava;
-	require ("../tilauskasittely/suuntalavat.inc");
+	echo "Suuntalava $suuntalava siirtovalmiiksi<br>";
 
-	// # Takaisin suuntalavat listaan
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
-	exit();
-}
-# Suuntalava siirtovalmiiksi (suoraan hyllyyn)
-else if ($tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
-	$title = t("Suuntalava siirtovalmiiksi");
-	echo "Suuntalava {$suuntalava} laitetaan suoraan hyllyyn";
-
-	# Asetetaan käsittelytavaksi suoraan (H)yllyyn
-	$query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
-	$result = pupe_query($query);
+	# Suuntalavan käsittelytapa (Suoraan (H)yllyyn)
+	if ($tee == 'suoraan_hyllyyn') {
+		echo "Käsittelytapa suoraan hyllyyn";
+		$query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
+		$result = pupe_query($query);
+	}
 
 	# Suuntalava siirtovalmiiksi
 	$suuntalavat_ei_kayttoliittymaa = "KYLLA";
@@ -244,6 +235,7 @@ else if ($tee == 'suoraan_hyllyyn' and isset($suuntalava)) {
 	$suuntalavan_tunnus = $suuntalava;
 	require ("../tilauskasittely/suuntalavat.inc");
 
+	# Takaisin suuntalavat listaan
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
 	exit();
 }

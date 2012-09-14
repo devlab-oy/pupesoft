@@ -179,16 +179,22 @@ if ($tee == 'PAIVITA_SARJANUMERO') {
 	$sarjanumero_dropdown = (int) $sarjanumero_dropdown;
 
 	$query = "	UPDATE sarjanumeroseuranta SET
-				myyntirivitunnus = 0
+				myyntirivitunnus = 0,
+				muuttaja = '{$kukarow['kuka']}',
+				muutospvm = now()
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND myyntirivitunnus = '{$rivitunnus}'";
 	$upd_res = pupe_query($query);
 
-	$query = "	UPDATE sarjanumeroseuranta SET
-				myyntirivitunnus = '{$rivitunnus}'
-				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND tunnus = '{$sarjanumero_dropdown}'";
-	$upd_res = pupe_query($query);
+	if ($sarjanumero_dropdown != '') {
+		$query = "	UPDATE sarjanumeroseuranta SET
+					myyntirivitunnus = '{$rivitunnus}',
+					muuttaja = '{$kukarow['kuka']}',
+					muutospvm = now()
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$sarjanumero_dropdown}'";
+		$upd_res = pupe_query($query);
+	}
 
 	$tee = '';
 }
@@ -5444,14 +5450,20 @@ if ($tee == '') {
 
 					if ($kukarow['extranet'] != '') {
 
-						$query = "	SELECT DISTINCT sarjanumero, tunnus, myyntirivitunnus
+						$query = "	SELECT DISTINCT sarjanumeroseuranta.sarjanumero,
+									sarjanumeroseuranta.tunnus,
+									sarjanumeroseuranta.myyntirivitunnus
 									FROM sarjanumeroseuranta
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tuoteno = '{$row['tuoteno']}'
-									AND hyllyalue = '{$row['hyllyalue']}'
-									AND hyllynro = '{$row['hyllynro']}'
-									AND hyllyvali = '{$row['hyllyvali']}'
-									AND hyllytaso = '{$row['hyllytaso']}'
+									JOIN tuotepaikat ON (tuotepaikat.yhtio = sarjanumeroseuranta.yhtio and tuotepaikat.tuoteno = sarjanumeroseuranta.tuoteno)
+									JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+									and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+									and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
+									WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+									AND sarjanumeroseuranta.tuoteno = '{$row['tuoteno']}'
+									AND sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
+									AND sarjanumeroseuranta.hyllynro = tuotepaikat.hyllynro
+									AND sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
+									AND sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
 									ORDER BY sarjanumero";
 						$sarjares = pupe_query($query);
 
@@ -5467,7 +5479,8 @@ if ($tee == '') {
 								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tee' value = 'PAIVITA_SARJANUMERO'>
-								<select name='sarjanumero_dropdown' onchange='submit();'>";
+								<select name='sarjanumero_dropdown' onchange='submit();'>
+								<option value=''>",t("Valitse sarjanumero"),"</option>";
 
 						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 							if ($sarjanumero_dropdown == $sarjarow['tunnus']) $sel = ' selected';

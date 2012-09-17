@@ -498,12 +498,6 @@
 										AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
 							$upres = pupe_query($query);
 
-							$query = "	UPDATE tilausrivi SET
-										perheid = tunnus
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$myynti_tilausrivi_id_isa}'";
-							$upres = pupe_query($query);
-
 							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 							$query = "	UPDATE tilausrivi SET
 										varattu = '{$erotus}',
@@ -742,12 +736,6 @@
 									tilausrivilinkki = '{$tilausrivi_id}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
-						$upres = pupe_query($query);
-
-						$query = "	UPDATE tilausrivi SET
-									perheid = tunnus
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$myynti_tilausrivi_id_isa}'";
 						$upres = pupe_query($query);
 					}
 

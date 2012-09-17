@@ -721,6 +721,19 @@
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
 						$upres = pupe_query($query);
+
+						$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
+						$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
+						$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
+
+						// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+						$query = "	UPDATE tilausrivi SET
+									{$splitlisa}
+									{$splitlisa2}
+									{$rivihintalisa}
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
+						$upres = pupe_query($query);
 					}
 
 					// katsotaan onko tuoteperheen is‰tuote
@@ -766,6 +779,19 @@
 											tilausrivilinkki = '{$lapsi_uusi_id}'
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+								$upres = pupe_query($query);
+
+								$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
+								$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
+								$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
+
+								// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+								$query = "	UPDATE tilausrivi SET
+											{$splitlisa}
+											{$splitlisa2}
+											{$rivihintalisa}
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 								$upres = pupe_query($query);
 							}
 
@@ -1169,6 +1195,22 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tilausrivitunnus = '{$myynti_tilausrivi_id_isa}'";
 							$upres = pupe_query($query);
+
+							$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
+							$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
+							$rivihintalisa = $split_row['kpl'] != 0 ? " rivihinta = '".(($split_row['rivihinta'] / $split_row['kpl']) * $erotus)."', " : " rivihinta = 0, ";
+
+							$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
+
+							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+							$query = "	UPDATE tilausrivi SET
+										{$splitlisa}
+										{$splitlisa2}
+										{$rivihintalisa}
+										kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
+							$upres = pupe_query($query);
 						}
 
 						// katsotaan onko tuoteperheen is‰tuote
@@ -1213,6 +1255,22 @@
 												tilausrivilinkki = '{$lapsi_uusi_id}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND tilausrivitunnus = '{$myynti_tilausrivi_id_lapsi}'";
+									$upres = pupe_query($query);
+
+									$splitlisa = $split_row['kpl'] != 0 ? " varattu = '0', " : " varattu = '{$erotus}', ";
+									$splitlisa2 = $split_row['kpl'] != 0 ? " kpl = '{$erotus}', " : " kpl = 0, ";
+									$rivihintalisa = $split_row['kpl'] != 0 ? " rivihinta = '".(($split_row['rivihinta'] / $split_row['kpl']) * $erotus)."', " : " rivihinta = 0, ";
+
+									$komm_lisa = $split_row['kpl'] + $split_row['varattu'];
+
+									// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+									$query = "	UPDATE tilausrivi SET
+												{$splitlisa}
+												{$splitlisa2}
+												{$rivihintalisa}
+												kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 									$upres = pupe_query($query);
 								}
 

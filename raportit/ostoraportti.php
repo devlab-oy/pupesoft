@@ -5,6 +5,12 @@
 		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
 
+	// Enabloidaan, että Apache flushaa kaiken mahdollisen ruudulle kokoajan.
+	//apache_setenv('no-gzip', 1);
+	ini_set('zlib.output_compression', 0);
+	ini_set('implicit_flush', 1);
+	ob_implicit_flush(1);
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -942,8 +948,8 @@
 
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');
-				#$bar = new ProgressBar();
-				#$bar->initialize($elements); // print the empty bar
+				$bar = new ProgressBar();
+				$bar->initialize($elements); // print the empty bar
 			}
 
 			while ($row = mysql_fetch_array($res)) {
@@ -952,6 +958,9 @@
 
 				if ($paikoittain != '') {
 					$paikkalisa = " and concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso)='$row[varastopaikka]' ";
+				}
+				else {
+					$paikkalisa = "";
 				}
 
 				//toimittajatiedot
@@ -1221,7 +1230,10 @@
 					$ero = $ero/60/60/24/7;
 					$ehd_kausi1	= "1";
 
-					if ($valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]] != '') {
+					if (isset($row["abcluokka"]) and 
+						isset($ryhmanimet[$row["abcluokka"]]) and 
+						isset($valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]]) and
+						$valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]] != '') {
 						list($al, $lo) = explode("##", $valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]]);
 						$ehd_kausi1	= $lo;
 					}
@@ -1307,7 +1319,7 @@
 					$asrow = mysql_fetch_array($asresult);
 				}
 
-				if ($valitut['EHDOTETTAVAT'] == '' or ($ostettavahaly_kausi1 > 0 or $ostettavahaly_kausi2 > 0 or $ostettavahaly_kausi3 > 0 or $ostettavahaly_kausi4 > 0) or ($ostettava_kausi1 > 0 or $ostettava_kausi2 > 0 or $ostettava_kausi3 > 0 or $ostettava_kausi4 > 0)) {
+				if (!isset($valitut['EHDOTETTAVAT']) or $valitut['EHDOTETTAVAT'] == '' or ($ostettavahaly_kausi1 > 0 or $ostettavahaly_kausi2 > 0 or $ostettavahaly_kausi3 > 0 or $ostettavahaly_kausi4 > 0) or ($ostettava_kausi1 > 0 or $ostettava_kausi2 > 0 or $ostettava_kausi3 > 0 or $ostettava_kausi4 > 0)) {
 
 					$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
 					$excelsarake++;
@@ -1332,17 +1344,17 @@
 						$bg_color = '';
 						$sarake = trim($sarake);
 
-						if ($sarake_keyt[$sarake] != '') {
+						if (isset($sarake_keyt[$sarake]) and $sarake_keyt[$sarake] != '') {
 
 							$value = '';
 
 							// jos sarake on abc (abcluokkanumero), haetaan se kauniimpi nimi (esim. A-30)
 							if ($sarake == 'abc' or $sarake == 'abc os' or $sarake == 'abc try' or $sarake == 'abc tme') {
-								$value = $ryhmanimet[$row[$sarake_keyt[$sarake]]];
+								$value = isset($ryhmanimet[$row[$sarake_keyt[$sarake]]]) ? $ryhmanimet[$row[$sarake_keyt[$sarake]]] : "";
 							}
 							// jos sarake on saldo, haetaan saldo toisesta muuttujasta
 							elseif ($sarake == 'saldo' or $sarake == 'saldo2') {
-								$value = $saldo[$sarake_keyt[$sarake]];
+								$value = isset($saldo[$sarake_keyt[$sarake]]) ? $saldo[$sarake_keyt[$sarake]] : "";
 							}
 							elseif ($sarake == 'reaalisaldo') {
 								$value = $saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'];
@@ -1686,7 +1698,7 @@
 					$excelsarake = 0;
 				}
 
-				#$bar->increase();
+				$bar->increase();
 			}
 
 			if ($korvaavien_otsikot > 0) {

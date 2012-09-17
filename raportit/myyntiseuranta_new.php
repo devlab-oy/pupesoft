@@ -891,6 +891,8 @@
 							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino) toim_postino, ";
 							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp) toim_postitp, ";
 							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa) toim_maa, ";
+							$select .= "if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) puhelin, ";
+							$select .= "asiakas.email, ";
 						}
 						else {
 							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)) nimi, concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)) postitp, ";

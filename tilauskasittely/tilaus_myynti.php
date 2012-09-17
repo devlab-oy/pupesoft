@@ -6661,8 +6661,11 @@ if ($tee == '') {
 								echo "</tr><tr>";
 							}
 
+							// Tilaustyyppi 2, eli varastotäydennys, siirretään aina yhden päivän eteenpäin
+							$eteenpain = ($laskurow["tilaustyyppi"] == 2) ? 1 : 0;
+
 							// Haetaan seuraavat lähdöt
-							$lahdot = seuraavat_lahtoajat($laskurow["toimitustapa"], $laskurow["prioriteettinro"], $vrst);
+							$lahdot = seuraavat_lahtoajat($laskurow["toimitustapa"], $laskurow["prioriteettinro"], $vrst, 0, $eteenpain);
 
 							echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
 							echo "<td colspan='2' nowrap class='back'><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";

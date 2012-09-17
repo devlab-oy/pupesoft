@@ -1461,6 +1461,7 @@ else {
 					if (mysql_num_rows($result) > 0) {
 						$lahtorow = mysql_fetch_assoc($result);
 
+						// Tilaustyyppi 2, eli varastot‰ydennys, siirret‰‰n aina yhden p‰iv‰n eteenp‰in
 						$eteenpain = ($lahtorow["tilaustyyppi"] == 2) ? 1 : 0;
 
 						$lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);

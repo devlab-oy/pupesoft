@@ -727,7 +727,7 @@
 						$query = "	UPDATE tilausrivi SET
 									varattu = '{$row['kappalemaara']}',
 									tilkpl	= '{$row['kappalemaara']}',
-									kommentti = CONCAT(IFNULL(kommentti),' ennen splittausta {$myynti_rivi_row_isa['tilkpl']} : {$myynti_rivi_row_isa['varattu']}, kohdistettiin {$row['kappalemaara']}')
+									kommentti = CONCAT(IFNULL(kommentti, ''),' ennen splittausta {$myynti_rivi_row_isa['tilkpl']} : {$myynti_rivi_row_isa['varattu']}, kohdistettiin {$row['kappalemaara']}')
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
 						$upres = pupe_query($query);

@@ -11,6 +11,11 @@
 	ini_set('implicit_flush', 1);
 	ob_implicit_flush(1);
 
+	// Aikaa ja muistia enemmän kun normisivuille
+	ini_set("memory_limit", "5G");
+	ini_set("mysql.connect_timeout", 600);
+	ini_set("max_execution_time", 18000);
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {

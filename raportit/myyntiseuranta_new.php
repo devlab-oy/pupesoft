@@ -277,9 +277,9 @@
 				<table><tr><td class='spec'>".t("Hae asiakastiedot").":</td><td><select name='ytunnus_mistatiedot'>
 				<option value=''>",t("Asiakasrekisteristä"),"</option>
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
-				</select></td></tr>";
-				#<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytunnus_laajattiedot' value='laajat' {$ruk10chk}></td></tr>
-			echo "</table>
+				</select></td></tr>
+				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytunnus_laajattiedot' value='laajat' {$ruk10chk}></td></tr>
+				</table>
 				</tr>
 				<tr>
 				<th>",t("Listaa asiakasnumerolla"),"</th>
@@ -884,7 +884,18 @@
 							$etuliite = "asiakas";
 						}
 
-						$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)) nimi, concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)) postitp, ";
+						if (isset($ytunnus_laajattiedot) and $ytunnus_laajattiedot != "") {
+							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark)) nimi, {$etuliite}.osoite, {$etuliite}.postino, {$etuliite}.postitp, {$etuliite}.maa, ";
+							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark)), concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark))) toim_nimi, ";
+							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite) toim_osoite, ";
+							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino) toim_postino, ";
+							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp) toim_postitp, ";
+							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa) toim_maa, ";
+						}
+						else {
+							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)) nimi, concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)) postitp, ";
+						}
+
 						$order  .= "{$etuliite}.ytunnus,";
 						$gluku++;
 					}

@@ -54,6 +54,7 @@
 					AND tilausrivi.jaksotettu = 0
 					AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY)
 					AND kuka.eposti != ''
+					AND kuka.myyjanro != '0'
 					GROUP BY 1,2,3,4,5,6
 					ORDER BY lasku.laatija";
 		$result = pupe_query($query);

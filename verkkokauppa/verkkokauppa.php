@@ -87,88 +87,6 @@ if (!isset($osasto)) $osasto = '';
 if (!isset($try)) $try = '';
 if (!isset($tuotemerkki)) $tuotemerkki = '';
 
-echo "<input type='hidden' id='osasto_js' value='{$osasto}' />";
-echo "<input type='hidden' id='tuoteryhma_js' value='{$try}' />";
-echo "<input type='hidden' id='tuotemerkki_js' value='{$tuotemerkki}' />";
-
-echo "	<script type='text/javascript'>
-
-			$(function() {
-
-				$('td.td_parent, td.td_parent_try, td.td_parent_tuotemerkki').on('click', 'a', function(e) {
-
-					$('.selected').removeClass('selected');
-
-					var id = $(this).attr('id');
-					target_ja_id = id.split(\"_\", 2);
-
-					$(this).addClass('selected');
-
-					if ($(this).attr('id') == 'T_'+target_ja_id[1] && $('#T_'+target_ja_id[1]).is(':visible')) {
-						sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+target_ja_id[1], \"\", false);
-					}
-				});
-
-				var osasto = '';
-				var tuoteryhma = '';
-				var tuotemerkki = '';
-
-				if ($('#osasto_js')) {
-					osasto = $('#osasto_js').val();
-					$('#osasto_js').val('');
-				}
-
-				if ($('#tuoteryhma_js')) {
-					tuoteryhma = $('#tuoteryhma_js').val();
-					$('#tuoteryhma_js').val('');
-				}
-
-				if ($('#tuotemerkki_js')) {
-					tuotemerkki = $('#tuotemerkki_js').val();
-					$('#tuotemerkki_js').val('');
-				}
-
-
-				if (osasto != '') {
-
-					$('.selected').removeClass('selected');
-					$('#P_'+osasto).addClass('selected');
-
-					if (tuoteryhma == '' && tuotemerkki == '') {
-						sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+osasto, \"\", false);
-					}
-
-					sndReq(\"T_\"+osasto, \"verkkokauppa.php?tee=menu&osasto=\"+osasto, \"P_\"+osasto, false, false);
-				}
-
-				if (tuoteryhma != '') {
-
-					$('.selected').removeClass('selected');
-
-					sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki='+tuotemerkki, '', false);
-					sndReq('P_'+osasto+'_'+tuoteryhma, 'verkkokauppa.php?tee=menu&osasto='+osasto+'&try='+tuoteryhma, 'P_'+osasto+'_'+tuoteryhma, false);
-
-					if (tuotemerkki == '') {
-						setTimeout(function() {
-							$('#T_'+osasto+'_'+tuoteryhma).addClass('selected');
-						}, 200);
-					}
-				}
-
-				if (tuotemerkki != '') {
-
-					$('.selected').removeClass('selected');
-
-					sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki='+tuotemerkki, '', false);
-
-					setTimeout(function() {
-						$('#P_'+osasto+'_'+tuoteryhma+'_'+tuotemerkki).addClass('selected');
-					}, 200);
-				}
-			});
-
-		</script>";
-
 if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
 
 if (!function_exists("tilaus")) {
@@ -391,8 +309,9 @@ if (!function_exists("menu")) {
 					$parent	= "T_".$osasto."_".$tryrow["try"];
 
 					if ($verkkokauppa_tuotemerkit) {
+						$onclick	= "sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow['try']}\", \"\", false)";
 						$href 	= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try=$tryrow[try]\", \"$parent\", false); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=\", \"\", false);";
-						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' id='$parent' href='$href'>$tryrow[trynimi]</a><div id=\"$target\" style='display: none'></div></td></tr>";
+						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' id='$parent' onclick='{$onclick}' href='$href'>$tryrow[trynimi]</a><div id=\"$target\" style='display: none'></div></td></tr>";
 					}
 					else {
 						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' name = 'menulinkki' id='$parent' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', false);\">$tryrow[trynimi]</a></td></tr>";
@@ -1246,6 +1165,96 @@ if ($tee == "selaa") {
 if ($tee == "") {
 
 	enable_ajax();
+
+	echo "<input type='hidden' id='osasto_js' value='{$osasto}' />";
+	echo "<input type='hidden' id='tuoteryhma_js' value='{$try}' />";
+	echo "<input type='hidden' id='tuotemerkki_js' value='{$tuotemerkki}' />";
+
+	echo "	<script type='text/javascript'>
+
+				$(function() {
+
+					$('td.td_parent > a, td.td_parent_try > a, td.td_parent_tuotemerkki > a').live('click', function(e) {
+
+						$('.selected').removeClass('selected');
+
+						var id = $(this).attr('id');
+						target_ja_id = id.split(\"_\", 3);
+
+						$(this).addClass('selected');
+
+						console.log(target_ja_id);
+
+						$('div[id^=\"P_'+target_ja_id[1]+'_\"]').each(function() {
+							if ($(this).attr('id') != 'P_'+target_ja_id[1]+'_'+target_ja_id[2] && $(this).is(':visible')) {
+								$(this).hide();
+							}
+						});
+
+						if ($(this).attr('id') == 'P_'+target_ja_id[1] && $('#P_'+target_ja_id[1]).is(':visible')) {
+							sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+target_ja_id[1], \"\", false);
+						}
+					});
+
+					var osasto = '';
+					var tuoteryhma = '';
+					var tuotemerkki = '';
+
+					if ($('#osasto_js')) {
+						osasto = $('#osasto_js').val();
+						$('#osasto_js').val('');
+					}
+
+					if ($('#tuoteryhma_js')) {
+						tuoteryhma = $('#tuoteryhma_js').val();
+						$('#tuoteryhma_js').val('');
+					}
+
+					if ($('#tuotemerkki_js')) {
+						tuotemerkki = $('#tuotemerkki_js').val();
+						$('#tuotemerkki_js').val('');
+					}
+
+
+					if (osasto != '') {
+
+						$('.selected').removeClass('selected');
+						$('#P_'+osasto).addClass('selected');
+
+						if (tuoteryhma == '' && tuotemerkki == '') {
+							sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+osasto, \"\", false);
+						}
+
+						sndReq(\"T_\"+osasto, \"verkkokauppa.php?tee=menu&osasto=\"+osasto, \"P_\"+osasto, false, false);
+					}
+
+					if (tuoteryhma != '') {
+
+						$('.selected').removeClass('selected');
+
+						sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki='+tuotemerkki, '', false);
+						sndReq('P_'+osasto+'_'+tuoteryhma, 'verkkokauppa.php?tee=menu&osasto='+osasto+'&try='+tuoteryhma, 'P_'+osasto+'_'+tuoteryhma, false);
+
+						if (tuotemerkki == '') {
+							setTimeout(function() {
+								$('#T_'+osasto+'_'+tuoteryhma).addClass('selected');
+							}, 200);
+						}
+					}
+
+					if (tuotemerkki != '') {
+
+						$('.selected').removeClass('selected');
+
+						sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto='+osasto+'&try='+tuoteryhma+'&tuotemerkki='+tuotemerkki, '', false);
+
+						setTimeout(function() {
+							$('#P_'+osasto+'_'+tuoteryhma+'_'+tuotemerkki).addClass('selected');
+						}, 200);
+					}
+				});
+
+			</script>";
 
 	if ($kukarow["kuka"] == "www") {
 		$login_screen = "<form name='login' id= 'loginform' method='post'>

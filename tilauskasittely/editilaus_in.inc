@@ -968,6 +968,10 @@ while ($tietue = fgets($fd)) {
 						$editilaus_eilahetetta = "o";
 						$editilaus_sisainen = "o";
 					}
+					elseif ($editilaus_tilaustyyppi == 'K') {
+						$editilaus_tila 	= 'N';
+						$editilaus_alatila 	= '';
+					}
 				}
 
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
@@ -1733,7 +1737,7 @@ while ($tietue = fgets($fd)) {
 					require ("tilaus-valmis.inc");
 
 					// jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9" and $editilaus_tilaustyyppi != 'K') {
 						// Haetaan yrityksen ensimmäinen normivarasto. Tallennetaan tilaus tähän varastoon
 						$varasto_query = "	SELECT tunnus
 											from varastopaikat
@@ -1923,5 +1927,3 @@ else {
 	echo $edi_ulos;
 	echo "\n";
 }
-
-?>

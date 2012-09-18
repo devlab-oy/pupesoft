@@ -188,27 +188,15 @@ if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$upd_res = pupe_query($query);
 
 	if ($sarjanumero_dropdown != 0) {
-		// Tarkistetaan onko valittu sarjanumero vielä vapaa
-		$query = "	SELECT tunnus
-					FROM sarjanumeroseuranta
+
+		$query = "	UPDATE sarjanumeroseuranta SET
+					myyntirivitunnus = '{$rivitunnus}',
+					muuttaja = '{$kukarow['kuka']}',
+					muutospvm = now()
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND myyntirivitunnus = 0
 					AND tunnus = '{$sarjanumero_dropdown}'";
-		$chk_res = pupe_query($query);
-
-		// Jos sarjanumero oli vielä vapaa, varataan se tälle tuotteelle
-		if (mysql_num_rows($chk_res) == 1) {
-
-			if ($sarjanumero_dropdown != 0) {
-				$query = "	UPDATE sarjanumeroseuranta SET
-							myyntirivitunnus = '{$rivitunnus}',
-							muuttaja = '{$kukarow['kuka']}',
-							muutospvm = now()
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$sarjanumero_dropdown}'";
-				$upd_res = pupe_query($query);
-			}
-		}
+		$upd_res = pupe_query($query);
 	}
 
 	$tee = '';

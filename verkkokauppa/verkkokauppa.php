@@ -1193,6 +1193,12 @@ if ($tee == "") {
 							}
 						});
 
+						$('div[id^=\"T_\"]').each(function() {
+							if ($(this).attr('id') != 'T_'+target_ja_id[1] && $(this).is(':visible')) {
+								$(this).hide();
+							}
+						});
+
 						if ($(this).attr('id') == 'P_'+target_ja_id[1] && $('#P_'+target_ja_id[1]).is(':visible')) {
 							sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=\"+target_ja_id[1], \"\", false);
 						}

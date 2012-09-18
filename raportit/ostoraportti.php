@@ -499,14 +499,6 @@
 			if ($valitut["EIVARASTOITAVA"] != '') {
 				$lisaa .= " and tuote.status != 'T' ";
 			}
-			// Listaa vain äskettäin perustetut tuotteet:
-			if ($valitut["VAINUUDETTUOTTEET"] != '') {
-				$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
-			}
-			// Älä listaa äskettäin perustettuja tuotteita:
-			if ($valitut["UUDETTUOTTEET"] != '') {
-				$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
-			}
 
 			if ($toimittajaid != '') {
 				$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid' ";
@@ -536,18 +528,18 @@
 
 				if ($yhtiot != '') {
 					$yhtiot = substr($yhtiot,0,-1);
-					$yhtiot = " yhtio in ($yhtiot) ";
+					$yhtiot = "yhtio in ($yhtiot) ";
 				}
 
 				$konsyhtiot = substr($konsyhtiot,0,-1);
-				$konsyhtiot = " yhtio in ($konsyhtiot) ";
+				$konsyhtiot = "yhtio in ($konsyhtiot) ";
 			}
 			else {
 				$yhtiot = "'".$kukarow["yhtio"]."'";
-				$yhtiot = " yhtio in ($yhtiot) ";
+				$yhtiot = "yhtio in ($yhtiot) ";
 
 				$konsyhtiot = "'".$kukarow["yhtio"]."'";
-				$konsyhtiot = " yhtio in ($konsyhtiot) ";
+				$konsyhtiot = "yhtio in ($konsyhtiot) ";
 			}
 
 			//Katsotaan valitut varastot
@@ -611,31 +603,54 @@
 					$jt_tuotteet = $vrow[0];
 				}
 
-				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-				if ($abcrajausluokka != '') {
-					if ($abcrajausluokka == 'y') {
-						$abcwhere .= " and abc_aputaulu.luokka <= '$abcrajaus' ";
-					}
-					elseif ($abcrajausluokka == 'os') {
-						$abcwhere .= " and abc_aputaulu.luokka_osasto <= '$abcrajaus' ";
-					}
-					elseif ($abcrajausluokka == 'try') {
-						$abcwhere .= " and abc_aputaulu.luokka_try <= '$abcrajaus' ";
-					}
-					elseif ($abcrajausluokka == 'tme') {
-						$abcwhere .= " and abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus' ";
-					}
-					else {
-						$abcwhere .= " and abc_aputaulu.luokka <= '$abcrajaus' or abc_aputaulu.luokka_osasto <= '$abcrajaus' or abc_aputaulu.luokka_try <= '$abcrajaus' or abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus' or tuote.luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet) ";
-					}
+				$abc_luontiaikarajaus = "";
+
+				if ($abc_laadittuaika == "alle_12kk") {
+					# Nämä menee lisää -muuttujaan, koska on AND ja pitää rajata koko queryä
+					$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+				}
+				elseif ($abc_laadittuaika == "yli_12kk") {
+					# Nämä menee lisää -muuttujaan, koska on AND ja pitää rajata koko queryä
+					$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+				}
+				elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
+					# Nämä menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pitää rajata ehdollisesti abc rajausta
+					$abc_luontiaikarajaus = " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
 				}
 				else {
-					$abcwhere .= " and abc_aputaulu.luokka <= '$abcrajaus' or abc_aputaulu.luokka_osasto <= '$abcrajaus' or abc_aputaulu.luokka_try <= '$abcrajaus' or abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus' or tuote.luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet) ";
+					# Nämä menee abc_luontiaikarajaus -muuttujaan, koska on OR ja pitää rajata ehdollisesti abc rajausta
+					$abc_luontiaikarajaus = " or tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
 				}
-			}
 
-			if ($valitut['NAYTAUUDET'] != '' and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-				$abcwhere .= " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
+				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
+				if ($abcrajausluokka == 'y') {
+					$abcwhere .= " and (abc_aputaulu.luokka <= '$abcrajaus'
+									$abc_luontiaikarajaus
+									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
+				}
+				elseif ($abcrajausluokka == 'os') {
+					$abcwhere .= " and (abc_aputaulu.luokka_osasto <= '$abcrajaus'
+									$abc_luontiaikarajaus
+									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
+				}
+				elseif ($abcrajausluokka == 'try') {
+					$abcwhere .= " and (abc_aputaulu.luokka_try <= '$abcrajaus'
+									$abc_luontiaikarajaus
+									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
+				}
+				elseif ($abcrajausluokka == 'tme') {
+					$abcwhere .= " and (abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus'
+									$abc_luontiaikarajaus
+									or abc_aputaulu.tuoteno in ($jt_tuotteet))";
+				}
+				else {
+					$abcwhere .= " and (abc_aputaulu.luokka <= '$abcrajaus'
+									or abc_aputaulu.luokka_osasto <= '$abcrajaus'
+									or abc_aputaulu.luokka_try <= '$abcrajaus'
+									or abc_aputaulu.luokka_tuotemerkki <= '$abcrajaus'
+									$abc_luontiaikarajaus
+									or abc_aputaulu.tuoteno in ($jt_tuotteet)) ";
+				}
 			}
 
 			if ($varastot != '') {
@@ -836,22 +851,25 @@
 			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
 				echo "<font class='message'>".t("Tilatut eritellään varastoittain").".<br>";
 			}
-			if ($valitut["VAINUUDETTUOTTEET"] != '') {
-				echo "<font class='message'>".t("Listaa vain 12kk sisällä perustetut tuotteet").".<br>";
-			}
-			if ($valitut["UUDETTUOTTEET"] != '') {
-				echo "<font class='message'>".t("Ei listata 12kk sisällä perustettuja tuotteita").".<br>";
-			}
+
 			if ($abcrajaus != "") {
 
-				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka tai ABC-tuotemerkkiluokka")."  >= $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
+				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka tai ABC-tuotemerkkiluokka")."  >= $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa")." ";
 
-				if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
-					echo " ".t("tai tuote on perustettu viimeisen 12kk sisällä").".<br>";
+				if ($abc_laadittuaika == "alle_12kk") {
+					echo t("ja tuote on perustettu 12kk sisällä");
+				}
+				elseif ($abc_laadittuaika == "yli_12kk") {
+					echo t("ja tuotetta ei olla perustettu 12kk sisällä");
+				}
+				elseif ($abc_laadittuaika == "yli_annettu" and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
+					echo t("tai tuote on perustettu jälkeen"). " $naytauudet_pp.$naytauudet_kk.$naytauudet_vv";
 				}
 				else {
-					echo ".<br>";
+					echo t("tai tuote on perustettu viimeisen 12kk sisällä");
 				}
+
+				echo ".<br>";
 			}
 
 			echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
@@ -958,6 +976,8 @@
 			}
 
 			while ($row = mysql_fetch_array($res)) {
+
+				$bar->increase();
 
 				$ykpl1 = $ykpl2 = $ykpl3 = $ykpl4 = 0;
 
@@ -1235,8 +1255,8 @@
 					$ero = $ero/60/60/24/7;
 					$ehd_kausi1	= "1";
 
-					if (isset($row["abcluokka"]) and 
-						isset($ryhmanimet[$row["abcluokka"]]) and 
+					if (isset($row["abcluokka"]) and
+						isset($ryhmanimet[$row["abcluokka"]]) and
 						isset($valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]]) and
 						$valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]] != '') {
 						list($al, $lo) = explode("##", $valitut["KAUSI".$ryhmanimet[$row["abcluokka"]]]);
@@ -1575,7 +1595,7 @@
 											$prow = mysql_fetch_array($presult);
 
 											foreach ($valitut as $key => $val) {
-												if ($sarakkeet[$key] != '') {
+												if (isset($sarakkeet[$key]) and $sarakkeet[$key] != '') {
 													if ($sarakkeet[$key] == 'Kortuoteno') {
 														$worksheet->write($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
 														$excelsarake++;
@@ -1702,8 +1722,6 @@
 					$excelrivi++;
 					$excelsarake = 0;
 				}
-
-				$bar->increase();
 			}
 
 			if ($korvaavien_otsikot > 0) {
@@ -2366,37 +2384,56 @@
 
 			echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='2'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 
-			//Näytetäänkö 12kk uudemmat tuotteet
-			$chk = "";
-			if ($valitut["NAYTAUUDET"] != '' or $defaultit == "PÄÄLLE") {
-				$chk = "CHECKED";
-			}
-
-			echo "<tr><th>".t("Näytä myös uudemmat tuotteet kuin")."</th><td colspan='2'><input type='checkbox' name='valitut[NAYTAUUDET]' value='NAYTAUUDET' $chk>&nbsp;";
-			echo "<input type='text' name='naytauudet_pp' value='$naytauudet_pp' size='5'>
-					<input type='text' name='naytauudet_kk' value='$naytauudet_kk' size='5'>
-					<input type='text' name='naytauudet_vv' value='$naytauudet_vv' size='5'></td></tr>";
-
 			if ($abcrajaus != "") {
 
 				echo "<tr><td class='back'><br></td></tr>";
-				echo "<tr><th colspan='2'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
+				echo "<tr><th colspan='3'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
 
-				//näytetäänkö uudet tuotteet
-				$chk = "";
-				if ($valitut["UUDETTUOTTEET"] != '') {
-					$chk = "CHECKED";
-				}
+				if (!isset($abc_laadittuaika) or $abc_laadittuaika == "")            $chk1 = "CHECKED";
+				if (isset($abc_laadittuaika) and $abc_laadittuaika == "alle_12kk")   $chk2 = "CHECKED";
+				if (isset($abc_laadittuaika) and $abc_laadittuaika == "yli_12kk")    $chk3 = "CHECKED";
+				if (isset($abc_laadittuaika) and $abc_laadittuaika == "yli_annettu") $chk4 = "CHECKED";
 
-				echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
+				echo "
+				<tr>
+					<th>
+						".t("Listaa myös tuotteet, jotka on perustettu 12kk sisällä")."
+					</th>
+					<td colspan='2'>
+						<input type='radio' name='abc_laadittuaika' value='' $chk1>
+					</td>
+				</tr>
 
-				//näytetäänkö uudet tuotteet
-				$chk = "";
-				if ($valitut["VAINUUDETTUOTTEET"] != '') {
-					$chk = "CHECKED";
-				}
+				<tr>
+					<th>
+						".t("Älä listaa 12kk sisällä perustettuja tuotteita")."
+					</th>
+					<td colspan='2'>
+						<input type='radio' name='abc_laadittuaika' value='alle_12kk' $chk2>
+					</td>
+				</tr>
 
-				echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='2'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
+				<tr>
+					<th>
+						".t("Listaa vain 12kk sisällä perustetut tuotteet")."
+					</th>
+					<td colspan='2'>
+						<input type='radio' name='abc_laadittuaika' value='yli_12kk' $chk3>
+					</td>
+				</tr>
+
+				<tr>
+					<th>
+						".t("Listaa myös tuotteet, jotka on perustettu jälkeen")."
+					</th>
+					<td colspan='2'>
+						<input type='radio' name='abc_laadittuaika' value='yli_annettu' $chk4>&nbsp;
+						<input type='text' name='naytauudet_pp' value='$naytauudet_pp' size='5'>
+						<input type='text' name='naytauudet_kk' value='$naytauudet_kk' size='5'>
+						<input type='text' name='naytauudet_vv' value='$naytauudet_vv' size='5'>
+						".t("pp.kk.vvvv")."
+					</td>
+				</tr>";
 			}
 
 			echo "<tr><td class='back'><br></td></tr>";
@@ -2481,5 +2518,3 @@
 
 		require ("../inc/footer.inc");
 	}
-
-?>

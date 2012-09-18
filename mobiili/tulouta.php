@@ -42,7 +42,7 @@ if (isset($submit) and trim($submit) == 'submit') {
 	if ($tulotyyppi == '') $errors['tulotyyppi'] = t("Valitse tulotyyppi");
 }
 
-$kesken = ($kesken['kesken'] == 0) ? "" : "({$kesken['kesken']})";
+$kesken = ($kesken['kesken'] == 0) ? "" : "(Kesken)";
 
 echo "<div class='header'>
 <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
@@ -53,7 +53,7 @@ echo "<div class='main'>
 	<b>",t("TULOTYYPPI"),"</b>
 	<p>
 	<a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a><br>
-	<a href='ostotilaus.php' class='button'>",t("Ostotilaus"),"</a><br>
+	<a href='ostotilaus.php' class='button'>",t("Ostotilaus"),"</a> <font style='color: red'>$kesken</font><br>
 	</p>
 	<a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a><br>
 </div>";

@@ -10,6 +10,8 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (!isset($errors)) $errors = array();
 
+if (isset($virhe)) $errors[] = t("Hyllytett‰v‰n m‰‰r‰n on oltava numero");
+
 if (empty($ostotilaus) or empty($tilausrivi) or empty($saapuminen)) {
     exit("Virheelliset parametrit");
 }

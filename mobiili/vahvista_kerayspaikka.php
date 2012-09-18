@@ -30,7 +30,7 @@ if (!empty($alusta_tunnus)) {
 }
 
 # Jos suuntalavan_tuotteet() ei löytänyt mitään
-if(!$row) {
+if(!isset($row)) {
 	$query = "	SELECT
 				tilausrivi.*,
 				tuotteen_toimittajat.toim_tuoteno
@@ -221,7 +221,6 @@ if (isset($submit) and trim($submit) != '') {
 			$errors[] = t("Odottamaton virhe");
 			break;
 	}
-
 }
 
 # Asetetaan määrä varattu kentän arvoksi jos sitä ei ole setattu
@@ -259,7 +258,7 @@ if (isset($hyllytys)) {
 
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("VAHVISTA KERƒYSPAIKKA"),"</h1></div>";
+echo "<h1>",t("VAHVISTA KERÄYSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -304,7 +303,7 @@ echo "<div class='controls'>
 	<button name='submit' class='button' value='submit' onclick='return vahvista();'>",t("Vahvista"),"</button>";
 
 # Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) echo "<button class='right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
+if (!isset($hyllytys)) echo "<button class='button right' name='submit' value='new'>",t("Uusi keräyspaikka"),"</button>";
 
 echo "
 	<input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

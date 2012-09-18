@@ -1720,7 +1720,7 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
-				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
@@ -1737,7 +1737,7 @@ while ($tietue = fgets($fd)) {
 					require ("tilaus-valmis.inc");
 
 					// jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9" and $editilaus_tilaustyyppi != 'K') {
+					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
 						// Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
 						$varasto_query = "	SELECT tunnus
 											from varastopaikat

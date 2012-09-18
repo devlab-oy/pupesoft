@@ -1854,7 +1854,7 @@ if (!function_exists("synkronoi")) {
 		global $yhtiorow, $kukarow, $synkronoi_kiellot;
 
 		//	Onko mahdollista synkronoida?
-		if (strpos($yhtiorow["synkronoi"], $table) === false) {
+		if (stripos($yhtiorow["synkronoi"], $table) === false) {
 			return false;
 		}
 

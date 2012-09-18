@@ -87,7 +87,7 @@ if (!isset($osasto)) $osasto = '';
 if (!isset($try)) $try = '';
 if (!isset($tuotemerkki)) $tuotemerkki = '';
 
-if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
+if ($verkkokauppa == "") die("Verkkokauppayhtiö määrittelemättä");
 
 if (!function_exists("tilaus")) {
 	function tilaus($tunnus, $muokkaa = "") {

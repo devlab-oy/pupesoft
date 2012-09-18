@@ -175,7 +175,7 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
 	exit;
 }
 
-if ($tee == 'PAIVITA_SARJANUMERO') {
+if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
 	$sarjanumero_dropdown = (int) $sarjanumero_dropdown;
 
 	$query = "	UPDATE sarjanumeroseuranta SET
@@ -188,13 +188,27 @@ if ($tee == 'PAIVITA_SARJANUMERO') {
 	$upd_res = pupe_query($query);
 
 	if ($sarjanumero_dropdown != 0) {
-		$query = "	UPDATE sarjanumeroseuranta SET
-					myyntirivitunnus = '{$rivitunnus}',
-					muuttaja = '{$kukarow['kuka']}',
-					muutospvm = now()
+		// Tarkistetaan onko valittu sarjanumero vielä vapaa
+		$query = "	SELECT tunnus
+					FROM sarjanumeroseuranta
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND myyntirivitunnus = 0
 					AND tunnus = '{$sarjanumero_dropdown}'";
-		$upd_res = pupe_query($query);
+		$chk_res = pupe_query($query);
+
+		// Jos sarjanumero oli vielä vapaa, varataan se tälle tuotteelle
+		if (mysql_num_rows($chk_res) == 1) {
+
+			if ($sarjanumero_dropdown != 0) {
+				$query = "	UPDATE sarjanumeroseuranta SET
+							myyntirivitunnus = '{$rivitunnus}',
+							muuttaja = '{$kukarow['kuka']}',
+							muutospvm = now()
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$sarjanumero_dropdown}'";
+				$upd_res = pupe_query($query);
+			}
+		}
 	}
 
 	$tee = '';
@@ -7159,7 +7173,7 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 			}
-			elseif ($kukarow['mitatoi_tilauksia'] != 'E' and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
+			elseif (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $kukarow['taso'] != '4')) and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
 				echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>

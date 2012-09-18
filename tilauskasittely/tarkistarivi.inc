@@ -89,6 +89,12 @@
 		$saako_hyvaksya++;
 	}
 
+	if ($kukarow['extranet'] != '' and $trow['sarjanumeroseuranta'] != '' and $row['varattu'] != 1) {
+		$varaosavirhe .= t("HUOM: T‰m‰ on sarjanumeroseurannallinen tuote. Kappalem‰‰r‰ pit‰‰ olla 1")."!<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
 	$korvattiin_korvaavalla = "";
 
 	if (mysql_num_rows($tres) == 0) {
@@ -786,7 +792,7 @@
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$nayta_sostolisateksti = "TOTTA";			
+			$nayta_sostolisateksti = "TOTTA";
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
 		}
 	}
@@ -880,8 +886,6 @@
 			if ($kutsuttu > 0) {
 				$vastaavat_html .= "</table>";
 				$vastaavattuotteet = 1;
-			}			
+			}
 		}
 	}
-
-?>

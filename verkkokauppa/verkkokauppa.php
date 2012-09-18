@@ -17,10 +17,10 @@ if ($_REQUEST["tee"] == "login") {
 
 		$query = "	SELECT kuka, session, salasana
 					FROM kuka
-					where kuka 			 = '$user'
-					and yhtio 			 = '$verkkokauppa'
-					and extranet 		!= ''
-					and oletus_asiakas 	!= ''";
+					WHERE kuka 			 = '{$user}'
+					AND yhtio 			 = '{$verkkokauppa}'
+					AND extranet 		!= ''
+					AND oletus_asiakas 	!= ''";
 		$result = pupe_query($query);
 		$krow = mysql_fetch_array($result);
 
@@ -43,27 +43,27 @@ if ($_REQUEST["tee"] == "login") {
 			}
 
 			$query = "	UPDATE kuka
-						SET session = '$session',
+						SET session = '{$session}',
 						lastlogin = now()
-						WHERE kuka 			 = '$user'
-						and yhtio 			 = '$verkkokauppa'
-						and extranet		!= ''
-						and oletus_asiakas	!= ''";
+						WHERE kuka 			 = '{$user}'
+						AND yhtio 			 = '{$verkkokauppa}'
+						AND extranet		!= ''
+						AND oletus_asiakas	!= ''";
 			$result = pupe_query($query);
 
 			$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
 
 			if ($location != "") {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$location}'>";
 			}
 			else {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}?go={$go}'>";
 			}
 			exit;
 		}
 	}
 
-	$errormsg = "<br><br><font class='error'>Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen!</font><br>";
+	$errormsg = "<br /><br /><font class='error'>Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen!</font><br />";
 	$tee = "";
 
 	unset($user);
@@ -95,7 +95,9 @@ if (!function_exists("tilaus")) {
 
 		$query = "	SELECT *
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and liitostunnus = '$kukarow[oletus_asiakas]'";
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'
+					AND liitostunnus = '{$kukarow['oletus_asiakas']}'";
 		$result = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 
@@ -107,9 +109,9 @@ if (!function_exists("tilaus")) {
 		if ($muokkaa != "") {
 			$ulos .= "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, false);\">
 						<input type='hidden' name='tee' value = 'tallenna_osoite'>
-						<input type='hidden' name='osasto' value = '$osasto'>
-						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
-						<input type='hidden' name='try' value = '$try'>";
+						<input type='hidden' name='osasto' value = '{$osasto}'>
+						<input type='hidden' name='tuotemerkki' value = '{$tuotemerkki}'>
+						<input type='hidden' name='try' value = '{$try}'>";
 		}
 
 		ob_start();
@@ -158,10 +160,10 @@ if (!function_exists("menu")) {
 		unset($vierow);
 
 		if ($kukarow["kesken"] > 0) {
-			$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
+			$query  = "	SELECT IF(toim_maa != '', toim_maa, maa) maa
 						FROM lasku
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus  = '$kukarow[kesken]'";
+						WHERE yhtio	= '{$kukarow['yhtio']}'
+						AND tunnus  = '{$kukarow['kesken']}'";
 			$vieres = pupe_query($query);
 			$vierow = mysql_fetch_array($vieres);
 		}
@@ -177,7 +179,7 @@ if (!function_exists("menu")) {
 		}
 
 		if (isset($vierow) and $vierow["maa"] != "") {
-			$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+			$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-{$vierow['maa']}%' or tuote.vienti like '%+%') and tuote.vienti not like '%+{$vierow['maa']}%' ";
 		}
 
 		if ($kukarow["kieli"] == "") {
@@ -190,8 +192,8 @@ if (!function_exists("menu")) {
 			$result = t_avainsana("VERKKOKAULINKKI");
 
 			while ($orow = mysql_fetch_array($result)) {
-				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = '$palvelin2'>".t("Etusivu")."</a></td></tr>";
-				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu=$orow[selite]', false, false);\">$orow[selitetark]</a></td></tr>";
+				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = '{$palvelin2}'>".t("Etusivu")."</a></td></tr>";
+				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu={$orow['selite']}', false, false);\">{$orow['selitetark']}</a></td></tr>";
 			}
 
 			$verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
@@ -199,7 +201,7 @@ if (!function_exists("menu")) {
 						<tr><td class='back'><input type = 'text' size='12' name = 'tuotehaku'></td></tr>
 						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
 						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
-						$toimlisa
+						{$toimlisa}
 						</form>";
 
 			if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
@@ -216,10 +218,10 @@ if (!function_exists("menu")) {
 					$target		= "T_".$orow["selite"];
 					$parent		= "P_".$orow["selite"];
 
-					$onclick	= "document.getElementById(\"$target\").style.display==\"none\" ? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=$orow[selite]\", \"\", false) : \"\"";
-					$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$orow[selite]\", \"$parent\", false, false);";
-					$val .=  "<tr><td class='menucell td_parent'><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>$orow[selitetark]</a></td></tr>
-								<tr><td class='menuspacer'><div id='$target' style='display: none'></div></td></tr>";
+					$onclick	= "document.getElementById(\"{$target}\").style.display==\"none\" ? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto={$orow['selite']}\", \"\", false) : \"\"";
+					$href 		= "javascript:sndReq(\"{$target}\", \"verkkokauppa.php?tee=menu&osasto={$orow['selite']}\", \"{$parent}\", false, false);";
+					$val .=  "<tr><td class='menucell td_parent'><a class = 'menu' id='{$parent}' onclick='{$onclick}' href='{$href}'>{$orow['selitetark']}</a></td></tr>
+								<tr><td class='menuspacer'><div id='{$target}' style='display: none'></div></td></tr>";
 				}
 
 				if (!$verkkokauppa_hakualkuun) {
@@ -233,21 +235,21 @@ if (!function_exists("menu")) {
 		elseif ($try == "" and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 			$val = "<table class='menutable'>";
 
-			$query = "	SELECT distinct avainsana.selite try,
+			$query = "	SELECT DISTINCT avainsana.selite try,
 						IFNULL((SELECT avainsana_kieli.selitetark
-				        FROM avainsana as avainsana_kieli
+				        FROM avainsana AS avainsana_kieli
 				        WHERE avainsana_kieli.yhtio = avainsana.yhtio
-				        and avainsana_kieli.laji = avainsana.laji
-				        and avainsana_kieli.perhe = avainsana.perhe
-				        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) trynimi
+				        AND avainsana_kieli.laji = avainsana.laji
+				        AND avainsana_kieli.perhe = avainsana.perhe
+				        AND avainsana_kieli.kieli = '{$kukarow['kieli']}' LIMIT 1), avainsana.selitetark) trynimi
 						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') and avainsana.nakyvyys = '')
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.osasto = '$osasto'
-						$kieltolisa
-						$tuotemerkkilis
-						and tuote.status != 'P'
-						and tuote.hinnastoon IN ('W', 'V')
+						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.try = avainsana.selite AND avainsana.laji = 'TRY' AND avainsana.kieli IN ('{$yhtiorow['kieli']}', '') AND avainsana.nakyvyys = '')
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						AND tuote.osasto = '{$osasto}'
+						{$kieltolisa}
+						{$tuotemerkkilis}
+						AND tuote.status != 'P'
+						AND tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite+0";
 			$tryres = pupe_query($query);
 
@@ -259,13 +261,13 @@ if (!function_exists("menu")) {
 				//	Tarkastetaan onko täällä sopivia tuotteita
 				$query = "	SELECT *
 				 			FROM tuote
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and osasto 		= '$osasto'
-							and try 		= '$tryrow[try]'
-							and status 	   != 'P'
-							$kieltolisa
-							$tuotemerkkilis
-							and hinnastoon IN ('W','V')";
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							AND osasto 		= '{$osasto}'
+							AND try 		= '{$tryrow['try']}'
+							AND status 	   != 'P'
+							{$kieltolisa}
+							{$tuotemerkkilis}
+							AND hinnastoon IN ('W','V')";
 				$res = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
@@ -276,7 +278,8 @@ if (!function_exists("menu")) {
 						if (!is_array($asiakasrow)) {
 							$query = "	SELECT *
 										FROM asiakas
-										WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$kukarow['oletus_asiakas']}'";
 							$asres = pupe_query($query);
 							$asiakasrow = mysql_fetch_array($asres);
 						}
@@ -310,11 +313,11 @@ if (!function_exists("menu")) {
 
 					if ($verkkokauppa_tuotemerkit) {
 						$onclick	= "sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow['try']}\", \"\", false)";
-						$href 	= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try=$tryrow[try]\", \"$parent\", false); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=\", \"\", false);";
-						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' id='$parent' onclick='{$onclick}' href='$href'>$tryrow[trynimi]</a><div id=\"$target\" style='display: none'></div></td></tr>";
+						$href 	= "javascript:sndReq(\"{$target}\", \"verkkokauppa.php?tee=menu&osasto={$osasto}&try={$tryrow['try']}\", \"{$parent}\", false); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow['try']}&tuotemerkki=\", \"\", false);";
+						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' id='{$parent}' onclick='{$onclick}' href='{$href}'>{$tryrow['trynimi']}</a><div id=\"{$target}\" style='display: none'></div></td></tr>";
 					}
 					else {
-						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' name = 'menulinkki' id='$parent' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', false);\">$tryrow[trynimi]</a></td></tr>";
+						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_try'><a class = 'menu' name = 'menulinkki' id='{$parent}' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow['try']}&tuotemerkki=', '', false);\">{$tryrow['trynimi']}</a></td></tr>";
 					}
 				}
 			}
@@ -323,22 +326,22 @@ if (!function_exists("menu")) {
 		elseif ($verkkokauppa_tuotemerkit and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 			$val = "<table class='menutable'>";
 
-			$query = "	SELECT distinct avainsana.selite as tuotemerkki,
+			$query = "	SELECT DISTINCT avainsana.selite AS tuotemerkki,
 						IFNULL((SELECT avainsana_kieli.selite
-	        			FROM avainsana as avainsana_kieli
+	        			FROM avainsana AS avainsana_kieli
 	        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
-	        			and avainsana_kieli.laji = avainsana.laji
-	        			and avainsana_kieli.perhe = avainsana.perhe
-	        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
+	        			AND avainsana_kieli.laji = avainsana.laji
+	        			AND avainsana_kieli.perhe = avainsana.perhe
+	        			AND avainsana_kieli.kieli = '{$kukarow['kieli']}' LIMIT 1), avainsana.selite) selite
 						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.nakyvyys = '')
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.osasto = '$osasto'
-						and tuote.try = '$try'
-						$kieltolisa
-						$tuotemerkkilis
-						and tuote.status != 'P'
-						and tuote.hinnastoon IN ('W', 'V')
+						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND tuote.tuotemerkki = avainsana.selite AND avainsana.laji = 'TUOTEMERKKI' AND avainsana.nakyvyys = '')
+						WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+						AND tuote.osasto = '{$osasto}'
+						AND tuote.try = '{$try}'
+						{$kieltolisa}
+						{$tuotemerkkilis}
+						AND tuote.status != 'P'
+						AND tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$meres = pupe_query($query);
 
@@ -350,13 +353,13 @@ if (!function_exists("menu")) {
 				//	Tarkastetaan onko täällä sopivia tuotteita
 				$query = "	SELECT *
 				 			FROM tuote
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and osasto 		= '$osasto'
-							and try 		= '$try'
-							and tuotemerkki = '$merow[tuotemerkki]'
-							and status 	   != 'P'
-							$kieltolisa
-							and hinnastoon IN ('W', 'V')";
+							WHERE yhtio 	= '{$kukarow['yhtio']}'
+							AND osasto 		= '{$osasto}'
+							AND try 		= '{$try}'
+							AND tuotemerkki = '{$merow['tuotemerkki']}'
+							AND status 	   != 'P'
+							{$kieltolisa}
+							AND hinnastoon IN ('W', 'V')";
 				$res = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
@@ -367,7 +370,8 @@ if (!function_exists("menu")) {
 						if (!is_array($asiakasrow)) {
 							$query = "	SELECT *
 										FROM asiakas
-										WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$kukarow['oletus_asiakas']}'";
 							$asres = pupe_query($query);
 							$asiakasrow = mysql_fetch_array($asres);
 						}
@@ -396,7 +400,7 @@ if (!function_exists("menu")) {
 				}
 
 				if ($ok == 1) {
-					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_tuotemerkki'><a class = 'menu' id='P_".$osasto."_".$try."_".$merow["selite"]."' name = 'menulinkki' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$merow[tuotemerkki]', '', false);\">$merow[tuotemerkki]</a></td></tr>";
+					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell td_parent_tuotemerkki'><a class = 'menu' id='P_{$osasto}_{$try}_{$merow['selite']}' name = 'menulinkki' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$try}&tuotemerkki={$merow['tuotemerkki']}', '', false);\">{$merow['tuotemerkki']}</a></td></tr>";
 				}
 			}
 			$val .= "</table>";

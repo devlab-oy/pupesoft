@@ -1046,7 +1046,7 @@ if ($kasitellaan_tiedosto) {
 							WHERE $valinta";
 				$fresult = pupe_query($query);
 
-				$valinta_ennen_runkkausta = $valinta;
+				$valinta_orig = $valinta;
 
 				if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA/LISAA") {
 					// Muutetaan jos löytyy muuten lisätään!
@@ -1841,7 +1841,7 @@ if ($kasitellaan_tiedosto) {
 				else {
 					$tarq .= " WHERE ".$valinta;
 
-					if ($valinta_ennen_runkkausta == $valinta) {
+					if ($valinta_orig == $valinta) {
 						$result = $fresult;
 					}
 					else {

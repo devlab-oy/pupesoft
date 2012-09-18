@@ -1183,8 +1183,6 @@ if ($tee == "") {
 
 						$(this).addClass('selected');
 
-						console.log(target_ja_id);
-
 						$('div[id^=\"P_'+target_ja_id[1]+'_\"]').each(function() {
 							if ($(this).attr('id') != 'P_'+target_ja_id[1]+'_'+target_ja_id[2] && $(this).is(':visible')) {
 								$(this).hide();

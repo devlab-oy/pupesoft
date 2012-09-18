@@ -106,6 +106,9 @@ if (count($tuotetiedot) > 0) {
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 
+			// maventa-case
+			$rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
+
 			// Tallennetaan riville jos tämä on kauttalaskutusta
 			if ($kauttalaskutus == "KAUTTALASKUTUS") {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";

@@ -531,6 +531,56 @@ if (!function_exists('alku_kerayslista')) {
 				//dellataan tmp filet kuleksimasta
 				system("rm -f $nimi1 $nimi2");
 			}
+
+			// Tehdään asiakasnumero-viivakoodi
+			unset($obj);
+
+			if (class_exists("C39Object") and isset($asrow['asiakasnro']) and trim($asrow['asiakasnro']) != '' and $asrow['asiakasnro'] != 0) {
+				$obj = new C39Object($width, $height, $style, $asrow["asiakasnro"]);
+			}
+
+			if ($obj) {
+				$obj->SetFont($font);
+				$obj->DrawObject($xres);
+
+				//flushataan pdf ja saadaam filenimi johon se tallennettiin
+				$nimi1 = $obj->FlushObject();
+
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
+
+				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+
+				if ($fh = @fopen($nimi2, "r")) {
+					$data = fread($fh, filesize($nimi2));
+					fclose($fh);
+					$image = $pdf->png_embed($data);
+
+					if ($image) {
+
+						if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
+							$bottom_barcode = 588;
+							$bottom_barcode_text = 578;
+						}
+						else {
+							$bottom_barcode = 610;
+							$bottom_barcode_text = 600;
+						}
+
+						$placement = $pdf->image_place($image, $bottom_barcode, 440, $thispage);
+
+						$oikpos = $pdf->strlen(t("Asnro")." ".$asrow["asiakasnro"], $norm);
+						$pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
+					}
+				}
+
+				unset($obj);
+
+				//dellataan tmp filet kuleksimasta
+				system("rm -f $nimi1 $nimi2");
+			}
 		}
 
 		// Luodaan palautettavat
@@ -1394,5 +1444,3 @@ if (!function_exists('print_pdf_kerayslista')) {
 		}
 	}
 }
-
-?>

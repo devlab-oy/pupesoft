@@ -1706,9 +1706,11 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				// Tilaus merkataan valmiiksi
-				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or die($query);
+				if ($editilaus_tilaustyyppi != 'K') {
+					// Tilaus merkataan valmiiksi
+					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+					$result = mysql_query($query) or die($query);
+				}
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";

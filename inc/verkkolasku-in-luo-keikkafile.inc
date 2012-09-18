@@ -488,6 +488,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
 							ORDER BY laadittu ASC";
+				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					#echo "<pre>",str_replace("\t", "", $query),"</pre>";

@@ -1213,7 +1213,6 @@ if ($tee == "") {
 						$('#tuotemerkki_js').val('');
 					}
 
-
 					if (osasto != '') {
 
 						$('.selected').removeClass('selected');

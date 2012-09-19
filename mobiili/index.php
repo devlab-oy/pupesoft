@@ -25,7 +25,9 @@ if (tarkista_oikeus("mobiili/tulouta.php")) {
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
+	echo "<form name='tulouta' target='_top' action='inventointi.php' method='post'>";
 	echo "<button class='button' value=''>",t("Inventointi", $browkieli),"</button>";
+	echo "</form>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {

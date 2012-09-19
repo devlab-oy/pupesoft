@@ -180,14 +180,20 @@
 								var val = $(this).val();
 								val = parseFloat(val.replace(',', '.'));
 
+								var summa = '';
+
 								if (!isNaN(val)) {
 									var kaytettava_saldo = parseFloat($('#vyorytyksen_kaytettava_saldo').html());
-									var summa = (val / 100) * kaytettava_saldo;
-									$('#summa_'+$(this).attr('id')).html(summa.toFixed(2));
+									summa = (val / 100) * kaytettava_saldo;
+									summa = summa.toFixed(2);
+									$('#summa_'+$(this).attr('id')).html(summa);
 								}
 								else {
 									$('#summa_'+$(this).attr('id')).html('');
 								}
+
+								var tmp_i = $('#summa_'+$(this).attr('id')).attr('name');
+								$('#isumma\\\\['+tmp_i+'\\\\]').val(summa);
 
 								var val_sum = 0;
 
@@ -261,14 +267,6 @@
 
 				$kumulus = $kumulus + $trow["Saldo"];
 
-				echo "<input type='hidden' name='tpp' value='".date("d")."'>\n";
-				echo "<input type='hidden' name='tpk' value='".date("m")."'>\n";
-				echo "<input type='hidden' name='tpv' value='".date("Y")."'>\n";
-
-				echo "<input type='hidden' name='itili[$i]' value='$trow[tilino]'>\n";
-				echo "<input type='hidden' name='isumma[$i]' value='".($trow["tilisaldo"]*-1)."'>\n";
-				echo "<input type='hidden' name='ikustp[$i]' value='$trow[kustp]'>\n";
-				echo "<input type='hidden' name='iselite[$i]' value='".t("Vyörytys")."'>\n";
 				$i++;
 			}
 
@@ -309,12 +307,23 @@
 			while ($row = mysql_fetch_assoc($res)) {
 				echo "<tr>";
 				echo "<td>{$row['koodi']} {$row['nimi']}</td>";
-				echo "<td id='summa_vyorytys_pros_{$i}'></td>";
+				echo "<td id='summa_vyorytys_pros_{$i}' name='{$i}'></td>";
 				echo "<td>{$vyorytyksen_tili}</td>";
-				echo "<td><input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='' size='6' maxlength='5' /></td>";
+				echo "<td>";
+				echo "<input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='' size='6' maxlength='5' />";
+				echo "<input type='hidden' name='itili[$i]' value='{$vyorytyksen_tili}'>\n";
+				echo "<input type='hidden' name='isumma[$i]' id='isumma[{$i}]' value=''>\n";
+				echo "<input type='hidden' name='ikustp[$i]' value='{$row['koodi']}'>\n";
+				echo "<input type='hidden' name='iselite[$i]' value='",t("Vyörytys"),"'>\n";
+				echo "</td>";
 				echo "</tr>";
+
 				$i++;
 			}
+
+			echo "<input type='hidden' name='tpp' value='".date("d")."'>\n";
+			echo "<input type='hidden' name='tpk' value='".date("m")."'>\n";
+			echo "<input type='hidden' name='tpv' value='".date("Y")."'>\n";
 
 			echo "<tr>";
 			echo "<th>",t("Yhteensä"),"</th>";

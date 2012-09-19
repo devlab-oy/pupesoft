@@ -1,5 +1,15 @@
 <?php
-var_dump($_POST);
+
+# Varmistuskoodi ja hyllypaikka talteen
+if ($_GET['tee'] == 'varmistuskoodi' and isset($_POST['varmistuskoodi'])) {
+	setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
+	setcookie("_tuotepaikka", $_POST['tuotepaikka']);
+}
+# Nollataan keksit
+if ($_GET['tee'] == '' and (isset($_COOKIE['_tuotepaikka']) or isset($_COOKIE['_varmistuskoodi']))) {
+	setcookie("_varmistuskoodi");
+	setcookie("_tuotepaikka");
+}
 
 $_GET['ohje'] = 'off';
 $_GET['no_css'] = 'yes';
@@ -9,24 +19,26 @@ $mobile = true;
 if (@include_once("../inc/parametrit.inc"));
 elseif (@include_once("inc/parametrit.inc"));
 
-echo "<table>";
-echo "<tr><td><a href='inventointi.php'>Vapaa inventointi</a></td></tr>";
-echo "<tr><td><a href='?tee=useita_listoja'>Keräyspaikat listalta</a></td></tr>";
-echo "<tr><td><a href='?tee=useita_osumia'>Reservipaikat listalta</a></td></tr>";
-echo "</tr></table>";
+# Haetaan tuotteita
+function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
+	# Kaikki ei saa olla tyhjiä
+	#assert(!empty($viivakoodi) and !empty($tuoteno) and !empty($tuotepaikka));
+	global $kukarow;
 
-if (!isset($tee)) {
-	$title = "Haku";
-
-	# Tarkistetaan että edes yhdellä kentällä on haettu
-	if (isset($viivakoodi) 	and empty($viivakoodi) 	and
-		isset($tuoteno) 	and empty($tuoteno) 	and
-		isset($tuotepaikka) and empty($tuotepaikka)) {
-
-		$errors[] = "Vähintään yksi kenttä on syötettävä";
+	if (!empty($tuoteno)) {
+		$query = "SELECT
+				tuote.nimitys,
+				tuote.tuoteno,
+				concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+							tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+				FROM tuotepaikat
+				JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+				AND tuote.tuoteno='$tuoteno'
+				order by tuotepaikat.tuoteno
+				limit 20";
 	}
-	elseif ($tee == '' and (!empty($viivakoodi) or !empty($tuoteno) or !empty($tuotepaikka))) {
-		# Haetaan tuotepaikan mukaan
+	if (!empty($tuotepaikka)) {
 		$query = "	SELECT
 					tuote.nimitys,
 					tuote.tuoteno,
@@ -38,59 +50,169 @@ if (!isset($tee)) {
 					AND concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'
 					order by tuotepaikat.tuoteno
-					limit 20;";
-		$result = pupe_query($query);
-
-		while($row = mysql_fetch_assoc($result)) {
-			$osumat[] = $row;
-		}
-
-		if (count($osumat) == 0) {
-			$errors[] = "Ei löytynyt";
-		}
-		else {
-			echo "osumia löyty";
-			include('views/inventointi/osumia.php');
-			break;
-		}
+					limit 50;";
 	}
-	include('views/inventointi/vapaa.php');
+	$result = pupe_query($query);
+
+	while($row = mysql_fetch_assoc($result)) {
+		$osumat[] = $row;
+	}
+
+	return $osumat;
 }
 
-if ($tee == 'varmistuskoodi') {
-	$title = t("Varmistuskoodi");
+# Index
+if (!isset($tee)) {
+	$title = t("Inventointi");
+	include('views/inventointi/index.php');
+	exit();
+}
 
-	echo $tuotepaikka."<br>";
+# Haku
+if ($tee == 'vapaa_inventointi') {
+
+	$title = t("Vapaa Inventointi");
+	# Haettu jollain
+	if (isset($viivakoodi) or isset($tuoteno) or (isset($tuotepaikka))) {
+		$osumat = hae($viivakoodi,$tuoteno,$tuotepaikka);
+		if(count($osumat) == 0) $errors[] = "Ei löytynyt";
+	}
+	# Löyty
+	if (isset($osumat) and count($osumat) > 0) {
+		include('views/inventointi/osumia.php');
+	}
+	# Ei löytyny
+	else {
+		include('views/inventointi/vapaa.php');
+	}
+}
+
+# Varmistuskoodin tarkistus
+if ($tee == 'varmistuskoodi') {
+
 	$hylly = explode('-', $tuotepaikka);
 
-	if (isset($varmistuskoodi)) {
-		if (empty($varmistuskoodi)) {
-			echo "Syötä koodi";
-		}
-		elseif (!empty($varmistuskoodi)) {
-			echo "Jee koodi, tarkastetaan!";
-			echo "tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi)";
+	# TODO:
+	# Hyllypaikka ja varmistuskoodi talteen. Jos tullaan uudelleen varmistuskoodiin ja hylly on sama
+	# kuin edellisellä kerralla, muistetaan varmistuskoodi!
 
-			if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi)) {
-				# hyllypaikka ja koodi OK!
-				echo "Koodi OK!";
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=inventointi.php?tee=laske_maara'>";
-			}
-			else {
-				echo "Koodi VÄÄRIN!";
+	# Jos on talletettu tuotepaikka ja varmistuskoodi
+	if (isset($_COOKIE['_tuotepaikka']) and isset($_COOKIE['_varmistuskoodi'])) {
+		echo "Edellinen: ".$_COOKIE['_tuotepaikka']." : ".$_COOKIE['_varmistuskoodi'];
+
+		# Jos nykyinen tuotepaikka on sama kuin edellisellä kerralla
+		# tarkistetaan koodi ja mennään eteenpäin.
+		if ($tuotepaikka == $_COOKIE['_tuotepaikka']) {
+			echo "<br>Jee sama paikka kun ennenkin!<br>";
+			echo "tarkista_varaston_hyllypaikka()";
+			if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $_varmistuskoodi)) {
+				echo "tarkista_varasto on OK!";
+			} else {
+				echo "tarkista_varasto feilas, väärät koodit!";
 			}
 		}
 	}
 
+	# Varmistuskoodi annettu
+	if (is_numeric($varmistuskoodi)) {
+		echo "tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi)";
+
+		if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi)) {
+			# hyllypaikka ja koodi OK!
+			echo "Koodi OK!";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno))."'>";
+		}
+		else $errors[] = t("Varmistuskoodi on väärin!")."!";
+	}
+	else if(isset($varmistuskoodi)) $errors[] = t("Varmistuskoodin pitää olla numero");
+
+	$title = t("Varmistuskoodi");
 	include('views/inventointi/varmistuskoodi.php');
 }
-elseif ($tee == 'laske_maara') {
+
+# Lasketaan tuotteet
+if ($tee == 'laske_maara') {
+	# Mitä parametrejä tarvitaan (tuoteno)
+	assert(!empty($tuoteno));
+
+	$query = "SELECT
+				tuote.nimitys,
+				tuote.tuoteno,
+				tuote.yksikko,
+				concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+							tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+				FROM tuotepaikat
+				JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+				WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+				and tuote.tuoteno='{$tuoteno}'
+				order by tuotepaikat.tuoteno";
+	$result = pupe_query($query);
+	$tuote = mysql_fetch_assoc($result);
+
+	echo "<pre>";
+	var_dump($tuote);
+	echo "</pre>";
+
+	# Disabloidaan apulaskuri jos pakkaus2-3 ei löydy?
+	$query = "SELECT tunnus
+				FROM tuotteen_avainsanat
+				WHERE tuoteno='{$tuoteno}'
+				AND yhtio='{$kukarow['yhtio']}'
+				AND (laji='pakkauskoko2' OR laji='pakkauskoko3');";
+	$result = pupe_query($query);
+	$count = mysql_num_rows($result);
+	$disabled = ($count == 0) ? false : true;
+
+	$title = t("Laske määrä");
 	include('views/inventointi/laske_maara.php');
 }
-elseif ($tee == 'apulaskuri') {
+
+if ($tee == 'apulaskuri') {
+
+	# Pakkaus1
+	$query = "SELECT
+				if(myynti_era > 0, myynti_era, 1) as myynti_era,
+				yksikko
+				FROM tuote
+				WHERE tuoteno='{$tuoteno}' AND yhtio='{$kukarow['yhtio']}'";
+	$result = pupe_query($query);
+	$p1 = mysql_fetch_assoc($result);
+
+	# Pakkaus2
+	$query ="SELECT
+				selite as myynti_era,
+				selitetark as yksikko
+				FROM tuotteen_avainsanat
+				WHERE tuoteno='{$tuoteno}'
+				AND yhtio='{$kukarow['yhtio']}'
+				AND laji='pakkauskoko2'";
+	$result = pupe_query($query);
+	$p2 = mysql_fetch_assoc($result);
+
+	# Pakkaus2
+	$query ="SELECT
+				selite as myynti_era,
+				selitetark as yksikko
+				FROM tuotteen_avainsanat
+				WHERE tuoteno='{$tuoteno}'
+				AND yhtio='{$kukarow['yhtio']}'
+				AND laji='pakkauskoko3'";
+	$result = pupe_query($query);
+	$p3 = mysql_fetch_assoc($result);
+
+	$title = t("Apulaskuri");
 	include('views/inventointi/apulaskuri.php');
 }
 
+if ($tee == 'inventoi') {
+	echo "Inventoidaan<br>";
+	echo "Inventointilaji: Kiertävä<br>";
+	echo "Selite: Päivittäisinventointi käsipäätteellä<br>";
+}
+
+if ($tee == 'useita_listoja') {
+	echo "Useita listoja";
+}
 
 # Virheet
 if (isset($errors)) {
@@ -100,59 +222,3 @@ if (isset($errors)) {
 	}
 	echo "</span>";
 }
-
-exit();
-if ($tee == 'vapaa') {
-	$title = t("Vapaa inventointi");
-
-	if (isset($submit)) {
-		$url = http_build_query($data);
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?tee=osumia&{$url}'>"; exit();
-	}
-	if (isset($submit)) {
-		if (empty($data['viivakoodi']) and empty($data['tuoteno']) and empty($data['tuotepaikka'])) {
-			$errors[] = t("Vähintään yksi kenttä on syötettävä");
-		}
-		else {
-			if($data['tuotepaikka'] != '') {
-
-				# Haetaan tuotepaikan mukaan
-				$query = "	SELECT
-							tuote.nimitys,
-							tuote.tuoteno,
-							concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-							FROM tuotepaikat
-							JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-							WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-							AND concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$data['tuotepaikka']}'
-							order by tuotepaikat.tuoteno
-							limit 20;";
-				$result = pupe_query($query);
-
-				while($row = mysql_fetch_assoc($result)) {
-					$osumat[] = $row;
-				}
-
-				if (count($osumat) > 0) {
-					include('views/inventointi/osumia.php');
-				}
-				else $errors[] = "Haulla ei löytyny mitään";
-			}
-		}
-	}
-
-	include('views/inventointi/vapaa.php');
-}
-if ($tee == 'useita_listoja') {
-	$title = t("Useita listoja");
-	include('views/inventointi/listoja.php');
-}
-if ($tee == 'osumia') {
-	# Jos ei osumia mennään takasin edelliseen
-	if (empty($viivakoodi) and empty($tuoteno) and empty($tuotepaikka)) {
-		echo t("Vähintään yksi kenttä on syötettävä");
-	}
-	$title = t("Useita listoja");
-	include('views/inventointi/osumia.php');
-}
-

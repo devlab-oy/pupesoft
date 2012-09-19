@@ -6,6 +6,7 @@
 <div class='main'>
 
 	<form action='inventointi.php' method='get'>
+		<input type='hidden' name='tee' value='vapaa_inventointi'>
 		<table>
 			<tr>
 				<th>Viivakoodi</th>
@@ -23,7 +24,7 @@
 				<td colspan='2'>
 					<div class='controls'>
 						<input type='submit' value='OK'>
-						<input type='submit' name='lopeta' value='LOPETA'>
+						<a href='inventointi.php'>Lopeta</a>
 					</div>
 				</td>
 			</tr>

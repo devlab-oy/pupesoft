@@ -1,4 +1,5 @@
 <div class='header'>
+	<button onclick='window.location.href="inventointi.php?tee=vapaa_inventointi"' class='button left'><img src='back2.png'></button>
 	<h1><?php echo $title ?></h1>
 </div>
 
@@ -7,29 +8,29 @@
 		<tr>
 			<th>M‰‰r‰</th>
 			<td><input type='text' value='<?= $maara ?>'></td>
-			<td>KPL</td>
+			<td><?= $tuote['yksikko'] ?></td>
 		</tr>
 		<tr>
 			<th>SSCC</th>
-			<td>7943975168</td>
-		</tr>		<tr>
+			<td>-</td>
+		</tr>
+		<tr>
 			<th>Tuote</th>
-			<td>+1</td>
+			<td><?= $tuote['tuoteno'] ?></td>
 		</tr>
 		<tr>
 			<th>Nimitys</th>
-			<td>Sytystulppa</td>
+			<td><?= $tuote['nimitys'] ?></td>
 		</tr>
 		<tr>
 			<th>Tuotepaikka</th>
-			<td>7-0-0-1</td>
+			<td><?= $tuote['tuotepaikka'] ?></td>
 		</tr>
 	</table>
 
-	<!--<input type='button' value='OK' class='color green button'>-->
-	<!--<input type='button' value='Lopeta' class='color red button'>-->
-	<a href='inventointi.php?tee=apulaskuri' class='color green button'>OK</a>
-	<a href='inventointi.php?tee=apulaskuri' class='color red button'>Lopeta</a>
-	<a href='inventointi.php?tee=apulaskuri' class='color blue button'>Apulaskuri</a>
-
+	<a href='inventointi.php?tee=inventoi' class='color green button'>OK</a>
+	<a href='inventointi.php' class='color red button'>Lopeta</a>
+	<? if($disabled): ?>
+		<a href='inventointi.php?<?= http_build_query(array('tee' => 'apulaskuri', 'tuoteno' => $tuote['tuoteno'])) ?>' class='color blue button'>Apulaskuri</a>
+	<? endif ?>
 </div>

@@ -4,12 +4,17 @@
 
 	enable_ajax();
 
-	if ($livesearch_tee == "TILIHAKU") {
+	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
 	}
 
 	$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+
+	if (!isset($tilinimi)) $tilinimi = "";
+	if (!isset($vyorytyksen_tili)) $vyorytyksen_tili = "";
+	if (!isset($tilinalku)) $tilinalku = "";
+	if (!isset($tilinloppu)) $tilinloppu = "";
 
 	echo "<font class='head'>".t("Tilisaldon vyörytys")."</font><hr>\n";
 
@@ -67,6 +72,7 @@
 	}
 
 
+	echo "<tr><th>".t("Vyörytyksen tili")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "vyorytyksen_tili", 170, $vyorytyksen_tili, "EISUBMIT")." $tilinimi</td></tr>";
 	echo "<tr><th>".t("Tilin alku")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT")." $tilinimi</td></tr>";
 	echo "<tr><th>".t("Tilin loppu")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT")." $tilinimi</td></tr>";
 
@@ -125,6 +131,9 @@
 		if ($tilinalku == '' and $tilinloppu == '') {
 			echo "<font class='error'>".t("Pitää syöttää ainakin yksi tili")."</font>";
 		}
+		elseif ($vyorytyksen_tili == "") {
+			echo "<font class='error'>",t("Syötä vyörytyksen tili"),"</font>";
+		}
 		else {
 
 			if (count($mul_kustp) > 0 and $mul_kustp[0] !='') {
@@ -163,11 +172,51 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$laskuri = mysql_num_rows($result)+2;
 
+			echo "	<script type='text/javascript'>
+						$(function() {
+
+							$('.vyorytys_pros').on('keyup', function() {
+
+								var val = $(this).val();
+								val = parseFloat(val.replace(',', '.'));
+
+								if (!isNaN(val)) {
+									var kaytettava_saldo = parseFloat($('#vyorytyksen_kaytettava_saldo').html());
+									var summa = (val / 100) * kaytettava_saldo;
+									$('#summa_'+$(this).attr('id')).html(summa.toFixed(2));
+								}
+								else {
+									$('#summa_'+$(this).attr('id')).html('');
+								}
+
+								var val_sum = 0;
+
+								$('.vyorytys_pros').each(function() {
+									var val = $(this).val();
+									val = parseFloat(val.replace(',', '.'));
+
+									if (!isNaN(val)) val_sum += val;
+								});
+
+								$('#vyorytys_pros_total').html(val_sum);
+
+								if (val_sum > 100.00 || val_sum < 100.00) $('#vyorytys_pros_total').removeClass('ok').addClass('error');
+								else $('#vyorytys_pros_total').removeClass('error').addClass('ok');
+							});
+
+						});
+					</script>";
+
 			echo "<form name='tosite' action='tosite.php' method='post' autocomplete='off'>\n";
 			echo "<input type='hidden' name='tee' value='I'>\n";
 			echo "<input type='hidden' name='maara' value='$laskuri'>\n";
 
 			$i=1;
+
+			// Tehdään päätaulu
+			echo "<table>";
+			echo "<tr>";
+			echo "<td class='back'>";
 
 			echo "<table>";
 			echo "<tr>";
@@ -177,6 +226,9 @@
 				echo "<th>".t("Kustannuspaikka")."</th>";
 			}
 			echo "</tr>";
+
+			$saldo_per_kp = array();
+			$kumulus = 0;
 
 			while ($trow = mysql_fetch_array($result)) {
 
@@ -202,6 +254,11 @@
 
 				echo "</tr>";
 
+				$kp_koodi = (isset($tarkenne) and isset($tarkenne['koodi'])) ? "{$tarkenne['koodi']} {$tarkenne['nimi']}" : 0;
+
+				if (!isset($saldo_per_kp[$kp_koodi])) $saldo_per_kp[$kp_koodi] = 0;
+				$saldo_per_kp[$kp_koodi] += $trow['Saldo'];
+
 				$kumulus = $kumulus + $trow["Saldo"];
 
 				echo "<input type='hidden' name='tpp' value='".date("d")."'>\n";
@@ -215,11 +272,65 @@
 				$i++;
 			}
 
+			echo "<tr><td class='back' colspan='3'></td></tr>";
+
+			foreach ($saldo_per_kp as $kp_koodi => $saldo_kum) {
+				echo "<tr>";
+				echo "<th>",t("Yhteensä"),"</th>";
+				echo "<td>{$saldo_kum}</td>";
+				echo "<td>{$kp_koodi}</td>";
+				echo "</tr>";
+			}
+
 			echo "<input type='hidden' name='summa' value='$kumulus'>\n";
 			echo "</table>";
+
+			echo "</td>";
+
+			echo "<td class='back'>";
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>",t("Kustannuspaikka"),"</th>";
+			echo "<th>",t("Saldo"),"</th>";
+			echo "<th>",t("Tili"),"</th>";
+			echo "<th>%</th>";
+			echo "</tr>";
+
+			$query = "	SELECT DISTINCT kustannuspaikka.koodi, kustannuspaikka.nimi
+						FROM kustannuspaikka
+						WHERE kustannuspaikka.yhtio = '{$kukarow['yhtio']}'
+						AND kustannuspaikka.koodi != ''
+						ORDER BY kustannuspaikka.koodi ASC";
+			$res = pupe_query($query);
+
+			$i = 0;
+
+			while ($row = mysql_fetch_assoc($res)) {
+				echo "<tr>";
+				echo "<td>{$row['koodi']} {$row['nimi']}</td>";
+				echo "<td id='summa_vyorytys_pros_{$i}'></td>";
+				echo "<td>{$vyorytyksen_tili}</td>";
+				echo "<td><input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='' size='6' maxlength='5' /></td>";
+				echo "</tr>";
+				$i++;
+			}
+
+			echo "<tr>";
+			echo "<th>",t("Yhteensä"),"</th>";
+			echo "<td id='vyorytyksen_kaytettava_saldo'>{$kumulus}</td>";
+			echo "<td>{$vyorytyksen_tili}</td>";
+			echo "<td id='vyorytys_pros_total'></td>";
+			echo "</tr>";
+
+			echo "</table>";
+
+			echo "</td>";
+			echo "</tr>";
+			echo "</table>";
+
 			echo "<br><input type='submit' value='".t("Tee tosite")."'></form><br><br>";
 		}
 	}
 
 	require ("inc/footer.inc");
-?>

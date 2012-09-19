@@ -258,6 +258,7 @@
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
+			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
 
 			echo "<table>
@@ -278,7 +279,7 @@
 				<option value=''>",t("Asiakasrekisteristä"),"</option>
 				<option value='laskulta' {$ytun_mistatiedot_sel}>",t("Laskuilta"),"</option>
 				</select></td></tr>
-				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytunnus_laajattiedot' value='laajat' {$ruk10chk}></td></tr>
+				<tr><td class='spec'>".t("Näytä laajat asiakastiedot").":</td><td><input type='checkbox' name='ytun_laajattied' value='laajat' {$ytun_laajattiedchk}></td></tr>
 				</table>
 				</tr>
 				<tr>
@@ -884,7 +885,7 @@
 							$etuliite = "asiakas";
 						}
 
-						if (isset($ytunnus_laajattiedot) and $ytunnus_laajattiedot != "") {
+						if (isset($ytun_laajattied) and $ytun_laajattied != "") {
 							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark)) nimi, {$etuliite}.osoite, {$etuliite}.postino, {$etuliite}.postitp, {$etuliite}.maa, ";
 							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark)), concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark))) toim_nimi, ";
 							$select .= "if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite) toim_osoite, ";

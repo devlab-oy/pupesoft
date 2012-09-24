@@ -17,7 +17,7 @@
 	if (!isset($tilinloppu)) $tilinloppu = "";
 	if (!isset($tee)) $tee = "";
 	if (!isset($valkoodi)) $valkoodi = "";
-	if (!isset($ala_tallenna)) $ala_tallenna = array("kysely", "uusirappari");
+	if (!isset($ala_tallenna)) $ala_tallenna = array("kysely", "uusirappari", "tee", "alvk", "tkausi", "vyorytyksen_tili", "tilinalku", "tilinloppu", "mul_kustp");
 	if (!isset($uusirappari)) $uusirappari = "";
 	if (!isset($vyorytys_pros)) $vyorytys_pros = array();
 	if (!isset($mul_kustp)) $mul_kustp = array();

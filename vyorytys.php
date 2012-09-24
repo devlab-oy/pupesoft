@@ -43,7 +43,7 @@
 		else {
 			echo "<font class='error'>",t("Et ole valinnut raporttia"),"!</font><br/>";
 			$tee = '';
-			$error++;
+			$mul_kustp = array();
 		}
 	}
 

@@ -16,6 +16,36 @@
 	if (!isset($tilinalku)) $tilinalku = "";
 	if (!isset($tilinloppu)) $tilinloppu = "";
 	if (!isset($tee)) $tee = "";
+	if (!isset($valkoodi)) $valkoodi = "";
+
+	if ($tee == 'I') {
+
+		$isumma_tmp = $itili_tmp = $iselite_tmp = $ikustp_tmp = array();
+
+		$i = 1;
+
+		foreach ($isumma as $key => $val) {
+			if ($val != '') {
+				$isumma_tmp[$i] = $val;
+				$itili_tmp[$i] = $itili[$key];
+				$iselite_tmp[$i] = $iselite[$key];
+				$ikustp_tmp[$i] = $ikustp[$key];
+				$i++;
+			}
+		}
+
+		if (count($isumma_tmp) > 0) {
+			$isumma = $isumma_tmp;
+			$itili = $itili_tmp;
+			$iselite = $iselite_tmp;
+			$ikustp = $ikustp_tmp;
+
+			$maara = count($isumma) + 1;
+
+			require('tosite.php');
+			exit;
+		}
+	}
 
 	echo "<font class='head'>".t("Tilisaldon vyörytys")."</font><hr>\n";
 
@@ -72,6 +102,27 @@
 		echo "<option value = '$a' $sel>".substr($a, 0, 4)." - ".$MONTH_ARRAY[(int) substr($a, -2)]."</option>";
 	}
 
+	echo "</td></tr>";
+
+	echo "<tr><th>",t("Valuutta"),"</th><td>";
+
+	$query = "	SELECT nimi, tunnus
+				FROM valuu
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY jarjestys";
+	$vresult = pupe_query($query);
+
+	echo " <select name='valkoodi'>\n";
+
+	while ($vrow = mysql_fetch_assoc($vresult)) {
+		$sel = "";
+		if (($vrow['nimi'] == $yhtiorow["valkoodi"] and $valkoodi == "") or ($vrow["nimi"] == $valkoodi)) {
+			$sel = "selected";
+		}
+		echo "<option value='{$vrow['nimi']}' {$sel}>{$vrow['nimi']}</option>\n";
+	}
+
+	echo "</select></td></tr>";
 
 	echo "<tr><th>".t("Vyörytyksen tili")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "vyorytyksen_tili", 170, $vyorytyksen_tili, "EISUBMIT")." $tilinimi</td></tr>";
 	echo "<tr><th>".t("Tilin alku")."</th><td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT")." $tilinimi</td></tr>";
@@ -161,17 +212,16 @@
 				$tilinloppu = $swap;
 			}
 
-			$query = "	SELECT tiliointi.tilino, group_concat(distinct tiliointi.kustp) kustp, $lisa1, sum(tiliointi.summa) tilisaldo
+			$query = "	SELECT tiliointi.tilino, group_concat(distinct tiliointi.kustp) kustp, {$lisa1}, sum(tiliointi.summa) tilisaldo
 						FROM tiliointi
-						WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+						WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm   >= '$tilikausirow[tilikausi_alku]'
-						AND tiliointi.tapvm   <= '$tilikausirow[tilikausi_loppu]'
-						AND tiliointi.tilino between '$tilinalku' AND '$tilinloppu'
-						$where
-						GROUP BY tilino $groupby";
+						AND tiliointi.tapvm   >= '{$tilikausirow['tilikausi_alku']}'
+						AND tiliointi.tapvm   <= '{$tilikausirow['tilikausi_loppu']}'
+						AND tiliointi.tilino between '{$tilinalku}' AND '{$tilinloppu}'
+						{$where}
+						GROUP BY tilino {$groupby}";
 			$result = mysql_query($query) or pupe_error($query);
-			$laskuri = mysql_num_rows($result)+2;
 
 			echo "	<script type='text/javascript'>
 						$(function() {
@@ -222,11 +272,10 @@
 									$('#submit_button').attr('disabled', false);
 								}
 							});
-
 						});
 					</script>";
 
-			echo "<form name='tosite' action='tosite.php' method='post' autocomplete='off'>\n";
+			echo "<form name='tosite' action='' method='post' autocomplete='off'>\n";
 			echo "<input type='hidden' name='tee' value='I'>\n";
 
 			$i = 1;
@@ -318,14 +367,15 @@
 			echo "<th>%</th>";
 			echo "</tr>";
 
-			$query = "	SELECT DISTINCT kustannuspaikka.koodi, kustannuspaikka.nimi, kustannuspaikka.tunnus
+			$query = "	SELECT DISTINCT koodi, nimi, tunnus
 						FROM kustannuspaikka
-						WHERE kustannuspaikka.yhtio = '{$kukarow['yhtio']}'
-						AND kustannuspaikka.koodi != ''
-						ORDER BY kustannuspaikka.koodi ASC";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tyyppi = 'K'
+						AND kaytossa != 'E'
+						ORDER BY koodi+0, koodi, nimi";
 			$res = pupe_query($query);
 
-			$i = 0;
+			$i = 1;
 
 			while ($row = mysql_fetch_assoc($res)) {
 				echo "<tr>";
@@ -386,13 +436,14 @@
 
 				echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
 				echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$saldo_kum}'>\n";
-				echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['koodi']}'>\n";
+				echo "<input type='hidden' name='ikustp[{$i}]' value='{$kp_tunn}'>\n";
 				echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyörytys"),"'>\n";
 
 				$i++;
 			}
 
 			echo "<input type='hidden' name='maara' value='{$i}'>\n";
+			echo "<input type='hidden' name='valkoodi' value='{$valkoodi}'>\n";
 
 			echo "</table>";
 

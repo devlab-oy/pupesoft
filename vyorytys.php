@@ -216,9 +216,8 @@
 
 			echo "<form name='tosite' action='tosite.php' method='post' autocomplete='off'>\n";
 			echo "<input type='hidden' name='tee' value='I'>\n";
-			echo "<input type='hidden' name='maara' value='$laskuri'>\n";
 
-			$i=1;
+			$i = 1;
 
 			// Tehd‰‰n p‰‰taulu
 			echo "<table>";
@@ -245,7 +244,7 @@
 
 				if ($kustp != '') {
 
-					$query2 = "	SELECT nimi, koodi
+					$query2 = "	SELECT nimi, koodi, tunnus
 								FROM kustannuspaikka
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$trow[kustp]'";
@@ -261,10 +260,10 @@
 
 				echo "</tr>";
 
-				$kp_koodi = (isset($tarkenne) and isset($tarkenne['koodi'])) ? "{$tarkenne['koodi']} {$tarkenne['nimi']}" : 0;
+				$kp_tunn = (isset($tarkenne) and isset($tarkenne['tunnus'])) ? $tarkenne['tunnus'] : 0;
 
-				if (!isset($saldo_per_kp[$kp_koodi])) $saldo_per_kp[$kp_koodi] = 0;
-				$saldo_per_kp[$kp_koodi] += $trow['Saldo'];
+				if (!isset($saldo_per_kp[$kp_tunn])) $saldo_per_kp[$kp_tunn] = 0;
+				$saldo_per_kp[$kp_tunn] += $trow['Saldo'];
 
 				$kumulus = $kumulus + $trow["Saldo"];
 
@@ -273,11 +272,22 @@
 
 			echo "<tr><td class='back' colspan='3'></td></tr>";
 
-			foreach ($saldo_per_kp as $kp_koodi => $saldo_kum) {
+			foreach ($saldo_per_kp as $kp_tunn => $saldo_kum) {
 				echo "<tr>";
 				echo "<th>",t("Yhteens‰"),"</th>";
 				echo "<td>{$saldo_kum}</td>";
-				echo "<td>{$kp_koodi}</td>";
+
+				$query2 = "	SELECT nimi, koodi
+							FROM kustannuspaikka
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$kp_tunn}'";
+				$result2 = mysql_query($query2) or pupe_error($query2);
+				$tarkenne = mysql_fetch_assoc($result2);
+
+				if ($tarkenne["nimi"] != '') {
+					echo "<td>$tarkenne[koodi] $tarkenne[nimi]</td>";
+				}
+
 				echo "</tr>";
 			}
 
@@ -296,7 +306,7 @@
 			echo "<th>%</th>";
 			echo "</tr>";
 
-			$query = "	SELECT DISTINCT kustannuspaikka.koodi, kustannuspaikka.nimi
+			$query = "	SELECT DISTINCT kustannuspaikka.koodi, kustannuspaikka.nimi, kustannuspaikka.tunnus
 						FROM kustannuspaikka
 						WHERE kustannuspaikka.yhtio = '{$kukarow['yhtio']}'
 						AND kustannuspaikka.koodi != ''
@@ -312,19 +322,19 @@
 				echo "<td>{$vyorytyksen_tili}</td>";
 				echo "<td>";
 				echo "<input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='' size='6' maxlength='5' />";
-				echo "<input type='hidden' name='itili[$i]' value='{$vyorytyksen_tili}'>\n";
-				echo "<input type='hidden' name='isumma[$i]' id='isumma[{$i}]' value=''>\n";
-				echo "<input type='hidden' name='ikustp[$i]' value='{$row['koodi']}'>\n";
-				echo "<input type='hidden' name='iselite[$i]' value='",t("Vyˆrytys"),"'>\n";
+				echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
+				echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value=''>\n";
+				echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['tunnus']}'>\n";
+				echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyˆrytys"),"'>\n";
 				echo "</td>";
 				echo "</tr>";
 
 				$i++;
 			}
 
-			echo "<input type='hidden' name='tpp' value='".date("d")."'>\n";
-			echo "<input type='hidden' name='tpk' value='".date("m")."'>\n";
-			echo "<input type='hidden' name='tpv' value='".date("Y")."'>\n";
+			echo "<input type='hidden' name='tpp' value='",date("d"),"'>\n";
+			echo "<input type='hidden' name='tpk' value='",date("m"),"'>\n";
+			echo "<input type='hidden' name='tpv' value='",date("Y"),"'>\n";
 
 			echo "<tr>";
 			echo "<th>",t("Yhteens‰"),"</th>";
@@ -332,6 +342,45 @@
 			echo "<td>{$vyorytyksen_tili}</td>";
 			echo "<td id='vyorytys_pros_total'></td>";
 			echo "</tr>";
+
+			echo "<tr><td class='back' colspan='4'></td></tr>";
+
+			$i++;
+
+			foreach ($saldo_per_kp as $kp_tunn => $saldo_kum) {
+
+				echo "<tr>";
+
+				$query2 = "	SELECT nimi, koodi
+							FROM kustannuspaikka
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$kp_tunn}'";
+				$result2 = mysql_query($query2) or pupe_error($query2);
+				$tarkenne = mysql_fetch_assoc($result2);
+
+				if ($tarkenne["nimi"] != '') {
+					echo "<td>$tarkenne[koodi] $tarkenne[nimi]</td>";
+				}
+				else {
+					echo "<td></td>";
+				}
+
+				$saldo_kum = -1 * $saldo_kum;
+
+				echo "<td>{$saldo_kum}</td>";
+				echo "<td>{$vyorytyksen_tili}</td>";
+				echo "<td></td>";
+				echo "</tr>";
+
+				echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
+				echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$saldo_kum}'>\n";
+				echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['koodi']}'>\n";
+				echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyˆrytys"),"'>\n";
+
+				$i++;
+			}
+
+			echo "<input type='hidden' name='maara' value='{$i}'>\n";
 
 			echo "</table>";
 

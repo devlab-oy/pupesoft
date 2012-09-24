@@ -20,7 +20,7 @@
 
 	if ($tee == 'I') {
 
-		$isumma_tmp = $itili_tmp = $iselite_tmp = $ikustp_tmp = array();
+		$isumma_tmp = $itili_tmp = $iselite_tmp = $ikustp_tmp = $isumma_valuutassa = array();
 
 		$i = 1;
 
@@ -35,12 +35,14 @@
 		}
 
 		if (count($isumma_tmp) > 0) {
-			$isumma = $isumma_tmp;
+			$isumma = $isumma_valuutassa = $isumma_tmp;
 			$itili = $itili_tmp;
 			$iselite = $iselite_tmp;
 			$ikustp = $ikustp_tmp;
 
 			$maara = count($isumma) + 1;
+
+			$tee = '';
 
 			require('tosite.php');
 			exit;

@@ -1289,4 +1289,3 @@
 	}
 
 	require "inc/footer.inc";
-?>

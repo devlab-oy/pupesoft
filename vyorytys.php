@@ -15,6 +15,7 @@
 	if (!isset($vyorytyksen_tili)) $vyorytyksen_tili = "";
 	if (!isset($tilinalku)) $tilinalku = "";
 	if (!isset($tilinloppu)) $tilinloppu = "";
+	if (!isset($tee)) $tee = "";
 
 	echo "<font class='head'>".t("Tilisaldon vyörytys")."</font><hr>\n";
 
@@ -60,9 +61,9 @@
 			<td><select name='alvk'>
 			<option value=''>".t("Koko tilikausi")."</option>";
 
-	for ($a=$alku; $a<=$lopp; $a++) {
+	for ($a = $alku; $a <= $lopp; $a++) {
 		if (substr($a, -2) == "13") {
-			$a+=88;
+			$a += 88;
 		}
 
 		if ($alvk == $a) $sel = "SELECTED";

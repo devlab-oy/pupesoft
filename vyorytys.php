@@ -17,6 +17,49 @@
 	if (!isset($tilinloppu)) $tilinloppu = "";
 	if (!isset($tee)) $tee = "";
 	if (!isset($valkoodi)) $valkoodi = "";
+	if (!isset($ala_tallenna)) $ala_tallenna = array("kysely", "uusirappari");
+	if (!isset($uusirappari)) $uusirappari = "";
+	if (!isset($vyorytys_pros)) $vyorytys_pros = array();
+	if (!isset($mul_kustp)) $mul_kustp = array();
+
+	if ($tee == "tallenna" or $tee == "lataavanha") {
+		if (isset($kysely) and trim($kysely) != '') {
+			list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
+
+			if ($tee == "tallenna") {
+				tallenna_muisti($kysely_mika, $ala_tallenna, $kysely_kuka);
+				$tee = 'TARKISTA';
+			}
+
+			if ($tee == "lataavanha") {
+
+				$mul_kustp = array();
+
+				hae_muisti($kysely_mika, $kysely_kuka);
+				$kysely = "$kysely_kuka#$kysely_mika";
+				$tee = 'TARKISTA';
+			}
+		}
+		else {
+			echo "<font class='error'>",t("Et ole valinnut raporttia"),"!</font><br/>";
+			$tee = '';
+			$error++;
+		}
+	}
+
+	if ($tee == 'uusiraportti') {
+		if (trim($uusirappari) != '') {
+			tallenna_muisti($uusirappari, $ala_tallenna);
+			$kysely = "$kukarow[kuka]#$uusirappari";
+			$tee = 'TARKISTA';
+		}
+		else {
+			echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhjä"),"!</font><br/>";
+			$tee = '';
+		}
+	}
+
+	if ($tee == 'TARKISTA' and isset($mul_kustp) and !is_array($mul_kustp)) $mul_kustp = unserialize(urldecode($mul_kustp));
 
 	if ($tee == 'I') {
 
@@ -138,7 +181,8 @@
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "</td></tr></table>\n";
-	echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
+	echo "<br><input type = 'submit' value = '".t("Näytä")."'>";
+	echo "</form><br><br>";
 
 	if ($tee == "TARKISTA") {
 
@@ -226,59 +270,114 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "	<script type='text/javascript'>
-						$(function() {
 
-							$('#submit_button').attr('disabled', true);
+						var laske_summa_prosentista = function(e) {
+							e.preventDefault();
 
-							$('.vyorytys_pros').on('keyup', function(e) {
+							if (e.keyCode == 13) return;
 
-								e.preventDefault();
+							var val = $(this).val();
+							val = parseFloat(val.replace(',', '.'));
 
-								if (e.keyCode == 13) return false;
+							var summa = '';
 
+							if (!isNaN(val)) {
+								var kaytettava_saldo = parseFloat($('#vyorytyksen_kaytettava_saldo').html());
+								summa = (val / 100) * kaytettava_saldo;
+								summa = summa.toFixed(2);
+								$('#summa_'+$(this).attr('id')).html(summa);
+							}
+							else {
+								$('#summa_'+$(this).attr('id')).html('');
+							}
+
+							var tmp_i = $('#summa_'+$(this).attr('id')).attr('name');
+							$('#isumma\\\\['+tmp_i+'\\\\]').val(summa);
+
+							var val_sum = 0;
+
+							$('.vyorytys_pros').each(function() {
 								var val = $(this).val();
 								val = parseFloat(val.replace(',', '.'));
 
-								var summa = '';
+								if (!isNaN(val)) val_sum += val;
+							});
 
-								if (!isNaN(val)) {
-									var kaytettava_saldo = parseFloat($('#vyorytyksen_kaytettava_saldo').html());
-									summa = (val / 100) * kaytettava_saldo;
-									summa = summa.toFixed(2);
-									$('#summa_'+$(this).attr('id')).html(summa);
-								}
-								else {
-									$('#summa_'+$(this).attr('id')).html('');
-								}
+							$('#vyorytys_pros_total').html(val_sum);
 
-								var tmp_i = $('#summa_'+$(this).attr('id')).attr('name');
-								$('#isumma\\\\['+tmp_i+'\\\\]').val(summa);
+							if (val_sum > 100.00 || val_sum < 100.00) {
+								$('#vyorytys_pros_total').removeClass('ok').addClass('error');
+								$('#submit_button').attr('disabled', true);
+							}
+							else {
+								$('#vyorytys_pros_total').removeClass('error').addClass('ok');
+								$('#submit_button').attr('disabled', false);
+							}
+						}
 
-								var val_sum = 0;
+						$(function() {
 
-								$('.vyorytys_pros').each(function() {
-									var val = $(this).val();
-									val = parseFloat(val.replace(',', '.'));
+							$('#submit_button, #tallenna_button').attr('disabled', true);
 
-									if (!isNaN(val)) val_sum += val;
-								});
+							$('#uusirappari').on('keyup', function(e) {
+								e.preventDefault();
 
-								$('#vyorytys_pros_total').html(val_sum);
+								if (e.keyCode == 13) return;
 
-								if (val_sum > 100.00 || val_sum < 100.00) {
-									$('#vyorytys_pros_total').removeClass('ok').addClass('error');
-									$('#submit_button').attr('disabled', true);
-								}
-								else {
-									$('#vyorytys_pros_total').removeClass('error').addClass('ok');
-									$('#submit_button').attr('disabled', false);
-								}
+								if ($(this).val() != '') $('#tallenna_button').attr('disabled', false);
+								else $('#tallenna_button').attr('disabled', true);
+							});
+
+							$('.vyorytys_pros').on('keyup', laske_summa_prosentista);
+
+							$('.vyorytys_pros').each(function() {
+								if ($(this).val() != '') $(this).trigger('keyup', laske_summa_prosentista);
 							});
 						});
 					</script>";
 
 			echo "<form name='tosite' action='' method='post' autocomplete='off'>\n";
-			echo "<input type='hidden' name='tee' value='I'>\n";
+			echo "<input type='hidden' id='tee' name='tee' value='I'>\n";
+			echo "<input type='hidden' name='alvk' value='{$alvk}'>\n";
+			echo "<input type='hidden' name='tkausi' value='{$tkausi}'>\n";
+			echo "<input type='hidden' name='vyorytyksen_tili' value='{$vyorytyksen_tili}'>\n";
+			echo "<input type='hidden' name='tilinalku' value='{$tilinalku}'>\n";
+			echo "<input type='hidden' name='tilinloppu' value='{$tilinloppu}'>\n";
+			echo "<input type='hidden' name='mul_kustp' value='",urlencode(serialize($mul_kustp)),"'>\n";
+
+			echo "<table><tr><th colspan='2'>",t("Raportin valinnat"),"</th></tr>";
+
+			//Haetaan tallennetut kyselyt
+			$query = "	SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+						FROM tallennetut_parametrit
+						JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+						WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
+						and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+						ORDER BY tallennetut_parametrit.nimitys";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><td>",t("Valitse raportti"),":</td>";
+			echo "<td><select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
+			echo "<option value=''>",t("Valitse"),"</option>";
+
+			while ($srow = mysql_fetch_assoc($sresult)) {
+
+				$sel = '';
+				if ($kysely == $srow["kuka"]."#".$srow["nimitys"]) {
+					$sel = "selected";
+				}
+
+				echo "<option value='$srow[kuka]#$srow[nimitys]' $sel>$srow[nimitys] ($srow[nimi])</option>";
+			}
+
+			echo "</select>&nbsp;";
+
+			echo "<input type='button' value='",t("Tallenna"),"' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'></td></tr>";
+
+			echo "<tr><td>",t("Tallenna uusi raportti"),":</td>";
+			echo "<td><input type='text' id='uusirappari' name='uusirappari' value=''>&nbsp;";
+			echo "<input type='submit' id='tallenna_button' value='",t("Tallenna"),"' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
+			echo "</tr></table><br /><br />";
 
 			$i = 1;
 
@@ -380,14 +479,18 @@
 			$i = 1;
 
 			while ($row = mysql_fetch_assoc($res)) {
+
+				if (!isset($isumma[$i])) $isumma[$i] = "";
+				if (!isset($vyorytys_pros[$i])) $vyorytys_pros[$i] = "";
+
 				echo "<tr>";
 				echo "<td>{$row['koodi']} {$row['nimi']}</td>";
-				echo "<td id='summa_vyorytys_pros_{$i}' name='{$i}'></td>";
+				echo "<td id='summa_vyorytys_pros_{$i}' name='{$i}'>{$isumma[$i]}</td>";
 				echo "<td>{$vyorytyksen_tili}</td>";
 				echo "<td>";
-				echo "<input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='' size='6' maxlength='5' />";
+				echo "<input type='text' class='vyorytys_pros' id='vyorytys_pros_{$i}' name='vyorytys_pros[{$i}]' value='{$vyorytys_pros[$i]}' size='6' maxlength='5' />";
 				echo "<input type='hidden' name='itili[{$i}]' value='{$vyorytyksen_tili}'>\n";
-				echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value=''>\n";
+				echo "<input type='hidden' name='isumma[{$i}]' id='isumma[{$i}]' value='{$isumma[$i]}'>\n";
 				echo "<input type='hidden' name='ikustp[{$i}]' value='{$row['tunnus']}'>\n";
 				echo "<input type='hidden' name='iselite[{$i}]' value='",t("Vyörytys"),"'>\n";
 				echo "</td>";

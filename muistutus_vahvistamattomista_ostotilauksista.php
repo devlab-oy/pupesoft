@@ -40,50 +40,60 @@
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 
-		$query = "	SELECT tilausrivi.otunnus, lasku.laatija, kuka.eposti, lasku.nimi, lasku.ytunnus, vastuuostaja.eposti AS vo_eposti, COUNT(*) kpl
+		$query = "	(SELECT tilausrivi.otunnus, lasku.laatija, concat('vastuuostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
 					FROM tilausrivi
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '')
-					JOIN kuka ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = lasku.laatija)
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					LEFT JOIN kuka AS vastuuostaja ON (vastuuostaja.yhtio = tuote.yhtio AND vastuuostaja.myyja = tuote.ostajanro AND tuote.ostajanro > 0)
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ostajanro > 0)
+					JOIN kuka  ON (kuka.yhtio = tuote.yhtio AND kuka.myyja = tuote.ostajanro AND kuka.eposti != '')
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
 					and tilausrivi.varattu != 0
 					AND tilausrivi.jaksotettu = 0
-					AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY)
-					AND kuka.eposti != ''
-					GROUP BY 1,2,3,4,5,6
-					ORDER BY lasku.laatija";
+					GROUP BY 1,2,3,4,5)
+					UNION
+					(SELECT tilausrivi.otunnus, lasku.laatija, concat('ostaja#', kuka.eposti) eposti, lasku.nimi, lasku.ytunnus, COUNT(*) kpl
+					FROM tilausrivi
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '' AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY))
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija AND kuka.eposti != '')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.toimitettu = ''
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
+					and tilausrivi.varattu != 0
+					AND tilausrivi.jaksotettu = 0
+					GROUP BY 1,2,3,4,5)
+					ORDER BY eposti, otunnus";
 		$result = pupe_query($query);
 
-		$veposti = $meili = $vastuuostajaposti = "";
+		$veposti = "";
+		$meili   = "";
 
-		while ($trow = mysql_fetch_array($result)) {
+		do {
+			$trow = mysql_fetch_assoc($result);
 
 			if ($trow['eposti'] != $veposti and $veposti != "") {
-				$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
-				$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+
+				list($postityyppi, $l_veposti) = explode("#", $veposti);
+
+				if ($postityyppi == 'vastuuostaja') {
+					$meili = t("Vastuuostajalle ilmoitus vahvistamatta olevista ostotilauksien riveistä").":\n\n" . $meili;
+				}
+				else {
+					$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit").":\n\n" . $meili;
+				}
+
+				$tulos = mail($l_veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				$meili = "";
 			}
 
-			// setataan sähköpostimuuttuja
+			$meili .= t("Ostotilaus").": " . $trow['otunnus'] . "\n";
+			$meili .= t("Toimittaja").": " . $trow['nimi'] . "\n";
+			$meili .= t("Vahvistamattomia rivejä").": " . $trow['kpl'] . "\n\n";
+
 			$veposti = $trow['eposti'];
-			$vastuuostajaposti = $trow['vo_eposti'];
 
-			$meili .= "Ostotilaus: " . $trow['otunnus'] . "\n";
-			$meili .= "Toimittaja: " . $trow['nimi'] . "\n";
-			$meili .= "Vahvistamattomia rivejä: " . $trow['kpl'] . "\n\n";
-		}
-
-		if ($meili != '') {
-			$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit").":\n\n" . $meili;
-			$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-
-			if ($vastuuostajaposti != '') {
-				$meili = t("Vastuuostajalle ilmoitus vahvistamatta olevista ostotilauksien riveistä").":\n\n" . $meili;
-				$tulos = mail($vastuuostajaposti, mb_encode_mimeheader(t("Muistutus vahvistamattomista ostotilausriveistä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-			}
-		}
+		} while ($trow);
 	}

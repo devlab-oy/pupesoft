@@ -176,7 +176,13 @@
 			echo "	<script type='text/javascript'>
 						$(function() {
 
-							$('.vyorytys_pros').on('keyup', function() {
+							$('#submit_button').attr('disabled', true);
+
+							$('.vyorytys_pros').on('keyup', function(e) {
+
+								e.preventDefault();
+
+								if (e.keyCode == 13) return;
 
 								var val = $(this).val();
 								val = parseFloat(val.replace(',', '.'));
@@ -207,8 +213,14 @@
 
 								$('#vyorytys_pros_total').html(val_sum);
 
-								if (val_sum > 100.00 || val_sum < 100.00) $('#vyorytys_pros_total').removeClass('ok').addClass('error');
-								else $('#vyorytys_pros_total').removeClass('error').addClass('ok');
+								if (val_sum > 100.00 || val_sum < 100.00) {
+									$('#vyorytys_pros_total').removeClass('ok').addClass('error');
+									$('#submit_button').attr('disabled', true);
+								}
+								else {
+									$('#vyorytys_pros_total').removeClass('error').addClass('ok');
+									$('#submit_button').attr('disabled', false);
+								}
 							});
 
 						});
@@ -388,7 +400,7 @@
 			echo "</tr>";
 			echo "</table>";
 
-			echo "<br><input type='submit' value='".t("Tee tosite")."'></form><br><br>";
+			echo "<br><input id='submit_button' type='submit' value='".t("Tee tosite")."'></form><br><br>";
 		}
 	}
 

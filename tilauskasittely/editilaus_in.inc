@@ -968,6 +968,10 @@ while ($tietue = fgets($fd)) {
 						$editilaus_eilahetetta = "o";
 						$editilaus_sisainen = "o";
 					}
+					elseif ($editilaus_tilaustyyppi == 'K') {
+						$editilaus_tila 	= 'N';
+						$editilaus_alatila 	= '';
+					}
 				}
 
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
@@ -1702,9 +1706,11 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				// Tilaus merkataan valmiiksi
-				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or die($query);
+				if ($editilaus_tilaustyyppi != 'K') {
+					// Tilaus merkataan valmiiksi
+					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+					$result = mysql_query($query) or die($query);
+				}
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
@@ -1716,7 +1722,7 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
@@ -1923,5 +1929,3 @@ else {
 	echo $edi_ulos;
 	echo "\n";
 }
-
-?>

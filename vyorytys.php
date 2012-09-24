@@ -26,7 +26,7 @@
 
 		foreach ($isumma as $key => $val) {
 			if ($val != '') {
-				$isumma_tmp[$i] = $val;
+				$isumma_tmp[$i] = (float) $val;
 				$itili_tmp[$i] = $itili[$key];
 				$iselite_tmp[$i] = $iselite[$key];
 				$ikustp_tmp[$i] = $ikustp[$key];
@@ -234,7 +234,7 @@
 
 								e.preventDefault();
 
-								if (e.keyCode == 13) return;
+								if (e.keyCode == 13) return false;
 
 								var val = $(this).val();
 								val = parseFloat(val.replace(',', '.'));

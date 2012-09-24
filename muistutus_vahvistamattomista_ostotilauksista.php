@@ -45,7 +45,7 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '')
 					JOIN kuka ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = lasku.laatija)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					LEFT JOIN kuka AS vastuuostaja ON (vastuuostaja.yhtio = tuote.yhtio AND vastuuostaja.myyja = tuote.ostajanro)
+					LEFT JOIN kuka AS vastuuostaja ON (vastuuostaja.yhtio = tuote.yhtio AND vastuuostaja.myyja = tuote.ostajanro AND tuote.ostajanro > 0)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'
@@ -54,7 +54,6 @@
 					AND tilausrivi.jaksotettu = 0
 					AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY)
 					AND kuka.eposti != ''
-					AND tuote.ostajanro > 0
 					GROUP BY 1,2,3,4,5,6
 					ORDER BY lasku.laatija";
 		$result = pupe_query($query);

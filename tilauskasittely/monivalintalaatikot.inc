@@ -310,21 +310,27 @@
 
 					if (trim($dynaamiset) != '') {
 
+						$liitoksetlisa = "";
+						$liitoksetlisawhere = "";
+
 						if ($param == "tuote" or $param == "kuka") {
 							$liitoksetlisa = ", GROUP_CONCAT(DISTINCT concat('\'',puun_alkio.liitos,'\'')) liitokset ";
+							$liitoksetlisawhere = " and puun_alkio.liitos != '' ";
 						}
 						elseif ($param == "asiakas") {
 							$liitoksetlisa = ", GROUP_CONCAT(DISTINCT puun_alkio.liitos) liitokset ";
+							$liitoksetlisawhere = " and puun_alkio.liitos != '' ";
 						}
 
 						$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
-									$liitoksetlisa
+									{$liitoksetlisa}
 									FROM dynaaminen_puu AS node
 									JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
 									JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
 									WHERE node.yhtio = '{$kukarow['yhtio']}'
 									AND node.laji = '{$param}'
 									AND node.lft > 1
+									{$liitoksetlisawhere}
 									ORDER BY node.lft";
 						$kaikki_puun_tunnukset_res = pupe_query($query, $link);
 						$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);

@@ -23,6 +23,9 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
+// jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
+$ehdota_maksukielto=0;
+
 $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
 $res = pupe_query($query);
 
@@ -32,7 +35,17 @@ if (mysql_num_rows($res) == 0) {
 }
 
 if ($tee == 'LAHETA') {
-	// kirjeen l‰hetyksen status
+	
+	if (!empty($aseta_myyntikielto)) {
+		$query = "  UPDATE asiakas
+					SET myyntikielto = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$aseta_myyntikielto'";
+					
+		$result = pupe_query($query);
+	}
+	
+		// kirjeen l‰hetyksen status
 	$ekarhu_success = true;
 
 	if (!empty($_POST['lasku_tunnus'])) {
@@ -146,6 +159,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 
 	$query = "	SELECT asiakas.ytunnus,
+				asiakas.myyntikielto,
 				IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
 						concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
 						concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
@@ -454,6 +468,11 @@ if ($tee == 'KARHUA')  {
 		echo "<td>$lasku[comments]</td>";
 		echo "</tr>\n";
 
+		// jos yht‰k‰‰n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
+		if ($lasku["karhuttu"] > 2) {
+			$ehdota_maksukielto = 1;
+		}
+		
 		$summmmma += $lasku["summa"];
 
 		// ker‰t‰‰n eri valuutat taulukkoon
@@ -470,6 +489,13 @@ if ($tee == 'KARHUA')  {
 
 	echo "</table><br>";
 
+	if ($asiakastiedot["myyntikielto"] == 'K') {
+		echo t("Asiakas on myyntikiellossa");
+	}
+	else if ($ehdota_maksukielto) {
+		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '" . $asiakastiedot["tunnus"] . "'> " . t("Aseta asiakkaalle myyntikielto");
+	}
+	
 	echo "<table>";
 	echo "<tr>";
 

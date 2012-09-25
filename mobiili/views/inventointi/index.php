@@ -6,7 +6,7 @@
 <div class='main'>
 	<table>
 		<tr>
-			<td><a href='?tee=vapaa_inventointi'>Vapaa inventointi</a></td>
+			<td><a href='inventointi?tee=vapaa_inventointi'>Vapaa inventointi</a></td>
 		</tr>
 		<tr>
 			<td><a href='?tee=useita_listoja'>Keräyspaikat listalta</a></td>

@@ -11,17 +11,18 @@
 				<th>Listan nro</th>
 				<th>Tuotteita</th>
 				<th>Hyllyalue väli</th>
+				<th>eka_hylly</th>
 			</tr>
-			<tr>
-				<td>6234</td>
-				<td>10</td>
-				<td>7 - 8</td>
-			</tr>
-			<tr>
-				<td>62345</td>
-				<td>12</td>
-				<td>1 - 1</td>
-			</tr>
+
+			<? foreach($listat as $lista): ?>
+				<tr>
+					<td><a href='?tee=varmistuskoodi&lista=<?= $lista['lista'] ?>'><?= $lista['lista'] ?></a></td>
+					<td><?= $lista['tuotteita'] ?></td>
+					<td><?= $lista['hyllyvali'] ?></td>
+					<td><?= $ensimmainen['tuotepaikka'] ?></td>
+				</tr>
+			<? endforeach ?>
+
 			<tr>
 				<td colspan='3'>
 					<div class='controls'>

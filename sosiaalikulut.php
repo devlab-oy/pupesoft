@@ -97,147 +97,75 @@
 
 			echo "<table><tr><td class='back'>";
 
-			echo "<table>";
-			echo "<tr>";
-			echo "<th>",t("Tili"),"</th>";
-			echo "<th>",t("Saldo"),"</th>";
-			echo "<th>",t("Kustp"),"</th>";
-			echo "</tr>";
+			for ($i = 1; $i < 4; $i++) {
 
-			while ($row = mysql_fetch_assoc($result)) {
-
-				$saldo1 = $row['tilisaldo'];
-
+				echo "<table>";
 				echo "<tr>";
-				echo "<td>{$row['tilino']}</td>";
-				echo "<td>{$saldo1}</td>";
+				echo "<th>",t("Tili"),"</th>";
+				echo "<th>",t("Saldo"),"</th>";
+				echo "<th>",t("Kustp"),"</th>";
+				echo "</tr>";
 
-				$tarkenne = array('koodi' => "", 'nimi' => "");
+				mysql_data_seek($result, 0);
 
-				if ($row['kustp'] != '') {
+				$class = $i > 1 ? 'spec' : '';
 
-					$query2 = "	SELECT nimi, koodi
-								FROM kustannuspaikka
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$row['kustp']}'";
-					$result2 = pupe_query($query2);
-					$tarkenne_row = mysql_fetch_assoc($result2);
+				while ($row = mysql_fetch_assoc($result)) {
 
-					$tarkenne['koodi'] = $tarkenne_row['koodi'];
-					$tarkenne['nimi'] = $tarkenne_row['nimi'];
+					if ($i == 3) $row['kustp'] = $mul_kustp[0] != '' ? $mul_kustp[0] : "";
 
-					if ($tarkenne_row["nimi"] == '') {
-						$tarkenne["nimi"] = t("Ei kustannuspaikkaa");
+					$tarkenne = array('koodi' => "", 'nimi' => "");
+
+					if ($row['kustp'] != '') {
+
+						$query2 = "	SELECT nimi, koodi
+									FROM kustannuspaikka
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$row['kustp']}'";
+						$result2 = pupe_query($query2);
+						$tarkenne_row = mysql_fetch_assoc($result2);
+
+						$tarkenne['koodi'] = $tarkenne_row['koodi'];
+						$tarkenne['nimi'] = $tarkenne_row['nimi'];
+
+						if ($tarkenne_row["nimi"] == '') {
+							$tarkenne["nimi"] = t("Ei kustannuspaikkaa");
+						}
 					}
+
+					switch($i) {
+						case '1':
+							$saldo1 = $row['tilisaldo'];
+							$show_tilino = $row['tilino'];
+							$key = $row['tilino'];
+							break;
+						case '2':
+							$saldo2 = round(($prosentti / 100) * $row['tilisaldo'], 2);
+							$show_tilino = $tilino;
+							$key = $tarkenne['koodi'];
+							break;
+						case '3':
+							$saldo3 = -1 * round(($prosentti / 100) * $row['tilisaldo'], 2);
+							$show_tilino = $tilino;
+							$key = $tarkenne['koodi'];
+							break;
+					}
+
+					echo "<tr>";
+					echo "<td class='{$class}'>{$show_tilino}</td>";
+					echo "<td class='{$class}'>",${"saldo{$i}"},"</td>";
+					echo "<td class='{$class}'>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
+
+					if (!isset(${"yhteensa{$i}"}[$key])) ${"yhteensa{$i}"}[$key] = 0;
+					${"yhteensa{$i}"}[$key] += ${"saldo{$i}"};
+
+					echo "</tr>";
 				}
 
-				echo "<td>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
+				echo "</table>";
 
-				if (!isset($yhteensa1[$row['tilino']])) $yhteensa1[$row['tilino']] = 0;
-				$yhteensa1[$row['tilino']] += $row['tilisaldo'];
-
-				echo "</tr>";
+				if ($i < 3)	echo "</td><td class='back'>";
 			}
-
-			echo "</table>";
-
-			echo "</td><td class='back'>";
-
-			mysql_data_seek($result, 0);
-
-			echo "<table>";
-			echo "<tr>";
-			echo "<th>",t("Kirjaustili"),"</th>";
-			echo "<th>",t("Saldo"),"</th>";
-			echo "<th>",t("Kustp"),"</th>";
-			echo "</tr>";
-
-			while ($row = mysql_fetch_assoc($result)) {
-
-				echo "<tr>";
-
-				echo "<td class='spec'>{$tilino}</td>";
-
-				$saldo2 = round(($prosentti / 100) * $row['tilisaldo'], 2);
-
-				echo "<td class='spec'>{$saldo2}</td>";
-
-				$tarkenne = array('koodi' => "", 'nimi' => "");
-
-				if ($row['kustp'] != '') {
-
-					$query2 = "	SELECT nimi, koodi
-								FROM kustannuspaikka
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$row['kustp']}'";
-					$result2 = pupe_query($query2);
-					$tarkenne_row = mysql_fetch_assoc($result2);
-
-					$tarkenne['koodi'] = $tarkenne_row['koodi'];
-					$tarkenne['nimi'] = $tarkenne_row['nimi'];
-
-					if ($tarkenne_row["nimi"] == '') {
-						$tarkenne["nimi"] = t("Ei kustannuspaikkaa");
-					}
-				}
-
-				echo "<td class='spec'>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
-
-				if (!isset($yhteensa2[$tarkenne['koodi']])) $yhteensa2[$tarkenne['koodi']] = 0;
-				$yhteensa2[$tarkenne['koodi']] += $saldo2;
-
-				echo "</tr>";
-			}
-
-			echo "</table>";
-			echo "</td><td class='back'>";
-
-			mysql_data_seek($result, 0);
-
-			echo "<table>";
-			echo "<tr>";
-			echo "<th>",t("Kirjaustili"),"</th>";
-			echo "<th>",t("Saldo"),"</th>";
-			echo "<th>",t("Kustp"),"</th>";
-			echo "</tr>";
-
-			while ($row = mysql_fetch_assoc($result)) {
-
-				echo "<tr>";
-
-				$saldo3 = -1 * round(($prosentti / 100) * $row['tilisaldo'], 2);
-
-				$tarkenne = array('koodi' => "", 'nimi' => "");
-
-				if (count($mul_kustp) > 0 and $mul_kustp[0] !='') {
-
-					$query2 = "	SELECT nimi, koodi
-								FROM kustannuspaikka
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$mul_kustp[0]}'";
-					$result2 = pupe_query($query2);
-					$tarkenne_row = mysql_fetch_assoc($result2);
-
-					$tarkenne['koodi'] = $tarkenne_row['koodi'];
-					$tarkenne['nimi'] = $tarkenne_row['nimi'];
-
-					if ($tarkenne_row["nimi"] == '') {
-						$tarkenne["nimi"] = t("Ei kustannuspaikkaa");
-					}
-				}
-
-				echo "<td class='spec'>{$tilino}</td>";
-
-				if (!isset($yhteensa3[$tarkenne['koodi']])) $yhteensa3[$tarkenne['koodi']] = 0;
-				$yhteensa3[$tarkenne['koodi']] += $saldo3;
-
-				echo "<td class='spec'>{$saldo3}</td>";
-				echo "<td class='spec'>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
-
-				echo "</tr>";
-			}
-
-			echo "</table>";
 
 			echo "</td></tr><tr><td class='back'>";
 

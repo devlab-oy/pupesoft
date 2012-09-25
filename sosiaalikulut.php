@@ -242,7 +242,7 @@
 							echo "<input type='hidden' name='isumma[{$x}]' value='{$arvo}' />";
 							echo "<input type='hidden' name='isumma_valuutassa[{$x}]' value='{$arvo}' />";
 							echo "<input type='hidden' name='ikustp[{$x}]' value='{$tarkenne_row['tunnus']}' />";
-							echo "<input type='hidden' name='iselite[{$x}]' value='",t("Vyörytys"),"' />";
+							echo "<input type='hidden' name='iselite[{$x}]' value='",t("Sosiaalikulu"),"' />";
 
 							$x++;
 							break;

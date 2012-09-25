@@ -15,7 +15,8 @@
 		'tilinimi' => "string",
 		'tilino' => "string",
 		'prosentti' => "float",
-		'tee' => "string"
+		'tee' => "string",
+		'valkoodi' => "string"
 	);
 
 	foreach ($muuttujien_alustus as $muuttuja => $tyyppi) {
@@ -44,6 +45,24 @@
 	echo "<tr><th>",t("Tilin loppu"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT")," {$tilinimi}</td></tr>";
 
 	echo "<tr><th>",t("Laskentaprosentti"),"</th><td><input type='text' name='prosentti' value='{$prosentti}' /></td></tr>";
+
+	$query = "	SELECT nimi, tunnus
+				FROM valuu
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY jarjestys";
+	$vresult = pupe_query($query);
+
+	echo "<tr><th>",t("Valuutta"),"</th><td><select name='valkoodi'>";
+
+	while ($vrow = mysql_fetch_assoc($vresult)) {
+		$sel = "";
+		if (($vrow['nimi'] == $yhtiorow["valkoodi"] and $valkoodi == "") or ($vrow["nimi"] == $valkoodi)) {
+			$sel = "selected";
+		}
+		echo "<option value='{$vrow['nimi']}' {$sel}>{$vrow['nimi']}</option>";
+	}
+
+	echo "</select></td></tr>";
 
 	echo "<tr><td class='back' colspan='2'>";
 	echo "<input type='hidden' name='tee' value='laske' />";
@@ -94,6 +113,13 @@
 
 			$prosentti = (float) $prosentti;
 			$yhteensa1 = $yhteensa2 = $yhteensa3 = array();
+
+			echo "<form method='post' action='tosite.php'>";
+			echo "<input type='hidden' name='tee' value='' />";
+			echo "<input type='hidden' name='valkoodi' value='{$valkoodi}' />";
+			echo "<input type='hidden' name='tpp' value='",date("d"),"'>";
+			echo "<input type='hidden' name='tpk' value='",date("m"),"'>";
+			echo "<input type='hidden' name='tpv' value='",date("Y"),"'>";
 
 			echo "<table><tr><td class='back'>";
 
@@ -169,6 +195,8 @@
 
 			echo "</td></tr><tr><td class='back'>";
 
+			$x = 1;
+
 			for ($i = 1; $i < 4; $i++) {
 
 				$summaus = 0;
@@ -177,7 +205,7 @@
 				echo "<tr>";
 				echo "<th>",t("Yhteensä"),"</th>";
 				echo "<th></th>";
-				echo "<th></th>";
+				if ($i > 1) echo "<th></th>";
 				echo "</tr>";
 
 				foreach (${"yhteensa{$i}"} as $koodi => $arvo) {
@@ -188,14 +216,13 @@
 						case '1':
 							echo "<td>{$koodi}</td>";
 							echo "<td>{$arvo}</td>";
-							echo "<td></td>";
 							break;
 						case '2':
 						case '3':
 							echo "<td>{$tilino}</td>";
 							echo "<td>{$arvo}</td>";
 
-							$query2 = "	SELECT nimi, koodi
+							$query2 = "	SELECT nimi, koodi, tunnus
 										FROM kustannuspaikka
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND koodi = '{$koodi}'";
@@ -210,6 +237,14 @@
 							}
 
 							echo "<td>{$tarkenne['koodi']} {$tarkenne['nimi']}</td>";
+
+							echo "<input type='hidden' name='itili[{$x}]' value='{$tilino}' />";
+							echo "<input type='hidden' name='isumma[{$x}]' value='{$arvo}' />";
+							echo "<input type='hidden' name='isumma_valuutassa[{$x}]' value='{$arvo}' />";
+							echo "<input type='hidden' name='ikustp[{$x}]' value='{$tarkenne_row['tunnus']}' />";
+							echo "<input type='hidden' name='iselite[{$x}]' value='",t("Vyörytys"),"' />";
+
+							$x++;
 							break;
 					}
 
@@ -221,7 +256,7 @@
 				echo "<tr>";
 				echo "<th>",t("Yhteensä"),"</th>";
 				echo "<td>{$summaus}</td>";
-				echo "<td></td>";
+				if ($i > 1) echo "<td></td>";
 				echo "</tr>";
 
 				echo "</table>";
@@ -230,7 +265,12 @@
 
 			}
 
-			echo "</td></tr></table>";
+			echo "<input type='hidden' name='maara' value='{$x}' />";
+
+			echo "</td></tr>";
+			echo "<tr><td colspan='3' class='back'><input type='submit' value='",t("Tee tosite"),"' /></td></tr>";
+			echo "</table>";
+			echo "</form>";
 		}
 
 	}

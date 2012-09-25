@@ -731,9 +731,24 @@
 									{$splitlisa}
 									{$splitlisa2}
 									{$rivihintalisa}
+									, tilkpl = '{$rtuoteno[$i]['kpl']}'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
 						$upres = pupe_query($query);
+					}
+
+					$query = "	UPDATE tilausrivi SET
+								perheid = '{$tilausrivi_id}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tilausrivi_id}'";
+					$upd_res = pupe_query($query);
+
+					if ($myynti_tilausrivi_id_isa != 0) {
+						$query = "	UPDATE tilausrivi SET
+									perheid = '{$myynti_tilausrivi_id_isa}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+						$upd_res = pupe_query($query);
 					}
 
 					// katsotaan onko tuoteperheen isätuote
@@ -790,6 +805,7 @@
 											{$splitlisa}
 											{$splitlisa2}
 											{$rivihintalisa}
+											, tilkpl = '{$rtuoteno[$i]['kpl']}'
 											WHERE yhtio = '$kukarow[yhtio]'
 											AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 								$upres = pupe_query($query);
@@ -848,20 +864,6 @@
 									$upd_res = pupe_query($query);
 								}
 							}
-						}
-
-						$query = "	UPDATE tilausrivi SET
-									perheid = '{$tilausrivi_id}'
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$tilausrivi_id}'";
-						$upd_res = pupe_query($query);
-
-						if ($myynti_tilausrivi_id_isa != 0) {
-							$query = "	UPDATE tilausrivi SET
-										perheid = '{$myynti_tilausrivi_id_isa}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$myynti_tilausrivi_id_isa}'";
-							$upd_res = pupe_query($query);
 						}
 					}
 
@@ -1213,6 +1215,20 @@
 							$upres = pupe_query($query);
 						}
 
+						$query = "	UPDATE tilausrivi SET
+									perheid = '{$tilausrivi_id}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$tilausrivi_id}'";
+						$upd_res = pupe_query($query);
+
+						if ($myynti_tilausrivi_id_isa != 0) {
+							$query = "	UPDATE tilausrivi SET
+										perheid = '{$myynti_tilausrivi_id_isa}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$myynti_tilausrivi_id_isa}'";
+							$upd_res = pupe_query($query);
+						}
+
 						// katsotaan onko tuoteperheen isätuote
 						if ($split_row['perheid'] == $split_row['tunnus']) {
 
@@ -1327,20 +1343,6 @@
 										$upd_res = pupe_query($query);
 									}
 								}
-							}
-
-							$query = "	UPDATE tilausrivi SET
-										perheid = '{$tilausrivi_id}'
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$tilausrivi_id}'";
-							$upd_res = pupe_query($query);
-
-							if ($myynti_tilausrivi_id_isa != 0) {
-								$query = "	UPDATE tilausrivi SET
-											perheid = '{$myynti_tilausrivi_id_isa}'
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$myynti_tilausrivi_id_isa}'";
-								$upd_res = pupe_query($query);
 							}
 						}
 

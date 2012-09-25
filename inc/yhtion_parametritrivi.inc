@@ -3154,3 +3154,16 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'matkalaskun_viite') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Matkalaskun viite ei ole pakolinen")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Matkalaskun viite on pakolinen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

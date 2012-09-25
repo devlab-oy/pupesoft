@@ -73,16 +73,19 @@
 	echo "</td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";
-
+	
+	$sel = array((isset($raportti) ? $raportti : '') => "SELECTED");
     echo "<tr>";
     echo "<td class='back' colspan='2'>".t("tai inventoi raportin avulla")."...</th></tr>";
 	echo "<tr><th>".t("Valitse raportti")."</th>";
-	echo "<td><select name='raportti'>
-		<option value=''>".t("Valitse")."</option>
-		<option value='vaarat'>".t("Väärät saldot")."</option>
-		<option value='loppuneet'>".t("Loppuneet tuotteet")."</option>
-		<option value='negatiiviset'>".t("Kaikki miinus-saldolliset")."</option>
-				</select>";
+	echo "<td>
+			<select name='raportti'>
+				<option value=''>".t("Valitse")."</option>
+				<option value='vaarat' ".$sel['vaarat'].">".t("Väärät saldot")."</option>
+				<option value='loppuneet' ".$sel['loppuneet'].">".t("Loppuneet tuotteet")."</option>
+				<option value='negatiiviset' ".$sel['negatiiviset'].">".t("Kaikki miinus-saldolliset")."</option>
+				<option value='tapahtumia' ".$sel['tapahtumia'].">".t("Tuotteet joilla tulo, myynti, valmistus tai varastonsiirtotapahtumia")."</option>
+			</select>";
 	echo "</td></tr>";
 
 	if (!isset($kka))
@@ -149,8 +152,16 @@
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu kahden viikon sisällä:")."</th>
-			<td><input type='checkbox' name='naytainvtuot'></td>
+			<td><input type='checkbox' name='naytainvtuot' ".((isset($naytainvtuot) and $naytainvtuot!='') ? 'CHECKED' : '')."></td>
 			</tr>";
+			
+	if ($piilotaToim_tuoteno != "") {
+			$checkPiilotaToim_tuoteno = "CHECKED";
+		}
+
+		echo "<tr><th>".t("Älä tulosta toimittajan tuotenumeroa listauksiin:")."</th>
+		<td><input type='checkbox' name='piilotaToim_tuoteno' value='Y' $checkPiilotaToim_tuoteno></td>
+		</tr>";
 
 	echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu päivämääränä tai sen jälkeen:")."</th>
 		<td><input type='text' name='ippa' value='$ippa' size='3'>
@@ -695,6 +706,37 @@
 				$saldoresult = pupe_query($query);
             }
 
+			if ($raportti == 'tapahtumia') {
+
+				$kutsu = " ".t("Tuotteet joilla tulo, myynti, valmistus tai varastonsiirtotapahtumia")." ($ppa.$kka.$vva-$ppl.$kkl.$vvl) ";
+
+				if ($jarjestys == 'tuoteno') {
+					$orderby = " tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'osastotrytuoteno') {
+					$orderby = " osasto, try, tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'nimityssorttaus') {
+					$orderby = " nimitys, sorttauskentta ";
+				}
+				else {
+					$orderby = " sorttauskentta, tuoteno ";
+				}
+
+				$query = "	SELECT $select
+							FROM tuotepaikat use index (saldo_index)
+							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = ''
+							JOIN tapahtuma ON tapahtuma.yhtio=tuote.yhtio and tapahtuma.tuoteno=tuote.tuoteno and tapahtuma.laji IN ('tulo', 'laskutus', 'valmistus', 'siirto') and tapahtuma.laadittu BETWEEN '$vva-$kka-$ppa' and '$vvl-$kkl-$ppl'
+							LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+							WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'
+							$rajauslisa
+							$invaamatta
+							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
+							group by $groupby
+							ORDER BY $orderby";
+				$saldoresult = pupe_query($query);
+            }
+
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Yhtään tuotetta ei löytynyt")."!</font><br><br>";
 				$tee = '';
@@ -747,11 +789,18 @@
 			$listanro = $lrow["listanro"]+1;
 			$listaaika = date("Y-m-d H:i:s");
 
-			$ots  = t("Inventointilista")." $kutsu  Listanumero: $listanro   $pp.$kk.$vv - $kello\n$yhtiorow[nimi]\n\n";
+			$ots  = t("Inventointilista")." $kutsu  Listanumero: $listanro   $pp.$kk.$vv - $kello\tSivu <SIVUNUMERO>\n$yhtiorow[nimi]\n\n";
 			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
-			$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
-			$ots .= sprintf ('%-40.38s', 	t("Nimitys"));
+
+			// Ei näytetä toim_tuotenumeroa, nimitys voi olla pidempi
+			if ($piilotaToim_tuoteno == "") {
+				$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
+				$ots .= sprintf ('%-40.38s', 	t("Nimitys"));
+			}
+			else {
+				$ots .= sprintf ('%-60.58s', 	t("Nimitys"));
+			}
 
 			if ($naytasaldo == 'H') {
 				$rivinleveys += 10;
@@ -769,11 +818,11 @@
 			$ots .= sprintf ('%-8.8s',	 	t("Tikpl"));
 			$ots .= "\n";
 			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
-			fwrite($fh, $ots);
+			fwrite($fh, str_replace("<SIVUNUMERO>","1",$ots));
 			$ots = chr(12).$ots;
 
 			$rivit = 1;
-
+			$sivulaskuri = 1;
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
 
 				// Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
@@ -793,7 +842,8 @@
 				}
 
 				if ($rivit >= 17) {
-					fwrite($fh, $ots);
+					$sivulaskuri++;
+					fwrite($fh, str_replace("<SIVUNUMERO>",$sivulaskuri,$ots));
 					$rivit = 1;
 				}
 
@@ -859,8 +909,16 @@
 
 				$prn  = sprintf ('%-28.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
-				$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
-				$prn .= sprintf ('%-40.38s', 	t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+
+				// Jos valittu toim_tuoteno piilotus ei sitä piirretä (säästetään tilaa)
+				if ($piilotaToim_tuoteno == "") {
+					$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
+					$prn .= sprintf ('%-40.38s', 	t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+				}
+				else {
+					// Jos toim_tuoteno ei nnäytetä, tämä voi olla pidempi
+					$prn .= sprintf ('%-60.58s', 	t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+				}
 
 				if ($naytasaldo == 'H') {
 					if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
@@ -974,7 +1032,7 @@
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";
-					$kutsu = "Inventointilista";
+					$kutsu = "Inventointilista_$listanro";
 
 					require("inc/sahkoposti.inc");
 				}

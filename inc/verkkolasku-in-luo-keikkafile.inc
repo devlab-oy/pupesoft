@@ -1209,7 +1209,7 @@
 										{$splitlisa}
 										{$splitlisa2}
 										{$rivihintalisa}
-										kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+										kommentti = concat(ifnull(kommentti, ''),' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tunnus = '{$myynti_rivi_row_isa['tunnus']}'";
 							$upres = pupe_query($query);
@@ -1284,7 +1284,7 @@
 												{$splitlisa}
 												{$splitlisa2}
 												{$rivihintalisa}
-												kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+												kommentti = concat(ifnull(kommentti, ''),' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND tunnus = '{$myynti_rivi_row['tunnus']}'";
 									$upres = pupe_query($query);
@@ -1357,7 +1357,7 @@
 									{$splitlisa}
 									{$splitlisa2}
 									{$rivihintalisa}
-									kommentti = concat(kommentti,' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
+									kommentti = concat(ifnull(kommentti, ''),' Ennen splittausta {$komm_lisa} : kohdistettiin {$erotus}')
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '{$split_row['tunnus']}'";
 						$upres = pupe_query($query);

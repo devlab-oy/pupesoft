@@ -130,8 +130,8 @@
 
 	echo "<td><select name='arvomatikka'>";
 	echo "<option value=''>".t("Kaikki")."</option>";
-	echo "<option value='S' $sel1>".t("Saldolliset")."</option>";
-	echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option></select>";
+	echo "<option value='S' $sel1>".t("Saldolliset, ei negatiivisia")."</option>";
+	echo "<option value='N' $sel2>".t("Saldo ei ole nolla")."</option></select>";
 	echo "</td></tr>";
 
 	$sel1 = "";
@@ -630,6 +630,7 @@
 							and tuotepaikat.saldo 	  <= 0
 							$rajauslisa
 							$invaamatta
+							$extra
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
 							ORDER BY $orderby";
@@ -656,7 +657,7 @@
 
 				$query = "	SELECT distinct $select
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tilausrivi.tuoteno
+							JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tilausrivi.tuoteno $extra
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = ''
 							LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.yhtio			= '$kukarow[yhtio]'
@@ -700,6 +701,7 @@
 							and tuotepaikat.saldo 	  < 0
 							$rajauslisa
 							$invaamatta
+							$extra
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
 							ORDER BY $orderby";
@@ -731,6 +733,7 @@
 							WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'
 							$rajauslisa
 							$invaamatta
+							$extra
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
 							ORDER BY $orderby";
@@ -789,7 +792,7 @@
 			$listanro = $lrow["listanro"]+1;
 			$listaaika = date("Y-m-d H:i:s");
 
-			$ots  = t("Inventointilista")." $kutsu  Listanumero: $listanro   $pp.$kk.$vv - $kello\tSivu <SIVUNUMERO>\n$yhtiorow[nimi]\n\n";
+			$ots  = t("Inventointilista")." $kutsu\tSivu <SIVUNUMERO>\nListanumero: $listanro\t\t$yhtiorow[nimi]\t\t$pp.$kk.$vv - $kello\n\n";
 			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 
@@ -1026,7 +1029,7 @@
 			}
 			else {
 				system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=$rivinleveys --no-header --columns=1 --margin=0 --borders=0 $filenimi");
-
+				
 				if ($komento["Inventointi"] == 'email') {
 					
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");

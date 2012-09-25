@@ -17,7 +17,7 @@
 	if (!isset($tilinloppu)) $tilinloppu = "";
 	if (!isset($tee)) $tee = "";
 	if (!isset($valkoodi)) $valkoodi = "";
-	if (!isset($ala_tallenna)) $ala_tallenna = array("kysely", "uusirappari", "tee", "alvk", "tkausi", "vyorytyksen_tili", "tilinalku", "tilinloppu", "mul_kustp");
+	if (!isset($ala_tallenna)) $ala_tallenna = array("kysely", "uusirappari", "tee", "alvk", "tkausi", "vyorytyksen_tili", "tilinalku", "tilinloppu");
 	if (!isset($uusirappari)) $uusirappari = "";
 	if (!isset($vyorytys_pros)) $vyorytys_pros = array();
 	if (!isset($mul_kustp)) $mul_kustp = array();
@@ -29,6 +29,7 @@
 			if ($tee == "tallenna") {
 				tallenna_muisti($kysely_mika, $ala_tallenna, $kysely_kuka);
 				$tee = 'TARKISTA';
+				$mul_kustp = unserialize(urldecode($mul_kustp));
 			}
 
 			if ($tee == "lataavanha") {
@@ -38,6 +39,8 @@
 				hae_muisti($kysely_mika, $kysely_kuka);
 				$kysely = "$kysely_kuka#$kysely_mika";
 				$tee = 'TARKISTA';
+
+				$mul_kustp = unserialize(urldecode($mul_kustp));
 			}
 		}
 		else {
@@ -52,6 +55,7 @@
 			tallenna_muisti($uusirappari, $ala_tallenna);
 			$kysely = "$kukarow[kuka]#$uusirappari";
 			$tee = 'TARKISTA';
+			$mul_kustp = unserialize(urldecode($mul_kustp));
 		}
 		else {
 			echo "<font class='error'>",t("Tallennettavan raportin nimi ei saa olla tyhjä"),"!</font><br/>";

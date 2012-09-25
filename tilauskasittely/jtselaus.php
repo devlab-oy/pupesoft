@@ -679,7 +679,7 @@
 		$tilausrivilisa = "";
 
 		if ($jt_huomioi_pvm != "") {
-			$laskulisa .= " and lasku.kerayspvm <= now() ";
+			$tilausrivilisa .= " and lasku.kerayspvm <= now() and tilausrivi.kerayspvm <= now() ";
 		}
 
 		if ($toimittaja != '') {

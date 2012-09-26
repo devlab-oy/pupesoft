@@ -4,7 +4,7 @@
 </div>
 
 <div class='main'>
-	<form method='post'>
+	<form method='post' action='inventointi.php'>
 		<table>
 			<tr>
 				<th>M‰‰r‰</th>
@@ -31,6 +31,7 @@
 			</tr>
 		</table>
 		<input type='hidden' name='tee' value='inventoidaan'>
+		<input type='hidden' name='tyyppi' value='<?=$tyyppi?>'>
 		<input type='submit' name='inventoidaan' value='OK'>
 		<a href='inventointi.php?tee=inventoidaan' class='color green button'>OK</a>
 		<a href='inventointi.php' class='color red button'>Lopeta</a>

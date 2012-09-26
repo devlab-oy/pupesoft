@@ -22,6 +22,7 @@
 					<td><input type='text' name='tuoteno' value='<?= $osuma['tuoteno'] ?>'></td>
 					<td><a href='inventointi.php?<?= $url ?>'><?= $osuma['tuoteno'] ?></a></td>
 					<td><?= $osuma['tuotepaikka'] ?></td>
+					<td><? if($osuma['inventointilista_aika'] != '0000-00-00 00:00:00') echo "({$osuma['inventointilista']})" ?></td>
 				</tr>
 			<?php endforeach ?>
 

@@ -37,6 +37,8 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 		$query = "SELECT
 				tuote.nimitys,
 				tuote.tuoteno,
+				tuotepaikat.inventointilista,
+				tuotepaikat.inventointilista_aika,
 				concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 							tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
 				FROM tuotepaikat
@@ -102,13 +104,11 @@ if ($tee == 'varmistuskoodi') {
 	}
 
 	# Setataan takaisin nappi, riippuen mistä on tultu
-	if (!empty($tuotepaikka)) {
-		$back = http_build_query(array('tee' => 'vapaa_inventointi'));
-	}
-	else {
-		$back = http_build_query(array('tee' => 'useita_listoja'));
-	}
+	if (!empty($tuotepaikka)) $back = http_build_query(array('tee' => 'vapaa_inventointi'));
+	else $back = http_build_query(array('tee' => 'useita_listoja'));
 
+	$tyyppi = 'vapaa';
+	# Inventoidaan listalla
 	if (!empty($lista)) {
 		# Haetaan listan ensimmäinen tuote
 		# Skipataan kyseisen listalta jo inventoidut tuotteet
@@ -128,11 +128,9 @@ if ($tee == 'varmistuskoodi') {
 			$result = pupe_query($query);
 			$result = mysql_fetch_assoc($result);
 
-			echo "<br><br>";
-			var_dump($result);
-
 			$tuotepaikka = $result['tuotepaikka'];
 			$tuoteno = $result['tuoteno'];
+			$tyyppi = "lista";
 	}
 
 	$hylly = explode('-', $tuotepaikka);
@@ -144,22 +142,20 @@ if ($tee == 'varmistuskoodi') {
 		# tarkistetaan koodi ja mennään eteenpäin.
 		if ($tuotepaikka == $_COOKIE['_tuotepaikka'] and isset($_COOKIE['_varmistuskoodi'])) {
 			if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $_COOKIE['_varmistuskoodi']) or $_varmistuskoodi ==  '9999') {
-				$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka));
+				$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka, 'tyyppi' => $tyyppi));
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".$url."'>";
 			} else {
-				echo "tarkista_varasto feilas, väärä koodi!";
+				#echo "tarkista_varasto feilas, väärä koodi!";
 			}
 		}
 	}
 
 	# Varmistuskoodi annettu
 	if (is_numeric($varmistuskoodi)) {
-		echo "tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi)";
-
 		if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi) or $varmistuskoodi == '9999') {
 			# hyllypaikka ja koodi OK!
 			echo "Koodi OK!";
-			$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka));
+			$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka, 'tyyppi' => $tyyppi));
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".$url."'>";
 		}
 		else $errors[] = t("Varmistuskoodi on väärin!")."!";
@@ -196,7 +192,7 @@ if ($tee == 'laske_maara') {
 				FROM tuotteen_avainsanat
 				WHERE tuoteno='{$tuoteno}'
 				AND yhtio='{$kukarow['yhtio']}'
-				AND (laji='pakkauskoko2' OR laji='pakkauskoko3');";
+				AND (laji='pakkauskoko2' OR laji='pakkauskoko3')";
 	$result = pupe_query($query);
 	$count = mysql_num_rows($result);
 
@@ -266,7 +262,20 @@ if ($tee == 'inventoidaan') {
 	$tuote = array($result['tunnus'] => $hash);
 	$maara = array($result['tunnus'] => $maara);
 
+	# inventointi
 	include('inventointi_valmis.php');
+
+	# Jos kaikki ok
+	# echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".$paluu_url."'>";
+
+	if ($tyyppi == 'vapaa') {
+		# Jos haettu tuotepaikalla?
+		$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka, 'tyyppi' => 'vapaa'));
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".$url."'>";
+	}
+	else {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?tee='>";
+	}
 }
 
 if ($tee == 'useita_listoja') {
@@ -287,12 +296,14 @@ if ($tee == 'useita_listoja') {
 		$listat[] = $row;
 	}
 
-	$linkki = http_build_query(array(
-			'tee' => 'varmistuskoodi',
-			'lista' => ''));
-
-	$title = t('Useita listoja');
-	include('views/inventointi/listoja.php');
+	if (count($listat) > 0) {
+		$title = t('Useita listoja');
+		include('views/inventointi/listoja.php');
+	}
+	else {
+		$errors[] =  t("Inventoitavia eriä ei ole");
+		$title = t("Inventointi");
+		include('views/inventointi/index.php');	}
 }
 
 # Virheet

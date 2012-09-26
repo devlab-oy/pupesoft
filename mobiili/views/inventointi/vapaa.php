@@ -6,7 +6,7 @@
 <div class='main'>
 
 	<form action='inventointi.php' method='get'>
-		<input type='hidden' name='tee' value='haku'>
+		<input type='hidden' name='tee' value='vapaa_inventointi'>
 		<table>
 			<tr>
 				<th>Viivakoodi</th>

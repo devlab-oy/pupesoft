@@ -12974,7 +12974,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			mysql_data_seek($riresult1, 0);
 		}
 
-		if (mysql_num_rows($riresult2) > 0) {
+		if (mysql_num_rows($riresult1) > 1 and mysql_num_rows($riresult2) > 0) {
 			while ($row = mysql_fetch_assoc($riresult2)) {
 
 				$query = "	SELECT *
@@ -12993,16 +12993,16 @@ if (!function_exists("palauta_vak_tiedot")) {
 						$vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
 
 						if (!isset($tuotepainot)) {
-							$vakkirakirri .= sprintf("%.1f", $row["kilot"]);
+							$vakkirakirri .= round($row["kilot"]);
 						}
 
 						$vakrakirtiedot[] = $vakkirakirri;
 					}
 					else {
-						$vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".sprintf("%.1f", $row["kilot"])." kg) ".t("sisältäen", $kieli).":";
+						$vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".round($row["kilot"])." kg) ".t("sisältäen", $kieli).":";
 					}
 
-					$rakirkilot += $row["kilot"];
+					$rakirkilot += round($row["kilot"]);
 				}
 			}
 		}
@@ -13035,7 +13035,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					}
 
 					if ($tyyppi == "DGD" and isset($tuotepainot)) {
-						$vakecho .= "###".sprintf("%.1f", $tuotepainot);
+						$vakecho .= "###".round($tuotepainot);
 					}
 
 					$max_ltq_til = 0;
@@ -13048,9 +13048,9 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot = 0;
 				}
 
-				$eramaara = round($row["kpl"]/$row["era"],1);
+				$eramaara = ceil($row["kpl"]/$row["era"]);
 
-				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." $row[era] x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
 
 				// Mikä on toistaiseksi suurin vakmäärä
 				$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
@@ -13065,8 +13065,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
 
 				if (isset($tuotepainot)) {
-					$tuotepainot += $row["tuotepaino"];
-					$tuotepainot_yht += $row["tuotepaino"];
+					$tuotepainot += round($row["tuotepaino"]);
+					$tuotepainot_yht += round($row["tuotepaino"]);
 				}
 
 				$edrow = $row;
@@ -13091,7 +13091,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			}
 
 			if ($tyyppi == "DGD" and isset($tuotepainot)) {
-				$vakecho .= "###".sprintf("%.1f", $tuotepainot);
+				$vakecho .= "###$tuotepainot";
 			}
 
 			if ($vakecho != "") {
@@ -13100,7 +13100,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			if (isset($tuotepainot)) {
 				$vaktuotetiedot[] = "";
-				$vaktuotetiedot[] = "TOTAL GROSS MASS: ".sprintf("%.1f", $rakirkilot)." kg";
+				$vaktuotetiedot[] = "TOTAL GROSS MASS: $rakirkilot kg";
 			}
 		}
 

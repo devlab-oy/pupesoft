@@ -402,7 +402,7 @@
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos lasku on liitetty keikkaan ja rivillä on veroa
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
-			// vesak 2012-09-24 tai rivilla on manuaali_esto
+			//tai rivilla on manuaali_esto
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>

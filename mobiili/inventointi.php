@@ -1,24 +1,25 @@
 <?php
 
-$_GET['ohje'] = 'off';
-$_GET['no_css'] = 'yes';
-$mobile = true;
-
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
-
 # Varmistuskoodi ja hyllypaikka talteen
 if ($_GET['tee'] == 'varmistuskoodi' and (isset($_POST['varmistuskoodi']) or isset($_GET['lista']))) {
+	# Varmistuskoodi ja tuotepaikka talteen
 	setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
 	setcookie("_tuotepaikka", $_POST['tuotepaikka']);
 	setcookie("_lista", $_GET['lista']);
 }
 # Nollataan keksit
 if ($_GET['tee'] == '' and (isset($_COOKIE['_tuotepaikka']) or isset($_COOKIE['_varmistuskoodi']))) {
-	#setcookie("_varmistuskoodi");
-	#setcookie("_tuotepaikka");
-	#setcookie("_lista");
+	setcookie("_varmistuskoodi");
+	setcookie("_tuotepaikka");
+	setcookie("_lista");
 }
+
+$_GET['ohje'] = 'off';
+$_GET['no_css'] = 'yes';
+$mobile = true;
+
+if (@include_once("../inc/parametrit.inc"));
+elseif (@include_once("inc/parametrit.inc"));
 
 $_GET['ohje'] = 'off';
 $_GET['no_css'] = 'yes';
@@ -138,17 +139,15 @@ if ($tee == 'varmistuskoodi') {
 
 	# Jos on talletettu tuotepaikka ja varmistuskoodi
 	if (isset($_COOKIE['_tuotepaikka']) and isset($_COOKIE['_varmistuskoodi'])) {
-		echo "<br>Edellinen: ".$_tuotepaikka." : ".$_varmistuskoodi;
 
 		# Jos nykyinen tuotepaikka on sama kuin edellisellä kerralla
 		# tarkistetaan koodi ja mennään eteenpäin.
 		if ($tuotepaikka == $_COOKIE['_tuotepaikka'] and isset($_COOKIE['_varmistuskoodi'])) {
-
-			if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $_COOKIE['varmistuskoodi']) or $_varmistuskoodi = '9999') {
+			if (tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $_COOKIE['_varmistuskoodi']) or $_varmistuskoodi ==  '9999') {
 				$url = http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno, 'tuotepaikka' => $tuotepaikka));
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=inventointi.php?".$url."'>";
 			} else {
-				echo "tarkista_varasto feilas, väärät koodit!";
+				echo "tarkista_varasto feilas, väärä koodi!";
 			}
 		}
 	}
@@ -176,6 +175,7 @@ if ($tee == 'laske_maara') {
 	# Mitä parametrejä tarvitaan (tuoteno)
 	assert(!empty($tuoteno));
 
+	# Haetaan tuotteen ja tuotepaikan tiedot
 	$query = "	SELECT
 				tuote.nimitys,
 				tuote.tuoteno,
@@ -190,10 +190,6 @@ if ($tee == 'laske_maara') {
 				order by tuotepaikka";
 	$result = pupe_query($query);
 	$tuote = mysql_fetch_assoc($result);
-
-	echo "<pre>";
-	var_dump($tuote);
-	echo "</pre>";
 
 	# Disabloidaan apulaskuri jos pakkaus2-3 ei löydy?
 	$query = "	SELECT tunnus

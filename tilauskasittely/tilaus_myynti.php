@@ -6579,7 +6579,7 @@ if ($tee == '') {
 						// muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$rah_hinta = laskuval($rah_hinta, $laskurow["vienti_kurssi"]);
-						}						
+						}
 
 						foreach ($rah_ale as $key => $val) {
 							$rah_hinta *= (1 - ($val / 100));
@@ -6595,7 +6595,7 @@ if ($tee == '') {
 
 					if (is_array($rah_ale) and count($rah_ale) > 0) {
 						foreach ($rah_ale as $key => $val) {
-							echo " ($key $val %)";
+							if ($val > 0) echo " ($key $val %)";
 						}
 					}
 

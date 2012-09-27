@@ -6572,74 +6572,40 @@ if ($tee == '') {
 					// haetaan rahtimaksu
 					// hae_rahtimaksu-funktio palauttaa arrayn, jossa on rahtimatriisin hinta ja alennus
 					// mahdollinen alennus (i.e. asiakasalennus) tulee dummy-tuotteelta, joka voi olla syötettynä toimitustavan taakse
-					$rahtihinta_array = hae_rahtimaksu($laskurow["tunnus"]);
+					list($rah_hinta, $rah_ale, $rah_alv, $rah_netto) = hae_rahtimaksu($laskurow["tunnus"]);
 
-					$rahtihinta_ale_kaikki_array = array();
-
-					// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
-					if (is_array($rahtihinta_array)) {
-						$rahtihinta = $rahtihinta_array['rahtihinta'];
-
-						foreach ($rahtihinta_array['alennus'] as $ale_key => $ale_val) {
-							$rahtihinta_ale_kaikki_array[$ale_key] = $ale_val;
-						}
-					}
-					else {
-						$rahtihinta = 0;
-					}
-
-					if ($rahtihinta != 0) {
-
-						// haetaan rahtituotteen tiedot
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-						$rahti_trow_res = pupe_query($query);
-						$rahti_trow  = mysql_fetch_assoc($rahti_trow_res);
-
-						$netto = count($rahtihinta_ale_kaikki_array) > 0 ? '' : 'N';
+					if ($rah_hinta > 0) {
 
 						// muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-							$rahtihinta = laskuval($rahtihinta, $laskurow["vienti_kurssi"]);
+							$rah_hinta = laskuval($rah_hinta, $laskurow["vienti_kurssi"]);
 						}
 
-						list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_trow, '1', $netto, $rahtihinta, $rahtihinta_ale_kaikki_array);
-						list($hinta, $alv) = alv($laskurow, $rahti_trow, $lis_hinta, '', $alehinta_alv);
-
-						// muutetaan rahtihinta laskun valuuttaan, koska alehinta-funktio palauttaa aina hinnan yhtiön kotivaluutassa
-						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
-						}
-
-						$rahtihinta = $hinta;
-
-						foreach ($lis_ale_kaikki as $key => $val) {
-							$rahtihinta *= (1 - ($val / 100));
+						foreach ($rah_ale as $key => $val) {
+							$rah_hinta *= (1 - ($val / 100));
 						}
 
 						// jos yhtiön tuotteiden myyntihinnat ovat arvonlisäverottomia ja lasku on verollinen, lisätään rahtihintaan arvonlisävero
 						if ($yhtiorow['alv_kasittely'] != '' and $laskurow['alv'] != 0) {
-							$rahtihinta = $rahtihinta * (1 + ($alv / 100));
+							$rah_hinta = $rah_hinta * (1 + ($rah_alv / 100));
 						}
 					}
 
 					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu")." ",t("verollinen");
 
-					if (is_array($rahtihinta_ale_kaikki_array) and count($rahtihinta_ale_kaikki_array) > 0) {
-						foreach ($rahtihinta_ale_kaikki_array as $key => $val) {
-							echo " ($key $val %)";
+					if (is_array($rah_ale) and count($rah_ale) > 0) {
+						foreach ($rah_ale as $key => $val) {
+							if ($val > 0) echo " ($key $val %)";
 						}
 					}
 
-					echo ":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td>";
+					echo ":</th><td class='spec' align='right'>".sprintf("%.2f",$rah_hinta)."</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td>";
+					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rah_hinta)."</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}

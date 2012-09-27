@@ -1311,7 +1311,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 6;
+			$miinus = 7;
 		}
 		$result = pupe_query($query);
 

@@ -283,11 +283,11 @@
 		echo "<table>";
 		echo "<tr><th>".t("Laskun kieli").":</th>";
 		echo "<td><select name='kieli'>";
-		echo "<option value='fi' $sel[fi]>".t("Suomi")."</option>";
-		echo "<option value='se' $sel[se]>".t("Ruotsi")."</option>";
-		echo "<option value='en' $sel[en]>".t("Englanti")."</option>";
-		echo "<option value='de' $sel[de]>".t("Saksa")."</option>";
-		echo "<option value='dk' $sel[dk]>".t("Tanska")."</option>";
+		echo "<option value='fi'>".t("Suomi")."</option>";
+		echo "<option value='se'>".t("Ruotsi")."</option>";
+		echo "<option value='en'>".t("Englanti")."</option>";
+		echo "<option value='de'>".t("Saksa")."</option>";
+		echo "<option value='dk'>".t("Tanska")."</option>";
 		echo "</select></td></tr>";
 
 		echo "<tr><th>".t("Laskutulostin").":</th><td><select name='valittu_tulostin'>";

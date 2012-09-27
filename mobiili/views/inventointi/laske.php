@@ -1,14 +1,16 @@
 <div class='header'>
-	<button onclick='window.location.href="inventointi.php?tee=vapaa_inventointi"' class='button left'><img src='back2.png'></button>
+	<button onclick='window.location.href="inventointi.php"' class='button left'><img src='back2.png'></button>
 	<h1><?php echo $title ?></h1>
 </div>
 
 <div class='main'>
 	<form method='post' action='inventointi.php'>
+		tuoteno<input type='text' name='tuoteno' value='<?= $tuote['tuoteno'] ?>'>
+		lista<input type='text' name='lista' value='<?= $tuote['inventointilista'] ?>'>
 		<table>
 			<tr>
 				<th>M‰‰r‰</th>
-				<td><input type='text' name='maara' value='<?= $maara ?>'></td>
+				<td><input type='text' name='maara' value='<?= $maara ?>' size='4'></td>
 				<td><?= $tuote['yksikko'] ?></td>
 			</tr>
 			<tr>
@@ -26,16 +28,14 @@
 			<tr>
 				<th>Tuotepaikka</th>
 				<td><?= $tuote['tuotepaikka'] ?></td>
-				<td><input type='text' name='tuote' value='<?= $tuote['tuoteno'] ?>'>
-				<td><input type='text' name='lista' value='<?= $tuote['inventointilista'] ?>'>
 			</tr>
 		</table>
-		<input type='hidden' name='tee' value='inventoidaan'>
-		<input type='hidden' name='tyyppi' value='<?=$tyyppi?>'>
+		<input type='hidden' name='tee' value='inventoi'>
 		<input type='submit' name='inventoidaan' value='OK'>
-		<a href='inventointi.php?tee=inventoidaan' class='color green button'>OK</a>
+		<a href='inventointi.php?tee=haku' class='color green button'>OK</a>
 		<a href='inventointi.php' class='color red button'>Lopeta</a>
 	</form>
+
 	<? if($disabled): ?>
 		<a href='inventointi.php?<?= http_build_query(array('tee' => 'apulaskuri', 'tuoteno' => $tuote['tuoteno'])) ?>' class='color blue button'>Apulaskuri</a>
 	<? endif ?>

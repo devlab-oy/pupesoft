@@ -11,12 +11,11 @@
 				<th>Listan nro</th>
 				<th>Tuotteita</th>
 				<th>Hyllyalue väli</th>
-				<th>eka_hylly</th>
 			</tr>
 
 			<? foreach($listat as $lista): ?>
 				<tr>
-					<td><a href='?tee=varmistuskoodi&lista=<?= $lista['lista'] ?>'><?= $lista['lista'] ?></a></td>
+					<td><a href='?tee=laske&lista=<?= $lista['lista'] ?>'><?= $lista['lista'] ?></a></td>
 					<td><?= $lista['tuotteita'] ?></td>
 					<td><?= $lista['hyllyvali'] ?></td>
 					<td><?= $ensimmainen['tuotepaikka'] ?></td>

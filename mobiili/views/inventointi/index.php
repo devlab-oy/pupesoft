@@ -6,13 +6,13 @@
 <div class='main'>
 	<table>
 		<tr>
-			<td><a href='inventointi?tee=vapaa_inventointi'>Vapaa inventointi</a></td>
+			<td><a href='inventointi?tee=haku'>Vapaa inventointi</a></td>
 		</tr>
 		<tr>
-			<td><a href='?tee=useita_listoja'>Keräyspaikat listalta</a></td>
+			<td><a href='?tee=listat'>Keräyspaikat listalta</a></td>
 		</tr>
 		<tr>
-			<td><a href='?tee=useita_listoja'>Reservipaikat listalta</a></td>
+			<td><a href='?tee=listat'>Reservipaikat listalta</a></td>
 		</tr>
 		</tr>
 	</table>

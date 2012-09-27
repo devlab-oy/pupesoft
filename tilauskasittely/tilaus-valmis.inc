@@ -525,21 +525,7 @@ else {
 				if ($torow["nouto"] == "") {
 
 					// haetaan rahtimaksu
-					$rahtihinta_array = hae_rahtimaksu($rahtimaksu_tunnukset);
-
-					$rahtihinta_ale_kaikki_array = array();
-
-					// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
-					if (is_array($rahtihinta_array)) {
-						$rahtihinta = $rahtihinta_array['rahtihinta'];
-
-						foreach ($rahtihinta_array['alennus'] as $ale_key => $ale_val) {
-							$rahtihinta_ale_kaikki_array[$ale_key] = $ale_val;
-						}
-					}
-					else {
-						$rahtihinta = 0;
-					}
+					list($rah_hinta, $rah_ale, $rah_alv, $rah_netto) = hae_rahtimaksu($rahtimaksu_tunnukset);
 
 					// haetaan rahtituotteen tiedot
 					$query = "	SELECT *
@@ -549,29 +535,26 @@ else {
 					$rhire = pupe_query($query);
 
 					//lisätään rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivejä on ilmeisesti turha lisätä (ja rahtikulutuote löytyy)
-					if ($rahtihinta != 0 and mysql_num_rows($rhire) == 1) {
+					if ($rah_hinta > 0 and mysql_num_rows($rhire) == 1) {
 
-						$trow  = mysql_fetch_assoc($rhire);
-
-						$otunnus	 = $laskurow['tunnus'];
-						$hinta		 = $rahtihinta;
-						$trow["alv"] = $laskurow["alv"];
-						$nimitys	 = $laskurow["toimitustapa"];
-						$netto 		 = count($rahtihinta_ale_kaikki_array) > 0 ? '' : 'N';
-
-						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale_kaikki_array);
-						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+						$trow  	 = mysql_fetch_assoc($rhire);
+						$otunnus = $laskurow['tunnus'];
+						$nimitys = $laskurow["toimitustapa"];
 
 						$query_ale_lrivi = "";
+						$rah_alet = "";
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							$query_ale_lrivi .= " ale{$alepostfix} = '".$lis_ale['ale'.$alepostfix]."',";
+							if (isset($rah_ale["ale{$alepostfix}"]) and $rah_ale["ale{$alepostfix}"] > 0) {
+								$query_ale_lrivi .= " ale{$alepostfix} = '".$rah_ale['ale'.$alepostfix]."',";
+								$rah_alet .= ", ".t("Ale")."$alepostfix: ".$rah_ale["ale{$alepostfix}"]."%";
+							}
 						}
 
 						$query = "	INSERT into tilausrivi SET
 									laadittu	= now(),
-									hinta 		= '$hinta',
-									netto 		= '$netto',
+									hinta 		= '$rah_hinta',
+									netto 		= '$rah_netto',
 									varattu 	= '1',
 									tilkpl 		= '1',
 									otunnus 	= '$otunnus',
@@ -580,16 +563,10 @@ else {
 									yhtio 		= '$kukarow[yhtio]',
 									tyyppi 		= 'L',
 									$query_ale_lrivi
-									alv 		= '$alv'";
+									alv 		= '$rah_alv'";
 						$addtil = pupe_query($query);
 
-						if ($rahtihinta_ale != 0) {
-							$hinta *= (1 - ($rahtihinta_ale / 100));
-						}
-
-						$hinta = money_format('%.2n', $hinta);
-
-						$tilaus_valmis_ulos .= t("Tilaukselle lisättiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
+						$tilaus_valmis_ulos .= t("Tilaukselle lisättiin rahtikulua").": $rah_hinta $laskurow[valkoodi]$rah_alet<br>";
 					}
 
 					if ($yhtiorow["jalkivaatimus_tuotenumero"] == "") {

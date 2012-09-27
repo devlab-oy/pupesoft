@@ -1,5 +1,12 @@
 <?php
+
 	header('Content-Type: application/json');
+	header('Access-Control-Allow-Origin: *');
+	header('Access-Control-Allow-Headers: X-Requested-With');
+
+	if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+		return;
+	}
 
 	$data = $_GET;
 	error_reporting(E_ALL ^E_NOTICE);
@@ -226,4 +233,3 @@
 	else {
 		rest_virhe_header("Valittu tyyppi ei ole sallittu");
 	}
-?>

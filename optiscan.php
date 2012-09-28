@@ -545,7 +545,7 @@
 		$response = "0x100";
 
 	}
-	elseif ($sanoma == "AllPicked") {
+	elseif ($sanoma == "StopAssignment") {
 
 		// Napataan kukarow ja yhtorow
 		$yhtiorow = hae_yhtion_parametrit("artr");
@@ -652,27 +652,27 @@
 					if (isset($laheteprintterinimi) and $laheteprintterinimi != "") {
 						$laheteprintterinimi = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $laheteprintterinimi);
 
-						$response = "{$lahete_tulostus_paperille} l‰hetett‰ tulostuu kirjoittimelta {$laheteprintterinimi},0,\r\n\r\n";
+						$response = "0,{$lahete_tulostus_paperille} l‰hetett‰ tulostuu kirjoittimelta {$laheteprintterinimi}\r\n\r\n";
 					}
 					else {
-						$response = "{$lahete_tulostus_paperille} l‰hetett‰ tulostuu kirjoittimelta,0,\r\n\r\n";
+						$response = "0,{$lahete_tulostus_paperille} l‰hetett‰ tulostuu kirjoittimelta\r\n\r\n";
 					}
 				}
 				else {
-					$response = "L‰hetteit‰ ei tulosteta,0,\r\n\r\n";
+					$response = "0,L‰hetteit‰ ei tulosteta\r\n\r\n";
 				}
 			}
 		}
 	}
-	elseif ($sanoma == "StopAssignment") {
+	elseif ($sanoma == "AllPicked") {
 
 		// Napataan kukarow ja yhtorow
-		$yhtiorow = hae_yhtion_parametrit("artr");
-		$kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
+		// $yhtiorow = hae_yhtion_parametrit("artr");
+		// $kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
 
-		$nro = (int) trim($sisalto[3]);
+		// $nro = (int) trim($sisalto[3]);
 
-		$response = "0,\r\n\r\n";
+		$response = "Er‰ valmis,0,\r\n\r\n";
 	}
 	elseif ($sanoma == "SignOff") {
 

@@ -798,7 +798,7 @@
 										{$splitlisa}
 										{$splitlisa2}
 										{$rivihintalisa}
-										tilkpl = '{$rtuoteno[$i]['kpl']}'
+										, tilkpl = '{$rtuoteno[$i]['kpl']}'
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tunnus = '{$lapsi_chk_row['tunnus']}'";
 							$upres = pupe_query($query);

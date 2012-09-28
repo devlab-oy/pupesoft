@@ -789,8 +789,15 @@
 
 							echo "uusi lapsen id: $lapsi_uusi_id<br>";
 
+							$splitlisa = $tilausrivirow['kpl'] > 0 ? " varattu = '0' " : " varattu = '{$rtuoteno[$i]['kpl']}' ";
+							$splitlisa2 = $tilausrivirow['kpl'] > 0 ? ", kpl = '{$rtuoteno[$i]['kpl']}'" : ", kpl = 0 ";
+							$rivihintalisa = $tilausrivirow['kpl'] > 0 ? ", rivihinta = '".(($tilausrivirow['rivihinta'] / $tilausrivirow['kpl']) * $rtuoteno[$i]['kpl'])."'" : ", rivihinta = 0";
+
 							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
 							$query = "	UPDATE tilausrivi SET
+										{$splitlisa}
+										{$splitlisa2}
+										{$rivihintalisa}
 										tilkpl = '{$rtuoteno[$i]['kpl']}'
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tunnus = '{$lapsi_chk_row['tunnus']}'";

@@ -18,7 +18,7 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta_new.php") !== FALSE) {
+	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
 	}
 
@@ -1778,7 +1778,7 @@
 					}
 
 					if ($query != "") {
-						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta_new.php") !== FALSE) {
+						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 							if(@include('Spreadsheet/Excel/Writer.php')) {
 
 								//keksit‰‰n failille joku varmasti uniikki nimi:
@@ -2137,7 +2137,7 @@
 											$serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = "asiakasryhma";
 										}
 
-										$row[$ken_nimi] = "<a href='myyntiseuranta_new.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+										$row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
 									}
 
 									// jos kyseessa on piiri, haetaan sen nimi
@@ -2173,7 +2173,7 @@
 											$serialisoitavat_muuttujat["ruksit"][80] = "tuote";
 										}
 
-										$row[$ken_nimi] = "<a href='myyntiseuranta_new.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+										$row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
 									}
 
 									// jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -2203,7 +2203,7 @@
 											$serialisoitavat_muuttujat["ruksit"]["try"] = "tuoteryhma";
 										}
 
-										$row[$ken_nimi] = "<a href='myyntiseuranta_new.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+										$row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
 									}
 
 									// jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -2230,7 +2230,7 @@
 											$serialisoitavat_muuttujat["ruksit"][30] = "tuote";
 										}
 
-										$row[$ken_nimi] = "<a href='myyntiseuranta_new.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+										$row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
 									}
 
 									// jos kyseessa on myyj‰, haetaan sen nimi
@@ -2629,7 +2629,7 @@
 			}
 		}
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta_new.php") !== FALSE) {
+		if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 			require ("../inc/footer.inc");
 		}
 	}

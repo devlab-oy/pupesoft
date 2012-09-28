@@ -2045,7 +2045,7 @@ if (!function_exists("synkronoi")) {
 		global $yhtiorow, $kukarow, $synkronoi_kiellot;
 
 		//	Onko mahdollista synkronoida?
-		if (strpos($yhtiorow["synkronoi"], $table) === false) {
+		if (stripos($yhtiorow["synkronoi"], $table) === false) {
 			return false;
 		}
 
@@ -8813,13 +8813,12 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 if (!function_exists("hae_rahtimaksu")) {
 	// otetaan sisään halutut otsikot mysql muodossa (1,2,3,4)
 	function hae_rahtimaksu ($otsikot) {
-
 		global $kukarow, $yhtiorow;
 
 		$otsikot = mysql_real_escape_string(trim($otsikot));
 
 		if ($otsikot == "") {
-			return 0;
+			return array(0, 0, 0, 0);
 		}
 
 		// haetaan ensimmäisen otsikon tiedot
@@ -8836,12 +8835,45 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		// jos JT-tilaukset annetaan aina rahtivapaasti
 		if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "B") {
-			return 0;
+			return array(0, 0, 0, 0);
 		}
 
 		// jos laskulla on rahtivapaa täppä niin annetaan ilmaseks (paitsi jos kyseessä on JT ja niille halutaan väkisin rahti optiot C tai D)
 		if ($laskurow["rahtivapaa"] != "" AND ($laskurow["clearing"] != "JT-TILAUS" OR $yhtiorow["jt_rahti"] != "C") AND ($laskurow["clearing"] != "JT-TILAUS" OR $yhtiorow["jt_rahti"] != "D")) {
-			return 0;
+			return array(0, 0, 0, 0);
+		}
+
+		// Jos rahtituoteno tulee toimitustavan takaa, niin tehdään alennuslaskenta
+		$rahtituoteno_toimitustavalta = FALSE;
+
+		// yhtiön rahtikulutuotenumero, ilman tätä ei onnistu
+		$query = "  SELECT tuote.*
+					FROM tuote
+					WHERE yhtio  = '$kukarow[yhtio]'
+					AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+					AND tuoteno != ''";
+		$rahti_tuoteno_result = pupe_query($query);
+
+		// Ei löydetty sopivaa tuotetta
+		if (mysql_num_rows($rahti_tuoteno_result) == 0) {
+			return array(0, 0, 0, 0);
+		}
+		else {
+			$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
+		}
+
+		// katsotaan onko toimitustavan taakse syötetty rahtimaksutuoteno
+		$query = "	SELECT tuote.*
+					FROM toimitustapa
+					JOIN tuote ON (tuote.yhtio = toimitustapa.yhtio AND tuote.tuoteno = toimitustapa.rahti_tuotenumero)
+					WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
+					AND toimitustapa.selite  = '$laskurow[toimitustapa]'
+					AND toimitustapa.rahti_tuotenumero not in ('','$yhtiorow[rahti_tuotenumero]')";
+		$rahti_tuoteno_result = pupe_query($query);
+
+		if (mysql_num_rows($rahti_tuoteno_result) == 1) {
+			$rahtituoteno_toimitustavalta = TRUE;
+			$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 		}
 
 		// jos meillä on automaattinen tuoteella tallennettuihin painoihin perustuva hinnoittelu
@@ -8849,7 +8881,7 @@ if (!function_exists("hae_rahtimaksu")) {
 		// erikoisvarastoista myydyt tuotteet ovat aina rahtivapaita ja lähettäjä maksaa rahdin.
 		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
 			// Jos hyvitysrivi ja tuotteen paino on nolla niin laitetaan tuotteen painoksi yksi gramma, muuten hyvärillekin saattaa tulla rahtia jos kaikkien tuotteiden painot on nolla.
-			$query  = "	SELECT sum(if ((varattu + kpl + jt) < 0 and tuotemassa = 0, 0.001, tuotemassa) * (varattu + kpl + jt)) massa
+			$query  = "	SELECT sum(if((varattu + kpl + jt) < 0 and tuotemassa = 0, 0.001, tuotemassa) * (varattu + kpl + jt)) massa
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
@@ -8925,7 +8957,14 @@ if (!function_exists("hae_rahtimaksu")) {
 						AND otsikkonro in ($otsikot)";
 			$pakre = pupe_query($query);
 			$pakka = mysql_fetch_assoc($pakre);
-			$kyht = $pakka["kilot"];
+
+			// Jos rahtikirjaa ei olla syötetty niin resturnataan nollaa
+			if (is_null($pakka["kilot"])) {
+				return array(0, 0, 0, 0);
+			}
+			else {
+				$kyht = $pakka["kilot"];
+			}
 		}
 
 		// haetaan ensimmäinen (pienimmällä postinumerolla) etäisyys
@@ -8948,8 +8987,8 @@ if (!function_exists("hae_rahtimaksu")) {
 			$km = 0;
 		}
 
-		//haetaan tällä rahtimaksu hinnan/painon ja/tai etäisyyden mukaan
-		$query = "	SELECT *
+		// haetaan rahtimaksu hinnan/painon ja/tai etäisyyden mukaan
+		$query = "	SELECT rahtihinta
 					FROM rahtimaksut
 					WHERE toimitustapa = '$laskurow[toimitustapa]'
 					AND toimitustapa != ''
@@ -8963,38 +9002,29 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		if (mysql_num_rows($rares) == 1) {
 			$hirow = mysql_fetch_assoc($rares);
-
-			// katsotaan onko toimitustavan taakse syötetty vaihtoehtoinen rahdin tuotenumero, jolle on annettu asiakasalennus
-			$query = "	SELECT rahti_tuotenumero
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND selite = '$laskurow[toimitustapa]'
-						AND rahti_tuotenumero != ''";
-			$rahti_tuoteno_result = pupe_query($query);
-
 			$ale_kaikki_array = array();
 
-			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
-				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
+			if ($rahtituoteno_toimitustavalta) {
+				// Etsitään spessuhintaa/alennuksia jos toimitustavan takana oli oma rahti_tuotenumero
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_tuoteno_row, 1, '', '', '');
 
-				$query = "	SELECT *
-							FROM tuote
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
-				$tres = pupe_query($query);
-				$trow = mysql_fetch_assoc($tres);
-
-				list($lis_hinta, $lis_netto, $ale_kaikki_array, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');
-
-				if (trim($lis_hinta) != '' and trim($lis_hinta) != 0) {
-					$hirow['rahtihinta'] = $lis_hinta;
+				// Ei asiakashintaa, otetaan hinta rahtimatriisista
+				if ((float) $lis_hinta == 0) {
+					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_tuoteno_row, 1, $lis_netto, $hirow['rahtihinta'], $lis_ale_kaikki);
 				}
 			}
+			else {
+				// Yhtiön oletus rahti_tuotenumero
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_tuoteno_row, 1, 'N', $hirow['rahtihinta'], '');
+			}
 
-			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale_kaikki_array);
+			// Alvit kuntoon
+			list($lis_hinta, $alehinta_alv) = alv($laskurow, $rahti_tuoteno_row, $lis_hinta, '', $alehinta_alv);
+
+			return array($lis_hinta, $lis_ale_kaikki, $alehinta_alv, $lis_netto);
 		}
 		else {
-			return 0;
+			return array(0, 0, 0, 0);
 		}
 	}
 }
@@ -13267,16 +13297,16 @@ if (!function_exists("palauta_vak_tiedot")) {
 						$vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
 
 						if (!isset($tuotepainot)) {
-							$vakkirakirri .= sprintf("%.1f", $row["kilot"]);
+							$vakkirakirri .= round($row["kilot"]);
 						}
 
 						$vakrakirtiedot[] = $vakkirakirri;
 					}
 					else {
-						$vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".sprintf("%.1f", $row["kilot"])." kg) ".t("sisältäen", $kieli).":";
+						$vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".round($row["kilot"])." kg) ".t("sisältäen", $kieli).":";
 					}
 
-					$rakirkilot += $row["kilot"];
+					$rakirkilot += round($row["kilot"]);
 				}
 			}
 		}
@@ -13309,7 +13339,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					}
 
 					if ($tyyppi == "DGD" and isset($tuotepainot)) {
-						$vakecho .= "###".sprintf("%.1f", $tuotepainot);
+						$vakecho .= "###".round($tuotepainot);
 					}
 
 					$max_ltq_til = 0;
@@ -13322,9 +13352,9 @@ if (!function_exists("palauta_vak_tiedot")) {
 					$tuotepainot = 0;
 				}
 
-				$eramaara = round($row["kpl"]/$row["era"],1);
+				$eramaara = ceil($row["kpl"]/$row["era"]);
 
-				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." $row[era] x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
+				$vaktuotetiedot[] = "$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." ".(float) $row['era']." x $row[tilavuus] (".t($row["materiaali"], $kieli).")";
 
 				// Mikä on toistaiseksi suurin vakmäärä
 				$ltq_yks = preg_replace("/[^a-z]/", "", strtolower($row["tilavuus"]));
@@ -13339,8 +13369,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
 
 				if (isset($tuotepainot)) {
-					$tuotepainot += $row["tuotepaino"];
-					$tuotepainot_yht += $row["tuotepaino"];
+					$tuotepainot += round($row["tuotepaino"]);
+					$tuotepainot_yht += round($row["tuotepaino"]);
 				}
 
 				$edrow = $row;
@@ -13365,7 +13395,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 			}
 
 			if ($tyyppi == "DGD" and isset($tuotepainot)) {
-				$vakecho .= "###".sprintf("%.1f", $tuotepainot);
+				$vakecho .= "###$tuotepainot";
 			}
 
 			if ($vakecho != "") {
@@ -13374,7 +13404,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 			if (isset($tuotepainot)) {
 				$vaktuotetiedot[] = "";
-				$vaktuotetiedot[] = "TOTAL GROSS MASS: ".sprintf("%.1f", $rakirkilot)." kg";
+				$vaktuotetiedot[] = "TOTAL GROSS MASS: $rakirkilot kg";
 			}
 		}
 

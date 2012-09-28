@@ -1,7 +1,8 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+// Tämä skripti käyttää slave-tietokantapalvelinta,
+// mutta katsotaan sessio aina masterilta, koska slave voi olla jäljessä ja sessio ei vielä voimassa.
+unset($useslave);
 
 if (file_exists("inc/connect.inc")) {
 	require ("inc/connect.inc");
@@ -22,6 +23,16 @@ if (mysql_num_rows($result) != 1) {
 	exit;
 }
 
+// Otetaan slave yhteys
+$useslave = 1;
+
+if (file_exists("inc/connect.inc")) {
+	require ("inc/connect.inc");
+}
+else {
+	require ("connect.inc");
+}
+
 $id = (int) $_GET["id"];
 
 $query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
@@ -40,5 +51,3 @@ if (mysql_num_rows($liiteres) > 0) {
 
 	echo $liiterow["data"];
 }
-
-?>

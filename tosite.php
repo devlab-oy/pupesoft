@@ -40,16 +40,16 @@
 	if (isset($muutparametrit)) {
 		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus, $ed_iliitos) = explode("#!#", $muutparametrit);
 
-		$itili		= unserialize(urldecode($itili));
-		$ikustp		= unserialize(urldecode($ikustp));
-		$ikohde		= unserialize(urldecode($ikohde));
-		$isumma		= unserialize(urldecode($isumma));
-		$ivero		= unserialize(urldecode($ivero));
-		$iselite	= unserialize(urldecode($iselite));
-		$iliitos 	= unserialize(urldecode($iliitos));
-		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
-		$ed_iliitos = unserialize(urldecode($ed_iliitos));
-		$tiliointirivit = unserialize(urldecode($tiliointirivit));
+		$itili				= unserialize(urldecode($itili));
+		$ikustp				= unserialize(urldecode($ikustp));
+		$ikohde				= unserialize(urldecode($ikohde));
+		$isumma				= unserialize(urldecode($isumma));
+		$ivero				= unserialize(urldecode($ivero));
+		$iselite			= unserialize(urldecode($iselite));
+		$iliitos 			= unserialize(urldecode($iliitos));
+		$ed_iliitostunnus 	= unserialize(urldecode($ed_iliitostunnus));
+		$ed_iliitos 		= unserialize(urldecode($ed_iliitos));
+		$tiliointirivit 	= unserialize(urldecode($tiliointirivit));
 	}
 
 	if ($toimittajaid > 0) {
@@ -119,17 +119,16 @@
 		require ("inc/kevyt_toimittajahaku.inc");
 
 		if ($toimittajaid > 0) {
-			$tee = "";
+			unset($teetosite);
 		}
 
 		if ($monta == 0) {
-			$tee = "N";
+			unset($teetosite);
 		}
 		elseif ($toimittajaid == 0) {
 			require ("inc/footer.inc");
 			exit;
 		}
-
 	}
 
 	if ($asiakas_y != '') {
@@ -140,11 +139,11 @@
 		require ("inc/asiakashaku.inc");
 
 		if ($asiakasid > 0) {
-			$tee = "";
+			unset($teetosite);
 		}
 
 		if ($monta == 0) {
-			$tee = "N";
+			unset($teetosite);
 		}
 		elseif ($asiakasid == 0) {
 			require ("inc/footer.inc");

@@ -499,7 +499,7 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
-					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>Lasku:</font></td><td class='back' colspan='3'><hr></td></tr>";
+					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>".t("Lasku").":</font></td><td class='back' colspan='3'><hr></td></tr>";
 				}
 
 				// jos yksikin on käteinen niin kaikki on käteistä (se hoidetaan jo ylhäällä)
@@ -602,28 +602,21 @@
 				if ($yhtiorow["rahti_hinnoittelu"] == "" and $row["rahtivapaa"] == "") {
 
 					// haetaan rahtimaksu
-					$rahtihinta_array = hae_rahtimaksu($row["tunnus"]);
+					list($rah_hinta, $rah_ale, $rah_alv, $rah_netto) = hae_rahtimaksu($row["tunnus"]);
 
-					$rahtihinta_ale = array();
+					$rah_alet = "";
 
-					if (is_array($rahtihinta_array)) {
-						$rahtihinta = $rahtihinta_array['rahtihinta'];
-
-						foreach ($rahtihinta_array['alennus'] as $ale_k => $ale_v) {
-							$rahtihinta_ale[$ale_k] = $ale_v;
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						if (isset($rah_ale["ale{$alepostfix}"]) and $rah_ale["ale{$alepostfix}"] > 0) {
+							$rah_alet .= ", ".t("Ale")."$alepostfix: ".$rah_ale["ale{$alepostfix}"]."%";
 						}
 					}
-					else {
-						$rahtihinta = 0;
-					}
-
-					$hinta = $rahtihinta;
 
 					if ($row["kohdistettu"] == "K") {
-						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
+						$rahti_hinta = "(" . (float) $rah_hinta ." $row[valkoodi]$rah_alet)";
 					}
 					else {
-						$rahti_hinta = "(vastaanottaja)";
+						$rahti_hinta = "(".t("vastaanottaja").")";
 					}
 				}
 
@@ -692,6 +685,7 @@
 
 				$edketjutus = $row["ketjutuskentta"];
 			}
+			
 			echo "</table><br>";
 
 			echo "<table>";

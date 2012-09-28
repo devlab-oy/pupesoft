@@ -40,7 +40,7 @@ FILENAME="${DBKANTA}-backup-${FILEDATE}.sql.bz2"
 mysqldump --lock-all-tables --flush-logs --master-data -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} | pbzip2 > ${BACKUPDIR}/${FILENAME}
 
 # siivotaan yli 30pv vanhat pois
-find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
+find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
 
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Backup done."

@@ -5,12 +5,13 @@
 
 <div class='main'>
 	<form method='post' action='inventointi.php'>
-		tuoteno<input type='text' name='tuoteno' value='<?= $tuote['tuoteno'] ?>'>
-		lista<input type='text' name='lista' value='<?= $tuote['inventointilista'] ?>'>
+		<input type='hidden' name='tuoteno' value='<?= $tuote['tuoteno'] ?>'>
+		<input type='hidden' name='tuotepaikka' value='<?= $tuote['tuotepaikka'] ?>'>
+		<input type='hidden' name='lista' value='<?= $tuote['inventointilista'] ?>'>
 		<table>
 			<tr>
 				<th>M‰‰r‰</th>
-				<td><input type='text' name='maara' value='<?= $maara ?>' size='4'></td>
+				<td><input type='text' name='maara' value='<?= $maara ?>' size=''></td>
 				<td><?= $tuote['yksikko'] ?></td>
 			</tr>
 			<tr>
@@ -32,8 +33,6 @@
 		</table>
 		<input type='hidden' name='tee' value='inventoi'>
 		<input type='submit' name='inventoidaan' value='OK'>
-		<a href='inventointi.php?tee=haku' class='color green button'>OK</a>
-		<a href='inventointi.php' class='color red button'>Lopeta</a>
 	</form>
 
 	<? if($disabled): ?>

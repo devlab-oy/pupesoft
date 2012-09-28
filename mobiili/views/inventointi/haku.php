@@ -24,7 +24,6 @@
 				<td colspan='2'>
 					<div class='controls'>
 						<input type='submit' value='OK'>
-						<a href='inventointi.php'>Lopeta</a>
 					</div>
 				</td>
 			</tr>

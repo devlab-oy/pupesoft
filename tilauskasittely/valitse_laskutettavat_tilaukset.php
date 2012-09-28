@@ -830,9 +830,9 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and ((mysql_fetch_array($prires) > 0 and $kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0 and $yhtiorow["lasku_tulostin"] == 0) 
+				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and ((mysql_fetch_array($prires) > 0 and $kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) 
 					or $kirrow["tunnus"] == $kukarow["kirjoitin"]
-					or $kirrow["tunnus"] == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0)) {
+					or $kirrow["tunnus"] == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0)) {
 					$sel = "SELECTED";
 				}
 

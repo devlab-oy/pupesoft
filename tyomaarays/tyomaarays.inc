@@ -18,7 +18,7 @@
 			require("inc/valitse_tulostin.inc");
 		}
 		elseif ($kappaleet > 0) {
-			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email") {
+			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email" and $tyomtyyppi != 'Z') {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 			elseif ($komento["Reklamaatio"] != "email") {

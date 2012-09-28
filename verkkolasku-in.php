@@ -142,7 +142,7 @@
 		}
 
 		# siivotaan yli 90 päivää vanhat aineistot
-		system("find $verkkolaskut_in -mtime +90 -delete");
+		system("find $verkkolaskut_in -type f -mtime +90 -delete");
 	}
 
 ?>

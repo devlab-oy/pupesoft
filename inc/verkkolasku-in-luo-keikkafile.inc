@@ -699,7 +699,12 @@
 						'tilausrivi.luontiaika' => $tilausrivirow['luontiaika'],
 					);
 
+					echo "splitattavalle poikkeukset: <br>";
+					echo "<pre>",var_dump($tilausrivirow['tunnus'], $poikkeukset),"</pre>";
+
 					$tilausrivi_id = kopioi_tilausrivi($tilausrivirow['tunnus'], $poikkeukset);
+
+					echo "uusi tilausrivi id: $tilausrivi_id<br>";
 
 					// etsitään ja splitataan myös myyntitilausrivi ISÄ
 					$query = "	SELECT tilausrivi.tunnus
@@ -762,6 +767,9 @@
 									AND tunnus != '{$tilausrivirow['perheid']}'";
 						$lapsi_chk_res = pupe_query($query);
 
+						echo "Etsitään lapsia!<br>";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 
 							$poikkeukset = array(
@@ -772,7 +780,12 @@
 								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 							);
 
+							echo "splitattavalle lapselle poikkeukset: <br>";
+							echo "<pre>",var_dump($lapsi_chk_row['tunnus'], $poikkeukset),"</pre>";
+
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
+
+							echo "uusi lapsen id: $lapsi_uusi_id<br>";
 
 							$myynti_tilausrivi_id_lapsi = 0;
 
@@ -787,6 +800,9 @@
 								$myynti_rivi_row = mysql_fetch_assoc($myynti_rivi_res);
 
 								$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
+
+								echo "splitattavalle myyntilapselle poikkeukset: <br>";
+								echo "<pre>",var_dump($myynti_rivi_row['tunnus'], $poikkeukset),"</pre>";
 
 								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
 

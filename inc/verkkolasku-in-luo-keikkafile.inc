@@ -692,6 +692,8 @@
 
 					$kappaleerotus = $tilausrivirow["varattu"] - $rtuoteno[$i]["kpl"];
 
+					echo "KAPPALEITA!!! $kappaleerotus = $tilausrivirow[varattu] - {$rtuoteno[$i]["kpl"]}<br><br>";
+
 					$poikkeukset = array(
 						'tilausrivi.varattu' => ($tilausrivirow['kpl'] == 0 ? $kappaleerotus : 0),
 						'tilausrivi.tilkpl' => $kappaleerotus,
@@ -767,8 +769,8 @@
 									AND tunnus != '{$tilausrivirow['perheid']}'";
 						$lapsi_chk_res = pupe_query($query);
 
-						echo "Etsit‰‰n lapsia!<br>";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						echo "<br>Etsit‰‰n lapsia!<br>";
+						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 
 						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 
@@ -780,12 +782,19 @@
 								'tilausrivi.luontiaika' => $lapsi_chk_row['luontiaika'],
 							);
 
-							echo "splitattavalle lapselle poikkeukset: <br>";
-							echo "<pre>",var_dump($lapsi_chk_row['tunnus'], $poikkeukset),"</pre>";
+							echo "<br>splitattavalle lapselle poikkeukset: <br>";
+							echo "<br><pre>",var_dump($lapsi_chk_row['tunnus'], $poikkeukset),"</pre><br>";
 
 							$lapsi_uusi_id = kopioi_tilausrivi($lapsi_chk_row['tunnus'], $poikkeukset);
 
 							echo "uusi lapsen id: $lapsi_uusi_id<br>";
+
+							// P‰ivitet‰‰n alkuper‰iselle riville saapunut kappalem‰‰r‰
+							$query = "	UPDATE tilausrivi SET
+										tilkpl = '{$rtuoteno[$i]['kpl']}'
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus = '{$lapsi_chk_row['tunnus']}'";
+							$upres = pupe_query($query);
 
 							$myynti_tilausrivi_id_lapsi = 0;
 
@@ -801,8 +810,8 @@
 
 								$poikkeukset['tilausrivi.perheid'] = $myynti_tilausrivi_id_isa;
 
-								echo "splitattavalle myyntilapselle poikkeukset: <br>";
-								echo "<pre>",var_dump($myynti_rivi_row['tunnus'], $poikkeukset),"</pre>";
+								echo "<br>splitattavalle myyntilapselle poikkeukset: <br>";
+								echo "<br><pre>",var_dump($myynti_rivi_row['tunnus'], $poikkeukset),"</pre><br>";
 
 								$myynti_tilausrivi_id_lapsi = kopioi_tilausrivi($myynti_rivi_row['tunnus'], $poikkeukset);
 
@@ -895,6 +904,7 @@
 								, tilkpl = '{$rtuoteno[$i]['kpl']}'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '{$tilausrivirow['tunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$upres = pupe_query($query);
 
 					$update_asn = "	UPDATE asn_sanomat SET

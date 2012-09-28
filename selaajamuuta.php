@@ -5,6 +5,10 @@
 
 	enable_ajax();
 
+//	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+//		require ("../inc/tilioinnin_toiminnot.inc");
+//	}
+
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;

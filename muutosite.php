@@ -4,6 +4,10 @@ if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf = 
 
 require ("inc/parametrit.inc");
 
+//if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+//	require ("../inc/tilioinnin_toiminnot.inc");
+//}
+
 if (!isset($ok)) $ok = 0;
 if (!isset($tee)) $tee = "";
 if (!isset($tee2)) $tee2 = "";

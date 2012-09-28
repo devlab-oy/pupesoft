@@ -2,7 +2,40 @@
 
 	if (!isset($link)) require "inc/parametrit.inc";
 
+	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+		require ("inc/tilioinnin_toiminnot.inc");
+	}
+	
 	enable_ajax();
+	
+	echo "
+<script type='text/javascript'>
+	function hae_oletusalv(indeksi) {
+
+		var t = document.getElementsByName('itili[' + indeksi + ']');
+		if (t.length != 1) {
+				alert('wrong length');
+				return;
+		}
+		$.post('{$_SERVER['SCRIPT_NAME']}',
+			{ 	ajax_toiminto: 'tilin_oletusalv',
+				tilino: t[0].value,
+				no_head: 'yes',
+				ohje: 'off' },
+			function(return_value) {
+				var data = $.parseJSON(return_value);
+
+				if (data.vero.length > 0) {
+					t = document.getElementsByName('ivero[' + indeksi + ']');
+					if (t.length == 1) {
+				 		t[0].value = data.vero;
+					}
+				}
+
+			}
+			);
+	}
+</script>";
 
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
@@ -1115,7 +1148,7 @@
 						$tilinimi = $vrow['nimi'];
 					}
 				}
-				echo "<td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT")." {$tilinimi}</td>\n";
+				echo "<td width='200' valign='top'\">".livesearch_kentta_alvhaku("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", $i)." {$tilinimi}</td>\n";
 			}
 			else {
 				echo "<td width='200' valign='top'>{$iulos[$i]}</td>\n";

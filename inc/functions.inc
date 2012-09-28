@@ -6279,6 +6279,8 @@ if (!function_exists("enable_ajax")) {
 			return xmlHttp;
 		}
 
+
+
 		function handleResponse() {
 			if (http.readyState == 4) {
 				var response = http.responseText;
@@ -6447,7 +6449,7 @@ if (!function_exists("enable_ajax")) {
 		}
 	}
 
-	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
+	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after, ivero_index) {
 
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
 
@@ -6490,79 +6492,10 @@ if (!function_exists("enable_ajax")) {
 			if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
 				var selectValues = document.getElementsByName('selectValues'+haku_id);
 				document.getElementById(haku_id).value=selectValues[keyStrokeIndex].id;
-				if (dont_submit_after) {
-					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
+				
+				if (ivero_index) {
+					hae_oletusalv(ivero_index);
 				}
-				else {
-					document.haku_formi.submit();
-				}
-				keyStrokeIndex=-1;
-			}
-			else {
-				document.haku_formi.submit();
-			}
-
-			return false;
-		}
-		else if (event.keyCode == 27) {
-			selectOptions[keyStrokeIndex].className='';
-			KeyStrokeIndex = -1;
-		}
-		else if (event.keyCode == 9) {
-			document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
-			KeyStrokeIndex = -1;
-		}
-
-		if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-			selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-		}
-	}
-
-	function livesearch_keyhandler_alv(event, haku_id, haku_formi, dont_submit_after, ivero_index) {
-
-		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
-
-		for (var iEl = 0; iEl < selectOptions.length; iEl++) {
-			document.getElementById(selectOptions[iEl].id).className='';
-		}
-
-		if (event.keyCode == 40 || event.keyCode == 38) {
-			if (event.keyCode  == 40) {
-				previousKeyStrokeIndex=keyStrokeIndex;
-				keyStrokeIndex++;
-			}
-			else if (event.keyCode == 38){
-				previousKeyStrokeIndex=keyStrokeIndex;
-				keyStrokeIndex--;
-			}
-
-			if (keyStrokeIndex > selectOptions.length-1) {
-				keyStrokeIndex = selectOptions.length-1;
-			}
-			else if (keyStrokeIndex < 0) {
-				keyStrokeIndex = -1;
-				selectOptions[previousKeyStrokeIndex].className='';
-			}
-			else {
-				if (previousKeyStrokeIndex < 0) {
-					previousKeyStrokeIndex = 0;
-				}
-
-				if (previousKeyStrokeIndex != keyStrokeIndex) {
-					selectOptions[previousKeyStrokeIndex].className='';
-				}
-
-				selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-
-				if (selectOptions[keyStrokeIndex].id) document.getElementById(selectOptions[keyStrokeIndex].id).scrollIntoView();
-			}
-		}
-		else if (event.keyCode == 13) {
-			if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-				var selectValues = document.getElementsByName('selectValues'+haku_id);
-				document.getElementById(haku_id).value=selectValues[keyStrokeIndex].id;
-			
-				hae_oletusalv(ivero_index);
 				
 				if (dont_submit_after) {
 					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
@@ -6592,6 +6525,31 @@ if (!function_exists("enable_ajax")) {
 		}
 	}
 
+	function hae_oletusalv(indeksi) {
+
+		var t = document.getElementsByName('itili[' + indeksi + ']');
+		if (t.length != 1) {
+				return;
+		}
+
+		$.post( <?php echo "'{$_SERVER['SCRIPT_NAME']}', " ?>
+			{ 	ajax_toiminto: 'tilin_oletusalv',
+				tilino: t[0].value,
+				no_head: 'yes',
+				ohje: 'off' },
+			function(return_value) {
+				var data = $.parseJSON(return_value);
+
+				if (data.vero.length > 0) {
+					t = document.getElementsByName('ivero[' + indeksi + ']');
+					if (t.length == 1) {
+				 		t[0].value = data.vero;
+					}
+				}
+
+			}
+			);
+	}
 </script>
 
 <?php
@@ -8159,7 +8117,6 @@ if (!function_exists("livesearch_tilihaku")) {
 									echo "document.$formi.submit();";
 								}
 								else {
-//									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden'; document.getElementById('$hakuid').focus(); document.getElementById('$hakuid').trigger('focus');";
 									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
 								}
 								echo "\"
@@ -8599,7 +8556,7 @@ if (!function_exists("livesearch_varastohaku")) {
 }
 
 if (!function_exists("livesearch_kentta")) {
-	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
+	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $ivero_index = '') {
 		global $kukarow, $toim;
 
 		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
@@ -8607,38 +8564,21 @@ if (!function_exists("livesearch_kentta")) {
 		}
 
 		$hakuID = "haku".uniqid();
-
-		return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
-					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
+		
+		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
+					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', $ivero_index);\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&toim=$toim&livesearch_haku='+this.value);
-							keyStrokeIndex = -1;}\"
+							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_ivero_index=$ivero_index&ohje=off&toim=$toim&livesearch_haku='+this.value);
+							keyStrokeIndex = -1;";
+		if ($ivero_index) {
+			$return .= " hae_oletusalv($ivero_index);";
+		}
+		$return .= "}\"
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
 				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
-	}
-}
-
-if (!function_exists("livesearch_kentta_alvhaku")) {
-	// lomakkeella oltava kentt‰ ivero[ivero_index], johon valitun tilin oletusalv vied‰‰n.
-	function livesearch_kentta_alvhaku($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $ivero_index) {
-		global $kukarow, $toim;
-
-		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
-			return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
-		}
-
-		$hakuID = "haku".uniqid();
-
-		return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
-					onkeydown=\"return livesearch_keyhandler_alv(event, '$hakuID', '$formi', '$submit', $ivero_index);\"
-					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&livesearch_ivero_index=$ivero_index&toim=$toim&livesearch_haku='+this.value);
-							keyStrokeIndex = -1; hae_oletusalv($ivero_index);}\"
-				    onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\');', 100);\"
-					onfocus=\"hae_oletusalv($ivero_index);\">
-				<div style='break:all'></div>
-				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10); \"></div>";
+				
+		return $return;
 	}
 }
 

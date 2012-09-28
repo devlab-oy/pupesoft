@@ -580,6 +580,13 @@ if ($tee == 'MONISTA') {
 			$monistares = pupe_query($query);
 			$monistarow = mysql_fetch_array($monistares);
 
+			$squery = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$monistarow['liitostunnus']}'";
+			$asiakres = pupe_query($squery);
+			$asiakrow = mysql_fetch_array($asiakres);
+
 			$fields = "yhtio";
 			$values = "'$kukarow[yhtio]'";
 
@@ -815,13 +822,6 @@ if ($tee == 'MONISTA') {
 					case 'alv':
 						//Korjataanko laskun alvit
 						if ($alvik == "on") {
-							$squery = "	SELECT *
-										FROM asiakas
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$monistarow['liitostunnus']}'";
-							$asiakres = pupe_query($squery);
-							$asiakrow = mysql_fetch_array($asiakres);
-
 							// katsotaan miten vienti ja ALV k‰sitell‰‰n
 							$alv_velvollisuus = "";
 							$uusi_alv = 0;
@@ -895,16 +895,16 @@ if ($tee == 'MONISTA') {
 						break;
 					case 'viesti':
 						if ($kumpi == 'HYVITA' and $alvik == "on") {
-							$values .= ", '".t("Hyvitet‰‰n ja tehd‰‰n ALV-korjaus laskuun").": ".$monistarow["laskunro"].".'";
+							$values .= ", '".t("Hyvitet‰‰n ja tehd‰‰n ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
 						}
 						elseif ($kumpi == 'HYVITA') {
-							$values .= ", '".t("Hyvitys laskuun").": ".$monistarow["laskunro"].".'";
+							$values .= ", '".t("Hyvitys laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
 						}
 						elseif ($kumpi == 'REKLAMA') {
-							$values .= ", '".t("Reklamaatio laskuun").": ".$monistarow["laskunro"].".'";
+							$values .= ", '".t("Reklamaatio laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
 						}
 						elseif($kumpi == 'MONISTA' and $alvik == "on") {
-							$values .= ", '".t("ALV-korjaus laskuun").": ".$monistarow["laskunro"].".'";
+							$values .= ", '".t("ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
 						}
 						else {
 							$values .= ", ''";

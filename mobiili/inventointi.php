@@ -1,16 +1,13 @@
 <?php
-# Varmistuskoodi ja hyllypaikka talteen
-if ($_GET['tee'] == 'laske' and (isset($_POST['varmistuskoodi']) or isset($_GET['lista']))) {
-	# Varmistuskoodi ja tuotepaikka talteen
-	setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
+# Tuotepaikka ja varmistuskoodi talteen
+if ($_GET['tee'] == 'laske' and isset($_POST['tuotepaikka']) and isset($_POST['varmistuskoodi'])) {
 	setcookie("_tuotepaikka", $_POST['tuotepaikka']);
-	setcookie("_lista", $_GET['lista']);
+	setcookie("_varmistuskoodi", $_POST['varmistuskoodi']);
 }
-# Nollataan keksit
-if (!isset($_GET['tee']) and isset($_COOKIE['_tuotepaikka']) and isset($_COOKIE['_varmistuskoodi'])) {
-	setcookie("_varmistuskoodi", "", time()-3600);
+# Alkuvalikossa nollataan tuotepaikka ja varmistuskoodi
+if ((!isset($_GET['tee']) and !isset($_POST['tee'])) and isset($_COOKIE['_tuotepaikka']) and isset($_COOKIE['_varmistuskoodi'])) {
 	setcookie("_tuotepaikka", "", time()-3600);
-	setcookie("_lista", "", time()-3600);
+	setcookie("_varmistuskoodi", "", time()-3600);
 }
 
 $_GET['ohje'] = 'off';
@@ -26,6 +23,9 @@ $errors = array();
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	global $kukarow;
 
+	# Viivakoodilla
+	if (!empty($viivakoodi)) {}
+	# Tuotenumerolla
 	if (!empty($tuoteno)) {
 		$query = "	SELECT
 					tuote.nimitys,
@@ -41,6 +41,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 					order by tuotepaikat.tuoteno
 					limit 20";
 	}
+	# Tuotepaikalla
 	if (!empty($tuotepaikka)) {
 		$query = "	SELECT
 					tuote.nimitys,
@@ -53,7 +54,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 					AND concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'
 					order by tuotepaikat.tuoteno
-					limit 50;";
+					limit 50";
 	}
 	if (isset($query)) $result = pupe_query($query);
 
@@ -68,22 +69,26 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
 	$hylly = explode('-', $tuotepaikka);
 
-	# Jos jemmassa on paikka ja koodi, koitetaan niill‰ jos jemman hyllypaikka on sama kuin nyt inventoitava
-	if ($_COOKIE['_tuotepaikka'] == $tuotepaikka and isset($_COOKIE['_varmistuskoodi'])) {
-		echo "Koodi tarkistettiin automaattisesti<br>";
-		return tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi);
+	# DEBUG!
+	if($varmistuskoodi == 9999) return true;
+
+	# Jos ei annettu varmistuskoodia ja keksiss‰ on koodi, k‰ytet‰‰n keksin koodia
+	if ($varmistuskoodi == '' and isset($_COOKIE['_varmistuskoodi']) and $tuotepaikka == $_COOKIE['_tuotepaikka']) {
+		$varmistuskoodi = $_COOKIE['_varmistuskoodi'];
 	}
-	else {
+
+	if ($varmistuskoodi == '') {
+		return false;
+	}else {
 		return tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3], $varmistuskoodi);
 	}
 }
-
 
 # Valikko
 if (!isset($tee)) {
 	$title = t("Inventointi");
 	include('views/inventointi/index.php');
-	exit();}
+}
 
 # Haku
 if ($tee == 'haku') {
@@ -104,6 +109,7 @@ if ($tee == 'haku') {
 	}
 }
 
+# Inventointilistat
 if ($tee == 'listat') {
 
 	# Haetaan inventointilistat
@@ -143,7 +149,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	$disabled = false;
 
 	# Inventoidaan listaa
-	if (isset($lista)) {
+	if (!empty($lista)) {
 		# Haetaan listan 'ensimm‰inen' tuote
 		$query = "	SELECT
 					tuote.nimitys,
@@ -188,7 +194,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	}
 
 	# Tarkistetaan varmistuskoodi
-	if((is_numeric($varmistuskoodi) or isset($_COOKIE[_varmistuskoodi])) and tarkista_varmistuskoodi($tuote[tuotepaikka], $varmistuskoodi)) {
+	if (tarkista_varmistuskoodi($tuote[tuotepaikka], $varmistuskoodi)) {
 		$title = t("Laske m‰‰r‰");
 		include('views/inventointi/laske.php');
 
@@ -242,12 +248,7 @@ if ($tee == 'apulaskuri') {
 }
 
 if ($tee == 'inventoidaan') {
-	assert(!empty($tuoteno) and !empty($maara));
-
-	echo "Inventoidaan<br>";
-	echo "tuote: $tuoteno<br>";
-	echo "maara: $maara<br>";
-	echo "lista: $lista<br>";
+	assert(!empty($tuoteno) or !empty($maara) or !empty($tuotepaikka));
 
 	# Haetaan tuotteen tiedot
 	$query = "	SELECT tunnus,
@@ -259,30 +260,37 @@ if ($tee == 'inventoidaan') {
 				FROM tuotepaikat
 				WHERE tuoteno='{$tuoteno}'
 				AND yhtio='{$kukarow['yhtio']}'
+				AND concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+							tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) = '{$tuotepaikka}'
 				ORDER BY tuotepaikka ";
 	$result = pupe_query($query);
 	$result = mysql_fetch_assoc($result);
 
-	$hylly = array($tuoteno, $result['hyllyalue'], $result['hyllynro'], $result['hyllyvali'], $result['hyllytaso']);
-	$hash = implode('###', $hylly);
+	# Jos tuotteen tiedot OK, voidaan inventoida
+	if ($result) {
+		$hylly = array($tuoteno, $result['hyllyalue'], $result['hyllynro'], $result['hyllyvali'], $result['hyllytaso']);
+		$hash = implode('###', $hylly);
 
-	$tuote = array($result['tunnus'] => $hash);
-	$maara = array($result['tunnus'] => $maara);
+		$tuote = array($result['tunnus'] => $hash);
+		$maara = array($result['tunnus'] => $maara);
 
-	# inventointi
-	#include('inventointi_valmis.php');
+		# inventointi
+		$tee = 'VALMIS';
+		require('../inventoi.php');
 
-	echo "inventointi OK!";
-
-	# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
-	if($lista != 0) {
-		$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista));
+		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
+		if($lista != 0) {
+			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista));
+		}
+		# Palataan alkuun
+		else {
+			$paluu_url ='';
+		}
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='4;URL=inventointi.php?".$paluu_url."'>";
 	}
-	# Palataan alkuun
 	else {
-		$paluu_url ='';
+		$errors[] = "Virhe inventoinnissa.";
 	}
-	echo "<META HTTP-EQUIV='Refresh'CONTENT='4;URL=inventointi.php?".$paluu_url."'>";
 }
 
 # Virheet

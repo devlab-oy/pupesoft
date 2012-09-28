@@ -1385,7 +1385,7 @@
 						$kv_vaktuote = $yhtiorow["kuljetusvakuutus_tuotenumero"];
 
 						while ($row = mysql_fetch_assoc($kvak_result)) {
-							if ($row["kv_tuotenumero"] != "" and ($row["kv_kuljetusvakuutus"] > 0 or $row["kv_tyyppi"] == 'F') and $row["kv_tyyppi"] != "") {
+							if ($row["laskun_loppusumma"] > 0 and $row["kv_tuotenumero"] != "" and ($row["kv_kuljetusvakuutus"] > 0 or $row["kv_tyyppi"] == 'F') and $row["kv_tyyppi"] != "") {
 
 								// haetaan kuljetusvakuutus_tuotenumero-tuotteen tiedot
 								$query = "  SELECT *

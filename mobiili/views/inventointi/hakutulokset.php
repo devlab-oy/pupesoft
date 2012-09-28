@@ -17,7 +17,7 @@
 				<tr>
 					<td><a href='inventointi.php?<?= $url ?>'><?= $tuote['tuoteno'] ?></a></td>
 					<td><?= $tuote['tuotepaikka'] ?></td>
-					<td><? if($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') echo "({$tuote['inventointilista']})" ?></td>
+					<td><? if($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') echo "(listalla {$tuote['inventointilista']})" ?></td>
 				</tr>
 			<?php endforeach ?>
 		</table>

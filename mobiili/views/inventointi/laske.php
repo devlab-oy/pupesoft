@@ -14,11 +14,13 @@
 				<td><input type='text' name='maara' value='<?= $maara ?>' size=''></td>
 				<td><?= $tuote['yksikko'] ?></td>
 			</tr>
+			<? if (!empty($tuote['tyyppi'])): ?>
 			<tr>
 				<th>SSCC</th>
 				<td>-</td>
 			</tr>
 			<tr>
+			<? endif ?>
 				<th>Tuote</th>
 				<td><?= $tuote['tuoteno'] ?></td>
 			</tr>
@@ -33,10 +35,8 @@
 		</table>
 		<input type='hidden' name='tee' value='inventoi'>
 		<input type='submit' name='inventoidaan' value='OK'>
+		<? if(!$disabled): ?>
+			<a class='right' href='inventointi.php?<?= http_build_query(array('tee' => 'apulaskuri', 'tuotepaikka' => $tuotepaikka, 'tuoteno' => $tuote['tuoteno'])) ?>'>Apulaskuri</a>
+		<? endif ?>
 	</form>
-
-	<? if($disabled): ?>
-		<a href='inventointi.php?<?= http_build_query(array('tee' => 'apulaskuri', 'tuoteno' => $tuote['tuoteno'])) ?>' class='color blue button'>Apulaskuri</a>
-	<? endif ?>
-
 </div>

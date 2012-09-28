@@ -1,10 +1,11 @@
 <div class='header'>
+	<button onclick='window.location.href="inventointi.php?<?= $back ?>"' class='button left'><img src='back2.png'></button>
 	<h1><?php echo $title ?></h1>
 </div>
 
 <div class='main'>
 	<form action'inventointi.php' method='post'>
-	<table border='1	'>
+	<table>
 		<tr>
 			<th nowrap>Pakkaus 1</th>
 			<td><input type='text' id='p1' onkeyup='update_maara(this);' value='0'/></td>
@@ -39,15 +40,13 @@
 		<tr>
 			<th>M‰‰r‰ yhteens‰</th>
 			<td>
-				<input type='text' id='maara' name='maara' value='570' readonly>
+				<input type='text' id='maara' name='maara' value='0' readonly>
 			</td>
 		</tr>
 	</table>
 
-	<input type='hidden' name='tee' value='laske_maara'>
-
+	<input type='hidden' name='tee' value='laske'>
 	<input class="color button green" type='submit' value='OK'/>
-	<a href='inventointi.php?<?= http_build_query(array('tee' => 'laske_maara', 'tuoteno' => $tuoteno)) ?>' class='color red button'>LOPETA</a>
 	</form>
 </div>
 

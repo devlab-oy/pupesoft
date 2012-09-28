@@ -24,7 +24,25 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	global $kukarow;
 
 	# Viivakoodilla
-	if (!empty($viivakoodi)) {}
+	if (!empty($viivakoodi)) {
+		$query = "	SELECT
+					tuote.nimitys,
+					tuote.tuoteno,
+					tuotepaikat.inventointilista,
+					tuotepaikat.inventointilista_aika,
+					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
+							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
+							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
+							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
+					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+					FROM tuotepaikat
+					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+					AND tuote.eankoodi='$viivakoodi'
+					order by sorttauskentta
+					limit 100";
+	}
 	# Tuotenumerolla
 	if (!empty($tuoteno)) {
 		$query = "	SELECT
@@ -32,20 +50,30 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 					tuote.tuoteno,
 					tuotepaikat.inventointilista,
 					tuotepaikat.inventointilista_aika,
+					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
+							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
+							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
+							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
 					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
 					FROM tuotepaikat
 					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
 					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
 					AND tuote.tuoteno='$tuoteno'
-					order by tuotepaikat.tuoteno
-					limit 20";
+					order by sorttauskentta
+					limit 100";
 	}
 	# Tuotepaikalla
 	if (!empty($tuotepaikka)) {
 		$query = "	SELECT
 					tuote.nimitys,
 					tuote.tuoteno,
+					tuotepaikat.inventointilista,
+					tuotepaikat.inventointilista_aika,
+					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
+							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
+							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
+							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
 					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
 					FROM tuotepaikat
@@ -54,7 +82,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 					AND concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'
 					order by tuotepaikat.tuoteno
-					limit 50";
+					limit 100";
 	}
 	if (isset($query)) $result = pupe_query($query);
 
@@ -146,8 +174,6 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	if (!isset($maara)) $maara = 0;
 	if (!is_numeric($maara)) $errors[] = t("Määrän on oltava numero");
 
-	$disabled = false;
-
 	# Inventoidaan listaa
 	if (!empty($lista)) {
 		# Haetaan listan 'ensimmäinen' tuote
@@ -156,6 +182,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 					tuote.tuoteno,
 					tuote.yksikko,
 					tuotepaikat.inventointilista,
+					tuotepaikat.tyyppi,
 			 		concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 			 					tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka,
 			 		concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
@@ -207,11 +234,9 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	if ($tee == 'inventoi' and count($errors) == 0) {
 		$tee = 'inventoidaan';
 	}
-
 }
 
 if ($tee == 'apulaskuri') {
-
 	# Pakkaus1
 	$query = "SELECT
 				if(myynti_era > 0, myynti_era, 1) as myynti_era,
@@ -242,6 +267,8 @@ if ($tee == 'apulaskuri') {
 				AND laji='pakkauskoko3'";
 	$result = pupe_query($query);
 	$p3 = mysql_fetch_assoc($result);
+
+	$back = http_build_query(array('tee' => 'laske', 'tuotepaikka' => $tuotepaikka, 'tuoteno' => $tuoteno));
 
 	$title = t("Apulaskuri");
 	include('views/inventointi/apulaskuri.php');

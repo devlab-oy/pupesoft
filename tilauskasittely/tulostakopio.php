@@ -1247,7 +1247,7 @@
 		}
 		if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
-			if ($kappaleet > 0) {
+			if ($kappaleet > 0 and $tyomtyyppi != 'Z') {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}

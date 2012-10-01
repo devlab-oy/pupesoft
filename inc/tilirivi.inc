@@ -154,7 +154,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "muokkausesto") {
+	if (mysql_field_name($result, $i) == "manuaali_esto") {
 		$sel = "";
 		if ($trow[$i] != "") $sel = "SELECTED";
 

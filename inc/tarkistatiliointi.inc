@@ -12,7 +12,7 @@
 		if (strlen($tili) > 0) {
 
 			// Onko suoraan tilinumero
-			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi, muokkausesto
+			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi, manuaali_esto
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
@@ -147,7 +147,7 @@
 				$ok = 1;
 				$projekti = $xrow['projekti'];
 			}
-			if ($xrow['muokkausesto'] != '') {
+			if ($xrow['manuaali_esto'] != '') {
 				$virhe .= t("Tilille on asetettu manuaalisen muokkauksen esto")."!";
 				$ok = 1;
 			}

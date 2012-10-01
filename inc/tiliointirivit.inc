@@ -312,7 +312,7 @@
 				tiliointi.valkoodi,
 				tiliointi.lukko,
 				tiliointi.korjattu,
-				tili.manuaali_esto,
+				tili.muokkausesto,
 				$summaselect
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
@@ -397,12 +397,12 @@
 		    and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) 
 		    and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["korjattu"] == ""
 		    and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)
-		    and ($trow["manuaali_esto"] == '')) {
+		    and ($trow["muokkausesto"] == '')) {
 			//Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos lasku on liitetty keikkaan ja rivillä on veroa
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
-			//tai rivilla on manuaali_esto
+			//tai rivilla on muokkausesto
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -424,7 +424,7 @@
 			if ($maara > 1) {
 
 				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)
-				  or $trow["manuaali_esto"] != '') {
+				  or $trow["muokkausesto"] != '') {
 					echo "<td class='$class'>";
 					// Rivi on poistettu
 					if ($trow['korjattu'] != '') {

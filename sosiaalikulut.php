@@ -41,6 +41,129 @@
 
 	echo "</td></tr>";
 
+	if (!isset($alkukausi_vv)) {
+		$query = "	SELECT *
+					FROM tilikaudet
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tilikausi_alku <= now()
+					and tilikausi_loppu >= now()";
+		$result = pupe_query($query);
+		$tilikausirow = mysql_fetch_assoc($result);
+
+		$alkukausi_vv = substr($tilikausirow['tilikausi_alku'], 0, 4);
+		$alkukausi_kk = substr($tilikausirow['tilikausi_alku'], 5, 2);
+		$alkukausi_pp = substr($tilikausirow['tilikausi_alku'], 8, 2);
+	}
+
+	echo "	<tr><th valign='top'>",t("Alkukausi"),"</th>
+			<td><select name='alkukausi_vv'>";
+
+	$sel = array();
+	$sel[$alkukausi_vv] = "SELECTED";
+
+	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+
+		if (!isset($sel[$i])) {
+			$sel[$i] = "";
+		}
+
+		echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
+	}
+
+	echo "</select>";
+
+	$sel = array();
+	$sel[$alkukausi_kk] = "SELECTED";
+
+	echo "<select name='alkukausi_kk'>";
+
+	for ($opt = 1; $opt <= 12; $opt++) {
+		$opt = sprintf("%02d", $opt);
+
+		if (!isset($sel[$opt])) {
+			$sel[$opt] = "";
+		}
+
+		echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+	}
+
+	echo "</select>";
+
+	$sel = array();
+	$sel[$alkukausi_pp] = "SELECTED";
+
+	echo "<select name='alkukausi_pp'>";
+
+	for ($opt = 1; $opt <= 31; $opt++) {
+		$opt = sprintf("%02d", $opt);
+
+		if (!isset($sel[$opt])) {
+			$sel[$opt] = "";
+		}
+
+		echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+	}
+
+	echo "</select></td></tr>";
+
+	echo "<tr>
+		<th valign='top'>",t("Loppukausi"),"</th>
+		<td><select name='loppukausi_vv'>";
+
+	if (!isset($loppukausi_vv)) $loppukausi_vv = date("Y") + 1;
+
+	$sel = array();
+	$sel[$loppukausi_vv] = "SELECTED";
+
+	for ($i = date("Y") + 1; $i >= date("Y") - 4; $i--) {
+
+		if (!isset($sel[$i])) {
+			$sel[$i] = "";
+		}
+
+		echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
+	}
+
+	echo "</select>";
+
+	if (!isset($loppukausi_kk)) $loppukausi_kk = date("m");
+
+	$sel = array();
+	$sel[$loppukausi_kk] = "SELECTED";
+
+	echo "<select name='loppukausi_kk'>";
+
+	for ($opt = 1; $opt <= 12; $opt++) {
+		$opt = sprintf("%02d", $opt);
+
+		if (!isset($sel[$opt])) {
+			$sel[$opt] = "";
+		}
+
+		echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+	}
+
+	echo "</select>";
+
+	if (!isset($loppukausi_pp)) $loppukausi_pp = date("d");
+
+	$sel = array();
+	$sel[$loppukausi_pp] = "SELECTED";
+
+	echo "<select name='loppukausi_pp'>";
+
+	for ($opt = 1; $opt <= 31; $opt++) {
+		$opt = sprintf("%02d", $opt);
+
+		if (!isset($sel[$opt])) {
+			$sel[$opt] = "";
+		}
+
+		echo "<option {$sel[$opt]} value = '{$opt}'>{$opt}</option>";
+	}
+
+	echo "</select></td></tr>";
+
 	echo "<tr><th>",t("Tilin alku"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilinalku", 170, $tilinalku, "EISUBMIT")," {$tilinimi}</td></tr>";
 	echo "<tr><th>",t("Tilin loppu"),"</th><td width='200' valign='top'>",livesearch_kentta("sosiaali", "TILIHAKU", "tilinloppu", 170, $tilinloppu, "EISUBMIT")," {$tilinimi}</td></tr>";
 
@@ -71,6 +194,17 @@
 
 	echo "</table>";
 	echo "</form>";
+
+	// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+	if (!checkdate($alkukausi_kk, $alkukausi_pp, $alkukausi_vv)) {
+		echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+		$tee = "";
+	}
+
+	if (!checkdate($loppukausi_kk, $loppukausi_pp, $loppukausi_vv)) {
+		echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br>";
+		$tee = "";
+	}
 
 	if ($tee == 'laske') {
 
@@ -106,6 +240,8 @@
 						WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
 						AND tiliointi.korjattu = ''
 						AND tiliointi.tilino BETWEEN '{$tilinalku}' AND '{$tilinloppu}'
+						AND tiliointi.tapvm >= '{$alkukausi_vv}-{$alkukausi_kk}-{$alkukausi_pp}'
+						AND tiliointi.tapvm <= '{$loppukausi_vv}-{$loppukausi_kk}-{$loppukausi_pp}'
 						GROUP BY tiliointi.tilino, tiliointi.kustp
 						HAVING tilisaldo != 0
 						ORDER BY tiliointi.tilino, kustannuspaikka.koodi+0 ASC";
@@ -132,7 +268,7 @@
 				echo "<th>",t("Kustp"),"</th>";
 				echo "</tr>";
 
-				mysql_data_seek($result, 0);
+				if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
 
 				$class = $i > 1 ? 'spec' : '';
 

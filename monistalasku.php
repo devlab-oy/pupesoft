@@ -501,6 +501,17 @@ if ($tee == "ETSILASKU") {
 
 					echo "<input type='checkbox' name='sailytatyomaarays[{$row['tilaus']}]' value='on' {$sel}> ".t("Säilytä työmääräystiedot")."<br>";
 				}
+
+				if ($toim == '' and $yhtiorow['rahti_hinnoittelu'] == '') {
+					$sel = "";
+					if (isset($korjaarahdit[$row["tilaus"]]) and $korjaarahdit[$row["tilaus"]] != '') {
+						$sel = "CHECKED";
+					}
+
+					echo "<input type='checkbox' name='korjaarahdit[{$row['tilaus']}]' value='on' {$sel}> ".t("Laske rahtiveloitus uudestaan")."<br>";
+				}
+
+
 				echo "</{$ero}>";
 			}
 
@@ -538,11 +549,13 @@ if ($tee == 'MONISTA') {
 		$slask 			= "";
 		$sprojekti  	= "";
 		$koptyom		= "";
+		$korjrahdit		= "";
 
 		if (isset($korjaaalvit[$lasku]) and $korjaaalvit[$lasku] != '')  			$alvik		= "on";
 		if (isset($suoraanlasku[$lasku]) and $suoraanlasku[$lasku] != '') 			$slask		= "on";
 		if (isset($sailytaprojekti[$lasku]) and $sailytaprojekti[$lasku] != '') 	$sprojekti	= "on";
 		if (isset($sailytatyomaarays[$lasku]) and $sailytatyomaarays[$lasku] != '')	$koptyom 	= "on";
+		if (isset($korjaarahdit[$lasku]) and $korjaarahdit[$lasku] != '')			$korjrahdit	= "on";
 
 		if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 			$kklkm = 1;
@@ -591,7 +604,7 @@ if ($tee == 'MONISTA') {
 			$values = "'$kukarow[yhtio]'";
 
 			// Ei monisteta tunnusta
-			for($i = 1; $i < mysql_num_fields($monistares) - 1; $i++) {
+			for ($i = 1; $i < mysql_num_fields($monistares) - 1; $i++) {
 
 				$fields .= ", ".mysql_field_name($monistares, $i);
 
@@ -911,8 +924,8 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'vienti_kurssi';
-						// hyvityksissä pidetään kurssi samana
-						if (1==1 or $kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
+						// hyvityksissä pidetään kurssi samana, tai jos korjataan rahtikuluja
+						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or ($toim == '' and $kumpi == 'MONISTA' and $korjrahdit == 'on')) {
 							if ($monistarow[$i] == 0) {
 								// Vanhoilla u-laskuilla ei ole vienti kurssia....
 								$vienti_kurssi = @round($monistarow["arvo"] / $monistarow["arvo_valuutassa"], 9);
@@ -1468,7 +1481,6 @@ if ($tee == 'MONISTA') {
 
 						$uusihinta = $rivirow['hinta'] / (1+$rivirow['orig_alv']/100) * (1+$korj_alv/100);
 
-
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 							$uusihinta = round($uusihinta, 6);
 						}
@@ -1487,7 +1499,8 @@ if ($tee == 'MONISTA') {
 						echo t("Korjataan hinta").": $trow[tuoteno], {$vanhahinta} --> {$lis_hinta},  $rivirow[alv] --> $alehinta_alv<br>";
 
 						$query = "	UPDATE tilausrivi
-									SET hinta = '{$lis_hinta}', alv = '{$alehinta_alv}'
+									SET hinta = '{$lis_hinta}',
+									alv 	  = '{$alehinta_alv}'
 									where yhtio	= '{$kukarow['yhtio']}'
 									and otunnus	= '{$utunnus}'
 									and tunnus	= '{$insid}'";
@@ -1534,13 +1547,13 @@ if ($tee == 'MONISTA') {
 
 
 			// Korjataanko rahdit?
-			if ($kumpi == 'MONISTA' and $monistarow['laskunro'] > 0) {
+			if ($toim == '' and $kumpi == 'MONISTA' and $korjrahdit == 'on' and $monistarow['laskunro'] > 0 and $yhtiorow['rahti_hinnoittelu'] == '') {
 
 				// Poistetaan virheelliset rahdit
 				$query  = " UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus='$utunnus' AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 				$addtil = pupe_query($query);
 
-				$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
+				$query   = "SELECT date_format(rahtikirjat.tulostettu, '%Y-%m-%d') tulostettu, group_concat(distinct lasku.tunnus) tunnukset
 							FROM lasku, rahtikirjat, maksuehto
 							WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 							and lasku.rahtivapaa 	= ''
@@ -1559,7 +1572,7 @@ if ($tee == 'MONISTA') {
 					//haetaan ekan otsikon tiedot
 					$query = "  SELECT lasku.*, maksuehto.jv
 								FROM lasku, maksuehto
-								WHERE lasku.yhtio='$kukarow[yhtio]'
+								WHERE lasku.yhtio ='$kukarow[yhtio]'
 								AND lasku.tunnus in ($rahtirow[tunnukset])
 								AND lasku.yhtio = maksuehto.yhtio
 								AND lasku.maksuehto = maksuehto.tunnus
@@ -1571,8 +1584,6 @@ if ($tee == 'MONISTA') {
 					// haetaan rahdin hinta
 					list($rah_hinta, $rah_ale, $rah_alv, $rah_netto) = hae_rahtimaksu($rahtirow['tunnukset']);
 
-					echo "$rah_hinta, $rah_ale, $rah_alv, $rah_netto<br>";
-
 					$query = "  SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -1583,7 +1594,7 @@ if ($tee == 'MONISTA') {
 
 						$trow      = mysql_fetch_assoc($rhire);
 						$otunnus   = $laskurow['tunnus'];
-						$nimitys   = "$pvm $laskurow[toimitustapa]";
+						$nimitys   = tv1dateconv($rahtirow['tulostettu'])." $laskurow[toimitustapa]";
 
 						$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
@@ -1597,12 +1608,6 @@ if ($tee == 'MONISTA') {
 						$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$utunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '')";
 						$addtil = pupe_query($query);
-
-
-
-
-						echo "$query<br>";
-
 					}
 				}
 			}

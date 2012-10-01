@@ -147,6 +147,12 @@
 				// Aloitellaan lomakkeen teko
 				$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
 
+				if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
+					// Ekan sivun otsikot
+					$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;
+					$params_tyomaarays = tyomaarays_rivi_otsikot($params_tyomaarays);
+				}
+
 				while ($row = mysql_fetch_assoc($riresult)) {
 					$params_tyomaarays["row"] = $row;
 					$params_tyomaarays = tyomaarays_rivi($params_tyomaarays);

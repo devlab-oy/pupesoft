@@ -394,10 +394,14 @@
 			echo "<td>".t("Tiivistetty")."</td>";
 		}
 		elseif ((mysql_num_rows($keikres) == 0 or $trow["vero"] == 0)
-		    and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) 
-		    and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["korjattu"] == ""
-		    and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)
-		    and ($trow["manuaali_esto"] == '')) {
+		    and $tiliointi_pvm <= $tilikausi_loppu
+			and $tiliointi_pvm >= $tilikausi_alku
+		    and ($trow["lukko"] == "" or $kukarow["taso"] == 3)
+			and $trow["korjattu"] == ""
+		    and $maara > 1
+			and $oikeurow["paivitys"] == 1
+			and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)
+		    and $trow["manuaali_esto"] == '') {
 			//Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos lasku on liitetty keikkaan ja rivillä on veroa
@@ -423,8 +427,14 @@
 		else {
 			if ($maara > 1) {
 
-				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)
-				  or $trow["manuaali_esto"] != '') {
+				if (mysql_num_rows($keikres) != 0
+					or $trow['lukko'] != ''
+					or $oikeurow['paivitys'] != 1
+					or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3)
+					or $tiliointi_pvm > $tilikausi_loppu
+					or $tiliointi_pvm < $tilikausi_alku
+				  	or $trow["manuaali_esto"] != '') {
+
 					echo "<td class='$class'>";
 					// Rivi on poistettu
 					if ($trow['korjattu'] != '') {

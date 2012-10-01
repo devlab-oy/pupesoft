@@ -160,7 +160,7 @@
 
 		$ulos = "<td><select name='$nimi'>\n";
 		$ulos .= "<option value = ''>".t("Tiliöinti muokattavissa")."</option>\n";
-		$ulos .= "<option value = 'X' $sel>".t("Tiliöinnin manuaalinen muokkaus estetty")."</option>\n";
+		$ulos .= "<option value = 'X' $sel>".t("Tiliöinnin manuaalinen lisäys/muokkaus estetty")."</option>\n";
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}

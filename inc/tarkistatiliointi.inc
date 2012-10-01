@@ -148,7 +148,7 @@
 				$projekti = $xrow['projekti'];
 			}
 			if ($xrow['manuaali_esto'] != '') {
-				$virhe .= t("Tilille on asetettu manuaalisen muokkauksen esto")."!";
+				$virhe .= t("Tilille on asetettu manuaalisen lisäyksen/muokkauksen esto")."!";
 				$ok = 1;
 			}
 		}

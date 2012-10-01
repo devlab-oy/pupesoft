@@ -6279,8 +6279,6 @@ if (!function_exists("enable_ajax")) {
 			return xmlHttp;
 		}
 
-
-
 		function handleResponse() {
 			if (http.readyState == 4) {
 				var response = http.responseText;
@@ -6449,7 +6447,7 @@ if (!function_exists("enable_ajax")) {
 		}
 	}
 
-	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after, ivero_index) {
+	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after, vero_field) {
 
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
 
@@ -6492,11 +6490,11 @@ if (!function_exists("enable_ajax")) {
 			if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
 				var selectValues = document.getElementsByName('selectValues'+haku_id);
 				document.getElementById(haku_id).value=selectValues[keyStrokeIndex].id;
-				
-				if (ivero_index) {
-					hae_oletusalv(ivero_index);
+
+				if (vero_field) {
+					hae_oletusalv(haku_id, vero_field);
 				}
-				
+
 				if (dont_submit_after) {
 					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
 				}
@@ -6525,23 +6523,20 @@ if (!function_exists("enable_ajax")) {
 		}
 	}
 
-	function hae_oletusalv(indeksi) {
+	function hae_oletusalv(tilikentta_id, alvkentta) {
 
-		var t = document.getElementsByName('itili[' + indeksi + ']');
-		if (t.length != 1) {
-				return;
-		}
+		var t = document.getElementById(tilikentta_id);
 
 		$.post( <?php echo "'{$_SERVER['SCRIPT_NAME']}', " ?>
 			{ 	ajax_toiminto: 'tilin_oletusalv',
-				tilino: t[0].value,
+				tilino: t.value,
 				no_head: 'yes',
 				ohje: 'off' },
 			function(return_value) {
 				var data = $.parseJSON(return_value);
 
 				if (data.vero.length > 0) {
-					t = document.getElementsByName('ivero[' + indeksi + ']');
+					t = document.getElementsByName(alvkentta);
 					if (t.length == 1) {
 				 		t[0].value = data.vero;
 					}
@@ -8069,7 +8064,7 @@ if (!function_exists("livesearch_tilihaku")) {
 		$formi = $_REQUEST["livesearch_form"];
 		$hakuid = $_REQUEST["livesearch_hakuid"];
 		$submit = $_REQUEST["livesearch_submit"];
-		$ivero_index = $_REQUEST["livesearch_ivero_index"];
+		$vero_field = $_REQUEST["livesearch_vero_field"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
 		if (strlen($haku) > 2) {
@@ -8108,11 +8103,11 @@ if (!function_exists("livesearch_tilihaku")) {
 									} \"
 								onmouseout=\"this.className='';\"
 								onclick=\"document.getElementById('$hakuid').value='$row[tilino]';";
-								
-								if ($ivero_index) {
-									echo "hae_oletusalv($ivero_index); ";
+
+								if ($vero_field) {
+									echo "hae_oletusalv('$hakuid', '$vero_field'); ";
 								}
-								
+
 								if ($submit == "") {
 									echo "document.$formi.submit();";
 								}
@@ -8556,7 +8551,7 @@ if (!function_exists("livesearch_varastohaku")) {
 }
 
 if (!function_exists("livesearch_kentta")) {
-	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $ivero_index = '') {
+	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '') {
 		global $kukarow, $toim;
 
 		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
@@ -8566,12 +8561,12 @@ if (!function_exists("livesearch_kentta")) {
 		$hakuID = "haku".uniqid();
 		
 		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
-					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', $ivero_index);\"
+					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_ivero_index=$ivero_index&ohje=off&toim=$toim&livesearch_haku='+this.value);
+							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+this.value);
 							keyStrokeIndex = -1;";
-		if ($ivero_index) {
-			$return .= " hae_oletusalv($ivero_index);";
+		if ($vero_field) {
+			$return .= "hae_oletusalv('$hakuID', '$vero_field');";
 		}
 		$return .= "}\"
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">

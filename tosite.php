@@ -1119,7 +1119,7 @@
 						$tilinimi = $vrow['nimi'];
 					}
 				}
-				echo "<td width='200' valign='top'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", $i)." {$tilinimi}</td>\n";
+				echo "<td width='200' valign='top'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." {$tilinimi}</td>\n";
 			}
 			else {
 				echo "<td width='200' valign='top'>{$iulos[$i]}</td>\n";

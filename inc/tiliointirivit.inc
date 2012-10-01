@@ -154,7 +154,7 @@
 				<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 		if ($tiliulos == '') {
-			echo livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT");
+			echo livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT", "vero");
 		}
 		else {
 			echo "$tiliulos";

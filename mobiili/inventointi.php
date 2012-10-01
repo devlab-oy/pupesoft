@@ -77,8 +77,10 @@ function tarkista_varmistuskoodi($tuotepaikka, $varmistuskoodi) {
 	}
 }
 
+if (!isset($tee)) $tee = '';
+
 # Valikko
-if (!isset($tee)) {
+if ($tee == '') {
 	$title = t("Inventointi");
 	include('views/inventointi/index.php');
 }
@@ -169,8 +171,6 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 			include('views/inventointi/erat_loppu.php');
 			exit();
 		}
-
-		$tuote = mysql_fetch_assoc($result);
 	}
 	# Inventoidaan haulla
 	else {
@@ -179,7 +179,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 					tuote.nimitys,
 					tuote.tuoteno,
 					tuote.yksikko,
-					#tuotepaikat.inventointilista,
+					tuotepaikat.inventointilista,
+					tuotepaikat.tyyppi,
 					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka
 					FROM tuotepaikat
@@ -189,17 +190,52 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 					AND concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) = '{$tuotepaikka}'";
 		$result = pupe_query($query);
-		$tuote = mysql_fetch_assoc($result);
+	}
+	$tuote = mysql_fetch_assoc($result);
+
+	# Haetaan sscc jos tyyppi
+	if ($tuote['tyyppi'] == 'S') {
+		# etsitään suuntalavan sscc
+		$suuntalava_query = "SELECT group_concat(sscc) as sscc
+						FROM tilausrivi
+						JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio AND suuntalavat.tunnus=tilausrivi.suuntalava)
+						WHERE tuoteno='{$tuote['tuoteno']}'
+							AND tilausrivi.tyyppi='O'
+							AND tilausrivi.suuntalava!=''
+							AND tilausrivi.yhtio='{$kukarow['yhtio']}'
+							AND concat_ws('-', hyllyalue, hyllynro,
+										hyllyvali, hyllytaso) = '{$tuote['tuotepaikka']}'";
+		$suuntalava_sscc = pupe_query($suuntalava_query);
+		$suuntalava_sscc = mysql_fetch_assoc($suuntalava_sscc);
+		$sscc = $suuntalava_sscc['sscc'];
+
+	}
+
+	$disabled = '';
+	# Näytetäänkö apulaskuri
+	$query = "SELECT
+				count(tunnus) as monta
+				FROM tuotteen_avainsanat
+				WHERE tuoteno='{$tuote['tuoteno']}'
+				AND yhtio='{$kukarow['yhtio']}'
+				AND (laji='pakkauskoko2' OR laji='pakkauskoko3')";
+	$pakkaukset = pupe_query($query);
+	$pakkaukset = mysql_fetch_assoc($pakkaukset);
+
+	# Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
+	if ($pakkaukset['monta'] == 0) {
+		$disabled = true;
 	}
 
 	# Tarkistetaan varmistuskoodi
-	if (tarkista_varmistuskoodi($tuote[tuotepaikka], $varmistuskoodi)) {
+	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
 		$title = t("Laske määrä");
 		include('views/inventointi/laske.php');
 
 	}
 	else {
 		if (isset($varmistuskoodi)) $errors[] = "Virheellinen varmistuskoodi";
+		$title = t("Varmistuskoodi");
 		include('views/inventointi/varmistuskoodi.php');
 	}
 

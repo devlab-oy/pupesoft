@@ -412,6 +412,28 @@
 						$kaytetyt_tilausrivit[] = $extraa;
 						$paketin_rivit[]		= $extraa;
 
+						// Satula-Runko case
+						$query = "	SELECT tilausrivi.tunnus
+									FROM tilausrivi
+									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									and tilausrivi.tyyppi = 'O'
+									and tilausrivi.netto = ''
+									and tilausrivi.tunnus IN ({$siistitty},{$extraa})";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) > 0) {
+
+							while ($chk_row = mysql_fetch_assoc($chk_res)) {
+								$query = "	UPDATE tilausrivi SET
+											perheid = tunnus
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$chk_row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
+
 					}
 					elseif ($ylimaaraista == 0) {
 						// Jos menee tasan tilatut ja tulleet.
@@ -426,6 +448,28 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
 						$upd_res = pupe_query($updatequery);
+
+						// Satula-Runko case
+						$query = "	SELECT tilausrivi.tunnus
+									FROM tilausrivi
+									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									and tilausrivi.tyyppi = 'O'
+									and tilausrivi.netto = ''
+									and tilausrivi.tunnus IN ({$siistitty})";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) > 0) {
+
+							while ($chk_row = mysql_fetch_assoc($chk_res)) {
+								$query = "	UPDATE tilausrivi SET
+											perheid = tunnus
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$chk_row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
 
 					}
 					elseif ($ylimaaraista < 0) {
@@ -458,6 +502,28 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
 						$upd_res = pupe_query($updatequery);
+
+						// Satula-Runko case
+						$query = "	SELECT tilausrivi.tunnus
+									FROM tilausrivi
+									JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tuoteperhe.isatuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
+									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tuoteperhe.tuoteno)
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									and tilausrivi.tyyppi = 'O'
+									and tilausrivi.netto = ''
+									and tilausrivi.tunnus IN ({$siistitty})";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) > 0) {
+
+							while ($chk_row = mysql_fetch_assoc($chk_res)) {
+								$query = "	UPDATE tilausrivi SET
+											perheid = tunnus
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tunnus = '{$chk_row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
 
 						// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
 						$query = "	INSERT INTO tilausrivi SET

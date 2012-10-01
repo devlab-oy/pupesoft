@@ -885,9 +885,9 @@
 				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
 					//rahtien ja jälkivaatimuskulujen muuttujia
-					$rah     = 0;
-					$jvhinta = 0;
-					$rahinta = 0;
+					$rah       = 0;
+					$jvhinta   = 0;
+					$rah_hinta = 0;
 
 					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per päivä
 					// jälkivaatimukset omalle riville ja tutkitaan tarvimmeko lisäillä JV-kuluja
@@ -1013,7 +1013,7 @@
 					foreach ($yhdista as $otsikot) {
 
 						// lisätään näille tilauksille rahtikulut
-						$virhe=0;
+						$virhe = 0;
 
 						//haetaan ekan otsikon tiedot
 						$query = "  SELECT lasku.*, maksuehto.jv
@@ -1027,7 +1027,7 @@
 						$otsre = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($otsre);
 
-						if (mysql_num_rows($otsre)!=1) $virhe++;
+						if (mysql_num_rows($otsre) != 1) $virhe++;
 
 						//summataan kaikki painot yhteen
 						$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro in ($otsikot)";
@@ -1047,24 +1047,10 @@
 						}
 
 						//vika pilkku pois
-						$rahtikirjanrot = substr($rahtikirjanrot,0,-1);
+						$rahtikirjanrot = substr($rahtikirjanrot, 0, -1);
 
 						// haetaan rahdin hinta
-						$rahtihinta_array = hae_rahtimaksu($otsikot);
-
-						$rahtihinta_ale = array();
-
-						// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
-						if (is_array($rahtihinta_array)) {
-							$rahtihinta = $rahtihinta_array['rahtihinta'];
-
-							foreach ($rahtihinta_array['alennus'] as $ale_k => $ale_v) {
-								$rahtihinta_ale[$ale_k] = $ale_v;
-							}
-						}
-						else {
-							$rahtihinta = 0;
-						}
+						list($rah_hinta, $rah_ale, $rah_alv, $rah_netto) = hae_rahtimaksu($otsikot);
 
 						$query = "  SELECT *
 									FROM tuote
@@ -1072,47 +1058,24 @@
 									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 						$rhire = pupe_query($query);
 
-						if ($rahtihinta != 0 and $virhe == 0 and mysql_num_rows($rhire) == 1) {
+						if ($rah_hinta > 0 and $virhe == 0 and mysql_num_rows($rhire) == 1) {
 
-							$trow       = mysql_fetch_assoc($rhire);
-							$otunnus    = $laskurow['tunnus'];
-							$hinta      = $rahtihinta;
-							$nimitys    = "$pvm $laskurow[toimitustapa]";
-							$kommentti  = t("Rahtikirja").": $rahtikirjanrot";
-							$netto      = count($rahtihinta_ale) > 0 ? '' : 'N';
-
-							$query = "	SELECT rahti_tuotenumero
-										FROM toimitustapa
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND selite = '$laskurow[toimitustapa]'
-										AND rahti_tuotenumero != ''";
-							$rahti_tuoteno_result = pupe_query($query);
-
-							if (mysql_num_rows($rahti_tuoteno_result) > 0) {
-								$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
-
-								$query = "	SELECT *
-											FROM tuote
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tuoteno = '{$rahti_tuoteno_row['rahti_tuotenumero']}'";
-								$tres_chk = pupe_query($query);
-								$trow_chk = mysql_fetch_assoc($tres_chk);
-
-								list($rahinta, $alv) = alv($laskurow, $trow_chk, $hinta, '', '');
-							}
-							else {
-								list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-							}
+							$trow      = mysql_fetch_assoc($rhire);
+							$otunnus   = $laskurow['tunnus'];
+							$nimitys   = "$pvm $laskurow[toimitustapa]";
+							$kommentti = t("Rahtikirja").": $rahtikirjanrot";
 
 							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								$ale_lisa_insert_query_1 .= " ale{$alepostfix},";
-								$ale_lisa_insert_query_2 .= " '".$rahtihinta_ale["ale{$alepostfix}"]."',";
+								if (isset($rah_ale["ale{$alepostfix}"]) and $rah_ale["ale{$alepostfix}"] > 0) {
+									$ale_lisa_insert_query_1 .= " ale{$alepostfix},";
+									$ale_lisa_insert_query_2 .= " '".$rah_ale["ale{$alepostfix}"]."',";
+								}
 							}
 
 							$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('automaatti', now(), '$rahinta', {$ale_lisa_insert_query_2} '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+										values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti')";
 							$addtil = pupe_query($query);
 
 							if ($silent == "") {

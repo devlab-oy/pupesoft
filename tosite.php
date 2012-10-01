@@ -909,11 +909,11 @@
 			}
 
 			$maara = (!isset($maara) or $maara < (count($tiliointirivit) + 1 - $skipattuja)) ? count($tiliointirivit) + 1 - $skipattuja : $maara;
+		}
 
-			if (!in_array($maara, $tilmaarat)) {
-				$tilmaarat[] = $maara;
-				sort($tilmaarat);
-			}
+		if (!in_array($maara, $tilmaarat)) {
+			$tilmaarat[] = $maara;
+			sort($tilmaarat);
 		}
 
 		$sel = array();
@@ -1293,4 +1293,3 @@
 	}
 
 	require "inc/footer.inc";
-?>

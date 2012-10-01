@@ -25,9 +25,6 @@ if ($_POST['ajax_toiminto'] == 'tilin_oletusalv') {
 	);
 
 }
-else {
-	// wtf, unknown ajax call
-}
 
 exit;
 ?>

@@ -1624,7 +1624,7 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 		if (strlen($ivero[$i]) == 0) {
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				$ivero[$i] = alv_oletus();
+				$ivero[$i] = alv_oletus($oltil);
 			}
 			else {
 				$ivero[$i] = 0;

@@ -10331,9 +10331,22 @@ if (!function_exists("alv_popup_oletus")) {
 }
 
 if (!function_exists("alv_oletus")) {
-	function alv_oletus() {
+	function alv_oletus($tili = '') {
 		global $kukarow;
 		$ulos = 0;
+		
+		if ($tili !='') {
+				$query = "	SELECT oletus_alv
+							FROM tili
+							WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili' and oletus_alv IS NOT NULL";
+				$vresult = pupe_query($query);
+				
+				if (mysql_num_rows($vresult) == 1) {
+					$vrow = mysql_fetch_array($vresult);
+					return $vrow['oletus_alv'];
+				}
+		}
+		
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";

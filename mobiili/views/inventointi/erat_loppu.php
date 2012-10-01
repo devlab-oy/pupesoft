@@ -2,8 +2,10 @@
 	<h1>Inventoi</h1>
 </div>
 
-<b><?= t("Inventoitavia eriä ei ole") ?></b>
+<div class='main'>
+	<b><?= t("Inventoitavia eriä ei ole") ?></b>
+</div>
 
 <div class='controls'>
-	<a href='inventointi.php'>OK</a>
+	<a href='inventointi.php' class='button'>OK</a>
 </div>

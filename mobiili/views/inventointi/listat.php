@@ -18,7 +18,6 @@
 					<td><a href='?tee=laske&lista=<?= $lista['lista'] ?>'><?= $lista['lista'] ?></a></td>
 					<td><?= $lista['tuotteita'] ?></td>
 					<td><?= $lista['hyllyvali'] ?></td>
-					<td><?= $ensimmainen['tuotepaikka'] ?></td>
 				</tr>
 			<? endforeach ?>
 

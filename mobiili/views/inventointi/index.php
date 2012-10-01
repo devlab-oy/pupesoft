@@ -4,16 +4,7 @@
 </div>
 
 <div class='main'>
-	<table>
-		<tr>
-			<td><a href='inventointi?tee=haku'>Vapaa inventointi</a></td>
-		</tr>
-		<tr>
-			<td><a href='?tee=listat'>Keräyspaikat listalta</a></td>
-		</tr>
-		<tr>
-			<td><a href='?tee=listat'>Reservipaikat listalta</a></td>
-		</tr>
-		</tr>
-	</table>
+	<p><a href='inventointi?tee=haku' class='button'><?= t("Vapaa inventointi") ?></a></p>
+	<p><a href='?tee=listat' class='button'><?= t("Keräyspaikat listalta") ?></a></p>
+	<p><a href='?tee=listat' class='button'><?= t("Reservipaikat listalta") ?></a></p>
 </div>

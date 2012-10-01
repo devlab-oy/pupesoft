@@ -1114,7 +1114,24 @@
 								if (mysql_num_rows($chk_res) == 0) {
 									// echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 									// $virheet++;
-									continue;
+
+									// TÄMÄ ON PUUKOTUS
+									if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+
+										// isä pitää olla jo kohdistettu
+										$query = "	SELECT tunnus
+													FROM asn_sanomat
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND laji = 'asn'
+													AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
+													AND status = 'X'";
+										$chk_res = pupe_query($query);
+
+										if (mysql_num_rows($chk_res) == 0) continue;
+									}
+									else {
+										continue;
+									}
 								}
 							}
 

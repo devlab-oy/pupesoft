@@ -685,7 +685,7 @@
 
 				$edketjutus = $row["ketjutuskentta"];
 			}
-			
+
 			echo "</table><br>";
 
 			echo "<table>";
@@ -819,8 +819,8 @@
 							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
-			$prires= pupe_query($query);
-			$prirow= mysql_fetch_array($prires);
+			$prires = pupe_query($query);
+			$prirow = mysql_fetch_array($prires);
 
 			$query = "	SELECT *
 						FROM kirjoittimet
@@ -831,7 +831,11 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirrow["tunnus"] == $kukarow["kirjoitin"])) {
+
+				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and
+					(($kirrow["tunnus"] == $kukarow["kirjoitin"]) or
+					($kirrow["tunnus"]  == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or
+					($kirrow["tunnus"]  == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0))) {
 					$sel = "SELECTED";
 				}
 
@@ -842,7 +846,6 @@
 
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {
 				echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td colspan='3'><select name='valittu_sadtulostin'>";
-
 				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 				mysql_data_seek($kirre,0);

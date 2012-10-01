@@ -2,6 +2,10 @@
 
 	if (!isset($link)) require "inc/parametrit.inc";
 
+	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+		require ("inc/tilioinnin_toiminnot.inc");
+	}
+	
 	enable_ajax();
 
 	if ($livesearch_tee == "TILIHAKU") {
@@ -426,7 +430,7 @@
 							$tilinimi = "<br>".$vrow['nimi'];
 						}
 					}
-					echo "<td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT")." $tilinimi</td>";
+					echo "<td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." $tilinimi</td>";
 				}
 				else {
 					echo "<td>$iulos[$i]</td>";

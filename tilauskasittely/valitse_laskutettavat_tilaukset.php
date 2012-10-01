@@ -685,7 +685,7 @@
 
 				$edketjutus = $row["ketjutuskentta"];
 			}
-			
+
 			echo "</table><br>";
 
 			echo "<table>";
@@ -802,7 +802,8 @@
 			}
 
 			echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";
-			
+			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($ekarow["varasto"] == 0) {
 				$query = "	SELECT *
@@ -830,9 +831,11 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and ((mysql_fetch_array($prires) > 0 and $kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) 
-					or $kirrow["tunnus"] == $kukarow["kirjoitin"]
-					or $kirrow["tunnus"] == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0)) {
+
+				if (($yhtiorow["verkkolasku_lah"] == "" or $ekarow["chn"] == "667") and
+					(($kirrow["tunnus"] == $kukarow["kirjoitin"]) or
+					($kirrow["tunnus"]  == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or
+					($kirrow["tunnus"]  == $yhtiorow["lasku_tulostin"] and $kukarow["kirjoitin"] == 0 and $prirow["printteri5"] == 0))) {
 					$sel = "SELECTED";
 				}
 
@@ -843,7 +846,6 @@
 
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {
 				echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td colspan='3'><select name='valittu_sadtulostin'>";
-
 				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 				mysql_data_seek($kirre,0);

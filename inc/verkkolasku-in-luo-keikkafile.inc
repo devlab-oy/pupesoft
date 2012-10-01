@@ -1053,9 +1053,11 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-													AND (lasku.tunnus = tilausrivi.uusiotunnus OR lasku.tunnus = tilausrivi.otunnus)
-													AND lasku.mapvm = '0000-00-00'
-													AND lasku.tapvm = '0000-00-00')
+													AND (
+														(lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00') OR
+														(lasku.tunnus = tilausrivi.otunnus and tilausrivi.uusiotunnus = 0)
+														)
+													)
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'

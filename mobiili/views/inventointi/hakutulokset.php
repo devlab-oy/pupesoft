@@ -13,7 +13,7 @@
 			</tr>
 
 			<?php foreach($tuotteet as $tuote): ?>
-				<?php $url = http_build_query(array('tee' => 'laske', 'tuotepaikka' => $tuote['tuotepaikka'], 'tuoteno' => $tuote['tuoteno'])) ?>
+				<?php $url = http_build_query(array('tee' => 'laske', 'tuotepaikka' => $tuote['tuotepaikka'], 'tuoteno' => $tuote['tuoteno'], 'tuotepaikalla' => $haku_tuotepaikalla)) ?>
 				<tr>
 					<td><a href='inventointi.php?<?= $url ?>'><?= $tuote['tuoteno'] ?></a></td>
 					<td><?= $tuote['tuotepaikka'] ?></td>

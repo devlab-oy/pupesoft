@@ -23,71 +23,36 @@ $errors = array();
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	global $kukarow;
 
-	# Viivakoodilla
-	if (!empty($viivakoodi)) {
-		$query = "	SELECT
-					tuote.nimitys,
-					tuote.tuoteno,
-					tuotepaikat.inventointilista,
-					tuotepaikat.inventointilista_aika,
-					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
-							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
-							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
-							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
-					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
-								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-					FROM tuotepaikat
-					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-					AND tuote.eankoodi='$viivakoodi'
-					order by sorttauskentta
-					limit 100";
-	}
-	# Tuotenumerolla
-	if (!empty($tuoteno)) {
-		$query = "	SELECT
-					tuote.nimitys,
-					tuote.tuoteno,
-					tuotepaikat.inventointilista,
-					tuotepaikat.inventointilista_aika,
-					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
-							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
-							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
-							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
-					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
-								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-					FROM tuotepaikat
-					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-					AND tuote.tuoteno='$tuoteno'
-					order by sorttauskentta
-					limit 100";
-	}
-	# Tuotepaikalla
-	if (!empty($tuotepaikka)) {
-		$query = "	SELECT
-					tuote.nimitys,
-					tuote.tuoteno,
-					tuotepaikat.inventointilista,
-					tuotepaikat.inventointilista_aika,
-					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
-							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
-							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
-							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
-					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
-								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
-					FROM tuotepaikat
-					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-					AND concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
-								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'
-					order by tuotepaikat.tuoteno
-					limit 100";
-	}
-	if (isset($query)) $result = pupe_query($query);
+	# Hakuehdot
+	if ($viivakoodi != '')	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
+	if ($tuoteno != '')		$params[] = "tuote.tuoteno = '{$tuoteno}'";
+	if ($tuotepaikka != '')	$params[] = "concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+										tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'";
+	$haku_ehto = implode($params, " AND ");
 
-	while($row = mysql_fetch_assoc($result)) {
-		$osumat[] = $row;
+	$osumat = array();
+	if (!empty($haku_ehto)) {
+		$query = "	SELECT
+					tuote.nimitys,
+					tuote.tuoteno,
+					tuotepaikat.inventointilista,
+					tuotepaikat.inventointilista_aika,
+					concat(	lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
+							lpad(upper(tuotepaikat.hyllynro), 5, '0'),
+							lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
+							lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta,
+					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
+					FROM tuotepaikat
+					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+					AND $haku_ehto
+					LIMIT 200";
+		$result = pupe_query($query);
+
+		while($row = mysql_fetch_assoc($result)) {
+			$osumat[] = $row;
+		}
 	}
 
 	return $osumat;
@@ -129,6 +94,8 @@ if ($tee == 'haku') {
 	}
 	# Löydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
+		# Jos haettu pelkällä tuotepaikalla, muistetaan palata hakutuloksiin
+		$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
 		include('views/inventointi/hakutulokset.php');
 	}
 	# Haku formi
@@ -197,12 +164,17 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 			 		ORDER BY sorttauskentta, tuoteno
 			 		LIMIT 1";
 		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			include('views/inventointi/erat_loppu.php');
+			exit();
+		}
+
 		$tuote = mysql_fetch_assoc($result);
 	}
 	# Inventoidaan haulla
 	else {
 		# Haetaan tuotteen ja tuotepaikan tiedot
-		# TODO: viivakoodi, tuoteno tai tuotepaikka
 		$query = "	SELECT
 					tuote.nimitys,
 					tuote.tuoteno,
@@ -303,17 +275,22 @@ if ($tee == 'inventoidaan') {
 
 		# inventointi
 		$tee = 'VALMIS';
+		$inven_laji = 'Kiertävä';
+		$lisaselite = 'Päivittäisinventointi käsipäätteellä';
 		require('../inventoi.php');
 
 		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
 		if($lista != 0) {
 			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista));
 		}
+		elseif($tuotepaikalla=='true') {
+			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
+		}
 		# Palataan alkuun
 		else {
 			$paluu_url ='';
 		}
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='4;URL=inventointi.php?".$paluu_url."'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?".$paluu_url."'>";
 	}
 	else {
 		$errors[] = "Virhe inventoinnissa.";

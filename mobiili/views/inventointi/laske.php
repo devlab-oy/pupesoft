@@ -8,6 +8,7 @@
 		<input type='hidden' name='tuoteno' value='<?= $tuote['tuoteno'] ?>'>
 		<input type='hidden' name='tuotepaikka' value='<?= $tuote['tuotepaikka'] ?>'>
 		<input type='hidden' name='lista' value='<?= $tuote['inventointilista'] ?>'>
+		<input type='hidden' name='tuotepaikalla' value='<?= $tuotepaikalla ?>'>
 		<table>
 			<tr>
 				<th>M‰‰r‰</th>

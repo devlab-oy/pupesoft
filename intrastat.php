@@ -14,6 +14,8 @@
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
+	// testing 2012-10-01
+$kayttajan_valinta_maa = "EE";
 
 	if (!isset($tapa))					$tapa = "";
 	if (!isset($tee))					$tee = "";
@@ -29,6 +31,13 @@
 	if (!isset($totsumma))				$totsumma = "";
 	if (!isset($vaintullinimike))		$vaintullinimike = "";
 
+	if ($kayttajan_valinta_maa != "") {
+		$maa = $kayttajan_valinta_maa;
+	}
+	else {
+		$maa = $yhtiorow["maa"];
+	}
+			
 	// tuonti vai vienti
 	if ($tapa == "tuonti") {
 		$laji = "A";
@@ -83,20 +92,17 @@
 		}
 		$eumaat = substr($eumaat, 0, -1);
 
-		if ($kayttajan_valinta_maa != "") {
-			$maa = $kayttajan_valinta_maa;
-		}
-		else {
-			$maa = $yhtiorow["maa"];
-		}
 
+		
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
 			$maalisa = "maamaara in ('', '$maa') and maalahetys in ('',$eumaat) and maalahetys != '$maa'";
 		}
-		else {
-			$tapa = "vienti";
+		else if ($tapa == "vienti") {
 			$maalisa = "maalahetys in ('', '$maa') and maamaara in ('',$eumaat) and maamaara != '$maa'";
+		}
+		else if ($tapa == "yhdistetty") {
+			$maalisa = "maalahetys in ('', '$eumaat') and maamaara in ('',$eumaat) and maamaara != maalahetys";
 		}
 
 		if ($lisavar == "S") {
@@ -283,7 +289,20 @@
 			// tehd‰‰n tilastoarvot listausta
 			$tilastoarvot = "<table>
 				<tr>
-				<th>#</th>
+				<th>#</th>";
+				if ($maa=="EE") {
+					$tilastoarvot .= "
+						<th>".t("Luontipvm")."</th>
+						<th>".t("Vuosi")."</th>
+						<th>".t("Kuukausi")."</th>
+						<th>".t("Ilmoitus")."</th>
+						<th>".t("Ytunnus")."</th>
+						<th>".t("Rivinro")."</th>
+						<th>".t("Toimitusehto")."</th>
+						<th>".t("Maa")."</th>
+				";
+				}
+				$tilastoarvot .= "
 				<th>".t("Tullinimike")."</th>
 				<th>".t("Alkuper‰maa")."</th>
 				<th>".t("L‰hetysmaa")."</th>
@@ -817,12 +836,16 @@
 	if ($tapa == "vientituonti") $tapa = "vienti";
 	if ($tapa == "tuontivienti") $tapa = "tuonti";
 
+	if ($maa == "EE") {
+		$tapa = "yhdistetty";
+	}
+	
 	$sel1[$outputti] = "SELECTED";
 	$sel2[$tapa]     = "SELECTED";
 	$sel3[$lahetys]  = "SELECTED";
 	$sel4[$lisavar]  = "SELECTED";
 	$sel5[$tapahtumalaji] = "SELECTED";
-
+	
 	if ($excel != "") {
 		$echecked = "checked";
 	}
@@ -831,7 +854,6 @@
 	}
 
 	echo "<br>
-
 	<form method='post' action='intrastat.php'>
 	<input type='hidden' name='tee' value='tulosta'>
 
@@ -841,7 +863,11 @@
 			<td>
 				<select name='tapa'>
 				<option value='vienti' $sel2[vienti]>".t("Vienti-ilmoitus")."</option>
-				<option value='tuonti' $sel2[tuonti]>".t("Tuonti-ilmoitus")."</option>
+				<option value='tuonti' $sel2[tuonti]>".t("Tuonti-ilmoitus")."</option>";
+				if ($maa == "EE") {
+					echo "<option value='yhdistetty' SELECTED>".t("Yhdistetty")."</option>";
+				}
+				echo"
 				</select>
 			</td>
 		</tr>";

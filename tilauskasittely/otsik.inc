@@ -739,7 +739,7 @@
 
 				// jos ei löydy niin mennään erroriin
 				if (mysql_num_rows($alhire) == 0) {
-					echo "<font class='error'>Oletus ALV-kantaa ei löydy asiakkaan maahan $srow[maa]! Ei voida jatkaa!</font><br>";
+					echo "<font class='error'>".t("VIRHE: Oletus ALV-kantaa ei löydy asiakkaan maahan")." $srow[maa]! ".t("Ei voida jatkaa")."!</font><br>";
 					exit;
 				}
 				else {

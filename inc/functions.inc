@@ -18384,7 +18384,7 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) != 0) {
-							#echo "Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
+							echo "Funktion sis‰ll‰: Lis‰t‰‰n k‰ytett‰viin tilausriveihin {$tilausrivirow['tunnus']} (K)<br><br>";
 							$kaytettavat_tilausrivit[] = $tilausrivirow['tunnus'];
 						}
 					}

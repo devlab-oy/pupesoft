@@ -194,7 +194,7 @@
 			$kokeillaan = pupe_query($query);
 
 			if (mysql_num_rows($kokeillaan) > 0) {
-				#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 			}
@@ -231,7 +231,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -268,7 +268,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -305,7 +305,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -341,7 +341,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -373,7 +373,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -407,7 +407,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -438,7 +438,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -471,7 +471,7 @@
 				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
-					#echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
@@ -500,11 +500,15 @@
 							ORDER BY laadittu ASC";
 
 				if (mysql_num_rows($kokeillaan) > 0) {
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
+
 					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
 				}
 			}
 
 			if (count($kaytettavat_tilausrivit) > 0) {
+
+				echo "<br>Käytettävät tilausrivit <pre>",var_dump($kaytettavat_tilausrivit),"</pre>";
 
 				$tilausrivi_nro = "";
 
@@ -629,6 +633,7 @@
 
 					while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
 						if ($rtuoteno[$i+1]["lapsi"] == "yes") {
+							echo "<br>isalisä tuotteella $tilausrivirow[tuoteno] (tunnus $tilausrivirow[tunnus])<br><br>";
 							$rtuoteno[$i+1]["isa_olemassa"] = $tilausrivirow['tunnus'];
 							break;
 						}
@@ -1044,7 +1049,7 @@
 
 					$ylimaaraista = $rtuoteno[$i]["kpl"] - $laskuri; // liikaa miinus tilauksella
 
-					#echo "$ylimaaraista = {$rtuoteno[$i]['kpl']} - $laskuri<br><br>";
+					echo "$ylimaaraista = {$rtuoteno[$i]['kpl']} - $laskuri<br><br>";
 
 					if ($ylimaaraista > 0) {
 
@@ -1065,7 +1070,8 @@
 																	AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.tyyppi = 'O')
+									AND tilausrivi.tyyppi = 'O'
+									{$isalisa})
 									UNION
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,
@@ -1084,8 +1090,10 @@
 																	AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.tyyppi = 'O')
+									AND tilausrivi.tyyppi = 'O'
+									{$isalisa})
 									ORDER BY uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$kokeillaan = pupe_query($query);
 
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
@@ -1112,7 +1120,7 @@
 								$chk_res = pupe_query($query);
 
 								if (mysql_num_rows($chk_res) == 0) {
-									// echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
+									echo "3 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3 {$rtuoteno[$i]['tuoteno3']}<br><br>";
 									// $virheet++;
 
 									// TÄMÄ ON PUUKOTUS
@@ -1127,9 +1135,13 @@
 													AND status = 'X'";
 										$chk_res = pupe_query($query);
 
-										if (mysql_num_rows($chk_res) == 0) continue;
+										if (mysql_num_rows($chk_res) == 0) {
+											echo "<br>continue1 <br><br>";
+											continue;
+										}
 									}
 									else {
+										echo "<br>continue2 <br><br>";
 										continue;
 									}
 								}
@@ -1150,7 +1162,7 @@
 
 					if ($ylimaaraista > 0) {
 
-						#echo "Jouduttiin haaraan ylimääräistä > 0 ($ylimaaraista > 0)<br><br>";
+						echo "Jouduttiin haaraan ylimääräistä > 0 ($ylimaaraista > 0)<br><br>";
 
 						// Tehdään uusi rivi, jossa on jäljelle jääneet kappaleet
 						$fields = "yhtio";
@@ -1192,6 +1204,7 @@
 						}
 
 						$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+						echo "<pre>$kysely</pre>";
 						$uusires = pupe_query($kysely);
 						$extraa = mysql_insert_id();
 						$lisa_array[]			= $extraa;
@@ -1205,6 +1218,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$rtuoteno[$i]['insert_id']}'";
+						echo "<pre>$updatequery</pre>";
 						$upd_res = pupe_query($updatequery);
 					}
 					elseif ($ylimaaraista == 0) {

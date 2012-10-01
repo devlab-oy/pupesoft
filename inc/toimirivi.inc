@@ -518,7 +518,6 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimittajalta ei tule ASN-sanomia eik‰ laskuja")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimittaja l‰hett‰‰ ASN-sanoman ja TecCom-laskun")."</option>";
-		$ulos .= "<option value='S' $sel[S]>".t("Toimittaja l‰hett‰‰ vain ASN-sanoman")."</option>";
 		$ulos .= "<option value='L' $sel[L]>".t("Toimittaja l‰hett‰‰ vain TecCom-laskun")."</option>";
 		$ulos .= "</select></td>";
 

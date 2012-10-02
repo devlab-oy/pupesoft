@@ -946,6 +946,14 @@ if ($tee == 'MONISTA') {
 							$values .= ", '{$valrow['kurssi']}'";
 						}
 						break;
+					case 'kolmikantakauppa':
+						if ($monistarow[$i] != "") {
+							$values .= ", 'M'";
+						}
+						else {
+							$values .= ", ''";
+						}
+						break;
 					default:
 						$values .= ", '".$monistarow[$i]."'";
 				}

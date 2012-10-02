@@ -39,6 +39,19 @@
 		$rakirno = $toimitustavan_tarkistin[0];
 	}
 
+	if (isset($pakkaus) and count($pakkaus) > 0) {
+
+		$pakkauskuvaus = array();
+
+		foreach ($pakkaus as $key => $val) {
+			if (strpos($val, '####') !== FALSE) {
+				list($pak, $pak_kuvaus) = explode('####', $val);
+				$pakkauskuvaus[$key] = $pak_kuvaus;
+				$pakkaus[$key] = $pak;
+			}
+		}
+	}
+
 	if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
 		list($toimitustapa, $yhtio, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
@@ -2477,7 +2490,8 @@
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
 							kerayserat.otunnus,
-							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot,
+							SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) kuutiot
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -2542,9 +2556,7 @@
 					elseif ($pak_row['pakkaus'] == $keraysera_row['pakkaus']) $sel = " selected";
 					else $sel = "";
 
-					
-
-					echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+					echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 				}
 
 				echo "</select></td>";
@@ -2642,7 +2654,7 @@
 
 				$sel = $pak_row['pakkaus'] == $row['pakkaus'] ? " selected" : "";
 
-				echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
 			echo "</select></td>";

@@ -91,8 +91,6 @@ $kayttajan_valinta_maa = "EE";
 			$eumaat .= "'$row[koodi]',";
 		}
 		$eumaat = substr($eumaat, 0, -1);
-
-
 		
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
@@ -138,6 +136,7 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Saapuminen' as tapa,
+						lasku.toimitusehto,
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
@@ -202,6 +201,7 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Lasku' as tapa,
+						lasku.toimitusehto,
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
@@ -243,6 +243,7 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Siirtolista' as tapa,
+						lasku.toimitusehto,
 						$vainnimikelisa2
 						max(lasku.tunnus) laskunro,
 						max(tuote.tuoteno) tuoteno,
@@ -288,8 +289,7 @@ $kayttajan_valinta_maa = "EE";
 		if ($outputti == "tilasto") {
 			// tehd‰‰n tilastoarvot listausta
 			$tilastoarvot = "<table>
-				<tr>
-				<th>#</th>";
+				<tr>";
 				if ($maa=="EE") {
 					$tilastoarvot .= "
 						<th>".t("Luontipvm")."</th>
@@ -303,6 +303,7 @@ $kayttajan_valinta_maa = "EE";
 				";
 				}
 				$tilastoarvot .= "
+				<th>#</th>
 				<th>".t("Tullinimike")."</th>
 				<th>".t("Alkuper‰maa")."</th>
 				<th>".t("L‰hetysmaa")."</th>
@@ -500,6 +501,21 @@ $kayttajan_valinta_maa = "EE";
 			if ($outputti == "tilasto") {
 				// tehd‰‰n tilastoarvolistausta
 				$tilastoarvot .= "<tr>";
+				if ($maa == "EE"){
+					$ee_pvm = date("d.m.Y");
+					$ee_ilmoitus = ((($row[maamaara] == $maa or $row[maamaara] == '') and $row[maalahetys] != $maa) ? 'S' : 'L');
+					$ee_rivi = sprintf('%05d', $lask);
+					$ee_toimehto = substr($row[toimitusehto], 0, 3);
+
+					$tilastoarvot .= "<td>$ee_pvm</td>";
+					$tilastoarvot .= "<td>$vv</td>";
+					$tilastoarvot .= "<td>$kuuka</td>";
+					$tilastoarvot .= "<td>$ee_ilmoitus</td>";
+					$tilastoarvot .= "<td>$yhtiorow[ytunnus]</td>";
+					$tilastoarvot .= "<td>$ee_rivi</td>";
+					$tilastoarvot .= "<td>$ee_toimehto</td>";
+					$tilastoarvot .= "<td>FINLAND</td>";
+				}
 				$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
 
 				$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";	//Tullinimike CN
@@ -645,7 +661,8 @@ $kayttajan_valinta_maa = "EE";
 		if ($outputti == "tilasto") {
 			// tehd‰‰n tilaustoarvolistausta
 			$tilastoarvot .= "<tr>";
-			$tilastoarvot .= "<th colspan='7'>".t("Yhteens‰").":</td>";
+			$span = ($maa == "EE" ? 15 : 7);
+			$tilastoarvot .= "<th colspan='$span'>".t("Yhteens‰").":</td>";
 			$tilastoarvot .= "<th>$arvoyht</th>";
 			$tilastoarvot .= "<th colspan='4'></th>";
 			$tilastoarvot .= "</tr>";

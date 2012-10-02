@@ -351,9 +351,14 @@
 							}
 						}
 
-						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+						if (mysql_field_type($result,$i) == 'real') {
+							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
 
-						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
+							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
+						}
+						else {
+							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
+						}
 					}
 				}
 			}
@@ -386,9 +391,14 @@
 							}
 						}
 
-						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
-						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
+						if (mysql_field_type($result,$i) == 'real') {
+							$t[$i] = $t[$i] != "NULL" ? (float) str_replace(",", ".", $t[$i]) : $t[$i];
 
+							$query .= ", ". mysql_field_name($result,$i)." = {$t[$i]} ";
+						}
+						else {
+							$query .= ", ". mysql_field_name($result,$i)." = '".trim($t[$i])."' ";
+						}
 					}
 				}
 

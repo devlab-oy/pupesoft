@@ -8559,7 +8559,7 @@ if (!function_exists("livesearch_kentta")) {
 		}
 
 		$hakuID = "haku".uniqid();
-		
+
 		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
@@ -8572,7 +8572,7 @@ if (!function_exists("livesearch_kentta")) {
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
 				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
-				
+
 		return $return;
 	}
 }
@@ -10227,6 +10227,7 @@ if (!function_exists("alv_popup")) {
 		}
 		else {
 			$ulos = "<select name='$nimi'>";
+
 			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel = "";
 
@@ -10245,6 +10246,7 @@ if (!function_exists("alv_popup")) {
 			}
 			$ulos .= "</select>";
 		}
+		
 		return $ulos;
 	}
 }
@@ -10334,19 +10336,19 @@ if (!function_exists("alv_oletus")) {
 	function alv_oletus($tili = '') {
 		global $kukarow;
 		$ulos = 0;
-		
+
 		if ($tili !='') {
-				$query = "	SELECT oletus_alv
-							FROM tili
-							WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili' and oletus_alv IS NOT NULL";
-				$vresult = pupe_query($query);
-				
-				if (mysql_num_rows($vresult) == 1) {
-					$vrow = mysql_fetch_array($vresult);
-					return $vrow['oletus_alv'];
-				}
+			$query = "	SELECT oletus_alv
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili' and oletus_alv IS NOT NULL";
+			$vresult = pupe_query($query);
+
+			if (mysql_num_rows($vresult) == 1) {
+				$vrow = mysql_fetch_array($vresult);
+				return $vrow['oletus_alv'];
+			}
 		}
-		
+
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";

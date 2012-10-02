@@ -174,7 +174,7 @@
 	}
 	if ($lasrow["vienti"] == 'E') {
 
-		if ($lasrow['kolmikantakauppa'] == "K") {
+		if ($lasrow['kolmikantakauppa'] != "") {
 			$lisa_comments .= "VAT 0% Triangulation.\n";
 		}
 		else {

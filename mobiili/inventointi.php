@@ -108,13 +108,21 @@ if ($tee == 'haku') {
 
 # Inventointilistat
 if ($tee == 'listat') {
+	# Reservipaikka
+	if (!isset($reservipaikka)) $reservipaikka = 'E';
 
 	# Haetaan inventointilistat
 	$query = "	SELECT DISTINCT(inventointilista) as lista,
 				count(tuoteno) as tuotteita,
-				concat_ws('-', min(hyllyalue), max(hyllyalue)) as hyllyvali
+				concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
 				FROM tuotepaikat
-				WHERE yhtio	= '{$kukarow['yhtio']}'
+				JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
+				                              and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
+				                              and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
+				                              and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
+				                              and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
+				WHERE tuotepaikat.yhtio	= '{$kukarow['yhtio']}'
+				and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
 				and inventointilista > 0
 				and inventointilista_aika > '0000-00-00 00:00:00'
 				GROUP BY inventointilista_aika
@@ -122,10 +130,15 @@ if ($tee == 'listat') {
 	$result = pupe_query($query);
 
 	while($row = mysql_fetch_assoc($result)) {
+		$row['url'] = "?tee=laske&lista={$row['lista']}&reservipaikka={$reservipaikka}";
 		$listat[] = $row;
 	}
 
-	if (count($listat) > 0) {
+	if (count($listat) == 1) {
+		# Jos löytyi vain yksi lista, inventoidaan suoraan sitä
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php{$listat[0]['url']}'>";
+	}
+	elseif (count($listat) > 1) {
 		$title = t('Useita listoja');
 		include('views/inventointi/listat.php');
 	}
@@ -145,6 +158,10 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 
 	# Inventoidaan listaa
 	if (!empty($lista)) {
+
+		# Hybridilistat, reservipaikka voi olla K tai E
+		if (!isset($reservipaikka)) $reservipaikka = 'E';
+
 		# Haetaan listan 'ensimmäinen' tuote
 		$query = "	SELECT
 					tuote.nimitys,
@@ -160,7 +177,13 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 			 				lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta
 			 		FROM tuotepaikat
 			 		JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
+			 		JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
+			 		                              and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
+			 		                              and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
+			 		                              and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
+			 		                              and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
 			 		WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
+			 		and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
 			 		AND inventointilista='{$lista}'
 			 		AND inventointilista_aika > '0000-00-00 00:00:00' # Inventoidut tuotteet on nollattu
 			 		ORDER BY sorttauskentta, tuoteno
@@ -172,14 +195,13 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 			exit();
 		}
 	}
-	# Inventoidaan haulla
+	# Inventoidaan haulla, tuote kerrallaan
 	else {
 		# Haetaan tuotteen ja tuotepaikan tiedot
 		$query = "	SELECT
 					tuote.nimitys,
 					tuote.tuoteno,
 					tuote.yksikko,
-					tuotepaikat.inventointilista,
 					tuotepaikat.tyyppi,
 					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka
@@ -228,7 +250,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	}
 
 	# Tarkistetaan varmistuskoodi
-	if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
+	if ((isset($varmistuskoodi) or isset($_varmistuskoodi)) and tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi)) {
 		$title = t("Laske määrä");
 		include('views/inventointi/laske.php');
 
@@ -313,11 +335,12 @@ if ($tee == 'inventoidaan') {
 		$tee = 'VALMIS';
 		$inven_laji = 'Kiertävä';
 		$lisaselite = 'Päivittäisinventointi käsipäätteellä';
+		$mobiili = 'YES';
 		require('../inventoi.php');
 
 		# Jos inventoidaan listalta, palataan inventoimaan listan seuraava tuote.
 		if($lista != 0) {
-			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista));
+			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
 		}
 		elseif($tuotepaikalla=='true') {
 			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
@@ -331,6 +354,7 @@ if ($tee == 'inventoidaan') {
 	else {
 		$errors[] = "Virhe inventoinnissa.";
 	}
+	exit();
 }
 
 # Virheet

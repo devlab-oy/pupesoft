@@ -3,20 +3,19 @@
 	<h1><?php echo $title ?>
 </div>
 
-<div class='main'>
-	<form method='post'>
+<form method='post'>
+	<div class='main'>
 		<table>
 			<tr>
 				<th>Koodi</th>
-				<td><input type='text' name='varmistuskoodi' size='10'></td>
+				<td><input type='text' name='varmistuskoodi' size='10' autofocus></td>
 			</tr>
 			<tr>
 				<th>Osoite</th>
-				<td><input type='text' name='tuotepaikka' value='<?php echo $tuote['tuotepaikka'] ?>' size='10'></td>
-			</tr>
-			<tr>
-				<td><input type='submit' value='OK'></td>
+				<td><input type='text' name='tuotepaikka' value='<?php echo $tuote['tuotepaikka'] ?>' size='10' readonly></td>
 			</tr>
 		</table>
-	</form>
-</div>
+	</div>
+	<div class='controls'><input type='submit' value='OK'></div>
+	</div>
+</form>

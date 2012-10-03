@@ -3,8 +3,8 @@
 	<h1><?php echo $title ?></h1>
 </div>
 
-<div class='main'>
+<div class='main valikko'>
 	<p><a href='inventointi?tee=haku' class='button'><?= t("Vapaa inventointi") ?></a></p>
 	<p><a href='?tee=listat' class='button'><?= t("Keräyspaikat listalta") ?></a></p>
-	<p><a href='?tee=listat' class='button'><?= t("Reservipaikat listalta") ?></a></p>
+	<p><a href='?tee=listat&reservipaikka=k' class='button'><?= t("Reservipaikat listalta") ?></a></p>
 </div>

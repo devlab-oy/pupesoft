@@ -2599,25 +2599,23 @@
 				}
 			}
 
-			if ($yhtiorow['kerayserat'] != 'P' and $yhtiorow['kerayserat'] != 'A') {
-				$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
-							FROM rahtikirjat use index (otsikko_index)
-							WHERE yhtio			= '$kukarow[yhtio]'
-							$rahti_otsikot
-							$rahti_rahtikirjanro
-							AND pakkaus			= '$row[pakkaus]'
-							AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
-				$rarrr = pupe_query($query);
+			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
+						$rahti_otsikot
+						$rahti_rahtikirjanro
+						AND pakkaus			= '$row[pakkaus]'
+						AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
+			$rarrr = pupe_query($query);
 
-				if (mysql_num_rows($rarrr) == 1) {
-					$roror = mysql_fetch_assoc($rarrr);
+			if (mysql_num_rows($rarrr) == 1) {
+				$roror = mysql_fetch_assoc($rarrr);
 
-					if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
-					if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
-					if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
-					if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
-					if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-				}
+				if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
+				if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
+				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
+				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
+				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
 			}
 
 			echo "<tr>";

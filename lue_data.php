@@ -1409,9 +1409,9 @@ if ($kasitellaan_tiedosto) {
 							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 								$chasiakas = $taulunrivit[$taulu][$eriviindex][$r];
 							}
-
-							// Asiakas sarakkaassa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
-							if ($otsikko == 'ASIAKAS' and $asiakkaanvalinta != '1' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+							
+							// Asiakas sarakkaassa ytunnus ja Ytunnus-sarakkeessa on toim_ovttunnus (ytunnus pit‰‰ olla setattu) (t‰m‰ on oletus er‰ajossa)
+							if ($otsikko == 'YTUNNUS' and $asiakkaanvalinta != '1' and $taulunrivit[$taulu][$eriviindex][$r] != "" and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 								$etsitunnus = " SELECT tunnus
 												FROM asiakas
 												USE INDEX (toim_ovttunnus_index)
@@ -1419,16 +1419,17 @@ if ($kasitellaan_tiedosto) {
 												AND toim_ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
 												AND toim_ovttunnus != ''
 												AND ytunnus != ''
-												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("ASIAKAS", $taulunotsikot[$taulu])]."'";
 								$etsiresult = pupe_query($etsitunnus);
 
 								if (mysql_num_rows($etsiresult) == 1) {
 									$etsirow = mysql_fetch_assoc($etsiresult);
-
+// echo "$otsikko, $etsirow[tunnus]<br><br>";
 									// Vaihdetaan asiakas sarakkeeseen tunnus sek‰ ytunnus tulee nollata (koska ei saa olla molempia)
 									$chasiakas = $etsirow['tunnus'];
 									$chytunnus = "";
-									$taulunrivit[$taulu][$eriviindex][$r] = $etsirow['tunnus'];
+									// $taulunrivit[$taulu][$eriviindex][$r] = $etsirow['tunnus'];
+									$taulunrivit[$taulu][$eriviindex][array_search("ASIAKAS", $taulunotsikot[$taulu])] = $etsirow['tunnus'];
 									$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])] = "";
 								}
 								else {
@@ -1459,7 +1460,7 @@ if ($kasitellaan_tiedosto) {
 							if ($otsikko == 'LOPPUPVM' and $taulunrivit[$taulu][$eriviindex][$r] != '') {
 								$chloppupvm = $taulunrivit[$taulu][$eriviindex][$r];
 							}
-
+echo "as: $chasiakas, $chtuoteno, $chytunnus<br><br>";
 							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $taulunrivit[$taulu][$eriviindex][$r] > 0) {
 								// 1 tarkoittaa dynaamisen puun KOODIA
 								$etsitunnus = " SELECT tunnus
@@ -2186,7 +2187,7 @@ if (!$cli and !isset($api_kentat)) {
 		echo "<tr><th>".t("Asiakkaan valinta").":</th>
 					<td><select name='asiakkaanvalinta'>
 					<option value='1'>".t("Asiakas-sarakkeessa asiakkaan tunnus")."</option>
-					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan toim_ovttunnus")."</option>
+					<option value='2'>".t("Asiakas-sarakkeessa asiakkaan ytunnus, ytunnus-sarakkeessa toim_ovttunnus")."</option>
 					</select></td>
 			</tr>";
 	}

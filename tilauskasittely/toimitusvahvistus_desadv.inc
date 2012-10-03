@@ -290,6 +290,10 @@
 					$pakkaus_res = pupe_query($query);
 					$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
 
+					if ($pakkaus_row['korkeus'] == 0 or $pakkaus_row['leveys'] == 0 or $pakkaus_row['syvyys'] == 0) {
+						$error .= "Pakkauksella {$pakkaus_row['pakkaus']} {$pakkaus_row['pakkauskuvaus']} on puutteelliset mittatiedot<br>";
+					}
+
 					// Haetaan pakkauksen tiedot
 					$query = "	SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
 								FROM tilausrivi

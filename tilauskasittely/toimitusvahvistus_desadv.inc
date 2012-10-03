@@ -283,7 +283,33 @@
 					$desadv_message .= "PAC+1++PK'";
 					$x++;
 
-					// LIN - line item
+					$query = "	SELECT *
+								FROM pakkaus
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$keraysera_row['pakkaus']}'";
+					$pakkaus_res = pupe_query($query);
+					$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
+
+					// Haetaan pakkauksen tiedot
+					$query = "	SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+								FROM tilausrivi
+								JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.tunnus IN ({$keraysera_row['tilausrivit']})";
+					$paino_res = pupe_query($query);
+					$paino_row = mysql_fetch_assoc($paino_res);
+
+					$paino_row['kilot'] += $pakkaus_row['oma_paino'];
+
+					// Pakkauksen bruttopaino
+					$desadv_message .= "MEA+AAE+AAB+KGM:{$paino_row['kilot']}'";
+
+					// Pakkauksen tilavuus
+					// m3 => litrat
+					$pakkauksen_tilavuus_litroina = $pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000;
+					$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
+
 					$query = "	SELECT tuote.eankoodi,
 								tilausrivi.tuoteno,
 								tilausrivi.nimitys,
@@ -292,7 +318,7 @@
 								FROM tilausrivi
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-		 						AND tilausrivi.otunnus = '{$desadv_laskurow['laskutunnus']}'
+		 						AND tilausrivi.tunnus IN ({$keraysera_row['tilausrivit']})
 								AND tilausrivi.tyyppi != 'D'
 								GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 					$tuotteet_res = pupe_query($query);
@@ -305,6 +331,7 @@
 							$error .= "Tuotteelta {$tuotteet_row['tuoteno']} puuttuu EAN-koodi<br>";
 						}
 
+						// LIN - line item
 						$desadv_message .= "LIN+{$i}++".substr($tuotteet_row["eankoodi"], 0, 35).":EN'";
 						$x++;
 
@@ -313,7 +340,8 @@
 						$x++;
 
 						// IMD - additional information of the article
-						$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
+						$tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['nimitys']);
+						$desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
 						$x++;
 
 						// QTY - quantity
@@ -321,6 +349,20 @@
 						// tarvitaan varmaan laittaa eri uniitteja???? UN/ECE recommendation number 20
 						$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
 						$x++;
+
+						// RFF - buyer's order number
+						// CO = buyer's order number
+						if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
+							if (strpos($desadv_laskurow['asiakkaan_tilausnumero'], "-") !== FALSE) {
+								// Stockmannille explodetaan
+								list($group, $order) = explode("-", $desadv_laskurow['asiakkaan_tilausnumero']);
+								$desadv_message .= "RFF+CO:".substr($order, 0, 35).":{$i}'";
+							}
+							else {
+								$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35).":{$i}'";
+							}
+							$x++;
+						}
 
 						$i++;
 					}

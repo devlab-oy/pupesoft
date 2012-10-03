@@ -4,6 +4,7 @@
 	* Despatch Advice Messages
 	* DESADV D.00A
 	* Version 0.2
+	* EDIT: FI0089
 	**/
 
 	// Tarvitaan $otunnukset jossa on tilauksien tunnukset
@@ -34,8 +35,8 @@
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tunnus in ($otunnukset)
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tunnus in ({$otunnukset})
 					ORDER BY lasku.tunnus";
 		$desadv_laskures = pupe_query($query);
 
@@ -47,8 +48,8 @@
 
 			$query = "	SELECT *
 						FROM rahtikirjat
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tunnus in ($tunnukset)";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus in ({$tunnukset})";
 			$desadv_rakir_res = pupe_query($query);
 
 			if (mysql_num_rows($desadv_rakir_res) > 0) {
@@ -82,13 +83,13 @@
 				$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
 			}
 			// UNH - message header
-			$desadv_message .= "UNH+$desadv_laskurow[laskutunnus]+DESADV:D:00A:UN'";
+			$desadv_message .= "UNH+{$desadv_laskurow['laskutunnus']}+DESADV:D:00A:UN:FI0089'";
 			$x++;
 
 			// BGM (beginning of message) - identification data of despatch advice
 			// 351 = despatch advice
 			// document identifier? onko tämä laskun tunnus myös?
-			$desadv_message .= "BGM+351+$desadv_laskurow[laskutunnus]+9'";
+			$desadv_message .= "BGM+351+{$desadv_laskurow['laskutunnus']}+9'";
 			$x++;
 
 			// DTM - date of despatch advice
@@ -97,28 +98,26 @@
 
 			list($date, $time) = explode(" ", $desadv_rakir_row['tulostettu']);
 			list($year, $month, $day) = explode("-", $date);
-			list($hour, $minute, $second) = explode(":", $time);
-			$desadv_message .= "DTM+137:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+			$desadv_message .= "DTM+137:{$year}{$month}{$day}:102'";
 			$x++;
 
 			// DTM - despatch and/or delivery date/time
 			// 11 = despatch date/time
-			$desadv_message .= "DTM+11:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+			$desadv_message .= "DTM+11:{$year}{$month}{$day}:102'";
 			$x++;
 
 			// DTM - despatch and/or delivery date/time
 			// 171 = tilauspäivä
 			list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
 			list($year, $month, $day) = explode("-", $date);
-			list($hour, $minute, $second) = explode(":", $time);
-			$desadv_message .= "DTM+171:".substr($year, 2, 2).$month.$day.$hour.$minute.$second.":202'";
+			$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
 			$x++;
 
 			// DTM - despatch and/or delivery date/time
 			// 171 = tilauspäivä
 			list($date, $time) = explode(" ", $desadv_laskurow['toimaika']);
 			list($year, $month, $day) = explode("-", $date);
-			$desadv_message .= "DTM+69:$year$month$day:102'";
+			$desadv_message .= "DTM+69:{$year}{$month}{$day}:102'";
 			$x++;
 
 			// RFF - customer reference number
@@ -154,7 +153,10 @@
 			// NAD - identification of the seller
 			// SE = seller
 			// 100 = Finnish EDI identifier
-			$desadv_message .= "NAD+SE+$yhtiorow[ovttunnus]:100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
+			$desadv_message .= "NAD+SE+{$yhtiorow['ovttunnus']}:100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
+			$x++;
+
+			$desadv_message .= "NAD+CZ+{$yhtiorow['ovttunnus']}::92++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
 			$x++;
 
 			// CTA - contact information
@@ -230,7 +232,7 @@
 
 			// NAD - identification of the delivery party
 			if ($desadv_laskurow['asiakastoim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
-				$desadv_message .= "NAD+DP+$desadv_laskurow[asiakastoim_ovttunnus]:100++".substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":".substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++".substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+".substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
+				$desadv_message .= "NAD+DP+{$desadv_laskurow['asiakastoim_ovttunnus']}::92++".substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":".substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++".substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+".substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
 				$x++;
 
 				$desadv_message .= "LOC+11+:::".substr($desadv_laskurow["asiakastoim_postitp"], 0, 70)."'";
@@ -242,7 +244,7 @@
 
 			// NAD - identification of consignee
 			if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
-				$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
+				$desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::92++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
 				$x++;
 			}
 			else {
@@ -368,4 +370,3 @@
 			$rajaus++;
 		}
 	}
-?>

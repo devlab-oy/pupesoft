@@ -5,16 +5,16 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr>";
 
 if ($tee == "VALMIS") {
-	$sql = 'SELECT tunnus, viite
+	$query = "SELECT tunnus, viite
 		FROM lasku
-		WHERE yhtio = "' . $kukarow[yhtio] . '"
-		and tunnus = "' . $tilausnumero . '"';
+		WHERE yhtio = '{$kukarow['yhtio']}'
+		and tunnus = '{$tilausnumero}'";
 	
-	$result = pupe_query($sql);
+	$result = pupe_query($query);
 	$row = mysql_fetch_assoc($result);
 
 	if (!empty($yhtiorow['matkalaskun_viite']) && empty($row['viite'])) {
-		echo '<p style="color:red;">HUOM! Viite on tyhjä!<p/>';
+		echo "<font class='error'>".t('HUOM! Viite on tyhjä')."!</font>";
 		
 		$tee = 'MUOKKAA';
 	}

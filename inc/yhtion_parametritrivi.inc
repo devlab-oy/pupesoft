@@ -3161,8 +3161,8 @@
 		$sel = "";
 		if ($trow[$i] != "") $sel = "SELECTED";
 
-		$ulos .= "<option value = ''>".t("Matkalaskun viite ei ole pakolinen")."</option>";
-		$ulos .= "<option value = 'X' {$sel}>".t("Matkalaskun viite on pakolinen")."</option>";
+		$ulos .= "<option value = ''>".t("Matkalaskun viite ei ole pakollinen")."</option>";
+		$ulos .= "<option value = 'X' {$sel}>".t("Matkalaskun viite on pakollinen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

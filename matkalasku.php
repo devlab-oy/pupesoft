@@ -13,7 +13,7 @@ if ($tee == "VALMIS") {
 	$row = mysql_fetch_assoc($result);
 
 	if (empty($row['viite'])) {
-		echo "<font class='error'>".t('VIRHE: Viite on tyhjä, tämä on pakollinen kenttä')."!</font>";
+		echo "<br><font class='error'>".t('VIRHE: Viite on tyhjä, tämä on pakollinen kenttä')."!</font><br><br>";
 		
 		$tee = 'MUOKKAA';
 	}

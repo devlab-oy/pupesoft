@@ -263,12 +263,12 @@
 			$x++;
 
 			// Katsotaan löytyykö tilaukselle keräyserä
-			$query = "	SELECT sscc, pakkaus, pakkausnro, GROUP_CONCAT(tilausrivi) AS tilausrivit
+			$query = "	SELECT sscc, pakkaus, GROUP_CONCAT(tilausrivi) AS tilausrivit
 						FROM kerayserat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND otunnus = '{$desadv_laskurow['laskutunnus']}'
-						GROUP BY 1,2,3
-						ORDER BY 1,2,3";
+						GROUP BY 1,2
+						ORDER BY 1,2";
 			$keraysera_res = pupe_query($query);
 
 			if (mysql_num_rows($keraysera_res) > 0) {

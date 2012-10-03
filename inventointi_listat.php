@@ -67,13 +67,15 @@
 
 	echo "<td><select name='tuotemerkki'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
-	while($srow = mysql_fetch_array ($sresult)){
-		echo "<option value='$srow[0]'>$srow[0]</option>";
+
+	while($srow = mysql_fetch_assoc($sresult)){
+		echo "<option value='$srow[tuotemerkki]'>$srow[tuotemerkki]</option>";
 	}
+
 	echo "</td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";
-	
+
 	$sel = array((isset($raportti) ? $raportti : '') => "SELECTED");
     echo "<tr>";
     echo "<td class='back' colspan='2'>".t("tai inventoi raportin avulla")."...</th></tr>";
@@ -154,12 +156,12 @@
 	echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu kahden viikon sisällä:")."</th>
 			<td><input type='checkbox' name='naytainvtuot' ".((isset($naytainvtuot) and $naytainvtuot!='') ? 'CHECKED' : '')."></td>
 			</tr>";
-			
+
 	if ($piilotaToim_tuoteno != "") {
 			$checkPiilotaToim_tuoteno = "CHECKED";
 		}
 
-		echo "<tr><th>".t("Älä tulosta toimittajan tuotenumeroa listauksiin:")."</th>
+	echo "<tr><th>".t("Älä tulosta toimittajan tuotenumeroa listauksiin:")."</th>
 		<td><input type='checkbox' name='piilotaToim_tuoteno' value='Y' $checkPiilotaToim_tuoteno></td>
 		</tr>";
 
@@ -1029,9 +1031,9 @@
 			}
 			else {
 				system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=$rivinleveys --no-header --columns=1 --margin=0 --borders=0 $filenimi");
-				
+
 				if ($komento["Inventointi"] == 'email') {
-					
+
 					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";

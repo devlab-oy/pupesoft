@@ -262,82 +262,153 @@
 			$desadv_message .= "LOC+1'";
 			$x++;
 
-			// CPS - consignment packing sequence
-			$desadv_message .= "CPS+1'";
-			$x++;
+			// Katsotaan löytyykö tilaukselle keräyserä
+			$query = "	SELECT sscc, pakkaus, pakkausnro, GROUP_CONCAT(tilausrivi) AS tilausrivit
+						FROM kerayserat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$desadv_laskurow['laskutunnus']}'
+						GROUP BY 1,2,3
+						ORDER BY 1,2,3";
+			$keraysera_res = pupe_query($query);
 
-			if (trim($desadv_rakir_row['viesti']) != '') {
-				$desadv_message .= "FTX+GEN+++$desadv_rakir_row[viesti]'";
-				$x++;
-			}
+			if (mysql_num_rows($keraysera_res) > 0) {
 
-			// PAC - number and type of packages
-			unset($desadv_kollitres);
+				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
-			if ((int) $rahtikirjanro != 0) {
-				$query = "	SELECT sum(kollit) kollit
-							from rahtikirjat use index (otsikko_index)
-							where yhtio = '$kukarow[yhtio]'
-							and otsikkonro = '$desadv_laskurow[laskutunnus]'
-							and rahtikirjanro = '$rahtikirjanro'";
-				$desadv_kollitres = pupe_query($query);
-			}
+					// CPS - consignment packing sequence
+					$desadv_message .= "CPS+{$keraysera_row['sscc']}++1'";
+					$x++;
 
-			if (isset($desadv_kollitres) and mysql_num_rows($desadv_kollitres) > 0) {
-				$desadv_kollitrow = mysql_fetch_assoc($desadv_kollitres);
+					// PAC - number and type of packages
+					$desadv_message .= "PAC+1++PK'";
+					$x++;
+
+					// LIN - line item
+					$query = "	SELECT tuote.eankoodi,
+								tilausrivi.tuoteno,
+								tilausrivi.nimitys,
+								tilausrivi.tilaajanrivinro,
+								SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
+								FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+		 						AND tilausrivi.otunnus = '{$desadv_laskurow['laskutunnus']}'
+								AND tilausrivi.tyyppi != 'D'
+								GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
+					$tuotteet_res = pupe_query($query);
+
+					$i = 1;
+
+					while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
+
+						if ($tuotteet_row["eankoodi"] == "") {
+							$error .= "Tuotteelta {$tuotteet_row['tuoteno']} puuttuu EAN-koodi<br>";
+						}
+
+						$desadv_message .= "LIN+{$i}++".substr($tuotteet_row["eankoodi"], 0, 35).":EN'";
+						$x++;
+
+						// PIA - additional product identification
+						$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
+						$x++;
+
+						// IMD - additional information of the article
+						$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
+						$x++;
+
+						// QTY - quantity
+						// PCE = piece
+						// tarvitaan varmaan laittaa eri uniitteja???? UN/ECE recommendation number 20
+						$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
+						$x++;
+
+						$i++;
+					}
+				}
 			}
 			else {
-				$desadv_kollitrow["kollit"] = 0;
-			}
 
-			$desadv_message .= "PAC+$desadv_kollitrow[kollit]++PK:6'";
-			$x++;
+				// CPS - consignment packing sequence
+				$desadv_message .= "CPS+1'";
+				$x++;
 
-			// LIN - line item
-			$query = "	SELECT tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, sum(tilausrivi.varattu+tilausrivi.kpl) varattu
-						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
- 						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
-						AND tilausrivi.tyyppi != 'D'
-						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
-			$tuotteet_res = pupe_query($query);
-
-			$i = 1;
-
-			while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
-
-				if ($tuotteet_row["eankoodi"] == "") {
-					$error .= "Tuotteelta $tuotteet_row[tuoteno] puuttuu EAN-koodi<br>";
+				if (trim($desadv_rakir_row['viesti']) != '') {
+					$desadv_message .= "FTX+GEN+++{$desadv_rakir_row['viesti']}'";
+					$x++;
 				}
 
-				$desadv_message .= "LIN+$i++".substr($tuotteet_row["eankoodi"], 0, 35).":EN'";
+				unset($desadv_kollitres);
+
+				if ((int) $rahtikirjanro != 0) {
+					$query = "	SELECT SUM(kollit) kollit
+								FROM rahtikirjat USE INDEX (otsikko_index)
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otsikkonro = '{$desadv_laskurow['laskutunnus']}'
+								AND rahtikirjanro = '{$rahtikirjanro}'";
+					$desadv_kollitres = pupe_query($query);
+				}
+
+				if (isset($desadv_kollitres) and mysql_num_rows($desadv_kollitres) > 0) {
+					$desadv_kollitrow = mysql_fetch_assoc($desadv_kollitres);
+				}
+				else {
+					$desadv_kollitrow["kollit"] = 0;
+				}
+
+				// PAC - number and type of packages
+				$desadv_message .= "PAC+{$desadv_kollitrow['kollit']}++PK:6'";
 				$x++;
 
-				// PIA - additional product identification
-				$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
-				$x++;
+				// LIN - line item
+				$query = "	SELECT tuote.eankoodi,
+							tilausrivi.tuoteno,
+							tilausrivi.nimitys,
+							tilausrivi.tilaajanrivinro,
+							SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+	 						AND tilausrivi.otunnus = '{$desadv_laskurow['laskutunnus']}'
+							AND tilausrivi.tyyppi != 'D'
+							GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
+				$tuotteet_res = pupe_query($query);
 
-				// IMD - additional information of the article
-				$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
-				$x++;
+				$i = 1;
 
-				// QTY - quantity
-				// PCE = piece
-				// tarvitaan varmaan laittaa eri uniitteja???? UN/ECE recommendation number 20
-				$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
-				$x++;
+				while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
 
-				$i++;
+					if ($tuotteet_row["eankoodi"] == "") {
+						$error .= "Tuotteelta {$tuotteet_row['tuoteno']} puuttuu EAN-koodi<br>";
+					}
+
+					$desadv_message .= "LIN+{$i}++".substr($tuotteet_row["eankoodi"], 0, 35).":EN'";
+					$x++;
+
+					// PIA - additional product identification
+					$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
+					$x++;
+
+					// IMD - additional information of the article
+					$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
+					$x++;
+
+					// QTY - quantity
+					// PCE = piece
+					// tarvitaan varmaan laittaa eri uniitteja???? UN/ECE recommendation number 20
+					$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
+					$x++;
+
+					$i++;
+				}
 			}
 
 			// CNT - control total
-			$desadv_message .= "CNT+2:$i'";
+			$desadv_message .= "CNT+2:{$i}'";
 			$x++;
 
 			// UNT - message trailer
 			$x++;
-			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
+			$desadv_message .= "UNT+{$x}+{$desadv_laskurow['laskutunnus']}'";
 
 			if ($tulostauna != "") {
 				// loppuun pakollinen UNZ ja EOF. HUOM: UNZ ja EOF pitää olla erillisillä riveillä !!!
@@ -345,11 +416,11 @@
 				$desadv_message .= "\n'''EOF'''0'";
 			}
 
-			$filenimi = $pupe_root_polku."/dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+			$filenimi = $pupe_root_polku."/dataout/desadv_import-{$kukarow['yhtio']}-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 			//kirjoitetaan faili levylle..
 			if (file_put_contents($filenimi, $desadv_message) === FALSE) {
-				echo "<br/><font class='error'>",t("tiedoston kirjoitus EPÄONNISTUI")," ($filenimi)</font><br/>";
+				echo "<br/><font class='error'>",t("tiedoston kirjoitus EPÄONNISTUI")," ({$filenimi})</font><br/>";
 			}
 
 			if ($error == '') {
@@ -364,7 +435,7 @@
 				require ("inc/ftp-send.inc");
 			}
 			else {
-				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
+				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>{$error}</font><hr><br>";
 			}
 
 			$rajaus++;

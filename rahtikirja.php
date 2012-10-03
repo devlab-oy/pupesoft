@@ -44,8 +44,8 @@
 		$pakkauskuvaus = array();
 
 		foreach ($pakkaus as $key => $val) {
-			if (strpos($val, '####') !== FALSE) {
-				list($pak, $pak_kuvaus) = explode('####', $val);
+			if (strpos($val, '!¡!') !== FALSE) {
+				list($pak, $pak_kuvaus) = explode('!¡!', $val);
 				$pakkauskuvaus[$key] = $pak_kuvaus;
 				$pakkaus[$key] = $pak;
 			}
@@ -2553,11 +2553,11 @@
 
 				while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-					if (isset($pakkaus[$i]) and $pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $pakkaus[$i]) $sel = " selected";
-					elseif ($pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $keraysera_row['pakkaus'].'####'.$keraysera_row['pakkauskuvaus']) $sel = " selected";
+					if (isset($pakkaus[$i]) and $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $pakkaus[$i]) $sel = " selected";
+					elseif ($pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $keraysera_row['pakkaus'].'!¡!'.$keraysera_row['pakkauskuvaus']) $sel = " selected";
 					else $sel = "";
 
-					echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+					echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 				}
 
 				echo "</select></td>";
@@ -2653,9 +2653,9 @@
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-				$sel = $pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $row['pakkaus'].'####'.$row['pakkauskuvaus'] ? " selected" : "";
+				$sel = $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $row['pakkaus'].'!¡!'.$row['pakkauskuvaus'] ? " selected" : "";
 
-				echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
 			echo "</select></td>";

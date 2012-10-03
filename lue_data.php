@@ -1424,7 +1424,7 @@ if ($kasitellaan_tiedosto) {
 
 								if (mysql_num_rows($etsiresult) == 1) {
 									$etsirow = mysql_fetch_assoc($etsiresult);
-// echo "$otsikko, $etsirow[tunnus]<br><br>";
+
 									// Vaihdetaan asiakas sarakkeeseen tunnus sekä ytunnus tulee nollata (koska ei saa olla molempia)
 									$chasiakas = $etsirow['tunnus'];
 									$chytunnus = "";
@@ -1460,7 +1460,7 @@ if ($kasitellaan_tiedosto) {
 							if ($otsikko == 'LOPPUPVM' and $taulunrivit[$taulu][$eriviindex][$r] != '') {
 								$chloppupvm = $taulunrivit[$taulu][$eriviindex][$r];
 							}
-echo "as: $chasiakas, $chtuoteno, $chytunnus<br><br>";
+
 							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $taulunrivit[$taulu][$eriviindex][$r] > 0) {
 								// 1 tarkoittaa dynaamisen puun KOODIA
 								$etsitunnus = " SELECT tunnus

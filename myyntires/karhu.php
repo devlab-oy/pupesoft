@@ -493,7 +493,7 @@ if ($tee == 'KARHUA')  {
 		echo t("Asiakas on myyntikiellossa");
 	}
 	else if ($ehdota_maksukielto) {
-		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '" . $asiakastiedot["tunnus"] . "'> " . t("Aseta asiakkaalle myyntikielto");
+		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["tunnus"]}'> " . t("Aseta asiakkaalle myyntikielto");
 	}
 	
 	echo "<table>";

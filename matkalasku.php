@@ -14,7 +14,7 @@ if ($tee == "VALMIS") {
 	$row = mysql_fetch_assoc($result);
 
 	if (!empty($yhtiorow['matkalaskun_viite']) && empty($row['viite'])) {
-		echo "<font class='error'>".t('HUOM! Viite on tyhjä')."!</font>";
+		echo "<font class='error'>".t('VIRHE: Viite on tyhjä, tämä on pakollinen kenttä')."!</font>";
 		
 		$tee = 'MUOKKAA';
 	}

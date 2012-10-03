@@ -307,7 +307,7 @@
 
 					// Pakkauksen tilavuus
 					// m3 => litrat
-					$pakkauksen_tilavuus_litroina = $pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000;
+					$pakkauksen_tilavuus_litroina = round($pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000, 0);
 					$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
 
 					$query = "	SELECT tuote.eankoodi,
@@ -336,7 +336,8 @@
 						$x++;
 
 						// PIA - additional product identification
-						$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
+						$tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tuotteet_row['tuoteno']);
+						$desadv_message .= "PIA+5+".substr($tuotenumero, 0, 35).":SA'";
 						$x++;
 
 						// IMD - additional information of the article

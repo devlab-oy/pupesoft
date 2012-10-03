@@ -2487,6 +2487,7 @@
 
 				$query = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro,
 							pakkaus.pakkaus,
+							pakkaus.pakkauskuvaus,
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
 							kerayserat.otunnus,
@@ -2498,7 +2499,7 @@
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
 							AND kerayserat.otunnus 	IN ({$querytunlisa})
-							GROUP BY 1,2,3,4,5,6
+							GROUP BY 1,2,3,4,5,6,7
 							ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 			}
 
@@ -2552,8 +2553,8 @@
 
 				while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-					if (isset($pakkaus[$i]) and $pak_row['pakkaus'] == $pakkaus[$i]) $sel = " selected";
-					elseif ($pak_row['pakkaus'] == $keraysera_row['pakkaus']) $sel = " selected";
+					if (isset($pakkaus[$i]) and $pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $pakkaus[$i]) $sel = " selected";
+					elseif ($pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $keraysera_row['pakkaus'].'####'.$keraysera_row['pakkauskuvaus']) $sel = " selected";
 					else $sel = "";
 
 					echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
@@ -2652,7 +2653,7 @@
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-				$sel = $pak_row['pakkaus'] == $row['pakkaus'] ? " selected" : "";
+				$sel = $pak_row['pakkaus'].'####'.$pak_row['pakkauskuvaus'] == $row['pakkaus'].'####'.$row['pakkauskuvaus'] ? " selected" : "";
 
 				echo "<option value='{$pak_row['pakkaus']}####{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}

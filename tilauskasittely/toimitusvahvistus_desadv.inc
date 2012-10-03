@@ -304,11 +304,13 @@
 
 					// Pakkauksen bruttopaino
 					$desadv_message .= "MEA+AAE+AAB+KGM:{$paino_row['kilot']}'";
+					$x++;
 
 					// Pakkauksen tilavuus
 					// m3 => litrat
 					$pakkauksen_tilavuus_litroina = round($pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000, 0);
 					$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
+					$x++;
 
 					$query = "	SELECT tuote.eankoodi,
 								tilausrivi.tuoteno,
@@ -364,6 +366,13 @@
 							}
 							$x++;
 						}
+
+						// DTM - despatch and/or delivery date/time
+						// 171 = tilauspäivä
+						list($date, $time) = explode(" ", $desadv_laskurow['luontiaika']);
+						list($year, $month, $day) = explode("-", $date);
+						$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
+						$x++;
 
 						$i++;
 					}

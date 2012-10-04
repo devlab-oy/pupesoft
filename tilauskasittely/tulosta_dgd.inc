@@ -30,7 +30,7 @@ if (!function_exists('alku_dgd')) {
 		// Rakirno
 		$query = "	SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
 					FROM rahtikirjat r1
-					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0
+					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0 and r2.otsikkonro>0
 					WHERE r1.otsikkonro = '$laskurow[tunnus]'
 	            	AND r1.yhtio = '$kukarow[yhtio]'
 					GROUP BY 1";
@@ -62,7 +62,7 @@ if (!function_exists('alku_dgd')) {
 
 		// 9 Additional handling information
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"]." ".$yhtiorow["puhelin"], mm_pt(105), mm_pt(202), 'LATIN1');
-		
+
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
@@ -169,6 +169,30 @@ if (!function_exists('rivi_dgd')) {
 		$kollimaara_yht = 0;
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
+
+			if (($sivu == 0 and $kala < 120) or ($sivu > 0 and $kala < 30)) {
+
+				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+
+				$sivu++;
+
+				// Luodaan palautettavat
+				$return = array();
+
+				foreach ($params as $key => $null) {
+					$return[$key] = ${$key};
+				}
+
+				$params = uusi_sivu_dgd($return);
+
+				// Luodaan muuttujat
+				foreach ($params as $key => $val) {
+					${$key} = $val;
+				}
+
+				$kala = 240;
+				$pdf->pages[$sivu]->setFont($norm, 8);
+			}
 
 			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
 

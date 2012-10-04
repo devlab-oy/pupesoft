@@ -230,14 +230,14 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
 	scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 
 	# Siivotaan vanhat backupit pois remoteserverilt‰
-	ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -mtime +${BACKUPPAIVAT} -delete";
+	ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -type f -mtime +${BACKUPPAIVAT} -delete";
 
 	# Pidet‰‰n master serverill‰ vain uusin backuppi
 	BACKUPPAIVAT=1
 fi
 
 # Siivotaan vanhat backupit pois
-find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete
+find ${BACKUPDIR} -type f -mtime +${BACKUPPAIVAT} -delete
 
 # Synkataan backuppi Amazon S3:een
 if [ ! -z "${S3BUCKET}" ]; then

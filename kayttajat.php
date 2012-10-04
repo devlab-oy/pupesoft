@@ -829,28 +829,19 @@
 
 				}
 				else {
-					$sel2 = $sel1 = "";
 
-					if ($krow["taso"] == "1") {
-						$sel1 = "SELECTED";
-					}
-					if ($krow["taso"] == "2") {
-						$sel2 = "SELECTED";
-					}
-					if ($krow["taso"] == "3") {
-						$sel3 = "SELECTED";
-					}
-					if ($krow["taso"] == "9") {
-						$sel9 = "SELECTED";
-					}
+					$sel = array_fill_keys(array($krow['taso']), " selected") + array_fill_keys(array('1','2','3','4','9'), '');
+
 					echo "<tr><th align='left'>",t("Taso"),":</th>";
 
 					echo "<td><select name='taso'>";
-					echo "<option value='1' {$sel1}>",t("Tehotilaaja, tilaukset menee suoraan tomitukseen"),"</option>";
-					echo "<option value='2' {$sel2}>",t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta"),"</option>";
-					echo "<option value='3' {$sel3}>",t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA"),"</option>";
+					echo "<option value='1' {$sel[1]}>",t("Tehotilaaja, tilaukset menee suoraan tomitukseen"),"</option>";
+					echo "<option value='2' {$sel[2]}>",t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta"),"</option>";
+					echo "<option value='3' {$sel[3]}>",t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA"),"</option>";
+					echo "<option value='4' {$sel[4]}>",t("Aloittelijatilaaja, tilauksia ei saa laittaa valmiiksi"),"</option>";
+
 					if ($kukarow['yhtio'] == 'artr') {
-						echo "<option value='9' {$sel9}>",t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti"),"</option>";
+						echo "<option value='9' {$sel[9]}>",t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti"),"</option>";
 					}
 					echo "</select></td></tr>";
 				}
@@ -1284,18 +1275,6 @@
 
 					echo "</select></td></tr>";
 
-					$sel1 = "";
-
-					if ($krow['mitatoi_tilauksia'] != "") {
-						$sel1 = "SELECTED";
-					}
-
-					echo "<tr><th align='left'>",t("Tilausten mitätöiminen"),":</td>";
-					echo "<td><select name='mitatoi_tilauksia'>
-							<option value=''>",t("Käyttäjä saa mitätöidä tilauksia"),"</option>
-							<option value='X' {$sel1}>",t("Käyttäjä ei saa mitätöidä tilauksia"),"</option>";
-					echo "</select></td></tr>";
-
 					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 					if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
 
@@ -1315,6 +1294,15 @@
 						echo "</select></td></tr>";
 					}
 				}
+
+				$sel = $krow['mitatoi_tilauksia'] == 'X' ? ' selected' : '';
+
+				echo "<tr><th align='left'>",t("Tilausten mitätöiminen"),":</td>";
+				echo "<td><select name='mitatoi_tilauksia'>
+						<option value=''>",t("Käyttäjä saa mitätöidä tilauksia"),"</option>
+						<option value='X' {$sel}>",t("Käyttäjä ei saa mitätöidä tilauksia"),"</option>";
+				echo "</select></td></tr>";
+
 				$andextra = "";
 
 				if ($krow['extranet'] == "") {

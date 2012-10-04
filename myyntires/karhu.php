@@ -40,7 +40,7 @@ if ($tee == 'LAHETA') {
 		$query = "  UPDATE asiakas
 					SET myyntikielto = 'K'
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$aseta_myyntikielto'";
+					AND ytunnus = '$aseta_myyntikielto'";
 					
 		$result = pupe_query($query);
 	}
@@ -247,8 +247,10 @@ if ($tee == 'KARHUA')  {
 				count(distinct karhu_lasku.ktunnus) as karhuttu,
 				sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
 				if(maksuehto.jv!='', '".t("Jälkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
-				concat_ws(' ', lasku.viesti, lasku.comments) comments
+				concat_ws(' ', lasku.viesti, lasku.comments) comments,
+				asiakas.myyntikielto
 				FROM lasku
+				JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 				LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
 				LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
@@ -420,6 +422,7 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Karhuttu")."</th>";
 	echo "<th>".t("Viimeisin karhu")."</th>";
 	echo "<th>".t("Lasku karhutaan")."</th>";
+	echo "<th>".t("Myyntikielto")."</th>";
 	echo "<th>".t("Viesti")."</th></tr>";
 	$summmmma = 0;
 
@@ -465,6 +468,7 @@ if ($tee == 'KARHUA')  {
 
 		echo "</td>";
 
+		echo "<td>$lasku[myyntikielto]</td>";
 		echo "<td>$lasku[comments]</td>";
 		echo "</tr>\n";
 
@@ -489,11 +493,8 @@ if ($tee == 'KARHUA')  {
 
 	echo "</table><br>";
 
-	if ($asiakastiedot["myyntikielto"] == 'K') {
-		echo t("Asiakas on myyntikiellossa");
-	}
-	else if ($ehdota_maksukielto) {
-		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["tunnus"]}'> " . t("Aseta asiakkaalle myyntikielto");
+	if ($ehdota_maksukielto) {
+		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Aseta myyntikielto asiakkaalle ") . $asiakastiedot["ytunnus"];
 	}
 	
 	echo "<table>";

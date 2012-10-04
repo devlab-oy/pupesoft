@@ -39,6 +39,19 @@
 		$rakirno = $toimitustavan_tarkistin[0];
 	}
 
+	if (isset($pakkaus) and count($pakkaus) > 0) {
+
+		$pakkauskuvaus = array();
+
+		foreach ($pakkaus as $key => $val) {
+			if (strpos($val, '!¡!') !== FALSE) {
+				list($pak, $pak_kuvaus) = explode('!¡!', $val);
+				$pakkauskuvaus[$key] = $pak_kuvaus;
+				$pakkaus[$key] = $pak;
+			}
+		}
+	}
+
 	if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
 		list($toimitustapa, $yhtio, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
@@ -2484,17 +2497,19 @@
 
 				$query = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro,
 							pakkaus.pakkaus,
+							pakkaus.pakkauskuvaus,
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
 							kerayserat.otunnus,
-							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot,
+							SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) kuutiot
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
 							AND kerayserat.otunnus 	IN ({$querytunlisa})
-							GROUP BY 1,2,3,4,5,6
+							GROUP BY 1,2,3,4,5,6,7
 							ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 			}
 
@@ -2548,13 +2563,11 @@
 
 				while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-					if (isset($pakkaus[$i]) and $pak_row['pakkaus'] == $pakkaus[$i]) $sel = " selected";
-					elseif ($pak_row['pakkaus'] == $keraysera_row['pakkaus']) $sel = " selected";
+					if (isset($pakkaus[$i]) and $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $pakkaus[$i]) $sel = " selected";
+					elseif ($pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $keraysera_row['pakkaus'].'!¡!'.$keraysera_row['pakkauskuvaus']) $sel = " selected";
 					else $sel = "";
 
-					
-
-					echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+					echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 				}
 
 				echo "</select></td>";
@@ -2596,25 +2609,23 @@
 				}
 			}
 
-			if ($yhtiorow['kerayserat'] != 'P' and $yhtiorow['kerayserat'] != 'A') {
-				$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
-							FROM rahtikirjat use index (otsikko_index)
-							WHERE yhtio			= '$kukarow[yhtio]'
-							$rahti_otsikot
-							$rahti_rahtikirjanro
-							AND pakkaus			= '$row[pakkaus]'
-							AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
-				$rarrr = pupe_query($query);
+			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
+						$rahti_otsikot
+						$rahti_rahtikirjanro
+						AND pakkaus			= '$row[pakkaus]'
+						AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
+			$rarrr = pupe_query($query);
 
-				if (mysql_num_rows($rarrr) == 1) {
-					$roror = mysql_fetch_assoc($rarrr);
+			if (mysql_num_rows($rarrr) == 1) {
+				$roror = mysql_fetch_assoc($rarrr);
 
-					if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
-					if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
-					if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
-					if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
-					if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-				}
+				if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
+				if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
+				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
+				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
+				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
 			}
 
 			echo "<tr>";
@@ -2650,9 +2661,9 @@
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-				$sel = $pak_row['pakkaus'] == $row['pakkaus'] ? " selected" : "";
+				$sel = $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $row['pakkaus'].'!¡!'.$row['pakkauskuvaus'] ? " selected" : "";
 
-				echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
 			echo "</select></td>";

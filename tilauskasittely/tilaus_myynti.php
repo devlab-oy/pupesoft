@@ -230,6 +230,7 @@ if ($tee == 'AKTIVOI') {
 		if (tarkista_oikeus("kayttajat.php", "", "1")) {
 			echo "<br><form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
 				<input type='hidden' name='selkuka' value='{$row['kuka']}'>
+				<input type='hidden' name='toim' value='{$toim}'>
 				<input type='hidden' name='tee' value='DELKESKEN'>
 				<input type='submit' value='* ",t("Vapauta käyttäjän")," $row[nimi] ($row[kuka]). ",t("keskenoleva tilaus")," *'>
 				</form>";

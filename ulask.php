@@ -4,6 +4,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {
 	require "inc/parametrit.inc";
 }
 
+if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+	require ("inc/tilioinnin_toiminnot.inc");
+}
+
 enable_ajax();
 
 if ($livesearch_tee == "TILIHAKU") {
@@ -1627,7 +1631,7 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 		if (strlen($ivero[$i]) == 0) {
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				$ivero[$i] = alv_oletus();
+				$ivero[$i] = alv_oletus($oltil);
 			}
 			else {
 				$ivero[$i] = 0;
@@ -1672,7 +1676,7 @@ if ($tee == 'P' or $tee == 'E') {
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
-				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]");
 			}
 			else {
 				echo "$iulos[$i]";

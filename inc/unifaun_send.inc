@@ -147,7 +147,7 @@ class Unifaun {
 
 		$uni_ready = $control->addChild('ready');
 
-		$uni_ready_val = $uni_ready->addChild('val', $mergeid);
+		$uni_ready_val = $uni_ready->addChild('val', utf8_encode($mergeid));
 		$uni_ready_val->addAttribute('n', 'mergeid');
 
 		$uni_close = $control->addChild('close');
@@ -155,7 +155,7 @@ class Unifaun {
 		$uni_close_val = $uni_close->addChild('val', $printer);
 		$uni_close_val->addAttribute('n', 'printer');
 
-		$uni_close_val = $uni_close->addChild('val', $mergeid);
+		$uni_close_val = $uni_close->addChild('val', utf8_encode($mergeid));
 		$uni_close_val->addAttribute('n', 'mergeid');
 
 		$this->xml = $xml;
@@ -174,7 +174,7 @@ class Unifaun {
 		$uni_discard->addAttribute('type', 'parcel');
 
 		if ($mergeid != "") {
-			$uni_discard_val = $uni_discard->addChild('val', $mergeid);
+			$uni_discard_val = $uni_discard->addChild('val', utf8_encode($mergeid));
 			$uni_discard_val->addAttribute('n', 'mergeid');
 		}
 
@@ -466,7 +466,14 @@ class Unifaun {
 			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
 
 			if ($this->toitarow['tulostustapa'] == 'E') {
-				$mergeid = md5($this->postirow["toimitustavan_lahto"].$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				
+				if ($this->yhtiorow['kerayserat'] == 'K') {								
+					$mergeid = md5($this->postirow["toimitustavan_lahto"].$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				}
+				else {
+					$mergeid = md5(date("Ymd").$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				}
+								
 				$uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
 			}
 

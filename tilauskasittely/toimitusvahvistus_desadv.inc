@@ -271,6 +271,8 @@
 						ORDER BY 1,2";
 			$keraysera_res = pupe_query($query);
 
+			$kokonais_pakettimaara = 0;
+
 			if (mysql_num_rows($keraysera_res) > 0) {
 
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
@@ -330,9 +332,11 @@
 								GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 					$tuotteet_res = pupe_query($query);
 
-					$i = 1;
+					$i = 0;
 
 					while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
+
+						$i++;
 
 						if ($tuotteet_row["eankoodi"] == "") {
 							$error .= "Tuotteelta {$tuotteet_row['tuoteno']} puuttuu EAN-koodi<br>";
@@ -379,8 +383,9 @@
 						$desadv_message .= "DTM+171:{$year}{$month}{$day}:102'";
 						$x++;
 
-						$i++;
 					}
+
+					$kokonais_pakettimaara += $i;
 				}
 			}
 			else {
@@ -430,9 +435,11 @@
 							GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 				$tuotteet_res = pupe_query($query);
 
-				$i = 1;
+				$i = 0;
 
 				while ($tuotteet_row = mysql_fetch_assoc($tuotteet_res)) {
+
+					$i++;
 
 					if ($tuotteet_row["eankoodi"] == "") {
 						$error .= "Tuotteelta {$tuotteet_row['tuoteno']} puuttuu EAN-koodi<br>";
@@ -455,12 +462,13 @@
 					$desadv_message .= "QTY+12:".round($tuotteet_row['varattu'], 0).":PCE'";
 					$x++;
 
-					$i++;
 				}
+
+				$kokonais_pakettimaara += $i;
 			}
 
 			// CNT - control total
-			$desadv_message .= "CNT+2:{$i}'";
+			$desadv_message .= "CNT+11:{$kokonais_pakettimaara}'";
 			$x++;
 
 			// UNT - message trailer

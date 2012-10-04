@@ -468,7 +468,7 @@
 			}
 
 			// CNT - control total
-			$desadv_message .= "CNT+11:{$kokonais_pakettimaara}'";
+			$desadv_message .= "CNT+2:{$kokonais_pakettimaara}'";
 			$x++;
 
 			// UNT - message trailer

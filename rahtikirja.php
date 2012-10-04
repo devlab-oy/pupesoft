@@ -763,7 +763,7 @@
 
 					$toimitustapa_varasto = $toimitustapa."!!!!".$kukarow['yhtio']."!!!!".$tulostuspaikka;
 					$tee				  = "tulosta";
-					
+
 					// triggeröidään tämä, niin ei tulosteta liikaa rahtikirjoja
 					if ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
 						$sel_ltun = explode(",", $tunnukset);
@@ -773,7 +773,7 @@
 
 				} // end if tulostetaanko heti
 
-				// Haetaan laskun kaikki tiedot uudestaan koska rahtikirja-tulostus.php ilikirjaa muuttujamme
+				// Haetaan laskun kaikki tiedot uudestaan koska rahtikirja-tulostus.php ylikirjaa muuttujamme
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio	= '$kukarow[yhtio]'

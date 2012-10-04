@@ -385,7 +385,7 @@
 
 					}
 
-					$kokonais_pakettimaara += $i;
+					$kokonais_pakettimaara++;
 				}
 			}
 			else {
@@ -464,7 +464,7 @@
 
 				}
 
-				$kokonais_pakettimaara += $i;
+				$kokonais_pakettimaara++;
 			}
 
 			// CNT - control total

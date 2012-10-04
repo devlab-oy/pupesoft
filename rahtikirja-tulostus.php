@@ -6,6 +6,7 @@
 
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
+	if (!isset($unifaun_era_vainkollitarra)) $unifaun_era_vainkollitarra = FALSE;
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
@@ -601,7 +602,7 @@
 				}
 
 				// merkataan tilausrivit toimitetuiksi, paitsi kun tulostetaan Unifaun erätulostuksen kollitarra
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'))) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
 					$query = "	UPDATE tilausrivi
 								SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 								WHERE otunnus in ($otunnukset)
@@ -665,7 +666,7 @@
 				// tulostetaan rahtikirja
 
 				// merkataan rahtikirjat tulostetuksi..
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'))) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and !$unifaun_era_vainkollitarra) {
 					$query = "	UPDATE rahtikirjat
 								SET tulostettu = now()
 								WHERE tunnus  IN ($tunnukset)
@@ -846,7 +847,7 @@
 				}
 
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin E-tyyppiset Unifaunit merkataan toimitetuiksi close_with_printer-haarassa..
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '' and !($toitarow['tulostustapa'] == 'E' and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'))) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '' and !$unifaun_era_vainkollitarra) {
 
 					// kotimaan myynti menee alatilaan D
 					$query = "UPDATE lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";

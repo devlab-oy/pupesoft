@@ -309,6 +309,8 @@
 					$lisa_array = array();
 					$split_array = array();
 
+					echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
+
 					// Lasketaan ensin kaikki rivit yhteen ja sen j‰lkeen katsotaan tarvitaanko lis‰rivi‰
 					$olen_apu_result = pupe_query($query);
 
@@ -323,6 +325,8 @@
 					}
 
 					$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
+
+					echo "<br>Ylim‰‰r‰ist‰1: $ylimaaraista = {$row["kappalemaara"]} - $laskuri<br>";
 
 					// haetaan viel‰ varmuudeksi lˆysimm‰ll‰ queryll‰ lis‰rivej‰.
 					if ($ylimaaraista > 0) {
@@ -350,6 +354,7 @@
 									AND tilausrivi.uusiotunnus = 0
 									{$loysan_tilausrivi_muuttuja}
 									ORDER BY laadittu ASC";
+						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$loysa_result = pupe_query($query);
 
 						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
@@ -363,6 +368,7 @@
 						}
 
 						$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
+						echo "<br>Ylim‰‰r‰ist‰2: $ylimaaraista = {$row["kappalemaara"]} - $laskuri<br>";
 
 					}
 
@@ -394,6 +400,7 @@
 										hyllytaso		= '{$tilausrivirow['hyllytaso']}',
 										hyllyvali		= '{$tilausrivirow['hyllyvali']}',
 										tilaajanrivinro = '{$tilausrivirow['tilaajanrivinro']}'";
+						echo "<br>Ylim‰‰r‰ist‰ > 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$inskres = pupe_query($lisaaquery);
 						$extraa = mysql_insert_id();
 
@@ -408,6 +415,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
+						echo "<br>Siistitty: $siistitty, extraa: $extraa<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 						$kaytetyt_tilausrivit[] = $extraa;
 						$paketin_rivit[]		= $extraa;
@@ -431,6 +439,7 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
 								$upd_res = pupe_query($query);
+								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 							}
 						}
 
@@ -447,6 +456,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
+						echo "<br>Ylim‰‰r‰ist‰ == 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case
@@ -467,6 +477,7 @@
 											perheid = tunnus
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
+								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 								$upd_res = pupe_query($query);
 							}
 						}
@@ -489,6 +500,7 @@
 									kommentti = CONCAT(IFNULL(kommentti,''),' Ennen splittausta {$split_row['tilkpl']} : kohdistettiin {$erotus}')
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$split_row['tunnus']}'";
+						echo "<br>Ylim‰‰r‰ist‰ < 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upres = pupe_query($query);
 
 						$kaytetyt_tilausrivit	= array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
@@ -501,6 +513,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
+						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case
@@ -522,6 +535,7 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$chk_row['tunnus']}'";
 								$upd_res = pupe_query($query);
+								echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 							}
 						}
 
@@ -552,6 +566,7 @@
 									hyllytaso		= '{$split_row['hyllytaso']}',
 									hyllyvali		= '{$split_row['hyllyvali']}',
 									tilaajanrivinro = '{$split_row['tilaajanrivinro']}'";
+						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$inskres = pupe_query($query);
 						$tilausrivi_id = mysql_insert_id();
 

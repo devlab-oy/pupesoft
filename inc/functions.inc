@@ -8760,7 +8760,7 @@ if (!function_exists("livesearch_kentta")) {
 		}
 
 		$hakuID = "haku".uniqid();
-		
+
 		$return = "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
@@ -8773,7 +8773,7 @@ if (!function_exists("livesearch_kentta")) {
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
 				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
-				
+
 		return $return;
 	}
 }
@@ -10566,19 +10566,19 @@ if (!function_exists("alv_oletus")) {
 	function alv_oletus($tili = '') {
 		global $kukarow;
 		$ulos = 0;
-		
+
 		if ($tili !='') {
 				$query = "	SELECT oletus_alv
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili' and oletus_alv IS NOT NULL";
 				$vresult = pupe_query($query);
-				
+
 				if (mysql_num_rows($vresult) == 1) {
 					$vrow = mysql_fetch_array($vresult);
 					return $vrow['oletus_alv'];
 				}
 		}
-		
+
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
@@ -19205,6 +19205,50 @@ if (!function_exists('tarkiste')) {
 	}
 }
 
+if (!function_exists('uusi_sscc_nro')) {
+	function uusi_sscc_nro() {
+		global $kukarow;
+
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji 	= 'SSCC'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+
+		if (trim($row['selite']) == '') {
+
+			$query = "	INSERT INTO avainsana SET
+						yhtio 			= '{$kukarow['yhtio']}',
+						perhe 			= '666',
+						kieli 			= '{$kukarow['kieli']}',
+						laji 			= 'SSCC',
+						nakyvyys 		= '',
+						selite 			= '{$sscc}',
+						selitetark	 	= '',
+						selitetark_2 	= '',
+						selitetark_3 	= '',
+						jarjestys 		= 0,
+						laatija 		= '{$kukarow['kuka']}',
+						luontiaika 		= now(),
+						muutospvm 		= now(),
+						muuttaja 		= '{$kukarow['kuka']}'";
+			$insert_res = pupe_query($query);
+		}
+		else {
+			$query = "	UPDATE avainsana
+						SET selite  = '{$sscc}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji	= 'SSCC'";
+			$update_res = pupe_query($query);
+		}
+
+		return $sscc;
+	}
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
 	function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
 
@@ -19343,12 +19387,14 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 				$rivi['data']['tunnus'] = $tun;
 				$kappalemaara = $uusikpl;
 
+				$sscc = uusi_sscc_nro();
+
 				$query = "	INSERT INTO kerayserat SET
 							yhtio = '{$kukarow['yhtio']}',
 							nro = {$keraysera_nro},
 							keraysvyohyke = 0,
 							tila = '',
-							sscc = 0,
+							sscc = {$sscc},
 							sscc_ulkoinen = '',
 							otunnus = '{$rivi['data']['otunnus']}',
 							tilausrivi = '{$rivi['data']['tunnus']}',
@@ -19375,12 +19421,14 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 				$kappalemaara = $rivi['data']['upd_varattu'];
 
+				$sscc = uusi_sscc_nro();
+
 				$query = "	INSERT INTO kerayserat SET
 							yhtio = '{$kukarow['yhtio']}',
 							nro = {$keraysera_nro},
 							keraysvyohyke = 0,
 							tila = '',
-							sscc = 0,
+							sscc = {$sscc},
 							sscc_ulkoinen = '',
 							otunnus = '{$rivi['data']['otunnus']}',
 							tilausrivi = '{$rivi['data']['tunnus']}',
@@ -19409,12 +19457,15 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 					$upd_res = pupe_query($query);
 				}
 				else {
+
+					$sscc = uusi_sscc_nro();
+
 					$query = "	INSERT INTO kerayserat SET
 								yhtio = '{$kukarow['yhtio']}',
 								nro = {$keraysera_nro},
 								keraysvyohyke = 0,
 								tila = '',
-								sscc = 0,
+								sscc = {$sscc},
 								sscc_ulkoinen = '',
 								otunnus = '{$rivi['data']['otunnus']}',
 								tilausrivi = '{$rivi['data']['tunnus']}',

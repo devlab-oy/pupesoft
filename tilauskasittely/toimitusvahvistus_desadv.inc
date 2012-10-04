@@ -305,6 +305,7 @@
 					$paino_row = mysql_fetch_assoc($paino_res);
 
 					$paino_row['kilot'] += $pakkaus_row['oma_paino'];
+					$paino_row['kilot'] = round($paino_row['kilot']);
 
 					// Pakkauksen bruttopaino
 					$desadv_message .= "MEA+AAE+AAB+KGM:{$paino_row['kilot']}'";
@@ -312,7 +313,7 @@
 
 					// Pakkauksen tilavuus
 					// m3 => litrat
-					$pakkauksen_tilavuus_litroina = round($pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000, 0);
+					$pakkauksen_tilavuus_litroina = round($pakkaus_row['korkeus'] * $pakkaus_row['leveys'] * $pakkaus_row['syvyys'] * 1000);
 					$desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
 					$x++;
 

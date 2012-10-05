@@ -526,7 +526,7 @@
 			}
 
 			// Otetaan alkuper‰isen tuotteen hinta talteen
-			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
+			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 			// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
 			$query = "	SELECT *
@@ -548,7 +548,7 @@
 				while ($krow2 = mysql_fetch_assoc($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
-					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '', '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 					$if_ale_korva_isa_chk1 = $korva_isa_hinta;
 					$if_ale_korva_isa_chk2 = $korva_hinta;
@@ -1254,7 +1254,7 @@
 									$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
 								}
 
-								list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array);
+								list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
 								list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
@@ -1675,6 +1675,7 @@
 		$puu_alekerr	= array();
 		$puu_ein 		= array();
 		$puu_var		= array();
+		$puu_lapsi      = array();
 
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
@@ -1759,6 +1760,7 @@
 				$puu_alekerr[]	= $perherow["alekerroin"];
 				$puu_ein[] 		= $perherow["ei_nayteta"];
 				$puu_var[]		= $var;
+				$puu_lapsi      = 
 			}
 		}
 
@@ -1848,7 +1850,7 @@
 					$alemaara = $kpl;
 				}
 
-				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array);
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array,'','', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 

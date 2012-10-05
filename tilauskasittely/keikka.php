@@ -757,6 +757,22 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
 	}
 
+	echo "</tr>";
+	echo "<tr>";
+	echo "<th>",t("Lis‰rajaus"),"</th>";
+
+	if (!isset($lisarajaus)) $lisarajaus = "";
+
+	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+
+	echo "<td><select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250),">";
+	echo "<option value=''>",t("N‰yt‰ kaikki"),"</option>";
+	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivej‰ viem‰tt‰ varastoon"),"</option>";
+	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
+	echo "</select></td>";
+
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";
 
@@ -785,19 +801,48 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
 
+	// if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+	if ($lisarajaus == 'riveja_viematta_varastoon') {
+		$havinglisa = "HAVING tilriv_kpl IS NOT NULL AND tilriv_kpl > 0 AND tilriv_varattu > 0 AND uusiotunnukset != ''";
+	}
+	elseif ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+		$havinglisa = "HAVING tilriv_kpl IS NOT NULL AND tilriv_kpl > 0 AND tilriv_varattu = 0 AND uusiotunnukset != ''";
+	}
+	else {
+		$havinglisa = "";
+	}
+
+	$joinlisa = "";
+
+	// if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+	if ($lisarajaus == 'liitetty_lasku') {
+		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
+	}
+
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(distinct if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(distinct lasku.tunnus) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
-				round(sum(tilausrivi.rivihinta),2) varastossaarvo, lasku.laskunro
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postitp, lasku.swift, lasku.liitostunnus,
+				COUNT(DISTINCT lasku.tunnus) kpl,
+				ROUND(SUM(tilausrivi.rivihinta),2) varastossaarvo,
+				ROUND(SUM(lasku.rahti_etu), 2) eturahdit,
+				SUM(tilausrivi.kpl) AS tilriv_kpl,
+				SUM(tilausrivi.varattu) AS tilriv_varattu,
+				GROUP_CONCAT(DISTINCT IF(lasku.comments != '', lasku.comments, NULL) SEPARATOR '<br><br>') comments,
+				GROUP_CONCAT(DISTINCT lasku.laskunro SEPARATOR ', ') keikat,
+				GROUP_CONCAT(DISTINCT lasku.laskunro) AS laskunrot,
+				GROUP_CONCAT(DISTINCT tilausrivi.uusiotunnus) AS uusiotunnukset,
+				GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
-				$suuntalavajoin
+				{$joinlisa}
+				{$suuntalavajoin}
 				WHERE lasku.yhtio 	  = '$kukarow[yhtio]'
 				and lasku.tila 		  = 'K'
 				and lasku.alatila 	  = ''
 				and lasku.vanhatunnus = 0
 				and lasku.mapvm 	  = '0000-00-00'
-				$laatijalisa
-				GROUP BY liitostunnus, ytunnus, nimi, osoite, postitp, swift
+				{$laatijalisa}
+				GROUP BY liitostunnus, ytunnus, nimi, nimitark, osoite, postitp, swift
+				{$havinglisa}
 				ORDER BY nimi, nimitark, ytunnus";
 	$result = pupe_query($query);
 
@@ -813,15 +858,40 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			$query = "	SELECT count(*) num,
 						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', 1, 0)) volasku,
 						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L', 1, 0)) kulasku,
-						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', summa * vienti_kurssi, 0)) vosumma,
+						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', round(summa * vienti_kurssi, 2), 0)) vosumma,
 						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L', arvo * vienti_kurssi, 0)) kusumma
 						from lasku use index (yhtio_tila_laskunro)
 						where yhtio='$kukarow[yhtio]'
 						and tila='K'
 						and vanhatunnus<>0
-						and laskunro='$row[laskunro]'";
+						and laskunro IN ({$row['laskunrot']})";
 			$laskuja_result = pupe_query($query);
 			$laskuja_row = mysql_fetch_assoc($laskuja_result);
+
+			if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+
+				$query = "	SELECT ROUND(SUM(summa), 2) summa
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus IN ({$row['tilauksien_tunnukset']})";
+				$sum_chk_res = pupe_query($query);
+				$sum_chk_row = mysql_fetch_assoc($sum_chk_res);
+
+				//$row_chk['summa'] += $row['eturahdit'];
+
+				$erotus_chk = abs(round($sum_chk_row['summa'] - $laskuja_row['vosumma'], 2));
+
+				/*
+				Battle of the languages: laske t‰m‰ laskutoimitus 6059.69 - 6059.70
+				Results:
+				 - PHP:  	-0.010000000000218
+				 - Ruby: 	-0.010000000000218279
+				 - Python: 	-0.010000000000218279
+				*/
+
+				if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($sum_chk_row['summa'] == $laskujen_summa or $erotus_chk == 0.01)) continue;
+				if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and $sum_chk_row['summa'] != $laskujen_summa and $erotus_chk > 0.01) continue;
+			}
 
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 			$vaihtoomaisuuslaskujayhteensa += $laskuja_row["vosumma"];

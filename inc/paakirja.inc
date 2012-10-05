@@ -706,9 +706,14 @@
 							$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa"] != ($trow["laskusumma"]*-1)) {
-							$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+						if ($trow["valkoodi"] == "") {
+							if ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa"] != ($trow["laskusumma"]*-1)) {
+								$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+							}
 						}
+						elseif ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)) {
+								$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+							}
 
 						if ($virhe != "") echo "<td class='spec'><font class='error'>$virhe</font></td>";
 					}

@@ -898,7 +898,7 @@
 						else {
 							$select .= "{$etuliite}.ytunnus, {$etuliite}.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)) nimi, concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)) postitp, ";
 						}
-
+						if (strpos($select, "'asiakaslista',") === FALSE) $select .= "asiakas.tunnus 'asiakaslista', ";
 						$order  .= "{$etuliite}.ytunnus,";
 						$gluku++;
 					}
@@ -1361,7 +1361,7 @@
 					// N‰ytet‰‰n asiakasbudjetti:
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
-					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $turyhgroups > 0 or $tuosagroups > 0) {
+					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
@@ -1885,7 +1885,7 @@
 										$bulisa .= " and osasto != '' ";
 									}
 									elseif ($vertailubu == "asbury" and $turyhgroups > 0) {
-										$bulisa .= " and try = '{$row['try']}' ";
+										$bulisa .= " and try = '{$row['tuoteryhm‰']}' ";
 									}
 									elseif ($vertailubu == "asbury") {
 										$bulisa .= " and try != '' ";

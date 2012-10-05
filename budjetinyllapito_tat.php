@@ -7,26 +7,31 @@
 	require ("inc/parametrit.inc");
 
 	// K‰ytett‰v‰t muuttujat
-	$alkukk 				= isset($alkukk) ? trim($alkukk) : "";
-	$alkuvv 				= isset($alkuvv) ? trim($alkuvv) : "";
-	$budj_kohtelu 			= isset($budj_kohtelu) ? trim($budj_kohtelu) : "";
-	$budjetointi_taso 		= isset($budjetointi_taso) ? trim($budjetointi_taso) : "";
-	$loppukk 				= isset($loppukk) ? trim($loppukk) : "";
-	$loppuvv 				= isset($loppuvv) ? trim($loppuvv) : "";
-	$muutparametrit 		= isset($muutparametrit) ? trim($muutparametrit) : "";
-	$onko_ilman_budjettia 	= isset($onko_ilman_budjettia) ? trim($onko_ilman_budjettia) : "";
-	$submit_button 			= isset($submit_button) ? trim($submit_button) : "";
-	$summabudjetti 			= isset($summabudjetti) ? trim($summabudjetti) : "";
-	$tee 					= isset($tee) ? trim($tee) : "";
-	$tuoteno 				= isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
-	$osastotryttain 		= isset($osastotryttain) ? trim($osastotryttain) : "";
-	$lisa 					= isset($lisa) ? trim($lisa) : "";
-	$lisa_parametri 		= isset($lisa_parametri) ? trim($lisa_parametri) : "";
-	$ytunnus 				= isset($ytunnus) ? trim($ytunnus) : "";
-	$asiakasid 				= isset($asiakasid) ? (int) $asiakasid : 0;
-	$toimittajaid 			= isset($toimittajaid) ? (int) $toimittajaid : 0;
+	$alkukk 			  = isset($alkukk) ? trim($alkukk) : "";
+	$alkuvv 			  = isset($alkuvv) ? trim($alkuvv) : "";
+	$budj_kohtelu 		  = isset($budj_kohtelu) ? trim($budj_kohtelu) : "";
+	$budjetointi_taso 	  = isset($budjetointi_taso) ? trim($budjetointi_taso) : "";
+	$loppukk 			  = isset($loppukk) ? trim($loppukk) : "";
+	$loppuvv 			  = isset($loppuvv) ? trim($loppuvv) : "";
+	$muutparametrit 	  = isset($muutparametrit) ? trim($muutparametrit) : "";
+	$onko_ilman_budjettia = isset($onko_ilman_budjettia) ? trim($onko_ilman_budjettia) : "";
+	$submit_button 		  = isset($submit_button) ? trim($submit_button) : "";
+	$summabudjetti 		  = isset($summabudjetti) ? trim($summabudjetti) : "";
+	$tee 				  = isset($tee) ? trim($tee) : "";
+	$tuoteno 			  = isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
+	$osastotryttain 	  = isset($osastotryttain) ? trim($osastotryttain) : "";
+	$lisa 				  = isset($lisa) ? trim($lisa) : "";
+	$lisa_parametri 	  = isset($lisa_parametri) ? trim($lisa_parametri) : "";
+	$ytunnus 			  = isset($ytunnus) ? trim($ytunnus) : "";
+	$asiakasid 			  = isset($asiakasid) ? (int) $asiakasid : 0;
+	$toimittajaid 		  = isset($toimittajaid) ? (int) $toimittajaid : 0;
 
-	$maxrivimaara = 64000;
+
+	$edellinen_vuosi_alku 	  = date("Y-m-d", mktime(0, 0, 0, 1, 1, date("Y")-1));
+	$edellinen_vuosi_loppu 	  = date("Y-m-d", mktime(0, 0, 0, 1, 0, date("Y")));
+	$edellinen_kuukausi_loppu = date("Y-m-d", mktime(0, 0, 0, date("m"), 0, date("Y")));
+
+	$maxrivimaara = 1000;
 
 	// Tiedoston tallennusta varten
 	if ($tee == "lataa_tiedosto") {
@@ -56,7 +61,9 @@
 
 	// funkkarin $org_sar passataan alkuper‰iset sarakkeet, jota taas k‰ytet‰‰n "ohituksessa"
 	function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
-		global $kukarow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak, $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain;
+		global  $kukarow, $yhtiorow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak,
+				$sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain,
+				$edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu;
 
 		$excelsarake = 0;
 		$worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
@@ -109,6 +116,44 @@
 			}
 		}
 
+		if ($toim == "ASIAKAS") {
+			$rivilisa = "";
+
+			if (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
+				$rivilisa = " and tuote.try = '{$ostryrow['selite']}' ";
+			}
+			elseif (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "osastoittain") {
+				$rivilisa = " and tuote.osasto = '{$ostryrow['selite']}' ";
+			}
+
+			$query = "	SELECT round(sum(if(tapvm <= '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
+						round(sum(if(tapvm > '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno !='{$yhtiorow['ennakkomaksu_tuotenumero']}')
+						JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi in ('','R','K','M') {$rivilisa})
+						WHERE lasku.yhtio 	   = '$kukarow[yhtio]'
+						and lasku.tila    	   = 'U'
+						and lasku.alatila 	   = 'X'
+						and lasku.tapvm 	  >= '{$edellinen_vuosi_alku}'
+						and lasku.tapvm 	  <= '{$edellinen_kuukausi_loppu}'
+						and lasku.liitostunnus = '$row[asiakkaan_tunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$laskurow = mysql_fetch_assoc($result);
+
+			$laskurow['edvuodenkokonaismyynti'] = (float) $laskurow['edvuodenkokonaismyynti'] == 0 ? "" : $laskurow['edvuodenkokonaismyynti'];
+			$laskurow['tanvuodenalustamyynti']  = (float) $laskurow['tanvuodenalustamyynti']  == 0 ? "" : $laskurow['tanvuodenalustamyynti'];
+
+			if ($rivimaara < $maxrivimaara) {
+				echo "<td align='right'>{$laskurow['edvuodenkokonaismyynti']}</td>";
+				echo "<td align='right'>{$laskurow['tanvuodenalustamyynti']}</td>";
+			}
+
+			$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['edvuodenkokonaismyynti']);
+			$excelsarake++;
+			$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['tanvuodenalustamyynti']);
+			$excelsarake++;
+		}
+
 		if ($ohitus != "") {
 			$sarakkeet = 1;
 		}
@@ -154,7 +199,7 @@
 				// ƒLƒ MUUTA "<input type='text' class = '{$row[$budj_sarak]}'"
 				// Mik‰li teet muutoksia niin muuta myˆs jqueryyn riville noin 17
 				if ($nro != "") $nro = $nro*$org_sar;
-				
+
 				if ($grouppaus != "") {
 					if ($haen == "try" and $passaan == "yksi"){
 						echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='8'>";
@@ -172,7 +217,7 @@
 						echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
 					}
 				}
-				else {					
+				else {
 					echo "<input type='text' class = '{$row[$budj_sarak]}{$ostry_ind}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='8'>";
 				}
 
@@ -299,12 +344,19 @@
 		}
 
 		if ($headers[$lukualku] == "Tuoteryhm‰") {
+			$tryindeksi = $lukualku;
 			$lukualku++;
 			$osastotryttain = "tuoteryhmittain";
 		}
 		elseif ($headers[$lukualku] == "Osasto") {
+			$tryindeksi = $lukualku;
 			$lukualku++;
 			$osastotryttain = "osastoittain";
+		}
+
+		// Hyp‰t‰‰n myˆs myyntisarakkeiden yli
+		if ($toim == "ASIAKAS") {
+			$lukualku += 2;
 		}
 
 		$insert_rivimaara = 0;
@@ -315,7 +367,7 @@
 			$liitostunnukset .= "'$liitun',";
 
 			if ($osastotryttain != "") {
-				$try = $rivi[$lukualku-1];
+				$try = $rivi[$tryindeksi];
 			}
 
 			for ($excej = $lukualku; $excej < count($headers); $excej++) {
@@ -335,9 +387,10 @@
 		if ($insert_rivimaara >= $maxrivimaara) {
 			// Vied‰‰n suoraan kantaan
 			$luvut = $budj_taulunrivit;
-			$submit_button = "OK";
+			$tee   = "TALLENNA_BUDJETTI_TARKISTA";
+			$submit_button = "";
 
-			echo "<font class='error'>".t("HUOM: Maksimirivim‰‰r‰ ylittyi, rivej‰ ei n‰ytet‰ ruudulla. Rivit tallennetaan suoraan tietokantaan")."!<br><br></font>";
+			echo "<br><font class='error'>".t("HUOM: Maksimirivim‰‰r‰ ylittyi, rivej‰ ei n‰ytet‰ ruudulla. Rivit tallennetaan suoraan tietokantaan")."!<br><br></font>";
 		}
 		else {
 			echo "<font class='error'>".t("HUOM: Excel-tiedoston luvut eiv‰t viel‰ tallennettu tietokantaan")."!<br>".t("Klikkaa")." '",t("Tallenna budjettiluvut"),"' ".t("tallentaaksesi luvut")."!</font><br><br></font>";
@@ -1142,41 +1195,43 @@
 		if ($rivimaara >= $maxrivimaara) {
 			echo "<br><font class='error'>".t("HUOM: Maksimirivim‰‰r‰ ylittyi, rivej‰ ei n‰ytet‰ ruudulla. Tallenna Excel-tiedosto")."!</font><br><br>";
 		}
+		else {
+			echo "<form method='post' enctype='multipart/form-data' autocomplete='off'>";
 
-		echo "<form method='post' enctype='multipart/form-data' autocomplete='off'>";
-
-		// Laitetaan monivalintalaatikoiden valinnat myˆs mukaan
-		if (count($mul_try) > 0) {
-			foreach ($mul_try as $try) {
-				echo "<input type='hidden' name='mul_try[]' value = '$try'>";
+			// Laitetaan monivalintalaatikoiden valinnat myˆs mukaan
+			if (count($mul_try) > 0) {
+				foreach ($mul_try as $try) {
+					echo "<input type='hidden' name='mul_try[]' value = '$try'>";
+				}
 			}
-		}
-		if (count($mul_osasto) > 0) {
-			foreach ($mul_osasto as $os) {
-				echo "<input type='hidden' name='mul_osasto[]' value = '$os'>";
+			if (count($mul_osasto) > 0) {
+				foreach ($mul_osasto as $os) {
+					echo "<input type='hidden' name='mul_osasto[]' value = '$os'>";
+				}
 			}
+
+			#TODO: ei osaa s‰ilytt‰‰ dynaamisia tuotekategorioita.
+			echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
+			echo "<input type='hidden' name='alkukk' value = '$alkukk'>";
+			echo "<input type='hidden' name='alkuvv' value = '$alkuvv'>";
+			echo "<input type='hidden' name='loppukk' value = '$loppukk'>";
+			echo "<input type='hidden' name='loppuvv' value = '$loppuvv'>";
+			echo "<input type='hidden' name='tuoteno' value = '$tuoteno'>";
+			echo "<input type='hidden' name='budj_kohtelu' value='$budj_kohtelu'>";
+			echo "<input type='hidden' name='budjetointi_taso' value='$budjetointi_taso'>";
+			echo "<input type='hidden' name='kausi_alku' value='{$tilikaudetrow["tilikausi_alku"]}'>";
+			echo "<input type='hidden' name='kausi_loppu' value='{$tilikaudetrow["tilikausi_loppu"]}'>";
+			echo "<input type='hidden' name='onko_ilman_budjettia' value='$onko_ilman_budjettia'>";
+			echo "<input type='hidden' name='summabudjetti' value='$summabudjetti'>";
+			echo "<input type='hidden' name='osastotryttain' value='$osastotryttain'>";
+			echo "<input type='hidden' name='tee' value='TALLENNA_BUDJETTI_TARKISTA'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+
+			echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna budjettiluvut"),"' />";
+			echo "<br><br>";
+
+			echo "<table>";
 		}
-		#TODO: ei osaa s‰ilytt‰‰ dynaamisia tuotekategorioita.
-		echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
-		echo "<input type='hidden' name='alkukk' value = '$alkukk'>";
-		echo "<input type='hidden' name='alkuvv' value = '$alkuvv'>";
-		echo "<input type='hidden' name='loppukk' value = '$loppukk'>";
-		echo "<input type='hidden' name='loppuvv' value = '$loppuvv'>";
-		echo "<input type='hidden' name='tuoteno' value = '$tuoteno'>";
-		echo "<input type='hidden' name='budj_kohtelu' value='$budj_kohtelu'>";
-		echo "<input type='hidden' name='budjetointi_taso' value='$budjetointi_taso'>";
-		echo "<input type='hidden' name='kausi_alku' value='{$tilikaudetrow["tilikausi_alku"]}'>";
-		echo "<input type='hidden' name='kausi_loppu' value='{$tilikaudetrow["tilikausi_loppu"]}'>";
-		echo "<input type='hidden' name='onko_ilman_budjettia' value='$onko_ilman_budjettia'>";
-		echo "<input type='hidden' name='summabudjetti' value='$summabudjetti'>";
-		echo "<input type='hidden' name='osastotryttain' value='$osastotryttain'>";
-		echo "<input type='hidden' name='tee' value='TALLENNA_BUDJETTI_TARKISTA'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
-
-		echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna budjettiluvut"),"' />";
-		echo "<br><br>";
-
-		if ($rivimaara < $maxrivimaara) echo "<table>";
 
 		if ($toim == "TUOTE") {
 			if ($grouppaus != "") {
@@ -1210,6 +1265,19 @@
 			if ($rivimaara < $maxrivimaara) echo "<th>",t("Osasto"),"</th>";
 
 			$worksheet->write($excelrivi, $excelsarake, t("Osasto"), $format_bold);
+			$excelsarake++;
+		}
+
+		if ($toim == "ASIAKAS") {
+			if ($rivimaara < $maxrivimaara) {
+				echo "<th>",t("Myynti")," ",(date('Y')-1),"</th>";
+				echo "<th>",t("Myynti")," ",date('Y'),"-01 - ",substr($edellinen_kuukausi_loppu, 0, 7),"</th>";
+			}
+
+			$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".(date('Y')-1), $format_bold);
+			$excelsarake++;
+
+			$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".date('Y')."-01 - ".substr($edellinen_kuukausi_loppu, 0, 7), $format_bold);
 			$excelsarake++;
 		}
 
@@ -1269,12 +1337,12 @@
 
 		if ($budjetointi_taso == "joka_kk_sama" or $budjetointi_taso == "summa_jaetaan") {
 			if (isset($osastotryttain) and ($osastotryttain == "tuoteryhmittain" or $osastotryttain == "osastoittain")) {
-				while ($ostryrow = mysql_fetch_assoc($res)) {
-					while ($row = mysql_fetch_assoc($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
+					while ($ostryrow = mysql_fetch_assoc($res)) {
 						piirra_budj_rivi($row, $ostryrow, 'OHITA', $ohituksen_alkuperaiset_sarakkeet);
 					}
 
-					mysql_data_seek($result, 0);
+					mysql_data_seek($res, 0);
 				}
 			}
 			else {
@@ -1316,12 +1384,12 @@
 		}
 		else {
 			if (isset($osastotryttain) and ($osastotryttain == "tuoteryhmittain" or $osastotryttain == "osastoittain")) {
-				while ($ostryrow = mysql_fetch_assoc($res)) {
-					while ($row = mysql_fetch_assoc($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
+					while ($ostryrow = mysql_fetch_assoc($res)) {
 						piirra_budj_rivi($row, $ostryrow);
 					}
 
-					mysql_data_seek($result, 0);
+					mysql_data_seek($res, 0);
 				}
 			}
 			else {
@@ -1331,12 +1399,13 @@
 			}
 		}
 
-		if ($rivimaara < $maxrivimaara) echo "</table>";
-
 		$excelnimi = $worksheet->close();
 
-		echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna budjettiluvut"),"' />";
-		echo "</form>";
+		if ($rivimaara < $maxrivimaara) {
+			echo "</table>";
+			echo "<br><input type='submit' name='tallenna_budjetti' id='tallenna_budjetti' value='",t("Tallenna budjettiluvut"),"' />";
+			echo "</form>";
+		}
 
 		echo "<br><br><font class='message'>".t("Budjettiluvut Excel muodossa")."</font><br>";
 

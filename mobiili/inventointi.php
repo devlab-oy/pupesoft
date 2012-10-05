@@ -94,10 +94,22 @@ if ($tee == 'haku') {
 		$tuotteet = hae($viivakoodi,$tuoteno,$tuotepaikka);
 		if(count($tuotteet) == 0) $errors[] = "Ei löytynyt";
 	}
+
+	$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
+
+	# Vain yksi osuma
+	if (isset($tuotteet) and count($tuotteet) == 1) {
+		# Suoraan varmistuskoodiin
+		$url = http_build_query(array('tee' => 'laske',
+								'tuotepaikka' => $tuotteet[0]['tuotepaikka'],
+								'tuoteno' => $tuotteet[0]['tuoteno'],
+								'tuotepaikalla' => $haku_tuotepaikalla));
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?{$url}'>";
+		exit();
+	}
 	# Löydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
 		# Jos haettu pelkällä tuotepaikalla, muistetaan palata hakutuloksiin
-		$haku_tuotepaikalla = ($viivakoodi=='' and $tuoteno=='' and $tuotepaikka != '') ? 'true' : '';
 		include('views/inventointi/hakutulokset.php');
 	}
 	# Haku formi
@@ -230,10 +242,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 		$suuntalava_sscc = pupe_query($suuntalava_query);
 		$suuntalava_sscc = mysql_fetch_assoc($suuntalava_sscc);
 		$sscc = $suuntalava_sscc['sscc'];
-
 	}
 
-	$disabled = '';
 	# Näytetäänkö apulaskuri
 	$query = "SELECT
 				count(tunnus) as monta
@@ -244,9 +254,12 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	$pakkaukset = pupe_query($query);
 	$pakkaukset = mysql_fetch_assoc($pakkaukset);
 
+	$apulaskuri_url = '';
 	# Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
-	if ($pakkaukset['monta'] == 0) {
-		$disabled = true;
+	if ($pakkaukset['monta'] > 0) {
+		$apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
+									'tuotepaikka' => $tuotepaikka,
+									'tuoteno' => $tuote['tuoteno']));
 	}
 
 	# Tarkistetaan varmistuskoodi

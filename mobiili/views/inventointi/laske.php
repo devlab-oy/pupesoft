@@ -34,17 +34,15 @@
 		</tr>
 		<tr>
 			<th>Tuotepaikka</th>
-			<td>
-				<?= $tuote['tuotepaikka'] ?>
-			</td>
+			<td><?= $tuote['tuotepaikka'] ?></td>
 		</tr>
 	</table>
 </div>
 <div class='controls'>
 	<input type='hidden' name='tee' value='inventoi'>
 	<input type='submit' name='inventoidaan' value='OK'>
-	<? if(!$disabled): ?>
-		<a class='button right' href='inventointi.php?<?= http_build_query(array('tee' => 'apulaskuri', 'tuotepaikka' => $tuotepaikka, 'tuoteno' => $tuote['tuoteno'])) ?>'>Apulaskuri</a>
+	<? if($apulaskuri_url != ''): ?>
+		<a class='button right' href='inventointi.php?<?= $apulaskuri_url ?>'>Apulaskuri</a>
 	<? endif ?>
 </div>
 </form>

@@ -15,7 +15,7 @@
 		exit;
 	}
 	// testing 2012-10-01
-$kayttajan_valinta_maa = "EE";
+// $kayttajan_valinta_maa = "EE";
 
 	if (!isset($tapa))					$tapa = "";
 	if (!isset($tee))					$tee = "";
@@ -43,11 +43,11 @@ $kayttajan_valinta_maa = "EE";
 		$laji = "A";
 		$tilastoloppu = '001';
 	}
-	else {
-		$tapa = "vienti";
+	else if ($tapa == "vienti") {
 		$laji = "D";
 		$tilastoloppu = '002';
 	}
+// else $tapa == yhdistetty, ei tehd‰ ascii-aineistoa eli ei tarvita n‰it‰ tekstej‰
 
 	echo "<font class='head'>".t("Intrastat-ilmoitukset")."</font><hr>";
 
@@ -91,6 +91,10 @@ $kayttajan_valinta_maa = "EE";
 			$eumaat .= "'$row[koodi]',";
 		}
 		$eumaat = substr($eumaat, 0, -1);
+
+		$ee_yhdistettyorder = "";
+		$ee_kentat = "";
+		$ee_group = "";
 		
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
@@ -100,7 +104,18 @@ $kayttajan_valinta_maa = "EE";
 			$maalisa = "maalahetys in ('', '$maa') and maamaara in ('',$eumaat) and maamaara != '$maa'";
 		}
 		else if ($tapa == "yhdistetty") {
-			$maalisa = "maalahetys in ('', '$eumaat') and maamaara in ('',$eumaat) and maamaara != maalahetys";
+			$maalisa = "(maamaara != maalahetys AND 
+							(
+								(maalahetys in ('', '$maa') AND maamaara in ('',$eumaat))
+							OR
+								(maalahetys in ('', $eumaat) AND maamaara in ('','$maa'))
+							)
+						)";
+			$ee_yhdistettyorder = "if(maamaara='$maa', 0, 1), ";
+			if ($maa == "EE") {
+				$ee_kentat = "lasku.valkoodi, tullinimike.dm, substr(lasku.toimitusehto, 1, 3) as toim_ehto, ";
+				$ee_group = ", valkoodi, dm, toim_ehto";
+			}
 		}
 
 		if ($lisavar == "S") {
@@ -136,8 +151,8 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Saapuminen' as tapa,
-						lasku.toimitusehto,
 						$vainnimikelisa2
+						$ee_kentat 
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
@@ -183,7 +198,7 @@ $kayttajan_valinta_maa = "EE";
 
 			$query .= "	$vainnimikelisa
 						$lisavarlisa
-						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup $ee_group
 						HAVING $maalisa)";
 		}
 
@@ -201,8 +216,8 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Lasku' as tapa,
-						lasku.toimitusehto,
 						$vainnimikelisa2
+						$ee_kentat 
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
@@ -225,7 +240,7 @@ $kayttajan_valinta_maa = "EE";
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
 						$vainnimikelisa
 						$lisavarlisa
-						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup $ee_group
 						HAVING $maalisa)";
 		}
 
@@ -243,8 +258,8 @@ $kayttajan_valinta_maa = "EE";
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Siirtolista' as tapa,
-						lasku.toimitusehto,
 						$vainnimikelisa2
+						$ee_kentat
 						max(lasku.tunnus) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						left(max(tuote.nimitys), 40) nimitys,
@@ -267,11 +282,11 @@ $kayttajan_valinta_maa = "EE";
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
 						$vainnimikelisa
 						$lisavarlisa
-						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup $ee_group
 						HAVING $maalisa)";
 		}
 
-		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
+		$query .= "	ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$nim     = "";
@@ -295,28 +310,44 @@ $kayttajan_valinta_maa = "EE";
 						<th>".t("Luontipvm")."</th>
 						<th>".t("Vuosi")."</th>
 						<th>".t("Kuukausi")."</th>
-						<th>".t("Ilmoitus")."</th>
+						<th>".t("Tuonti tai vienti")."</th>
 						<th>".t("Ytunnus")."</th>
 						<th>".t("Rivinro")."</th>
 						<th>".t("Toimitusehto")."</th>
-						<th>".t("Maa")."</th>
-				";
+						<th>".t("Saapumisen l‰hetysmaa")."</th>
+						<th>".t("Kuljetusmuoto")."</th>
+						<th>".t("L‰hetysmaa")."</th>
+						<th>".t("Kauppatapahtuman luonne")."</th>
+						<th>".t("Alkuper‰maa")."</th>
+						<th>".t("M‰‰r‰maa")."</th>
+						<th>".t("Tullinimike")."</th>
+						<th>".t("Paino")."</th>
+						<th>".t("Kpl")."</th>
+						<th>".t("2. paljous")."</th>
+						<th>".t("Laskutusarvo")."</th>
+						<th>".t("Ostolaskun valuutta")."</th>
+						<th>".t("Tilastoarvo")."</th>
+						<th>".t("Statsin valuutta")."</th>
+						<th>".t("Tullinimikkeen nimitys")."</th>
+						</tr>";
 				}
-				$tilastoarvot .= "
-				<th>#</th>
-				<th>".t("Tullinimike")."</th>
-				<th>".t("Alkuper‰maa")."</th>
-				<th>".t("L‰hetysmaa")."</th>
-				<th>".t("M‰‰r‰maa")."</th>
-				<th>".t("Kuljetusmuoto")."</th>
-				<th>".t("Kauppat. luonne")."</th>
-				<th>".t("Tilastoarvo")."</th>
-				<th>".t("Paino")."</th>
-				<th>".t("2-paljous")."</th>
-				<th>".t("2-paljous m‰‰r‰")."</th>
-				<th>".t("Laskutusarvo")."</th>
-				</tr>";
-
+				else {
+					$tilastoarvot .= "
+						<th>#</th>
+						<th>".t("Tullinimike")."</th>
+						<th>".t("Alkuper‰maa")."</th>
+						<th>".t("L‰hetysmaa")."</th>
+						<th>".t("M‰‰r‰maa")."</th>
+						<th>".t("Kuljetusmuoto")."</th>
+						<th>".t("Kauppat. luonne")."</th>
+						<th>".t("Tilastoarvo")."</th>
+						<th>".t("Paino")."</th>
+						<th>".t("2-paljous")."</th>
+						<th>".t("2-paljous m‰‰r‰")."</th>
+						<th>".t("Laskutusarvo")."</th>
+						</tr>";
+				}
+				
 				if (isset($workbook)) {
 					$worksheet->write($excelrivi, 1, "Tullinimike", $format_bold);
 					$worksheet->write($excelrivi, 2, "Alkuper‰maa", $format_bold);
@@ -505,76 +536,96 @@ $kayttajan_valinta_maa = "EE";
 					$ee_pvm = date("d.m.Y");
 					$ee_ilmoitus = ((($row[maamaara] == $maa or $row[maamaara] == '') and $row[maalahetys] != $maa) ? 'S' : 'L');
 					$ee_rivi = sprintf('%05d', $lask);
-					$ee_toimehto = substr($row[toimitusehto], 0, 3);
 
-					$tilastoarvot .= "<td>$ee_pvm</td>";
-					$tilastoarvot .= "<td>$vv</td>";
-					$tilastoarvot .= "<td>$kuuka</td>";
-					$tilastoarvot .= "<td>$ee_ilmoitus</td>";
-					$tilastoarvot .= "<td>$yhtiorow[ytunnus]</td>";
-					$tilastoarvot .= "<td>$ee_rivi</td>";
-					$tilastoarvot .= "<td>$ee_toimehto</td>";
-					$tilastoarvot .= "<td>FINLAND</td>";
-				}
-				$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
+					$tilastoarvot .= "
+						<td>$ee_pvm</td>
+						<td>$vv</td>
+						<td>$kuuka</td>
+						<td>$ee_ilmoitus</td>
+						<td>$yhtiorow[ytunnus]</td>
+						<td>$ee_rivi</td>
+						<td>$row[toim_ehto]</td>
+						<td>$row[maalahetys]</td>
 
-				$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";	//Tullinimike CN
-
-				if ($tapa == "tuonti") {
-					$tilastoarvot .= "<td>$row[alkuperamaa]</td>";																					//alkuper‰maa
-					$tilastoarvot .= "<td>$row[maalahetys]</td>";																					//l‰hetysmaa
-					$tilastoarvot .= "<td></td>";
-				}
-				else {
-					$tilastoarvot .= "<td></td>";
-					$tilastoarvot .= "<td></td>";
-					$tilastoarvot .= "<td>$row[maamaara]</td>";																					//m‰‰r‰maa
-				}
-
-				$tilastoarvot .= "<td>$row[kuljetusmuoto]</td>";																					//kuljetusmuoto
-				$tilastoarvot .= "<td>$row[kauppatapahtuman_luonne]</td>";																			//kauppatapahtuman luonne
-				$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//tilastoarvo
-				$tilastoarvot .= "<td>$row[paino] | $row[paino2]</td>";																							//nettopaino
-
-				if ($row["su"] != '') {
-					$tilastoarvot .= "<td>{$row["su"]}</td>"; 																							//2 paljouden lajikoodi
-					$tilastoarvot .= "<td>{$row["kpl"]}</td>";																							//2 paljouden m‰‰r‰
+						<td>$row[kuljetusmuoto]</td>
+						<td>$row[maalahetys]</td>
+						<td>$row[kauppatapahtuman_luonne]</td>
+						<td>$row[alkuperamaa]</td>
+						<td>$row[maamaara]</td>
+						<td>$row[tullinimike1]</td>
+						<td>$row[paino]</td>
+						<td>$row[kpl]</td>
+						<td>$row[su]</td>
+						<td>$row[rivihinta]</td>
+						
+						<td>$row[valkoodi]</td>
+						<td>$row[rivihinta]</td>
+						<td>$yhtiorow[valkoodi]</td>
+						<td>$row[dm]</td>
+					</tr>";
+					
 				}
 				else {
-					$tilastoarvot .= "<td></td>"; 																									//2 paljouden lajikoodi
-					$tilastoarvot .= "<td></td>";																									//2 paljouden m‰‰r‰
-				}
+					$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
 
-				$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//nimikkeen laskutusarvo
-				$tilastoarvot .= "</tr>";
-
-				if (isset($workbook)) {
-					$worksheet->write($excelrivi, 1, $lask);
-					$worksheet->write($excelrivi, 2, $row["tullinimike1"]);
+					$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";	//Tullinimike CN
 
 					if ($tapa == "tuonti") {
-						$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
-						$worksheet->write($excelrivi, 4, $row["maalahetys"]);
-
+						$tilastoarvot .= "<td>$row[alkuperamaa]</td>";																					//alkuper‰maa
+						$tilastoarvot .= "<td>$row[maalahetys]</td>";																					//l‰hetysmaa
+						$tilastoarvot .= "<td></td>";
 					}
 					else {
-						$worksheet->write($excelrivi, 5, $row["maamaara"]);
-
+						$tilastoarvot .= "<td></td>";
+						$tilastoarvot .= "<td></td>";
+						$tilastoarvot .= "<td>$row[maamaara]</td>";																					//m‰‰r‰maa
 					}
 
-					$worksheet->write($excelrivi, 6, $row["kuljetusmuoto"]);
-					$worksheet->write($excelrivi, 7, $row["kauppatapahtuman_luonne"]);
-					$worksheet->write($excelrivi, 8, $row["rivihinta"]);
-					$worksheet->write($excelrivi, 9, $row["paino"]);
+					$tilastoarvot .= "<td>$row[kuljetusmuoto]</td>";																					//kuljetusmuoto
+					$tilastoarvot .= "<td>$row[kauppatapahtuman_luonne]</td>";																			//kauppatapahtuman luonne
+					$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//tilastoarvo
+					$tilastoarvot .= "<td>$row[paino] | $row[paino2]</td>";																							//nettopaino
+
 					if ($row["su"] != '') {
-						$worksheet->write($excelrivi, 10, $row["su"]);
-						$worksheet->write($excelrivi, 11, $row["kpl"]);
+						$tilastoarvot .= "<td>{$row["su"]}</td>"; 																							//2 paljouden lajikoodi
+						$tilastoarvot .= "<td>{$row["kpl"]}</td>";																							//2 paljouden m‰‰r‰
 					}
-					$worksheet->write($excelrivi, 12, $row["rivihinta"]);
+					else {
+						$tilastoarvot .= "<td></td>"; 																									//2 paljouden lajikoodi
+						$tilastoarvot .= "<td></td>";																									//2 paljouden m‰‰r‰
+					}
 
-					$excelrivi++;
+					$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//nimikkeen laskutusarvo
+					$tilastoarvot .= "</tr>";
+
+					if (isset($workbook)) {
+						$worksheet->write($excelrivi, 1, $lask);
+						$worksheet->write($excelrivi, 2, $row["tullinimike1"]);
+
+						if ($tapa == "tuonti") {
+							$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
+							$worksheet->write($excelrivi, 4, $row["maalahetys"]);
+
+						}
+						else {
+							$worksheet->write($excelrivi, 5, $row["maamaara"]);
+
+						}
+
+						$worksheet->write($excelrivi, 6, $row["kuljetusmuoto"]);
+						$worksheet->write($excelrivi, 7, $row["kauppatapahtuman_luonne"]);
+						$worksheet->write($excelrivi, 8, $row["rivihinta"]);
+						$worksheet->write($excelrivi, 9, $row["paino"]);
+						if ($row["su"] != '') {
+							$worksheet->write($excelrivi, 10, $row["su"]);
+							$worksheet->write($excelrivi, 11, $row["kpl"]);
+						}
+						$worksheet->write($excelrivi, 12, $row["rivihinta"]);
+
+						$excelrivi++;
+					}
+
 				}
-
 			}
 			else {
 				// tehd‰‰n kaunista ruutukamaa
@@ -661,7 +712,7 @@ $kayttajan_valinta_maa = "EE";
 		if ($outputti == "tilasto") {
 			// tehd‰‰n tilaustoarvolistausta
 			$tilastoarvot .= "<tr>";
-			$span = ($maa == "EE" ? 15 : 7);
+			$span = ($maa == "EE" ? 19 : 7);
 			$tilastoarvot .= "<th colspan='$span'>".t("Yhteens‰").":</td>";
 			$tilastoarvot .= "<th>$arvoyht</th>";
 			$tilastoarvot .= "<th colspan='4'></th>";

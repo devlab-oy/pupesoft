@@ -18,7 +18,7 @@
 				JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				AND lasku.tunnus in ($otunnukset)
-				ORDER BY lasku.tunnus";
+				ORDER BY lasku.ytunnus, lasku.tunnus";
 	$tempr = mysql_query($query) or pupe_error($query);
 
 	//PDF:n luonti ja defaultit
@@ -42,6 +42,9 @@
 	$kirj["height"] = 8;
 	//$kirj["font"] = "Times-Roman";
 	$kirj["font"] = "Times-Bold";
+	
+	$iso_non_bold['height'] = 10; 
+	$iso_non_bold['font'] = 'Times-Roman';
 
 	$iso["height"] = 12;
 	$iso["font"] = "Helvetica-Bold";
@@ -62,6 +65,8 @@
 		   	$pdf->draw_text(62, $kala-28, $asiakkaan_tiedot_row['nimi']." ".$asiakkaan_tiedot_row['nimitark'],	$firstpage, $kirj);
 		   	$pdf->draw_text(62, $kala-38, $asiakkaan_tiedot_row['osoite'],	$firstpage, $kirj);
 		   	$pdf->draw_text(62, $kala-48, $asiakkaan_tiedot_row['postino']." ".$asiakkaan_tiedot_row['postitp'],	$firstpage, $kirj);
+			
+			$pdf->draw_text(244, $kala-10, 'Allekirjoitus ja nimenselvennys', $firstpage, $iso_non_bold);
 
 			$kala -= 57; // kala = 713
 			$vanhakala = $kala;
@@ -103,8 +108,12 @@
 	$rivi = 1;
 	$maxrivit = mysql_num_rows($tempr);
 
+	$asiakkaan_tilausnumerot = array();
+	
 	while ($asiakkaan_tiedot_row = mysql_fetch_assoc($tempr)) {
 
+		$asiakkaan_tilausnumerot[] = $asiakkaan_tiedot_row['tunnus'];
+		
 		if ($asiakas == '' or $asiakas != $asiakkaan_tiedot_row['ytunnus'] or ($asiakas == $asiakkaan_tiedot_row['ytunnus'] and $asiakkaan_tiedot_row['tunnus'] != $ed_tun)) {
 
 			if ($kala < 80) {
@@ -125,6 +134,14 @@
 				$ed_tun = $asiakkaan_tiedot_row['tunnus'];
 			}
 			elseif ($asiakas != $asiakkaan_tiedot_row['ytunnus']) {
+				$asiakkaan_tilausnumero_temp = array_pop($asiakkaan_tilausnumerot);
+				$pdf->draw_text(62, $kala_temp, 'Tilausnumerot:', $firstpage, $iso_non_bold);
+				$kala_temp = $kala_temp - 10;
+				foreach ($asiakkaan_tilausnumerot as $a) {
+					$pdf->draw_text(62, $kala_temp, $a, $firstpage, $iso_non_bold);
+					$kala_temp = $kala_temp - 10;
+				}
+				
 				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
 				//alarivi
@@ -146,6 +163,11 @@
 
 				$kollityht = 0;
 				$kilotyht = 0;
+				
+				unset($asiakkaan_tilausnumerot);
+				$asiakkaan_tilausnumerot = array();
+				$asiakkaan_tilausnumerot[] = $asiakkaan_tilausnumero_temp;
+				unset($kala_temp);
 			}
 
 			//summataan kaikki painot yhteen
@@ -172,11 +194,8 @@
 		while ($pakkarow = mysql_fetch_assoc($pakka)) {
 
 			//kollit
-			if ($i == 0) {
-				$pdf->draw_text(62, $kala, $asiakkaan_tiedot_row['toim_ovttunnus'],	$firstpage, $kirj);
-				$pdf->draw_text(112, $kala, $asiakkaan_tiedot_row['toim_nimi'],	$firstpage, $kirj);
-				$pdf->draw_text(112, $kala-10, $asiakkaan_tiedot_row['toim_postitp'],	$firstpage, $kirj);
-				$pdf->draw_text(62, $kala-10, $asiakkaan_tiedot_row['asiakkaan_tilausnumero'],	$firstpage, $kirj);
+			if ($i == 0 && !isset($kala_temp)) {
+				$kala_temp = $kala;
 			}
 
 			$pdf->draw_text(246, $kala, $pakkarow['kollit']."  ".$pakkarow['pakkaus'], $firstpage, $kirj);
@@ -205,6 +224,13 @@
 		$kala -= 10;
 
 		if ($asiakas != $asiakkaan_tiedot_row['ytunnus'] or $rivi == $maxrivit) {
+			$pdf->draw_text(62, $kala_temp, 'Tilausnumerot:', $firstpage, $iso_non_bold);
+			$kala_temp = $kala_temp - 10;
+			foreach ($asiakkaan_tilausnumerot as $a) {
+				$pdf->draw_text(62, $kala_temp, $a, $firstpage, $iso_non_bold);
+				$kala_temp = $kala_temp - 10;
+			}
+			
 			$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
 			//alarivi

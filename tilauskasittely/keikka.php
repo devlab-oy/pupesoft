@@ -557,6 +557,26 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
+if (isset($messenger) and $messenger == 'X' and isset($message) and trim($message) != "" and isset($vastaanottaja) and trim($vastaanottaja) != "" and isset($status) and $status == 'X') {
+
+	$message = trim($message);
+
+	$message .= " {$message_postfix}";
+
+	$query = "	INSERT INTO messenger SET
+				yhtio = '{$kukarow['yhtio']}',
+				kuka = '{$kukarow['kuka']}',
+				vastaanottaja = '{$vastaanottaja}',
+				viesti = '{$message}',
+				status = '{$status}',
+				luontiaika = now()";
+	$messenger_result = pupe_query($query);
+
+	echo "<font class='message'>",sprintf(t('Viesti lähetetty onnistuneesti käyttäjälle %s.'), $vastaanottaja)."</font><br />";
+
+	$messenger = $message = $vastaanottaja = $status = "";
+}
+
 if ($toiminto == "kohdista") {
 	require('ostotilausten_rivien_kohdistus.inc');
 }

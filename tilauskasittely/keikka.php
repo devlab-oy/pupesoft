@@ -801,20 +801,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = lasku.tunnus) ";
 	}
 
-	// if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
-	if ($lisarajaus == 'riveja_viematta_varastoon') {
-		$havinglisa = "HAVING tilriv_kpl IS NOT NULL AND tilriv_kpl > 0 AND tilriv_varattu > 0 AND uusiotunnukset != ''";
-	}
-	elseif ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
-		$havinglisa = "HAVING tilriv_kpl IS NOT NULL AND tilriv_kpl > 0 AND tilriv_varattu = 0 AND uusiotunnukset != ''";
-	}
-	else {
-		$havinglisa = "";
-	}
-
 	$joinlisa = "";
 
-	// if ($lisarajaus == 'liitetty_lasku' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 	if ($lisarajaus == 'liitetty_lasku') {
 		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
 	}
@@ -829,7 +817,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				GROUP_CONCAT(DISTINCT IF(lasku.comments != '', lasku.comments, NULL) SEPARATOR '<br><br>') comments,
 				GROUP_CONCAT(DISTINCT lasku.laskunro SEPARATOR ', ') keikat,
 				GROUP_CONCAT(DISTINCT lasku.laskunro) AS laskunrot,
-				GROUP_CONCAT(DISTINCT tilausrivi.uusiotunnus) AS uusiotunnukset,
 				GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
@@ -842,7 +829,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				and lasku.mapvm 	  = '0000-00-00'
 				{$laatijalisa}
 				GROUP BY liitostunnus, ytunnus, nimi, nimitark, osoite, postitp, swift
-				{$havinglisa}
 				ORDER BY nimi, nimitark, ytunnus";
 	$result = pupe_query($query);
 
@@ -854,6 +840,35 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("saapumisnumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_assoc($result)) {
+
+			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+
+				if ($lisarajaus == 'riveja_viematta_varastoon') {
+					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu > 0";
+				}
+				else {
+					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";
+				}
+
+				$query = "	SELECT lasku.laskunro, SUM(tilausrivi.kpl) kpl, SUM(tilausrivi.varattu) varattu
+							FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.uusiotunnus IN ({$row['tilauksien_tunnukset']})
+							AND tilausrivi.tyyppi = 'O'
+							GROUP BY 1
+							{$havinglisa}";
+				$tilriv_chk_res = pupe_query($query);
+				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
+
+				$row_keikat = array();
+
+				while ($tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res)) {
+					$row_keikat[] = $tilriv_chk_row['laskunro'];
+				}
+
+				$row['keikat'] = implode(", ", $row_keikat);
+			}
 
 			$query = "	SELECT count(*) num,
 						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', 1, 0)) volasku,
@@ -918,6 +933,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
 			echo "<td><form method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
+			echo "<input type='hidden' name='lisarajaus' value='{$lisarajaus}' />";
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</form></td>";
 			echo "</tr>";
@@ -959,7 +975,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
 
-	echo "<td class='back' rowspan='4' style='vertical-align:bottom;'>";
+	echo "<td class='back' style='vertical-align:bottom;'>";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -973,7 +989,30 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
-	echo "</table><br>";
+	if (!isset($lisarajaus)) $lisarajaus = "";
+
+	$sel = array_fill_keys(array($lisarajaus), ' selected') + array_fill_keys(array('riveja_viematta_varastoon', 'liitetty_lasku', 'liitetty_lasku_rivitok_kohdistus_eiok', 'liitetty_lasku_rivitok_kohdistus_ok'), '');
+
+	echo "<tr>";
+	echo "<th>",t("Lisärajaus"),"</th>";
+	echo "<td colspan='4'>";
+	echo "<form method='post'>";
+	echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+	echo "<select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250)," onchange='submit();'>";
+	echo "<option value=''>",t("Näytä kaikki"),"</option>";
+	echo "<option value='riveja_viematta_varastoon'{$sel['riveja_viematta_varastoon']}>",t("Saapumiset joissa on rivejä viemättä varastoon"),"</option>";
+	echo "<option value='liitetty_lasku'{$sel['liitetty_lasku']}>",t("Saapumiset joihin on liitetty lasku"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_eiok'{$sel['liitetty_lasku_rivitok_kohdistus_eiok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus ei ole ok"),"</option>";
+	echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>",t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"),"</option>";
+	echo "</select></form></td></tr>";
+
+	echo "</table><br />";
+
+	$joinlisa = "";
+
+	if ($lisarajaus == 'liitetty_lasku') {
+		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
+	}
 
 	// etsitään vanhoja keikkoja, vanhatunnus pitää olla tyhjää niin ei listata liitettyjä laskuja
 	$query = "	SELECT *
@@ -1031,6 +1070,26 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 		$kululaskujayhteensa 			= 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
+
+			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
+
+				if ($lisarajaus == 'riveja_viematta_varastoon') {
+					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu > 0";
+				}
+				else {
+					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";
+				}
+
+				$query = "	SELECT SUM(kpl) kpl, SUM(varattu) varattu
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND uusiotunnus = '{$row['tunnus']}'
+							AND tyyppi = 'O'
+							{$havinglisa}";
+				$tilriv_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
+			}
 
 			list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($row,$kaikkivarastossayhteensa,$toimittajaid);
 			$vaihtoomaisuuslaskujayhteensa += $llrow["vosumma"];

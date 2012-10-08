@@ -469,40 +469,6 @@ if ($toiminto == "tulosta") {
 	}
 }
 
-if ($toiminto == 'erolista') {
-
-	// Haetaan itse saapuminen
-	$query    = "	SELECT *
-					FROM lasku
-					WHERE tunnus = '{$otunnus}'
-					AND yhtio = '{$kukarow['yhtio']}'";
-	$result   = pupe_query($query);
-	$laskurow = mysql_fetch_assoc($result);
-
-	// katotaan liitetyt laskut
-	$query = "	SELECT GROUP_CONCAT(DISTINCT ostores_lasku.laskunro SEPARATOR ',') volaskutunn
-				FROM lasku
-				JOIN lasku ostores_lasku on (ostores_lasku.yhtio = lasku.yhtio and ostores_lasku.tunnus = lasku.vanhatunnus)
-				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-				AND lasku.tila = 'K'
-				AND lasku.vienti IN ('C','F','I','J','K','L')
-				AND lasku.vanhatunnus <> 0
-				AND lasku.laskunro = '{$laskurow['laskunro']}'
-				HAVING volaskutunn IS NOT NULL";
-	$llres = pupe_query($query);
-	$llrow = mysql_fetch_assoc($llres);
-
-	if ($llrow['volaskutunn'] != '') {
-
-		$komento = isset($komento) ? $komento : '';
-
-		$return_bool = erolista($llrow['volaskutunn'], 'ostolasku', $komento, $otunnus);
-
-		$toiminto = $return_bool === TRUE ? "" : $toiminto;
-		$toimittajaid = $laskurow['liitostunnus'];
-	}
-}
-
 // syˆtet‰‰n keikan lis‰tietoja
 if ($toiminto == "lisatiedot") {
 	require ("ostotilauksen_lisatiedot.inc");
@@ -1215,7 +1181,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
 				echo "<option value='kululaskut'>"       .t("Saapumisen laskut")."</option>";
 				echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
-				echo "<option value='erolista'>"       	 .t("Erolista")."</option>";
 				echo "<option value='yhdista'>"          .t("Yhdist‰ saapumisia")."</option>";
 
 				// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
@@ -1329,12 +1294,6 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$nappikeikka .= "<input type='hidden' name='toiminto' value='lisatiedot'>";
 	$nappikeikka .= "<input type='submit' value='".t("Lis‰tiedot")."'>";
 	$nappikeikka .= "$formloppu";
-
-	$nappikeikka .= "$formalku";
-	$nappikeikka .= "<input type='hidden' name='toiminto' value='erolista'>";
-	$nappikeikka .= "<input type='submit' value='".t("Erolista")."'>";
-	$nappikeikka .= "$formloppu";
-
 
 	// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
 	if ($kplyhteensa == 0 and $llrow["num"] == 0) {

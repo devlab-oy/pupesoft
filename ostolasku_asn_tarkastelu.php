@@ -31,11 +31,6 @@
 						}
 					});
 
-					$('.hintapoikkeavuusbutton').click(function(){
-						$('#tee').val('hintavertailu');
-						$('#kolliformi').submit();
-					});
-
 					$('.etsibutton').click(function(){
 						var rivitunniste = $(this).attr('id');
 						$('#asn_rivi').val(rivitunniste);
@@ -121,14 +116,6 @@
 		}
 
 		$tee = 'nayta';
-	}
-
-	if ($tee == 'hintavertailu') {
-
-		$komento = isset($komento) ? $komento : '';
-
-		erolista($lasku, $valitse, $komento);
-
 	}
 
 	if ($tee == 'vaihdatoimittaja') {
@@ -1784,7 +1771,6 @@
 			$result = pupe_query($query);
 
 			$ok = $virhe = 0;
-			$hintapoikkeavuus = false;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -1841,7 +1827,6 @@
 
 					if ($row['hinta'] != $hinta_chk_row['hinta']) {
 						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
-						$hintapoikkeavuus = true;
 					}
 				}
 				else {
@@ -1862,10 +1847,6 @@
 			}
 
 			if ($ok and !$virhe) {
-				if ($hintapoikkeavuus) {
-					echo "<tr><th colspan='9'><input type='button' class='hintapoikkeavuusbutton' value='",t("Hintapoikkeavuus raportti"),"' /></th></tr>";
-				}
-
 				echo "<tr><th colspan='9'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 

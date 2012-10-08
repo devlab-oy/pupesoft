@@ -259,7 +259,9 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 	if ($pakkaukset['monta'] > 0) {
 		$apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
 									'tuotepaikka' => $tuotepaikka,
-									'tuoteno' => $tuote['tuoteno']));
+									'tuoteno' => $tuote['tuoteno'],
+									'lista' => $lista,
+									'reservipaikka' => $reservipaikka));
 	}
 
 	# Tarkistetaan varmistuskoodi
@@ -311,7 +313,11 @@ if ($tee == 'apulaskuri') {
 	$result = pupe_query($query);
 	$p3 = mysql_fetch_assoc($result);
 
-	$back = http_build_query(array('tee' => 'laske', 'tuotepaikka' => $tuotepaikka, 'tuoteno' => $tuoteno));
+	$back = http_build_query(array('tee' => 'laske',
+									'tuotepaikka' => $tuotepaikka,
+									'tuoteno' => $tuoteno,
+									'lista' => $lista,
+									'reservipaikka' => $reservipaikka));
 
 	$title = t("Apulaskuri");
 	include('views/inventointi/apulaskuri.php');

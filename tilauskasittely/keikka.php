@@ -1130,52 +1130,6 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				'ei_liitetty_lasku_viety_kpl' => $ei_liitetty_lasku_viety_kpl,
 			);
 			echo_yhteenveto_table($params);
-//			
-//			echo "<br><table>";
-//			echo "<tr><th>".t("Varastoon viety yhteensä")."</th><td align='right'> ".sprintf("%01.2f", $kaikkivarastossayhteensa)." $yhtiorow[valkoodi]</td></tr>";
-//			echo "<tr><th>".t("Vaihto-omaisuuslaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $vaihtoomaisuuslaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
-//			echo "<tr><th>".t("Vaihto-omaisuuslaskuja liittämättä")."</th><td align='right'>".sprintf("%01.2f", $row_vaihto['summa'])." $yhtiorow[valkoodi]</td></tr>";
-//			echo "<tr><th>".t("Kululaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $kululaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
-//			
-//			echo '<tr><td class="back"></td></tr>';
-//			echo '<tr>';
-//			echo "<th>".t('Saapumiset')."</th>";
-//			echo '<th>'.t('johon liitetty lasku (rivien arvo)').'</th>';
-//			echo '<th>'.t('johon ei liitetty lasku (rivien arvo)').'</th>';
-//			echo '<th>'.t('Laskut').'</th>';
-//			echo '</tr>';
-//
-//			echo '<tr>';
-//			echo '<th>'.t('Viemättä varastoon').'</th>';
-//			echo "<td style='text-align:right;'>".number_format($liitetty_lasku_ei_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($ei_liitetty_lasku_ei_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($laskut_ei_viety, 2, '.', ' ')."</td>";
-//			echo '</tr>';
-//
-//			echo '<tr>';
-//			echo '<th>'.t('Viety varastoon kokonaan').'</th>';
-//			echo "<td style='text-align:right;'>".number_format($liitetty_lasku_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($ei_liitetty_lasku_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($laskut_viety, 2, '.', ' ')."</td>";
-//			echo '</tr>';
-//
-//			echo '<tr>';
-//			echo '<th>'.t('Viety varastoon osittain').'</th>';
-//			echo "<td style='text-align:right;'>".number_format($liitetty_lasku_osittain_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($ei_liitetty_lasku_osittain_viety_kpl, 2, '.', ' ')."</td>";
-//			echo "<td style='text-align:right;'>".number_format($laskut_osittain_viety, 2, '.', ' ')."</td>";
-//			echo '</tr>';
-//
-//			echo '<tr>';
-//			echo '<th>'.t('Yhteensä').'</th>';
-//			$yhteensa	 = $liitetty_lasku_ei_viety_kpl + $liitetty_lasku_viety_kpl + $liitetty_lasku_osittain_viety_kpl;
-//			echo "<th style='text-align:right;'>".number_format($yhteensa, 2, '.', ' ')."</th>";
-//			$yhteensa	 = $ei_liitetty_lasku_ei_viety_kpl + $ei_liitetty_lasku_viety_kpl + $ei_liitetty_lasku_osittain_viety_kpl;
-//			echo "<th style='text-align:right;'>".number_format($yhteensa, 2, '.', ' ')."</th>";
-//			$yhteensa	 = $laskut_viety + $laskut_ei_viety + $laskut_osittain_viety;
-//			echo "<th style='text-align:right;'>".number_format($yhteensa, 2, '.', ' ')."</th>";
-//			echo '</tr>';
-//			echo "</table>";
 		}
 		
 		// Rajaukset
@@ -1384,8 +1338,6 @@ AND liitos.tunnus IS NULL
 	$result_vaihto_omaisuus = pupe_query($query);
 
 	$row_vaihto = mysql_fetch_assoc($result_vaihto_omaisuus);
-	
-	echo $row_vaihto['summa'] . '<br/>';
 
 	$liitetty_lasku_viety_kpl	 = 0;
 	$ei_liitetty_lasku_viety_kpl = 0;

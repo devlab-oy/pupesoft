@@ -516,7 +516,7 @@ class Unifaun {
 				# ohjausmerkki
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($ohjausmerkki1)); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext3");
-//****
+
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->rakir_row["viesti"])); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext4");
 

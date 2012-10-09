@@ -876,7 +876,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				'kusumma' => 0
 			);
 
-			$oliko_ok = false;
+			$oliko_ok = ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') ? false : true;
 
 			while ($laskuja_row = mysql_fetch_assoc($laskuja_result)) {
 
@@ -1015,6 +1015,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 	echo "<th>",t("Lisärajaus"),"</th>";
 	echo "<td colspan='4'>";
 	echo "<form method='post'>";
+	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
 	echo "<select name='lisarajaus' ",js_alasvetoMaxWidth('lisarajaus', 250)," onchange='submit();'>";
 	echo "<option value=''>",t("Näytä kaikki"),"</option>";

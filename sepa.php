@@ -148,7 +148,7 @@
 
 	}
 
-	function sepa_credittransfer($laskurow, $netotetut_rivit = '') {
+	function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
 
 		global $xml, $pain, $PmtInf, $yhtiorow, $kukarow;
 
@@ -157,8 +157,9 @@
 		$CdtTrfTxInf = $PmtInf->addChild('CdtTrfTxInf', '');										// CreditTransferTransaction Information
 
 			$PmtId = $CdtTrfTxInf->addChild('PmtId', '');											// PaymentIdentification
-				$InstrId = $PmtId->addChild('InstrId', $laskurow['tunnus']);						// Instruction Id
-				$EndToEndId = $PmtId->addChild('EndToEndId', $laskurow['tunnus']);					// EndToEndIdentification, Pakollinen kenttä
+				$InstrId = $PmtId->addChild('InstrId', "{$laskurow['tunnus']}-$popvm");				// Instruction Id
+
+				$EndToEndId = $PmtId->addChild('EndToEndId', "{$laskurow['tunnus']}-$popvm");		// EndToEndIdentification, Pakollinen kenttä
 
 			$PmtTpInf = $CdtTrfTxInf->addChild('PmtTpInf', '');										// PaymentTypeInformation
 //				$InstrPrty = $PmtTpInf->addChild('InstrPrty', '');
@@ -670,7 +671,7 @@
 			$nettorow["summa"]		= $netotettava_summa[$i];	// Netotettu summa
 
 			sepa_paymentinfo($nettorow);
-			sepa_credittransfer($nettorow, $tunnukset);
+			sepa_credittransfer($nettorow, $popvm_nyt, $tunnukset);
 			$tapahtuma_maara++;
 
 			if ($tee == "KIRJOITA") {
@@ -718,7 +719,7 @@
 				$edtili = $laskurow['ultilno'];
 			}
 
-			sepa_credittransfer($laskurow);
+			sepa_credittransfer($laskurow, $popvm_nyt);
 			$tapahtuma_maara++;
 
 			if ($tee == "KIRJOITA") {

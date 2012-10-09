@@ -886,14 +886,26 @@
 					$selite = t("Oma sis‰inen viite").": ";
 					$selite .= trim(substr($arvo, 0, 35))."<br>\n";
 					$selite .= trim(substr($arvo, 35, 35));
-					$sisviite = trim(substr($arvo, 0, 35))*1;
+					$sisviite = trim(substr($arvo, 0, 35));
 
 					//T‰m‰ on (kai) ongelma Analysten pankkisoftassa. Lis‰‰v‰t joskus oman tunnuksen
 					//ekaan sis‰inenviite kentt‰‰n, silloin meid‰n onkin toisessa.
 					if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
-						$sisviite = trim(substr($arvo, 35, 35))*1;
+						$sisviite = trim(substr($arvo, 35, 35));
 					}
 
+					// 2012-10-09 vesak
+					// sepa-aineistoon lisat‰‰n t‰h‰n kentt‰‰n merkill‰ '-' erotettuna timestamp,
+					// jotta saadaan uniikki EndToEndId. T‰ss‰ timestamp poistetaan.
+					
+					$dash_pos = strpos($sisviite, "-")
+
+					if ($dash_pos) {
+						$sisviite = substr($sisviite, 0, $dash_pos - 1);
+					}
+					
+					$sisviite = (integer) $sisviite;
+					
 					break;
 
 				// ?

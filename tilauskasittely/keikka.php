@@ -856,7 +856,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				$row['keikat'] = implode(", ", $row_keikat);
 			}
 
-			$query = "	SELECT tunnus,
+			$query = "	SELECT tunnus, laskunro,
 						IF(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', 1, 0) volasku,
 						IF(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L', 1, 0) kulasku,
 						IF(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', round(summa * vienti_kurssi, 2), 0) vosumma,
@@ -866,7 +866,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 						AND tila = 'K'
 						AND vanhatunnus <> 0
 						AND laskunro IN ({$row['laskunrot']})
-						GROUP BY 1";
+						GROUP BY 1,2";
 			$laskuja_result = pupe_query($query);
 
 			$summat_row = array(
@@ -875,6 +875,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				'vosumma' => 0,
 				'kusumma' => 0
 			);
+
+			$oliko_ok = false;
 
 			while ($laskuja_row = mysql_fetch_assoc($laskuja_result)) {
 
@@ -889,6 +891,19 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 					$erotus_chk = abs(round($sum_chk_row['summa'] - $laskuja_row['vosumma'], 2));
 
+					$query = "	SELECT kohdistettu, tunnus
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND laskunro = '{$laskuja_row['laskunro']}'
+								AND tunnus IN ({$row['tilauksien_tunnukset']})
+								and tila 		= 'K'
+								and alatila 	= ''
+								and vanhatunnus	= 0
+								and mapvm 		= '0000-00-00'";
+					$kohdistettu_chk_res = pupe_query($query);
+					$kohdistettu_chk_row = mysql_fetch_assoc($kohdistettu_chk_res);
+
+
 					/*
 					Battle of the languages: laske tämä laskutoimitus 6059.69 - 6059.70
 					Results:
@@ -897,8 +912,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					 - Python: 	-0.010000000000218279
 					*/
 
-					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($sum_chk_row['summa'] == $laskujen_summa or $erotus_chk == 0.01)) continue;
-					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and $sum_chk_row['summa'] != $laskujen_summa and $erotus_chk > 0.01) continue;
+					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($sum_chk_row['summa'] == $laskuja_row['vosumma'] or $erotus_chk == 0.01) and $kohdistettu_chk_row['kohdistettu'] == 'K') continue;
+					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and ($kohdistettu_chk_row['kohdistettu'] == '' or ($sum_chk_row['summa'] != $laskuja_row['vosumma'] and $erotus_chk > 0.01))) continue;
+
+					$oliko_ok = true;
 				}
 
 				$summat_row['volasku'] += $laskuja_row['volasku'];
@@ -906,6 +923,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				$summat_row['vosumma'] += $laskuja_row['vosumma'];
 				$summat_row['kusumma'] += $laskuja_row['kusumma'];
 			}
+
+			if (!$oliko_ok) continue;
 
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 			$vaihtoomaisuuslaskujayhteensa += $summat_row["vosumma"];

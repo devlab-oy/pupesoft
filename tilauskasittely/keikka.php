@@ -827,10 +827,12 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 		while ($row = mysql_fetch_assoc($result)) {
 
+			$row_keikat = array();
+
 			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 
 				if ($lisarajaus == 'riveja_viematta_varastoon') {
-					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu > 0";
+					$havinglisa = "HAVING kpl IS NOT NULL AND (kpl > 0 OR kpl = 0) AND varattu > 0";
 				}
 				else {
 					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";
@@ -845,15 +847,15 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 							GROUP BY 1
 							{$havinglisa}";
 				$tilriv_chk_res = pupe_query($query);
-				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
 
-				$row_keikat = array();
+				if (mysql_num_rows($tilriv_chk_res) == 0) continue;
 
 				while ($tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res)) {
 					$row_keikat[] = $tilriv_chk_row['laskunro'];
 				}
-
-				$row['keikat'] = implode(", ", $row_keikat);
+			}
+			else {
+				$row_keikat = explode(',', $row['laskunrot']);
 			}
 
 			$query = "	SELECT tunnus, laskunro,
@@ -877,8 +879,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			);
 
 			$oliko_ok = ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') ? false : true;
-
-			$_keikat = array();
 
 			while ($laskuja_row = mysql_fetch_assoc($laskuja_result)) {
 
@@ -920,8 +920,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					$oliko_ok = true;
 				}
 
-				$_keikat[] = $laskuja_row['laskunro'];
-
 				$summat_row['volasku'] += $laskuja_row['volasku'];
 				$summat_row['kulasku'] += $laskuja_row['kulasku'];
 				$summat_row['vosumma'] += $laskuja_row['vosumma'];
@@ -930,7 +928,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			if (!$oliko_ok) continue;
 
-			$row['keikat'] = implode(", ", array_unique($_keikat));
+			$row['keikat'] = implode(", ", array_unique($row_keikat));
 
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 			$vaihtoomaisuuslaskujayhteensa += $summat_row["vosumma"];
@@ -1033,16 +1031,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 	echo "</table><br />";
 
-	$joinlisa = "";
-
-	if ($lisarajaus == 'liitetty_lasku') {
-		$joinlisa = "JOIN lasku AS liitetty_lasku ON (liitetty_lasku.yhtio = lasku.yhtio AND liitetty_lasku.tila = 'K' AND liitetty_lasku.laskunro = lasku.laskunro AND liitetty_lasku.vanhatunnus <> 0 AND liitetty_lasku.vienti IN ('C','F','I','J','K','L'))";
-	}
-
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT *
 				FROM lasku USE INDEX (tila_index)
-				{$joinlisa}
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.liitostunnus = '{$toimittajaid}'
 				AND lasku.tila = 'K'
@@ -1097,10 +1088,22 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
 		while ($row = mysql_fetch_assoc($result)) {
 
+			if ($lisarajaus == 'liitetty_lasku') {
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'K'
+							AND laskunro = '{$row['laskunro']}'
+							AND vanhatunnus <> 0
+							AND vienti IN ('C','F','I','J','K','L')";
+				$lasku_chk_res = pupe_query($query);
+				if (mysql_num_rows($lasku_chk_res) == 0) continue;
+			}
+
 			if ($lisarajaus == 'riveja_viematta_varastoon' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
 
 				if ($lisarajaus == 'riveja_viematta_varastoon') {
-					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu > 0";
+					$havinglisa = "HAVING kpl IS NOT NULL AND (kpl > 0 OR kpl = 0) AND varattu > 0";
 				}
 				else {
 					$havinglisa = "HAVING kpl IS NOT NULL AND kpl > 0 AND varattu = 0";

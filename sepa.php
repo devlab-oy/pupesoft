@@ -158,7 +158,6 @@
 
 			$PmtId = $CdtTrfTxInf->addChild('PmtId', '');											// PaymentIdentification
 				$InstrId = $PmtId->addChild('InstrId', "{$laskurow['tunnus']}-$popvm");				// Instruction Id
-
 				$EndToEndId = $PmtId->addChild('EndToEndId', "{$laskurow['tunnus']}-$popvm");		// EndToEndIdentification, Pakollinen kenttä
 
 			$PmtTpInf = $CdtTrfTxInf->addChild('PmtTpInf', '');										// PaymentTypeInformation

@@ -547,7 +547,7 @@
 				// Summataan kaikki painot yhteen
 				$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark,
 							sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri,
-							min(tunnus) shipment_id
+							group_concat(tunnus SEPARATOR '_') shipment_id
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset)
 							AND yhtio = '$kukarow[yhtio]'

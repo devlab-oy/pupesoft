@@ -1415,7 +1415,9 @@
 							toimitustapa.nouto,
 							lasku.varasto,
 							lasku.toimitustapa,
-							lasku.jaksotettu
+							lasku.jaksotettu,
+							lasku.yhtio,
+							lasku.liitostunnus
 							FROM lasku
 							LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
 							where lasku.yhtio = '$kukarow[yhtio]'
@@ -1428,6 +1430,19 @@
 				$extra    = "";
 
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
+					
+					$query = "SELECT kuljetusohje
+								FROM asiakas
+								WHERE yhtio = '{$laskurow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}';";
+					$resul = pupe_query($query);
+
+					if (mysql_num_rows($resul) == 1) {
+						$temprow = mysql_fetch_assoc($resul);
+						$asiakkaan_kuljetusohje = $temprow["ohje"];
+					}
+					else {
+						$asiakkaan_kuljetusohje = "";
+					}
 
 					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
 
@@ -1501,7 +1516,8 @@
 										rahtikirjanro 	= '$lask_nro',
 										otsikkonro 		= '$lask_nro',
 										tulostuspaikka 	= '$laskurow[varasto]',
-										yhtio 			= '$kukarow[yhtio]'";
+										yhtio 			= '$kukarow[yhtio]',
+										viesti			= '$asiakkaan_kuljetusohje'";
 							$result_rk = pupe_query($query);
 						}
 
@@ -1515,7 +1531,8 @@
 										rahtikirjanro 	= '$lask_nro',
 										otsikkonro 		= '$lask_nro',
 										tulostuspaikka 	= '$laskurow[varasto]',
-										yhtio 			= '$kukarow[yhtio]'";
+										yhtio 			= '$kukarow[yhtio]',
+										viesti			= '$asiakkaan_kuljetusohje'";
 							$result_rk = pupe_query($query);
 						}
 					}
@@ -1564,7 +1581,8 @@
 											otsikkonro 		= '{$laskurow['tunnus']}',
 											tulostuspaikka 	= '{$laskurow['varasto']}',
 											toimitustapa 	= '{$laskurow['toimitustapa']}',
-											yhtio 			= '{$kukarow['yhtio']}'
+											yhtio 			= '{$kukarow['yhtio']}',
+											viesti			= '$asiakkaan_kuljetusohje'
 											{$tulostettulisa}";
 							$ker_res = pupe_query($query_ker);
 						}

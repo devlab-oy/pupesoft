@@ -15,6 +15,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 		'viitelah'     => strip_tags($_POST['viitelah']),
 		'viitevas'     => strip_tags($_POST['viitevas']),
         'rahtisopimus' => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
+		'viesti'	   => strip_tags($_POST['viesti']),
     );
 
 	$count = 0;
@@ -148,7 +149,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 	$osoitelappurow["osoite"] 			= $asiakasrow["osoite"];
 	$osoitelappurow["postino"] 			= $asiakasrow["postino"];
 	$osoitelappurow["postitp"] 			= $asiakasrow["postitp"];
-	$osoitelappurow["viesti"] 			= "";
+	$osoitelappurow["viesti"] 			= $asiakasrow["kuljetusohje"];
 	$osoitelappurow["liitostunnus"] 	= $asiakasrow["tunnus"];
 	$osoitelappurow["toimitustapa"] 	= $data['toimitustapa'];
 	$osoitelappurow["maksuehto"] 		= $asiakasrow["maksuehto"];
@@ -365,7 +366,6 @@ if ($asiakasid) {
 	echo "<tr>
 			<td valign='top'>".t("Postitp").": </td>
 			<td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
-
 ?>
 
 <tr><th><?php echo t('Varasto') ?></th><td><select name='varasto' onChange='document.rahtikirja.submit();'>
@@ -459,6 +459,7 @@ else {
 <?php
 	echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
 	echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
+	echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
     echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
 	echo "<option value=''>".t("Ei tulosteta")."</option>";
 
@@ -577,6 +578,7 @@ function pupe_rahtikirja_insert($data) {
         'kuutiot'       	=> 0,
         'lavametri'     	=> 0,
 		'pakkauskuvaustark' => null,
+		'viesti'			=> null,
 	);
 
 	$data = array_merge($alustus, $data);
@@ -586,7 +588,7 @@ function pupe_rahtikirja_insert($data) {
 	}
 
 	$query = sprintf(
-		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark)
+		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti)
 		values('%s')",
 		implode("','", array_values($data))
 	);

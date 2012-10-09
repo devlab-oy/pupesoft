@@ -665,7 +665,7 @@
 		echo file_get_contents($pdffilenimi);
 	}
 
-	if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] = 'Lähetä Maventaan') {
+	if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] == 'Lähetä Maventaan') {
 		
 		if (!function_exists("vlas_dateconv")) {
 			function vlas_dateconv($date) {
@@ -823,7 +823,10 @@
 		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
 		
 		if(stristr($return_value->status, 'OK')) {
-			
+			echo t("Karhukirje lähetettiin Maventaan")."\n<br>";
+		}
+		else {
+			echo '<font class="error">'.t("Karhukirje lähetys maventaan epäonnistui")."</font>\n<br>";
 		}
 		
 		$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
@@ -900,8 +903,8 @@
 		}
 	}
 
-	// tulostetaan jos ei lähetetä ekirjettä
-	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu') {
+	// tulostetaan jos ei lähetetä ekirjettä eikä maventaan 
+	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'Lähetä Maventaan') {
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet

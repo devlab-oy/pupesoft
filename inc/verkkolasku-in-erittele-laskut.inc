@@ -96,7 +96,7 @@
 			$i = 1;
 
 			// Unikon laskuaineisto
-			if ($xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
+			if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
 
 				$vakio_alku = '<?xml version="1.0"?><LedgerJournal><LedgerJournalTable><LedgerJournalName>ORAO</LedgerJournalName><Name>Ostolaskut Unikosta</Name>';
 				$vakio_loppu = '</LedgerJournalTable></LedgerJournal>';
@@ -127,6 +127,24 @@
 				// Lis‰t‰‰n viimeiseen tiedostoon lopputagit
 				file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
 				$luotiinlaskuja++;
+			}
+
+			// Teccom laskuaineisto
+			if (isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
+
+				$xmldata = file_get_contents($file);
+
+				// Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
+				if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
+        			$xmldata = utf8_encode($xmldata);
+        		}
+
+				//	T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
+				$save = file_put_contents($file, preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata));
+
+				$path_parts = pathinfo($file);
+
+				rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
 			}
 		}
 

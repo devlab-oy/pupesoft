@@ -1962,7 +1962,7 @@
 					$query = "	SELECT nro
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$etsi}'";
+								AND (otunnus = '{$etsi}' or nro = '{$etsi}')";
 					$nro_chk_res = pupe_query($query);
 					$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
 
@@ -2088,10 +2088,10 @@
 			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
 				$row = mysql_fetch_assoc($result);
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-					$id = $row[keraysera];
+					$id = $row["keraysera"];
 				}
 				else {
-					$id = $row[tunnus];
+					$id = $row["tunnus"];
 				}
 			}
 			else if (mysql_num_rows($result) > 0) {

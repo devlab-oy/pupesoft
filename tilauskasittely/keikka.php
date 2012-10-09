@@ -878,6 +878,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			$oliko_ok = ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') ? false : true;
 
+			$_keikat = array();
+
 			while ($laskuja_row = mysql_fetch_assoc($laskuja_result)) {
 
 				if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' or $lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok') {
@@ -912,11 +914,13 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					 - Python: 	-0.010000000000218279
 					*/
 
-					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($sum_chk_row['summa'] == $laskuja_row['vosumma'] or $erotus_chk == 0.01) and $kohdistettu_chk_row['kohdistettu'] == 'K') continue;
+					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_eiok' and ($kohdistettu_chk_row['kohdistettu'] == 'K' or ($sum_chk_row['summa'] != $laskuja_row['vosumma'] and $erotus_chk > 0.01))) continue;
 					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and ($kohdistettu_chk_row['kohdistettu'] == '' or ($sum_chk_row['summa'] != $laskuja_row['vosumma'] and $erotus_chk > 0.01))) continue;
 
 					$oliko_ok = true;
 				}
+
+				$_keikat[] = $laskuja_row['laskunro'];
 
 				$summat_row['volasku'] += $laskuja_row['volasku'];
 				$summat_row['kulasku'] += $laskuja_row['kulasku'];
@@ -925,6 +929,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			}
 
 			if (!$oliko_ok) continue;
+
+			$row['keikat'] = implode(", ", array_unique($_keikat));
 
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 			$vaihtoomaisuuslaskujayhteensa += $summat_row["vosumma"];

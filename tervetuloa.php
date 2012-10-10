@@ -6,39 +6,6 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
 
-
-// Päivitetään _new --> ei newta
-$query = "	SELECT *
-			FROM oikeu
-			WHERE nimi = 'raportit/myyntiseuranta_new.php'";
-$result1 = mysql_query($query) or pupe_error($query);
-
-while ($trow = mysql_fetch_assoc($result1)) {
-
-	// Törmätäänkö
-	$query = "	SELECT *
-				FROM oikeu
-				WHERE kuka		= '$trow[kuka]'
-				AND sovellus	= '$trow[sovellus]'
-				AND nimi		= 'raportit/myyntiseuranta.php'
-				AND alanimi		= '$trow[alanimi]'
-				AND profiili	= '$trow[profiili]'
-				AND yhtio		= '$trow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) == 0) {
-		$query = "	UPDATE oikeu
-					SET nimi 	 = 'raportit/myyntiseuranta.php', nimitys = 'Myynninseuranta'
-					WHERE tunnus = '$trow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
-	}
-	else {
-		$query = "	DELETE from oikeu
-					WHERE tunnus	= '$trow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
-	}
-}
-
 if (!isset($tee) or $tee == '') {
 
 	if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {

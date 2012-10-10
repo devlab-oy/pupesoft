@@ -94,6 +94,13 @@
 	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
 	$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
 
+	if (!isset($piirivalinta) or $piirivalinta == 'lasku') {
+		$laskuvalintachk  	= "CHECKED";
+	}
+	else {
+		$asiakasvalintachk  = "CHECKED";
+	}
+
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
 	if (!isset($mul_try)) 			$mul_try = array();
@@ -530,8 +537,15 @@
 		$asiakaspiirit = substr($asiakaspiirit, 0, -1);
 
 		if (trim($asiakaspiirit) != '') {
-			$lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
-			$lisa .= " and asiakas.piiri in ($asiakaspiirit) ";
+
+			if (isset($piirivalinta) and $piirivalinta == "lasku") {
+				$lisa_haku_asiakaspiiri = " and lasku.piiri in ($asiakaspiirit) ";
+				$lisa .= " and lasku.piiri in ($asiakaspiirit) ";
+			}
+			else {
+				$lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
+				$lisa .= " and asiakas.piiri in ($asiakaspiirit) ";
+			}
 		}
 	}
 
@@ -1576,7 +1590,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1761,7 +1777,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1803,7 +1821,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1845,7 +1865,9 @@
 					}
 				}
 
-				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite]";
+				if ($sxrow["selite"] != $sxrow["selitetark"]) echo " $sxrow[selitetark]";
+				echo "</option>";
 			}
 
 			echo "</select></td>";
@@ -1858,7 +1880,12 @@
 					$ruksitchk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk></th></tr>";
+				echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[asiakaspiiri]' size='2' value='$jarjestys[asiakaspiiri]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[asiakaspiiri]' value='asiakaspiiri' $ruksitchk><br>";
+
+				echo "<input type='radio' name='piirivalinta' value='lasku' {$laskuvalintachk}>",t("Laskuilta");
+				echo "<input type='radio' name='piirivalinta' value='asiakas' {$asiakasvalintachk}>",t("Asiakkailta");
+
+				echo "</th></tr>";
 			}
 
 			echo "</table></div>";

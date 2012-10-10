@@ -406,6 +406,16 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
+
+		// ennen varastoon vienti‰ tallennetaan alkuper‰inen ostohinta talteen
+		if ($toiminto == "kalkyyli" and $tee == "varastoon") {
+			$query  = "	UPDATE tilausrivi SET
+						hinta_alkuperainen = '{$ohinta}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilrivirow['tunnus']}'";
+			$resultxxx = pupe_query($query);
+		}
+
 		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
 	}

@@ -5,6 +5,27 @@ $useslave = 1;
 
 require('../inc/parametrit.inc');
 
+// ehdotetaan 7 p‰iv‰‰ taaksep‰in
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
+
+if (!isset($kkl)) $kkl = date("m");
+if (!isset($vvl)) $vvl = date("Y");
+if (!isset($ppl)) $ppl = date("d");
+
+if(!isset($tee))      	$tee = "";
+if(!isset($toppi))      $toppi = "";
+if(!isset($ahyllyalue)) $ahyllyalue = "";
+if(!isset($ahyllynro))  $ahyllynro  = "";
+if(!isset($ahyllyvali)) $ahyllyvali = "";
+if(!isset($ahyllytaso)) $ahyllytaso = "";
+if(!isset($lhyllyalue)) $lhyllyalue = "";
+if(!isset($lhyllynro))  $lhyllynro  = "";
+if(!isset($lhyllyvali)) $lhyllyvali = "";
+if(!isset($lhyllytaso)) $lhyllytaso = "";
+if(!isset($summaa_varastopaikalle)) $summaa_varastopaikalle = "";
+
 echo "<font class='head'>".t("Varastopaikkojen ker‰ysseuranta")."</font><hr>";
 
 if ($tee != '') {
@@ -18,12 +39,12 @@ if ($tee != '') {
 	}
 
 	if (!empty($summaa_varastopaikalle)) {
-		$result = hae_varastopaikkakohtaisesti($kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka);
-		$saldolliset = echo_varastopaikkakohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
+		$result = hae_rivit("PAIKKA", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka);
+		$saldolliset = echo_rivit("PAIKKA", $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
 	}
 	else {
-		$result = hae_tuotekohtaisesti($kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka);
-		$saldolliset = echo_tuotekohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
+		$result = hae_rivit("TUOTE", $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka);
+		$saldolliset = echo_rivit("TUOTE", $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl);
 	}
 
 	echo_tulosta_inventointilista($saldolliset);
@@ -31,7 +52,7 @@ if ($tee != '') {
 
 echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso, $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso, $toppi, $summaa_varastopaikalle);
 
-function hae_tuotekohtaisesti($kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka) {	
+function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka) {
 	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
 		$_date = "AND tapahtuma.laadittu >= '$vva-$kka-$ppa'
 				  AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl'";
@@ -39,92 +60,117 @@ function hae_tuotekohtaisesti($kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apa
 	else {
 		$_date = "AND tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month)";
 	}
-	
-				$query = "
-SELECT tapahtuma.hyllyalue
-       hyllyalue_alias,
-       tapahtuma.hyllynro
-       hyllynro_alias,
-       tapahtuma.hyllyvali
-       hyllyvali_alias,
-       tapahtuma.hyllytaso
-       hyllytaso_alias,
-	   
-       Sum(IF (tapahtuma.laadittu >= '$vva-$kka-$ppa'
-               AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0))
-       kpl_valittu_aika,
-	   
-       Sum(IF (tapahtuma.laadittu >= '$vva-$kka-$ppa'
-               AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', tapahtuma.kpl * -1, 0))
-       tuokpl_valittu_aika,
-	   
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), 1, 0))
-       kpl_6,
-	   
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month),
-           tapahtuma.kpl * -1,
-               0))
-       tuo_kpl_6,
-	   
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0))
-       kpl_12,
-	   
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month),
-           tapahtuma.kpl * -1
-           , 0))
-       tuo_kpl_12,
-	   
-	   sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
-	   tapahtuma.tuoteno,
-	   tuotepaikat.saldo,
-	   tuotepaikat.tunnus paikkatun,
-	   tuote.nimitys
-	   
-FROM   tapahtuma
-JOIN tuote
-ON ( tapahtuma.yhtio = tuote.yhtio
-     AND tapahtuma.tuoteno = tuote.tuoteno )
-	 
-LEFT JOIN tuotepaikat
-ON (tapahtuma.yhtio = tuotepaikat.yhtio
-	and tapahtuma.hyllyalue = tuotepaikat.hyllyalue
-	and tapahtuma.hyllynro = tuotepaikat.hyllynro
-	and tapahtuma.hyllyvali = tuotepaikat.hyllyvali
-	and tapahtuma.hyllytaso = tuotepaikat.hyllytaso
-	and tapahtuma.tuoteno = tuotepaikat.tuoteno)
-WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
-   AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) >=
-       '{$apaikka}'
-   AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) <=
-       '{$lpaikka}'
-   AND tapahtuma.laji = 'laskutus'
-   {$_date}
-GROUP  BY tapahtuma.hyllyalue,
-          tapahtuma.hyllynro,
-          tapahtuma.hyllyvali,
-          tapahtuma.hyllytaso,
-		  tapahtuma.tuoteno";
+
+	if ($tyyppi == "TUOTE") {
+		$query = "	SELECT tapahtuma.hyllyalue hyllyalue_alias,
+					tapahtuma.hyllynro hyllynro_alias,
+					tapahtuma.hyllyvali hyllyvali_alias,
+					tapahtuma.hyllytaso hyllytaso_alias,
+					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', tapahtuma.kpl * -1, 0)) tuokpl_valittu_aika,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), tapahtuma.kpl * -1, 0)) tuo_kpl_6,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), tapahtuma.kpl * -1, 0)) tuo_kpl_12,
+					sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
+					tapahtuma.tuoteno,
+					tuotepaikat.saldo,
+					tuotepaikat.tunnus paikkatun,
+					tuote.nimitys
+					FROM tapahtuma
+					JOIN tuote ON ( tapahtuma.yhtio = tuote.yhtio AND tapahtuma.tuoteno = tuote.tuoteno )
+					LEFT JOIN tuotepaikat
+					ON (tapahtuma.yhtio = tuotepaikat.yhtio
+						and tapahtuma.hyllyalue = tuotepaikat.hyllyalue
+						and tapahtuma.hyllynro = tuotepaikat.hyllynro
+						and tapahtuma.hyllyvali = tuotepaikat.hyllyvali
+						and tapahtuma.hyllytaso = tuotepaikat.hyllytaso
+						and tapahtuma.tuoteno = tuotepaikat.tuoteno)
+					WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
+					AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) >= '{$apaikka}'
+					AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
+					           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) <= '{$lpaikka}'
+					AND tapahtuma.laji = 'laskutus'
+					{$_date}
+					GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso, tapahtuma.tuoteno
+					ORDER BY kpl_valittu_aika DESC";
+	}
+	else {
+
+		$query = "	SELECT tapahtuma.hyllyalue hyllyalue_alias,
+					tapahtuma.hyllynro hyllynro_alias,
+					tapahtuma.hyllyvali hyllyvali_alias,
+					tapahtuma.hyllytaso hyllytaso_alias,
+					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0)) kpl_valittu_aika,
+					sum(if(tapahtuma.laadittu >= '$vva-$kka-$ppa' AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', tapahtuma.kpl * -1, 0)) tuokpl_valittu_aika,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), 1, 0)) kpl_6,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), tapahtuma.kpl * -1, 0)) tuo_kpl_6,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0)) kpl_12,
+					sum(if(tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), tapahtuma.kpl * -1, 0)) tuo_kpl_12,
+					sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
+					tuotepaikat.tunnus paikkatun
+					FROM tapahtuma
+					LEFT JOIN tuotepaikat
+					ON (tapahtuma.yhtio = tuotepaikat.yhtio
+						and tapahtuma.hyllyalue = tuotepaikat.hyllyalue
+						and tapahtuma.hyllynro = tuotepaikat.hyllynro
+						and tapahtuma.hyllyvali = tuotepaikat.hyllyvali
+						and tapahtuma.hyllytaso = tuotepaikat.hyllytaso
+						and tapahtuma.tuoteno = tuotepaikat.tuoteno)
+					WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
+				   	AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) >= '{$apaikka}'
+				   	AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
+				   	        Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) <= '{$lpaikka}'
+				   	AND tapahtuma.laji = 'laskutus'
+				   	{$_date}
+					GROUP BY tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso
+					ORDER BY kpl_valittu_aika DESC";
+	}
 
 	$result = mysql_query($query) or pupe_error($query);
-
 	return $result;
 }
 
-function echo_tuotekohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
-	echo "<table>";
 
-	echo "<tr>
-				<th>".t("Tuoteno")."</th>
-				<th>".t("Nimitys")."</th>
-				<th>".t("Varastopaikka")."</th>
-				<th>".t("Saldo")."</th>
-				<th>".t("Ker‰yst‰")."</th>
+function echo_rivit($tyyppi, $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
+
+	echo "<table><tr>
+		<th>".t("Valittu kausi")."</th>
+		<td>{$ppa}</td>
+		<td>{$kka}</td>
+		<td>{$vva}</td>
+		<th>-</th>
+		<td>{$ppl}</td>
+		<td>{$kkl}</td>
+		<td>{$vvl}</td>
+		</tr></table><br>";
+
+	echo "<table>";
+	echo "<tr>";
+
+	if ($tyyppi == "TUOTE") {
+		echo "<th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Nimitys")."</th>";
+	}
+
+	echo "<th>".t("Varastopaikka")."</th>";
+
+
+	if ($tyyppi == "TUOTE") {
+		echo "<th>".t("Saldo")."</th>";
+	}
+
+	echo "<th>".t("Ker‰yst‰")."</th>
 				<th>".t("Ker‰yst‰/P‰iv‰")."</th>
 				<th>".t("Kpl/Ker‰ys")."</th>
 				<th>".t('Ker‰yst‰ t‰st‰ p‰iv‰st‰ 6kk')."</th>
@@ -133,26 +179,37 @@ function echo_tuotekohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) 
 	echo "</tr>";
 
 	//p‰ivi‰ aikajaksossa
-	$epa1 = (int)date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
-	$epa2 = (int)date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
+	$epa1 = (int) date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
+	$epa2 = (int) date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
 
 	//Diff in workdays (5 day week)
 	$pva = abs($epa2 - $epa1) / 60 / 60 / 24 / 7 * 5;
 
 	$saldolliset = array();
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		echo "<tr>";
-		echo "<td>$row[tuoteno]</td>";
-		echo "<td>".$row[nimitys]."</td>";
+
+		if ($tyyppi == "TUOTE") {
+			echo "<td>$row[tuoteno]</td>";
+			echo "<td>$row[nimitys]</td>";
+		}
+
 		echo "<td>$row[hyllyalue_alias] $row[hyllynro_alias] $row[hyllyvali_alias] $row[hyllytaso_alias]</td>";
-		echo "<td align='right'>$row[saldo]</td>";
+
+		if ($tyyppi == "TUOTE") {
+			echo "<td align='right'>$row[saldo]</td>";
+		}
+
+		$kpl_kerays = $row["kpl_valittu_aika"] > 0 ? round($row["tuokpl_valittu_aika"] / $row["kpl_valittu_aika"]) : "";
+
 		echo "<td align='right'>$row[kpl_valittu_aika]</td>";
 		echo "<td align='right'>".round($row["kpl_valittu_aika"] / $pva)."</td>";
-		echo "<td align='right'>".round($row["tuokpl_valittu_aika"] / $row["kpl_valittu_aika"])."</td>";
+		echo "<td align='right'>$kpl_kerays</td>";
 		echo "<td align='right'>$row[kpl_6]</td>";
 		echo "<td align='right'>$row[kpl_12]</td>";
-		if($row['poistettu'] != 0) {
+
+		if ($row['poistettu'] != 0) {
 			echo "<td align='right'><font class='error'>".t('Poistettu')."</font></td>";
 		}
 		else {
@@ -163,119 +220,6 @@ function echo_tuotekohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) 
 		echo "</tr>";
 	}
 	echo "</table><br/><br/>";
-
-	return $saldolliset;
-}
-
-function hae_varastopaikkakohtaisesti($kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaikka, $lpaikka) {
-	if (strtotime("$vva-$kka-$ppa") < strtotime('now - 12 months')) {
-		$_date = "AND tapahtuma.laadittu >= '$vva-$kka-$ppa'
-				  AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl'";
-	}
-	else {
-		$_date = "AND tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month)";
-	}
-	
-			$query = "
-SELECT tapahtuma.hyllyalue
-       hyllyalue_alias,
-       tapahtuma.hyllynro
-       hyllynro_alias,
-       tapahtuma.hyllyvali
-       hyllyvali_alias,
-       tapahtuma.hyllytaso
-       hyllytaso_alias,
-       Sum(IF (tapahtuma.laadittu >= '$vva-$kka-$ppa'
-               AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', 1, 0))
-       kpl_valittu_aika,
-       Sum(IF (tapahtuma.laadittu >= '$vva-$kka-$ppa'
-               AND tapahtuma.laadittu <= '$vvl-$kkl-$ppl', tapahtuma.kpl * -1, 0))
-       tuokpl_valittu_aika,
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month), 1, 0))
-       kpl_6,
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 6 month),
-           tapahtuma.kpl * -1,
-               0))
-       tuo_kpl_6,
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month), 1, 0))
-       kpl_12,
-       Sum(IF (tapahtuma.laadittu >= Date_sub(Now(), INTERVAL 12 month),
-           tapahtuma.kpl * -1
-           , 0))
-       tuo_kpl_12,
-	   sum(if(tuotepaikat.tunnus IS NULL , 1, 0)) poistettu,
-	   tuotepaikat.tunnus paikkatun
-FROM   tapahtuma
-LEFT JOIN tuotepaikat
-ON (tapahtuma.yhtio = tuotepaikat.yhtio
-	and tapahtuma.hyllyalue = tuotepaikat.hyllyalue
-	and tapahtuma.hyllynro = tuotepaikat.hyllynro
-	and tapahtuma.hyllyvali = tuotepaikat.hyllyvali
-	and tapahtuma.hyllytaso = tuotepaikat.hyllytaso
-	and tapahtuma.tuoteno = tuotepaikat.tuoteno)
-WHERE  tapahtuma.yhtio = '{$kukarow['yhtio']}'
-   AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) >=
-       '{$apaikka}'
-   AND Concat(Rpad(Upper(tapahtuma.hyllyalue), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllynro), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllyvali), 5, '0'),
-           Lpad(Upper(tapahtuma.hyllytaso), 5, '0')) <=
-       '{$lpaikka}'
-   AND tapahtuma.laji = 'laskutus'
-   {$_date}
-GROUP  BY tapahtuma.hyllyalue,
-          tapahtuma.hyllynro,
-          tapahtuma.hyllyvali,
-          tapahtuma.hyllytaso";
-	
-	$result = mysql_query($query) or pupe_error($query);
-
-	return $result;
-}
-
-function echo_varastopaikkakohtainen_table($result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
-	echo "<table>";
-
-	echo "<tr>
-				<th>".t("Varastopaikka")."</th>
-				<th>".t("Ker‰yst‰")."</th>
-				<th>".t("Ker‰yst‰/P‰iv‰")."</th>
-				<th>".t("Kpl/Ker‰ys")."</th>
-				<th>".t('Ker‰yst‰ t‰st‰ p‰iv‰st‰ 6kk')."</th>
-				<th>".t('Ker‰yst‰ t‰st‰ p‰iv‰st‰ 12kk')."</th>
-				<th>".t('Poistettu varastopaikka')."</th>";
-	echo "</tr>";
-
-	//p‰ivi‰ aikajaksossa
-	$epa1 = (int)date('U', mktime(0, 0, 0, $kka, $ppa, $vva));
-	$epa2 = (int)date('U', mktime(0, 0, 0, $kkl, $ppl, $vvl));
-
-	//Diff in workdays (5 day week)
-	$pva = abs($epa2 - $epa1) / 60 / 60 / 24 / 7 * 5;
-
-	$saldolliset = array();
-
-	while ($row = mysql_fetch_assoc($result)) {
-		echo "<tr>";
-		echo "<td>{$row['hyllyalue_alias']} {$row['hyllynro_alias']} {$row['hyllyvali_alias']} {$row['hyllytaso_alias']}</td>";
-		echo "<td align='right'>{$row['kpl_valittu_aika']}</td>";
-		echo "<td align='right'>".round($row["kpl_valittu_aika"] / $pva)."</td>";
-		echo "<td align='right'>".round((int)$row["tuokpl_valittu_aika"] / (int)$row["kpl_valittu_aika"])."</td>";
-		echo "<td align='right'>{$row['kpl_6']}</td>";
-		echo "<td align='right'>{$row['kpl_12']}</td>";
-		if($row['poistettu'] != 0) {
-			echo "<td align='right'><font class='error'>".t('Poistettu')."</font></td>";
-		}
-		else {
-			echo '<td></td>';
-			$saldolliset[] = $row["paikkatun"];
-		}
-		echo "</tr>";
-	}
-	echo "</table><br><br>";
 
 	return $saldolliset;
 }
@@ -302,21 +246,6 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 	echo "<br>";
 	echo "<form method='POST'>";
 	echo "<table>";
-	// ehdotetaan 7 p‰iv‰‰ taaksep‰in
-	if (!isset($kka))
-		$kka = date("m", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-	if (!isset($vva))
-		$vva = date("Y", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-	if (!isset($ppa))
-		$ppa = date("d", mktime(0, 0, 0, date("m") - 3, date("d"), date("Y")));
-
-	if (!isset($kkl))
-		$kkl = date("m");
-	if (!isset($vvl))
-		$vvl = date("Y");
-	if (!isset($ppl))
-		$ppl = date("d");
-
 	echo "<input type='hidden' name='tee' value='kaikki' />";
 
 	if (!empty($summaa_varastopaikalle)) {
@@ -325,7 +254,8 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 	else {
 		$checked = '';
 	}
-	echo "<tr><th>".t('Summaa varastopaikka tasolle')."</th>
+
+	echo "<tr><th>".t('Summaa per varastopaikka')."</th>
 			<td><input type='checkbox' name='summaa_varastopaikalle' $checked /></td></tr>";
 
 	echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
@@ -361,4 +291,3 @@ function echo_kayttoliittyma($ppa, $kka, $vva, $ppl, $kkl, $vvl, $ahyllyalue, $a
 }
 
 require ("../inc/footer.inc");
-?>

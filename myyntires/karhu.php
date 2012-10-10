@@ -23,6 +23,9 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
+// jos jollain laskulla on kolmas tai useampi karhukierros menossa, asetetaan asiakas myyntikieltoon
+$ehdota_maksukielto=0;
+
 $query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
 $res = pupe_query($query);
 
@@ -32,6 +35,15 @@ if (mysql_num_rows($res) == 0) {
 }
 
 if ($tee == 'LAHETA') {
+
+	if (!empty($aseta_myyntikielto)) {
+		$query = "  UPDATE asiakas
+					SET myyntikielto = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ytunnus = '$aseta_myyntikielto'";
+		$result = pupe_query($query);
+	}
+
 	// kirjeen l‰hetyksen status
 	$ekarhu_success = true;
 
@@ -143,8 +155,6 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
-
-
 	$query = "	SELECT asiakas.ytunnus,
 				IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
 						concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
@@ -233,8 +243,10 @@ if ($tee == 'KARHUA')  {
 				count(distinct karhu_lasku.ktunnus) as karhuttu,
 				sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
 				if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
-				concat_ws(' ', lasku.viesti, lasku.comments) comments
+				concat_ws(' ', lasku.viesti, lasku.comments) comments,
+				asiakas.myyntikielto
 				FROM lasku
+				JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 				LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
 				LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
@@ -406,6 +418,7 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Karhuttu")."</th>";
 	echo "<th>".t("Viimeisin karhu")."</th>";
 	echo "<th>".t("Lasku karhutaan")."</th>";
+	echo "<th>".t("Myyntikielto")."</th>";
 	echo "<th>".t("Viesti")."</th></tr>";
 	$summmmma = 0;
 
@@ -451,8 +464,14 @@ if ($tee == 'KARHUA')  {
 
 		echo "</td>";
 
+		echo "<td>$lasku[myyntikielto]</td>";
 		echo "<td>$lasku[comments]</td>";
 		echo "</tr>\n";
+
+		// jos yht‰k‰‰n laskua on karhuttu kolmeen kertaan, tarjotaan asiakkaan asettamista myyntikieltoon
+		if ($lasku["karhuttu"] > 2) {
+			$ehdota_maksukielto = 1;
+		}
 
 		$summmmma += $lasku["summa"];
 
@@ -469,6 +488,10 @@ if ($tee == 'KARHUA')  {
 	echo "<td class='back'></td></tr>";
 
 	echo "</table><br>";
+
+	if ($ehdota_maksukielto) {
+		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n kolme kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
+	}
 
 	echo "<table>";
 	echo "<tr>";

@@ -124,7 +124,8 @@
 						JOIN suuntalavat on (suuntalavat.yhtio=tilausrivi.yhtio and suuntalavat.tunnus=tilausrivi.suuntalava)
 						WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
 						AND tuotepaikat.tyyppi='S'
-						AND suuntalavat.sscc='{$sscc}'";
+						AND suuntalavat.sscc='{$sscc}'
+						GROUP BY tuotepaikat.tuoteno";
 			$result = pupe_query($query);
 		}
 		else {

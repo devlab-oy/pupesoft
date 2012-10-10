@@ -389,19 +389,16 @@ if ($tee == 'KARHUA')  {
 	echo "</table>";
 	echo "</td></tr></table><br>";
 
-	if (isset($ekirje_config) and is_array($ekirje_config)) {
-		$submit_text = 'L‰het‰ eKirje';
-	}
-	else {
-		$submit_text = 'Tulosta paperille';
-	}
-
 	echo "<table>";
 	echo "<tr>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
 
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L‰het‰ eKirje')."'></td>";
+	}
+
+	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+		echo "<td class='back'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('L‰het‰ Maventaan')."'></td>";
 	}
 
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
@@ -509,6 +506,10 @@ if ($tee == 'KARHUA')  {
 	// voiko l‰hett‰‰ eKirjeen?
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
+	}
+	
+	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+		echo "<input type='submit' name='maventa_laheta' value='" . t('L‰het‰ Maventaan') . "'>";
 	}
 
 	echo "</td></form>";

@@ -979,8 +979,9 @@
 
 			echo "</tr>";
 			echo "<tr><th>".t("tai rajaa asiakaskategorialla")."</th><td>";
-
-			$monivalintalaatikot = array('DYNAAMINEN_ASIAKAS', '<br>ASIAKASOSASTO', 'ASIAKASRYHMA');
+			
+			$mulselprefix = "asiakas";			
+			$monivalintalaatikot = array('DYNAAMINEN_ASIAKAS', '<br>ASIAKASOSASTO', 'ASIAKASRYHMA', "<br>KUSTP", "KOHDE", "PROJEKTI");
 			$monivalintalaatikot_normaali = array();
 
 			require ("tilauskasittely/monivalintalaatikot.inc");

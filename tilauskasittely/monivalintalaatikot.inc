@@ -549,7 +549,12 @@
 		$kustpt = substr($kustpt, 0, -1);
 
 		if (trim($kustpt) != '') {
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+
+			if ($mulselprefix == "asiakas") {
+				$lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
+				$lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$lisa_haku_kustp = " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 				$lisa .= " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 			}
@@ -574,8 +579,18 @@
 		$kohdet = substr($kohdet, 0, -1);
 
 		if (trim($kohdet) != '') {
-			$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
-			$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			if ($mulselprefix == "asiakas") {
+				$lisa_haku_kustp = " and asiakas.kohde in ($kohdet) ";
+				$lisa .= " and asiakas.kohde in ($kohdet) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+				$lisa .= " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+			}
+			else {
+				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
+				$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			}
 		}
 	}
 
@@ -593,8 +608,18 @@
 		$projektit = substr($projektit, 0, -1);
 
 		if (trim($projektit) != '') {
-			$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
-			$lisa .= " and tiliointi.projekti in ($projektit) ";
+			if ($mulselprefix == "asiakas") {
+				$lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
+				$lisa .= " and asiakas.projekti in ($projektit) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+				$lisa .= " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+			}
+			else {
+				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
+				$lisa .= " and tiliointi.projekti in ($projektit) ";
+			}
 		}
 	}
 

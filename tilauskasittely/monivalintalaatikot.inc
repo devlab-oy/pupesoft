@@ -1980,7 +1980,7 @@
 
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' $tunnukset_save $autosubmit>";
+				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while ($sxrow = mysql_fetch_array ($sresult)){

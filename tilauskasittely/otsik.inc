@@ -1956,8 +1956,19 @@
 
 					echo "</select></td>";
 
-					echo "<td></td><td></td>";
+					echo "<td></td><td></td></tr>";
 				}
+
+				$sel = $laskurow['kolmikantakauppa'] == "M" ? " selected" : "";
+
+				echo "<tr>";
+				echo "<td>",t("Kolmikantakauppa"),"</td>";
+				echo "<td><select name='kolmikantakauppa'>";
+				echo "<option value=''>",t("Valitse"),"</option>";
+				echo "<option value='M'{$sel}>",t("Kyllä"),"</option>";
+				echo "</select></td>";
+				echo "<td></td><td></td>";
+				echo "</tr>";
 			}
 
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
@@ -2967,6 +2978,7 @@
 		}
 
 		$label = !isset($label) ? "" : $label;
+		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
@@ -2993,6 +3005,7 @@
 					ketjutus 							= '$ketjutus',
 					kohde								= '$kohde',
 					kohdistettu 						= '$maksaja',
+					kolmikantakauppa					= '{$kolmikantakauppa}',
 					kuljetus 							= '$kuljetus',
 					kuljetusmuoto						= '',
 					label								= '{$label}',
@@ -3419,4 +3432,3 @@
 	}
 
 	unset($alv);
-?>

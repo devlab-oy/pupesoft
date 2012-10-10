@@ -946,6 +946,22 @@ if ($tee == 'MONISTA') {
 							$values .= ", '{$valrow['kurssi']}'";
 						}
 						break;
+					case 'kolmikantakauppa':
+						if ($monistarow[$i] != "") {
+							$values .= ", 'M'";
+						}
+						else {
+							$values .= ", ''";
+						}
+						break;
+					case 'sisviesti1':
+						if ($monistarow['kolmikantakauppa'] != "") {
+							$values .= ", '".str_replace("VAT 0% Triangulation.\n", "", $monistarow['sisviesti1'])."'";
+						}
+						else {
+							$values .= ", '".$monistarow[$i]."'";
+						}
+						break;
 					default:
 						$values .= ", '".$monistarow[$i]."'";
 				}

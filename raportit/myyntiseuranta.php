@@ -179,8 +179,8 @@
 				echo "<input type='hidden' name='yhtiot[]' value='{$kukarow['yhtio']}'>";
 			}
 
+			$noautosubmit = TRUE;
 			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>KUSTP", "KOHDE", "PROJEKTI");
-			#$monivalintalaatikot = array("<br>DYNAAMINEN_ASIAKAS", "<br>DYNAAMINEN_TUOTE");
 			$monivalintalaatikot_normaali = array();
 
 			require ("tilauskasittely/monivalintalaatikot.inc");
@@ -260,7 +260,6 @@
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
-
 
 			echo "<table>
 				<tr>

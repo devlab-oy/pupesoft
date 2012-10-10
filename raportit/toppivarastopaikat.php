@@ -192,7 +192,7 @@ function echo_rivit($tyyppi, $result, $ppa, $kka, $vva, $ppl, $kkl, $vvl) {
 
 		if ($tyyppi == "TUOTE") {
 			echo "<td>$row[tuoteno]</td>";
-			echo "<td>$row[nimitys]</td>";
+			echo "<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 		}
 
 		echo "<td>$row[hyllyalue_alias] $row[hyllynro_alias] $row[hyllyvali_alias] $row[hyllytaso_alias]</td>";

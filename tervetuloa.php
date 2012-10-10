@@ -6,6 +6,39 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
 
+
+// Päivitetään _new --> ei newta
+$query = "	SELECT *
+			FROM oikeu
+			WHERE nimi = 'raportit/myyntiseuranta_new.php'";
+$result1 = mysql_query($query) or pupe_error($query);
+
+while ($trow = mysql_fetch_assoc($result1)) {
+
+	// Törmätäänkö
+	$query = "	SELECT *
+				FROM oikeu
+				WHERE kuka		= '$trow[kuka]'
+				AND sovellus	= '$trow[sovellus]'
+				AND nimi		= 'raportit/myyntiseuranta.php'
+				AND alanimi		= '$trow[alanimi]'
+				AND profiili	= '$trow[profiili]'
+				AND yhtio		= '$trow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) == 0) {
+		$query = "	UPDATE oikeu
+					SET nimi 	 = 'raportit/myyntiseuranta.php', nimitys = 'Myynninseuranta'
+					WHERE tunnus = '$trow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+	else {
+		$query = "	DELETE from oikeu
+					WHERE tunnus	= '$trow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+}
+
 if (!isset($tee) or $tee == '') {
 
 	if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {
@@ -27,14 +60,15 @@ if (!isset($tee) or $tee == '') {
 
 	// haetaan kaikki yritykset, jonne tämä käyttäjä pääsee
 	$query  = "	SELECT distinct yhtio.yhtio, yhtio.nimi
-				from kuka
-				join yhtio using (yhtio)
-				where kuka='$kukarow[kuka]'";
+				FROM kuka
+				JOIN yhtio using (yhtio)
+				WHERE kuka = '$kukarow[kuka]'";
 	$kukres = mysql_query($query) or pupe_error($query);
 
 	while ($kukrow = mysql_fetch_array($kukres)) {
 
-		$query = "	SELECT count(*) FROM lasku
+		$query = "	SELECT count(*)
+					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
 					ORDER BY erpcm";
 		$result = mysql_query($query) or pupe_error($query);

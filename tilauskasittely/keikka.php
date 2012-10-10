@@ -853,6 +853,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				while ($tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res)) {
 					$row_keikat[$tilriv_chk_row['laskunro']] = $tilriv_chk_row['laskunro'];
 				}
+
+				$row['laskunrot'] = implode(",", $row_keikat);
 			}
 			else {
 				$row_keikat = explode(',', $row['laskunrot']);
@@ -918,6 +920,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 						unset($row_keikat[$laskuja_row['laskunro']]);
 						continue;
 					}
+
 					if ($lisarajaus == 'liitetty_lasku_rivitok_kohdistus_ok' and ($kohdistettu_chk_row['kohdistettu'] == '' or ($sum_chk_row['summa'] != $laskuja_row['vosumma'] and $erotus_chk > 0.01))) {
 						unset($row_keikat[$laskuja_row['laskunro']]);
 						continue;

@@ -330,8 +330,13 @@
 					}
 					else {
 						// HUOM: Tämä vielää off line, väärät muuttujat $params-arrayssa!!!!
-						continue;
-
+						
+						$tilriv = $row['tunnus'];//Tilausnumero
+						$pakkaus_kirjain = chr($keraysera_res['pakkausnro'] + 64);
+						$sscc = $keraysera_res['sscc'];
+						$toimitustapa = $toitarow['selite'];
+						$rivit = '';
+						$paino = '';
 						// Tulostetaan Pupen oma kollitarra
 						$params = array(
 				 			'tilriv' => $tilriv,

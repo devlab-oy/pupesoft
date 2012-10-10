@@ -337,9 +337,9 @@
 		}
 
 		$ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittelyä")."</option>";
+		$ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
 		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely per asiakas")."</option>";
-		$ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely per toimitustapa")."</option>";
-
+		
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

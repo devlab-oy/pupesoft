@@ -3971,8 +3971,7 @@ if ($tee == '') {
 			}
                         
             if ($jalkitoimutus_heti == '2') {
-				$date = new DateTime('now + 30days');
-				$kerayspvm = $date->format('Y-m-d');
+				$kerayspvm = date('Y-m-d' , strtotime('now + 1 month'));
 			}
 			elseif ($jalkitoimutus_heti == '1') {
 				$kerayspvm = '';

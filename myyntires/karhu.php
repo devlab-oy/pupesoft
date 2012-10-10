@@ -387,7 +387,7 @@ if ($tee == 'KARHUA')  {
 	}
 
 	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
-		echo "<td class='back'><input type='hidden' name='maventa_laheta' value='1'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('Lähetä Maventaan')."'></td>";
+		echo "<td class='back'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('Lähetä Maventaan')."'></td>";
 	}
 
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";

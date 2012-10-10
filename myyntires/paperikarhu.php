@@ -482,13 +482,15 @@
 	$query = "	SELECT *
 				FROM maksuehto
 				LEFT JOIN pankkiyhteystiedot ON (pankkiyhteystiedot.yhtio = maksuehto.yhtio AND pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
-				WHERE maksuehto.yhtio='$kukarow[yhtio]' AND maksuehto.tunnus = '$laskutiedot[maksuehto]'";
+				WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+				AND maksuehto.tunnus  = '$laskutiedot[maksuehto]'";
 	$maksuehtoresult = pupe_query($query);
 	$maksuehtotiedot = mysql_fetch_assoc($maksuehtoresult);
 
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus  = '$laskutiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
 	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
@@ -666,13 +668,14 @@
 	}
 
 	if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] == 'L‰het‰ Maventaan') {
-		
+
 		if (!function_exists("vlas_dateconv")) {
 			function vlas_dateconv($date) {
 				//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
 				return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
 			}
 		}
+
 		if (!function_exists("pp")) {
 			function pp($muuttuja, $round = "", $rmax = "", $rmin = "") {
 				if (strlen($round) > 0) {
@@ -689,11 +692,13 @@
 				}
 			}
 		}
+
 		if (!function_exists("spyconv")) {
-				function spyconv ($spy) {
-					return $spy = sprintf("%020.020s",$spy);
-				}
+			function spyconv ($spy) {
+				return $spy = sprintf("%020.020s",$spy);
+			}
 		}
+
 		// T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
 		$api_keys = array();
 		$api_keys["user_api_key"]	 = $yhtiorow['maventa_api_avain'];
@@ -705,83 +710,59 @@
 		}
 
 		// Testaus
-		$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 		// Tuotanto
-		#$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-		require 'tilauskasittely/verkkolasku_finvoice.inc';
+		require ('tilauskasittely/verkkolasku_finvoice.inc');
 
 		$invoice_number = $laskutiedot['laskunro'];
 		$finvoice_file_path = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.xml";
-		$tootfinvoice	 = fopen($finvoice_file_path, 'w');
-		$kieli			 = '';
-		$pankkitiedot["pankkinimi1"]	 = $yhtiorow["pankkinimi1"];
-		$pankkitiedot["pankkitili1"]	 = $yhtiorow["pankkitili1"];
-		$pankkitiedot["pankkiiban1"]	 = $yhtiorow["pankkiiban1"];
-		$pankkitiedot["pankkiswift1"]	 = $yhtiorow["pankkiswift1"];
-		$pankkitiedot["pankkinimi2"]	 = $yhtiorow["pankkinimi2"];
-		$pankkitiedot["pankkitili2"]	 = $yhtiorow["pankkitili2"];
-		$pankkitiedot["pankkiiban2"]	 = $yhtiorow["pankkiiban2"];
-		$pankkitiedot["pankkiswift2"]	 = $yhtiorow["pankkiswift2"];
-		$pankkitiedot["pankkinimi3"]	 = $yhtiorow["pankkinimi3"];
-		$pankkitiedot["pankkitili3"]	 = $yhtiorow["pankkitili3"];
-		$pankkitiedot["pankkiiban3"]	 = $yhtiorow["pankkiiban3"];
-		$pankkitiedot["pankkiswift3"]	 = $yhtiorow["pankkiswift3"];
-		$masrow			 = '';
-		$mquery			 = "SELECT nimi, puhno, eposti
-			FROM kuka
-			WHERE tunnus='$laskutiedot[myyja]' and yhtio='$kukarow[yhtio]'";
-		$myyresult		 = pupe_query($mquery);
-		$myyrow			 = mysql_fetch_assoc($myyresult);
-		$tyyppi			 = '';
+		$tootfinvoice	= fopen($finvoice_file_path, 'w');
 
+		$pankkitiedot 	= $yhtiorow;
+		$tyyppi			= '';
+		$silent			= '';
 		$toimaikarow['mint'] = date("Y-m-d");
 		$toimaikarow['maxt'] = date("Y-m-d");
-		$silent = '';
-		
-		$yhtiorow['finvoice_senderpartyid'] = '1';
-		$yhtiorow['finvoice_senderintermediator'] = '003721291126';
-		
-		$api_keys['user_api_key'] = '78ece923-cad3-4169-9766-e689603ce32c';
-		$api_keys["vendor_api_key"]	 = '6dc3e78a-9c56-4a5d-9451-e07b6c188663';
-		$api_keys["company_uuid"] = 'd071d98c-89c4-4493-ae67-6f40977ea77d';
-		
-		$yhtiorow['ytunnus'] = '20428100';
-		$yhtiorow['ovttunnus'] = '003720428100';
-		
-			
-		$laskutiedot['toim_osoite']	 = '';
-		$laskutiedot['toim_postitp'] = '';
-		$laskutiedot['toim_postino'] = '';
-		$laskutiedot['toim_maa']	 = 'FI';
-		$laskutiedot['yhtio_maa']	 = 'FI';
-		
-		$query = "	SELECT *
-				FROM lasku
-				WHERE tunnus in ($ltunnukset)
-				and yhtio = '$kukarow[yhtio]'
-				and tila = 'U'
-				LIMIT 1";
-		$result_temp = pupe_query($query);
-		
-		$laskurow = mysql_fetch_assoc($result_temp);
-		$laskutiedot = $laskurow;
 
-		finvoice_otsik($tootfinvoice, $laskutiedot, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+		// Otetaan ekan laskun tiedot
+		$query = "	SELECT *
+					FROM lasku
+					WHERE tunnus in ($ltunnukset)
+					and yhtio = '$kukarow[yhtio]'
+					and tila = 'U'
+					LIMIT 1";
+		$result_temp = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result_temp);
+
+		$laskurow["chn"] = "100";
+		$laskurow["verkkotunnus"] = "PRINT";
+		$laskurow["arvo"]  = 0;
+		$laskurow["summa"] = 0;
+		$laskurow["tapvm"] = date("Y-m-d");
+		$laskurow["erpcm"] = date("Y-m-d");
+		$laskurow["kapvm"] = date("Y-m-d");
 
 		$alvrow = array(
-			'rivihinta'		 => 100,
+			'rivihinta'		 => 0,
 			'alv'			 => 23,
-			'alvrivihinta'	 => 123
+			'alvrivihinta'	 => 0
 		);
-		finvoice_alvierittely($tootfinvoice, $laskutiedot, $alvrow);
 
 		$masrow = array(
-			'teksti' => 'Heti',//payment terms
-			'kassa_alepros' => 0//cash discount percent
+			'teksti' => 'Heti',
+			'kassa_alepros' => 0
 		);
-		finvoice_otsikko_loput($tootfinvoice, $laskutiedot, $masrow);
-		
+
+		$myyrow = array(
+			'nimi' => ''
+		);
+
+		finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent);
+		finvoice_alvierittely($tootfinvoice, $laskurow, $alvrow);
+		finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow);
+
 		$tilrow = array(
 			'tuoteno' => 1,
 			'nimitys' => 'Tyhj‰',
@@ -795,12 +776,13 @@
 			'alv' => 0,
 			'rivihinta' => 0,
 		);
-		$vatamount = 0;
-		$totalvat = 0;
 
-		finvoice_rivi($tootfinvoice, $tilrow, $laskutiedot, $vatamount, $totalvat);
-		
-		finvoice_lasku_loppu($tootfinvoice, $laskutiedot, $pankkitiedot, $masrow);
+		$vatamount = 0;
+		$totalvat  = 0;
+
+		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount, $totalvat);
+
+		finvoice_lasku_loppu($tootfinvoice, $laskurow, $pankkitiedot, $masrow);
 
 		fclose($tootfinvoice);
 
@@ -814,23 +796,22 @@
 		$files_out['files'][1]		 = base64_encode(file_get_contents($pdffilenimi));
 		$files_out['filenames'][1]	 = $pdffilenimi;
 
-		
-			// Tehd‰‰n validaatio Application Requestille
+		// Tehd‰‰n validaatio Application Requestille
 		$axml = new DomDocument('1.0');
 		$axml->encoding = 'UTF-8';
 		$axml->loadXML(file_get_contents($finvoice_file_path));
-		
+
 		$return_value = $client->invoice_put_finvoice($api_keys, $files_out);
-		
-		if(stristr($return_value->status, 'OK')) {
-			echo t("Karhukirje l‰hetettiin Maventaan")."\n<br>";
+
+		if (stristr($return_value->status, 'OK')) {
+			echo "".t("Karhukirje l‰hetettiin Maventaan")."\n<br>";
 		}
 		else {
-			echo '<font class="error">'.t("Karhukirje l‰hetys maventaan ep‰onnistui")."</font>\n<br>";
+			echo '<font class="error">'.t("Karhukirjeen l‰hetys maventaan ep‰onnistui")." ({$return_value->status})</font>\n<br>";
+			throw new Exception("Maventa Error.");
 		}
-		
-		$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
-}
+	}
+
 	// jos halutaan eKirje sek‰ configuraatio on olemassa niin
 	// l‰hetet‰‰n eKirje
 	if (isset($_POST['ekirje_laheta']) === true and (isset($ekirje_config) and is_array($ekirje_config))) {
@@ -903,7 +884,7 @@
 		}
 	}
 
-	// tulostetaan jos ei l‰hetet‰ ekirjett‰ eik‰ maventaan 
+	// tulostetaan jos ei l‰hetet‰ ekirjett‰ eik‰ maventaan
 	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'L‰het‰ Maventaan') {
 		// itse print komento...
 		$query = "	SELECT komento

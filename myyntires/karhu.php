@@ -490,7 +490,7 @@ if ($tee == 'KARHUA')  {
 	echo "</table><br>";
 
 	if ($ehdota_maksukielto) {
-		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Aseta myyntikielto asiakkaalle")." {$asiakastiedot["ytunnus"]}";
+		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n kolme kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
 	}
 
 	echo "<table>";

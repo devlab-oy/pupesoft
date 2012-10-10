@@ -79,9 +79,26 @@ else {
 
 		$konsrow = hae_asiakas($laskurow);
 
-		$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($konsrow, $mehtorow, $laskurow, $maksuehto, $tunnus, $toim, $tapahtumapaiva);
+		$params = array(
+			'konsrow'		 => $konsrow,
+			'mehtorow'		 => $mehtorow,
+			'laskurow'		 => $laskurow,
+			'maksuehto'		 => $maksuehto,
+			'tunnus'		 => $tunnus,
+			'toim'			 => $toim,
+			'tapahtumapaiva' => $tapahtumapaiva,
+			'kassalipas'	 => $kassalipas
+		);
+		$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 
-		tee_kirjanpito_muutokset($laskurow, $tunnus, $myysaatili, $toim);
+		$params = array(
+			'laskurow'		 => $laskurow,
+			'tunnus'		 => $tunnus,
+			'myysaatili'	 => $myysaatili,
+			'toim'			 => $toim,
+			'_kassalipas'	 => $_kassalipas
+		);
+		tee_kirjanpito_muutokset($params);
 
 		yliviivaa_alet_ja_pyoristykset($tunnus);
 
@@ -159,8 +176,8 @@ function hae_asiakas($laskurow) {
 	
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ytunnus = '$laskurow[ytunnus]'";
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				and tunnus = '{$laskurow['liitostunnus']}'";
 	$konsres = pupe_query($query);
 	
 	return mysql_fetch_assoc($konsres);
@@ -169,7 +186,7 @@ function hae_asiakas($laskurow) {
 function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 	global $kukarow, $yhtiorow;
 
-	if ($toim == 'KATEINEN') {
+	if ($params['toim'] == 'KATEINEN') {
 		$query	 = "	UPDATE lasku set
 						mapvm      = '{$params['tapahtumapaiva']}',
 						maksuehto  = '{$params['maksuehto']}',
@@ -184,7 +201,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 	else {
 		// korjaillaan eräpäivät ja kassa-alet
 		if ($params['mehtorow']['abs_pvm'] == '0000-00-00') {
-			$erapvm = "adddate('$laskurow[tapvm]', interval {$params['mehtorow']['rel_pvm']} day)";
+			$erapvm = "adddate('{$params['laskurow']['tapvm']}', interval {$params['mehtorow']['rel_pvm']} day)";
 		}
 		else {
 			$erapvm = "'{$params['mehtorow']['abs_pvm']}'";
@@ -192,12 +209,12 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 
 		if ($params['mehtorow']['kassa_abspvm'] != '0000-00-00' or $params['mehtorow']["kassa_relpvm"] > 0) {
 			if ($params['mehtorow']['kassa_abspvm'] == '0000-00-00') {
-				$kassa_erapvm = "adddate('$laskurow[tapvm]', interval {$params['mehtorow']['kassa_relpvm']} day)";
+				$kassa_erapvm = "adddate('{$params['laskurow']['tapvm']}', interval {$params['mehtorow']['kassa_relpvm']} day)";
 			}
 			else {
 				$kassa_erapvm = "'{$params['mehtorow']['kassa_abspvm']}'";
 			}
-			$kassa_loppusumma = round($laskurow['summa'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
+			$kassa_loppusumma = round($params['laskurow']['tapvm'] * $params['mehtorow']['kassa_alepros'] / 100, 2);
 		}
 		else {
 			$kassa_erapvm = "''";
@@ -217,10 +234,10 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
 		$result = pupe_query($query);
 
 		if (mysql_affected_rows() > 0) {
-			echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";
+			echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";
 		}
 		else {
-			echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";
+			echo "<font class='error'>".t("Laskua")." {$params['laskurow']['laskunro']} ".t("ei pystytty muuttamaan")."!</font><br>";
 		}
 	}
 
@@ -241,7 +258,7 @@ function tee_kirjanpito_muutokset($params) {
 
 	if ($params['toim'] == 'KATEINEN') {
 		$query = "	UPDATE tiliointi
-					SET tilino = '{$params['kassalipas']['kassa']}',
+					SET tilino = '{$params['_kassalipas']['kassa']}',
 					summa = '{$params['laskurow']['summa']}'
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and ltunnus	= '{$params['tunnus']}'
@@ -356,22 +373,69 @@ function vapauta_kateistasmaytys($kassalipasrow, $paiva) {
 function hae_lasku2($laskuno, $toim) {
 	global $kukarow;
 	if ($toim == 'KATEINEN') {
-		$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
-				from lasku
-				JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen=''
-				where lasku.yhtio	= '$kukarow[yhtio]'
-				and lasku.laskunro	= '$laskuno'
-				and lasku.tila		= 'U'
-				and lasku.alatila	= 'X'";
+		
+		$query = "
+SELECT lasku.ytunnus,
+       lasku.liitostunnus,
+       lasku.*,
+       lasku.tunnus ltunnus,
+       maksuehto.tunnus,
+       maksuehto.teksti,
+       asiakas.ytunnus asiakas_ytunnus,
+       asiakas.nimi asiakas_nimi,
+       asiakas.nimitark asiakas_nimitark,
+       asiakas.osoite asiakas_osoite,
+       asiakas.postino asiakas_postino,
+       asiakas.postitp asiakas_postitp,
+       asiakas.toim_nimi asiakas_toim_nimi,
+       asiakas.toim_nimitark asiakas_toim_nimitark,
+       asiakas.toim_osoite asiakas_toim_osoite,
+       asiakas.toim_postino asiakas_toim_postino,
+       asiakas.toim_postitp asiakas_toim_postitp
+FROM   lasku
+       JOIN maksuehto
+         ON lasku.yhtio = maksuehto.yhtio
+            AND lasku.maksuehto = maksuehto.tunnus
+            AND maksuehto.kateinen = ''
+       JOIN asiakas
+         ON asiakas.yhtio = lasku.yhtio
+            AND asiakas.tunnus = lasku.liitostunnus
+WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
+   AND lasku.laskunro = '{$laskuno}'
+   AND lasku.tila = 'U'
+   AND lasku.alatila = 'X'";
 	}
 	else {
-		$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
-				from lasku
-				JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
-				where lasku.yhtio	= '$kukarow[yhtio]'
-				and lasku.laskunro	= '$laskuno'
-				and lasku.tila		= 'U'
-				and lasku.alatila	= 'X'";
+		$query = "
+SELECT lasku.ytunnus,
+       lasku.liitostunnus,
+       lasku.*,
+       lasku.tunnus ltunnus,
+       maksuehto.tunnus,
+       maksuehto.teksti,
+       asiakas.ytunnus asiakas_ytunnus,
+       asiakas.nimi asiakas_nimi,
+       asiakas.nimitark asiakas_nimitark,
+       asiakas.osoite asiakas_osoite,
+       asiakas.postino asiakas_postino,
+       asiakas.postitp asiakas_postitp,
+       asiakas.toim_nimi asiakas_toim_nimi,
+       asiakas.toim_nimitark asiakas_toim_nimitark,
+       asiakas.toim_osoite asiakas_toim_osoite,
+       asiakas.toim_postino asiakas_toim_postino,
+       asiakas.toim_postitp asiakas_toim_postitp
+FROM   lasku
+       JOIN maksuehto
+         ON lasku.yhtio = maksuehto.yhtio
+            AND lasku.maksuehto = maksuehto.tunnus
+            AND maksuehto.kateinen != ''
+       JOIN asiakas
+         ON asiakas.yhtio = lasku.yhtio
+            AND asiakas.tunnus = lasku.liitostunnus
+WHERE  lasku.yhtio = '{$kukarow['yhtio']}'
+   AND lasku.laskunro = '{$laskuno}'
+   AND lasku.tila = 'U'
+   AND lasku.alatila = 'X'";
 	}
 
 	$result = pupe_query($query);
@@ -388,16 +452,23 @@ function echo_lasku_table($laskurow, $toim) {
 	echo "<form method='post' autocomplete='off'>";
 	echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
 
+	if (!empty($laskurow['asiakas_toim_osoite'])) {
+		$asiakas_string = "<tr><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_toim_nimi] $laskurow[asiakas_toim_nimitark]<br> $laskurow[asiakas_toim_osoite]<br> $laskurow[asiakas_toim_postino] $laskurow[asiakas_toim_postitp]</td></tr>";
+	}
+	else {
+		$asiakas_string = "<tr><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td><td>$laskurow[asiakas_ytunnus]<br> $laskurow[asiakas_nimi] $laskurow[asiakas_nimitark]<br> $laskurow[asiakas_osoite]<br> $laskurow[asiakas_postino] $laskurow[asiakas_postitp]</td></tr>";
+	}
 	echo "<table>
 			<tr><th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th></tr>
-			<tr><td>$laskurow[ytunnus]<br> $laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td><td>$laskurow[ytunnus]<br> $laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>
+			{$asiakas_string}
 			<tr><th>".t("Laskunumero")."</th><td>$laskurow[laskunro]</td></tr>
 			<tr><th>".t("Laskun summa")."</th><td>$laskurow[summa]</td></tr>
 			<tr><th>".t("Laskun summa (veroton)")."</th><td>$laskurow[arvo]</td></tr>
 			<tr><th>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV")."</td></tr>";
 
 	if ($toim == 'KATEINEN') {
-		$now = new DateTime('now');
+		$now = date('Y-m-d');
+		$now = explode('-' , $now);
 		// haetaan kaikki käteisen maksuehdot
 		$query = 'SELECT * FROM kassalipas WHERE kassalipas.yhtio="'.$kukarow['yhtio'].'"';
 		$result = pupe_query($query);
@@ -413,7 +484,7 @@ function echo_lasku_table($laskurow, $toim) {
 		echo '</td>';
 		echo '</tr>';
 
-		echo "<tr><th>".t("Tapahtumapäivä")."</th><td>".t('Päivä')." <input name='tapahtumapaiva_pp' type='text' size='2' value='".$now->format('d')."'/> ".t('Kuukausi')." <input name='tapahtumapaiva_kk' type='text' size='2' value='".$now->format('m')."'/> ".t('Vuosi')." <input name='tapahtumapaiva_vv' type='text' size='4' value='".$now->format('Y')."'/></td></tr>";
+		echo "<tr><th>".t("Tapahtumapäivä")."</th><td>".t('Päivä')." <input name='tapahtumapaiva_pp' type='text' size='2' value='".$now[2]."'/> ".t('Kuukausi')." <input name='tapahtumapaiva_kk' type='text' size='2' value='".$now[1]."'/> ".t('Vuosi')." <input name='tapahtumapaiva_vv' type='text' size='4' value='".$now[0]."'/></td></tr>";
 
 		$query = "	SELECT *
 					FROM maksuehto

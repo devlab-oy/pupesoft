@@ -963,7 +963,7 @@
 						$turyhgroups++;
 					}
 
-					if ($mukaan == "merkki") {
+					if ($mukaan == "tuotemerkki") {
 						$group .= ",tuote.tuotemerkki";
 						$select .= "tuote.tuotemerkki 'tuotemerkki', ";
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";
@@ -2120,6 +2120,7 @@
 
 									// jos kyseessa on tuote
 									if ($ken_nimi == "tuoteno") {
+										$koskematon_tuoteno = $row["tuoteno"];
 										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
 									}
 
@@ -2416,7 +2417,8 @@
 
 									// jos kyseessa on varastonarvo
 									if ($ken_nimi == "varastonarvo") {
-										list($varvo, $kierto, $varaston_saldo) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
+										if (!isset($koskematon_tuoteno)) $koskematon_tuoteno = $row["tuoteno"];
+										list($varvo, $kierto, $varaston_saldo) = vararvo($koskematon_tuoteno, $vvl, $kkl, $ppl);
 										$row[$ken_nimi] = $varvo;
 									}
 

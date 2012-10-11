@@ -963,7 +963,7 @@
 						$turyhgroups++;
 					}
 
-					if ($mukaan == "merkki") {
+					if ($mukaan == "tuotemerkki") {
 						$group .= ",tuote.tuotemerkki";
 						$select .= "tuote.tuotemerkki 'tuotemerkki', ";
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";

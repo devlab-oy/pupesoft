@@ -458,7 +458,7 @@
 		
 		$pregit = FALSE;
 		
-		if (preg_match_all("/Tilaus jakaantunut [0-9]* tilaukseksi: ([0-9, ]*) Tilaus:/", $laskurow['sisviesti2'], $tilausnumerotlista)) {
+		if ((preg_match_all("/Tilaus jakaantunut [0-9]* tilaukseksi: ([0-9, ]*) Tilaus:/", $laskurow['sisviesti2'], $tilausnumerotlista))  and $toim != '') {
 			foreach ($tilausnumerotlista[1] as $tilausnumerolis) {
 				foreach (explode(",", $tilausnumerolis) as $tilnro) {
 

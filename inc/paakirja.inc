@@ -699,25 +699,19 @@
 						$virhe = "";
 
 						if ($trow["tapvm"] != $trow["laskutapvm"] and $trow["tapvm"] != $trow["laskumapvm"]) {
-							$virhe	.= "Ostovelkatiliöinnin päivämäärä virheellinen!";
+							$virhe	.= t("Ostovelkatiliöinnin päivämäärä virheellinen")."!";
 						}
 
-						if ($trow["tapvm"] == $trow["laskumapvm"] and $trow["summa"] != $trow["laskusumma"]) {
-							$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
+						if ($trow["tapvm"] == $trow["laskumapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != $trow["laskusumma"]) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != $trow["laskusumma"]))) {
+							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
 
-						if ($trow["valkoodi"] == "") {
-							if ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa"] != ($trow["laskusumma"]*-1)) {
-								$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
-							}
+						if ($trow["tapvm"] == $trow["laskutapvm"] and (($trow["valkoodi"] == "" and $trow["summa"] != ($trow["laskusumma"]*-1)) or ($trow["valkoodi"] != "" and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)))) {
+							$virhe	.= t("Ostovelkatiliöinnin summa virheellinen")."!";
 						}
-						elseif ($trow["tapvm"] == $trow["laskutapvm"] and $trow["summa_valuutassa"] != ($trow["laskusumma"]*-1)) {
-								$virhe	.= "Ostovelkatiliöinnin summa virheellinen!";
-							}
 
 						if ($virhe != "") echo "<td class='spec'><font class='error'>$virhe</font></td>";
 					}
-
 
 					if ($trow["alv_taso"] == "fi305" or $trow["alv_taso"] == "fi307") {
 						// Onko tosite liitetty keikkaan

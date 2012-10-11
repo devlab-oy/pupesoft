@@ -27,7 +27,7 @@
 		exit;
 	}
 	else {
-		echo "<font class='head'>",t("Myyntiseuranta"),"</font><hr>";
+		echo "<font class='head'>",t("Myynninseuranta"),"</font><hr>";
 
 		// tehdään kaikista raportin parametreistä yksi muuttuja serialisoimista varten
 		$kaikki_muuttujat_array = array();
@@ -1792,22 +1792,11 @@
 
 					if ($query != "") {
 						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-							if(@include('Spreadsheet/Excel/Writer.php')) {
+							include('inc/pupeExcel.inc');
 
-								//keksitään failille joku varmasti uniikki nimi:
-								list($usec, $sec) = explode(' ', microtime());
-								mt_srand((float) $sec + ((float) $usec * 100000));
-								$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-								$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-								$workbook->setVersion(8);
-								$worksheet =& $workbook->addWorksheet('Sheet 1');
-
-								$format_bold =& $workbook->addFormat();
-								$format_bold->setBold();
-
-								$excelrivi = 0;
-							}
+							$worksheet 	 = new pupeExcel();
+							$format_bold = array("bold" => TRUE);
+							$excelrivi 	 = 0;
 						}
 
 						echo "<a name='focus_tahan' /><table>";
@@ -2005,7 +1994,7 @@
 							echo "</tr>\n";
 						}
 
-						if (isset($workbook)) {
+						if (isset($worksheet)) {
 							$excelsarake=0;
 							foreach ($rows[0] as $ken_nimi => $null) {
 								if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
@@ -2101,7 +2090,7 @@
 
 										if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-										if (isset($workbook)) {
+										if (isset($worksheet)) {
 											$worksheet->write($excelrivi, $excelsarake++, $vsum);
 										}
 									}
@@ -2438,7 +2427,7 @@
 												echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$ken_nimi])."</td>";
 											}
 
-											if (isset($workbook)) {
+											if (isset($worksheet)) {
 												$worksheet->writeNumber($excelrivi, $excelsarake++, sprintf("%.02f",$row[$ken_nimi]));
 											}
 										}
@@ -2447,7 +2436,7 @@
 												echo "<td valign='top'>{$row[$ken_nimi]}</td>";
 											}
 
-											if (isset($workbook)) {
+											if (isset($worksheet)) {
 												$worksheet->writeString($excelrivi, $excelsarake++, strip_tags(str_replace("<br>", "\n", $row[$ken_nimi])));
 											}
 										}
@@ -2456,7 +2445,7 @@
 												echo "<td valign='top'>{$row[$ken_nimi]}</td>";
 											}
 
-											if (isset($workbook)) {
+											if (isset($worksheet)) {
 												$worksheet->writeString($excelrivi, $excelsarake++, strip_tags(str_replace("<br>", " / ", $row[$ken_nimi])));
 											}
 										}
@@ -2551,7 +2540,7 @@
 
 								if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-								if(isset($workbook)) {
+								if(isset($worksheet)) {
 									$worksheet->write($excelrivi, $excelsarake++, $vsum);
 								}
 							}
@@ -2600,7 +2589,7 @@
 
 							if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-							if (isset($workbook)) {
+							if (isset($worksheet)) {
 								$worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
 							}
 						}
@@ -2612,15 +2601,15 @@
 
 						echo "<br>";
 
-						if (isset($workbook)) {
-							// We need to explicitly close the workbook
-							$workbook->close();
+						if (isset($worksheet)) {
+							// We need to explicitly close the worksheet
+							$excelnimi = $worksheet->close();
 
 							echo "<table>";
 							echo "<tr><th>",t("Tallenna tulos"),":</th>";
 							echo "<form method='post' class='multisubmit'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-							echo "<input type='hidden' name='kaunisnimi' value='Myyntiseuranta.xls'>";
+							echo "<input type='hidden' name='kaunisnimi' value='".t('Myynninseuranta').".xlsx'>";
 							echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
 							echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
 							echo "</table><br>";

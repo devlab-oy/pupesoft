@@ -319,10 +319,34 @@
 
 	$paikat	= "";
 
-	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
-		$varaosavirhe .= $trow[minimi_era] > 0 
-			? t("HUOM: Rivin m‰‰r‰ on pyˆristetty minimier‰‰n tai t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era] ".t("Minimier‰ on") . ": $trow[minimi_era]<br>"
-			: t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]<br>";
+	if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
+
+		$mimyhuom = "HUOM: Rivin m‰‰r‰ on pyˆristetty";
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " minimier‰‰n";
+		}
+
+		if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+			if ($trow["minimi_era"] > 0) {
+				$mimyhuom .= " tai";
+			}
+
+			$mimyhuom .= " t‰yteen myyntier‰‰n";
+		}
+
+		// K‰‰nnet‰‰n teksti
+		$mimyhuom = t($mimyhuom)."!";
+
+		if ($trow['myynti_era'] > 0) {
+			$mimyhuom .= " ".t("Myyntier‰ on").": $trow[myynti_era]";
+		}
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " ".t("Minimier‰ on").": $trow[minimi_era]";
+		}
+
+		$varaosavirhe .= $mimyhuom."<br>";
 	}
 
 	//T‰ss‰ on kaikki saldoihin ja varastopaikkoihin liittyv‰t tsekit, eli EI tehd‰ saldottomille tuotteille, eik‰ tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
@@ -338,7 +362,7 @@
 		$varow = mysql_fetch_assoc($varesult);
 
 		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and !in_array($row["var2"], array("OK", "PK"))) {
-			$varaosavirhe .= "HUOM: Tuote sijaitsee erikoisvarastossa!<br>";
+			$varaosavirhe .= t("HUOM: Tuote sijaitsee erikoisvarastossa")."!<br>";
 			$riviok++;
 			$tilausok++;
 			$saako_hyvaksya++;

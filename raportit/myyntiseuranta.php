@@ -2120,6 +2120,7 @@
 
 									// jos kyseessa on tuote
 									if ($ken_nimi == "tuoteno") {
+										$row["koskematon_tuoteno"] = $row["tuoteno"];
 										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
 									}
 
@@ -2416,7 +2417,8 @@
 
 									// jos kyseessa on varastonarvo
 									if ($ken_nimi == "varastonarvo") {
-										list($varvo, $kierto, $varaston_saldo) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
+										if (!isset($row["koskematon_tuoteno"])) $row["koskematon_tuoteno"] = $row["tuoteno"];
+										list($varvo, $kierto, $varaston_saldo) = vararvo($row["koskematon_tuoteno"], $vvl, $kkl, $ppl);
 										$row[$ken_nimi] = $varvo;
 									}
 

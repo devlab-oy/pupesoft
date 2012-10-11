@@ -2128,12 +2128,26 @@
 		// viedään varastoon...
 		require ("tilauskasittely/varastoon.inc");
 
-		// laskutetaan suoratoimitetut jtrivit jos niitä oli tällä keikalla...
-		$toiminto = "kaikkiok";
-		$tee = "varma";
+		if ($tullaan_automaattikohdistuksesta) {
 
-		// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
-		require ("tilauskasittely/varastoon.inc");
+			$query = "	SELECT SUM(tilausrivi.hinta) hinta, SUM(tilausrivi.hinta_alkuperainen) hinta_alkuperainen
+						FROM tilausrivi
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus = '{$otunnus}'
+						AND tilausrivi.tyyppi != 'D'";
+			$sum_chk_row = mysql_fetch_assoc(pupe_query($query));
+
+			if ($sum_chk_row['hinta'] - $sum_chk_row['hinta_alkuperainen'] != 0) $tullaan_automaattikohdistuksesta = false;
+		}
+
+		if ($kauttalaskutus == "kylla" or $tullaan_automaattikohdistuksesta) {
+			// laskutetaan suoratoimitetut jtrivit jos niitä oli tällä keikalla...
+			$toiminto = "kaikkiok";
+			$tee = "varma";
+
+			// viedään varastoon TEHDÄÄN LOPPUKALKYYLI
+			require ("tilauskasittely/varastoon.inc");
+		}
 
 		if ($kauttalaskutus == "kylla") {
 			require ("tilauskasittely/laskuta_kauttalaskutus.inc");

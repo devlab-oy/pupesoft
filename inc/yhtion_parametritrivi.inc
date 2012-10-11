@@ -3154,3 +3154,15 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'ei_alennuksia_lapsituotteille') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'X' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Lapsituotteille lasketaan kaikki alennukset")."</option>";
+		$ulos .= "<option value = 'X' $sel>".t("Lapsituotteille ei anneta isätuotteen alennuksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

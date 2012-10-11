@@ -1675,7 +1675,6 @@
 		$puu_alekerr	= array();
 		$puu_ein 		= array();
 		$puu_var		= array();
-		$puu_lapsi      = array();
 
 		if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
 			// Kappalem‰‰r‰‰ ei voida lis‰t‰
@@ -1760,7 +1759,6 @@
 				$puu_alekerr[]	= $perherow["alekerroin"];
 				$puu_ein[] 		= $perherow["ei_nayteta"];
 				$puu_var[]		= $var;
-				$puu_lapsi      = 
 			}
 		}
 

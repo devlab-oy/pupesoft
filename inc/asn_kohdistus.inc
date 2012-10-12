@@ -335,7 +335,7 @@
 						$loysan_tilausrivi_muuttuja = count($kaytetyt_tilausrivit) > 0 ? ",'".implode("','", $kaytetyt_tilausrivit)."'" : "";
 						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','",$lisa_array)."'{$loysan_tilausrivi_muuttuja})";
 
-						$query = "	SELECT tilausrivi.*
+						$query = "	SELECT tilausrivi.*, tilausrivi.varattu+tilausrivi.kpl AS varattu
 									FROM tilausrivi
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND lasku.tunnus = tilausrivi.otunnus

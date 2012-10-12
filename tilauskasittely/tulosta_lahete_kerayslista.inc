@@ -491,7 +491,7 @@ if (!function_exists('alku_kerayslista')) {
 			$pdf->image_place($image, 801, 460, $thispage, array("scale" => 0.5));
 
 			// Tehdään asiakasnumero-viivakoodi
-			if ($asrow["asiakasnro"] > 0) {
+			if ($kukarow['yhtio'] == 'hair' and $asrow["asiakasnro"] > 0) {
 				if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 					$bottom_barcode = 582;
 					$bottom_barcode_text = 578;

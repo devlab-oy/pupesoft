@@ -1058,7 +1058,7 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00')
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1078,7 +1078,7 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00')
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.uusiotunnus AND lasku.mapvm = '0000-00-00' AND lasku.tapvm = '0000-00-00' AND lasku.alatila != 'X')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1098,7 +1098,7 @@
 									IF(tilausrivi.uusiotunnus = 0, ".PHP_INT_MAX.", tilausrivi.uusiotunnus) AS uusiotunnus,
 									tilausrivi.laadittu
 									FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus and tilausrivi.uusiotunnus = 0)
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.tunnus = '{$trow['tunnus']}'
@@ -1110,7 +1110,8 @@
 																	AND tuotteen_toimittajat.toim_tuoteno IN ({$toim_tuotenolisa}))
 									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-									AND tilausrivi.tyyppi = 'O')
+									AND tilausrivi.tyyppi = 'O'
+									AND tilausrivi.uusiotunnus = 0)
 									ORDER BY uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$kokeillaan = pupe_query($query);

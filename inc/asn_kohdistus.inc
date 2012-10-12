@@ -368,8 +368,8 @@
 							$kohdistamatta 	-= $loysatpois["varattu"];
 						}
 
-						$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
-						echo "<br>Ylim‰‰r‰ist‰2: $ylimaaraista = {$row["kappalemaara"]} - $laskuri<br>";
+						$ylimaaraista = $ylimaaraista - $laskuri; // liikaa miinus tilauksella
+						echo "<br>Ylim‰‰r‰ist‰2: $ylimaaraista = {$ylimaaraista} - $laskuri<br>";
 
 					}
 
@@ -489,7 +489,7 @@
 						$vika_rivi = array_pop($split_array);
 						// vika_rivi on se tilausrivi joka splitataan ett‰ m‰‰r‰ t‰sm‰‰
 
-						$split_query	= "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$vika_rivi}'";
+						$split_query	= "SELECT *, varattu+kpl AS tilkpl FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$vika_rivi}'";
 						$split_result	= pupe_query($split_query);
 						$split_row		= mysql_fetch_assoc($split_result);
 						$erotus			= $split_row["tilkpl"] - $positiivinen_arvo;
@@ -514,7 +514,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
-						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
+						echo "<br><pre>",str_replace("\t", "", $updatequery),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case

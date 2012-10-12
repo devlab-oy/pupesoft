@@ -138,7 +138,7 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 											AND lasku.tunnus = tilausrivi.otunnus
 											AND lasku.tila = 'O'
-											AND alatila in ('A','X'))
+											AND lasku.alatila = 'A')
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
 											AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -164,7 +164,7 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND alatila in ('A','X'))
+												AND lasku.alatila = 'A')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -191,7 +191,7 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND alatila in ('A','X'))
+												AND lasku.alatila = 'A')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -217,7 +217,7 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND alatila in ('A','X'))
+												AND lasku.alatila = 'A')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -244,7 +244,7 @@
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 												AND lasku.tunnus = tilausrivi.otunnus
 												AND lasku.tila = 'O'
-												AND alatila in ('A','X'))
+												AND lasku.alatila = 'A')
 								JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 												AND toimi.tunnus = lasku.liitostunnus
 												AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -339,7 +339,7 @@
 									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 													AND lasku.tunnus = tilausrivi.otunnus
 													AND lasku.tila = 'O'
-													AND alatila in ('A','X'))
+													AND lasku.alatila = 'A')
 									JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 													AND toimi.tunnus = lasku.liitostunnus
 													AND toimi.toimittajanro = '{$row['toimittajanumero']}'
@@ -456,7 +456,7 @@
 										tuoteno = '{$tilausrivirow['tuoteno']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$row['tunnus']}'";
-						echo "<br>Ylim‰‰r‰ist‰ == 0 haara<br><pre>",str_replace("\t", "", $query),"</pre><br>";
+						echo "<br>Ylim‰‰r‰ist‰ == 0 haara<br><pre>",str_replace("\t", "", $updatequery),"</pre><br>";
 						$upd_res = pupe_query($updatequery);
 
 						// Satula-Runko case

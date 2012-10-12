@@ -332,7 +332,8 @@
 					if ($ylimaaraista > 0) {
 
 						// $tilausrivi_muuttuja sisältää jo käytetyt rivit. Otetaan lisa_array:sta extraa vielä.
-						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $kaytetyt_tilausrivit)."','".implode("','",$lisa_array)."')";
+						$loysan_tilausrivi_muuttuja = count($kaytetyt_tilausrivit) > 0 ? ",'".implode("','", $kaytetyt_tilausrivit)."'" : "";
+						$loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','",$lisa_array)."'{$loysan_tilausrivi_muuttuja})";
 
 						$query = "	SELECT tilausrivi.*
 									FROM tilausrivi

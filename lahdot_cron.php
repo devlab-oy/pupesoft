@@ -144,8 +144,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila IN ('N','L')
 					AND alatila not in ('D','X')
-					AND toimitustavan_lahto = {$chk_row['tunnus']}
-					AND varasto = {$chk_row['varasto']}";
+					AND toimitustavan_lahto = {$chk_row['tunnus']}";
 		$chk_res3 = pupe_query($query);
 
 		if (mysql_num_rows($chk_res2) == 0 and mysql_num_rows($chk_res3) == 0) {
@@ -204,8 +203,8 @@
 
 			// Lis‰t‰‰n vain jos p‰iv‰lle ei oo aikaisemmin lis‰tty, tai jos alkupvm-muuttujalla halutaan lis‰t‰ $max_pvm_array-slotin sis‰lle uusia l‰htˆj‰
 			if (($pvm_int >= $alkupvm and $alkupvm > 0) or
-				($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]]) or
-				(isset($max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]])))) {
+				($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) or
+				(isset($max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$t_row["varasto"]])))) {
 
 				// Tehd‰‰n asiakasluokka-konversio
 				$asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");

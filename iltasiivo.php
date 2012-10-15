@@ -444,6 +444,14 @@
 				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
 		}
+
+		# Poistetaan tyhjät tuotepaikat joiden saldo on 0 ja tyyppi on 'S'
+		$query = "DELETE FROM tuotepaikat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					AND saldo = 0
+					AND tyyppi='S'
+					AND inventointilista_aika = '0000-00-00 00:00:00'";
+		$tuotepaikat_siivo_result = pupe_query($query);
 	}
 
 	if (!$php_cli) {

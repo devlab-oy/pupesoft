@@ -10478,7 +10478,7 @@ if (!function_exists("alv_popup")) {
 			}
 			$ulos .= "</select>";
 		}
-		
+
 		return $ulos;
 	}
 }
@@ -18770,27 +18770,36 @@ if (!function_exists('lisaa_tuotepaikka')) {
 }
 
 if (!function_exists('tarkista_varaston_hyllypaikka')) {
-	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $varmistuskoodi = '') {
+	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options = array()) {
 		global $kukarow;
 
-		$query_lisa = '';
-		if ($varmistuskoodi != '') {
-			$query_lisa = "AND varmistuskoodi = '{$varmistuskoodi}'";
+		# Haetaan varastopaikka
+		$query = "SELECT * FROM varaston_hyllypaikat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					AND hyllyalue='{$hyllyalue}'
+					AND hyllynro='{$hyllynro}'
+					AND hyllyvali='{$hyllyvali}'
+					AND hyllytaso='{$hyllytaso}'
+					";
+
+		# Sallitut kyselyn ehdot
+		$acceptable_options = array('varmistuskoodi', 'reservipaikka');
+		$query_lisa = array();
+
+		# parse options
+		foreach($options as $key => $value) {
+			if (!empty($key) and !empty($value) and in_array($key, $acceptable_options)) {
+				$query_lisa[] = "$key = '{$value}'";
+			}
 		}
 
-		$query = "	SELECT tunnus
-					FROM varaston_hyllypaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND hyllyalue = '{$hyllyalue}'
-					AND hyllynro = '{$hyllynro}'
-					AND hyllyvali = '{$hyllyvali}'
-					AND hyllytaso = '{$hyllytaso}'
-					$query_lisa";
-					# Noticet pois
-					##AND varasto = '{$varasto}'";
-		$chk_res = pupe_query($query);
+		if (count($query_lisa) > 0) {
+			$query_lisa = implode($query_lisa, " AND ");
+			$query .= "AND $query_lisa";
+		}
 
-		return mysql_num_rows($chk_res) == 0 ? false : true;
+		$result = pupe_query($query);
+		return (mysql_num_rows($result) == 0) ? false : true;
 	}
 }
 

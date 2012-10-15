@@ -81,7 +81,8 @@ if (isset($submit) and trim($submit) != '') {
 				$errors[] = t("Virheellinen määrä");
 			}
 			# Tarkistetaan koodi
-			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $koodi)) {
+			$options = array('varmistuskoodi' => $koodi);
+			if (!is_numeric($koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
 				$errors[] = t("Virheellinen varmistuskoodi");
 			}
 

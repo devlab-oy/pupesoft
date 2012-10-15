@@ -539,18 +539,11 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
 
 		# Koko suuntalava voidaan viedä vain reservipaikalle, jossa ei ole tuotteita.
-		$query = "SELECT *
-					FROM varaston_hyllypaikat
-					WHERE yhtio='{$kukarow['yhtio']}'
-					  AND hyllyalue='$suuntalavan_hyllyalue'
-					  AND hyllynro='$suuntalavan_hyllynro'
-					  AND hyllyvali='$suuntalavan_hyllyvali'
-					  AND hyllytaso='$suuntalavan_hyllytaso'
-					  AND reservipaikka='K'";
-		$hyllypaikka = mysql_fetch_assoc(pupe_query($query));
+		$options = array('reservipaikka' => 'K');
+		$hyllypaikka_ok = tarkista_varaston_hyllypaikka($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso, $options);
 
 		# Jos hyllypaikka on ok, tarkistetaan että siellä ei ole tuotteita
-		if (!$hyllypaikka) {
+		if (!$hyllypaikka_ok) {
 			echo "<font class='error'>".t("Hyllypaikkaa ei löydy tai se ei ole reservipaikka")."</font></br>";
 
 			# Takaisin samaan näkymään
@@ -560,11 +553,11 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		else {
 			$query = "SELECT *
 						FROM tuotepaikat
-						WHERE yhtio='{$kukarow['yhtio']}'
-						AND hyllyalue='$suuntalavan_hyllyalue'
-						AND hyllynro='$suuntalavan_hyllynro'
-						AND hyllyvali='$suuntalavan_hyllyvali'
-						AND hyllytaso='$suuntalavan_hyllytaso'
+						WHERE yhtio		= '{$kukarow['yhtio']}'
+						AND hyllyalue	= '$suuntalavan_hyllyalue'
+						AND hyllynro	= '$suuntalavan_hyllynro'
+						AND hyllyvali	= '$suuntalavan_hyllyvali'
+						AND hyllytaso	= '$suuntalavan_hyllytaso'
 						AND saldo > 0";
 			$result = pupe_query($query);
 			$tuotepaikat = mysql_num_rows($result);

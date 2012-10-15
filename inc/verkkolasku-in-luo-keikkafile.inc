@@ -1114,7 +1114,7 @@
 									AND tilausrivi.tyyppi = 'O'
 									AND tilausrivi.uusiotunnus = 0)
 									ORDER BY uusiotunnus ASC, laskutettuaika ASC, laadittu ASC";
-						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						echo "<pre>",str_replace("\t", "", $query),"</pre><br>";
 						$kokeillaan = pupe_query($query);
 
 						$laskuri = 0;
@@ -1178,9 +1178,14 @@
 							$lisa_array[] = $kokeiltiin['tunnus'];
 							$split_array[] = $kokeiltiin['tunnus'];
 							$kohdistamatta -= $kpl_chk_row["varattu"];
+
+							echo "laskuri: $laskuri kohdistamatta: $kohdistamatta lisättiin tunnus lisa_arrayseen <-- $kokeiltiin[tunnus]<br><br>";
 						}
 
-						if (mysql_num_rows($kokeillaan) > 0) $ylimaaraista = $rtuoteno[$i]["kpl"] - $laskuri; // liikaa miinus tilauksella
+						if (mysql_num_rows($kokeillaan) > 0) {
+							echo "ylimaaraista ".($ylimaaraista - $laskuri)." = {$ylimaaraista} - $laskuri<br><br>";
+							$ylimaaraista = $ylimaaraista - $laskuri; // liikaa miinus tilauksella
+						}
 					}
 
 					if ($ylimaaraista > 0) {

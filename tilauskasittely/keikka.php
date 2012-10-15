@@ -557,8 +557,7 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 						AND hyllyalue	= '$suuntalavan_hyllyalue'
 						AND hyllynro	= '$suuntalavan_hyllynro'
 						AND hyllyvali	= '$suuntalavan_hyllyvali'
-						AND hyllytaso	= '$suuntalavan_hyllytaso'
-						AND saldo > 0";
+						AND hyllytaso	= '$suuntalavan_hyllytaso'";
 			$result = pupe_query($query);
 			$tuotepaikat = mysql_num_rows($result);
 

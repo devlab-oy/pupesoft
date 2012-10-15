@@ -36,8 +36,7 @@ if (isset($submit) and trim($submit) != '') {
 						AND hyllyalue	= '$hyllyalue'
 						AND hyllynro	= '$hyllynro'
 						AND hyllyvali	= '$hyllyvali'
-						AND hyllytaso	= '$hyllytaso'
-						AND saldo > 0";
+						AND hyllytaso	= '$hyllytaso'";
 			$result = pupe_query($query);
 			$tuotteita_tuotepaikalla = mysql_num_rows($result);
 
@@ -87,7 +86,7 @@ if (isset($submit) and trim($submit) != '') {
 				}
 			}
 			else {
-				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";
+				$error['varalle']  = "Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka.";
 			}
 		}
 		else {

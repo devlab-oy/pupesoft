@@ -326,7 +326,7 @@
 
 					$ylimaaraista = $row["kappalemaara"] - $laskuri; // liikaa miinus tilauksella
 
-					echo "<br>Ylim‰‰r‰ist‰1: $ylimaaraista = {$row["kappalemaara"]} - $laskuri<br>";
+					echo "<br>Ylim‰‰r‰ist‰1: $ylimaaraista = {$row["kappalemaara"]} - $laskuri (kohdistamatta: $kohdistamatta)<br>";
 
 					// haetaan viel‰ varmuudeksi lˆysimm‰ll‰ queryll‰ lis‰rivej‰.
 					if ($ylimaaraista > 0) {
@@ -358,7 +358,11 @@
 						echo "<br><pre>",str_replace("\t", "", $query),"</pre><br>";
 						$loysa_result = pupe_query($query);
 
+						$laskuri = 0;
+
 						while ($loysatpois = mysql_fetch_assoc($loysa_result)) {
+
+							echo "loop (kohdistamatta: $kohdistamatta)<br>";
 
 							if ($kohdistamatta <= 0) break;
 
@@ -368,8 +372,8 @@
 							$kohdistamatta 	-= $loysatpois["varattu"];
 						}
 
+						echo "<br>Ylim‰‰r‰ist‰2: ".($ylimaaraista-$laskuri)." = {$ylimaaraista} - $laskuri<br>";
 						$ylimaaraista = $ylimaaraista - $laskuri; // liikaa miinus tilauksella
-						echo "<br>Ylim‰‰r‰ist‰2: $ylimaaraista = {$ylimaaraista} - $laskuri<br>";
 
 					}
 

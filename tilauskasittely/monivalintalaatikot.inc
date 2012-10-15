@@ -563,7 +563,11 @@
 		$kustpt = substr($kustpt, 0, -1);
 
 		if (trim($kustpt) != '') {
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
+				$lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$lisa_haku_kustp = " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 				$lisa .= " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
 			}

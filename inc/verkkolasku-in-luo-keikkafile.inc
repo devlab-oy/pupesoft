@@ -1091,7 +1091,8 @@
 									JOIN tuote on (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.status != 'P')
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tyyppi = 'O'
-									AND tilausrivi.uusiotunnus != '{$tilausrivirow['uusiotunnus']}')
+									AND tilausrivi.uusiotunnus != '{$tilausrivirow['uusiotunnus']}'
+									AND tilausrivi.uusiotunnus != 0)
 									UNION
 									(SELECT DISTINCT tilausrivi.tunnus, toimi.asn_sanomat,
 									IF(tilausrivi.laskutettuaika = '0000-00-00', '9999-12-31', tilausrivi.laskutettuaika) AS laskutettuaika,

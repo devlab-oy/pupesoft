@@ -43,7 +43,7 @@
 				$kardex_sscc_sisalto = $kardex_row['sscc_ulkoinen'];
 			}
 
-			$query = "	SELECT tunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
+			$query = "	SELECT tunnus, tuoteno, nimitys, hyllyalue, CONCAT(hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$kardex_row['tilausrivi']}'";
@@ -60,7 +60,11 @@
 
 			$kardex_row['kpl'] = str_replace(".", ",", $kardex_row['kpl']);
 
-			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$tilriv_tiedot_row['hyllypaikka']};{$kardex_row['tunnus']}\r\n";
+			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($tilriv_tiedot_row["hyllyalue"], $yhtiorow['varastontunniste']) : $tilriv_tiedot_row["hyllyalue"];
+
+			$hyllypaikka = "{$hyllyalue_value}-{$tilriv_tiedot_row['hyllypaikka']}";
+
+			$sisalto .= "4;{$kardex_sscc_sisalto};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kardex_row['kpl']};{$hyllypaikka};{$kardex_row['tunnus']}\r\n";
 		}
 
 		if ($kardex_ok) {
@@ -97,4 +101,3 @@
 			}
 		}
 	}
-?>

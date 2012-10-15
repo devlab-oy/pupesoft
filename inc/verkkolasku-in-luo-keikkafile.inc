@@ -1116,6 +1116,8 @@
 						echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$kokeillaan = pupe_query($query);
 
+						$laskuri = 0;
+
 						while ($kokeiltiin = mysql_fetch_assoc($kokeillaan)) {
 
 							// tilausrivi ei saa olla jo kohdistettu

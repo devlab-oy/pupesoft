@@ -144,7 +144,8 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila IN ('N','L')
 					AND alatila not in ('D','X')
-					AND toimitustavan_lahto = {$chk_row['tunnus']}";
+					AND toimitustavan_lahto = {$chk_row['tunnus']}
+					AND varasto = {$chk_row['varasto']}";
 		$chk_res3 = pupe_query($query);
 
 		if (mysql_num_rows($chk_res2) == 0 and mysql_num_rows($chk_res3) == 0) {
@@ -164,16 +165,16 @@
 
 
 	// Kuinka pitkälle ollaan jo generoitu tän skriptin toimesta lähtöjä per toimitustapa
-	$query = "	SELECT liitostunnus, max(pvm) maxpvm
+	$query = "	SELECT liitostunnus, varasto, max(pvm) maxpvm
 				FROM lahdot
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				GROUP BY 1";
+				GROUP BY 1,2";
 	$chk_res = pupe_query($query);
 
 	$max_pvm_array = array();
 
 	while ($chk_row = mysql_fetch_assoc($chk_res)) {
-		$max_pvm_array[$chk_row["liitostunnus"]] = (int) str_replace("-", "", $chk_row["maxpvm"]);
+		$max_pvm_array[$chk_row["liitostunnus"]][$chk_row["varasto"]] = (int) str_replace("-", "", $chk_row["maxpvm"]);
 	}
 
 	for ($i = 0; $i <= $paivia_eteenpain; $i++) {
@@ -194,7 +195,7 @@
 					WHERE yhtio 		 = '{$kukarow['yhtio']}'
 					AND lahdon_viikonpvm = '{$aika_vkonpvm}'
 					AND aktiivi 		!= 'E'
-					ORDER BY liitostunnus, asiakasluokka";
+					ORDER BY liitostunnus, varasto, asiakasluokka";
 		$toimitustavan_lahdot_res = pupe_query($query);
 
 		while ($t_row = mysql_fetch_assoc($toimitustavan_lahdot_res)) {
@@ -203,8 +204,8 @@
 
 			// Lisätään vain jos päivälle ei oo aikaisemmin lisätty, tai jos alkupvm-muuttujalla halutaan lisätä $max_pvm_array-slotin sisälle uusia lähtöjä
 			if (($pvm_int >= $alkupvm and $alkupvm > 0) or
-				($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]]) or
-				(isset($max_pvm_array[$t_row["liitostunnus"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]])))) {
+				($alkupvm == 0 and (!isset($max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]]) or
+				(isset($max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]]) and $pvm_int > $max_pvm_array[$t_row["liitostunnus"]][$chk_row["varasto"]])))) {
 
 				// Tehdään asiakasluokka-konversio
 				$asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");

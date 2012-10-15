@@ -210,14 +210,6 @@
 
 							if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
 									($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
-
-								$query = "	SELECT unifaun_nimi
-									FROM kirjoittimet
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$reittietikettitulostin}'";
-								$kirjoitin_res = pupe_query($query);
-								$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
-
 								$unifaun_kaytossa = TRUE;
 							}
 

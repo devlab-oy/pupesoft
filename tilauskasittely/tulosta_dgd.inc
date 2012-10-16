@@ -30,7 +30,7 @@ if (!function_exists('alku_dgd')) {
 		// Rakirno
 		$query = "	SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
 					FROM rahtikirjat r1
-					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0
+					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0 and r2.otsikkonro>0
 					WHERE r1.otsikkonro = '$laskurow[tunnus]'
 	            	AND r1.yhtio = '$kukarow[yhtio]'
 					GROUP BY 1";
@@ -62,7 +62,7 @@ if (!function_exists('alku_dgd')) {
 
 		// 9 Additional handling information
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"]." ".$yhtiorow["puhelin"], mm_pt(105), mm_pt(202), 'LATIN1');
-		
+
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 

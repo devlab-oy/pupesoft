@@ -462,7 +462,21 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
 		//Magento keississä maksuehdon koko nimi verkkokaupassa
-			if ($edi_tyyppi == "magento") {
+			if ($edi_tyyppi == "magento" and $tieto != '') {
+
+				if ($editilaus_maksuehto == "") {
+					$query = "	SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND teksti = '{$tieto}'";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) == 1) {
+						$editilaus_maksuehto_row = mysql_fetch_assoc($result);
+						$editilaus_maksuehto	 = $editilaus_maksuehto_row['tunnus'];
+					}
+				}
+
 				$editilaus_maksuteksti .= $tieto;
 			}
 			break;
@@ -967,6 +981,10 @@ while ($tietue = fgets($fd)) {
 					if ($editilaus_tilaustyyppi == "9") {
 						$editilaus_eilahetetta = "o";
 						$editilaus_sisainen = "o";
+					}
+					elseif ($editilaus_tilaustyyppi == 'K') {
+						$editilaus_tila 	= 'N';
+						$editilaus_alatila 	= '';
 					}
 				}
 
@@ -1702,9 +1720,11 @@ while ($tietue = fgets($fd)) {
 					}
 				}
 
-				// Tilaus merkataan valmiiksi
-				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or die($query);
+				if ($editilaus_tilaustyyppi != 'K') {
+					// Tilaus merkataan valmiiksi
+					$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+					$result = mysql_query($query) or die($query);
+				}
 
 				// haetaan tilauksen tiedot
 				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
@@ -1716,7 +1736,7 @@ while ($tietue = fgets($fd)) {
 				$editilaus_lasku_tunnus = $laskurow["tunnus"];
 
 				// jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3) {
+				if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
 					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
@@ -1923,5 +1943,3 @@ else {
 	echo $edi_ulos;
 	echo "\n";
 }
-
-?>

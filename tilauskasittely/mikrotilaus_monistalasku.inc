@@ -23,6 +23,7 @@ if ($tee == "file") {
 		$korjaaalvit 	= array();
 		$monistettavat	= array();
 		$suoraanlasku 	= array();
+		$korjaarahdit 	= array();
 
 		while ($rivi = fgets($file, 4096)) {
 
@@ -38,7 +39,7 @@ if ($tee == "file") {
 			$alvik = trim($rivi[1]);
 			$hyvit = trim($rivi[2]);
 			$slask = trim($rivi[3]);
-
+			$krahd = trim($rivi[4]);
 
 			$query = "	SELECT tunnus
 						FROM lasku
@@ -63,6 +64,7 @@ if ($tee == "file") {
 
 				$korjaaalvit[$row["tunnus"]]  = $alvik;
 				$suoraanlasku[$row["tunnus"]] = $slask;
+				$korjaarahdit[$row["tunnus"]] = $krahd;
 			}
 		}
 
@@ -71,9 +73,11 @@ if ($tee == "file") {
 		$alvik 		= "";
 		$hyvit 		= "";
 		$slask 		= "";
+		$krahd		= "";
 
 		fclose($file);
 	}
+
 	$tee = "ETSILASKU";
 }
 
@@ -83,11 +87,11 @@ if ($tee == 'mikrotila') {
 	echo "	<form method='post' name='sendfile' enctype='multipart/form-data'>
 			<input type='hidden' name='tee' value='file'>
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>
-			<table border='0' cellpadding='3' cellspacing='2'>
+			<table>
 			<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 			<tr>";
 
-	echo "	<td>".t("Laskunro")."</td><td>".t("Korjaa alvit")."</td><td>".t("Hyvitä")."</td><td>".t("Suoraan laskutukseen")."</td>";
+	echo "	<td>".t("Laskunro")."</td><td>".t("Korjaa alvit")."</td><td>".t("Hyvitä")."</td><td>".t("Suoraan laskutukseen")."</td><td>".t("Laske rahtiveloitus uudestaan")."</td>";
 
 	echo "	</tr>
 			</table>
@@ -95,8 +99,7 @@ if ($tee == 'mikrotila') {
 			<table>
 			<tr>";
 
-	echo "
-			<th>".t("Valitse tiedosto").":</th>
+	echo "	<th>".t("Valitse tiedosto").":</th>
 			<td><input name='userfile' type='file'></td>
 			<td class='back'><input type='submit' value='".t("Läheta")."'></td>
 			</tr>

@@ -1247,7 +1247,7 @@
 		}
 		if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
-			if ($kappaleet > 0) {
+			if ($kappaleet > 0 and $tyomtyyppi != 'Z') {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
@@ -1683,6 +1683,12 @@
 
 					// Aloitellaan lomakkeen teko
 					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
+					
+					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
+						// Ekan sivun otsikot
+						$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;
+						$params_tyomaarays = tyomaarays_rivi_otsikot($params_tyomaarays);
+					}
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$params_tyomaarays["row"] = $row;

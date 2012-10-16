@@ -405,6 +405,26 @@
 		}
 		*/
 
+		// Poistetaan kaikki yhden tuotteen korvaavuusketjut
+		$query = "	SELECT group_concat(tunnus) as tunnus, id
+					FROM korvaavat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					GROUP BY id
+					HAVING count(id) = 1";
+		$result = pupe_query($query);
+
+		$laskuri = 0;
+
+		while ($row = mysql_fetch_assoc($result)) {
+			$query = "DELETE FROM korvaavat WHERE tunnus='$row[tunnus]'";
+			if($delete_result = pupe_query($query)) {
+				$laskuri++;
+			}
+		}
+
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri yhden tuotteen korvaavuusketjua.\n";
+		$laskuri = 0;
+
 		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
 					FROM tuotepaikat

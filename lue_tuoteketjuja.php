@@ -158,7 +158,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 	if ($vikaa != 0 or $tarkea < count($pakolliset)) {
 		die("<br><br><font class='error'>".t("VIRHE: Pakollisisa sarakkeita puuttuu! Ei voida jatkaa")."!<br></font>");
 	}
-	
+
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
 	if ($postoiminto == 'X') {
 		die("<br><br><font class='error'>".t("VIRHE: Toiminto-sarake puuttuu! Ei voida jatkaa")."!<br></font>");
@@ -312,15 +312,16 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 							if ((mysql_num_rows($kresult) == 0 and $toiminto == 'LISAA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
 
 								if ($toiminto == 'LISAA') {
+									# Jos ei annettu järjestystä, lisätään uusi järjestys+1
 									if ($jarjestys == 0) {
-										$kquery = "	SELECT max(jarjestys) jarjestys
-													FROM $table
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													and id = '$id'";
-										$iresult = pupe_query($kquery);
-										$irow = mysql_fetch_assoc($iresult);
+										# Uusi korvaava laitetaan aina päätuotteeksi
+										$jarjestys = 1;
 
-										$jarjestys = (int) $irow["jarjestys"] + 1;
+										# Päivitetään järjestyksiä jonossa +1
+										$uquery = "UPDATE korvaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+													WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
+										$result = pupe_query($uquery);
+
 									}
 
 									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
@@ -357,7 +358,7 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 												SET jarjestys = $siirtojarj,
 												muuttaja = '$kukarow[kuka]',
 												muutospvm = now()
-												WHERE tunnus = '$irow[tunnus]'";
+												WHERE tunnus = '$irow[tunnus]' and jarjestys!=0";
 									$updres = pupe_query($kquery);
 
 									$siirtojarj++;

@@ -1184,7 +1184,7 @@
 
 						if (mysql_num_rows($kokeillaan) > 0) {
 							echo "ylimaaraista ".($ylimaaraista - $laskuri)." = {$ylimaaraista} - $laskuri<br><br>";
-							$ylimaaraista = $ylimaaraista - $laskuri; // liikaa miinus tilauksella
+							$ylimaaraista = $ylimaaraista - $laskuri;
 						}
 					}
 

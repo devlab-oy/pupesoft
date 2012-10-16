@@ -35,17 +35,16 @@ if (mysql_num_rows($res) == 0) {
 }
 
 if ($tee == 'LAHETA') {
-	
+
 	if (!empty($aseta_myyntikielto)) {
 		$query = "  UPDATE asiakas
 					SET myyntikielto = 'K'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND ytunnus = '$aseta_myyntikielto'";
-					
 		$result = pupe_query($query);
 	}
-	
-		// kirjeen l‰hetyksen status
+
+	// kirjeen l‰hetyksen status
 	$ekarhu_success = true;
 
 	if (!empty($_POST['lasku_tunnus'])) {
@@ -156,10 +155,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
-
-
 	$query = "	SELECT asiakas.ytunnus,
-				asiakas.myyntikielto,
 				IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
 						concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
 						concat(asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp)) asiakastiedot,
@@ -394,19 +390,16 @@ if ($tee == 'KARHUA')  {
 	echo "</table>";
 	echo "</td></tr></table><br>";
 
-	if (isset($ekirje_config) and is_array($ekirje_config)) {
-		$submit_text = 'L‰het‰ eKirje';
-	}
-	else {
-		$submit_text = 'Tulosta paperille';
-	}
-
 	echo "<table>";
 	echo "<tr>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
 
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L‰het‰ eKirje')."'></td>";
+	}
+
+	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+		echo "<td class='back'><input type='button' onclick='document.lahetaformi.maventa_laheta.click();' value='".t('L‰het‰ Maventaan')."'></td>";
 	}
 
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
@@ -476,7 +469,7 @@ if ($tee == 'KARHUA')  {
 		if ($lasku["karhuttu"] > 2) {
 			$ehdota_maksukielto = 1;
 		}
-		
+
 		$summmmma += $lasku["summa"];
 
 		// ker‰t‰‰n eri valuutat taulukkoon
@@ -494,9 +487,9 @@ if ($tee == 'KARHUA')  {
 	echo "</table><br>";
 
 	if ($ehdota_maksukielto) {
-		echo "<input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Aseta myyntikielto asiakkaalle ") . $asiakastiedot["ytunnus"];
+		echo "<font class='error'><input type='checkbox' name = 'aseta_myyntikielto' value = '{$asiakastiedot["ytunnus"]}'> " . t("Asiakkaalla on v‰hint‰‰n kolme kertaa karhuttu lasku. Aseta myyntikielto asiakkaille ytunnuksella").": {$asiakastiedot["ytunnus"]}</font>";
 	}
-	
+
 	echo "<table>";
 	echo "<tr>";
 
@@ -514,6 +507,10 @@ if ($tee == 'KARHUA')  {
 	// voiko l‰hett‰‰ eKirjeen?
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
+	}
+	
+	if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+		echo "<input type='submit' name='maventa_laheta' value='" . t('L‰het‰ Maventaan') . "'>";
 	}
 
 	echo "</td></form>";

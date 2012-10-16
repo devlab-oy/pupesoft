@@ -462,7 +462,21 @@ while ($tietue = fgets($fd)) {
 
 		case 'OSTOTIL.OT_MAKSUEHTO' :
 		//Magento keississä maksuehdon koko nimi verkkokaupassa
-			if ($edi_tyyppi == "magento") {
+			if ($edi_tyyppi == "magento" and $tieto != '') {
+
+				if ($editilaus_maksuehto == "") {
+					$query = "	SELECT *
+								FROM maksuehto
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND teksti = '{$tieto}'";
+					$result = pupe_query($query);
+
+					if (mysql_num_rows($result) == 1) {
+						$editilaus_maksuehto_row = mysql_fetch_assoc($result);
+						$editilaus_maksuehto	 = $editilaus_maksuehto_row['tunnus'];
+					}
+				}
+
 				$editilaus_maksuteksti .= $tieto;
 			}
 			break;

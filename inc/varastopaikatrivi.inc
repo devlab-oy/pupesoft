@@ -37,6 +37,7 @@
 		$ulos .= "<option value=''>".t("Normaalivarasto josta kaikki myyvät")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Erikoisvarasto josta voi myydä")."</option>";
 		$ulos .= "<option value='E' $sel[E]>".t("Erikoisvarasto josta automaattisesti ei myydä")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Poistettu varasto")."</option>";
 		$ulos .= "</select>";
 
 		$ulos .= "</select></td>";

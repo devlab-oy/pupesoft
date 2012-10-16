@@ -3128,6 +3128,30 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'korvaavuusketjun_tuotteet') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Korvaavaksi tuotteeksi kelpaa korvaavuusketjun kaikki tuotteet")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Korvaaviksi tuotteiksi kelpaa korvaavuusketjussa j‰rjestykselt‰‰n pienimm‰t tuotteet")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'korvaavusketjun_puutekasittely') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n syˆtetty tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Jos korvaavuusketjun kaikki tuotteet on loppu, lis‰t‰‰n korvaavuusketjun ensimm‰inen tuote puutteeksi/j‰lkitoimitukseen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == 'ostolaskun_kulutilit') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

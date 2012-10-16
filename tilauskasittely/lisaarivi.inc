@@ -543,14 +543,23 @@
 						and yhtio		= '$kukarow[yhtio]'";
 			$kres1 = pupe_query($query);
 
-			while ($krow1 = mysql_fetch_assoc($kres1)) {
+			while ($krow1 = mysql_fetch_array($kres1)) {
+				
+				if ($yhtiorow["korvaavuusketjun_tuotteet"] == "K") { 
+					$korvaavuusketjun_jarjestys = " and korvaavat.jarjestys <= '{$krow1["jarjestys"]}' ";
+				}
+				else {
+					$korvaavuusketjun_jarjestys = "";
+				}
+
 				// Käydään läpi kaikki korvaavat...
 				$query = "	SELECT tuote.*
 							FROM korvaavat
 							JOIN tuote ON korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
 							WHERE korvaavat.id	='$krow1[id]'
 							and korvaavat.yhtio	='$kukarow[yhtio]'
-							order by korvaavat.jarjestys, korvaavat.tuoteno";
+							{$korvaavuusketjun_jarjestys}
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno";
 				$kres2 = pupe_query($query);
 
 				while ($krow2 = mysql_fetch_assoc($kres2)) {
@@ -2215,6 +2224,31 @@
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
 				}
+			}
+
+			if ($yhtiorow["korvaavusketjun_puutekasittely"] == "K") {
+
+				$query = "	SELECT id 
+							FROM korvaavat 
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$trow["tuoteno"]}'
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno
+							limit 1";
+				$presult = pupe_query($query);
+				$prow = mysql_fetch_assoc($presult);
+				
+				$query = "	SELECT tuoteno 
+							FROM korvaavat 
+							WHERE yhtio = '{$kukarow["yhtio"]}' 
+							AND id = '{$prow["id"]}'
+							order by if(korvaavat.jarjestys = 0, 9999999999, korvaavat.jarjestys), korvaavat.tuoteno
+							limit 1";
+				$tresult = pupe_query($query);
+				$korvaava_row = mysql_fetch_assoc($tresult);
+				
+				$kommentti .= " HUOM! Korvaa tuotteen {$alkupera_trow["tuoteno"]}";
+				
+				$trow["tuoteno"] = $korvaava_row["tuoteno"];
 			}
 
 			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';

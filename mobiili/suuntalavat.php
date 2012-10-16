@@ -145,7 +145,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	}
 
 	# Jos suuntalavalle on ehditty listätä tuotteita, disabloidaan keräysvyöhyke ja hyllyalue
-	$query = "SELECT tunnus FROM tilausrivi WHERE suuntalava = '{$muokkaa}' and yhtio='artr'";
+	$query = "SELECT tunnus FROM tilausrivi WHERE suuntalava = '{$muokkaa}' and yhtio='{$kukarow['yhtio']}'";
 	$result = pupe_query($query);
 	$disabled = (mysql_num_rows($result) != 0) ? ' disabled' : '';
 
@@ -160,7 +160,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	$result = pupe_query($query);
 	if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
 
-	$rivit_query = "SELECT * FROM tilausrivi WHERE suuntalava='{$suuntalava['tunnus']}'";
+	$rivit_query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' and suuntalava='{$suuntalava['tunnus']}'";
 	$rivit = mysql_num_rows(pupe_query($rivit_query));
 
 	$disable_siirtovalmis = ($rivit == 0) ? ' disabled' : '';
@@ -175,6 +175,9 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 
 		# Jos ei virheitä niin päivitetään suuntalava
 		if(count($errors) == 0) {
+
+			$keraysvyohyke = (isset($keraysvyohyke)) ? $keraysvyohyke : $suuntalava['keraysvyohyke'];
+
 			# Tehdään uusi suuntalava
 			$params = array(
 					'suuntalavan_tunnus'	=> $suuntalava['tunnus'],
@@ -188,7 +191,7 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 					'loppuhyllyvali'	 	=> $loppuhyllyvali,
 					'loppuhyllytaso'	 	=> $loppuhyllytaso,
 					'tyyppi'				=> $tyyppi,
-					'keraysvyohyke'	 		=> $keraysvyohyke = ($keraysvyohyke) ? : $suuntalava['keraysvyohyke'],
+					'keraysvyohyke'	 		=> $keraysvyohyke,
 					'kaytettavyys'	 		=> $kaytettavyys,
 					'terminaalialue'	 	=> $terminaalialue,
 					'korkeus'	 			=> '',
@@ -205,11 +208,11 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 			$otunnus = '';
 
 			require ("../tilauskasittely/suuntalavat.inc");
-			echo "<br>Päivitetiin suuntalava lisaa_suuntalava(:saapuminen => $otunnus, :params => $params)";
+			echo "<br>Päivitetiin suuntalava";
 			lisaa_suuntalava($otunnus, $params);
 
 			# Takaisin suuntalavat listaan
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavat.php'>";
 			exit();
 		}
 	}
@@ -225,7 +228,7 @@ else if ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntala
 	# Suuntalavan käsittelytapa (Suoraan (H)yllyyn)
 	if ($tee == 'suoraan_hyllyyn') {
 		echo "Käsittelytapa suoraan hyllyyn";
-		$query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
+		$query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}' and yhtio='{$kukarow['yhtio']}'";
 		$result = pupe_query($query);
 	}
 

@@ -243,7 +243,11 @@
 		$jatko = 0;
 	}
 
-	if ($sel["KERAYSLISTA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+	if ($avain_sel["TARJOUS_VAKIOTE"] == "SELECTED" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3" or mysql_field_name($result, $i) == "selitetark_4")) {
+		$tyyppi = 0;
+	}
+
+	if ($avain_sel["KERAYSLISTA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$handle = opendir("tilauskasittely");
 
@@ -371,7 +375,7 @@
 		$jatko  = 0;
 	}
 
-	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED" or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

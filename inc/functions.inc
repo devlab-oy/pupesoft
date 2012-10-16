@@ -3115,7 +3115,7 @@ if (!function_exists("alehinta")) {
 		// jos yhtio ei laske alennuksia lapsituotteille ja kyseessä on lapsituote, voidaan hieman oikaista...
 		if ($onlapsi !="" and $yhtiorow["ei_alennuksia_lapsituotteille"] != "" ) {
 			$hinta = tuotteen_myyntihinta($laskurow, $trow, $kpl);
-			return array($hinta, 'N', 0, $alehinta_alv, $alehinta_val);
+			return array($hinta, '', array() , $alehinta_alv, $alehinta_val);
 		}
 		
 		// haetaan asiakkaan tiedot

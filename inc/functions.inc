@@ -8186,19 +8186,19 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
-			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-			$laskurow["kontti"]								= $aputoimirow["kontti"];
-			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+			$laskurow["aktiivinen_kuljetus"] 				= $laskurow["aktiivinen_kuljetus"] != "" ? $laskurow["aktiivinen_kuljetus"] : $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $laskurow["aktiivinen_kuljetus_kansallisuus"] != "" ? $laskurow["aktiivinen_kuljetus_kansallisuus"] : $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $laskurow["bruttopaino"] != "" ? $laskurow["bruttopaino"] : $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $laskurow["kauppatapahtuman_luonne"] != "" ? $laskurow["kauppatapahtuman_luonne"] : $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $laskurow["kontti"] != 0 ? $laskurow["kontti"] : $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $laskurow["kuljetusmuoto"] != 0 ? $laskurow["kuljetusmuoto"] : $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $laskurow["lisattava_era"] != 0 ? $laskurow["lisattava_era"] : $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $laskurow["poistumistoimipaikka"] != "" ? $laskurow["poistumistoimipaikka"] : $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $laskurow["poistumistoimipaikka_koodi"] != "" ? $laskurow["poistumistoimipaikka_koodi"] : $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $laskurow["sisamaan_kuljetus"] != "" ? $laskurow["sisamaan_kuljetus"] : $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $laskurow["sisamaan_kuljetusmuoto"] != 0 ? $laskurow["sisamaan_kuljetusmuoto"] : $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $laskurow["sisamaan_kuljetus_kansallisuus"] != "" ? $laskurow["sisamaan_kuljetus_kansallisuus"] : $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $laskurow["vahennettava_era"] != 0 ? $laskurow["vahennettava_era"] : $aputoimirow["vahennettava_era"];
 		}
 		elseif ($laskurow["ultilno"] == '-2') {
 			// tuonti-ilmoitus
@@ -8210,19 +8210,19 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
-			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-			$laskurow["kontti"]								= $aputoimirow["kontti"];
-			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+			$laskurow["aktiivinen_kuljetus"] 				= $laskurow["aktiivinen_kuljetus"] != "" ? $laskurow["aktiivinen_kuljetus"] : $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $laskurow["aktiivinen_kuljetus_kansallisuus"] != "" ? $laskurow["aktiivinen_kuljetus_kansallisuus"] : $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $laskurow["bruttopaino"] != "" ? $laskurow["bruttopaino"] : $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $laskurow["kauppatapahtuman_luonne"] != "" ? $laskurow["kauppatapahtuman_luonne"] : $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $laskurow["kontti"] != 0 ? $laskurow["kontti"] : $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $laskurow["kuljetusmuoto"] != 0 ? $laskurow["kuljetusmuoto"] : $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $laskurow["lisattava_era"] != 0 ? $laskurow["lisattava_era"] : $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $laskurow["poistumistoimipaikka"] != "" ? $laskurow["poistumistoimipaikka"] : $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $laskurow["poistumistoimipaikka_koodi"] != "" ? $laskurow["poistumistoimipaikka_koodi"] : $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $laskurow["sisamaan_kuljetus"] != "" ? $laskurow["sisamaan_kuljetus"] : $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $laskurow["sisamaan_kuljetusmuoto"] != 0 ? $laskurow["sisamaan_kuljetusmuoto"] : $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $laskurow["sisamaan_kuljetus_kansallisuus"] != "" ? $laskurow["sisamaan_kuljetus_kansallisuus"] : $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $laskurow["vahennettava_era"] != 0 ? $laskurow["vahennettava_era"] : $aputoimirow["vahennettava_era"];
 		}
 		elseif ($varaston_row["maa"] == $laskurow["toim_maa"] and $laskurow["toim_maa"] != "") {
 			// intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
@@ -10478,7 +10478,7 @@ if (!function_exists("alv_popup")) {
 			}
 			$ulos .= "</select>";
 		}
-		
+
 		return $ulos;
 	}
 }

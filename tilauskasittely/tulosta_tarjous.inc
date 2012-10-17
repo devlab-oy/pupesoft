@@ -1303,7 +1303,7 @@ if (!function_exists('loppu_tarjous')) {
 
 				$result = t_avainsana('TARJOUS_VAKIOTE');
 				$veroteksti_row = mysql_fetch_assoc($result);
-				$veroteksti = $veroteksti_row['selite'];
+				$veroteksti = $veroteksti_row['selitetark'];
 
 				if(!$veroteksti) {
 					$veroteksti = "";
@@ -1358,7 +1358,17 @@ if (!function_exists('loppu_tarjous')) {
 					$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
 				}
 				else {
-					$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
+					if(strlen($veroteksti) > 110) {
+						$veroteksti = wordwrap($veroteksti, 110, "\n");
+						$_y = $kuha-24;
+						foreach (explode("\n", $veroteksti) as $teksi) {
+							$pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
+							$_y = $_y - 10;
+						}
+					}
+					else {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
+					}
 				}
 
 				$pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen", $kieli)."!", $page_tarjous[$sivu], $boldi);

@@ -44,6 +44,7 @@
 								child.show();
 							}
 							else {
+								if ($(child).hasClass('osasto')) $('tr.try').hide();
 								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 								child.hide();
 							}
@@ -713,7 +714,7 @@
 
 			$_osasto = $osasto == '' ? t("Ei osastoa") : $osasto;
 
-			echo "<tr class='yhteensa_osasto aktiivi' style='display:none;'>";
+			echo "<tr class='yhteensa_osasto aktiivi osasto' style='display:none;'>";
 			echo "<td align='right'></td>";
 			echo "<th class='toggleable' id='{$osasto}_try'><img style='float:left;' id='img_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteens‰")," {$_osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
 			echo "<td align='right'></td>";
@@ -731,7 +732,7 @@
 
 				if ($try == '') $try = t("Ei tuoteryhm‰‰");
 
-				echo "<tr class='{$osasto}_try spec aktiivi' style='display:none;'>";
+				echo "<tr class='{$osasto}_try spec aktiivi try' style='display:none;'>";
 				echo "<td align='right'></td>";
 				echo "<td align='left' class='tumma'>",t("Yhteens‰")," {$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
 				echo "<td align='right'></td>";

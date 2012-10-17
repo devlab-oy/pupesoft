@@ -587,20 +587,20 @@
 					$tilatut_katepros = $vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : '';
 					$laskutetut_katepros = (isset($vals['laskutetut_kate']) and isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != 0) ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : '';
 
-					if (!isset($yhteensa_try[$try]['tilatut_eurot'])) 		$yhteensa_try[$try]['tilatut_eurot'] = 0;
-					if (!isset($yhteensa_try[$try]['tilatut_kate'])) 		$yhteensa_try[$try]['tilatut_kate'] = 0;
-					if (!isset($yhteensa_try[$try]['tilatut_rivit'])) 		$yhteensa_try[$try]['tilatut_rivit'] = 0;
-					if (!isset($yhteensa_try[$try]['laskutetut_eurot'])) 	$yhteensa_try[$try]['laskutetut_eurot'] = 0;
-					if (!isset($yhteensa_try[$try]['laskutetut_kate']))		$yhteensa_try[$try]['laskutetut_kate'] = 0;
-					if (!isset($yhteensa_try[$try]['laskutetut_rivit'])) 	$yhteensa_try[$try]['laskutetut_rivit'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['tilatut_eurot'])) 		$yhteensa_try[$osasto][$try]['tilatut_eurot'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['tilatut_kate'])) 		$yhteensa_try[$osasto][$try]['tilatut_kate'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['tilatut_rivit'])) 		$yhteensa_try[$osasto][$try]['tilatut_rivit'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['laskutetut_eurot'])) 	$yhteensa_try[$osasto][$try]['laskutetut_eurot'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['laskutetut_kate']))	$yhteensa_try[$osasto][$try]['laskutetut_kate'] = 0;
+					if (!isset($yhteensa_try[$osasto][$try]['laskutetut_rivit'])) 	$yhteensa_try[$osasto][$try]['laskutetut_rivit'] = 0;
 
-					$yhteensa_try[$try]['tilatut_eurot'] 		+= $vals['tilatut_eurot'];
-					$yhteensa_try[$try]['tilatut_kate'] 		+= $vals['tilatut_kate'];
-					$yhteensa_try[$try]['tilatut_rivit'] 		+= $vals['tilatut_rivit'];
-					$yhteensa_try[$try]['laskutetut_eurot'] 	+= (isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != '') ? $vals['laskutetut_eurot'] : 0;
-					$yhteensa_try[$try]['laskutetut_kate'] 		+= (isset($vals['laskutetut_kate']) and $vals['laskutetut_kate'] != '') ? $vals['laskutetut_kate'] : 0;
-					$yhteensa_try[$try]['laskutetut_rivit'] 	+= (isset($vals['laskutetut_rivit']) and $vals['laskutetut_rivit'] != '') ? $vals['laskutetut_rivit'] : 0;
-					$yhteensa_try[$try]['pvm'][$pvm]			= $pvm;
+					$yhteensa_try[$osasto][$try]['tilatut_eurot'] 		+= $vals['tilatut_eurot'];
+					$yhteensa_try[$osasto][$try]['tilatut_kate'] 		+= $vals['tilatut_kate'];
+					$yhteensa_try[$osasto][$try]['tilatut_rivit'] 		+= $vals['tilatut_rivit'];
+					$yhteensa_try[$osasto][$try]['laskutetut_eurot'] 	+= (isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != '') ? $vals['laskutetut_eurot'] : 0;
+					$yhteensa_try[$osasto][$try]['laskutetut_kate'] 	+= (isset($vals['laskutetut_kate']) and $vals['laskutetut_kate'] != '') ? $vals['laskutetut_kate'] : 0;
+					$yhteensa_try[$osasto][$try]['laskutetut_rivit'] 	+= (isset($vals['laskutetut_rivit']) and $vals['laskutetut_rivit'] != '') ? $vals['laskutetut_rivit'] : 0;
+					$yhteensa_try[$osasto][$try]['pvm'][$pvm]			= $pvm;
 
 					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000, 0) : '';
 					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000, 0) : '';
@@ -619,8 +619,8 @@
 			}
 		}
 
-		echo "<tr>";
-		echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Kaikki Yhteens‰"),"</th>";
+		echo "<tr class='aktiivi'>";
+		echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteens‰"),"</th>";
 		echo "<td align='right' class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",round($yhteensa['tilatut_eurot'] / 1000, 0),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_rivit']),"</td>";
@@ -635,7 +635,7 @@
 
 			if ($kustp == '') $kustp = t("Ei kustannuspaikkaa");
 
-			echo "<tr class='yhteensa_kustp' style='display:none;'>";
+			echo "<tr class='yhteensa_kustp aktiivi' style='display:none;'>";
 			echo "<th>",t("Yhteens‰")," {$kustp}</th>";
 			echo "<td align='right'>",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
 			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
@@ -652,17 +652,36 @@
 
 		foreach ($yhteensa_osasto as $osasto => $vals) {
 
-			if ($osasto == '') $osasto = t("Ei osastoa");
+			$_osasto = $osasto == '' ? t("Ei osastoa") : $osasto;
 
-			echo "<tr class='yhteensa_osasto' style='display:none;'>";
-			echo "<th>",t("Yhteens‰")," {$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
-			echo "<td align='right'>",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
+			echo "<tr class='yhteensa_osasto aktiivi' style='display:none;'>";
+			echo "<th>",t("Yhteens‰")," {$_osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
+			echo "<td align='right' class='toggleable' id='{$osasto}_try'><img style='float:left;' id='img_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
 			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 			echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
 			echo "<td align='right'>",round($vals['laskutetut_eurot'] / 1000, 0),"</td>";
 			echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
 			echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
 			echo "</tr>";
+
+			unset($try);
+
+			foreach ($yhteensa_try[$osasto] as $try => $vals) {
+
+				if ($try == '') $try = t("Ei tuoteryhm‰‰");
+
+				echo "<tr class='{$osasto}_try spec aktiivi' style='display:none;'>";
+				echo "<td align='left' class='tumma'>",t("Yhteens‰")," {$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+				echo "<td align='right'>",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
+				echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
+				echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+				echo "<td align='right'>",round($vals['laskutetut_eurot'] / 1000, 0),"</td>";
+				echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
+				echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+				echo "</tr>";
+
+
+			}
 		}
 
 		echo "</table>";

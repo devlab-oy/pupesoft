@@ -13,30 +13,36 @@
 
 					$('td.toggleable, th.toggleable').toggle(
 						function() {
-							var child = $('.'+$(this).attr('id'));
+							var id = $(this).attr('id');
+							var child = $('.'+id);
 
-							$('tr.kustp').hide();
-							$('tr.try').hide();
-							$('tr.osasto').hide();
+							// $('tr.kustp').hide();
+							// $('tr.try').hide();
+							// $('tr.osasto').hide();
 
 							if (!$(child).is(':visible')) {
+								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 								child.show();
 							}
 							else {
+								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 								child.hide();
 							}
 						},
 						function() {
-							var child = $('.'+$(this).attr('id'));
+							var id = $(this).attr('id');
+							var child = $('.'+id);
 
-							$('tr.kustp').hide();
-							$('tr.try').hide();
-							$('tr.osasto').hide();
+							// $('tr.kustp').hide();
+							// $('tr.try').hide();
+							// $('tr.osasto').hide();
 
 							if (!$(child).is(':visible')) {
+								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 								child.show();
 							}
 							else {
+								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 								child.hide();
 							}
 						}
@@ -486,8 +492,8 @@
 			$arvot['laskutetut_rivit'] = isset($arvot['laskutetut_rivit']) ? $arvot['laskutetut_rivit'] : '';
 
 			echo "<tr class='aktiivi'>";
-			echo "<td align='left' class='toggleable' id='{$pvm}'><img src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />&nbsp;{$_pvm}</td>";
-			echo "<td align='right' class='toggleable' id='{$pvm}_osasto'>{$arvot['tilatut_eurot']}&nbsp;<img src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /></td>";
+			echo "<td align='left' class='toggleable' id='{$pvm}'><img style='float:left;' id='img_{$pvm}' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$_pvm}</td>";
+			echo "<td align='right' class='toggleable' id='{$pvm}_osasto'><img style='float:left;' id='img_{$pvm}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$arvot['tilatut_eurot']}</td>";
 			echo "<td align='right'>{$tilatut_katepros}</td>";
 			echo "<td align='right'>{$arvot['tilatut_rivit']}</td>";
 			echo "<td align='right'>{$arvot['laskutetut_eurot']}</td>";
@@ -521,7 +527,7 @@
 				$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000, 0) : '';
 				$vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : '';
 
-				echo "<tr class='{$pvm} tumma kustp' style='display:none;'>";
+				echo "<tr class='{$pvm} spec kustp' style='display:none;'>";
 				echo "<td align='right'>{$kustp}</td>";
 				echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
 				echo "<td align='right'>{$tilatut_katepros}</td>";
@@ -558,7 +564,7 @@
 				$vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : '';
 
 				echo "<tr class='{$pvm}_osasto tumma osasto' style='display:none;'>";
-				echo "<td align='right' class='toggleable' id='{$pvm}_{$osasto}_try'>{$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"&nbsp;<img src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' /></td>";
+				echo "<td align='right' class='toggleable' id='{$pvm}_{$osasto}_try'><img style='float:left;' id='img_{$pvm}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</td>";
 				echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
 				echo "<td align='right'>{$tilatut_katepros}</td>";
 				echo "<td align='right'>{$vals['tilatut_rivit']}</td>";
@@ -614,8 +620,8 @@
 		}
 
 		echo "<tr>";
-		echo "<th class='toggleable' id='yhteensa_kustp'><img src='{$palvelin2}pics/lullacons/bullet-arrow-down.png' />&nbsp;",t("Kaikki Yhteensä"),"</th>";
-		echo "<td align='right'>",round($yhteensa['tilatut_eurot'] / 1000, 0),"</td>";
+		echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Kaikki Yhteensä"),"</th>";
+		echo "<td align='right' class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",round($yhteensa['tilatut_eurot'] / 1000, 0),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_rivit']),"</td>";
 		echo "<td align='right'>",round($yhteensa['laskutetut_eurot'] / 1000, 0),"</td>";
@@ -630,7 +636,26 @@
 			if ($kustp == '') $kustp = t("Ei kustannuspaikkaa");
 
 			echo "<tr class='yhteensa_kustp' style='display:none;'>";
-			echo "<th>",t("Yhteensä {$kustp}"),"</th>";
+			echo "<th>",t("Yhteensä")," {$kustp}</th>";
+			echo "<td align='right'>",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
+			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
+			echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+			echo "<td align='right'>",round($vals['laskutetut_eurot'] / 1000, 0),"</td>";
+			echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
+			echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+			echo "</tr>";
+		}
+
+		ksort($yhteensa_osasto);
+
+		unset($osasto);
+
+		foreach ($yhteensa_osasto as $osasto => $vals) {
+
+			if ($osasto == '') $osasto = t("Ei osastoa");
+
+			echo "<tr class='yhteensa_osasto' style='display:none;'>";
+			echo "<th>",t("Yhteensä")," {$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
 			echo "<td align='right'>",round($vals['tilatut_eurot'] / 1000, 0),"</td>";
 			echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
 			echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";

@@ -304,8 +304,7 @@
 							AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
 							AND tuote.status != 'P'
 							AND tuote.tuotetyyppi NOT in ('A','B')
-							AND tuote.tuoteno != ''
-							AND tuote.nakyvyys != '')
+							AND tuote.tuoteno != '')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys' and ta_nimitys_se.kieli = 'se')
 						LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys' and ta_nimitys_en.kieli = 'en')
 						WHERE tuotteen_avainsanat.yhtio='{$kukarow["yhtio"]}'

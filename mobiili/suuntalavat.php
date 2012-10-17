@@ -160,10 +160,11 @@ else if (isset($muokkaa) and is_numeric($muokkaa)) {
 	$result = pupe_query($query);
 	if(!$suuntalava = mysql_fetch_assoc($result)) exit("Virheellinen suuntalavan tunnus");
 
+	# Siirtovalmis nappi ja poista nappi
 	$rivit_query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' and suuntalava='{$suuntalava['tunnus']}'";
 	$rivit = mysql_num_rows(pupe_query($rivit_query));
-
-	$disable_siirtovalmis = ($rivit == 0) ? ' disabled' : '';
+	$disable_siirtovalmis = ($rivit == 0) ? ' disabled' : '';	# Rivejä ei löydy, disabloidaan siirtovalmis nappi
+	$disable_poista = ($rivit != 0) ? ' disabled' : '';			# Rivejä löytyy, disabloidaan poista nappi
 
 	# Suuntalavan päivitys
 	if (isset($post) and is_numeric($muokkaa)) {
@@ -242,7 +243,33 @@ else if ($tee == 'siirtovalmis' or $tee == 'suoraan_hyllyyn' and isset($suuntala
 	echo "<META HTTP-EQUIV='Refresh'CONTENT='3;URL=suuntalavat.php'>";
 	exit();
 }
+else if ($tee == 'poista') {
 
+	# Varmistetaan että suuntalava on tyhjä
+	$query = "SELECT * FROM tilausrivi WHERE yhtio='{$kukarow['yhtio']}' AND suuntalava='{$suuntalava}'";
+	$suuntalavan_rivit = mysql_num_rows(pupe_query($query));
+
+	if ($suuntalavan_rivit == 0) {
+		# Poistetaan suuntalava_saapumiset
+		$query = "DELETE FROM suuntalavat_saapuminen WHERE yhtio='{$kukarow['yhtio']}' AND suuntalava='{$suuntalava}'";
+		$poista_result = pupe_query($query);
+
+		# Poistetaan suuntalava
+		$query = "DELETE FROM suuntalavat WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$suuntalava}'";
+		$poista_result = pupe_query($query);
+
+		echo "Suuntalava $suuntalava poistettu.";
+	}
+	else {
+		echo "Suuntalava ei ollut tyhjä ja sitä ei voida poistaa";
+	}
+
+
+	# Takaisin suuntalavat listaan
+	echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=suuntalavat.php'>";
+	exit();
+
+}
 # Lista suuntalavoista
 # index.php
 else {

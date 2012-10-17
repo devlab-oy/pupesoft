@@ -74,7 +74,7 @@
 							type: 'custom_parseint'
 						}
 
-						gauge.draw($('#tilatut_eurot').val(), draw_options);
+						if (!isNaN($('#tilatut_eurot').val()) && $('#tilatut_eurot').val() != '') gauge.draw($('#tilatut_eurot').val(), draw_options);
 
 						var gauge = new Gauge();
 						var args = {
@@ -106,7 +106,7 @@
 							type: 'custom_parseint'
 						}
 
-						gauge.draw($('#toimitetut_rivit').val(), draw_options);
+						if (!isNaN($('#toimitetut_rivit').val()) && $('#toimitetut_rivit').val() != '') gauge.draw($('#toimitetut_rivit').val(), draw_options);
 
 						var gauge = new Gauge();
 						var args = {
@@ -138,7 +138,7 @@
 							type: 'custom_parsefloat'
 						}
 
-						gauge.draw($('#tilatut_katepros').val(), draw_options);
+						if (!isNaN($('#tilatut_katepros').val()) && $('#tilatut_katepros').val() != '') gauge.draw($('#tilatut_katepros').val(), draw_options);
 					}, 1);
 
 					$('#naytetaan_tulos').change(function() {
@@ -192,7 +192,7 @@
 
 	echo "<input type='hidden' id='tilatut_eurot' value='{$row['tilatut_eurot']}' />";
 	echo "<input type='hidden' id='toimitetut_rivit' value='{$row['toimitetut_rivit']}' />";
-	echo "<input type='hidden' id='tilatut_katepros' value='".round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1)."' />";
+	echo "<input type='hidden' id='tilatut_katepros' value='",($row['tilatut_eurot'] != 0 ? round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1) : 0),"' />";
 	echo "<input type='hidden' name='tee' value='laske' />";
 
 	if (!isset($kka)) $kka = date("n",mktime(0, 0, 0, date("n"), 1, date("Y")));

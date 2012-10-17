@@ -18,10 +18,6 @@
 							var id = $(this).attr('id');
 							var child = $('.'+id);
 
-							// $('tr.kustp').hide();
-							// $('tr.try').hide();
-							// $('tr.osasto').hide();
-
 							if (!$(child).is(':visible')) {
 								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 								child.show();
@@ -35,16 +31,16 @@
 							var id = $(this).attr('id');
 							var child = $('.'+id);
 
-							// $('tr.kustp').hide();
-							// $('tr.try').hide();
-							// $('tr.osasto').hide();
-
 							if (!$(child).is(':visible')) {
 								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-down.png');
 								child.show();
 							}
 							else {
-								if ($(child).hasClass('osasto')) $('tr.try').hide();
+
+								if ($(child).hasClass('osasto')) {
+									$('tr.try:visible').hide();
+								}
+
 								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 								child.hide();
 							}
@@ -126,15 +122,15 @@
 										width: 800,
 										height: 220,
 										min: 0,
-										max: 100,
-										redFrom: 50,
-										redTo: 75,
-										greenFrom: 90,
-										greenTo: 100,
-										yellowFrom: 75,
-										yellowTo: 90,
-										minorTicks: 5,
-										majorTicks: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+										max: 50,
+										redFrom: 25,
+										redTo: 30,
+										greenFrom: 40,
+										greenTo: 50,
+										yellowFrom: 30,
+										yellowTo: 40,
+										minorTicks: 2,
+										majorTicks: ['0', '5', '10', '15', '20', '25', '30', '35', '40', '45', '50'],
 										animation: {
 											easing: 'out',
 											duration: 4000
@@ -343,7 +339,7 @@
 		echo "<br />";
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>",t("Kustannuspaikka"),"</th>";
+		echo "<th>",t("Kustp"),"</th>";
 		echo "<th>",t("Osasto"),"<br />",t("Try"),"</th>";
 		echo "<th>";
 		echo $naytetaan_tulos == 'monthly' ? t("Kuukausi") : ($naytetaan_tulos == 'weekly' ? t("Viikko") : t("Päivä"));
@@ -767,8 +763,8 @@
 		}
 
 		echo "<tr class='aktiivi'>";
-		echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä kustp"),"</th>";
-		echo "<th class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä os / try"),"</th>";
+		echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä"),"<br />",t("Kustp"),"</th>";
+		echo "<th class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä"),"<br />",t("os / try"),"</th>";
 		echo "<td align='right'></td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_eurot'] / 1000, 0),"</td>";
 		echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";

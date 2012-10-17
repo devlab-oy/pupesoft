@@ -106,7 +106,6 @@ if (isset($uusi)) {
 				# Lisää suuntalava -funktio
 				require ("../tilauskasittely/suuntalavat.inc");
 
-				echo "lisaa_suuntalava(:saapuminen => $otunnus	, :params => $params)";
 				$uusi_suuntalava = lisaa_suuntalava($otunnus, $params);
 				echo "<br>Lisättiin lava! ".$uusi_suuntalava;
 

@@ -118,12 +118,8 @@
 <div class='controls'>
 	<input type='submit' name='post' value='OK' class='button left' />
 	</form>
-		<button onclick='window.location.href="suuntalavat.php?tee=poista&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button left' <?= $disable_poista ?>>Poista</button>
 		<? if(isset($muokkaa)): ?>
-		<!--
-		<a href='suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (normaali)</a>
-		<a href='suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>' class='right'>Siirtovalmis (suoraan hyllyyn)</a>
-		-->
+		<button onclick='window.location.href="suuntalavat.php?tee=poista&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button left' <?= $disable_poista ?>>Poista</button>
 		<button onclick='window.location.href="suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (normaali)</button>
 		<button onclick='window.location.href="suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (suoraan hyllyyn)</button>
 

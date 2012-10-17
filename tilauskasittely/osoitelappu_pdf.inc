@@ -68,7 +68,7 @@ if ($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_vastaanottovaras
 $query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 			FROM varastopaikat
 			WHERE yhtio = '$kukarow[yhtio]'
-			AND tunnus = '$laskurow[varasto]'";
+			AND tunnus = '$laskurow[varasto]' AND varasto_status != 'P'";
 $tempr = pupe_query($query);
 $postirow_varasto = mysql_fetch_array($tempr);
 

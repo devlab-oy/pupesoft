@@ -287,7 +287,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+						WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P' order by nimitys";
 			$vtresult = pupe_query($query);
 
 			echo "<select name='lahettava_varasto'>";
@@ -311,7 +311,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 						order by nimitys";
 			$vtresult = pupe_query($query);
 
@@ -1683,7 +1683,7 @@
 
 					// Aloitellaan lomakkeen teko
 					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
-					
+
 					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
 						// Ekan sivun otsikot
 						$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;
@@ -1860,7 +1860,7 @@
 				$query = "	SELECT ulkoinen_jarjestelma
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus = '$laskurow[varasto]'";
+							and tunnus = '$laskurow[varasto]' AND varasto_status != 'P'";
 				$result = pupe_query($query);
 				$varastorow = mysql_fetch_assoc($result);
 

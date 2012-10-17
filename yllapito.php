@@ -405,6 +405,18 @@
 				$query .= " where yhtio='$kukarow[yhtio]' and tunnus = $tunnus";
 			}
 
+			$kayttajat = tarkista_kayttajien_oletus_varastot($tunnus);
+
+			if(!empty($kayttajat)) {
+				$errori = 1;
+
+				echo "<font class='error'>".t("Seuraavilla käyttäjillä oli tämä varasto oletus varastona. Et voi piilottaa varastoa")."</font>";
+				foreach ($kayttajat as $k) {
+					echo "<font class='error'>".t($k)."</font>";
+					echo '<br/>';
+				}
+			}
+
 			$result = pupe_query($query);
 
 			if ($tunnus == '') {
@@ -1948,4 +1960,24 @@
 
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");
+	}
+
+	function tarkista_kayttajien_oletus_varastot($varasto_tunnus) {
+		global $kukarow;
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio='{$kukarow['yhtio']}' AND oletus_varasto='{$varasto_tunnus}'";
+		$result = pupe_query($query);
+
+		//Palautetaan käyttäjien nimet joilla on piilotettava varasto oletus varastona tai tyhjä array
+		if(mysql_num_rows($result) > 0) {
+			$kayttajat_array = array();
+			while ($row = mysql_fetch_assoc($result)) {
+				$kayttajat_array[] = $row['nimi'];
+			}
+			return $kayttajat_array;
+		}
+		else {
+			return array();
+		}
 	}

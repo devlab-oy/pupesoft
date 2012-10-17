@@ -662,7 +662,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 				$query = "	SELECT alkuhyllyalue, alkuhyllynro
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tyyppi = ''
+							and tyyppi = '' AND varasto_status != 'P'
 							ORDER BY alkuhyllyalue, alkuhyllynro
 							LIMIT 1";
 				$result = pupe_query($query);
@@ -671,7 +671,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 					// haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
 					$query = "	SELECT alkuhyllyalue, alkuhyllynro
 								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 								ORDER BY alkuhyllyalue, alkuhyllynro
 								LIMIT 1";
 					$result = pupe_query($query);

@@ -41,9 +41,9 @@
 						ultilno = '$ultilno'
 						WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$tee = "";
-						
+
 			if ($lopetus != "") {
 				lopetus($lopetus, 'meta');
 			}
@@ -238,7 +238,7 @@
 				$laskun_res = mysql_query($query) or pupe_error($query);
 				$laskun_row = mysql_fetch_array($laskun_res);
 
-				$query = "SELECT maa from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$laskun_row[varasto]'";
+				$query = "SELECT maa from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$laskun_row[varasto]' AND varasto_status != 'P'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
@@ -434,9 +434,9 @@
 				echo "<input type='text' name='aktiivinen_kuljetus' style='width:200px;' value='$laskurow[aktiivinen_kuljetus]'>";
 				echo "<select name='aktiivinen_kuljetus_kansallisuus' style='width:100px;'>";
 				echo "<option value=''>".t("Valitse")."</option>";
-			
+
 				mysql_data_seek($maat_result, 0);
-			
+
 				while ($row = mysql_fetch_array($maat_result)) {
 					$sel = '';
 					if ($row[0] == $laskurow["aktiivinen_kuljetus_kansallisuus"]) {
@@ -468,7 +468,7 @@
 				}
 				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 			}
-		
+
 			echo "</select></td>";
 			echo "<td class='back'>".t("Pakollinen kenttä")."</td>";
 			echo "</tr>";
@@ -560,30 +560,30 @@
 			require ("raportit/naytatilaus.inc");
 		}
 	}
-	
+
 	// meillä ei ole valittua tilausta
 	if ($tee == '' and $toim == "MUOKKAA") {
-		
+
 		$formi  = "find";
 		$kentta = "etsi";
 
 		// tehdään etsi valinta
 		echo "<form name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>";
 		echo t("Valitse tapa");
 		echo "</th>";
 		echo "<td>";
-		
+
 		$seltuoteni = "";
-		
+
 		if ($tapa == "tuonti") {
 			$seltuoteni = "SELECTED";
 		}
-		
+
 		echo "<select name='tapa'>";
 		echo "<option value='vienti'>".t("Vienti")."</option>";
 		echo "<option value='tuonti' $seltuoteni>".t("Tuonti")."</option>";
@@ -601,7 +601,7 @@
 		echo "</table>";
 		echo "<br><input type='Submit' value='".t("Etsi")."'>";
 		echo "</form><br><br>";
-		
+
 		if (trim($etsi) != "") {
 
 			$haku = '';
@@ -612,10 +612,10 @@
 			else $tila = " and lasku.tila in ('L','U') and lasku.alatila IN ('X', 'J') ";
 
 			$query = "	SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
-						FROM lasku 
+						FROM lasku
 						LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.vienti != '' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.vienti != ''
 						$tila
 						$haku
 						GROUP BY lasku.laskunro
@@ -666,10 +666,10 @@
 				echo "<th colspan='5'>".t("Yhtään laskua ei löytynyt")."!</th>";
 				echo "</tr>";
 			}
-			
+
 			echo "</table>";
 		}
-	}	
+	}
 	elseif ($tee == '') {
 
 		$formi="find";

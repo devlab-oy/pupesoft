@@ -1595,7 +1595,7 @@
 
 		$query = "	SELECT yhtio, tunnus, nimitys
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND varasto_status != 'P'
 					ORDER BY yhtio, tyyppi, nimitys";
 		$result = pupe_query($query);
 
@@ -1618,7 +1618,7 @@
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
 					WHERE maa != ''
-					and $logistiikka_yhtiolisa
+					and $logistiikka_yhtiolisa AND varasto_status != 'P'
 					ORDER BY maa";
 		$result = pupe_query($query);
 
@@ -1703,7 +1703,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa' AND varasto_status != 'P'";
 			$maare = pupe_query($query);
 			$maarow = mysql_fetch_assoc($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -2477,7 +2477,7 @@
 				if ($lp_varasto == 0) {
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio = '$kukarow[yhtio]'
+								where yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 								order by alkuhyllyalue,alkuhyllynro
 								limit 1";
 				}
@@ -2485,7 +2485,7 @@
 					$query = "	SELECT *
 								from varastopaikat
 								where yhtio	= '$kukarow[yhtio]'
-								and tunnus	= '$lp_varasto'
+								and tunnus	= '$lp_varasto' AND varasto_status != 'P'
 								order by alkuhyllyalue,alkuhyllynro";
 				}
 				$kirre = pupe_query($query);

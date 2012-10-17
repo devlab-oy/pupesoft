@@ -312,7 +312,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						where yhtio = '$kukarow[yhtio]'";
+						where yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 			$osvres = pupe_query($query);
 
 			$abuArray=array();
@@ -510,7 +510,7 @@
 			//Katsotaan valitut varastot
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE $konsyhtiot";
+						WHERE $konsyhtiot AND varasto_status != 'P'";
 			$vtresult = pupe_query($query);
 
 			$varastot 			= "";
@@ -2607,7 +2607,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE $konsyhtiot
+						WHERE $konsyhtiot AND varasto_status != 'P'
 						ORDER BY yhtio, nimitys";
 			$vtresult = pupe_query($query);
 

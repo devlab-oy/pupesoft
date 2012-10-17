@@ -1202,7 +1202,7 @@
 
 											$query = "	SELECT *
 														FROM varastopaikat
-														WHERE yhtio = '$kukarow[yhtio]' $asiakasmaalisa";
+														WHERE yhtio = '$kukarow[yhtio]' $asiakasmaalisa AND varasto_status != 'P'";
 											$vtresult = pupe_query($query);
 
 											if (mysql_num_rows($vtresult) > 1) {
@@ -1959,7 +1959,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'";
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 		$vtresult = pupe_query($query);
 
 		echo "	<form name='valinta' method='post'>

@@ -151,7 +151,7 @@
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND alkuhyllyalue = '!!M'
-					AND loppuhyllyalue = '!!M'";
+					AND loppuhyllyalue = '!!M' AND varasto_status != 'P'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 

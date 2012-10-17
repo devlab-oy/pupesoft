@@ -16,7 +16,7 @@
 	$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$postirow[varasto]'";
+				AND tunnus = '$postirow[varasto]' AND varasto_status != 'P'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$postirow_varasto = mysql_fetch_array($tempr);
 

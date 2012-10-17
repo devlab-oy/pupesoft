@@ -228,7 +228,7 @@
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and tunnus	= '$varasto'
 								and alkuhyllyalue <= '$t1[$tun]'
-								and loppuhyllyalue >= '$t1[$tun]'";
+								and loppuhyllyalue >= '$t1[$tun]' AND varasto_status != 'P'";
 					$vares = pupe_query($query);
 
 					if (mysql_num_rows($vares) == 1) {
@@ -648,7 +648,7 @@
 
 		$query  = "	SELECT tunnus, nimitys, maa
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 
@@ -912,7 +912,7 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						and alkuhyllyalue = '!!M'
-						and loppuhyllyalue = '!!M'";
+						and loppuhyllyalue = '!!M' AND varasto_status != 'P'";
 			$tresult = pupe_query($query);
 			$mrow = mysql_fetch_assoc($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";
@@ -937,7 +937,7 @@
 		$query  = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$row[clearing]'";
+					and tunnus = '$row[clearing]' AND varasto_status != 'P'";
 		$vares = pupe_query($query);
 		$varow2 = mysql_fetch_assoc($vares);
 

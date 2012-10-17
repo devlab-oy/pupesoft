@@ -191,4 +191,21 @@
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
+
+	if(mysql_field_name($result, $i) == 'varasto_status') {
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos = "<td>";
+
+		$ulos .= "<select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Valitse")."</option>";
+		$ulos .= "<option value='N' {$sel['N']}>".t('Näkyvillä')."</option>";
+		$ulos .= "<option value='P' {$sel['P']}>".t('Piilotettu')."</option>";
+		$ulos .= "</select>";
+
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
 ?>

@@ -188,7 +188,7 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 	$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$varasto'";
+				AND tunnus = '$varasto' AND varasto_status != 'P'";
 	$tempr = pupe_query($query);
 	$postirow_varasto = mysql_fetch_assoc($tempr);
 
@@ -469,7 +469,7 @@ else {
 		$query = "	SELECT *
 					from varastopaikat
 					where yhtio	= '$kukarow[yhtio]'
-					and tunnus	= '$varasto'
+					and tunnus	= '$varasto' AND varasto_status != 'P'
 					order by alkuhyllyalue, alkuhyllynro";
 	}
 	$kirre = pupe_query($query);
@@ -661,7 +661,7 @@ function pupe_rahtikirja_fetch($otsikkonro) {
 function pupe_varasto_fetch_all() {
 	$query = sprintf("SELECT tunnus, nimitys
 				FROM varastopaikat
-				WHERE yhtio = '%s'
+				WHERE yhtio = '%s' AND varasto_status != 'P'
 				ORDER BY nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
 
 	$result = pupe_query($query);

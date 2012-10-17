@@ -10,7 +10,7 @@
 	if (mysql_field_name($result, $i) == "varasto_postino") {
 		$query = "	SELECT DISTINCT postino, postitp
 					FROM varastopaikat
-					WHERE yhtio='$kukarow[yhtio]' AND postino != ''
+					WHERE yhtio='$kukarow[yhtio]' AND postino != '' AND varasto_status != 'P'
 					ORDER BY postino";
 		$varastoresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
@@ -26,5 +26,5 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 ?>

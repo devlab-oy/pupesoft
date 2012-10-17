@@ -3,7 +3,7 @@
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
-	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
+	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' AND varasto_status != 'P'";
 	$prires = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($prires) != 0) {
@@ -143,7 +143,7 @@
 		$query = "	SELECT ulkoinen_jarjestelma
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus = '$laskurow[varasto]'";
+					and tunnus = '$laskurow[varasto]' AND varasto_status != 'P'";
 		$result = pupe_query($query);
 		$varastorow = mysql_fetch_assoc($result);
 
@@ -319,14 +319,14 @@
 		if ($laskurow["varasto"] == 0) {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]'
+						where yhtio='$kukarow[yhtio]' AND varasto_status != 'P'
 						order by alkuhyllyalue,alkuhyllynro
 						limit 1";
 		}
 		else {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]'
+						where yhtio='$kukarow[yhtio]' AND varasto_status != 'P'
 						and tunnus='$laskurow[varasto]'";
 		}
 		$prires = mysql_query($query) or pupe_error($query);

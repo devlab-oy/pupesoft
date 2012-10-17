@@ -563,7 +563,7 @@
 					FROM varastopaikat
 					WHERE tunnus = '$laskurow[varasto]'
 					and yhtio = '$kukarow[yhtio]'
-					and osoite != ''";
+					and osoite != '' AND varasto_status != 'P'";
 		$varresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($varresult) > 0) {

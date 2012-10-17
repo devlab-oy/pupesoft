@@ -1079,7 +1079,7 @@ else {
 					$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa
 								FROM varastopaikat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$varasto}'";
+								AND tunnus = '{$varasto}' AND varasto_status != 'P'";
 					$ulkoinen_jarjestelma_res = pupe_query($query);
 					$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
@@ -1224,7 +1224,7 @@ else {
 			$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$varasto}'";
+						AND tunnus = '{$varasto}' AND varasto_status != 'P'";
 			$ulkoinen_jarjestelma_res = pupe_query($query);
 			$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 

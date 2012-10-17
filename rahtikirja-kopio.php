@@ -320,7 +320,7 @@
 		echo "</select></td></tr>";
 
 		// haetaan kaikki varastot
-		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $logistiikka_yhtiolisa";
+		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $logistiikka_yhtiolisa  AND varasto_status != 'P'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..

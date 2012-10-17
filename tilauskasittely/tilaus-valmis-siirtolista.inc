@@ -579,14 +579,14 @@
 				if ($laskurow["varasto"] == '') {
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio='$kukarow[yhtio]'
+								where yhtio='$kukarow[yhtio]' AND varasto_status != 'P'
 								order by alkuhyllyalue,alkuhyllynro
 								limit 1";
 				}
 				else {
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
+								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]' AND varasto_status != 'P'
 								order by alkuhyllyalue,alkuhyllynro";
 				}
 				$prires = mysql_query($query) or pupe_error($query);

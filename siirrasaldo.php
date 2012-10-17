@@ -28,7 +28,7 @@
 			if ($kohdevarasto != '') {
 				$query = "	SELECT *
 							FROM varastopaikat
-							WHERE tunnus='$kohdevarasto' and yhtio = '$kukarow[yhtio]'";
+							WHERE tunnus='$kohdevarasto' and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 				$result = pupe_query($query);
 				$kohderow = mysql_fetch_array($result);
 			}
@@ -51,7 +51,7 @@
 						FROM varastopaikat
 						WHERE alkuhyllyalue <= '$hyllyalue'
 						and loppuhyllyalue >= '$hyllyalue'
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -356,7 +356,7 @@
 				echo "<tr><td>".t("Kohdevarasto").":</td>";
 				echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' AND varasto_status != 'P'";
 				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))

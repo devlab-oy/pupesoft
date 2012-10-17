@@ -28,7 +28,7 @@
 
 		$query = "	SELECT group_concat(distinct tunnus order by tunnus) varastot
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'";
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 		$varastores = mysql_query($query) or die ("Varastonhaussa tapahtui virhe!\n".mysql_error()."\n");
 		$varastorow = mysql_fetch_array($varastores);
 

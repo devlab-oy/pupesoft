@@ -84,11 +84,11 @@
 							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
 			}
 			else {
-				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto' AND varasto_status != 'P'";
 			}
 		}
 		else {
-			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto' AND varasto_status != 'P'";
 		}
 
 		$pres  = pupe_query($query);
@@ -575,7 +575,7 @@
 				}
 
 				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
-				
+
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
 				// tulostetaan toimitustavan määrittelemä rahtikirja
@@ -718,7 +718,7 @@
 			if (!isset($nayta_pdf)) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
-		
+
 		if ($toitarow['erittely'] == 't') {
 			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2);//poistetaan pilkku ja välilyönti viimosen perästä
 			$otunnukset_temp = $otunnukset;
@@ -938,7 +938,7 @@
 			echo "<td><select id='kirjoitin' name='laskukomento'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-			$query = "SELECT printteri7 FROM varastopaikat WHERE $logistiikka_yhtiolisa and tunnus='$varasto'";
+			$query = "SELECT printteri7 FROM varastopaikat WHERE $logistiikka_yhtiolisa and tunnus='$varasto' AND varasto_status != 'P'";
 			$jvres = pupe_query($query);
 			$jvrow = mysql_fetch_assoc($jvres);
 			$e = $jvrow["printteri7"];

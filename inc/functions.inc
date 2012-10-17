@@ -438,7 +438,7 @@ if (!function_exists("kuuluukovarastoon")) {
 					WHERE
 					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
 					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
-					yhtio = '$yhtiolisa'
+					yhtio = '$yhtiolisa' AND varasto_status != 'P'
 					$varastolisa";
 		$varcheckres = pupe_query($query);
 
@@ -7960,7 +7960,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 		global $yhtiorow, $kukarow;
 
 		if ($varasto > 0) {
-			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto' AND varasto_status != 'P'";
 			$varaston_res = pupe_query($query);
 			$varaston_row = mysql_fetch_assoc($varaston_res);
 		}

@@ -1509,7 +1509,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 		$query = "	SELECT ulkoinen_jarjestelma
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tunnus = '{$varasto_chk}'";
+					AND tunnus = '{$varasto_chk}' AND varasto_status != 'P'";
 		$ulkoinen_jarjestelma_res = pupe_query($query);
 		$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
@@ -1795,7 +1795,7 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '') AND varasto_status != 'P'";
 			$vtresult = pupe_query($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
 
@@ -4220,7 +4220,7 @@ if ($tee == '') {
 								FROM varastopaikat
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
-								AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
+								AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0')) AND varasto_status != 'P'
 								order by prioriteetti, nimitys";
 					$nimre = pupe_query($query);
 					$nimro = mysql_fetch_assoc($nimre);
@@ -6832,7 +6832,7 @@ if ($tee == '') {
 
 				$query = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'";
+							WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 				$vtresult = pupe_query($query);
 
 				while ($vrow = mysql_fetch_assoc($vtresult)) {

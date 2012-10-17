@@ -2,7 +2,7 @@
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Luo siirtolista tuotepaikkojen hälytysrajojen perusteella")."</font><hr>";
-	
+
 	// org_rajausta tarvitaan yhdessä selectissä joka triggeröi taas toisen asian.
 	$org_rajaus = $abcrajaus;
 	list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
@@ -313,7 +313,7 @@
 		echo "<tr><th>".t("Kohdevarasto, eli varasto jonne lähetetään").":</th>";
 		echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
-		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' AND varasto_status != 'P'";
 		$vares = mysql_query($query) or pupe_error($query);
 
 		while ($varow = mysql_fetch_array($vares))
@@ -409,45 +409,45 @@
 		echo "<option  value=''>".t("Valitse")."</option>";
 
 		$teksti = "";
-		for ($i=0; $i < count($ryhmaprossat); $i++) { 
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
 			$selabc = "";
 
-			if ($i > 0) $teksti = t("ja paremmat"); 
+			if ($i > 0) $teksti = t("ja paremmat");
 			if ($org_rajaus == "{$i}##TM") $selabc = "SELECTED";
 
 			echo "<option  value='$i##TM' $selabc>".t("Myynti").": {$ryhmanimet[$i]} $teksti</option>";
-		}	
+		}
 
 		$teksti = "";
-		for ($i=0; $i < count($ryhmaprossat); $i++) { 
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
 			$selabc = "";
 
-			if ($i > 0) $teksti = t("ja paremmat"); 
+			if ($i > 0) $teksti = t("ja paremmat");
 			if ($org_rajaus == "{$i}##TK") $selabc = "SELECTED";
 
 			echo "<option  value='$i##TK' $selabc>".t("Myyntikate").": {$ryhmanimet[$i]} $teksti</option>";
 		}
 
 		$teksti = "";
-		for ($i=0; $i < count($ryhmaprossat); $i++) { 
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
 			$selabc = "";
 
-			if ($i > 0) $teksti = t("ja paremmat"); 
+			if ($i > 0) $teksti = t("ja paremmat");
 			if ($org_rajaus == "{$i}##TR") $selabc = "SELECTED";
 
 			echo "<option  value='$i##TR' $selabc>".t("Myyntirivit").": {$ryhmanimet[$i]} $teksti</option>";
 		}
 
 		$teksti = "";
-		for ($i=0; $i < count($ryhmaprossat); $i++) { 
+		for ($i=0; $i < count($ryhmaprossat); $i++) {
 			$selabc = "";
 
-			if ($i > 0) $teksti = t("ja paremmat"); 
+			if ($i > 0) $teksti = t("ja paremmat");
 			if ($org_rajaus == "{$i}##TP") $selabc = "SELECTED";
 
 			echo "<option  value='$i##TP' $selabc>".t("Myyntikappaleet").": {$ryhmanimet[$i]} $teksti</option>";
 		}
-		
+
 		echo "</select>";
 
 		echo "<tr>";

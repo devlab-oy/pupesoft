@@ -59,7 +59,7 @@
 
 				$query = "	SELECT alkuhyllyalue, alkuhyllynro, tunnus
 							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 							ORDER BY alkuhyllyalue, alkuhyllynro
 							LIMIT 1";
 				$ekavarres = pupe_query($query);
@@ -144,7 +144,7 @@
 								muutospvm	= now(),
 								oletus		= '$oletus'";
 					$paikres = pupe_query($query);
-					
+
 					$tapahtumaquery = "	INSERT into tapahtuma set
 										yhtio 		= '$kukarow[yhtio]',
 										tuoteno 	= '$tuoteno',
@@ -256,7 +256,7 @@
 								muutospvm	= now(),
 								oletus		= '$oletus'";
 					$paikres = pupe_query($query);
-					
+
 					$tapahtumaquery = "	INSERT into tapahtuma set
 										yhtio 		= '$kukarow[yhtio]',
 										tuoteno 	= '$tuoteno',
@@ -272,7 +272,7 @@
 										laatija 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 					$result = pupe_query($tapahtumaquery);
-					
+
 				}
 				elseif (mysql_num_rows($alkuresult) == 1) {
 					$query = "	UPDATE tuotepaikat SET

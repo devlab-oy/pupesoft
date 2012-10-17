@@ -365,7 +365,7 @@
 			'laskutetut_rivit' => 0,
 		);
 
-		$arr = $arr_kustp = $arr_kustp_osasto = $arr_kustp_osasto_try = $arr_osasto = $arr_try = $yhteensa_kustp = $yhteensa_osasto = $yhteensa_try = array();
+		$arr = $arr_kustp = $arr_kustp_osasto = $arr_kustp_osasto_try = $arr_osasto = $arr_try = $yhteensa_kustp = $yhteensa_osasto = $yhteensa_try = $yhteensa_kustp_osasto = $yhteensa_kustp_osasto_try = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
 
@@ -382,13 +382,13 @@
 			if (!isset($arr_kustp[$pvm][$kustp]['tilatut_kate'])) 	$arr_kustp[$pvm][$kustp]['tilatut_kate'] = 0;
 			if (!isset($arr_kustp[$pvm][$kustp]['tilatut_rivit'])) 	$arr_kustp[$pvm][$kustp]['tilatut_rivit'] = 0;
 
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['tilatut_eurot'])) $arr_kustp[$pvm][$kustp][$osasto]['tilatut_eurot'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['tilatut_kate'])) 	$arr_kustp[$pvm][$kustp][$osasto]['tilatut_kate'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['tilatut_rivit'])) $arr_kustp[$pvm][$kustp][$osasto]['tilatut_rivit'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_eurot'])) $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_eurot'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_kate']))  $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_kate'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_rivit'])) $arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_rivit'] = 0;
 
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_eurot'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_eurot'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_kate'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_kate'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_rivit'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_rivit'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_eurot'])) 	$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_eurot'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_kate'])) 	$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_kate'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_rivit'])) 	$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_rivit'] = 0;
 
 			if (!isset($arr_osasto[$pvm][$osasto]['tilatut_eurot'])) $arr_osasto[$pvm][$osasto]['tilatut_eurot'] = 0;
 			if (!isset($arr_osasto[$pvm][$osasto]['tilatut_kate'])) $arr_osasto[$pvm][$osasto]['tilatut_kate'] = 0;
@@ -406,13 +406,13 @@
 			$arr_kustp[$pvm][$kustp]['tilatut_kate'] += $row['tilatut_kate'];
 			$arr_kustp[$pvm][$kustp]['tilatut_rivit']++;
 
-			$arr_kustp[$pvm][$kustp][$osasto]['tilatut_eurot'] += $row['tilatut_eurot'];
-			$arr_kustp[$pvm][$kustp][$osasto]['tilatut_kate'] += $row['tilatut_kate'];
-			$arr_kustp[$pvm][$kustp][$osasto]['tilatut_rivit']++;
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_eurot'] += $row['tilatut_eurot'];
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_kate'] += $row['tilatut_kate'];
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['tilatut_rivit']++;
 
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_eurot'] += $row['tilatut_eurot'];
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_kate'] += $row['tilatut_kate'];
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['tilatut_rivit']++;
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_eurot'] += $row['tilatut_eurot'];
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_kate'] += $row['tilatut_kate'];
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['tilatut_rivit']++;
 
 			$arr_osasto[$pvm][$osasto]['tilatut_eurot'] += $row['tilatut_eurot'];
 			$arr_osasto[$pvm][$osasto]['tilatut_kate'] += $row['tilatut_kate'];
@@ -466,13 +466,13 @@
 			if (!isset($arr_kustp[$pvm][$kustp]['laskutetut_kate'])) $arr_kustp[$pvm][$kustp]['laskutetut_kate'] = 0;
 			if (!isset($arr_kustp[$pvm][$kustp]['laskutetut_rivit'])) $arr_kustp[$pvm][$kustp]['laskutetut_rivit'] = 0;
 
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['laskutetut_eurot'])) $arr_kustp[$pvm][$kustp][$osasto]['laskutetut_eurot'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['laskutetut_kate'])) 	$arr_kustp[$pvm][$kustp][$osasto]['laskutetut_kate'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto]['laskutetut_rivit'])) $arr_kustp[$pvm][$kustp][$osasto]['laskutetut_rivit'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_eurot'])) $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_eurot'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_kate']))  $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_kate'] = 0;
+			if (!isset($arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_rivit'])) $arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_rivit'] = 0;
 
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_kate'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_kate'] = 0;
-			if (!isset($arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_rivit'])) 	$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_rivit'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'])) $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_kate'])) 	$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_kate'] = 0;
+			if (!isset($arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_rivit'])) $arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_rivit'] = 0;
 
 			if (!isset($arr_osasto[$pvm][$osasto]['laskutetut_eurot'])) $arr_osasto[$pvm][$osasto]['laskutetut_eurot'] = 0;
 			if (!isset($arr_osasto[$pvm][$osasto]['laskutetut_kate'])) $arr_osasto[$pvm][$osasto]['laskutetut_kate'] = 0;
@@ -490,13 +490,13 @@
 			$arr_kustp[$pvm][$kustp]['laskutetut_kate'] += $row['laskutetut_kate'];
 			$arr_kustp[$pvm][$kustp]['laskutetut_rivit']++;
 
-			$arr_kustp[$pvm][$kustp][$osasto]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-			$arr_kustp[$pvm][$kustp][$osasto]['laskutetut_kate'] += $row['laskutetut_kate'];
-			$arr_kustp[$pvm][$kustp][$osasto]['laskutetut_rivit']++;
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_eurot'] += $row['laskutetut_eurot'];
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_kate'] += $row['laskutetut_kate'];
+			$arr_kustp_osasto[$pvm][$kustp][$osasto]['laskutetut_rivit']++;
 
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'] += $row['laskutetut_eurot'];
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_kate'] += $row['laskutetut_kate'];
-			$arr_kustp[$pvm][$kustp][$osasto][$try]['laskutetut_rivit']++;
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_eurot'] += $row['laskutetut_eurot'];
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_kate'] += $row['laskutetut_kate'];
+			$arr_kustp_osasto_try[$pvm][$kustp][$osasto][$try]['laskutetut_rivit']++;
 
 			$arr_osasto[$pvm][$osasto]['laskutetut_eurot'] += $row['laskutetut_eurot'];
 			$arr_osasto[$pvm][$osasto]['laskutetut_kate'] += $row['laskutetut_kate'];
@@ -572,8 +572,10 @@
 				$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000, 0) : '';
 				$vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : '';
 
+				$id = str_replace(" ", "", $pvm.'_'.$kustp);
+
 				echo "<tr class='{$pvm} spec kustp' style='display:none;'>";
-				echo "<td align='right'>{$kustp}</td>";
+				echo "<td align='right' class='toggleable' id='{$id}_osasto'><img style='float:left;' id='img_{$id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$kustp}</td>";
 				echo "<td align='right'></td>";
 				echo "<td align='right'></td>";
 				echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
@@ -583,6 +585,95 @@
 				echo "<td align='right'>{$laskutetut_katepros}</td>";
 				echo "<td align='right'>{$vals['laskutetut_rivit']}</td>";
 				echo "</tr>";
+
+				ksort($arr_kustp_osasto[$pvm][$kustp]);
+
+				foreach ($arr_kustp_osasto[$pvm][$kustp] as $osasto => $vals) {
+
+					if (!isset($vals['tilatut_eurot'])) $vals['tilatut_eurot'] = 0;
+					if (!isset($vals['tilatut_kate'])) $vals['tilatut_kate'] = 0;
+					if (!isset($vals['tilatut_rivit'])) $vals['tilatut_rivit'] = 0;
+
+					$tilatut_katepros = $vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : '';
+					$laskutetut_katepros = (isset($vals['laskutetut_kate']) and isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != 0) ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : '';
+
+					if (!isset($yhteensa_kustp_osasto[$osasto]['tilatut_eurot'])) $yhteensa_kustp_osasto[$osasto]['tilatut_eurot'] = 0;
+					if (!isset($yhteensa_kustp_osasto[$osasto]['tilatut_kate'])) $yhteensa_kustp_osasto[$osasto]['tilatut_kate'] = 0;
+					if (!isset($yhteensa_kustp_osasto[$osasto]['tilatut_rivit'])) $yhteensa_kustp_osasto[$osasto]['tilatut_rivit'] = 0;
+					if (!isset($yhteensa_kustp_osasto[$osasto]['laskutetut_eurot'])) $yhteensa_kustp_osasto[$osasto]['laskutetut_eurot'] = 0;
+					if (!isset($yhteensa_kustp_osasto[$osasto]['laskutetut_kate'])) $yhteensa_kustp_osasto[$osasto]['laskutetut_kate'] = 0;
+					if (!isset($yhteensa_kustp_osasto[$osasto]['laskutetut_rivit'])) $yhteensa_kustp_osasto[$osasto]['laskutetut_rivit'] = 0;
+
+					$yhteensa_kustp_osasto[$osasto]['tilatut_eurot'] 		+= $vals['tilatut_eurot'];
+					$yhteensa_kustp_osasto[$osasto]['tilatut_kate'] 		+= $vals['tilatut_kate'];
+					$yhteensa_kustp_osasto[$osasto]['tilatut_rivit'] 		+= $vals['tilatut_rivit'];
+					$yhteensa_kustp_osasto[$osasto]['laskutetut_eurot'] 	+= (isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != '') ? $vals['laskutetut_eurot'] : 0;
+					$yhteensa_kustp_osasto[$osasto]['laskutetut_kate'] 	+= (isset($vals['laskutetut_kate']) and $vals['laskutetut_kate'] != '') ? $vals['laskutetut_kate'] : 0;
+					$yhteensa_kustp_osasto[$osasto]['laskutetut_rivit'] 	+= (isset($vals['laskutetut_rivit']) and $vals['laskutetut_rivit'] != '') ? $vals['laskutetut_rivit'] : 0;
+					$yhteensa_kustp_osasto[$osasto]['pvm'][$pvm]			= $pvm;
+
+					$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000, 0) : '';
+					$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000, 0) : '';
+					$vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : '';
+
+					echo "<tr class='{$id}_osasto tumma osasto' style='display:none;'>";
+					echo "<td align='right'></td>";
+					echo "<td align='right' class='toggleable' id='{$id}_{$osasto}_try'><img style='float:left;' id='img_{$id}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</td>";
+					echo "<td align='right'></td>";
+					echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
+					echo "<td align='right'>{$tilatut_katepros}</td>";
+					echo "<td align='right'>{$vals['tilatut_rivit']}</td>";
+					echo "<td align='right'>{$vals['laskutetut_eurot']}</td>";
+					echo "<td align='right'>{$laskutetut_katepros}</td>";
+					echo "<td align='right'>{$vals['laskutetut_rivit']}</td>";
+					echo "</tr>";
+
+					ksort($arr_kustp_osasto_try[$pvm][$kustp][$osasto]);
+
+					foreach ($arr_kustp_osasto_try[$pvm][$kustp][$osasto] as $try => $vals) {
+
+						if (!isset($vals['tilatut_eurot'])) $vals['tilatut_eurot'] = 0;
+						if (!isset($vals['tilatut_kate'])) $vals['tilatut_kate'] = 0;
+						if (!isset($vals['tilatut_rivit'])) $vals['tilatut_rivit'] = 0;
+						if (!isset($vals['laskutetut_eurot'])) $vals['laskutetut_eurot'] = 0;
+						if (!isset($vals['laskutetut_kate'])) $vals['laskutetut_kate'] = 0;
+						if (!isset($vals['laskutetut_rivit'])) $vals['laskutetut_rivit'] = 0;
+
+						$tilatut_katepros = $vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : '';
+						$laskutetut_katepros = (isset($vals['laskutetut_kate']) and isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != 0) ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : '';
+
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_eurot'])) 	$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_eurot'] = 0;
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_kate'])) 		$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_kate'] = 0;
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_rivit'])) 	$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_rivit'] = 0;
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_eurot'])) 	$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_eurot'] = 0;
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_kate']))	$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_kate'] = 0;
+						if (!isset($yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_rivit'])) 	$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_rivit'] = 0;
+
+						$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_eurot'] 		+= $vals['tilatut_eurot'];
+						$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_kate'] 		+= $vals['tilatut_kate'];
+						$yhteensa_kustp_osasto_try[$osasto][$try]['tilatut_rivit'] 		+= $vals['tilatut_rivit'];
+						$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_eurot'] 	+= (isset($vals['laskutetut_eurot']) and $vals['laskutetut_eurot'] != '') ? $vals['laskutetut_eurot'] : 0;
+						$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_kate'] 	+= (isset($vals['laskutetut_kate']) and $vals['laskutetut_kate'] != '') ? $vals['laskutetut_kate'] : 0;
+						$yhteensa_kustp_osasto_try[$osasto][$try]['laskutetut_rivit'] 	+= (isset($vals['laskutetut_rivit']) and $vals['laskutetut_rivit'] != '') ? $vals['laskutetut_rivit'] : 0;
+						$yhteensa_kustp_osasto_try[$osasto][$try]['pvm'][$pvm]			= $pvm;
+
+						$vals['tilatut_eurot'] = $vals['tilatut_eurot'] != '' ? round($vals['tilatut_eurot'] / 1000, 0) : '';
+						$vals['laskutetut_eurot'] = isset($vals['laskutetut_eurot']) ? round($vals['laskutetut_eurot'] / 1000, 0) : '';
+						$vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : '';
+
+						echo "<tr class='{$id}_{$osasto}_try spec try' style='display:none;'>";
+						echo "<td align='right'></td>";
+						echo "<td align='right'>{$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+						echo "<td align='right'></td>";
+						echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
+						echo "<td align='right'>{$tilatut_katepros}</td>";
+						echo "<td align='right'>{$vals['tilatut_rivit']}</td>";
+						echo "<td align='right'>{$vals['laskutetut_eurot']}</td>";
+						echo "<td align='right'>{$laskutetut_katepros}</td>";
+						echo "<td align='right'>{$vals['laskutetut_rivit']}</td>";
+						echo "</tr>";
+					}
+				}
 			}
 
 			ksort($arr_osasto[$pvm]);

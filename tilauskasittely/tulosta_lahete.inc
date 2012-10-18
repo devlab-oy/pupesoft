@@ -1568,7 +1568,20 @@ if (!function_exists('rivi_lahete')) {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['rivihinta'];
+					#$yhtiorow['alv_kasittely'] == '' - Verolliset myyntihinnat
+					#$yhtiorow['alv_kasittely'] != '' - Verottomat myyntihinnat
+
+					$alv_laskentaan = ($row['alv'] >= 500) ? 0 : $row['alv'];
+
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + $alv_laskentaan / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + $alv_laskentaan / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -3384,6 +3397,13 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
 				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys", $kieli), $thispage, $boldi);
 			}
+			else if ($tyyppi == 'TILAUSVAHVISTUS' and strpos($laskurow['tilausvahvistus'], 'A') !== FALSE) {
+				$kala -= 10;
+				$ed_sivu = $sivu;
+
+				$return = compact(array_keys($params));
+				$params = alvierittely_lahete($return);
+			}
 			else {
 				if ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {
 					$pdf->draw_text(410, 72, t("Yhteensä verollinen", $kieli).":", $thispage, $norm);
@@ -3487,7 +3507,7 @@ if (!function_exists('alvierittely_lahete')) {
 		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $arvo), $thispage, $boldi);
 		$pdf->draw_text(473, $kala, $laskurow["valkoodi"], $thispage, $boldi);
 
-		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi in ('L', 'T') " : " and tilausrivi.tyyppi = 'L' ";
+		$tyyppilisa = (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") or ($tyyppi == "TILAUSVAHVISTUS") ? " and tilausrivi.tyyppi in ('L', 'T') " : " and tilausrivi.tyyppi = 'L' ";
 
 		$jtlisa = "";
 

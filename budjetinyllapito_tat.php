@@ -3,9 +3,13 @@
 	// Tiedoston tallennusta varten
 	$lataa_tiedosto = (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "lataa_tiedosto") ? 1 : 0;
 	$_REQUEST["kaunisnimi"] = isset($_REQUEST["kaunisnimi"]) ? str_replace("/", "", $_REQUEST["kaunisnimi"]) : "";
-	
+
 	ini_set("memory_limit", "5G");
-	
+
+	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
+	$usemastertoo = 1;
+
 	require ("inc/parametrit.inc");
 
 	// K‰ytett‰v‰t muuttujat
@@ -30,7 +34,6 @@
 	$myyntiennustekerroin = isset($myyntiennustekerroin) ? (float) str_replace(",", ".", $myyntiennustekerroin) : 12;
 	$myyntitavoitekerroin = (isset($myyntitavoitekerroin) and $myyntitavoitekerroin != "") ? (float) str_replace(",", ".", $myyntitavoitekerroin) : "";
 	$naytamyyntiennuste   = isset($naytamyyntiennuste) ? trim($naytamyyntiennuste) : "";
-
 
 	$edellinen_vuosi_alku 	  = date("Y-m-d", mktime(0, 0, 0, 1, 1, date("Y")-1));
 	$edellinen_vuosi_loppu 	  = date("Y-m-d", mktime(0, 0, 0, 1, 0, date("Y")));
@@ -64,40 +67,16 @@
 		return array($rivi["summa"], $rivi["maara"]);
 	}
 
-	function asiakkaanmyynti($tunnukset, $vaintamavuosi=FALSE) {
-		global $kukarow, $yhtiorow, $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu,
-			   $myyntiennustekerroin, $myyntitavoitekerroin, $ostryrow, $osastotryttain;
+	function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
+		global $kukarow, $yhtiorow, $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $myyntiennustekerroin, $myyntitavoitekerroin, $ostryntuotteet;
 
 		$rivilisa = "";
 
-		if (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
-			$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-						FROM tuote
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and try 	= '{$ostryrow['selite']}'
-						and tuotetyyppi in ('','R','K','M')
-						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'";
-			$result = pupe_query($query);
-			$tryrow = mysql_fetch_assoc($result);
-
-			if ($tryrow['tuotteet'] != "") {
-				$rivilisa = " and tilausrivi.tuoteno in ({$tryrow['tuotteet']}) ";
-			}
-
+		if ($try != "" and isset($ostryntuotteet[$try]) and $ostryntuotteet[$try] != "") {
+			$rivilisa = " and tilausrivi.tuoteno in ({$ostryntuotteet[$try]}) ";
 		}
-		elseif (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "osastoittain") {
-			$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-						FROM tuote
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and osasto 	= '{$ostryrow['selite']}'
-						and tuotetyyppi in ('','R','K','M')
-						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'";
-			$result = pupe_query($query);
-			$tryrow = mysql_fetch_assoc($result);
-
-			if ($tryrow['tuotteet'] != "") {
-				$rivilisa = " and tilausrivi.tuoteno in ({$tryrow['tuotteet']}) ";
-			}
+		elseif ($osasto != "" and isset($ostryntuotteet[$osasto]) and $ostryntuotteet[$osasto] != "") {
+			$rivilisa = " and tilausrivi.tuoteno in ({$ostryntuotteet[$osasto]}) ";
 		}
 
 		if ($vaintamavuosi) {
@@ -138,7 +117,7 @@
 		global  $kukarow, $yhtiorow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak,
 				$sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain,
 				$edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $summabudjetti, $myyntiennustekerroin,
-				$naytamyyntiennuste, $myyntitavoitekerroin, $budjetointi_taso;
+				$naytamyyntiennuste, $myyntitavoitekerroin, $budjetointi_taso, $ostryntuotteet;
 
 		$excelsarake = 0;
 		$worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
@@ -193,7 +172,7 @@
 
 		if ($toim == "ASIAKAS") {
 			if ($naytamyyntiennuste != "") {
-				list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"]);
+				list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"], $try, $osasto);
 
 				if ($rivimaara < $maxrivimaara) {
 					echo "<td align='right'>{$edvuodenkokonaismyynti}</td>";
@@ -230,7 +209,7 @@
 			}
 			else {
 
-				if ($toim == "ASIAKAS" and $summabudjetti == "on") {
+				if ($toim == "ASIAKAS" and $summabudjetti == "on" and $row[$budj_sarak] != "") {
 					$query = "	SELECT sum(summa) summa,
 								sum(maara) maara,
 								avg(indeksi) indeksi
@@ -238,7 +217,6 @@
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and kausi		 	= '$ik'
 								and $budj_sarak		in ($row[$budj_sarak])
-								and dyna_puu_tunnus	= ''
 								and try				= '$try'
 								and osasto			= '$osasto'";
 				}
@@ -248,7 +226,6 @@
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and kausi		 	= '$ik'
 								and $budj_sarak		= '$row[$budj_sarak]'
-								and dyna_puu_tunnus	= ''
 								and try				= '$try'
 								and osasto			= '$osasto'";
 				}
@@ -505,6 +482,38 @@
 		}
 	}
 
+
+	if (($tee == "TALLENNA_BUDJETTI" or $submit_button != "") and $toim == "ASIAKAS" and isset($osastotryttain) and $osastotryttain != "") {
+		if ($osastotryttain == "tuoteryhmittain") {
+			$query = "	SELECT try, group_concat(concat('\'',tuoteno,'\'')) tuotteet
+						FROM tuote
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tuotetyyppi in ('','R','K','M')
+						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						GROUP BY try";
+			$result = pupe_query($query);
+			$ostryntuotteet = array();
+
+			while ($tryrow = mysql_fetch_assoc($result)) {
+				$ostryntuotteet[$tryrow["try"]] = $tryrow["tuotteet"];
+			}
+		}
+		elseif ($osastotryttain == "osastoittain") {
+			$query = "	SELECT osasto, group_concat(concat('\'',tuoteno,'\'')) tuotteet
+						FROM tuote
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tuotetyyppi in ('','R','K','M')
+						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						GROUP BY osasto";
+			$result = pupe_query($query);
+			$ostryntuotteet = array();
+
+			while ($tryrow = mysql_fetch_assoc($result)) {
+				$ostryntuotteet[$tryrow["osasto"]] = $tryrow["tuotteet"];
+			}
+		}
+	}
+
 	// Lis‰t‰‰n/P‰ivitet‰‰n budjetti
 	if ($tee == "TALLENNA_BUDJETTI") {
 
@@ -619,25 +628,7 @@
 								$update_vai_insert = "DELETE";
 							}
 							else {
-								// Katsotaan lˆytyykˆ n‰ill‰ tiedoilla jo budjetti
-								$query = "	SELECT summa
-											FROM $budj_taulu
-											WHERE yhtio 	= '{$kukarow["yhtio"]}'
-											AND $budj_sarak	= '$liitostunnari'
-											AND kausi 		= '$kausi'
-											AND try 		= '$try'
-											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-
-								if (mysql_num_rows($result) > 0) {
-									$budjrow = mysql_fetch_assoc($result);
-									// Lˆytyy budjetti -> p‰ivitet‰‰n
-									$update_vai_insert = "UPDATE";
-								}
-								else {
-									// Ei lˆydy budjettia -> lis‰t‰‰n
-									$update_vai_insert = "INSERT";
-								}
+								$update_vai_insert = "INSERT/UPDATE";
 							}
 
 							// $solu_orig on k‰ytt‰j‰n syˆtt‰m‰ luku
@@ -675,7 +666,7 @@
 									$tall_summa = round($solu, 2);
 								}
 								elseif ($budj_kohtelu == "indeksi") {
-									list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($liitostunnari, TRUE);
+									list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($liitostunnari, $try, $osasto, TRUE);
 
 									$tall_index = round($solu, 2);
 									$tall_summa = $tanvuodenennuste > 0 ? round($tanvuodenennuste/12*$tall_index, 2): 0;
@@ -741,43 +732,31 @@
 											AND kausi 		= '$kausi'
 											AND try 		= '$try'
 											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-								$pois += mysql_affected_rows();
+								$result = pupe_query($query, $masterlink);
+								$pois++;
 							}
-							elseif ($update_vai_insert == "UPDATE") {
-								$query	= "	UPDATE $budj_taulu SET
-											summa		= '$tall_summa',
-											maara		= '$tall_maara',
-											indeksi		= '$tall_index',
-											muuttaja	= '{$kukarow["kuka"]}',
-											muutospvm	= now()
-											WHERE yhtio 	= '{$kukarow["yhtio"]}'
-											AND $budj_sarak	= '$liitostunnari'
-											AND kausi 		= '$kausi'
-											AND try 		= '$try'
-											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-								$paiv += mysql_affected_rows();
-							}
-							elseif ($update_vai_insert == "INSERT") {
+							elseif ($update_vai_insert != "") {
 								$query = "	INSERT INTO $budj_taulu SET
 											summa 				= '$tall_summa',
 											maara				= '$tall_maara',
+											indeksi				= '$tall_index',
 											yhtio 				= '{$kukarow["yhtio"]}',
 											kausi 				= '$kausi',
 											$budj_sarak		 	= '$liitostunnari',
 											try 				= '$try',
 											osasto 				= '$osasto',
-											indeksi				= '$tall_index',
 											laatija 			= '{$kukarow["kuka"]}',
 											luontiaika 			= now(),
 											muutospvm 			= now(),
+											muuttaja 			= '{$kukarow["kuka"]}'
+											ON DUPLICATE KEY UPDATE
+											summa 				= '$tall_summa',
+											maara				= '$tall_maara',
+											indeksi				= '$tall_index',
+											muutospvm 			= now(),
 											muuttaja 			= '{$kukarow["kuka"]}'";
-								$result = pupe_query($query);
-								$lisaa += mysql_affected_rows();
-							}
-							else {
-								echo "<font class='error'>".t("Virheelliset parametrit")." '$budj_sarak' '$liitostunnari' / '$budj_kohtelu' / '$budjetointi_taso' / '$summabudjetti' / $solu </font><br>";
+								$result = pupe_query($query, $masterlink);
+								$lisaa++;
 							}
 						}
 					}
@@ -787,7 +766,7 @@
 			unset($rivi);
 		}
 
-		echo "<font class='message'>".t("P‰ivitin")." $paiv. ".t("Lis‰sin")." $lisaa ".t("Poistin")." $pois.</font><br /><br />";
+		echo "<font class='message'>".t("P‰ivitin/lis‰sin")." $lisaa. ".t("Poistin")." $pois.</font><br /><br />";
 		$tee = "";
 	}
 
@@ -1191,13 +1170,6 @@
 
 	// Ajetaan raportti
 	if ($tee == "AJA_RAPORTTI") {
-
-		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-		$useslave = 1;
-		$usemastertoo = 1;
-
-		// Eli haetaan connect.inc uudestaan t‰ss‰
-		require("inc/connect.inc");
 
 		include('inc/pupeExcel.inc');
 

@@ -49,8 +49,8 @@ $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails
 
 $laskuttajan_toimittajanumero = "";
 
-if (strpos($file, "maventa") !== false) {
-	$laskuttajan_toimittajanumero = str_replace("-", "", $xml->SellerPartyDetails->SellerPartyIdentifier);
+if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->SellerPartyIdentifier) != "") {
+	$laskuttajan_toimittajanumero = str_replace("-", "", trim($xml->SellerPartyDetails->SellerPartyIdentifier));
 
 	$query = "	SELECT toimittajanro
 				FROM toimi

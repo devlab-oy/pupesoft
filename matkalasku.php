@@ -5,18 +5,32 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr>";
 
 if ($tee == "VALMIS") {
-	$query = "	UPDATE lasku SET
+	$query = "	SELECT tunnus, viite
+				FROM lasku
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				and tunnus  = '{$tilausnumero}'";
+	$result = pupe_query($query);
+	$row = mysql_fetch_assoc($result);
+
+	if (empty($row['viite'])) {
+		echo "<br><font class='error'>".t('VIRHE: Viite on tyhjä, tämä on pakollinen kenttä')."!</font><br><br>";
+		
+		$tee = 'MUOKKAA';
+	}
+	else {
+		$query = "	UPDATE lasku SET
 				alatila = ''
 				WHERE yhtio 	 = '$kukarow[yhtio]'
 				and tunnus 		 = '$tilausnumero'
 				and tila		 = 'H'
 				and tilaustyyppi = 'M'
 				and alatila 	 = 'M'";
-	$updres = pupe_query($query);
+		$updres = pupe_query($query);
 
-	$tee 		  = "";
-	$tunnus 	  = 0;
-	$tilausnumero = 0;
+		$tee = "";
+		$tunnus = 0;
+		$tilausnumero = 0;
+	}
 }
 
 if ($tee == "UUSI") {

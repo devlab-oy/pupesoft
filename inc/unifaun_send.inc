@@ -147,7 +147,7 @@ class Unifaun {
 
 		$uni_ready = $control->addChild('ready');
 
-		$uni_ready_val = $uni_ready->addChild('val', $mergeid);
+		$uni_ready_val = $uni_ready->addChild('val', utf8_encode($mergeid));
 		$uni_ready_val->addAttribute('n', 'mergeid');
 
 		$uni_close = $control->addChild('close');
@@ -155,7 +155,7 @@ class Unifaun {
 		$uni_close_val = $uni_close->addChild('val', $printer);
 		$uni_close_val->addAttribute('n', 'printer');
 
-		$uni_close_val = $uni_close->addChild('val', $mergeid);
+		$uni_close_val = $uni_close->addChild('val', utf8_encode($mergeid));
 		$uni_close_val->addAttribute('n', 'mergeid');
 
 		$this->xml = $xml;
@@ -174,7 +174,7 @@ class Unifaun {
 		$uni_discard->addAttribute('type', 'parcel');
 
 		if ($mergeid != "") {
-			$uni_discard_val = $uni_discard->addChild('val', $mergeid);
+			$uni_discard_val = $uni_discard->addChild('val', utf8_encode($mergeid));
 			$uni_discard_val->addAttribute('n', 'mergeid');
 		}
 
@@ -466,7 +466,14 @@ class Unifaun {
 			$uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
 
 			if ($this->toitarow['tulostustapa'] == 'E') {
-				$mergeid = md5($this->postirow["toimitustavan_lahto"].$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				
+				if ($this->yhtiorow['kerayserat'] == 'K') {								
+					$mergeid = md5($this->postirow["toimitustavan_lahto"].$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				}
+				else {
+					$mergeid = md5(date("Ymd").$this->postirow["ytunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
+				}
+								
 				$uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
 			}
 
@@ -494,12 +501,25 @@ class Unifaun {
 				#$uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow["tunnus"])); # Shipment ID. UFPS only.
 				#$uni_shi_val->addAttribute('n', "shpid");
 
+
+				if ($this->yhtiorow['kerayserat'] == 'K') {
+					$pakkausid = chr(64+$this->postirow['pakkausid']);
+				}
+				else {
+					$pakkausid = $this->postirow['kuljetusohjeet'];
+				}
+
 				# PakkausID
-				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr(chr(64+$this->postirow['pakkausid']), 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
+				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($pakkausid, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext1");
 
 				# kollilaji
-				$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus']." / ".$this->postirow['rivimaara'];
+				if ($this->yhtiorow['kerayserat'] == 'K') {
+					$kollilaji = $this->postirow['kollilaji']." / ".$this->kukarow['keraajanro']." / ".$this->postirow['tunnus']." / ".$this->postirow['rivimaara'];
+				}
+				else {
+					$kollilaji = "";
+				}
 
 				$uni_shi_val = $uni_shipment->addChild('val', utf8_encode(substr($kollilaji, 0, 30))); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 4 lines available, freetext1-4. Max. 30 characters/line.
 				$uni_shi_val->addAttribute('n', "freetext2");

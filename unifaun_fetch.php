@@ -112,20 +112,33 @@
 
 					$sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 
-					list($eranumero, $sscc) = explode("_", $eranumero_sscc);
-
 					// Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
 					// Palautussanomasta etunollaat puuttuu, joten lis‰t‰‰n ne t‰ss‰
 					if (is_numeric($sscc_ulkoinen)) {
 						$sscc_ulkoinen = "00".$sscc_ulkoinen;
 					}
 
-					$query = "	UPDATE kerayserat SET
-								sscc_ulkoinen = '{$sscc_ulkoinen}'
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND sscc 	= '{$sscc}'
-								AND nro 	= '{$eranumero}'";
-					$upd_res = pupe_query($query);
+					if ($yhtiorow['kerayserat'] == 'K') {
+
+						list($eranumero, $sscc) = explode("_", $eranumero_sscc);
+
+						$query = "	UPDATE kerayserat SET
+									sscc_ulkoinen = '{$sscc_ulkoinen}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND sscc 	= '{$sscc}'
+									AND nro 	= '{$eranumero}'";
+						$upd_res = pupe_query($query);
+					}
+					else {
+
+						$eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
+
+						$query = "	UPDATE rahtikirjat SET
+									sscc_ulkoinen = '{$sscc_ulkoinen}'
+									WHERE yhtio   = '{$kukarow['yhtio']}'
+									AND tunnus in ($eranumero_sscc)";
+						$upd_res  = pupe_query($query);
+					}
 
 					rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
 				}

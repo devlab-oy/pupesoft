@@ -207,7 +207,7 @@
 										ytunnus				= '$tiltoi[ytunnus]'";
 							$updre = pupe_query($query);
 							$tunnus = (string) mysql_insert_id();
-							
+
 							// hintojen ja alennuksien hakuun tarvitaan laskurow, tehd‰‰n t‰ss‰ array kuntoon alehinta_osto() funktiota varten
 							$jtsro = array(
 								'liitostunnus' 	=> $tiltoi['tunnus'],
@@ -276,7 +276,7 @@
 									'tuoteno' 	=> $tilrivirow['tuoteno']
 								);
 
-								list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl']);	
+								list($hinta,$netto,$ale,) = alehinta_osto($jtsro, $tuote_row, $tilrivirow['kpl']);
 								// lis‰t‰‰n ostotilausrivi
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$jtstu[hyllyalue]',
@@ -392,16 +392,16 @@
 						}
 					}
 				}
+
+				// Katsotaan oliko kolmikantakauppaa
+				$triangulation = triangulation($otunnus) != "" ? "K" : "";
+
+				$query = "	UPDATE lasku SET
+							kolmikantakauppa = '{$triangulation}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$otunnus}'";
+				$upd_res = pupe_query($query);
 			}
-
-			// Katsotaan oliko kolmikantakauppaa
-			$triangulation = triangulation($otunnus) != "" ? "K" : "";
-
-			$query = "	UPDATE lasku SET
-						kolmikantakauppa = '{$triangulation}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$otunnus}'";
-			$upd_res = pupe_query($query);
 
 			return $tilauksesta_ostotilaus;
 		}

@@ -14,10 +14,15 @@
 	require ("../inc/connect.inc");
 	require ("../inc/functions.inc");
 
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
+
 	// hmm.. j‰nn‰‰
-	$kukarow['yhtio'] = $argv[1];
-	$kieli = $argv[2];
-	$kukarow['kuka']  = "crond";
+	$kukarow['yhtio'] 		= $argv[1];
+	$kieli 					= $argv[2];
+	$kukarow['kuka']  		= "crond";
+	$kukarow["kirjoitin"] 	= "";
 
 	// Haetaan yhtion tiedot (virhetsekki funktiossa....)
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

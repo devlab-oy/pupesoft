@@ -57,7 +57,7 @@ echo "<div class='main'>
 	</tr>
 	<tr>
 		<th><label for='ostotilaus'>",t("Ostotilaus"),"</label></th>
-		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
+		<td><input type='text' id='ostotilaus' name='data[ostotilaus]' value=''/><td>
 	</tr>
 </table>
 </div>";

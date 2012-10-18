@@ -39,6 +39,19 @@
 		$rakirno = $toimitustavan_tarkistin[0];
 	}
 
+	if (isset($pakkaus) and count($pakkaus) > 0) {
+
+		$pakkauskuvaus = array();
+
+		foreach ($pakkaus as $key => $val) {
+			if (strpos($val, '!¡!') !== FALSE) {
+				list($pak, $pak_kuvaus) = explode('!¡!', $val);
+				$pakkauskuvaus[$key] = $pak_kuvaus;
+				$pakkaus[$key] = $pak;
+			}
+		}
+	}
+
 	if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
 		list($toimitustapa, $yhtio, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
@@ -708,9 +721,9 @@
 
 			// Katsotaan pitäisikö tämä rahtikirja tulostaa heti...
 			$query = "	SELECT *
-						from toimitustapa
-						where yhtio = '$kukarow[yhtio]'
-						and selite = '$toimitustapa'";
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite  = '$toimitustapa'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
@@ -736,27 +749,41 @@
 								sisamaan_kuljetusmuoto  			= '$row[sisamaan_kuljetusmuoto]',
 								sisamaan_kuljetus_kansallisuus		= '$row[sisamaan_kuljetus_kansallisuus]',
 								vahennettava_era 					= '$row[vahennettava_era]'
-								where yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset)";
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus in ($tunnukset)";
 					$updateres = pupe_query($query);
 				}
 
 				// tämä toimitustapa pitäisi tulostaa nyt..
-				if ($row['nouto']=='' and ($row['tulostustapa']=='H' or $row['tulostustapa']=='K')) {
+				if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or $row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
 					// rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
 					// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
 					// $tee						tässä pitää olla teksti tulosta
 
-					$toimitustapa_varasto = $toimitustapa."!!!!".$kukarow['yhtio']."!!!!".$tulostuspaikka;
-					$tee				  = "tulosta";
+					$toimitustapa_varasto 		= $toimitustapa."!!!!".$kukarow['yhtio']."!!!!".$tulostuspaikka;
+					$tee				  		= "tulosta";
+					$unifaun_era_vainkollitarra = FALSE;
+
+					if ($row['tulostustapa'] == 'E' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+						$unifaun_era_vainkollitarra = TRUE;
+					}
+
+					// triggeröidään tämä, niin ei tulosteta liikaa rahtikirjoja
+					if ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+						$sel_ltun = explode(",", $tunnukset);
+					}
 
 					require ("rahtikirja-tulostus.php");
 
 				} // end if tulostetaanko heti
 
-				// Haetaan laskun kaikki tiedot uudestaan koska rahtikirja-tulostus.php ilikirjaa muuttujamme
-				$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskurow_rakirsyotto_original[tunnus]'";
-				$lasresult   = pupe_query($query);
+				// Haetaan laskun kaikki tiedot uudestaan koska rahtikirja-tulostus.php ylikirjaa muuttujamme
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tunnus	= '$laskurow_rakirsyotto_original[tunnus]'";
+				$lasresult = pupe_query($query);
 				$laskurow = mysql_fetch_assoc($lasresult);
 
 			} // end if löytykö toimitustapa
@@ -791,16 +818,17 @@
 			}
 			elseif ($laskurow["varasto"] == '') {
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]'
-							order by alkuhyllyalue,alkuhyllynro
-							limit 1";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							ORDER BY alkuhyllyalue,alkuhyllynro
+							LIMIT 1";
 			}
 			else {
 				$query = "	SELECT *
-							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
-							order by alkuhyllyalue,alkuhyllynro";
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus='$laskurow[varasto]'
+							ORDER BY alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = pupe_query($query);
 
@@ -1854,7 +1882,7 @@
 					JOIN varastopaikat use index (PRIMARY) ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
 					WHERE lasku.$logistiikka_yhtiolisa
 					AND	lasku.tila = '$tila'
-					AND (lasku.alatila in ('B','E') or (lasku.alatila='D' and toimitustapa.tulostustapa='H'))
+					AND (lasku.alatila in ('B','E') or (lasku.alatila = 'D' and toimitustapa.tulostustapa = 'H'))
 					$haku
 					$tilaustyyppi
 					GROUP BY 1,2,3
@@ -2474,17 +2502,19 @@
 
 				$query = "	SELECT kerayserat.pakkaus, kerayserat.pakkausnro,
 							pakkaus.pakkaus,
+							pakkaus.pakkauskuvaus,
 							kerayserat.pakkausnro,
 							pakkaus.erikoispakkaus,
 							kerayserat.otunnus,
-							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot
+							SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot,
+							SUM(tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl_keratty) kuutiot
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
 							AND kerayserat.otunnus 	IN ({$querytunlisa})
-							GROUP BY 1,2,3,4,5,6
+							GROUP BY 1,2,3,4,5,6,7
 							ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
 			}
 
@@ -2538,13 +2568,11 @@
 
 				while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-					if (isset($pakkaus[$i]) and $pak_row['pakkaus'] == $pakkaus[$i]) $sel = " selected";
-					elseif ($pak_row['pakkaus'] == $keraysera_row['pakkaus']) $sel = " selected";
+					if (isset($pakkaus[$i]) and $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $pakkaus[$i]) $sel = " selected";
+					elseif ($pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $keraysera_row['pakkaus'].'!¡!'.$keraysera_row['pakkauskuvaus']) $sel = " selected";
 					else $sel = "";
 
-					
-
-					echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+					echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 				}
 
 				echo "</select></td>";
@@ -2586,25 +2614,23 @@
 				}
 			}
 
-			if ($yhtiorow['kerayserat'] != 'P' and $yhtiorow['kerayserat'] != 'A') {
-				$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
-							FROM rahtikirjat use index (otsikko_index)
-							WHERE yhtio			= '$kukarow[yhtio]'
-							$rahti_otsikot
-							$rahti_rahtikirjanro
-							AND pakkaus			= '$row[pakkaus]'
-							AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
-				$rarrr = pupe_query($query);
+			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
+						$rahti_otsikot
+						$rahti_rahtikirjanro
+						AND pakkaus			= '$row[pakkaus]'
+						AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
+			$rarrr = pupe_query($query);
 
-				if (mysql_num_rows($rarrr) == 1) {
-					$roror = mysql_fetch_assoc($rarrr);
+			if (mysql_num_rows($rarrr) == 1) {
+				$roror = mysql_fetch_assoc($rarrr);
 
-					if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
-					if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
-					if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
-					if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
-					if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-				}
+				if ($roror['kollit'] > 0)				$kollit[$i]				= $roror['kollit'];
+				if ($roror['kilot'] > 0)				$kilot[$i]				= $roror['kilot'];
+				if ($roror['kuutiot']  > 0)				$kuutiot[$i]			= $roror['kuutiot'];
+				if ($roror['lavametri'] > 0)			$lavametri[$i]			= $roror['lavametri'];
+				if ($roror['pakkauskuvaustark'] != '')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
 			}
 
 			echo "<tr>";
@@ -2640,9 +2666,9 @@
 
 			while ($pak_row = mysql_fetch_assoc($pak_res)) {
 
-				$sel = $pak_row['pakkaus'] == $row['pakkaus'] ? " selected" : "";
+				$sel = $pak_row['pakkaus'].'!¡!'.$pak_row['pakkauskuvaus'] == $row['pakkaus'].'!¡!'.$row['pakkauskuvaus'] ? " selected" : "";
 
-				echo "<option value='{$pak_row['pakkaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
+				echo "<option value='{$pak_row['pakkaus']}!¡!{$pak_row['pakkauskuvaus']}'{$sel}>{$pak_row['pakkaus']} {$pak_row['pakkauskuvaus']}</option>";
 			}
 
 			echo "</select></td>";

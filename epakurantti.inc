@@ -227,7 +227,7 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.uusiotunnus
 						AND lasku.tila = 'K'
-						AND lasku.alatila != 'X')
+						AND lasku.alatila not in ('X', 'I'))
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoterow[tuoteno]'
 					and varattu = 0

@@ -89,6 +89,12 @@
 		$saako_hyvaksya++;
 	}
 
+	if ($kukarow['extranet'] != '' and $trow['sarjanumeroseuranta'] != '' and $row['varattu'] != 1) {
+		$varaosavirhe .= t("HUOM: T‰m‰ on sarjanumeroseurannallinen tuote. Kappalem‰‰r‰ pit‰‰ olla 1")."!<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
 	$korvattiin_korvaavalla = "";
 
 	if (mysql_num_rows($tres) == 0) {
@@ -313,8 +319,34 @@
 
 	$paikat	= "";
 
-	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
-		$varaosavirhe .= t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on").": $trow[myynti_era]<br>";
+	if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
+
+		$mimyhuom = "HUOM: Rivin m‰‰r‰ on pyˆristetty";
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " minimier‰‰n";
+		}
+
+		if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+			if ($trow["minimi_era"] > 0) {
+				$mimyhuom .= " tai";
+			}
+
+			$mimyhuom .= " t‰yteen myyntier‰‰n";
+		}
+
+		// K‰‰nnet‰‰n teksti
+		$mimyhuom = t($mimyhuom)."!";
+
+		if ($trow['myynti_era'] > 0) {
+			$mimyhuom .= " ".t("Myyntier‰ on").": $trow[myynti_era]";
+		}
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " ".t("Minimier‰ on").": $trow[minimi_era]";
+		}
+
+		$varaosavirhe .= $mimyhuom."<br>";
 	}
 
 	//T‰ss‰ on kaikki saldoihin ja varastopaikkoihin liittyv‰t tsekit, eli EI tehd‰ saldottomille tuotteille, eik‰ tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
@@ -330,7 +362,7 @@
 		$varow = mysql_fetch_assoc($varesult);
 
 		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and !in_array($row["var2"], array("OK", "PK"))) {
-			$varaosavirhe .= "HUOM: Tuote sijaitsee erikoisvarastossa!<br>";
+			$varaosavirhe .= t("HUOM: Tuote sijaitsee erikoisvarastossa")."!<br>";
 			$riviok++;
 			$tilausok++;
 			$saako_hyvaksya++;
@@ -786,7 +818,7 @@
 				$tilaustyypilla = t("Valmistuksella");
 			}
 
-			$nayta_sostolisateksti = "TOTTA";			
+			$nayta_sostolisateksti = "TOTTA";
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";
 		}
 	}
@@ -880,8 +912,6 @@
 			if ($kutsuttu > 0) {
 				$vastaavat_html .= "</table>";
 				$vastaavattuotteet = 1;
-			}			
+			}
 		}
 	}
-
-?>

@@ -154,4 +154,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "oletus_alv") {
+		$alvulos = preg_replace("/<select name='.*?'>/", "\\0<option value = 'NULL'>".t("Ei valintaa")."</option>", alv_popup($nimi, $trow[$i]));
+		$ulos = "<td>{$alvulos}</td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "manuaali_esto") {
+		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos = "<td><select name='$nimi'>\n";
+		$ulos .= "<option value = ''>".t("Tiliöinti muokattavissa")."</option>\n";
+		$ulos .= "<option value = 'X' $sel>".t("Tiliöinnin manuaalinen lisäys/muokkaus estetty")."</option>\n";
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
 ?>

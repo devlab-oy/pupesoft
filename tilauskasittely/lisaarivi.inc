@@ -326,27 +326,31 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
+	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
 		$org_kpl = $kpl;
 
-		if ($kpl <= $trow['myynti_era']) {
-			$kpl = $trow['myynti_era'];
+		if ($kpl < $trow['minimi_era']) {
+			$kpl = $trow['minimi_era'];
 		}
-		else {
-			$kokonaisluku = round($kpl / $trow['myynti_era']);
 
-			$test = $kokonaisluku * $trow['myynti_era'];
-
-			if ($kpl > $test) {
-				$test = ($kokonaisluku + 1) * $trow['myynti_era'];
+		if ($yhtiorow['myyntiera_pyoristys'] == 'K') {
+			if ($kpl <= $trow['myynti_era']) {
+				$kpl = $trow['myynti_era'];
 			}
+			else {
+				$kokonaisluku = round($kpl / $trow['myynti_era']);
 
-			$kpl = (float) $test;
+				$test = $kokonaisluku * $trow['myynti_era'];
+
+				if ($kpl > $test) {
+					$test = ($kokonaisluku + 1) * $trow['myynti_era'];
+				}
+
+				$kpl = (float) $test;
+			}
 		}
 
-		if ($org_kpl != $kpl) {
-			$myyntierahuomatus = TRUE;
-		}
+		if ($org_kpl != $kpl) $myyntierahuomatus = TRUE;
 	}
 
 	if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
@@ -393,9 +397,7 @@
 
 		}
 
-		if ($org_kpl != $kpl) {
-			$ostoerahuomatus = TRUE;
-		}
+		if ($org_kpl != $kpl) $ostoerahuomatus = TRUE;
 	}
 
 	$toimittamatta = $kpl; //Näin paljon ollaan toimittamassa

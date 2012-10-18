@@ -10,10 +10,9 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if (!isset($errors)) $errors = array();
 
-if (empty($ostotilaus) or empty($tilausrivi) or empty($saapuminen)) {
+if (empty($ostotilaus) or empty($tilausrivi)) {
     exit("Virheelliset parametrit");
 }
-
 # Haetaan tilausrivin ja laskun tiedot
 /* Ostotilausten_kohdistus rivi 847 - 895 */
 $query = "  SELECT
@@ -39,6 +38,16 @@ $row = mysql_fetch_assoc($result);
 
 if (!$row) {
     exit("Virhe, riviä ei löydy");
+}
+
+# Tehdään tarvittaessa uusi saapuminen
+if (empty($saapuminen)) {
+    $toimittaja_query = "SELECT * FROM toimi WHERE tunnus='{$row['liitostunnus']}'";
+    $toimittaja = mysql_fetch_assoc(pupe_query($toimittaja_query));
+    $saapuminen = uusi_saapuminen($toimittaja);
+
+    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $updated = pupe_query($update_kuka);
 }
 
 # Kontrolleri

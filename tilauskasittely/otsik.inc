@@ -739,7 +739,7 @@
 
 				// jos ei löydy niin mennään erroriin
 				if (mysql_num_rows($alhire) == 0) {
-					echo "<font class='error'>Oletus ALV-kantaa ei löydy asiakkaan maahan $srow[maa]! Ei voida jatkaa!</font><br>";
+					echo "<font class='error'>".t("VIRHE: Oletus ALV-kantaa ei löydy asiakkaan maahan")." $srow[maa]! ".t("Ei voida jatkaa")."!</font><br>";
 					exit;
 				}
 				else {
@@ -1325,24 +1325,32 @@
 				$vteksti=t("Vienti ei-EU");
 			}
 
-			echo "<td>".t("Vienti").":</td>";
+			echo "<td>".t("Vienti").":</td><td>";
 
 			if ($srow["alv"] == 99.99) {
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
+				echo "<input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä");
 			}
 			elseif ($alv_velvollisuus != "") {
-				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])</td>";
+				echo "<input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])";
 			}
 			else {
-				echo "<td>
+				echo "
 					<select name='vienti'>
 					<option value=''  $sel1>".t("Kotimaa")."</option>
-					<option value='E' $sel2>".t("vienti EU")."</option>
+					<option value='E' $sel2>".t("Vienti EU")."</option>
 					<option value='K' $sel3>".t("Vienti ei-EU")."</option>
-					</select></td>";
+					</select>";
+
+				$sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
+
+
+				echo "<select name='kolmikantakauppa'>";
+				echo "<option value=''>",t("Normaali myynti"),"</option>";
+				echo "<option value='M'{$sel}>",t("Kolmikantakauppa"),"</option>";
+				echo "</select>";
 			}
 
-			echo "</tr>";
+			echo "</td></tr>";
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
@@ -1958,7 +1966,7 @@
 
 					echo "</select></td>";
 
-					echo "<td></td><td></td>";
+					echo "<td></td><td></td></tr>";
 				}
 			}
 
@@ -2978,6 +2986,7 @@
 		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
 		$label = !isset($label) ? "" : $label;
+		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
@@ -3005,6 +3014,7 @@
 					ketjutus 							= '$ketjutus',
 					kohde								= '$kohde',
 					kohdistettu 						= '$maksaja',
+					kolmikantakauppa					= '{$kolmikantakauppa}',
 					kuljetus 							= '$kuljetus',
 					kuljetusmuoto						= '',
 					label								= '{$label}',
@@ -3432,4 +3442,3 @@
 	}
 
 	unset($alv);
-?>

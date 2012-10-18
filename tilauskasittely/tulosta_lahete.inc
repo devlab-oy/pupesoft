@@ -654,6 +654,8 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
+		
+		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 
 		$thispage = $pdf->new_page("a4");
 
@@ -782,12 +784,14 @@ if (!function_exists('uusi_sivu_lahete')) {
 			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
 			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
+			
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 			}
 			else {
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
 			}
+			
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);
@@ -877,6 +881,11 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 370, $kala+10, 420, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 420, $kala+10, 580, 	$thispage, $rectparam);
+
+			if (trim($naytetaanko_rivihinta) == '') {
+				$pdf->draw_rectangle($kala+30, 490, $kala+10, 580, 	$thispage, $rectparam);
+			}
+
 			$pdf->draw_text(25,  $kala+15, "#",					$thispage, $norm);
 
 			if ($pitkattuotteet) {
@@ -889,9 +898,10 @@ if (!function_exists('rivi_otsikot_lahete')) {
 
 			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
+			$pdf->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
 
 			if (trim($naytetaanko_rivihinta) == '') {
-				$pdf->draw_text(425, $kala+15, t("Rivihinta", $kieli),	$thispage, $norm);
+				$pdf->draw_text(495, $kala+15, t("Rivihinta", $kieli),	$thispage, $norm);
 			}
 		}
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
@@ -2118,6 +2128,8 @@ if (!function_exists('rivi_hinta_eiale_lahete_ean')) {
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], $thispage, $norm);
+
+		$pdf->draw_text(425, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
 		if (trim($naytetaanko_rivihinta) == '') {
 

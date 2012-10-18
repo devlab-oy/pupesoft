@@ -3,7 +3,7 @@
 if(!function_exists("tilitarkista")) {
 	function tilitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
-		
+
 		if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) != '') {
 
 			$query   = "select tunnus from tili where yhtio='$kukarow[yhtio]' and tilino='$t[$i]' and tunnus != '$tunnus'";
@@ -36,6 +36,12 @@ if(!function_exists("tilitarkista")) {
 
 		if (mysql_field_name($result, $i) == "ulkoinen_taso" and trim($t[$i]) == "") {
 			$virhe[$i] = t("Ulkoinen taso on syötettävä")."!";
+		}
+
+		if (mysql_field_name($result, $i) == "oletus_alv" and trim($t[$i]) == "") {
+
+			// Jos on tyhjä niin laitetaan stringi NULL, joka tarkoittaa 'ei oletusta'
+			$t[$i] = "NULL";
 		}
 	}
 }

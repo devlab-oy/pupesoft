@@ -738,6 +738,8 @@
 			$toimppa = substr($toimaika, 8, 2);
 		}
 
+		echo "<input type='hidden' name='myy_sarjatunnus' value='{$myy_sarjatunnus}'>";
+
 		echo "<table>
 				<tr>$jarjlisa
 					<th align='left'>".t("Tuotenumero")."</th>
@@ -781,5 +783,3 @@
    if ($kentta == '') {
        $kentta='tuoteno';
    }
-
-?>

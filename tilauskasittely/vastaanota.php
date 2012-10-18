@@ -648,7 +648,7 @@
 
 		$query  = "	SELECT tunnus, nimitys, maa
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 
@@ -912,7 +912,7 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						and alkuhyllyalue = '!!M'
-						and loppuhyllyalue = '!!M'";
+						and loppuhyllyalue = '!!M' AND tyyppi != 'P'";
 			$tresult = pupe_query($query);
 			$mrow = mysql_fetch_assoc($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";

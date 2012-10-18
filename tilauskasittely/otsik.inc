@@ -1560,7 +1560,7 @@
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and alkuhyllyalue = '!!M'
-							and loppuhyllyalue = '!!M'";
+							and loppuhyllyalue = '!!M' AND tyyppi != 'P'";
 				$tresult = pupe_query($query);
 				$mrow = mysql_fetch_assoc($tresult);
 
@@ -1629,7 +1629,7 @@
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						$varastot_lisa_query
+						$varastot_lisa_query AND tyyppi != 'P'
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 

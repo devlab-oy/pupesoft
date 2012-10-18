@@ -4229,6 +4229,7 @@ if ($tee == '') {
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
 								AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
+								AND tyyppi != 'P'
 								ORDER BY tyyppi, nimitys";
 					$nimre = pupe_query($query);
 					$nimro = mysql_fetch_assoc($nimre);

@@ -51,7 +51,7 @@
 						FROM varastopaikat
 						WHERE alkuhyllyalue <= '$hyllyalue'
 						and loppuhyllyalue >= '$hyllyalue'
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -342,7 +342,7 @@
 
 				$query  = "	SELECT tunnus, nimitys
 							FROM varastopaikat
-							WHERE yhtio='$kukarow[yhtio]'
+							WHERE yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
 							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 
@@ -361,7 +361,7 @@
 
 				$query  = "	SELECT tunnus, nimitys
 							FROM varastopaikat
-							WHERE yhtio='$kukarow[yhtio]'
+							WHERE yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
 							ORDER BY tyyppi, nimitys";
 				$vares = pupe_query($query);
 

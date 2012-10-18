@@ -1925,7 +1925,7 @@
 					if ($whiletoim == "PROJEKTI") {
 						echo "	<input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
 					}
-					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
+					echo "	<input type='hidden' name='dlopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='tee'			 value='AKTIVOI'>

@@ -135,6 +135,12 @@ if (count($tuotetiedot) > 0) {
 		// tuotekoodi
 		$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ArticleIdentifier);
 
+		$rtuoteno[$i]["tuoteno2"] = "";
+
+		if ($laskun_ebid == "MAVENTAXML") {
+			$rtuoteno[$i]["tuoteno2"] = $rtuoteno[$i]["tuoteno"];
+		}
+
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 
 			// Telko-case

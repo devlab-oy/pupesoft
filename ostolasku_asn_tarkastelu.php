@@ -1784,7 +1784,7 @@
 
 			$query = "	SELECT asn_sanomat.toimittajanumero,
 						asn_sanomat.toim_tuoteno,
-						asn_sanomat.toim_tuoteno2,
+						IF(asn_sanomat.toim_tuoteno2 = '', asn_sanomat.toim_tuoteno, asn_sanomat.toim_tuoteno2) toim_tuoteno2,
 						asn_sanomat.tuoteno,
 						asn_sanomat.tilausrivinpositio,
 						asn_sanomat.status,

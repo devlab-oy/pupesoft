@@ -2209,7 +2209,7 @@ if (!function_exists("tulosta_lasku")) {
 				else {
 					$query = "	SELECT *
 								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 								ORDER BY alkuhyllyalue,alkuhyllynro
 								LIMIT 1";
 				}

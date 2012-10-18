@@ -266,7 +266,8 @@
 	if ($tee == 'peruutettu') {
 		$query = "	UPDATE suuntalavat SET
 					tila = '',
-					paino = 0
+					paino = 0,
+					kasittelytapa = ''
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
 		$tila_res = pupe_query($query);
@@ -361,8 +362,12 @@
 				}
 			}
 
+			# Jos käsittelytapa on setattu
+			$kasittelytapa_lisa = (isset($kasittelytapa) && $kasittelytapa == 'H') ? ", kasittelytapa = 'H'" : "";
+
 			$query = "	UPDATE suuntalavat SET
 						tila = 'S'
+						$kasittelytapa_lisa
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$suuntalavan_tunnus}'";
 			$tila_res = pupe_query($query);
@@ -381,6 +386,7 @@
 	if ($tee == 'purettu') {
 		$query = "	UPDATE suuntalavat SET
 					tila = 'P'
+					kasittelytapa = ''
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalavan_tunnus}'";
 		$tila_res = pupe_query($query);
@@ -982,6 +988,17 @@
 				echo "<input type='hidden' name='tee' value='siirtovalmis' />";
 				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
 				echo "<input type='submit' value='",t("Siirtovalmis"),"' />";
+				echo "</form>";
+
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+				echo "<input type='hidden' name='toiminto' value='suuntalavat'>";
+				echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+				echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+				echo "<input type='hidden' name='tee' value='siirtovalmis' />";
+				echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+				echo "<input type='hidden' name='kasittelytapa' value='H' />";
+				echo "<input type='submit' value='",t("Siirtovalmis (suoraan hyllyyn)"),"' />";
 				echo "</form>";
 
 				echo "<br><form method='post'>";

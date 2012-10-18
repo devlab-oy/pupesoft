@@ -519,7 +519,7 @@
 			$yhteensa['laskutetut_kate'] 	+= (isset($arvot['laskutetut_kate']) and $arvot['laskutetut_kate'] != '') ? $arvot['laskutetut_kate'] : 0;
 			$yhteensa['laskutetut_rivit'] 	+= (isset($arvot['laskutetut_rivit']) and $arvot['laskutetut_rivit'] != '') ? $arvot['laskutetut_rivit'] : 0;
 
-			$tilatut_katepros = round($arvot['tilatut_kate'] / $arvot['tilatut_eurot'] * 100, 1);
+			$tilatut_katepros = (isset($arvot['tilatut_eurot']) and $arvot['tilatut_eurot'] != 0) ? round($arvot['tilatut_kate'] / $arvot['tilatut_eurot'] * 100, 1) : 0;
 			$laskutetut_katepros = (isset($arvot['laskutetut_kate']) and isset($arvot['laskutetut_eurot'])) ? round($arvot['laskutetut_kate'] / $arvot['laskutetut_eurot'] * 100, 1) : '';
 
 			$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot'] / 1000, 0);

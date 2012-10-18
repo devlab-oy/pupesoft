@@ -128,6 +128,8 @@ $osto_kulu_alv = 0;
 $osto_rahti_alv = 0;
 $osto_rivi_kulu_alv = 0;
 
+$ei_oteta_kulua_pois = true;
+
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi

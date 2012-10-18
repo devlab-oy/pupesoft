@@ -609,6 +609,9 @@
 						$try 	= "";
 						$osasto	= $osasto_try;
 					}
+					else {
+						$osasto_try = 0;
+					}
 
 					if ($solu_orig == '!' or is_numeric($solu_orig)) {
 
@@ -666,10 +669,12 @@
 									$tall_summa = round($solu, 2);
 								}
 								elseif ($budj_kohtelu == "indeksi") {
-									list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($liitostunnari, $try, $osasto, TRUE);
+									if (!isset($tanvuodenennuste[$liitostunnari][$osasto_try])) {
+										list($null, $null, $tanvuodenennuste[$liitostunnari][$osasto_try], $null) = asiakkaanmyynti($liitostunnari, $try, $osasto, TRUE);
+									}
 
 									$tall_index = round($solu, 2);
-									$tall_summa = $tanvuodenennuste > 0 ? round($tanvuodenennuste/12*$tall_index, 2): 0;
+									$tall_summa = $tanvuodenennuste[$liitostunnari][$osasto_try] > 0 ? round($tanvuodenennuste[$liitostunnari][$osasto_try]/12*$tall_index, 2): 0;
 
 								}
 								else {

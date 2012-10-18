@@ -1741,14 +1741,15 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 
 			// Tehdään projektipopup
-			if (mysql_num_rows($vresult) > 0) {
-				$query = "	SELECT tunnus, nimi, koodi
+			$query = "	SELECT tunnus, nimi, koodi
 							FROM kustannuspaikka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
 							ORDER BY koodi+0, koodi, nimi";
-				$vresult = pupe_query($query);
+			$vresult = pupe_query($query);
+				
+			if (mysql_num_rows($vresult) > 0) {
 
 				echo "<select name='iprojekti[$i]'>";
 				echo "<option value =' '>".t("Ei projektia")."";

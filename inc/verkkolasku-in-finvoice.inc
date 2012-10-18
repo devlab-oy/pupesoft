@@ -55,7 +55,8 @@ if (strpos($file, "maventa") !== false and trim($xml->SellerPartyDetails->Seller
 	$query = "	SELECT toimittajanro
 				FROM toimi
 				WHERE yhtio = '{$kukarow['yhtio']}'
-				AND ytunnus = '{$laskuttajan_toimittajanumero}'";
+				AND ytunnus = '{$laskuttajan_toimittajanumero}'
+				AND toimittajanro != ''";
 	$toimittajanro_chk_res = pupe_query($query);
 	$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
 

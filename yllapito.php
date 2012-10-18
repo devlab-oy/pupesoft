@@ -334,6 +334,23 @@
 			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
 		}
 
+		if($t['varasto_status'] == 'P') {
+			$kayttajat = tarkista_kayttajien_oletus_varastot($tunnus);
+
+			if(!empty($kayttajat)) {
+				$errori = 1;
+				echo "<font class='error'>".t(count($kayttajat) . " k‰ytt‰j‰ll‰ on t‰m‰ varasto oletus varastona. Et voi piilottaa varastoa")."</font>";
+				echo "<br/>";
+			}
+
+			$varastonarvo = tarkista_piilotettavan_varaston_arvo($tunnus);
+
+			if ($varastonarvo['varasto'] != 0) {
+				$errori = 1;
+				echo "<font class='error'>".t("Varastolla on arvoa, et voi piilottaa varastoa.")."</font>";
+			}
+		}
+
 		// Luodaan tietue
 		if ($errori == "") {
 			if ($tunnus == "") {
@@ -403,18 +420,6 @@
 				}
 
 				$query .= " where yhtio='$kukarow[yhtio]' and tunnus = $tunnus";
-			}
-
-			$kayttajat = tarkista_kayttajien_oletus_varastot($tunnus);
-
-			if(!empty($kayttajat)) {
-				$errori = 1;
-
-				echo "<font class='error'>".t("Seuraavilla k‰ytt‰jill‰ oli t‰m‰ varasto oletus varastona. Et voi piilottaa varastoa")."</font>";
-				foreach ($kayttajat as $k) {
-					echo "<font class='error'>".t($k)."</font>";
-					echo '<br/>';
-				}
 			}
 
 			$result = pupe_query($query);
@@ -1980,4 +1985,76 @@
 		else {
 			return array();
 		}
+	}
+
+	function tarkista_piilotettavan_varaston_arvo($varaston_tunnus) {
+		global $kukarow;
+		$query = "
+SELECT Sum(IF(tuote.sarjanumeroseuranta = 'S'
+               OR tuote.sarjanumeroseuranta = 'U', (SELECT
+                      tuotepaikat.saldo * IF(
+                      tuote.epakurantti75pvm = '0000-00-00',
+           IF(
+           tuote.epakurantti75pvm = '0000-00-00',
+           IF(
+           tuote.epakurantti50pvm = '0000-00-00',
+           IF(
+           tuote.epakurantti25pvm = '0000-00-00',
+           Avg(
+           tilausrivi_osto.rivihinta / tilausrivi_osto.kpl),
+           Avg(
+           tilausrivi_osto.rivihinta / tilausrivi_osto.kpl) * 0.75), Avg(
+           tilausrivi_osto.rivihinta /
+           tilausrivi_osto.kpl) * 0.5), Avg
+           (tilausrivi_osto.rivihinta / tilausrivi_osto.kpl) * 0.25), 0)
+           FROM   sarjanumeroseuranta
+           LEFT JOIN tilausrivi tilausrivi_myynti USE INDEX (primary)
+                  ON tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio
+                     AND tilausrivi_myynti.tunnus =
+                         sarjanumeroseuranta.myyntirivitunnus
+           LEFT JOIN tilausrivi tilausrivi_osto USE INDEX (primary)
+                  ON tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
+                     AND tilausrivi_osto.tunnus =
+                         sarjanumeroseuranta.ostorivitunnus
+           WHERE  sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
+           AND sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
+           AND sarjanumeroseuranta.myyntirivitunnus != -1
+           AND ( tilausrivi_myynti.tunnus IS NULL
+              OR tilausrivi_myynti.laskutettuaika = '0000-00-00' )
+           AND tilausrivi_osto.laskutettuaika != '0000-00-00'),
+tuotepaikat.saldo * IF(tuote.epakurantti100pvm = '0000-00-00',
+IF(tuote.epakurantti75pvm = '0000-00-00', IF(
+tuote.epakurantti50pvm = '0000-00-00',
+IF(
+tuote.epakurantti25pvm = '0000-00-00',
+tuote.kehahin, tuote.kehahin * 0.75),
+tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0))) varasto
+FROM   tuotepaikat
+       JOIN tuote
+         ON ( tuote.tuoteno = tuotepaikat.tuoteno
+              AND tuote.yhtio = tuotepaikat.yhtio
+              AND tuote.ei_saldoa = '' )
+       JOIN varastopaikat
+         ON ( varastopaikat.yhtio = tuotepaikat.yhtio
+              AND varastopaikat.tunnus IN ('$varaston_tunnus')
+              AND Concat(Rpad(Upper(alkuhyllyalue), 5, '0'),
+                  Lpad(Upper(alkuhyllynro), 5, '0')
+                  ) <=
+                  Concat(Rpad(Upper(tuotepaikat.hyllyalue), 5,
+                      '0'), Lpad(
+                            Upper(
+                            tuotepaikat.hyllynro), 5, '0'))
+              AND Concat(Rpad(Upper(loppuhyllyalue), 5, '0'),
+                  Lpad(Upper(loppuhyllynro), 5, '0'))
+                  >= Concat(Rpad(Upper(tuotepaikat.hyllyalue), 5,
+                      '0'), Lpad(Upper(
+                            tuotepaikat.hyllynro), 5, '0')) )
+WHERE  tuotepaikat.yhtio = '$kukarow[yhtio]'
+   AND tuotepaikat.saldo <> 0";
+
+		$result = pupe_query($query);
+
+		$row = mysql_fetch_assoc($result);
+
+		return $row;
 	}

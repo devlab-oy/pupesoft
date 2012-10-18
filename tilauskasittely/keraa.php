@@ -1982,7 +1982,7 @@
 							FROM varastopaikat
 							WHERE maa != ''
 							AND {$logistiikka_yhtiolisa}
-							AND maa = '{$tumaa}' AND tyyppi != 'P'";
+							AND maa = '{$tumaa}'";
 				$maare = pupe_query($query);
 				$maarow = mysql_fetch_assoc($maare);
 				$haku .= " AND lasku.varasto IN ({$maarow['tunnukset']}) ";

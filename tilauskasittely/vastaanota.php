@@ -912,7 +912,7 @@
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						and alkuhyllyalue = '!!M'
-						and loppuhyllyalue = '!!M' AND tyyppi != 'P'";
+						and loppuhyllyalue = '!!M'";
 			$tresult = pupe_query($query);
 			$mrow = mysql_fetch_assoc($tresult);
 			echo "<input type='hidden' name='varasto' value='$mrow[tunnus]'>";

@@ -1227,7 +1227,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa' AND tyyppi != 'P'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
 			$maare = pupe_query($query);
 			$maarow = mysql_fetch_assoc($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -1834,7 +1834,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa' AND tyyppi != 'P'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
 			$maare = pupe_query($query);
 			$maarow = mysql_fetch_assoc($maare);
 

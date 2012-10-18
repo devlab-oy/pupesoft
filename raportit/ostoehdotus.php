@@ -493,7 +493,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		// katsotaan valitut varastot
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio in ($yhtiot) AND tyyppi != 'P'
+					WHERE yhtio in ($yhtiot)
 					ORDER BY yhtio, tyyppi, nimitys";
 		$vtresult = pupe_query($query);
 
@@ -973,7 +973,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT distinct maa
 				from varastopaikat
 				where maa != ''
-				and yhtio in ($yhtiot) AND tyyppi != 'P'
+				and yhtio in ($yhtiot)
 				order by yhtio, maa";
 	$vtresult = pupe_query($query);
 
@@ -998,7 +998,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	//Valitaan varastot joiden saldot huomioidaan
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio in ($yhtiot) AND tyyppi != 'P'
+				WHERE yhtio in ($yhtiot)
 				ORDER BY yhtio, tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 

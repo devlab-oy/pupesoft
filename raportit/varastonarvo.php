@@ -83,7 +83,7 @@ $varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POS
 
 $query  = "	SELECT tunnus, nimitys
 			FROM varastopaikat
-			WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+			WHERE yhtio = '$kukarow[yhtio]'
 			ORDER BY tyyppi, nimitys";
 $vares = mysql_query($query) or pupe_error($query);
 

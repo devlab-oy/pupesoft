@@ -635,7 +635,7 @@
 						FROM varastopaikat
 						WHERE maa != ''
 						and $logistiikka_yhtiolisa
-						and maa = '$tumaa' AND tyyppi != 'P'";
+						and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";

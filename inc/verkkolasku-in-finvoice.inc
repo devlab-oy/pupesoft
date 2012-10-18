@@ -47,7 +47,20 @@ $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails-
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
 
-$laskuttajan_toimittajanumero = strpos($file, "maventa") !== false ?  $xml->SellerPartyDetails->SellerPartyIdentifier : "";
+$laskuttajan_toimittajanumero = "";
+
+if (strpos($file, "maventa") !== false) {
+	$laskuttajan_toimittajanumero = str_replace("-", "", $xml->SellerPartyDetails->SellerPartyIdentifier);
+
+	$query = "	SELECT toimittajanro
+				FROM toimi
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND ytunnus = '{$laskuttajan_toimittajanumero}'";
+	$toimittajanro_chk_res = pupe_query($query);
+	$toimittajanro_chk_row = mysql_fetch_assoc($toimittajanro_chk_res);
+
+	$laskuttajan_toimittajanumero = $toimittajanro_chk_row['toimittajanro'];
+}
 
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
@@ -124,7 +137,7 @@ if (count($tuotetiedot) > 0) {
 			// Telko-case
 			// 300013 = rahtiveloitus
 			// 300023 = pakkauskulu
-			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023")) {
+			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
 
 				if ($rtuoteno[$i]["tuoteno"] == "300013") {
 					$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);

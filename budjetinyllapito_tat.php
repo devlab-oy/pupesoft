@@ -4,6 +4,12 @@
 	$lataa_tiedosto = (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "lataa_tiedosto") ? 1 : 0;
 	$_REQUEST["kaunisnimi"] = isset($_REQUEST["kaunisnimi"]) ? str_replace("/", "", $_REQUEST["kaunisnimi"]) : "";
 
+	ini_set("memory_limit", "5G");
+
+	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
+	$usemastertoo = 1;
+
 	require ("inc/parametrit.inc");
 
 	// K‰ytett‰v‰t muuttujat
@@ -26,12 +32,14 @@
 	$asiakasid 			  = isset($asiakasid) ? (int) $asiakasid : 0;
 	$toimittajaid 		  = isset($toimittajaid) ? (int) $toimittajaid : 0;
 	$myyntiennustekerroin = isset($myyntiennustekerroin) ? (float) str_replace(",", ".", $myyntiennustekerroin) : 12;
+	$myyntitavoitekerroin = (isset($myyntitavoitekerroin) and $myyntitavoitekerroin != "") ? (float) str_replace(",", ".", $myyntitavoitekerroin) : "";
+	$naytamyyntiennuste   = isset($naytamyyntiennuste) ? trim($naytamyyntiennuste) : "";
 
 	$edellinen_vuosi_alku 	  = date("Y-m-d", mktime(0, 0, 0, 1, 1, date("Y")-1));
 	$edellinen_vuosi_loppu 	  = date("Y-m-d", mktime(0, 0, 0, 1, 0, date("Y")));
 	$edellinen_kuukausi_loppu = date("Y-m-d", mktime(0, 0, 0, date("m"), 0, date("Y")));
 
-	$maxrivimaara = 1000;
+	$maxrivimaara = 15000;
 
 	// Tiedoston tallennusta varten
 	if ($tee == "lataa_tiedosto") {
@@ -59,11 +67,57 @@
 		return array($rivi["summa"], $rivi["maara"]);
 	}
 
+	function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
+		global $kukarow, $yhtiorow, $edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $myyntiennustekerroin, $myyntitavoitekerroin, $ostryntuotteet;
+
+		$rivilisa = "";
+
+		if ($try != "" and isset($ostryntuotteet[$try]) and $ostryntuotteet[$try] != "") {
+			$rivilisa = " and tilausrivi.tuoteno in ({$ostryntuotteet[$try]}) ";
+		}
+		elseif ($osasto != "" and isset($ostryntuotteet[$osasto]) and $ostryntuotteet[$osasto] != "") {
+			$rivilisa = " and tilausrivi.tuoteno in ({$ostryntuotteet[$osasto]}) ";
+		}
+
+		if ($vaintamavuosi) {
+			$alkupaiva = " and lasku.tapvm > '{$edellinen_vuosi_loppu}' ";
+		}
+		else {
+			$alkupaiva = " and lasku.tapvm >= '{$edellinen_vuosi_alku}' ";
+		}
+
+		$query = "	SELECT round(sum(if(tapvm <= '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
+					round(sum(if(tapvm > '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
+					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+					JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
+					WHERE lasku.yhtio 	   = '$kukarow[yhtio]'
+					and lasku.tila    	   = 'U'
+					and lasku.alatila 	   = 'X'
+					and lasku.liitostunnus in ($tunnukset)
+					{$alkupaiva}
+					and lasku.tapvm 	  <= '{$edellinen_kuukausi_loppu}'";
+		$result = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($result);
+
+		$edvuodenkokonaismyynti = (float) $laskurow['edvuodenkokonaismyynti'] == 0 ? "" : $laskurow['edvuodenkokonaismyynti'];
+		$tanvuodenalustamyynti  = (float) $laskurow['tanvuodenalustamyynti']  == 0 ? "" : $laskurow['tanvuodenalustamyynti'];
+		$tanvuodenennuste 		= "";
+		$ensvuodenennuste 		= "";
+
+		if ((float) $tanvuodenalustamyynti != 0) {
+			$tanvuodenennuste = round($tanvuodenalustamyynti / substr($edellinen_kuukausi_loppu, 5, 2) * $myyntiennustekerroin);
+			if ($myyntitavoitekerroin > 0 and $tanvuodenennuste > 0) $ensvuodenennuste = round($tanvuodenalustamyynti / substr($edellinen_kuukausi_loppu, 5, 2) * $myyntiennustekerroin * $myyntitavoitekerroin);
+		}
+
+		return array($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste);
+	}
+
 	// funkkarin $org_sar passataan alkuper‰iset sarakkeet, jota taas k‰ytet‰‰n "ohituksessa"
 	function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
 		global  $kukarow, $yhtiorow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak,
 				$sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu, $osastotryttain,
-				$edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $summabudjetti, $myyntiennustekerroin;
+				$edellinen_vuosi_alku, $edellinen_kuukausi_loppu, $edellinen_vuosi_loppu, $summabudjetti, $myyntiennustekerroin,
+				$naytamyyntiennuste, $myyntitavoitekerroin, $budjetointi_taso, $ostryntuotteet;
 
 		$excelsarake = 0;
 		$worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
@@ -117,71 +171,22 @@
 		}
 
 		if ($toim == "ASIAKAS") {
-			$rivilisa = "";
+			if ($naytamyyntiennuste != "") {
+				list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"], $try, $osasto);
 
-			if (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
-				$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-							FROM tuote
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and try 	= '{$ostryrow['selite']}'
-							and tuotetyyppi in ('','R','K','M')
-							and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'";
-				$result = pupe_query($query);
-				$tryrow = mysql_fetch_assoc($result);
-
-				if ($tryrow['tuotteet'] != "") {
-					$rivilisa = " and tilausrivi.tuoteno in ({$tryrow['tuotteet']}) ";
+				if ($rivimaara < $maxrivimaara) {
+					echo "<td align='right'>{$edvuodenkokonaismyynti}</td>";
+					echo "<td align='right'>{$tanvuodenalustamyynti}</td>";
+					echo "<td align='right'>{$tanvuodenennuste}</td>";
 				}
 
+				$worksheet->writeNumber($excelrivi, $excelsarake, $edvuodenkokonaismyynti);
+				$excelsarake++;
+				$worksheet->writeNumber($excelrivi, $excelsarake, $tanvuodenalustamyynti);
+				$excelsarake++;
+				$worksheet->writeNumber($excelrivi, $excelsarake, $tanvuodenennuste);
+				$excelsarake++;
 			}
-			elseif (is_array($ostryrow) and isset($osastotryttain) and $osastotryttain == "osastoittain") {
-				$query = "	SELECT group_concat(concat('\'',tuoteno,'\'')) tuotteet
-							FROM tuote
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and osasto 	= '{$ostryrow['selite']}'
-							and tuotetyyppi in ('','R','K','M')
-							and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'";
-				$result = pupe_query($query);
-				$tryrow = mysql_fetch_assoc($result);
-
-				if ($tryrow['tuotteet'] != "") {
-					$rivilisa = " and tilausrivi.tuoteno in ({$tryrow['tuotteet']}) ";
-				}
-			}
-
-			$query = "	SELECT round(sum(if(tapvm <= '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) edvuodenkokonaismyynti,
-						round(sum(if(tapvm > '$edellinen_vuosi_loppu', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
-						FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-						JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
-						WHERE lasku.yhtio 	   = '$kukarow[yhtio]'
-						and lasku.tila    	   = 'U'
-						and lasku.alatila 	   = 'X'
-						and lasku.liitostunnus in ($row[asiakkaan_tunnus])
-						and lasku.tapvm 	  >= '{$edellinen_vuosi_alku}'
-						and lasku.tapvm 	  <= '{$edellinen_kuukausi_loppu}'";
-			$result = pupe_query($query);
-			$laskurow = mysql_fetch_assoc($result);
-
-			$laskurow['edvuodenkokonaismyynti'] = (float) $laskurow['edvuodenkokonaismyynti'] == 0 ? "" : $laskurow['edvuodenkokonaismyynti'];
-			$laskurow['tanvuodenalustamyynti']  = (float) $laskurow['tanvuodenalustamyynti']  == 0 ? "" : $laskurow['tanvuodenalustamyynti'];
-			$laskurow['tanvuodenennuste'] 		= "";
-
-			if ((float) $laskurow['tanvuodenalustamyynti'] != 0) {
-				$laskurow['tanvuodenennuste'] = round($laskurow['tanvuodenalustamyynti'] / substr($edellinen_kuukausi_loppu, 5, 2) * $myyntiennustekerroin);
-			}
-
-			if ($rivimaara < $maxrivimaara) {
-				echo "<td align='right'>{$laskurow['edvuodenkokonaismyynti']}</td>";
-				echo "<td align='right'>{$laskurow['tanvuodenalustamyynti']}</td>";
-				echo "<td align='right'>{$laskurow['tanvuodenennuste']}</td>";
-			}
-
-			$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['edvuodenkokonaismyynti']);
-			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['tanvuodenalustamyynti']);
-			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['tanvuodenennuste']);
-			$excelsarake++;
 		}
 
 		if ($ohitus != "") {
@@ -191,12 +196,20 @@
 		for ($k = 0; $k < $sarakkeet; $k++) {
 			$ik = $rajataulu[$k];
 
-			if (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$ostry_ind])) {
+			if ($myyntitavoitekerroin > 0) {
+				if ($budj_kohtelu == "indeksi") {
+					$nro = $myyntitavoitekerroin;
+				}
+				elseif ($ensvuodenennuste > 0) {
+					$nro = round($ensvuodenennuste/12);
+				}
+			}
+			elseif (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$ostry_ind])) {
 				$nro = trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$ostry_ind]) == "" ? "" : (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$ostry_ind]);
 			}
 			else {
 
-				if ($toim == "ASIAKAS" and $summabudjetti == "on") {
+				if ($toim == "ASIAKAS" and $summabudjetti == "on" and $row[$budj_sarak] != "") {
 					$query = "	SELECT sum(summa) summa,
 								sum(maara) maara,
 								avg(indeksi) indeksi
@@ -204,7 +217,6 @@
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and kausi		 	= '$ik'
 								and $budj_sarak		in ($row[$budj_sarak])
-								and dyna_puu_tunnus	= ''
 								and try				= '$try'
 								and osasto			= '$osasto'";
 				}
@@ -214,7 +226,6 @@
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and kausi		 	= '$ik'
 								and $budj_sarak		= '$row[$budj_sarak]'
-								and dyna_puu_tunnus	= ''
 								and try				= '$try'
 								and osasto			= '$osasto'";
 				}
@@ -224,13 +235,13 @@
 
 				if (mysql_num_rows($xresult) == 1) {
 					$brow = mysql_fetch_assoc($xresult);
-					$nro = $brow['summa'];
+					$nro  = $brow['summa'];
 
 					// normaalisti n‰ytet‰‰n summaa, mutta tuotteella, mik‰li k‰sitell‰‰n m‰‰r‰‰ niin n‰ytet‰‰n m‰‰r‰ tai indeksiss‰ indeksi
-					if ($budj_kohtelu == "maara" and $toim == "TUOTE") {
+					if ($budj_kohtelu == "maara") {
 						$nro = $brow['maara'];
 					}
-					if ($budj_kohtelu == "indeksi" and $toim == "TUOTE") {
+					if ($budj_kohtelu == "indeksi") {
 						$nro = $brow['indeksi'];
 					}
 				}
@@ -243,52 +254,56 @@
 				// jossa k‰sitell‰‰n ne arrayn luonnissa
 				// ƒLƒ MUUTA "<input type='text' class = '{$row[$budj_sarak]}'"
 				// Mik‰li teet muutoksia niin muuta myˆs jqueryyn riville noin 17
-				if ($nro != "") $nro = $nro*$org_sar;
+				if ($nro != "" and $budjetointi_taso == "summa_jaetaan") {
+					$nro = $nro*$org_sar;
+				}
 
 				$classi = preg_replace("/[^0-9]/", "", $row[$budj_sarak].$ostry_ind);
 
-				if ($grouppaus != "") {
-					if ($haen == "try" and $passaan == "yksi"){
-						echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
-						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-						echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
-					}
-					elseif ($haen == "osasto" and $passaan == "yksi") {
-						echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
-						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-						echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
-					}
-					elseif ($haen == "try" and $passaan == "kaksi") {
-						echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
-						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-						echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
-					}
-				}
-				else {
-					echo "<input type='text' class = '{$classi}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
-				}
-
-				for ($a = 1; $a < $org_sar; $a++) {
-					$ik = $rajataulu[$a];
-
+				if ($rivimaara < $maxrivimaara) {
 					if ($grouppaus != "") {
 						if ($haen == "try" and $passaan == "yksi"){
-							echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
+							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+							echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
 						}
 						elseif ($haen == "osasto" and $passaan == "yksi") {
-							echo "<br>input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'
-							<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
+							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+							echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
 						}
 						elseif ($haen == "try" and $passaan == "kaksi") {
-							echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
+							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+							echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
 						}
 					}
 					else {
-						echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+						echo "<input type='text' class = '{$classi}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
 					}
-				}
 
-				echo "</td>";
+					for ($a = 1; $a < $org_sar; $a++) {
+						$ik = $rajataulu[$a];
+
+						if ($grouppaus != "") {
+							if ($haen == "try" and $passaan == "yksi"){
+								echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							}
+							elseif ($haen == "osasto" and $passaan == "yksi") {
+								echo "<br>input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'
+									<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							}
+							elseif ($haen == "try" and $passaan == "kaksi") {
+								echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+							}
+						}
+						else {
+							echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
+						}
+					}
+
+					echo "</td>";
+				}
 			}
 			else {
 				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][$ostry_ind]' value='{$nro}' size='10'>";
@@ -467,6 +482,38 @@
 		}
 	}
 
+
+	if (($tee == "TALLENNA_BUDJETTI" or $submit_button != "") and $toim == "ASIAKAS" and isset($osastotryttain) and $osastotryttain != "") {
+		if ($osastotryttain == "tuoteryhmittain") {
+			$query = "	SELECT try, group_concat(concat('\'',tuoteno,'\'')) tuotteet
+						FROM tuote
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tuotetyyppi in ('','R','K','M')
+						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						GROUP BY try";
+			$result = pupe_query($query);
+			$ostryntuotteet = array();
+
+			while ($tryrow = mysql_fetch_assoc($result)) {
+				$ostryntuotteet[$tryrow["try"]] = $tryrow["tuotteet"];
+			}
+		}
+		elseif ($osastotryttain == "osastoittain") {
+			$query = "	SELECT osasto, group_concat(concat('\'',tuoteno,'\'')) tuotteet
+						FROM tuote
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tuotetyyppi in ('','R','K','M')
+						and tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+						GROUP BY osasto";
+			$result = pupe_query($query);
+			$ostryntuotteet = array();
+
+			while ($tryrow = mysql_fetch_assoc($result)) {
+				$ostryntuotteet[$tryrow["osasto"]] = $tryrow["tuotteet"];
+			}
+		}
+	}
+
 	// Lis‰t‰‰n/P‰ivitet‰‰n budjetti
 	if ($tee == "TALLENNA_BUDJETTI") {
 
@@ -581,33 +628,14 @@
 								$update_vai_insert = "DELETE";
 							}
 							else {
-								// Katsotaan lˆytyykˆ n‰ill‰ tiedoilla jo budjetti
-								$query = "	SELECT summa
-											FROM $budj_taulu
-											WHERE yhtio 	= '{$kukarow["yhtio"]}'
-											AND $budj_sarak	= '$liitostunnari'
-											AND kausi 		= '$kausi'
-											AND try 		= '$try'
-											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-
-								if (mysql_num_rows($result) > 0) {
-									$budjrow = mysql_fetch_assoc($result);
-									// Lˆytyy budjetti -> p‰ivitet‰‰n
-									$update_vai_insert = "UPDATE";
-								}
-								else {
-									// Ei lˆydy budjettia -> lis‰t‰‰n
-									$update_vai_insert = "INSERT";
-								}
+								$update_vai_insert = "INSERT/UPDATE";
 							}
 
 							// $solu_orig on k‰ytt‰j‰n syˆtt‰m‰ luku
 							// $tall_summa on kantaan tallennettava summa
 							// $tall_index on kantaan tallennettava indeksi-luku
 							// $tall_maara on kantaan tallennettava kappalem‰‰r‰
-
-							if (count($liitostunnarit_array) > 1) {
+							if ($budj_kohtelu != "indeksi" and count($liitostunnarit_array) > 1) {
 								$solu = (float) round($solu_orig/count($liitostunnarit_array));
 							}
 							else {
@@ -629,8 +657,25 @@
 							}
 
 							// Toimittaja ja asiakasbudjetti tehd‰‰n aina euroissa
-							if ($toim == "TOIMITTAJA" or $toim == "ASIAKAS") {
+							if ($toim == "TOIMITTAJA") {
 								$tall_summa = $solu;
+							}
+							elseif ($toim == "ASIAKAS") {
+								if ($budj_kohtelu == "euro") {
+									// Syˆtetty arvo summa kentt‰‰n
+									$tall_summa = round($solu, 2);
+								}
+								elseif ($budj_kohtelu == "indeksi") {
+									list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($liitostunnari, $try, $osasto, TRUE);
+
+									$tall_index = round($solu, 2);
+									$tall_summa = $tanvuodenennuste > 0 ? round($tanvuodenennuste/12*$tall_index, 2): 0;
+
+								}
+								else {
+									// Virheellinen kohtelu, ei tehd‰ mit‰‰n
+									$update_vai_insert = "";
+								}
 							}
 							// Tuotebudjetissa on muitakin vaihtoehtoja
 							elseif ($toim == "TUOTE") {
@@ -687,51 +732,41 @@
 											AND kausi 		= '$kausi'
 											AND try 		= '$try'
 											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-								$pois += mysql_affected_rows();
+								$result = pupe_query($query, $masterlink);
+								$pois++;
 							}
-							elseif ($update_vai_insert == "UPDATE") {
-								$query	= "	UPDATE $budj_taulu SET
-											summa		= '$tall_summa',
-											maara		= '$tall_maara',
-											indeksi		= '$tall_index',
-											muuttaja	= '{$kukarow["kuka"]}',
-											muutospvm	= now()
-											WHERE yhtio 	= '{$kukarow["yhtio"]}'
-											AND $budj_sarak	= '$liitostunnari'
-											AND kausi 		= '$kausi'
-											AND try 		= '$try'
-											AND osasto 		= '$osasto'";
-								$result = pupe_query($query);
-								$paiv += mysql_affected_rows();
-							}
-							elseif ($update_vai_insert == "INSERT") {
+							elseif ($update_vai_insert != "") {
 								$query = "	INSERT INTO $budj_taulu SET
 											summa 				= '$tall_summa',
 											maara				= '$tall_maara',
+											indeksi				= '$tall_index',
 											yhtio 				= '{$kukarow["yhtio"]}',
 											kausi 				= '$kausi',
 											$budj_sarak		 	= '$liitostunnari',
 											try 				= '$try',
 											osasto 				= '$osasto',
-											indeksi				= '$tall_index',
 											laatija 			= '{$kukarow["kuka"]}',
 											luontiaika 			= now(),
 											muutospvm 			= now(),
+											muuttaja 			= '{$kukarow["kuka"]}'
+											ON DUPLICATE KEY UPDATE
+											summa 				= '$tall_summa',
+											maara				= '$tall_maara',
+											indeksi				= '$tall_index',
+											muutospvm 			= now(),
 											muuttaja 			= '{$kukarow["kuka"]}'";
-								$result = pupe_query($query);
-								$lisaa += mysql_affected_rows();
-							}
-							else {
-								echo "<font class='error'>".t("Virheelliset parametrit")." '$budj_sarak' '$liitostunnari' / '$budj_kohtelu' / '$budjetointi_taso' / '$summabudjetti' / $solu </font><br>";
+								$result = pupe_query($query, $masterlink);
+								$lisaa++;
 							}
 						}
 					}
 				}
+				unset($solut);
 			}
+			unset($rivi);
 		}
 
-		echo "<font class='message'>".t("P‰ivitin")." $paiv. ".t("Lis‰sin")." $lisaa ".t("Poistin")." $pois.</font><br /><br />";
+		echo "<font class='message'>".t("P‰ivitin/lis‰sin")." $lisaa. ".t("Poistin")." $pois.</font><br /><br />";
 		$tee = "";
 	}
 
@@ -850,7 +885,7 @@
 				</td>";
 		echo "</tr>";
 
-		if ($toim == "TUOTE") {
+		if ($toim == "TUOTE" or $toim == "ASIAKAS") {
 
 			// indeksi vai eurom‰‰r‰
 			echo "<tr>";
@@ -873,7 +908,7 @@
 			echo "<select name='budj_kohtelu' onchange='submit()';>";
 			echo "<option value = 'euro'>".t("Budjetti syˆtet‰‰n euroilla")."</option>";
 			echo "<option value = 'indeksi' $bkcheck>".t("Budjetti syˆtet‰‰n indekseill‰")."</option>";
-			echo "<option value = 'maara' $bkcheckb>".t("Budjetti syˆtet‰‰n m‰‰rill‰")."</option>";
+			if ($toim == "TUOTE") echo "<option value = 'maara' $bkcheckb>".t("Budjetti syˆtet‰‰n m‰‰rill‰")."</option>";
 			echo "</td>";
 			echo "</tr>";
 		}
@@ -899,7 +934,7 @@
 		echo "<select name='budjetointi_taso' onchange='submit()';>";
 		echo "<option value = 'kuukausittain'>".t("Kuukausittain")."</option>";
 		echo "<option value = 'joka_kk_sama' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
-		echo "<option value = 'summa_jaetaan' $btcheck2>".t("Budjettiluku jaetaan kuukausille tasan")."</option>";
+		if ($budj_kohtelu != "indeksi") echo "<option value = 'summa_jaetaan' $btcheck2>".t("Budjettiluku jaetaan kuukausille tasan")."</option>";
 		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
@@ -1024,9 +1059,18 @@
 
 		if ($toim == "ASIAKAS") {
 			// Keroin jolla interpoloidaan asiakkaan kuluvan vuoden myynnit koko vuoden myynneiksi
-			echo "<tr><th>",t("Myyntiennustekerroin"),"</th><td>";
+			echo "<tr><th>",t("Myyntiennustekerroin, kuluva vuosi"),"</th><td>";
 			echo "<input type='text' name='myyntiennustekerroin' value='$myyntiennustekerroin' size='5'>";
+
+			$scheck = ($naytamyyntiennuste != "") ? "CHECKED": "";
+			echo "&nbsp;&nbsp;&nbsp;".t("N‰yt‰ myyntiennusteet").": <input type='checkbox' name='naytamyyntiennuste' $scheck>";
+
+
 			echo "</td></tr>";
+
+			echo "<tr><th>",t("Myyntitavoitekerroin"),"</th><td>";
+			echo "<input type='text' name='myyntitavoitekerroin' value='$myyntitavoitekerroin' size='5'>";
+			echo "&nbsp;&nbsp;&nbsp;".t("Myyntitavoitekertoimen avulla luodaan automaattisesti tavoiteluku kuluvan vuoden myyntiennusteesta")."</td></tr>";
 		}
 
 		echo "<tr>";
@@ -1102,7 +1146,7 @@
 		}
 
 		// Kokonaisbudjetti-tarkastukset
-		if ($toim == "TUOTE" and $summabudjetti == "on") {
+		if (($toim == "TUOTE" or $toim == "ASIAKAS") and $summabudjetti == "on") {
 			if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
 				echo "<font class='error'>".t("VIRHE: Kokonaisbudjetin voi syˆtt‰‰ indeksiluvulla vain budjetoimalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
 				$tee = "";
@@ -1126,13 +1170,6 @@
 
 	// Ajetaan raportti
 	if ($tee == "AJA_RAPORTTI") {
-
-		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
-		$useslave = 1;
-		$usemastertoo = 1;
-
-		// Eli haetaan connect.inc uudestaan t‰ss‰
-		require("inc/connect.inc");
 
 		include('inc/pupeExcel.inc');
 
@@ -1323,6 +1360,7 @@
 			echo "<input type='hidden' name='tee' value='TALLENNA_BUDJETTI_TARKISTA'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='myyntiennustekerroin' value='$myyntiennustekerroin'>";
+			echo "<input type='hidden' name='naytamyyntiennuste' value='$naytamyyntiennuste'>";
 
 			echo "<input type='submit' name='tallennus' id='tallennus' value='",t("Tallenna budjettiluvut"),"' />";
 			echo "<br><br>";
@@ -1366,20 +1404,22 @@
 		}
 
 		if ($toim == "ASIAKAS") {
-			if ($rivimaara < $maxrivimaara) {
-				echo "<th>",t("Myynti")," ",(date('Y')-1),"</th>";
-				echo "<th>",t("Myynti")," ",date('Y'),"-01 - ",substr($edellinen_kuukausi_loppu, 0, 7),"</th>";
-				echo "<th>",t("Myyntiennuste")," ",date('Y'),"</th>";
+			if ($naytamyyntiennuste != "") {
+				if ($rivimaara < $maxrivimaara) {
+					echo "<th>",t("Myynti")," ",(date('Y')-1),"</th>";
+					echo "<th>",t("Myynti")," ",date('Y'),"-01 - ",substr($edellinen_kuukausi_loppu, 0, 7),"</th>";
+					echo "<th>",t("Myyntiennuste")," ",date('Y'),"</th>";
+				}
+
+				$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".(date('Y')-1), $format_bold);
+				$excelsarake++;
+
+				$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".date('Y')."-01 - ".substr($edellinen_kuukausi_loppu, 0, 7), $format_bold);
+				$excelsarake++;
+
+				$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".date('Y'), $format_bold);
+				$excelsarake++;
 			}
-
-			$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".(date('Y')-1), $format_bold);
-			$excelsarake++;
-
-			$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".date('Y')."-01 - ".substr($edellinen_kuukausi_loppu, 0, 7), $format_bold);
-			$excelsarake++;
-
-			$worksheet->write($excelrivi, $excelsarake, t("Myynti")." ".date('Y'), $format_bold);
-			$excelsarake++;
 		}
 
 		$raja 		= '0000-00';

@@ -47,3 +47,6 @@ else {
 mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
 mysql_set_charset("latin1", $link);
 mysql_query("set group_concat_max_len=1000000", $link);
+
+// Jos slavea pyydettiin, mutta sitä ei käytetän ja halutiin tämäkin, niin tehdään näin
+if (isset($usemastertoo) and $usemastertoo > 0 and !isset($masterlink)) $masterlink = $link;

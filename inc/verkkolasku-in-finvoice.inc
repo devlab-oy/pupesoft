@@ -140,15 +140,16 @@ if (count($tuotetiedot) > 0) {
 			// Telko-case
 			// 300013 = rahtiveloitus
 			// 300023 = pakkauskulu
+			// 300027 = pakkauskulu
 			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023" or $rtuoteno[$i]["tuoteno"] == "300027")) {
 
 				if ($rtuoteno[$i]["tuoteno"] == "300013") {
-					$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
-					$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+					$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
+					$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
 					$osto_rahti_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 				}
 				else {
-					$osto_kulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+					$osto_kulu += (float) str_replace(",", ".", $tuotetieto->RowAmount);
 					$osto_kulu_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 				}
 

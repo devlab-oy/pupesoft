@@ -41,7 +41,7 @@ if (isset($submit) and trim($submit) != '') {
 			$tuotteita_tuotepaikalla = mysql_num_rows($result);
 
 			if ($tuotteita_tuotepaikalla > 0) {
-				$error['varalle'] = "Tuotepaikalla on tuotteita!";
+				$error['varalle'] = t("Tuotepaikalla on tuotteita!");
 				$kaikki_ok = false;
 			}
 
@@ -75,22 +75,22 @@ if (isset($submit) and trim($submit) != '') {
 					}
 					# Jos kaikki meni ok
 					if (isset($varastovirhe)) {
-						$error['varalle'] .= "Virhe varastoonviennissä";
+						$error['varalle'] .= t("Virhe varastoonviennissä");
 					} else {
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 						exit;
 					}
 				}
 				else {
-					$error['varalle'] = "Yhtään tuotetta ei löytynyt suuntalavalta";
+					$error['varalle'] = t("Yhtään tuotetta ei löytynyt suuntalavalta");
 				}
 			}
 			else {
-				$error['varalle']  = "Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka.";
+				$error['varalle']  = t("Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka");
 			}
 		}
 		else {
-			$error['varalle'] = "Varmistukoodi ei voi olla tyhjä";
+			$error['varalle'] = t("Varmistukoodi ei voi olla tyhjä");
 		}
 	}
 	# Takaisin

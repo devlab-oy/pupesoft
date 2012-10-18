@@ -563,7 +563,7 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 
 			# Onko paikalla tuotteita
 			if ($tuotepaikat > 0) {
-				echo "<font class='error'>Tuotepaikalla on jotain tuotteita!</font><br>";
+				echo "<font class='error'>".t("Tuotepaikalla on jotain tuotteita")."!</font><br>";
 				# Takaisin samaan n‰kym‰‰n
 				$toiminto = 'suuntalavat';
 				$tee = 'vie_koko_suuntalava';

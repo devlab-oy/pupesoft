@@ -150,13 +150,13 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>Tuoteno</th>";
-		echo "<th>Paikka</th>";
-		echo "<th>Nimitys</th>";
-		echo "<th>Saldo</th>";
-		echo "<th>Oletus</th>";
-		echo "<th>Suuntalava</th>";
-		echo "<th>Siirrä</th>";
+		echo "<th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Paikka")."</th>";
+		echo "<th>".t("Nimitys")."</th>";
+		echo "<th>".t("Saldo")."</th>";
+		echo "<th>".t("Oletus")."</th>";
+		echo "<th>".t("Suuntalava")."</th>";
+		echo "<th>".t("Siirrä")."</th>";
 		echo "</tr>";
 
 		$i=0;
@@ -183,7 +183,8 @@
 				$s_query = "SELECT group_concat(distinct(sscc)) as sscc
 							FROM tilausrivi
 							join suuntalavat on (tilausrivi.yhtio=suuntalavat.yhtio AND tilausrivi.suuntalava=suuntalavat.tunnus)
-							WHERE suuntalava > 0
+							WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+							AND suuntalava > 0
 							AND tuoteno='$rivi[tuoteno]'
 							AND hyllyalue='$rivi[hyllyalue]'
 							AND hyllynro='$rivi[hyllynro]'

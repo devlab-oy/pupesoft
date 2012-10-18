@@ -14,7 +14,9 @@
 
 	$laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä muuttujaa.!!! Tai no joo... Ongelma..
 
-	if ($osrow["ebid"] != "TECCOM-INVOICE") {
+	$lajilisa = $osrow['ebid'] == 'MAVENTAXML' ? 'mav' : 'tec';
+
+	if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 		$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
 		$result = pupe_query($query);
 
@@ -91,7 +93,7 @@
 	for ($i = 0; $i < count($rtuoteno); $i++) {
 
 		// tehdään tää vaan jos meillä on rivinumero
-		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE") {
+		if ($rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 
 			$toim_tuoteno 	= $rtuoteno[$i]["tuoteno"];
 			$kpl			= (float) $rtuoteno[$i]["kpl"];
@@ -144,7 +146,7 @@
 				$laskuvirhe .= t("Tuotenumero").": {$toim_tuoteno} ".t("Kpl").": {$kpl} ".t("Ei voitu kohdistaa saapumiseen")."! ({$keikantunnus}/{$rtuoteno[$i]['tilaajanrivinro']})\n";
 			}
 		}
-		elseif ($osrow["ebid"] == "TECCOM-INVOICE" and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and !$tullaan_virhetarkistuksesta) {
+		elseif (($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == "MAVENTAXML") and $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS" and !$tullaan_virhetarkistuksesta) {
 			// Onko ostolaskua ja onko kohdistamatta
 
 			// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
@@ -196,7 +198,7 @@
 			if (mysql_num_rows($kokeillaan) > 0) {
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+				$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 			}
 
 			if (count($kaytettavat_tilausrivit) == 0) {
@@ -233,7 +235,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -270,7 +272,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -307,7 +309,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -343,7 +345,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -375,7 +377,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -409,7 +411,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -440,7 +442,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -473,7 +475,7 @@
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -498,11 +500,12 @@
 							AND tilausrivi.uusiotunnus = 0
 							{$isalisa}
 							ORDER BY laadittu ASC";
+				$kokeillaan = pupe_query($query);
 
 				if (mysql_num_rows($kokeillaan) > 0) {
 					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 
-					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan);
+					$kaytettavat_tilausrivit = teccom_kaytettavat_tilausrivit($kokeillaan, $lajilisa);
 				}
 			}
 
@@ -652,7 +655,7 @@
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}'
-									AND laji = 'tec'";
+									AND laji = '{$lajilisa}'";
 					pupe_query($update_asn);
 
 					if ($tilausrivirow['uusiotunnus'] == 0) {
@@ -928,7 +931,7 @@
 									tuoteno = '{$tilausrivirow['tuoteno']}'
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$rtuoteno[$i]['insert_id']}'
-									AND laji = 'tec'";
+									AND laji = '{$lajilisa}'";
 					$foo = pupe_query($update_asn);
 
 					if ($tilausrivirow['uusiotunnus'] == 0) {
@@ -1125,7 +1128,7 @@
 							$query = "	SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND laji = 'tec'
+										AND laji = '{$lajilisa}'
 										AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'";
 							$chk_res = pupe_query($query);
 
@@ -1590,7 +1593,7 @@
 				continue;
 			}
 		}
-		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE") {
+		elseif ($rtuoteno[$i]["kauttalaskutus"] == "KAUTTALASKUTUS" and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML") {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1646,7 +1649,7 @@
 	}
 
 	// Jos kyseessä on TecCom oastolasku
-	if ($osrow["ebid"] == "TECCOM-INVOICE") {
+	if ($osrow["ebid"] == "TECCOM-INVOICE" or $osrow['ebid'] == 'MAVENTAXML') {
 
 		// Mikäli toimittajalla on kenttä "asn_sanomat" arvoja, ja ne on
 		// K = tulee asn-sanoma ja lasku
@@ -1743,7 +1746,7 @@
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
-								AND laji = 'tec'";
+								AND laji = '{$lajilisa}'";
 				pupe_query($update_asn);
 
 				if ($hinta_chk_row['perheid'] != 0) {
@@ -1932,7 +1935,7 @@
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri['insert_id']}'
-								AND laji = 'tec'";
+								AND laji = '{$lajilisa}'";
 				#echo "Keikoilla<pre>",str_replace("\t", "", $update_asn),"</pre>";
 				pupe_query($update_asn);
 
@@ -2060,7 +2063,7 @@
 								tuoteno = '{$hinta_chk_row['tuoteno']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$pointteri1['insert_id']}'
-								AND laji = 'tec'";
+								AND laji = '{$lajilisa}'";
 				#echo "Ostoilla:<pre>",str_replace("\t", "", $update_asn),"</pre>";
 				pupe_query($update_asn);
 

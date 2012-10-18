@@ -2,12 +2,18 @@
 
 $laskuformaatti 		= "FINVOICE";
 
+if (strpos($file, "maventa") !== false) {
+	$laskun_ebid = "MAVENTAXML";
+}
+else {
+	$laskun_ebid 			= "FINVOICEXML";
+}
+
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
-$laskun_ebid 			= "FINVOICEXML";
 $laskun_tapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_lapvm			= $xml->InvoiceDetails->InvoiceDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
@@ -41,7 +47,7 @@ $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails-
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
 
-$laskuttajan_toimittajanumero = "";
+$laskuttajan_toimittajanumero = strpos($file, "maventa") !== false ?  $xml->SellerPartyDetails->SellerPartyIdentifier : "";
 
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
@@ -93,12 +99,70 @@ $rtuoteno		= array();
 $ealvi		 	= array("");
 $lisavat	 	= array("");
 
+$laskun_rahtikulu = 0;
+
+/*
+ * osto_kulu = $laskun_pakkauskulu
+ * osto_rahti = invoiceSummary rahti
+ * osto_rivi_kulu  = ($laskun_rahtikulu, $rtuoteno[$i]['kulu'])
+ */
+$osto_kulu = 0;
+$osto_rahti = 0;
+$osto_rivi_kulu = 0;
+
+$osto_kulu_alv = 0;
+$osto_rahti_alv = 0;
+$osto_rivi_kulu_alv = 0;
+
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
 		$rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ArticleIdentifier);
 
 		if ($rtuoteno[$i]["tuoteno"] != "") {
+
+			// Telko-case
+			// 300013 = rahtiveloitus
+			// 300023 = pakkauskulu
+			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123335" and ($rtuoteno[$i]["tuoteno"] == "300013" or $rtuoteno[$i]["tuoteno"] == "300023")) {
+
+				if ($rtuoteno[$i]["tuoteno"] == "300013") {
+					$laskun_rahtikulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+					$osto_rivi_kulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+					$osto_rahti_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+				}
+				else {
+					$osto_kulu += (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
+					$osto_kulu_alv = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+				}
+
+				unset($rtuoteno[$i]);
+				continue;
+			}
+
+			// Brembo-case
+			if ($laskun_ebid == "MAVENTAXML" and $laskuttajan_toimittajanumero == "123098") {
+
+				$query = "	SELECT tuotteen_toimittajat.toim_tuoteno
+							FROM toimi
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+														AND tuotteen_toimittajat.tuoteno = '{$rtuoteno[$i]['tuoteno']}'
+														AND tuotteen_toimittajat.tuoteno != '')
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+							AND toimi.tyyppi != 'P'
+							AND toimi.asn_sanomat IN ('K', 'L')";
+				$tuoteno_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tuoteno_chk_res) > 0) {
+					$tuoteno_chk_row = mysql_fetch_assoc($tuoteno_chk_res);
+					$rtuoteno[$i]['tuoteno'] = $tuoteno_chk_row['toim_tuoteno'];
+				}
+			}
+
+			// maventa-case
+			$rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
 			// Tallennetaan riville jos tämä on kauttalaskutusta
 			if ($kauttalaskutus == "KAUTTALASKUTUS") {
@@ -135,6 +199,30 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
+
+			if ($laskun_ebid == "MAVENTAXML") {
+
+				$query = "	SELECT tuotteen_toimittajat.tuotekerroin
+							FROM toimi
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio
+														AND tuotteen_toimittajat.liitostunnus = toimi.tunnus
+														AND tuotteen_toimittajat.toim_tuoteno IN ('{$rtuoteno[$i]['tuoteno']}')
+														AND tuotteen_toimittajat.toim_tuoteno != '')
+							WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+							AND toimi.toimittajanro = '{$laskuttajan_toimittajanumero}'
+							AND toimi.tyyppi != 'P'
+							AND toimi.asn_sanomat IN ('K', 'L')";
+				$tuotekerroin_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($tuotekerroin_chk_res) > 0) {
+					$tuotekerroin_chk_row = mysql_fetch_assoc($tuotekerroin_chk_res);
+
+					if ($tuotekerroin_chk_row['tuotekerroin'] != 0) {
+						$rtuoteno[$i]['kpl'] /= $tuotekerroin_chk_row['tuotekerroin'];
+					}
+				}
+			}
+
 			$rtuoteno[$i]["yksikko"] = $tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode;
 			$rtuoteno[$i]["tilaajanrivinro"] = $tuotetieto->RowIdentifier;
 		}
@@ -157,5 +245,3 @@ if (count($vattiedot) > 0) {
 		$i++;
 	}
 }
-
-?>

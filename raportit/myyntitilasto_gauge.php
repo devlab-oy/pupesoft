@@ -41,6 +41,11 @@
 									$('tr.try:visible').hide();
 								}
 
+								if ($(child).hasClass('kustp')) {
+									$('tr.try:visible').hide();
+									$('tr.osasto:visible').hide();
+								}
+
 								$('#img_'+id).attr('src', '{$palvelin2}pics/lullacons/bullet-arrow-right.png');
 								child.hide();
 							}

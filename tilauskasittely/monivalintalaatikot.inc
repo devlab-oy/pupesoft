@@ -1970,7 +1970,17 @@
 
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+				echo "<td nowrap style='padding:0px'>";
+
+				$multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+
+				if (in_array("kustp", $monivalintalaatikot_normaali)) {
+					$multiple_lisa = "";
+				}
+
+				echo "<select id='mul_kustp[]' name='mul_kustp[]' $multiple_lisa $autosubmit>";
+
+
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				lapsitasot(0, -1, "0,");
@@ -2096,4 +2106,3 @@
 	}
 
 	echo "<div style='clear: both;'></div>";
-?>

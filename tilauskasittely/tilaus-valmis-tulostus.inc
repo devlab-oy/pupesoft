@@ -78,22 +78,24 @@
 					yhtion_parametrit READ,
 					yhtion_toimipaikat READ";
 
+		if ($yhtiorow['kerayserat'] != '') {
+			$query .= ",pakkaus READ,
+						kerayserat WRITE";
+		}
+
 		if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 			$query .= ",asiakas AS asiakas1 READ,
 						asiakas AS asiakas2 READ,
-						kerayserat WRITE,
 						keraysvyohyke AS keraysvyohyke1 READ,
 						keraysvyohyke AS keraysvyohyke2 READ,
 						keraysvyohyke READ,
 						lahdot AS lahdot1 READ,
 						lahdot AS lahdot2 READ,
 						lahdot AS lahdot3 READ,
-						lahdot AS lahdot4 READ,
 						lahdot READ,
 						lasku AS lasku1 WRITE,
 						lasku AS lasku2 WRITE,
 						laskun_lisatiedot WRITE,
-						pakkaus READ,
 						tilausrivi AS tilausrivi1 READ,
 						tilausrivi AS tilausrivi2 READ,
 						toimitustapa AS toimitustapa1 READ,
@@ -126,6 +128,67 @@
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
 	if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
 
+		if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '') {
+
+			if ($yhtiorow['saldotarkistus_tulostusjonossa'] == 'P') {
+				$var_wherelisa = "AND var = 'P'";
+			}
+			elseif ($yhtiorow['saldotarkistus_tulostusjonossa'] == 'JT') {
+				$var_wherelisa = "AND var = 'J'";
+			}
+			else {
+				$var_wherelisa = "AND var IN ('P','J')";
+			}
+
+			$query = "	SELECT *
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus IN ($tilausnumeroita)
+						AND tilkpl > 0
+						{$var_wherelisa}";
+			$var_chk_res = pupe_query($query);
+
+			if (mysql_num_rows($var_chk_res) > 0) {
+
+				while ($var_chk_row = mysql_fetch_assoc($var_chk_res)) {
+
+					list($var_saldo, $var_hyllyssa, $var_myytavissa) = saldo_myytavissa($var_chk_row['tuoteno'], 'JTSPEC', 0, '', $var_chk_row['hyllyalue'], $var_chk_row['hyllynro'], $var_chk_row['hyllyvali'], $var_chk_row['hyllytaso']);
+
+					if ($var_myytavissa > 0) {
+
+						if ($var_myytavissa >= $var_chk_row['tilkpl']) {
+
+							$query = "	UPDATE tilausrivi SET
+										varattu = tilkpl,
+										var = ''
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$var_chk_row['tunnus']}'";
+							$upd_res = pupe_query($query);
+						}
+						else {
+
+							$uuden_rivin_varattu = $var_chk_row['tilkpl'] - $var_myytavissa;
+
+							$poikkeukset = array(
+								'tilausrivi.varattu' => 0,
+								'tilausrivi.tilkpl' => $uuden_rivin_varattu
+							);
+
+							kopioi_tilausrivi($var_chk_row['tunnus'], $poikkeukset);
+
+							$query = "	UPDATE tilausrivi SET
+										tilkpl = '{$var_myytavissa}',
+										varattu = '{$var_myytavissa}',
+										var = ''
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$var_chk_row['tunnus']}'";
+							$upd_res = pupe_query($query);
+						}
+					}
+				}
+			}
+		}
+
 		$ei_pakkaamoa = !isset($ei_pakkaamoa) ? '' : $ei_pakkaamoa;
 
 		$laskurow['pakkaamo'] = pakkaamo($tilausnumeroita, "yes", $ei_pakkaamoa);
@@ -134,11 +197,15 @@
 		require_once ("tulosta_lahete_kerayslista.inc");
 
 		//haetaan asiakkaan tiedot
-		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+		$query = "  SELECT luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, kerayserat
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($riresult);
+
+		if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
+			$kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
+		}
 
 		$query = "	SELECT ulkoinen_jarjestelma
 					FROM varastopaikat
@@ -180,7 +247,7 @@
 			}
 		}
 		else {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$query = "	SELECT keraysjarjestys
 							FROM keraysvyohyke
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -197,8 +264,6 @@
 				else {
 					$sorttauskentta = 'vh.indeksi as sorttauskentta';
 				}
-
-				$tyyppi = 'KERAYSERA';
 			}
 			else {
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
@@ -214,8 +279,12 @@
 			}
 		}
 
-		//keräyslistan rivit
-		if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		// keräyslistan rivit
+		if (($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
+
+			if ($yhtiorow['kerayserat'] == 'K') $vhlisa = "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)";
+			else $vhlisa = "";
+
 			$query = "	SELECT tilausrivi.*,
 						tuote.sarjanumeroseuranta,
 						kerayserat.kpl as tilkpl,
@@ -226,7 +295,7 @@
 						FROM kerayserat
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno {$lisa1})
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+						{$vhlisa}
 						WHERE kerayserat.otunnus IN ({$tilausnumeroita})
 						AND kerayserat.yhtio   = '{$kukarow['yhtio']}'
 						ORDER BY sorttauskentta";
@@ -255,8 +324,8 @@
 
 		$kal = 1;
 
-		while ($row = mysql_fetch_array($riresult)) {
-			if ($yhtiorow['kerayserat'] == 'K' and isset($tullaan_kerayserasta) and trim($tullaan_kerayserasta) != '' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
+		while ($row = mysql_fetch_assoc($riresult)) {
+			if ($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') {
 				$rivinumerot[$row["ker_tunnus"]] = $kal;
 			}
 			else {
@@ -265,7 +334,7 @@
 			$kal++;
 		}
 
-		mysql_data_seek($riresult,0);
+		mysql_data_seek($riresult, 0);
 
 		if (!isset($kieli)) $kieli = "";
 		if (!isset($toim)) $toim = "";
@@ -449,8 +518,8 @@
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
 
-	// poistetaan lukot
-	$query = "UNLOCK TABLES";
-	$res   = mysql_query($query) or pupe_error($query);
-
-?>
+	if (!isset($lukotetaan) or $lukotetaan) {
+		// poistetaan lukot
+		$query = "UNLOCK TABLES";
+		$res   = pupe_query($query);
+	}

@@ -346,6 +346,7 @@
 						keraysvyohyke					= '{$keraysvyohyke}',
 						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
+						budjetti						= '{$budjetti}',
 						yhtio 							= '{$yhtio}'";
 			$result = pupe_query($query);
 			$selkuka = mysql_insert_id();
@@ -545,7 +546,8 @@
 						fyysinen_sijainti				= '{$fyysinen_sijainti}',
 						keraysvyohyke					= '{$keraysvyohyke}',
 						muuttaja						= '{$kukarow['kuka']}',
-						muutospvm						= now()
+						muutospvm						= now(),
+						budjetti						= '{$budjetti}'
 						WHERE kuka	= '{$kuka}'
 						AND yhtio	= '{$yhtio}'";
 			$result = pupe_query($query);
@@ -1356,6 +1358,10 @@
 						echo "<input type='checkbox' name='piiri[]' value='{$prow['selite']}' {$chk}>{$prow['selite']} - {$prow['selitetark']}<br>";
 					}
 					echo "</td><td class='back'>",t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin"),"</td></tr>";
+				}
+
+				if ($toim != 'extranet') {
+					echo "<tr><th>".t('Käyttäjän budjetti').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
 				}
 			}
 

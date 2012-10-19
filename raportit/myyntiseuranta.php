@@ -790,6 +790,7 @@
 				$gluku  			= 0;
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
+				$kuka_join			= "";
 
 				// n‰it‰ k‰ytet‰‰n queryss‰
 				$sel_osasto = "";
@@ -1068,10 +1069,11 @@
 					//** Laskugrouppaukset start **//
 					if ($mukaan == "laskumyyja") {
 						$group .= ",lasku.myyja";
-						$select .= "lasku.myyja 'myyj‰', ";
+						$select .= "lasku.myyja 'myyj‰', kuka.budjetti, ";
 						$order  .= "lasku.myyja,";
 						$gluku++;
 						$laskugroups++;
+						$kuka_join = "JOIN kuka ON kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja";
 					}
 
 					if ($mukaan == "maa") {
@@ -1704,6 +1706,7 @@
 								{$varasto_join}
 								{$kantaasiakas_join}
 								{$lisa_parametri}
+								{$kuka_join}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
 

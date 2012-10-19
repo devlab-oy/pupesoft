@@ -656,7 +656,7 @@
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/karhukirje-".md5(uniqid(mt_rand(), true)).".pdf";
+	$pdffilenimi = "/tmp/karhu-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
@@ -717,7 +717,7 @@
 		require ('tilauskasittely/verkkolasku_finvoice.inc');
 
 		$invoice_number = $laskutiedot['laskunro'];
-		$finvoice_file_path = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.xml";
+		$finvoice_file_path = "$pupe_root_polku/dataout/karhu-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.xml";
 		$tootfinvoice	= fopen($finvoice_file_path, 'w');
 
 		$pankkitiedot 	= $yhtiorow;

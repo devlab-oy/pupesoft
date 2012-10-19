@@ -19449,6 +19449,77 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 	}
 }
 
+if (!function_exists('luottotilanne')) {
+	function luottotilanne($liitostunnus, $valuutassa=FALSE) {
+		global $kukarow, $yhtiorow;
+
+		// Lasketaan asiakkaan luottotilanne, EI HUOMIOIDA AVOIMIA LASKUJA
+		if ($liitostunnus == "") return 0;
+
+		$salisa2 = "";
+
+		if ($valuutassa !== FALSE) {
+			$salisa2 = " and suoritus.valkoodi='$valuutassa' ";
+		}
+
+		$query = "	SELECT luottoraja
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus in ($liitostunnus)";
+		$asresult = pupe_query($query);
+		$asrow = mysql_fetch_assoc($asresult);
+
+		if ($valuutassa !== FALSE) {
+			// Suorituksen valuutassa
+			$suorilisa = " sum(summa) summa ";
+		}
+		else {
+			// Yhtiön valuutassa
+			$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
+		}
+
+		// Haetaan kaatotilin summa
+		$query = "	SELECT
+					$suorilisa
+					FROM suoritus
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and ltunnus > 0
+					and kohdpvm = '0000-00-00'
+					and asiakas_tunnus in ($liitostunnus)
+					$salisa2";
+		$kaatotilires = pupe_query($query);
+		$kaatotilirow = mysql_fetch_assoc($kaatotilires);
+
+		if ($valuutassa !== FALSE) {
+			// Laskun valuutassa
+			$avtilisa = "(tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi))";
+		}
+		else {
+			// Yhtiön valuutassa
+			$avtilisa = "tilausrivi.hinta";
+		}
+
+		$query_alennuksia = generoi_alekentta('M');
+
+		// Avoimet tilaukset
+		$query = "	SELECT
+					round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+					FROM lasku
+					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+					)
+					AND lasku.liitostunnus in ($liitostunnus)";
+		$avoimettilauksetres = pupe_query($query);
+		$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
+
+		return array($asrow['luottoraja'], $kaatotilirow["summa"], $avoimettilauksetrow['tilausavoinsaldo']);
+	}
+}
+
+
 if (!function_exists('triangulation')) {
 	function triangulation($tunnukset) {
 		global $kukarow, $yhtiorow;

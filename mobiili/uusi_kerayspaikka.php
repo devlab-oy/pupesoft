@@ -44,14 +44,6 @@ else {
 if (isset($submit) and trim($submit) != '') {
 
 	switch ($submit) {
-		case 'cancel':
-			if (isset($hyllytys)) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
-			} else {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=vahvista_kerayspaikka.php?{$url}'>"; exit();
-			}
-			break;
-
 		case 'submit':
 
 			# Ei saa olla tyhjiä kenttiä
@@ -117,8 +109,15 @@ if ($row_suoratoimitus = mysql_fetch_assoc($onko_suoratoimitus_res)) {
 	if ($row_suoratoimitus["suoraan_laskutukseen"] == "") $oletuspaikka_chk = '';
 }
 
+$paluu_url = "vahvista_kerayspaikka.php?{$url}";
+if (isset($hyllytys)) {
+	$paluu_url = "hyllytys.php?{$url}";
+}
+
 ####
-echo "<div class='header'><h1>",t("UUSI KERÄYSPAIKKA"),"</h1></div>";
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("UUSI KERÄYSPAIKKA"),"</h1></div>";
 
 # Virheet
 if (isset($errors)) {
@@ -169,8 +168,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t("Perusta"),"</button>
-	<button id='takaisin' name='submit' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
+	<button name='submit' class='button' value='submit' onclick='submit();'>",t("Perusta"),"</button>
 	</form>
 </div>";
 

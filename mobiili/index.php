@@ -20,20 +20,20 @@ if (tarkista_oikeus("mobiili/siirto.php")) {
 
 if (tarkista_oikeus("mobiili/tulouta.php")) {
 	echo "<form name='tulouta' target='_top' action='tulouta.php' method='post'>";
-	echo "<input type='submit' value='",t("Tulouta", $browkieli),"' />";
+	echo "<input class='button' type='submit' value='",t("Tulouta", $browkieli),"' />";
 	echo "</form>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
-	echo "<button value=''>",t("Inventointi", $browkieli),"</button>";
+	echo "<button class='button' value=''>",t("Inventointi", $browkieli),"</button>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {
-	echo "<button value=''>",t("Tuki", $browkieli),"</button>";
+	echo "<button class='button' value=''>",t("Tuki", $browkieli),"</button>";
 }
 
 echo "<form method='post' action='{$palvelin2}logout.php?location={$palvelin2}mobiili'>";
-echo "<input type='submit' value='",t("Lopeta", $browkieli),"' />";
+echo "<input type='submit' class='button' value='",t("Lopeta", $browkieli),"' />";
 echo "</form>";
 echo "</body>";
 

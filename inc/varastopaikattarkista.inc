@@ -3,9 +3,9 @@
 if(!function_exists("varastopaikattarkista")) {
 	function varastopaikattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
-		
+
 		static $alkuhyllyalue, $alkuhyllynro, $loppuhyllyalue, $loppuhyllynro;
-		
+
 		if (mysql_field_name($result, $i) == "alkuhyllyalue") {
 			$t[$i] = trim(strtoupper($t[$i]));
 			$alkuhyllyalue = $t[$i];
@@ -48,7 +48,7 @@ if(!function_exists("varastopaikattarkista")) {
 						tunnus != '$tunnus'
 						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
 						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vares) == 0) {
@@ -59,7 +59,7 @@ if(!function_exists("varastopaikattarkista")) {
 								tunnus != '$tunnus'
 								and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
 								and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-								and yhtio = '$kukarow[yhtio]'";
+								and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 					$vares = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($vares) == 0) {
@@ -70,7 +70,7 @@ if(!function_exists("varastopaikattarkista")) {
 									tunnus != '$tunnus'
 									and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
 									and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-									and yhtio = '$kukarow[yhtio]'";
+									and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 						$vares = mysql_query($query) or pupe_error($query);
 					}
 			}

@@ -23,7 +23,7 @@
 		// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
 		$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 					AND tunnus = '$postirow[varasto]'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$postirow_varasto = mysql_fetch_array($tempr);
@@ -71,7 +71,7 @@
 			$rakir_row['toim_nimi']    = $rakir_row['nimi'];
 		}
 	}
-	
+
 	if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
 		$logyq = "	SELECT min(rahtikirjanro) rahtikirjanro
@@ -82,7 +82,7 @@
 		$logyrow = mysql_fetch_assoc($logyres);
 
 		$rahtikirjanro = $logyrow["rahtikirjanro"];
-		
+
 		$logyq = "	UPDATE rahtikirjanumero
 					SET kayttaja = '$kukarow[kuka]',
 					kaytettyaika = now()

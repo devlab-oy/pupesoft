@@ -147,7 +147,7 @@
 					$query = "	SELECT nimitys
 								FROM varastopaikat
 								WHERE tunnus='$rahtirow[tulostuspaikka]'
-								and $logistiikka_yhtiolisa
+								and $logistiikka_yhtiolisa AND varasto_status != 'P'
 								limit 1";
 					$varnimresult = pupe_query($query);
 					$varnimrow = mysql_fetch_array($varnimresult);

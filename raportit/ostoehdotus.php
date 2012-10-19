@@ -52,7 +52,7 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 	if ($myynti_varasto != "") {
 		$varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
 
-		$query = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
+		$query = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto' AND varasto_status != 'P'";
 		$result   = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 		$riviheaderi = $laskurow["nimitys"];
@@ -184,7 +184,7 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 		if ($myynti_varasto != "") {
 			$varastotapa = " and varastopaikat.tunnus = '$myynti_varasto' ";
 
-			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
+			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto' AND varasto_status != 'P'";
 			$result   = pupe_query($query);
 			$laskurow = mysql_fetch_array($result);
 			$riviheaderi = $laskurow["nimitys"];
@@ -241,13 +241,13 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 		if ($myynti_varasto != "") {
 			$varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
 
-			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
+			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto' AND varasto_status != 'P'";
 			$result   = pupe_query($query);
 			$laskurow = mysql_fetch_array($result);
 			$riviheaderi = $laskurow["nimitys"];
 		}
 		elseif ($erikoisvarastot != "" and $myynti_maa == "") {
-			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and tyyppi = ''";
+			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and tyyppi = '' AND varasto_status != 'P'";
 			$result   = pupe_query($query);
 			$laskurow = mysql_fetch_array($result);
 
@@ -257,7 +257,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 			}
 		}
 		elseif ($myynti_maa != "") {
-			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and maa = '$myynti_maa'";
+			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and maa = '$myynti_maa' AND varasto_status != 'P'";
 
 			if ($erikoisvarastot != "") {
 				$query .= " and tyyppi = '' ";
@@ -493,7 +493,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		// katsotaan valitut varastot
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio in ($yhtiot)";
+					WHERE yhtio in ($yhtiot) AND varasto_status != 'P'";
 		$vtresult = pupe_query($query);
 
 		while ($vrow = mysql_fetch_array($vtresult)) {
@@ -972,7 +972,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$query = "	SELECT distinct maa
 				from varastopaikat
 				where maa != ''
-				and yhtio in ($yhtiot)
+				and yhtio in ($yhtiot) AND varasto_status != 'P'
 				order by yhtio, maa";
 	$vtresult = pupe_query($query);
 
@@ -997,7 +997,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	//Valitaan varastot joiden saldot huomioidaan
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio in ($yhtiot)
+				WHERE yhtio in ($yhtiot) AND varasto_status != 'P'
 				ORDER BY yhtio, nimitys";
 	$vtresult = pupe_query($query);
 

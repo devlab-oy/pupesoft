@@ -282,7 +282,7 @@
 					$aquery = "	SELECT *
 								FROM varastopaikat
 								WHERE yhtio = '{$kukarow["yhtio"]}'
-								and tunnus = '{$kohde_varasto}'";
+								and tunnus = '{$kohde_varasto}' AND varasto_status != 'P'";
 					$vtresult = pupe_query($aquery);
 					$vtrow = mysql_fetch_array($vtresult);
 
@@ -851,7 +851,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow["yhtio"]}'
+					WHERE yhtio = '{$kukarow["yhtio"]}' AND varasto_status != 'P'
 					order by tyyppi, nimitys";
 		$result = pupe_query($query);
 

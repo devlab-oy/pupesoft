@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Varastot';
-	$kentat = 'tunnus, nimitys, alkuhyllyalue, alkuhyllynro, loppuhyllyalue, loppuhyllynro, tyyppi';
-	$jarjestys = 'nimitys, alkuhyllyalue, alkuhyllynro';	
+	$kentat = 'tunnus, nimitys, alkuhyllyalue, alkuhyllynro, loppuhyllyalue, loppuhyllynro, tyyppi, varasto_status';
+	$jarjestys = 'nimitys, alkuhyllyalue, alkuhyllynro';
 ?>

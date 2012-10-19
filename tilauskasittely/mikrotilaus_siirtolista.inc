@@ -159,7 +159,7 @@
 						exit;
 					}
 
-					$query = "SELECT nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = '$varasto'";
+					$query = "SELECT nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = '$varasto' AND varasto_status != 'P'";
 					$varres = mysql_query($query) or pupe_error($query);
 					$varrow = mysql_fetch_array($varres);
 

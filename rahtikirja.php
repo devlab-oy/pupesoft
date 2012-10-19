@@ -792,14 +792,14 @@
 			elseif ($laskurow["varasto"] == '') {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio = '$kukarow[yhtio]'
+							where yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}
 			else {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
+							where yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[varasto]'  AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = pupe_query($query);
@@ -1015,7 +1015,7 @@
 
 		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND varasto_status != 'P'
 					ORDER BY yhtio, tyyppi, nimitys";
 		$result = pupe_query($query);
 
@@ -1038,7 +1038,7 @@
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					and maa != ''
+					and maa != '' AND varasto_status != 'P'
 					ORDER BY maa";
 		$result = pupe_query($query);
 
@@ -1211,7 +1211,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa' AND varasto_status != 'P'";
 			$maare = pupe_query($query);
 			$maarow = mysql_fetch_assoc($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -1712,7 +1712,7 @@
 
 		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND varasto_status != 'P'
 					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 
@@ -1732,7 +1732,7 @@
 
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
-					WHERE maa != '' and $logistiikka_yhtiolisa
+					WHERE maa != '' and $logistiikka_yhtiolisa AND varasto_status != 'P'
 					ORDER BY maa";
 		$result = pupe_query($query);
 
@@ -1818,7 +1818,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa' AND varasto_status != 'P'";
 			$maare = pupe_query($query);
 			$maarow = mysql_fetch_assoc($maare);
 
@@ -2174,7 +2174,7 @@
 			// haetaan kaikki varastot
 			$query  = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 						ORDER BY tyyppi, nimitys";
 			$result = pupe_query($query);
 
@@ -2230,7 +2230,7 @@
 								ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
 				}
 				else {
-					$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka'";
+					$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka' AND varasto_status != 'P'";
 				}
 
 				$pres  = pupe_query($query);
@@ -2351,7 +2351,7 @@
 				echo "<option value=''>".t("Ei tulosteta laskua")."</option>";
 
 				//Haetaan varaston JV-kuittitulostin
-				$query = "SELECT printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$tulostuspaikka'";
+				$query = "SELECT printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$tulostuspaikka' AND varasto_status != 'P'";
 				$jvres = pupe_query($query);
 				$jvrow = mysql_fetch_assoc($jvres);
 
@@ -2616,14 +2616,14 @@
 			elseif ($otsik["varasto"] == '') {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]'
+							where yhtio='$kukarow[yhtio]' AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}
 			else {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]'
+							where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]' AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = pupe_query($query);

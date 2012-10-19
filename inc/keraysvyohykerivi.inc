@@ -102,7 +102,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$kukarow['yhtio']}' AND varasto_status != 'P'
 					ORDER BY nimitys";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 

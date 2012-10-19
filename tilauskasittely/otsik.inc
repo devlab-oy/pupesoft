@@ -252,7 +252,7 @@
 			}
 
 			//	Denial by maa
-			$query = "SELECT maa FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+			$query = "SELECT maa FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$varasto' AND varasto_status != 'P'";
 			$result = pupe_query($query);
 			$vara = mysql_fetch_assoc($result);
 
@@ -459,7 +459,7 @@
 						WHERE yhtio = '{$kukarow["yhtio"]}'
 						AND alkuhyllyalue = '!!M'
 						AND loppuhyllyalue = '!!M'
-						AND tyyppi = 'E'";
+						AND tyyppi = 'E' AND varasto_status != 'P'";
 			$myyntitili_result = pupe_query($query);
 
 			if (mysql_num_rows($myyntitili_result) != 1) {
@@ -1561,7 +1561,7 @@
 							FROM varastopaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and alkuhyllyalue = '!!M'
-							and loppuhyllyalue = '!!M'";
+							and loppuhyllyalue = '!!M' AND varasto_status != 'P'";
 				$tresult = pupe_query($query);
 				$mrow = mysql_fetch_assoc($tresult);
 
@@ -1629,7 +1629,7 @@
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						$varastot_lisa_query
+						$varastot_lisa_query AND varasto_status != 'P'
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 

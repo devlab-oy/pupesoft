@@ -279,7 +279,7 @@ else {
 
 			$query = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 						ORDER BY nimitys";
 			$result = mysql_query($query) or pupe_error($query);
 

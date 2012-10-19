@@ -2203,13 +2203,13 @@ if (!function_exists("tulosta_lasku")) {
 					$query = "	SELECT *
 								FROM varastopaikat
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus = '$varasto'
+								AND tunnus = '$varasto' AND varasto_status != 'P'
 								ORDER BY alkuhyllyalue,alkuhyllynro";
 				}
 				else {
 					$query = "	SELECT *
 								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 								ORDER BY alkuhyllyalue,alkuhyllynro
 								LIMIT 1";
 				}

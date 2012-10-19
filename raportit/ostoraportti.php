@@ -545,7 +545,7 @@
 			//Katsotaan valitut varastot
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE $konsyhtiot";
+						WHERE $konsyhtiot AND varasto_status != 'P'";
 			$vtresult = pupe_query($query);
 
 			$varastot 			= "";
@@ -2450,7 +2450,7 @@
 			// normivarastot
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE $konsyhtiot
+						WHERE $konsyhtiot AND varasto_status != 'P'
 						ORDER BY yhtio, nimitys";
 			$vtresult = pupe_query($query);
 

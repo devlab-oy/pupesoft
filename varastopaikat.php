@@ -13,7 +13,7 @@ if ($tee == 'update') {
 				tunnus != '$tunnus'
 				and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
 				and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-				and yhtio = '$kukarow[yhtio]'";
+				and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($vares) == 0) {
@@ -24,7 +24,7 @@ if ($tee == 'update') {
 						tunnus != '$tunnus'
 						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
 						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vares) == 0) {
@@ -35,7 +35,7 @@ if ($tee == 'update') {
 							tunnus != '$tunnus'
 							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
 							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
-							and yhtio = '$kukarow[yhtio]'";
+							and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 				$vares = mysql_query($query) or pupe_error($query);
 			}
 	}
@@ -108,7 +108,7 @@ if ($tee == 'uusi') {
 
 // n‰ytet‰‰n muokkausruutu
 if ($tee == 'edit') {
-	$query  = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' order by alkuhyllyalue, alkuhyllynro";
+	$query  = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' AND varasto_status != 'P' order by alkuhyllyalue, alkuhyllynro";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 
@@ -231,7 +231,7 @@ if ($tee == '') {
 	$query  = "	SELECT varastopaikat.*,
 				concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) sorttaus
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 				ORDER by sorttaus";
 	$result = mysql_query($query) or pupe_error($query);
 

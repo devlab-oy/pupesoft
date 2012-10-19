@@ -1204,7 +1204,7 @@
 							WHERE
 							concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and
 							concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
-							and yhtio = '$kukarow[yhtio]'";
+							and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 				$varesult = pupe_query($query);
 				$varow = mysql_fetch_assoc($varesult);
 
@@ -1243,7 +1243,7 @@
 							WHERE
 							concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and
 							concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
-							and yhtio = '$kukarow[yhtio]'";
+							and yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'";
 				$varesult = pupe_query($query);
 				$varow = mysql_fetch_assoc($varesult);
 

@@ -457,7 +457,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	//Valitaan varastot
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 				ORDER BY nimitys";
 	$vtresult = pupe_query($query);
 

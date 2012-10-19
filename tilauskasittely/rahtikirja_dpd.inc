@@ -45,7 +45,7 @@ if ($kollityht > 0) {
 		// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
 		$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 					AND tunnus = '$laskurow[varasto]'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$postirow_varasto = mysql_fetch_array($tempr);

@@ -236,7 +236,7 @@
 					if ($kuuluu == 0) {
 
 						// haetaan halutun varaston tiedot
-						$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'";
+						$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]' AND varasto_status != 'P'";
 						$hyllyres = pupe_query($query);
 						$hyllyrow =  mysql_fetch_array($hyllyres);
 

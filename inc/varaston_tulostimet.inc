@@ -4,7 +4,7 @@
 	$otsikko_nappi = "tulostusalue";
 
 	$kentat = " tunnus,
-				(select nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = varaston_tulostimet.varasto) varasto,
+				(select nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = varaston_tulostimet.varasto AND varasto_status != 'P') varasto,
 				nimi,
 				pakkaamo,
 				prioriteetti,

@@ -316,7 +316,7 @@
 								echo "<br><font class='error'>".t("Tuotteella")." $rivirow[tuoteno] ".t("ei ole oletuspaikkaakaan")."!!!</font><br><br>";
 
 								// haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
-								$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue, alkuhyllynro limit 1";
+								$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' AND varasto_status != 'P' order by alkuhyllyalue, alkuhyllynro limit 1";
 								$korjres = mysql_query($query) or pupe_error($query);
 								$hyllyrow =  mysql_fetch_array($korjres);
 

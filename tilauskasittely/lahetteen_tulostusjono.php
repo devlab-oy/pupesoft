@@ -522,7 +522,7 @@
 				//haetaan keräyslistan oletustulostin
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon'";
+							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon' AND varasto_status != 'P'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
 				$kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
@@ -634,7 +634,7 @@
 						FROM varastopaikat
 						WHERE maa != ''
 						and $logistiikka_yhtiolisa
-						and maa = '$tumaa'";
+						and maa = '$tumaa' AND varasto_status != 'P'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -677,7 +677,7 @@
 		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.varasto_status != 'P'
 					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
 					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
@@ -707,7 +707,7 @@
 		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.varasto_status != 'P'
 					GROUP BY varastopaikat.maa
 					ORDER BY varastopaikat.maa";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1019,7 +1019,7 @@
 					$query = "	SELECT *
 								from varastopaikat
 								where yhtio = '$kukarow[yhtio]'
-								and tunnus = '$tilrow[varasto]'";
+								and tunnus = '$tilrow[varasto]' AND varasto_status != 'P'";
 					$prires = mysql_query($query) or pupe_error($query);
 					$prirow = mysql_fetch_array($prires);
 					$kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];

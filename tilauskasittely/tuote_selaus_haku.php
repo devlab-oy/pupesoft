@@ -1710,7 +1710,7 @@
 											FROM varastopaikat
 											WHERE yhtio = '$kukarow[yhtio]'
 											AND maa 	= '{$oleasrow["varastomaa"]}'
-											AND nouto 	= '1'";
+											AND nouto 	= '1' AND varasto_status != 'P'";
 								$noutovarres = pupe_query($query);
 							}
 							else {

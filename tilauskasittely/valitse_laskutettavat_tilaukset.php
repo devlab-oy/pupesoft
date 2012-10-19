@@ -809,14 +809,14 @@
 				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
-							and printteri5 != ''
+							and printteri5 != '' AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}
 			else {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
+							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]' AND varasto_status != 'P'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = pupe_query($query);

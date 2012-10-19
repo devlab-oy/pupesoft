@@ -56,7 +56,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi  = ''
-					$asiakasmaalisa";
+					$asiakasmaalisa AND varasto_status != 'P'";
 		$vtresult = pupe_query($query);
 
 		$varastosta = array();
@@ -1536,7 +1536,7 @@ while ($tietue = fgets($fd)) {
 							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND prioriteetti > 0";
+										AND prioriteetti > 0 AND varasto_status != 'P'";
 							$pres = pupe_query($query);
 							$prow = mysql_fetch_assoc($pres);
 
@@ -1758,7 +1758,7 @@ while ($tietue = fgets($fd)) {
 						$varasto_query = "	SELECT tunnus
 											from varastopaikat
 											where yhtio = '$kukarow[yhtio]'
-											and tyyppi = ''
+											and tyyppi = '' AND varasto_status != 'P'
 											order by alkuhyllyalue
 											limit 1";
 						$varasto_res = pupe_query($varasto_query);

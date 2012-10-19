@@ -13,11 +13,11 @@
 	//	Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
 	if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
 		//	Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
-		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
+		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing' AND varasto_status != 'P'";
 		$abures = mysql_query($query) or pupe_error($query);
 		$kohdev = mysql_fetch_array($abures);
 
-		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' AND varasto_status != 'P'";
 		$abures = mysql_query($query) or pupe_error($query);
 		$lahdev = mysql_fetch_array($abures);
 
@@ -97,7 +97,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 					order by tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
@@ -148,7 +148,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
@@ -416,7 +416,7 @@
 
 		$aquery = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND varasto_status != 'P'
 					and tunnus='$clearing'";
 		$vtresult = mysql_query($aquery) or pupe_error($aquery);
 		$vtrow = mysql_fetch_array($vtresult);

@@ -481,6 +481,20 @@
 
 						$attachmentbody = base64_decode($attachmentbody);
 
+						// Katotaan, ettei samalla nimellä oo jo laskua jonossa
+						if (file_exists($skannauskansio."/".$matches[2])) {
+
+							$kala = 1;
+							$filename = $matches[2];
+
+							while (file_exists($skannauskansio."/".$filename)) {
+								$filename = $kala."_".$matches[2];
+								$kala++;
+							}
+
+							$matches[2] = $filename;
+						}
+
 						file_put_contents($skannauskansio."/".$matches[2], $attachmentbody);
 					}
 				}

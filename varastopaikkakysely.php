@@ -184,6 +184,7 @@
 							FROM tilausrivi
 							join suuntalavat on (tilausrivi.yhtio=suuntalavat.yhtio AND tilausrivi.suuntalava=suuntalavat.tunnus)
 							WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+							AND tilausrivi.tyyppi='O'
 							AND suuntalava > 0
 							AND tuoteno='$rivi[tuoteno]'
 							AND hyllyalue='$rivi[hyllyalue]'

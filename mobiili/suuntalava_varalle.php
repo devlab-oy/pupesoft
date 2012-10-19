@@ -25,7 +25,25 @@ if (isset($submit) and trim($submit) != '') {
 		if ($koodi != '') {
 
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
-			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $koodi);
+			# hyllypaikan on oltava reservipaikka ja siellä ei saa olla tuotteita
+			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
+			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
+
+			# tarkistetaan että paikalla ei ole tuotteita
+			$query = "SELECT *
+						FROM tuotepaikat
+						WHERE yhtio		= '{$kukarow['yhtio']}'
+						AND hyllyalue	= '$hyllyalue'
+						AND hyllynro	= '$hyllynro'
+						AND hyllyvali	= '$hyllyvali'
+						AND hyllytaso	= '$hyllytaso'";
+			$result = pupe_query($query);
+			$tuotteita_tuotepaikalla = mysql_num_rows($result);
+
+			if ($tuotteita_tuotepaikalla > 0) {
+				$error['varalle'] = t("Tuotepaikalla on tuotteita!");
+				$kaikki_ok = false;
+			}
 
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
@@ -57,22 +75,22 @@ if (isset($submit) and trim($submit) != '') {
 					}
 					# Jos kaikki meni ok
 					if (isset($varastovirhe)) {
-						$error['varalle'] .= "Virhe varastoonviennissä";
+						$error['varalle'] .= t("Virhe varastoonviennissä");
 					} else {
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 						exit;
 					}
 				}
 				else {
-					$error['varalle'] = "Yhtään tuotetta ei löytynyt suuntalavalta";
+					$error['varalle'] = t("Yhtään tuotetta ei löytynyt suuntalavalta");
 				}
 			}
 			else {
-				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";
+				$error['varalle']  = t("Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka");
 			}
 		}
 		else {
-			$error['varalle'] = "Varmistukoodi ei voi olla tyhjä";
+			$error['varalle'] = t("Varmistukoodi ei voi olla tyhjä");
 		}
 	}
 }

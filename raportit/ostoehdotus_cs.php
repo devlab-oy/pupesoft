@@ -975,7 +975,7 @@
 	//Valitaan varastot joiden saldot huomioidaan
 	$query = "	SELECT *
 				FROM varastopaikat
-				WHERE yhtio in ($yhtiot)
+				WHERE yhtio in ($yhtiot) AND tyyppi != 'P'
 				ORDER BY yhtio, tyyppi, nimitys";
 	$vtresult = pupe_query($query);
 

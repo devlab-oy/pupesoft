@@ -1588,7 +1588,7 @@ while ($tietue = fgets($fd)) {
 							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND prioriteetti > 0";
+										AND prioriteetti > 0 AND tyyppi != 'P'";
 							$pres = pupe_query($query);
 							$prow = mysql_fetch_assoc($pres);
 
@@ -1965,7 +1965,7 @@ while ($tietue = fgets($fd)) {
 
 // l‰hetet‰‰n meili
 if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtiorow) and $yhtiorow["edi_email"] != "") {
-	
+
 	$edi_ulos = strip_tags($edi_ulos);
 
 	$bound   = uniqid(time()."_") ;

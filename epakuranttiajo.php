@@ -167,7 +167,7 @@
 				$query  = "	SELECT laadittu
 							FROM tapahtuma
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND laji 	= 'laskutus'
+							AND laji in ('laskutus', 'kulutus')
 							AND tuoteno = '$epakurantti_row[tuoteno]'
 							ORDER BY laadittu DESC
 							LIMIT 1;";

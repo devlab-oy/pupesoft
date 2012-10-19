@@ -237,7 +237,6 @@
 			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
-			if ($myyntihinnat != '')   		$myyntihinnatchk		= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
@@ -404,11 +403,6 @@
 				<tr>
 				<th>",t("Näytä tuotteiden nimitykset"),"</th>
 				<td colspan='3'><input type='checkbox' name='nimitykset' {$nimchk}></td>
-				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
-				</tr>
-				<tr>
-				<th>",t("Näytä tuotteiden myyntihinnat"),"</th>
-				<td colspan='3'><input type='checkbox' name='myyntihinnat' {$myyntihinnatchk}></td>
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
@@ -1029,14 +1023,6 @@
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
 							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
 							$order  .= "tuote.tuoteno,";
-							$gluku++;
-						}
-
-						if ($myyntihinnat != "") {
-							$group .= ",tuote.myyntihinta";
-							$select .= "round(tuote.myyntihinta, {$yhtiorow['hintapyoristys']}) AS myyntihinta, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.myyntihinta,";
 							$gluku++;
 						}
 
@@ -1999,7 +1985,7 @@
 									$liitetiedosto_indeksi = 1;
 									$row['liitetiedostot'] = '';
 									while($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
-										$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' >Liite {$liitetiedosto_indeksi}</a> ";
+										$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' target='Attachment'>".t("Liite")." {$liitetiedosto_indeksi}</a> ";
 										$liitetiedosto_indeksi++;
 									}
 							}

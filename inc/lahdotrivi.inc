@@ -62,9 +62,9 @@
 	}
 
 	if (mysql_field_name($result, $i) == "aktiivi") {
-		
+
 		$sel1 = $sel2 = "";
-		
+
 		if ($trow[$i] == "E") {
 			$sel2 = "SELECTED";
 		}
@@ -123,7 +123,7 @@
 
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$varastores = pupe_query($query);
 

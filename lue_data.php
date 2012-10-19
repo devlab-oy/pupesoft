@@ -2125,6 +2125,8 @@ if (!$cli and !isset($api_kentat)) {
 		$taulut['yhteensopivuus_rekisteri']        = 'Yhteensopivuus rekisterinumerot';
 		$taulut['yhteensopivuus_tuote']            = 'Yhteensopivuus tuotteet';
 		$taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lisätiedot';
+		$taulut['rekisteritiedot_lisatiedot']      = 'Rekisteritiedot lisatiedot';
+		$taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
 	}
 
 	// Taulut aakkosjärjestykseen

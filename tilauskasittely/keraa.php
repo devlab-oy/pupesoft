@@ -1852,7 +1852,7 @@
 
 			$query = "	SELECT yhtio, tunnus, nimitys
 						FROM varastopaikat
-						WHERE {$logistiikka_yhtiolisa}
+						WHERE {$logistiikka_yhtiolisa} AND tyyppi != 'P'
 						ORDER BY yhtio, tyyppi, nimitys";
 			$result = pupe_query($query);
 
@@ -1879,7 +1879,7 @@
 			$query = "	SELECT DISTINCT maa
 						FROM varastopaikat
 						WHERE maa != ''
-						AND {$logistiikka_yhtiolisa}
+						AND {$logistiikka_yhtiolisa} AND tyyppi != 'P'
 						ORDER BY maa";
 			$result = pupe_query($query);
 
@@ -1962,7 +1962,7 @@
 					$query = "	SELECT nro
 								FROM kerayserat
 								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND otunnus = '{$etsi}'";
+								AND (otunnus = '{$etsi}' or nro = '{$etsi}')";
 					$nro_chk_res = pupe_query($query);
 					$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
 
@@ -2088,10 +2088,10 @@
 			if (mysql_num_rows($result) == 1 AND is_numeric($etsi) and $etsi != '') {
 				$row = mysql_fetch_assoc($result);
 				if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-					$id = $row[keraysera];
+					$id = $row["keraysera"];
 				}
 				else {
-					$id = $row[tunnus];
+					$id = $row["tunnus"];
 				}
 			}
 			else if (mysql_num_rows($result) > 0) {
@@ -2964,7 +2964,7 @@
 					if ($lp_varasto == 0) {
 						$query = "	SELECT *
 									from varastopaikat
-									where yhtio = '$kukarow[yhtio]'
+									where yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}

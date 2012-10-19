@@ -289,7 +289,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
@@ -314,7 +314,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vtresult = pupe_query($query);
 
@@ -1736,7 +1736,7 @@
 
 					// Aloitellaan lomakkeen teko
 					$params_tyomaarays = tyomaarays_alku($params_tyomaarays);
-					
+
 					if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "") {
 						// Ekan sivun otsikot
 						$params_tyomaarays['kala'] -= $params_tyomaarays['rivinkorkeus']*3;

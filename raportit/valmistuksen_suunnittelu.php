@@ -851,7 +851,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow["yhtio"]}'
+					WHERE yhtio = '{$kukarow["yhtio"]}' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 

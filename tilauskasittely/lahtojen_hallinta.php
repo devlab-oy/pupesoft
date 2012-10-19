@@ -688,19 +688,19 @@
 				echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
 				echo "<table>";
-				echo "<tr><td>",t("Tulosta kaikki rahtikirjat"),":</td>";
+				echo "<tr><th>",t("Tulosta kaikki rahtikirjat"),":</th>";
 				echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
 
-				echo "<tr><td>",t("Tulosta vain jälkivaatimukset"),":</td>";
+				echo "<tr><th>",t("Tulosta vain jälkivaatimukset"),":</th>";
 				echo "<td><input type='radio' name='jv' value='vainjv'></td></tr>";
 
-				echo "<tr><td>",t("Älä tulosta jälkivaatimuksia"),":</td>";
+				echo "<tr><th>",t("Älä tulosta jälkivaatimuksia"),":</th>";
 				echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 
-				echo "<tr><td>",t("Tulosta vain rahtikirjoja joilla on VAK-koodeja"),":</td>";
+				echo "<tr><th>",t("Tulosta vain rahtikirjoja joilla on VAK-koodeja"),":</th>";
 				echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
-				echo "<tr><td>",t("Valitse jälkivaatimuslaskujen tulostuspaikka"),":</td>";
+				echo "<tr><th>",t("Valitse jälkivaatimuslaskujen tulostuspaikka"),":</th>";
 				echo "<td><select id='kirjoitin' name='laskukomento'>";
 				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
@@ -720,7 +720,7 @@
 
 				echo "</select></td></tr>";
 
-				echo "<tr><td>",t("Valitse tulostin"),":</td>";
+				echo "<tr><th>",t("Valitse tulostin"),":</th>";
 				echo "<td><select name='komento'>";
 
 				// Oletustulostin rahtikirjojen tulostukseen. Käytetään oletustulostimena varaston takana olevaa Rahtikirja A4 -tulostinta eli printteri6-kenttää.
@@ -746,7 +746,7 @@
 
 				echo "</select></td></tr>";
 
-				echo "<tr><td>",t("Tulosta osoitelaput"),"</td>";
+				echo "<tr><th>",t("Tulosta osoitelaput"),"</th>";
 				echo "<td><select name='valittu_rakiroslapp_tulostin'>";
 				echo "<option value=''>",t("Ei tulosteta"),"</option>";
 
@@ -1666,7 +1666,7 @@
 
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$varastores = pupe_query($query);
 

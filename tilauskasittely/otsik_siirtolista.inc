@@ -97,7 +97,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
@@ -148,7 +148,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 

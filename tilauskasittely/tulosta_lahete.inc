@@ -654,6 +654,8 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 		// Luodaan muuttujat
 		extract($params);
+		
+		$lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
 
 		$thispage = $pdf->new_page("a4");
 
@@ -782,12 +784,14 @@ if (!function_exists('uusi_sivu_lahete')) {
 			// $pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 						$thispage, $pieni);
 			// $pdf->draw_text(310, 761, $asrow["asiakasnro"], 							$thispage, $norm);
 			$pdf->draw_text(430, 771, t("Päiväys", $kieli), 							$thispage, $pieni);
+			
 			if ($lahetetyyppi_avainsana == 1) { # Ei kellonaikaa
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"], "pitka"), 	$thispage, $norm);
 			}
 			else {
 				$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 	$thispage, $norm);
 			}
+			
 			# viivakoodi
 			$data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
 			$image = $pdf->jfif_embed($data);

@@ -61,7 +61,7 @@
 									FROM varastopaikat
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tyyppi != 'E'
-									ORDER BY nimitys
+									ORDER BY tyyppi, nimitys
 									LIMIT 1";
 						$vtresult = mysql_query($query) or pupe_error($query);
 						$vrow = mysql_fetch_array($vtresult);

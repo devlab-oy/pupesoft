@@ -170,6 +170,30 @@ if (!function_exists('rivi_dgd')) {
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
 
+			if (($sivu == 0 and $kala < 120) or ($sivu > 0 and $kala < 30)) {
+
+				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
+
+				$sivu++;
+
+				// Luodaan palautettavat
+				$return = array();
+
+				foreach ($params as $key => $null) {
+					$return[$key] = ${$key};
+				}
+
+				$params = uusi_sivu_dgd($return);
+
+				// Luodaan muuttujat
+				foreach ($params as $key => $val) {
+					${$key} = $val;
+				}
+
+				$kala = 240;
+				$pdf->pages[$sivu]->setFont($norm, 8);
+			}
+
 			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
 
 			$kollimaara_yht += $kollimaara;

@@ -238,9 +238,9 @@
 
 			$query = "	SELECT *
 						FROM kirjoittimet
-						WHERE
-						yhtio='$kukarow[yhtio]'
-						ORDER by kirjoitin";
+						WHERE yhtio='$kukarow[yhtio]'
+						AND komento != 'EDI'
+						ORDER BY kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
 			echo t("Rahtikirjatulostin"),"<br>";
@@ -320,7 +320,10 @@
 		echo "</select></td></tr>";
 
 		// haetaan kaikki varastot
-		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $logistiikka_yhtiolisa";
+		$query  = "	SELECT tunnus, nimitys, yhtio
+					FROM varastopaikat
+					WHERE $logistiikka_yhtiolisa
+					ORDER BY yhtio, tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..

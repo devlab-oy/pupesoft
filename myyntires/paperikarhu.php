@@ -889,7 +889,8 @@
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet
-					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
+					where yhtio = '{$kukarow['yhtio']}'
+					and tunnus = '{$kukarow['kirjoitin']}'";
 		$kires = pupe_query($query);
 
 		if (mysql_num_rows($kires) == 1) {

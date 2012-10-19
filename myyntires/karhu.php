@@ -190,7 +190,6 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$karhuttavat = array();
-
 		unset($pdf);
 
 		while ($karhuttavarow = mysql_fetch_assoc($result)) {

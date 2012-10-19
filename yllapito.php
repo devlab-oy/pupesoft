@@ -992,6 +992,14 @@
 			elseif ($toim == 'puun_alkio' and $i == 5) {
 				$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
 			}
+			elseif ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
+				if ($i == 2 and $haku[$i] != '') {
+					$lisa .= " AND varaston_hyllypaikat.reservipaikka {$hakuehto} ";
+				}
+				else {
+					$lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
+				}
+			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
 				$lisa .= " and (";
 
@@ -1117,7 +1125,7 @@
 					<input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
 		}
 
-		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka") {
+		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1220,8 +1228,38 @@
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
 					else	$size='10';
 
-					// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
+					if ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
+						if (!isset($haku[$i])) $haku[$i] = "";
+
+						echo "<br />";
+						echo "<select name='haku[{$i}]'>";
+
+						if ($i == 1) {
+							echo "<option value=''></option>";
+
+							$query = "SELECT nimitys, tunnus FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimitys";
+							$keraysvyohyke_chk_res = pupe_query($query);
+
+							while ($keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res)) {
+
+								$sel = (isset($haku[$i]) and $haku[$i] == "@".$keraysvyohyke_chk_row['tunnus']) ? ' selected' : '';
+
+								echo "<option value='@{$keraysvyohyke_chk_row['tunnus']}'{$sel}>{$keraysvyohyke_chk_row['nimitys']}</option>";
+							}
+						}
+						else {
+
+							$sel = array_fill_keys(array($haku[$i]), ' selected') + array('@E' => '', '@K' => '');
+
+							echo "<option value=''></option>";
+							echo "<option value='@E'{$sel['@E']}>",t("Ei"),"</option>";
+							echo "<option value='@K'{$sel['@K']}>",t("Kyll‰"),"</option>";
+						}
+
+						echo "</select>";
+					}
+					elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
+						// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
 						if (!isset($haku[$i])) $haku[$i] = "";
 
 						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
@@ -1259,7 +1297,9 @@
 				($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
 				(($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
 				($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
-				($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E")) {
+				($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
+				($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
+				($toim == "toimitustavan_lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
 
 				$fontlisa1 = "<font style='text-decoration: line-through'>";
 				$fontlisa2 = "</font>";
@@ -1724,6 +1764,12 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'pakkaus') {
+			if (($toikrow = tarkista_oikeus("yllapito.php", "pakkauskoodit%", "", "OK")) !== FALSE) {
+				echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);
@@ -1767,6 +1813,8 @@
 			$toim == "auto_vari_korvaavat" or
 			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
+			$toim == "pakkauskoodit" or
+			$toim == "rahdinkuljettajat" or
 			$toim == "keraysvyohyke" or
 			$toim == "avainsana" or
 			$toim == "pakkaus" or
@@ -1927,6 +1975,10 @@
 
 	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "pakkauskoodit") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('pakkauskoodit_iframe' {$jcsmaxheigth});</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "auto_vari_tuote") {

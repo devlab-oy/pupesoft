@@ -23,6 +23,7 @@ $laskun_summa_eur		= (float) str_replace(",", ".", $xml->EpiDetails->EpiPaymentI
 $laskun_tilausviite 	= utf8_decode($xml->InvoiceDetails->AgreementIdentifier);
 $laskun_asiakkaan_tilausnumero = utf8_decode($xml->InvoiceDetails->OrderIdentifier);
 $kauttalaskutus 		= utf8_decode($xml->DeliveryDetails->TerminalAddressText);
+$laskun_toimitunnus		= $xml->SellerPartyDetails->SellerPupesoftId;
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = trim($xml->DeliveryOrganisationUnitNumber);
@@ -130,7 +131,7 @@ if (count($tuotetiedot) > 0) {
 			if ($tuotetieto->RowIdentifierUrlText != "") {
 				$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
 			}
-			
+
 			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);

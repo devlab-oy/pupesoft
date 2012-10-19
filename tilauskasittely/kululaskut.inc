@@ -573,7 +573,19 @@ if ($silent == "") {
 			$sel3 = "SELECTED";
 		}
 
-		echo "<br><font class='message'>".t("Liitä lasku")." (".t("saapuminen").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("saapuminen")."</th>";
+		echo "<th>".t("ytunnus")."</th>";
+		echo "<th>".t("nimi")."</th>";
+		echo "</tr>";
+		echo "<tr>
+				<td>$laskurow[laskunro]</td>
+				<td>$laskurow[ytunnus]</td>
+				<td>$laskurow[nimi]</td>
+				</tr>";
+		echo "</table><br>";
+
 		echo "<table><tr>";
 		echo "<th>".t("Etsi lasku")."</th>";
 		echo "<th><SELECT name='hakutapa'>";

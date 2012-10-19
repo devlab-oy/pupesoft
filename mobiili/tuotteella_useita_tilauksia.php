@@ -88,9 +88,6 @@ if (isset($submit)) {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
 			break;
-		case 'cancel':
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus=$ostotilaus'>"; exit();
-		   	break;
 		default:
 			echo "Virhe";
 			break;
@@ -118,7 +115,9 @@ if ($tilausten_lukumaara == 1) {
 mysql_data_seek($result, 0);
 
 ### UI ###
-echo "<div class='header'><h1>",t("TUOTTEELLA USEITA TILAUKSIA"), "</h1></div>";
+echo "<div class='header'>
+	<button onclick='window.location.href=\"ostotilaus.php\"' class='button left'><img src='back2.png'></button>
+	<h1>",t("USEITA TILAUKSIA"), "</h1></div>";
 
 echo "<div class='main'>
 <form name='form1' method='post' action=''>

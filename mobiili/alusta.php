@@ -21,11 +21,6 @@ if (isset($submit) and trim($submit) == 'submit' and trim($alusta) == '') {
 
 if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 
-	if ($submit == 'cancel') {
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>";
-		exit;
-	}
-
 	if ($submit == 'submit' and $alusta == $alusta_chk and trim($alusta_tunnus) != '' and trim($liitostunnus) != '') {
 
 
@@ -39,17 +34,28 @@ if (isset($submit) and trim($submit) != '' and $error['alusta'] == '') {
 	}
 
 	if ($submit == 'submit') {
-		$return = etsi_suuntalava_sscc(trim($alusta));
+		$query = "SELECT * FROM suuntalavat WHERE sscc='$alusta' AND yhtio='{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		$valinta = "Valitse";
+		if (mysql_num_rows($result) == 0) {
+			$error['alusta'] = "<font class='error'>".t("Alustaa ei ole olemassa.")."</font>";
+		}
+		else {
+			$return = etsi_suuntalava_sscc(trim($alusta));
 
-		if (count($return) == 0) {
-			$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn. Hae uudestaan.").".</font>";
+			$valinta = "Valitse";
+
+			if (count($return) == 0) {
+				$error['alusta'] = "<font class='error'>".t("Alustaa ei voida vielä ottaa käsittelyyn. Hae uudestaan.").".</font>";
+			}
 		}
 	}
 }
 
-echo "<div class='header'><h1>",t("ALUSTA", $browkieli),"</h1></div>";
+echo "<div class='header'>
+	<button onclick='window.location.href=\"tulouta.php\"' class='button left'><img src='back2.png'></button>
+	<h1>",t("ALUSTA", $browkieli),"</h1>
+</div>";
 
 echo "<div class='main'>
 	<form method='post' action=''>
@@ -69,16 +75,18 @@ echo "<div class='main'>
 
 if (isset($return) and count($return) > 0) {
 
-	echo "<table id='saapumiset'>";
+	echo "<table>";
 
 	foreach ($return as $row) {
 		echo "<tr>";
 		echo "<th nowrap>",t("Saapuminen", $browkieli),"</th>";
 		echo "<td nowrap>{$row['saapuminen_nro']}";
 		echo "</tr><tr>";
-		echo "<th nowrap>",t("Nimi", $browkieli),"<br>",t("Toim.nro", $browkieli),"</th>";
+		echo "<th nowrap>",t("Nimi", $browkieli),"</th>";
 		echo "<td nowrap>{$row['nimi']}<br>";
-		echo "{$row['toimittajanro']}</td>";
+		echo "</tr><tr>";
+		echo "<th nowrap>",t("Toim.nro", $browkieli),"</th>";
+		echo "<td nowrap>{$row['toimittajanro']}</td>";
 		echo "</tr><tr>";
 		echo "<th nowrap>",t("Var / Koh", $browkieli),"</th>";
 		echo "<td nowrap>{$row['varastossa']} / {$row['kohdistettu']}</td>";
@@ -94,8 +102,7 @@ echo "</table>";
 echo "</div>";
 
 echo "<div class='controls'>
-	<button name='submit' value='submit' onclick='submit();'>",t($valinta, $browkieli),"</button>
-	<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
+	<button name='submit' value='submit' class='button' onclick='submit();'>",t($valinta, $browkieli),"</button>
 	</form>
 </div>";
 

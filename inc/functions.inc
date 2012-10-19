@@ -18578,6 +18578,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 
 		$query = "	SELECT tilausrivi.*,
 					suuntalavat.sscc,
+					suuntalavat.kasittelytapa,
 					tuotteen_toimittajat.toim_tuoteno,
 					tilausrivi.varattu + tilausrivi.kpl siskpl,
 					tuote.eankoodi,

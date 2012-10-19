@@ -66,78 +66,82 @@ $query = "  (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.t
 $suuntalavat_res = pupe_query($query);
 
 if (isset($submit)) {
-    switch($submit) {
-        case 'hae':
-            break;
-        case 'ok':
-            if(empty($suuntalava)) {
-                $errors[] = t("Valitse suuntalava.");
-                break;
+    if(empty($suuntalava)) $errors[] = t("Valitse suuntalava");
+
+    # Rivi suuntalavalle
+    if (($submit == 'ok' or $submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') and count($errors) == 0) {
+
+        # Kohdista rivi(t)
+        $query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
+        $result   = pupe_query($query);
+        $laskurow = mysql_fetch_array($result);
+
+        require("../inc/keikan_toiminnot.inc"); # T‰‰ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
+
+        # Tarkistetaan m‰‰r‰ ja splittaillaan jos tarvetta
+        if ($hyllytetty < $tilausrivi['varattu']) {
+            # P‰ivitet‰‰n alkuper‰isen rivin kpl
+            $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
+            $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, false, false);
+
+            kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+        }
+        else if ($hyllytetty > $tilausrivi['varattu']) {
+            $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$tilausrivi['varattu']));
+            $uusi_tilausrivi = kopioi_tilausrivi($tilausrivi['tunnus'], $poikkeukset);
+
+            # Kohdistetaan molemmat rivit
+            kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+            kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+        }
+        else {
+            kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
+        }
+
+        # Laitetaanko lava siirtovalmiiksi
+        if ($submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') {
+            echo "Suuntalava $suuntalava siirtovalmiiksi<br>";
+
+            # Suuntalavan k‰sittelytapa (Suoraan (H)yllyyn)
+            if ($submit == 'suoraan_hyllyyn') {
+                echo "K‰sittelytapa suoraan hyllyyn";
+                $query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
+                $result = pupe_query($query);
             }
 
-            # Kohdista rivi(t)
-            $query    = "SELECT * FROM lasku WHERE tunnus = '{$saapuminen}' AND yhtio = '{$kukarow['yhtio']}'";
-            $result   = pupe_query($query);
-            $laskurow = mysql_fetch_array($result);
+            # Suuntalava siirtovalmiiksi
+            $suuntalavat_ei_kayttoliittymaa = "KYLLA";
+            $tee = 'siirtovalmis';
+            $suuntalavan_tunnus = $suuntalava;
+            require ("../tilauskasittely/suuntalavat.inc");
+        }
 
-            require("../inc/keikan_toiminnot.inc"); # T‰‰ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
-
-            if ($hyllytetty < $tilausrivi['varattu']) {
-                # P‰ivitet‰‰n alkuper‰isen rivin kpl
-                $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
-
-                $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, false, false);
-
-                kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
-            }
-            else if ($hyllytetty >$tilausrivi['varattu']) {
-                $poikkeukset = array("tilausrivi.varattu" => ($hyllytetty-$tilausrivi['varattu']));
-                $uusi_tilausrivi = kopioi_tilausrivi($tilausrivi['tunnus'], $poikkeukset);
-
-                # Kohdistetaan molemmat rivit
-                kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
-                kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
-            }
-            else {
-                kohdista_rivi($laskurow, $tilausrivi['tunnus'], $tilausrivi['otunnus'], $saapuminen, $suuntalava);
-            }
-
-            # Kaikki ok
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$tilausrivi['otunnus']}'>"; exit();
-            break;
-
-        case 'lopeta':
-            $url = array (
-                        'ostotilaus' => $tilausrivi['otunnus'],
-                        'tilausrivi' => $tilausrivi['tunnus'],
-                        'saapuminen' => $alkuperainen_saapuminen
-                    );
-
-            echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."'>"; exit();
-            break;
-        case 'suuntalavalle':
-            if(empty($suuntalava)) {
-                $errors[] = t("Valitse suuntalava.");
-                break;
-            }
-            echo "varmistus";
-            break;
-        case 'hyllytyskierrokselle':
-            if(is_numeric($korkeus)) echo " korkeus ok";
-            break;
-        case 'hyllyyn':
-            if(is_numeric($korkeus)) echo " korkeus ok";
-            break;
-        default:
-            echo "VIRHE";
-            break;
+        # Kaikki ok
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$tilausrivi['otunnus']}'>";
+        exit();
     }
 }
 
-echo "<div class='header'><h1>",t("SUUNTALAVALLE"), "</h1></div>";
+$url = array (
+            'ostotilaus' => $tilausrivi['otunnus'],
+            'tilausrivi' => $tilausrivi['tunnus'],
+            'saapuminen' => $alkuperainen_saapuminen
+        );
+
+if (!is_numeric($hyllytetty)) {
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url)."&virhe'>";
+}
+
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"hyllytys.php?".http_build_query($url)."\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVALLE"), "</h1></div>";
 
 echo "<div class='main'>
 <form method='post' action=''>
+
+<input type='hidden' name='hyllytetty' value='{$hyllytetty}' />
+<input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' />
+
 <table>
     <tr>
         <th><label for='sscc'>",t("Hae suuntalava"),"</label></th>
@@ -145,13 +149,11 @@ echo "<div class='main'>
             <input type='text' id='sscc' name='sscc' value='$hae'/>
         </td>
         <td>
-            <button name='submit' value='hae' onclick='submit();'>",t("Etsi"),"</button>
+            <button name='submit' class='button' value='hae' onclick='submit();'>",t("Etsi"),"</button>
         </td>
     </tr>
 </table>
-</form>
 
-<form method='post' action=''>
 <table>
     <tr>
         <th></th>
@@ -181,27 +183,16 @@ while($row = mysql_fetch_assoc($suuntalavat_res)) {
     $keraysvyohyke = mysql_fetch_assoc(pupe_query($keraysvyohyke_query));
 
     #Haetaan suuntalavan tilausrivit
-    // $query =    "   SELECT tilausrivi.*
-    //                 FROM tilausrivi
-    //                 JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = '') AND suuntalavat.tunnus = tilausrivi.suuntalava and suuntalavat.tunnus = {$row['tunnus']}
-    //                 JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus)
-    //                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-    //                 LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-    //                 WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-    //                 AND tilausrivi.tyyppi = 'O'
-    //                 AND tilausrivi.kpl = 0
-    //                 AND tilausrivi.suuntalava > 0;";
-    // $rivit = mysql_num_rows(pupe_query($query));
+    $query = "SELECT tunnus FROM tilausrivi WHERE suuntalava='{$row['tunnus']}' AND yhtio='{$yhtiorow['yhtio']}'";
+    $rivit = mysql_num_rows(pupe_query($query));
 
     echo "<tr>
         <td><input class='radio' id='suuntalava' type='radio' name='suuntalava' value='{$row['tunnus']}' />
         <td>{$row['sscc']}</td>
         <td>{$keraysvyohyke['nimitys']}</td>
-        <td></td>
+        <td>{$rivit}</td>
         <td>{$tyyppi['pakkaus']}</td>
         <td>{$row['tila']}</td>
-        <td><input type='hidden' name='hyllytetty' value='{$hyllytetty}' /></td>
-        <td><input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' /></td>
     </tr>";
 }
 
@@ -209,9 +200,9 @@ if (!$loytyiko) $errors[] = t("Suuntalavaa ei lˆytynyt");
 
 echo "</table></div>";
 echo "<div class='controls'>
-    <button name='submit' id='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
-    <button name='submit' id='submit' value='lopeta' onclick='submit();'>",t("Lopeta"),"</button>
-    <button name='submit' id='submit' value='suuntalavalle' onclick='submit();'>",t("OK Valmis"),"</button>
+    <button name='submit' class='button' id='submit' value='ok' onclick='submit();'>",t("OK"),"</button>
+    <button name='submit' class='button right' id='submit' value='siirtovalmis' onclick='submit();'>",t("Siirtovalmis (normaali)"),"</button>
+    <button name='submit' class='button right' id='submit' value='suoraan_hyllyyn' onclick='submit();'>",t("Siirtovalmis (suoraan hyllyyn)"),"</button>
 </div>
 </form>
 ";

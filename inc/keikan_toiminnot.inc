@@ -272,7 +272,7 @@
 
 			$uusiotunnus = $otunnus_fetch_row['uusiotunnus'];
 
-			if ($suuntalava != 0) {
+			if ($suuntalava != 0 and $uusiotunnus != 0) {
 				$query = "	SELECT saapuminen
 							FROM suuntalavat_saapuminen
 							WHERE yhtio = '{$kukarow['yhtio']}'

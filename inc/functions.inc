@@ -19089,7 +19089,7 @@ if (!function_exists('tee_hyllyalue_input')) {
 		$maxlength = $yhtiorow['varastontunniste'] != "" ? (5 - $yhtiorow['varastontunniste']) : 5;
 		$size = $maxlength + 1;
 
-		$hyllyalue_value = substr($hyllyalue_value, $yhtiorow['varastontunniste']);
+		$hyllyalue_value = substr("{$hyllyalue_value}", $yhtiorow['varastontunniste']);
 
 		$input_html .= "	<input type='text' class='hyllyalue' id='{$hyllyalue_key}' size='{$size}' maxlength='{$maxlength}' value = '{$hyllyalue_value}' />
 							<input type='hidden' id='{$hyllyalue_key}_hidden' name='{$hyllyalue_key}' value='{$varastolisa}{$hyllyalue_value}' />";

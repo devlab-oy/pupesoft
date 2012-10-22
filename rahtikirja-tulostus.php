@@ -575,7 +575,7 @@
 				}
 
 				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
-				
+
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
 				// tulostetaan toimitustavan määrittelemä rahtikirja
@@ -715,10 +715,10 @@
 					}
 				}
 			}
-			if (!isset($nayta_pdf)) echo "<br>";
+			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
-		
+
 		if ($toitarow['erittely'] == 't') {
 			$kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus ,0 ,-2);//poistetaan pilkku ja välilyönti viimosen perästä
 			$otunnukset_temp = $otunnukset;

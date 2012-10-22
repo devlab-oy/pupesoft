@@ -541,9 +541,16 @@
 
 	if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
-		$popvm_nyt = date("Y-m-d H:i:s");
-
 		if (mysql_num_rows($result) > 0) {
+
+			// uniikkia tunnusta varten popvm: aineistokopiolle alkuper‰inen ja uudelle aineistolle se joka kirjoitetaan kantaan
+			if ($tee == "KIRJOITAKOPIO") {
+				$popvm_row = mysql_fetch_assoc($result);
+				$popvm_nyt = $popvm_row["popvm"];
+			}
+			else {
+				$popvm_nyt = date("Y-m-d H:i:s");
+			}
 
 			// P‰‰tet‰‰m maksuaineston tiedostonimi
 			$kaunisnimi = "SEPA-$kukarow[yhtio]-".date("d.m.y.H.i.s").".xml";

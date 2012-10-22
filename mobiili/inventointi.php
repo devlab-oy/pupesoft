@@ -23,17 +23,20 @@ $errors = array();
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 	global $kukarow;
 
+	$hylly = explode('-', $tuotepaikka);
+
 	# Hakuehdot
 	if ($viivakoodi != '')	$params[] = "tuote.eankoodi = '{$viivakoodi}'";
 	if ($tuoteno != '')		$params[] = "tuote.tuoteno = '{$tuoteno}'";
-	if ($tuotepaikka != '')	$params[] = "concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
-										tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) like '{$tuotepaikka}'";
+	if ($tuotepaikka != '')	$params[] = "tuotepaikat.hyllyalue='{$hylly[0]}'
+										AND tuotepaikat.hyllynro='{$hylly[1]}'
+										AND tuotepaikat.hyllyvali='{$hylly[2]}'
+										AND tuotepaikat.hyllytaso='{$hylly[3]}'";
 	$haku_ehto = implode($params, " AND ");
 
 	$osumat = array();
 	if (!empty($haku_ehto)) {
 		$query = "	SELECT
-					tuote.nimitys,
 					tuote.tuoteno,
 					tuotepaikat.inventointilista,
 					tuotepaikat.inventointilista_aika,
@@ -44,7 +47,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 					concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
 								tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
 					FROM tuotepaikat
-					JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+					JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
 					WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
 					AND $haku_ehto
 					LIMIT 200";
@@ -102,14 +105,12 @@ if ($tee == 'haku') {
 		# Suoraan varmistuskoodiin
 		$url = http_build_query(array('tee' => 'laske',
 								'tuotepaikka' => $tuotteet[0]['tuotepaikka'],
-								'tuoteno' => $tuotteet[0]['tuoteno'],
-								'tuotepaikalla' => $haku_tuotepaikalla));
+								'tuoteno' => $tuotteet[0]['tuoteno']));
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?{$url}'>";
 		exit();
 	}
 	# Löydetyt osumat
 	if (isset($tuotteet) and count($tuotteet) > 0) {
-		# Jos haettu pelkällä tuotepaikalla, muistetaan palata hakutuloksiin
 		include('views/inventointi/hakutulokset.php');
 	}
 	# Haku formi
@@ -271,7 +272,14 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 
 	}
 	else {
-		if (isset($varmistuskoodi)) $errors[] = "Virheellinen varmistuskoodi";
+		# Tarkistetaan että varaston_hyllypaikka on perustettu
+		$hylly = explode('-', $tuotepaikka);
+		if (isset($varmistuskoodi) and !tarkista_varaston_hyllypaikka($hylly[0], $hylly[1], $hylly[2], $hylly[3])) {
+			$errors[] = "Tuotteen tietoja ei ole määritelty varaston hyllypaikoissa!";
+		}
+		# Tarkistetaan varmistuskoodi
+		elseif (isset($varmistuskoodi)) $errors[] = "Virheellinen varmistuskoodi";
+
 		$title = t("Varmistuskoodi");
 		include('views/inventointi/varmistuskoodi.php');
 	}
@@ -361,12 +369,13 @@ if ($tee == 'inventoidaan') {
 		if($lista != 0) {
 			$paluu_url = http_build_query(array('tee' => 'laske', 'lista' => $lista, 'reservipaikka' => $reservipaikka));
 		}
+		# Jos inventoitu tuotepaikalla, palataan takaisin hakuun kyseisellä tuotepaikalla
 		elseif($tuotepaikalla=='true') {
 			$paluu_url = http_build_query(array('tee' => 'haku', 'viivakoodi' => '', 'tuoteno' => '', 'tuotepaikka' => $tuotepaikka));
 		}
 		# Palataan alkuun
 		else {
-			$paluu_url ='';
+			$paluu_url =http_build_query(array('tee' => 'haku'));
 		}
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=inventointi.php?".$paluu_url."'>";
 	}
@@ -384,3 +393,6 @@ if (isset($errors)) {
 	}
 	echo "</span>";
 }
+
+require "inc/footer.inc";
+

@@ -8,11 +8,11 @@
 		<table>
 			<tr>
 				<th>Koodi</th>
-				<td><input type='text' name='varmistuskoodi' size='10' autofocus></td>
+				<td><input type='text' name='varmistuskoodi' size='4' autofocus></td>
 			</tr>
 			<tr>
 				<th>Osoite</th>
-				<td><input type='text' name='tuotepaikka' value='<?php echo $tuote['tuotepaikka'] ?>' size='10' readonly></td>
+				<td><input type='text' name='tuotepaikka' value='<?php echo $tuote['tuotepaikka'] ?>' size='14' readonly></td>
 			</tr>
 		</table>
 	</div>

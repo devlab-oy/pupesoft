@@ -678,8 +678,11 @@
 		$toimittajalisa = "";
 		$tilausrivilisa = "";
 
-		if ($jt_huomioi_pvm != "") {
+		if ($jt_huomioi_pvm != "" and $yhtiorow['saldo_kasittely'] != '') {
 			$tilausrivilisa .= " and lasku.kerayspvm <= now() and tilausrivi.kerayspvm <= now() ";
+		}
+		else if ($jt_huomioi_pvm != "" and $yhtiorow['saldo_kasittely'] == '') {
+			$tilausrivilisa .= " and lasku.kerayspvm <= now() ";
 		}
 
 		if ($toimittaja != '') {

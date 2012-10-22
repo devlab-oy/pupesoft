@@ -207,11 +207,17 @@
 	$aikatsk_p = (int) $aikatsk_p;
 	$aikatsk_v = (int) $aikatsk_v;
 
+	$kerayspvm_temp = $kerayspvm;
+
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
 		if ($toim == "YLLAPITO") {
 			$kerayspvm = "0000-00-00"; // Ylläpitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppupäivää ja nolla on default
 		}
+	}
+
+	if($_REQUEST['var'] == 'J' and $_REQUEST['toim'] == 'RIVISYOTTO') {
+		$kerayspvm = $kerayspvm_temp;
 	}
 
 	// Jos yhtiön saldokäsittely on ajasta riippuvainen
@@ -1884,7 +1890,6 @@
 			if ($rivityyppi != 'O') {
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
-					case 'I' : // Jälkitoimitus muiden mukana
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'T' : // Tilataan toimittajalta

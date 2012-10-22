@@ -3981,13 +3981,11 @@ if ($tee == '') {
 
 			//jälkitoimitus_heti 2 = jälkitoimitus muidenmukana
             if ($jalkitoimitus_heti == '2') {
-				$kerayspvm = date('Y-m-d');
-				$var = 'I';
+				$kerayspvm = date('Y-m-d', strtotime('now + 1 month'));
 			}
 			//jälkitoimitus_heti = jälkitoimitus heti
 			elseif ($jalkitoimitus_heti == '1') {
-				$kerayspvm = date('Y-m-d');
-				$var = 'J';
+				$kerayspvm = '0000-00-00';
 			}
                         
 			if ($tuoteno != '' and $kpl != 0) {
@@ -6061,6 +6059,43 @@ if ($tee == '') {
 								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
 								<input type='Submit' value='".t("Hyväksy")."'>
 								</form> ";
+					}
+
+					if($row['var'] == 'J' and $row['kerayspvm'] != '0000-00-00') {
+						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+									<input type='hidden' name='toim' 			value = '$toim'>
+									<input type='hidden' name='lopetus' 		value = '$lopetus'>
+									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+									<input type='hidden' name='projektilla' 	value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+									<input type='hidden' name='mista' 			value = '$mista'>
+									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tila' 			value = 'MUUTA'>
+									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+									<input type='hidden' name='var' 			value = 'J'>
+                                    <input type='hidden' name='jalkitoimitus_heti'          value = '1'>
+									<input type='Submit' value='" . t("Jälkitoim") . "'>
+									</form> ";
+					}
+					else if ($row['var'] == 'J' and $row['kerayspvm'] == '0000-00-00'){
+						echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
+									<input type='hidden' name='toim' 			value = '$toim'>
+									<input type='hidden' name='lopetus' 		value = '$lopetus'>
+									<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+									<input type='hidden' name='projektilla' 	value = '$projektilla'>
+									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+									<input type='hidden' name='mista' 			value = '$mista'>
+									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tila' 			value = 'MUUTA'>
+									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
+									<input type='hidden' name='var' 			value = 'J'>
+                                    <input type='hidden' name='jalkitoimitus_heti'          value = '2'>
+									<input type='Submit' value='" . t("Jälkitoim, muiden mukana") . "'>
+									</form> ";
 					}
 				}
 				elseif ($row["laskutettuaika"] != '0000-00-00') {

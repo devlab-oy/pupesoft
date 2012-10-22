@@ -167,10 +167,11 @@
 		$tilausok++;
 	}
 
-	if (!in_array($row["var"], array('','P','J','H','S','T','U','V','A','B','R'))) {
+	if (!in_array($row["var"], array('','P','J','I','H','S','T','U','V','A','B','R'))) {
 		// Tässä varrien selitykset
 		// P - Puute
 		// J - Jt
+		// I - Jt muiden mukana
 		// H - Väkisinhyväksytty
 		// T - Tilataan joltain toimittajalta omaan varastoon
 		// U - Tilataan joltain toimittajalta suoraan asiakkaalle

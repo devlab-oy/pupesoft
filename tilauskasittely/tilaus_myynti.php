@@ -3969,12 +3969,16 @@ if ($tee == '') {
 				//Tuotetta ei löydy, aravataan muutamia muuttujia
 				$trow["alv"] = $laskurow["alv"];
 			}
-                        
-            if ($jalkitoimutus_heti == '2') {
-				$kerayspvm = date('Y-m-d' , strtotime('now + 1 month'));
+
+			//jälkitoimitus_heti 2 = jälkitoimitus muidenmukana
+            if ($jalkitoimitus_heti == '2') {
+				$kerayspvm = date('Y-m-d');
+				$var = 'I';
 			}
-			elseif ($jalkitoimutus_heti == '1') {
-				$kerayspvm = '';
+			//jälkitoimitus_heti = jälkitoimitus heti
+			elseif ($jalkitoimitus_heti == '1') {
+				$kerayspvm = date('Y-m-d');
+				$var = 'J';
 			}
                         
 			if ($tuoteno != '' and $kpl != 0) {
@@ -5992,7 +5996,7 @@ if ($tee == '') {
 									<input type='hidden' name='tila' 			value = 'MUUTA'>
 									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 									<input type='hidden' name='var' 			value = 'J'>
-                                    <input type='hidden' name='jalkitoimutus_heti'          value = '1'>
+                                    <input type='hidden' name='jalkitoimitus_heti'          value = '1'>
 									<input type='Submit' value='" . t("Jälkitoim") . "'>
 									</form> ";
 
@@ -6010,7 +6014,7 @@ if ($tee == '') {
 									<input type='hidden' name='tila' 			value = 'MUUTA'>
 									<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>
 									<input type='hidden' name='var' 			value = 'J'>
-                                    <input type='hidden' name='jalkitoimutus_heti'          value = '2'>
+                                    <input type='hidden' name='jalkitoimitus_heti'          value = '2'>
 									<input type='Submit' value='" . t("Jälkitoim, muiden mukana") . "'>
 									</form> ";
 						}

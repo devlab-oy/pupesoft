@@ -1855,6 +1855,7 @@
 			if ($rivityyppi != 'O') {
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
+					case 'I' : // Jälkitoimitus muiden mukana
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'T' : // Tilataan toimittajalta

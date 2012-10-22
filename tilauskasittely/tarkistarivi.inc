@@ -320,8 +320,34 @@
 
 	$paikat	= "";
 
-	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
-		$varaosavirhe .= t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]<br>";
+	if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
+
+		$mimyhuom = "HUOM: Rivin määrä on pyöristetty";
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " minimierään";
+		}
+
+		if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+			if ($trow["minimi_era"] > 0) {
+				$mimyhuom .= " tai";
+			}
+
+			$mimyhuom .= " täyteen myyntierään";
+		}
+
+		// Käännetään teksti
+		$mimyhuom = t($mimyhuom)."!";
+
+		if ($trow['myynti_era'] > 0) {
+			$mimyhuom .= " ".t("Myyntierä on").": $trow[myynti_era]";
+		}
+
+		if ($trow["minimi_era"] > 0) {
+			$mimyhuom .= " ".t("Minimierä on").": $trow[minimi_era]";
+		}
+
+		$varaosavirhe .= $mimyhuom."<br>";
 	}
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
@@ -337,7 +363,7 @@
 		$varow = mysql_fetch_assoc($varesult);
 
 		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and !in_array($row["var2"], array("OK", "PK"))) {
-			$varaosavirhe .= "HUOM: Tuote sijaitsee erikoisvarastossa!<br>";
+			$varaosavirhe .= t("HUOM: Tuote sijaitsee erikoisvarastossa")."!<br>";
 			$riviok++;
 			$tilausok++;
 			$saako_hyvaksya++;

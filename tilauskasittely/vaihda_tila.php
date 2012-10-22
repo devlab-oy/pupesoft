@@ -24,6 +24,7 @@
 
 			// lock tables
 			$query = "	LOCK TABLES lasku WRITE,
+						sanakirja WRITE,
 						tilausrivi WRITE,
 						rahtikirjat WRITE,
 						tuote WRITE,

@@ -2,8 +2,12 @@
 
 	if (!isset($link)) require "inc/parametrit.inc";
 
+	if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+		require ("inc/tilioinnin_toiminnot.inc");
+	}
+	
 	enable_ajax();
-
+	
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -905,11 +909,11 @@
 			}
 
 			$maara = (!isset($maara) or $maara < (count($tiliointirivit) + 1 - $skipattuja)) ? count($tiliointirivit) + 1 - $skipattuja : $maara;
+		}
 
-			if (!in_array($maara, $tilmaarat)) {
-				$tilmaarat[] = $maara;
-				sort($tilmaarat);
-			}
+		if (!in_array($maara, $tilmaarat)) {
+			$tilmaarat[] = $maara;
+			sort($tilmaarat);
 		}
 
 		$sel = array();
@@ -1115,7 +1119,7 @@
 						$tilinimi = $vrow['nimi'];
 					}
 				}
-				echo "<td width='200' valign='top'>".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT")." {$tilinimi}</td>\n";
+				echo "<td width='200' valign='top'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." {$tilinimi}</td>\n";
 			}
 			else {
 				echo "<td width='200' valign='top'>{$iulos[$i]}</td>\n";
@@ -1289,4 +1293,3 @@
 	}
 
 	require "inc/footer.inc";
-?>

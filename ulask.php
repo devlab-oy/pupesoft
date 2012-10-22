@@ -4,6 +4,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {
 	require "inc/parametrit.inc";
 }
 
+if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+	require ("inc/tilioinnin_toiminnot.inc");
+}
+
 enable_ajax();
 
 if ($livesearch_tee == "TILIHAKU") {
@@ -1620,7 +1624,7 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 		if (strlen($ivero[$i]) == 0) {
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-				$ivero[$i] = alv_oletus();
+				$ivero[$i] = alv_oletus($oltil);
 			}
 			else {
 				$ivero[$i] = 0;
@@ -1665,7 +1669,7 @@ if ($tee == 'P' or $tee == 'E') {
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
-				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]");
 			}
 			else {
 				echo "$iulos[$i]";
@@ -1737,14 +1741,15 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 
 			// Tehdään projektipopup
-			if (mysql_num_rows($vresult) > 0) {
-				$query = "	SELECT tunnus, nimi, koodi
+			$query = "	SELECT tunnus, nimi, koodi
 							FROM kustannuspaikka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
 							ORDER BY koodi+0, koodi, nimi";
-				$vresult = pupe_query($query);
+			$vresult = pupe_query($query);
+				
+			if (mysql_num_rows($vresult) > 0) {
 
 				echo "<select name='iprojekti[$i]'>";
 				echo "<option value =' '>".t("Ei projektia")."";

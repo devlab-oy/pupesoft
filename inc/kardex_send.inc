@@ -60,7 +60,7 @@
 
 			$kardex_row['kpl'] = str_replace(".", ",", $kardex_row['kpl']);
 
-			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($tilriv_tiedot_row["hyllyalue"], $yhtiorow['varastontunniste']) : $tilriv_tiedot_row["hyllyalue"];
+			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$tilriv_tiedot_row["hyllyalue"]}", $yhtiorow['varastontunniste']) : $tilriv_tiedot_row["hyllyalue"];
 
 			$hyllypaikka = "{$hyllyalue_value}-{$tilriv_tiedot_row['hyllypaikka']}";
 

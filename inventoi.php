@@ -333,31 +333,7 @@
 									$oletus = "X";
 								}
 
-								$query = "INSERT into tuotepaikat set
-											yhtio     = '$kukarow[yhtio]',
-											tuoteno	  = '$tuoteno',
-											hyllyalue = '$hyllyalue',
-											hyllynro  = '$hyllynro',
-											hyllyvali = '$hyllyvali',
-											hyllytaso = '$hyllytaso',
-											oletus    = '$oletus'";
-								$result = pupe_query($query);
-
-								$query = "	INSERT into tapahtuma set
-											yhtio 		= '$kukarow[yhtio]',
-											tuoteno 	= '$tuoteno',
-											kpl 		= 0,
-											kplhinta	= 0,
-											hinta 		= 0,
-											laji 		= 'uusipaikka',
-											hyllyalue 	= '$hyllyalue',
-											hyllynro 	= '$hyllynro',
-											hyllyvali 	= '$hyllyvali',
-											hyllytaso 	= '$hyllytaso',
-											selite 		= '".t("Inventoidessa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-								$result = pupe_query($query);
+								lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus);
 
 								// haetaan perustettu resultti (sama query ku ylh‰‰ll‰)
 								$query = "	SELECT *

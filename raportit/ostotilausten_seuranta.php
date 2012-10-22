@@ -194,12 +194,11 @@
 
 					// keikka
 					$query = "	SELECT distinct lasku.laskunro, lasku.rahti_etu, lasku.tunnus, lasku.mapvm
-								FROM lasku
-								JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.otunnus = '$tilrivi_row[ltunnus]')
-								WHERE lasku.yhtio = '$kukarow[yhtio]' and
-								lasku.tila = 'K' and
-								lasku.vanhatunnus = 0 and
-								lasku.liitostunnus = '$toimittajarow[tunnus]'";
+								FROM tilausrivi
+								JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus AND lasku.tila = 'K' AND lasku.vanhatunnus = 0 AND lasku.liitostunnus = '$toimittajarow[tunnus]')
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.tyyppi = 'O'
+								and tilausrivi.otunnus = '$tilrivi_row[ltunnus]'";
 					$result = pupe_query($query);
 
 					$i = 1;

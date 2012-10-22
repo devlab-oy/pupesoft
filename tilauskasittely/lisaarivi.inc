@@ -94,7 +94,7 @@
 	}
 
 	if (!function_exists("tuoteperhe_reku2")) {
-		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug) {
+		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array) {
 			global $yhtiorow, $kukarow;
 
 			$perhearray = array();
@@ -122,6 +122,7 @@
 
 					$kaikki_array[]		= $perherow["tuoteno"]; // lisätään tuoteno arrayseen
 					$kerroin_array[]	= $tuoteno."#!¡!#".$perherow["kerroin"];
+					$ohita_kerays_array[] = $perherow['ohita_kerays'];
 
 					$mikaisa = $perherow["tuoteno"];
 					$tmp_kaikki_array = $kaikki_array;
@@ -149,7 +150,7 @@
 					$perhearray[] = $perherow;
 				}
 			}
-			return array($perhearray, $isat_array, $kaikki_array, $kerroin_array);
+			return array($perhearray, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array);
 		}
 	}
 
@@ -278,6 +279,7 @@
 	$myy_era 		= array();
 	$myy_tyyppi		= array();
 	$myy_lapsi_ein 	= array();
+	$myy_ohita_kerays = array();
 	$lisatyt_rivit1 = array();
 	$lisatyt_rivit2 = array();
 	$korkieltokommi = array();
@@ -324,7 +326,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET')) {
+	if ($kpl > 0 and (($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') or $trow['minimi_era'] > 0) and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET' or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))) {
 		$org_kpl = $kpl;
 
 		if ($kpl < $trow['minimi_era']) {
@@ -332,17 +334,18 @@
 		}
 
 		if ($yhtiorow['myyntiera_pyoristys'] == 'K') {
-			if ($kpl < $trow['myynti_era']) {
+			if ($kpl <= $trow['myynti_era']) {
 				$kpl = $trow['myynti_era'];
 			}
 			else {
-				(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0,'','');
-				(float) $jakojaannos = fmod($kpl,$trow['myynti_era']);
+				$kokonaisluku = round($kpl / $trow['myynti_era']);
 
 				$test = $kokonaisluku * $trow['myynti_era'];
+
 				if ($kpl > $test) {
 					$test = ($kokonaisluku + 1) * $trow['myynti_era'];
 				}
+
 				$kpl = (float) $test;
 			}
 		}
@@ -468,9 +471,10 @@
 		$var = "Y";
 	}
 
-	//Varastosiirroissa ei siirretä lähdevarastosta lähdevarastoon!!!!
-	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0 and $yhtiorow['kerayserat'] == '') {
-		$notfromvarasto = " and varastopaikat.tunnus != $laskurow[clearing] ";
+	// Jos varastosiirto tehdään saman varaston sisällä, niin siiretään aina oletupaikalle
+	// Eli otetaan tuote joltain muulta paikalta kuin oletuspaikalta
+	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] == $laskurow["varasto"]) {
+		$notfromvarasto = " and tuotepaikat.oletus = '' ";
 	}
 	else {
 		$notfromvarasto = "";
@@ -478,7 +482,7 @@
 
 	// Jos skripti (kululaskut.inc) päässää tilausrivilinkin, niin laitetaan se mukaan kyselyyn
 	if ($tilausrivilinkki > 0) {
-		$tlisatied_lisa = " , tilausrivilinkki = '$tilausrivilinkki' ";
+		$tlisatied_lisa = " , tilausrivilinkki = '".mysql_real_escape_string($tilausrivilinkki)."' ";
 	}
 
 	if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
@@ -756,10 +760,16 @@
 						}
 					}
 
-					if ($zrow['varasto'] == $kukarow['oletus_varasto']) {
+					if ($zrow['varasto'] == $kukarow['oletus_varasto'] and $zrow['oletus'] != '') {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 1
+						$zrow['oletus'] = 3;
+					}
+					elseif ($zrow['varasto'] == $kukarow['oletus_varasto']) {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 2
 						$zrow['oletus'] = 2;
 					}
 					elseif ($zrow['oletus'] != '') {
+						// Käyttäjän oletusvarasto ja oletuspaikka, prio 1 jos käyttäjälle ei oo oletusvarastoa, muuten prio 3
 						$zrow['oletus'] = 1;
 					}
 
@@ -815,15 +825,14 @@
 						- Jos ei niin splitataan.
 						*/
 
-						$chk_yksi_paikka = false;
+						$chk_yksi_paikka = FALSE;
 
 						// Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
 						foreach ($arr as $indx => $chk_row) {
-
 							if ($chk_row['myytavissa'] >= $kpl) {
 								unset($arr[$indx]);
 								array_unshift($arr, $chk_row);
-								$chk_yksi_paikka = true;
+								$chk_yksi_paikka = TRUE;
 								break;
 							}
 						}
@@ -1174,9 +1183,10 @@
 							$kaikki_array 	= array($tuoteno);
 							$kerroin_array 	= array($tuoteno."#!¡!#1");
 							$perhearray 	= array();
+							$ohita_kerays_array = array();
 
 							for ($isa = 0; $isa < $riikoko; $isa++) {
-								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
+								list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
 								$perhearray	= array_merge($perhearray, $perherow);
 
 								if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
@@ -1196,6 +1206,7 @@
 										$myy_hintakerr[$j] = $perherow["hintakerroin"];
 										$myy_alekerroi[$j] = $perherow["alekerroin"];
 										$myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
+										$myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
 										// jos ei olla vielä toimitettu kaikkea, niin lisätään tilausrivi
 										if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
@@ -1309,6 +1320,12 @@
 								$tilattu = $myy_kpl[$indeksi];
 								$varattu = $myy_kpl[$indeksi];
 
+								if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+									if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on")) === FALSE) {
+										$kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]";
+									}
+								}
+
 								// Jos hinta ja alekertoimet on setattu
 								if (isset($myy_hintakerr[$indeksi])) {
 									if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1334,7 +1351,7 @@
 									}
 								}
 
-								//Jos ei varata saldoa niin ei varata saldoa
+								// Jos ei varata saldoa niin ei varata saldoa
 								if ($varataan_saldoa == "EI" and $rivityyppi == 'G') {
 									$varattu = 0;
 								}
@@ -1450,14 +1467,17 @@
 									$myy_lapsi_ein[$indeksi] = "";
 								}
 
+								$tlisatied_lisa2 = "";
+
 								if ($toim == "YLLAPITO") {
-									$sopimuslisays = ", sopimuksen_lisatieto1 = '$sopimuksen_lisatieto1', sopimuksen_lisatieto2 = '$sopimuksen_lisatieto2'";
-								}
-								else {
-									$sopimuslisays = "";
+									$tlisatied_lisa2 .= ", sopimuksen_lisatieto1 = '".mysql_real_escape_string($sopimuksen_lisatieto1)."', sopimuksen_lisatieto2 = '".mysql_real_escape_string($sopimuksen_lisatieto2)."'";
 								}
 
-								$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+								$tlisatied_lisa2 .= in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
+								if ($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "") {
+									$tlisatied_lisa2 .= ", kohde_hyllyalue='".mysql_real_escape_string($kohde_alue)."' , kohde_hyllynro='".mysql_real_escape_string($kohde_nro)."' , kohde_hyllyvali='".mysql_real_escape_string($kohde_vali)."' , kohde_hyllytaso='".mysql_real_escape_string($kohde_taso)."'";
+								}
 
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_assoc($lisatied_res);
@@ -1468,10 +1488,10 @@
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
-												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
-												{$omalle_tilaukselle_lisa}
-												$sopimuslisays
-												$tlisatied_lisa
+												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
+												ohita_kerays = '{$myy_ohita_kerays[$indeksi]}'
+												{$tlisatied_lisa}
+												{$tlisatied_lisa2}
 												WHERE yhtio			 = '$kukarow[yhtio]'
 												and tilausrivitunnus = '$lisatty_tun'";
 									$result = pupe_query($query);
@@ -1485,19 +1505,19 @@
 									}
 
 									$query = "	INSERT INTO tilausrivin_lisatiedot
-												SET yhtio			= '$kukarow[yhtio]',
-												positio 			= '$trivtyrow[selite]',
-												toimittajan_tunnus	= '$toimittajan_tunnus',
-												ei_nayteta 			= '$myy_lapsi_ein[$indeksi]',
-												tilausrivitunnus	= '$lisatty_tun',
-												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
-												vanha_otunnus		= '$kukarow[kesken]',
-												jarjestys			= '$jarjestys',
-												luontiaika			= now(),
-												laatija 			= '$kukarow[kuka]'
-												{$omalle_tilaukselle_lisa}
-												$sopimuslisays
-												$tlisatied_lisa";
+												SET yhtio				= '$kukarow[yhtio]',
+												positio 				= '$trivtyrow[selite]',
+												toimittajan_tunnus		= '$toimittajan_tunnus',
+												ei_nayteta 				= '$myy_lapsi_ein[$indeksi]',
+												tilausrivitunnus		= '$lisatty_tun',
+												erikoistoimitus_myynti 	= '$myy_erikoistoimitus[$indeksi]',
+												ohita_kerays			= '{$myy_ohita_kerays[$indeksi]}',
+												vanha_otunnus			= '$kukarow[kesken]',
+												jarjestys				= '$jarjestys',
+												luontiaika				= now(),
+												laatija 				= '$kukarow[kuka]'
+												{$tlisatied_lisa}
+												{$tlisatied_lisa2}";
 
 									if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
 										$query .= " , osto_vai_hyvitys='O' ";
@@ -1744,9 +1764,10 @@
 			$kaikki_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
 			$kerroin_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
 			$perhearray 	= array();
+			$ohita_kerays_array = array();
 
 			for ($isa=0; $isa < $riikoko; $isa++) {
-				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
+				list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
 				$perhearray	= array_merge($perhearray, $perherow);
 
 				// Ollaanko rekursiivisia vai ei
@@ -2184,6 +2205,12 @@
 				}
 			}
 
+			if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
+				if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on")) === FALSE) {
+					$kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]";
+				}
+			}
+
 			// jos meillä on vanha laadittuaikaa, niin käytetää sitä
 			if ($rivilaadittu != "" and $rivitunnus != 0) {
 				$vanharivilaadittu = "'$rivilaadittu'";
@@ -2307,7 +2334,17 @@
 						and tilausrivitunnus = '$lisatty_tun'";
 			$lisatied_res = pupe_query($query);
 
-			$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+			$tlisatied_lisa2 = "";
+
+			if ($toim == "YLLAPITO") {
+				$tlisatied_lisa2 .= ", sopimuksen_lisatieto1 = '$sopimuksen_lisatieto1', sopimuksen_lisatieto2 = '$sopimuksen_lisatieto2'";
+			}
+
+			$tlisatied_lisa2 .= in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
+			if ($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "") {
+				$tlisatied_lisa2 .= ", kohde_hyllyalue='$kohde_alue' , kohde_hyllynro='$kohde_nro' , kohde_hyllyvali='$kohde_vali' , kohde_hyllytaso='$kohde_taso'";
+			}
 
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_assoc($lisatied_res);
@@ -2318,8 +2355,8 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]'
-							{$omalle_tilaukselle_lisa}
-							$tlisatied_lisa
+							{$tlisatied_lisa}
+							{$tlisatied_lisa2}
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$lisatty_tun'";
 				$result = pupe_query($query);
@@ -2341,8 +2378,8 @@
 							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
-							{$omalle_tilaukselle_lisa}
-							$tlisatied_lisa";
+							{$tlisatied_lisa}
+							{$tlisatied_lisa2}";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
 					$query .= " , osto_vai_hyvitys='O' ";

@@ -1392,7 +1392,7 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'O' AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.uusiotunnus = 0 {$tilaajanrivinrolisa} {$tuotenolisa} {$kpllisa})
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.status != 'P')
 						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
-						AND lasku.tila 		   in ('O','K')
+						AND ((lasku.tila = 'O' AND lasku.alatila = 'A') OR lasku.tila = 'K')
 						AND lasku.liitostunnus 	= '{$toimirow['tunnus']}'
 						{$tilausnrolisa}";
 

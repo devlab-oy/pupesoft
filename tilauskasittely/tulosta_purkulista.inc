@@ -354,7 +354,7 @@
 			$yksikko = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 			$varattu = ($yksikko != "") ? $row["varattu"]." ".$yksikko : $row["varattu"];
 
-			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($row["hyllyalue"], $yhtiorow['varastontunniste']) : $row["hyllyalue"];
+			$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$row["hyllyalue"]}", $yhtiorow['varastontunniste']) : $row["hyllyalue"];
 
 			// RIVI 1
 			$out .= sprintf('%-46.46s',	$row["tuoteno"]." ".$row["nimitys"]);
@@ -527,7 +527,7 @@
 
 			if ($mista == "vastaanota") {
 
-				$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($row["trhyllyalue"], $yhtiorow['varastontunniste']) : $row["trhyllyalue"];
+				$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$row["trhyllyalue"]}", $yhtiorow['varastontunniste']) : $row["trhyllyalue"];
 
 				$pdf->draw_text(315, $kala, $hyllyalue_value." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
 
@@ -591,7 +591,7 @@
 
 					$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($row["hyllyalue"], $yhtiorow['varastontunniste']) : $row["hyllyalue"];
+					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$row["hyllyalue"]}", $yhtiorow['varastontunniste']) : $row["hyllyalue"];
 
 					$pdf->draw_text(475, $kala, $hyllyalue_value." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
@@ -600,13 +600,13 @@
 			else {
 
 				if ($yhtiorow['suuntalavat'] == 'S') {
-					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($olesaldorow["hyllyalue"], $yhtiorow['varastontunniste']) : $olesaldorow["hyllyalue"];
+					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$olesaldorow["hyllyalue"]}", $yhtiorow['varastontunniste']) : $olesaldorow["hyllyalue"];
 
 					$pdf->draw_text(440, $kala, $hyllyalue_value." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}
 				else {
 
-					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr($row["hyllyalue"], $yhtiorow['varastontunniste']) : $row["hyllyalue"];
+					$hyllyalue_value = $yhtiorow['varastontunniste'] != "" ? substr("{$row["hyllyalue"]}", $yhtiorow['varastontunniste']) : $row["hyllyalue"];
 
 					$pdf->draw_text(440, $kala, $hyllyalue_value." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 				}

@@ -156,6 +156,7 @@
 							{$tilausrivi_muuttuja}
 							ORDER BY laadittu asc";
 				$kokeillaan = pupe_query($query);
+				echo "<pre>",str_replace("\t", "", $query),"</pre><br /><br />";
 
 				if (mysql_num_rows($kokeillaan) == 0) {
 					// tiukka 2
@@ -182,6 +183,7 @@
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
+					echo "<pre>",str_replace("\t", "", $query),"</pre><br /><br />";
 				}
 
 				if (mysql_num_rows($kokeillaan) == 0) {
@@ -208,6 +210,7 @@
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
+					echo "<pre>",str_replace("\t", "", $query),"</pre><br /><br />";
 				}
 
 				if (mysql_num_rows($kokeillaan) == 0) {
@@ -234,6 +237,7 @@
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
 					$kokeillaan = pupe_query($query);
+					echo "<pre>",str_replace("\t", "", $query),"</pre><br /><br />";
 
 				}
 
@@ -259,6 +263,7 @@
 								AND tilausrivi.uusiotunnus = 0
 								{$tilausrivi_muuttuja}
 								ORDER BY laadittu ASC";
+					echo "<pre>",str_replace("\t", "", $query),"</pre><br /><br />";
 				}
 
 				$checkres = pupe_query($query);

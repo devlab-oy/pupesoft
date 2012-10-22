@@ -145,7 +145,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	}
 
 	// tavallinen laskenta.. VARATTU PITÄÄ OLLA > 0 ja netto-kenttä tyhjä!
-	// jos nettokentässä on jotain niin tätä riviä ei haluttu vielä viedä varastoon
+	// jos nettokentässä on X niin tätä riviä ei haluttu vielä viedä varastoon
 	$query = "	SELECT tilausrivi.*
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
@@ -155,7 +155,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
-				and tilausrivi.netto = ''
+				and tilausrivi.netto != 'X'
 				$varastoon_tilausrivirajaus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
@@ -259,7 +259,7 @@ else {
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					and	tilausrivi.tyyppi = 'O'
-					and tilausrivi.netto = ''
+					and tilausrivi.netto != 'X'
 					$maara_peruste";
 	$result   = pupe_query($query);
 	$hintarow = mysql_fetch_assoc($result);
@@ -824,7 +824,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	if ($toiminto == "kalkyyli" and $tee == "") {
 		$chk = "";
-		if ($tilrivirow["netto"] == '') {
+		if ($tilrivirow["netto"] != 'X') {
 			$chk = "CHECKED";
 		}
 
@@ -867,7 +867,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 		}
 	}
 	else {
-		if ($tilrivirow["netto"] == '') {
+		if ($tilrivirow["netto"] != 'X') {
 			$varastoon_msg .= "<td align='center' valign='top'>x</td>";
 		}
 		else {
@@ -1251,7 +1251,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			 			SET suuntalavat.tila = 'P'
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-						AND tilausrivi.netto 		= ''
+						AND tilausrivi.netto 		!= 'X'
 						AND tilausrivi.kpl 		   != 0
 						AND tilausrivi.tyyppi 		= 'O'
 						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";
@@ -1286,7 +1286,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $kauttalaskutus == '
 			 			SET tilausrivi.suuntalava = 0
 						WHERE tilausrivi.yhtio 		= '{$kukarow['yhtio']}'
 						AND tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})
-						AND tilausrivi.netto 		= ''
+						AND tilausrivi.netto 		!= 'X'
 						AND tilausrivi.kpl 		   != 0
 						AND tilausrivi.tyyppi 		= 'O'
 						AND tilausrivi.suuntalava 	= '{$suuntalavan_tunnus}'";

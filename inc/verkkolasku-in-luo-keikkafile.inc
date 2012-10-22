@@ -1621,6 +1621,7 @@
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
+								netto = '',
 								uusiotunnus = '{$keikan_tunnus}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otunnus = '{$hinta_chk_row['otunnus']}'
@@ -1635,6 +1636,7 @@
 
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}',
+							netto = '',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
@@ -1811,6 +1813,7 @@
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
+								netto = '',
 								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otunnus = '{$hinta_chk_row['otunnus']}'
@@ -1825,6 +1828,7 @@
 
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}',
+							netto = '',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}
@@ -1939,6 +1943,7 @@
 								ale1 = 0,
 								ale2 = 0,
 								ale3 = 0,
+								netto = '',
 								uusiotunnus = '{$keikoilla[0]['uusiotunnus']}'
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND otunnus = '{$hinta_chk_row['otunnus']}'
@@ -1953,6 +1958,7 @@
 
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri1['hinta']}',
+							netto = '',
 							{$ale1lisa}
 							{$ale2lisa}
 							{$ale3lisa}

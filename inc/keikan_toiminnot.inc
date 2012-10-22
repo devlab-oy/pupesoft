@@ -179,13 +179,21 @@
 
 	    // poistetaan myös netto = X, jos räplätään ruksia
 	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
-	                uusiotunnus = '{$otunnus}',
-	                netto = ''
-	                $updatelisa
+	                uusiotunnus = '{$otunnus}'
+	                {$updatelisa}
 	                WHERE yhtio = '{$kukarow['yhtio']}'
 	                AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
 	    $result = pupe_query($query);
+
+	    // päivitetään netto X pois.
+	    $query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus) SET
+	    			netto = ''
+	    			WHERE yhtio = '{$kukarow['yhtio']}'
+	    			AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+	    			AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')
+	    			AND netto = 'X'";
+	    $netto_res = pupe_query($query);
 
 	    // Haetaan päivitetyt rivit
 	    $uudethinnat = array();

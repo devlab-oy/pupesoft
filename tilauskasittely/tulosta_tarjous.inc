@@ -1302,10 +1302,11 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(575-$oikpos, $kuha, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
 
 				$result = t_avainsana('TARJOUS_VAKIOTE');
-				$veroteksti_row = mysql_fetch_assoc($result);
-				$veroteksti = $veroteksti_row['selitetark'];
+				$vakioteksti_row = mysql_fetch_assoc($result);
+				$vakioteksti = $vakioteksti_row['selitetark'];
 
-				if(!$veroteksti) {
+				if ($vakioteksti == "") {
+
 					$veroteksti = "";
 
 					if ($laskurow["vienti"] != "") {
@@ -1358,16 +1359,16 @@ if (!function_exists('loppu_tarjous')) {
 					$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
 				}
 				else {
-					if(strlen($veroteksti) > 110) {
-						$veroteksti = wordwrap($veroteksti, 110, "\n");
+					if (strlen($vakioteksti) > 110) {
+						$vakioteksti = wordwrap($vakioteksti, 110, "\n");
 						$_y = $kuha-24;
-						foreach (explode("\n", $veroteksti) as $teksi) {
+						foreach (explode("\n", $vakioteksti) as $teksi) {
 							$pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
 							$_y = $_y - 10;
 						}
 					}
 					else {
-						$pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
+						$pdf_tarjous->draw_text(30,  $kuha-24, $vakioteksti, $page_tarjous[$sivu], $norm);
 					}
 				}
 

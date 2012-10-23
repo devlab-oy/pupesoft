@@ -3000,7 +3000,7 @@ if (!function_exists("etayhtio_hinta")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="") {
 		global $yhtiorow, $kukarow;
 
 		// T‰m‰ rutiini m‰‰rittelee riville hinnan ja alennuksen
@@ -3110,6 +3110,12 @@ if (!function_exists("alehinta")) {
 					$alehinta_alv = $alehi_alrow["alv"];
 				}
 			}
+		}
+
+		// jos yhtio ei laske alennuksia lapsituotteille ja kyseess‰ on lapsituote, voidaan hieman oikaista...
+		if ($onlapsi !="" and $yhtiorow["ei_alennuksia_lapsituotteille"] != "" ) {
+			$hinta = tuotteen_myyntihinta($laskurow, $trow, $kpl);
+			return array($hinta, '', array() , $alehinta_alv, $laskurow["valkoodi"]);
 		}
 
 		// haetaan asiakkaan tiedot

@@ -890,7 +890,8 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivin_lisatiedot.tilausrivilinkki,
-							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta
+							tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa} jt_rivihinta,
+							tilausrivi.kerayspvm
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
@@ -916,6 +917,8 @@
 
 				$jt_rivilaskuri = 1;
 				$jt_hintalaskuri = 0;
+
+				$jt_muiden_mukana = array();
 
 				while ($jtrow = mysql_fetch_array($isaresult)) {
 
@@ -1057,6 +1060,11 @@
 								if ($yhtiorow["saldo_kasittely"] != "") $jt_saldopvm = date("Y-m-d");
 
 								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+
+								if($jtrow['kerayspvm'] != '0000-00-00') {
+									//jälkitoimitus muiden mukana, eli tälle riville pitää varata saldot
+									$jt_muiden_mukana[$jtrow['tuoteno']] += $jtrow['jt'];
+								}
 
 								if ($saldolaskenta == "hyllysaldo") {
 									$kokonaismyytavissa += $hyllyssa;
@@ -1467,34 +1475,113 @@
 
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
-								// Riittää kaikille
-								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
+								//eli toimitusta ei haluta edes tehdä jos tilausrivi on jt_muiden_mukana
+								if($jtrow['kerayspvm'] == '0000-00-00') {
+									//jos ollaan toimittamassa jotain, katsotaan onko jt_muiden mukana varannut saldoa
+									if(isset($jt_muiden_mukana[$jtrow['tuoteno']])) {
+										//vähennetään kokonaismyytävistä muiden mukana varaama saldo
+										$kokonaismyytavissa -= $jt_muiden_mukana[$jtrow['tuoteno']];
+									}
+									// Riittää kaikille
+									if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
 
-									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
+										// Jos haluttiin toimittaa tämä rivi automaagisesti
+										if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
 
-										if ($from_varastoon_inc == "editilaus_in.inc") {
-											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
+											if ($from_varastoon_inc == "editilaus_in.inc") {
+												$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
+											}
+											else {
+												echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
+											}
+
+											// Pomitaan tämä rivi/perhe
+											$loput[$tunnukset] 	= "KAIKKI";
+											$kpl[$tunnukset] 	= 0;
+											$tunnusarray 		= explode(',', $tunnukset);
+
+											// Toimitetaan jtrivit
+											tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
+
+											$jt_rivilaskuri++;
 										}
 										else {
-											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
+											echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
+
+											if ($kukarow["extranet"] == "") {
+												echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:green;'>".t("Riittää kaikille")."!</font><br>";
+
+												if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
+													echo t("Viikko")." $toimvko";
+												}
+												elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
+													echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
+												}
+												else {
+													echo tv1dateconv($toimaika);
+												}
+
+												echo "</td>";
+
+												echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
+
+												if ($jtrow["osatoimitus"] == "") {
+													echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='{$kpl[$tunnukset]}'></td>";
+													echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
+													echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
+												}
+												else {
+													echo "<td valign='top' align='center' colspan='3' $class>".t("Tilausta ei osatoimiteta")."</td>";
+												}
+
+												echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+												echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+											}
+											elseif ($kukarow["extranet"] != "") {
+												echo "<td valign='top' $class><font style='color:green;'>".t("Voidaan toimittaa")."!</font></td>";
+
+												if ((int) $kukarow["kesken"] > 0) {
+													echo "	<td valign='top' align='center' $class>".t("Toimita")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>";
+												}
+												else {
+													echo "<td valign='top' $class>".t("Avaa uusi tilaus jotta voit toimittaa rivin").".</td>";
+												}
+
+												if ($yhtiorow["jt_rivien_kasittely"] != 'E') {
+													echo "<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+												}
+												echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
+
+											}
+
+											$jt_rivilaskuri++;
 										}
-
-										// Pomitaan tämä rivi/perhe
-										$loput[$tunnukset] 	= "KAIKKI";
-										$kpl[$tunnukset] 	= 0;
-										$tunnusarray 		= explode(',', $tunnukset);
-
-										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
-
-										$jt_rivilaskuri++;
 									}
-									else {
-										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
+									// Riittää tälle riville mutta ei kaikille
+									elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0) {
 
-										if ($kukarow["extranet"] == "") {
-											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:green;'>".t("Riittää kaikille")."!</font><br>";
+										// Jos haluttiin toimittaa tämä rivi automaagisesti
+										if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen') {
+
+											if ($from_varastoon_inc == "editilaus_in.inc") {
+												$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
+											}
+											else {
+												echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta ei riittänyt kaikille JT-riveille").")</font><br>";
+											}
+
+											// Pomitaan tämä rivi/perhe
+											$loput[$tunnukset] 	= "KAIKKI";
+											$kpl[$tunnukset] 	= 0;
+											$tunnusarray 		= explode(',', $tunnukset);
+
+											// Toimitetaan jtrivit
+											tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
+
+											$jt_rivilaskuri++;
+										}
+										elseif ($automaaginen == "") {
+											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
 
 											if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
 												echo t("Viikko")." $toimvko";
@@ -1505,13 +1592,13 @@
 											else {
 												echo tv1dateconv($toimaika);
 											}
-
 											echo "</td>";
 
+											echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
 
 											if ($jtrow["osatoimitus"] == "") {
-												echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='{$kpl[$tunnukset]}'></td>";
+												echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
 												echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
 												echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
 											}
@@ -1521,153 +1608,85 @@
 
 											echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
 											echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-										}
-										elseif ($kukarow["extranet"] != "") {
-											echo "<td valign='top' $class><font style='color:green;'>".t("Voidaan toimittaa")."!</font></td>";
 
-											if ((int) $kukarow["kesken"] > 0) {
-												echo "	<td valign='top' align='center' $class>".t("Toimita")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>";
+											$jt_rivilaskuri++;
+										}
+									}
+									// Ei riitä koko riville
+									elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
+										if ($automaaginen == '') {
+											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font><br>";
+
+											if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
+												echo t("Viikko")." $toimvko";
+											}
+											elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
+												echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
 											}
 											else {
-												echo "<td valign='top' $class>".t("Avaa uusi tilaus jotta voit toimittaa rivin").".</td>";
+												echo tv1dateconv($toimaika);
 											}
+											echo "</td>";
 
-											if ($yhtiorow["jt_rivien_kasittely"] != 'E') {
-												echo "<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
-											}
-											echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
-
-										}
-
-										$jt_rivilaskuri++;
-									}
-								}
-								// Riittää tälle riville mutta ei kaikille
-								elseif (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0) {
-
-									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $automaattinen_poiminta != '')) and $automaaginen == 'tosi_automaaginen') {
-
-										if ($from_varastoon_inc == "editilaus_in.inc") {
-											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
-										}
-										else {
-											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta ei riittänyt kaikille JT-riveille").")</font><br>";
-										}
-
-										// Pomitaan tämä rivi/perhe
-										$loput[$tunnukset] 	= "KAIKKI";
-										$kpl[$tunnukset] 	= 0;
-										$tunnusarray 		= explode(',', $tunnukset);
-
-										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
-
-										$jt_rivilaskuri++;
-									}
-									elseif ($automaaginen == "") {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
-
-										if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
-											echo t("Viikko")." $toimvko";
-										}
-										elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
-											echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
-										}
-										else {
-											echo tv1dateconv($toimaika);
-										}
-										echo "</td>";
-
-										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
-										echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
-
-										if ($jtrow["osatoimitus"] == "") {
-											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
-											echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
-											echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
-										}
-										else {
-											echo "<td valign='top' align='center' colspan='3' $class>".t("Tilausta ei osatoimiteta")."</td>";
-										}
-
-										echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
-										echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-
-										$jt_rivilaskuri++;
-									}
-								}
-								// Ei riitä koko riville
-								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
-									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font><br>";
-
-										if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
-											echo t("Viikko")." $toimvko";
-										}
-										elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
-											echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
-										}
-										else {
-											echo tv1dateconv($toimaika);
-										}
-										echo "</td>";
-
-										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
-										echo "<td valign='top' align='center' $class>&nbsp;</td>";
-
-										if ($jtrow["osatoimitus"] == "") {
-											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
-											echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
-											echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
-										}
-										else {
-											echo "<td valign='top' align='center' colspan='3' $class>".t("Tilausta ei osatoimiteta")."</td>";
-										}
-
-										echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
-										echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-
-										$jt_rivilaskuri++;
-									}
-								}
-								// Riviä ei voida toimittaa
-								else {
-									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:red;'>".t("Riviä ei voida toimittaa")."!</font><br>";
-
-										if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
-											echo t("Viikko")." $toimvko";
-										}
-										elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
-											echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
-										}
-										else {
-											echo tv1dateconv($toimaika);
-										}
-										echo "</td>";
-										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
-
-										if ($kukarow["extranet"] == "") {
-											echo "	<td valign='top' align='center' $class>&nbsp;</td>
-													<td valign='top' align='center' $class>&nbsp;</td>
-													<td valign='top' align='center' $class>&nbsp;</td>
-													<td valign='top' align='center' $class>&nbsp;</td>
-													<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
-											echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-										}
-										else {
+											echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 											echo "<td valign='top' align='center' $class>&nbsp;</td>";
-											if ($kukarow["extranet"] != "" and $yhtiorow["jt_rivien_kasittely"] != 'E') {
-												echo "<td valign='top' align='center' $class>".t("Mitätöi")." $yhtiorow[jt_rivien_kasittely]<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
-											}
-											echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
-										}
 
-										$jt_rivilaskuri++;
+											if ($jtrow["osatoimitus"] == "") {
+												echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='$kpl[$tunnukset]'></td>";
+												echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
+												echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
+											}
+											else {
+												echo "<td valign='top' align='center' colspan='3' $class>".t("Tilausta ei osatoimiteta")."</td>";
+											}
+
+											echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+											echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+
+											$jt_rivilaskuri++;
+										}
+									}
+									// Riviä ei voida toimittaa
+									else {
+										if ($automaaginen == '') {
+											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:red;'>".t("Riviä ei voida toimittaa")."!</font><br>";
+
+											if (isset($toimvko) and $toimvko > 0 and !isset($toimpva)) {
+												echo t("Viikko")." $toimvko";
+											}
+											elseif (isset($toimvko) and $toimvko > 0 and isset($toimpva)) {
+												echo t("Viikko")." $toimvko (".$DAY_ARRAY[$toimpva].")";
+											}
+											else {
+												echo tv1dateconv($toimaika);
+											}
+											echo "</td>";
+											echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
+
+											if ($kukarow["extranet"] == "") {
+												echo "	<td valign='top' align='center' $class>&nbsp;</td>
+														<td valign='top' align='center' $class>&nbsp;</td>
+														<td valign='top' align='center' $class>&nbsp;</td>
+														<td valign='top' align='center' $class>&nbsp;</td>
+														<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+												echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+											}
+											else {
+												echo "<td valign='top' align='center' $class>&nbsp;</td>";
+												if ($kukarow["extranet"] != "" and $yhtiorow["jt_rivien_kasittely"] != 'E') {
+													echo "<td valign='top' align='center' $class>".t("Mitätöi")." $yhtiorow[jt_rivien_kasittely]<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+												}
+												echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
+											}
+
+											$jt_rivilaskuri++;
+										}
 									}
 								}
-
+								else {
+									//jt rivi oli jt_muiden_mukana, sitä ei siis laiteta keräys jonoon
+									echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("oli jälkitoimitus muiden mukana").". (".t("Tuotetta ei lisätty jälkitoimitukselle, mutta sille varattiin saldoa").")</font><br>";
+								}
 							}
 							else {
 								echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";

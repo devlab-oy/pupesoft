@@ -1,0 +1,104 @@
+body {
+	padding: 0;
+	margin: 0;
+	font-family: 'Verdana';
+	font-size: 0.8em;
+}
+
+a, a:visited {
+	padding-top: 1px;
+	color: #5050E0; text-decoration:none;
+}
+
+.error {
+	color: #ff6666;
+}
+
+.center {
+	text-align: center;
+}
+
+h1 {
+	margin: 0;
+	padding-top: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+form {
+	margin: 0;
+}
+
+select {
+	font-size: 1em;
+}
+
+table {
+	width: 100%;
+	line-height: 10px;
+}
+
+li {
+	margin: 10px;
+}
+
+.search  {
+	line-height: 5px;
+}
+
+/******************************/
+
+.header {
+	text-align: center;
+	width: 100%;
+	height: 25px;
+	background-color: #eeeeff;
+}
+
+.main {
+	width: 100%;
+	background-color: #fff;
+}
+
+.controls {
+	float:left;
+	width: 100%;
+	background-color: #f5f5ff;
+	font-size: 1.2em;
+}
+.numero {
+	text-align: right;
+	font-size: 1.3em;
+	width: 60px;
+}
+
+.radio {
+
+}
+
+.right {
+	clear:right;
+	float:right;
+}
+
+.left {
+	clear:both;
+	float:left;
+}
+
+.button {
+	height: 24px;
+	font-size: 1.15em;
+}
+
+#takaisin {
+	float: right;
+}
+
+#alusta {
+	width: 200px;
+}
+
+th {
+	text-align: left;
+}

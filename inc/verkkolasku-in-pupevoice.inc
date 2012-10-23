@@ -22,6 +22,7 @@ $laskun_asiakastunnus	= array_shift($xml->xpath('Group2[NAD/@e3035="IV"]/Group3/
 $laskun_summa_eur		= (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345="EUR"]/@eC516.5004'));
 $laskun_tilausviite 	= "";
 $kauttalaskutus			= "";
+$laskun_toimitunnus		= 0;
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"]	= trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));

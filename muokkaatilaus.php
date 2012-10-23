@@ -509,11 +509,19 @@
 			$myyntitili_haku = "";
 
 			if ($toim == "MYYNTITILITOIMITA") {
-				$myyntitili_haku = "or tilausrivi.tuoteno like '%$etsi%'";
+				$myyntitili_haku = " or tilausrivi.tuoteno like '%$etsi%' ";
 			}
 
-			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%' $myyntitili_haku)";
-			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku)";
+			if ($kukarow["yhtio"] == "savt") {
+				$myyntitili_haku .= " or lasku.viesti like '%$etsi%' ";
+			}
+
+			if (is_string($etsi))  {
+				$haku = " and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or kuka2.nimi like '%$etsi%' $myyntitili_haku) ";
+			}
+			if (is_numeric($etsi)) {
+				$haku = " and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%' $myyntitili_haku) ";
+			}
 
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
 				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
@@ -546,7 +554,7 @@
 			$assel2 = "CHECKED";
 		}
 		else {
-			$asiakasstring = " concat(lasku.ytunnus, '<br>', lasku.nimi) ";
+			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark) ";
 			$assel1 = "CHECKED";
 			$assel2 = "";
 		}

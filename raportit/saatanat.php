@@ -34,6 +34,7 @@
 	if (!isset($tee)) 				$tee = "";
 	if (!isset($pupe_DataTables)) 	$pupe_DataTables = "";
 	if (!isset($luottolisa)) 		$luottolisa = "";
+	if (!isset($sliitostunnus)) 	$sliitostunnus = "";
 
 	if ($eiliittymaa != 'ON') {
 
@@ -244,11 +245,9 @@
 		}
 
 		$salisa1 = "";
-		$salisa2 = "";
 
 		if ($savalkoodi != "") {
 			$salisa1 = " and lasku.valkoodi='$savalkoodi' ";
-			$salisa2 = " and suoritus.valkoodi='$savalkoodi' ";
 		}
 
 		if ($eiliittymaa != 'ON' and isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
@@ -433,74 +432,29 @@
 			echo "<tbody>";
 
 			$divi = "";
-			$query_alennuksia = generoi_alekentta('M');
 
 			while ($row = mysql_fetch_assoc($result)) {
 
 				if (isset($row["liitostunnus"]) and $row["liitostunnus"] != "") {
 
-					$query = "	SELECT luottoraja
-								FROM asiakas
-								WHERE yhtio = '$saatavat_yhtio'
-								and tunnus in ($row[liitostunnus])";
-					$asresult = pupe_query($query);
-					$asrow = mysql_fetch_assoc($asresult);
-
 					if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-						// Suorituksen valuutassa
-						$suorilisa = " sum(summa) summa ";
+						list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"], $savalkoodi);
 					}
 					else {
-						// Yhtiön valuutassa
-						$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
+						list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"]);
 					}
-
-					// Haetaan kaatotilin summa
-					$query = "	SELECT
-								$suorilisa
-								FROM suoritus
-								WHERE yhtio = '$saatavat_yhtio'
-								and ltunnus > 0
-								and kohdpvm = '0000-00-00'
-								and asiakas_tunnus in ($row[liitostunnus])
-								$salisa2";
-					$kaatotilires = pupe_query($query);
-					$kaatotilirow = mysql_fetch_assoc($kaatotilires);
-
-					if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-						// Laskun valuutassa
-						$avtilisa = "(tilausrivi.hinta/if(tilausrivi.vienti_kurssi=0, 1, tilausrivi.vienti_kurssikurssi))";
-					}
-					else {
-						// Yhtiön valuutassa
-						$avtilisa = "tilausrivi.hinta";
-					}
-
-					// Avoimet tilaukset
-					$query = "	SELECT
-								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
-								FROM lasku
-								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
-								  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyväksyntää
-								  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
-								)
-								AND lasku.liitostunnus in ($row[liitostunnus])";
-					$avoimettilauksetres = pupe_query($query);
-					$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 
 					// Lasketaan luottotilanne nyt
-					$luottotilanne_nyt = round($asrow['luottoraja'] - $row["avoimia"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
+					$luottotilanne_nyt = round($luottoraja + $kaatotilisumma - $row["avoimia"] - $avoimettilaukset, 2);
 				}
 				else {
-					$asrow				 = array();
-					$kaatotilirow 		 = array();
-					$avoimettilauksetrow = array();
-					$luottotilanne_nyt   = 0;
+					$luottoraja        = 0;
+					$kaatotilisumma    = 0;
+					$avoimettilaukset  = 0;
+					$luottotilanne_nyt = 0;
 				}
 
-				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0)) {
+				if ($ylilimiitin == '' or ($ylilimiitin == 'ON' and $luottoraja > 0 and $luottotilanne_nyt < 0)) {
 
 					if (isset($row["toim_nimi"]) and $row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
@@ -510,7 +464,7 @@
 						}
 					}
 
-					if (isset($asrow["luottoraja"]) and $asrow["luottoraja"] > 0 and $luottotilanne_nyt < 0) {
+					if (isset($luottoraja) and $luottoraja > 0 and $luottotilanne_nyt < 0) {
 						$luottorajavirhe = 'kyllä';
 					}
 					else {
@@ -518,7 +472,7 @@
 					}
 
 					// Ei näytetä nollia ruudulla
-					if (isset($asrow["luottoraja"]) and $asrow['luottoraja'] == 0) $asrow['luottoraja'] = '';
+					if (isset($luottoraja) and $luottoraja == 0) $luottoraja = '';
 					if ($row["alle_{$saatavat_array[0]}"] == 0) $row["alle_{$saatavat_array[0]}"] = "";
 
 					for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -592,10 +546,10 @@
 
 					echo "<td valign='top' align='right'>".$row["yli_{$saatavat_array[count($saatavat_array)-1]}"]."</td>";
 					echo "<td valign='top' align='right'>$row[avoimia]</td>";
-					echo "<td valign='top' align='right'>$avoimettilauksetrow[tilausavoinsaldo]</td>";
-					echo "<td valign='top' align='right'>$kaatotilirow[summa]</td>";
-					echo "<td valign='top' align='right'>".($row["avoimia"]+$avoimettilauksetrow["tilausavoinsaldo"]-$kaatotilirow["summa"])."</td>";
-					echo "<td valign='top' align='right'>$asrow[luottoraja]</td>";
+					echo "<td valign='top' align='right'>$avoimettilaukset</td>";
+					echo "<td valign='top' align='right'>$kaatotilisumma</td>";
+					echo "<td valign='top' align='right'>".($row["avoimia"]+$avoimettilaukset-$kaatotilisumma)."</td>";
+					echo "<td valign='top' align='right'>$luottoraja</td>";
 					echo "</tr>";
 
 					if (isset($workbook)) {
@@ -625,13 +579,13 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["avoimia"]);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, $avoimettilauksetrow["tilausavoinsaldo"]);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $avoimettilaukset);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, $kaatotilirow["summa"]);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $kaatotilisumma);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, ($row["avoimia"]+$avoimettilauksetrow["tilausavoinsaldo"]-$kaatotilirow["summa"]));
+						$worksheet->writeNumber($excelrivi, $excelsarake, ($row["avoimia"]+$avoimettilaukset-$kaatotilisumma));
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, $asrow["luottoraja"]);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $luottoraja);
 
 						$excelsarake = 0;
 						$excelrivi++;
@@ -651,10 +605,10 @@
 
 
 
-					$kaato_yhteensa 			+= $kaatotilirow["summa"];
+					$kaato_yhteensa 			+= $kaatotilisumma;
 					$avoimia_yhteensa 			+= $row["avoimia"];
 					$ylivito					+= $row["ylivito"];
-					$avoimettilaukset_yhteensa 	+= $avoimettilauksetrow["tilausavoinsaldo"];
+					$avoimettilaukset_yhteensa 	+= $avoimettilaukset;
 					$rivilask++;
 				}
 			}
@@ -710,10 +664,12 @@
 
 			if ($sytunnus != '') {
 
-				$liitoslisa = "";
+				$liitoslisa1 = "";
+				$liitoslisa2 = "";
 
-				if ($sliitostunnus !="") {
-					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
+				if ($sliitostunnus != "") {
+					$liitoslisa1 = "AND asiakas.tunnus='{$sliitostunnus}' ";
+					$liitoslisa2 = "AND lasku.liitostunnus='{$sliitostunnus}' ";
 				}
 
 				$query = "	SELECT jv
@@ -722,7 +678,7 @@
 							WHERE asiakas.yhtio = '$saatavat_yhtio'
 							AND asiakas.ytunnus = '$sytunnus'
 							AND asiakas.laji != 'P'
-							{$liitoslisa}
+							{$liitoslisa1}
 							$eta_asiakaslisa
 							LIMIT 1";
 
@@ -747,9 +703,15 @@
 
 				//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehdä tilausta
 				$query = " 	SELECT count(lasku.tunnus) kpl
-							FROM karhu_lasku
-							JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$saatavat_yhtio' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$sytunnus')
-							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')";
+							FROM lasku
+							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')
+							WHERE lasku.yhtio = '$saatavat_yhtio'
+							and lasku.tila    = 'U'
+							and lasku.alatila = 'X'
+							and lasku.mapvm   = '0000-00-00'
+							and lasku.ytunnus = '$sytunnus'
+							{$liitoslisa2}";
 				$trattares = pupe_query($query);
 				$tratat = mysql_fetch_assoc($trattares);
 
@@ -786,6 +748,30 @@
 				echo "</form><br>";
 			}
 
+		}
+		elseif ($eiliittymaa == 'ON') {
+
+			// Voi olla, että asiakkaalla on avoimia tilauksia, mutta ei avoimia laskuja, huomioidaan nämä luottorajassa
+			$query = "	SELECT ifnull(group_concat(tunnus), 0) liitostunnus
+						FROM asiakas
+						WHERE yhtio = '$saatavat_yhtio'
+						AND ytunnus = '$sytunnus'
+						AND laji != 'P'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+
+			if (isset($row["liitostunnus"]) and $row["liitostunnus"] != 0) {
+				list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"], $saatavat_yhtio);
+
+				$luottotilanne_nyt = round($luottoraja+$kaatotilisumma-$avoimettilaukset, 2);
+
+				if (isset($luottoraja) and $luottoraja > 0 and $luottotilanne_nyt < 0) {
+					$luottorajavirhe = 'kyllä';
+				}
+				else {
+					$luottorajavirhe = '';
+				}
+			}
 		}
 		elseif ($eiliittymaa != 'ON') {
 			echo "<br><br>".t("Ei saatavia!")."<br>";

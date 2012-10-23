@@ -1307,19 +1307,19 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 		else {
 
-			//Luodaan valituista riveist‰ suoraan normaali ostotilaus
+			// Luodaan valituista riveist‰ suoraan normaali ostotilaus
 			if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
 
-				//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
+				// Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
 				if ($tee_osto != "") {
-					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
+					$tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
 
 					// P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
 					$query  = "	UPDATE lasku set
 								osatoimitus = 'o'
 								where yhtio = '$kukarow[yhtio]'
-								and tunnus = '$kukarow[kesken]'";
+								and tunnus  = '$kukarow[kesken]'";
 					$result = pupe_query($query);
 				}
 				else {

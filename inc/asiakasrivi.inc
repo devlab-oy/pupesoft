@@ -111,14 +111,14 @@
 		$sel[$apu] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value='100' $sel[100]>".t("Paperilasku, tulostuspalvelu")."</option>";
+		$ulos .= "<option value='100' $sel[100]>".t("Verkkolasku, tulostuspalvelu")."</option>";
 		$ulos .= "<option value='010' $sel[010]>".t("Verkkolasku")."</option>";
 		#$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";
 		$ulos .= "<option value='020' $sel[020]>".t("Vienti-Verkkolasku (EU)")."</option>";
 		$ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sähköinen lasku")."</option>";
 		$ulos .= "<option value='112' $sel[112]>".t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
-		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen, käsitellään manuaalisesti")."</option>";
+		$ulos .= "<option value='667' $sel[667]>".t("Paperilasku, tulostetaan manuaalisesti")."</option>";
 		$ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdä")."</option>";
 		$ulos .= "</select></td>";
 
@@ -943,6 +943,8 @@
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
+		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
 
 		$ulos .= "</select></td>";
 

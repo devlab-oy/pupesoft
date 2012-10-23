@@ -25,7 +25,25 @@ if (isset($submit) and trim($submit) != '') {
 		if ($koodi != '') {
 
 			# Tarkistetaan hyllypaikka ja varmistuskoodi
-			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $koodi);
+			# hyllypaikan on oltava reservipaikka ja siellä ei saa olla tuotteita
+			$options = array('varmistuskoodi' => $koodi, 'reservipaikka' => 'K');
+			$kaikki_ok = tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options);
+
+			# tarkistetaan että paikalla ei ole tuotteita
+			$query = "SELECT *
+						FROM tuotepaikat
+						WHERE yhtio		= '{$kukarow['yhtio']}'
+						AND hyllyalue	= '$hyllyalue'
+						AND hyllynro	= '$hyllynro'
+						AND hyllyvali	= '$hyllyvali'
+						AND hyllytaso	= '$hyllytaso'";
+			$result = pupe_query($query);
+			$tuotteita_tuotepaikalla = mysql_num_rows($result);
+
+			if ($tuotteita_tuotepaikalla > 0) {
+				$error['varalle'] = t("Tuotepaikalla on tuotteita!");
+				$kaikki_ok = false;
+			}
 
 			# Jos hyllypaikka ok, laitetaan koko suuntalava varastoon
 			if ($kaikki_ok) {
@@ -57,30 +75,23 @@ if (isset($submit) and trim($submit) != '') {
 					}
 					# Jos kaikki meni ok
 					if (isset($varastovirhe)) {
-						$error['varalle'] .= "Virhe varastoonviennissä";
+						$error['varalle'] .= t("Virhe varastoonviennissä");
 					} else {
 						echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=alusta.php'>";
 						exit;
 					}
 				}
 				else {
-					$error['varalle'] = "Yhtään tuotetta ei löytynyt suuntalavalta";
+					$error['varalle'] = t("Yhtään tuotetta ei löytynyt suuntalavalta");
 				}
 			}
 			else {
-				$error['varalle']  = "Virheellinen varmistukoodi tai tuotepaikka.";
+				$error['varalle']  = t("Virheellinen varmistukoodi tai hyllypaikka ei ole reservipaikka");
 			}
 		}
 		else {
-			$error['varalle'] = "Varmistukoodi ei voi olla tyhjä";
+			$error['varalle'] = t("Varmistukoodi ei voi olla tyhjä");
 		}
-	}
-	# Takaisin
-	elseif ($submit == 'cancel') {
-		$url = "?alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
-
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php{$url}'>";
-		exit;
 	}
 }
 
@@ -91,7 +102,11 @@ $sscc_query = mysql_query("	SELECT sscc
 							AND yhtio='{$kukarow['yhtio']}'");
 $sscc = mysql_fetch_assoc($sscc_query);
 
-echo "<div class='header'><h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
+$url = "alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
+
+echo "<div class='header'>";
+echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
+echo "<h1>",t("SUUNTALAVAVARALLE"),"</h1></div>";
 
 echo "<div class='main'>
 
@@ -123,14 +138,7 @@ echo "<div class='main'>
 	</div>
 
 	<div class='controls'>
-		<tr>
-			<td nowrap>
-				<button name='submit' value='submit' onclick='submit();'>",t("OK", $browkieli),"</button>
-			</td>
-			<td nowrap>
-				<button class='right' name='submit' value='cancel' onclick='submit();'>",t("Takaisin", $browkieli),"</button>
-			</td>
-		</tr>
+		<button name='submit' value='submit' class='button' onclick='submit();'>",t("OK", $browkieli),"</button>
 	</div>
 
 	<span class='error'>{$error['varalle']}</span>

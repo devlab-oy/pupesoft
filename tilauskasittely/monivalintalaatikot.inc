@@ -592,8 +592,18 @@
 		$kohdet = substr($kohdet, 0, -1);
 
 		if (trim($kohdet) != '') {
-			$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
-			$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.kohde in ($kustpt) ";
+				$lisa .= " and asiakas.kohde in ($kustpt) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
+				$lisa .= " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
+			}
+			else {
+				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
+				$lisa .= " and tiliointi.kohde in ($kohdet) ";
+			}
 		}
 	}
 
@@ -611,8 +621,18 @@
 		$projektit = substr($projektit, 0, -1);
 
 		if (trim($projektit) != '') {
-			$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
-			$lisa .= " and tiliointi.projekti in ($projektit) ";
+			if ($mulselprefix == 'asiakas') {
+				$lisa_haku_kustp = " and asiakas.projekti in ($kustpt) ";
+				$lisa .= " and asiakas.projekti in ($kustpt) ";
+			}
+			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
+				$lisa .= " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
+			}
+			else {
+				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
+				$lisa .= " and tiliointi.projekti in ($projektit) ";
+			}
 		}
 	}
 
@@ -1970,7 +1990,17 @@
 
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+				echo "<td nowrap style='padding:0px'>";
+
+				$multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+
+				if (in_array("kustp", $monivalintalaatikot_normaali)) {
+					$multiple_lisa = "";
+				}
+
+				echo "<select id='mul_kustp[]' name='mul_kustp[]' $multiple_lisa $autosubmit>";
+
+
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				lapsitasot(0, -1, "0,");
@@ -2096,4 +2126,3 @@
 	}
 
 	echo "<div style='clear: both;'></div>";
-?>

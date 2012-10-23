@@ -196,15 +196,18 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
-		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
-		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi)")."</option>";
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
+		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja");
+		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
+		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
+		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi)")."</option>";
+		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
-		$ulos .= "<option value = '8' $sel[8]>".t("Ruotsin laskupohja")."</option>";
+		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
+		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
+		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
+				
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2809,7 +2812,7 @@
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$sresult = mysql_query($query) or pupe_error($query);
 

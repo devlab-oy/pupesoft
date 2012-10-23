@@ -453,7 +453,7 @@ if (!function_exists('alku_kerayslista')) {
 				$kala = 560;
 			}
 
-			// viivakoodin arvo
+			// Viivakoodi
 			if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 				$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 			}
@@ -461,9 +461,28 @@ if (!function_exists('alku_kerayslista')) {
 				$barcode  = $laskurow["tunnus"];
 			}
 
-			$data = viivakoodi($barcode, "code128", 150, 30, "");
+			$data = viivakoodi(trim($barcode), "code128", 150, 30, "");
 			$image = $pdf->jfif_embed($data);
 			$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+
+			// Tehdään asiakasnumero-viivakoodi
+			if ($kukarow['yhtio'] == 'hair' and $asrow["asiakasnro"] > 0) {
+				if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
+					$bottom_barcode = 582;
+					$bottom_barcode_text = 578;
+				}
+				else {
+					$bottom_barcode = 605;
+					$bottom_barcode_text = 600;
+				}
+
+				$data = viivakoodi(trim($asrow["asiakasnro"]), "code128", 70, 10, "");
+				$image = $pdf->jfif_embed($data);
+				$pdf->image_place($image, $bottom_barcode, 475, $thispage, array("scale" => 0.5));
+
+				$oikpos = $pdf->strlen(t("Asnro")." ".$asrow["asiakasnro"], $norm);
+				$pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
+			}
 		}
 
 		// Luodaan palautettavat
@@ -553,7 +572,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$pdf->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]), 	$thispage, $boldi);
 		}
 
-		// viivakoodin arvo
+		// Viivakoodi
 		if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 			$barcode = strlen($kerayseran_numero) < 6 ? str_pad((int) $kerayseran_numero, 6, "0", STR_PAD_LEFT) : $kerayseran_numero;
 		}
@@ -561,7 +580,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$barcode  = $laskurow["tunnus"];
 		}
 
-		$data = viivakoodi($barcode, "code128", 150, 30, "");
+		$data = viivakoodi(trim($barcode), "code128", 150, 30, "");
 		$image = $pdf->jfif_embed($data);
 		$pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
 

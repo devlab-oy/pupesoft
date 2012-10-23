@@ -19,6 +19,25 @@ echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
 			});
 		</script>";
 
+if ($piilotetut_varastot == 'on') {
+	$piilotetut_select = "checked='checked'";
+}
+else {
+	$piilotetut_select = "";
+}
+echo "<table>";
+echo "<tr>";
+echo "<th valign=top>".t('N‰yt‰ piilotetut varastot')."</th>";
+
+echo "<td>";
+echo "<form method='POST'>";
+echo "<input type='checkbox' {$piilotetut_select} name='piilotetut_varastot' onclick='submit();' />";
+echo "</form>";
+echo "</td>";
+echo "</tr>";
+echo "</table>";
+echo "<br />";
+
 // piirrell‰‰n formi
 echo "<form method='post'>";
 
@@ -79,11 +98,16 @@ echo "<tr><th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.
 	,"</span></th>
     <td>";
 
+if($piilotetut_varastot != 'on') {
+	$piilotetut_varastot_where = ' AND tyyppi != "P"';
+}
+
 $varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
 $query  = "	SELECT tunnus, nimitys
 			FROM varastopaikat
 			WHERE yhtio = '$kukarow[yhtio]'
+			$piilotetut_varastot_where
 			ORDER BY tyyppi, nimitys";
 $vares = mysql_query($query) or pupe_error($query);
 

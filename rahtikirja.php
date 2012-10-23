@@ -31,6 +31,7 @@
 	if (!isset($kuutiot)) $kuutiot = '';
 	if (!isset($lavametri)) $lavametri = '';
 	if (!isset($montavalittu)) $montavalittu = '';
+	if (!isset($kuljetusohje)) $kuljetusohje = '';
 
 	if ($montavalittu == "kylla") {
 		$toimitustavan_tarkistin = explode(",", $tunnukset);
@@ -819,7 +820,7 @@
 			elseif ($laskurow["varasto"] == '') {
 				$query = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 							ORDER BY alkuhyllyalue,alkuhyllynro
 							LIMIT 1";
 			}
@@ -1031,7 +1032,7 @@
 
 		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
 					ORDER BY yhtio, tyyppi, nimitys";
 		$result = pupe_query($query);
 
@@ -1054,7 +1055,7 @@
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					and maa != ''
+					and maa != '' AND tyyppi != 'P'
 					ORDER BY maa";
 		$result = pupe_query($query);
 
@@ -1728,7 +1729,7 @@
 
 		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 
@@ -1748,7 +1749,7 @@
 
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
-					WHERE maa != '' and $logistiikka_yhtiolisa
+					WHERE maa != '' and $logistiikka_yhtiolisa AND tyyppi != 'P'
 					ORDER BY maa";
 		$result = pupe_query($query);
 
@@ -1994,6 +1995,20 @@
 
 			$otsik = mysql_fetch_assoc($resul);
 
+			$query = "	SELECT kuljetusohje
+						FROM asiakas
+						WHERE yhtio = '{$otsik["yhtio"]}'
+						AND tunnus = '{$otsik["liitostunnus"]}';";
+			$resul = pupe_query($query);
+
+			if (mysql_num_rows($resul) == 1) {
+				$temprow = mysql_fetch_assoc($resul);
+				$asiakkaan_kuljetusohje = $temprow["kuljetusohje"];
+			}
+			else {
+				$asiakkaan_kuljetusohje = "";
+			}
+
 			if ($tila == 'L') {
 				$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
 				$resul = pupe_query($query);
@@ -2084,6 +2099,7 @@
 			echo "<input type='hidden' name='dgdlle_tunnukset' value='$tunnukset'>";
 			echo "<input type='hidden' name='montavalittu' value='$montavalittu'>";
 			echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
+			echo "<input type='hidden' name='kuljetusohje' value='$asiakkaan_kuljetusohje'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$otsik[yhtio]'>";
 
 			echo "<tr><th align='left'>".t("Tilaus")."</th>";
@@ -2190,7 +2206,7 @@
 			// haetaan kaikki varastot
 			$query  = "	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$result = pupe_query($query);
 
@@ -2298,7 +2314,6 @@
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
 
-				#echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 				echo "</select></td>";
 			}
 			else {
@@ -2307,7 +2322,6 @@
 
 			echo "</tr>";
 
-
 			if ($tee == 'change') {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
 							FROM rahtikirjat use index (otsikko_index)
@@ -2315,6 +2329,9 @@
 							AND otsikkonro		= '$id'
 							AND rahtikirjanro	= '$rakirno'";
 				$viestirar = pupe_query($query);
+				$viestirarrow = mysql_fetch_assoc($viestirar);
+
+				$viesti = trim($viestirarrow["viesti"]);
 			}
 			else {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT if(tuote.kuljetusohje!='',tuote.kuljetusohje,NULL) separator '. ') viesti
@@ -2324,11 +2341,12 @@
 							AND tilausrivi.otunnus	= '$id'
 							AND tilausrivi.tyyppi  != 'D'";
 				$viestirar = pupe_query($query);
+				$viestirarrow = mysql_fetch_assoc($viestirar);
+
+				$viesti = trim("$asiakkaan_kuljetusohje $viestirarrow[viesti]");
 			}
 
-			$viestirarrow = mysql_fetch_assoc($viestirar);
-
-			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viestirarrow[viesti]</textarea></td></tr>";
+			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viesti</textarea></td></tr>";
 
 			if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 				if (strpos($tunnukset,',') !== false) {
@@ -2772,7 +2790,7 @@
 			elseif ($otsik["varasto"] == '') {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]'
+							where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}

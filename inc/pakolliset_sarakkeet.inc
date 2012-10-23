@@ -189,6 +189,18 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$eiyhtiota 	 = "EILAATIJAA";
 				$saakopoistaa = TRUE;
 				break;
+			case "rekisteritiedot_lisatiedot" :
+				$pakolliset  = array("VALMISTENUMERO");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
+			case "yhteensopivuus_valmistenumero" :
+				$pakolliset  = array("TUOTENO", "VALMISTENUMERO");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

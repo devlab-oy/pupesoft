@@ -585,6 +585,14 @@ if (!function_exists('rivi_lasku')) {
 	function rivi_lasku ($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
+		if($laskutyyppi == 10 or $laskutyyppi == 12) {
+			$row["hinta"] = 0;
+			$row["rivihinta"] = 0;
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$row["ale{$alepostfix}"] = 0;
+			}
+		}
+		
 		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		if ($row["vienti_kurssi"] > 0) {
@@ -709,7 +717,7 @@ if (!function_exists('rivi_lasku')) {
 		if ($laskutyyppi == 1) {
 			list($thispage, $kala, $summa, $arvo) = rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
-		elseif ($laskutyyppi == 2) {
+		elseif ($laskutyyppi == 2 or $laskutyyppi == 12) {
 			list($thispage, $kala, $summa, $arvo) = rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi);
 		}
 		elseif ($laskutyyppi == 4 or $laskutyyppi == 8) {
@@ -2072,7 +2080,7 @@ if (!function_exists("tulosta_lasku")) {
 				$rivigrouppaus = TRUE;
 			}
 
-			if (($laskutyyppi != 2) or ($laskutyyppi == 2 and $row["perheid"] > 0 and $row["perheid"] == $row["tunnus"])) {
+			if (($laskutyyppi != 2 and $laskutyyppi != 12) or (($laskutyyppi == 2 or $laskutyyppi == 12) and $row["perheid"] > 0 and $row["perheid"] == $row["tunnus"])) {
 				$yhteensamaara += $row["kpl"];
 			}
 
@@ -2209,7 +2217,7 @@ if (!function_exists("tulosta_lasku")) {
 				else {
 					$query = "	SELECT *
 								FROM varastopaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 								ORDER BY alkuhyllyalue,alkuhyllynro
 								LIMIT 1";
 				}

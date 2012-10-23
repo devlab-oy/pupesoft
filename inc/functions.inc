@@ -19024,7 +19024,7 @@ if (!function_exists('saako_vieda_varastoon')) {
 			$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND uusiotunnus = '{$otunnus}'
+						AND uusiotunnus = '{$saapumisen_tunnus}'
 						AND tyyppi = 'O'
 						AND kpl = 0
 						AND suuntalava != 0";

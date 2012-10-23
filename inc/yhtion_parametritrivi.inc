@@ -3160,8 +3160,8 @@
 
 		$sel = $trow[$i] == 'X' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("Lapsituotteille lasketaan kaikki alennukset")."</option>";
-		$ulos .= "<option value = 'X' $sel>".t("Lapsituotteille ei anneta isätuotteen alennuksia")."</option>";
+		$ulos .= "<option value = ''>".t("Tuoteperheiden lapsituotteille lasketaan asiakashinta ja -alennus")."</option>";
+		$ulos .= "<option value = 'X' $sel>".t("Tuoteperheiden lapsituotteille ei lasketa asiakashintoja eikä -alennuksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

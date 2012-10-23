@@ -68,6 +68,25 @@
 
 		echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
 
+		if ($piilotetut_varastot == 'on') {
+			$piilotetut_select = "checked='checked'";
+		}
+		else {
+			$piilotetut_select = "";
+		}
+		echo "<table>";
+		echo "<tr>";
+		echo "<th valign=top>".t('N‰yt‰ piilotetut varastot')."</th>";
+
+		echo "<td>";
+		echo "<form method='POST'>";
+		echo "<input type='checkbox' {$piilotetut_select} name='piilotetut_varastot' onclick='submit();' />";
+		echo "</form>";
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "<br />";
+		
 		// piirrell‰‰n formi
 		echo "<form name='formi' method='post' autocomplete='OFF'>";
 		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
@@ -237,9 +256,14 @@
 
 		echo "</select></td></tr>";
 
+		if($piilotetut_varastot != 'on') {
+			$piilotetut_varastot_where = ' AND tyyppi != "P"';
+		}
+
 		$query  = "	SELECT tunnus, nimitys
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
+					{$piilotetut_varastot_where}
 					ORDER BY tyyppi, nimitys";
 		$vares = pupe_query($query);
 

@@ -322,7 +322,7 @@
 		// haetaan kaikki varastot
 		$query  = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
-					WHERE $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
 					ORDER BY yhtio, tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 

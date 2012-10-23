@@ -538,15 +538,50 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$suuntalavan_hyllyvali = mysql_real_escape_string($suuntalavan_hyllyvali);
 		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
 
-		$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
-												$suuntalavan_hyllyalue,
-												$suuntalavan_hyllynro,
-												$suuntalavan_hyllyvali,
-												$suuntalavan_hyllytaso);
+		# Koko suuntalava voidaan viedä vain reservipaikalle, jossa ei ole tuotteita.
+		$options = array('reservipaikka' => 'K');
+		$hyllypaikka_ok = tarkista_varaston_hyllypaikka($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso, $options);
 
-		if ($paivitetyt_rivit > 0) {
-			echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
-			$vietiinko_koko_suuntalava = 'joo';
+		# Jos hyllypaikka on ok, tarkistetaan että siellä ei ole tuotteita
+		if (!$hyllypaikka_ok) {
+			echo "<font class='error'>".t("Hyllypaikkaa ei löydy tai se ei ole reservipaikka")."</font></br>";
+
+			# Takaisin samaan näkymään
+			$toiminto = 'suuntalavat';
+			$tee = 'vie_koko_suuntalava';
+		}
+		else {
+			$query = "SELECT *
+						FROM tuotepaikat
+						WHERE yhtio		= '{$kukarow['yhtio']}'
+						AND hyllyalue	= '$suuntalavan_hyllyalue'
+						AND hyllynro	= '$suuntalavan_hyllynro'
+						AND hyllyvali	= '$suuntalavan_hyllyvali'
+						AND hyllytaso	= '$suuntalavan_hyllytaso'";
+			$result = pupe_query($query);
+			$tuotepaikat = mysql_num_rows($result);
+
+			# Onko paikalla tuotteita
+			if ($tuotepaikat > 0) {
+				echo "<font class='error'>".t("Tuotepaikalla on jotain tuotteita")."!</font><br>";
+				# Takaisin samaan näkymään
+				$toiminto = 'suuntalavat';
+				$tee = 'vie_koko_suuntalava';
+			}
+			else {
+
+				# OK, päivitetään tilausrivien hyllypaikat
+				$paivitetyt_rivit = paivita_hyllypaikat($suuntalavan_tunnus,
+														$suuntalavan_hyllyalue,
+														$suuntalavan_hyllynro,
+														$suuntalavan_hyllyvali,
+														$suuntalavan_hyllytaso);
+
+				if ($paivitetyt_rivit > 0) {
+					echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
+					$vietiinko_koko_suuntalava = 'joo';
+				}
+			}
 		}
 	}
 }

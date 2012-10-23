@@ -1,24 +1,17 @@
 body {
 	padding: 0;
 	margin: 0;
-	font-family: 'Arial';
-	font-size: 1em;
+	font-family: 'Verdana';
+	font-size: 0.8em;
 }
 
-A, A:visited {
-	color: #c0c0c0; text-decoration:none;
+a, a:visited {
+	padding-top: 1px;
+	color: #5050E0; text-decoration:none;
 }
 
 .error {
 	color: #ff6666;
-}
-
-table {
-	/*width: 100%; */
-	/*text-align: center;*/
-	padding: 0;
-	margin: 0;
-	/*font-size: 0.90em;*/
 }
 
 .center {
@@ -27,8 +20,9 @@ table {
 
 h1 {
 	margin: 0;
-	padding: 0;
-	font-size: 1.3em;
+	padding-top: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
 }
 
 form {
@@ -38,6 +32,20 @@ form {
 select {
 	font-size: 1em;
 }
+
+table {
+	width: 100%;
+	line-height: 10px;
+}
+
+li {
+	margin: 10px;
+}
+
+.search  {
+	line-height: 5px;
+}
+
 /******************************/
 
 .header {
@@ -49,7 +57,7 @@ select {
 
 .main {
 	width: 100%;
-	/*background-color: #ccFFcc;*/
+	background-color: #fff;
 }
 
 .controls {
@@ -63,13 +71,9 @@ select {
 	font-size: 1.3em;
 	width: 60px;
 }
-input {
-	font-size: 1em;
-	width: 100px;
-}
 
 .radio {
-	width: 8px;
+
 }
 
 .right {
@@ -82,10 +86,9 @@ input {
 	float:left;
 }
 
-button {
-	font-size: 1.1em;
-	margin: 3px;
-	float:left;
+.button {
+	height: 24px;
+	font-size: 1.15em;
 }
 
 #takaisin {

@@ -388,7 +388,7 @@
 		if ($laskurow["varasto"] == 0) {
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]'
+						where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
 						order by alkuhyllyalue,alkuhyllynro
 						limit 1";
 		}

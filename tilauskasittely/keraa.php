@@ -1431,14 +1431,15 @@
 
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
 					
-					$query = "SELECT kuljetusohje
+					$query = "	SELECT kuljetusohje
 								FROM asiakas
-								WHERE yhtio = '{$laskurow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}';";
+								WHERE yhtio = '{$laskurow['yhtio']}' 
+								AND tunnus = '{$laskurow['liitostunnus']}';";
 					$resul = pupe_query($query);
 
 					if (mysql_num_rows($resul) == 1) {
 						$temprow = mysql_fetch_assoc($resul);
-						$asiakkaan_kuljetusohje = $temprow["ohje"];
+						$asiakkaan_kuljetusohje = $temprow["kuljetusohje"];
 					}
 					else {
 						$asiakkaan_kuljetusohje = "";

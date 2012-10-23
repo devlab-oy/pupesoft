@@ -2314,7 +2314,6 @@
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
 
-				#echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 				echo "</select></td>";
 			}
 			else {
@@ -2330,6 +2329,9 @@
 							AND otsikkonro		= '$id'
 							AND rahtikirjanro	= '$rakirno'";
 				$viestirar = pupe_query($query);
+				$viestirarrow = mysql_fetch_assoc($viestirar);
+
+				$viesti = trim($viestirarrow["viesti"]);
 			}
 			else {
 				$query = "	SELECT GROUP_CONCAT(DISTINCT if(tuote.kuljetusohje!='',tuote.kuljetusohje,NULL) separator '. ') viesti
@@ -2339,10 +2341,10 @@
 							AND tilausrivi.otunnus	= '$id'
 							AND tilausrivi.tyyppi  != 'D'";
 				$viestirar = pupe_query($query);
-			}
+				$viestirarrow = mysql_fetch_assoc($viestirar);
 
-			$viestirarrow = mysql_fetch_assoc($viestirar);
-			$viesti = trim("$asiakkaan_kuljetusohje $viestirarrow[viesti]");
+				$viesti = trim("$asiakkaan_kuljetusohje $viestirarrow[viesti]");
+			}
 
 			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viesti</textarea></td></tr>";
 

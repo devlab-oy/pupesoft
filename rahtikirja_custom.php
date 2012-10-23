@@ -662,7 +662,7 @@ function pupe_rahtikirja_fetch($otsikkonro) {
 function pupe_varasto_fetch_all() {
 	$query = sprintf("	SELECT tunnus, nimitys
 						FROM varastopaikat
-						WHERE yhtio = '%s'
+						WHERE yhtio = '%s' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
 
 	$result = pupe_query($query);

@@ -279,7 +279,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
@@ -348,7 +348,7 @@
 						AND uusiotunnus > 0
 						LIMIT 1";
 			$vresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($vresult) == 0) {
 				echo "<td class='back'>
 						<form method='post' autocomplete='off'>

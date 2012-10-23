@@ -1465,7 +1465,7 @@ if ($tee == "MUOKKAA") {
 
 			if ($laskurow["tilaustyyppi"] == "M") {
 				echo "	<tr><th>".t("Viite")."</th>
-						<td><input type='text' size='30' name='viesti' value='$laskurow[viite]'><input type='submit' value='".t("Tallenna viite")."'></td></tr>";
+						<td><input type='text' size='30' maxlength='25' name='viesti' value='$laskurow[viite]'><input type='submit' value='".t("Tallenna viite")."'></td></tr>";
 			}
 			else {
 				echo "	<tr><th>".t("Viite")."</th>

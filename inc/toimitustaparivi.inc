@@ -731,6 +731,7 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$chk1 = '';
 		$chk2 = '';
+		$chk3 = '';
 
 		if ($trow[$i] == "k") {
 			$chk1 = 'selected';
@@ -738,10 +739,14 @@
 		if ($trow[$i] == "") {
 			$chk2 = 'selected';
 		}
+		if ($trow[$i] == "t") {
+			$chk3 = 'selected';
+		}
 
 		$ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittelyä")."</option>";
-		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
-
+		$ulos .= "<option value='t' $chk3>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
+		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely per asiakas")."</option>";
+		
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

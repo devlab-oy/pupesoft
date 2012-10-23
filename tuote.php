@@ -423,7 +423,14 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
+			echo "<td style='font-weight:bold;'>";
+
+			if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
+				echo "<a href='{$palvelin2}yllapito.php?toim=tuote&tunnus={$tuoterow["tunnus"]}&lopetus=$tkysy_lopetus'>{$tuoterow["tuoteno"]}</a>";
+			}
+			else {
+				echo "$tuoterow[tuoteno]";
+			}
 
 			//haetaan orginaalit
 			if (table_exists("tuotteen_orginaalit")) {

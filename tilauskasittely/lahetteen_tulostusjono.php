@@ -93,7 +93,7 @@
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
 
-		require ("raportit/naytatilaus.inc");		
+		require ("raportit/naytatilaus.inc");
 		echo "<br><br><br>";
 		$tee2 = $vanha_tee2;
 
@@ -678,7 +678,7 @@
 		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
 					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
 					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
@@ -708,7 +708,7 @@
 		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
-					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa
+					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
 					GROUP BY varastopaikat.maa
 					ORDER BY varastopaikat.maa";
 		$result = mysql_query($query) or pupe_error($query);

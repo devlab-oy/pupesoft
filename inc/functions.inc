@@ -13657,7 +13657,7 @@ if (!function_exists('tulosta_reittietiketti')) {
 					{XS;I,0001,0002C3210|}
 					".chr(12);
 
-		if (trim($reittietikettitulostin) != '') {
+		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {
 			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
 		}
 	}
@@ -17518,39 +17518,6 @@ if (!function_exists('raaka_aineiden_riitto')) {
 	}
 }
 
-if (!function_exists("mod11_tarkiste")) {
-	function mod11_tarkiste ($numero) {
-
-		$tulos = "";
-		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
-
-		# K‰‰nnet‰‰n stringi takaperin
-		$numero_rev = strrev($numero);
-
-		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
-			# Lasketaan tulo ja kumuloidaan
-			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
-		}
-
-		# lasketaan tarkiste ja konkatenoidaan peruslukuun
-		$jaannos = $summa % 11;
-
-		switch ($jaannos) {
-			case 0:
-				$tulos = $numero . 0;
-				break;
-			case 1:
-				$tulos = $numero . 0;
-				break;
-			default:
-				$tulos = $numero . (11 - $jaannos);
-				break;
-		}
-
-		return $tulos;
-	}
-}
-
 if (!function_exists("mod10_tarkiste")) {
 	function mod10_tarkiste ($numero) {
 
@@ -19519,6 +19486,24 @@ if (!function_exists('luottotilanne')) {
 	}
 }
 
+if (!function_exists('excel_column_name')) {
+	function excel_column_name($luku) {
+		$luku = (int)$luku;
+		if ($luku < 1) {
+			return ' ';
+		}
+		$string	 = "";
+		$number	 = $luku - 1;
+
+		while ($number >= 0) {
+			$string	 = chr($number % 26 + 65) . $string;
+			$number	 = $number / 26 - 1;
+		}
+
+		return $string;
+	}
+
+}
 
 if (!function_exists('triangulation')) {
 	function triangulation($tunnukset) {

@@ -121,6 +121,14 @@
 				$new_res = pupe_query($query);
 				$new_row = mysql_fetch_assoc($new_res);
 
+				//haetaan kirjoittimen tiedot
+				$query = "	SELECT *
+							FROM kirjoittimet
+							WHERE yhtio='{$kukarow['yhtio']}'
+							AND tunnus='{$reittietikettitulostin}'";
+				$kirjoitin_res = pupe_query($query);
+				$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
+
 				$erat = array('tilaukset' => array(), 'pakkaukset' => array());
 
 				// otetaan duplikaatit pois.
@@ -198,6 +206,13 @@
 							$res = pupe_query($query);
 							$row = mysql_fetch_assoc($res);
 
+							$unifaun_kaytossa = FALSE;
+
+							if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
+									($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
+								$unifaun_kaytossa = TRUE;
+							}
+
 							if ($toitarow['tulostustapa'] == 'E' and ((is_numeric($era_row['sscc_ulkoinen']) and (int) $era_row['sscc_ulkoinen'] > 0) or (!is_numeric($era_row['sscc_ulkoinen']) and (string) $era_row['sscc_ulkoinen'] != ""))) {
 								if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
 									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
@@ -220,10 +235,6 @@
 										AND selite = '{$new_row['selite']}'";
 							$toitares = pupe_query($query);
 							$toitarow = mysql_fetch_assoc($toitares);
-
-							$query = "SELECT unifaun_nimi FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$reittietikettitulostin}'";
-							$kirjoitin_res = pupe_query($query);
-							$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
 							$query = "SELECT * FROM maksuehto WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['maksuehto']}'";
 							$mehto_res = pupe_query($query);
@@ -271,67 +282,107 @@
 
 							while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
-								$row['pakkausid'] = $keraysera_row['pakkausnro'];
-								$row['kollilaji'] = $keraysera_row['kollilaji'];
-								$row['sscc'] = $keraysera_row['sscc'];
+								if ($unifaun_kaytossa) {
+									$row['pakkausid'] = $keraysera_row['pakkausnro'];
+									$row['kollilaji'] = $keraysera_row['kollilaji'];
+									$row['sscc'] = $keraysera_row['sscc'];
 
-								$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
+									$row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 
-								if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
-									$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+									if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+										$unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+									}
+									elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+										$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+									}
+
+									$unifaun->setYhtioRow($yhtiorow);
+									$unifaun->setKukaRow($kukarow);
+									$unifaun->setPostiRow($row);
+									$unifaun->setToimitustapaRow($toitarow);
+									$unifaun->setMehto($mehto);
+
+									$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
+
+									$unifaun->setRahtikirjaRow($rakir_row);
+
+									$unifaun->setYhteensa($row['summa']);
+									$unifaun->setViite($row['viesti']);
+
+									$unifaun->_getXML();
+
+									$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+									$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+									$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
+
+									$query = "	SELECT tuote.vakkoodi,
+												{$selectlisa},
+												ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
+												FROM kerayserat
+												{$joinlisa}
+												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+												JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+												WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+												AND kerayserat.sscc = '{$row['sscc']}'
+												GROUP BY 1,2,3,4";
+									$pakkaus_info_res = pupe_query($query);
+									$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+									$kollitiedot = array(
+										'maara' => $keraysera_row['maara'],
+										'paino' => $keraysera_row['tuotemassa'],
+										'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
+										'leveys' => $pakkaus_info_row['leveys'],
+										'korkeus' => $pakkaus_info_row['korkeus'],
+										'syvyys' => $pakkaus_info_row['syvyys'],
+										'vakkoodi' => $pakkaus_info_row['vakkoodi'],
+										'kuutiot' => $pakkaus_info_row['kuutiot']
+									);
+
+									$unifaun->setContainerRow($kollitiedot);
+									$unifaun->ftpSend();
 								}
-								elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
-									$unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+								else {
+									$selectlisa   = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
+									$joinlisa 	  = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
+									$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
+
+									$query = "	SELECT {$selectlisa},
+												ROUND(SUM(tuote.tuotemassa * kerayserat.kpl) + IFNULL(pakkaus2.oma_paino, 0), 1) tuotemassa,
+												ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
+												FROM kerayserat
+												{$joinlisa}
+												JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+												JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+												LEFT JOIN pakkaus AS pakkaus2 ON (pakkaus2.yhtio = kerayserat.yhtio AND pakkaus2.tunnus = kerayserat.pakkaus)
+												WHERE kerayserat.yhtio 	= '{$kukarow['yhtio']}'
+												AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'
+												GROUP BY 1,2,3";
+									$pakkaus_info_res = pupe_query($query);
+									$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
+
+									$params = array(
+										'tilriv' => $row['tunnus'],//tilausnumero
+										'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+										'sscc' => $keraysera_row['sscc'],
+										'toimitustapa' => $row['toimitustapa'],
+										'rivit' => $keraysera_row['maara'],//tilausrivien määrä
+										'paino' => $pakkaus_info_row['tuotemassa'],
+										'tilavuus' => $pakkaus_info_row['kuutiot'],
+										'lask_nimi' => $rakir_row['toim_nimi'],
+										'lask_nimitark' => $rakir_row['toim_nimitark'],
+										'lask_osoite' => $rakir_row['toim_osoite'],
+										'lask_postino' => $rakir_row['toim_postino'],
+										'lask_postitp' => $rakir_row['toim_postitp'],
+										'lask_viite' => $row['viesti'],
+										'lask_merkki' => $row['ohjausmerkki'],
+										'reittietikettitulostin' => $kirjoitin_row['komento'],
+									);
+
+									tulosta_reittietiketti($params);
 								}
-
-								$unifaun->setYhtioRow($yhtiorow);
-								$unifaun->setKukaRow($kukarow);
-								$unifaun->setPostiRow($row);
-								$unifaun->setToimitustapaRow($toitarow);
-								$unifaun->setMehto($mehto);
-
-								$unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
-
-								$unifaun->setRahtikirjaRow($rakir_row);
-
-								$unifaun->setYhteensa($row['summa']);
-								$unifaun->setViite($row['viesti']);
-
-								$unifaun->_getXML();
-
-								$selectlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "tuote.tuoteleveys AS leveys, tuote.tuotekorkeus AS korkeus, tuote.tuotesyvyys AS syvyys" : "pakkaus.leveys, pakkaus.korkeus, pakkaus.syvyys";
-								$joinlisa = $keraysera_row['kollilaji'] == 'MUU KOLLI' ? "" : "JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)";
-								$puukotuslisa = $keraysera_row['kollilaji'] != 'MUU KOLLI' ? "* IF(pakkaus.puukotuskerroin > 0, pakkaus.puukotuskerroin, 1)" : "";
-
-								$query = "	SELECT tuote.vakkoodi,
-											{$selectlisa},
-											ROUND(SUM((tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * kerayserat.kpl) {$puukotuslisa}), 2) as kuutiot
-											FROM kerayserat
-											{$joinlisa}
-											JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
-											JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-											WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-											AND kerayserat.sscc = '{$row['sscc']}'
-											GROUP BY 1,2,3,4";
-								$pakkaus_info_res = pupe_query($query);
-								$pakkaus_info_row = mysql_fetch_assoc($pakkaus_info_res);
-
-								$kollitiedot = array(
-									'maara' => $keraysera_row['maara'],
-									'paino' => $keraysera_row['tuotemassa'],
-									'pakkauskuvaus' => $keraysera_row['pakkauskuvaus'],
-									'leveys' => $pakkaus_info_row['leveys'],
-									'korkeus' => $pakkaus_info_row['korkeus'],
-									'syvyys' => $pakkaus_info_row['syvyys'],
-									'vakkoodi' => $pakkaus_info_row['vakkoodi'],
-									'kuutiot' => $pakkaus_info_row['kuutiot']
-								);
-
-								$unifaun->setContainerRow($kollitiedot);
-								$unifaun->ftpSend();
+								$sscc_chk_arr[$sscc_chk_row['sscc_ulkoinen']] = $sscc_chk_row['sscc_ulkoinen'];
 							}
-
-							$sscc_chk_arr[$sscc_chk_row['sscc_ulkoinen']] = $sscc_chk_row['sscc_ulkoinen'];
 						}
 					}
 				}

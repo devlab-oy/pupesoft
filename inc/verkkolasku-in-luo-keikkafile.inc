@@ -586,9 +586,12 @@
 								AND tyyppi = 'O'";
 					$loytyiko_lapsi_res = pupe_query($query);
 
+					// Jos luodaan lapsirivi tässä kohtaa, ja isä on jo tuloutettu, lapsi ei saa olla tuloutettu!!
 					if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
 
 						echo "Lapsiriviä ei löytynyt! Perustetaan se.<br><br>";
+
+						$saldo_varattu = $lapsitieto['varattu'] + $lapsitieto['kpl'];
 
 						$lisainsert = "	INSERT INTO tilausrivi SET
 										yhtio			= '{$lapsitieto['yhtio']}',
@@ -602,8 +605,8 @@
 										nimitys			= '{$lapsitieto['nimitys']}',
 										yksikko			= '{$lapsitieto['yksikko']}',
 										tilkpl			= '{$lapsitieto['tilkpl']}',
-										varattu			= '{$lapsitieto['varattu']}',
-										kpl 			= '{$lapsitieto['kpl']}',
+										varattu			= '{$saldo_varattu}',
+										kpl 			= '0',
 										ale1			= '{$ale['ale1']}',
 										ale2			= '{$ale['ale2']}',
 										ale3			= '{$ale['ale3']}',

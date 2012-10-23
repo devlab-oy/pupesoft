@@ -554,7 +554,7 @@
 			$assel2 = "CHECKED";
 		}
 		else {
-			$asiakasstring = " concat(lasku.ytunnus, '<br>', lasku.nimi) ";
+			$asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark) ";
 			$assel1 = "CHECKED";
 			$assel2 = "";
 		}

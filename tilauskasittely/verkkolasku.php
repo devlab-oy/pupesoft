@@ -2200,7 +2200,7 @@
 							while ($tilrow = mysql_fetch_assoc($tilres)) {
 
 								// Näytetään vain perheen isä ja summataan lasten hinnat isäriville
-								if ($laskutyyppi == 2) {
+								if ($laskutyyppi == 2 or $laskutyyppi == 12) {
 									if ($tilrow["perheid"] > 0) {
 										// kyseessä on isä
 										if ($tilrow["perheid"] == $tilrow["tunnus"]) {
@@ -2312,7 +2312,7 @@
 									$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 								}
 
-								if ($laskutyyppi == "7") {
+								if ($laskutyyppi == 7) {
 
 									if ($tilrow["eankoodi"] != "") {
 										$tilrow["kommentti"] = "EAN: $tilrow[eankoodi]|$tilrow[kommentti]";
@@ -2393,10 +2393,10 @@
 									elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 								}
 								elseif ($lasrow["chn"] == "112") {
-									finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
+									finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat, $laskutyyppi);
 								}
 								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
+									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat, $laskutyyppi);
 								}
 								else {
 									pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);

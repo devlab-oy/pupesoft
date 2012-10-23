@@ -1301,56 +1301,77 @@ if (!function_exists('loppu_tarjous')) {
 				$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);
 				$pdf_tarjous->draw_text(575-$oikpos, $kuha, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
 
-				$veroteksti = "";
+				$result = t_avainsana('TARJOUS_VAKIOTE');
+				$vakioteksti_row = mysql_fetch_assoc($result);
+				$vakioteksti = $vakioteksti_row['selitetark'];
 
-				if ($laskurow["vienti"] != "") {
-					$veroteksti = ""; // Laitetaan tyhjänä
-				}
-				elseif ($kaanteinen_verotus === TRUE) {
-					$veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
-				}
-				elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
-		        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
-				}
-				elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
-		        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
-				}
-				elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
-					if ($yhtiorow['alv_kasittely'] != '') {
-			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+				if ($vakioteksti == "") {
+
+					$veroteksti = "";
+
+					if ($laskurow["vienti"] != "") {
+						$veroteksti = ""; // Laitetaan tyhjänä
+					}
+					elseif ($kaanteinen_verotus === TRUE) {
+						$veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
+					}
+					elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+						$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+					}
+					elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
+						$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+					}
+					elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
+						if ($yhtiorow['alv_kasittely'] != '') {
+							$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+						}
+						else {
+							$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+						}
 					}
 					else {
-			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+						if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+							$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+						}
+						else {
+							$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+						}
 					}
-				}
-				else {
-					if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
-			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+
+					if ($laskurow["rahtivapaa"] == "") $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+
+					$pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
+
+
+					if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
+						$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
+						$tkka = date("m",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
+						$tppa = date("d",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
 					}
 					else {
-			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+						$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+						$tkka = date("m",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+						$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+					}
+
+					$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
+
+					$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
+				}
+				else {
+					if (strlen($vakioteksti) > 110) {
+						$vakioteksti = wordwrap($vakioteksti, 110, "\n");
+						$_y = $kuha-24;
+						foreach (explode("\n", $vakioteksti) as $teksi) {
+							$pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
+							$_y = $_y - 10;
+						}
+					}
+					else {
+						$pdf_tarjous->draw_text(30,  $kuha-24, $vakioteksti, $page_tarjous[$sivu], $norm);
 					}
 				}
 
-				if ($laskurow["rahtivapaa"] == "") $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
-
-				$pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
-
-
-				if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
-					$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
-					$tkka = date("m",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
-					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
-				}
-				else {
-					$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-					$tkka = date("m",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
-				}
-
-				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
-
-				$pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
 				$pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen", $kieli)."!", $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(30,  $kuha-80, t("Kunnioittavasti", $kieli).",", $page_tarjous[$sivu], $boldi);
 

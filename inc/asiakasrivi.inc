@@ -943,6 +943,8 @@
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
+		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
 
 		$ulos .= "</select></td>";
 

@@ -1586,6 +1586,9 @@
 				}
 			}
 			else {
+
+				echo "<br>Ei löytynyt rivejä!!!! Debug tuotteelle {$rtuoteno[$i]['tuoteno']}<br><pre>",var_dump($rtuoteno[$i]),"</pre><br><br>";
+
 				// ei löydy tai joku muu virhe
 				#echo "Virheellisiä kappalemääriä tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
 				#echo "7 Debug VIRHEET++: tilausrivi $tilausrivirow[tunnus] tuoteno {$rtuoteno[$i]['tuoteno']} tuoteno2 {$rtuoteno[$i]['tuoteno2']} tuoteno3: {$rtuoteno[$i]['tuoteno3']}<br><br>";

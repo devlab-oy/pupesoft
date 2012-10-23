@@ -176,7 +176,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 						AND tuoteno = '{$chk_row['tuoteno']}'
 						AND kpl = '{$chk_row['kpl']}'
 						AND varattu = '{$chk_row['varattu']}'
-						AND tyyppi = 'O'";
+						AND tyyppi = 'O'
+						AND tunnus != '{$chk_row['tunnus']}'";
 			$loytyiko_lapsi_res = pupe_query($query);
 
 			if (mysql_num_rows($loytyiko_lapsi_res) == 0) {

@@ -764,7 +764,7 @@
 		//Tarkistetaan onko paikka validi
 		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
 
-		if ($saldo === FALSE) {
+		if ($saldo === FALSE or $saldo == 0) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 

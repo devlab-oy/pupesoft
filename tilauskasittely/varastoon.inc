@@ -162,7 +162,6 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
-				and tilausrivi.perheid != 0
 				ORDER BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 	$chk_res = pupe_query($query);
 

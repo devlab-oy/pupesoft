@@ -241,6 +241,17 @@
 							$rakir_res = pupe_query($query);
 							$rakir_row = mysql_fetch_assoc($rakir_res);
 
+							$query = "	SELECT DISTINCT viesti
+										FROM rahtikirjat
+										WHERE otsikkonro = {$row['tunnus']};";
+							$viesti_res = pupe_query($query);
+
+							$tmpviesti = "";
+							while ($viesti_row = mysql_fetch_assoc($viesti_res)) {
+								$tmpviesti = trim( "$tmpviesti {$viesti_row['viesti']}" );
+							}
+							$rakir_row['viesti'] = trim("{$rakir_row['viesti']} $tmpviesti");
+
 							$query = "	SELECT IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkaus) AS pakkauskuvaus,
 										IF(kerayserat.pakkaus = '999', 'MUU KOLLI', pakkaus.pakkauskuvaus) AS kollilaji,
 										kerayserat.pakkausnro,

@@ -41,11 +41,10 @@
 		$laji = "A";
 		$tilastoloppu = '001';
 	}
-	else if ($tapa == "vienti") {
+	elseif ($tapa == "vienti") {
 		$laji = "D";
 		$tilastoloppu = '002';
 	}
-// else $tapa == yhdistetty, ei tehd‰ ascii-aineistoa eli ei tarvita n‰it‰ tekstej‰
 
 	echo "<font class='head'>".t("Intrastat-ilmoitukset")."</font><hr>";
 
@@ -60,16 +59,17 @@
 		}
 
 		// tehd‰‰n kauniiseen muotoon annetun kauden eka ja vika pvm
-		$vva = date("Y",mktime(0, 0, 0, $kk, 1, $vv));
-		$kka = date("m",mktime(0, 0, 0, $kk, 1, $vv));
-		$ppa = date("d",mktime(0, 0, 0, $kk, 1, $vv));
-		$vvl = date("Y",mktime(0, 0, 0, $kk+1, 0, $vv));
-		$kkl = date("m",mktime(0, 0, 0, $kk+1, 0, $vv));
-		$ppl = date("d",mktime(0, 0, 0, $kk+1, 0, $vv));
+		$vva = date("Y", mktime(0, 0, 0, $kk, 1, $vv));
+		$kka = date("m", mktime(0, 0, 0, $kk, 1, $vv));
+		$ppa = date("d", mktime(0, 0, 0, $kk, 1, $vv));
+		$vvl = date("Y", mktime(0, 0, 0, $kk+1, 0, $vv));
+		$kkl = date("m", mktime(0, 0, 0, $kk+1, 0, $vv));
+		$ppl = date("d", mktime(0, 0, 0, $kk+1, 0, $vv));
 
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
-					where nimi != '' and eu != ''
+					where nimi != ''
+					and eu != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -80,33 +80,32 @@
 		$eumaat = substr($eumaat, 0, -1);
 
 		$ee_yhdistettyorder = "";
-		$ee_kentat = "";
-		$ee_group = "";
+		$ee_kentat 			= "";
+		$ee_group 			= "";
 
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
-			$maalisa = "maamaara in ('', '$maa') and maalahetys in ('',$eumaat) and maalahetys != '$maa'";
+			$maalisa = " maamaara in ('', '$maa') and maalahetys in ('',$eumaat) and maalahetys != '$maa' ";
 		}
-		else if ($tapa == "vienti") {
-			$maalisa = "maalahetys in ('', '$maa') and maamaara in ('',$eumaat) and maamaara != '$maa'";
+		elseif ($tapa == "vienti") {
+			$maalisa = " maalahetys in ('', '$maa') and maamaara in ('',$eumaat) and maamaara != '$maa' ";
 		}
-		else if ($tapa == "yhdistetty") {
-			$maalisa = "(maamaara != maalahetys AND
+		elseif ($tapa == "yhdistetty") {
+			$maalisa = " (maamaara != maalahetys AND
 							(
 								(maalahetys in ('', '$maa') AND maamaara in ('',$eumaat))
 							OR
 								(maalahetys in ('', $eumaat) AND maamaara in ('','$maa'))
 							)
-						)";
-			$ee_yhdistettyorder = "if(maamaara='$maa', 0, 1), ";
-			if ($maa == "EE") {
-				$ee_kentat = "lasku.valkoodi, tullinimike.dm, substr(lasku.toimitusehto, 1, 3) as toim_ehto, ";
-				$ee_group = ", valkoodi, dm, toim_ehto";
-			}
+						) ";
+			$ee_yhdistettyorder = " if(maamaara='$maa', 0, 1), ";
+
+			$ee_kentat = " lasku.valkoodi, tullinimike.dm, substr(lasku.toimitusehto, 1, 3) as toim_ehto, ";
+			$ee_group = ", valkoodi, dm, toim_ehto ";
 		}
 
 		if ($lisavar == "S") {
-			$lisavarlisa = "  and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
+			$lisavarlisa = " and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
 		}
 		else {
 			$lisavarlisa = "";
@@ -290,9 +289,9 @@
 
 		if ($outputti == "tilasto") {
 			// tehd‰‰n tilastoarvot listausta
-			$tilastoarvot = "<table>
-				<tr>";
-				if ($maa=="EE") {
+			$tilastoarvot = "<table><tr>";
+
+				if ($maa == "EE") {
 					$tilastoarvot .= "
 						<th>".t("Luontipvm")."</th>
 						<th>".t("Vuosi")."</th>
@@ -336,7 +335,7 @@
 				}
 
 				if (isset($worksheet)) {
-					if ($maa=="EE") {
+					if ($maa == "EE") {
 						$worksheet->write($excelrivi, 1, t("Luontipvm"), $format_bold);
 						$worksheet->write($excelrivi, 2, t("Vuosi"), $format_bold);
 						$worksheet->write($excelrivi, 3, t("Kuukausi"), $format_bold);
@@ -544,7 +543,7 @@
 			if ($outputti == "tilasto") {
 				// tehd‰‰n tilastoarvolistausta
 				$tilastoarvot .= "<tr>";
-				if ($maa == "EE"){
+				if ($maa == "EE") {
 					$ee_pvm = date("d.m.Y");
 					$ee_ilmoitus = ((($row["maamaara"] == $maa or $row["maamaara"] == '') and $row["maalahetys"] != $maa) ? 'S' : 'L');
 					$ee_rivi = sprintf('%05d', $lask);
@@ -612,7 +611,7 @@
 				}
 
 				if (isset($worksheet)) {
-					if ($maa=="EE") {
+					if ($maa == "EE") {
 						$worksheet->write($excelrivi, 1, $ee_pvm);
 						$worksheet->write($excelrivi, 2, $vv);
 						$worksheet->write($excelrivi, 3, $kuuka);
@@ -756,7 +755,7 @@
 			$tilastoarvot .= "</table>";
 
 			if (isset($worksheet)) {
-				if ($maa=="EE") {
+				if ($maa == "EE") {
 					$worksheet->write($excelrivi, 20, $arvoyht, $format_bold);
 				}
 				else {
@@ -945,14 +944,14 @@
 	if ($tapa == "vientituonti") $tapa = "vienti";
 	if ($tapa == "tuontivienti") $tapa = "tuonti";
 
-	if ($maa == "EE") {
+	if ($maa == "EE" and $tapa == "") {
 		$tapa = "yhdistetty";
 	}
 
-	$sel1[$outputti] = "SELECTED";
-	$sel2[$tapa]     = "SELECTED";
-	$sel3[$lahetys]  = "SELECTED";
-	$sel4[$lisavar]  = "SELECTED";
+	$sel1[$outputti] 	  = "SELECTED";
+	$sel2[$tapa]     	  = "SELECTED";
+	$sel3[$lahetys]  	  = "SELECTED";
+	$sel4[$lisavar]  	  = "SELECTED";
 	$sel5[$tapahtumalaji] = "SELECTED";
 
 	if ($excel != "") {
@@ -974,7 +973,7 @@
 				<option value='vienti' $sel2[vienti]>".t("Vienti-ilmoitus")."</option>
 				<option value='tuonti' $sel2[tuonti]>".t("Tuonti-ilmoitus")."</option>";
 				if ($maa == "EE") {
-					echo "<option value='yhdistetty' SELECTED>".t("Yhdistetty")."</option>";
+					echo "<option value='yhdistetty' $sel2[yhdistetty]>".t("Yhdistetty")."</option>";
 				}
 				echo"
 				</select>

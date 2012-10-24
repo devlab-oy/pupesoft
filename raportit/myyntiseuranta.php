@@ -217,10 +217,6 @@
 			$piilota_kappaleet_sel 	= "";
 			$einollachk 			= "";
 			$naytaennakkochk 		= "";
-			$sel_asbu				= "";
-			$sel_asbury				= "";
-			$sel_asbuos				= "";
-			$sel_tubu				= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
 			if ($ruksit[20]  != '') 		$ruk20chk  				= "CHECKED";
@@ -237,7 +233,6 @@
 			if ($ruksit[140] != '')			$ruk140chk 				= "CHECKED";
 
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
-			if ($myyntihinnat != '')   		$myyntihinnatchk		= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
@@ -261,6 +256,7 @@
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
 			if($myyjabudjetti != '')		$myyjabudjettichk		= "CHECKED";
+			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
 			echo "<table>
@@ -407,11 +403,6 @@
 				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
 				</tr>
 				<tr>
-				<th>",t("Näytä tuotteiden myyntihinnat"),"</th>
-				<td colspan='3'><input type='checkbox' name='myyntihinnat' {$myyntihinnatchk}></td>
-				<td class='back'>",t("(Toimii vain jos listaat tuotteittain)"),"</td>
-				</tr>
-				<tr>
 				<th>",t("Näytä sarjanumerot"),"</th>
 				<td colspan='3'><input type='checkbox' name='sarjanumerot' {$sarjachk}></td>
 				<td class='back'></td>
@@ -503,26 +494,29 @@
 				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
+			$busel[$vertailubu] = "SELECTED";
+
 			echo "<tr>
 			<th>",t("Näytä budjetti"),"</th>";
 			echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
-			echo "<option value='asbu' {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
-			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
-			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhmäbudjetti"),"</option>";
-			echo "<option value='tubu' {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
+			echo "<option value='asbu'   {$busel["asbu"]}>",t("Asiakasbudjetti"),"</option>";
+			echo "<option value='asbuos' {$busel["asbuos"]}>",t("Asiakas-Osastobudjetti"),"</option>";
+			echo "<option value='asbury' {$busel["asbury"]}>",t("Asiakas-Tuoteryhmäbudjetti"),"</option>";
+			echo "<option value='tubu' 	 {$busel["tubu"]}>",t("Tuotebudjetti"),"</option>";
+			echo "<option value='mybu' 	 {$busel["mybu"]}>",t("Myyjäbudjetti"),"</option>";
 			echo "</select></td>
 			</tr>";
 
 			echo "<tr>
 			<th>",t("Näytä asiakaskäynnit"),"</th>";
 			echo "<td colspan='3'><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td>
-			<td class='back'>".t("Toimii vain jos listaat asiakkaittain")."</td>
+			<td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
 			</tr>";
 
 			echo "<tr>";
-			echo "<th>".t('Näytä myyjäbudjetit')."</th>";
-			echo "<td colspan='3'><input type='checkbox' name='myyjabudjetti' {$myyjabudjettichk} /></td>";
-			echo "<td class='back'>".t('Toimii vain jos listaat myyjittäin')."</td>";
+			echo "<th>".t('Näytä tilauksen liitetiedostot')."</th>";
+			echo "<td colspan='3'><input type='checkbox' name='liitetiedostot' {$liitetiedostotchk} /></td>";
+			echo "<td class='back'>".t('(Toimii vain jos listaat tilauksittain)')."</td>";
 			echo "</tr>";
 
 			echo "</table><br>";
@@ -1030,14 +1024,6 @@
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
 							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
 							$order  .= "tuote.tuoteno,";
-							$gluku++;
-						}
-
-						if ($myyntihinnat != "") {
-							$group .= ",tuote.myyntihinta";
-							$select .= "round(tuote.myyntihinta, {$yhtiorow['hintapyoristys']}) AS myyntihinta, ";
-							if (strpos($select, "'tuotelista',") === FALSE) $select .= "concat('\'',tuote.tuoteno,'\'') 'tuotelista', ";
-							$order  .= "tuote.myyntihinta,";
 							$gluku++;
 						}
 
@@ -1990,31 +1976,32 @@
 								}
 							}
 
-							if ($myyjabudjetti != '') {
+							if ($vertailubu == "mybu") {
 								if ($row['tuotemyyjä'] != 0 and !isset($row['asiakasmyyjä']) and !isset($row['myyjä'])) {
 									$myyja_query = "SELECT budjetti
-														FROM kuka
-														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-														AND kuka.myyja = '{$row['tuotemyyjä']}'";
+													FROM kuka
+													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+													AND kuka.myyja = '{$row['tuotemyyjä']}'";
 								}
-								else if ($row['asiakasmyyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['myyjä'])) {
+								elseif ($row['asiakasmyyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['myyjä'])) {
 									$myyja_query = "SELECT budjetti
-														FROM kuka
-														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-														AND kuka.myyja = '{$row['asiakasmyyjä']}'";
+													FROM kuka
+													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+													AND kuka.myyja = '{$row['asiakasmyyjä']}'";
 								}
-								else if ($row['myyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['asiakasmyyjä'])) {
+								elseif ($row['myyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['asiakasmyyjä'])) {
 									$myyja_query = "SELECT budjetti
-														FROM kuka
-														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-														AND kuka.tunnus = '{$row['myyjä']}'";
+													FROM kuka
+													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+													AND kuka.tunnus = '{$row['myyjä']}'";
 								}
 								else {
 									$myyja_query = "";
 								}
 
-								if($myyja_query != "") {
-									$myyja_result	 = pupe_query($myyja_query);
+								if ($myyja_query != "") {
+									$myyja_result = pupe_query($myyja_query);
+
 									if (mysql_num_rows($myyja_result) > 0) {
 										$myyja_row		 = mysql_fetch_assoc($myyja_result);
 										$row['budjetti'] = $myyja_row['budjetti'];
@@ -2022,6 +2009,23 @@
 									else {
 										$row['budjetti'] = 0;
 									}
+								}
+							}
+
+							if ($ruk140chk != '' and $liitetiedostot != '') {
+								$liitetiedosto_query = "SELECT *
+														FROM liitetiedostot
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND liitos = 'lasku'
+														AND liitostunnus = '{$row['tilausnumero']}'";
+								$liitetiedosto_result = pupe_query($liitetiedosto_query);
+
+								$liitetiedosto_indeksi = 1;
+								$row['liitetiedostot'] = '';
+
+								while ($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
+									$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' target='Attachment'>".t("Liite")." {$liitetiedosto_indeksi}</a> ";
+									$liitetiedosto_indeksi++;
 								}
 							}
 

@@ -148,7 +148,7 @@
 
 	}
 
-	function sepa_credittransfer($laskurow, $netotetut_rivit = '') {
+	function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
 
 		global $xml, $pain, $PmtInf, $yhtiorow, $kukarow;
 
@@ -157,8 +157,8 @@
 		$CdtTrfTxInf = $PmtInf->addChild('CdtTrfTxInf', '');										// CreditTransferTransaction Information
 
 			$PmtId = $CdtTrfTxInf->addChild('PmtId', '');											// PaymentIdentification
-				$InstrId = $PmtId->addChild('InstrId', $laskurow['tunnus']);						// Instruction Id
-				$EndToEndId = $PmtId->addChild('EndToEndId', $laskurow['tunnus']);					// EndToEndIdentification, Pakollinen kentt‰
+				$InstrId = $PmtId->addChild('InstrId', "{$laskurow['tunnus']}-".preg_replace("/[^0-9]/", "", $popvm_nyt));			// Instruction Id
+				$EndToEndId = $PmtId->addChild('EndToEndId', "{$laskurow['tunnus']}-".preg_replace("/[^0-9]/", "", $popvm_nyt));	// EndToEndIdentification, Pakollinen kentt‰
 
 			$PmtTpInf = $CdtTrfTxInf->addChild('PmtTpInf', '');										// PaymentTypeInformation
 //				$InstrPrty = $PmtTpInf->addChild('InstrPrty', '');
@@ -463,7 +463,8 @@
 
 	// Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
 	$haku_query = "	SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-					yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+					yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus,
+					date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
@@ -541,12 +542,21 @@
 
 	if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
-		$popvm_nyt = date("Y-m-d H:i:s");
-
 		if (mysql_num_rows($result) > 0) {
 
+			// uniikkia tunnusta varten popvm: aineistokopiolle alkuper‰inen ja uudelle aineistolle se joka kirjoitetaan kantaan
+			if ($tee == "KIRJOITAKOPIO") {
+				$popvm_row = mysql_fetch_assoc($result);
+				$popvm_nyt = $popvm_row["popvm"];
+				$popvm_dmy = $popvm_row["popvm_dmy"];
+			}
+			else {
+				$popvm_nyt = date("Y-m-d H:i:s");
+				$popvm_dmy = date("d.m.y.H.i.s");
+			}
+
 			// P‰‰tet‰‰m maksuaineston tiedostonimi
-			$kaunisnimi = "SEPA-$kukarow[yhtio]-".date("d.m.y.H.i.s").".xml";
+			$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
 			$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 			if (!$toot) {
@@ -670,7 +680,7 @@
 			$nettorow["summa"]		= $netotettava_summa[$i];	// Netotettu summa
 
 			sepa_paymentinfo($nettorow);
-			sepa_credittransfer($nettorow, $tunnukset);
+			sepa_credittransfer($nettorow, $popvm_nyt, $tunnukset);
 			$tapahtuma_maara++;
 
 			if ($tee == "KIRJOITA") {
@@ -718,7 +728,7 @@
 				$edtili = $laskurow['ultilno'];
 			}
 
-			sepa_credittransfer($laskurow);
+			sepa_credittransfer($laskurow, $popvm_nyt);
 			$tapahtuma_maara++;
 
 			if ($tee == "KIRJOITA") {

@@ -196,15 +196,18 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
-		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
-		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
-		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi)")."</option>";
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
+		$ulos .= "<option value = '0'  $sel[0]>".t("Normaali laskupohja");
+		$ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
+		$ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
+		$ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi)")."</option>";
+		$ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
-		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
-		$ulos .= "<option value = '8' $sel[8]>".t("Ruotsin laskupohja")."</option>";
+		$ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
+		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
+		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
+				
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3150,6 +3153,18 @@
 
 		$ulos .= "<option value = ''>".t("Tositteella näytetään oletuksena kaikki tiliöintirivit")."</option>";
 		$ulos .= "<option value = 'X' {$sel}>".t("Tositteella näytetään tiliöintirivit summattuna per tili/pvm/tarkenne")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ei_alennuksia_lapsituotteille') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'X' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Tuoteperheiden lapsituotteille lasketaan asiakashinta ja -alennus")."</option>";
+		$ulos .= "<option value = 'X' $sel>".t("Tuoteperheiden lapsituotteille ei lasketa asiakashintoja eikä -alennuksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

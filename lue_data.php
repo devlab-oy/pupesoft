@@ -1176,8 +1176,8 @@ if ($kasitellaan_tiedosto) {
 								lue_data_echo(t("Huomio rivillä").": $rivilaskuri <font class='message'>".t("Luku pyöristettiin sallittuun tarkkuuteen")." $desimaali_talteen &raquo; {$taulunrivit[$taulu][$eriviindex][$r]}</font><br>");
 							}
 						}
-
-						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] != 'XVAIHDA')) {
+						
+						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($taulunrivit[$taulu][$eriviindex][$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] != 'XVAIHDA') and ($table_mysql != "asiakashinta" and $otsikko != 'ASIAKAS' and $asiakkaanvalinta != '1')) {
 							lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kentässä on liian pitkä tieto")."!</font> {$taulunrivit[$taulu][$eriviindex][$r]}: ".strlen($taulunrivit[$taulu][$eriviindex][$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>");
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
@@ -1418,8 +1418,8 @@ if ($kasitellaan_tiedosto) {
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND toim_ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
 												AND toim_ovttunnus != ''
-												AND ytunnus != ''
-												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+												/* AND ytunnus != ''
+												AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."' */";
 								$etsiresult = pupe_query($etsitunnus);
 
 								if (mysql_num_rows($etsiresult) == 1) {

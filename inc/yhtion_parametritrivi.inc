@@ -207,7 +207,7 @@
 		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
 		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
-				
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3170,6 +3170,18 @@
 		$ulos .= "<option value = 'P' {$sel['P']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n Puute rivit")."</option>";
 		$ulos .= "<option value = 'JT' {$sel['JT']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n JT rivit")."</option>";
 		$ulos .= "<option value = 'PJ' {$sel['PJ']}>".t("Tarkistetaan tilauksen saldot ennen ker‰yslistan tulostusta, p‰ivitet‰‰n Puute+JT rivit")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ei_alennuksia_lapsituotteille') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'X' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Tuoteperheiden lapsituotteille lasketaan asiakashinta ja -alennus")."</option>";
+		$ulos .= "<option value = 'X' $sel>".t("Tuoteperheiden lapsituotteille ei lasketa asiakashintoja eik‰ -alennuksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

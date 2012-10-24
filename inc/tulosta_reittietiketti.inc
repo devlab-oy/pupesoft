@@ -106,9 +106,12 @@
 							lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 							if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 							asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
+							yhteyshenkilo.nimi yhteyshenkilo_nimi,
+							if(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, if(yhteyshenkilo.puh != '', yhteyshenkilo.puh, '')) yhteyshenkilo_puhelin,
 							asiakas.kuljetusohje viesti
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+							LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
 							JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tunnus 	= '{$row['tunnus']}'";
@@ -330,6 +333,14 @@
 						$unifaun->ftpSend();
 					}
 					else {
+
+						$query = "	SELECT komento
+									FROM kirjoittimet
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$reittietikettitulostin}'";
+						$kirjoitin_res = pupe_query($query);
+						$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
+
 						// Tulostetaan Pupen oma kollitarra
 						$params = array(
 				 			'tilriv' => $row['tunnus'],//tilausnumero
@@ -346,10 +357,34 @@
 				 			'lask_postitp' => $rakir_row['toim_postitp'],
 				 			'lask_viite' => $row['viesti'],
 				 			'lask_merkki' => $row['ohjausmerkki'],
-				 			'reittietikettitulostin' => $reittietikettitulostin,
+				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
 				 		);
 
-					 	tulosta_reittietiketti($params);
+					 	// tulosta_reittietiketti($params);
+
+
+						// Tulostetaan Pupen oma kollitarra
+						$params = array(
+				 			'tilriv' => $row['tunnus'],//tilausnumero
+				 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+				 			'sscc' => $keraysera_row['sscc'],
+				 			'toimitustapa' => $row['toimitustapa'],
+				 			'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
+				 			'paino' => $pakkaus_info_row['tuotemassa'],
+				 			'tilavuus' => $pakkaus_info_row['kuutiot'],
+				 			'toim_nimi' => $rakir_row['toim_nimi'],
+				 			'toim_nimitark' => $rakir_row['toim_nimitark'],
+				 			'toim_osoite' => $rakir_row['toim_osoite'],
+				 			'toim_postino' => $rakir_row['toim_postino'],
+				 			'toim_postitp' => $rakir_row['toim_postitp'],
+				 			'yhteyshenkilo_nimi' => $rakir_row['yhteyshenkilo_nimi'],
+				 			'yhteyshenkilo_puhelin' => $rakir_row['yhteyshenkilo_puhelin'],
+				 			'lask_viite' => $row['viesti'],
+				 			'lask_merkki' => $row['ohjausmerkki'],
+				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
+				 		);
+
+						tulosta_hrx($params);
 					}
 				}
 			}

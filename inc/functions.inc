@@ -13663,6 +13663,169 @@ if (!function_exists('tulosta_reittietiketti')) {
 	}
 }
 
+if (!function_exists('tulosta_hrx')) {
+	function tulosta_hrx($params) {
+		global $kukarow, $yhtiorow;
+
+		extract($params);
+
+		$y_nimi 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
+		$y_osoite 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['osoite']);
+		$y_postino 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postino']);
+		$y_postitp 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postitp']);
+
+		$viivakoodi1  = ">6";
+		$viivakoodi1 .= substr($tilriv,0,2);
+		$viivakoodi1 .= ">5";
+		$viivakoodi1 .= substr($tilriv,2);
+
+		$viivakoodi2  = ">6";
+		$viivakoodi2 .= substr($sscc,0,1);
+		$viivakoodi2 .= ">5";
+		$viivakoodi2 .= substr($sscc,1);
+
+		$ot_toimosoite = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Toimitusosoite", $yhtiorow['kieli'])." / Delivery address");
+
+		$ot_lahettaja = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Lähettäjä", $yhtiorow['kieli'])." / Consignor");
+
+		$ot_kuljetusliike = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Kuljetusliike", $yhtiorow['kieli'])." / Carrier");
+
+		$toimosoite_nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), trim($toim_nimi.' '.$toim_nimitark));
+		$toimosoite_postino_postitp = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), trim($toim_postino.' '.$toim_postitp));
+
+		$ot_yhteyshenkilo = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Yhteyshenkilö"));
+		$ot_puhelin = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Puhelin"));
+
+		$sivu = "	*** ETIKETIN KOKO ***
+					{D1530,1040,1490|}
+					{AX;+000,+000,+00|}
+					{AY;+10,0|}
+					{C|}
+
+				 	*** TOIMITUSOSOITE ***
+				 	{PC000;0070,0140,1,1,G,00,B|}
+					{RC000;{$ot_toimosoite}|}
+
+				 	{PC001;0070,0200,1,1,A,00,B|}
+					{RC001;{$toimosoite_nimi}|}
+
+				 	{PC002;0070,0240,1,1,A,00,B|}
+					{RC002;{$toim_osoite}|}
+
+				 	{PC003;0070,0330,1,1,A,00,B|}
+					{RC003;{$toimosoite_postino_postitp}|}
+
+				 	{PC004;0070,0380,1,1,A,00,B|}
+					{RC004;{$ot_yhteyshenkilo}: {$yhteyshenkilo_nimi}|}
+
+				 	{PC005;0070,0430,1,1,A,00,B|}
+					{RC005;{$ot_puhelin}: {$yhteyshenkilo_puhelin}|}
+
+				 	*** VAAKAVIIVA ***
+				 	{LC;0070,0440,0920,0440,0,2|}
+
+				 	{PC006;0070,0470,1,1,G,00,B|}
+					{RC006;{$ot_lahettaja}|}
+
+				 	{PC007;0070,0530,1,1,A,00,B|}
+					{RC007;{$y_nimi}|}
+
+				 	{PC008;0070,0580,1,1,A,00,B|}
+					{RC008;{$y_osoite} {$y_postino} {$y_postitp}|}
+
+				 	*** VAAKAVIIVA ***
+				 	{LC;0070,0600,0920,0600,0,2|}
+
+				 	{PC009;0070,0630,1,1,G,00,B|}
+					{RC009;{$ot_kuljetusliike}|}
+
+					*** TULOSTUS  ***
+					{XS;I,0001,0002C3210|}
+					".chr(12);
+
+		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {
+			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
+		}
+
+		// $sivu = "	*** ETIKETIN KOKO ***
+		// 			{D2280,1040,2250|}
+		// 			{AX;+000,+000,+00|}
+		// 			{AY;+10,0|}
+		// 			{C|}
+
+		// 		 	*** YHTIÖN NIMI ***
+		// 		 	{PC000;0850,0260,3,3,M,00,B|}
+		// 			{RC000;{$pakkaus_kirjain}|}
+
+		// 		 	{PC001;0100,0100,1,1,J,00,B|}
+		// 	 		{RC001;{$y_nimi}|}
+
+		// 		 	{PC002;0100,0150,05,05,J,00,B|}
+		// 	 		{RC002;{$y_osoite}|}
+
+		// 		 	{PC003;0100,0190,05,05,J,00,B|}
+		// 	 		{RC003;{$y_postino} {$y_postitp}|}
+
+		// 		 	{PC004;0600,0050,07,07,H,00,B|}
+		// 	 		{RC004;".date("d.m.Y")."|}
+
+		// 		 	{PC005;0100,0340,1,1,H,00,B|}
+		// 	 		{RC005;{$toimitustapa}|}
+
+		// 		 	{PC006;0100,0390,05,05,J,00,B|}
+		// 	 		{RC006;Keraaja: {$kukarow['nimi']}|}
+
+		// 		 	{PC007;0100,0430,05,05,J,00,B|}
+		// 	 		{RC007;Til.nro: {$tilriv}|}
+
+		// 		 	{PC008;0100,0470,05,05,J,00,B|}
+		// 	 		{RC008;Rivit: {$rivit}|}
+
+		// 		 	{PC009;0300,0470,05,05,J,00,B|}
+		// 	 		{RC009;Paino: {$paino} kg|}
+
+		// 		 	{PC010;0650,0470,05,05,J,00,B|}
+		// 	 		{RC010;Tilavuus: {$tilavuus} m3|}
+
+		// 		 	*** VAAKAVIIVAT ***
+		// 		 	{LC;0100,0570,1000,0570,0,2|}
+		// 		 	{LC;0100,0900,1000,0900,0,2|}
+
+		// 		 	*** PYSTYVIIVAT ***
+		// 		 	{LC;0100,0570,0100,0900,0,2|}
+		// 		 	{LC;1000,0570,1000,0900,0,2|}
+
+		// 		 	{PC011;0120,0660,1,1,H,00,B|}
+		// 	 		{RC011;{$lask_nimi}|}
+
+		// 		 	{PC012;0120,0720,1,1,H,00,B|}
+		// 	 		{RC012;{$lask_nimitark}|}
+
+		// 		 	{PC013;0120,0780,1,1,H,00,B|}
+		// 	 		{RC013;{$lask_osoite}|}
+
+		// 		 	{PC014;0120,0840,1,1,H,00,B|}
+		// 	 		{RC014;{$lask_postino} {$lask_postitp}|}
+
+		// 		 	{PC015;0100,0980,1,1,H,00,B|}
+		// 	 		{RC015;Viite: {$lask_viite}|}
+
+		// 		 	{PC016;0100,1040,1,1,H,00,B|}
+		// 	 		{RC016;Merkki: {$lask_merkki}|}
+
+		// 	     	{XB00;0100,1100,A,3,04,0,0150,+0000000000,000,1,00|}
+		// 	     	{RB00;{$viivakoodi1}|}
+
+		// 	     	{XB01;0100,1320,A,3,04,0,0150,+0000000000,000,1,00|}
+		// 	     	{RB01;{$viivakoodi2}|}
+
+		// 		 	*** TULOSTUS  ***
+		// 			{XS;I,0001,0002C3210|}
+		// 			".chr(12);
+
+	}
+}
+
 if (!function_exists("tarkista_email")) {
 	function tarkista_email($email) {
 
@@ -15108,7 +15271,7 @@ if (!function_exists("tee_keraysera")) {
 			// $mediaanilkm = 1;
 
 			// jos mediaanien lukumäärä on vähintään yhtä suuri kuin annettu minimi
-			if ($mediaanilkm >= key($min_max[0])) {
+			if (1 == 2 and $mediaanilkm >= key($min_max[0])) {
 
 				// jos mediaanien lukumäärä ylittää sallitun maksimin, käytetään maksimin askelväliä
 				if ($mediaanilkm > key($min_max[1])) {

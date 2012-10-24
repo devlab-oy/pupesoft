@@ -260,6 +260,7 @@
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
+			if($myyjabudjetti != '')		$myyjabudjettichk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
 			echo "<table>
@@ -517,6 +518,12 @@
 			echo "<td colspan='3'><input type='checkbox' name='asiakaskaynnit' {$asiakaskaynnitchk}></td>
 			<td class='back'>".t("Toimii vain jos listaat asiakkaittain")."</td>
 			</tr>";
+
+			echo "<tr>";
+			echo "<th>".t('Näytä myyjäbudjetit')."</th>";
+			echo "<td colspan='3'><input type='checkbox' name='myyjabudjetti' {$myyjabudjettichk} /></td>";
+			echo "<td class='back'>".t('Toimii vain jos listaat myyjittäin')."</td>";
+			echo "</tr>";
 
 			echo "</table><br>";
 
@@ -1069,11 +1076,10 @@
 					//** Laskugrouppaukset start **//
 					if ($mukaan == "laskumyyja") {
 						$group .= ",lasku.myyja";
-						$select .= "lasku.myyja 'myyjä', kuka.budjetti, ";
+						$select .= "lasku.myyja 'myyjä', ";
 						$order  .= "lasku.myyja,";
 						$gluku++;
 						$laskugroups++;
-						$kuka_join = "JOIN kuka ON kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja";
 					}
 
 					if ($mukaan == "maa") {
@@ -1981,6 +1987,41 @@
 										$row["budjinded"] = $row["myyntied"] / $budj_yhtl;
 									}
 
+								}
+							}
+
+							if ($myyjabudjetti != '') {
+								if ($row['tuotemyyjä'] != 0 and !isset($row['asiakasmyyjä']) and !isset($row['myyjä'])) {
+									$myyja_query = "SELECT budjetti
+														FROM kuka
+														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+														AND kuka.myyja = '{$row['tuotemyyjä']}'";
+								}
+								else if ($row['asiakasmyyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['myyjä'])) {
+									$myyja_query = "SELECT budjetti
+														FROM kuka
+														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+														AND kuka.myyja = '{$row['asiakasmyyjä']}'";
+								}
+								else if ($row['myyjä'] != 0 and !isset($row['tuotemyyjä']) and !isset($row['asiakasmyyjä'])) {
+									$myyja_query = "SELECT budjetti
+														FROM kuka
+														WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+														AND kuka.tunnus = '{$row['myyjä']}'";
+								}
+								else {
+									$myyja_query = "";
+								}
+
+								if($myyja_query != "") {
+									$myyja_result	 = pupe_query($myyja_query);
+									if (mysql_num_rows($myyja_result) > 0) {
+										$myyja_row		 = mysql_fetch_assoc($myyja_result);
+										$row['budjetti'] = $myyja_row['budjetti'];
+									}
+									else {
+										$row['budjetti'] = 0;
+									}
 								}
 							}
 

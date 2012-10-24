@@ -132,7 +132,7 @@
 										and alatila = 'K'
 										$kohdm_valkoodilisa";
 							$result = pupe_query($query);
-							
+
 							// tarkka 35 merkkiä <-> 35 merkkiä nimihaku ilman käteisalennusta
 							if (mysql_num_rows($result) != 1) {
 								"	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma')
@@ -157,7 +157,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									// tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku ilman käteisalennusta
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
@@ -183,7 +183,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									// kokeillaan samalla kaavalla kun lum2 rivissä ilman käteisalennusta
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
@@ -211,7 +211,7 @@
 											and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
@@ -239,11 +239,11 @@
 											WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio 	= '$yritirow[yhtio]'
-											and tila 	= 'Q'	
+											and tila 	= 'Q'
 												and alatila = 'K'
 											$kohdm_valkoodilisa";
 								$result = pupe_query($query);
-								
+
 								if (mysql_num_rows($result) != 1) {
 									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
 												FROM lasku
@@ -886,14 +886,23 @@
 					$selite = t("Oma sisäinen viite").": ";
 					$selite .= trim(substr($arvo, 0, 35))."<br>\n";
 					$selite .= trim(substr($arvo, 35, 35));
-					$sisviite = trim(substr($arvo, 0, 35))*1;
+					$sisviite = trim(substr($arvo, 0, 35));
 
 					//Tämä on (kai) ongelma Analysten pankkisoftassa. Lisäävät joskus oman tunnuksen
 					//ekaan sisäinenviite kenttään, silloin meidän onkin toisessa.
 					if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
-						$sisviite = trim(substr($arvo, 35, 35))*1;
+						$sisviite = trim(substr($arvo, 35, 35));
 					}
 
+					// sepa-aineistoon lisatään tähän kenttään merkillä '-' erotettuna timestamp,
+					// jotta saadaan uniikki EndToEndId. Tässä timestamp poistetaan.
+					$dash_pos = strpos($sisviite, "-");
+
+					if ($dash_pos !== FALSE) {
+						$sisviite = substr($sisviite, 0, $dash_pos);
+					}
+
+					$sisviite = (int) $sisviite;
 					break;
 
 				// ?

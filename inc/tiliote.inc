@@ -899,7 +899,7 @@
 					$dash_pos = strpos($sisviite, "-");
 
 					if ($dash_pos !== FALSE) {
-						$sisviite = substr($sisviite, 0, $dash_pos - 1);
+						$sisviite = substr($sisviite, 0, $dash_pos);
 					}
 
 					$sisviite = (int) $sisviite;

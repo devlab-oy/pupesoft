@@ -157,8 +157,8 @@
 		$CdtTrfTxInf = $PmtInf->addChild('CdtTrfTxInf', '');										// CreditTransferTransaction Information
 
 			$PmtId = $CdtTrfTxInf->addChild('PmtId', '');											// PaymentIdentification
-				$InstrId = $PmtId->addChild('InstrId', "{$laskurow['tunnus']}-$popvm");				// Instruction Id
-				$EndToEndId = $PmtId->addChild('EndToEndId', "{$laskurow['tunnus']}-$popvm");		// EndToEndIdentification, Pakollinen kentt‰
+				$InstrId = $PmtId->addChild('InstrId', "{$laskurow['tunnus']}-".preg_replace("/[^0-9]/", "", $popvm_nyt));			// Instruction Id
+				$EndToEndId = $PmtId->addChild('EndToEndId', "{$laskurow['tunnus']}-".preg_replace("/[^0-9]/", "", $popvm_nyt));	// EndToEndIdentification, Pakollinen kentt‰
 
 			$PmtTpInf = $CdtTrfTxInf->addChild('PmtTpInf', '');										// PaymentTypeInformation
 //				$InstrPrty = $PmtTpInf->addChild('InstrPrty', '');
@@ -463,7 +463,8 @@
 
 	// Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
 	$haku_query = "	SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-					yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
+					yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus,
+					date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
@@ -547,13 +548,15 @@
 			if ($tee == "KIRJOITAKOPIO") {
 				$popvm_row = mysql_fetch_assoc($result);
 				$popvm_nyt = $popvm_row["popvm"];
+				$popvm_dmy = $popvm_row["popvm_dmy"];
 			}
 			else {
 				$popvm_nyt = date("Y-m-d H:i:s");
+				$popvm_dmy = date("d.m.y.H.i.s");
 			}
 
 			// P‰‰tet‰‰m maksuaineston tiedostonimi
-			$kaunisnimi = "SEPA-$kukarow[yhtio]-".date("d.m.y.H.i.s").".xml";
+			$kaunisnimi = "SEPA-$kukarow[yhtio]-".$popvm_dmy.".xml";
 			$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 			if (!$toot) {

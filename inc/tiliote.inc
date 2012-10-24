@@ -894,18 +894,15 @@
 						$sisviite = trim(substr($arvo, 35, 35));
 					}
 
-					// 2012-10-09 vesak
 					// sepa-aineistoon lisat‰‰n t‰h‰n kentt‰‰n merkill‰ '-' erotettuna timestamp,
 					// jotta saadaan uniikki EndToEndId. T‰ss‰ timestamp poistetaan.
-
 					$dash_pos = strpos($sisviite, "-");
 
 					if ($dash_pos !== FALSE) {
 						$sisviite = substr($sisviite, 0, $dash_pos - 1);
 					}
 
-					$sisviite = (integer) $sisviite;
-
+					$sisviite = (int) $sisviite;
 					break;
 
 				// ?

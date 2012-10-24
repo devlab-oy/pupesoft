@@ -260,7 +260,7 @@
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
-			if ($liitetiedostot != '')	$liitetiedostotchk		= "CHECKED";
+			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
 			echo "<table>
@@ -1988,20 +1988,22 @@
 								}
 							}
 
-							if ($liitetiedostot != '') {
-									$liitetiedosto_query = "SELECT *
-															FROM liitetiedostot
-															WHERE yhtio = '{$kukarow['yhtio']}'
-															AND liitos = 'lasku'
-															AND liitostunnus = '{$row['tilausnumero']}'";
-									$liitetiedosto_result = pupe_query($liitetiedosto_query);
+							if($ruk140chk != '') {
+								if ($liitetiedostot != '') {
+										$liitetiedosto_query = "SELECT *
+																FROM liitetiedostot
+																WHERE yhtio = '{$kukarow['yhtio']}'
+																AND liitos = 'lasku'
+																AND liitostunnus = '{$row['tilausnumero']}'";
+										$liitetiedosto_result = pupe_query($liitetiedosto_query);
 
-									$liitetiedosto_indeksi = 1;
-									$row['liitetiedostot'] = '';
-									while($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
-										$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' >Liite {$liitetiedosto_indeksi}</a> ";
-										$liitetiedosto_indeksi++;
-									}
+										$liitetiedosto_indeksi = 1;
+										$row['liitetiedostot'] = '';
+										while($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
+											$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' >Liite {$liitetiedosto_indeksi}</a> ";
+											$liitetiedosto_indeksi++;
+										}
+								}
 							}
 
 							$rows[] = $row;

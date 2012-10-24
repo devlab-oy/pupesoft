@@ -1161,9 +1161,7 @@ if (!function_exists("saldo_myytavissa")) {
 			$varaako_jt_saldoa = " and (tilausrivi.var != 'J' or (tilausrivi.var = 'J' and tilausrivi.kerayspvm > CURDATE())) ";
 			$tyyppi = "";
 		}
-		
-		echo "$varaako_jt_saldoa<br>";
-		
+
 		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto = implode(",", $varasto);
 		}

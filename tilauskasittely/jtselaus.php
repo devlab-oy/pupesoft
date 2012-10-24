@@ -148,7 +148,7 @@
 				}
 
 				// Toimitetaan jtrivit
-				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, "", $tilaus_on_jo, $varastosta);
+				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, "", $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
 
 				if ($kukarow['extranet'] != '' and $tee == "JT_TILAUKSELLE") {
 					unset($jarj);
@@ -678,8 +678,15 @@
 		$toimittajalisa = "";
 		$tilausrivilisa = "";
 
+		// N‰ytet‰‰n vain ne rivit joiden kerayspvm sanoo, ett‰ nyt menn‰‰n
 		if ($jt_huomioi_pvm != "") {
 			$tilausrivilisa .= " and tilausrivi.kerayspvm <= now() ";
+
+			// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, ett‰ JT-rivien varauksia ei huomioida
+			$jtspec = "JTSPEC2";
+		}
+		else {
+			$jtspec = "JTSPEC";
 		}
 
 		if ($toimittaja != '') {
@@ -915,8 +922,6 @@
 				$jt_rivilaskuri = 1;
 				$jt_hintalaskuri = 0;
 
-				$jt_muiden_mukana = array();
-
 				while ($jtrow = mysql_fetch_assoc($isaresult)) {
 
 					//tutkitaan onko t‰m‰ suoratoimitusrivi
@@ -1023,7 +1028,7 @@
 
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa);
 
 										if ($saldolaskenta == "hyllysaldo") {
 											$lapsitoimittamatta -= $hyllyssa;
@@ -1056,7 +1061,7 @@
 								$jt_saldopvm = "";
 								if ($yhtiorow["saldo_kasittely"] != "") $jt_saldopvm = date("Y-m-d");
 
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
 								if ($saldolaskenta == "hyllysaldo") {
 									$kokonaismyytavissa += $hyllyssa;
@@ -1180,6 +1185,7 @@
 										echo "<input type='hidden' name='suoratoimit' value='$suoratoimit'>";
 										echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
 										echo "<input type='hidden' name='tilaus' value='$tilaus'>";
+										echo "<input type='hidden' name='jt_huomioi_pvm' value='$jt_huomioi_pvm'>";
 
 										if (is_array($varastosta)) {
 											foreach ($varastosta as $vara) {
@@ -1487,7 +1493,7 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
 
 										$jt_rivilaskuri++;
 									}
@@ -1562,7 +1568,7 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm);
 
 										$jt_rivilaskuri++;
 									}
@@ -1721,7 +1727,7 @@
 									$kokonaismyytavissa = 0;
 
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa);
 
 										if ($saldolaskenta == "hyllysaldo") {
 											$kokonaismyytavissa += $hyllyssa;
@@ -1851,7 +1857,7 @@
 											}
 
 											foreach ($varastosta as $vara) {
-												list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($krow2row["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+												list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($krow2row["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
 												if ($saldolaskenta == "hyllysaldo") {
 													$vapaana += $hyllyssa;

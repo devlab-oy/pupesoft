@@ -6,13 +6,10 @@
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
 	// $suoratoimpaikat = paikat josta myyd‰‰n suoratoimituksia
 	// $tilaus_on_jo = KYLLA niin lis‰t‰‰n rivit $kukarow[kesken] tilaukselle
-	// $olpaikalta = pakotetaan myym‰‰n oletuspaikalta
-	// $varataan_saldoa = varataanko saldoa
-	// $alv = alviprossa
 	// $varastosta = mist‰ varastosta myyd‰‰n
 
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '') {
 			global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
 
 			$debug = 0;
@@ -730,7 +727,14 @@
 								$kommentti .= t("Toimitettavissa oleva JT-rivi")."!";
 							}
 
-							$jtspec = "JTSPEC";
+
+							if ($jt_huomioi_pvm != "") {						
+								// Jos JT-rivit varaavat saldoa, niin tulevaisuudessa toimitettavat rivit varaavat nykyhetken saldoa vaikka "JTSPEC" tarkoittaa, ett‰ JT-rivien varauksia ei huomioida
+								$jtspec = "JTSPEC2";
+							}
+							else {
+								$jtspec = "JTSPEC";
+							}
 
 							// Tutkitaan onko t‰m‰ myyty ulkomaan alvilla
 							list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $trow, $kpl, '', '', '');

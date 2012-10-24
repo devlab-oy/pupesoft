@@ -1148,14 +1148,22 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
 		global $kukarow, $yhtiorow;
 
-		//Speciaalitapaus jossa JT-rivit varaavat saldoa
+
 		$varaako_jt_saldoa = "";
 
 		if ($tyyppi == "JTSPEC" and $yhtiorow["varaako_jt_saldoa"] != "") {
+			// JT-rivit varaavat saldoa, mutta nyt ei haluta huomioida niitä
 			$varaako_jt_saldoa = " and tilausrivi.var != 'J' ";
 			$tyyppi = "";
 		}
-
+		elseif ($tyyppi == "JTSPEC2" and $yhtiorow["varaako_jt_saldoa"] != "") {
+			// JT-rivit varaavat saldoa, mutta nyt ei halutaan huomioida VAIN tulevaisuudessa toimitettavat JT-rivit
+			$varaako_jt_saldoa = " and (tilausrivi.var != 'J' or (tilausrivi.var = 'J' and tilausrivi.kerayspvm > CURDATE())) ";
+			$tyyppi = "";
+		}
+		
+		echo "$varaako_jt_saldoa<br>";
+		
 		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto = implode(",", $varasto);
 		}
@@ -1245,6 +1253,7 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			$kerayslisa = "";
+
 			if ($pvm != '') {
 				$kerayslisa = " and tilausrivi.kerayspvm <= '$pvm' ";
 			}

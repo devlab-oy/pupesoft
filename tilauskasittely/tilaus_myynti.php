@@ -3980,7 +3980,7 @@ if ($tee == '') {
 			}
 
 			// jälkitoimitus muiden mukana
-            if ($jt_muidenmukana == 'KYLLA') {
+			if ($jt_muidenmukana == 'KYLLA') {
 				$kerayspvm = date('Y-m-d', strtotime('now + 1 month'));
 			}
 			elseif ($jt_muidenmukana == 'EI') {

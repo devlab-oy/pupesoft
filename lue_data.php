@@ -1545,7 +1545,7 @@ if ($kasitellaan_tiedosto) {
 						}
 
 						//muutetaan rivi‰, silloin ei saa p‰ivitt‰‰ pakollisia kentti‰
-						if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA'))) {
+						if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'auto_vari_korvaavat' or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') and ($table_mysql != "asiakashinta" and $otsikko != 'ASIAKAS' and $asiakkaanvalinta != '1'))) {
 							///* T‰ss‰ on kaikki oikeellisuuscheckit *///
 							if (($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') or ($table_mysql == 'toimittajahinta' and $otsikko == 'HINTA')) {
 								if ($taulunrivit[$taulu][$eriviindex][$r] != 0 and $taulunrivit[$taulu][$eriviindex][$r] != '') {

@@ -13669,32 +13669,47 @@ if (!function_exists('tulosta_hrx')) {
 
 		extract($params);
 
-		$y_nimi 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
-		$y_osoite 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['osoite']);
-		$y_postino 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postino']);
-		$y_postitp 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postitp']);
+		$from = array('Ä','ä','Ö','ö');
+		$to = array('A','a','O','o');
+
+		$y_nimi 	= trim($lahettaja_nimi.' '.$lahettaja_nimitark);
+		$y_osoite 	= trim($lahettaja_osoite);
+		$y_postino 	= trim($lahettaja_postino);
+		$y_postitp 	= trim($lahettaja_postitp);
+		$y_maa 		= trim($lahettaja_maa);
 
 		$viivakoodi1  = ">6";
-		$viivakoodi1 .= substr($tilriv,0,2);
+		$viivakoodi1 .= substr($tilriv,0,1);
 		$viivakoodi1 .= ">5";
 		$viivakoodi1 .= substr($tilriv,2);
 
-		$viivakoodi2  = ">6";
-		$viivakoodi2 .= substr($sscc,0,1);
-		$viivakoodi2 .= ">5";
-		$viivakoodi2 .= substr($sscc,1);
+		$viivakoodi1 = $tilriv; 
 
-		$ot_toimosoite = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Toimitusosoite", $yhtiorow['kieli'])." / Delivery address");
+		// $viivakoodi2  = ">6";
+		// $viivakoodi2 .= substr($sscc,0,1);
+		// $viivakoodi2 .= ">5";
+		// $viivakoodi2 .= substr($sscc,1);
 
-		$ot_lahettaja = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Lähettäjä", $yhtiorow['kieli'])." / Consignor");
+		$ot_toimosoite = t("Toimitusosoite", $yhtiorow['kieli'])." / Delivery address";
 
-		$ot_kuljetusliike = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Kuljetusliike", $yhtiorow['kieli'])." / Carrier");
+		// $toim_nimi = str_replace($from, $to, trim($toim_nimi.' '.$toim_nimitark));
+		// $toim_osoite = str_replace($from, $to, $toim_osoite);
+		// $toim_postino = str_replace($from, $to, $toim_postino);
+		// $toim_postitp = str_replace($from, $to, $toim_postitp);
 
-		$toimosoite_nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), trim($toim_nimi.' '.$toim_nimitark));
-		$toimosoite_postino_postitp = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), trim($toim_postino.' '.$toim_postitp));
+		$ot_lahettaja = t("Lähettäjä", $yhtiorow['kieli'])." / Consignor";
 
-		$ot_yhteyshenkilo = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Yhteyshenkilö"));
-		$ot_puhelin = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), t("Puhelin"));
+		$ot_kuljetusliike = t("Kuljetusliike", $yhtiorow['kieli'])." / Carrier";
+
+		$toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
+		$toimosoite_postino_postitp = trim($toim_postino.' '.$toim_postitp);
+
+		$ot_yhteyshenkilo = t("Yhteyshenkilö", $yhtiorow['kieli']);
+		$ot_puhelin = t("Puhelin", $yhtiorow['kieli']);
+
+		/*
+			Yhteyshenkilö ja puhelinnumero toimitusosoite-kohdassa tulee jostakin
+		*/
 
 		$sivu = "	*** ETIKETIN KOKO ***
 					{D1530,1040,1490|}
@@ -13707,37 +13722,64 @@ if (!function_exists('tulosta_hrx')) {
 					{RC000;{$ot_toimosoite}|}
 
 				 	{PC001;0070,0200,1,1,A,00,B|}
-					{RC001;{$toimosoite_nimi}|}
+					{RC001;{$toim_nimi}|}
 
-				 	{PC002;0070,0240,1,1,A,00,B|}
+				 	{PC002;0070,0250,1,1,A,00,B|}
 					{RC002;{$toim_osoite}|}
 
 				 	{PC003;0070,0330,1,1,A,00,B|}
-					{RC003;{$toimosoite_postino_postitp}|}
+					{RC003;{$toim_postino} {$toim_postitp}|}
 
 				 	{PC004;0070,0380,1,1,A,00,B|}
-					{RC004;{$ot_yhteyshenkilo}: {$yhteyshenkilo_nimi}|}
+					{RC004;{$ot_yhteyshenkilo}: |}
 
 				 	{PC005;0070,0430,1,1,A,00,B|}
-					{RC005;{$ot_puhelin}: {$yhteyshenkilo_puhelin}|}
+					{RC005;{$ot_puhelin}: |}
 
 				 	*** VAAKAVIIVA ***
-				 	{LC;0070,0440,0920,0440,0,2|}
+				 	{LC;0070,0450,0920,0450,0,2|}
 
-				 	{PC006;0070,0470,1,1,G,00,B|}
+				 	{PC006;0070,0490,1,1,G,00,B|}
 					{RC006;{$ot_lahettaja}|}
 
-				 	{PC007;0070,0530,1,1,A,00,B|}
-					{RC007;{$y_nimi}|}
+				 	{PC007;0070,0535,1,1,A,00,B|}
+					{RC007;Mercantile Group As|}
 
 				 	{PC008;0070,0580,1,1,A,00,B|}
-					{RC008;{$y_osoite} {$y_postino} {$y_postitp}|}
+					{RC008;Pärnu mnt 549 Laagri Eesti|}
 
 				 	*** VAAKAVIIVA ***
 				 	{LC;0070,0600,0920,0600,0,2|}
 
-				 	{PC009;0070,0630,1,1,G,00,B|}
+				 	{PC009;0070,0640,1,1,G,00,B|}
 					{RC009;{$ot_kuljetusliike}|}
+
+				 	{PC010;0070,0700,1,1,A,00,B|}
+					{RC010;AS HRX   Reg.no.: 10117789|}
+
+				 	{PC011;0070,0745,1,1,A,00,B|}
+					{RC011;Alasi tee 5 Tabasalu EST/031/1010|}
+
+				 	{PC012;0070,0790,1,1,A,00,B|}
+					{RC012;Ph.: +372 6277800|}
+
+				 	{PC013;0070,0840,1,1,A,00,B|}
+					{RC013;Fax: +372 6277817|}
+
+				 	{PC014;0070,0890,1,1,A,00,B|}
+					{RC014;E-mail: info@hrx.ee Web: www.hrx.ee|}
+
+				 	*** VAAKAVIIVA ***
+				 	{LC;0070,0910,0920,0910,0,2|}
+
+			     	{XB00;0070,0930,C,2,04,0,0230,+0000000000,000,0,00|}
+			     	{RB00;{$viivakoodi1}|}
+
+				 	{PC015;0070,1210,1,1,A,00,B|}
+					{RC015;CMR: {$viivakoodi1}|}
+
+				 	{PC016;0070,1310,1,1,A,00,B|}
+					{RC016;n / n {$pakkauskoodi}|}
 
 					*** TULOSTUS  ***
 					{XS;I,0001,0002C3210|}

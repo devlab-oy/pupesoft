@@ -106,12 +106,9 @@
 							lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 							if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti,
 							asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
-							yhteyshenkilo.nimi yhteyshenkilo_nimi,
-							if(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, if(yhteyshenkilo.puh != '', yhteyshenkilo.puh, '')) yhteyshenkilo_puhelin,
 							asiakas.kuljetusohje viesti
 							FROM lasku
 							JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-							LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
 							JOIN maksuehto on (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
 							WHERE lasku.yhtio 	= '{$kukarow['yhtio']}'
 							AND lasku.tunnus 	= '{$row['tunnus']}'";
@@ -362,6 +359,30 @@
 
 					 	// tulosta_reittietiketti($params);
 
+						// haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
+						$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+									FROM varastopaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$row['varasto']}'";
+						$tempr = pupe_query($query);
+						$postirow_varasto = mysql_fetch_array($tempr);
+
+						if ($postirow_varasto['nimi'] != "") {
+							$lahettaja_nimi = $postirow_varasto['nimi'];
+							$lahettaja_nimitark = $postirow_varasto['nimitark'];
+							$lahettaja_osoite = $postirow_varasto['osoite'];
+							$lahettaja_postino = $postirow_varasto['postino'];
+							$lahettaja_postitp = $postirow_varasto['postitp'];
+							$lahettaja_maa = $postirow_varasto['maa'];
+						}
+						else {
+							$lahettaja_nimi = $row['yhtio_nimi'];
+							$lahettaja_nimitark = "";
+							$lahettaja_osoite = $row['yhtio_osoite'];
+							$lahettaja_postino = $row['yhtio_postino'];
+							$lahettaja_postitp = $row['yhtio_postitp'];
+							$lahettaja_maa = $row['yhtio_maa'];
+						}
 
 						// Tulostetaan Pupen oma kollitarra
 						$params = array(
@@ -369,19 +390,19 @@
 				 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
 				 			'sscc' => $keraysera_row['sscc'],
 				 			'toimitustapa' => $row['toimitustapa'],
-				 			'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
-				 			'paino' => $pakkaus_info_row['tuotemassa'],
-				 			'tilavuus' => $pakkaus_info_row['kuutiot'],
 				 			'toim_nimi' => $rakir_row['toim_nimi'],
 				 			'toim_nimitark' => $rakir_row['toim_nimitark'],
 				 			'toim_osoite' => $rakir_row['toim_osoite'],
 				 			'toim_postino' => $rakir_row['toim_postino'],
 				 			'toim_postitp' => $rakir_row['toim_postitp'],
-				 			'yhteyshenkilo_nimi' => $rakir_row['yhteyshenkilo_nimi'],
-				 			'yhteyshenkilo_puhelin' => $rakir_row['yhteyshenkilo_puhelin'],
-				 			'lask_viite' => $row['viesti'],
-				 			'lask_merkki' => $row['ohjausmerkki'],
+				 			'lahettaja_nimi' => $lahettaja_nimi,
+				 			'lahettaja_nimitark' => $lahettaja_nimitark,
+				 			'lahettaja_osoite' => $lahettaja_osoite,
+				 			'lahettaja_postino' => $lahettaja_postino,
+				 			'lahettaja_postitp' => $lahettaja_postitp,
+				 			'lahettaja_maa' => $lahettaja_maa,
 				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
+				 			'pakkauskoodi' => $pakkauskoodit_row['koodi'],
 				 		);
 
 						tulosta_hrx($params);

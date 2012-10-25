@@ -337,6 +337,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$saakopoistaa = TRUE;
 				break;
 			case "vak" :
+			case "vak_imdg" :
 				$pakolliset = array("YK_NRO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("NIMI_JA_KUVAUS", "LUOKKA", "LUOKITUSKOODI", "PAKKAUSRYHMA", "LIPUKKEET", "ERITYISMAARAYKSET");

@@ -186,7 +186,7 @@
 	if ($tilatapa == "PALAUTA") {
 
 		// Tehdään siirrettävistä riveistä siirtolista
-		$query = "	SELECT tilausrivi.*
+		$query = "	SELECT tilausrivi.*, concat_ws('#!¡!#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.otunnus = '{$kukarow["kesken"]}'
@@ -238,6 +238,7 @@
 				$tuoteno = $palauta_row["tuoteno"];
 				$kpl = $palauta_row["kpl"];
 				$var = "H"; // Varmuuden vuoksi väkisin hyväksytty rivi, ettei tule ongelmia
+				$paikka = $palauta_row["paikka"];
 
 				// Lisätään rivi
 				// $laskurow			--> jossa on laskun kaikki tiedot
@@ -245,6 +246,8 @@
 				// $tuoteno				--> jossa on tuotenumero
 				// $kpl					--> jossa on kappalemäärä
 				// $var					--> H,J,P varrit
+				// $paikka				--> miltä varastopaikalta siirretään
+
 				require("tilauskasittely/lisaarivi.inc");
 
 				// Päivitetään uusi siirtolistan rivi samantien kerätyksi

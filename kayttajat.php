@@ -1360,9 +1360,7 @@
 					echo "</td><td class='back'>",t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin"),"</td></tr>";
 				}
 
-				if ($toim != 'extranet') {
-					echo "<tr><th>".t('Käyttäjän budjetti').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
-				}
+				echo "<tr><th>".t('Käyttäjän myyntitavoite 12kk').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
 			}
 
 			echo "</table>";

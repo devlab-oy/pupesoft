@@ -53,7 +53,8 @@ echo "<div class='main'>
 	<b>",t("TULOTYYPPI"),"</b>
 	<p>
 	<a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a><br>
-	<a href='ostotilaus.php' class='button'>",t("Ostotilaus"),"</a> <font style='color: red'>$kesken</font><br>
+	<a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>
+	<a href='ostotilaus.php' class='button'><font style='color: red'>$kesken</font></a><br>
 	</p>
 	<a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a><br>
 </div>";

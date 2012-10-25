@@ -2988,24 +2988,6 @@
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
-		$toim_params = array(
-			'toim_maa'		 => $toim_maa,
-			'toim_nimi'		 => $tnimi,
-			'toim_nimitark'	 => $tnimitark,
-			'toim_osoite'	 => $tosoite,
-			'toim_ovttunnus' => $toim_ovttunnus,
-			'toim_postino'	 => $tpostino,
-			'toim_postitp'	 => $tpostitp,
-		);
-		$onko_toimitusosoite_olemassa = tarkista_tilauksen_toimitusosoite($toim_params);
-
-		if(!$onko_toimitusosoite_olemassa) {
-			echo "<font class='error'>".t("VIRHE: Et voi lisätä tätä jälkitoimitusta tähän tilaukseen poikkeavan toimitusosoiteen vuoksi")."!</font><br>";
-			$tee = "OTSIK";
-			$tila = "";
-			unset($jatka);
-		}
-
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
@@ -3460,23 +3442,3 @@
 	}
 
 	unset($alv);
-
-	function tarkista_tilauksen_toimitusosoite($toim_params = array()) {
-		global $kukarow;
-
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio ='{$kukarow['yhtio']}'
-					AND toim_maa = '{$toim_params['toim_maa']}'
-					AND toim_nimi = '{$toim_params['toim_nimi']}'
-					AND toim_osoite = '{$toim_params['toim_osoite']}'
-					AND toim_postino = '{$toim_params['toim_postino']}'
-					AND toim_postitp = '{$toim_params['toim_postitp']}'";
-
-		$result = pupe_query($query);
-
-		if(mysql_num_rows($result) > 0) {
-			return true;
-		}
-		return false;
-	}

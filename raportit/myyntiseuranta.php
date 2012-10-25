@@ -255,7 +255,6 @@
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
-			if($myyjabudjetti != '')		$myyjabudjettichk		= "CHECKED";
 			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
@@ -494,16 +493,14 @@
 				<td class='back'>",t("(Toimii vain jos listaat laskuittain)"),"</td>
 				</tr>";
 
-			$busel[$vertailubu] = "SELECTED";
-
 			echo "<tr>
 			<th>",t("N‰yt‰ budjetti"),"</th>";
 			echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
-			echo "<option value='asbu'   {$busel["asbu"]}>",t("Asiakasbudjetti"),"</option>";
-			echo "<option value='asbuos' {$busel["asbuos"]}>",t("Asiakas-Osastobudjetti"),"</option>";
-			echo "<option value='asbury' {$busel["asbury"]}>",t("Asiakas-Tuoteryhm‰budjetti"),"</option>";
-			echo "<option value='tubu' 	 {$busel["tubu"]}>",t("Tuotebudjetti"),"</option>";
-			echo "<option value='mybu' 	 {$busel["mybu"]}>",t("Myyj‰budjetti"),"</option>";
+			echo "<option value='asbu'   {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
+			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
+			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhm‰budjetti"),"</option>";
+			echo "<option value='tubu' 	 {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
+			echo "<option value='mybu' 	 {$sel_mybu}>",t("Myyj‰budjetti"),"</option>";
 			echo "</select></td>
 			</tr>";
 
@@ -791,7 +788,6 @@
 				$gluku  			= 0;
 				$varasto_join 		= "";
 				$kantaasiakas_join 	= "";
-				$kuka_join			= "";
 
 				// n‰it‰ k‰ytet‰‰n queryss‰
 				$sel_osasto = "";
@@ -830,6 +826,7 @@
 				$tuosagroups   = 0;
 				$laskugroups   = 0;
 				$muutgroups    = 0;
+				$myyjagroups   = 0;
 
 				// K‰yd‰‰n l‰pi k‰ytt‰j‰n syˆtt‰m‰t grouppaukset
 				foreach ($apu as $i => $mukaan) {
@@ -879,6 +876,7 @@
 						$order  .= "asiakas.myyjanro,";
 						$gluku++;
 						$asiakasgroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "ytunnus") {
@@ -999,7 +997,7 @@
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";
 						$order  .= "tuote.myyjanro,";
 						$gluku++;
-						$tuotegroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "tuoteostaja") {
@@ -1065,7 +1063,7 @@
 						$select .= "lasku.myyja 'myyj‰', ";
 						$order  .= "lasku.myyja,";
 						$gluku++;
-						$laskugroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "maa") {
@@ -1369,7 +1367,7 @@
 					// N‰ytet‰‰n asiakasbudjetti:
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
-					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $myyjagroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
 						$tee = '';
 					}
@@ -1396,7 +1394,7 @@
 					// N‰ytet‰‰n tuotebudjetti:
 
 					//siin‰ tapauksessa ei voi groupata muiden kuin asiakkaiden ja/tai tuoteryhm‰n tietojen mukaan
-					if ($asiakasgroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+					if ($asiakasgroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $myyjagroups > 0) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
 						$tee = '';
 					}
@@ -1409,6 +1407,22 @@
 
 					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
 						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
+						$tee = '';
+					}
+				}
+
+				if ($vertailubu == "mybu") {
+					// N‰ytet‰‰n myyj‰budjetti:
+
+					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+					if ($tuotegroups > 0 or $turyhgroups > 0 or $tuosagroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+						echo "<font class='error'>".t("VIRHE: Muita kuin myyjiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n myyj‰budjetti")."!</font><br>";
+						$tee = '';
+					}
+					
+					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+					if ($myyjagroups > 1) {
+						echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
 						$tee = '';
 					}
 				}
@@ -1698,7 +1712,6 @@
 								{$varasto_join}
 								{$kantaasiakas_join}
 								{$lisa_parametri}
-								{$kuka_join}
 								WHERE lasku.yhtio in ({$yhtio})
 								and lasku.tila in ({$tila})";
 
@@ -1830,6 +1843,12 @@
 						$alkukuun_paivat = date('t', mktime(0,0,0,$kka,1,$vva));
 						$lopukuun_paivat = date('t', mktime(0,0,0,$kkl,1,$vvl));
 
+						$kka = sprintf("%02d", $kka);
+						$kkl = sprintf("%02d", $kkl);
+
+						// Kausi p‰iviss‰
+						$kausi_paivissa = round((mktime(0,0,0,$kkl,$ppl,$vvl)-mktime(0,0,0,$kka,$ppa,$vva))/86400);
+
 						// Luodann resultista array ja korjataan/lis‰t‰‰n tietoja joita ei olla voitu laittaa mukaan isoon kyselyyn
 						$rows = array();
 						$groupby = array();
@@ -1864,9 +1883,6 @@
 							}
 
 							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
-
-								$kka = sprintf("%02d", $kka);
-								$kkl = sprintf("%02d", $kkl);
 
 								if ($vertailubu == "tubu") {
 									$budj_taulu = "budjetti_tuote";
@@ -1929,7 +1945,7 @@
 
 								if ($budj_yhtl != 0) {
 									$row["budjnyt"] = $budj_yhtl;
-									$row["budjindnyt"] = $row["myyntinyt"] / $budj_yhtl;
+									$row["budjindnyt"] = round($row["myyntinyt"] / $budj_yhtl, 2);
 								}
 
 								if ($piiloed == "") {
@@ -1970,30 +1986,32 @@
 
 									if ($budj_yhtl != 0) {
 										$row["budjed"] = $budj_yhtl;
-										$row["budjinded"] = $row["myyntied"] / $budj_yhtl;
+										$row["budjinded"] = round($row["myyntied"] / $budj_yhtl, 2);
 									}
-
 								}
 							}
 
-							if ($vertailubu == "mybu") {
+							if (isset($vertailubu) and $vertailubu == "mybu" and $myyjagroups > 0) {
 								if ($row['tuotemyyj‰'] != 0 and !isset($row['asiakasmyyj‰']) and !isset($row['myyj‰'])) {
 									$myyja_query = "SELECT budjetti
 													FROM kuka
-													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-													AND kuka.myyja = '{$row['tuotemyyj‰']}'";
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND myyja 	 = '{$row['tuotemyyj‰']}'
+													AND budjetti > 0";
 								}
 								elseif ($row['asiakasmyyj‰'] != 0 and !isset($row['tuotemyyj‰']) and !isset($row['myyj‰'])) {
 									$myyja_query = "SELECT budjetti
 													FROM kuka
-													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-													AND kuka.myyja = '{$row['asiakasmyyj‰']}'";
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND myyja 	 = '{$row['asiakasmyyj‰']}'
+													AND budjetti > 0";
 								}
 								elseif ($row['myyj‰'] != 0 and !isset($row['tuotemyyj‰']) and !isset($row['asiakasmyyj‰'])) {
 									$myyja_query = "SELECT budjetti
 													FROM kuka
-													WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-													AND kuka.tunnus = '{$row['myyj‰']}'";
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND tunnus   = '{$row['myyj‰']}'
+													AND budjetti > 0";
 								}
 								else {
 									$myyja_query = "";
@@ -2003,11 +2021,51 @@
 									$myyja_result = pupe_query($myyja_query);
 
 									if (mysql_num_rows($myyja_result) > 0) {
-										$myyja_row		 = mysql_fetch_assoc($myyja_result);
-										$row['budjetti'] = $myyja_row['budjetti'];
-									}
-									else {
-										$row['budjetti'] = 0;
+
+										// K‰ytt‰j‰n budjetti on per 12kk
+										$myyja_row = mysql_fetch_assoc($myyja_result);
+
+										if ($kuukausittain != "") {
+											foreach ($rows[0] as $ken_nimi => $null) {
+												if (preg_match("/^([0-9]{4,4})([0-9]{2,2})_budjnyt/", $ken_nimi, $pregkk)) {
+
+													if ($pregkk[1].$pregkk[2] == $alku_kausi and (int) $ppa != 1) {
+														// 12 kk myyj‰budjetti / 365 ja kerrotaan syˆtetyn ekan kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*($alkukuun_paivat+1-$ppa));
+													}
+													elseif ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
+														// 12 kk myyj‰budjetti / 365 ja kerrotaan syˆtetyn vikan kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*$ppl);
+													}
+													else {
+														// 12 kk myyj‰budjetti / 365 ja kerrotaan kyseisen kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*date('t', mktime(0,0,0,$pregkk[2],1,$pregkk[1])));
+													}
+
+													$row[$pregkk[1].$pregkk[2]."_budjnyt"]	  = $bunyt;
+													$row[$pregkk[1].$pregkk[2]."_budjindnyt"] = round($row[$pregkk[1].$pregkk[2]."_myynti"] / $bunyt, 2);
+
+													if ($piiloed == "") {
+														// Edellisen vuoden budjettina k‰ytet‰‰n nykyist‰ budjettia
+														$edbudvv = $pregkk[1] - 1;
+
+														$row[$edbudvv.$pregkk[2]."_budjed"] = $bunyt;
+														$row[$edbudvv.$pregkk[2]."_budjinded"] = round($row[$edbudvv.$pregkk[2]."_myynti"] / $bunyt, 2);
+													}
+												}
+											}
+										}
+										else {
+											// 12 kk myyj‰budjetti / 365 ja kerrotaan syˆtetyn p‰iv‰m‰‰r‰v‰lin p‰ivien m‰‰r‰ll‰
+											$row["budjnyt"] = round($myyja_row['budjetti']/365*$kausi_paivissa);
+											$row["budjindnyt"] = round($row["myyntinyt"] / $row["budjnyt"], 2);
+
+											if ($piiloed == "") {
+												// Edellisen vuoden budjettina k‰ytet‰‰n nykyist‰ budjettia
+												$row["budjed"] = $row["budjnyt"];
+												$row["budjinded"] = round($row["myyntied"] / $row["budjnyt"], 2);
+											}
+										}
 									}
 								}
 							}

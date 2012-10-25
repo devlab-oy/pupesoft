@@ -631,15 +631,17 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "vakkoodi" and $yhtiorow["vak_kasittely"] != "") {
+	if ((mysql_field_name($result, $i) == "vakkoodi" or mysql_field_name($result, $i) == "vak_imdg_koodi") and $yhtiorow["vak_kasittely"] != "") {
 
 		$sel = array();
 		$sel[$trow[$i]] = ' selected';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
+		$query_taulu = mysql_field_name($result, $i) == "vak_imdg_koodi" ? "vak_imdg" : "vak";
+
 		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
-					FROM vak
+					FROM {$query_taulu}
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$vak_res = pupe_query($query);
 

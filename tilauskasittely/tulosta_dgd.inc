@@ -164,7 +164,7 @@ if (!function_exists('rivi_dgd')) {
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
 
-		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['otsikkonro'], $kieli, "DGD");
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['otsikkonro'], $kieli, "DGD", "imdg");
 
 		$kollimaara_yht = 0;
 
@@ -310,5 +310,3 @@ if (!function_exists('print_pdf_dgd')) {
 		}
 	}
 }
-
-?>

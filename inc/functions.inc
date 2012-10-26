@@ -14983,21 +14983,19 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			$lahetetyyppi = pupesoft_lahetetyyppi($otunnus, $laskurow['liitostunnus']);
 		}
 
-		/*
-		Testausta varten.....
-		$lahetetyyppi = "tulosta_lahete.inc";
-		$lahetetyyppi = "tulosta_lahete_ean.inc";
-		$lahetetyyppi = "tulosta_lahete_brutto.inc";
-		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-		$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-		$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-		$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-		$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-		$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-		$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-		$lahetetyyppi = "tulosta_lahete_custom.inc";
-		$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
-		*/
+		#Testausta varten.....
+		#$lahetetyyppi = "tulosta_lahete.inc";
+		#$lahetetyyppi = "tulosta_lahete_ean.inc";
+		#$lahetetyyppi = "tulosta_lahete_brutto.inc";
+		#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
+		#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
+		#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
+		#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+		#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
+		#$lahetetyyppi = "tulosta_lahete_custom.inc";
+		#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 
 		if (@include("tilauskasittely/tulosta_lahete.inc"));
 		else require("tulosta_lahete.inc");

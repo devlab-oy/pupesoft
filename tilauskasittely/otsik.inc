@@ -1058,7 +1058,6 @@
 				echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
 			}
 
-
 			//Tutkitaan onko laskulla maksupositioita
 			$query = "	SELECT *
 						FROM maksupositio
@@ -1126,6 +1125,63 @@
 			}
 			echo "</td>";
 
+			// Tsekataan
+			$toimehto_tresult = t_avainsana("TOIMEHTO");
+
+			$toimehtosel  = "";
+			$toimehtosel1 = "";
+			$toimehtosel2 = "";
+			$toimehtosel3 = "";
+			$toimehtoseltark  = "";
+			$toimehtoseltark1 = "";
+			$toimehtoseltark2 = "";
+			$toimehtoseltark3 = "";
+			$toimehtoseltark_3  = "";
+			$toimehtoseltark_31 = "";
+			$toimehtoseltark_32 = "";
+			$toimehtoseltark_33 = "";
+
+			// Valitaan sopivin toimitusehto
+			while ($row = mysql_fetch_assoc($toimehto_tresult)) {
+
+				// Tarkka mätsi
+				if ($srow["toimitusehto"] != "" and strtoupper($srow["toimitusehto"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel1 = $row["tunnus"];
+					$toimehtoseltark1 = $row["selitetark"];
+					$toimehtoseltark_31 = $row["selitetark_3"];
+				}
+
+				// Alku mätsää
+				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
+					$toimehtosel2 = $row["tunnus"];
+					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
+					$toimehtoseltark_32 = $row["selitetark_3"];
+				}
+
+				// Otetaan yhtiön oletus
+				if ($srow["toimitusehto"] == "" and strtoupper($yhtiorow['oletus_toimitusehto']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel3 = $row["tunnus"];
+					$toimehtoseltark3 = $row["selitetark"];
+					$toimehtoseltark_33 = $row["selitetark_3"];
+				}
+			}
+
+			if ($toimehtosel1 != "") {
+				$toimehtosel		= $toimehtosel1;
+				$toimehtoseltark	= $toimehtoseltark1;
+				$toimehtoseltark_3	= $toimehtoseltark_31;
+			}
+			elseif ($toimehtosel2 != "") {
+				$toimehtosel		= $toimehtosel2;
+				$toimehtoseltark	= $toimehtoseltark2;
+				$toimehtoseltark_3	= $toimehtoseltark_32;
+			}
+			elseif ($toimehtosel3 != "") {
+				$toimehtosel 		= $toimehtosel3;
+				$toimehtoseltark 	= $toimehtoseltark3;
+				$toimehtoseltark_3	= $toimehtoseltark_33;
+			}
+
 			$state_chk = '';
 
 			if (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0) {
@@ -1136,14 +1192,26 @@
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
 			if ($apu_rahdinmaksaja == "O") {
-				$apuqu = "	SELECT *
-							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND selite  = '$srow[toimitustapa]'";
-				$meapu = pupe_query($apuqu);
-				$apuro = mysql_fetch_assoc($meapu);
 
-				$apu_rahdinmaksaja = $apuro['merahti'];
+				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPPARI") {
+					$apu_rahdinmaksaja = "K";
+				}
+				elseif ($toimehtoseltark_3 == "VASTAANOTTAJAN_SOPPARI") {
+					$apu_rahdinmaksaja = "";
+				}
+				elseif ($toimehtoseltark_3 == "RAHTIVAPAA") {
+					$apu_rahdinmaksaja = "";
+				}
+				else {
+					$apuqu = "	SELECT *
+								FROM toimitustapa
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND selite  = '$srow[toimitustapa]'";
+					$meapu = pupe_query($apuqu);
+					$apuro = mysql_fetch_assoc($meapu);
+
+					$apu_rahdinmaksaja = $apuro['merahti'];
+				}
 			}
 
 			$sel = array("K" => "", "V" => "");
@@ -1716,50 +1784,13 @@
 			echo "<tr>";
 			echo "<td>".t("Toimitusehto").":</td><td>";
 
-			$tresult = t_avainsana("TOIMEHTO");
-
 			echo "<select name='toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
 
-			$toimehtosel  = "";
-			$toimehtosel1 = "";
-			$toimehtosel2 = "";
-			$toimehtosel3 = "";
-			$toimehtoseltark  = "";
-			$toimehtoseltark1 = "";
-			$toimehtoseltark2 = "";
-			$toimehtoseltark3 = "";
-
-			// Valitaan sopivin toimitusehto
-			while ($row = mysql_fetch_assoc($tresult)) {
-
-				// Tarkka mätsi
-				if ($srow["toimitusehto"] != "" and strtoupper($srow["toimitusehto"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
-					$toimehtosel1 = $row["tunnus"];
-					$toimehtoseltark1 = $row["selitetark"];
-				}
-
-				// Alku mätsää
-				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
-					$toimehtosel2 = $row["tunnus"];
-					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
-				}
-
-				// Otetaan yhtiön oletus
-				if ($srow["toimitusehto"] == "" and strtoupper($yhtiorow['oletus_toimitusehto']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
-					$toimehtosel3 = $row["tunnus"];
-					$toimehtoseltark3 = $row["selitetark"];
-				}
-			}
-
-			if ($toimehtosel1 != "") $toimehtosel = $toimehtosel1;
-			elseif ($toimehtosel2 != "") $toimehtosel = $toimehtosel2;
-			elseif ($toimehtosel3 != "") $toimehtosel = $toimehtosel3;
-
-			mysql_data_seek($tresult, 0);
+			mysql_data_seek($toimehto_tresult, 0);
 
 			echo "<option value=''></option>";
 
-			while ($row = mysql_fetch_assoc($tresult)) {
+			while ($row = mysql_fetch_assoc($toimehto_tresult)) {
 				$sel = "";
 				if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
@@ -1767,11 +1798,6 @@
 			}
 
 			echo "</select>";
-
-			if ($toimehtoseltark1 != "") $toimehtoseltark = $toimehtoseltark1;
-			elseif ($toimehtoseltark2 != "") $toimehtoseltark = $toimehtoseltark2;
-			elseif ($toimehtoseltark3 != "") $toimehtoseltark = $toimehtoseltark3;
-
 			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$toimehtoseltark' size='20'>";
 			echo "</td>";
 

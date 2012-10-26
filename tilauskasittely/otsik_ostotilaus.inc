@@ -239,10 +239,12 @@
 				echo "<option value='1' $sel[1]>".t("Pikalähetys")."</option>";
 				echo "<option value='3' $sel[3]>".t("Yölähetys")."</option>";
 				echo "</select></td>";
-				//visuaalista säätöä, "täytetään" turha väli
+
 				echo "<td>";
+				echo t("Erikoisalennus") . ':';
 				echo "</td>";
 				echo "<td>";
+				echo "<input type='text' name='erikoisale' value='{$srow['erikoisale']}'>";
 				echo "</td>";
 			}
 			
@@ -457,6 +459,9 @@
 		if ($toim == "HAAMU") {
 			$tilaustyyppi = "O";
 		}
+		
+		//Erikoisalennuksen desimaalipilkku
+		$erikoisale = str_replace (",", ".", $erikoisale);
 
 		$query .= "	lasku SET
 					alatila 			= '$alatila',
@@ -496,7 +501,8 @@
 					viesti 				= '$viesti',
 					viikorkopros 		= '$yhtiorow[viivastyskorko]',
 					yhtio 				= '$kukarow[yhtio]',
-					ytunnus				= '$ytunnus'";
+					ytunnus				= '$ytunnus',
+					erikoisale			= '$erikoisale'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();

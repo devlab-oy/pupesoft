@@ -193,6 +193,24 @@
 				exit;
 			}
 
+			//lasketaan erikoisalennus ale3 kenttään koska saapumisen erikoisale käyttää tilausrivin erikoisalea
+			$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
+			$result = pupe_query($query);
+			while($row = mysql_fetch_assoc($result)) {
+				if($row['ale3'] != 0) {
+					$ale_prosentti = ((1 - ($row['ale3'] / 100)) * (1 - ($row['erikoisale'] / 100)) * 100);
+				}
+				else {
+					$ale_prosentti = $row['erikoisale'];
+				}
+				$query = "	UPDATE tilausrivi set
+										ale3 = '$ale_prosentti',
+										erikoisale = 0
+										where yhtio = '$kukarow[yhtio]' and
+										tunnus = '$row[tunnus]'";
+				$result = pupe_query($query);
+			}
+
 			// katotaan ollaanko haluttu optimoida johonki varastoon
 			if ($laskurow["varasto"] != 0) {
 
@@ -796,6 +814,7 @@
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
 						tuotteen_toimittajat.valuutta,
+						tilausrivi.erikoisale,
 						tilausrivi.ale1,
 						tilausrivi.ale2,
 						tilausrivi.ale3
@@ -837,9 +856,13 @@
 				$lask 			= mysql_num_rows($presult);
 				$tilausok 		= 0;
 				$divnolla		= 0;
+				$erikoisale_summa = 0;
 
 				while ($prow = mysql_fetch_array ($presult)) {
 					$divnolla++;
+					//$erikoisale_summa = alehinta_osto ($laskurow, array('tuoteno' => $prow['tuoteno']), $prow["tilattu"], '', $prow['hinta'], array('ale1' => $prow['ale1'] , 'ale2' => $prow['ale2'] , 'ale3' => $prow['ale3'] , 'aleerikoisale' => $prow['erikoisale']));
+					$erikoisale_maara = ($prow['rivihinta'] * ($prow['erikoisale'] / 100));
+					$erikoisale_summa += ($erikoisale_maara * -1);
 					$yhteensa += $prow["rivihinta"];
 					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
 
@@ -1215,12 +1238,32 @@
 						<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'tulosta_osto'); return false;\">
 						<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'samewindow'); return false;\">
 						</form>
+						</td>";
+
+				if($laskurow['erikoisale'] > 0) {
+					$_colspan = $backspan1 - 1;
+					echo "<td>
+						<td class='back' colspan='$_colspan'></td>
+						<td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
 						</td>
-						<td class='back' colspan='$backspan1'></td>
+						</tr>";
+					$_colspan = $backspan1 + 4;
+					echo "<tr>
+						<td class='back' colspan='$_colspan'></td>
 						<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
 						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						</tr>";
+				}
+				else {
+					echo "<td class='back' colspan='$backspan1'></td>
+						<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
+						<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+						<td class='spec'>$laskurow[valkoodi]</td>
+						</tr>";
+				}
 
 				echo "	<tr>
 						<td class='back' colspan='$backspan2'></td>

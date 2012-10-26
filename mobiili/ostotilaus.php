@@ -11,6 +11,13 @@ elseif (@include_once("inc/parametrit.inc"));
 
 if(!isset($errors)) $errors = array();
 
+
+// Nollataan kuka.kesken
+if (isset($uusi)) {
+	$nollaus_query = "UPDATE kuka SET kesken=0 WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+	$result = pupe_query($nollaus_query);
+}
+
 # Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
 	$errors[] = t("Ei löytynyt. Hae uudestaan.");

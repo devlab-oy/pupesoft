@@ -1588,7 +1588,7 @@
 			// lisätään tuotteet keikalle ja kohdistetaan
 			foreach ($ostoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3
+				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1632,6 +1632,26 @@
 				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
 				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
 				$ale3lisa = (isset($pointteri['ale3']) and trim($pointteri['ale3']) != "" and trim($pointteri['ale3']) != 0) ? " ale3 = '{$pointteri['ale3']}', " : " ale3 = 0, ";
+
+				$query  = "	SELECT tuote.*,
+							if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
+							if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
+							from tuote
+							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$osrow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+							where tuote.yhtio	= '$kukarow[yhtio]'
+							and tuote.tuoteno	= '$hinta_chk_row[tuoteno]'";
+				$tuores = pupe_query($query);
+				$tuorow = mysql_fetch_assoc($tuores);
+
+				$ale_lisa_apu_kala = generoi_alekentta_php($hinta_chk_row, 'O', 'kerto');
+
+				$ohinta = round($hinta_chk_row['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$osrow['vienti_kurssi']*$hinta_chk_row['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
+
+				$query  = "	UPDATE tilausrivi SET
+							hinta_alkuperainen = '{$ohinta}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$hinta_chk_row['tunnus']}'";
+				$resultxxx = pupe_query($query);
 
 				$update = "	UPDATE tilausrivi SET
 							hinta = '{$pointteri['hinta']}',
@@ -1777,7 +1797,7 @@
 
 			foreach ($keikoilla as $pointteri) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno, uusiotunnus, suuntalava, ale1, ale2, ale3
+				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri['tunnus']}'";
@@ -1818,6 +1838,26 @@
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
 				}
+
+				$query  = "	SELECT tuote.*,
+							if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
+							if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
+							from tuote
+							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$osrow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+							where tuote.yhtio	= '$kukarow[yhtio]'
+							and tuote.tuoteno	= '$hinta_chk_row[tuoteno]'";
+				$tuores = pupe_query($query);
+				$tuorow = mysql_fetch_assoc($tuores);
+
+				$ale_lisa_apu_kala = generoi_alekentta_php($hinta_chk_row, 'O', 'kerto');
+
+				$ohinta = round($hinta_chk_row['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$osrow['vienti_kurssi']*$hinta_chk_row['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
+
+				$query  = "	UPDATE tilausrivi SET
+							hinta_alkuperainen = '{$ohinta}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$hinta_chk_row['tunnus']}'";
+				$resultxxx = pupe_query($query);
 
 				$ale1lisa = (isset($pointteri['ale1']) and trim($pointteri['ale1']) != "" and trim($pointteri['ale1']) != 0) ? " ale1 = '{$pointteri['ale1']}', " : " ale1 = 0, ";
 				$ale2lisa = (isset($pointteri['ale2']) and trim($pointteri['ale2']) != "" and trim($pointteri['ale2']) != 0) ? " ale2 = '{$pointteri['ale2']}', " : " ale2 = 0, ";
@@ -1905,7 +1945,7 @@
 
 			foreach ($ostoilla as $pointteri1) {
 
-				$query = "	SELECT hinta, otunnus, perheid, tuoteno, ale1, ale2, ale3, suuntalava
+				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$pointteri1['tunnus']}'";
@@ -1946,6 +1986,26 @@
 								AND tunnus != '{$hinta_chk_row['perheid']}'";
 					pupe_query($update);
 				}
+
+				$query  = "	SELECT tuote.*,
+							if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
+							if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
+							from tuote
+							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$osrow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+							where tuote.yhtio	= '$kukarow[yhtio]'
+							and tuote.tuoteno	= '$hinta_chk_row[tuoteno]'";
+				$tuores = pupe_query($query);
+				$tuorow = mysql_fetch_assoc($tuores);
+
+				$ale_lisa_apu_kala = generoi_alekentta_php($hinta_chk_row, 'O', 'kerto');
+
+				$ohinta = round($hinta_chk_row['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$osrow['vienti_kurssi']*$hinta_chk_row['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
+
+				$query  = "	UPDATE tilausrivi SET
+							hinta_alkuperainen = '{$ohinta}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$hinta_chk_row['tunnus']}'";
+				$resultxxx = pupe_query($query);
 
 				$ale1lisa = (isset($pointteri1['ale1']) and trim($pointteri1['ale1']) != "" and trim($pointteri1['ale1']) != 0) ? " ale1 = '{$pointteri1['ale1']}', " : " ale1 = 0, ";
 				$ale2lisa = (isset($pointteri1['ale2']) and trim($pointteri1['ale2']) != "" and trim($pointteri1['ale2']) != 0) ? " ale2 = '{$pointteri1['ale2']}', " : " ale2 = 0, ";

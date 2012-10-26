@@ -217,10 +217,6 @@
 			$piilota_kappaleet_sel 	= "";
 			$einollachk 			= "";
 			$naytaennakkochk 		= "";
-			$sel_asbu				= "";
-			$sel_asbury				= "";
-			$sel_asbuos				= "";
-			$sel_tubu				= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
 			if ($ruksit[20]  != '') 		$ruk20chk  				= "CHECKED";
@@ -259,7 +255,7 @@
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
-			if ($liitetiedostot != '')	$liitetiedostotchk		= "CHECKED";
+			if ($liitetiedostot != '')		$liitetiedostotchk		= "CHECKED";
 			if ($ytun_laajattied != '')		$ytun_laajattiedchk		= "CHECKED";
 
 			echo "<table>
@@ -498,12 +494,13 @@
 				</tr>";
 
 			echo "<tr>
-			<th>",t("N‰yt‰ budjetti"),"</th>";
-			echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei budjettivertailua"),"</option>";
-			echo "<option value='asbu' {$sel_asbu}>",t("Asiakasbudjetti"),"</option>";
-			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastobudjetti"),"</option>";
-			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhm‰budjetti"),"</option>";
-			echo "<option value='tubu' {$sel_tubu}>",t("Tuotebudjetti"),"</option>";
+			<th>",t("Tavoitevertailu"),"</th>";
+			echo "<td colspan='3'><select name='vertailubu'><option value=''>",t("Ei tavoitevertailua"),"</option>";
+			echo "<option value='asbu'   {$sel_asbu}>",t("Asiakastavoitteet"),"</option>";
+			echo "<option value='asbuos' {$sel_asbuos}>",t("Asiakas-Osastotavoitteet"),"</option>";
+			echo "<option value='asbury' {$sel_asbury}>",t("Asiakas-Tuoteryhm‰tavoitteet"),"</option>";
+			echo "<option value='tubu' 	 {$sel_tubu}>",t("Tuotetavoitteet"),"</option>";
+			echo "<option value='mybu' 	 {$sel_mybu}>",t("Myyj‰tavoitteet"),"</option>";
 			echo "</select></td>
 			</tr>";
 
@@ -822,13 +819,14 @@
 					}
 				}
 
-				// Pidet‰‰n lukua mink‰ mukaan groupataan, jotta osataan liitt‰‰ budjetti mukaan
+				// Pidet‰‰n lukua mink‰ mukaan groupataan, jotta osataan liitt‰‰ tavoitteet mukaan
 				$asiakasgroups = 0;
 				$tuotegroups   = 0;
 				$turyhgroups   = 0;
 				$tuosagroups   = 0;
 				$laskugroups   = 0;
 				$muutgroups    = 0;
+				$myyjagroups   = 0;
 
 				// K‰yd‰‰n l‰pi k‰ytt‰j‰n syˆtt‰m‰t grouppaukset
 				foreach ($apu as $i => $mukaan) {
@@ -878,6 +876,7 @@
 						$order  .= "asiakas.myyjanro,";
 						$gluku++;
 						$asiakasgroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "ytunnus") {
@@ -998,7 +997,7 @@
 						if (strpos($select, "'tuotelista',") === FALSE) $select .= "group_concat(DISTINCT concat('\'',tuote.tuoteno,'\'')) 'tuotelista', ";
 						$order  .= "tuote.myyjanro,";
 						$gluku++;
-						$tuotegroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "tuoteostaja") {
@@ -1064,7 +1063,7 @@
 						$select .= "lasku.myyja 'myyj‰', ";
 						$order  .= "lasku.myyja,";
 						$gluku++;
-						$laskugroups++;
+						$myyjagroups++;
 					}
 
 					if ($mukaan == "maa") {
@@ -1363,51 +1362,67 @@
 					$tilauslisa3 = "";
 				}
 
-				// Onnistuuko budjettivertailu
+				// Onnistuuko tavoitevertailu
 				if ($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") {
-					// N‰ytet‰‰n asiakasbudjetti:
+					// N‰ytet‰‰n asiakastavoitteet:
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan
-					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
-						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
+					if ($tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $myyjagroups > 0) {
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
 					// ei voi groupata muiden kuin asiakkaiden tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan asbury)
 					if ($vertailubu == "asbu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
-						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
 					// eik‰ rajata muiden kuin aiakkaan tietojen mukaan (t‰ss‰ on kaikki joinit ja wheren ehdot)
 					if (preg_match("/JOIN (tilausrivin_lisatiedot|asiakkaan_avainsanat|laskun_lisatiedot|varastopaikat)/i", $lisatiedot_join.$varasto_join.$kantaasiakas_join.$lisa_parametri) or $lisa_dynaaminen["tuote"] != '') {
-						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
 					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|tuote\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
-						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n asiakasbudjetti")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin asiakaaseen liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n asiakastavoitteet")."!</font><br>";
 						$tee = '';
 					}
 				}
 
 				if ($vertailubu == "tubu") {
-					// N‰ytet‰‰n tuotebudjetti:
+					// N‰ytet‰‰n tuotetavoitteet:
 
 					//siin‰ tapauksessa ei voi groupata muiden kuin asiakkaiden ja/tai tuoteryhm‰n tietojen mukaan
-					if ($asiakasgroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
-						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
+					if ($asiakasgroups > 0 or $laskugroups > 0 or $muutgroups > 0 or $myyjagroups > 0) {
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n tuotetavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
 					// eik‰ rajata muiden kuin tuotteen tietojen mukaan (t‰ss‰ on kaikki joinit ja wheren ehdot)
 					if (preg_match("/JOIN (tilausrivin_lisatiedot|asiakkaan_avainsanat|laskun_lisatiedot|varastopaikat)/i", $lisatiedot_join.$varasto_join.$kantaasiakas_join.$lisa_parametri) or $lisa_dynaaminen["asiakas"] != '') {
-						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ JOINeja ei voida valita kun n‰ytet‰‰n tuotetavoitteet")."!</font><br>";
 						$tee = '';
 					}
 
 					if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $asiakasrajaus.$lisa)) {
-						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotebudjetti")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotetavoitteet")."!</font><br>";
+						$tee = '';
+					}
+				}
+
+				if ($vertailubu == "mybu") {
+					// N‰ytet‰‰n myyj‰tavoitteet:
+
+					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+					if ($tuotegroups > 0 or $turyhgroups > 0 or $tuosagroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+						echo "<font class='error'>".t("VIRHE: Muita kuin myyjiin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n myyj‰tavoitteet")."!</font><br>";
+						$tee = '';
+					}
+
+					//siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+					if ($myyjagroups > 1) {
+						echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
 						$tee = '';
 					}
 				}
@@ -1458,8 +1473,8 @@
 							}
 
 							if ($vertailubu != "") {
-								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_budjnyt', ";
-								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_budjindnyt', ";
+								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoitenyt', ";
+								$query .= " sum(0) '".substr($i,0,4).substr($i,4,2)."_tavoiteindnyt', ";
 							}
 
 							if ($ajotapa == 'tilausjaauki') {
@@ -1477,8 +1492,8 @@
 								}
 
 								if ($vertailubu != "") {
-									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_budjed', ";
-									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_budjinded', ";
+									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteed', ";
+									$query .= " sum(0) '".(substr($i,0,4)-1).substr($i,4,2)."_tavoiteinded', ";
 								}
 							}
 
@@ -1504,8 +1519,8 @@
 							}
 
 							if ($vertailubu != "") {
-								$query .= " sum(0) 'budjnyt', ";
-								$query .= " sum(0) 'budjindnyt', ";
+								$query .= " sum(0) 'tavoitenyt', ";
+								$query .= " sum(0) 'tavoiteindnyt', ";
 							}
 
 							if ($ajotapa == 'tilausjaauki') {
@@ -1527,8 +1542,8 @@
 								}
 
 								if ($vertailubu != "") {
-									$query .= " sum(0) 'budjed', ";
-									$query .= " sum(0) 'budjinded', ";
+									$query .= " sum(0) 'tavoiteed', ";
+									$query .= " sum(0) 'tavoiteinded', ";
 								}
 							}
 						}
@@ -1828,6 +1843,12 @@
 						$alkukuun_paivat = date('t', mktime(0,0,0,$kka,1,$vva));
 						$lopukuun_paivat = date('t', mktime(0,0,0,$kkl,1,$vvl));
 
+						$kka = sprintf("%02d", $kka);
+						$kkl = sprintf("%02d", $kkl);
+
+						// Kausi p‰iviss‰
+						$kausi_paivissa = round((mktime(0,0,0,$kkl,$ppl,$vvl)-mktime(0,0,0,$kka,$ppa,$vva))/86400);
+
 						// Luodann resultista array ja korjataan/lis‰t‰‰n tietoja joita ei olla voitu laittaa mukaan isoon kyselyyn
 						$rows = array();
 						$groupby = array();
@@ -1863,9 +1884,6 @@
 
 							if (isset($vertailubu) and (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or ($vertailubu == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "")) {
 
-								$kka = sprintf("%02d", $kka);
-								$kkl = sprintf("%02d", $kkl);
-
 								if ($vertailubu == "tubu") {
 									$budj_taulu = "budjetti_tuote";
 									$bulisa = " and tuoteno	in ({$row['tuotelista']}) ";
@@ -1891,7 +1909,7 @@
 									}
 								}
 
-								// Valitun kauden budjetti:
+								// Valitun kauden tavoite:
 								$budj_q = "	SELECT kausi, sum(summa) summa
 											FROM {$budj_taulu}
 											WHERE yhtio				= '{$kukarow['yhtio']}'
@@ -1902,7 +1920,7 @@
 											GROUP BY kausi";
 								$budj_r = pupe_query($budj_q);
 
-								$budj_yhtl = 0;
+								$tavoite_yhtl = 0;
 
 								while ($dyprow = mysql_fetch_assoc($budj_r)) {
 
@@ -1915,23 +1933,23 @@
 									}
 
 									if ($kuukausittain != "") {
-										if (isset($row[$dyprow["kausi"]."_budjnyt"])) {
-											$row[$dyprow["kausi"]."_budjnyt"] = $dyprow["summa"];
-											$row[$dyprow["kausi"]."_budjindnyt"] = $row[$dyprow["kausi"]."_myynti"] / $dyprow["summa"];
+										if (isset($row[$dyprow["kausi"]."_tavoitenyt"])) {
+											$row[$dyprow["kausi"]."_tavoitenyt"] = $dyprow["summa"];
+											$row[$dyprow["kausi"]."_tavoiteindnyt"] = $row[$dyprow["kausi"]."_myynti"] / $dyprow["summa"];
 										}
 									}
 									else {
-										$budj_yhtl += $dyprow["summa"];
+										$tavoite_yhtl += $dyprow["summa"];
 									}
 								}
 
-								if ($budj_yhtl != 0) {
-									$row["budjnyt"] = $budj_yhtl;
-									$row["budjindnyt"] = $row["myyntinyt"] / $budj_yhtl;
+								if ($tavoite_yhtl != 0) {
+									$row["tavoitenyt"] = $tavoite_yhtl;
+									$row["tavoiteindnyt"] = round($row["myyntinyt"] / $tavoite_yhtl, 2);
 								}
 
 								if ($piiloed == "") {
-									// Edellisen kauden budjetti
+									// Edellisen kauden tavoite
 									$budj_q = "	SELECT kausi, sum(summa) summa
 												FROM {$budj_taulu}
 												WHERE yhtio				= '{$kukarow['yhtio']}'
@@ -1943,7 +1961,7 @@
 												GROUP BY kausi";
 									$budj_r = pupe_query($budj_q);
 
-									$budj_yhtl = 0;
+									$tavoite_yhtl = 0;
 
 									while ($dyprow = mysql_fetch_assoc($budj_r)) {
 
@@ -1956,38 +1974,117 @@
 										}
 
 										if ($kuukausittain != "") {
-											if (isset($row[$dyprow["kausi"]."_budjed"])) {
-												$row[$dyprow["kausi"]."_budjed"] = $dyprow["summa"];
-												$row[$dyprow["kausi"]."_budjinded"] = $row[$dyprow["kausi"]."_myynti"] / $dyprow["summa"];
+											if (isset($row[$dyprow["kausi"]."_tavoiteed"])) {
+												$row[$dyprow["kausi"]."_tavoiteed"] = $dyprow["summa"];
+												$row[$dyprow["kausi"]."_tavoiteinded"] = $row[$dyprow["kausi"]."_myynti"] / $dyprow["summa"];
 											}
 										}
 										else {
-											$budj_yhtl += $dyprow["summa"];
+											$tavoite_yhtl += $dyprow["summa"];
 										}
 									}
 
-									if ($budj_yhtl != 0) {
-										$row["budjed"] = $budj_yhtl;
-										$row["budjinded"] = $row["myyntied"] / $budj_yhtl;
+									if ($tavoite_yhtl != 0) {
+										$row["tavoiteed"] = $tavoite_yhtl;
+										$row["tavoiteinded"] = round($row["myyntied"] / $tavoite_yhtl, 2);
 									}
-
 								}
 							}
 
-							if ($liitetiedostot != '') {
-									$liitetiedosto_query = "SELECT *
-															FROM liitetiedostot
-															WHERE yhtio = '{$kukarow['yhtio']}'
-															AND liitos = 'lasku'
-															AND liitostunnus = '{$row['tilausnumero']}'";
-									$liitetiedosto_result = pupe_query($liitetiedosto_query);
+							if (isset($vertailubu) and $vertailubu == "mybu" and $myyjagroups > 0) {
+								if ($row['tuotemyyj‰'] != 0 and !isset($row['asiakasmyyj‰']) and !isset($row['myyj‰'])) {
+									$myyja_query = "SELECT budjetti
+													FROM kuka
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND myyja 	 = '{$row['tuotemyyj‰']}'
+													AND budjetti > 0";
+								}
+								elseif ($row['asiakasmyyj‰'] != 0 and !isset($row['tuotemyyj‰']) and !isset($row['myyj‰'])) {
+									$myyja_query = "SELECT budjetti
+													FROM kuka
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND myyja 	 = '{$row['asiakasmyyj‰']}'
+													AND budjetti > 0";
+								}
+								elseif ($row['myyj‰'] != 0 and !isset($row['tuotemyyj‰']) and !isset($row['asiakasmyyj‰'])) {
+									$myyja_query = "SELECT budjetti
+													FROM kuka
+													WHERE yhtio  = '{$kukarow['yhtio']}'
+													AND tunnus   = '{$row['myyj‰']}'
+													AND budjetti > 0";
+								}
+								else {
+									$myyja_query = "";
+								}
 
-									$liitetiedosto_indeksi = 1;
-									$row['liitetiedostot'] = '';
-									while($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
-										$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' target='Attachment'>".t("Liite")." {$liitetiedosto_indeksi}</a> ";
-										$liitetiedosto_indeksi++;
+								if ($myyja_query != "") {
+									$myyja_result = pupe_query($myyja_query);
+
+									if (mysql_num_rows($myyja_result) > 0) {
+
+										// K‰ytt‰j‰n tavoite on per 12kk
+										$myyja_row = mysql_fetch_assoc($myyja_result);
+
+										if ($kuukausittain != "") {
+											foreach ($rows[0] as $ken_nimi => $null) {
+												if (preg_match("/^([0-9]{4,4})([0-9]{2,2})_tavoitenyt/", $ken_nimi, $pregkk)) {
+
+													if ($pregkk[1].$pregkk[2] == $alku_kausi and (int) $ppa != 1) {
+														// 12 kk myyj‰tavoitteet / 365 ja kerrotaan syˆtetyn ekan kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*($alkukuun_paivat+1-$ppa));
+													}
+													elseif ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
+														// 12 kk myyj‰tavoitteet / 365 ja kerrotaan syˆtetyn vikan kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*$ppl);
+													}
+													else {
+														// 12 kk myyj‰tavoitteet / 365 ja kerrotaan kyseisen kuukauden p‰ivill‰
+														$bunyt = round($myyja_row['budjetti']/365*date('t', mktime(0,0,0,$pregkk[2],1,$pregkk[1])));
+													}
+
+													$row[$pregkk[1].$pregkk[2]."_tavoitenyt"]	  = $bunyt;
+													$row[$pregkk[1].$pregkk[2]."_tavoiteindnyt"] = round($row[$pregkk[1].$pregkk[2]."_myynti"] / $bunyt, 2);
+
+													if ($piiloed == "") {
+														// Edellisen vuoden tavoitteina k‰ytet‰‰n nykyist‰ tavoittetta
+														$edbudvv = $pregkk[1] - 1;
+
+														$row[$edbudvv.$pregkk[2]."_tavoiteed"] = $bunyt;
+														$row[$edbudvv.$pregkk[2]."_tavoiteinded"] = round($row[$edbudvv.$pregkk[2]."_myynti"] / $bunyt, 2);
+													}
+												}
+											}
+										}
+										else {
+											// 12 kk myyj‰tavoitteet / 365 ja kerrotaan syˆtetyn p‰iv‰m‰‰r‰v‰lin p‰ivien m‰‰r‰ll‰
+											$row["tavoitenyt"] = round($myyja_row['budjetti']/365*$kausi_paivissa);
+											$row["tavoiteindnyt"] = round($row["myyntinyt"] / $row["tavoitenyt"], 2);
+
+											if ($piiloed == "") {
+												// Edellisen vuoden tavoitteina k‰ytet‰‰n nykyist‰ tavoittetta
+												$row["tavoiteed"] = $row["tavoitenyt"];
+												$row["tavoiteinded"] = round($row["myyntied"] / $row["tavoitenyt"], 2);
+											}
+										}
 									}
+								}
+							}
+
+							if ($ruk140chk != '' and $liitetiedostot != '') {
+								$liitetiedosto_query = "SELECT *
+														FROM liitetiedostot
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND liitos = 'lasku'
+														AND liitostunnus = '{$row['tilausnumero']}'";
+								$liitetiedosto_result = pupe_query($liitetiedosto_query);
+
+								$liitetiedosto_indeksi = 1;
+								$row['liitetiedostot'] = '';
+
+								while ($liitetiedosto_row = mysql_fetch_assoc($liitetiedosto_result)) {
+									$row['liitetiedostot'] .= "<a href='{$palvelin2}/view.php?id={$liitetiedosto_row['tunnus']}' target='Attachment'>".t("Liite")." {$liitetiedosto_indeksi}</a> ";
+									$liitetiedosto_indeksi++;
+								}
 							}
 
 							$rows[] = $row;
@@ -2091,8 +2188,8 @@
 										elseif ($vnim == "myykplind") {
 											if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
 										}
-										elseif ($vnim == "budjindnyt") {
-											if ($valisummat["budjnyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["budjnyt"],2);
+										elseif ($vnim == "tavoiteindnyt") {
+											if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
 										}
 										elseif ((string) $vsum != '') {
 											$vsum = sprintf("%.2f", $vsum);
@@ -2541,8 +2638,8 @@
 								elseif ($vnim == "myykplind") {
 									if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
 								}
-								elseif ($vnim == "budjindnyt") {
-									if ($valisummat["budjnyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["budjnyt"],2);
+								elseif ($vnim == "tavoiteindnyt") {
+									if ($valisummat["tavoitenyt"] <> 0)		$vsum = round($valisummat["myyntinyt"] / $valisummat["tavoitenyt"],2);
 								}
 								elseif ((string) $vsum != '') {
 									$vsum = sprintf("%.2f", $vsum);
@@ -2593,8 +2690,8 @@
 							if ($vnim == "myykplind") {
 								if ($totsummat["myykpled"] <> 0)		$vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"],2);
 							}
-							if ($vnim == "budjindnyt") {
-								if ($totsummat["budjnyt"] <> 0)			$vsum = round($totsummat["myyntinyt"] / $totsummat["budjnyt"],2);
+							if ($vnim == "tavoiteindnyt") {
+								if ($totsummat["tavoitenyt"] <> 0)			$vsum = round($totsummat["myyntinyt"] / $totsummat["tavoitenyt"],2);
 							}
 
 							if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";

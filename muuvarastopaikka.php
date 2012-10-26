@@ -762,9 +762,17 @@
 		$ahyllytaso = trim($ahyllytaso);
 
 		//Tarkistetaan onko paikka validi
-		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
+		$query = "	SELECT oletus
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and hyllyalue = '$ahyllyalue'
+					and hyllynro = '$ahyllynro'
+					and hyllytaso = '$ahyllytaso'
+					and hyllyvali = '$ahyllyvali'";
+		$result = mysql_query($query) or pupe_error($query);
 
-		if ($saldo === FALSE) {
+		if (mysql_num_rows($result) == 0) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) != 0 and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '' and $ahyllyalue != "!!M") {
 				echo "<font class='message'>".("Uusi varastopaikka luotiin tuotteelle").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 

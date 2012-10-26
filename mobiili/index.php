@@ -14,27 +14,26 @@ echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
 echo "<div class='header'><h1>",t("PÄÄVALIKKO", $browkieli),"</h1></div>";
 
+echo "<div class='main valikko'>";
 if (tarkista_oikeus("mobiili/siirto.php")) {
 	echo "<button value=''>",t("Siirto", $browkieli),"</button>";
 }
 
 if (tarkista_oikeus("mobiili/tulouta.php")) {
-	echo "<form name='tulouta' target='_top' action='tulouta.php' method='post'>";
-	echo "<input class='button' type='submit' value='",t("Tulouta", $browkieli),"' />";
-	echo "</form>";
+	echo "<p><a href='tulouta.php' class='button'>",t("Tulouta", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
-	echo "<button class='button' value=''>",t("Inventointi", $browkieli),"</button>";
+	echo "<p><a href='inventointi.php' class='button'>",t("Inventointi", $browkieli),"</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {
 	echo "<button class='button' value=''>",t("Tuki", $browkieli),"</button>";
 }
 
-echo "<form method='post' action='{$palvelin2}logout.php?location={$palvelin2}mobiili'>";
-echo "<input type='submit' class='button' value='",t("Lopeta", $browkieli),"' />";
-echo "</form>";
+echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}mobiili' class='button'>",t("Lopeta", $browkieli),"</a></p>";
+
+echo "</div>";
 echo "</body>";
 
 require('inc/footer.inc');

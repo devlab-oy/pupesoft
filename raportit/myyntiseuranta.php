@@ -1916,7 +1916,6 @@
 											and kausi 			   >= '{$alku_kausi}'
 											and kausi 			   <= '{$lopu_kausi}'
 											{$bulisa}
-											and dyna_puu_tunnus		= ''
 											GROUP BY kausi";
 								$budj_r = pupe_query($budj_q);
 
@@ -1956,7 +1955,6 @@
 												and kausi 			   >= '{$alku_kausi_ed}'
 												and kausi 			   <= '{$lopu_kausi_ed}'
 												{$bulisa}
-												and dyna_puu_tunnus		= ''
 												and osasto				= ''
 												GROUP BY kausi";
 									$budj_r = pupe_query($budj_q);

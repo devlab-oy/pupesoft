@@ -13683,7 +13683,7 @@ if (!function_exists('tulosta_hrx')) {
 		$viivakoodi1 .= ">5";
 		$viivakoodi1 .= substr($tilriv,2);
 
-		$viivakoodi1 = $tilriv; 
+		$viivakoodi1 = $tilriv;
 
 		// $viivakoodi2  = ">6";
 		// $viivakoodi2 .= substr($sscc,0,1);
@@ -13779,7 +13779,7 @@ if (!function_exists('tulosta_hrx')) {
 					{RC015;CMR: {$viivakoodi1}|}
 
 				 	{PC016;0070,1310,1,1,A,00,B|}
-					{RC016;n / n {$pakkauskoodi}|}
+					{RC016;{$monesko_laatikko} / {$montako_laatikkoa_yht} {$pakkauskoodi}|}
 
 					*** TULOSTUS  ***
 					{XS;I,0001,0002C3210|}

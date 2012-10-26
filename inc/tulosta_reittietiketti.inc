@@ -135,6 +135,8 @@
 							GROUP BY 1,2,3,4,5";
 				$keraysera_res = pupe_query($query);
 
+				$monesko_laatikko = 1;
+
 				while ($keraysera_row = mysql_fetch_assoc($keraysera_res)) {
 
 					$query = "	SELECT koodi
@@ -171,7 +173,7 @@
 								AND kerayserat.sscc 	= '{$keraysera_row['sscc']}'";
 					$paino_chk_res = pupe_query($query);
 					$paino_chk_row = mysql_fetch_assoc($paino_chk_res);
-						
+
 					if ($unifaun_kaytossa) {
 						$row['pakkausid'] = $keraysera_row['pakkausnro'];
 						$row['kollilaji'] = $keraysera_row['kollilaji'];
@@ -339,23 +341,23 @@
 						$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
 						// Tulostetaan Pupen oma kollitarra
-						$params = array(
-				 			'tilriv' => $row['tunnus'],//tilausnumero
-				 			'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
-				 			'sscc' => $keraysera_row['sscc'],
-				 			'toimitustapa' => $row['toimitustapa'],
-				 			'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
-				 			'paino' => $pakkaus_info_row['tuotemassa'],
-				 			'tilavuus' => $pakkaus_info_row['kuutiot'],
-				 			'lask_nimi' => $rakir_row['toim_nimi'],
-				 			'lask_nimitark' => $rakir_row['toim_nimitark'],
-				 			'lask_osoite' => $rakir_row['toim_osoite'],
-				 			'lask_postino' => $rakir_row['toim_postino'],
-				 			'lask_postitp' => $rakir_row['toim_postitp'],
-				 			'lask_viite' => $row['viesti'],
-				 			'lask_merkki' => $row['ohjausmerkki'],
-				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
-				 		);
+						// $params = array(
+				 	// 		'tilriv' => $row['tunnus'],//tilausnumero
+				 	// 		'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+				 	// 		'sscc' => $keraysera_row['sscc'],
+				 	// 		'toimitustapa' => $row['toimitustapa'],
+				 	// 		'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
+				 	// 		'paino' => $pakkaus_info_row['tuotemassa'],
+				 	// 		'tilavuus' => $pakkaus_info_row['kuutiot'],
+				 	// 		'lask_nimi' => $rakir_row['toim_nimi'],
+				 	// 		'lask_nimitark' => $rakir_row['toim_nimitark'],
+				 	// 		'lask_osoite' => $rakir_row['toim_osoite'],
+				 	// 		'lask_postino' => $rakir_row['toim_postino'],
+				 	// 		'lask_postitp' => $rakir_row['toim_postitp'],
+				 	// 		'lask_viite' => $row['viesti'],
+				 	// 		'lask_merkki' => $row['ohjausmerkki'],
+				 	// 		'reittietikettitulostin' => $kirjoitin_row['komento'],
+				 	// 	);
 
 					 	// tulosta_reittietiketti($params);
 
@@ -402,10 +404,14 @@
 				 			'lahettaja_postitp' => $lahettaja_postitp,
 				 			'lahettaja_maa' => $lahettaja_maa,
 				 			'reittietikettitulostin' => $kirjoitin_row['komento'],
+				 			'monesko_laatikko' => $monesko_laatikko,
+				 			'montako_laatikkoa_yht' => count($eran_sscct),
 				 			'pakkauskoodi' => $pakkauskoodit_row['koodi'],
 				 		);
 
 						tulosta_hrx($params);
+
+						$monesko_laatikko++;
 					}
 				}
 			}

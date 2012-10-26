@@ -122,7 +122,7 @@ else {
 			echo "<br /><font class='error'>{$return['error']}</font><br />";
 	}
 
-	echo "	<br /><input type='submit' value='",t("Sisään",$browkieli),"'>
+	echo "	<br /><input type='submit' class='button' value='",t("Sisään",$browkieli),"'>
 			</form>";
 
 	echo "<script LANGUAGE='JavaScript'>window.document.{$formi}.{$kentta}.focus();</script>";

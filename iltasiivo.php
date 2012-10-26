@@ -444,6 +444,42 @@
 				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
 		}
+
+		# Poistetaan tyhjät tuotepaikat joiden saldo on 0 ja tyyppi on 'S'
+		$query = "SELECT *
+					FROM tuotepaikat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					AND saldo=0
+					AND tyyppi='S'
+					AND inventointilista_aika='0000-00-00 00:00:00'";
+		$tuotepaikat = pupe_query($query);
+
+		# Poistetaan löydetyt rivit ja tehdään tapahtuma
+		while($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
+			# Poistetaan paikka
+			$query = "DELETE FROM tuotepaikat
+						WHERE yhtio='{$kukarow['yhtio']}'
+						AND tunnus='{$tuotepaikkarow['tunnus']}'
+						AND saldo=0";
+			$tuotepaikat_siivo_result = pupe_query($query);
+
+			# Tehdään tapahtuma
+			$query = "INSERT INTO tapahtuma SET
+						yhtio 		= '$kukarow[yhtio]',
+						tuoteno 	= '$tuotepaikkarow[tuoteno]',
+						kpl			= '0',
+						kplhinta	= '0',
+						hinta		= '0',
+						hyllyalue	= '$tuotepaikkarow[hyllyalue]',
+						hyllynro	= '$tuotepaikkarow[hyllynro]',
+						hyllyvali	= '$tuotepaikkarow[hyllyvali]',
+						hyllytaso	= '$tuotepaikkarow[hyllytaso]',
+						laji		= 'poistettupaikka',
+						selite		= '".t("Poistettiin tuotepaikka")." $tuotepaikkarow[hyllyalue] $tuotepaikkarow[hyllynro] $tuotepaikkarow[hyllyvali] $tuotepaikkarow[hyllytaso]',
+						laatija		= '$kukarow[kuka]',
+						laadittu	= now()";
+			$tapahtuma_result = pupe_query($query);
+		}
 	}
 
 	if (!$php_cli) {

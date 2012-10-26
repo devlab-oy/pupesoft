@@ -3191,7 +3191,7 @@ if (!function_exists("etayhtio_hinta")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="", $onlapsi="") {
 		global $yhtiorow, $kukarow;
 
 		// T‰m‰ rutiini m‰‰rittelee riville hinnan ja alennuksen
@@ -3301,6 +3301,12 @@ if (!function_exists("alehinta")) {
 					$alehinta_alv = $alehi_alrow["alv"];
 				}
 			}
+		}
+
+		// jos yhtio ei laske alennuksia lapsituotteille ja kyseess‰ on lapsituote, voidaan hieman oikaista...
+		if ($onlapsi !="" and $yhtiorow["ei_alennuksia_lapsituotteille"] != "" ) {
+			$hinta = tuotteen_myyntihinta($laskurow, $trow, $kpl);
+			return array($hinta, '', array() , $alehinta_alv, $laskurow["valkoodi"]);
 		}
 
 		// haetaan asiakkaan tiedot
@@ -8186,19 +8192,19 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
-			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-			$laskurow["kontti"]								= $aputoimirow["kontti"];
-			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+			$laskurow["aktiivinen_kuljetus"] 				= $laskurow["aktiivinen_kuljetus"] != "" ? $laskurow["aktiivinen_kuljetus"] : $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $laskurow["aktiivinen_kuljetus_kansallisuus"] != "" ? $laskurow["aktiivinen_kuljetus_kansallisuus"] : $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $laskurow["bruttopaino"] != "" ? $laskurow["bruttopaino"] : $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $laskurow["kauppatapahtuman_luonne"] != "" ? $laskurow["kauppatapahtuman_luonne"] : $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $laskurow["kontti"] != 0 ? $laskurow["kontti"] : $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $laskurow["kuljetusmuoto"] != 0 ? $laskurow["kuljetusmuoto"] : $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $laskurow["lisattava_era"] != 0 ? $laskurow["lisattava_era"] : $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $laskurow["poistumistoimipaikka"] != "" ? $laskurow["poistumistoimipaikka"] : $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $laskurow["poistumistoimipaikka_koodi"] != "" ? $laskurow["poistumistoimipaikka_koodi"] : $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $laskurow["sisamaan_kuljetus"] != "" ? $laskurow["sisamaan_kuljetus"] : $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $laskurow["sisamaan_kuljetusmuoto"] != 0 ? $laskurow["sisamaan_kuljetusmuoto"] : $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $laskurow["sisamaan_kuljetus_kansallisuus"] != "" ? $laskurow["sisamaan_kuljetus_kansallisuus"] : $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $laskurow["vahennettava_era"] != 0 ? $laskurow["vahennettava_era"] : $aputoimirow["vahennettava_era"];
 		}
 		elseif ($laskurow["ultilno"] == '-2') {
 			// tuonti-ilmoitus
@@ -8210,19 +8216,19 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
-			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-			$laskurow["kontti"]								= $aputoimirow["kontti"];
-			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+			$laskurow["aktiivinen_kuljetus"] 				= $laskurow["aktiivinen_kuljetus"] != "" ? $laskurow["aktiivinen_kuljetus"] : $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $laskurow["aktiivinen_kuljetus_kansallisuus"] != "" ? $laskurow["aktiivinen_kuljetus_kansallisuus"] : $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $laskurow["bruttopaino"] != "" ? $laskurow["bruttopaino"] : $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $laskurow["kauppatapahtuman_luonne"] != "" ? $laskurow["kauppatapahtuman_luonne"] : $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $laskurow["kontti"] != 0 ? $laskurow["kontti"] : $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $laskurow["kuljetusmuoto"] != 0 ? $laskurow["kuljetusmuoto"] : $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $laskurow["lisattava_era"] != 0 ? $laskurow["lisattava_era"] : $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $laskurow["poistumistoimipaikka"] != "" ? $laskurow["poistumistoimipaikka"] : $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $laskurow["poistumistoimipaikka_koodi"] != "" ? $laskurow["poistumistoimipaikka_koodi"] : $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $laskurow["sisamaan_kuljetus"] != "" ? $laskurow["sisamaan_kuljetus"] : $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $laskurow["sisamaan_kuljetusmuoto"] != 0 ? $laskurow["sisamaan_kuljetusmuoto"] : $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $laskurow["sisamaan_kuljetus_kansallisuus"] != "" ? $laskurow["sisamaan_kuljetus_kansallisuus"] : $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $laskurow["vahennettava_era"] != 0 ? $laskurow["vahennettava_era"] : $aputoimirow["vahennettava_era"];
 		}
 		elseif ($varaston_row["maa"] == $laskurow["toim_maa"] and $laskurow["toim_maa"] != "") {
 			// intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
@@ -13657,7 +13663,7 @@ if (!function_exists('tulosta_reittietiketti')) {
 					{XS;I,0001,0002C3210|}
 					".chr(12);
 
-		if (trim($reittietikettitulostin) != '') {
+		if (trim($reittietikettitulostin) != '' and $reittietikettitulostin != 'email') {
 			$line = exec(" echo \"$sivu\" | $reittietikettitulostin");
 		}
 	}
@@ -17518,39 +17524,6 @@ if (!function_exists('raaka_aineiden_riitto')) {
 	}
 }
 
-if (!function_exists("mod11_tarkiste")) {
-	function mod11_tarkiste ($numero) {
-
-		$tulos = "";
-		$painoarvo = array( 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7 );
-
-		# K‰‰nnet‰‰n stringi takaperin
-		$numero_rev = strrev($numero);
-
-		for ($i = 0, $summa = 0; $i < strlen($numero_rev); $i++) {
-			# Lasketaan tulo ja kumuloidaan
-			$summa += substr($numero_rev, $i, 1 ) * $painoarvo[$i];
-		}
-
-		# lasketaan tarkiste ja konkatenoidaan peruslukuun
-		$jaannos = $summa % 11;
-
-		switch ($jaannos) {
-			case 0:
-				$tulos = $numero . 0;
-				break;
-			case 1:
-				$tulos = $numero . 0;
-				break;
-			default:
-				$tulos = $numero . (11 - $jaannos);
-				break;
-		}
-
-		return $tulos;
-	}
-}
-
 if (!function_exists("mod10_tarkiste")) {
 	function mod10_tarkiste ($numero) {
 
@@ -18225,6 +18198,7 @@ if (!function_exists("suuntalavan_tuotteet")) {
 
 		$query = "	SELECT tilausrivi.*,
 					suuntalavat.sscc,
+					suuntalavat.kasittelytapa,
 					tuotteen_toimittajat.toim_tuoteno,
 					tilausrivi.varattu + tilausrivi.kpl siskpl,
 					tuote.eankoodi,
@@ -18417,27 +18391,36 @@ if (!function_exists('lisaa_tuotepaikka')) {
 }
 
 if (!function_exists('tarkista_varaston_hyllypaikka')) {
-	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $varmistuskoodi = '') {
+	function tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options = array()) {
 		global $kukarow;
 
-		$query_lisa = '';
-		if ($varmistuskoodi != '') {
-			$query_lisa = "AND varmistuskoodi = '{$varmistuskoodi}'";
+		# Haetaan varastopaikka
+		$query = "SELECT * FROM varaston_hyllypaikat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					AND hyllyalue='{$hyllyalue}'
+					AND hyllynro='{$hyllynro}'
+					AND hyllyvali='{$hyllyvali}'
+					AND hyllytaso='{$hyllytaso}'
+					";
+
+		# Sallitut kyselyn ehdot
+		$acceptable_options = array('varmistuskoodi', 'reservipaikka');
+		$query_lisa = array();
+
+		# parse options
+		foreach($options as $key => $value) {
+			if (!empty($key) and !empty($value) and in_array($key, $acceptable_options)) {
+				$query_lisa[] = "$key = '{$value}'";
+			}
 		}
 
-		$query = "	SELECT tunnus
-					FROM varaston_hyllypaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND hyllyalue = '{$hyllyalue}'
-					AND hyllynro = '{$hyllynro}'
-					AND hyllyvali = '{$hyllyvali}'
-					AND hyllytaso = '{$hyllytaso}'
-					$query_lisa";
-					# Noticet pois
-					##AND varasto = '{$varasto}'";
-		$chk_res = pupe_query($query);
+		if (count($query_lisa) > 0) {
+			$query_lisa = implode($query_lisa, " AND ");
+			$query .= "AND $query_lisa";
+		}
 
-		return mysql_num_rows($chk_res) == 0 ? false : true;
+		$result = pupe_query($query);
+		return (mysql_num_rows($result) == 0) ? false : true;
 	}
 }
 
@@ -18661,7 +18644,7 @@ if (!function_exists('saako_vieda_varastoon')) {
 			$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND uusiotunnus = '{$otunnus}'
+						AND uusiotunnus = '{$saapumisen_tunnus}'
 						AND tyyppi = 'O'
 						AND kpl = 0
 						AND suuntalava != 0";
@@ -19084,6 +19067,95 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
 		return $keraysera_nro;
 	}
+}
+
+if (!function_exists('luottotilanne')) {
+	function luottotilanne($liitostunnus, $valuutassa=FALSE) {
+		global $kukarow, $yhtiorow;
+
+		// Lasketaan asiakkaan luottotilanne, EI HUOMIOIDA AVOIMIA LASKUJA
+		if ($liitostunnus == "") return 0;
+
+		$salisa2 = "";
+
+		if ($valuutassa !== FALSE) {
+			$salisa2 = " and suoritus.valkoodi='$valuutassa' ";
+		}
+
+		$query = "	SELECT luottoraja
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus in ($liitostunnus)";
+		$asresult = pupe_query($query);
+		$asrow = mysql_fetch_assoc($asresult);
+
+		if ($valuutassa !== FALSE) {
+			// Suorituksen valuutassa
+			$suorilisa = " sum(summa) summa ";
+		}
+		else {
+			// Yhtiˆn valuutassa
+			$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
+		}
+
+		// Haetaan kaatotilin summa
+		$query = "	SELECT
+					$suorilisa
+					FROM suoritus
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and ltunnus > 0
+					and kohdpvm = '0000-00-00'
+					and asiakas_tunnus in ($liitostunnus)
+					$salisa2";
+		$kaatotilires = pupe_query($query);
+		$kaatotilirow = mysql_fetch_assoc($kaatotilires);
+
+		if ($valuutassa !== FALSE) {
+			// Laskun valuutassa
+			$avtilisa = "(tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi))";
+		}
+		else {
+			// Yhtiˆn valuutassa
+			$avtilisa = "tilausrivi.hinta";
+		}
+
+		$query_alennuksia = generoi_alekentta('M');
+
+		// Avoimet tilaukset
+		$query = "	SELECT
+					round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+					FROM lasku
+					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND ((lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','J','V'))	# Kaikki myyntitilaukset, paitsi laskutetut
+					  OR (lasku.tila = 'N' and lasku.alatila in ('','A','F'))					# Myyntitilaus kesken, tulostusjonossa tai odottaa hyv‰ksynt‰‰
+					  OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))			# Valmistukset
+					)
+					AND lasku.liitostunnus in ($liitostunnus)";
+		$avoimettilauksetres = pupe_query($query);
+		$avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
+
+		return array($asrow['luottoraja'], $kaatotilirow["summa"], $avoimettilauksetrow['tilausavoinsaldo']);
+	}
+}
+
+if (!function_exists('excel_column_name')) {
+	function excel_column_name($luku) {
+		$luku = (int)$luku;
+		if ($luku < 1) {
+			return ' ';
+		}
+		$string	 = "";
+		$number	 = $luku - 1;
+
+		while ($number >= 0) {
+			$string	 = chr($number % 26 + 65) . $string;
+			$number	 = $number / 26 - 1;
+		}
+
+		return $string;
+	}
+
 }
 
 if (!function_exists('triangulation')) {

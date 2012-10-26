@@ -793,7 +793,7 @@
 				echo "<tr><td>".t("Valmistuksessa")."	</td><td>{$tuoterivi['valmistuksessa']}		</td></tr>";
 				echo "<tr><td>".t("Varattu")."			</td><td>{$tuoterivi['varattu']}			</td></tr>";
 				echo "<tr><td>".t("Ennakkotilaukset")."	</td><td>{$tuoterivi['ennakko']}			</td></tr>";
-				echo "<tr><td>".t("Budjetoitu myynti")."</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
+				echo "<tr><td>".t("Myyntitavoite")."	</td><td>{$tuoterivi['budjetoitu_myynti']}	</td></tr>";
 				echo "<tr><td>".t("Vuosikulutus")."		</td><td>{$tuoterivi['vuosikulutus']}		</td></tr>";
 				echo "<tr><td>".t("P‰iv‰kulutus")."		</td><td>{$tuoterivi['paivakulutus']}		</td></tr>";
 				echo "<tr><td>".t("Riitto p‰iv‰t")."	</td><td>{$tuoterivi['riittopv']}			</td></tr>";
@@ -813,7 +813,7 @@
 				echo "{$tuoterivi["paivakulutus"]} = round({$tuoterivi["vuosikulutus"]} / 240)<br><br>";
 				echo t("Riitto p‰iv‰t")." = floor(".t("Reaalisaldo")." / ".t("P‰iv‰kulutus").")<br>";
 				echo "{$tuoterivi["riittopv"]} = floor({$tuoterivi["reaalisaldo"]} / {$tuoterivi["paivakulutus"]})<br><br>";
-				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Budjetoitu myynti")."<br>";
+				echo t("M‰‰r‰ennuste")." = (".t("P‰iv‰kulutus")." * ".t("Toimitusaika").") + ".t("Myyntitavoite")."<br>";
 				echo "{$tuoterivi["maaraennuste"]} = ({$tuoterivi["paivakulutus"]} * {$tuoterivi["toimitusaika"]}) + {$tuoterivi["budjetoitu_myynti"]}<br><br>";
 				echo t("Valmistussuositus")." = round(".t("M‰‰r‰ennuste")." - ".t("Reaalisaldo").")<br>";
 				echo "{$tuoterivi["valmistussuositus"]} = round({$tuoterivi["maaraennuste"]} - {$tuoterivi["reaalisaldo"]})<br><br>";
@@ -851,7 +851,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow["yhtio"]}'
+					WHERE yhtio = '{$kukarow["yhtio"]}' AND tyyppi != 'P'
 					ORDER BY tyyppi, nimitys";
 		$result = pupe_query($query);
 

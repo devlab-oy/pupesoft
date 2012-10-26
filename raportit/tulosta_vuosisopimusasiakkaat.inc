@@ -137,14 +137,13 @@ function rivi ($firstpage, $laji = '') {
 		$lask++;
 	}
 
-	$pdf->draw_text(30,  $kala, $asananumero, $firstpage, $norm);
-	$pdf->draw_text(55,  $kala, $tryro["selitetark"],$firstpage, $norm);
+	$pdf->draw_text(30,  $kala, $asananumero." - ".$tryro["selitetark"],	$firstpage, $norm);
 
 	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kplva"]), $norm);
-	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 		$firstpage, $norm);
+	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 	$firstpage, $norm);
 
 	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
-	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 		$firstpage, $norm);
+	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 	$firstpage, $norm);
 
 	$oikpos = $pdf->strlen(hintapyoristys($row["va"]), $norm);
 	$pdf->draw_text(460-$oikpos, $kala, hintapyoristys($row["va"]),			$firstpage, $norm);

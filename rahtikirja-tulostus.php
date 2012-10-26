@@ -916,7 +916,7 @@
 					}
 				}
 			}
-			if (!isset($nayta_pdf)) echo "<br>";
+			if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
 

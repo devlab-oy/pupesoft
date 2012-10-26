@@ -159,6 +159,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Ylläpitosopimuksen rivien kentät")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LABEL") 			$ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>						".t("Myyntitilauksen luokitus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") 	$ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>	".t("Tarjouksen vakioteksti")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -242,7 +243,11 @@
 		$jatko = 0;
 	}
 
-	if ($sel["KERAYSLISTA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+	if ($avain_sel["TARJOUS_VAKIOTE"] == "SELECTED" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3" or mysql_field_name($result, $i) == "selitetark_4")) {
+		$tyyppi = 0;
+	}
+
+	if ($avain_sel["KERAYSLISTA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$handle = opendir("tilauskasittely");
 
@@ -370,7 +375,7 @@
 		$jatko  = 0;
 	}
 
-	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED" or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
@@ -486,7 +491,7 @@
 	if ($avain_sel['VARASTORYHMA'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '{$kukarow['yhtio']}'";
+					WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<td>";

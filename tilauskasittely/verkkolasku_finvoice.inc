@@ -582,8 +582,19 @@ if (!function_exists('finvoice_otsikko_loput')) {
 }
 
 if (!function_exists('finvoice_rivi')) {
-	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat) {
+	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat, $laskutyyppi = 0) {
 		global $err_finvoice, $yhtiorow, $kukarow;
+
+		if ($laskutyyppi == 10 or $laskutyyppi == 12) {
+			$tilrow['hinta'] = 0;
+			$tilrow['rivihinta'] = 0;
+			$totalvat = 0;
+			$vatamount = 0;
+			$alennukset_yhteensa = 0;
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$tilrow["ale{$alepostfix}"] = 0;
+			}
+		}
 
 		if ($err_finvoice == 0) {
 			fputs($tootfinvoice, "<InvoiceRow>\r\n");

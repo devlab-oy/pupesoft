@@ -168,14 +168,14 @@
 
 			$kieliind = "teksti_".$kielirow["kieli"];
 
-			if (trim($frow[$kieliind]) != "") $lisa_comments .= trim($frow[$kieliind])." \n";
-			else $lisa_comments .= trim($frow["teksti_fi"])." \n";
+			if (trim($frow[$kieliind]) != "" and stripos($sisviestit1, $frow[$kieliind]) === FALSE) $lisa_comments .= trim($frow[$kieliind])." \n";
+			elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n";
 		}
 	}
 	if ($lasrow["vienti"] == 'E') {
 
-		if ($lasrow['kolmikantakauppa'] == "K") {
-			$lisa_comments .= "VAT 0% Triangulation.\n";
+		if ($lasrow['kolmikantakauppa'] != "") {
+			if (stripos($sisviestit1, "VAT 0% Triangulation.") === FALSE) $lisa_comments .= "VAT 0% Triangulation. \n";
 		}
 		else {
 			//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
@@ -187,16 +187,16 @@
 			$abulisares = pupe_query($query);
 
 			if (mysql_num_rows($abulisares) == 0) {
-				$lisa_comments .= "Reverse charge, intangible service. \n";
+				if (stripos($sisviestit1, "Reverse charge, intangible service.") === FALSE) $lisa_comments .= "Reverse charge, intangible service. \n";
 			}
 			else {
-				$lisa_comments .= "VAT 0% Intra community supply. \n";
+				if (stripos($sisviestit1, "VAT 0% Intra community supply.") === FALSE) $lisa_comments .= "VAT 0% Intra community supply. \n";
 			}
 		}
 	}
 
 	if ($lasrow["vienti"] == 'K') {
-		$lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
+		if (stripos($sisviestit1, "VAT 0% Export of goods outside the European Union.") === FALSE) $lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
 	}
 
 	if ($lasrow["vienti"] != '') {
@@ -232,14 +232,18 @@
 				$rahtirow_pakkaus .= ", ".$rahtirow["pakkauskuvaustark"];
 			}
 
-			$lisa_comments .= "$rahtirow[kollit] x ".trim($rahtirow_pakkaus).", ".t("yhteensä", $kielirow["kieli"])." $rahtirow[kilot] kg. \n";
+			$ralisvie = "$rahtirow[kollit] x ".trim($rahtirow_pakkaus).", ".t("yhteensä", $kielirow["kieli"])." $rahtirow[kilot] kg.";
+
+			if (stripos($sisviestit1, $ralisvie) === FALSE) $lisa_comments .= $ralisvie." \n";
 		}
 	}
 
 	//Laitetaan laskun viestikenttään talteen tiettyjä lisätietoja
 	if ($mehtorow["jv"] != '') {
-		$lisa_viestit 	.= t("Kuitti jälkivaatimuksesta", $kielirow["kieli"]);
-		$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"])."\n";
+		$lisa_viestit  .= t("Kuitti jälkivaatimuksesta", $kielirow["kieli"]);
+		$jvlisvie = t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"]);
+
+		if (stripos($sisviestit1, $jvlisvie) === FALSE) $lisa_comments .= $jvlisvie." \n";
 	}
 
 	// Haetaan avainsanoista vakioviesti
@@ -255,17 +259,17 @@
 	if (mysql_num_rows($vakioviesti_result) == 1) {
 		$vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
 
-		$lisa_comments .= " $vakioviesti_row[selite]\n";
+		if (stripos($sisviestit1, $vakioviesti_row["selite"]) === FALSE) $lisa_comments .= $vakioviesti_row["selite"]." \n";
 	}
 
 	// Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
 	if ($lisa_comments != "") {
-		$sisviestit1 = $lisa_comments." ".$sisviestit1;
+		$sisviestit1 = trim($lisa_comments." ".$sisviestit1);
 	}
 
 	// Lisätään järjestelmän generoimat viestit laskun viestikenttään
 	if ($lisa_viestit != "") {
-		$viestit = $lisa_viestit." ".$viestit;
+		$viestit = trim($lisa_viestit." ".$viestit);
 	}
 
 	//Siivotaan kommenteista kaikki kummalliset merkit pois

@@ -384,7 +384,18 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	// t‰m‰ on miinusta hyvitysrivill‰
-	$ohinta = round($tilrivirow['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+	$ohinta = round($tilrivirow['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu'], 6); // tuotteen rivihinta OLETUSVALUUTASSA
+
+	// ennen varastoon vienti‰ tallennetaan alkuper‰inen ostohinta talteen
+	if ($toiminto == "kalkyyli" and $tee == "varastoon" and $tiliointirow['hinta_alkuperainen'] == 0) {
+		$query  = "	UPDATE tilausrivi SET
+					hinta_alkuperainen = '{$ohinta}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tilrivirow['tunnus']}'";
+		$resultxxx = pupe_query($query);
+	}
+
+	$ohinta = round($ohinta+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	// Osuus kululaskuista # Osuus eturahdista
 	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
@@ -407,16 +418,6 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
-
-		// ennen varastoon vienti‰ tallennetaan alkuper‰inen ostohinta talteen
-		if ($toiminto == "kalkyyli" and $tee == "varastoon") {
-			$query  = "	UPDATE tilausrivi SET
-						hinta_alkuperainen = '{$ohinta}'
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tunnus = '{$tilrivirow['tunnus']}'";
-			$resultxxx = pupe_query($query);
-		}
-
 		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
 	}

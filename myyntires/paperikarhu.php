@@ -656,7 +656,7 @@
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/karhu-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.pdf";
+	$pdffilenimi = "karhu-$kukarow[yhtio]-".date("Ymd")."-".$invoice_number."_finvoice.pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");

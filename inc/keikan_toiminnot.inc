@@ -177,7 +177,6 @@
 	        $vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"]);
 	    }
 
-	    // poistetaan myˆs netto = X, jos r‰pl‰t‰‰n ruksia
 	    $query = "  UPDATE tilausrivi use index (yhtio_otunnus) SET
 	                uusiotunnus = '{$otunnus}'
 	                {$updatelisa}
@@ -186,14 +185,14 @@
 	                AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
 	    $result = pupe_query($query);
 
-	    // p‰ivitet‰‰n netto X pois.
+	    // p‰ivitet‰‰n varastoon 0 pois.
 	    $query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus) SET
-	    			netto = ''
+	    			varastoon = 1
 	    			WHERE yhtio = '{$kukarow['yhtio']}'
 	    			AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 	    			AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')
-	    			AND netto = 'X'";
-	    $netto_res = pupe_query($query);
+	    			AND varastoon = 0";
+	    $varastoon_res = pupe_query($query);
 
 	    // Haetaan p‰ivitetyt rivit
 	    $uudethinnat = array();

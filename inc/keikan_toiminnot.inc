@@ -401,6 +401,12 @@
 
 		$uuden_rivin_id = splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, true);
 
+		$query = "	UPDATE tilausrivi SET
+					varastoon = 0
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$uuden_rivin_id}'";
+		$upd_res = pupe_query($query);
+
 		$hinnat = laske_hinta($laskurow, $uuden_rivin_id);
 
 		$rivi['rivihinta'] = $hinnat['rivihinta'];

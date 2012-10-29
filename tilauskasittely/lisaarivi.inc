@@ -876,11 +876,19 @@
 						reset($arr);
 
 						if ($checked_saldo) {
+							$var_temp = array();
+
 							foreach ($arr as $indx => $chk_row) {
-								if ($chk_row['varasto'] == $chk_oletus_var) {
+								if ($chk_row['varasto'] == $varasto_set) {
+									$var_temp[] = $chk_row;
 									unset($arr[$indx]);
-									array_unshift($arr, $chk_row);
 								}
+							}
+
+							if (count($var_temp) > 0) {
+								// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+								usort($var_temp, "zzrowprio");
+								$arr = array_merge($var_temp, $arr);
 							}
 						}
 						else {

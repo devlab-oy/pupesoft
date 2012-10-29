@@ -158,12 +158,13 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
 			}
 
-			$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
-			$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
+			$toimitusehto  = substr($yhtiorow['oletus_toimitusehto'], 0, 3);
+			$kasitoimehto  = substr($yhtiorow['oletus_toimitusehto'], 4);
 
-			$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
-			$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
+			$toimitusehto2 = substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
+			$kasitoimehto2 = substr($yhtiorow['oletus_toimitusehto2'], 4);
 
+			// Onko toimitusehdon takana määritelty rahdinmaksaja?
 			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
 
 			if (mysql_num_rows($toimehto_tresult) > 0) {

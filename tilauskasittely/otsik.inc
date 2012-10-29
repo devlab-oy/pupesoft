@@ -9,13 +9,12 @@
 		// Voidaan esim. luoda lennossa uusia yhteyshenkilöitä
 		js_open_yllapito();
 
-
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
-				function merahti_oletus() {
+				function merahti_oletus(kentta) {
 					// Toimitustapa alasvetovalikon id
-					var ttdd_id = document.getElementById('toimitustapa');
+					var ttdd_id = document.getElementById(kentta);
 
 					// Valitun toimitustavan tunnus
 					var val = ttdd_id.options[ttdd_id.selectedIndex].id;
@@ -30,7 +29,12 @@
 					// Katotaan onko rahtivapaa
 					var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
-					if (merahti == 'K' && mrdd_sel != 1) {
+					if (merahti == 'R') {
+						mrdd_id.options[1].selected = '1';
+						document.getElementById('rahtivapaa').checked = true;
+						alert('".t("HUOM: Tilaus rahtivapaa")."!');
+					}
+					else if (merahti == 'K' && mrdd_sel != 1) {
 						mrdd_id.options[1].selected = '1';
 						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
@@ -42,7 +46,6 @@
 
 				//-->
 				</script>";
-
 	}
 
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
@@ -1136,7 +1139,15 @@
 			}
 			echo "</td>";
 
-			// Tsekataan
+			// Valitun toimitustavan tietoja
+			$apuqu = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite  = '$srow[toimitustapa]'";
+			$meapu = pupe_query($apuqu);
+			$toimtapa_apuro = mysql_fetch_assoc($meapu);
+
+			// Tsekataan toimitusehtojuttuja
 			$toimehto_tresult = t_avainsana("TOIMEHTO");
 
 			$toimehtosel  = "";
@@ -1175,6 +1186,16 @@
 					$toimehtoseltark3 = $row["selitetark"];
 					$toimehtoseltark_33 = $row["selitetark_3"];
 				}
+
+				if ($row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>K</div>";
+				}
+				elseif ($row["selitetark_3"] == "RAHTIVAPAA") {
+					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>R</div>";
+				}
+				else {
+					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'></div>";
+				}
 			}
 
 			if ($toimehtosel1 != "") {
@@ -1204,6 +1225,7 @@
 
 			if ($apu_rahdinmaksaja == "O") {
 
+				// Onko toimitusehdon takana määritelty rahdinmaksaja?
 				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPIMUS") {
 					$apu_rahdinmaksaja = "K";
 				}
@@ -1215,14 +1237,7 @@
 					$srow["rahtivapaa"] = "ON";
 				}
 				else {
-					$apuqu = "	SELECT *
-								FROM toimitustapa
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND selite  = '$srow[toimitustapa]'";
-					$meapu = pupe_query($apuqu);
-					$apuro = mysql_fetch_assoc($meapu);
-
-					$apu_rahdinmaksaja = $apuro['merahti'];
+					$apu_rahdinmaksaja = $toimtapa_apuro['merahti'];
 				}
 			}
 
@@ -1260,13 +1275,13 @@
 			$tresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($tresult)) {
-				echo "<div style='display: none; visibility: hidden;' id='merahti_ttapa_$row[tunnus]'>$row[merahti]</div>";
+				echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
 			}
 
 			mysql_data_seek($tresult, 0);
 
 			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
+			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
 
 			while ($row = mysql_fetch_assoc($tresult)) {
 
@@ -1275,7 +1290,7 @@
 					$sel = 'selected';
 				}
 
-				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]' $sel>";
+				echo "<option id='toimitustapa_$row[tunnus]' value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 
 				echo "</option>";
@@ -1731,7 +1746,7 @@
 			$tresult = t_avainsana("TV");
 
 			echo "<tr><td>".t("Tilausvahvistus").":</td>";
-			echo "<td><select name='tilausvahvistus'><option value=' '>".t("Ei vahvistusta")."</option>";
+			echo "<td><select name='tilausvahvistus' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
 
 			while($row = mysql_fetch_assoc($tresult)) {
 				$sel = "";
@@ -1796,7 +1811,7 @@
 			echo "<tr>";
 			echo "<td>".t("Toimitusehto").":</td><td>";
 
-			echo "<select name='toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
+			echo "<select name='toimitusehto' id = 'toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\"); merahti_oletus(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
 
 			mysql_data_seek($toimehto_tresult, 0);
 
@@ -1806,7 +1821,7 @@
 				$sel = "";
 				if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
-				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
+				echo "<option value='$row[selite]' id='toimitusehto_$row[tunnus]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
 			}
 
 			echo "</select>";
@@ -1828,7 +1843,7 @@
 
 				$tresult = t_avainsana("TOIMEHTO");
 
-				echo "<select name='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
+				echo "<select name='toimitusehto2' id='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
 
 				$toimehtosel  = "";
 				$toimehtosel1 = "";
@@ -2918,7 +2933,7 @@
 			}
 		}
 
-		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
+		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitusehdolta tai toimitustavalta
 		if ($maksaja == "O") {
 			$apuqu = "	SELECT *
 						FROM toimitustapa
@@ -2927,7 +2942,29 @@
 			$meapu = pupe_query($apuqu);
 			$apuro = mysql_fetch_assoc($meapu);
 
-			$maksaja = $apuro['merahti'];
+			// Onko toimitusehdon takana määritelty rahdinmaksaja?
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = '$toimitusehto' ");
+
+			if (mysql_num_rows($toimehto_tresult) > 0) {
+				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					$maksaja = "K";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+					$maksaja = "";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "RAHTIVAPAA") {
+					$maksaja    = "K";
+					$rahtivapaa = "ON";
+				}
+				else {
+					$maksaja = $apuro['merahti'];
+				}
+			}
+			else {
+				$maksaja = $apuro['merahti'];
+			}
 		}
 
 		// Marginaalimyyntispecial

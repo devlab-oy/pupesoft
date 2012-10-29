@@ -905,7 +905,7 @@
 								AND lasku.yhtio = maksuehto.yhtio
 								AND lasku.maksuehto = maksuehto.tunnus
 								AND maksuehto.jv != ''
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa";
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp";
 					$result = pupe_query($query);
 
 					$yhdista = array();
@@ -990,7 +990,8 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per päivä missä merahti (eli kohdistettu) = K (Käytetään lähettäjän rahtisopimusnumeroa)
+					// haetaan laskutettavista tilauksista per lähtö, ytunnus ja toimitusosite.
+					// missä merahti (eli kohdistettu) = K (Käytetään lähettäjän rahtisopimusnumeroa)
 					// jälkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto
@@ -1002,7 +1003,7 @@
 								and lasku.tunnus = rahtikirjat.otsikkonro
 								and lasku.yhtio = maksuehto.yhtio
 								and lasku.maksuehto = maksuehto.tunnus
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa, maksuehto.jv";
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, maksuehto.jv";
 					$result  = pupe_query($query);
 
 					$yhdista = array();

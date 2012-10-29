@@ -12,27 +12,7 @@
 		exit;
 	}
 
-	if (is_array($suuntalavat) and count($suuntalavat) > 0) {
-		$suuntalavalisa = " AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") ";
-	}
-	else {
-		echo "<font class='error'>",t("VIRHE: Et valinnut suuntalavaa"),"!</font>";
-		require('../inc/footer.inc');
-		exit;
-	}
-
-	$query = "	SELECT tilausrivi.*, suuntalavat.sscc, tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu+tilausrivi.kpl siskpl, tuote.eankoodi
-				FROM tilausrivi
-				JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tila = 'S' AND suuntalavat.tunnus = tilausrivi.suuntalava $suuntalavalisa)
-				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
-				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				AND tilausrivi.uusiotunnus = '{$otunnus}'
-				AND tilausrivi.tyyppi = 'O'
-				AND tilausrivi.kpl = 0
-				AND tilausrivi.suuntalava != 0
-				ORDER BY suuntalavat.sscc, tilausrivi.tuoteno";
-	$tavaraetiketti_res = mysql_query($query) or pupe_error($query);
+	$tavaraetiketti_res = suuntalavan_tuotteet($suuntalavat, $laskurow['liitostunnus']);
 
 	$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
 
@@ -53,11 +33,6 @@
 			$viivakoodi1 .= ">5";
 			$viivakoodi1 .= substr($row['eankoodi'],2);
 		}
-
-		$viivakoodi2  = ">6";
-		$viivakoodi2 .= substr($row['sscc'],0,1);
-		$viivakoodi2 .= ">5";
-		$viivakoodi2 .= substr($row['sscc'],1);
 
 		$sivu = "*** ETIKETIN KOKO ***
             	 {D1530,1040,1470|}
@@ -129,7 +104,7 @@
 	             {RC013;$row[eankoodi]|}
 
 			     {XB01;0050,1060,A,3,04,0,0270,+0000000000,000,0,00|}
-			     {RB01;$viivakoodi2|}
+			     {RB01;$row[sscc]|}
 
 				 {PC014;0100,1365,05,05,J,00,B|}
 	             {RC014;SSCC|}
@@ -144,6 +119,6 @@
 		$sivu = escapeshellarg($sivu);
 
 		if ($komento["Tavaraetiketti"] != '' and $komento["Tavaraetiketti"] != 'edi' and $komento["Tavaraetiketti"] != 'email') {
-			$line = exec(" echo \"$sivu\" | $komento[Tavaraetiketti]");
+			$line = exec("echo \"$sivu\" | $komento[Tavaraetiketti]");
 		}
 	}

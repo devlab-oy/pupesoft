@@ -7,7 +7,17 @@
 		unset($nayta_pdf);
 	}
 
-	require('../inc/parametrit.inc');
+	if (isset($_REQUEST["tee"])) {
+		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+	}
+
+	require ("../inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("$pupe_root_polku/dataout/".basename($filenimi));
+		exit;
+	}
 
 	if (!isset($nayta_pdf)) {
 		// scripti balloonien tekemiseen
@@ -1038,7 +1048,6 @@
 										AND tuote.tuoteno = '{$prow["tuoteno"]}'";
 							$ttresult = pupe_query($query);
 							$ttrow = mysql_fetch_assoc($ttresult);
-
 						}
 
 						echo "</td>";
@@ -1252,6 +1261,7 @@
 						<input type='hidden' name='otunnus' 		value = '$tilausnumero'>
 						<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
+						<input type='hidden' name='toimittajaid' 	value = '$laskurow[liitostunnus]'>
 						<input type='hidden' name='toim' 			value = '$kopiotoim'>
 						<input type='hidden' name='nimitykset' 		value = 'JOO'>
 						<input type='hidden' name='tee' 			value = 'TULOSTA'>

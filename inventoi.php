@@ -1,6 +1,7 @@
 <?php
-
-	require ("inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
+			require ("inc/parametrit.inc");
+		}
 
 	if (!isset($fileesta))			$fileesta = "";
 	if (!isset($filusta))			$filusta = "";
@@ -333,31 +334,7 @@
 									$oletus = "X";
 								}
 
-								$query = "INSERT into tuotepaikat set
-											yhtio     = '$kukarow[yhtio]',
-											tuoteno	  = '$tuoteno',
-											hyllyalue = '$hyllyalue',
-											hyllynro  = '$hyllynro',
-											hyllyvali = '$hyllyvali',
-											hyllytaso = '$hyllytaso',
-											oletus    = '$oletus'";
-								$result = pupe_query($query);
-
-								$query = "	INSERT into tapahtuma set
-											yhtio 		= '$kukarow[yhtio]',
-											tuoteno 	= '$tuoteno',
-											kpl 		= 0,
-											kplhinta	= 0,
-											hinta 		= 0,
-											laji 		= 'uusipaikka',
-											hyllyalue 	= '$hyllyalue',
-											hyllynro 	= '$hyllynro',
-											hyllyvali 	= '$hyllyvali',
-											hyllytaso 	= '$hyllytaso',
-											selite 		= '".t("Inventoidessa lis‰ttiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-								$result = pupe_query($query);
+								lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus);
 
 								// haetaan perustettu resultti (sama query ku ylh‰‰ll‰)
 								$query = "	SELECT *
@@ -1043,398 +1020,398 @@
 			echo "<font class='error'>".t("VIRHE: Tarkista syˆtetyt tiedot")."!</font><br><br>";
 			$tee='';
 		}
+	}
 
-		if ($tee == 'INVENTOI') {
+	if ($tee == 'INVENTOI') {
 
-			echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-				<!--
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
 
-				function toggleAll(toggleBox, toggleBoxBoxes) {
+			function toggleAll(toggleBox, toggleBoxBoxes) {
 
-					var currForm  = toggleBox.form;
-					var isChecked = toggleBox.checked;
-					var nimi      = toggleBoxBoxes;
+				var currForm  = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				var nimi      = toggleBoxBoxes;
 
-					for (var elementIdx=0; elementIdx < currForm.elements.length; elementIdx++) {
-						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name == nimi) {
-							currForm.elements[elementIdx].checked = isChecked;
-						}
+				for (var elementIdx=0; elementIdx < currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name == nimi) {
+						currForm.elements[elementIdx].checked = isChecked;
 					}
 				}
-
-				//-->
-				</script>";
-
-			$sel1rivi=$sel18rivi=$sel180rivi="";
-
-			if ($rivimaara == '1') {
-				$sel1rivi = "SELECTED";
-			}
-			elseif ($rivimaara == '18') {
-				$sel18rivi = "SELECTED";
-			}
-			else {
-				$sel180rivi = "SELECTED";
 			}
 
-			$seljarj1 = "";
-			$seljarj2 = "";
-			$seljarj3 = "";
-			$seljarj4 = "";
+			//-->
+			</script>";
 
-			if ($jarjestys == 'tuoteno') {
-				$seljarj2 = "SELECTED";
-			}
-			elseif ($jarjestys == 'osastotrytuoteno') {
-				$seljarj3 = "SELECTED";
-			}
-			elseif ($jarjestys == 'nimityssorttaus') {
-				$seljarj4 = "SELECTED";
-			}
-			else {
-				$seljarj1 = "SELECTED";
-			}
+		$sel1rivi=$sel18rivi=$sel180rivi="";
 
-			if ($lista != "") {
-				echo "<form method='post'>";
-				echo "<select name='rivimaara' onchange='submit()'>";
-				echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
-				echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
-				echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
-				echo "</select>";
-				echo "<select name='jarjestys' onchange='submit()'>";
-				echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
-				echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
-				echo "<option value='nimityssorttaus' $seljarj4>".t("Nimitysj‰rjestykseen")."</option>";
-				echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhm‰/Tuotenumeroj‰rjestykseen")."</option>";
-				echo "</select>";
-				echo "<input type='hidden' name='tee' value='INVENTOI'>";
-				echo "<input type='hidden' name='lista' value='$lista'>";
-				echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
-				echo "<input type='hidden' name='alku' value='$alku'>";
-				echo "</form>";
-			}
+		if ($rivimaara == '1') {
+			$sel1rivi = "SELECTED";
+		}
+		elseif ($rivimaara == '18') {
+			$sel18rivi = "SELECTED";
+		}
+		else {
+			$sel180rivi = "SELECTED";
+		}
 
+		$seljarj1 = "";
+		$seljarj2 = "";
+		$seljarj3 = "";
+		$seljarj4 = "";
 
-			echo "<form name='inve' method='post' autocomplete='off'>";
-			echo "<input type='hidden' name='tee' value='VALMIS'>";
+		if ($jarjestys == 'tuoteno') {
+			$seljarj2 = "SELECTED";
+		}
+		elseif ($jarjestys == 'osastotrytuoteno') {
+			$seljarj3 = "SELECTED";
+		}
+		elseif ($jarjestys == 'nimityssorttaus') {
+			$seljarj4 = "SELECTED";
+		}
+		else {
+			$seljarj1 = "SELECTED";
+		}
+
+		if ($lista != "") {
+			echo "<form method='post'>";
+			echo "<select name='rivimaara' onchange='submit()'>";
+			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
+			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
+			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
+			echo "</select>";
+			echo "<select name='jarjestys' onchange='submit()'>";
+			echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
+			echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
+			echo "<option value='nimityssorttaus' $seljarj4>".t("Nimitysj‰rjestykseen")."</option>";
+			echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhm‰/Tuotenumeroj‰rjestykseen")."</option>";
+			echo "</select>";
+			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
-			echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
-			echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
+			echo "</form>";
+		}
 
-			echo "<table>";
-			echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
 
-			echo "<tr>";
-			echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
-			echo "</tr>";
+		echo "<form name='inve' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='tee' value='VALMIS'>";
+		echo "<input type='hidden' name='lista' value='$lista'>";
+		echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
+		echo "<input type='hidden' name='alku' value='$alku'>";
+		echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
+		echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
 
-			$rivilask = 0;
+		echo "<table>";
+		echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
 
-			while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
+		echo "<tr>";
+		echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
+		echo "</tr>";
 
-				//Haetaan ker‰tty m‰‰r‰
-				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and tyyppi 		in ('L','G','V')
-							and tuoteno		= '$tuoterow[tuoteno]'
-							and varattu    <> 0
-							and laskutettu 	= ''
-							and hyllyalue	= '$tuoterow[hyllyalue]'
-							and hyllynro 	= '$tuoterow[hyllynro]'
-							and hyllyvali 	= '$tuoterow[hyllyvali]'
-							and hyllytaso 	= '$tuoterow[hyllytaso]'";
-				$hylresult = pupe_query($query);
-				$hylrow = mysql_fetch_assoc($hylresult);
+		$rivilask = 0;
 
-				$hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
+		while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 
-				if ($tuoterow["sarjanumeroseuranta"] != "") {
-					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, tilausrivi_myynti.otunnus myyntitunnus, tilausrivi_myynti.varattu myyntikpl,
-								round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl, tilausrivi_osto.yksikko, tilausrivi_osto.laskutettuaika
-								FROM sarjanumeroseuranta
-								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
-								and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
-								and sarjanumeroseuranta.myyntirivitunnus	!= -1
-								and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]'
-										 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]'
-										 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]'
-										 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]')
-									 or ('$tuoterow[oletus]' != '' and
-										(	SELECT tunnus
-											FROM tuotepaikat tt
-											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
-											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
-								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or (tilausrivi_osto.laatija = 'Invent' and tilausrivi_osto.laskutettuaika = '0000-00-00')))
-								and ('$tuoterow[sarjanumeroseuranta]' not in ('E','F','G') or era_kpl != 0)
-								ORDER BY sarjanumero";
-					$sarjares = pupe_query($query);
+			//Haetaan ker‰tty m‰‰r‰
+			$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
+						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tyyppi 		in ('L','G','V')
+						and tuoteno		= '$tuoterow[tuoteno]'
+						and varattu    <> 0
+						and laskutettu 	= ''
+						and hyllyalue	= '$tuoterow[hyllyalue]'
+						and hyllynro 	= '$tuoterow[hyllynro]'
+						and hyllyvali 	= '$tuoterow[hyllyvali]'
+						and hyllytaso 	= '$tuoterow[hyllytaso]'";
+			$hylresult = pupe_query($query);
+			$hylrow = mysql_fetch_assoc($hylresult);
+
+			$hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
+
+			if ($tuoterow["sarjanumeroseuranta"] != "") {
+				$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, tilausrivi_myynti.otunnus myyntitunnus, tilausrivi_myynti.varattu myyntikpl,
+							round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl, tilausrivi_osto.yksikko, tilausrivi_osto.laskutettuaika
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
+							and sarjanumeroseuranta.myyntirivitunnus	!= -1
+							and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]'
+									 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]'
+									 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]'
+									 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]')
+								 or ('$tuoterow[oletus]' != '' and
+									(	SELECT tunnus
+										FROM tuotepaikat tt
+										WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
+										and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
+							and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or (tilausrivi_osto.laatija = 'Invent' and tilausrivi_osto.laskutettuaika = '0000-00-00')))
+							and ('$tuoterow[sarjanumeroseuranta]' not in ('E','F','G') or era_kpl != 0)
+							ORDER BY sarjanumero";
+				$sarjares = pupe_query($query);
+			}
+
+			if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
+
+				echo "<tr>";
+				echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
+
+				if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+					if (mysql_num_rows($sarjares) > 0) {
+						echo "<br><table width='100%'>";
+
+						$sarjalaskk = 1;
+
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+							if ($sarjanumero[$tuoterow["tptunnus"]][$sarjarow["tunnus"]] != '') {
+								$chk = "CHECKED";
+							}
+							else {
+								$chk = "";
+							}
+
+							echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td><td align='right'>";
+
+							if ($tuoterow['sarjanumeroseuranta'] == 'T' or $tuoterow['sarjanumeroseuranta'] == 'V') {
+								echo sprintf("%.02f", $tuoterow['kehahin']);
+							}
+							else {
+								echo sprintf("%.02f",sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]));
+							}
+
+							echo "</td><td>";
+							echo "	<input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>
+									<input type='hidden' name='sarjanumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
+
+							if ($sarjarow['laskutettuaika'] == '0000-00-00') {
+								echo "<input type='hidden' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>";
+								echo "<font class='message'>**",t("UUSI"),"**</font>";
+							}
+							else {
+								echo "<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]' $chk></td>";
+							}
+
+							echo "</td>";
+
+							if ($sarjarow["myyntitunnus"] != 0) {
+								echo "<td><font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus]</font></td>";
+							}
+							echo "</tr>";
+
+							$sarjalaskk++;
+						}
+						echo "</table>";
+					}
+					echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi sarjanumero")."</a>";
 				}
+				elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+					if (mysql_num_rows($sarjares) > 0) {
+						echo "<br><table width='100%'>";
 
-				if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
+						$sarjalaskk = 1;
 
-					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
+						while($sarjarow = mysql_fetch_assoc($sarjares)) {
+							echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
+									<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>
+									<td>";
 
-					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
-						if (mysql_num_rows($sarjares) > 0) {
-							echo "<br><table width='100%'>";
+							if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+								echo sprintf('%.02f', $tuoterow['kehahin']);
+							}
+							else {
+								echo sprintf('%.02f', $sarjarow['ostohinta']);
+							}
 
-							$sarjalaskk = 1;
+							echo "</td>
+									<td>
+									<input type='hidden' name='eranumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>
+									<input type='hidden' name='eranumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
 
-							while ($sarjarow = mysql_fetch_assoc($sarjares)) {
-								if ($sarjanumero[$tuoterow["tptunnus"]][$sarjarow["tunnus"]] != '') {
-									$chk = "CHECKED";
-								}
-								else {
-									$chk = "";
-								}
-
-								echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td><td align='right'>";
-
-								if ($tuoterow['sarjanumeroseuranta'] == 'T' or $tuoterow['sarjanumeroseuranta'] == 'V') {
-									echo sprintf("%.02f", $tuoterow['kehahin']);
-								}
-								else {
-									echo sprintf("%.02f",sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]));
-								}
-
-								echo "</td><td>";
-								echo "	<input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>
-										<input type='hidden' name='sarjanumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
-
+							if ($sarjarow['laskutettuaika'] == '0000-00-00' or $sarjarow["myyntitunnus"] != 0) {
 								if ($sarjarow['laskutettuaika'] == '0000-00-00') {
-									echo "<input type='hidden' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>";
+									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
 									echo "<font class='message'>**",t("UUSI"),"**</font>";
 								}
 								else {
-									echo "<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]' $chk></td>";
+									echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
+									echo "<font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus] $sarjarow[myyntikpl]</font>";
 								}
-
-								echo "</td>";
-
-								if ($sarjarow["myyntitunnus"] != 0) {
-									echo "<td><font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus]</font></td>";
-								}
-								echo "</tr>";
-
-								$sarjalaskk++;
 							}
-							echo "</table>";
-						}
-						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi sarjanumero")."</a>";
-					}
-					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
-						if (mysql_num_rows($sarjares) > 0) {
-							echo "<br><table width='100%'>";
-
-							$sarjalaskk = 1;
-
-							while($sarjarow = mysql_fetch_assoc($sarjares)) {
-								echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
-										<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>
-										<td>";
-
-								if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
-									echo sprintf('%.02f', $tuoterow['kehahin']);
+							else {
+								if ($onko_uusia > 0) {
+									$apu_era_kpl = "";
 								}
 								else {
-									echo sprintf('%.02f', $sarjarow['ostohinta']);
+									$apu_era_kpl = $sarjarow["era_kpl"];
 								}
-
-								echo "</td>
-										<td>
-										<input type='hidden' name='eranumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>
-										<input type='hidden' name='eranumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
-
-								if ($sarjarow['laskutettuaika'] == '0000-00-00' or $sarjarow["myyntitunnus"] != 0) {
-									if ($sarjarow['laskutettuaika'] == '0000-00-00') {
-										echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
-										echo "<font class='message'>**",t("UUSI"),"**</font>";
-									}
-									else {
-										echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
-										echo "<font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus] $sarjarow[myyntikpl]</font>";
-									}
-								}
-								else {
-									if ($onko_uusia > 0) {
-										$apu_era_kpl = "";
-									}
-									else {
-										$apu_era_kpl = $sarjarow["era_kpl"];
-									}
-									echo "<input type='text' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$apu_era_kpl'>";
-								}
-								echo "</td>";
-								echo "</tr>";
-
-								$sarjalaskk++;
+								echo "<input type='text' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$apu_era_kpl'>";
 							}
+							echo "</td>";
+							echo "</tr>";
 
-							echo "</table>";
+							$sarjalaskk++;
 						}
-						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi er‰numero")."</a>";
+
+						echo "</table>";
 					}
-
-					echo "</td><td valign='top'>";
-
-					if ($tuoterow["hyllyalue"] == "!!M") {
-						$asiakkaan_tunnus = (int) $tuoterow["hyllynro"].$tuoterow["hyllyvali"].$tuoterow["hyllytaso"];
-						$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
-									FROM asiakas
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									AND tunnus = '$asiakkaan_tunnus'";
-						$asiakasresult = pupe_query($query);
-						$asiakasrow = mysql_fetch_assoc($asiakasresult);
-						echo t("Myyntitili"), " ", $asiakasrow["asiakkaan_nimi"];
-					}
-					else {
-						echo "$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]";
-					}
-
-					echo "</td>";
-
-					if ($tuoterow["sarjanumeroseuranta"] != "S") {
-						echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";
-					}
-					else {
-						echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'></td><td valign='top'>$tuoterow[saldo]</td>";
-					}
-
-					echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
-					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
-					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
-
-					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
-						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
-					}
-					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
-						echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
-					}
-
-					echo "</tr>";
-
-					if ($rivilask == 0) {
-						echo "<script LANGUAGE='JavaScript'>document.getElementById('maara_$tuoterow[tptunnus]').focus();</script>";
-						$kentta = "";
-						$rivilask++;
-					}
-
+					echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi er‰numero")."</a>";
 				}
-				elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {
 
-					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
+				echo "</td><td valign='top'>";
 
-					if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
-						if (mysql_num_rows($sarjares) > 0) {
-							echo "<br><table>";
-
-							while($sarjarow = mysql_fetch_assoc($sarjares)) {
-								echo "<tr><td>$sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td></tr>";
-							}
-
-							echo "</table>";
-						}
-					}
-
-					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
-
-					$query = "	SELECT *
-								FROM tapahtuma
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and tuoteno 	= '$tuoterow[tuoteno]'
-								and laji		= 'Inventointi'
-								and laadittu   >= '$lista_aika'
-								and hyllyalue 	= '$tuoterow[hyllyalue]'
-								and hyllynro 	= '$tuoterow[hyllynro] '
-								and hyllyvali 	= '$tuoterow[hyllyvali]'
-								and hyllytaso 	= '$tuoterow[hyllytaso]'
-								ORDER BY tunnus desc
-								LIMIT 1";
-					$tapresult = pupe_query($query);
-					$taptrow = mysql_fetch_assoc($tapresult);
-
-					$taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
-
-					echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!")." $taptrow[selite]";
-
-					//Jos invauseroh‰lytys on triggerˆity
-					$query = "	SELECT abs(kpl) kpl
-								FROM tapahtuma
-								WHERE yhtio   = '$kukarow[yhtio]'
-								and tuoteno   = '$tuoterow[tuoteno]'
-								and laji	  = 'Inventointi'
-								and laadittu >= '$lista_aika'
-								and kpl 	 <> 0
-								ORDER BY tunnus desc
-								LIMIT 1";
-					$tapresult = pupe_query($query);
-					$taptrow = mysql_fetch_assoc ($tapresult);
-
-					if ($taptrow["kpl"] > 10) {
-						echo "<br><font class='error'>".t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!")."</font>";
-					}
-
-					echo "</td>";
-
-					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
-						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
-					}
-					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
-						echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
-					}
-
-					echo "</tr>";
+				if ($tuoterow["hyllyalue"] == "!!M") {
+					$asiakkaan_tunnus = (int) $tuoterow["hyllynro"].$tuoterow["hyllyvali"].$tuoterow["hyllytaso"];
+					$query = "	SELECT if(nimi = toim_nimi OR toim_nimi = '', nimi, concat(nimi, ' / ', toim_nimi)) asiakkaan_nimi
+								FROM asiakas
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND tunnus = '$asiakkaan_tunnus'";
+					$asiakasresult = pupe_query($query);
+					$asiakasrow = mysql_fetch_assoc($asiakasresult);
+					echo t("Myyntitili"), " ", $asiakasrow["asiakkaan_nimi"];
 				}
 				else {
-					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
-					echo "<td valign='top'>".sprintf(t("T‰t‰ tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
-					echo "</tr>";
+					echo "$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]";
 				}
-			}
 
-			echo "</table><br>";
+				echo "</td>";
 
-			echo "<table>";
-
-			$tresult = t_avainsana("INVEN_LAJI");
-
-			if (mysql_num_rows($tresult) > 0) {
-				echo "<tr><th>".t("Inventoinnin laji").":</th>";
-
-				echo "<td><select name='inven_laji'>";
-
-				while($itrow = mysql_fetch_assoc($tresult)) {
-					$sel = "";
-					if ($itrow["selite"] == $inven_laji) $sel = 'selected';
-					echo "<option value='$itrow[selite]' $sel>$itrow[selite]</option>";
+				if ($tuoterow["sarjanumeroseuranta"] != "S") {
+					echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";
 				}
-				echo "</select></td></tr>";
+				else {
+					echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'></td><td valign='top'>$tuoterow[saldo]</td>";
+				}
+
+				echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
+				echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
+				echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
+
+				if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+					echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+				}
+				elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+					echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+				}
+
+				echo "</tr>";
+
+				if ($rivilask == 0) {
+					echo "<script LANGUAGE='JavaScript'>document.getElementById('maara_$tuoterow[tptunnus]').focus();</script>";
+					$kentta = "";
+					$rivilask++;
+				}
+
 			}
+			elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {
 
-			echo "<tr><th>".t("Syˆt‰ inventointiselite:")."</th>";
-			echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
-			echo "</table><br><br>";
+				echo "<tr>";
+				echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
+				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+					if (mysql_num_rows($sarjares) > 0) {
+						echo "<br><table>";
 
-			if (mysql_num_rows($saldoresult) == $rivimaara) {
-				echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
-				//echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";
+						while($sarjarow = mysql_fetch_assoc($sarjares)) {
+							echo "<tr><td>$sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td></tr>";
+						}
+
+						echo "</table>";
+					}
+				}
+
+				echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+
+				$query = "	SELECT *
+							FROM tapahtuma
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tuoteno 	= '$tuoterow[tuoteno]'
+							and laji		= 'Inventointi'
+							and laadittu   >= '$lista_aika'
+							and hyllyalue 	= '$tuoterow[hyllyalue]'
+							and hyllynro 	= '$tuoterow[hyllynro] '
+							and hyllyvali 	= '$tuoterow[hyllyvali]'
+							and hyllytaso 	= '$tuoterow[hyllytaso]'
+							ORDER BY tunnus desc
+							LIMIT 1";
+				$tapresult = pupe_query($query);
+				$taptrow = mysql_fetch_assoc($tapresult);
+
+				$taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
+
+				echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!")." $taptrow[selite]";
+
+				//Jos invauseroh‰lytys on triggerˆity
+				$query = "	SELECT abs(kpl) kpl
+							FROM tapahtuma
+								WHERE yhtio   = '$kukarow[yhtio]'
+							and tuoteno   = '$tuoterow[tuoteno]'
+							and laji	  = 'Inventointi'
+							and laadittu >= '$lista_aika'
+							and kpl 	 <> 0
+							ORDER BY tunnus desc
+							LIMIT 1";
+				$tapresult = pupe_query($query);
+				$taptrow = mysql_fetch_assoc ($tapresult);
+
+				if ($taptrow["kpl"] > 10) {
+					echo "<br><font class='error'>".t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!")."</font>";
+				}
+
+				echo "</td>";
+
+				if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+					echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+				}
+				elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+					echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+				}
+
+				echo "</tr>";
 			}
 			else {
-				echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
+				echo "<tr>";
+				echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+				echo "<td valign='top'>".sprintf(t("T‰t‰ tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
+				echo "</tr>";
 			}
-
-			echo "</form>";
 		}
+
+		echo "</table><br>";
+
+		echo "<table>";
+
+		$tresult = t_avainsana("INVEN_LAJI");
+
+		if (mysql_num_rows($tresult) > 0) {
+			echo "<tr><th>".t("Inventoinnin laji").":</th>";
+
+			echo "<td><select name='inven_laji'>";
+
+			while($itrow = mysql_fetch_assoc($tresult)) {
+				$sel = "";
+				if ($itrow["selite"] == $inven_laji) $sel = 'selected';
+				echo "<option value='$itrow[selite]' $sel>$itrow[selite]</option>";
+			}
+			echo "</select></td></tr>";
+		}
+
+		echo "<tr><th>".t("Syˆt‰ inventointiselite:")."</th>";
+		echo "<td><input type='text' size='50' name='lisaselite' value='$lisaselite'></td></tr>";
+		echo "</table><br><br>";
+
+
+		if (mysql_num_rows($saldoresult) == $rivimaara) {
+			echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
+			//echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";
+		}
+		else {
+			echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
+		}
+
+		echo "</form>";
 	}
 
 	if ($tee == 'MITATOI') {

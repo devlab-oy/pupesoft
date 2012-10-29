@@ -187,22 +187,29 @@
 		$mitkalisa = "";
 	}
 
+
+
 	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
+
+		$query = "	SELECT GROUP_CONCAT(saapuminen) keikkatunnus
+					FROM suuntalavat_saapuminen
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND suuntalava IN (".implode(",", $suuntalavat).")";
+		$uusiotunnus_chk_res = pupe_query($query);
+		$uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
+
+		$otunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+
 		$selectlisa = ", suuntalavat.sscc ";
 		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava)
-		 					JOIN varaston_hyllypaikat ON (	varaston_hyllypaikat.yhtio = tilausrivi.yhtio
-															AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue
-															AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro
-															AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali
-															AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)";
-		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava) ";
-		$orderlisa = " suuntalavat.sscc, varaston_hyllypaikat.indeksi, ";
+							JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = tilausrivi.uusiotunnus) ";
 		$orderlisa = " suuntalavat.sscc, ";
 	}
 	else {
-		$selectlisa = "";
+		$otunnuslisa 	= "tilausrivi.uusiotunnus = '{$otunnus}'";
+		$selectlisa 	= "";
 		$suuntalavajoin = "";
-		$orderlisa = "";
+		$orderlisa 		= "";
 	}
 
 	if ($mista == "vastaanota" and $vainlistaus == '') {
@@ -284,7 +291,7 @@
 					$suuntalavajoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
 					LEFT JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-					WHERE tilausrivi.uusiotunnus = '$otunnus'
+					WHERE {$otunnuslisa}
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					$mitkalisa
 					ORDER BY $orderlisa sorttauskentta, tilausrivi.tunnus";

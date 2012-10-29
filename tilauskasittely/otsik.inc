@@ -1197,7 +1197,6 @@
 
 				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
 				echo "</option>";
 			}
 			echo "</select>";
@@ -1607,6 +1606,7 @@
 				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
 				echo "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
 				echo "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
+				echo "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
 				echo "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				echo "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
 
@@ -1629,7 +1629,7 @@
 			$query  = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
-						$varastot_lisa_query
+						$varastot_lisa_query AND tyyppi != 'P'
 						order by tyyppi, nimitys";
 			$vares = pupe_query($query);
 
@@ -1689,7 +1689,7 @@
 			}
 			echo "</tr>";
 
-			echo "<td>".t("Keräysprioriteetti").":</td><td>";
+			echo "<tr><td>".t("Keräysprioriteetti").":</td><td>";
 
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 
@@ -1700,7 +1700,9 @@
 
 				if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
-				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
+				echo "<option value='$row[selite]' $sel>$row[selite]";
+				if ($row["selitetark"] != "") echo " - $row[selitetark]";
+				echo "</option>";
 			}
 			echo "</select>";
 
@@ -2459,6 +2461,8 @@
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
+			echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
+
 			if (isset($srow["myynti_kommentti1"]) and $srow["myynti_kommentti1"] != "") {
 				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 			}
@@ -2974,6 +2978,13 @@
 			$voimaika_pp = "00";
 		}
 
+		$ohjausmerkki = trim($ohjausmerkki);
+
+		$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");
+
+		// Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+		if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
 		$label = !isset($label) ? "" : $label;
 		$kolmikantakauppa = !isset($kolmikantakauppa) ? "" : $kolmikantakauppa;
 
@@ -2992,6 +3003,7 @@
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					huolitsija 							= '$huolitsija',
 					hyvaksynnanmuutos 					= '$luokka',
+					prioriteettinro						= '$prioriteettinro',
 					jakelu 								= '$jakelu',
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',
@@ -3014,6 +3026,7 @@
 					myyja 								= '$myyja',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',
+					ohjausmerkki						= '$ohjausmerkki',
 					olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp',
 					osatoimitus							= '$osatoimitus',
 					osoite 								= '$osoite',

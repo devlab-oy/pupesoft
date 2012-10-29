@@ -1205,6 +1205,18 @@
 		$osto_kulu_alv = (float) $osto_kulu_alv;
 		$osto_rivi_kulu_alv = (float) $osto_rivi_kulu_alv;
 
+		if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
+			$osto_kulu = $osto_kulu * (1 + ($osto_kulu_alv / 100));
+		}
+
+		if (isset($osto_rahti_alv_verollisuus) and $osto_rahti_alv_verollisuus == 'X') {
+			$osto_rahti = $osto_rahti * (1 + ($osto_rahti_alv / 100));
+		}
+
+		if (isset($osto_rivi_kulu_alv_verollisuus) and $osto_rivi_kulu_alv_verollisuus == 'X') {
+			$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
+		}
+
 		$query = "	UPDATE lasku SET
 					osto_rahti = '{$osto_rahti}',
 					osto_kulu = '{$osto_kulu}',
@@ -1802,21 +1814,36 @@
 					case '1':
 						if ($yhtiorow['osto_rahti'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun rahdit"),"</th>";
-							echo "<td><input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
+							echo "<td>";
+							echo "<select name='osto_rahti_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_rahti' value='{$trow['osto_rahti']}' />";
 							echo "&nbsp;".alv_popup('osto_rahti_alv', $trow['osto_rahti_alv'])."</td>";
 						}
 						break;
 					case '2':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun kulut"),"</th>";
-							echo "<td><input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
+							echo "<td>";
+							echo "<select name='osto_kulu_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_kulu' value='{$trow['osto_kulu']}' />";
 							echo "&nbsp;".alv_popup('osto_kulu_alv', $trow['osto_kulu_alv'])."</td>";
 						}
 						break;
 					case '3':
 						if ($yhtiorow['osto_rahti'] != '' and $yhtiorow['osto_kulu'] != '' and $yhtiorow['osto_rivi_kulu'] != '') {
 							echo "<th>",t("Vaihto-omaisuuslaskun tuoterivikohtaiset kulut"),"</th>";
-							echo "<td><input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
+							echo "<td>";
+							echo "<select name='osto_rivi_kulu_alv_verollisuus'>";
+							echo "<option value=''>",t("Verollinen arvo"),"</option>";
+							echo "<option value='X'>",t("Veroton arvo"),"</option>";
+							echo "</select>";
+							echo "<input type='text' name='osto_rivi_kulu' value='{$trow['osto_rivi_kulu']}' />";
 							echo "&nbsp;".alv_popup('osto_rivi_kulu_alv', $trow['osto_rivi_kulu_alv'])."</td>";
 						}
 						break;
@@ -2112,5 +2139,3 @@
 	if ($phpnimi == 'muutosite.php') {
 		$tee = 'E'; // Estetään väärä käyttöliittymä
 	}
-
-?>

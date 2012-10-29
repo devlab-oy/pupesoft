@@ -198,7 +198,7 @@
 			$result = pupe_query($query);
 			while($row = mysql_fetch_assoc($result)) {
 				if($row['ale3'] != 0) {
-					$ale_prosentti = ((1 - ($row['ale3'] / 100)) * (1 - ($row['erikoisale'] / 100)) * 100);
+					$ale_prosentti = 100 - ((1 - ($row['ale3'] / 100)) * (1 - ($row['erikoisale'] / 100)) * 100);
 				}
 				else {
 					$ale_prosentti = $row['erikoisale'];
@@ -858,10 +858,14 @@
 				$divnolla		= 0;
 				$erikoisale_summa = 0;
 
+				//haetaan erikoisale otsikoilta koska se nollataan tietyssä pisteessä riviltä
+				$tilaus_query = "SELECT erikoisale FROM lasku WHERE yhtio ='{$kukarow['yhtio']}' AND tunnus = '{$kukarow['kesken']}'";
+				$tilaus_result = pupe_query($tilaus_query);
+				$tilaus_row = mysql_fetch_assoc($tilaus_result);
+
 				while ($prow = mysql_fetch_array ($presult)) {
 					$divnolla++;
-					//$erikoisale_summa = alehinta_osto ($laskurow, array('tuoteno' => $prow['tuoteno']), $prow["tilattu"], '', $prow['hinta'], array('ale1' => $prow['ale1'] , 'ale2' => $prow['ale2'] , 'ale3' => $prow['ale3'] , 'aleerikoisale' => $prow['erikoisale']));
-					$erikoisale_maara = ($prow['rivihinta'] * ($prow['erikoisale'] / 100));
+					$erikoisale_maara = ($prow['hinta'] * ($tilaus_row['erikoisale'] / 100));
 					$erikoisale_summa += ($erikoisale_maara * -1);
 					$yhteensa += $prow["rivihinta"];
 					$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);

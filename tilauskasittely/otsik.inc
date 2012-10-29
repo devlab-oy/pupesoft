@@ -200,7 +200,10 @@
 			unset($jatka);
 		}
 		elseif ($toimitustapa != "") {
-			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+			$query = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						and selite  = '$toimitustapa'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -234,13 +237,21 @@
 
 	//	Tarkastetaan toimitustapa saadaanko laittaa jälkivaatimuksia
 	if (isset($jatka)) {
-		$query = "SELECT tunnus FROM maksuehto WHERE yhtio ='$kukarow[yhtio]' and tunnus = '$maksuehto' and jv != ''";
+		$query = "	SELECT tunnus
+					FROM maksuehto
+					WHERE yhtio ='$kukarow[yhtio]'
+					AND tunnus = '$maksuehto'
+					AND jv != ''";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 
 			//	Denial by toimitustapa
-			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa' and jvkielto != ''";
+			$query = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						and selite = '$toimitustapa'
+						and jvkielto != ''";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -1200,7 +1211,8 @@
 					$apu_rahdinmaksaja = "";
 				}
 				elseif ($toimehtoseltark_3 == "RAHTIVAPAA") {
-					$apu_rahdinmaksaja = "";
+					$apu_rahdinmaksaja  = "K";
+					$srow["rahtivapaa"] = "ON";
 				}
 				else {
 					$apuqu = "	SELECT *
@@ -2849,13 +2861,21 @@
 		// jos kyseessä oli käteinen
 		if ($meapurow["kateinen"] != "") {
 			// haetaan toimitustavan tiedot tarkastuksia varten
-			$apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$apuqu2 = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'";
 			$meapu2 = pupe_query($apuqu2);
 			$meapu2row = mysql_fetch_assoc($meapu2);
 
 			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
 			if ($meapu2row["nouto"] == "") {
-				$apuqu = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+				$apuqu = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nouto != ''
+							ORDER BY jarjestys
+							LIMIT 1";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_assoc($meapu);
 

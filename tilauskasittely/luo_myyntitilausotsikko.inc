@@ -67,17 +67,6 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			}
 
 			$maksuehto 		= $asiakasrow["maksuehto"];
-			$toimitustapa 	= $asiakasrow["toimitustapa"];
-
-			// haetaan tomitustavan oletusmaksajan tiedot
-			$apuqu = "	SELECT *
-						from toimitustapa use index (selite_index)
-						where yhtio='$kukarow[yhtio]'
-						and selite='$asiakasrow[toimitustapa]'";
-			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-			$apuro = mysql_fetch_array($meapu);
-
-			$maksaja = $apuro['merahti'];
 
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
@@ -121,16 +110,6 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$comments = $asiakasrow["myynti_kommentti1"];
 			}
 
-			if (trim($asiakasrow["toimitusehto"]) != "") {
-				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
-			}
-
-			$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
-			$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
-
-			$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
-			$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
-
 			//annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
 			if ($kukarow["extranet"] != '') {
 				$query  = "	SELECT distinct selite
@@ -163,11 +142,52 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$splittauskielto = "";
 			}
 
-			$jtkielto = $asiakasrow['jtkielto'];
+			$jtkielto 		= $asiakasrow['jtkielto'];
+			$toimitustapa 	= $asiakasrow["toimitustapa"];
+
+			// Haetaan tomitustavan oletusmaksajan tiedot
+			$apuqu = "	SELECT *
+						from toimitustapa use index (selite_index)
+						where yhtio	= '$kukarow[yhtio]'
+						and selite	= '$toimitustapa'";
+			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+			$apuro = mysql_fetch_array($meapu);
+
+			// Toimitusehto
+			if (trim($asiakasrow["toimitusehto"]) != "") {
+				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
+			}
+
+			$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
+			$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
+
+			$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
+			$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
+
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$asiakasrow[toimitusehto]') ");
+
+			if (mysql_num_rows($toimehto_tresult) > 0) {
+				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPPARI") {
+					$maksaja = "K";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPPARI") {
+					$maksaja = "";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "RAHTIVAPAA") {
+					$maksaja    = "K";
+					$rahtivapaa = "ON";
+				}
+				else {
+					$maksaja = $apuro['merahti'];
+				}
+			}
+			else {
+				$maksaja = $apuro['merahti'];
+			}
 
 			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
-			// if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON'; // Tälläistä kenttää ei ole
-
 		}
 		else {
 			//yhtiön oletusalvi!

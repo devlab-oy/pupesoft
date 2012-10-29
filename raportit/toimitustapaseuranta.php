@@ -43,7 +43,7 @@
 	if ($tee != '') {
 		echo "<table>";
 
-		$lisa = $orderbylisa = "";
+		$lisa = $orderbylisa = $groupbylisa = "";
 
 		if ($tee == 'paivittain') {
 			$lisa = ", LEFT(tilausrivi.toimitettuaika, 10) tapvm";
@@ -60,17 +60,12 @@
 					COUNT(DISTINCT tilausrivi.tunnus) tilausriveja,
 					ROUND(SUM(tilausrivi.kpl)) kpl_tilriv
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					and lasku.tila = 'L'
-					and lasku.alatila = 'X'
-					#and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
-					#and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
-					and tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-					and tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					AND lasku.tila = 'L'
+					AND lasku.alatila = 'X'
 					GROUP BY 1 {$groupbylisa}
 					ORDER BY {$orderbylisa} aika, kpl desc, toimitustapa";
-		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$otsikot =  "	<tr>
@@ -102,7 +97,15 @@
 
 		$paivamaara = "";
 
-		$kappalemaara_kaikki = $kappalemaara = 0;
+		$tilauksia_kaikki = 0;
+		$tilauksia = 0;
+		$kerayslistoja_kaikki = 0;
+		$kerayslistoja = 0;
+		$tilausriveja_kaikki = 0;
+		$tilausriveja = 0;
+		$maara_kaikki = 0;
+		$maara = 0;
+		$kplperpva_kaikki = 0;
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -111,11 +114,14 @@
 			if ($tee == 'paivittain' and ($paivamaara == "" or $paivamaara != $row['tapvm'])) {
 
 				if ($paivamaara != "") {
-					echo "<tr><th colspan='2'>&nbsp;</th><th>{$kappalemaara}</th><th colspan='4'>&nbsp;</th></tr>";
+					echo "<tr><th colspan='2'>&nbsp;</th><th>{$kerayslistoja}</th><th>{$tilauksia}</th><th>{$tilausriveja}</th><th>{$maara}</th><th>&nbsp;</th></tr>";
 					echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 				}
 
-				$kappalemaara = 0;
+				$tilauksia = 0;
+				$kerayslistoja = 0;
+				$tilausriveja = 0;
+				$maara = 0;
 
 				echo "<tr><th colspan='7'>",tv1dateconv($row['tapvm']),"</th></tr>";
 				echo $otsikot;
@@ -125,13 +131,22 @@
 			echo "<td>$row[toimitustapa]</td>";
 			echo "<td>$row[aika]</td>";
 
-			if ($tee == 'paivittain') echo "<td>{$row['kpl_kerayslista']}</td>";
+			if ($tee == 'paivittain') {
+				echo "<td>{$row['kpl_kerayslista']}</td>";
+				$kerayslistoja += $row['kpl_kerayslista'];
+				$kerayslistoja_kaikki += $row['kpl_kerayslista'];
+				$tilausriveja += $row['tilausriveja'];
+				$tilausriveja_kaikki += $row['tilausriveja'];
+				$maara += $row['kpl_tilriv'];
+				$maara_kaikki += $row['kpl_tilriv'];
+			}
 
 			echo "<td>$row[kpl]</td>";
 
 			if ($tee == 'kaikki') {
 				$kplperpva = round($row["kpl"]/$pva,0);
 				echo "<td>$kplperpva</td>";
+				$kplperpva_kaikki += $kplperpva;
 			}
 			else {
 				echo "<td>{$row['tilausriveja']}</td>";
@@ -143,16 +158,20 @@
 
 			$paivamaara = $row['tapvm'];
 
-			$kappalemaara += $row['kpl'];
-			$kappalemaara_kaikki += $row['kpl'];
+			$tilauksia += $row['kpl'];
+			$tilauksia_kaikki += $row['kpl'];
 		}
 
 		if ($tee == 'paivittain') {
-			echo "<tr><th colspan='2'>&nbsp;</th><th>{$kappalemaara}</th><th colspan='4'>&nbsp;</th></tr>";
+			echo "<tr><th colspan='2'>&nbsp;</th><th>{$kerayslistoja}</th><th>{$tilauksia}</th><th>{$tilausriveja}</th><th>{$maara}</th><th>&nbsp;</th></tr>";
 
 			echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
-			echo "<tr><th colspan='2'>",t("Kaikki yhteensä"),"</th><th>{$kappalemaara_kaikki}</th><th colspan='4'>&nbsp;</th>";
+			echo "<tr><th colspan='2'>",t("Kaikki yhteensä"),"</th><th>{$kerayslistoja_kaikki}</th><th>{$tilauksia_kaikki}</th><th>{$tilausriveja_kaikki}</th><th>{$maara_kaikki}</th><th>&nbsp;</th>";
 		}
+		else {
+			echo "<tr><th colspan='2'>",t("Kaikki yhteensä"),"</th><th>{$tilauksia_kaikki}</th><th>{$kplperpva_kaikki}</th><th>&nbsp;</th>";
+		}
+
 
 		echo "</table>";
 	}

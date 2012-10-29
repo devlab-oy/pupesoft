@@ -905,7 +905,7 @@
 								AND lasku.yhtio = maksuehto.yhtio
 								AND lasku.maksuehto = maksuehto.tunnus
 								AND maksuehto.jv != ''
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.toimitustapa, lasku.ytunnus, lasku.ovttunnus, lasku.toim_ovttunnus, lasku.toimitustavan_lahto";
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp";
 					$result = pupe_query($query);
 
 					$yhdista = array();
@@ -1003,7 +1003,7 @@
 								and lasku.tunnus = rahtikirjat.otsikkonro
 								and lasku.yhtio = maksuehto.yhtio
 								and lasku.maksuehto = maksuehto.tunnus
-								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.toimitustapa, lasku.ytunnus, lasku.ovttunnus, lasku.toim_ovttunnus, lasku.toimitustavan_lahto, maksuehto.jv";
+								GROUP BY lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, maksuehto.jv";
 					$result  = pupe_query($query);
 
 					$yhdista = array();

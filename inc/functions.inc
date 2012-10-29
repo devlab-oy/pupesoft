@@ -19900,3 +19900,101 @@ if (!function_exists('triangulation')) {
 		return mysql_num_rows($result) > 0 ? "VAT 0% Triangulation.\n" : "";
 	}
 }
+
+if(!function_exists('tarkista_myynti_osto_liitos_ja_poista_kaikki_myynti_rivit')) {
+	function tarkista_myynti_osto_liitos_ja_poista_kaikki_myynti_rivit($otunnus) {
+		global $kukarow;
+		$query = "	SELECT *
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus = '{$otunnus}'";
+		$result = pupe_query($query);
+		while($ostotilausrivi_row = mysql_fetch_assoc($result)) {
+			$query = "	SELECT *
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivilinkki = '{$ostotilausrivi_row['tunnus']}'";
+			$tilausrivi_lisatiedot_result = pupe_query($query);
+			if($tilausrivi_lisatiedot_row = mysql_fetch_assoc($tilausrivi_lisatiedot_result)) {
+				//osto ja myynti on naimisissa keskenään.
+				//myyntitilaus poistetaan vain jos sitä ei ole kerätty, toimitettu tai laskutettu
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kerattyaika = '0000-00-00 00:00:00'
+							AND toimitettuaika = '0000-00-00 00:00:00'
+							AND laskutettuaika = '0000-00-00'
+							AND tunnus = '{$tilausrivi_lisatiedot_row['tilausrivitunnus']}'";
+				$myyntitilausrivi_result = pupe_query($query);
+				if($myyntitilausrivi_row = mysql_fetch_assoc($myyntitilausrivi_result)) {
+					$query = "	UPDATE tilausrivi
+								SET tyyppi = 'D'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$myyntitilausrivi_row['tunnus']}'";
+					pupe_query($query);
+
+					echo "<font class='message'>".t("Ostotilaukseen liitetty myyntitilausrivi mitätöitiin myös")."!<br><br></font>";
+				}
+				else {
+					echo "<font class='message'>".t("Ostotilaukseen liitettyä myyntitilausriviä")." {$ostotilausrivi_row['nimitys']} ".t("ei mitätöity, koska se on kerätty, toimitettu tai laskutettu")."!<br/><br/></font>";
+				}
+			}
+		}
+	}
+}
+
+if(!function_exists('tarkista_myynti_osto_liitos_ja_poista')) {
+	function tarkista_myynti_osto_liitos_ja_poista($osto_rivitunnus) {
+		global $kukarow;
+		
+		$query = "	SELECT tilausrivin_lisatiedot.tilausrivitunnus
+					FROM tilausrivin_lisatiedot
+					WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivin_lisatiedot.tilausrivilinkki = '{$osto_rivitunnus}'";
+		$result = pupe_query($query);
+
+		if ($tilausrivin_lisatiedot_row = mysql_fetch_assoc($result)) {
+			//tilaukset on naitettu. poistetaan myynti jos ei kerätty, toimitettu tai laskutettu
+			$query = "	SELECT *
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'
+						AND tyyppi = 'L'
+						AND kerattyaika = '0000-00-00 00:00:00'
+						AND toimitettuaika = '0000-00-00 00:00:00'
+						AND laskutettuaika = '0000-00-00'";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) != 0) {
+				$query = "	UPDATE tilausrivi
+							SET tyyppi = 'D'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$tilausrivin_lisatiedot_row['tilausrivitunnus']}'";
+				$result = pupe_query($query);
+
+				echo "<font class='error'>".t("Rivi poistettiin myös myyntitilaukselta")."</font><br/><br/>";
+			}
+			else {
+				echo "<font class='error'>".t("Myyntitilaus rivi on keratty, toimitettu tai laskutettu")."</font><br/><br/>";
+			}
+		}
+
+		//tarkistetaan myös löytyykö ostotilausriviä ja poistetaan sekin jos löytyy
+		$query = "	SELECT *
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tyyppi = 'O'
+					AND tunnus = '{$osto_rivitunnus}'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) != 0) {
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus  = '{$osto_rivitunnus}'";
+			$result = pupe_query($query);
+
+			echo "<font class='error'>".t("Rivi poistettiin ostotilaukselta")."</font><br/><br/>";
+		}
+	}
+}

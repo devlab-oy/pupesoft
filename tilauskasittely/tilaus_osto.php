@@ -392,6 +392,38 @@
 			}
 		}
 
+		if($tee == 'POISTA_RIVI') {
+			//tarkistetaan onko ostotilausrivi naimisissa myyntitilausrivin kanssa
+			$query = "	SELECT *
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivilinkki = '{$rivitunnus}'";
+			$result = pupe_query($query);
+
+			if($myyntitilausrivi_row = mysql_fetch_assoc($result)) {
+				//poistetaan myös myyntitilausrivi
+				$query = "	DELETE
+							FROM tilausrivi
+							WHERE tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
+				$result = pupe_query($query);
+
+				//poistetaan linkki
+				$query = "	DELETE
+							FROM tilausrivin_lisatiedot
+							WHERE tilausrivilinkki = '{$rivitunnus}'";
+				$result = pupe_query($query);
+
+				echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";
+			}
+			$query = "	DELETE
+						FROM tilausrivi
+						WHERE tunnus = '$rivitunnus'";
+			$result = pupe_query($query);
+
+			$automatiikka = "ON";
+			$tee = "Y";
+		}
+
 		// Tyhjennetään tilausrivikentät näytöllä
 		if ($tee == 'TI' and isset($tyhjenna)) {
 
@@ -1063,6 +1095,18 @@
 									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
 									<input type='hidden' name='tee' 				value = 'PV'>
 									<input type='Submit' value='".t("Muuta")."'>
+									</td></form>";
+
+							echo "	<td valign='top' class='back' nowrap>
+									<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+									<input type='hidden' name='toim' 				value = '$toim'>
+									<input type='hidden' name='lopetus' 			value = '$lopetus'>
+									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+									<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+									<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
+									<input type='hidden' name='tee' 				value = 'POISTA_RIVI'>
+									<input type='Submit' value='".t("Poista")."'>
 									</td></form>";
 
 							if ($saako_hyvaksya > 0) {

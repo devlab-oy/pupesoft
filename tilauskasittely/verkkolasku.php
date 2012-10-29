@@ -990,7 +990,7 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct pvm, toimitustapa, ytunnus, ovttunnus, toim_ovttunnus JA lähtö (jos lähdöt käytössä)
+					// haetaan laskutettavista tilauksista per lähtö, ytunnus ja toimitusosite.
 					// missä merahti (eli kohdistettu) = K (Käytetään lähettäjän rahtisopimusnumeroa)
 					// jälkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset

@@ -207,7 +207,7 @@
 		$ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
 		$ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)");
 		$ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)");
-				
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -3168,4 +3168,19 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
+
+	}
+
+	if (mysql_field_name($result, $i) == 'epakurantoinnin_erityiskasittely') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ei erityiskäsittelyä")."</option>";
+		$ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Zeniorparts - käsittely")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+
 	}

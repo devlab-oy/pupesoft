@@ -1204,10 +1204,10 @@
 
 			if ($apu_rahdinmaksaja == "O") {
 
-				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPPARI") {
+				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPIMUS") {
 					$apu_rahdinmaksaja = "K";
 				}
-				elseif ($toimehtoseltark_3 == "VASTAANOTTAJAN_SOPPARI") {
+				elseif ($toimehtoseltark_3 == "VASTAANOTTAJAN_SOPIMUS") {
 					$apu_rahdinmaksaja = "";
 				}
 				elseif ($toimehtoseltark_3 == "RAHTIVAPAA") {

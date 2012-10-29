@@ -164,15 +164,15 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
 			$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
 
-			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$asiakasrow[toimitusehto]') ");
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
 
 			if (mysql_num_rows($toimehto_tresult) > 0) {
 				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
 
-				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPPARI") {
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
 					$maksaja = "K";
 				}
-				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPPARI") {
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
 					$maksaja = "";
 				}
 				elseif ($toimehto_row["selitetark_3"] == "RAHTIVAPAA") {

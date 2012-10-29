@@ -376,10 +376,10 @@
 		$sel2 = '';
 		$sel3 = '';
 
-		if ($trow[$i] == 'LAHETTAJAN_SOPPARI') {
+		if ($trow[$i] == 'LAHETTAJAN_SOPIMUS') {
 			$sel1 = 'SELECTED';
 		}
-		elseif ($trow[$i] == 'VASTAANOTTAJAN_SOPPARI') {
+		elseif ($trow[$i] == 'VASTAANOTTAJAN_SOPIMUS') {
 			$sel2 = 'SELECTED';
 		}
 		elseif ($trow[$i] == 'RAHTIVAPAA') {
@@ -388,8 +388,8 @@
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("K‰ytet‰‰n toimitustavan/asiakkaan oletusrahtisopimusta")."</option>";
-		$ulos .= "<option value='LAHETTAJAN_SOPPARI' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
-		$ulos .= "<option value='VASTAANOTTAJAN_SOPPARI' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
+		$ulos .= "<option value='LAHETTAJAN_SOPIMUS' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
+		$ulos .= "<option value='VASTAANOTTAJAN_SOPIMUS' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
 		$ulos .= "<option value='RAHTIVAPAA' $sel3>".t("Rahtivapaa")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;

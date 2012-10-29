@@ -250,6 +250,12 @@ class pupeExcel {
 
 		exec("cd /tmp/{$foldername}; find . -name .DS_Store -delete; /usr/bin/zip -r /tmp/{$xlsxfile} *; rm -rf /tmp/{$foldername};");
 
+		$query = "DROP TABLE excel_sharedstrings;";
+		$result = pupe_query($query, $this->_exceldblink);
+
+		$query = "DROP TABLE excel_data;";
+		$result = pupe_query($query, $this->_exceldblink);
+
 		return $xlsxfile;
 	}
 }

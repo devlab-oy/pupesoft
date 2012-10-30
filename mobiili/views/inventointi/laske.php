@@ -5,44 +5,44 @@
 
 <form method='post' action='inventointi.php'>
 <div class='main'>
-	<input type='hidden' name='tuoteno' value='<?= $tuote['tuoteno'] ?>'>
-	<input type='hidden' name='tuotepaikka' value='<?= $tuote['tuotepaikka'] ?>'>
-	<input type='hidden' name='lista' value='<?= $tuote['inventointilista'] ?>'>
-	<input type='hidden' name='tuotepaikalla' value='<?= $tuotepaikalla ?>'>
-	<input type='hidden' name='reservipaikka' value='<?= $reservipaikka ?>'>
+	<input type='hidden' name='tuoteno' value='<?php echo $tuote['tuoteno'] ?>'>
+	<input type='hidden' name='tuotepaikka' value='<?php echo $tuote['tuotepaikka'] ?>'>
+	<input type='hidden' name='lista' value='<?php echo $tuote['inventointilista'] ?>'>
+	<input type='hidden' name='tuotepaikalla' value='<?php echo $tuotepaikalla ?>'>
+	<input type='hidden' name='reservipaikka' value='<?php echo $reservipaikka ?>'>
 	<table>
 		<tr>
 			<th>M‰‰r‰</th>
 			<td>
-				<input type='text' name='maara' value='<?= $maara ?>' size='6' autofocus>
-				<b><?= $tuote['yksikko'] ?><b>
+				<input type='text' name='maara' value='<?php echo $maara ?>' size='6' autofocus>
+				<b><?php echo $tuote['yksikko'] ?><b>
 			</td>
 		</tr>
-		<? if (!empty($tuote['tyyppi'])): ?>
+		<?php if (!empty($tuote['tyyppi'])): ?>
 		<tr>
 			<th>SSCC</th>
-			<td><?= $sscc ?></td>
+			<td><?php echo $sscc ?></td>
 		</tr>
-		<? endif ?>
+		<?php endif ?>
 		<tr>
 			<th>Tuote</th>
-			<td><?= $tuote['tuoteno'] ?></td>
+			<td><?php echo $tuote['tuoteno'] ?></td>
 		</tr>
 		<tr>
 			<th>Nimitys</th>
-			<td><?= $tuote['nimitys'] ?></td>
+			<td><?php echo $tuote['nimitys'] ?></td>
 		</tr>
 		<tr>
 			<th>Tuotepaikka</th>
-			<td><?= $tuote['tuotepaikka'] ?></td>
+			<td><?php echo $tuote['tuotepaikka'] ?></td>
 		</tr>
 	</table>
 </div>
 <div class='controls'>
 	<input type='hidden' name='tee' value='inventoi'>
 	<input type='submit' name='inventoidaan' value='OK'>
-	<? if($apulaskuri_url != ''): ?>
-		<a class='button right' href='inventointi.php?<?= $apulaskuri_url ?>'>Apulaskuri</a>
-	<? endif ?>
+	<?php if($apulaskuri_url != ''): ?>
+		<a class='button right' href='inventointi.php?<?php echo $apulaskuri_url ?>'>Apulaskuri</a>
+	<?php endif ?>
 </div>
 </form>

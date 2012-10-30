@@ -23,12 +23,15 @@ echo "<div class='header'>
 
 echo "<div class='main'>
 	<b>",t("TULOTYYPPI"),"</b>
-	<p>
-	<a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a><br>
-	<a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>
-	<a href='ostotilaus.php' class='button'><font style='color: red'>$kesken</font></a><br>
-	</p>
-	<a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a><br>
+
+	<ul>
+	<li><a href='alusta.php' class='button'>",t("ASN / Suuntalava"),"</a></li>
+	<li><a href='ostotilaus.php?uusi' class='button'>",t("Ostotilaus"),"</a>
+	<a href='ostotilaus.php' class='button'><font style='color: red'>$kesken</font></a></li>
+
+	<br>
+	<li><a href='suuntalavat.php' class='button'>",t("Suuntalavat"),"</a></li>
+	<ul>
 </div>";
 
 echo "<div class='controls'>

@@ -99,6 +99,7 @@
 
 			//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 			$useslave = 1;
+			$usemastertoo = 1;
 
 			require ("inc/connect.inc");
 

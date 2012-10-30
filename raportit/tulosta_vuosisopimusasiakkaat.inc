@@ -159,7 +159,7 @@ function rivi ($firstpage, $laji = '') {
 }
 
 function loppu ($firstpage, $sendemail = '') {
-	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $edasiakasno, $komento, $emailok, $asnum;
+	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $edasiakasno, $komento, $emailok, $asnum, $myyja_eposti;
 
 	//kirjoitetaan yhteensärivit loppuun
 	$kala -= 15;
@@ -207,70 +207,92 @@ function loppu ($firstpage, $sendemail = '') {
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	//halutaan lähettää emailit ohjelman ajajalle
-	if($laheta_ajajalle != '') {
-		$edemail = $kukarow['yhtio'];
+	switch (htmlentities(trim($_REQUEST['laheta_sahkopostit']))) {
+		case 'ajajalle':
+			$edemail = $kukarow['eposti'];
+			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
+			if($komento == 'email') {
+				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
+			}
+			else {
+				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
+			}
+			break;
+		case 'asiakkaalle':
+			if($komento == 'email') {
+				laheta_raportit(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
+			}
+			else {
+				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
+			}
+			break;
+		case 'asiakkaan_myyjalle':
+			$edemail = $myyja_eposti;
+			if($komento == 'email') {
+				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
+			}
+			else {
+				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
+			}
+			break;
+		default:
+			//lähetetään ajajalle
+			$edemail = $kukarow['eposti'];
+			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
+			if($komento == 'email') {
+				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
+			}
+			else {
+				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
+			}
 	}
+}
 
-	// asiakkaalla on emailosoite ja ei olla ruksattu, lähetetään sähköposti
-	if ($edemail!='' and $emailok=='') {
-		echo "Lähetetään meili asiakkaalle $edasiakasno ($edemail).. ";
+function laheta_raportit($laheta_sahkopostit, $edemail, $edasiakasno, $pdffilenimi, $komento) {
+	global $kukarow, $yhtiorow;
 
-		$bound = uniqid(time()."_") ;
+	echo "Lähetetään meili {$laheta_sahkopostit} osoitteeseen {$edemail} ";
 
-		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-		$header .= "MIME-Version: 1.0\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+	$bound = uniqid(time()."_") ;
 
-		$content  = "--$bound\n";
+	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+	$header .= "MIME-Version: 1.0\n" ;
+	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta_{$edasiakasno}.pdf\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta_{$edasiakasno}.pdf\"\n\n";
+	$content  = "--$bound\n";
 
-		$handle  = fopen($pdffilenimi, "r");
-		$sisalto = fread($handle, filesize($pdffilenimi));
-		fclose($handle);
+	$content .= "Content-Type: application/pdf; name=\"Ostoseuranta_{$edasiakasno}.pdf\"\n" ;
+	$content .= "Content-Transfer-Encoding: base64\n" ;
+	$content .= "Content-Disposition: inline; filename=\"Ostoseuranta_{$edasiakasno}.pdf\"\n\n";
 
-		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\n" ;
+	$handle  = fopen($pdffilenimi, "r");
+	$sisalto = fread($handle, filesize($pdffilenimi));
+	fclose($handle);
 
-		$content .= "--$bound\n";
+	$content .= chunk_split(base64_encode($sisalto));
+	$content .= "\n" ;
 
-		$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	$content .= "--$bound\n";
 
-		if ($boob===FALSE) {
-			echo "Meilin lähetys epäonnistui!<br>";
-		}
-		else {
-			echo "ok.<br>";
-		}
+	$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+
+	if ($boob===FALSE) {
+		echo "Meilin lähetys epäonnistui!<br>";
 	}
-	// asiakkaalla on email, mutta halutaan skipata emailien lähetys...
-	elseif ($edemail!='' and $emailok!='') {
-		echo "Skipataan asiakas $edasiakasno.<br>";
-	}
-	// muissa keiseissa tulostetaan paprulle ta sähköpostiin
 	else {
-		echo "Tulostetaan asiakkaan $edasiakasno ostoseuranta.. ";
-
-		if ($komento == "email") {
-			$liite = $pdffilenimi;
-			$ctype = '';
-			$kutsu = "Ostoseuranta_{$edasiakasno}.pdf";
-
-			require("../inc/sahkoposti.inc");
-		}
-		else{
-			$line = exec($komento." ".$pdffilenimi);
-		}
-
-
 		echo "ok.<br>";
 	}
-
 	//poistetaan tmp file samantien kuleksimasta...
 	system("rm -f $pdffilenimi");
+}
+
+function tulosta_raportit($edasiakasno, $pdffilenimi, $komento) {
+	echo "Tulostetaan asiakkaan $edasiakasno ostoseuranta tulostimeen {$komento}";
+	$line = exec($komento." ".$pdffilenimi);
+}
+
+function laheta_koottu_sahkoposti($laheta_sahkopostit, $edemail, $edasiakasno, $pdffilenimi, $komento) {
+	global $kukarow, $yhtiorow;
 }
 
 ?>

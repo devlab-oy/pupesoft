@@ -62,14 +62,16 @@
 
 		flush();
 
-		$query = "	SELECT asiakas.tunnus, asiakas.email, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, sum(arvo) arvo
+		$query = "	SELECT asiakas.tunnus, asiakas.email, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, sum(arvo) arvo, kuka.eposti myyja_eposti
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+					JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.alatila = 'X'
 					and lasku.tapvm >= '$alkuvv-$alkukk-$alkupp'
 					and lasku.tapvm <= '$loppuvv-$loppukk-$loppupp'
+					and asiakas.myyjanro != 0
 					$aswhere
 					GROUP BY asiakas.tunnus
 					HAVING arvo > $raja";
@@ -90,8 +92,6 @@
 						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
 						JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN avainsana avain_osasto ON (avain_osasto.yhtio = lasku.yhtio and avain_osasto.kieli = '$yhtiorow[kieli]' and avain_osasto.laji = 'OSASTO' and avain_osasto.selite = tuote.osasto and avain_osasto.jarjestys < 10000)
-						JOIN avainsana avain_try ON (avain_try.yhtio = lasku.yhtio and avain_try.kieli = '$yhtiorow[kieli]' and avain_try.laji = 'TRY' and avain_try.selite = tuote.try and avain_try.jarjestys < 10000)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.liitostunnus = '$asiakasrow[tunnus]'
 						AND lasku.tapvm >= '$edalkupvm'
@@ -122,19 +122,22 @@
 			$edasiakas = $asiakasrow["tunnus"];
 			$edemail = $asiakasrow["email"];
 			$edasiakasno = $asiakasrow["asiakasnro"];
+			$myyja_eposti = $asiakasrow['myyja_eposti'];
 			$sumkpled = 0;
 			$sumkplva = 0;
 			$sumed = 0;
 			$sumva = 0;
 
 			while ($row = mysql_fetch_array($myyntires_os)) {
-				// kirjotetaan rivi
-				rivi($firstpage, "osasto");
-				///summaillaan yhteensäkenttiä
-				$sumkpled	+= $row["kpled"];
-				$sumkplva	+= $row["kplva"];
-				$sumed		+= $row["ed"];
-				$sumva		+= $row["va"];
+				if($row['osasto'] < 10000) {
+					// kirjotetaan rivi
+					rivi($firstpage, "osasto");
+					///summaillaan yhteensäkenttiä
+					$sumkpled	+= $row["kpled"];
+					$sumkplva	+= $row["kplva"];
+					$sumed		+= $row["ed"];
+					$sumva		+= $row["va"];
+				}
 			}
 
 			// kirjotetaan footer
@@ -148,8 +151,6 @@
 						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
 						JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-						JOIN avainsana avain_osasto ON (avain_osasto.yhtio = lasku.yhtio and avain_osasto.kieli = '$yhtiorow[kieli]' and avain_osasto.laji = 'OSASTO' and avain_osasto.selite = tuote.osasto and avain_osasto.jarjestys < 10000)
-						JOIN avainsana avain_try ON (avain_try.yhtio = lasku.yhtio and avain_try.kieli = '$yhtiorow[kieli]' and avain_try.laji = 'TRY' and avain_try.selite = tuote.try and avain_try.jarjestys < 10000)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.liitostunnus = '$asiakasrow[tunnus]'
 						AND lasku.tapvm >= '$edalkupvm'
@@ -174,14 +175,16 @@
 			$sumva = 0;
 
 			while ($row = mysql_fetch_array($myyntires_try)) {
-				// tehdään rivi
-				rivi($firstpage);
+				if($row['osasto'] < 10000) {
+					// tehdään rivi
+					rivi($firstpage);
 
-				///summaillaan yhteensäkenttiä
-				$sumkpled	+= $row["kpled"];
-				$sumkplva	+= $row["kplva"];
-				$sumed		+= $row["ed"];
-				$sumva		+= $row["va"];
+					///summaillaan yhteensäkenttiä
+					$sumkpled	+= $row["kpled"];
+					$sumkplva	+= $row["kplva"];
+					$sumed		+= $row["ed"];
+					$sumva		+= $row["va"];
+				}
 			}
 
 			// kirjotetaan footer
@@ -203,8 +206,7 @@
 		if (!isset($loppukk)) $loppukk = date("m");
 		if (!isset($loppuyy)) $loppuvv = date("Y");
 
-		echo "<font class='message'>Asiakkaille, joilla on sähköposti lähetetään viesti automaattisesti.<br>";
-		echo "Muut ostoseurannat tulostetaan valitsemaasi tulostimeen.</font><br><br>";
+		echo "<font class='message'>Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta.</font><br><br>";
 
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
@@ -230,9 +232,14 @@
 
 		echo "<tr><th>Syötä ostoraja:</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
-		echo "<tr><th>Lähetä sähköpostit ohjelman ajajalle:</th><td><input type='checkbox' name='laheta_ajajalle'/></td></tr>";
-		echo "<tr><th>Älä lähetä sähköposteja:</th>";
-		echo "<td><input type='checkbox' name='emailok'> vain sähköpostittomat asiakkaat</td></tr>";
+		echo "<tr>";
+		echo "<th>Lähetä sähköpostit:</th>";
+		echo "<td>
+				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>Ohjelman ajajalle<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>Asiakkaalle<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>Asiakkaan myyjälle<br>
+			</td>";
+		echo "</tr>";
 		echo "<tr><th>Asiakasnumero:</th>";
 		echo "<td><input type='text' name='ytunnus' size='10'> aja vain tämä asiakas (tyhjä=kaikki)</td></tr>";
 		echo "<tr><th>Alku päivämäärä:</th>";

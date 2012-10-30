@@ -119,9 +119,9 @@
 			$firstpage = alku("osasto");
 
 			// ytunnus ja email talteen
-			$edasiakas = $asiakasrow["liitostunnus"];
+			$edasiakas = $asiakasrow["tunnus"];
 			$edemail = $asiakasrow["email"];
-			$edasiakasno = $asiakasrow["asiakasno"];
+			$edasiakasno = $asiakasrow["asiakasnro"];
 			$sumkpled = 0;
 			$sumkplva = 0;
 			$sumed = 0;
@@ -230,6 +230,7 @@
 
 		echo "<tr><th>Syötä ostoraja:</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
+		echo "<tr><th>Lähetä sähköpostit ohjelman ajajalle:</th><td><input type='checkbox' name='laheta_ajajalle'/></td></tr>";
 		echo "<tr><th>Älä lähetä sähköposteja:</th>";
 		echo "<td><input type='checkbox' name='emailok'> vain sähköpostittomat asiakkaat</td></tr>";
 		echo "<tr><th>Asiakasnumero:</th>";

@@ -207,8 +207,9 @@ function loppu ($firstpage, $sendemail = '') {
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 	fclose($fh);
 
-	if ($asnum != '') { // ollaan valittu vain yksi asiakas, l‰hetet‰‰n meili ajajalle
-		$edemail = $kukarow['eposti'];
+	//halutaan l‰hett‰‰ emailit ohjelman ajajalle
+	if($laheta_ajajalle != '') {
+		$edemail = $kukarow['yhtio'];
 	}
 
 	// asiakkaalla on emailosoite ja ei olla ruksattu, l‰hetet‰‰n s‰hkˆposti
@@ -223,9 +224,9 @@ function loppu ($firstpage, $sendemail = '') {
 
 		$content  = "--$bound\n";
 
-		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta.pdf\"\n" ;
+		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta_{$edasiakasno}.pdf\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta.pdf\"\n\n";
+		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta_{$edasiakasno}.pdf\"\n\n";
 
 		$handle  = fopen($pdffilenimi, "r");
 		$sisalto = fread($handle, filesize($pdffilenimi));
@@ -256,7 +257,7 @@ function loppu ($firstpage, $sendemail = '') {
 		if ($komento == "email") {
 			$liite = $pdffilenimi;
 			$ctype = '';
-			$kutsu = "Ostoseuranta.pdf";
+			$kutsu = "Ostoseuranta_{$edasiakasno}.pdf";
 
 			require("../inc/sahkoposti.inc");
 		}

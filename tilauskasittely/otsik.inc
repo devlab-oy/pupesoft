@@ -29,12 +29,7 @@
 					// Katotaan onko rahtivapaa
 					var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
-					if (merahti == 'R') {
-						mrdd_id.options[1].selected = '1';
-						document.getElementById('rahtivapaa').checked = true;
-						alert('".t("HUOM: Tilaus rahtivapaa")."!');
-					}
-					else if (merahti == 'K' && mrdd_sel != 1) {
+					if (merahti == 'K' && mrdd_sel != 1) {
 						mrdd_id.options[1].selected = '1';
 						alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
 					}
@@ -1190,9 +1185,6 @@
 				if ($row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
 					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>K</div>";
 				}
-				elseif ($row["selitetark_3"] == "RAHTIVAPAA") {
-					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>R</div>";
-				}
 				else {
 					echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'></div>";
 				}
@@ -1225,16 +1217,12 @@
 
 			if ($apu_rahdinmaksaja == "O") {
 
-				// Onko toimitusehdon takana määritelty rahdinmaksaja?
+				// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
 				if ($toimehtoseltark_3 == "LAHETTAJAN_SOPIMUS") {
 					$apu_rahdinmaksaja = "K";
 				}
 				elseif ($toimehtoseltark_3 == "VASTAANOTTAJAN_SOPIMUS") {
 					$apu_rahdinmaksaja = "";
-				}
-				elseif ($toimehtoseltark_3 == "RAHTIVAPAA") {
-					$apu_rahdinmaksaja  = "K";
-					$srow["rahtivapaa"] = "ON";
 				}
 				else {
 					$apu_rahdinmaksaja = $toimtapa_apuro['merahti'];
@@ -2942,7 +2930,9 @@
 			$meapu = pupe_query($apuqu);
 			$apuro = mysql_fetch_assoc($meapu);
 
-			// Onko toimitusehdon takana määritelty rahdinmaksaja?
+			$maksaja = $apuro['merahti'];
+
+			// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
 			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = '$toimitusehto' ");
 
 			if (mysql_num_rows($toimehto_tresult) > 0) {
@@ -2954,16 +2944,6 @@
 				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
 					$maksaja = "";
 				}
-				elseif ($toimehto_row["selitetark_3"] == "RAHTIVAPAA") {
-					$maksaja    = "K";
-					$rahtivapaa = "ON";
-				}
-				else {
-					$maksaja = $apuro['merahti'];
-				}
-			}
-			else {
-				$maksaja = $apuro['merahti'];
 			}
 		}
 

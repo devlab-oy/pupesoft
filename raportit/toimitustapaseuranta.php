@@ -46,9 +46,9 @@
 		$lisa = $orderbylisa = $groupbylisa = "";
 
 		if ($tee == 'paivittain') {
-			$lisa = ", LEFT(tilausrivi.toimitettuaika, 10) tapvm";
+			$lisa = ", LEFT(tilausrivi.toimitettuaika, 10) toimitettuaika";
 			$groupbylisa = ",2";
-			$orderbylisa = "tapvm, ";
+			$orderbylisa = "toimitettuaika, ";
 		}
 
 		$query = "	SELECT lasku.toimitustapa
@@ -59,11 +59,12 @@
 					COUNT(DISTINCT IF(lasku.kerayslista = 0, lasku.tunnus, lasku.kerayslista)) kpl_kerayslista,
 					COUNT(DISTINCT tilausrivi.tunnus) tilausriveja,
 					ROUND(SUM(tilausrivi.kpl)) kpl_tilriv
-					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59')
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND lasku.tila = 'L'
-					AND lasku.alatila = 'X'
+					FROM tilausrivi
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+					AND tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					GROUP BY 1 {$groupbylisa}
 					ORDER BY {$orderbylisa} aika, kpl desc, toimitustapa";
 		$result = mysql_query($query) or pupe_error($query);
@@ -109,9 +110,9 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			if ($tee == 'kaikki') $row['tapvm'] = "";
+			if ($tee == 'kaikki') $row['toimitettuaika'] = "";
 
-			if ($tee == 'paivittain' and ($paivamaara == "" or $paivamaara != $row['tapvm'])) {
+			if ($tee == 'paivittain' and ($paivamaara == "" or $paivamaara != $row['toimitettuaika'])) {
 
 				if ($paivamaara != "") {
 					echo "<tr><th colspan='2'>&nbsp;</th><th>{$kerayslistoja}</th><th>{$tilauksia}</th><th>{$tilausriveja}</th><th>{$maara}</th><th>&nbsp;</th></tr>";
@@ -123,7 +124,7 @@
 				$tilausriveja = 0;
 				$maara = 0;
 
-				echo "<tr><th colspan='7'>",tv1dateconv($row['tapvm']),"</th></tr>";
+				echo "<tr><th colspan='7'>",tv1dateconv($row['toimitettuaika']),"</th></tr>";
 				echo $otsikot;
 			}
 
@@ -156,7 +157,7 @@
 			echo "<td>",hintapyoristys($row['summa']),"</td>";
 			echo "</tr>";
 
-			$paivamaara = $row['tapvm'];
+			$paivamaara = $row['toimitettuaika'];
 
 			$tilauksia += $row['kpl'];
 			$tilauksia_kaikki += $row['kpl'];

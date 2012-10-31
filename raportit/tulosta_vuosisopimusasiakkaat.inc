@@ -22,7 +22,7 @@ $lask = 1;
 $sivu = 1;
 
 function alku ($laji = '') {
-	global $pdf, $asiakasrow, $yhtiorow, $kukarow, $asrow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
+	global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
 
 	// jos ollaan syötetty poikkeava päivä, käytetään sitä
 	if ($pvm != '') {
@@ -90,8 +90,78 @@ function alku ($laji = '') {
 	return($firstpage);
 }
 
+function rivi_kaikki($firstpage, $laji = '', $rows) {
+	global $pdf, $kala, $sivu, $lask, $norm, $lask, $edosasto;
+
+	foreach ($rows as $row) {
+		if ($lask >= 34) {
+			// rivejä on tarpeeks, tehään uus headeri
+			$sivu++;
+			$kala = 575;
+			$lask = 1;
+			$firstpage = alku($laji);
+		}
+
+		if ($row["ed"] != 0) {
+			$indexi = round($row["va"]/$row["ed"],2)*100;
+		}
+		else {
+			$indexi = 0;
+		}
+
+		if ($laji == 'osasto') {
+			// tehdään avainsana query
+			$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+			$tryro = mysql_fetch_array($tryre);
+			$asananumero = $row["osasto"];
+		}
+		else {
+			// tehdään avainsana query
+			$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
+			$tryro = mysql_fetch_array($tryre);
+			$asananumero = $row["try"];
+		}
+
+		if ($edosasto != $row["osasto"] and $laji == "") {
+			$edosasto = $row["osasto"];
+
+			$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+			$osrow = mysql_fetch_array($tryre);
+
+			if ($edosasto != "" and $lask > 1) {
+				$kala = $kala - 20;
+				$lask++;
+			}
+
+			$pdf->draw_text(30, $kala, "Osasto $row[osasto] - $osrow[selitetark]", $firstpage, $norm);
+			$kala = $kala - 20;
+			$lask++;
+		}
+
+		$pdf->draw_text(30,  $kala, $asananumero." - ".$tryro["selitetark"],	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(sprintf("%.0f", $row["kplva"]), $norm);
+		$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
+		$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 	$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(hintapyoristys($row["va"]), $norm);
+		$pdf->draw_text(460-$oikpos, $kala, hintapyoristys($row["va"]),			$firstpage, $norm);
+
+		$oikpos = $pdf->strlen(hintapyoristys($row["ed"]), $norm);
+		$pdf->draw_text(530-$oikpos, $kala, hintapyoristys($row["ed"]), 		$firstpage, $norm);
+
+		$oikpos = $pdf->strlen($indexi, $norm);
+		$pdf->draw_text(575-$oikpos, $kala, $indexi, $firstpage, $norm);
+		$kala = $kala - 15;
+
+		$lask++;
+	}
+}
+
 function rivi ($firstpage, $laji = '') {
-	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $kukarow, $yhtiorow, $edosasto;
+	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $norm, $lask, $edosasto;
 
 	if ($lask >= 34) {
 		// rivejä on tarpeeks, tehään uus headeri
@@ -159,7 +229,7 @@ function rivi ($firstpage, $laji = '') {
 }
 
 function loppu ($firstpage, $sendemail = '') {
-	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $edasiakasno, $komento, $emailok, $asnum, $myyja_eposti;
+	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi;
 
 	//kirjoitetaan yhteensärivit loppuun
 	$kala -= 15;
@@ -207,92 +277,7 @@ function loppu ($firstpage, $sendemail = '') {
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	switch (htmlentities(trim($_REQUEST['laheta_sahkopostit']))) {
-		case 'ajajalle':
-			$edemail = $kukarow['eposti'];
-			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
-			if($komento == 'email') {
-				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
-			}
-			else {
-				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
-			}
-			break;
-		case 'asiakkaalle':
-			if($komento == 'email') {
-				laheta_raportit(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
-			}
-			else {
-				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
-			}
-			break;
-		case 'asiakkaan_myyjalle':
-			$edemail = $myyja_eposti;
-			if($komento == 'email') {
-				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
-			}
-			else {
-				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
-			}
-			break;
-		default:
-			//lähetetään ajajalle
-			$edemail = $kukarow['eposti'];
-			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
-			if($komento == 'email') {
-				laheta_koottu_sahkoposti(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
-			}
-			else {
-				tulosta_raportti($edasiakasno, $pdffilenimi, $komento);
-			}
-	}
-}
-
-function laheta_raportit($laheta_sahkopostit, $edemail, $edasiakasno, $pdffilenimi, $komento) {
-	global $kukarow, $yhtiorow;
-
-	echo "Lähetetään meili {$laheta_sahkopostit} osoitteeseen {$edemail} ";
-
-	$bound = uniqid(time()."_") ;
-
-	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-	$header .= "MIME-Version: 1.0\n" ;
-	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-	$content  = "--$bound\n";
-
-	$content .= "Content-Type: application/pdf; name=\"Ostoseuranta_{$edasiakasno}.pdf\"\n" ;
-	$content .= "Content-Transfer-Encoding: base64\n" ;
-	$content .= "Content-Disposition: inline; filename=\"Ostoseuranta_{$edasiakasno}.pdf\"\n\n";
-
-	$handle  = fopen($pdffilenimi, "r");
-	$sisalto = fread($handle, filesize($pdffilenimi));
-	fclose($handle);
-
-	$content .= chunk_split(base64_encode($sisalto));
-	$content .= "\n" ;
-
-	$content .= "--$bound\n";
-
-	$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-
-	if ($boob===FALSE) {
-		echo "Meilin lähetys epäonnistui!<br>";
-	}
-	else {
-		echo "ok.<br>";
-	}
-	//poistetaan tmp file samantien kuleksimasta...
-	system("rm -f $pdffilenimi");
-}
-
-function tulosta_raportit($edasiakasno, $pdffilenimi, $komento) {
-	echo "Tulostetaan asiakkaan $edasiakasno ostoseuranta tulostimeen {$komento}";
-	$line = exec($komento." ".$pdffilenimi);
-}
-
-function laheta_koottu_sahkoposti($laheta_sahkopostit, $edemail, $edasiakasno, $pdffilenimi, $komento) {
-	global $kukarow, $yhtiorow;
+	return $pdffilenimi;
 }
 
 ?>

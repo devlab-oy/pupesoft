@@ -1078,45 +1078,40 @@
 		echo "<br><table>";
 		echo "<tr>";
 
-		$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Kuka' ");
+		if ($laskurow['hyvaksyja_nyt'] == $kukarow['kuka']) {
+			$query = "	SELECT hyvaksyja_maksimisumma, hierarkia
+			          	FROM kuka
+			          	WHERE yhtio = '$kukarow[yhtio]'
+						and hyvaksyja = 'o'
+						and kuka = '$laskurow[hyvaksyja_nyt]'
+			          	ORDER BY nimi";
+			$vresult = pupe_query($query);
+			$hierarkiarow = mysql_fetch_assoc($vresult);
 
-		// katsotaan onko käyttäjien dynaaminenpuu luotu avainsanoihin ja laskun hyväksyja_nyt pitää olla käyttäjä
-		if (mysql_num_rows($avainsana_result) == 1) {
-			if ($laskurow['hyvaksyja_nyt'] == $kukarow['kuka']) {
-				$query = "	SELECT hyvaksyja_maksimisumma, hierarkia
-				          	FROM kuka
-				          	WHERE yhtio = '$kukarow[yhtio]'
-							and hyvaksyja = 'o'
-							and kuka = '$laskurow[hyvaksyja_nyt]'
-				          	ORDER BY nimi";
-				$vresult = pupe_query($query);
-				$hierarkiarow = mysql_fetch_assoc($vresult);
+			$loytyyko_esimies = '';
+			$hierarkia = $hierarkiarow['hierarkia'];
 
-				$loytyyko_esimies = '';
-				$hierarkia = $hierarkiarow['hierarkia'];
+			if ($hierarkiarow['hyvaksyja_maksimisumma'] > 0) {
+				for ($i = 1; $i < 5; $i++) {
 
-				if ($hierarkiarow['hyvaksyja_maksimisumma'] > 0) {
-					for ($i = 1; $i < 5; $i++) {
+					if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak'.$i]) {
 
-						if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak'.$i]) {
+						for ($x = ($i+1); $x < 6; $x++) {
 
-							for ($x = ($i+1); $x < 6; $x++) {
-
-								if ($laskurow['hyvak'.$x] != '') {
-									$hyvaksyja_maksimisumma = $hierarkiarow['hyvaksyja_maksimisumma'];
-									break;
-								}
-								else {
-									unset($hyvaksyja_maksimisumma);
-								}
+							if ($laskurow['hyvak'.$x] != '') {
+								$hyvaksyja_maksimisumma = $hierarkiarow['hyvaksyja_maksimisumma'];
+								break;
+							}
+							else {
+								unset($hyvaksyja_maksimisumma);
 							}
 						}
 					}
 				}
-				else {
-					$hyvaksyja_maksimisumma = 0;
-					$loytyyko_esimies = 'joo';
-				}
+			}
+			else {
+				$hyvaksyja_maksimisumma = 0;
+				$loytyyko_esimies = 'joo';
 			}
 		}
 
@@ -1163,7 +1158,7 @@
 
 			echo "<tr><td>";
 
-			// Täytetään 4 hyväksyntäkenttää (ensinmäinen on jo käytössä)
+			// Täytetään 4 hyväksyntäkenttää (ensimmäinen on jo käytössä)
 			for ($i=2; $i<6; $i++) {
 
 				while ($vrow=mysql_fetch_assoc($vresult)) {

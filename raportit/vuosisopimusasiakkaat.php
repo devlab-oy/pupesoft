@@ -87,12 +87,10 @@
 				'sumva' => 0,
 			);
 			foreach($tilaukset_ilman_tuoteryhmia as $tilaus) {
-				if($tilaus['osasto'] < 10000) {
-					$summa_array['sumkpled'] += $tilaus['kpled'];
-					$summa_array['sumkplva'] += $tilaus['kplva'];
-					$summa_array['sumed'] += $tilaus['ed'];
-					$summa_array['sumva'] += $tilaus['va'];
-				}
+				$summa_array['sumkpled'] += $tilaus['kpled'];
+				$summa_array['sumkplva'] += $tilaus['kplva'];
+				$summa_array['sumed'] += $tilaus['ed'];
+				$summa_array['sumva'] += $tilaus['va'];
 			}
 
 			$tilaukset_tuoteryhmilla = hae_tilaukset_tuoteryhmilla($params, $asiakas['tunnus']);
@@ -104,12 +102,10 @@
 				'sumva' => 0,
 			);
 			foreach ($tilaukset_tuoteryhmilla as $tilaus) {
-				if($tilaus['osasto'] < 10000) {
-					$summa_array2['sumkpled'] += $tilaus['kpled'];
-					$summa_array2['sumkplva'] += $tilaus['kplva'];
-					$summa_array2['sumed'] += $tilaus['ed'];
-					$summa_array2['sumva'] += $tilaus['va'];
-				}
+				$summa_array2['sumkpled'] += $tilaus['kpled'];
+				$summa_array2['sumkplva'] += $tilaus['kplva'];
+				$summa_array2['sumed'] += $tilaus['ed'];
+				$summa_array2['sumva'] += $tilaus['va'];
 			}
 
 			$data_array[] = array(
@@ -248,11 +244,13 @@
 						ORDER BY osasto";
 		$result = pupe_query($query);
 
-		$laskut = array();
+		$tilaukset = array();
 		while($row = mysql_fetch_assoc($result)) {
-			$laskut[] = $row;
+			if($row['osasto'] < 10000) {
+				$tilaukset[] = $row;
+			}
 		}
-		return $laskut;
+		return $tilaukset;
 	}
 
 	function hae_tilaukset_tuoteryhmilla($params, $asiakas_tunnus) {
@@ -276,12 +274,13 @@
 						ORDER BY osasto, try";
 		$result = pupe_query($query);
 
-		$laskut = array();
+		$tilaukset = array();
 		while($row = mysql_fetch_assoc($result)) {
-			$laskut[] = $row;
+			if($row['osasto'] < 10000) {
+				$tilaukset[] = $row;
+			}
 		}
-
-		return $laskut;
+		return $tilaukset;
 	}
 
 	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params) {
@@ -292,7 +291,6 @@
 		switch ($laheta_sahkopostit) {
 		case 'ajajalle':
 			$email = $kukarow['eposti'];
-			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
 			if($komento == 'email') {
 				luo_zip_ja_laheta($pdf_tiedostot, $email);
 			}
@@ -300,14 +298,15 @@
 				tulosta_pdf_raportit($pdf_tiedostot, $komento);
 			}
 			break;
+			
 		case 'asiakkaalle':
 			if($komento == 'email') {
-				//laheta_raportit(htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $edemail, $edasiakasno, $pdffilenimi, $komento);
 			}
 			else {
 				tulosta_pdf_raportit($pdf_tiedostot, $komento);
 			}
 			break;
+
 		case 'asiakkaan_myyjalle':
 			$edemail = $myyja_eposti;
 			if($komento == 'email') {
@@ -317,10 +316,10 @@
 				tulosta_pdf_raportit($pdf_tiedostot, $komento);
 			}
 			break;
+
 		default:
-			//lähetetään ajajalle
+			//lähetetään ohjelman ajajalle
 			$edemail = $kukarow['eposti'];
-			//ajajalle ja asiakaan_myyjalle lähetettäessä sähköpostilla, raportit halutaan zippiin ja yhteen emailiin. muilla tavoilla normi komennolla
 			if($komento == 'email') {
 				luo_zip_ja_laheta($pdf_tiedostot, $email);
 			}
@@ -337,7 +336,7 @@
 		$alkukk = $params['alkukk'];
 		$alkupp = $params['alkupp'];
 		$loppuvv = $params['loppuvv'];
-		$loppukk = $params['lopukk'];
+		$loppukk = $params['loppukk'];
 		$loppupp = $params['loppupp'];
 
 		$pdf_tiedostot = array();
@@ -357,7 +356,7 @@
 			// kirjotetaan header
 			$firstpage = alku("osasto");
 
-			rivi_kaikki($firstpage, 'osasto', $data['tilaukset_ilman_try']);
+			$firstpage = rivi_kaikki($firstpage, 'osasto', $data['tilaukset_ilman_try']);
 
 			$sumkpled = $data['summat_ilman_try']['sumkpled'];
 			$sumkplva = $data['summat_ilman_try']['sumkplva'];
@@ -374,7 +373,7 @@
 			// uus pdf header
 			$firstpage = alku();
 
-			rivi_kaikki($firstpage , '' , $data['tilaukset_try']);
+			$firstpage = rivi_kaikki($firstpage , '' , $data['tilaukset_try']);
 			
 			$sumkpled = $data['summat_try']['sumkpled'];
 			$sumkplva = $data['summat_try']['sumkplva'];

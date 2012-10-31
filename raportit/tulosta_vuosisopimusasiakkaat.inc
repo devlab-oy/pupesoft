@@ -90,7 +90,7 @@ function alku ($laji = '') {
 	return($firstpage);
 }
 
-function rivi_kaikki($firstpage, $laji = '', $rows) {
+function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
 	global $pdf, $kala, $sivu, $lask, $norm, $lask, $edosasto;
 
 	foreach ($rows as $row) {
@@ -158,6 +158,9 @@ function rivi_kaikki($firstpage, $laji = '', $rows) {
 
 		$lask++;
 	}
+
+	//palautetaan sivu jossa ollaan menossa, jottai funkio loppu osaa printtailla oikeilla sivulle
+	return $firstpage;
 }
 
 function rivi ($firstpage, $laji = '') {

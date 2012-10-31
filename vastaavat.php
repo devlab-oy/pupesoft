@@ -137,87 +137,116 @@ if ($tee == 'add') {
     }
 }
 
-if ($tuoteno != '') {
-    $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
+function hae_tuote($tuoteno) {
+    global $kukarow;
+
+    // Haetaan tuotteen tiedot
+    $query = "SELECT * FROM tuote WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
     $result = pupe_query($query);
 
+    $tuote = mysql_fetch_assoc($result);
+
+    return $tuote;
+}
+
+function hae_vastaavat_ketjut($tuoteno) {
+    global $kukarow;
+
+    $query = "SELECT id FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
+    $result = pupe_query($query);
+
+    $ketjut = array();
+    while ($ketju = mysql_fetch_array($result)) {
+        $ketju_query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='{$ketju['id']}' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
+        $ketju_result = pupe_query($ketju_query);
+
+        $tuotteet = array();
+        while ($tuote = mysql_fetch_assoc($ketju_result)) {
+            $tuotteet[] = $tuote;
+        }
+
+        $ketjut[$ketju['id']] = $tuotteet;
+    }
+
+    return $ketjut;
+}
+
+if ($tuoteno != '') {
+    // $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
+    // $result = pupe_query($query);
     echo "<font class='head'>".t("Tuotenumero").": $tuoteno</font><hr>";
 
-    if (mysql_num_rows($result) == 0) {
-        $query = "SELECT * FROM tuote WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
-        $result = pupe_query($query);
+    $tuote = hae_tuote($tuoteno);
 
-        if (mysql_num_rows($result) == 0) {
-            echo "<br><font class='error'>".t("Tuotenumeroa")." $tuoteno ".t("ei ole perustettu")."!</font><br>";
-            $ok=1;
-        }
-        else {
-            echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
-        }
+    // Jos tuote on olemassa
+    if (!$tuote) {
+        echo "<br><font class='error'>".t("Tuotenumeroa")." $tuoteno ".t("ei ole perustettu")."!</font><br>";
     }
     else {
-        // tuote lˆytyi, joten haetaan sen id...
-        $row    = mysql_fetch_array($result);
-        $id     = $row['id'];
+        $ketjut = hae_vastaavat_ketjut($tuoteno);
 
-        $query = "SELECT * FROM vastaavat WHERE id = '$id' AND yhtio = '$kukarow[yhtio]' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
-        $result = pupe_query($query);
+        // Jos ketjuja ei lˆytynyt
+        if (!$ketjut) {
+            echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
 
-        echo "<br><table>";
-        echo "<tr>";
+            echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+                    <input type='hidden' name='tuoteno' value='$tuoteno'>
+                    <input type='hidden' name='tee' value='add'>
+                    <hr>";
 
-        echo "<th>".t("Vastaavia tuotteita")."</td>";
+            echo t("Lis‰‰ vastaava tuote").": ";
 
-        echo "<th>".t("J‰rjestys")."</th>";
-        echo "<td class='back'></td></tr>";
-
-        while ($row = mysql_fetch_array($result)) {
-            $error = "";
-            $query = "SELECT * FROM tuote WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
-            $res   = pupe_query($query);
-
-            if (mysql_num_rows($res) == 0) {
-                $error = "<font class='error'>(".t("Tuote ei en‰‰ rekisteriss‰")."!)</font>";
-            }
-
-            if ($row['jarjestys'] == 1) {
-                $paatuote = $row;
-            }
-
-            echo "<tr>
-                <td>$row[tuoteno] $error</td>
-
-                <form action='vastaavat.php' method='post' autocomplete='off'>
-                <td><input size='5' type='text' name='prio' value='$row[jarjestys]'></td>
-                <input type='hidden' name='tunnus' value='$row[tunnus]'>
-                <input type='hidden' name='tee' value='muutaprio'>
-                </form>
-
-                <form action='vastaavat.php' method='post'>
-                <td class='back'>
-                <input type='hidden' name='tunnus' value='$row[tunnus]'>
-                <input type='hidden' name='tee' value='del'>
-                <input type='submit' value='".t("Poista")."'>
-                </td>
-                </form>";
-
-            echo "</tr>";
+            echo "<input type='text' name='vastaava'>
+                    <input type='submit' value='".t("Lis‰‰")."'>
+                    </form>";
         }
+        // Loopataan ketjut l‰pi
+        else {
+            foreach($ketjut as $id => $tuotteet) {
+                echo "<br><table>";
+                echo "<tr><th colspan=2>Ketju $id</th></tr>";
+                echo "<tr>";
+                echo "<th>".t("Vastaavia tuotteita")."</td>";
+                echo "<th>".t("J‰rjestys")."</th>";
+                echo "<td class='back'></td></tr>";
 
-        echo "</table>";
-    }
+                // Loopataan ketjun tuotteet l‰pi
+                foreach ($tuotteet as $tuote) {
 
-    if ($ok != 1) {
-        echo "<form action='vastaavat.php' method='post' autocomplete='off'>
-                <input type='hidden' name='tuoteno' value='$tuoteno'>
-                <input type='hidden' name='tee' value='add'>
-                <hr>";
+                    // Tsekataan ett‰ ketjun tuotteet ovat olemassa
+                    $error = '';
+                    if (!hae_tuote($tuote['tuoteno'])) {
+                        $error = "<font class='error'>(".t("Tuote ei en‰‰ rekisteriss‰")."!)</font>";
+                    }
 
-        echo t("Lis‰‰ vastaava tuote").": ";
+                    echo "<tr><td>$tuote[tuoteno] $error</td>";
+                    echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+                        <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'></td>
+                        <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+                        <input type='hidden' name='tee' value='muutaprio'>
+                        </form>";
+                    echo"<form action='vastaavat.php' method='post'>
+                        <td class='back'>
+                        <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
+                        <input type='hidden' name='tee' value='del'>
+                        <input type='submit' value='".t("Poista")."'>
+                        </td>
+                        </form>
+                        </tr>";
+                }
+            echo "</table>";
 
-        echo "<input type='text' name='vastaava'>
-                <input type='submit' value='".t("Lis‰‰")."'>
-                </form>";
+            echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+                    <input type='hidden' name='tuoteno' value='$tuoteno'>
+                    <input type='hidden' name='tee' value='add'>
+                    <hr>";
+            echo t("Lis‰‰ vastaava tuote").": ";
+
+            echo "<input type='text' name='vastaava'>
+                    <input type='submit' value='".t("Lis‰‰")."'>
+                    </form><br>";
+            }
+        }
     }
 }
 

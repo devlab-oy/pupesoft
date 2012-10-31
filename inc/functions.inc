@@ -12956,7 +12956,7 @@ if (!function_exists("seuraavat_lahtoajat")) {
 					AND asiakasluokka 	= '{$asiakasluokka}'
 					AND varasto 		= '{$varasto}'
 					AND aktiivi IN ('', 'P')
-					AND ((viimeinen_tilausaika > curtime() and pvm = '{$pvmlisa}') or pvm > '{$pvmlisa}')
+					AND ((viimeinen_tilausaika > curtime() and pvm = '{$pvmlisa}') or (pvm = '{$pvmlisa}' and $eteenpain > 0) or pvm > '{$pvmlisa}')
 					{$excludelisa}
 					ORDER BY pvm, lahdon_kellonaika";
 		$lahdot_res = pupe_query($query);

@@ -108,10 +108,10 @@
 			// etsit‰‰n hyv‰‰ osumaa!
 			$query = "	SELECT tilausrivi.*, lasku.ketjutus
 						FROM tilausrivi
-						JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.tunnus = '{$rtuoteno[$i]['tilaajanrivinro']}'
-						AND tilausrivi.tyyppi = 'O'";
+						JOIN lasku on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus = '$trow[tunnus]'
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND tilausrivi.tunnus  = '{$rtuoteno[$i]["tilaajanrivinro"]}'
+						AND tilausrivi.tyyppi  = 'O'";
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {

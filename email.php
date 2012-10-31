@@ -1,22 +1,22 @@
 <?php
 
 /*
-HOW TO:
+  HOW TO:
 
-	$aihe = utf8_encode($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"));
-	$viesti = utf8_encode('Liitteenä löytyy ostoseuranta raportit zip-tiedostoon pakattuna.<br/><br/>');
+  $aihe = utf8_encode($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"));
+  $viesti = utf8_encode('Liitteenä löytyy ostoseuranta raportit zip-tiedostoon pakattuna.<br/><br/>');
 
-	$liitetiedosto = array(
-		'filename' => 'Ostoseuranta_raportit.zip',
-		'path' => '/tmp/Ostoseuranta_raportit.zip',
-		'mime' => mime_content_type($maaranpaa)
-	);
+  $liitetiedosto = array(
+  'filename' => 'Ostoseuranta_raportit.zip',
+  'path' => '/tmp/Ostoseuranta_raportit.zip',
+  'mime' => mime_content_type($maaranpaa)
+  );
 
-	$email = new Email($aihe, lahettaja@example.com);
-	$email->add_vastaanottaja('vastaanottaja@example.com');
-	$email->add_liitetiedosto($liitetiedosto);
-	$email->set_viesti($viesti);
-	$email->laheta();
+  $email = new Email($aihe, lahettaja@example.com);
+  $email->add_vastaanottaja('vastaanottaja@example.com');
+  $email->add_liitetiedosto($liitetiedosto);
+  $email->set_viesti($viesti);
+  $email->laheta();
  */
 
 class Email {
@@ -35,31 +35,31 @@ class Email {
 
 	public function laheta() {
 		global $yhtiorow;
-		$lahettaja	 = $this->get_lahettaja();
-		$bmixed		 = uniqid('mixed', true);
-		$balt		 = uniqid('alternative', true);
+		$lahettaja				 = $this->get_lahettaja();
+		$boundary_mixed			 = uniqid('mixed', true);
+		$boundary_alternative	 = uniqid('alternative', true);
 
-		$aihe_encoded = $this->encode_header($this->get_aihe());
+		$aihe_encoded = $this->encode_otsikko($this->get_aihe());
 
-		$plaintext		 = chunk_split(base64_encode($this->get_viesti()));
+		$plain_text		 = chunk_split(base64_encode($this->get_viesti()));
 		$html_encoded	 = chunk_split(base64_encode($this->get_html_viesti()));
 
 		$headers = <<<EOT
 From: $lahettaja
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="$bmixed"
+Content-Type: multipart/mixed; boundary="$boundary_mixed"
 EOT;
 
 		$body = <<<EOT
---$bmixed
-Content-Type: multipart/alternative; boundary="$balt"
+--$boundary_mixed
+Content-Type: multipart/alternative; boundary="$boundary_alternative"
 
---$balt
+--$boundary_alternative
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 
-$plaintext
---$balt
+$plain_text
+--$boundary_alternative
 
 EOT;
 		if (!empty($html_encoded)) {
@@ -68,28 +68,28 @@ Content-Type: text/html; charset="utf-8"
 Content-Transfer-Encoding: base64
 
 $html_encoded
---$balt--
+--$boundary_alternative--
 
 EOT;
 		}
 
 		if (!empty($this->liitetiedostot)) {
-			foreach ($this->liitetiedostot as $file) {
-				$file_content	 = $this->get_file_boundary($file);
+			foreach ($this->liitetiedostot as $tiedosto) {
+				$file_content	 = $this->get_file_boundary($tiedosto);
 				$body .= <<<EOT
---$bmixed
+--$boundary_mixed
 $file_content
 EOT;
 			}
 		}
 		$body .= <<<EOT
---$bmixed--
+--$boundary_mixed--
 EOT;
-		$emails			 = $this->get_vastaanottajat();
-		foreach ($emails as $to) {
+		$vastaanottajat			 = $this->get_vastaanottajat();
+		foreach ($vastaanottajat as $to) {
 			$ok = mail($to, $aihe_encoded, $body, $headers, "-f {$yhtiorow['postittaja_email']}");
 
-			if($ok === false) {
+			if ($ok === false) {
 				echo "Mailin lähetys osoitteeseen {$to} epäonnistui :(";
 			}
 			else {
@@ -172,19 +172,19 @@ EOT;
 	}
 
 	protected function get_file_boundary(array $file) {
-		$contents	 = chunk_split(base64_encode(file_get_contents($file['path'])));
-		$content	 = <<<EOT
+		$tiedosto_sisalto	 = chunk_split(base64_encode(file_get_contents($file['path'])));
+		$sisalto	 = <<<EOT
 Content-Type: {$file['mime']} name="{$file['filename']}"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="{$file['filename']}"
 
-{$contents}
+{$tiedosto_sisalto}
 EOT;
-		return $content;
+		return $sisalto;
 	}
 
-	protected function encode_header($header) {
-		return '=?UTF-8?B?'.base64_encode($header).'?=';
+	protected function encode_otsikko($otsikko) {
+		return '=?UTF-8?B?'.base64_encode($otsikko).'?=';
 	}
 
 }

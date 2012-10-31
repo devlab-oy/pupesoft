@@ -758,8 +758,8 @@ if ($kasitellaan_tiedosto) {
 							$query_x = "	SELECT tunnus
 											FROM dynaaminen_puu
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND laji = '{$table_tarkenne}'
-											AND koodi = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+											AND laji    = '{$table_tarkenne}'
+											AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
 							$koodi_tunnus_res = pupe_query($query_x);
 
 							// jos tunnusta ei löydy, ohitetaan kyseinen rivi
@@ -2066,10 +2066,13 @@ if (!$cli and !isset($api_kentat)) {
 		'kalenteri'                       => 'Kalenteritietoja',
 		'kuka'                            => 'Käyttäjätietoja',
 		'kustannuspaikka'                 => 'Kustannuspaikat',
+		'lahdot'            			  => 'Lähdöt',
 		'liitetiedostot'                  => 'Liitetiedostot',
 		'maksuehto'                       => 'Maksuehto',
 		'pakkaus'                         => 'Pakkaustiedot',
 		'perusalennus'                    => 'Perusalennukset',
+		'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitoket',
+		'puun_alkio_tuote'                => 'Tuote-segmenttiliitoket',
 		'rahtikirjanumero'				  => 'LOGY-rahtikirjanumerot',
 		'rahtimaksut'                     => 'Rahtimaksut',
 		'rahtisopimukset'                 => 'Rahtisopimukset',
@@ -2080,9 +2083,10 @@ if (!$cli and !isset($api_kentat)) {
 		'tili'                            => 'Tilikartta',
 		'todo'                            => 'Todo-lista',
 		'toimi'                           => 'Toimittaja',
+		'toimittajaalennus'               => 'Toimittajan alennukset',
+		'toimittajahinta'                 => 'Toimittajan hinnat',
 		'toimitustapa'                    => 'Toimitustavat',
 		'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-		'lahdot'            			  => 'Lähdöt',
 		'tullinimike'                     => 'Tullinimikeet',
 		'tuote'                           => 'Tuote',
 		'tuotepaikat'                     => 'Tuotepaikat',
@@ -2094,20 +2098,7 @@ if (!$cli and !isset($api_kentat)) {
 		'vak'                             => 'VAK-tietoja',
 		'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
 		'yhteyshenkilo'                   => 'Yhteyshenkilöt',
-		'toimittajahinta'                 => 'Toimittajan hinnat',
-		'toimittajaalennus'               => 'Toimittajan alennukset',
 	);
-
-	// Lisätään dynaamiset tiedot
-	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-	$dynaamiset_avainsanat = "";
-
-	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		$taulut["puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])] = "Dynaaminen_".strtolower($dynaamiset_avainsanat_row['selite']);
-		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-		}
-	}
 
 	// Yhtiökohtaisia
 	if ($kukarow['yhtio'] == 'mast') {
@@ -2160,7 +2151,7 @@ if (!$cli and !isset($api_kentat)) {
 			</tr>";
 	}
 
-	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+	if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
 		echo "	<tr><th>",t("Valitse liitos"),":</th>
 					<td><select name='dynaamisen_taulun_liitos'>";
 

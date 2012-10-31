@@ -963,8 +963,24 @@
 									}
 
 									if (count($var_temp) > 0) {
-										// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
-										usort($var_temp, "zzrowprio");
+
+										$chk_yksi_paikka = FALSE;
+
+										// koitetaan lˆyt‰‰ onko kaikki myyt‰viss‰ yhdelt‰ paikalta
+										foreach ($var_temp as $indx => $chk_row) {
+											if ($chk_row['myytavissa'] >= $kpl) {
+												unset($var_temp[$indx]);
+												array_unshift($var_temp, $chk_row);
+												$chk_yksi_paikka = TRUE;
+												break;
+											}
+										}
+
+										if (!$chk_yksi_paikka) {
+											// Sortataan varastopaikat prioriteetti j‰rkk‰‰n
+											usort($var_temp, "zzrowprio");
+										}
+
 										$arr = array_merge($var_temp, $arr);
 									}
 

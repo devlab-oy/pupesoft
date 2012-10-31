@@ -4,7 +4,7 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Vastaavien yll‰pito")."</font><hr>";
 
-echo "<form action='vastaavat.php' method='post' name='etsituote' autocomplete='off'>
+echo "<form method='get' name='etsituote' autocomplete='off'>
       ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
       <input type='submit' value='".t("Hae")."'>
       </form><br><br>";
@@ -19,12 +19,6 @@ if ($tee == 'del') {
     //poistetaan vastaava..
     $query  = "DELETE FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
-
-    //n‰ytet‰‰n silti loput.. kiltti‰.
-    $query  = "SELECT * FROM vastaavat WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $row    = mysql_fetch_array($result);
-    $tuoteno = $row['tuoteno'];
 }
 
 if ($tee == 'muutaprio') {
@@ -58,13 +52,6 @@ if ($tee == 'muutaprio') {
         $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
         $result = pupe_query($query);
     }
-
-    //n‰ytet‰‰n silti loput.. kiltti‰.
-    $query  = "SELECT * FROM vastaavat WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'
-                ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
-    $result = pupe_query($query);
-    $row    = mysql_fetch_array($result);
-    $tuoteno= $row['tuoteno'];
 }
 
 if ($tee == 'add') {
@@ -198,7 +185,7 @@ if ($tuoteno != '') {
         if (!$ketjut) {
             echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
 
-            echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+            echo "<form method='post' autocomplete='off'>
                     <input type='hidden' name='tuoteno' value='$tuoteno'>
                     <input type='hidden' name='tee' value='add'>
                     <hr>";
@@ -230,7 +217,7 @@ if ($tuoteno != '') {
                     }
 
                     echo "<tr><td>$tuote[tuoteno] $error</td>";
-                    echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+                    echo "<form method='post' autocomplete='off'>
                         <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
                         <input type='hidden' name='tee' value='muutaprio'></td>";
@@ -240,7 +227,7 @@ if ($tuoteno != '') {
                         </form>";
 
 
-                    echo"<form action='vastaavat.php' method='post'>
+                    echo"<form method='post'>
                         <td class='back'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
                         <input type='hidden' name='tee' value='del'>
@@ -251,7 +238,7 @@ if ($tuoteno != '') {
                 }
             echo "</table>";
 
-            echo "<form action='vastaavat.php' method='post' autocomplete='off'>
+            echo "<form method='post' autocomplete='off'>
                     <input type='hidden' name='tuoteno' value='$tuoteno'>
                     <input type='hidden' name='tee' value='add'>
                     <hr>";

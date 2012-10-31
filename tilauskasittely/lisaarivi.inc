@@ -844,6 +844,8 @@
 
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
+						global $kukarow;
+
 						/*
 						- Sortataan varastopaikat prioriteetti järkkään
 						- Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
@@ -909,13 +911,20 @@
 
 							unset($chk_distinct_varasto[$chk_oletus_var]);
 
+							if ($kukarow['varasto'] != '') {
+								$kukarow_varastot = explode(",", $kukarow['varasto']);
+							}
+							else {
+								$kukarow_varastot = array();
+							}
+
 							foreach ($chk_distinct_varasto as $varasto) {
 
 								$varaston_saldo = 0;
 								$varasto_set = '';
 
 								foreach ($arr as $indx => $chk_row) {
-									if ($varasto == $chk_row['varasto']) {
+									if ($varasto == $chk_row['varasto'] and (count($kukarow_varastot) == 0 or in_array($chk_row['varasto'], $kukarow_varastot))) {
 										$varaston_saldo += $chk_row['myytavissa'];
 
 										if ($varaston_saldo >= $kpl) {

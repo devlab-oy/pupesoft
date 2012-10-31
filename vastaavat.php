@@ -34,7 +34,7 @@ if ($tee == 'muutaprio') {
     $row    = mysql_fetch_array($result);
     $id     = $row['id'];
 
-    if ($prio != 0) {
+    if ($prio != 0 and $prio != $row['jarjestys']) {
         # Siirretään ketjun muita eteenpäin, jarjestys + 1
         $query = "UPDATE vastaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
                     WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND tunnus!=$tunnus AND jarjestys >= $prio";
@@ -49,8 +49,19 @@ if ($tee == 'muutaprio') {
                     WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
+    // Jos setattu vaihetoehtoiseksi?
+    if ($vaihtoehtoinen == 'true' and $row['vaihtoehtoinen'] != 'K') {
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='K' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+        $result = pupe_query($query);
+    }
+    else if ($vaihtoehtoinen != true and $row['vaihtoehtoinen'] == 'K') {
+        $query = "UPDATE vastaavat SET vaihtoehtoinen='' WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
+        $result = pupe_query($query);
+    }
+
     //näytetään silti loput.. kilttiä.
-    $query  = "SELECT * FROM vastaavat WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'";
+    $query  = "SELECT * FROM vastaavat WHERE id = '$id' AND yhtio = '$kukarow[yhtio]'
+                ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
     $result = pupe_query($query);
     $row    = mysql_fetch_array($result);
     $tuoteno= $row['tuoteno'];
@@ -58,10 +69,7 @@ if ($tee == 'muutaprio') {
 
 if ($tee == 'add') {
     // tutkitaan onko lisättävä tuote oikea tuote...
-    $query  = "SELECT * FROM tuote WHERE tuoteno = '$vastaava' AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) {
+    if (!hae_tuote($vastaava)) {
         echo "<font class='error'>".t("Lisäys ei onnistu! Tuotetta")." $vastaava ".t("ei löydy")."!</font><br><br>";
     }
     else {
@@ -157,7 +165,8 @@ function hae_vastaavat_ketjut($tuoteno) {
 
     $ketjut = array();
     while ($ketju = mysql_fetch_array($result)) {
-        $ketju_query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='{$ketju['id']}' ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
+        $ketju_query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND id='{$ketju['id']}'
+                        ORDER BY if(jarjestys=0, 9999, jarjestys), tuoteno";
         $ketju_result = pupe_query($ketju_query);
 
         $tuotteet = array();
@@ -204,10 +213,11 @@ if ($tuoteno != '') {
         else {
             foreach($ketjut as $id => $tuotteet) {
                 echo "<br><table>";
-                echo "<tr><th colspan=2>Ketju $id</th></tr>";
+                echo "<tr><th colspan=3>Ketju $id</th></tr>";
                 echo "<tr>";
                 echo "<th>".t("Vastaavia tuotteita")."</td>";
                 echo "<th>".t("Järjestys")."</th>";
+                echo "<th>".t("Vaihtoehtoinen")."</th>";
                 echo "<td class='back'></td></tr>";
 
                 // Loopataan ketjun tuotteet läpi
@@ -221,10 +231,15 @@ if ($tuoteno != '') {
 
                     echo "<tr><td>$tuote[tuoteno] $error</td>";
                     echo "<form action='vastaavat.php' method='post' autocomplete='off'>
-                        <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'></td>
+                        <td><input size='5' type='text' name='prio' value='$tuote[jarjestys]'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>
-                        <input type='hidden' name='tee' value='muutaprio'>
+                        <input type='hidden' name='tee' value='muutaprio'></td>";
+
+                    $checked = ($tuote['vaihtoehtoinen'] == 'K') ? 'checked' : '';
+                    echo "<td><input type='checkbox' name='vaihtoehtoinen' value='true' onclick='submit()' $checked></td>
                         </form>";
+
+
                     echo"<form action='vastaavat.php' method='post'>
                         <td class='back'>
                         <input type='hidden' name='tunnus' value='$tuote[tunnus]'>

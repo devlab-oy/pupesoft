@@ -93,8 +93,7 @@
 		$epa2 = (int) date('U',mktime(0,0,0,$kkl,$ppl,$vvl));
 
 		//Diff in workdays (5 day week)
-		if ($tee == 'paivittain') $pva = abs($epa2-$epa1)/60/60/24;
-		else $pva = abs($epa2-$epa1)/60/60/24/7*5;
+		$pva = abs($epa2-$epa1)/60/60/24/7*5;
 
 		$paivamaara = "";
 

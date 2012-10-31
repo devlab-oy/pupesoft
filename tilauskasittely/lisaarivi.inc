@@ -854,6 +854,13 @@
 						- Jos ei niin splitataan.
 						*/
 
+						if ($kukarow['varasto'] != '') {
+							$kukarow_varastot = explode(",", $kukarow['varasto']);
+						}
+						else {
+							$kukarow_varastot = array();
+						}
+
 						reset($arr);
 
 						// Katotaan missä oletuspaikka
@@ -865,7 +872,7 @@
 						// riittääkö oletuspaikan varaston saldo?
 						foreach ($arr as $indx => $chk_row) {
 
-							if ($chk_row['varasto'] == $chk_oletus_var) {
+							if ($chk_row['varasto'] == $chk_oletus_var and (count($kukarow_varastot) == 0 or in_array($chk_row['varasto'], $kukarow_varastot))) {
 								$chk_saldo += $chk_row['myytavissa'];
 
 								if ($chk_saldo >= $kpl) {
@@ -878,10 +885,11 @@
 						reset($arr);
 
 						if ($checked_saldo) {
+
 							$var_temp = array();
 
 							foreach ($arr as $indx => $chk_row) {
-								if ($chk_row['varasto'] == $varasto_set) {
+								if ($chk_row['varasto'] == $chk_oletus_var) {
 									$var_temp[] = $chk_row;
 									unset($arr[$indx]);
 								}
@@ -926,13 +934,6 @@
 							reset($arr);
 
 							unset($chk_distinct_varasto[$chk_oletus_var]);
-
-							if ($kukarow['varasto'] != '') {
-								$kukarow_varastot = explode(",", $kukarow['varasto']);
-							}
-							else {
-								$kukarow_varastot = array();
-							}
 
 							foreach ($chk_distinct_varasto as $varasto) {
 

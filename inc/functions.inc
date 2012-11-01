@@ -19509,6 +19509,59 @@ if (!function_exists('excel_column_name')) {
 
 }
 
+if (!function_exists('koontilahete_check')) {
+	function koontilahete_check($laskurow, $komento) {
+		global $kukarow, $yhtiorow;
+
+		$koontilahete = FALSE;
+
+		// onko koontivahvistus käytössä?
+		if (in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == '')) {
+
+			$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
+
+			// Onko kaikki rivit kerätty?
+			$query = "	SELECT lasku.tunnus
+						FROM lasku
+						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.keratty = '' AND tilausrivi.tyyppi != 'D' AND tilausrivi.var not in ('P','J'))
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
+						JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
+						WHERE lasku.yhtio	  = '$kukarow[yhtio]'
+						AND lasku.vanhatunnus = '$hakutunnus'";
+			$vanhat_res = pupe_query($query);
+
+			if (mysql_num_rows($vanhat_res) == 0) {
+				// Kaikki rivit kerätty! Tulostetaan koontilahete
+				$koontilahete = TRUE;
+			}
+			else {
+				// Tällä asiakkaalla on koontiläheteprosessi päällä, mutta kaikki rivit ei oo vielä kerätty, joten ei tulosteta mittään
+				$komento = "";
+			}
+		}
+
+		if ($koontilahete and $laskurow['email'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L' and $yhtiorow["keraysvahvistus_lahetys"] != 'L') {
+
+			if ($laskurow['keraysvahvistus_lahetys'] == 'M' or ($yhtiorow['keraysvahvistus_lahetys'] == 'M' and $laskurow['keraysvahvistus_lahetys'] == '')) {
+				$komento = $komento != "" ? $komento = array($komento) : array();
+				$komento[] = "asiakasemail".$laskurow['email'];
+			}
+			else {
+				// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
+				$komento = "asiakasemail".$laskurow['email'];
+			}
+		}
+		elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
+			// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
+			$komento = $komento != "" ? $komento = array($komento) : array();
+
+			$komento[] = "asiakasemail".$laskurow['email'];
+		}
+
+		return $komento;
+	}
+}
+
 if (!function_exists('triangulation')) {
 	function triangulation($tunnukset) {
 		global $kukarow, $yhtiorow;

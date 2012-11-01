@@ -871,35 +871,40 @@
 				$dgdkomento = $kirrow['komento'];
 			}
 
-			if ($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) {
+			if (($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) or ((in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
 
-				if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
-					$lahetteet = explode(",", $dgdlle_tunnukset);
-				}
-				else {
-					$lahetteet = array($laskurow["tunnus"]);
-				}
+				$komento = koontilahete_check($laskurow, $komento);
 
-				foreach ($lahetteet as $index => $laskutunnus) {
+				if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
-					// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
-					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
-					$lasresult = pupe_query($query);
-					$laskurow = mysql_fetch_assoc($lasresult);
+					if (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") {
+						$lahetteet = explode(",", $dgdlle_tunnukset);
+					}
+					else {
+						$lahetteet = array($laskurow["tunnus"]);
+					}
 
-					$params = array(
-						'laskurow'					=> $laskurow,
-						'sellahetetyyppi' 			=> $sellahetetyyppi,
-						'extranet_tilausvahvistus' 	=> "",
-						'naytetaanko_rivihinta'		=> "",
-						'tee'						=> $tee,
-						'toim'						=> $toim,
-						'komento' 					=> $komento,
-						'lahetekpl'					=> $lahetekpl,
-						'kieli' 					=> $kieli
-						);
+					foreach ($lahetteet as $index => $laskutunnus) {
 
-					pupesoft_tulosta_lahete($params);
+						// Haetaan laskun kaikki tiedot uudestaan koska haluamme lähetteen per yhdistetty rahtikirja
+						$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
+						$lasresult = pupe_query($query);
+						$laskurow = mysql_fetch_assoc($lasresult);
+
+						$params = array(
+							'laskurow'					=> $laskurow,
+							'sellahetetyyppi' 			=> $sellahetetyyppi,
+							'extranet_tilausvahvistus' 	=> "",
+							'naytetaanko_rivihinta'		=> "",
+							'tee'						=> $tee,
+							'toim'						=> $toim,
+							'komento' 					=> $komento,
+							'lahetekpl'					=> $lahetekpl,
+							'kieli' 					=> $kieli
+							);
+
+						pupesoft_tulosta_lahete($params);
+					}
 				}
 			}
 

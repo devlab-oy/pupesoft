@@ -795,16 +795,10 @@
 					$zzrowlask++;
 				}
 
-				// Sortataan varastopaikat oletus, prio, myyt‰viss‰ j‰rkk‰‰n
-				if (!function_exists('zzrowcmp')) {
-					function zzrowcmp($a, $b) {
-						if (strcmp($a["oletus"], $b["oletus"]) < 0) {
-							return 1;
-						}
-						elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
-							return -1;
-						}
-						elseif ($a["prio"] < $b["prio"]) {
+				// Sortataan varastopaikat prio, myyt‰viss‰ j‰rkk‰‰n
+				if (!function_exists('zzrowprio')) {
+					function zzrowprio($a, $b) {
+						if ($a["prio"] < $b["prio"]) {
 							return -1;
 						}
 						elseif ($a["prio"] > $b["prio"]) {
@@ -822,10 +816,16 @@
 					}
 				}
 
-				// Sortataan varastopaikat prio, myyt‰viss‰ j‰rkk‰‰n
-				if (!function_exists('zzrowprio')) {
-					function zzrowprio($a, $b) {
-						if ($a["prio"] < $b["prio"]) {
+				// Sortataan varastopaikat oletus, prio, myyt‰viss‰ j‰rkk‰‰n
+				if (!function_exists('zzrowcmp')) {
+					function zzrowcmp($a, $b) {
+						if (strcmp($a["oletus"], $b["oletus"]) < 0) {
+							return 1;
+						}
+						elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
+							return -1;
+						}
+						elseif ($a["prio"] < $b["prio"]) {
 							return -1;
 						}
 						elseif ($a["prio"] > $b["prio"]) {

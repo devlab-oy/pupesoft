@@ -1430,10 +1430,10 @@
 				$extra    = "";
 
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
-					
+
 					$query = "	SELECT kuljetusohje
 								FROM asiakas
-								WHERE yhtio = '{$laskurow['yhtio']}' 
+								WHERE yhtio = '{$laskurow['yhtio']}'
 								AND tunnus = '{$laskurow['liitostunnus']}';";
 					$resul = pupe_query($query);
 
@@ -1709,12 +1709,12 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or (($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ((in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
 
 							$koontilahete = FALSE;
 
 							// onko koontivahvistus käytössä?
-							if ($laskurow["keraysvahvistus_lahetys"] == 'k' or ($yhtiorow["keraysvahvistus_lahetys"] == 'k' and $laskurow["keraysvahvistus_lahetys"] == '')) {
+							if (in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == '')) {
 
 								$hakutunnus = ($laskurow["vanhatunnus"] > 0) ? $laskurow["vanhatunnus"] : $laskurow["tunnus"];
 
@@ -1738,14 +1738,20 @@
 								}
 							}
 
-							if ($koontilahete and $laskurow['email'] != "") {
-								// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
-								$komento = "asiakasemail".$laskurow['email'];
+							if ($koontilahete and $laskurow['email'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L' and $yhtiorow["keraysvahvistus_lahetys"] != 'L') {
+
+								if ($laskurow['keraysvahvistus_lahetys'] == 'M' or ($yhtiorow['keraysvahvistus_lahetys'] == 'M' and $laskurow['keraysvahvistus_lahetys'] == '')) {
+									$komento = $komento != "" ? $komento = array($komento) : array();
+									$komento[] = "asiakasemail".$laskurow['email'];
+								}
+								else {
+									// Jos lähetetään sähköinen koontilähete, niin ei tulosteta paperille mithään
+									$komento = "asiakasemail".$laskurow['email'];
+								}
 							}
 							elseif (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "") {
 								// Jos lähetetään sähköinen keräysvahvistus, niin ei tulostetaan myös paperille, eli pushataan arrayseen
-								if ($komento != "") $komento = array($komento);
-								else $komento = array();
+								$komento = $komento != "" ? $komento = array($komento) : array();
 
 								$komento[] = "asiakasemail".$laskurow['email'];
 							}

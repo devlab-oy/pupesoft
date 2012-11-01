@@ -3,9 +3,31 @@
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
-	require("../inc/parametrit.inc");
-	require("tulosta_vuosisopimusasiakkaat.inc");
+	require "../inc/parametrit.inc";
+	require "tulosta_vuosisopimusasiakkaat.inc";
+	require_once 'tulosta_vuosisopimusasiakkaat_excel.inc';
+
 	require_once '../email.php';
+
+	if($asiakas_tarkistus == 1) {
+		$ajax_params = array(
+			'ytunnus' => $ytunnus,
+			'asiakasid' => $asiakasid,
+			'alkuvv' => $alkuvv,
+			'alkukk' => $alkukk,
+			'alkupp' => $alkupp,
+			'loppuvv' => $loppuvv,
+			'loppukk' => $loppukk,
+			'loppupp' => $loppupp,
+			'raja' => $raja
+		);
+
+		$asiakkaat = hae_asiakkaat($ajax_params);
+
+		echo json_encode(count($asiakkaat));
+
+		exit;
+	}
 
 	echo "<font class='head'>Vuosisopimusasiakkaat</font><hr>";
 
@@ -117,7 +139,7 @@
 			);
 		}
 
-		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params);
+		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel);
 
 		echo "<br>Kaikki valmista.</font>";
 
@@ -135,7 +157,7 @@
 
 		echo "<font class='message'>Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta.</font><br><br>";
 
-		echo "<form method='post'>";
+		echo "<form name='vuosiasiakkaat_form' method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type ='hidden' name='muutparametrit' value='$muutparametrit'>";
@@ -159,6 +181,7 @@
 
 		echo "<tr><th>Syötä ostoraja:</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
+		echo "<tr><th>".t('Generoi excel tiedosto').":</th><td><input type='checkbox' name='generoi_excel' /></td></tr>";
 		echo "<tr>";
 		echo "<th>Lähetä sähköpostit:</th>";
 		echo "<td>
@@ -181,8 +204,75 @@
 		echo "<input type='text' name='loppuvv' value='$loppuvv' size='10'> pp kk vvvv</td></tr>";
 		echo "</table>";
 
-		echo "<br><input type='submit' value='Tulosta'></form>";
+		echo "<br><input type='submit' value='Tulosta' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
 
+		ob_start();
+		?>
+	<script>
+				function tarkista() {
+					var ok = true;
+
+					if(!tarkista_tulostin()) {
+						ok = false;
+					}
+					
+					if(!tarkista_lahettaja() && ok != false) {
+						ok = false;
+					}
+					return ok;
+				}
+
+				function tarkista_tulostin() {
+					if(($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle' || $('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaan_myyjalle') && $('select[name=komento]').val() != 'email') {
+						alert('Asiakkaalle tai asiakkaan myyjälle raportteja lähetettäessä pitää tulostimeksi olla valittuna email');
+						return false;
+					}
+					else {
+
+						return true;
+					}
+				}
+
+				function tarkista_lahettaja() {
+					if($('input[name=laheta_sahkopostit]:checked').val() == 'asiakkaalle') {
+						var ok;
+						$.ajax({
+							type: 'POST',
+							url: 'vuosisopimusasiakkaat.php?asiakas_tarkistus=1&no_head=yes',
+							data: {
+								'ytunnus': '',
+								'asiakasid': '',
+								'raja': $('input[name=raja]').val(),
+								'alkuvv': $('input[name=alkuvv]').val(),
+								'alkukk': $('input[name=alkukk]').val(),
+								'alkupp': $('input[name=alkupp]').val(),
+								'loppuvv': $('input[name=loppuvv]').val(),
+								'loppukk': $('input[name=loppukk]').val(),
+								'loppupp': $('input[name=loppupp]').val()
+							},
+							success: function(data) {
+								ok = confirm('Sähköposteja olisi lähdössä '+data+' kappaletta. Oletko varma, että haluat lähettää?');
+							},
+							async:false
+						});
+
+						if(ok) {
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
+					else {
+						return true;
+					}
+				}
+	</script>
+		<?php
+
+		$js = ob_get_clean();
+
+		echo $js;
 	}
 
 	function hae_asiakkaat($params) {
@@ -198,7 +288,7 @@
 			$aswhere = "";
 		}
 
-		$query = "	SELECT asiakas.tunnus, asiakas.email, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, sum(arvo) arvo, kuka.eposti myyja_eposti
+		$query = "	SELECT asiakas.tunnus, asiakas.email asiakas_email, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, sum(arvo) arvo, kuka.eposti myyja_eposti
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 					JOIN kuka ON (kuka.yhtio = asiakas.yhtio AND kuka.myyja = asiakas.myyjanro)
@@ -212,8 +302,6 @@
 					GROUP BY asiakas.tunnus
 					HAVING arvo > {$params['raja']}";
 		$result = mysql_query($query) or pupe_error($query);
-
-		echo "löytyi ".mysql_num_rows($result)." asiakasta.<br>";
 
 		$asiakkaat = array();
 		while($row = mysql_fetch_assoc($result)) {
@@ -247,6 +335,11 @@
 		$tilaukset = array();
 		while($row = mysql_fetch_assoc($result)) {
 			if($row['osasto'] < 10000) {
+				$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+				$tryro = mysql_fetch_array($tryre);
+				$row['asananumero'] = $row['osasto'];
+				$row['tryro_selitetark'] = $tryro["selitetark"];
+
 				$tilaukset[] = $row;
 			}
 		}
@@ -277,60 +370,71 @@
 		$tilaukset = array();
 		while($row = mysql_fetch_assoc($result)) {
 			if($row['osasto'] < 10000) {
+				$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
+				$tryro = mysql_fetch_array($tryre);
+				$row['asananumero'] = $row['try'];
+				$row['tryro_selitetark'] = $tryro["selitetark"];
+
+				$osre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+				$osrow = mysql_fetch_array($osre);
+
+				$row['osasto_selite'] = $osrow['selitetark'];
+
 				$tilaukset[] = $row;
 			}
 		}
 		return $tilaukset;
 	}
 
-	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params) {
+	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel) {
 		global $kukarow;
 
-		$pdf_tiedostot = generoi_pdf_tiedostot($data_array, $params);
+		if($generoi_excel == 'on') {
+			$tiedostot = generoi_excel_tiedostot($data_array, $params);
+		}
+		else {
+			$tiedostot = generoi_pdf_tiedostot($data_array, $params);
+		}
 
-		switch ($laheta_sahkopostit) {
-		case 'ajajalle':
-			$email = $kukarow['eposti'];
-			if($komento == 'email') {
-				luo_zip_ja_laheta($pdf_tiedostot, $email);
-			}
-			else {
-				tulosta_pdf_raportit($pdf_tiedostot, $komento);
-			}
-			break;
-			
-		case 'asiakkaalle':
-			if($komento == 'email') {
-			}
-			else {
-				tulosta_pdf_raportit($pdf_tiedostot, $komento);
-			}
-			break;
+		if($komento == 'email') {
+			switch ($laheta_sahkopostit) {
+				case 'ajajalle':
+					$email = $kukarow['eposti'];
+					luo_zip_ja_laheta($tiedostot, $email);
+					break;
 
-		case 'asiakkaan_myyjalle':
-			$edemail = $myyja_eposti;
-			if($komento == 'email') {
-				luo_zip_ja_laheta($pdf_tiedostot, $email);
-			}
-			else {
-				tulosta_pdf_raportit($pdf_tiedostot, $komento);
-			}
-			break;
+				case 'asiakkaalle':
+					foreach($data_array as $data) {
+						$email = $data['asiakasrow']['asiakas_email'];
+						$tiedosto = $data['tiedosto'];
 
-		default:
-			//lähetetään ohjelman ajajalle
-			$edemail = $kukarow['eposti'];
-			if($komento == 'email') {
-				luo_zip_ja_laheta($pdf_tiedostot, $email);
+						laheta_email($email, array($tiedosto));
+
+						unlink($tiedosto);
+					}
+					break;
+
+				case 'asiakkaan_myyjalle':
+					foreach($data_array as $data) {
+						$email = $data['myyja_eposti'];
+						luo_zip_ja_laheta($tiedostot, $email);
+					}
+					break;
+
+				default:
+					$email = $kukarow['eposti'];
+					luo_zip_ja_laheta($tiedostot, $email);
+
+					break;
 			}
-			else {
-				tulosta_pdf_raportit($pdf_tiedostot, $komento);
-			}
+		}
+		else {
+			tulosta_raportit($tiedostot, $komento);
 		}
 	}
 
-	function generoi_pdf_tiedostot($data_array, $params) {
-		global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp, $kala, $sivu, $lask, $sumkpled, $sumkplva, $sumed, $sumva;
+	function generoi_pdf_tiedostot(&$data_array, $params) {
+		global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp, $kala, $sivu, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $asiakas_numero;
 
 		$alkuvv = $params['alkuvv'];
 		$alkukk = $params['alkukk'];
@@ -340,7 +444,8 @@
 		$loppupp = $params['loppupp'];
 
 		$pdf_tiedostot = array();
-		foreach ($data_array as $data) {
+		$i = 0;
+		foreach ($data_array as &$data) {
 			$pdf = new pdffile();
 			$pdf->set_default('margin-top', 	0);
 			$pdf->set_default('margin-bottom', 	0);
@@ -379,19 +484,55 @@
 			$sumkplva = $data['summat_try']['sumkplva'];
 			$sumed = $data['summat_try']['sumed'];
 			$sumva = $data['summat_try']['sumva'];
+			$asiakas_numero = $data['asiakasrow']['tunnus'];
 			// kirjotetaan footer ja palautetaan luodun tiedoston polku
 			$pdf_tiedostot[] = loppu($firstpage);
+
+			$data['tiedosto'] = $pdf_tiedostot[$i];
+
+			$i++;
 		}
 
 		return $pdf_tiedostot;
 	}
 
-	function luo_zip_ja_laheta($pdf_tiedostot, $email_address) {
+	function generoi_excel_tiedostot(&$data_array, $params) {
+		global $yhtiorow;
+		$excel_tiedostot = array();
+		$i = 0;
+		foreach ($data_array as &$data) {
+			$temp_data = array(
+				'osastoittain' => $data['tilaukset_ilman_try'],
+				'tuoteryhmittain' => $data['tilaukset_try']
+			);
+			$excel = new vuosisopimus_asiakkaat_excel();
+			$excel->set_asiakas($data['asiakasrow']);
+			$excel->set_yhtiorow($yhtiorow);
+			$excel->set_rajaus_paivat(array(
+				'alkupaiva' => $params['alkupp'] . '.' . $params['alkukk'] . '.' . $params['alkuvv'],
+				'loppupaiva' => $params['loppupp'] . '.' . $params['loppukk'] . '.' .$params['loppuvv'],
+			));
+			$excel->set_tilausrivit($temp_data);
+			$excel->set_summat_osastoittain($data['summat_ilman_try']);
+			$excel->set_summat_tuoteryhmittain($data['summat_try']);
+
+			$excel_tiedosto_nimi = $excel->generoi();
+			$excel_tiedostot[] = '/tmp/' . $excel_tiedosto_nimi;
+			$data['tiedosto'] = $excel_tiedostot[$i];
+
+			unset($excel);
+			$i++;
+		}
+
+		return $excel_tiedostot;
+	}
+
+	function luo_zip_ja_laheta($tiedostot, $email_address) {
 		global $yhtiorow;
 		
 		$maaranpaa = '/tmp/Ostoseuranta_raportit.zip';
 		$ylikirjoita = true;//ihan varmuuden vuoks
-		if(luo_zip($pdf_tiedostot, $maaranpaa, $ylikirjoita)) {
+		if(luo_zip($tiedostot, $maaranpaa, $ylikirjoita)) {
 			//lähetetään email
 			laheta_email($email_address, array($maaranpaa));
 
@@ -403,7 +544,7 @@
 		}
 
 		//poistetaan pdf tiedostot
-		foreach($pdf_tiedostot as $tiedosto) {
+		foreach($tiedostot as $tiedosto) {
 			unlink($tiedosto);
 		}
 	}
@@ -412,14 +553,15 @@
 		global $yhtiorow;
 
 		$aihe = utf8_encode($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"));
-		$viesti = utf8_encode('Liitteenä löytyy ostoseuranta raportit zip-tiedostoon pakattuna.<br/><br/>');
+		$viesti = utf8_encode('Liitteenä löytyy ostoseuranta raportit.<br/><br/>');
 
 		$email = new Email($aihe, $yhtiorow['postittaja_email']);
 		$email->add_vastaanottaja($email_address);
 
 		foreach ($liitetiedostot_path as $liitetiedosto_path) {
+			$filename = basename($liitetiedosto_path);
 			$liitetiedosto = array(
-				'filename' => 'Ostoseuranta_raportit.zip',
+				'filename' => $filename,
 				'path' => $liitetiedosto_path,
 				'mime' => mime_content_type($liitetiedosto_path)
 			);
@@ -432,10 +574,10 @@
 		$email->laheta();
 	}
 
-	function tulosta_pdf_raportit($pdf_tiedostot, $komento) {
+	function tulosta_raportit($tiedostot, $komento) {
 		echo "Tulostetaan asiakkaan _ASIAKASNUMEROTAHAN_ ostoseuranta tulostimeen {$komento}";
 
-		foreach ($pdf_tiedostot as $tiedosto) {
+		foreach ($tiedostot as $tiedosto) {
 			$line = exec($komento." ".$tiedosto);
 
 			//poistetaan tulostettu tiedosto

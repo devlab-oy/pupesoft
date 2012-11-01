@@ -232,7 +232,7 @@ function rivi ($firstpage, $laji = '') {
 }
 
 function loppu ($firstpage, $sendemail = '') {
-	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi;
+	global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero;
 
 	//kirjoitetaan yhteens‰rivit loppuun
 	$kala -= 15;
@@ -273,7 +273,7 @@ function loppu ($firstpage, $sendemail = '') {
 	}
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-	$pdffilenimi = "/tmp/vuosisop-".md5(uniqid(rand(),true)).".pdf";
+	$pdffilenimi = "/tmp/Ostoseuranta_".$asiakas_numero.".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");

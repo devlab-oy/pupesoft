@@ -90,10 +90,10 @@ EOT;
 			$ok = mail($to, $aihe_encoded, $body, $headers, "-f {$yhtiorow['postittaja_email']}");
 
 			if ($ok === false) {
-				echo "Mailin lähetys osoitteeseen {$to} epäonnistui :(";
+				echo "<br/><br/>Mailin lähetys osoitteeseen: {$to} epäonnistui";
 			}
 			else {
-				echo "Mailin lähetys osoitteeseen {$to} onnistui :>";
+				echo "<br/><br/>Mailin lähetys osoitteeseen: {$to} onnistui";
 			}
 		}
 	}

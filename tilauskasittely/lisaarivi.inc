@@ -844,7 +844,7 @@
 
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
-						global $kukarow;
+						global $varasto;
 
 						/*
 						- Sortataan varastopaikat prioriteetti järkkään
@@ -854,13 +854,6 @@
 						- Jos ei niin splitataan.
 						*/
 
-						if ($kukarow['varasto'] != '') {
-							$kukarow_varastot = explode(",", $kukarow['varasto']);
-						}
-						else {
-							$kukarow_varastot = array();
-						}
-
 						reset($arr);
 
 						// Katotaan missä oletuspaikka
@@ -869,10 +862,10 @@
 						$chk_saldo = 0;
 						$checked_saldo = false;
 
-						// riittääkö oletuspaikan varaston saldo?
 						foreach ($arr as $indx => $chk_row) {
 
-							if ($chk_row['varasto'] == $chk_oletus_var and (count($kukarow_varastot) == 0 or in_array($chk_row['varasto'], $kukarow_varastot))) {
+							// riittääkö oletuspaikan varaston saldo tai käyttäjän takana olevat varastojen saldot
+							if ($chk_row['varasto'] == $chk_oletus_var or (isset($varasto) and in_array($chk_row['varasto'], $varasto))) {
 								$chk_saldo += $chk_row['myytavissa'];
 
 								if ($chk_saldo >= $kpl) {
@@ -884,12 +877,15 @@
 
 						reset($arr);
 
+						// Oletuspaikan myytävissä riitti
 						if ($checked_saldo) {
 
 							$var_temp = array();
 
 							foreach ($arr as $indx => $chk_row) {
-								if ($chk_row['varasto'] == $chk_oletus_var) {
+
+								// Otetaan oletuspaikan, ja käyttäjän takana olevan, varaston sisällä olevat tuotepaikat talteen
+								if ($chk_row['varasto'] == $chk_oletus_var or (isset($varasto) and in_array($chk_row['varasto'], $varasto))) {
 									$var_temp[] = $chk_row;
 									unset($arr[$indx]);
 								}
@@ -901,6 +897,8 @@
 
 								// koitetaan löytää onko kaikki myytävissä yhdeltä paikalta
 								foreach ($var_temp as $indx => $chk_row) {
+
+									// Jos oli tarpeeksi myytävissä kappaleita, siirretään se jonon ensimmäiseksi
 									if ($chk_row['myytavissa'] >= $kpl) {
 										unset($var_temp[$indx]);
 										array_unshift($var_temp, $chk_row);
@@ -909,6 +907,7 @@
 									}
 								}
 
+								// jos ei löydy vain yhtä paikkaa missä riittää saldo, sortataan varastopaikat prioriteetti järkkään
 								if (!$chk_yksi_paikka) {
 									// Sortataan varastopaikat prioriteetti järkkään
 									usort($var_temp, "zzrowprio");
@@ -941,7 +940,9 @@
 								$varasto_set = '';
 
 								foreach ($arr as $indx => $chk_row) {
-									if ($varasto == $chk_row['varasto'] and (count($kukarow_varastot) == 0 or in_array($chk_row['varasto'], $kukarow_varastot))) {
+
+									// Onko loopattavassa varastossa, tai käyttäjän takana olevissa varastoissa, tarpeeksi myytävissä olevia kappaleita
+									if ($varasto == $chk_row['varasto'] or (isset($varasto) and in_array($chk_row['varasto'], $varasto))) {
 										$varaston_saldo += $chk_row['myytavissa'];
 
 										if ($varaston_saldo >= $kpl) {
@@ -951,12 +952,15 @@
 									}
 								}
 
+								// Jos löytyi jokin varasto missä on tarpeeksi myytävissä olevia kappaleita
 								if ($varasto_set != '') {
 									reset($arr);
 
 									$var_temp = array();
 
 									foreach ($arr as $indx => $chk_row) {
+
+										// Otetaan kaikki varastopaikat talteen mitkä kuuluvat varastoon jossa on tarpeeksi myytävissä olevia kappaleita
 										if ($chk_row['varasto'] == $varasto_set) {
 											$var_temp[] = $chk_row;
 											unset($arr[$indx]);
@@ -977,6 +981,7 @@
 											}
 										}
 
+										// Jos ei löytynyt yhtä paikkaa mistä oltaisiin voitu myydä kaikki
 										if (!$chk_yksi_paikka) {
 											// Sortataan varastopaikat prioriteetti järkkään
 											usort($var_temp, "zzrowprio");

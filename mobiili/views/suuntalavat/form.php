@@ -62,20 +62,20 @@
 			<th>Alkuhylly</th>
 
 			<td>
-				<input type='text' class='hylly' name='alkuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyalue'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllynro'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllyvali'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='alkuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['alkuhyllytaso'] ?>' <?= $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyalue' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllyalue'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllynro' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllynro'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllyvali' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllyvali'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='alkuhyllytaso' size='3' maxlength='5' value='<?php echo $suuntalava['alkuhyllytaso'] ?>' <?php echo $disabled ?> >
 			</td>
 		</tr>
 		<tr>
 			<th>Loppuhylly</th>
 
 			<td>
-				<input type='text' class='hylly' name='loppuhyllyalue' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyalue'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllynro' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllynro'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllyvali' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllyvali'] ?>' <?= $disabled ?> >
-				<input type='text' class='hylly' name='loppuhyllytaso' size='3' maxlength='5' value='<?= $suuntalava['loppuhyllytaso'] ?>' <?= $disabled ?> ></td>
+				<input type='text' class='hylly' name='loppuhyllyalue' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllyalue'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllynro' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllynro'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllyvali' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllyvali'] ?>' <?php echo $disabled ?> >
+				<input type='text' class='hylly' name='loppuhyllytaso' size='3' maxlength='5' value='<?php echo $suuntalava['loppuhyllytaso'] ?>' <?php echo $disabled ?> ></td>
 			</tr>
 		</tr>
 		<tr>
@@ -118,12 +118,12 @@
 <div class='controls'>
 	<input type='submit' name='post' value='OK' class='button left' />
 	</form>
-		<? if(isset($muokkaa)): ?>
-		<button onclick='window.location.href="suuntalavat.php?tee=poista&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button left' <?= $disable_poista ?>>Poista</button>
-		<button onclick='window.location.href="suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (normaali)</button>
-		<button onclick='window.location.href="suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?= $disable_siirtovalmis ?>>Siirtovalmis (suoraan hyllyyn)</button>
+		<?php if(isset($muokkaa)): ?>
+		<button onclick='window.location.href="suuntalavat.php?tee=poista&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button left' <?php echo $disable_poista ?>>Poista</button>
+		<button onclick='window.location.href="suuntalavat.php?tee=siirtovalmis&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?php echo $disable_siirtovalmis ?>>Siirtovalmis (normaali)</button>
+		<button onclick='window.location.href="suuntalavat.php?tee=suoraan_hyllyyn&suuntalava=<?php echo $suuntalava['tunnus'] ?>"' class='button right' <?php echo $disable_siirtovalmis ?>>Siirtovalmis (suoraan hyllyyn)</button>
 
-		<? endif ?>
+		<?php endif ?>
 </div>
 
 <script type='text/javascript'>

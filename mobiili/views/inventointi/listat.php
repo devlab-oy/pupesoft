@@ -12,13 +12,13 @@
 			<th>Hyllyalue väli</th>
 		</tr>
 
-		<? foreach($listat as $lista): ?>
+		<?php foreach($listat as $lista): ?>
 			<tr>
-				<td><a href='<?= $lista['url'] ?>'><?= $lista['lista'] ?></a></td>
-				<td><?= $lista['tuotteita'] ?></td>
-				<td><?= $lista['hyllyvali'] ?></td>
+				<td><a href='<?php echo $lista['url'] ?>'><?php echo $lista['lista'] ?></a></td>
+				<td><?php echo $lista['tuotteita'] ?></td>
+				<td><?php echo $lista['hyllyvali'] ?></td>
 			</tr>
-		<? endforeach ?>
+		<?php endforeach ?>
 
 	</table>
 </div>

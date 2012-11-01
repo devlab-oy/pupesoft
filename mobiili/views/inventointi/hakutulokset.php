@@ -10,25 +10,25 @@
 			<th>Tuotepaikka</th>
 		</tr>
 
-		<?php foreach($tuotteet as $tuote): ?>
-			<? if ($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00'): ?>
+		<?php foreach($tuotteet as $tuote) { ?>
+			<?php if ($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') { ?>
 				<tr>
-					<td><?= $tuote['tuoteno'] ?></td>
-					<td><?= $tuote['tuotepaikka'] ?></td>
-					<td><?= "(".$tuote['inventointilista'].")" ?></td>
+					<td><?php echo $tuote['tuoteno'] ?></td>
+					<td><?php echo $tuote['tuotepaikka'] ?></td>
+					<td><?php echo "(".$tuote['inventointilista'].")" ?></td>
 				</tr>
-			<? else: ?>
+			<?php } else { ?>
 				<?php $url = http_build_query(array(
 									'tee' => 'laske',
 									'tuotepaikka' => $tuote['tuotepaikka'],
 									'tuoteno' => $tuote['tuoteno'],
 									'tuotepaikalla' => $haku_tuotepaikalla)) ?>
 				<tr>
-					<td><a href='inventointi.php?<?= $url ?>'><?= $tuote['tuoteno'] ?></a></td>
-					<td><?= $tuote['tuotepaikka'] ?></td>
-					<td><? if($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') echo "(listalla {$tuote['inventointilista']})" ?></td>
+					<td><a href='inventointi.php?<?php echo $url ?>'><?php echo $tuote['tuoteno'] ?></a></td>
+					<td><?php echo $tuote['tuotepaikka'] ?></td>
+					<td><?php if($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') echo "(listalla {$tuote['inventointilista']})" ?></td>
 				</tr>
-			<? endif ?>
-		<?php endforeach ?>
+			<?php } ?>
+		<?php } ?>
 	</table>
 </div>

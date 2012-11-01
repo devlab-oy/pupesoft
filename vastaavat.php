@@ -55,9 +55,15 @@ if ($tee == 'muutaprio') {
 }
 
 if ($tee == 'add') {
+
     // tutkitaan onko lis‰tt‰v‰ tuote oikea tuote...
     if (!hae_tuote($vastaava)) {
         echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuotetta")." $vastaava ".t("ei lˆydy")."!</font><br><br>";
+    }
+    // Lis‰t‰‰n haluttuun ketjuun
+    else if (!empty($ketju_id)) {
+        echo "Lis‰t‰‰n oikeaan ketjuun";
+        lisaa_tuote($vastaava, $ketju_id);
     }
     else {
         $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
@@ -129,6 +135,24 @@ if ($tee == 'add') {
         elseif ($fid != "" and $cid != "" ) {
             echo "<font class='error'>".t("Tuotteet")." $vastaava, $tuoteno ".t("kuuluvat jo eri vastaavuusketjuihin")."!</font><br><br>";
         }
+    }
+}
+
+function lisaa_tuote($vastaava, $ketju_id = '') {
+    global $kukarow;
+
+    // Jos ketju on setattu, lis‰t‰‰n tuote haluttuun ketjuun
+
+    if ($ketju_id != '') {
+        // Tarkistetaan ett‰ tuote on olemassa
+        $tuote = hae_tuote($vastaava);
+
+        if ($tuote) {
+            $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                        VALUES ('$ketju_id', '{$tuote['tuoteno']}', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+            $result = pupe_query($query);
+        }
+
     }
 }
 
@@ -240,6 +264,7 @@ if ($tuoteno != '') {
 
             echo "<form method='post' autocomplete='off'>
                     <input type='hidden' name='tuoteno' value='$tuoteno'>
+                    <input type='hidden' name='ketju_id' value='$id'>
                     <input type='hidden' name='tee' value='add'>
                     <hr>";
             echo t("Lis‰‰ vastaava tuote").": ";

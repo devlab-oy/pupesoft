@@ -9,6 +9,8 @@ echo "<form method='get' name='etsituote' autocomplete='off'>
       <input type='submit' value='".t("Hae")."'>
       </form><br><br>";
 
+if (!isset($tee)) $tee = '';
+
 if ($tee == 'del') {
     //haetaan poistettavan tuotteen id.. k‰ytt‰j‰st‰v‰llist‰..
     $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
@@ -62,107 +64,126 @@ if ($tee == 'add') {
     }
     // Lis‰t‰‰n haluttuun ketjuun
     else if (!empty($ketju_id)) {
-        echo "Lis‰t‰‰n oikeaan ketjuun";
-        lisaa_tuote($vastaava, $ketju_id);
+        lisaa_tuote($tuoteno, $vastaava, $ketju_id);
     }
     else {
-        $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
-        $result = pupe_query($query);
-
-        // katotaan onko is‰ tuote lis‰ttty..
-        if (mysql_num_rows($result) != 0) {
-            //jos on, otetaan ID luku talteen...
-            $row    = mysql_fetch_array($result);
-            $fid    = $row['id'];
-        }
-
-        //katotaan onko vastaava jo lis‰tty
-        $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$vastaava' AND yhtio = '$kukarow[yhtio]'";
-        $result = pupe_query($query);
-
-        if (mysql_num_rows($result) != 0) {
-            //vastaava on jo lis‰tty.. otetaan senki id..
-            $row    = mysql_fetch_array($result);
-            $cid    = $row['id'];
-        }
-
-        //jos kumpaakaan ei lˆytynyt...
-        if (($cid == "") and ($fid == "")) {
-            //silloin t‰m‰ on eka vastaava.. etsit‰‰n sopiva ID.
-            $query  = "SELECT max(id) FROM vastaavat";
-            $result = pupe_query($query);
-            $row    = mysql_fetch_array($result);
-            $id     = $row[0]+1;
-
-            //lis‰t‰‰n "is‰ tuote"...
-            $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
-                        VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
-            $result = pupe_query($query);
-
-            // lis‰t‰‰n vastaava tuote...
-            $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
-                        VALUES ('$id', '$vastaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
-            $result = pupe_query($query);
-        }
-
-        //lapsi on lˆytynyt, is‰‰ ei
-        if (($cid != "") and ($fid == "")) {
-            //lis‰t‰‰n "is‰ tuote"...
-            $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
-                        VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
-            $result = pupe_query($query);
-        }
-
-        //is‰ on lˆytynyt, lapsi ei
-        if (($fid != "") and ($cid == "")) {
-            # Siirret‰‰n ketjun muita eteenp‰in jarjestys + 1
-            $query = "UPDATE vastaavat SET jarjestys=jarjestys+1
-                        WHERE jarjestys!=0 AND id='$fid' AND yhtio='{$kukarow['yhtio']}'";
-            $result = pupe_query($query);
-
-            # Lis‰t‰‰n uusi aina p‰‰tuotteeksi jarjestys=1
-            //lis‰t‰‰n vastaava p‰‰tuotteeksi
-            $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, jarjestys, laatija, luontiaika, muutospvm, muuttaja)
-                        VALUES ('$fid', '$vastaava', '$kukarow[yhtio]', '1', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
-            $result = pupe_query($query);
-        }
-
-        //kummatkin lˆytyiv‰t.. ja ne korvaa toisensa
-        if ($fid != "" and $cid != "" and $fid == $cid) {
-             echo "<font class='error'>".t("Tuotteet")." $vastaava <> $tuoteno ".t("ovat jo vastaavia")."!</font><br><br>";
-
-        }
-        elseif ($fid != "" and $cid != "" ) {
-            echo "<font class='error'>".t("Tuotteet")." $vastaava, $tuoteno ".t("kuuluvat jo eri vastaavuusketjuihin")."!</font><br><br>";
-        }
+        lisaa_tuote($tuoteno, $vastaava);
     }
 }
 
-function lisaa_tuote($vastaava, $ketju_id = '') {
+function lisaa_tuote($tuoteno = '', $vastaava, $ketju_id = '') {
     global $kukarow;
 
-    // Jos ketju on setattu, lis‰t‰‰n tuote haluttuun ketjuun
+    // Tarkistetaan ett‰ tuote on olemassa
+    $tuote = hae_tuote($vastaava);
 
-    if ($ketju_id != '') {
-        // Tarkistetaan ett‰ tuote on olemassa
-        $tuote = hae_tuote($vastaava);
+    if ($tuote) {
 
-        if ($tuote) {
-            $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
-                        VALUES ('$ketju_id', '{$tuote['tuoteno']}', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+        // Jos ketju on setattu, lis‰t‰‰n tuote haluttuun ketjuun
+        if ($ketju_id != '') {
+
+            // Tarkistetaan ett‰ tuote ei jo ole kyseisess‰ ketjussa
+            $query = "SELECT * FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$vastaava}' AND id='{$ketju_id}'";
             $result = pupe_query($query);
-        }
 
+            // Tuote on jo ketjussa
+            if (mysql_num_rows($result) > 0) {
+                echo "<font class='error'>".t("Lis‰ys ei onnistu! Tuote")." $vastaava ".t("on jo ketjussa")." $ketju_id!</font><br><br>";
+            }
+            // Lis‰t‰‰n tuote haluttuun ketjuun
+            else {
+                $query  = "INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                            VALUES ('$ketju_id', '{$tuote['tuoteno']}', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+                $result = pupe_query($query);
+            }
+        }
+        //
+        elseif ($tuoteno != '' and $ketju_id == '') {
+
+            $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$tuoteno' AND yhtio = '$kukarow[yhtio]'";
+            $result = pupe_query($query);
+
+            // katotaan onko is‰ tuote lis‰ttty..
+            if (mysql_num_rows($result) != 0) {
+                //jos on, otetaan ID luku talteen...
+                $row    = mysql_fetch_array($result);
+                $fid    = $row['id'];
+            }
+
+            //katotaan onko vastaava jo lis‰tty
+            $query  = "SELECT * FROM vastaavat WHERE tuoteno = '$vastaava' AND yhtio = '$kukarow[yhtio]'";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) != 0) {
+                //vastaava on jo lis‰tty.. otetaan senki id..
+                $row    = mysql_fetch_array($result);
+                $cid    = $row['id'];
+            }
+
+            //jos kumpaakaan ei lˆytynyt...
+            if (($cid == "") and ($fid == "")) {
+                //silloin t‰m‰ on eka vastaava.. etsit‰‰n sopiva ID.
+                $query  = "SELECT max(id) FROM vastaavat";
+                $result = pupe_query($query);
+                $row    = mysql_fetch_array($result);
+                $id     = $row[0]+1;
+
+                //lis‰t‰‰n "is‰ tuote"...
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                            VALUES ('$id', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+                $result = pupe_query($query);
+
+                // lis‰t‰‰n vastaava tuote...
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                            VALUES ('$id', '$vastaava', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+                $result = pupe_query($query);
+            }
+
+            //lapsi on lˆytynyt, is‰‰ ei
+            if (($cid != "") and ($fid == "")) {
+                //lis‰t‰‰n "is‰ tuote"...
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, laatija, luontiaika, muutospvm, muuttaja)
+                            VALUES ('$cid', '$tuoteno', '$kukarow[yhtio]', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+                $result = pupe_query($query);
+            }
+
+            //is‰ on lˆytynyt, lapsi ei
+            if (($fid != "") and ($cid == "")) {
+                # Siirret‰‰n ketjun muita eteenp‰in jarjestys + 1
+                $query = "UPDATE vastaavat SET jarjestys=jarjestys+1
+                            WHERE jarjestys!=0 AND id='$fid' AND yhtio='{$kukarow['yhtio']}'";
+                $result = pupe_query($query);
+
+                # Lis‰t‰‰n uusi aina p‰‰tuotteeksi jarjestys=1
+                //lis‰t‰‰n vastaava p‰‰tuotteeksi
+                $query  = " INSERT INTO vastaavat (id, tuoteno, yhtio, jarjestys, laatija, luontiaika, muutospvm, muuttaja)
+                            VALUES ('$fid', '$vastaava', '$kukarow[yhtio]', '1', '$kukarow[kuka]', now(), now(), '$kukarow[kuka]')";
+                $result = pupe_query($query);
+            }
+
+            //kummatkin lˆytyiv‰t.. ja ne korvaa toisensa
+            if ($fid != "" and $cid != "" and $fid == $cid) {
+                 echo "<font class='error'>".t("Tuotteet")." $vastaava <> $tuoteno ".t("ovat jo vastaavia")."!</font><br><br>";
+
+            }
+            elseif ($fid != "" and $cid != "" ) {
+                echo "<font class='error'>".t("Tuotteet")." $vastaava, $tuoteno ".t("kuuluvat jo eri vastaavuusketjuihin")."!</font><br><br>";
+            }
+        }
+        else {
+            echo "<font class='error'>".t("Odottamaton virhe")."!</font><br><br>";
+        }
     }
 }
 
 function hae_tuote($tuoteno) {
     global $kukarow;
 
+    if (empty($tuoteno)) exit("ei voida hakea olematonta tuotetta!");
+
     // Haetaan tuotteen tiedot
     $query = "SELECT * FROM tuote WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$tuoteno}'";
     $result = pupe_query($query);
-
     $tuote = mysql_fetch_assoc($result);
 
     return $tuote;

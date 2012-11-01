@@ -31,7 +31,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 		if ($tee == "eitullia") {
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
-						SET var = '', netto = 'X'
+						SET var = '', varastoon = 0
 						WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 			$varresult = mysql_query($query) or pupe_error($query);
 
@@ -47,7 +47,7 @@ if (($vietiinko_koko_suuntalava == 'joo' or $varok == 1) and $sarjanrook == 1) {
 			if (count($varastoonko) > 0) {
 				foreach ($varastoonko as $varas) {
 					$query = "	UPDATE tilausrivi
-								SET netto = ''
+								SET varastoon = 1
 								WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 					$varresult = mysql_query($query) or pupe_error($query);
 				}

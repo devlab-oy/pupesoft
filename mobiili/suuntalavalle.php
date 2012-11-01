@@ -82,7 +82,7 @@ if (isset($submit)) {
         if ($hyllytetty < $tilausrivi['varattu']) {
             # Päivitetään alkuperäisen rivin kpl
             $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
-            $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, false, false);
+            $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, TRUE, FALSE);
 
             kohdista_rivi($laskurow, $uusi_tilausrivi, $tilausrivi['otunnus'], $saapuminen, $suuntalava);
         }

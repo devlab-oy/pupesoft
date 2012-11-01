@@ -910,8 +910,6 @@
 						}
 						else {
 
-							reset($arr);
-
 							// Riittääkö jonkun toisen varaston saldo?
 							$chk_distinct_varasto = array();
 
@@ -925,7 +923,7 @@
 
 							reset($arr);
 
-							foreach ($chk_distinct_varasto as $varasto) {
+							foreach ($chk_distinct_varasto as $varastosta) {
 
 								$varaston_saldo = 0;
 								$varasto_set 	= '';
@@ -933,7 +931,7 @@
 								foreach ($arr as $indx => $chk_row) {
 
 									// Onko loopattavassa varastossa tarpeeksi myytävissä olevia kappaleita
-									if ($varasto == $chk_row['varasto'] and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
+									if ($varastosta == $chk_row['varasto'] and (!isset($varasto) or in_array($chk_row['varasto'], $varasto))) {
 										$varaston_saldo += $chk_row['myytavissa'];
 
 										if ($varaston_saldo >= $kpl) {

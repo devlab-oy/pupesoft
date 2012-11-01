@@ -18596,7 +18596,7 @@ if (!function_exists('onko_suoratoimitus')) {
 }
 
 if (!function_exists('splittaa_tilausrivi')) {
-	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $netto = false, $pois_suuntalavalta = false, $perheid = false) {
+	function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoon = TRUE, $pois_suuntalavalta = FALSE, $perheid = FALSE) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
@@ -18620,13 +18620,13 @@ if (!function_exists('splittaa_tilausrivi')) {
 				case 'varattu':
 					$query .= " varattu = '{$uuden_rivin_kpl}',";
 					break;
-				case 'netto':
+				case 'varastoon':
 
-					if ($yhtiorow['suuntalavat'] == 'S' and $netto) {
-						$query .= " netto = 'X',";
+					if ($yhtiorow['suuntalavat'] == 'S' and !$varastoon) {
+						$query .= " varastoon = 0,";
 					}
 					else {
-						$query .= " netto = '".$rivi[mysql_field_name($result, $i)]."',";
+						$query .= " varastoon = '".$rivi[mysql_field_name($result, $i)]."',";
 					}
 
 					break;
@@ -18688,7 +18688,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 
 				$lapsen_uusi_kpl = $uuden_rivin_kpl * $lapsi_chk_row['kerroin'];
 
-				splittaa_tilausrivi($lapsi_chk_row['tunnus'], $lapsen_uusi_kpl, $netto, false, $uusi_id);
+				splittaa_tilausrivi($lapsi_chk_row['tunnus'], $lapsen_uusi_kpl, $varastoon, FALSE, $uusi_id);
 
 				// p‰ivitet‰‰n splitattava lapsi
 				$query = "	UPDATE tilausrivi SET
@@ -18862,7 +18862,10 @@ if (!function_exists('paivita_tilausrivin_kpl')) {
 
 			# Jos kpl nollassa ja suuntalavat == 'S'
 			if ($kpl == 0 and $yhtiorow['suuntalavat'] == 'S') {
-				$query = "UPDATE tilausrivi SET netto = 'X' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
+				$query = "	UPDATE tilausrivi
+							SET varastoon = 0
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tunnus  = '{$tunnus}'";
 				$result = pupe_query($query);
 			}
 		}

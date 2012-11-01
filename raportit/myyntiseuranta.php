@@ -354,7 +354,7 @@
 				<td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
 				<td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
 				<td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
-				<td class='back'>",t("(Toimii vain jos ajotapa on Laskutetuista tilaukista)"),"</td>
+				<td class='back'>",t("(Toimii vain jos listataan tilauksittain tai laskuittain)"),"</td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

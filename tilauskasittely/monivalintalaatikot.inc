@@ -593,12 +593,12 @@
 
 		if (trim($kohdet) != '') {
 			if ($mulselprefix == 'asiakas') {
-				$lisa_haku_kustp = " and asiakas.kohde in ($kustpt) ";
-				$lisa .= " and asiakas.kohde in ($kustpt) ";
+				$lisa_haku_kustp = " and asiakas.kohde in ($kohdet) ";
+				$lisa .= " and asiakas.kohde in ($kohdet) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
-				$lisa .= " and (tuote.kohde in ($kustpt) or asiakas.kohde in ($kustpt)) ";
+				$lisa_haku_kustp = " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
+				$lisa .= " and (tuote.kohde in ($kohdet) or asiakas.kohde in ($kohdet)) ";
 			}
 			else {
 				$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
@@ -622,12 +622,12 @@
 
 		if (trim($projektit) != '') {
 			if ($mulselprefix == 'asiakas') {
-				$lisa_haku_kustp = " and asiakas.projekti in ($kustpt) ";
-				$lisa .= " and asiakas.projekti in ($kustpt) ";
+				$lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
+				$lisa .= " and asiakas.projekti in ($projektit) ";
 			}
 			elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
-				$lisa_haku_kustp = " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
-				$lisa .= " and (tuote.projekti in ($kustpt) or asiakas.projekti in ($kustpt)) ";
+				$lisa_haku_kustp = " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
+				$lisa .= " and (tuote.projekti in ($projektit) or asiakas.projekti in ($projektit)) ";
 			}
 			else {
 				$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";

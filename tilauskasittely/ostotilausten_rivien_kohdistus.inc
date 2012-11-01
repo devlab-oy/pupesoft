@@ -1202,7 +1202,6 @@ if ($tila == '') {
 				if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tilausrivi.yksikko) toimyksikko,
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
 				tuote.keraysvyohyke,
-				tilausrivi.netto as netto_x,
 				tilausrivin_lisatiedot.suoratoimitettuaika,
 				lasku.comments
 				FROM lasku

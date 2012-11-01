@@ -1208,6 +1208,8 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
 						}
+
+						if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
 					}
 					//**  Tilauksittain loppu **//
 				}

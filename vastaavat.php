@@ -11,17 +11,17 @@ echo "<form method='get' name='etsituote' autocomplete='off'>
 
 if (!isset($tee)) $tee = '';
 
-if ($tee == 'del') {
-    //haetaan poistettavan tuotteen id.. käyttäjästävällistä..
-    $query  = "SELECT * FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $row    = mysql_fetch_array($result);
-    $id     = $row['id'];
+function poista_tuote_ketjusta($tunnus) {
+    global $kukarow;
 
-    //poistetaan vastaava..
-    $query  = "DELETE FROM vastaavat WHERE tunnus = '$tunnus' AND yhtio = '$kukarow[yhtio]'";
+    if (empty($tunnus)) exit("tunnus on tyhjä!");
+
+    // Poistetaan vastaava ketjusta
+    $query = "DELETE FROM vastaavat WHERE yhtio='{$kukarow['yhtio']}' AND tunnus='{$tunnus}'";
     $result = pupe_query($query);
 }
+
+if ($tee == 'del') poista_tuote_ketjusta($tunnus);
 
 if ($tee == 'muutaprio') {
     //haetaan poistettavan tuotteen id.. käyttäjästävällistä..

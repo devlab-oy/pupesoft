@@ -19540,7 +19540,7 @@ if (!function_exists('koontilahete_check')) {
 			}
 		}
 
-		if ($koontilahete and $laskurow['email'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L' and $yhtiorow["keraysvahvistus_lahetys"] != 'L') {
+		if ($koontilahete and $laskurow['email'] != "" and (($laskurow['keraysvahvistus_lahetys'] != "" and $laskurow['keraysvahvistus_lahetys'] != 'L') or ($laskurow['keraysvahvistus_lahetys'] == "" and $yhtiorow["keraysvahvistus_lahetys"] != "" and $yhtiorow["keraysvahvistus_lahetys"] != 'L'))) {
 
 			if ($laskurow['keraysvahvistus_lahetys'] == 'M' or ($yhtiorow['keraysvahvistus_lahetys'] == 'M' and $laskurow['keraysvahvistus_lahetys'] == '')) {
 				$komento = $komento != "" ? $komento = array($komento) : array();

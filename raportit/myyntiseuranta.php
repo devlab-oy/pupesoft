@@ -455,7 +455,7 @@
 				</tr>
 				<th>",t("Näytä laskutuspäivä"),"</th>
 				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
-				<td class='back'>",t("(Toimii vain jos ajotapa on Laskutetuista tilaukista)"),"</td>
+				<td class='back'>",t("(Toimii vain jos ajotapa on laskuittain)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Näytä tuotteet statuksella"),"</th>";

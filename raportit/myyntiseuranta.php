@@ -217,6 +217,7 @@
 			$piilota_kappaleet_sel 	= "";
 			$einollachk 			= "";
 			$naytaennakkochk 		= "";
+			$laskutuspaivachk		= "";
 
 			if ($ruksit[10]  != '') 		$ruk10chk  				= "CHECKED";
 			if ($ruksit[20]  != '') 		$ruk20chk  				= "CHECKED";
@@ -252,6 +253,7 @@
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($vertailubu != '')			${"sel_".$vertailubu}	= "SELECTED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
+			if ($laskutuspaiva != '')		$laskutuspaivachk		= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 			if ($naytamaksupvm != '')		$naytamaksupvmchk 		= "CHECKED";
 			if ($asiakaskaynnit != '')		$asiakaskaynnitchk 		= "CHECKED";
@@ -450,6 +452,10 @@
 				<th>",t("Näytä kaikki tuotetyypit"),"</th>
 				<td colspan='3'><input type='checkbox' name='naytakaikkityypit' {$naytakaikkityypitchk}></td>
 				<td class='back'></td>
+				</tr>
+				<th>",t("Näytä laskutuspäivä"),"</th>
+				<td colspan='3'><input type='checkbox' name='laskutuspaiva' {$laskutuspaivachk}></td>
+				<td class='back'>",t("(Toimii vain jos ajotapa on Laskutetuista tilaukista)"),"</td>
 				</tr>
 				<tr>
 				<th>",t("Näytä tuotteet statuksella"),"</th>";
@@ -1099,6 +1105,9 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.laskunro = '{$rajaus[$i]}' ";
 						}
+
+						if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
+
 						$laskugroups++;
 					}
 					//** Laskugrouppaukset loppu **//
@@ -2216,6 +2225,10 @@
 									if ($ken_nimi == "tuoteno") {
 										$koskematon_tuoteno = $row["tuoteno"];
 										$row[$ken_nimi] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$ken_nimi])."'>{$row[$ken_nimi]}</a>";
+									}
+
+									if ($ken_nimi == "laskutuspvm") {
+										$row[$ken_nimi] = tv1dateconv($kentta);
 									}
 
 									// jos kyseessa on asiakasosasto, haetaan sen nimi

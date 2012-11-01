@@ -2940,6 +2940,13 @@
 					$spanni += 1;
 				}
 
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$otsik_row['liitostunnus']}'";
+				$asiakas_chk_res = pupe_query($query);
+				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
+
 				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 
 					//tulostetaan faili ja valitaan sopivat printterit
@@ -3009,12 +3016,18 @@
 						}
 
 						echo "</select>";
-						echo "</th>";
 					}
+
+					if (in_array($asiakas_chk_row["keraysvahvistus_lahetys"], array('k','o','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','o','M')) and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
+						echo "<br /><font class='error'>",t("Lähete lähetetään asiakkaalle sähköisesti"),"!</font>";
+					}
+
+					echo "</th>";
 
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 						echo "<th>&nbsp;</th>";
 					}
+
 					echo "</tr>";
 				}
 
@@ -3080,14 +3093,7 @@
 
 						if ($yhtiorow['kerayserat'] == 'A') {
 
-							$query = "	SELECT kerayserat
-										FROM asiakas
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$otsik_row['liitostunnus']}'
-										AND kerayserat = 'A'";
-							$asiakas_chk_res = pupe_query($query);
-
-							if (mysql_num_rows($asiakas_chk_res) == 0) $kaikki_ok = false;
+							if ($asiakas_chk_row['kerayserat'] != 'A') $kaikki_ok = false;
 						}
 
 						if ($kaikki_ok) {

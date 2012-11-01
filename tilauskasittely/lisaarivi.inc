@@ -844,15 +844,7 @@
 
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
-						global $varasto;
-
-						/*
-						- Sortataan varastopaikat prioriteetti järkkään
-						- Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
-						- Katotaan missä oletuspaikka, riittääkö oletuspaikan varaston saldo?
-						- Riittääkö jonkun toisen varaston saldo?
-						- Jos ei niin splitataan.
-						*/
+						global $varasto;						
 
 						reset($arr);
 
@@ -999,7 +991,17 @@
 					}
 				}
 
-				// sortataan varastopaikkojen saldot by ostajan maa
+				/*
+				1. Normaalisti Pupe sorttaa paikat näin:
+				a) Ekana tulee oletuspaikka riippumatta sen saldosta (jos on oikeus varastoon jossa oletus on).
+				b) Muut paikat priojärjestyksessä saldojärjestyksessä oletuksen jälkeen (niistä varastoista johon on oikeus)
+
+				2. Jos $yhtiorow['varaston_splittaus'] parametri on 'K' (yritetäänkö myydä pääasiassa yhdestä varastosta tuotetta), niin Pupe sorttaa paikat 1 B kohdan mukaan ja jatkaa kohtaan 2 tutkimaan 1 B järjestyksessä tuotepaikkoja:
+				a) Katotaan missä oletuspaikka, riittääkö oletuspaikan varaston saldo (jos on oikeus varastoon jossa oletus on). Jos, katotaan ensin löytyykö tarvittava määrä joltain yhdeltä tietyltä paikalta.
+				b) Riittääkö jonkun toisen varaston saldo (ne mihin on oikeus). Jos, katotaan ensin löytyykö tarvittava määrä joltain yhdeltä tietyltä paikalta.
+				c) Jos a) tai b) ei natsaa niin palautetaan paikat saman kaavan mukaan kuin tapauksessa 1.
+				*/
+				
 				$oma_maa = array();
 				$muu_maa = array();
 

@@ -58,7 +58,8 @@
 		<input type='hidden' name='varastonarvo' value='$varastonarvo'>
 		<input type='hidden' name='kerayseran_numero' value='$kerayseran_numero'>
 		<input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
-		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />";
+		<input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
+		<input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 
 	if ($nappikeikalle == 'menossa') {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

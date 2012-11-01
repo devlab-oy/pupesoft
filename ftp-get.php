@@ -104,6 +104,8 @@
 				ftp_close($conn_id);
 			}
 
+			$palautus = 0;
+
 			// mikä feilas?
 			if ($conn_id === FALSE) {
 				$palautus = 1;

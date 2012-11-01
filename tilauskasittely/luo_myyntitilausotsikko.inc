@@ -8,10 +8,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus  = '$asiakasid'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
-			$asiakasrow  = mysql_fetch_array($result);
+			$asiakasrow  = mysql_fetch_assoc($result);
 
 			$ytunnus 			= $asiakasrow["ytunnus"];
 			$nimi 			   	= $asiakasrow["nimi"];
@@ -67,17 +67,6 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			}
 
 			$maksuehto 		= $asiakasrow["maksuehto"];
-			$toimitustapa 	= $asiakasrow["toimitustapa"];
-
-			// haetaan tomitustavan oletusmaksajan tiedot
-			$apuqu = "	SELECT *
-						from toimitustapa use index (selite_index)
-						where yhtio='$kukarow[yhtio]'
-						and selite='$asiakasrow[toimitustapa]'";
-			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-			$apuro = mysql_fetch_array($meapu);
-
-			$maksaja = $apuro['merahti'];
 
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
@@ -85,10 +74,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 							where yhtio = '$kukarow[yhtio]'
 							and myyja = '$myyjanro'
 							AND myyja > 0";
-				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+				$meapu = pupe_query($apuqu);
 
 				if (mysql_num_rows($meapu)==1) {
-					$apuro = mysql_fetch_array($meapu);
+					$apuro = mysql_fetch_assoc($meapu);
 					$myyja = $apuro['tunnus'];
 				}
 				elseif (mysql_num_rows($meapu)>1) {
@@ -116,20 +105,11 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$ketjutus 			= $asiakasrow["ketjutus"];
 			$valkoodi 			= $asiakasrow["valkoodi"];
 			$sisviesti1			= $asiakasrow["sisviesti1"];
+			$rahtivapaa 		= $asiakasrow["rahtivapaa"];
 
 			if ($asiakasrow["myynti_kommentti1"] != "") {
 				$comments = $asiakasrow["myynti_kommentti1"];
 			}
-
-			if (trim($asiakasrow["toimitusehto"]) != "") {
-				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
-			}
-
-			$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
-			$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
-
-			$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
-			$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
 
 			//annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
 			if ($kukarow["extranet"] != '') {
@@ -138,8 +118,8 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 							WHERE yhtio='$kukarow[yhtio]' and laji = 'asiakasluokka' and selite != ''
 							ORDER BY 1
 							LIMIT 1";
-				$prioresult = mysql_query($query) or pupe_error($query);
-				$priorow = mysql_fetch_array($prioresult);
+				$prioresult = pupe_query($query);
+				$priorow = mysql_fetch_assoc($prioresult);
 
 				$luokka = $priorow["selite"];
 			}
@@ -163,17 +143,49 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$splittauskielto = "";
 			}
 
-			$jtkielto = $asiakasrow['jtkielto'];
+			$jtkielto 		= $asiakasrow['jtkielto'];
+			$toimitustapa 	= $asiakasrow["toimitustapa"];
 
-			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
-			// if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON'; // Tälläistä kenttää ei ole
+			// Toimitusehto
+			if (trim($asiakasrow["toimitusehto"]) != "") {
+				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
+			}
 
+			$toimitusehto  = substr($yhtiorow['oletus_toimitusehto'], 0, 3);
+			$kasitoimehto  = substr($yhtiorow['oletus_toimitusehto'], 4);
+
+			$toimitusehto2 = substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
+			$kasitoimehto2 = substr($yhtiorow['oletus_toimitusehto2'], 4);
+
+			// Käytetäänkö lähettäjän vai vastaanottajan rahtisopparia
+			$apuqu = "	SELECT *
+						from toimitustapa
+						where yhtio	= '$kukarow[yhtio]'
+						and selite	= '$toimitustapa'";
+			$meapu = pupe_query($apuqu);
+			$apuro = mysql_fetch_assoc($meapu);
+
+			$maksaja = $apuro['merahti'];
+
+			// Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
+			$toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$yhtiorow[oletus_toimitusehto]') ");
+
+			if (mysql_num_rows($toimehto_tresult) > 0) {
+				$toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+				if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+					$maksaja = "K";
+				}
+				elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+					$maksaja = "";
+				}
+			}
 		}
 		else {
 			//yhtiön oletusalvi!
 			$xwquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-			$xwtres  = mysql_query($xwquery) or pupe_error($xwquery);
-			$xwtrow  = mysql_fetch_array($xwtres);
+			$xwtres  = pupe_query($xwquery);
+			$xwtrow  = mysql_fetch_assoc($xwtres);
 
 			$alv = (float) $xwtrow["selite"];
 
@@ -195,10 +207,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 						FROM valuu
 						WHERE yhtio = '$kukarow[yhtio]'
 						and nimi= '$valkoodi'";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 
 			if (mysql_num_rows($vresult) == 1) {
-				$vrow = mysql_fetch_array($vresult);
+				$vrow = mysql_fetch_assoc($vresult);
 
 				$valkoodi = $vrow["nimi"]."##".$vrow["kurssi"];
 			}
@@ -213,16 +225,16 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if ($maa != "" and $maa != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
 			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+			$alhire = pupe_query($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
 			if (mysql_num_rows($alhire) == 1) {
 
-				$alhiro  = mysql_fetch_array($alhire);
+				$alhiro  = mysql_fetch_assoc($alhire);
 
 				// haetaan maan oletusalvi
 				$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark!='' and selitetark_2='$maa' limit 1";
-				$alhire = mysql_query($query) or pupe_error($query);
+				$alhire = pupe_query($query);
 
 				// jos ei löydy niin mennään erroriin
 				if (mysql_num_rows($alhire) == 0) {
@@ -230,7 +242,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 					exit;
 				}
 				else {
-					$apuro  = mysql_fetch_array($alhire);
+					$apuro  = mysql_fetch_assoc($alhire);
 					// nämä tässä keisissä aina näin
 					$alv = $apuro["selite"];
 					$vienti = "";

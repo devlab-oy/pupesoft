@@ -1534,7 +1534,7 @@ if (!function_exists('rivi_lahete')) {
 			$row["kommentti"] .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
 		}
 
-		//Haetan sarjanumeron tiedot
+		// Haetaan sarjanumeron tiedot
 		if ($row["sarjanumeroseuranta"] != "") {
 			if ($tyyppi == "SIIRTOLISTA") {
 				$sarjanutunnus = "siirtorivitunnus";
@@ -1664,7 +1664,15 @@ if (!function_exists('rivi_lahete')) {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['rivihinta'];
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1675,7 +1683,15 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['rivihinta'];
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1686,7 +1702,15 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_ean_eiale.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['rivihinta'];
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1697,7 +1721,17 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				// tulosta_lahete_brutto.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += round($row['ovhhinta'] * $kpl_rivilla, 2);
+					$ovhrivihinta = round($row['ovhhinta'] * $kpl_rivilla, 2);
+
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $ovhrivihinta;
+						$return["arvo"]  += ($ovhrivihinta / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($ovhrivihinta * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $ovhrivihinta;
+					}
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1708,33 +1742,114 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialeja.inc") {
 				//tulosta_lahete_eialeja.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['brutto_rivihinta'];
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['brutto_rivihinta'];
+						$return["arvo"]  += ($row['brutto_rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['brutto_rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['brutto_rivihinta'];
+					}
+
 				}
 				else {
-					$row['rivihinta'] = 0;
+					$row['brutto_rivihinta'] = 0;
 				}
 
 				$return = rivi_eialeja_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi.inc") {
 				// tulosta_lahete_viivakoodi.inc
+				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
+
 				$return = rivi_viivakoodi_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_osh.inc") {
 				// tulosta_lahete_viivakoodi.inc
+				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
+
 				$return = rivi_viivakoodi_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 				// tulosta_lahete_asiakviivakoodi.inc
+				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
+
 				$return = rivi_asiakviivakoodi_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
+				// rivi_viivakoodi_lahete_ean13.inc
+				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $row['rivihinta'];
+						$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $row['rivihinta'];
+					}
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
 				$return = rivi_viivakoodi_lahete_ean13($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialehintoja.inc") {
 				// tulosta_lahete_eialehintoja.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += hintapyoristys($row['hinta'] * $row['tilkpl']);
+					$ovhrivihinta = hintapyoristys($row['hinta'] * $row['tilkpl']);
+
+
+					if ($yhtiorow['alv_kasittely'] == '') {
+						$return["summa"] += $ovhrivihinta;
+						$return["arvo"]  += ($ovhrivihinta / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+
+					}
+					else {
+						$return["summa"] += ($ovhrivihinta * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+						$return["arvo"]  += $ovhrivihinta;
+					}
+
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1746,19 +1861,14 @@ if (!function_exists('rivi_lahete')) {
 				$return = rivi_hae_hinnat_lahete($return);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
-
-				#$yhtiorow['alv_kasittely'] == '' - Verolliset myyntihinnat
-				#$yhtiorow['alv_kasittely'] != '' - Verottomat myyntihinnat
-
-				$alv_laskentaan = ($row['alv'] >= 500) ? 0 : $row['alv'];
-
+				//rivi_custom_lahete.inc
 				if ($yhtiorow['alv_kasittely'] == '') {
 					$return["summa"] += $row['rivihinta'];
-					$return["arvo"]  += ($row['rivihinta'] / (1 + $alv_laskentaan / 100));
+					$return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 
 				}
 				else {
-					$return["summa"] += ($row['rivihinta'] * (1 + $alv_laskentaan / 100));
+					$return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
 					$return["arvo"]  += $row['rivihinta'];
 				}
 
@@ -3471,16 +3581,29 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
 				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys", $kieli), $thispage, $boldi);
 			}
+			elseif ($tyyppi == 'TILAUSVAHVISTUS' and strpos($laskurow['tilausvahvistus'], 'A') !== FALSE) {
+				$kala -= 10;
+				$ed_sivu = $sivu;
+
+				// Luodaan palautettavat
+				$return = compact(array_keys($params));
+
+				$params = alvierittely_lahete($return);
+
+				// Luodaan muuttujat
+				extract($params);
+			}
 			else {
 				if ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {
 					$pdf->draw_text(410, 72, t("Yhteensä verollinen", $kieli).":", $thispage, $norm);
+					$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
+					$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
 				}
 				else {
 					$pdf->draw_text(410, 72, t("Yhteensä veroton", $kieli).":", $thispage, $norm);
+					$oikpos = $pdf->strlen(sprintf("%.2f",$arvo)." ".$laskurow["valkoodi"], $norm);
+					$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$arvo)." ".$laskurow["valkoodi"], $thispage, $norm);
 				}
-
-				$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
-				$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
 			}
 		}
 
@@ -3542,6 +3665,16 @@ if (!function_exists('alvierittely_lahete')) {
 			$sivu_vaihtui = TRUE;
 		}
 
+
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
+			$vasen1 = 150;
+			$vasen2 = 470;
+		}
+		else {
+			$vasen1 = 365;
+			$vasen2 = 555;
+		}
+
 		$kassa_ale_lisa = '';
 		$kassa_ale_lisateksti = '';
 
@@ -3550,12 +3683,12 @@ if (!function_exists('alvierittely_lahete')) {
 			$kassa_ale_lisa = " * (1-($kassa_ale/100)) ";
 
 			$kala-=10;
-			$pdf->draw_text(150, $kala, t("Kassa-alennuksella", $kieli), 			$thispage, $boldi);
+			$pdf->draw_text($vasen1, $kala, t("Kassa-alennuksella", $kieli), 			$thispage, $boldi);
 			$kala-=10;
 		}
 
 		// loppusummat vain vikalle sivulle
-		$pdf->draw_text(150, $kala, t("Veroton arvo yhteensä", $kieli).":", 		$thispage, $boldi);
+		$pdf->draw_text($vasen1, $kala, t("Veroton arvo yhteensä", $kieli).":", 		$thispage, $boldi);
 
 		if ($laskurow["arvo"] != 0) {
 			if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -3571,15 +3704,25 @@ if (!function_exists('alvierittely_lahete')) {
 		}
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $arvo), $norm);
-		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $arvo), $thispage, $boldi);
-		$pdf->draw_text(473, $kala, $laskurow["valkoodi"], $thispage, $boldi);
-
-		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi in ('L', 'T') " : " and tilausrivi.tyyppi = 'L' ";
+		$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $arvo), $thispage, $boldi);
+		$pdf->draw_text($vasen2+3, $kala, $laskurow["valkoodi"], $thispage, $boldi);
 
 		$jtlisa = "";
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 			$jtlisa = "+tilausrivi.jt";
+			$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') ";
+		}
+		else {
+			if ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE) {
+				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var != 'P' ";
+			}
+			elseif ($tyyppi == "TILAUSVAHVISTUS") {
+				$tyyppilisa = " and tilausrivi.tyyppi in ('L','T') and tilausrivi.var not in ('P','J') ";
+			}
+			else {
+				$tyyppilisa = " and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J') ";
+			}
 		}
 
 		// Haetaan kaikki alvikannat riveiltä
@@ -3644,18 +3787,18 @@ if (!function_exists('alvierittely_lahete')) {
 
 			$veron_maara += $arow['alvrivihinta'];
 
-			$pdf->draw_text(150, $kala, t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."): ",	$thispage, $boldi);
+			$pdf->draw_text($vasen1, $kala, t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."): ",	$thispage, $boldi);
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $boldi);
-			$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $boldi);
+			$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $boldi);
 
 			if ($alvrow["alv"] >= 600) {
-				$pdf->draw_text(473, $kala, t("K.V.", $kieli), 									$thispage, $boldi);
+				$pdf->draw_text($vasen2+3, $kala, t("K.V.", $kieli), 									$thispage, $boldi);
 			}
 			elseif ($alvrow["alv"] >= 500) {
-				$pdf->draw_text(473, $kala, t("M.V.", $kieli), 									$thispage, $boldi);
+				$pdf->draw_text($vasen2+3, $kala, t("M.V.", $kieli), 									$thispage, $boldi);
 			}
 			else {
-				$pdf->draw_text(473, $kala, ($alvrow["alv"]*1)."%", 							$thispage, $boldi);
+				$pdf->draw_text($vasen2+3, $kala, ($alvrow["alv"]*1)."%", 							$thispage, $boldi);
 			}
 
 			$kala -= 10;
@@ -3674,19 +3817,19 @@ if (!function_exists('alvierittely_lahete')) {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
 		}
 
-		$pdf->draw_text(150, $kala, t("Verollinen arvo yhteensä", $kieli).":", $thispage, $boldi);
+		$pdf->draw_text($vasen1, $kala, t("Verollinen arvo yhteensä", $kieli).":", $thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
-		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), $thispage, $boldi);
-		$pdf->draw_text(473, $kala, $laskurow['valkoodi'], $thispage, $boldi);
+		$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $summa), $thispage, $boldi);
+		$pdf->draw_text($vasen2+3, $kala, $laskurow['valkoodi'], $thispage, $boldi);
 
 		$kala -= 15;
 
-		$pdf->draw_text(150, $kala, t("Lasku yhteensä", $kieli).":",						$thispage, $boldi);
+		$pdf->draw_text($vasen1, $kala, t("Lasku yhteensä", $kieli).":",						$thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
-		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $boldi);
-		$pdf->draw_text(473, $kala, $laskurow["valkoodi"], 									$thispage, $boldi);
+		$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $boldi);
+		$pdf->draw_text($vasen2+3, $kala, $laskurow["valkoodi"], 									$thispage, $boldi);
 
 		if ($laskurow["pyoristys"] != 0) {
 
@@ -3698,16 +3841,16 @@ if (!function_exists('alvierittely_lahete')) {
 			}
 
 			$kala -= 10;
-			$pdf->draw_text(150, $kala, t("Pyöristys", $kieli).":",							$thispage, $boldi);
+			$pdf->draw_text($vasen1, $kala, t("Pyöristys", $kieli).":",							$thispage, $boldi);
 			$oikpos = $pdf->strlen(sprintf('%.2f', $pyoristys * -1), $boldi);
-			$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $pyoristys * -1), 			$thispage, $boldi);
-			$pdf->draw_text(473, $kala, $laskurow["valkoodi"], 								$thispage, $boldi);
+			$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $pyoristys * -1), 			$thispage, $boldi);
+			$pdf->draw_text($vasen2+3, $kala, $laskurow["valkoodi"], 								$thispage, $boldi);
 			$kala -= 10;
 
-			$pdf->draw_text(150, $kala, t("Yhteensä", $kieli).":",							$thispage, $boldi);
+			$pdf->draw_text($vasen1, $kala, t("Yhteensä", $kieli).":",							$thispage, $boldi);
 			$oikpos = $pdf->strlen(sprintf('%.2f', $summa - $pyoristys), $boldi);
-			$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa - $pyoristys), 		$thispage, $boldi);
-			$pdf->draw_text(473, $kala, $laskurow["valkoodi"], 								$thispage, $boldi);
+			$pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $summa - $pyoristys), 		$thispage, $boldi);
+			$pdf->draw_text($vasen2+3, $kala, $laskurow["valkoodi"], 								$thispage, $boldi);
 		}
 
 		// Luodaan palautettavat

@@ -312,17 +312,16 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 							if ((mysql_num_rows($kresult) == 0 and $toiminto == 'LISAA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
 
 								if ($toiminto == 'LISAA') {
-									# Jos ei annettu järjestystä, lisätään uusi järjestys+1
-									if ($jarjestys == 0) {
-										# Uusi korvaava laitetaan aina päätuotteeksi
-										$jarjestys = 1;
 
-										# Päivitetään järjestyksiä jonossa +1
-										$uquery = "UPDATE korvaavat SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
-													WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
-										$result = pupe_query($uquery);
+									// Korvaavat päätuotteeksi, ellei järjestystä ole annettu
+									if ($table == 'korvaavat' and $jarjestys == 0) {
+											$jarjestys = 1;
+										}
 
-									}
+									// Päivitetään järjestyksiä jonossa +1, mutta ei kosketa järjestys=0 riveihin
+									$uquery = "UPDATE $table SET jarjestys=jarjestys+1, muuttaja='{$kukarow['kuka']}', muutospvm=now()
+												WHERE jarjestys!=0 AND id='$id' AND yhtio='{$kukarow['yhtio']}' AND jarjestys >= $jarjestys";
+									$result = pupe_query($uquery);
 
 									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 								}

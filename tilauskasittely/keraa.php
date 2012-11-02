@@ -3103,7 +3103,6 @@
 										AND tunnus = '{$otsik_row['liitostunnus']}'
 										AND kerayserat = 'A'";
 							$asiakas_chk_res = pupe_query($query);
-							$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
 							if (mysql_num_rows($asiakas_chk_res) == 0) $kaikki_ok = false;
 						}

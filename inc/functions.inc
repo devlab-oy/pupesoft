@@ -17388,79 +17388,70 @@ if (!function_exists('gauge')) {
 			gauge.draw($('#value_from').val(), options.max);
 		*/
 
-		echo "<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
-		echo "	<script type='text/javascript' charset='utf-8'>
+?>
+	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+	<script type='text/javascript' charset='utf-8'>
 
-					google.load('visualization', '1', {packages:['gauge']});
-					// google.setOnLoadCallback(drawChart);
+		google.load('visualization', '1', {packages:['gauge']});
+		// google.setOnLoadCallback(drawChart);
 
-					var Gauge = (function() {
-						var data;
-						var options;
-						var chart;
+		var Gauge = (function() {
+			var data;
+			var options;
+			var chart;
 
-						return {
-							init: function(args, opt) {
-								data = new google.visualization.DataTable();
-								options = opt;
+			var parsers = {
+				'custom_parseint': function custom_parseint(val) { return parseInt(val); },
+				'custom_parsefloat': function custom_parsefloat(val) { return parseFloat(val); }
+			}
 
-								data.addColumn('string', 'Label');
-								data.addColumn('number', 'Value');
+			return {
+				init: function(args, opt) {
+					data = new google.visualization.DataTable();
+					options = opt;
 
-								data.addRows(1);
+					data.addColumn('string', 'Label');
+					data.addColumn('number', 'Value');
 
-								var div_id;
-								var _i = 0;
+					data.addRows(1);
 
-								for (var i in args) {
-									var _x = 0;
-									div_id = i;
+					var div_id;
+					var _i = 0;
 
-									for (var x in args[i]) {
-										data.setValue(_i, _x, args[i][x]);
-										_x++;
-									}
-									_i++;
-								}
+					for (var i in args) {
+						var _x = 0;
+						div_id = i;
 
-								$('#chart_div').append('<div id=\''+div_id+'\'></div>');
-								$('#'+div_id).css('float', 'left');
-								var div = document.getElementById(div_id);
-								chart = new google.visualization.Gauge(div);
-
-								chart.draw(data, options);
-
-								var body_bgcolor = $('body').css('background-color');
-								$('#chart_div *').css({'background-color': body_bgcolor});
-							},
-							draw: function(value, max) {
-
-								value = parseInt(value);
-
-								if (parseInt((value / (max / 40))) >= 4) {
-
-									var force = parseInt(value / (max / 40));
-									force = force < 2 ? 2 : force;
-									force = 1 + '.' + force;
-
-									var _dot120 = parseInt(value * force);
-									data.setValue(0, 1, _dot120);
-									chart.draw(data, options);
-
-									var _dot90 = parseInt(value * 0.9);
-									setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
-
-									setTimeout(function(){data.setValue(0, 1, value); chart.draw(data, options);}, 800);
-								}
-								else {
-									data.setValue(0, 1, value);
-									chart.draw(data, options);
-								}
-							}
+						for (var x in args[i]) {
+							data.setValue(_i, _x, args[i][x]);
+							_x++;
 						}
-					});
+						_i++;
+					}
 
-				</script>";
+					$('#chart_div').append('<div id=\''+div_id+'\'></div>');
+					$('#'+div_id).css('float', 'left');
+					var div = document.getElementById(div_id);
+					chart = new google.visualization.Gauge(div);
+
+					chart.draw(data, options);
+
+					var body_bgcolor = $('body').css('background-color');
+					$('#chart_div *').css({'background-color': body_bgcolor});
+				},
+				draw: function(value, draw_options) {
+
+					parser = parsers[draw_options.type];
+					value = parser(value);
+
+					data.setValue(0, 1, value);
+					chart.draw(data, options);
+				}
+			}
+		});
+
+	</script>
+<?php
 	}
 }
 

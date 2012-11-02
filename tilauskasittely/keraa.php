@@ -2956,13 +2956,6 @@
 					$spanni += 1;
 				}
 
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$otsik_row['liitostunnus']}'";
-				$asiakas_chk_res = pupe_query($query);
-				$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
-
 				if ($toim != 'VASTAANOTA_REKLAMAATIO' and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 
 					//tulostetaan faili ja valitaan sopivat printterit
@@ -3104,6 +3097,13 @@
 						$kaikki_ok = true;
 
 						if ($yhtiorow['kerayserat'] == 'A') {
+							$query = "	SELECT *
+										FROM asiakas
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$otsik_row['liitostunnus']}'";
+							$asiakas_chk_res = pupe_query($query);
+							$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
+
 							if ($asiakas_chk_row['kerayserat'] != 'A') $kaikki_ok = false;
 						}
 

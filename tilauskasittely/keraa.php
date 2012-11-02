@@ -1041,7 +1041,7 @@
 								$monistares2 = pupe_query($querys);
 
 								if (mysql_num_rows($monistares2) > 0) {
-									$monistarow2 = mysql_fetch_array($monistares2);
+									$monistarow2 = mysql_fetch_assoc($monistares2);
 
 									$querys = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio				= '$kukarow[yhtio]',
@@ -1352,7 +1352,7 @@
 				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
 				$ulos .= "</body></html>";
 
-				// korvataan poikkeama-meili keräysvahvistuksella
+				// korvataan poikkeama-meili keräysvahvistuksella JOs lähetetään keräysvahvistus per toimitus
 				if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
 					$laskurow["kerayspoikkeama"] = 2;
 				}
@@ -1672,6 +1672,7 @@
 
 					$tilausnumeroita_backup 	= $tilausnumeroita;
 					$lahete_tulostus_paperille 	= 0;
+					$lahete_tulostus_emailiin 	= 0;
 					$laheteprintterinimi 		= "";
 
 					while ($laskurow = mysql_fetch_assoc($lasresult)) {
@@ -1709,7 +1710,12 @@
 							$oslapp = $kirrow['komento'];
 						}
 
-						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ((in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == '')) or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != ""))) {
+						if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
+							or (
+								(in_array($laskurow["keraysvahvistus_lahetys"], array('k','L','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','L','M')) and $laskurow["keraysvahvistus_lahetys"] == ''))
+								or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
+							)
+						) {
 
 							$komento = koontilahete_check($laskurow, $komento);
 
@@ -1721,10 +1727,16 @@
 										if ($paprulleko != 'email' and substr($paprulleko,0,12) != 'asiakasemail') {
 											$lahete_tulostus_paperille++;
 										}
+										else {
+											$lahete_tulostus_emailiin++;
+										}
 									}
 								}
 								elseif ($komento != 'email' and substr($komento,0,12) != 'asiakasemail') {
 									$lahete_tulostus_paperille++;
+								}
+								else {
+									$lahete_tulostus_emailiin++;
 								}
 
 								$sellahetetyyppi = (!isset($sellahetetyyppi)) ? "" : $sellahetetyyppi;
@@ -1744,6 +1756,10 @@
 									);
 
 								pupesoft_tulosta_lahete($params);
+
+								if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";
+								if ($lahete_tulostus_emailiin > 0) echo "<br>".t("Lähetettiin %s sähköistä lähetettä", "", $lahete_tulostus_emailiin).".";
+								if ($lahete_tulostus_emailiin == 0 and $lahete_tulostus_paperille == 0) echo "<br>".t("Lähetteitä ei tulostettu").".";
 							}
 						}
 
@@ -3008,7 +3024,7 @@
 
 						$vresult = t_avainsana("LAHETETYYPPI");
 
-						while($row = mysql_fetch_array($vresult)) {
+						while ($row = mysql_fetch_assoc($vresult)) {
 							$sel = "";
 							if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
 
@@ -3016,10 +3032,6 @@
 						}
 
 						echo "</select>";
-					}
-
-					if (in_array($asiakas_chk_row["keraysvahvistus_lahetys"], array('k','o','M')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k','o','M')) and $asiakas_chk_row["keraysvahvistus_lahetys"] == '')) {
-						echo "<br /><font class='error'>",t("Lähete lähetetään asiakkaalle sähköisesti"),"!</font>";
 					}
 
 					echo "</th>";
@@ -3092,7 +3104,6 @@
 						$kaikki_ok = true;
 
 						if ($yhtiorow['kerayserat'] == 'A') {
-
 							if ($asiakas_chk_row['kerayserat'] != 'A') $kaikki_ok = false;
 						}
 

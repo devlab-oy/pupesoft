@@ -1126,7 +1126,7 @@
 		$ulos .= "<option value='E'{$sel['E']}>".t("Ker‰ysvahvistusta/s‰hkˆiset‰ l‰hetett‰ ei l‰hetet‰")."</option>";
 		$ulos .= "<option value='o'{$sel['o']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle jokaisesta toimituksesta erikseen")."</option>";
 		$ulos .= "<option value='k'{$sel['k']}>".t("Ker‰ysvahvistus/s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
-		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
+		$ulos .= "<option value='L'{$sel['L']}>".t("Ker‰ysvahvistus/paperinen l‰hete tulostetaan asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
 		$ulos .= "<option value='M'{$sel['M']}>".t("Ker‰ysvahvistus/paperinen & s‰hkoinen l‰hete l‰hetet‰‰n asiakkaalle kun koko alkuper‰inen tilaus on ker‰tty")."</option>";
 		$ulos .= "</select></td>";
 

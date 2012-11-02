@@ -425,6 +425,26 @@
 		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri yhden tuotteen korvaavuusketjua.\n";
 		$laskuri = 0;
 
+		// Poistetaan kaikki yhden tuotteen vastaavuusketjut
+		$query = "	SELECT group_concat(tunnus) as tunnus, id
+					FROM vastaavat
+					WHERE yhtio='{$kukarow['yhtio']}'
+					GROUP BY id
+					HAVING count(id) = 1";
+		$result = pupe_query($query);
+
+		$laskuri = 0;
+
+		while ($row = mysql_fetch_assoc($result)) {
+			$query = "DELETE FROM vastaavat WHERE tunnus='$row[tunnus]'";
+			if($delete_result = pupe_query($query)) {
+				$laskuri++;
+			}
+		}
+
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri yhden tuotteen vastaavuusketjua.\n";
+		$laskuri = 0;
+
 		// Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 		$query = "	SELECT tunnus, tuoteno
 					FROM tuotepaikat

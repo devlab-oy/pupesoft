@@ -823,7 +823,7 @@
 							$kieltolisa
 							$poislisa
 							$extra_poislisa
-							ORDER BY {$tvk_taulu}.jarjestys, {$tvk_taulu}.tuoteno";
+							ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
 				$kores = pupe_query($query);
 
 				return $kores;
@@ -888,7 +888,7 @@
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'V' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') osaluettelo,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
-					ifnull((SELECT id FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
+					ifnull((SELECT group_concat(id) FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
 					tuote.tuoteno,
 					tuote.nimitys,
 					tuote.osasto,
@@ -929,27 +929,33 @@
 
 				if ($mrow["vastaavat"] != $mrow["tuoteno"]) {
 
-					$kores = tuoteselaushaku_vastaavat_korvaavat("vastaavat", $mrow["vastaavat"], $mrow["tuoteno"]);
+					// Tuote voi olla useammassa vastaavuusketjussa
+					$vastaavat = explode(',', $mrow['vastaavat']);
 
-					if (mysql_num_rows($kores) > 0) {
+					foreach ($vastaavat as $mrow['vastaavat']) {
 
-						$vastaavamaara = mysql_num_rows($kores);
+						$kores = tuoteselaushaku_vastaavat_korvaavat("vastaavat", $mrow["vastaavat"], $mrow["tuoteno"]);
 
-						while ($krow = mysql_fetch_assoc($kores)) {
+						if (mysql_num_rows($kores) > 0) {
 
-							if (isset($vastaavamaara)) {
-								$krow["vastaavamaara"] = $vastaavamaara;
-								unset($vastaavamaara);
+							$vastaavamaara = mysql_num_rows($kores);
+
+							while ($krow = mysql_fetch_assoc($kores)) {
+
+								if (isset($vastaavamaara)) {
+									$krow["vastaavamaara"] = $vastaavamaara;
+									unset($vastaavamaara);
+								}
+								else {
+									$krow["mikavastaava"] = $mrow["tuoteno"];
+								}
+
+								if (!isset($rows[$mrow["vastaavat"].$krow["tuoteno"]])) $rows[$mrow["vastaavat"].$krow["tuoteno"]] = $krow;
 							}
-							else {
-								$krow["mikavastaava"] = $mrow["tuoteno"];
-							}
-
-							if (!isset($rows[$mrow["korvaavat"].$krow["tuoteno"]])) $rows[$mrow["korvaavat"].$krow["tuoteno"]] = $krow;
 						}
-					}
-					else {
-						$rows[$mrow["tuoteno"]] = $mrow;
+						else {
+							$rows[$mrow["tuoteno"]] = $mrow;
+						}
 					}
 				}
 

@@ -8,6 +8,10 @@
 	echo "<script type='text/javascript' language='JavaScript'>
 
 			<!--
+                                $(document).ready(function(){
+                                    update_summa(\"tasmaytysform\");
+                                  });
+                                
 				function disableDates() {
 					if (document.getElementById('tasmays').checked != true) {
 						document.getElementById('pp').disabled = true;
@@ -619,15 +623,16 @@
 		$result = pupe_query($query);
 		$laskuid = mysql_insert_id();
 
-		$maksutapa	 	= "";
-		$kassalipas 	= "";
-		$tilino 		= "";
-		$pohjakassa 	= "";
-		$loppukassa 	= "";
-		$comments 		= "";
-		$comments_yht 	= "";
-		$tyyppi 		= "";
-		$kustp 			= "";
+		$maksutapa	 	  = "";
+		$kassalipas 	  = "";
+		$tilino 		  = "";
+		$pohjakassa 	  = "";
+		$loppukassa 	  = "";
+		$comments 		  = "";
+		$comments_yht     = "";
+		$tyyppi 		  = "";
+		$kustp 			  = "";
+		$loppukassa_array = array();
 
 		foreach ($_POST as $kentta => $arvo) {
 
@@ -645,6 +650,7 @@
 			else if (stristr($kentta,"yht_lopkas")) {
 				$arvo = str_replace(".",",",sprintf('%.2f',$arvo));
 				$comments .= "$tyyppi loppukassa: $arvo<br><br>";
+				$loppukassa_array[$kassalipas] = $arvo;
 			}
 
 			if (stristr($kentta, "yht_")) {
@@ -883,7 +889,11 @@
 		$loppukassa = str_replace(".",",",sprintf('%.2f',$loppukassa));
 		$comments_yht .= "$loppukassa<br>";
 
-		$query = "	UPDATE lasku SET comments = '$comments<br>".t("Alkukassa yhteensä").": $pohjakassa<br>$comments_yht'
+		$kassa_json = json_encode(array("loppukassa" => $loppukassa_array, "date" => "{$vv}-{$kk}-{$pp}"));
+		$query = "	UPDATE lasku
+					SET
+						comments   = '$comments<br>".t("Alkukassa yhteensä").": $pohjakassa<br>$comments_yht',
+						sisviesti2 = concat_ws('##', '$kassa_json', sisviesti2) 
 					WHERE yhtio  = '$kukarow[yhtio]'
 					AND tunnus = $laskuid";
 		$result = pupe_query($query);
@@ -1121,7 +1131,7 @@
 				echo "</tr>";
 
 				$row = mysql_fetch_assoc($result);
-
+				$row = get_pohjakassa($row);
 				echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 				echo "<input type='hidden' name='tyyppi_pohjakassa$i' id='tyyppi_pohjakassa$i' value='$row[kassanimi]'>";
 				echo "<tr><td colspan='";
@@ -1134,7 +1144,8 @@
 				}
 
 				echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
-				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				$pohja = $row["pohjakassa"];
+				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$pohja}'></td>";
 
 				if ($tilityskpl > 1) {
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
@@ -1196,7 +1207,7 @@
 				}
 
 				while ($row = mysql_fetch_assoc($result)) {
-
+					$row = get_pohjakassa($row);
 					if ($row["tyyppi"] == 'Pankkikortti') {
 						$pankkikortti = true;
 					}
@@ -1326,7 +1337,8 @@
 									echo "9";
 								}
 							echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
-							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+							$pohja = $row["pohjakassa"];
+							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");' value='{$pohja}'></td>";
 							if ($tilityskpl > 1) {
 								for ($yy = 1; $yy < $tilityskpl; $yy++) {
 									echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
@@ -2145,4 +2157,30 @@
 
 	require ("inc/footer.inc");
 
+function get_pohjakassa($row) {
+	global $kukarow;
+	
+	if (isset($row["pohjakassa"])) {
+		return ($row);
+	}
+
+	$like = "%{\"loppukassa\":{%\"" . $row["kassanimi"] . "\"%}%}%";
+	
+	$pk_query = "SELECT tunnus, tapvm, sisviesti2 
+					FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]'
+					 	AND tila = 'X'
+						AND sisviesti2 LIKE '$like' 
+					ORDER BY tapvm DESC
+					LIMIT 1;";
+	$pk_result = pupe_query($pk_query);
+
+	if (mysql_num_rows($pk_result) == 1) {
+		$pk_row = mysql_fetch_assoc($pk_result);
+		$pk_t = explode("##", $pk_row["sisviesti2"]);
+		$pk = json_decode($pk_t[0], TRUE);
+		$row["pohjakassa"] = $pk["loppukassa"][$row["kassanimi"]];
+	}
+	return $row;
+}
 ?>

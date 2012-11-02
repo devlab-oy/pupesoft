@@ -3097,14 +3097,15 @@
 						$kaikki_ok = true;
 
 						if ($yhtiorow['kerayserat'] == 'A') {
-							$query = "	SELECT *
+							$query = "	SELECT kerayserat
 										FROM asiakas
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$otsik_row['liitostunnus']}'";
+										AND tunnus = '{$otsik_row['liitostunnus']}'
+										AND kerayserat = 'A'";
 							$asiakas_chk_res = pupe_query($query);
 							$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
-							if ($asiakas_chk_row['kerayserat'] != 'A') $kaikki_ok = false;
+							if (mysql_num_rows($asiakas_chk_res) == 0) $kaikki_ok = false;
 						}
 
 						if ($kaikki_ok) {

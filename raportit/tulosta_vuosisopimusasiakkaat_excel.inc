@@ -178,6 +178,11 @@ class vuosisopimus_asiakkaat_excel {
 		$this->excel_sarake++;
 	}
 
+	private function write_aika_solu($aika) {
+		$this->excel->writeDate($this->excel_rivi, $this->excel_sarake, $aika);
+		$this->excel_sarake++;
+	}
+
 	private function add_tyhja_kolumni($kolumni_numero = 1) {
 		$this->excel_sarake += $kolumni_numero;
 	}

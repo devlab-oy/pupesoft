@@ -152,8 +152,22 @@
 	}
 
 	if ($tee == "TULOSTAPDF") {
-		$komento["Ostotilaus"] = "email";
-		require("tulosta_vahvistamattomista_ostoriveista.inc");
+		if($tulosta_exceliin == 'on') {
+			$komento["Ostotilaus"] = "email";
+			require_once 'tulosta_vahvistamattomista_ostoriveista_excel.inc';
+
+			$excel = new vahvistamattomat_ostorivit_excel();
+			$excel->set_kieli($kieli);
+			$excel->set_yhtiorow($yhtiorow);
+			$excel->set_toimittaja($laskurow);
+			$excel->set_rivit(get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $kieli));
+
+			$excel->generoi();
+		}
+		else {
+			$komento["Ostotilaus"] = "email";
+			require("tulosta_vahvistamattomista_ostoriveista.inc");
+		}
 	}
 
 	if (isset($laskurow)) {
@@ -252,6 +266,8 @@
 				<input type='hidden' name='otunnus' value = '{$otunnus}'>
 				<input type='hidden' name='keikka' value = '{$keikka}'>
 				<input type='hidden' name='tee' value = 'TULOSTAPDF'>";
+
+		echo "<tr><th>".t('Tulosta tiedot exceliin')."</th><td><input type='checkbox' name='tulosta_exceliin' /></td></tr>";
 
 		echo "<tr><th>",t("Tulosta vahvistamattomat rivit"),": </th>
 				<td><input type='Submit' value='",t("Tulosta"),"'></form></td></tr></table><br>";
@@ -394,6 +410,65 @@
 			</tr>";
 
 		echo "</form></table>";
+	}
+
+	function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $kieli) {
+		global $yhtiorow, $kukarow;
+
+		$query_ale_lisa = generoi_alekentta('O');
+
+		$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
+		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
+					tilkpl,
+					round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
+					hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+					toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
+					toim_tuoteno
+					FROM tilausrivi
+					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
+					WHERE otunnus in ($tilaus_otunnukset)
+					and tilausrivi.yhtio='$kukarow[yhtio]'
+					and tilausrivi.uusiotunnus=0
+					and tilausrivi.tyyppi='O'
+					and tilausrivi.jaksotettu = 0
+					ORDER BY tilausrivi.otunnus";
+		$result = pupe_error($query);
+
+		$rivit = array();
+		$total = 0;
+		while($row = mysql_fetch_assoc($result)) {
+			//	Tarkastetaan olisiko toimittajalla yksikkö!
+			$query = "	SELECT toim_yksikko
+						FROM tuotteen_toimittajat
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and tuoteno 		= '$row[tuoteno]'
+						and liitostunnus 	= '$laskurow[liitostunnus]'
+						LIMIT 1";
+			$rarres = pupe_error($query);
+			$rarrow	 = mysql_fetch_assoc($rarres);
+
+			if ($row["yksikko"] == "") {
+				$row["yksikko"] = $rarrow["toim_yksikko"];
+			}
+			if ($rarrow["toim_yksikko"] == "") {
+				$rarrow["toim_yksikko"] = $row["yksikko"];
+			}
+
+			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			$toyks = t_avainsana("Y", $kieli, "and avainsana.selite='$rarrow[toim_yksikko]'", "", "", "selite");
+
+			$row['omyks'] = $omyks;
+			$row['toyks'] = $toyks;
+
+			$rivit[] = $row;
+			$total += $row['rivihinta'];
+		}
+
+		$rivit['total_rivihinta'] = $total;
+
+		return $rivit;
 	}
 
 	require ("inc/footer.inc");

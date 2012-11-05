@@ -502,7 +502,7 @@
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
 		while ($kirow = mysql_fetch_array($kires)) {
-			if ($kirow["selite"]." ".$kirow["selitetark"] == $trow[$i]) $select = 'SELECTED';
+			if (trim($kirow["selite"]." ".$kirow["selitetark"]) == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
 			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] $kirow[selitetark]</option>";

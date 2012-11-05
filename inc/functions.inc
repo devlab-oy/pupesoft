@@ -13999,7 +13999,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 
 if (!function_exists("hae_hyvityshinta")) {
 	function hae_hyvityshinta($liitostunnus, $tuoteno, $kpl) {
-		global $kukarow;
+		global $kukarow, $yhtiorow;
 
 		$kpl = abs($kpl);
 		$laskuri = 0;
@@ -14009,10 +14009,17 @@ if (!function_exists("hae_hyvityshinta")) {
 		// Haetaan tuotteen tiedot
 		$status =  "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tuoteno = '$tuoteno'";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$tuoteno}'";
 		$tuoteres = pupe_query($status);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
+
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$liitostunnus}'";
+		$asiakasres = pupe_query($query);
+		$asiakasrow = mysql_fetch_assoc($asiakasres);
 
 		$query_ale_lisa = generoi_alekentta('M');
 
@@ -14024,10 +14031,10 @@ if (!function_exists("hae_hyvityshinta")) {
 					JOIN tilausrivi USE index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
 									AND tilausrivi.otunnus = lasku.tunnus
 									AND tilausrivi.tyyppi != 'D'
-									AND tilausrivi.tuoteno = '$tuoteno'
+									AND tilausrivi.tuoteno = '{$tuoteno}'
 									AND tilausrivi.varattu+tilausrivi.kpl > 0)
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.liitostunnus = '$liitostunnus'
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.liitostunnus = '{$liitostunnus}'
 					AND lasku.tila = 'L'
 					AND lasku.alatila IN ('D','X')
 					GROUP BY ika, hinta
@@ -14039,10 +14046,10 @@ if (!function_exists("hae_hyvityshinta")) {
 					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_varattu)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
 						AND lasku.tunnus = tilausrivi.otunnus
-						AND lasku.liitostunnus = '$liitostunnus')
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND lasku.liitostunnus = '{$liitostunnus}')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tyyppi in ('0','L','M','V','W')
-					AND tilausrivi.tuoteno = '$tuoteno'
+					AND tilausrivi.tuoteno = '{$tuoteno}'
 					AND tilausrivi.varattu+tilausrivi.kpl < 0
 					GROUP BY ika, hinta
 					HAVING kpl != 0)
@@ -14102,26 +14109,62 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		foreach ($tilausrivit as $tilausrivi_index => $tilausrivi_arvo) {
 
-			unset($ale);
-			unset($kommentti);
+			$ale = $kommentti = $palautuskielto = "";
 
-			$sql = "SELECT tuote_kentta, tuote_arvo, aika_ostosta, rokotusprosentti, palautuskielto, prioriteetti, rokotusselite
+			$sql = "SELECT tuote_kentta,
+					tuote_arvo,
+					asiakas_kentta,
+					asiakas_arvo,
+					asiakas_segmentti,
+					aika_ostosta,
+					rokotusprosentti,
+					palautuskielto,
+					prioriteetti,
+					rokotusselite
 					FROM hyvityssaannot
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND (aika_ostosta > '$tilausrivi_arvo[ika]' or aika_ostosta = 0)
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND (aika_ostosta > '{$tilausrivi_arvo['ika']}' or aika_ostosta = 0)
 					ORDER BY prioriteetti, tunnus";
 			$result = pupe_query($sql);
 
 			while ($rivi = mysql_fetch_array($result)) {
 
-				if ($rivi["tuote_kentta"] == "") {
-					$ale = $rivi["rokotusprosentti"];
-					$kommentti = $rivi["rokotusselite"];
-					break;
+				$tuote = true;
+				$asiakas = true;
+				$segmentti = true;
+
+				unset($kentta, $arvo);
+
+				foreach ($rivi as $kentta => $arvo) {
+
+					switch ($kentta) {
+						case 'tuote_kentta':
+							if ($arvo != '' and $rivi['tuote_arvo'] != '' and $tuoterow[$arvo] != $rivi["tuote_arvo"]) $tuote = false;
+							break;
+						case 'asiakas_kentta':
+							if ($arvo != '' and $rivi['asiakas_arvo'] != '' and $asiakasrow[$arvo] != $rivi["asiakas_arvo"]) $asiakas = false;
+							break;
+						case 'asiakas_segmentti':
+							if ($arvo != 0) {
+								$query = "	SELECT tunnus
+											FROM puun_alkio
+											WHERE yhtio	= '{$kukarow['yhtio']}'
+											AND liitos = '{$liitostunnus}'
+											AND laji = 'asiakas'
+											AND puun_tunnus = '{$arvo}'
+											AND kieli = '{$yhtiorow['kieli']}'";
+
+								if (mysql_num_rows(pupe_query($query)) == 0) $segmentti = false;
+							}
+
+							break;
+					}
 				}
-				elseif ($rivi["tuote_kentta"] != "" and $tuoterow[$rivi["tuote_kentta"]] == $rivi["tuote_arvo"]) {
+
+				if ($tuote and $asiakas and $segmentti) {
 					$ale = $rivi["rokotusprosentti"];
 					$kommentti = $rivi["rokotusselite"];
+					$palautuskielto = $rivi['palautuskielto'];
 					break;
 				}
 			}
@@ -14131,7 +14174,13 @@ if (!function_exists("hae_hyvityshinta")) {
 				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
 			}
 			else {
-				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => "");
+
+				if ($palautuskielto != "") {
+					$tilausrivi_arvo['hinta'] = 0;
+					$ale = 0;
+				}
+
+				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => $palautuskielto);
 			}
 		}
 

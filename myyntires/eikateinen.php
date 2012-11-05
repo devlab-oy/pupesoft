@@ -27,7 +27,7 @@ if ($toim == 'KATEINEN') {
 		);
 		$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
 
-		$_kassalipas = hae_kassalippaan_tiedot($kassalipas);
+		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $konsrow);
 
 		$params = array(
 			'laskurow'		 => $laskurow,
@@ -258,7 +258,7 @@ function tee_kirjanpito_muutokset($params) {
 
 	if ($params['toim'] == 'KATEINEN') {
 		$query = "	UPDATE tiliointi
-					SET tilino = '{$params['_kassalipas']['kassa']}',
+					SET tilino = '{$params['_kassalipas']}',
 					summa = '{$params['laskurow']['summa']}'
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and ltunnus	= '{$params['tunnus']}'
@@ -526,16 +526,47 @@ function echo_lasku_search() {
 	echo "</form>";
 }
 
-function hae_kassalippaan_tiedot($kassalipas) {
-	global $kukarow;
-	$query = "
-		SELECT *
-		FROM kassalipas
-		WHERE kassalipas.yhtio='{$kukarow['yhtio']}' and kassalipas.tunnus='{$kassalipas}'";
+function hae_kassalippaan_tiedot($kassalipas, $mehtorow) {
+	global $yhtiorow, $kukarow;
 
-	$result = pupe_query($query);
+	if ($mehtorow['kateinen'] != '') {
 
-	return mysql_fetch_assoc($result);
+		$query = "	SELECT *
+					FROM kassalipas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and tunnus  = '{$kassalipas}'";
+		$kateisresult = pupe_query($query);
+		$kateisrow = mysql_fetch_assoc($kateisresult);
+
+		if ($mehtorow['kateinen'] == "n") {
+			if ($kateisrow["pankkikortti"] != "") {
+				$myysaatili = $kateisrow["pankkikortti"];
+			}
+			else {
+				$myysaatili = $yhtiorow['pankkikortti'];
+			}
+		}
+
+		if ($mehtorow['kateinen'] == "o") {
+			if ($kateisrow["luottokortti"] != "") {
+				$myysaatili = $kateisrow["luottokortti"];
+			}
+			else {
+				$myysaatili = $yhtiorow['luottokortti'];
+			}
+		}
+
+		if ($myysaatili == "") {
+			if ($kateisrow["kassa"] != "") {
+				$myysaatili = $kateisrow["kassa"];
+			}
+			else {
+				$myysaatili = $yhtiorow['kassa'];
+			}
+		}
+	}
+
+	return $myysaatili;
 }
 
 require ("inc/footer.inc");

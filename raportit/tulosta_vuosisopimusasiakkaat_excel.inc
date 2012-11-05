@@ -1,7 +1,6 @@
 <?php
 
 require_once '../inc/pupeExcel.inc';
-require_once '../inc/functions.inc';
 
 class vuosisopimus_asiakkaat_excel {
 

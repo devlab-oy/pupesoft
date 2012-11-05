@@ -2,8 +2,6 @@
 
 	require ("../inc/parametrit.inc");
 
-	require_once '../inc/functions.inc';
-
 	echo "<font class='head'>",t("Toimittajan avoimet tilausrivit"),":</font><hr>";
 
 	if (!isset($ytunnus)) $ytunnus = '';

@@ -7,10 +7,6 @@
 	require "tulosta_vuosisopimusasiakkaat.inc";
 	require_once 'tulosta_vuosisopimusasiakkaat_excel.inc';
 
-	require_once '../email.php';
-
-	require_once '../inc/functions.inc';
-
 	if($asiakas_tarkistus == 1) {
 		$ajax_params = array(
 			'ytunnus' => $ytunnus,
@@ -31,7 +27,7 @@
 		exit;
 	}
 
-	echo "<font class='head'>Vuosisopimusasiakkaat</font><hr>";
+	echo "<font class='head'>".t('Vuosisopimusasiakkaat' , $kieli)."</font><hr>";
 
 	if ($ytunnus != "" and $asiakasid == "") {
 		if ($muutparametrit == '') {
@@ -51,17 +47,17 @@
 	}
 
 	if ($tee == "tulosta" and $komento == "" and $ytunnus == "") {
-		echo "<font class='error'>VALITSE TULOSTIN!!!</font><br><br>";
+		echo "<font class='error'>".t('VALITSE TULOSTIN' , $kieli)."!!!</font><br><br>";
 		$tee = "";
 	}
 
 	if ($tee == "tulosta" and $raja == "") {
-		echo "<font class='error'>RAJA PUUTTUU!!!</font><br><br>";
+		echo "<font class='error'>".t('RAJA PUUTTUU' , $kieli)."!!!</font><br><br>";
 		$tee = "";
 	}
 
 	if ($tee == "tulosta" and (!checkdate($alkukk, $alkupp, $alkuvv) or !checkdate($loppukk, $loppupp, $loppuvv))) {
-		echo "<font class='error'>PVM RAJAT PUUTTUU, TAI NE ON VIRHEELLISET!!!</font><br><br>";
+		echo "<font class='error'>".t('PVM RAJAT PUUTTUU, TAI NE ON VIRHEELLISET', $kieli)."!!!</font><br><br>";
 		$tee = "";
 	}
 
@@ -69,7 +65,7 @@
 
 		// haetaan aluksi sopivat asiakkaat
 		// viimeisen 12 kuukauden myynti pitää olla yli $rajan
-		echo "<font class='message'>Haetaan sopivia asiakkaita (myynti $alkupvm - $loppupvm yli $raja)... ";
+		echo "<font class='message'>".t('Haetaan sopivia asiakkaita' , $kieli)." (".t('myynti', $kieli)." $alkupvm - $loppupvm ".t('yli' , $kieli)." $raja)... ";
 
 		$params = array(
 			'ytunnus' => $ytunnus,
@@ -102,7 +98,7 @@
 
 		$data_array = array();
 		foreach($asiakkaat as $asiakas) {
-			$tilaukset_ilman_tuoteryhmia = hae_tilaukset_ilman_tuoteryhmia($params, $asiakas['tunnus']);
+			$tilaukset_ilman_tuoteryhmia = hae_tilaukset($params, $asiakas['tunnus'], 'ilman_tuoteryhmia');
 			
 			$summa_array = array(
 				'sumkpled' => 0,
@@ -117,7 +113,7 @@
 				$summa_array['sumva'] += $tilaus['va'];
 			}
 
-			$tilaukset_tuoteryhmilla = hae_tilaukset_tuoteryhmilla($params, $asiakas['tunnus']);
+			$tilaukset_tuoteryhmilla = hae_tilaukset($params, $asiakas['tunnus'], '');
 
 			$summa_array2 = array(
 				'sumkpled' => 0,
@@ -143,7 +139,7 @@
 
 		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
 
-		echo "<br>Kaikki valmista.</font>";
+		echo "<br>".t('Kaikki valmista' , $kieli).".</font>";
 
 	} // end tee == tulosta
 
@@ -157,7 +153,7 @@
 		if (!isset($loppukk)) $loppukk = date("m");
 		if (!isset($loppuyy)) $loppuvv = date("Y");
 
-		echo "<font class='message'>Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta.</font><br><br>";
+		echo "<font class='message'>".t('Jos asiakkaalla tai sen myyjällä ei ole sähköpostia, raportit lähetetään sähköpostiin tai tulostetaan haluamaasi tulostimeen riippuen tulostimen valinnasta' , $kieli).".</font><br><br>";
 
 		echo "<form name='vuosiasiakkaat_form' method='post'>";
 		echo "<input type='hidden' name='tee' value='tulosta'>";
@@ -165,9 +161,9 @@
 		echo "<input type ='hidden' name='muutparametrit' value='$muutparametrit'>";
 
 		echo "<table>";
-		echo "<tr><th>Valitse tulostin:</th>";
+		echo "<tr><th>".t('Valitse tulostin',$kieli).":</th>";
 		echo "<td><select name='komento'>";
-		echo "<option value=''>Ei kirjoitinta</option>";
+		echo "<option value=''>".t('Ei kirjoitinta',$kieli)."</option>";
 
 		$query = "	SELECT *
 					FROM kirjoittimet
@@ -181,32 +177,32 @@
 
 		echo "</select></td></tr>";
 
-		echo "<tr><th>Syötä ostoraja:</th>";
+		echo "<tr><th>".t('Syötä ostoraja' , $kieli).":</th>";
 		echo "<td><input type='text' name='raja' value='10000' size='10'> $yhtiorow[valkoodi] valitulla ajanjaksolla</td></tr>";
 		echo "<tr><th>".t('Generoi excel tiedosto').":</th><td><input type='checkbox' name='generoi_excel' /></td></tr>";
 		echo "<tr>";
-		echo "<th>Lähetä sähköpostit:</th>";
+		echo "<th>".t('Lähetä sähköpostit', $kieli).":</th>";
 		echo "<td>
-				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>Ohjelman ajajalle<br>
-				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>Asiakkaalle<br>
-				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>Asiakkaan myyjälle<br>
+				<input type='radio' name='laheta_sahkopostit' value='ajajalle'>".t('Ohjelman ajajalle' , $kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaalle'>".t('Asiakkaalle',$kieli)."<br>
+				<input type='radio' name='laheta_sahkopostit' value='asiakkaan_myyjalle'>".t('Asiakkaan myyjälle',$kieli)."<br>
 			</td>";
 		echo "</tr>";
-		echo "<tr><th>Asiakasnumero:</th>";
-		echo "<td><input type='text' name='ytunnus' size='10'> aja vain tämä asiakas (tyhjä=kaikki)</td></tr>";
-		echo "<tr><th>Alku päivämäärä:</th>";
+		echo "<tr><th>".t('Asiakasnumero',$kieli).":</th>";
+		echo "<td><input type='text' name='ytunnus' size='10'> ".t('aja vain tämä asiakas',$kieli)." (".t('tyhjä',$kieli)."=".t('kaikki',$kieli).")</td></tr>";
+		echo "<tr><th>".t('Alku päivämäärä',$kieli).":</th>";
 		echo "<td>";
 		echo "<input type='text' name='alkupp' value='$alkupp' size='10'>";
 		echo "<input type='text' name='alkukk' value='$alkukk' size='10'>";
 		echo "<input type='text' name='alkuvv' value='$alkuvv' size='10'> pp kk vvvv</td></tr>";
-		echo "<tr><th>Loppu päivämäärä:</th>";
+		echo "<tr><th>".t('Loppu päivämäärä',$kieli).":</th>";
 		echo "<td>";
 		echo "<input type='text' name='loppupp' value='$loppupp' size='10'>";
 		echo "<input type='text' name='loppukk' value='$loppukk' size='10'>";
 		echo "<input type='text' name='loppuvv' value='$loppuvv' size='10'> pp kk vvvv</td></tr>";
 		echo "</table>";
 
-		echo "<br><input type='submit' value='Tulosta' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
+		echo "<br><input type='submit' value='".t('Tulosta',$kieli)."' onclick='if(tarkista()){document.vuosiasiakkaat_form.submit();} else{return false;}'></form>";
 
 		ob_start();
 		?>
@@ -313,45 +309,20 @@
 		return $asiakkaat;
 	}
 
-	function hae_tilaukset_ilman_tuoteryhmia($params, $asiakas_tunnus) {
+	function hae_tilaukset($params, $asiakas_tunnus, $tyyppi) {
 		global $kukarow;
 
-		$query = "	SELECT tuote.osasto,
-						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
-						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
-						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
-						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.kpl, 0)) kpled
-						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
-						JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.liitostunnus = '{$asiakas_tunnus}'
-						AND lasku.tapvm >= '{$params['edalkupvm']}'
-						AND lasku.tila = 'L'
-						AND lasku.alatila = 'X'
-						GROUP BY osasto
-						HAVING va != 0 OR ed != 0 OR kplva != 0 OR kpled != 0
-						ORDER BY osasto";
-		$result = pupe_query($query);
-
-		$tilaukset = array();
-		while($row = mysql_fetch_assoc($result)) {
-			if($row['osasto'] < 10000) {
-				$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-				$tryro = mysql_fetch_array($tryre);
-				$row['asananumero'] = $row['osasto'];
-				$row['tryro_selitetark'] = $tryro["selitetark"];
-
-				$tilaukset[] = $row;
-			}
+		if($tyyppi == 'ilman_tuoteryhmia') {
+			$select = "tuote.osasto,";
+			$group = "osasto";
+			$order = "osasto";
 		}
-		return $tilaukset;
-	}
-
-	function hae_tilaukset_tuoteryhmilla($params, $asiakas_tunnus) {
-		global $kukarow;
-
-		$query = "	SELECT tuote.osasto, tuote.try,
+		else {
+			$select = "tuote.osasto, tuote.try,";
+			$group = "osasto, try";
+			$order = "osasto, try";
+		}
+		$query = "	SELECT {$select},
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '{$params['edalkupvm']}'											and tapvm <= '{$params['edloppupvm']}', tilausrivi.rivihinta, 0)) ed,
 						sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'		and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
@@ -364,23 +335,31 @@
 						AND lasku.tapvm >= '{$params['edalkupvm']}'
 						AND lasku.tila = 'L'
 						AND lasku.alatila = 'X'
-						GROUP BY osasto, try
+						GROUP BY {$group}
 						HAVING va != 0 OR ed != 0 OR kplva != 0 OR kpled != 0
-						ORDER BY osasto, try";
+						ORDER BY {$order}";
 		$result = pupe_query($query);
 
 		$tilaukset = array();
 		while($row = mysql_fetch_assoc($result)) {
 			if($row['osasto'] < 10000) {
-				$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
-				$tryro = mysql_fetch_array($tryre);
-				$row['asananumero'] = $row['try'];
-				$row['tryro_selitetark'] = $tryro["selitetark"];
+				if($tyyppi == 'ilman_tuoteryhmia') {
+					$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+					$tryro = mysql_fetch_array($tryre);
+					$row['asananumero'] = $row['osasto'];
+					$row['tryro_selitetark'] = $tryro["selitetark"];
+				}
+				else {
+					$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
+					$tryro = mysql_fetch_array($tryre);
+					$row['asananumero'] = $row['try'];
+					$row['tryro_selitetark'] = $tryro["selitetark"];
 
-				$osre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-				$osrow = mysql_fetch_array($osre);
+					$osre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+					$osrow = mysql_fetch_array($osre);
 
-				$row['osasto_selite'] = $osrow['selitetark'];
+					$row['osasto_selite'] = $osrow['selitetark'];
+				}
 
 				$tilaukset[] = $row;
 			}
@@ -531,7 +510,7 @@
 	}
 
 	function luo_zip_ja_laheta($tiedostot, $email_address) {
-		global $yhtiorow;
+		global $yhtiorow, $kieli;
 		
 		$maaranpaa = '/tmp/Ostoseuranta_raportit.zip';
 		$ylikirjoita = true;//ihan varmuuden vuoks
@@ -543,7 +522,7 @@
 			unlink($maaranpaa);
 		}
 		else {
-			echo "Zipin luominen epäonnistui";
+			echo t("Zipin luominen epäonnistui", $kieli);
 		}
 
 		//poistetaan pdf tiedostot
@@ -570,8 +549,11 @@
 			if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
 				$ctype = 'pdf';
 			}
-			else {
+			else if(stristr(mime_content_type($liitetiedosto_path), 'xls')) {
 				$ctype = 'excel';
+			}
+			else {
+				$ctype = '';
 			}
 			$liitetiedosto =  array(
 				'filename' => $liitetiedosto_path,
@@ -585,7 +567,9 @@
 	}
 
 	function tulosta_raportit($tiedostot, $komento) {
-		echo "Tulostetaan asiakkaan ostoseuranta tulostimeen {$komento}";
+		global $kieli;
+		
+		echo t("Tulostetaan asiakkaan ostoseuranta tulostimeen {$komento}", $kieli);
 
 		foreach ($tiedostot as $tiedosto) {
 			$line = exec($komento." ".$tiedosto);

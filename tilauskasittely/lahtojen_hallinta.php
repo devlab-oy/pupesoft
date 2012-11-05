@@ -2140,6 +2140,8 @@
 			if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu');
 			$chk = array_fill_keys($nayta_valinnat, " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
 
+			$lopetus_url = "{$palvelin2}tilauskasittely/lahtojen_hallinta.php////select_varasto={$select_varasto}//tee=";
+
 			echo "<br />";
 			echo "<form method='post' action=''>";
 			echo "<table>";
@@ -2149,6 +2151,7 @@
 			echo "<input type='hidden' name='tee' value='lahto' />";
 			echo "<input type='hidden' name='tilaukset' value='{$tilaukset}' />";
 			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
+			echo "<input type='hidden' name='lopetus' value='{$lopetus_url}' />";
 			echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
 			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
 			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";

@@ -2,127 +2,73 @@
 
 require ("../inc/parametrit.inc");
 
-if ($toim == 'KATEINEN') {
-
+if($toim == 'KATEINEN') {
 	echo "<font class='head'>".t("Lasku halutaankin maksaa käteisellä")."</font><hr>";
-
-	if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
-
-		$mehtorow = hae_maksuehto($maksuehto);
-		$laskurow = hae_lasku($tunnus);
-		$konsrow  = hae_asiakas($laskurow);
-
-		$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
-
-		$params = array(
-			'konsrow'		 => $konsrow,
-			'mehtorow'		 => $mehtorow,
-			'laskurow'		 => $laskurow,
-			'maksuehto'		 => $maksuehto,
-			'tunnus'		 => $tunnus,
-			'toim'			 => $toim,
-			'tapahtumapaiva' => $tapahtumapaiva,
-			'kassalipas'	 => $kassalipas
-		);
-
-		$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
-
-		$params = array(
-			'laskurow'		 => $laskurow,
-			'tunnus'		 => $tunnus,
-			'myysaatili'	 => $myysaatili,
-			'toim'			 => $toim,
-			'_kassalipas'	 => $_kassalipas
-		);
-
-		tee_kirjanpito_muutokset($params);
-		yliviivaa_alet_ja_pyoristykset($tunnus);
-		tarkista_pyoristys_erotukset($laskurow, $tunnus);
-		vapauta_kateistasmaytys($_kassalipas, $tapahtumapaiva);
-
-		if (empty($mehtorow) and empty($laskurow)) {
-			$laskuno 	= 0;
-			$tunnus 	= 0;
-			$maksuehto 	= 0;
-		}
-
-		$laskuno = 0;
-	}
-
-	if ((int) $laskuno != 0) {
-		$laskurow = hae_lasku2($laskuno, $toim);
-
-		if (empty($laskurow)) {
-			$laskuno = 0;
-		}
-		else {
-			echo_lasku_table($laskurow, $toim);
-		}
-	}
-
-	if ($laskuno == 0) {
-		echo_lasku_search();
-	}
 }
 else {
-
 	echo "<font class='head'>".t("Lasku ei ollutkaan käteistä")."</font><hr>";
+}
 
-	if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
+if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 
-		$mehtorow = hae_maksuehto($maksuehto);
-		$laskurow = hae_lasku($tunnus);
-		$konsrow  = hae_asiakas($laskurow);
+	$mehtorow = hae_maksuehto($maksuehto);
+	$laskurow = hae_lasku($tunnus);
+	$konsrow  = hae_asiakas($laskurow);
 
-		$params = array(
-			'konsrow'		 => $konsrow,
-			'mehtorow'		 => $mehtorow,
-			'laskurow'		 => $laskurow,
-			'maksuehto'		 => $maksuehto,
-			'tunnus'		 => $tunnus,
-			'toim'			 => $toim,
-			'tapahtumapaiva' => $tapahtumapaiva,
-			'kassalipas'	 => $kassalipas
-		);
+	$tapahtumapaiva  = date('Y-m-d', mktime(0,0,0,$tapahtumapaiva_kk,$tapahtumapaiva_pp,$tapahtumapaiva_vv));
 
-		$myysaatili = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+	$params = array(
+		'konsrow'		 => $konsrow,
+		'mehtorow'		 => $mehtorow,
+		'laskurow'		 => $laskurow,
+		'maksuehto'		 => $maksuehto,
+		'tunnus'		 => $tunnus,
+		'toim'			 => $toim,
+		'tapahtumapaiva' => $tapahtumapaiva,
+		'kassalipas'	 => $kassalipas
+	);
 
-		$params = array(
-			'laskurow'		 => $laskurow,
-			'tunnus'		 => $tunnus,
-			'myysaatili'	 => $myysaatili,
-			'toim'			 => $toim,
-			'_kassalipas'	 => $_kassalipas
-		);
+	$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
+	$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
-		tee_kirjanpito_muutokset($params);
-		yliviivaa_alet_ja_pyoristykset($tunnus);
-		tarkista_pyoristys_erotukset($laskurow, $tunnus);
+	$params = array(
+		'laskurow'		 => $laskurow,
+		'tunnus'		 => $tunnus,
+		'myysaatili'	 => $myysaatili,
+		'toim'			 => $toim,
+		'_kassalipas'	 => $_kassalipas
+	);
 
-		if (empty($mehtorow) and empty($laskurow)) {
-			$laskuno 	= 0;
-			$tunnus 	= 0;
-			$maksuehto 	= 0;
-		}
+	tee_kirjanpito_muutokset($params);
+	yliviivaa_alet_ja_pyoristykset($tunnus);
+	tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
+	if($toim == 'KATEINEN') {
+		vapauta_kateistasmaytys($_kassalipas, $tapahtumapaiva);
+	}
+
+	if (empty($mehtorow) and empty($laskurow)) {
+		$laskuno 	= 0;
+		$tunnus 	= 0;
+		$maksuehto 	= 0;
+	}
+
+	$laskuno = 0;
+}
+
+if ((int) $laskuno != 0) {
+	$laskurow = hae_lasku2($laskuno, $toim);
+
+	if (empty($laskurow)) {
 		$laskuno = 0;
 	}
-
-	if ((int) $laskuno != 0) {
-		$laskurow = hae_lasku2($laskuno, $toim);
-
-		if (empty($laskurow)) {
-			$laskuno = 0;
-		}
-		else {
-			echo_lasku_table($laskurow, $toim);
-		}
+	else {
+		echo_lasku_table($laskurow, $toim);
 	}
+}
 
-	if ($laskuno == 0) {
-		echo_lasku_search();
-	}
+if ($laskuno == 0) {
+	echo_lasku_search();
 }
 
 //kursorinohjausta
@@ -530,7 +476,6 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 	global $yhtiorow, $kukarow;
 
 	if ($mehtorow['kateinen'] != '') {
-
 		$query = "	SELECT *
 					FROM kassalipas
 					WHERE yhtio = '{$kukarow['yhtio']}'

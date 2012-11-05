@@ -26,7 +26,7 @@ if ($toim == 'KATEINEN') {
 		);
 
 		$myysaatili  = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
-		$_kassalipas = hae_kassalippaan_tiedot($kassalipas);
+		$_kassalipas = hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow);
 
 		$params = array(
 			'laskurow'		 => $laskurow,
@@ -252,19 +252,19 @@ function tee_kirjanpito_muutokset($params) {
 	global $kukarow, $yhtiorow;
 
 	if ($params['toim'] == 'KATEINEN') {
-		$uusitili  = $params['_kassalipas']['kassa'];
-		$vanhatili = $params['myysaatili'];
+		$uusitili  = $params['_kassalipas'];
+		$vanhatili = '(' . $params['myysaatili'] . ')';
 	}
 	else {
 		$uusitili  = $params['myysaatili'];
-		$vanhatili = $yhtiorow['kassa'];
+		$vanhatili = '('.implode(',', $params['_kassalipas']).')';
 	}
 
 	$query = "	SELECT tunnus
 				FROM tiliointi
 				WHERE yhtio	 = '$kukarow[yhtio]'
 				AND ltunnus	 = '{$params['tunnus']}'
-				AND tilino	 = '{$vanhatili}'
+				AND tilino	 IN '{$vanhatili}'
 				AND korjattu = ''";
 	$result = pupe_query($query);
 
@@ -526,7 +526,7 @@ function echo_lasku_search() {
 	echo "</form>";
 }
 
-function hae_kassalippaan_tiedot($kassalipas, $mehtorow) {
+function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 	global $yhtiorow, $kukarow;
 
 	if ($mehtorow['kateinen'] != '') {
@@ -550,7 +550,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow) {
 		if ($mehtorow['kateinen'] == "o") {
 			if ($kateisrow["luottokortti"] != "") {
 				$myysaatili = $kateisrow["luottokortti"];
-}
+			}
 			else {
 				$myysaatili = $yhtiorow['luottokortti'];
 			}
@@ -563,6 +563,27 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow) {
 			else {
 				$myysaatili = $yhtiorow['kassa'];
 			}
+		}
+	}
+	else {
+		if($laskurow['kassalipas'] != '') {
+			//haetaan kassalippaan tilit kassalippaan takaa
+			$kassalipas_query = "	SELECT kassa,
+									pankkikortti,
+									luottokortti
+									FROM kassalipas
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND kassalipas = '{$laskurow['kassalipas']}'";
+			$kassalipas_result = pupe_query($kassalipas_query);
+
+			$myysaatili = mysql_fetch_assoc($kassalipas_result);
+		}
+		else {
+			$myysaatili = array(
+				'kassa' => $yhtiorow['kassa'],
+				'pankkikortti' => $yhtiorow['pankkikortti'],
+				'luottokortti' => $yhtiorow['luottokortti']
+			);
 		}
 	}
 

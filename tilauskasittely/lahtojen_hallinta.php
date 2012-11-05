@@ -963,7 +963,7 @@
 					$(':checkbox').live('click', function(event){
 						event.stopPropagation();
 
-						$(this).is(':checked') ? $(this).parent().parent().addClass('tumma') : $(this).parent().parent().removeClass('tumma');
+						if (!$(this).hasClass('nayta_valinnat')) $(this).is(':checked') ? $(this).parent().parent().addClass('tumma') : $(this).parent().parent().removeClass('tumma');
 					});
 
 					// numeroiden vertailu
@@ -2137,10 +2137,53 @@
 
 		if ($tee == 'lahto' and trim($tilaukset) != '') {
 
+			if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta', 'aloitettu');
+			$chk = array_fill_keys($nayta_valinnat, " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
+
+			echo "<br />";
+			echo "<form method='post' action=''>";
+			echo "<table>";
+			echo "<tr class='tumma'>";
+			echo "<th>",t("Valitse"),"</td>";
+			echo "<td style='vertical-align:middle;'>";
+			echo "<input type='hidden' name='tee' value='lahto' />";
+			echo "<input type='hidden' name='tilaukset' value='{$tilaukset}' />";
+			echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
+			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
+			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";
+			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ",t("Kerätty"),"&nbsp;&nbsp;";
+			echo "<input type='submit' value='",t("Näytä"),"' />";
+			echo "</td>";
+			echo "</tr>";
+			echo "</table>";
+			echo "</form>";
+
 			$y = 0;
 
 			echo "<form>";
 			echo "<table>";
+
+			$wherelisa = "";
+			$kerayserat_tilalisa = "";
+
+			foreach ($nayta_valinnat as $mita_naytetaan) {
+
+				switch ($mita_naytetaan) {
+					case 'aloittamatta':
+						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+						break;
+					case 'aloitettu':
+						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+						$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila IN ('K','X')" : "kerayserat.tila IN ('K','X')";
+						break;
+					case 'keratty':
+						$wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+						$kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T','R'))" : "(kerayserat.tila IN ('T','R'))";
+						break;
+				}
+			}
+
+			$wherelisa = "AND ({$wherelisa})";
 
 			$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
 						lahdot.pvm AS 'lahdon_pvm',
@@ -2183,6 +2226,7 @@
 						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$tilaukset})
+						{$wherelisa}
 						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
 			$lahto_res = pupe_query($query);
 

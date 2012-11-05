@@ -2148,6 +2148,7 @@
 			echo "<td style='vertical-align:middle;'>";
 			echo "<input type='hidden' name='tee' value='lahto' />";
 			echo "<input type='hidden' name='tilaukset' value='{$tilaukset}' />";
+			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 			echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
 			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
 			echo "<input type='checkbox' class='nayta_valinnat' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";
@@ -2285,9 +2286,9 @@
 
 	 		echo "<select class='filter_row_by_select' name='child_row_select_status' id='child_row_select_status'>";
 			echo "<option value=''>",t("Valitse"),"</option>";
-			echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
-			echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
-			echo "<option value='3'{$sel[3]}>",t("Kerätty"),"</option>";
+			if (in_array("aloittamatta", $nayta_valinnat)) echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
+			if (in_array("aloitettu", $nayta_valinnat)) echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
+			if (in_array("keratty", $nayta_valinnat)) echo "<option value='3'{$sel[3]}>",t("Kerätty"),"</option>";
 			echo "</select>";
 			echo "</th>";
 

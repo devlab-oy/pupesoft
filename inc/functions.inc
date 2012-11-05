@@ -14103,8 +14103,7 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		foreach ($tilausrivit as $tilausrivi_index => $tilausrivi_arvo) {
 
-			unset($ale);
-			unset($kommentti);
+			$ale = $kommentti = $palautuskielto = "";
 
 			$sql = "SELECT tuote_kentta,
 					tuote_arvo,
@@ -14159,6 +14158,7 @@ if (!function_exists("hae_hyvityshinta")) {
 				if ($tuote and $asiakas and $segmentti) {
 					$ale = $rivi["rokotusprosentti"];
 					$kommentti = $rivi["rokotusselite"];
+					$palautuskielto = $rivi['palautuskielto'];
 					break;
 				}
 			}
@@ -14168,7 +14168,7 @@ if (!function_exists("hae_hyvityshinta")) {
 				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
 			}
 			else {
-				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => "");
+				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => $palautuskielto);
 			}
 		}
 

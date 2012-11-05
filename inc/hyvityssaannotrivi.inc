@@ -83,8 +83,7 @@
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 200).">";
 		$ulos .= "<option value=''>".t("Ei Valintaa")."</option>";
-		$ulos .= "<option value='E'{$sel['E']}>".t("Ei Palautuskieltoa")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Palautuskielto")."</option>";
+		$ulos .= "<option value='X'{$sel['X']}>".t("Palautuskielto")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

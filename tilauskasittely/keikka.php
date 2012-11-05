@@ -1268,6 +1268,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				echo "<input type='hidden' name='tunnus' 		value='$row[tunnus]'>";
 				echo "<input type='hidden' name='laskunro' 		value='$row[laskunro]'>";
 				echo "<input type='hidden' name='indexvas' 		value='1'>";
+				echo "<input type='hidden' name='lisarajaus'	value='{$lisarajaus}' />";
 				echo "<select name='toiminto'>";
 
 				// näitä saa tehdä aina keikalle

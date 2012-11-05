@@ -2,6 +2,8 @@
 
 	require ("../inc/parametrit.inc");
 
+	require_once '../inc/functions.inc';
+
 	echo "<font class='head'>",t("Toimittajan avoimet tilausrivit"),":</font><hr>";
 
 	if (!isset($ytunnus)) $ytunnus = '';
@@ -160,9 +162,23 @@
 			$excel->set_kieli($kieli);
 			$excel->set_yhtiorow($yhtiorow);
 			$excel->set_toimittaja($laskurow);
-			$excel->set_rivit(get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $kieli));
+			$excel->set_rivit(get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow, $kieli));
 
-			$excel->generoi();
+			$excel_tiedosto = $excel->generoi();
+
+			$params = array(
+				"to"		 => $kukarow['eposti'],
+				"subject"	 => $yhtiorow['nimi'] . " - " . t('Ostotilaus' , $kieli),
+				"ctype"		 => "html",
+				"body"		 => t('Ostotilaus raportti liitteenä' , $kieli),
+				"attachements" => array(
+					0 => array(
+						"filename"		 => "/tmp/$excel_tiedosto",
+						"newfilename"	 => t('Ostotilaus' , $kieli) . ".xlsx",
+						"ctype"			 => "excel"),
+				)
+			);
+			pupesoft_sahkoposti($params);
 		}
 		else {
 			$komento["Ostotilaus"] = "email";
@@ -412,14 +428,14 @@
 		echo "</form></table>";
 	}
 
-	function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $kieli) {
+	function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow, $kieli) {
 		global $yhtiorow, $kukarow;
 
 		$query_ale_lisa = generoi_alekentta('O');
 
 		$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
-		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
+		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.yksikko, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
 					tilkpl,
 					round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
 					hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
@@ -434,7 +450,7 @@
 					and tilausrivi.tyyppi='O'
 					and tilausrivi.jaksotettu = 0
 					ORDER BY tilausrivi.otunnus";
-		$result = pupe_error($query);
+		$result = mysql_query($query) or pupe_error($query);
 
 		$rivit = array();
 		$total = 0;
@@ -446,7 +462,7 @@
 						and tuoteno 		= '$row[tuoteno]'
 						and liitostunnus 	= '$laskurow[liitostunnus]'
 						LIMIT 1";
-			$rarres = pupe_error($query);
+			$rarres = mysql_query($query) or pupe_error($query);
 			$rarrow	 = mysql_fetch_assoc($rarres);
 
 			if ($row["yksikko"] == "") {

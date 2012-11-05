@@ -1,6 +1,7 @@
 <?php
 
 require_once '../inc/pupeExcel.inc';
+require_once '../inc/functions.inc';
 
 class vuosisopimus_asiakkaat_excel {
 
@@ -13,6 +14,7 @@ class vuosisopimus_asiakkaat_excel {
 	protected $summat_osastoittain = array();
 	protected $rajaus_paivat = array();
 	protected $yhtiorow;
+	protected $kieli;
 
 	function __construct() {
 		$this->excel = new pupeExcel();
@@ -41,13 +43,13 @@ class vuosisopimus_asiakkaat_excel {
 	private function alku() {
 		$this->write_solu($this->yhtiorow['nimi']);
 		$this->add_tyhja_kolumni(3);
-		$this->write_solu('OSTOSEURANTA');
+		$this->write_solu(t('OSTOSEURANTA', $this->kieli));
 
 		$this->add_tyhja_rivi(2);
 
 		$this->write_solu($this->asiakas['ytunnus']);
 		$this->add_tyhja_kolumni(3);
-		$this->write_solu('Hyvä yhteistyökumppanimme,');
+		$this->write_solu(t('Hyvä yhteistyökumppanimme,', $this->kieli));
 
 		$this->move_seuraavalle_riville();
 
@@ -57,7 +59,7 @@ class vuosisopimus_asiakkaat_excel {
 
 		$this->write_solu($this->asiakas['nimitark']);
 		$this->add_tyhja_kolumni(3);
-		$this->write_solu('Ohessa tämänhetkinen ostotilanteenne.');
+		$this->write_solu(t('Ohessa tämänhetkinen ostotilanteenne.', $this->kieli));
 
 		$this->move_seuraavalle_riville();
 
@@ -67,7 +69,7 @@ class vuosisopimus_asiakkaat_excel {
 
 		$this->write_solu($this->asiakas['postino'].' '.$this->asiakas['postitp']);
 		$this->add_tyhja_kolumni(3);
-		$this->write_solu('Kunnioittaen,'.$this->yhtiorow['nimi']);
+		$this->write_solu(t('Kunnioittaen', $this->kieli).','.$this->yhtiorow['nimi']);
 
 		$this->move_seuraavalle_riville();
 
@@ -75,7 +77,7 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	private function rivit_osastoittain() {
-		$this->write_solu('Rajaus:');
+		$this->write_solu(t('Rajaus:', $this->kieli));
 		$this->write_solu($this->rajaus_paivat['alkupaiva'] . ' - ' . $this->rajaus_paivat['loppupaiva']);
 		$this->move_seuraavalle_riville();
 		$this->print_headers('osasto');
@@ -99,7 +101,6 @@ class vuosisopimus_asiakkaat_excel {
 			if ($edellinen_rivi != $rivi['osasto']) {
 				$this->move_seuraavalle_riville();
 				$this->move_seuraavalle_riville();
-				//$this->write_solu("Osasto {$rivi['osasto']} - " . '$osrow["selitetark"]');
 				$this->write_solu("Osasto {$rivi['osasto']} - ".$rivi['osasto_selite']);
 				$this->move_seuraavalle_riville();
 			}
@@ -110,19 +111,19 @@ class vuosisopimus_asiakkaat_excel {
 	}
 
 	private function print_headers($tyyppi = '') {
-		if($tyyppi = 'tuoteryhma') {
-			$this->write_solu('Tuoteryhma:');
+		if($tyyppi == 'tuoteryhma') {
+			$this->write_solu(t('Tuoteryhma:', $this->kieli));
 		}
 		else{
-			$this->write_solu('Osasto:');
+			$this->write_solu(t('Osasto:', $this->kieli));
 		}
 		
 		$this->add_tyhja_kolumni(2);
-		$this->write_solu('Kpl 2012');
-		$this->write_solu('Kpl 2011');
-		$this->write_solu('Osastot 2012');
-		$this->write_solu('Osasto 2011');
-		$this->write_solu('Indeksi');
+		$this->write_solu(t('Kpl', $this->kieli) . ' 2012');
+		$this->write_solu(t('Kpl', $this->kieli) . ' 2011');
+		$this->write_solu(t('Osasto', $this->kieli) . ' 2012');
+		$this->write_solu(t('Osasto', $this->kieli) . ' 2011');
+		$this->write_solu(t('Indeksi', $this->kieli));
 	}
 
 	private function print_rivi(array $rivi) {
@@ -148,9 +149,6 @@ class vuosisopimus_asiakkaat_excel {
 		else if ($tyyppi == 'osastoittain') {
 			$temp = $this->get_summat_osastoittain();
 		}
-		else {
-			error_log('Vituiks meni');
-		}
 
 		$sum_indeksi = 0;
 		if ($temp['ed'] != 0) {
@@ -158,7 +156,7 @@ class vuosisopimus_asiakkaat_excel {
 		}
 
 		$this->add_tyhja_kolumni(2);
-		$this->write_solu('Yhteensä:');
+		$this->write_solu(t('Yhteensä:', $this->kieli));
 		$this->write_numero_solu($temp['sumkplva']);
 		$this->write_numero_solu($temp['sumkpled']);
 		$this->write_numero_solu($temp['sumva']);
@@ -247,6 +245,14 @@ class vuosisopimus_asiakkaat_excel {
 
 	public function set_yhtiorow(array $yhtiorow) {
 		$this->yhtiorow = $yhtiorow;
+	}
+
+	public function get_kieli() {
+		return $this->kieli;
+	}
+
+	public function set_kieli($kieli) {
+		$this->kieli = $kieli;
 	}
 
 }

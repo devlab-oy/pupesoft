@@ -25,6 +25,13 @@ class vahvistamattomat_ostorivit_excel {
 		$this->move_seuraavalle_riville();
 
 		$this->rivit();
+
+		$this->move_seuraavalle_riville();
+		$this->move_seuraavalle_riville();
+
+		$this->loppu();
+
+		return $this->excel->close();
 	}
 
 	private function alku() {
@@ -44,7 +51,11 @@ class vahvistamattomat_ostorivit_excel {
 		$this->print_headers();
 		$this->move_seuraavalle_riville();
 		foreach ($this->rivit as $rivi) {
-			$this->print_rivi($rivi);
+			//countti tehdään sen takia, että arrayssä on myös total_rivihinta
+			if(count($rivi) > 2) {
+				$this->print_rivi($rivi);
+				$this->move_seuraavalle_riville();
+			}
 		}
 	}
 
@@ -60,15 +71,22 @@ class vahvistamattomat_ostorivit_excel {
 
 	private function print_rivi($rivi) {
 		$this->write_solu($rivi['otunnus']);
-		$this->write_solu($rivi['toim_tuoteno']);
-		$this->write_solu('(' . $rivi['tuoteno'] . ')');
+		$this->write_solu($rivi['toim_tuoteno'] . ' (' . $rivi['tuoteno'] . ')');
 		$this->write_aika_solu($rivi['toimaika']);
 		$this->write_solu($rivi['tilkpl'] . '/' . $rivi['ulkkpl'] . ' ' . $rivi['omyks'] . '/' . $rivi['toyks']);
 		$this->write_solu($rivi['hinta']);
 		if($rivi['ale1'] != 0) {
 			$this->write_solu($rivi['ale1'] * 1);
 		}
+		else {
+			$this->write_numero_solu(0);
+		}
 		$this->write_solu($rivi['rivihinta']);
+	}
+
+	private function loppu() {
+		$this->write_solu(t('Yhteensä', $this->kieli));
+		$this->write_solu($this->rivit['total_rivihinta']);
 	}
 
 	private function write_solu($data) {

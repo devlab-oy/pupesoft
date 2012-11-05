@@ -9,6 +9,8 @@
 
 	require_once '../email.php';
 
+	require_once '../inc/functions.inc';
+
 	if($asiakas_tarkistus == 1) {
 		$ajax_params = array(
 			'ytunnus' => $ytunnus,
@@ -139,7 +141,7 @@
 			);
 		}
 
-		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel);
+		kasittele_tilaukset($data_array, htmlentities(trim($_REQUEST['laheta_sahkopostit'])), $komento, $params, $generoi_excel, $kieli);
 
 		echo "<br>Kaikki valmista.</font>";
 
@@ -386,14 +388,14 @@
 		return $tilaukset;
 	}
 
-	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel) {
+	function kasittele_tilaukset($data_array, $laheta_sahkopostit, $komento, $params, $generoi_excel, $kieli) {
 		global $kukarow;
 
 		if($generoi_excel == 'on') {
-			$tiedostot = generoi_excel_tiedostot($data_array, $params);
+			$tiedostot = generoi_excel_tiedostot($data_array, $params, $kieli);
 		}
 		else {
-			$tiedostot = generoi_pdf_tiedostot($data_array, $params);
+			$tiedostot = generoi_pdf_tiedostot($data_array, $params, $kieli);
 		}
 
 		if($komento == 'email') {
@@ -433,7 +435,7 @@
 		}
 	}
 
-	function generoi_pdf_tiedostot(&$data_array, $params) {
+	function generoi_pdf_tiedostot(&$data_array, $params, $kieli) {
 		global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp, $kala, $sivu, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $asiakas_numero;
 
 		$alkuvv = $params['alkuvv'];
@@ -496,7 +498,7 @@
 		return $pdf_tiedostot;
 	}
 
-	function generoi_excel_tiedostot(&$data_array, $params) {
+	function generoi_excel_tiedostot(&$data_array, $params, $kieli) {
 		global $yhtiorow;
 		$excel_tiedostot = array();
 		$i = 0;
@@ -506,6 +508,7 @@
 				'tuoteryhmittain' => $data['tilaukset_try']
 			);
 			$excel = new vuosisopimus_asiakkaat_excel();
+			$excel->set_kieli($kieli);
 			$excel->set_asiakas($data['asiakasrow']);
 			$excel->set_yhtiorow($yhtiorow);
 			$excel->set_rajaus_paivat(array(
@@ -550,32 +553,39 @@
 	}
 
 	function laheta_email($email_address, array $liitetiedostot_path = array()) {
-		global $yhtiorow;
+		global $yhtiorow, $kieli;
 
-		$aihe = utf8_encode($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"));
-		$viesti = utf8_encode('Liitteenä löytyy ostoseuranta raportit.<br/><br/>');
 
-		$email = new Email($aihe, $yhtiorow['postittaja_email']);
-		$email->add_vastaanottaja($email_address);
+		$params = array(
+			"to"		 => $email_address,
+			"subject"	 => $yhtiorow['nimi'] . " - " . t('Ostotilaus' , $kieli) . ' ' . date("d.m.Y"),
+			"ctype"		 => "html",
+			"body"		 => t('Liitteenä löytyy ostoseuranta raportit' , $kieli),
+			"attachements" => array()
+		);
 
 		foreach ($liitetiedostot_path as $liitetiedosto_path) {
-			$filename = basename($liitetiedosto_path);
-			$liitetiedosto = array(
-				'filename' => $filename,
-				'path' => $liitetiedosto_path,
-				'mime' => mime_content_type($liitetiedosto_path)
+			$mime_type = mime_content_type($liitetiedosto_path);
+			$mime_type = explode('/' , $mime_type);
+			if(stristr(mime_content_type($liitetiedosto_path), 'pdf')) {
+				$ctype = 'pdf';
+			}
+			else {
+				$ctype = 'excel';
+			}
+			$liitetiedosto =  array(
+				'filename' => $liitetiedosto_path,
+				'newfilename' => t('Ostotilaus', $kieli) . '.' .$mime_type[1],
+				'ctype' => $ctype,
 			);
 
-			$email->add_liitetiedosto($liitetiedosto);
+			$params['attachements'][] = $liitetiedosto;
 		}
-		
-		$email->set_html_viesti($viesti);
-
-		$email->laheta();
+		pupesoft_sahkoposti($params);
 	}
 
 	function tulosta_raportit($tiedostot, $komento) {
-		echo "Tulostetaan asiakkaan _ASIAKASNUMEROTAHAN_ ostoseuranta tulostimeen {$komento}";
+		echo "Tulostetaan asiakkaan ostoseuranta tulostimeen {$komento}";
 
 		foreach ($tiedostot as $tiedosto) {
 			$line = exec($komento." ".$tiedosto);

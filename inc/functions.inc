@@ -14117,8 +14117,8 @@ if (!function_exists("hae_hyvityshinta")) {
 					prioriteetti,
 					rokotusselite
 					FROM hyvityssaannot
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND (aika_ostosta > '$tilausrivi_arvo[ika]' or aika_ostosta = 0)
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND (aika_ostosta > '{$tilausrivi_arvo['ika']}' or aika_ostosta = 0)
 					ORDER BY prioriteetti, tunnus";
 			$result = pupe_query($sql);
 
@@ -14161,38 +14161,6 @@ if (!function_exists("hae_hyvityshinta")) {
 					$kommentti = $rivi["rokotusselite"];
 					break;
 				}
-
-				// if ($rivi["tuote_kentta"] == "" and $rivi["asiakas_kentta"] == "") {
-				// 	$ale = $rivi["rokotusprosentti"];
-				// 	$kommentti = $rivi["rokotusselite"];
-				// 	break;
-				// }
-				// elseif ($rivi["tuote_kentta"] != "" and $tuoterow[$rivi["tuote_kentta"]] == $rivi["tuote_arvo"]) {
-				// 	$ale = $rivi["rokotusprosentti"];
-				// 	$kommentti = $rivi["rokotusselite"];
-				// 	break;
-				// }
-				// elseif ($rivi["asiakas_kentta"] != "" and $asiakasrow[$rivi["asiakas_kentta"]] == $rivi["asiakas_arvo"]) {
-				// 	$ale = $rivi["rokotusprosentti"];
-				// 	$kommentti = $rivi["rokotusselite"];
-				// 	break;
-				// }
-				// elseif ($rivi["asiakas_segmentti"] != "") {
-
-				// 	$query = "	SELECT tunnus
-				// 				FROM puun_alkio
-				// 				WHERE yhtio	= '{$kukarow['yhtio']}'
-				// 				AND liitos = '{$liitostunnus}'
-				// 				AND laji = 'asiakas'
-				// 				AND puun_tunnus = '{$rivi['asiakas_segmentti']}'
-				// 				AND kieli = '{$yhtiorow['kieli']}'";
-
-				// 	if (mysql_num_rows(pupe_query($query)) != 0) {
-				// 		$ale = $rivi["rokotusprosentti"];
-				// 		$kommentti = $rivi["rokotusselite"];
-				// 		break;
-				// 	}
-				// }
 			}
 
 			// Jos ei löytynyt yhtään hyvityssaantöjä -> palautuskielto

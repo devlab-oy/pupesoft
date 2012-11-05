@@ -519,7 +519,7 @@
 		$joinlisa = "";
 
 		# Resrvipaikka ja keräysvyöhyke rajaus vain jos keräyserät parametri on asetettu.
-		if (isset($reservipaikka) or isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '') {
+		if ($yhtiorow["varastopaikkojen_maarittely"] != '' and (isset($reservipaikka) or isset($keraysvyohyke) and $yhtiorow["kerayserat"] != '')) {
 			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
 			$vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 

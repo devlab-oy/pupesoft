@@ -772,12 +772,12 @@
 			'tilauspaiva' => date("Y-m-d"),
 			'alv' => 0,
 			'rivihinta' => 0,
+			'rivihinta_verollinen' => 0,
 		);
 
 		$vatamount = 0;
-		$totalvat  = 0;
 
-		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount, $totalvat);
+		finvoice_rivi($tootfinvoice, $tilrow, $laskurow, $vatamount);
 
 		finvoice_lasku_loppu($tootfinvoice, $laskurow, $pankkitiedot, $masrow);
 

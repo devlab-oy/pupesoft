@@ -180,6 +180,7 @@
 		}
 		else {
 			$komento["Ostotilaus"] = "email";
+			$vahvistamattomat_rivit = get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow, $kieli);
 			require("tulosta_vahvistamattomista_ostoriveista.inc");
 		}
 	}

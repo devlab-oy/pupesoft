@@ -255,30 +255,13 @@
 
 			$pdf->draw_text(30,  $kala, $row["otunnus"],									$thispage, $norm);
 
-			//	Tarkastetaan olisiko toimittajalla yksikkö!
-			$query = "	SELECT toim_yksikko
-						FROM tuotteen_toimittajat
-						WHERE yhtio 		= '$kukarow[yhtio]'
-						and tuoteno 		= '$row[tuoteno]'
-						and liitostunnus 	= '$laskurow[liitostunnus]'
-						LIMIT 1";
-			$rarres = mysql_query($query) or pupe_error($query);
-			$rarrow	 = mysql_fetch_array($rarres);
-
-			if ($row["yksikko"] == "") $row["yksikko"] = $rarrow["toim_yksikko"];
-			if ($rarrow["toim_yksikko"] == "") $rarrow["toim_yksikko"] = $row["yksikko"];
-
-
 			$pdf->draw_text(105,  $kala, $row["toim_tuoteno"],														$thispage, $norm);
 			$pdf->draw_text(205, $kala, "(".$row["tuoteno"].")",													$thispage, $norm);
 
 			$pdf->draw_text(295, $kala, tv1dateconv($row["toimaika"]),												$thispage, $norm);
 
-			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
-			$toyks = t_avainsana("Y", $kieli, "and avainsana.selite='$rarrow[toim_yksikko]'", "", "", "selite");
-
-			$oikpos = $pdf->strlen((float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." $omyks/$toyks", $norm);
-			$pdf->draw_text(415-$oikpos, $kala, (float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." $omyks/$toyks", 	$thispage, $norm);
+			$oikpos = $pdf->strlen((float) $row["tilkpl"]."/".(float) $row["ulkkpl"]. ' ' .$row['omyks'] . '/'. $row['toyks'], $norm);
+			$pdf->draw_text(415-$oikpos, $kala, (float) $row["tilkpl"]."/".(float) $row["ulkkpl"].' ' . $row['omyks'] . '/' . $row['toyks'], 	$thispage, $norm);
 
 			$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 			$pdf->draw_text(480-$oikpos, $kala, hintapyoristys($row["hinta"]), 		$thispage, $norm);
@@ -410,34 +393,11 @@
 				}
 
            		$tee = "";
-				//poistetaan tmp file samantien kuleksimasta...
-				//system("rm -f $pdffilenimi");
 			}
+
+			return $pdffilenimi;
 		}
 	}
-
-	$query_ale_lisa = generoi_alekentta('O');
-
-	$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
-
-	$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
-				tilkpl,
-				round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
-				hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-				toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
-				toim_tuoteno
-				FROM tilausrivi
-				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-				LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
-				WHERE otunnus in ($tilaus_otunnukset)
-				and tilausrivi.yhtio='$kukarow[yhtio]'
-				and tilausrivi.uusiotunnus=0
-				and tilausrivi.tyyppi='O'
-				and tilausrivi.jaksotettu = 0
-				ORDER BY tilausrivi.otunnus";
-	$result = mysql_query($query) or pupe_error($query);
-
-	$result = mysql_query($query) or pupe_error($query);
 
 	unset($pdf);
 	unset($page);
@@ -448,21 +408,25 @@
 	// Aloitellaan lähetteen teko
 	$page[$sivu] = alku();
 
-	while ($row = mysql_fetch_array($result)) {
-		rivi($page[$sivu]);
-		$total += $row["rivihinta"];
+	foreach ($vahvistamattomat_rivit as $row) {
+		//count koska array:ssa on myös total amount jonka ei haluta printtaantuvan
+		if(count($row) > 2) {
+			rivi($page[$sivu]);
+		}
 	}
+	$total = $vahvistamattomat_rivit['total_rivihinta'];
 
 	//Viimeiselle sivulle myös lopputekstit
 	loppu($page[$sivu], $total, 1);
 
 	//kutsutaan lopuksi vielä print_pdf funktiota
-	print_pdf();
+	$pdffilenimi = print_pdf();
 
 
+	system("rm -f $pdffilenimi");
 
-if ($silent == "") {
-	echo $tulosta_ostotilaus_ulos;
-}
+	if ($silent == "") {
+		echo $tulosta_ostotilaus_ulos;
+	}
 
 ?>

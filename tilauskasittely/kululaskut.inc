@@ -179,18 +179,6 @@ if ($tee_kululaskut == "liita") {
 		$osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : (float) $osto_rahti_alv;
 		$osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : (float) $osto_rivi_kulu_alv;
 
-		if (isset($osto_kulu_alv_verollisuus) and $osto_kulu_alv_verollisuus == 'X') {
-			$osto_kulu = $osto_kulu * (1 + ($osto_kulu_alv / 100));
-		}
-
-		if (isset($osto_rahti_alv_verollisuus) and $osto_rahti_alv_verollisuus == 'X') {
-			$osto_rahti = $osto_rahti * (1 + ($osto_rahti_alv / 100));
-		}
-
-		if (isset($osto_rivi_kulu_alv_verollisuus) and $osto_rivi_kulu_alv_verollisuus == 'X') {
-			$osto_rivi_kulu = $osto_rivi_kulu * (1 + ($osto_rivi_kulu_alv / 100));
-		}
-
 		// meill‰ on laskurow haettuna ylh‰‰ll‰, tehd‰‰n liitosotsikko
 		$query = "	INSERT into lasku set
 					yhtio        = '$kukarow[yhtio]',

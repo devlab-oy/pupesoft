@@ -33,11 +33,11 @@ if ($yhtiorow["epakurantoinnin_erityiskasittely"] != 'Z') {
 
 $query  = "	SELECT
 					a.tuoteno,
-					a.selitetark as orig_myyntihinta
+					a.selitetark as orig_myyntihinta,
  					sum(p.saldo) as saldosumma
 			FROM tuotteen_avainsanat a
 			JOIN tuotepaikat p ON (a.yhtio = p.yhtio AND a.tuoteno = p.tuoteno)
-			WHERE yhtio = '{$kukarow["yhtio"]}'
+			WHERE a.yhtio = '{$kukarow["yhtio"]}'
 				AND laji = 'zeniorparts'
 			GROUP BY 1, 2
 			HAVING saldosumma = 0;";
@@ -53,7 +53,7 @@ while ($row = mysql_fetch_assoc($result)) {
 					epakurantti50pvm  = '0000-00-00',
 					epakurantti75pvm  = '0000-00-00',
 					epakurantti100pvm = '0000-00-00',
-					myyntihinta       = {$trow["orig_myyntihinta"]}
+					myyntihinta       = {$row["orig_myyntihinta"]}
 				WHERE
 					yhtio = '{$kukarow["yhtio"]}'
 					AND tuoteno = '{$row["tuoteno"]}';";

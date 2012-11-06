@@ -296,25 +296,24 @@
 				break;
 
 			case "paalle" : 			// case fallthrough tarkoituksella - break-lauseet puuttuvat
-				if ($pvm100 = "0000-00-00"){
+				if ($pvm100 == "0000-00-00"){
 					$pvm100 = "now()";
 				}
-				$zenior_jaettava--;
-
+				// 100% ep‰kurantiksi tulevalle asetetaan 75% mukainen hinta, siksi ei jaettavaa v‰hennet‰
 			case "75paalle" :
-				if ($pvm75 = "0000-00-00"){
+				if ($pvm75 == "0000-00-00"){
 					$pvm75 = "now()";
 				}
 				$zenior_jaettava--;
 
 			case "50paalle" :
-				if ($pvm50 = "0000-00-00"){
+				if ($pvm50 == "0000-00-00"){
 					$pvm50 = "now()";
 				}
 				$zenior_jaettava--;
 
 			case "25paalle" :
-				if ($pvm25 = "0000-00-00"){
+				if ($pvm25 == "0000-00-00"){
 					$pvm25 = "now()";
 				}
 				$zenior_jaettava--;
@@ -325,7 +324,7 @@
 
 		if ($yhtiorow["epakurantoinnin_erityiskasittely"] == 'Z') {
 
-			if ($tuoterow["epakurantti25pvm"] == "0000-00-00") {
+			if ($tuoterow["epakurantti25pvm"] == "0000-00-00") { // oltiin nollassa, eka ep‰kurantoituminen
 				$zenior_jakaja = 4;
 				$on_jo_epakurantti = 0;
 			}
@@ -339,12 +338,10 @@
 				$on_jo_epakurantti = 1;
 			}
 
-			if ($tuoterow["epakurantti75pvm"] != "0000-00-00" or $tuoterow["epakurantti100pvm"] != "0000-00-00" ) {
-				$zenior_jakaja = 1;
+			if ($tuoterow["epakurantti75pvm"] != "0000-00-00" or $tuoterow["epakurantti100pvm"] != "0000-00-00" ) { // jos oltiin jo 75% tai 100%:ssa, hinta on jo kohdallaan
 				$on_jo_epakurantti = 1;
 			}
-
-			if ($zenior_jaettava > 0) {  // 100% kohdalla ei en‰‰ korjata hintaa
+			else {
 				$set_zenior = "myyntihinta = myyntihinta * " . ($zenior_jaettava / $zenior_jakaja) . ", ";
 			}
 

@@ -631,7 +631,7 @@ if ($tee != "") {
 									}
 
 									$rivitunnus = 0;
-									$summa += $rivihinta;
+									$summa += $hinta;
 								}
 							}
 							

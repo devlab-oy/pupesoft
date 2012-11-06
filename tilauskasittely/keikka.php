@@ -179,8 +179,8 @@ if (!function_exists("tsekit")) {
 					sum(if(ostores_lasku.tila != 'H' and lasku.vienti in ('C','F','I','J','K','L'), 1, 0)) volasku_ok,
 					sum(if(lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku,
 					sum(if(ostores_lasku.tila != 'H' and lasku.vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku_ok,
-					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), ostores_lasku.summa * ostores_lasku.vienti_kurssi, 0)), 2) vosumma,
-					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), ostores_lasku.summa, 0)), 2) vosumma_valuutassa,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)), 2) vosumma,
+					round(sum(if(ostores_lasku.vienti in ('C','F','I','J','K','L'), lasku.arvo, 0)), 2) vosumma_valuutassa,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo * lasku.vienti_kurssi, 0)),2) kusumma,
 					round(sum(if(lasku.vienti not in ('C','F','I','J','K','L'), lasku.arvo, 0)),2) kusumma_valuutassa
 					FROM lasku use index (yhtio_tila_laskunro)
@@ -742,22 +742,21 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			$query = "	SELECT count(*) num,
 						sum(if(vienti in ('C','F','I','J','K','L'), 1, 0)) volasku,
 						sum(if(vienti not in ('C','F','I','J','K','L'), 1, 0)) kulasku,
-						sum(if(vienti in ('C','F','I','J','K','L'), summa * vienti_kurssi, 0)) vosumma,
+						sum(if(vienti in ('C','F','I','J','K','L'), arvo * vienti_kurssi, 0)) vosumma,
 						sum(if(vienti not in ('C','F','I','J','K','L'), arvo * vienti_kurssi, 0)) kusumma
 						FROM lasku use index (yhtio_tila_laskunro)
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tila = 'K'
-						AND vanhatunnus <> 0
-						AND laskunro = '$row[laskunro]'";
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND tila 		= 'K'
+						AND vanhatunnus > 0
+						AND laskunro 	= '$row[laskunro]'";
 			$laskuja_result = pupe_query($query);
 			$laskuja_row = mysql_fetch_assoc($laskuja_result);
 
-			$kaikkivarastossayhteensa += $row["varastossaarvo"];
-			$vaihtoomaisuuslaskujayhteensa += $laskuja_row["vosumma"];
-			$kululaskujayhteensa += $laskuja_row["kusumma"];
+			$kaikkivarastossayhteensa 		+= $row["varastossaarvo"];
+			$vaihtoomaisuuslaskujayhteensa  += $laskuja_row["vosumma"];
+			$kululaskujayhteensa 			+= $laskuja_row["kusumma"];
 
 			echo "<tr class='aktiivi'>";
-
 			echo "<td valign='top'>$row[ytunnus]</td>";
 
 			// tehdään pop-up divi jos keikalla on kommentti...
@@ -1110,25 +1109,22 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 				$row_vaihto
 				) = hae_yhteenveto_tiedot($toimittajaid);
 
-		if ($kaikkivarastossayhteensa != 0 or $vaihtoomaisuuslaskujayhteensa != 0 or $kululaskujayhteensa != 0) {
-
-			$params = array(
-				'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
-				'vaihtoomaisuuslaskujayhteensa'			 => $vaihtoomaisuuslaskujayhteensa,
-				'row_vaihto'							 => $row_vaihto,
-				'kululaskujayhteensa'					 => $kululaskujayhteensa,
-				'liitetty_lasku_ei_viety_summa'			 => $liitetty_lasku_ei_viety_summa,
-				'ei_liitetty_lasku_ei_viety_summa'		 => $ei_liitetty_lasku_ei_viety_summa,
-				'laskut_ei_viety'						 => $laskut_ei_viety,
-				'liitetty_lasku_viety_summa'			 => $liitetty_lasku_viety_summa,
-				'ei_liitetty_lasku_viety_summa'			 => $ei_liitetty_lasku_viety_summa,
-				'laskut_viety'							 => $laskut_viety,
-				'liitetty_lasku_osittain_viety_summa'	 => $liitetty_lasku_osittain_viety_summa,
-				'ei_liitetty_lasku_osittain_viety_summa' => $ei_liitetty_lasku_osittain_viety_summa,
-				'laskut_osittain_viety'					 => $laskut_osittain_viety,
-			);
-			echo_yhteenveto_table($params);
-		}
+		$params = array(
+			'kaikkivarastossayhteensa'				 => $kaikkivarastossayhteensa,
+			'vaihtoomaisuuslaskujayhteensa'			 => $vaihtoomaisuuslaskujayhteensa,
+			'row_vaihto'							 => $row_vaihto,
+			'kululaskujayhteensa'					 => $kululaskujayhteensa,
+			'liitetty_lasku_ei_viety_summa'			 => $liitetty_lasku_ei_viety_summa,
+			'ei_liitetty_lasku_ei_viety_summa'		 => $ei_liitetty_lasku_ei_viety_summa,
+			'laskut_ei_viety'						 => $laskut_ei_viety,
+			'liitetty_lasku_viety_summa'			 => $liitetty_lasku_viety_summa,
+			'ei_liitetty_lasku_viety_summa'			 => $ei_liitetty_lasku_viety_summa,
+			'laskut_viety'							 => $laskut_viety,
+			'liitetty_lasku_osittain_viety_summa'	 => $liitetty_lasku_osittain_viety_summa,
+			'ei_liitetty_lasku_osittain_viety_summa' => $ei_liitetty_lasku_osittain_viety_summa,
+			'laskut_osittain_viety'					 => $laskut_osittain_viety,
+		);
+		echo_yhteenveto_table($params);
 
 		// Rajaukset
 		if ($keikkarajaus != "") {
@@ -1239,10 +1235,14 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 function echo_yhteenveto_table($params) {
 	global $yhtiorow;
 	echo "<br><table>";
-	echo "<tr><th>".t("Varastoon viety yhteensä")."</th><td align='right'> ".sprintf("%01.2f", $params['kaikkivarastossayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
-	echo "<tr><th>".t("Vaihto-omaisuuslaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $params['vaihtoomaisuuslaskujayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
-	echo "<tr><th>".t("Vaihto-omaisuuslaskuja liittämättä")."</th><td align='right'>".sprintf("%01.2f", $params['row_vaihto']['summa'])." $yhtiorow[valkoodi]</td></tr>";
-	echo "<tr><th>".t("Kululaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $params['kululaskujayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
+	echo "<tr><th>".t("Tuotteita viety varastoon yhteensä")."</th><td align='right'> ".sprintf("%01.2f", $params['kaikkivarastossayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
+	echo "<tr><th>".t("Saapumisille liitetyt vaihto-omaisuuslaskut")."</th><td align='right'>".sprintf("%01.2f", $params['vaihtoomaisuuslaskujayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
+	echo "<tr><th>".t("Vaihto-omaisuuslaskut joita ei ole liitetty saapumisille")."</th><td align='right'>".sprintf("%01.2f", $params['row_vaihto']['vosumma']-$params['row_vaihto']['voalvit'])." $yhtiorow[valkoodi]</td></tr>";
+
+	if ($yhtiorow["jalkilaskenta_kuluperuste"] != 'KP') {
+		echo "<tr><th>".t("Saapumisille liitetyt huolinta-/rahtilaskut")."</th><td align='right'>".sprintf("%01.2f", $params['kululaskujayhteensa'])." $yhtiorow[valkoodi]</td></tr>";
+		echo "<tr><th>".t("Huolinta-/rahtilaskut joita ei ole liitetty saapumisille")."</th><td align='right'>".sprintf("%01.2f", $params['row_vaihto']['kusumma']-$params['row_vaihto']['kualvit'])." $yhtiorow[valkoodi]</td></tr>";
+	}
 
 	echo '<tr><td class="back"></td></tr>';
 	echo '<tr>';
@@ -1286,7 +1286,7 @@ function echo_yhteenveto_table($params) {
 }
 
 function hae_yhteenveto_tiedot($toimittajaid = null) {
-	global $kukarow;
+	global $kukarow, $yhtiorow;
 
 	if ($toimittajaid == null) {
 		$toimittaja_where = '';
@@ -1295,28 +1295,30 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 		$toimittaja_where = "AND lasku.liitostunnus = '{$toimittajaid}'";
 	}
 
-	//haetaan liittämättömät vaihto-omaisuus laskut
-	$query = "	SELECT sum(round(lasku.vienti_kurssi * lasku.summa, 2)) summa
+	// haetaan vaihto-omaisuus laskut joita ei oo liitetty saapumisiin
+	$query = "	SELECT
+				round(sum(if(lasku.vienti in ('C','F','I','J','K','L'), lasku.summa * lasku.vienti_kurssi, 0)),2) vosumma,
+				round(sum(if(lasku.vienti in ('B','E','H'),	 			lasku.summa * lasku.vienti_kurssi, 0)),2) kusumma,
+				round(sum(if(lasku.vienti in ('C','F','I','J','K','L'), tiliointi.summa, 0)),2) voalvit,
+				round(sum(if(lasku.vienti in ('B','E','H'),	 			tiliointi.summa, 0)),2) kualvit
 				FROM lasku
-				LEFT JOIN lasku AS liitos
-				ON liitos.yhtio = lasku.yhtio
-				AND liitos.vanhatunnus = lasku.tunnus
-				AND liitos.tila = 'K'
+				LEFT JOIN tiliointi USE INDEX (tositerivit_index) ON (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[alv]' and tiliointi.korjattu = '' AND if(lasku.summa > 0, tiliointi.summa, tiliointi.summa*-1) > 0)
+				LEFT JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.vanhatunnus = lasku.tunnus AND liitos.tila = 'K'
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND lasku.tila IN ('H','Y','M','P','Q')
-				AND lasku.vienti IN ('C','F','I','J','K','L')
+				AND lasku.vienti in ('B','C','J','E','F','K','H','I','L')
 				AND liitos.tunnus IS NULL
 				{$toimittaja_where}";
 	$result_vaihto_omaisuus = pupe_query($query);
-	$row_vaihto = mysql_fetch_assoc($result_vaihto_omaisuus);
+	$row_vaihto  = mysql_fetch_assoc($result_vaihto_omaisuus);
 
-	$liitetty_lasku_viety_summa	 = 0;
+	$liitetty_lasku_viety_summa	   = 0;
 	$ei_liitetty_lasku_viety_summa = 0;
 
 	$liitetty_lasku_ei_viety_summa    = 0;
 	$ei_liitetty_lasku_ei_viety_summa = 0;
 
-	$liitetty_lasku_osittain_viety_summa	  = 0;
+	$liitetty_lasku_osittain_viety_summa	= 0;
 	$ei_liitetty_lasku_osittain_viety_summa = 0;
 
 	$laskut_ei_viety	   = 0;
@@ -1330,12 +1332,7 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 				count(DISTINCT liitos.tunnus) liitetty,
 				group_concat(liitos.vanhatunnus) tunnukset
 				FROM lasku
-				LEFT JOIN lasku AS liitos
-				ON liitos.yhtio = lasku.yhtio
-				AND liitos.laskunro = lasku.laskunro
-				AND liitos.vanhatunnus != 0
-				AND liitos.vienti IN ('C' , 'F' , 'I' , 'J', 'K' , 'L')
-				AND liitos.tila = 'K'
+				LEFT JOIN lasku AS liitos ON liitos.yhtio = lasku.yhtio AND liitos.laskunro = lasku.laskunro AND liitos.vanhatunnus > 0 AND liitos.vienti IN ('C','F','I','J','K','L') AND liitos.tila = 'K'
 				WHERE  lasku.yhtio 	  = '{$kukarow['yhtio']}'
 				AND lasku.tila 		  = 'K'
 				AND lasku.alatila 	  = ''
@@ -1345,10 +1342,14 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 				GROUP BY 1,2,3,4";
 	$result = pupe_query($query);
 
+	$query_ale_lisa = generoi_alekentta("O");
+
 	//haetaan saapuvia ostotilauksia, joihin liitetty tai ei liitetty lasku (kts. liitetty)
 	while ($row = mysql_fetch_assoc($result)) {
-		$query = "	SELECT sum((kpl * (hinta * (1 - (ale1 / 100)) * (1 - (ale2/100))  * (1 - (ale3/100))  * (1 - (erikoisale/100)) ) )) viety,
-					sum((varattu * (hinta * (1 - (ale1 / 100)) * (1 - (ale2/100))  * (1 - (ale3/100))  * (1 - (erikoisale/100)) ) )) ei_viety,
+
+		$query = "	SELECT
+					sum(kpl * hinta * {$query_ale_lisa}) viety,
+					sum(varattu * hinta * {$query_ale_lisa}) ei_viety
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND uusiotunnus = {$row['tunnus']}
@@ -1369,27 +1370,36 @@ function hae_yhteenveto_tiedot($toimittajaid = null) {
 			}
 		}
 		else {
-			$query = "	SELECT sum(round(vienti_kurssi * summa , 2)) summa
+			$query = "	SELECT round(lasku.vienti_kurssi * lasku.summa, 2) summa,
+						sum(round(tiliointi.summa, 2)) alvit
 						FROM lasku
+						LEFT JOIN tiliointi USE INDEX (tositerivit_index) ON (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[alv]' and tiliointi.korjattu = '' AND if(lasku.summa > 0, tiliointi.summa, tiliointi.summa*-1) > 0)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tunnus IN ({$row['tunnukset']})";
+						AND lasku.tunnus IN ({$row['tunnukset']})
+						GROUP BY 1";
 			$result_laskut = pupe_query($query);
-			$laskut = mysql_fetch_assoc($result_laskut);
+
+			$laskujensummat = 0;
+
+			while ($laskut = mysql_fetch_assoc($result_laskut)) {
+				$laskujensummat += ($laskut['summa']-$laskut['alvit']);
+			}
 
 			//on liitetty lasku
 			if ($tilausrivirow['viety'] == 0 and $tilausrivirow['ei_viety'] != 0) {
+				// ei viety ollenkaan
 				$liitetty_lasku_ei_viety_summa += $tilausrivirow['ei_viety'];
-				$laskut_ei_viety += $laskut['summa'];
+				$laskut_ei_viety += $laskujensummat;
 			}
 			elseif ($tilausrivirow['viety'] != 0 and $tilausrivirow['ei_viety'] == 0) {
 				//viety kokonaan
 				$liitetty_lasku_viety_summa += $tilausrivirow['viety'];
-				$laskut_viety += $laskut['summa'];
+				$laskut_viety += $laskujensummat;
 			}
 			else {
 				//saapuminen viety osittain varastoon ja liitetty lasku
 				$liitetty_lasku_osittain_viety_summa += $tilausrivirow['viety'];
-				$laskut_osittain_viety += $laskut['summa'];
+				$laskut_osittain_viety += $laskujensummat;
 			}
 		}
 	}

@@ -372,25 +372,16 @@ if ($tee != "") {
 								$tuoteno_osat = explode("-", $tuoteno);
 								$puolipaivatuoteno = "P".array_shift($tuoteno_osat)."-".array_pop($tuoteno_osat);
 
-								//	Haetaan osapäiväraha
-								$query = "	SELECT *
-											FROM tuote
-											WHERE yhtio 	= '$kukarow[yhtio]'
-											AND tuotetyyppi = '$tyyppi'
-											AND tuoteno 	= '$puolipaivatuoteno'
-											AND status 	   != 'P'";
-								$tres2 = pupe_query($query);
-								$trow2 = mysql_fetch_assoc($tres2);
-
+								//Osapäivärahan tiedot löytyvät $trow malli ja myymalahinta
 								$osapaivat++;
 
-								$tuoteno_array[1]	= $trow['tuoteno'];
+								$tuoteno_array[1]	= $puolipaivatuoteno;
 								$kpl_array[1]		= $osapaivat;
 								$hinta_array[1]		= $trow['myymalahinta'];
 								$nimitys_array[1]	= $trow['malli'];
 								$varri_array[1] 	= "2";	 // Kotimaan osapäiväraha
 
-								$selite .= "<br>$trow2[tuoteno] - $trow2[nimitys] $osapaivat kpl á ".(float) $trow2['myyntihinta'];
+								$selite .= "<br>$puolipaivatuoteno - {$trow['malli']} $osapaivat kpl á ".(float) round($trow['myymalahinta'], 2);
 							}
 						}
 						// Ulkomaanmatkat
@@ -427,15 +418,18 @@ if ($tee != "") {
 								jos työmatkaan käytetty aika ylittää viimeisen ulkomaan alueella tai sieltä lähteneessä laivassa tai lentokoneessa päättyneen täyden matkavuorokauden yli kahdella tunnilla.
 								*/
 
+								$tuoteno_osat = explode("-", $tuoteno);
+								$puolipaivatuoteno = "P".array_shift($tuoteno_osat)."-".array_pop($tuoteno_osat);
+
 								$puolipaivat++;
 
-								$tuoteno_array[1]	= $trow["tuoteno"];
+								$tuoteno_array[1]	= $puolipaivatuoteno;
 								$kpl_array[1]		= $puolipaivat;
 								$hinta_array[1]		= round($trow['myymalahinta'], 2);
-								$nimitys_array[1]	= $trow["nimitys"]." (".t("Puolitettu korvaus.").")";
+								$nimitys_array[1]	= $trow['malli'];
 								$varri_array[1] 	= "5";	 // Ulkomaan puolipäiväraha
 
-								$selite .= "<br>$trow[tuoteno] - $trow[nimitys] $puolipaivat kpl á ".(float) round($trow["myyntihinta"]/2, 2);
+								$selite .= "<br>$puolipaivatuoteno - {$trow['malli']} $puolipaivat kpl á ".(float) round($trow['myymalahinta'], 2);
 							}
 						}
 
@@ -503,6 +497,11 @@ if ($tee != "") {
 					ksort($tuoteno_array);
 
 					foreach ($tuoteno_array as $indeksi => $lisaa_tuoteno) {
+
+						//puolipäiväraha
+						if($indeksi == 1) {
+							$lisaa_tuoteno = substr($lisaa_tuoteno, 1);
+						}
 
 						//	Haetaan tuotteen tiedot
 						$query = "	SELECT *
@@ -634,8 +633,6 @@ if ($tee != "") {
 									$summa += $hinta;
 								}
 							}
-							
-
 						}
 						else {
 							echo "<font class='error'>".t("VIRHE: Viranomaistuote puuttuu")." (1) $lisaa_tuoteno</font><br>";

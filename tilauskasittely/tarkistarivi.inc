@@ -691,11 +691,7 @@
 
 				// ...kielletään tilaamasta asiakkaalle jos yhtiöparametri ohjaa katsomaan tuotteelta ja siellä ei ole sallittu...
 				if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W'))
-<<<<<<< HEAD
-					and !in_array($trow['suoratoimitus'], array('', 'X'))) {
-=======
 				 	and !in_array($trow['suoratoimitus'], array('', 'X'))) {				// vain S ja U sallivat tilauksen asiakkaalle
->>>>>>> korjauksia
 					$tmp_asiakkaalle = 0;
 				}
 

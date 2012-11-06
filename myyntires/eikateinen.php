@@ -501,6 +501,15 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 			}
 		}
 
+		if($mehtorow['kateinen'] == 'p') {
+			if($kateisrow['kassa'] != '') {
+				$myysaatili = $kateisrow['kassa'];
+			}
+			else {
+				$myysaatili = $yhtiorow['kassa'];
+			}
+		}
+
 		if ($myysaatili == "") {
 			if ($kateisrow["kassa"] != "") {
 				$myysaatili = $kateisrow["kassa"];
@@ -520,8 +529,19 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND kassalipas = '{$laskurow['kassalipas']}'";
 			$kassalipas_result = pupe_query($kassalipas_query);
+			
+			$kassalippaat = mysql_fetch_assoc($kassalipas_result);
 
-			$myysaatili = mysql_fetch_assoc($kassalipas_result);
+			if(!empty($kassalippaat)) {
+				$myysaatili = $kassalippaat;
+			}
+			else {
+				$myysaatili = array(
+					'kassa' => $yhtiorow['kassa'],
+					'pankkikortti' => $yhtiorow['pankkikortti'],
+					'luottokortti' => $yhtiorow['luottokortti']
+				);
+			}
 		}
 		else {
 			$myysaatili = array(

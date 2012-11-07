@@ -91,20 +91,20 @@
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty saapumisiin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
-				lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
+				lasku.vienti, liitos.tunnus, lasku.tunnus latunnus,
 				lasku.alv,
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
 				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
 				round(lasku.osto_rahti + lasku.osto_kulu + lasku.osto_rivi_kulu, 2) 'kulut'
 				FROM lasku
-				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
+				LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and
 				lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				GROUP BY 1,2,3,4,5,6,7,8,9
-				HAVING lasku2.tunnus IS NULL
+				HAVING liitos.tunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = pupe_query($query);
 
@@ -230,7 +230,7 @@
 
 	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan saapumisiin")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, liitos.tunnus, lasku.tunnus latunnus,
 				(	SELECT sum(summa) summa
 					FROM tiliointi
 					WHERE tiliointi.yhtio = lasku.yhtio
@@ -238,15 +238,15 @@
 					AND	tiliointi.tilino in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
 					AND	tiliointi.korjattu = '') varastossa,
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-				round(sum(lasku2.arvo*lasku2.vienti_kurssi),2) 'kohdistettu'
+				round(sum(liitos.arvo*liitos.vienti_kurssi),2) 'kohdistettu'
 				FROM lasku
-				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
-				WHERE lasku.yhtio = '$kukarow[yhtio]' and
-				lasku.tila in ('H','Y','M','P','Q') and
-				lasku.vienti in ('B','J','E','K','H','L') and
-				lasku.tapvm >= '$avv-$akk-$app' and
-				lasku.tapvm <= '$lvv-$lkk-$lpp'
-				GROUP by lasku.tunnus
+				LEFT JOIN lasku AS liitos on (liitos.yhtio = lasku.yhtio and liitos.vanhatunnus = lasku.tunnus and liitos.tila = 'K')
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				AND lasku.tila in ('H','Y','M','P','Q')
+				AND lasku.vienti in ('B','E','H')
+				AND lasku.tapvm >= '$avv-$akk-$app'
+				AND lasku.tapvm <= '$lvv-$lkk-$lpp'
+				GROUP BY lasku.tunnus
 				HAVING varastossa != kohdistettu
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = pupe_query($query);

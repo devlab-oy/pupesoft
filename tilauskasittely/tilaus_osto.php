@@ -885,7 +885,7 @@
 				$tilaus_otsikko_row = mysql_fetch_assoc($tilaus_otsikko_result);
 
 				while ($prow = mysql_fetch_array ($presult)) {
-					if($tilaus_otsikko_row['erikoisale'] != $prow['ale3']) {
+					if($tilaus_otsikko_row['erikoisale'] != $prow['ale3'] and $prow['erikoisale'] == '0') {
 						//ostotilauksen muokkausta varten
 						//erikoisale ja ale3 yhdistetään tilaus valmis kohdassa. tästä syystä rivihinnat menee plörinäks jos tilausta tullaan muokkaamaan.
 						//erikoisale tiedetään otsikolta ja sen perusteella voidaan laskea ale3 prosentti sekä oikea rivihinta ilman erikoisalennusta

@@ -149,9 +149,9 @@
 		else {
 
 			$nykyinen_keskihankintahinta = $tuoterow["kehahin_nyt"];
-			$tuotteen_saldo = $tuoterow["saldo"];
-			$brutto_varastonarvo = $tuotteen_saldo * $tuoterow["kehahin"];
-			$brutto_keskihankintahinta = $tuoterow["kehahin"];
+			$tuotteen_saldo 			 = $tuoterow["saldo"];
+			$brutto_varastonarvo 		 = $tuotteen_saldo * $tuoterow["kehahin"];
+			$brutto_keskihankintahinta 	 = $tuoterow["kehahin"];
 
 			// Tehd‰‰n selkokielinen selite
 			$epakurantti_selite = "Ep‰kuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
@@ -212,7 +212,7 @@
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					and tuoteno = '{$tuoterow["tuoteno"]}'
 					and varattu > 0
-					and tyyppi = 'O'";
+					and tyyppi  = 'O'";
 		$tilre = pupe_query($query);
 		$tilro = mysql_fetch_assoc($tilre);
 
@@ -284,8 +284,8 @@
 		$pvm75  = $tuoterow['epakurantti75pvm'];
 		$pvm100 = $tuoterow['epakurantti100pvm'];
 
-		$set_kehahin = "";
-		$set_zenior = "";
+		$set_kehahin 	 = "";
+		$set_zenior 	 = "";
 		$zenior_jaettava = 4;
 
 		switch ($tee) {
@@ -295,7 +295,7 @@
 								muuttaja  = '{$kukarow["kuka"]}', ";
 				break;
 
-			case "paalle" : 			// case fallthrough tarkoituksella - break-lauseet puuttuvat
+			case "paalle" :
 				if ($pvm100 == "0000-00-00"){
 					$pvm100 = "now()";
 				}
@@ -318,7 +318,6 @@
 				}
 				$zenior_jaettava--;
 				$tuotteen_saldo = $tuotteen_saldo * -1;
-
 				break;
 		}
 
@@ -358,17 +357,20 @@
 				$z_result = pupe_query($z_query);
 
 				// lis‰t‰‰n tuotteen_avainsana zeniorparts jollei sit‰ jo ole. otetaan muuttamaton hinta talteen
-				$z_query = "SELECT laji FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND tuoteno = '{$tuoterow["tuoteno"]}' AND laji = 'zeniorparts';";
+				$z_query = "SELECT laji
+							FROM tuotteen_avainsanat
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND tuoteno = '{$tuoterow["tuoteno"]}'
+							AND laji 	= 'zeniorparts';";
 				$z_result = pupe_query($z_query);
 
 				if (mysql_num_rows($z_result) == 0) {
 					$z_query = "INSERT INTO tuotteen_avainsanat	SET
-						yhtio      = '{$kukarow["yhtio"]}',
-						tuoteno    = '{$tuoterow["tuoteno"]}',
-						laji       = 'zeniorparts',
-						selite     = 'K',
-						selitetark = '{$tuoterow["myyntihinta"]}';";
-
+								yhtio      = '{$kukarow["yhtio"]}',
+								tuoteno    = '{$tuoterow["tuoteno"]}',
+								laji       = 'zeniorparts',
+								selite     = 'K',
+								selitetark = '{$tuoterow["myyntihinta"]}'";
 					$z_result = pupe_query($z_query);
 				}
 			}

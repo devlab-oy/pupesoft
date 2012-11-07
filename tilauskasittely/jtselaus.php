@@ -866,7 +866,7 @@
 
 			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
-			if($automaaginen != '') {
+			if($tilaus_on_jo != '') {
 				//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 				if ($toim == "ENNAKKO") {
 					$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,

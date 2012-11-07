@@ -412,9 +412,10 @@
 
 			if($myyntitilausrivi_row = mysql_fetch_assoc($result)) {
 				//poistetaan myös myyntitilausrivi
-				$query = "	DELETE
-							FROM tilausrivi
-							WHERE tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
+				$query = "	UPDATE tilausrivi
+							SET tyyppi = 'D'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$myyntitilausrivi_row['tilausrivitunnus']}'";
 				$result = pupe_query($query);
 
 				//poistetaan linkki
@@ -425,9 +426,10 @@
 
 				echo "<font class='error'>".t("Poistetaan rivi myös myyntitilaukselta")." {$myyntitilausrivi_row['vanha_otunnus']}</font><br/><br/>";
 			}
-			$query = "	DELETE
-						FROM tilausrivi
-						WHERE tunnus = '$rivitunnus'";
+			$query = "	UPDATE tilausrivi
+						SET tyyppi = 'D'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '$rivitunnus'";
 			$result = pupe_query($query);
 
 			$automatiikka = "ON";

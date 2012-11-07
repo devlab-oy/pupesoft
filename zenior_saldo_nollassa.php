@@ -46,6 +46,9 @@ $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
 
+	$row["orig_myyntihinta"] = floatval($row["orig_myyntihinta"]) + 0;
+
+
 	$t_query = "UPDATE tuote
 				SET
 					status            = 'T',
